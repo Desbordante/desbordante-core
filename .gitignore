@@ -1,0 +1,5 @@
+.idea/
+cmake-build-debug/
+CMakeLists.txt
+build/
+.sconsign.dblite

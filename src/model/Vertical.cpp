@@ -1,4 +1,4 @@
- //
+//
 // Created by kek on 17.07.19.
 //
 
@@ -9,12 +9,12 @@
 using namespace std;
 
 Vertical::Vertical(RelationalSchema *relSchema, int indices) :
-    schema(relSchema),
-    columnIndices(indices) {}
+    columnIndices(indices),
+    schema(relSchema) {}
 
 Vertical::Vertical(Vertical &&other) noexcept :
-    schema(other.schema),
-    columnIndices(std::move(other.columnIndices)) {
+    columnIndices(std::move(other.columnIndices)),
+    schema(other.schema) {
     other.schema = nullptr;
 }
 
@@ -22,6 +22,7 @@ Vertical& Vertical::operator=(Vertical &&rhs) noexcept {
     columnIndices = std::move(rhs.columnIndices);
     schema = rhs.schema;
     rhs.schema = nullptr;
+    return *this;
 }
 
 dynamic_bitset<>* Vertical::getColumnIndices() { return &columnIndices; }
@@ -34,7 +35,7 @@ bool Vertical::contains(Vertical &that) {
     dynamic_bitset<>& thisIndices = columnIndices;
     dynamic_bitset<>& thatIndices = that.columnIndices;
     if(thisIndices.count() < thatIndices.count()) return false;
-    for (int columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex + 1)){
+    for (unsigned int columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex + 1)){
         if (!(thisIndices[columnIndex])) return false;
     }
     return true;
@@ -50,6 +51,7 @@ Vertical Vertical::Union(Vertical &that) {
     dynamic_bitset<> retainedColumnIndices(columnIndices);
     retainedColumnIndices |= *(that.getColumnIndices());
     schema->getVertical(retainedColumnIndices);
+    return schema->getVertical(retainedColumnIndices);
 }
 
 Vertical Vertical::project(Vertical &that) {
