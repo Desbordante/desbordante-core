@@ -8,26 +8,24 @@
 
 using namespace std;
 
-Vertical::Vertical(RelationalSchema *relSchema, int indices) :
-    columnIndices(indices),
-    schema(relSchema) {}
+Vertical::Vertical(shared_ptr<RelationalSchema>& relSchema, int indices) :
+        columnIndices(indices),
+        schema(relSchema) {}
 
 Vertical::Vertical(Vertical &&other) noexcept :
     columnIndices(std::move(other.columnIndices)),
-    schema(other.schema) {
-    other.schema = nullptr;
+    schema(std::move(other.schema)) {
 }
 
 Vertical& Vertical::operator=(Vertical &&rhs) noexcept {
     columnIndices = std::move(rhs.columnIndices);
-    schema = rhs.schema;
-    rhs.schema = nullptr;
+    schema = std::move(rhs.schema);
     return *this;
 }
 
-dynamic_bitset<>* Vertical::getColumnIndices() { return &columnIndices; }
+dynamic_bitset<>& Vertical::getColumnIndices() { return columnIndices; }
 
-RelationalSchema* Vertical::getSchema() { return schema; }
+shared_ptr<RelationalSchema> Vertical::getSchema() { return schema.lock(); }
 
 //TODO: перепроверь цикл
 //TODO: перепроверь все операции с Джавой
@@ -49,37 +47,36 @@ bool Vertical::intersects(Vertical &that) {
 
 Vertical Vertical::Union(Vertical &that) {
     dynamic_bitset<> retainedColumnIndices(columnIndices);
-    retainedColumnIndices |= *(that.getColumnIndices());
-    schema->getVertical(retainedColumnIndices);
-    return schema->getVertical(retainedColumnIndices);
+    retainedColumnIndices |= that.columnIndices;
+    return schema.lock()->getVertical(retainedColumnIndices);
 }
 
 Vertical Vertical::project(Vertical &that) {
     dynamic_bitset<> retainedColumnIndices(columnIndices);
     retainedColumnIndices &= that.columnIndices;
-    return schema->getVertical(retainedColumnIndices);
+    return schema.lock()->getVertical(retainedColumnIndices);
 }
 
 Vertical Vertical::without(Vertical &that) {
     dynamic_bitset<> retainedColumnIndices(columnIndices);
     retainedColumnIndices &= that.columnIndices;
     retainedColumnIndices = ~retainedColumnIndices;
-    return schema->getVertical(retainedColumnIndices);
+    return schema.lock()->getVertical(retainedColumnIndices);
 }
 
 Vertical Vertical::invert() {
     dynamic_bitset<> flippedIndices(columnIndices);
     flippedIndices.flip();
-    return schema->getVertical(flippedIndices);
+    return schema.lock()->getVertical(flippedIndices);
 }
 
 Vertical Vertical::invert(Vertical &scope) {
     dynamic_bitset<> flippedIndices(columnIndices);
     flippedIndices ^= scope.columnIndices;
-    return schema->getVertical(flippedIndices);
+    return schema.lock()->getVertical(flippedIndices);
 }
 
-Vertical Vertical::emptyVertical(RelationalSchema *relSchema) {
+Vertical Vertical::emptyVertical(shared_ptr<RelationalSchema> relSchema) {
     return Vertical(relSchema, 0);
 }
 

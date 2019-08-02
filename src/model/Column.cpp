@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Column::Column(RelationalSchema *schema, string name, int index):
+Column::Column(shared_ptr<RelationalSchema> schema, string name, int index):
     Vertical(schema, index + 1),
     name(std::move(name)),
     index(index){
@@ -23,5 +23,5 @@ string Column::toString() { return "[" + name + "]";}
 
 bool Column::operator==(const Column &rhs) {
     if (this == &rhs) return true;
-    return index == rhs.index && schema == rhs.schema;
+    return index == rhs.index && schema.lock().get() == rhs.schema.lock().get();
 }

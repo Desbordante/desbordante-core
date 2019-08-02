@@ -6,17 +6,18 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <string>
+#include <memory>
 
-using boost::dynamic_bitset, std::string;
+using boost::dynamic_bitset, std::string, std::weak_ptr, std::shared_ptr;
 
 class RelationalSchema;
 
 class Vertical {
 protected:
-    Vertical(RelationalSchema* relSchema, int indices);
+    Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
 
     dynamic_bitset<> columnIndices;
-    RelationalSchema* schema;
+    weak_ptr<RelationalSchema> schema;
 
 public:
     Vertical(Vertical& other) = default;
@@ -24,8 +25,8 @@ public:
     Vertical(Vertical&& other) noexcept;
     Vertical& operator=(Vertical&& rhs) noexcept ;
 
-    dynamic_bitset<>* getColumnIndices();
-    RelationalSchema* getSchema();
+    dynamic_bitset<>& getColumnIndices();
+    shared_ptr<RelationalSchema> getSchema();
     bool contains(Vertical& that);
     bool intersects(Vertical& that);
     Vertical Union(Vertical& that);
@@ -33,7 +34,7 @@ public:
     Vertical without (Vertical& that);
     Vertical invert();
     Vertical invert(Vertical& scope);
-    static Vertical emptyVertical(RelationalSchema* relSchema);
+    static Vertical emptyVertical(shared_ptr<RelationalSchema> relSchema);
     int getArity();
     virtual string toString();
 };

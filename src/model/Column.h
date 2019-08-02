@@ -20,7 +20,7 @@ protected:
     int index;
 
 public:
-    Column(RelationalSchema* schema, string name, int index);
+    Column(shared_ptr<RelationalSchema> schema, string name, int index);
     int getIndex();
     string getName();
     string toString() override;

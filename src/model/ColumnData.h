@@ -6,23 +6,22 @@
 
 #include <vector>
 #include "Column.h"
+#include "../util/PositionListIndex.h"
 
 using std::vector;
 
-class PositionListIndex {}; //TODO: Волшебный класс
-
 class ColumnData {
 private:
-    Column* column;
+    shared_ptr<Column> column;
     vector<int> probingTable;
-    PositionListIndex* positionListIndex;
+    shared_ptr<PositionListIndex> positionListIndex;
 
 public:
-    ColumnData(Column* column, vector<int> probingTable, PositionListIndex* positionListIndex);
+    ColumnData(shared_ptr<Column>& column, vector<int> probingTable, shared_ptr<PositionListIndex>& positionListIndex);
     vector<int> getProbingTable();
     int getProbingTableValue(int tupleIndex);
-    Column* getColumn();
-    PositionListIndex* getPositionListIndex();
+    shared_ptr<Column> getColumn();
+    shared_ptr<PositionListIndex> getPositionListIndex();
     void shuffle();
     string toString();
     bool operator==(const ColumnData& rhs);

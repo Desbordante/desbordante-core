@@ -9,21 +9,24 @@
 #include <vector>
 #include "Vertical.h"
 #include "Column.h"
+#include <memory>
 
 using boost::dynamic_bitset, std::string, std::vector;
 
-class RelationalSchema {
-public:
+class RelationalSchema : public std::enable_shared_from_this<RelationalSchema> {
+private:
+    vector<shared_ptr<Column>> columns;
     string name;
-    Vertical emptyVertical;
     bool isNullEqNull;
-    vector<Column> columns;
+
+public:
+    Vertical emptyVertical;
 
     RelationalSchema(string name, bool isNullEqNull);
     string getName();
-    vector<Column>& getColumns();
-    Column& getColumn(const string &colName);
-    Column& getColumn(int index);
+    vector<shared_ptr<Column>> getColumns();
+    shared_ptr<Column> getColumn(const string &colName);
+    shared_ptr<Column> getColumn(int index);
     void appendColumn(const string& colName);
     int getNumColumns();
     //TODO: getVertical работает неверно, нужно будет подумать в зависимотси от его использования

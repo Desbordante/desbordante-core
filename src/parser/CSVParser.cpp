@@ -7,13 +7,25 @@
 
 using namespace std;
 
-CSVParser::CSVParser(fs::path &path): CSVParser(path, ',') {}
+CSVParser::CSVParser(fs::path path): CSVParser(path, ',') {}
 
-CSVParser::CSVParser(fs::path& path, char separator) : source(path), separator(separator), hasNext(true), nextLine() {
+CSVParser::CSVParser(fs::path path, char separator) :
+    source(path),
+    separator(separator),
+    hasNext(true),
+    nextLine(),
+    numberOfColumns(),
+    columnNames(),
+    relationName(path.filename()){
+
     // TODO: Настроить Exception
     if (separator == '\0'){
         assert(0);
     }
+    getNext();
+    vector<string> nextParsed = std::move(parseNext());
+    numberOfColumns = nextParsed.size();
+    columnNames = std::move(nextParsed);
     getNext();
 }
 
@@ -54,3 +66,6 @@ vector<string> CSVParser::parseNext() {
 
 bool CSVParser::getHasNext() { return hasNext;}
 char CSVParser::getSeparator() { return separator;}
+int CSVParser::getNumberOfColumns() { return numberOfColumns; }
+string CSVParser::getColumnName(int index) { return columnNames[index]; }
+string CSVParser::getRelationName() { return relationName; }

@@ -9,7 +9,7 @@
 
 using namespace std;
 
-ColumnData::ColumnData(Column *column, vector<int> probingTable, PositionListIndex* positionListIndex):
+ColumnData::ColumnData(shared_ptr<Column>& column, vector<int> probingTable, shared_ptr<PositionListIndex>& positionListIndex):
     column(column),
     probingTable(std::move(probingTable)),
     positionListIndex(positionListIndex)
@@ -19,9 +19,9 @@ vector<int> ColumnData::getProbingTable() { return probingTable; }
 
 int ColumnData::getProbingTableValue(int tupleIndex) { return probingTable[tupleIndex]; }
 
-Column* ColumnData::getColumn() { return column; }
+shared_ptr<Column> ColumnData::getColumn() { return column; }
 
-PositionListIndex* ColumnData::getPositionListIndex() { return positionListIndex; }
+shared_ptr<PositionListIndex> ColumnData::getPositionListIndex() { return positionListIndex; }
 
 void ColumnData::shuffle() {
     random_device rd;

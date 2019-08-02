@@ -16,4 +16,4 @@ env.Append(CPPFLAGS = [ '-O0', '-std=c++17',
         ])
 
 
-SConscript('sconscript.py', variant_dir = 'build', exports=['env'], duplicate=0)
+SConscript('SConscript', variant_dir = 'build', exports=['env'], duplicate=0)

@@ -5,37 +5,39 @@
 #include "RelationalSchema.h"
 #include <utility>
 
+
 using namespace std;
 
 RelationalSchema::RelationalSchema(string name, bool isNullEqNull) :
-    name(move(name)),
-    emptyVertical(Vertical::emptyVertical(this)),
-    isNullEqNull(isNullEqNull),
-    columns() {}
+        columns(),
+        name(std::move(name)),
+        isNullEqNull(isNullEqNull),
+        emptyVertical(Vertical::emptyVertical(shared_from_this())) {}
 
+//TODO: Перепроверь
 Vertical RelationalSchema::getVertical(dynamic_bitset<> indices) {
     return emptyVertical;
 }
 
 string RelationalSchema::getName() { return name; }
 
-vector<Column>& RelationalSchema::getColumns() { return columns; }
+vector<shared_ptr<Column>> RelationalSchema::getColumns() { return columns; }
 
 //TODO: assert'ы пофиксить на нормальные эксепшены
-Column& RelationalSchema::getColumn(const string &colName) {
+shared_ptr<Column> RelationalSchema::getColumn(const string &colName) {
     for (auto &column : columns){
-        if (column.name == colName)
+        if (column->name == colName)
             return column;
     }
     assert(0);
 }
 
-Column& RelationalSchema::getColumn(int index) {
+shared_ptr<Column> RelationalSchema::getColumn(int index) {
     return columns[index];
 }
 
 void RelationalSchema::appendColumn(const string& colName) {
-    columns.emplace_back(this, colName, columns.size());
+    columns.push_back(make_shared<Column>(shared_from_this(), colName, columns.size()));
 }
 
 int RelationalSchema::getNumColumns() {
