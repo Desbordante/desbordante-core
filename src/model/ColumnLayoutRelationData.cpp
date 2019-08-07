@@ -46,17 +46,14 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
 
 shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVParser &fileInput, bool isNullEqNull, int maxCols,
                                                               long maxRows) {
-    auto schema =  make_shared<RelationalSchema>(fileInput.getRelationName(), isNullEqNull);
+    auto schema =  RelationalSchema::create(fileInput.getRelationName(), isNullEqNull);
     map<string, int> valueDictionary;
     int nextValueId = 1;
     const int nullValueId = -1;
     const int unknownValueId = 0;
     int numColumns = fileInput.getNumberOfColumns();
     if (maxCols > 0) numColumns = min(numColumns, maxCols);
-    vector<vector<int>> columnVectors;
-    for (int i = 0; i < numColumns; ++i) {
-        columnVectors.emplace_back();
-    }
+    vector<vector<int>> columnVectors = vector<vector<int>>(numColumns);
     int rowNum = 0;
     while (fileInput.getHasNext()){
         vector<string> row = std::move(fileInput.parseNext());
@@ -90,7 +87,8 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
     for (int i = 0; i < numColumns; ++i) {
         auto column = make_shared<Column>(schema, fileInput.getColumnName(i), i);
         auto pli = PositionListIndex::createFor(columnVectors[i], schema->isNullEqualNull());
-        columnData.emplace_back(new ColumnData(column, pli->getProbingTable(true), pli));
+        auto colData = make_shared<ColumnData>(column, pli->getProbingTable(true), pli);
+        columnData.emplace_back(colData);
     }
     return shared_ptr<ColumnLayoutRelationData>(new ColumnLayoutRelationData(schema, columnData));
 }

@@ -15,14 +15,16 @@ using boost::dynamic_bitset, std::string, std::vector;
 
 class RelationalSchema : public std::enable_shared_from_this<RelationalSchema> {
 private:
+    RelationalSchema(string name, bool isNullEqNull);
+    void init();
     vector<shared_ptr<Column>> columns;
     string name;
     bool isNullEqNull;
 
 public:
-    Vertical emptyVertical;
+    shared_ptr<Vertical> emptyVertical;
 
-    RelationalSchema(string name, bool isNullEqNull);
+    static shared_ptr<RelationalSchema> create(string name, bool isNullEqNull);
     string getName();
     vector<shared_ptr<Column>> getColumns();
     shared_ptr<Column> getColumn(const string &colName);

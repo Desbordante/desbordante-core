@@ -37,11 +37,11 @@ shared_ptr<PositionListIndex> PositionListIndex::createFor(vector<int>& data, bo
     } else {
         index[RelationData::nullValueId].clear();
     }
-    double keyGap = 0;
+    double keyGap = 0.0;
     long nep = 0;
     int size = 0;
     for (auto & iter : index){
-        if (iter.second.size() == 1){
+        if (iter.second.size() <= 1){
             iter.second.clear();
             continue;
         }
@@ -52,14 +52,15 @@ shared_ptr<PositionListIndex> PositionListIndex::createFor(vector<int>& data, bo
     }
 
     double entropy = log(data.size()) - keyGap / data.size();
-    vector<vector<int>> clusters = vector<vector<int>>(index.size());
+    vector<vector<int>> clusters = vector<vector<int>>();
     for (auto & iter : index) {
-        clusters.emplace_back(std::move(iter.second));
+        if (!iter.second.empty())
+            clusters.emplace_back(std::move(iter.second));
     }
 
     sortClusters(clusters);
-
-    return shared_ptr<PositionListIndex>(new PositionListIndex(clusters, nullCluster, size, entropy, nep, data.size(), data.size()));
+    auto pli = shared_ptr<PositionListIndex>(new PositionListIndex(clusters, nullCluster, size, entropy, nep, data.size(), data.size()));
+    return pli;
 }
 
 long PositionListIndex::calculateNep(long numElements) {
@@ -78,7 +79,7 @@ vector<int> PositionListIndex::getProbingTable() {
 
 vector<int> PositionListIndex::getProbingTable(bool isCaching) {
     if (!probingTableCache.empty()) return probingTableCache;
-    vector<int> probingTable;
+    vector<int> probingTable = vector<int>(originalRelationSize);
     int nextClusterId = singletonValueId + 1;
     for (auto & cluster : index){
         int valueId = nextClusterId++;

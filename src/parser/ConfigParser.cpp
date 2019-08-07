@@ -9,7 +9,7 @@
 using namespace std;
 using json = nlohmann::json;
 
-ConfigParser::ConfigParser(fs::path& path) {
+ConfigParser::ConfigParser(fs::path path) {
     ifstream stream(path);
     json json = json::parse(string(istreambuf_iterator<char>(stream), istreambuf_iterator<char>()));
     inputPath = json["inputPath"];

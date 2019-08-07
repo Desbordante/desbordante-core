@@ -16,7 +16,7 @@ private:
     std::string inputPath;
 
 public:
-    ConfigParser(fs::path& path);
+    ConfigParser(fs::path path);
     std::string getOutputPath();
     std::string getInputPath();
 

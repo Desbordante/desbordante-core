@@ -26,7 +26,6 @@ CSVParser::CSVParser(fs::path path, char separator) :
     vector<string> nextParsed = std::move(parseNext());
     numberOfColumns = nextParsed.size();
     columnNames = std::move(nextParsed);
-    getNext();
 }
 
 /*

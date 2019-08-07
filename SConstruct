@@ -15,5 +15,6 @@ env.Append(CPPFLAGS = [ '-O0', '-std=c++17',
         #'-fsanitize=undefined', '-Wno-gnu-zero-variadic-macro-arguments'           # for clang
         ])
 
+test_env = env.Clone()
 
-SConscript('SConscript', variant_dir = 'build', exports=['env'], duplicate=0)
+SConscript('SConscript', variant_dir = 'build', exports=['env', 'test_env'], duplicate=0)

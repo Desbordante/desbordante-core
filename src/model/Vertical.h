@@ -20,6 +20,7 @@ protected:
     weak_ptr<RelationalSchema> schema;
 
 public:
+    Vertical() = default;
     Vertical(Vertical& other) = default;
     Vertical& operator=(const Vertical& rhs) = default;
     Vertical(Vertical&& other) noexcept;

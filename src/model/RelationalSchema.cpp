@@ -5,18 +5,28 @@
 #include "RelationalSchema.h"
 #include <utility>
 
-
 using namespace std;
 
 RelationalSchema::RelationalSchema(string name, bool isNullEqNull) :
         columns(),
         name(std::move(name)),
         isNullEqNull(isNullEqNull),
-        emptyVertical(Vertical::emptyVertical(shared_from_this())) {}
+        emptyVertical() {
+}
+
+shared_ptr<RelationalSchema> RelationalSchema::create(string name, bool isNullEqNull) {
+    auto schema = shared_ptr<RelationalSchema>(new RelationalSchema(std::move(name), isNullEqNull));
+    schema->init();
+    return schema;
+}
+
+void RelationalSchema::init() {
+    emptyVertical.reset(new Vertical(std::move(Vertical::emptyVertical(shared_from_this()))));
+}
 
 //TODO: Перепроверь
 Vertical RelationalSchema::getVertical(dynamic_bitset<> indices) {
-    return emptyVertical;
+    return *emptyVertical;
 }
 
 string RelationalSchema::getName() { return name; }
