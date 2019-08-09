@@ -31,4 +31,5 @@ public:
     static shared_ptr<PositionListIndex> createFor(vector<int>& data, bool isNullEqNull);
     vector<int> getProbingTable();
     vector<int> getProbingTable(bool isCaching);
+    vector<vector<int>> & getIndex();
 };

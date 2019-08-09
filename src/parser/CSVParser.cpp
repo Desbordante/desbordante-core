@@ -37,7 +37,7 @@ bool CSVParser::isSameChar(char separator, char escape) {
 void CSVParser::getNext(){
     nextLine = "";
     getline(source, nextLine);
-    if (nextLine.empty()){
+    if (source.eof()){
         hasNext = false;
     }
 }
