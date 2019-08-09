@@ -66,8 +66,8 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
                     int valueId = valueDictionary[field];
                     if (valueId == 0){
                         valueDictionary[field] = nextValueId;
-                        nextValueId++;
                         valueId = nextValueId;
+                        nextValueId++;
                     }
                     columnVectors[index].push_back(valueId);
                 }
@@ -81,8 +81,6 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
         rowNum++;
     }
 
-    //TODO: PositionListIndex нужно прикрутить и нормально ColumnData
-    //TODO: Тут на самом деле дохера всего, но это всё после PositionListIndex
     vector<shared_ptr<ColumnData>> columnData;
     for (int i = 0; i < numColumns; ++i) {
         auto column = make_shared<Column>(schema, fileInput.getColumnName(i), i);
@@ -90,5 +88,6 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
         auto colData = make_shared<ColumnData>(column, pli->getProbingTable(true), pli);
         columnData.emplace_back(colData);
     }
-    return shared_ptr<ColumnLayoutRelationData>(new ColumnLayoutRelationData(schema, columnData));
+    auto ans = shared_ptr<ColumnLayoutRelationData>(new ColumnLayoutRelationData(schema, columnData));
+    return ans;
 }
