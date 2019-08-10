@@ -5,8 +5,12 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 #include "../model/ColumnLayoutRelationData.h"
+#include <iostream>
 
 using ::testing::ContainerEq, ::testing::Eq;
+using namespace std;
+
+std::string get_selfpath();
 
 TEST(first, kek){
     vector<vector<int>> ans = {
@@ -17,15 +21,11 @@ TEST(first, kek){
             {10, 17} //null
     };
 
-    CSVParser csvParser("Test1.csv");
+    auto path = fs::path(get_selfpath()).parent_path().string();
+    CSVParser csvParser(path + "/Test1.csv");
     auto test = ColumnLayoutRelationData::createFrom(csvParser, true);
     for (auto & columnData : test->getColumnData()) {
         auto index = columnData->getPositionListIndex()->getIndex();
         ASSERT_THAT(ans, ContainerEq(index));
     }
-}
-
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
