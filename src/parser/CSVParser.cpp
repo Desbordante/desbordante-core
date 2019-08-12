@@ -37,16 +37,11 @@ bool CSVParser::isSameChar(char separator, char escape) {
 void CSVParser::getNext(){
     nextLine = "";
     getline(source, nextLine);
-    if (source.eof()){
-        hasNext = false;
-    }
 }
 
 vector<string> CSVParser::parseNext() {
     vector<string> result = vector<string>();
-    if (!hasNext){
-        return result;
-    }
+
     auto nextTokenBegin = nextLine.begin();
     auto nextTokenEnd = nextLine.begin();
     while (nextTokenEnd != nextLine.end()){
@@ -59,7 +54,12 @@ vector<string> CSVParser::parseNext() {
         }
     }
     result.emplace_back(nextTokenBegin, nextTokenEnd);
-    getNext();
+
+    hasNext = !source.eof();
+    if(hasNext){
+        getNext();
+    }
+
     return result;
 }
 

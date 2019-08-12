@@ -16,7 +16,7 @@ private:
     int size;
     double entropy;
     long nep;
-    int relationSize;
+    unsigned int relationSize;
     int originalRelationSize;
     vector<int> probingTableCache;
 
@@ -32,4 +32,7 @@ public:
     vector<int> getProbingTable();
     vector<int> getProbingTable(bool isCaching);
     vector<vector<int>> & getIndex();
+
+    shared_ptr<PositionListIndex> intersect(shared_ptr<PositionListIndex> that);
+    shared_ptr<PositionListIndex> probe(vector<int> probingTable);
 };

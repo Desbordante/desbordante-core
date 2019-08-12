@@ -94,3 +94,50 @@ vector<int> PositionListIndex::getProbingTable(bool isCaching) {
 vector<vector<int>> & PositionListIndex::getIndex() {
     return index;
 }
+
+shared_ptr<PositionListIndex> PositionListIndex::intersect(shared_ptr<PositionListIndex> that) {
+    assert(this->relationSize == that->relationSize);
+    auto result = this->size > that->size ?
+            that->probe(this->getProbingTable()) :
+            this->probe(that->getProbingTable());
+    return result;
+}
+
+//TODO: nullCluster некорректен
+shared_ptr<PositionListIndex> PositionListIndex::probe(vector<int> probingTable) {
+    assert(this->relationSize == probingTable.size());
+    vector<vector<int>> newIndex;
+    int newSize = 0;
+    double newKeyGap = 0.0;
+    long newNep = 0;
+    vector<int> nullCluster;
+
+    map<int, vector<int>> partialIndex;
+
+    for (auto & positions : index){
+        for (int & position : positions){
+            int probingTableValueId = probingTable[position];
+            if (probingTableValueId == singletonValueId) continue;
+            partialIndex[probingTableValueId].push_back(position);
+        }
+
+        for (auto & iter : partialIndex){
+            auto & cluster = iter.second;
+            if (cluster.size() == 1) continue;
+
+            newSize += cluster.size();
+            newKeyGap += cluster.size() * log(cluster.size());
+            newNep += calculateNep(cluster.size());
+            newIndex.emplace_back(std::move(cluster));
+        }
+
+        partialIndex.clear();
+    }
+
+    double newEntropy = log(relationSize) - newKeyGap / relationSize;
+
+    sortClusters(newIndex);
+
+    auto ans = shared_ptr<PositionListIndex>(new PositionListIndex(newIndex, nullCluster, newSize, newEntropy, newNep, relationSize, relationSize));
+    return ans;
+}
