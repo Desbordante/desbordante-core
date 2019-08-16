@@ -14,19 +14,20 @@ class RelationalSchema;
 
 class Vertical {
 protected:
-    Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
+    //Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
 
     dynamic_bitset<> columnIndices;
     weak_ptr<RelationalSchema> schema;
 
 public:
+    Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
     Vertical() = default;
     Vertical(Vertical& other) = default;
     Vertical& operator=(const Vertical& rhs) = default;
     Vertical(Vertical&& other) noexcept;
     Vertical& operator=(Vertical&& rhs) noexcept ;
 
-    dynamic_bitset<>& getColumnIndices();
+    dynamic_bitset<> getColumnIndices();
     shared_ptr<RelationalSchema> getSchema();
     bool contains(Vertical& that);
     bool intersects(Vertical& that);

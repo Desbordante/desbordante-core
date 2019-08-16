@@ -3,18 +3,19 @@
 //
 
 #include "PositionListIndex.h"
-#include "../model/RelationData.h"
 #include <map>
 #include <cmath>
 #include <algorithm>
 #include <utility>
+#include <boost/dynamic_bitset.hpp>
+#include "../model/ColumnLayoutRelationData.h"
 
 using namespace std;
 
 const int PositionListIndex::singletonValueId = 0;
 
 PositionListIndex::PositionListIndex(vector<vector<int>> index, vector<int> nullCluster, int size, double entropy,
-                                     long nep, int relationSize, int originalRelationSize):
+                                     long nep, unsigned int relationSize, unsigned int originalRelationSize):
                                      index(std::move(index)),
                                      nullCluster(std::move(nullCluster)),
                                      size(size),
@@ -140,4 +141,60 @@ shared_ptr<PositionListIndex> PositionListIndex::probe(vector<int> probingTable)
 
     auto ans = shared_ptr<PositionListIndex>(new PositionListIndex(newIndex, nullCluster, newSize, newEntropy, newNep, relationSize, relationSize));
     return ans;
+}
+
+
+//TODO: nullCluster не поддерживается
+shared_ptr<PositionListIndex> PositionListIndex::probeAll(Vertical probingColumns, ColumnLayoutRelationData & relationData) {
+    assert(this->relationSize == relationData.getNumRows());
+
+    vector<vector<int>> newIndex;
+    int newSize = 0;
+    double newKeyGap = 0.0;
+    long newNep = 0;
+
+    map<vector<int>, vector<int>> partialIndex;
+    vector<int> nullCluster;
+    vector<int> probe;
+
+    for (auto & cluster : this->index){
+        for (int & position : cluster){
+            if (!takeProbe(position, relationData, probingColumns, probe)){
+                probe.clear();
+                continue;
+            }
+
+            partialIndex[probe].push_back(position);
+            probe.clear();
+        }
+
+        for (auto & iter : partialIndex){
+            auto & newCluster = iter.second;
+            if (newCluster.size() == 1) continue;
+
+            newSize += newCluster.size();
+            newKeyGap += newCluster.size() * log(newCluster.size());
+            newNep += calculateNep(newCluster.size());
+
+            newIndex.emplace_back(std::move(newCluster));
+        }
+        partialIndex.clear();
+    }
+
+    double newEntropy = log(this->relationSize) - newKeyGap / this->relationSize;
+
+    sortClusters(newIndex);
+
+    auto ans = shared_ptr<PositionListIndex>(new PositionListIndex(newIndex, nullCluster, newSize, newEntropy, newNep, this->relationSize, this->relationSize));
+    return ans;
+}
+
+bool PositionListIndex::takeProbe(int position, ColumnLayoutRelationData & relationData, Vertical & probingColumns, vector<int> & probe){
+    dynamic_bitset<> probingIndices = probingColumns.getColumnIndices();
+    for (unsigned long index = probingIndices.find_first(); index < probingIndices.size(); index = probingIndices.find_next(index + 1)){
+        int value = relationData.getColumnData(index)->getProbingTableValue(position);
+        if (value == PositionListIndex::singletonValueId) return false;
+        probe.push_back(value);
+    }
+    return true;
 }

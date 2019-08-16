@@ -15,7 +15,7 @@ public:
     //static int singletonValueId;
     static const int nullValueId;
 
-    virtual int getNumRows()=0;
+    virtual unsigned int getNumRows()=0;
     int getNumColumns();
     virtual vector<shared_ptr<ColumnData>> getColumnData()=0;
     virtual shared_ptr<ColumnData> getColumnData(int columnIndex)=0;

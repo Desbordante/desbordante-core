@@ -4,6 +4,7 @@
 
 #include "RelationalSchema.h"
 #include <utility>
+#include "ColumnCombination.h"
 
 using namespace std;
 
@@ -24,9 +25,15 @@ void RelationalSchema::init() {
     emptyVertical.reset(new Vertical(std::move(Vertical::emptyVertical(shared_from_this()))));
 }
 
-//TODO: Перепроверь
+//TODO: В оригинале тут какая-то срань
 Vertical RelationalSchema::getVertical(dynamic_bitset<> indices) {
-    return *emptyVertical;
+    if (indices.empty()) return *(this->emptyVertical);
+
+    if (indices.count() == 1){
+        return *(this->columns[indices.find_first()]);
+    }
+
+    return ColumnCombination(indices, shared_from_this());
 }
 
 string RelationalSchema::getName() { return name; }
@@ -48,6 +55,10 @@ shared_ptr<Column> RelationalSchema::getColumn(int index) {
 
 void RelationalSchema::appendColumn(const string& colName) {
     columns.push_back(make_shared<Column>(shared_from_this(), colName, columns.size()));
+}
+
+void RelationalSchema::appendColumn(shared_ptr<Column> column) {
+    columns.push_back(column);
 }
 
 int RelationalSchema::getNumColumns() {

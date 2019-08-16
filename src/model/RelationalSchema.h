@@ -30,6 +30,7 @@ public:
     shared_ptr<Column> getColumn(const string &colName);
     shared_ptr<Column> getColumn(int index);
     void appendColumn(const string& colName);
+    void appendColumn(shared_ptr<Column> column);
     int getNumColumns();
     //TODO: getVertical работает неверно, нужно будет подумать в зависимотси от его использования
     Vertical getVertical(dynamic_bitset<> indices);

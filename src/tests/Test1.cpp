@@ -24,10 +24,9 @@ TEST(pliChecker, first){
     auto path = fs::path(get_selfpath()).parent_path().string();
     CSVParser csvParser(path + "/Test1.csv");
     auto test = ColumnLayoutRelationData::createFrom(csvParser, true);
-    for (auto & columnData : test->getColumnData()) {
-        auto index = columnData->getPositionListIndex()->getIndex();
-        ASSERT_THAT(ans, ContainerEq(index));
-    }
+    auto columnData = test->getColumnData(0);
+    auto index = columnData->getPositionListIndex()->getIndex();
+    ASSERT_THAT(ans, ContainerEq(index));
 }
 
 TEST(pliChecker, second){
@@ -41,8 +40,7 @@ TEST(pliChecker, second){
     auto path = fs::path(get_selfpath()).parent_path().string();
     CSVParser csvParser(path + "/Test1.csv");
     auto test = ColumnLayoutRelationData::createFrom(csvParser, false);
-    for (auto & columnData : test->getColumnData()) {
-        auto index = columnData->getPositionListIndex()->getIndex();
-        ASSERT_THAT(ans, ContainerEq(index));
-    }
+    auto columnData = test->getColumnData(0);
+    auto index = columnData->getPositionListIndex()->getIndex();
+    ASSERT_THAT(ans, ContainerEq(index));
 }

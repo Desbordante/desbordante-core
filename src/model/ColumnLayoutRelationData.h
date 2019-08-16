@@ -20,7 +20,7 @@ private:
 public:
     vector<shared_ptr<ColumnData>> getColumnData() override;
     shared_ptr<ColumnData> getColumnData(int columnIndex) override;
-    int getNumRows() override;
+    unsigned int getNumRows() override;
     vector<int> getTuple(int tupleIndex) override;
     void shuffleColumns() override;
 

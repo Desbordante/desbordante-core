@@ -23,7 +23,7 @@ Vertical& Vertical::operator=(Vertical &&rhs) noexcept {
     return *this;
 }
 
-dynamic_bitset<>& Vertical::getColumnIndices() { return columnIndices; }
+dynamic_bitset<> Vertical::getColumnIndices() { return columnIndices; }
 
 shared_ptr<RelationalSchema> Vertical::getSchema() { return schema.lock(); }
 
@@ -33,7 +33,7 @@ bool Vertical::contains(Vertical &that) {
     dynamic_bitset<>& thisIndices = columnIndices;
     dynamic_bitset<>& thatIndices = that.columnIndices;
     if(thisIndices.count() < thatIndices.count()) return false;
-    for (unsigned int columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex + 1)){
+    for (unsigned long columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex + 1)){
         if (!(thisIndices[columnIndex])) return false;
     }
     return true;
@@ -65,9 +65,11 @@ Vertical Vertical::without(Vertical &that) {
 }
 
 Vertical Vertical::invert() {
+    auto relation = schema.lock();
     dynamic_bitset<> flippedIndices(columnIndices);
-    flippedIndices.flip();
-    return schema.lock()->getVertical(flippedIndices);
+    flippedIndices.resize(relation->getNumColumns());
+    flippedIndices.flip(0, getSchema()->getNumColumns());
+    return relation->getVertical(flippedIndices);
 }
 
 Vertical Vertical::invert(Vertical &scope) {

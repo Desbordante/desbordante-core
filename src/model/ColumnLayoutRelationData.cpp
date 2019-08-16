@@ -21,7 +21,7 @@ shared_ptr<ColumnData> ColumnLayoutRelationData::getColumnData(int columnIndex) 
     return columnData[columnIndex];
 }
 
-int ColumnLayoutRelationData::getNumRows() {
+unsigned int ColumnLayoutRelationData::getNumRows() {
     return columnData[0]->getProbingTable().size();
 }
 
@@ -84,6 +84,7 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
     vector<shared_ptr<ColumnData>> columnData;
     for (int i = 0; i < numColumns; ++i) {
         auto column = make_shared<Column>(schema, fileInput.getColumnName(i), i);
+        schema->appendColumn(column);
         auto pli = PositionListIndex::createFor(columnVectors[i], schema->isNullEqualNull());
         auto colData = make_shared<ColumnData>(column, pli->getProbingTable(true), pli);
         columnData.emplace_back(colData);

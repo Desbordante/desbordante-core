@@ -6,8 +6,11 @@
 
 #include <vector>
 #include <memory>
+#include "../model/Vertical.h"
 
 using std::vector, std::shared_ptr;
+
+class ColumnLayoutRelationData;
 
 class PositionListIndex {
 private:
@@ -17,14 +20,15 @@ private:
     double entropy;
     long nep;
     unsigned int relationSize;
-    int originalRelationSize;
+    unsigned int originalRelationSize;
     vector<int> probingTableCache;
 
     PositionListIndex(vector<vector<int>> index, vector<int> nullCluster, int size, double entropy,
-                      long nep, int relationSize, int originalRelationSize);
+                      long nep, unsigned int relationSize, unsigned int originalRelationSize);
 
     static long calculateNep(long numElements);
     static void sortClusters(vector<vector<int>> & clusters);
+    static bool takeProbe(int position, ColumnLayoutRelationData & relationData, Vertical & probingColumns, vector<int> & probe);
 
 public:
     static const int singletonValueId;
@@ -35,4 +39,5 @@ public:
 
     shared_ptr<PositionListIndex> intersect(shared_ptr<PositionListIndex> that);
     shared_ptr<PositionListIndex> probe(vector<int> probingTable);
+    shared_ptr<PositionListIndex> probeAll(Vertical probingColumns, ColumnLayoutRelationData & relationData);
 };
