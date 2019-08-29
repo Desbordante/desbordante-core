@@ -1,0 +1,28 @@
+// Strutovsky, 21.08
+
+#pragma once
+
+#include <map>
+#include "LatticeVertex.h"
+#include <vector>
+
+class LatticeLevel{
+private:
+  int arity;
+  //TODO: store by value only if LatticeVertex exists only as a member of Level
+  //vertices are used once to get some data from LatticeLevel
+  //but in main algorithm vertices are firstly created, then added to a level =>
+  //perhaps, use unique + std::move
+  std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>> vertices;
+public:
+  LatticeLevel(int _arity) { arity = _arity; }
+  int getArity() const { return arity; }
+  //return const& ? Or use pointers?
+  std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>>& getVertices() { return vertices; }
+  const std::shared_ptr<LatticeVertex> getLatticeVertex(boost::dynamic_bitset<> columnIndices);
+  void add(std::shared_ptr<LatticeVertex> vertex);
+
+  //using vectors instead of lists because of .get()
+  static void generateNextLevel(std::vector<std::shared_ptr<LatticeLevel>>& levels);
+  static void clearLevelsBelow(std::vector<std::shared_ptr<LatticeLevel>>& levels, int arity);
+};
