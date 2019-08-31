@@ -1,4 +1,4 @@
-// Strutovsky, 21.08
+// Strutovsky, 21.08.2019
 
 #pragma once
 
@@ -15,7 +15,7 @@ private:
   //perhaps, use unique + std::move
   std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>> vertices;
 public:
-  LatticeLevel(int _arity) { arity = _arity; }
+  LatticeLevel(int m_arity) { arity = m_arity; }
   int getArity() const { return arity; }
   //return const& ? Or use pointers?
   std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>>& getVertices() { return vertices; }
