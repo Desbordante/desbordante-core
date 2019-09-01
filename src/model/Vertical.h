@@ -6,9 +6,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <string>
+#include <vector>
+#include "Column.h"
 #include <memory>
 
-using boost::dynamic_bitset, std::string, std::weak_ptr, std::shared_ptr;
+using boost::dynamic_bitset, std::string, std::weak_ptr, std::shared_ptr, std::vector;
 
 class RelationalSchema;
 
@@ -38,5 +40,8 @@ public:
     Vertical invert(Vertical& scope);
     static Vertical emptyVertical(shared_ptr<RelationalSchema> relSchema);
     int getArity();
+    vector<shared_ptr<Column>> getColumns();
+    //possible to use list or set?
+
     virtual string toString();
 };

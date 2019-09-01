@@ -3,7 +3,7 @@ def create_objs(srcs):
 
 Import('env')
 
-sources = Glob('src/parser/*.cpp') + Glob('src/model/*.cpp') + Glob('src/util/*.cpp')
+sources = Glob('src/parser/*.cpp') + Glob('src/model/*.cpp') + Glob('src/util/*.cpp') + Glob('src/*.cpp')
 objects = create_objs(sources)
 
 metanome = env.Program(target = 'metanome', source = objects + ['src/main.cpp'], LIBS = ['stdc++fs'])

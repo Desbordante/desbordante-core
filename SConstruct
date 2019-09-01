@@ -1,4 +1,7 @@
-env = Environment()
+env = Environment(CPPPATH='/home/maxim/Study/Practice/MetanomeCoding/Software/boost_1_70_0/boost_output/include',
+    CPPDEFINES=[],
+    LIBS=[],
+    SCONS_CXX_STANDARD="c++17")
 
 env.Append(CPPFLAGS = [ '-O0', '-std=c++17',
         #'-fvar-tracking',

@@ -15,11 +15,11 @@ private:
   //perhaps, use unique + std::move
   std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>> vertices;
 public:
-  LatticeLevel(int m_arity) { arity = m_arity; }
+  explicit LatticeLevel(int m_arity) { arity = m_arity; }
   int getArity() const { return arity; }
   //return const& ? Or use pointers?
   std::map<boost::dynamic_bitset<>, std::shared_ptr<LatticeVertex>>& getVertices() { return vertices; }
-  const std::shared_ptr<LatticeVertex> getLatticeVertex(boost::dynamic_bitset<> columnIndices);
+  std::shared_ptr<LatticeVertex> getLatticeVertex(const boost::dynamic_bitset<>& columnIndices);
   void add(std::shared_ptr<LatticeVertex> vertex);
 
   //using vectors instead of lists because of .get()

@@ -4,8 +4,8 @@
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
 //70% right analogy TODO: I suppose vector is needed
-void LatticeVertex::addRhsCandidates(const list<shared_ptr<Vertical>>& candidates) {
-  for (auto candPtr : candidates){
+void LatticeVertex::addRhsCandidates(vector<shared_ptr<Vertical>>& candidates) {
+  for (auto const& candPtr : candidates){
     rhsCandidates |= candPtr->getColumnIndices();
   }
 }

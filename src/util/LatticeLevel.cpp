@@ -13,7 +13,7 @@ void LatticeLevel::add(shared_ptr<LatticeVertex> vertex) {
 }
 
 //necessary to check ''!= nullptr'?
-const std::shared_ptr<LatticeVertex> LatticeLevel::getLatticeVertex(boost::dynamic_bitset<> columnIndices) {
+std::shared_ptr<LatticeVertex> LatticeLevel::getLatticeVertex(const boost::dynamic_bitset<>& columnIndices) {
   auto it = vertices.find(columnIndices);
   if (it != vertices.end()){
     return it->second;
@@ -24,14 +24,14 @@ const std::shared_ptr<LatticeVertex> LatticeLevel::getLatticeVertex(boost::dynam
 }
 
 void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
-  int arity = levels.size() - 1;
+  int arity = (int)levels.size() - 1;
   cout << "Creating level " << arity + 1 << "..." << endl;
   shared_ptr<LatticeLevel> currentLevel = levels[arity];
 
   //using vector because of 'get()''
   vector<shared_ptr<LatticeVertex>> currentLevelVertices;
-  for (auto it = currentLevel->getVertices().begin(); it != currentLevel->getVertices().end(); it++){
-    currentLevelVertices.push_back(it->second);
+  for (const auto& [map_key, vertice] : currentLevel->getVertices()){
+    currentLevelVertices.push_back(vertice);
   }
   std::sort(currentLevelVertices.begin(), currentLevelVertices.end());
   LatticeLevel nextLevel(arity + 1);
@@ -68,7 +68,7 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
       childVertex->setInvalid(vertex1->getIsInvalid() || vertex2->getIsInvalid());
 
       for (int i = 0, skipIndex = parentIndices.find_first(); i < arity - 1; i++, skipIndex = parentIndices.find_next(skipIndex + 1)){
-        parentIndices[skipIndex] = 0;
+        parentIndices[skipIndex] = false;
         shared_ptr<LatticeVertex> parentVertex = currentLevel->getLatticeVertex(parentIndices);
         if (parentVertex == nullptr){
           goto continueMidOuter;

@@ -1,24 +1,21 @@
 // Strutovsky, 29.08.2019
 
 #include "TaneX.h"
-#include "model/ColumnLayoutRelationData.h"
-#include "model/RelationalSchema.h"
-#include "model/ColumnData.h"
-#include "util/LatticeVertex.h"
-#include "util/LatticeLevel.h"
+#include "../model/ColumnLayoutRelationData.h"
+#include "../model/RelationalSchema.h"
+#include "../model/ColumnData.h"
+#include "../model/ColumnCombination.h"
+#include "../util/LatticeVertex.h"
+#include "../util/LatticeLevel.h"
 #include <iostream>
 #include <iomanip>
 #include <chrono>
 #include <list>
 
-using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::cout, std::endl, std::setw, std::vector, std::chrono, std::list;
+using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::cout, std::endl, std::setw, std::vector, std::list;
 
 
 void Tane::execute(){
-  double fdErrorMeasure = 0.1; //fdErrorMeasure - TODO: implement FdErrorMeasure
-  double maxFdError = 0.05; //configuration.maxFdError - TODO
-  double uccErrorMeasure = 0.1;   //TODO:
-  double maxUccError = 0.05;      //TODO:
 
   shared_ptr<ColumnLayoutRelationData> relation = ColumnLayoutRelationData::createFrom(inputGenerator, true);
   //TODO: this row won't work at all, so dig into this topic (because of inputGen initialization absence)
@@ -30,7 +27,7 @@ void Tane::execute(){
 
   for (auto column : schema->getColumns()){
     shared_ptr<ColumnData> columnData = relation->getColumnData(column->getIndex());
-    double avgPartners = columnData->getPositionListIndex()->getNep() * 2 / relation->getNumRows();
+    double avgPartners = columnData->getPositionListIndex()->getNep() * 2.0 / relation->getNumRows();
     cout << "* " << column->toString() << ": every tuple has " << setw(2)
          << avgPartners << " partners on average." << endl;
   }
@@ -49,25 +46,25 @@ void Tane::execute(){
     vertex->addRhsCandidates(schema->getColumns());
     vertex->getParents().push_back(emptyVertex);
     vertex->setKeyCandidate(true);
-    vertex->setPositiionListIndex(columnData->getPositionListIndex());
+    vertex->setPositionListIndex(columnData->getPositionListIndex());
     level1->add(vertex);
 
     double fdError = fdErrorMeasure;  //TODO: error
-    if (fdError <= 0.05){  //TODO: max_error
+    if (fdError <= maxFdError){  //TODO: max_error
       zeroaryFdRhs.set(column->getIndex());
       //TODO: registerFd
-      vertex->getRhsCandidates()->clear(column->getIndex());
+      vertex->getRhsCandidates().set(column->getIndex(), false);
       if (fdError == 0){
-        vertex->getRhsCandidates()->clear();
+        vertex->getRhsCandidates().clear();
       }
     }
   }
 
-  for (auto [key_map, vertex] : level1->getVerices()){
+  for (auto [key_map, vertex] : level1->getVertices()){
     shared_ptr<Column> column = (Column) vertex->getVertical();
     //TODO: tricky conversion: it looks like we originally constructed  vertex using columns,
     //so level1 has pointer to Vertices that actually point to columns, threfore we should be able to cast them somehow back to *columns
-    vertex->gerRhsCandidates() &= ~zeroaryFdRhs;  //~ returns flipped copy
+    vertex->getRhsCandidates() &= ~zeroaryFdRhs;  //~ returns flipped copy
 
     shared_ptr<ColumnData> columnData = relation->getColumnData(column->getIndex());
     double uccError = uccErrorMeasure;  //TODO: uccErrorMeasure
@@ -75,9 +72,9 @@ void Tane::execute(){
       //TODO: do something with discovered UCC
       vertex->setKeyCandidate(false);
       if (uccError == 0){
-        for (int rhsIndex = vertex->getRhsCandidates()->find_first();
-             rhsIndex != dynamic_bitset::npos;
-             rhsIndex = vertex->getRhsCandidates()->find_next(rhsIndex + 1)){
+        for (int rhsIndex = vertex->getRhsCandidates().find_first();
+             rhsIndex != dynamic_bitset<>::npos;
+             rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
           if (rhsIndex != column->getIndex()){
             //TODO: do smth
           }
@@ -93,20 +90,20 @@ void Tane::execute(){
 
   //TODO: configuration.maxArity
   for (int arity = 2; arity <= maxArity || maxArity <= 0; arity++){
-    auto startTime = chrono::system_clock::now();
+    auto startTime = std::chrono::system_clock::now();
     LatticeLevel::clearLevelsBelow(levels, arity - 1);
     LatticeLevel::generateNextLevel(levels);
-    std::chrono::duration<double> elapsed_milliseconds = chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - startTime);
+    std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
     aprioriMillis += elapsed_milliseconds.count();
 
     shared_ptr<LatticeLevel> level = levels[arity];   //TODO: careful, should write arity-1?
-    cout << "Checking " << level->getVertices()->size() << " " << arity << "-ary lattice vertices." << endl;
-    if (level->getVertices()->isEmpty()){
+    cout << "Checking " << level->getVertices().size() << " " << arity << "-ary lattice vertices." << endl;
+    if (level->getVertices().empty()){
       break;
     }
 
     for (auto [key_map, xaVertex] : level->getVertices()){
-      if (xaVertex->isInvalid()){
+      if (xaVertex->getIsInvalid()){
         continue;
       }
 
@@ -123,13 +120,14 @@ void Tane::execute(){
 
       for (auto xVertex : xaVertex->getParents()){
         shared_ptr<Vertical> lhs = xVertex->getVertical();
+        //TODO: faster to return shared_ptr to a lhs and use it afterwards or to return a & and call getVertical everytime?
 
         int aIndex = xaIndices.find_first();
         dynamic_bitset xIndices = lhs->getColumnIndices();
-        while (xIndices.get(aIndex)){
+        while (xIndices[aIndex]){
           aIndex = xaIndices.find_next(aIndex + 1);
         }
-        if (!aCandidates.get(aIndex)){
+        if (!aCandidates[aIndex]){
           continue;
         }
 
@@ -137,7 +135,7 @@ void Tane::execute(){
         if (error <= maxFdError){  //TODO: and again...
           shared_ptr<Column> rhs = schema->getColumns()[aIndex];
           //TODO: register FD
-          xaVertex->getRhsCandidates()->clear(rhs->getIndex());
+          xaVertex->getRhsCandidates().set(rhs->getIndex(), false);
           if (error == 0){
             xaVertex->getRhsCandidates() &= lhs->getColumnIndices();
           }
@@ -149,17 +147,17 @@ void Tane::execute(){
     for (auto [map_key, vertex] : level->getVertices()){
       shared_ptr<ColumnCombination> columns = vertex->getVertical();
 
-      if (vertex->isKeyCandidate()){
+      if (vertex->getIsKeyCandidate()){
         double uccError = uccErrorMeasure; //TODO
         if (uccError <= maxUccError){
           //TODO: smth with UCC
           vertex->setKeyCandidate(false);
           if (uccError == 0){
             for (int rhsIndex = vertex->getRhsCandidates().find_first();
-                 rhsIndex != dynamic_bitset::npos;
+                 rhsIndex != dynamic_bitset<>::npos;
                  rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
               shared_ptr<Column> rhs = schema->getColumn(rhsIndex);
-              if (!columns->contains(rhs)){
+              if (!columns->contains(rhs)){         //TODO: again this conversion
                 bool isRhsCandidate = true;
                 for (auto column : columns->getColumns()){ //TODO: implement getColumns
                   shared_ptr<Vertical> sibling = columns->without(column).union(rhs);   //check types carfully
@@ -180,7 +178,7 @@ void Tane::execute(){
       }
       if (maxFdError == 0 && maxUccError == 0){
         for (auto keyVertex : keyVertices){
-          keyVertex->getRhsCandidates() &= keyVertex->getVertical()->getColumnIndices();
+          keyVertex->getRhsCandidates() &= keyVertex->getVertical().getColumnIndices();
           keyVertex->setInvalid(true);
         }
       }
