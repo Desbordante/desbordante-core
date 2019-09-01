@@ -32,7 +32,6 @@ public:
     void appendColumn(const string& colName);
     void appendColumn(shared_ptr<Column> column);
     int getNumColumns();
-    //TODO: getVertical работает неверно, нужно будет подумать в зависимотси от его использования
     Vertical getVertical(dynamic_bitset<> indices);
     bool isNullEqualNull();
 };

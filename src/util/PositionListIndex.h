@@ -36,6 +36,9 @@ public:
     vector<int> getProbingTable();
     vector<int> getProbingTable(bool isCaching);
     vector<vector<int>> & getIndex();
+    double getNep();
+    long getNepAsLong();
+    int getNumNonSingletonCluster();
 
     shared_ptr<PositionListIndex> intersect(shared_ptr<PositionListIndex> that);
     shared_ptr<PositionListIndex> probe(vector<int> probingTable);

@@ -12,7 +12,7 @@ using std::vector;
 
 class RelationData {
 public:
-    //static int singletonValueId;
+    static const int singletonValueId;
     static const int nullValueId;
 
     virtual unsigned int getNumRows()=0;
@@ -21,6 +21,7 @@ public:
     virtual shared_ptr<ColumnData> getColumnData(int columnIndex)=0;
     virtual vector<int> getTuple(int tupleIndex)=0;
     virtual void shuffleColumns()=0;
+    int getNumTuplePairs();
 
     shared_ptr<RelationalSchema> getSchema();
 protected:
