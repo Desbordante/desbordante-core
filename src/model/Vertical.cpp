@@ -86,12 +86,12 @@ int Vertical::getArity() {
     return columnIndices.count();
 }
 
-vector<shared_ptr<Column>> Vertical::getColumns() {
+vector<shared_ptr<Vertical>> Vertical::getColumns() {
     //dynamic_bitset<> returnColumnIndices = getColumnIndices();
     auto relation = schema.lock();
-    vector<shared_ptr<Column>> columns;
+    vector<shared_ptr<Vertical>> columns;
     for (int index = columnIndices.find_first();
-         index != dynamic_bitset<>::npos;
+         index != -1;//dynamic_bitset<>::npos;
          index = columnIndices.find_next(index + 1)) {
         columns.push_back(relation->getColumns()[index]);
     }

@@ -34,7 +34,7 @@ void Tane::execute(){
 
   vector<shared_ptr<LatticeLevel>> levels;
   shared_ptr<LatticeLevel> level0 = make_shared<LatticeLevel>(0);
-  shared_ptr<LatticeVertex> emptyVertex = make_shared<LatticeVertex>(schema->emptyVertical);
+  shared_ptr<LatticeVertex> emptyVertex = make_shared<LatticeVertex>(*(schema->emptyVertical)); //TODO: resolve confict (func accepts ref, gets pointer)
   level0->add(emptyVertex);
   levels.push_back(level0);
 
@@ -42,8 +42,8 @@ void Tane::execute(){
   shared_ptr<LatticeLevel> level1 = make_shared<LatticeLevel>(1);
   for (auto column : schema->getColumns()){
     shared_ptr<ColumnData> columnData = relation->getColumnData(column->getIndex());
-    shared_ptr<LatticeVertex> vertex = make_shared<LatticeVertex>(column);
-    vertex->addRhsCandidates(schema->getColumns());
+    shared_ptr<LatticeVertex> vertex = make_shared<LatticeVertex>(LatticeVertex(static_cast<Vertical>(*column)));          //Column->Vertical-copy_constr>LV?
+    vertex->addRhsCandidates(schema->getColumns());                 //Had to remake addRhsCandidates to accept Columns
     vertex->getParents().push_back(emptyVertex);
     vertex->setKeyCandidate(true);
     vertex->setPositionListIndex(columnData->getPositionListIndex());
@@ -61,25 +61,26 @@ void Tane::execute(){
   }
 
   for (auto [key_map, vertex] : level1->getVertices()){
-    shared_ptr<Column> column = (Column) vertex->getVertical();
+    Vertical& column = vertex->getVertical();               //TODO: perhaps store V as pointer in LV??
     //TODO: tricky conversion: it looks like we originally constructed  vertex using columns,
     //so level1 has pointer to Vertices that actually point to columns, threfore we should be able to cast them somehow back to *columns
+    //would be possible if vertical had been an abstract class
     vertex->getRhsCandidates() &= ~zeroaryFdRhs;  //~ returns flipped copy
 
-    shared_ptr<ColumnData> columnData = relation->getColumnData(column->getIndex());
+    shared_ptr<ColumnData> columnData = relation->getColumnData(column.getColumnIndices().find_first());    //KOCTbIJlN!!!
     double uccError = uccErrorMeasure;  //TODO: uccErrorMeasure
     if (uccError <= maxUccError){
       //TODO: do something with discovered UCC
       vertex->setKeyCandidate(false);
       if (uccError == 0){
-        for (int rhsIndex = vertex->getRhsCandidates().find_first();
-             rhsIndex != dynamic_bitset<>::npos;
+        for (unsigned long rhsIndex = vertex->getRhsCandidates().find_first();
+             rhsIndex < vertex->getRhsCandidates().size();              //Possible to do it faster?
              rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
-          if (rhsIndex != column->getIndex()){
+          if (rhsIndex != column.getColumnIndices().find_first()){                          //KOSTYL'!!
             //TODO: do smth
           }
         }
-        vertex->getRhsCandidates() &= column->getColumnIndices();
+        vertex->getRhsCandidates() &= column.getColumnIndices();
         if (maxFdError == 0 && maxUccError == 0){     //TODO: errors
           vertex->setInvalid(true);
         }
@@ -108,22 +109,22 @@ void Tane::execute(){
       }
 
       //TODO: check the following conversion:
-      shared_ptr<ColumnCombination> xa = ((ColumnCombination) xaVertex->getVertical());
+      Vertical& xa = xaVertex->getVertical();       //- previously ColumnCombination
       if (xaVertex->getPositionListIndex() == nullptr){
         shared_ptr<PositionListIndex> parentPLI1 = xaVertex->getParents()[0]->getPositionListIndex();   //OK??
         shared_ptr<PositionListIndex> parentPLI2 = xaVertex->getParents()[1]->getPositionListIndex();
         xaVertex->setPositionListIndex(parentPLI1->intersect(parentPLI2));
       }
 
-      dynamic_bitset xaIndices = xa->getColumnIndices();
+      dynamic_bitset xaIndices = xa.getColumnIndices();
       dynamic_bitset aCandidates = xaVertex->getRhsCandidates();
 
-      for (auto xVertex : xaVertex->getParents()){
-        shared_ptr<Vertical> lhs = xVertex->getVertical();
+      for (const auto& xVertex : xaVertex->getParents()){
+        Vertical& lhs = xVertex->getVertical();
         //TODO: faster to return shared_ptr to a lhs and use it afterwards or to return a & and call getVertical everytime?
 
         int aIndex = xaIndices.find_first();
-        dynamic_bitset xIndices = lhs->getColumnIndices();
+        dynamic_bitset xIndices = lhs.getColumnIndices();
         while (xIndices[aIndex]){
           aIndex = xaIndices.find_next(aIndex + 1);
         }
@@ -137,7 +138,7 @@ void Tane::execute(){
           //TODO: register FD
           xaVertex->getRhsCandidates().set(rhs->getIndex(), false);
           if (error == 0){
-            xaVertex->getRhsCandidates() &= lhs->getColumnIndices();
+            xaVertex->getRhsCandidates() &= lhs.getColumnIndices();
           }
         }
       }
@@ -145,7 +146,7 @@ void Tane::execute(){
 
     list<shared_ptr<LatticeVertex>> keyVertices;
     for (auto [map_key, vertex] : level->getVertices()){
-      shared_ptr<ColumnCombination> columns = vertex->getVertical();
+      Vertical& columns = vertex->getVertical();
 
       if (vertex->getIsKeyCandidate()){
         double uccError = uccErrorMeasure; //TODO
@@ -153,16 +154,16 @@ void Tane::execute(){
           //TODO: smth with UCC
           vertex->setKeyCandidate(false);
           if (uccError == 0){
-            for (int rhsIndex = vertex->getRhsCandidates().find_first();
-                 rhsIndex != dynamic_bitset<>::npos;
+            for (unsigned long rhsIndex = vertex->getRhsCandidates().find_first();
+                 rhsIndex < vertex->getRhsCandidates().size();
                  rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
-              shared_ptr<Column> rhs = schema->getColumn(rhsIndex);
-              if (!columns->contains(rhs)){         //TODO: again this conversion
+              Vertical rhs = *(std::static_pointer_cast<Vertical>(schema->getColumn((int)rhsIndex)));        //TODO: KOSTYL'
+              if (!columns.contains(rhs)){         //TODO: again this conversion
                 bool isRhsCandidate = true;
-                for (auto column : columns->getColumns()){ //TODO: implement getColumns
-                  shared_ptr<Vertical> sibling = columns->without(column).union(rhs);   //check types carfully
-                  shared_ptr<LatticeVertex> siblingVertex = level->getLatticeVertex(sibling->getColumnIndices());
-                  if (siblingVertex == nullptr || !siblingVertex->getRhsCandidates()[rhs->getIndex()]){
+                for (const auto& column : columns.getColumns()){ //TODO: implement getColumns
+                  Vertical sibling = columns.without(*std::static_pointer_cast<Vertical>(column)).Union(rhs);   //check types carfully
+                  shared_ptr<LatticeVertex> siblingVertex = level->getLatticeVertex(sibling.getColumnIndices());
+                  if (siblingVertex == nullptr || !siblingVertex->getRhsCandidates()[rhs.getColumnIndices().find_first()]){ //TODO: KOSTYL'
                     isRhsCandidate = false;
                     break;
                   }

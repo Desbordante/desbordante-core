@@ -1,8 +1,10 @@
 // Strutovsky, 29.08.2019
+
+#pragma once
+
 #include <string>
 #include "../parser/CSVParser.h"
 
-#pragma once
 
 class Tane{
 private:

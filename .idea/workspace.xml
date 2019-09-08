@@ -15,15 +15,16 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/SConscript" beforeDir="false" afterPath="$PROJECT_DIR$/SConscript" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SConstruct" beforeDir="false" afterPath="$PROJECT_DIR$/SConstruct" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TaneX.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/TaneX.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/ColumnCombination.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnCombination.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Vertical.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Vertical.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/util/PositionListIndex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/PositionListIndex.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -59,6 +60,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PREVIOUS_COMMIT_AUTHORS">
+      <list>
+        <option value="Mstrutov &lt;strutovsky.m.a@gmail.com&gt;" />
+      </list>
+    </option>
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
         <entry key="$PROJECT_DIR$" value="Parser" />
@@ -289,6 +295,17 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="SHOW_OTHER_BRANCHES" value="true" />
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
       <map>
@@ -326,7 +343,8 @@
     <MESSAGE value="Добавлен PositionListIndex, ColumnLayoutRelationData, переход на Smart pointers" />
     <MESSAGE value="Большой Багфикс" />
     <MESSAGE value="Баг в нумерации" />
-    <option name="LAST_COMMIT_MESSAGE" value="Баг в нумерации" />
+    <MESSAGE value="Мелкие фиксы; добавлен getColumns()" />
+    <option name="LAST_COMMIT_MESSAGE" value="Мелкие фиксы; добавлен getColumns()" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

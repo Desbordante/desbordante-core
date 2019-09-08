@@ -30,7 +30,7 @@ Vertical RelationalSchema::getVertical(dynamic_bitset<> indices) {
     if (indices.empty()) return *(this->emptyVertical);
 
     if (indices.count() == 1){
-        return *(this->columns[indices.find_first()]);
+        return *(std::static_pointer_cast<Vertical>(this->columns[indices.find_first()]));          //TODO: TEMPORAL KOSTYL'
     }
 
     return ColumnCombination(indices, shared_from_this());

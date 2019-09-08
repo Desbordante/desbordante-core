@@ -13,6 +13,6 @@ class ColumnCombination : public Vertical {
 
 public:
     ColumnCombination(dynamic_bitset<> columnIndices, shared_ptr<RelationalSchema> schema);
-    ColumnCombination(Vertical& vertical) : Vertical(vertical) {}     //or const&??
+    explicit ColumnCombination(Vertical&& vertical) : Vertical(vertical) {}     //or const&??
     string toString() override ;
 };

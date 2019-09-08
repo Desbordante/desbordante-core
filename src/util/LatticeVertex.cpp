@@ -3,10 +3,10 @@
 #include "LatticeVertex.h"
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
-//70% right analogy TODO: I suppose vector is needed
-void LatticeVertex::addRhsCandidates(vector<shared_ptr<Vertical>>& candidates) {
+//70% right analogy TODO: double check - had to remake it for Columns!!!
+void LatticeVertex::addRhsCandidates(vector<shared_ptr<Column>>&& candidates) {
   for (auto const& candPtr : candidates){
-    rhsCandidates |= candPtr->getColumnIndices();
+    rhsCandidates.set(candPtr->getIndex());
   }
 }
 

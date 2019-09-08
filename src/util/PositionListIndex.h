@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <memory>
-#include "../model/Vertical.h"
+#include "../model/Column.h"
 
 using std::vector, std::shared_ptr;
 

@@ -6,6 +6,7 @@
 #include <list>
 #include <boost/dynamic_bitset.hpp>
 #include "PositionListIndex.h"
+//#include "../model/Column.h"
 //#include "../model/Vertical.h"
 
 
@@ -24,6 +25,7 @@ private:
 
 public:
   //TODO: no default initialization of PLI
+  explicit LatticeVertex(Vertical&& _vertical) : vertical (_vertical) {}
   explicit LatticeVertex(Vertical& _vertical) : vertical (_vertical) {}
 
   std::vector<std::shared_ptr<LatticeVertex>>& getParents() { return parents; }
@@ -31,8 +33,7 @@ public:
   Vertical& getVertical() { return vertical; }
   boost::dynamic_bitset<>& getRhsCandidates() { return rhsCandidates; }
 
-  //check if it's called only with lists; subclass of shared_ptr works OK?
-  void addRhsCandidates(std::vector<std::shared_ptr<Vertical>>& candidates);
+  void addRhsCandidates(std::vector<std::shared_ptr<Column>>&& candidates);
 
   //dynamic_bitset getBlockingPrefix();
   bool comesBeforeAndSharePrefixWith(LatticeVertex& that);
@@ -43,7 +44,7 @@ public:
 
   //OK to store AND return ptr to PLI?
   std::shared_ptr<PositionListIndex> getPositionListIndex() { return positionListIndex; }
-  void setPositionListIndex(shared_ptr<PositionListIndex> m_positionListIndex) { positionListIndex = std::make_shared<PositionListIndex>(m_positionListIndex); }
+  void setPositionListIndex(shared_ptr<PositionListIndex> m_positionListIndex) { positionListIndex = m_positionListIndex; }
 
   //right analogy to compareTo?
   bool operator> (LatticeVertex& that);

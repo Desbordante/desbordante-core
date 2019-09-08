@@ -7,7 +7,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <string>
 #include <vector>
-#include "Column.h"
+//#include "Column.h"
 #include <memory>
 
 using boost::dynamic_bitset, std::string, std::weak_ptr, std::shared_ptr, std::vector;
@@ -40,7 +40,7 @@ public:
     Vertical invert(Vertical& scope);
     static Vertical emptyVertical(shared_ptr<RelationalSchema> relSchema);
     int getArity();
-    vector<shared_ptr<Column>> getColumns();
+    vector<shared_ptr<Vertical>> getColumns();          //Very strange - orig demands vector<column> - how???
     //possible to use list or set?
 
     virtual string toString();
