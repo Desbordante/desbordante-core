@@ -21,7 +21,8 @@ public:
     virtual shared_ptr<ColumnData> getColumnData(int columnIndex)=0;
     virtual vector<int> getTuple(int tupleIndex)=0;
     virtual void shuffleColumns()=0;
-    double getMaximumNip() { return getNumRows() * (getNumRows() - 1) / 2; }
+    double getMaximumNip() { return getNumRows() * (getNumRows() - 1) / 2.0; }
+    unsigned int getNumTuplePairs() { return getNumRows() * (getNumRows() - 1) / 2; }
 
     shared_ptr<RelationalSchema> getSchema();
 protected:

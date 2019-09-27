@@ -6,7 +6,7 @@ using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std
 //70% right analogy TODO: double check - had to remake it for Columns!!!
 void LatticeVertex::addRhsCandidates(vector<shared_ptr<Column>>&& candidates) {
   for (auto const& candPtr : candidates){
-    rhsCandidates.set(candPtr->getIndex());
+    rhsCandidates.set(candPtr->getIndex());     //Failes here
   }
 }
 

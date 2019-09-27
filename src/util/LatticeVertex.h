@@ -6,6 +6,7 @@
 #include <list>
 #include <boost/dynamic_bitset.hpp>
 #include "PositionListIndex.h"
+#include "../model/RelationalSchema.h"
 //#include "../model/Column.h"
 //#include "../model/Vertical.h"
 
@@ -25,8 +26,8 @@ private:
 
 public:
   //TODO: no default initialization of PLI
-  explicit LatticeVertex(Vertical&& _vertical) : vertical (_vertical) {}
-  explicit LatticeVertex(Vertical& _vertical) : vertical (_vertical) {}
+  explicit LatticeVertex(Vertical&& _vertical) : vertical(_vertical), rhsCandidates(vertical.getSchema()->getNumColumns()) {}
+  explicit LatticeVertex(Vertical& _vertical) : vertical(_vertical), rhsCandidates(vertical.getSchema()->getNumColumns()) {}
 
   std::vector<std::shared_ptr<LatticeVertex>>& getParents() { return parents; }
   //TODO: const - usually other Metanome classes use these otputs, so returning const isn't possible

@@ -54,11 +54,14 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
         continue;
       }
 
-      shared_ptr<ColumnCombination> childColumns = make_shared<ColumnCombination>(ColumnCombination(vertex1->getVertical().Union(vertex2->getVertical())));
-       //TODO: check out if this cast is OK - had to add conversion constructor to CC
+      ColumnCombination tmp(vertex1->getVertical().Union(vertex2->getVertical()));
+     // shared_ptr<ColumnCombination> childColumns = make_shared<ColumnCombination>(ColumnCombination(vertex1->getVertical().Union(vertex2->getVertical())));
+      shared_ptr<ColumnCombination> childColumns = make_shared<ColumnCombination>(tmp);
+
+        //TODO: check out if this cast is OK - had to add conversion constructor to CC
       shared_ptr<LatticeVertex> childVertex = make_shared<LatticeVertex>(*childColumns);
 
-      dynamic_bitset parentIndices;
+      dynamic_bitset<> parentIndices(vertex1->getVertical().getSchema()->getNumColumns()); //TODO:very sophisticated way to get numofcolumns
       parentIndices |= vertex1->getVertical().getColumnIndices();
       parentIndices |= vertex2->getVertical().getColumnIndices();
 
@@ -66,6 +69,10 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
       childVertex->getRhsCandidates() &= vertex2->getRhsCandidates();
       childVertex->setKeyCandidate(vertex1->getIsKeyCandidate() && vertex2->getIsKeyCandidate());
       childVertex->setInvalid(vertex1->getIsInvalid() || vertex2->getIsInvalid());
+
+      dynamic_bitset<> tmpb(3);
+      tmpb.set(0);
+      tmpb.set(2);
 
       for (int i = 0, skipIndex = parentIndices.find_first(); i < arity - 1; i++, skipIndex = parentIndices.find_next(skipIndex + 1)){
         parentIndices[skipIndex] = false;
@@ -90,6 +97,8 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
 
       childVertex->getParents().push_back(vertex1);
       childVertex->getParents().push_back(vertex2);
+
+      nextLevel.add(childVertex);
 
 continueMidOuter:
       continue;

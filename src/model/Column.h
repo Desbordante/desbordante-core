@@ -21,6 +21,7 @@ protected:
 
 public:
     Column(shared_ptr<RelationalSchema> schema, string name, int index);
+    Column(shared_ptr<RelationalSchema> schema, string name, int index, int size);       //for TANE implementation (needed: each two vertices have equal bitset sizes
     int getIndex();
     string getName();
     string toString() override;

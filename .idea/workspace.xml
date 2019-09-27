@@ -11,20 +11,18 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb80a5c4-b662-4c0d-8645-0d9d54369a0b" name="Default Changelist" comment="">
+    <list default="true" id="fb80a5c4-b662-4c0d-8645-0d9d54369a0b" name="Default Changelist" comment="Багфикс; тесты для Тейна">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SConscript" beforeDir="false" afterPath="$PROJECT_DIR$/SConscript" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnCombination.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnCombination.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Vertical.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Vertical.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/Column.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/Column.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/model/RelationData.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationData.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/PositionListIndex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/PositionListIndex.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -149,6 +147,12 @@
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
+    <configuration name="pliChecker.first" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="metanome_cpp" TARGET_NAME="metanome_cpp" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="metanome_cpp" RUN_TARGET_NAME="metanome_cpp" TEST_CLASS="pliChecker" TEST_METHOD="first" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="metanome_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="metanome_cpp" TARGET_NAME="metanome_cpp" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="metanome_cpp" RUN_TARGET_NAME="metanome_cpp">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -165,8 +169,14 @@
       <item itemvalue="CMake Application.metanome_cpp" />
       <item itemvalue="Custom Build Application.Scons" />
       <item itemvalue="Custom Build Application.Scons tests" />
+      <item itemvalue="Google Test.pliChecker.first" />
       <item itemvalue="Shell Script.clean" />
     </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Google Test.pliChecker.first" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -344,7 +354,8 @@
     <MESSAGE value="Большой Багфикс" />
     <MESSAGE value="Баг в нумерации" />
     <MESSAGE value="Мелкие фиксы; добавлен getColumns()" />
-    <option name="LAST_COMMIT_MESSAGE" value="Мелкие фиксы; добавлен getColumns()" />
+    <MESSAGE value="TANE компилится!" />
+    <option name="LAST_COMMIT_MESSAGE" value="TANE компилится!" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -358,26 +369,6 @@
           <url>file://$PROJECT_DIR$/src/main.cpp</url>
           <line>8</line>
           <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/tests/Test1.cpp</url>
-          <line>23</line>
-          <option name="timeStamp" value="26" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp</url>
-          <line>57</line>
-          <option name="timeStamp" value="27" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/parser/CSVParser.cpp</url>
-          <line>45</line>
-          <option name="timeStamp" value="28" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/parser/CSVParser.cpp</url>
-          <line>37</line>
-          <option name="timeStamp" value="29" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

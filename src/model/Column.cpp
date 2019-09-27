@@ -9,11 +9,19 @@
 using namespace std;
 
 Column::Column(shared_ptr<RelationalSchema> schema, string name, int index):
-    Vertical(schema, index + 1),
+    Vertical(schema, schema->getNumColumns()),            //TODO: was: (schema, index + 1) - had problems with intersecting two differently sized bitsets
     name(std::move(name)),
     index(index){
     columnIndices.set(index);
 }
+
+Column::Column(shared_ptr<RelationalSchema> schema, string name, int index, int size):
+        Vertical(schema, size),
+        name(std::move(name)),
+        index(index){
+    columnIndices.set(index);
+}
+
 
 int Column::getIndex() { return index;}
 
