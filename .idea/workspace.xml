@@ -13,16 +13,9 @@
   <component name="ChangeListManager">
     <list default="true" id="fb80a5c4-b662-4c0d-8645-0d9d54369a0b" name="Default Changelist" comment="Багфикс; тесты для Тейна">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Column.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Column.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/RelationData.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationData.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -355,7 +348,8 @@
     <MESSAGE value="Баг в нумерации" />
     <MESSAGE value="Мелкие фиксы; добавлен getColumns()" />
     <MESSAGE value="TANE компилится!" />
-    <option name="LAST_COMMIT_MESSAGE" value="TANE компилится!" />
+    <MESSAGE value="Багфикс; тесты для Тейна" />
+    <option name="LAST_COMMIT_MESSAGE" value="Багфикс; тесты для Тейна" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -369,6 +363,16 @@
           <url>file://$PROJECT_DIR$/src/main.cpp</url>
           <line>8</line>
           <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/algorithms/TaneX.cpp</url>
+          <line>118</line>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/algorithms/TaneX.cpp</url>
+          <line>93</line>
+          <option name="timeStamp" value="73" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

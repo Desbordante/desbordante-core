@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <chrono>
 #include <list>
-//#define log(x) cout << (x) << endl;
+#define log(x) cout << (x) << endl;
 
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::cout, std::endl, std::setw, std::vector, std::list;
 
@@ -20,6 +20,7 @@ double Tane::calculateZeroAryFdError(shared_ptr<ColumnData> rhs, shared_ptr<Colu
 }
 
 double Tane::calculateFdError(shared_ptr<PositionListIndex> lhsPli, shared_ptr<PositionListIndex> jointPli, shared_ptr<ColumnLayoutRelationData> relationData) {
+   // log ((double) (lhsPli->getNep() - jointPli->getNep()) / (double) relationData->getNumTuplePairs())
     return (double) (lhsPli->getNep() - jointPli->getNep()) / (double) relationData->getNumTuplePairs();
 }
 
@@ -72,6 +73,7 @@ void Tane::execute() {
     cout << "* " << column->toString() << ": every tuple has " << setw(2)
          << avgPartners << " partners on average." << endl;
   }
+  auto startTime = std::chrono::system_clock::now();
 
   //Initialize level 0
   vector<shared_ptr<LatticeLevel>> levels;
@@ -103,7 +105,7 @@ void Tane::execute() {
       //cout << "AAAA" << endl;
       vertex->getRhsCandidates().set(column->getIndex(), false);
       if (fdError == 0) {
-        vertex->getRhsCandidates().clear();
+        vertex->getRhsCandidates().reset();
       }
     }
   }
@@ -144,11 +146,11 @@ void Tane::execute() {
   //TODO: configuration.maxArity
   for (int arity = 2; arity <= maxArity || maxArity <= 0; arity++) {
       //Generate next level - CHECK if the method itself is correct
-    auto startTime = std::chrono::system_clock::now();
+    //auto startTime = std::chrono::system_clock::now();
     LatticeLevel::clearLevelsBelow(levels, arity - 1);
     LatticeLevel::generateNextLevel(levels);
-    std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
-    aprioriMillis += elapsed_milliseconds.count();
+    //std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
+    //aprioriMillis += elapsed_milliseconds.count();
 
     shared_ptr<LatticeLevel> level = levels[arity];   //TODO: careful, should write arity-1? - No, its OK
     cout << "Checking " << level->getVertices().size() << " " << arity << "-ary lattice vertices." << endl;
@@ -255,6 +257,10 @@ void Tane::execute() {
       }
     }
 
-    //TODO: printProfilingData
+      //TODO: printProfilingData
   }
+  std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
+  aprioriMillis += elapsed_milliseconds.count();
+
+  cout << "Time: " << aprioriMillis << endl;
 }
