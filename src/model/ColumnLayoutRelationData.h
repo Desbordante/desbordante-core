@@ -4,11 +4,13 @@
 
 #pragma once
 
-#include "RelationData.h"
-#include "RelationalSchema.h"
-#include "ColumnData.h"
-#include "../parser/CSVParser.h"
 #include <vector>
+
+#include "model/ColumnData.h"
+#include "model/RelationalSchema.h"
+#include "model/RelationData.h"
+#include "parser/CSVParser.h"
+
 
 using std::vector;
 

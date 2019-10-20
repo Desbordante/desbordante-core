@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <memory>
 #include <string>
 #include <vector>
-//#include "Column.h"
-#include <memory>
+
+#include <boost/dynamic_bitset.hpp>
 
 using boost::dynamic_bitset, std::string, std::weak_ptr, std::shared_ptr, std::vector;
 

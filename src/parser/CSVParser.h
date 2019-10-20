@@ -4,10 +4,9 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-#include <fstream>
 #include <experimental/filesystem>
+#include <fstream>
+#include <string>
 #include <vector>
 
 namespace fs = std::experimental::filesystem;

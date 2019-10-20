@@ -2,9 +2,11 @@
 // Created by kek on 07.08.2019.
 //
 
-#include <gtest/gtest.h>
+#include "model/ColumnLayoutRelationData.h"
+
 #include <gmock/gmock.h>
-#include "../model/ColumnLayoutRelationData.h"
+#include <gtest/gtest.h>
+
 #include <iostream>
 
 using ::testing::ContainerEq, ::testing::Eq;
@@ -21,7 +23,8 @@ TEST(pliChecker, first){
             {10, 17} //null
     };
 
-    auto path = fs::path(get_selfpath()).parent_path().string();
+    string path = "/home/maxim/Study/Metanome-coding/metanome_git/src/tests";//fs::path(get_selfpath()).parent_path().string();
+    cout << path << endl;
     CSVParser csvParser(path + "/Test1.csv");
     auto test = ColumnLayoutRelationData::createFrom(csvParser, true);
     auto columnData = test->getColumnData(0);
@@ -37,7 +40,7 @@ TEST(pliChecker, second){
             {6, 7, 18},
     };
 
-    auto path = fs::path(get_selfpath()).parent_path().string();
+    string path = "/home/maxim/Study/Metanome-coding/metanome_git/src/tests";//fs::path(get_selfpath()).parent_path().string();
     CSVParser csvParser(path + "/Test1.csv");
     auto test = ColumnLayoutRelationData::createFrom(csvParser, false);
     auto columnData = test->getColumnData(0);

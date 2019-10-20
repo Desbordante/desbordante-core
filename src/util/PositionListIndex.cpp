@@ -3,12 +3,15 @@
 //
 
 #include "PositionListIndex.h"
+
 #include <map>
 #include <cmath>
 #include <algorithm>
 #include <utility>
+
 #include <boost/dynamic_bitset.hpp>
-#include "../model/ColumnLayoutRelationData.h"
+
+#include "model/ColumnLayoutRelationData.h"
 
 using namespace std;
 

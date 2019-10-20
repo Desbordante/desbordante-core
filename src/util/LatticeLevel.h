@@ -3,8 +3,9 @@
 #pragma once
 
 #include <map>
-#include "LatticeVertex.h"
 #include <vector>
+
+#include "util/LatticeVertex.h"
 
 class LatticeLevel{
 private:

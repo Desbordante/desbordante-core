@@ -5,8 +5,9 @@
 #pragma once
 
 #include <vector>
-#include "Column.h"
-#include "../util/PositionListIndex.h"
+
+#include "model/Column.h"
+#include "util/PositionListIndex.h"
 
 using std::vector;
 

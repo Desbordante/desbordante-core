@@ -4,7 +4,8 @@
 
 #pragma once
 
-#include "Vertical.h"
+#include "model/Vertical.h"
+
 #include <boost/dynamic_bitset.hpp>
 
 using boost::dynamic_bitset, std::string;

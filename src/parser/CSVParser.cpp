@@ -1,9 +1,11 @@
-#include "CSVParser.h"
+#include "parser/CSVParser.h"
+
 #include <cassert>
+#include <experimental/filesystem>
 #include <fstream>
 #include <string>
-#include <experimental/filesystem>
 #include <vector>
+
 
 using namespace std;
 

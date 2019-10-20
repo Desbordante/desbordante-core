@@ -2,11 +2,13 @@
 
 #pragma once
 
-#include <vector>
 #include <list>
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
-#include "PositionListIndex.h"
-#include "../model/RelationalSchema.h"
+
+#include "model/RelationalSchema.h"
+#include "util/PositionListIndex.h"
 //#include "../model/Column.h"
 //#include "../model/Vertical.h"
 

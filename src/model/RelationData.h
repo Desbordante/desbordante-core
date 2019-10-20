@@ -4,10 +4,11 @@
 
 #pragma once
 
-#include "RelationalSchema.h"
-#include "ColumnData.h"
 #include <iostream>
 #include <vector>
+
+#include "model/ColumnData.h"
+#include "model/RelationalSchema.h"
 
 using std::vector;
 

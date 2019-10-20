@@ -2,9 +2,12 @@
 // Created by kek on 18.07.19.
 //
 
-#include "Column.h"
-#include "RelationalSchema.h"
+#include "model/Column.h"
+
 #include <utility>
+
+#include "model/RelationalSchema.h"
+
 
 using namespace std;
 

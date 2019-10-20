@@ -2,9 +2,12 @@
 // Created by kek on 17.07.19.
 //
 
-#include "Vertical.h"
-#include "RelationalSchema.h"
+#include "model/Vertical.h"
+
 #include <utility>
+
+#include "model/RelationalSchema.h"
+
 
 using namespace std;
 

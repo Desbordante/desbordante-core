@@ -1,9 +1,12 @@
 // Strutovsky, 21.08
 
 #include "LatticeLevel.h"
-#include "../model/ColumnCombination.h"
+
 #include <algorithm>
 #include <iostream>
+
+#include "model/ColumnCombination.h"
+
 
 
 using std::move, std::min, std::shared_ptr, std::vector, std::cout, std::endl, std::sort, std::make_shared;

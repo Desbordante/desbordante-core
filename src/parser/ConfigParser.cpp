@@ -2,8 +2,10 @@
 // Created by kek on 10.07.19.
 //
 
-#include "ConfigParser.h"
+#include "parser/ConfigParser.h"
+
 #include <fstream>
+
 #include "json/json.hpp"
 
 using namespace std;

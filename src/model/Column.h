@@ -5,8 +5,10 @@
 #pragma once
 
 #include <string>
+
 #include <boost/dynamic_bitset.hpp>
-#include "Vertical.h"
+
+#include "model/Vertical.h"
 
 using std::string, boost::dynamic_bitset;
 

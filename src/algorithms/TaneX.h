@@ -3,9 +3,10 @@
 #pragma once
 
 #include <string>
-#include "../parser/CSVParser.h"
-#include "../util/PositionListIndex.h"
-#include "../model/RelationData.h"
+
+#include "model/RelationData.h"
+#include "parser/CSVParser.h"
+#include "util/PositionListIndex.h"
 
 
 class Tane{
@@ -33,8 +34,8 @@ public:
   static double calculateUccError(shared_ptr<PositionListIndex> pli, shared_ptr<ColumnLayoutRelationData> relationData);
   //static double round(double error) { return ((int)(error * 32768) + 1)/ 32768.0; }
   //can't say if this method is necessary -- TODO: use this function?
-  static void registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error);
-  static void registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error);
-  static void registerUCC(Vertical& key, double error);
+  static void registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
+  static void registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
+  static void registerUCC(Vertical& key, double error, shared_ptr<RelationalSchema> schema);
 
 };

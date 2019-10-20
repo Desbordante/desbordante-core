@@ -1,16 +1,19 @@
 // Strutovsky, 29.08.2019
 
 #include "TaneX.h"
-#include "../model/ColumnLayoutRelationData.h"
-#include "../model/RelationalSchema.h"
-#include "../model/ColumnData.h"
-#include "../model/ColumnCombination.h"
-#include "../util/LatticeVertex.h"
-#include "../util/LatticeLevel.h"
+
+#include <chrono>
 #include <iostream>
 #include <iomanip>
-#include <chrono>
 #include <list>
+
+#include "model/ColumnCombination.h"
+#include "model/ColumnData.h"
+#include "model/ColumnLayoutRelationData.h"
+#include "model/RelationalSchema.h"
+#include "util/LatticeLevel.h"
+#include "util/LatticeVertex.h"
+
 #define log(x) cout << (x) << endl;
 
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::cout, std::endl, std::setw, std::vector, std::list;
@@ -29,29 +32,29 @@ double Tane::calculateUccError(shared_ptr<PositionListIndex> pli, shared_ptr<Col
     return pli->getNep() / (double) relationData->getNumTuplePairs();
 }
 
-void Tane::registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error) {
+void Tane::registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> lhs_bitset = lhs.getColumnIndices();
-    cout << "Discovered FD: ";
+    //cout << "Discovered FD: ";
     for (int i = lhs_bitset.find_first(); i != -1; i = lhs_bitset.find_next(i)) {
-        cout << i << " ";
+        cout << schema->getColumn(i)->getName() << " ";
     }
-    cout << "-> " << rhs->getIndex() << " - error equals " << error << endl;
+    cout << "-> " << rhs->getName() << " - error equals " << error << endl;
 }
 
-void Tane::registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error) {
+void Tane::registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> lhs_bitset = lhs->getColumnIndices();
-    cout << "Discovered FD: ";
+    //cout << "Discovered FD: ";
     for (int i = lhs_bitset.find_first(); i != -1; i = lhs_bitset.find_next(i)) {
-        cout << i << " ";
+        cout << schema->getColumn(i)->getName() << " ";
     }
-    cout << "-> " << rhs->getIndex() << " - error equals " << error << endl;
+    cout << "-> " << rhs->getName() << " - error equals " << error << endl;
 }
 
-void Tane::registerUCC(Vertical& key, double error) {
+void Tane::registerUCC(Vertical& key, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> key_bitset = key.getColumnIndices();
     cout << "Discovered UCC: ";
     for (int i = key_bitset.find_first(); i != -1; i = key_bitset.find_next(i)) {
-        cout << i << " ";
+        cout << schema->getColumn(i)->getName() << " ";
     }
     cout << "- error equals " << error << endl;
 }
@@ -101,7 +104,7 @@ void Tane::execute() {
     if (fdError <= maxFdError) {  //TODO: max_error
       zeroaryFdRhs.set(column->getIndex());
       //TODO: registerFd
-      registerFD(schema->emptyVertical, column, fdError);
+      registerFD(schema->emptyVertical, column, fdError, schema);
       //cout << "AAAA" << endl;
       vertex->getRhsCandidates().set(column->getIndex(), false);
       if (fdError == 0) {
@@ -122,14 +125,14 @@ void Tane::execute() {
     double uccError = calculateUccError(columnData->getPositionListIndex(), relation);;  //TODO: uccErrorMeasure
     if (uccError <= maxUccError) {
       //TODO: do something with discovered UCC
-      registerUCC(column, uccError);
+      registerUCC(column, uccError, schema);
       vertex->setKeyCandidate(false);
       if (uccError == 0) {
         for (unsigned long rhsIndex = vertex->getRhsCandidates().find_first();
              rhsIndex < vertex->getRhsCandidates().size();              //Possible to do it faster?
              rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
           if (rhsIndex != column.getColumnIndices().find_first()){                          //KOSTYL'!!
-              registerFD(column, schema->getColumn(rhsIndex), 0);
+              registerFD(column, schema->getColumn(rhsIndex), 0, schema);
             //TODO: do smth with registered FD
           }
         }
@@ -199,7 +202,7 @@ void Tane::execute() {
         if (error <= maxFdError) {  //TODO: and again...
           shared_ptr<Column> rhs = schema->getColumns()[aIndex];
           //TODO: register FD
-          registerFD(lhs, rhs, error);
+          registerFD(lhs, rhs, error, schema);
           xaVertex->getRhsCandidates().set(rhs->getIndex(), false);
           if (error == 0) {
             xaVertex->getRhsCandidates() &= lhs.getColumnIndices(); //Can't figure out what it is for
@@ -214,11 +217,11 @@ void Tane::execute() {
       Vertical& columns = vertex->getVertical();            //Originally it's a ColumnCombination
 
       if (vertex->getIsKeyCandidate()) {
-        double uccError = calculateUccError(vertex->getPositionListIndex(), relation); //TODO
+        double uccError = calculateUccError(vertex->getPositionListIndex(), relation);
         if (uccError <= maxUccError) {       //If a key candidate is an approx UCC
           //TODO: do smth with UCC
 
-          registerUCC(columns, uccError);
+          registerUCC(columns, uccError, schema);
           vertex->setKeyCandidate(false);
           if (uccError == 0) {
               // Look at 185 for this cycle description in a nutshell
@@ -240,7 +243,7 @@ void Tane::execute() {
                 //Found fd: vertex->rhs => register it
                 if (isRhsCandidate){
                   //TODO: smth with FD
-                  registerFD(columns, schema->getColumn(rhsIndex), 0);
+                  registerFD(columns, schema->getColumn(rhsIndex), 0, schema);
                 }
               }
               keyVertices.push_back(vertex);
@@ -259,8 +262,8 @@ void Tane::execute() {
 
       //TODO: printProfilingData
   }
-  std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
+  std::chrono::milliseconds elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
   aprioriMillis += elapsed_milliseconds.count();
 
-  cout << "Time: " << aprioriMillis << endl;
+  cout << "Time: " << aprioriMillis << " milliseconds" << endl;
 }

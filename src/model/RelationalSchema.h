@@ -4,12 +4,15 @@
 
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <memory>
 #include <string>
 #include <vector>
-#include "Vertical.h"
-#include "Column.h"
-#include <memory>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "model/Column.h"
+#include "model/Vertical.h"
+
 
 using boost::dynamic_bitset, std::string, std::vector;
 

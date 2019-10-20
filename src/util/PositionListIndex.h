@@ -4,9 +4,10 @@
 
 #pragma once
 
-#include <vector>
 #include <memory>
-#include "../model/Column.h"
+#include <vector>
+
+#include "model/Column.h"
 
 using std::vector, std::shared_ptr;
 
