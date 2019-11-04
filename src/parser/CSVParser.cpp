@@ -20,6 +20,10 @@ CSVParser::CSVParser(fs::path path, char separator) :
     columnNames(),
     relationName(path.filename()){
 
+    //Wrong path
+    if (!source) {
+        assert(0);
+    }
     // TODO: Настроить Exception
     if (separator == '\0'){
         assert(0);

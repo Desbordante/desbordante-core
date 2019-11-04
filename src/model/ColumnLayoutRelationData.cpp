@@ -56,8 +56,17 @@ shared_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::createFrom(CSVPar
     if (maxCols > 0) numColumns = min(numColumns, maxCols);
     vector<vector<int>> columnVectors = vector<vector<int>>(numColumns);
     int rowNum = 0;
+    vector<string> row;
+
+    //TODO: can't process "Mercury, Venus"
     while (fileInput.getHasNext()){
-        vector<string> row = std::move(fileInput.parseNext());
+        row = std::move(fileInput.parseNext());
+
+        //skip incomplete rows
+        if ((int)row.size() != numColumns) {
+            continue;
+        }
+
         if (maxRows <= 0 || rowNum < maxRows){
             int index = 0;
             for (string& field : row){

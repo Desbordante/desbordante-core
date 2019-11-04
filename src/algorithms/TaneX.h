@@ -11,19 +11,19 @@
 
 class Tane{
 private:
-  // some input fields - ignore for now
   CSVParser inputGenerator;
 public:
-  const std::string INPUT_FILE_CONFIG_KEY = "inputFile";
+  constexpr static char INPUT_FILE_CONFIG_KEY[] = "inputFile";
 
-  //const double fdErrorMeasure = 0.1; //TODO: these consts should go in class (or struct) Configuration
-  const double maxFdError = 0.05;
-  //const double uccErrorMeasure = 0;
-  const double maxUccError = 0.05;
-  const int maxArity = 10;
+ //TODO: these consts should go in class (or struct) Configuration
+  const double maxFdError = 0;
+  const double maxUccError = 0;
+  const int maxArity = 20;
   //TODO: DO NOT FORGET ABOUT MAXARITY!!
   // no evidence that there will be multiple Tane instances + tricky static stuff => just const
 
+  int countOfFD = 0;
+  int countOfUCC = 0;
   long aprioriMillis = 0;
   explicit Tane(fs::path& path) : inputGenerator(path) {}
   explicit Tane(fs::path&& path) : inputGenerator(path) {}
@@ -34,8 +34,8 @@ public:
   static double calculateUccError(shared_ptr<PositionListIndex> pli, shared_ptr<ColumnLayoutRelationData> relationData);
   //static double round(double error) { return ((int)(error * 32768) + 1)/ 32768.0; }
   //can't say if this method is necessary -- TODO: use this function?
-  static void registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
-  static void registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
-  static void registerUCC(Vertical& key, double error, shared_ptr<RelationalSchema> schema);
+  void registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
+  void registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema);
+  void registerUCC(Vertical& key, double error, shared_ptr<RelationalSchema> schema);
 
 };

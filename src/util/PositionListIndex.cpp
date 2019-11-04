@@ -194,7 +194,7 @@ shared_ptr<PositionListIndex> PositionListIndex::probeAll(Vertical probingColumn
 
 bool PositionListIndex::takeProbe(int position, ColumnLayoutRelationData & relationData, Vertical & probingColumns, vector<int> & probe){
     dynamic_bitset<> probingIndices = probingColumns.getColumnIndices();
-    for (unsigned long index = probingIndices.find_first(); index < probingIndices.size(); index = probingIndices.find_next(index + 1)){
+    for (unsigned long index = probingIndices.find_first(); index < probingIndices.size(); index = probingIndices.find_next(index)){
         int value = relationData.getColumnData(index)->getProbingTableValue(position);
         if (value == PositionListIndex::singletonValueId) return false;
         probe.push_back(value);

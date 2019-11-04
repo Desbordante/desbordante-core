@@ -4,6 +4,7 @@
 
 #include "model/Vertical.h"
 
+#include <iostream>
 #include <utility>
 
 #include "model/RelationalSchema.h"
@@ -35,8 +36,8 @@ shared_ptr<RelationalSchema> Vertical::getSchema() { return schema.lock(); }
 bool Vertical::contains(Vertical &that) {
     dynamic_bitset<>& thisIndices = columnIndices;
     dynamic_bitset<>& thatIndices = that.columnIndices;
-    if(thisIndices.count() < thatIndices.count()) return false;
-    for (unsigned long columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex + 1)){
+    if(thisIndices.count() != thatIndices.count()) return false;
+    for (unsigned long columnIndex = thatIndices.find_first(); columnIndex < thatIndices.size(); columnIndex = thatIndices.find_next(columnIndex)){
         if (!(thisIndices[columnIndex])) return false;
     }
     return true;
@@ -60,10 +61,11 @@ Vertical Vertical::project(Vertical &that) {
     return schema.lock()->getVertical(retainedColumnIndices);
 }
 
+//TODO: check
 Vertical Vertical::without(Vertical &that) {
     dynamic_bitset<> retainedColumnIndices(columnIndices);
-    retainedColumnIndices &= that.columnIndices;
-    retainedColumnIndices = ~retainedColumnIndices;
+    retainedColumnIndices &= ~that.columnIndices;
+    //retainedColumnIndices = ~retainedColumnIndices;
     return schema.lock()->getVertical(retainedColumnIndices);
 }
 
@@ -95,10 +97,25 @@ vector<shared_ptr<Vertical>> Vertical::getColumns() {
     vector<shared_ptr<Vertical>> columns;
     for (int index = columnIndices.find_first();
          index != -1;//dynamic_bitset<>::npos;
-         index = columnIndices.find_next(index + 1)) {
+         index = columnIndices.find_next(index)) {
         columns.push_back(relation->getColumns()[index]);
     }
     return columns;
 }
 
-string Vertical::toString() { return "[]";}
+string Vertical::toString() {
+    string result = "[";
+
+    if ((int)columnIndices.find_first() == -1)
+        return "Empty Vertical";
+
+    auto relation = schema.lock();
+    int i = columnIndices.find_next(0);
+    for (int index = columnIndices.find_first();
+         index != -1;//dynamic_bitset<>::npos;
+         index = columnIndices.find_next(index)) {
+        result += relation->getColumn(index)->getName() + " ";   //to_string(index) + " ";
+    }
+    result[result.size() - 1] = ']';
+    return result;
+}

@@ -28,20 +28,24 @@ std::shared_ptr<LatticeVertex> LatticeLevel::getLatticeVertex(const boost::dynam
 
 void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
   int arity = (int)levels.size() - 1;
-  cout << "Creating level " << arity + 1 << "..." << endl;
+  cout << "-------------Creating level " << arity + 1 << "...-----------------" << endl;
   shared_ptr<LatticeLevel> currentLevel = levels[arity];
 
   //using vector because of 'get()''
   vector<shared_ptr<LatticeVertex>> currentLevelVertices;
   for (const auto& [map_key, vertice] : currentLevel->getVertices()){
-    currentLevelVertices.push_back(vertice);
+      currentLevelVertices.push_back(vertice);
   }
-  std::sort(currentLevelVertices.begin(), currentLevelVertices.end());
+
+  std::sort(currentLevelVertices.begin(), currentLevelVertices.end(), LatticeVertex::comparator);
   LatticeLevel nextLevel(arity + 1);
+
+
+  //TODO: вынести иниц-ю объектов за циклы
 
   for (unsigned int vertexIndex1 = 0; vertexIndex1 < currentLevelVertices.size(); vertexIndex1++){
     shared_ptr<LatticeVertex> vertex1 = currentLevelVertices[vertexIndex1];
-    if (vertex1->getRhsCandidates().empty() && !vertex1->getIsKeyCandidate()) {
+    if (vertex1->getRhsCandidates().none() && !vertex1->getIsKeyCandidate()) {
       continue;
     }
 
@@ -53,7 +57,7 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
         break;
       }
 
-      if (!vertex1->getRhsCandidates().none() && !vertex2->getIsKeyCandidate()){
+      if (!vertex1->getRhsCandidates().intersects(vertex1->getRhsCandidates()) && !vertex2->getIsKeyCandidate()){
         continue;
       }
 
@@ -63,6 +67,7 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
 
         //TODO: check out if this cast is OK - had to add conversion constructor to CC
       shared_ptr<LatticeVertex> childVertex = make_shared<LatticeVertex>(*childColumns);
+       // cout << "--------------------------" << endl << "Looking at: " << *childVertex;
 
       dynamic_bitset<> parentIndices(vertex1->getVertical().getSchema()->getNumColumns()); //TODO:very sophisticated way to get numofcolumns
       parentIndices |= vertex1->getVertical().getColumnIndices();
@@ -73,18 +78,15 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
       childVertex->setKeyCandidate(vertex1->getIsKeyCandidate() && vertex2->getIsKeyCandidate());
       childVertex->setInvalid(vertex1->getIsInvalid() || vertex2->getIsInvalid());
 
-      dynamic_bitset<> tmpb(3);
-      tmpb.set(0);
-      tmpb.set(2);
-
-      for (int i = 0, skipIndex = parentIndices.find_first(); i < arity - 1; i++, skipIndex = parentIndices.find_next(skipIndex + 1)){
+      for (int i = 0, skipIndex = parentIndices.find_first(); i < arity - 1; i++, skipIndex = parentIndices.find_next(skipIndex)) {
         parentIndices[skipIndex] = false;
         shared_ptr<LatticeVertex> parentVertex = currentLevel->getLatticeVertex(parentIndices);
+       // cout << "--------------------------" << endl << "Loop: " << *parentVertex;
         if (parentVertex == nullptr){
           goto continueMidOuter;
         }
         childVertex->getRhsCandidates() &= parentVertex->getRhsCandidates();
-        if (childVertex->getRhsCandidates().empty()){
+        if (childVertex->getRhsCandidates().none()){
           goto continueMidOuter;
         }
         childVertex->getParents().push_back(parentVertex);
@@ -93,15 +95,17 @@ void LatticeLevel::generateNextLevel(vector<shared_ptr<LatticeLevel>>& levels) {
         childVertex->setKeyCandidate(childVertex->getIsKeyCandidate() && parentVertex->getIsKeyCandidate());
         childVertex->setInvalid(childVertex->getIsInvalid() || parentVertex->getIsInvalid());
 
-        if (!childVertex->getIsKeyCandidate() && childVertex->getRhsCandidates().empty()){
+        if (!childVertex->getIsKeyCandidate() && childVertex->getRhsCandidates().none()){
           goto continueMidOuter;
         }
       }
 
       childVertex->getParents().push_back(vertex1);
       childVertex->getParents().push_back(vertex2);
+      //auto tmp2 = ;
 
       nextLevel.add(childVertex);
+      //cout << "--------------------------" << endl << "Added: " << *childVertex;
 
 continueMidOuter:
       continue;
@@ -114,12 +118,12 @@ continueMidOuter:
 void LatticeLevel::clearLevelsBelow(vector<shared_ptr<LatticeLevel>>& levels, int arity) {
   // Clear the levels from the level list
   auto it = levels.begin();
-  for (int i = 0; i < min((int)levels.size(), arity); i++){
+  for (int i = 0; i < min((int)levels.size(), arity); i++) {
     (*(it++))->getVertices().clear();
   }
 
   //Clear child references
-  if (arity < (signed int)levels.size()){ //(signed int) => no warning
+  if (arity < (signed int)levels.size()) { //(signed int) => no warning
     for (auto [map_key, retainedVertex] : levels[arity]->getVertices()){
       retainedVertex->getParents().clear();
     }

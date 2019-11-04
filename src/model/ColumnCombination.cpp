@@ -16,7 +16,7 @@ string ColumnCombination::toString() {
     string ans = "[";
     string separator;
     auto relation = schema.lock();
-    for (unsigned long index = columnIndices.find_first(); index < columnIndices.size(); index = columnIndices.find_next(index + 1)){
+    for (unsigned long index = columnIndices.find_first(); index < columnIndices.size(); index = columnIndices.find_next(index)){
         ans += separator + relation->getColumn(index)->getName();
         separator = ", ";
     }

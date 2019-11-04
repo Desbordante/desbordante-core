@@ -52,5 +52,8 @@ public:
   //right analogy to compareTo?
   bool operator> (LatticeVertex& that);
 
-  string toString() { return "Vtx" + vertical.toString(); }
+  string toString();
+
+  static bool comparator(const shared_ptr<LatticeVertex>& v1, const shared_ptr<LatticeVertex>& v2) { return *v2 > *v1; }
+  friend std::ostream& operator<<(std::ostream& os, LatticeVertex& lv);
 };

@@ -11,38 +11,20 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fb80a5c4-b662-4c0d-8645-0d9d54369a0b" name="Default Changelist" comment="Багфикс; тесты для Тейна">
+    <list default="true" id="fb80a5c4-b662-4c0d-8645-0d9d54369a0b" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SConstruct" beforeDir="false" afterPath="$PROJECT_DIR$/SConstruct" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/algorithms/TaneX.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/algorithms/TaneX.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main2.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Column.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Column.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Column.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main2.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/ColumnCombination.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnCombination.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnCombination.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnCombination.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnData.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnData.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/ColumnLayoutRelationData.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/RelationData.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationData.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/RelationData.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationData.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationalSchema.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/RelationalSchema.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/RelationalSchema.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/model/Vertical.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/model/Vertical.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/model/Vertical.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/parser/CSVParser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/parser/CSVParser.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/parser/CSVParser.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/parser/CSVParser.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/parser/ConfigParser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/parser/ConfigParser.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/tests/Test1.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/Test1.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/tests/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/tests/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/LatticeLevel.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeLevel.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/LatticeVertex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/LatticeVertex.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/util/PositionListIndex.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/PositionListIndex.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/PositionListIndex.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/util/PositionListIndex.h" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -116,7 +98,7 @@
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="settings.editor.selected.configurable" value="CLionExternalConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -172,6 +154,12 @@
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="pliIntersectChecker.first" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" PASS_PARENT_ENVS_2="true" PROJECT_NAME="metanome_cpp" TARGET_NAME="metanome_cpp" RUN_TARGET_PROJECT_NAME="metanome_cpp" RUN_TARGET_NAME="metanome_cpp" TEST_CLASS="pliIntersectChecker" TEST_METHOD="first" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="metanome_cpp" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="metanome_cpp" TARGET_NAME="metanome_cpp" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="metanome_cpp" RUN_TARGET_NAME="metanome_cpp">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -205,11 +193,13 @@
       <item itemvalue="Google Test.pliChecker.first" />
       <item itemvalue="Google Test.TaneTester.first" />
       <item itemvalue="Google Test.pliChecker.second" />
+      <item itemvalue="Google Test.pliIntersectChecker.first" />
       <item itemvalue="Shell Script.clean" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Google Test.TaneTester.first" />
+        <item itemvalue="Google Test.pliIntersectChecker.first" />
         <item itemvalue="Google Test.pliChecker.second" />
         <item itemvalue="Google Test.pliChecker.first" />
       </list>
@@ -287,7 +277,17 @@
       <workItem from="1565351876163" duration="14351000" />
       <workItem from="1565383161425" duration="6571000" />
       <workItem from="1571394683043" duration="5637000" />
-      <workItem from="1571553339745" duration="5764000" />
+      <workItem from="1571553339745" duration="7919000" />
+      <workItem from="1571572435766" duration="1474000" />
+      <workItem from="1571579734002" duration="4293000" />
+      <workItem from="1571754731401" duration="4552000" />
+      <workItem from="1572072335230" duration="6937000" />
+      <workItem from="1572080113925" duration="281000" />
+      <workItem from="1572080408798" duration="10000" />
+      <workItem from="1572080848328" duration="1089000" />
+      <workItem from="1572085681605" duration="6736000" />
+      <workItem from="1572684118725" duration="16060000" />
+      <workItem from="1572865811483" duration="1069000" />
     </task>
     <task id="LOCAL-00001" summary="Add ConfigParser and CSVParser">
       <created>1562777944282</created>
@@ -338,7 +338,14 @@
       <option name="project" value="LOCAL" />
       <updated>1565356528113</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Refactoring">
+      <created>1571563596533</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1571563596533</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -398,7 +405,19 @@
     <MESSAGE value="Мелкие фиксы; добавлен getColumns()" />
     <MESSAGE value="TANE компилится!" />
     <MESSAGE value="Багфикс; тесты для Тейна" />
-    <option name="LAST_COMMIT_MESSAGE" value="Багфикс; тесты для Тейна" />
+    <MESSAGE value="Refactoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactoring" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/tests/Test1.cpp</url>
+          <line>63</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand>

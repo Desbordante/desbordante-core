@@ -47,3 +47,23 @@ TEST(pliChecker, second){
     auto index = columnData->getPositionListIndex()->getIndex();
     ASSERT_THAT(ans, ContainerEq(index));
 }
+
+TEST(pliIntersectChecker, first){
+    vector<vector<int>> ans = {
+            {2, 5}
+    };
+
+    string path = "/home/maxim/Study/Metanome-coding/metanome_git/src/tests";//fs::path(get_selfpath()).parent_path().string();
+    CSVParser csvParser1(path + "/ProbeTest1.csv");
+    CSVParser csvParser2(path + "/ProbeTest2.csv");
+    auto test1 = ColumnLayoutRelationData::createFrom(csvParser1, false);
+    auto test2 = ColumnLayoutRelationData::createFrom(csvParser2, false);
+
+    auto pli1 = test1->getColumnData(0)->getPositionListIndex();
+    auto pli2 = test2->getColumnData(0)->getPositionListIndex();
+
+    auto intersection = pli1->intersect(pli2);
+    int i = 0;
+    //auto index = columnData->getPositionListIndex()->getIndex();
+    ASSERT_THAT(intersection->getIndex(), ContainerEq(ans));
+}

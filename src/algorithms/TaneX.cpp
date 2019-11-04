@@ -19,51 +19,55 @@
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::cout, std::endl, std::setw, std::vector, std::list;
 
 double Tane::calculateZeroAryFdError(shared_ptr<ColumnData> rhs, shared_ptr<ColumnLayoutRelationData> relationData) {
-    return 1 - rhs->getPositionListIndex()->getNep() / (double)relationData->getNumTuplePairs();
+    //log (1 - rhs->getPositionListIndex()->getNep() / static_cast<double>(relationData->getNumTuplePairs()));
+    return 1 - rhs->getPositionListIndex()->getNep() / static_cast<double>(relationData->getNumTuplePairs());
 }
 
 double Tane::calculateFdError(shared_ptr<PositionListIndex> lhsPli, shared_ptr<PositionListIndex> jointPli, shared_ptr<ColumnLayoutRelationData> relationData) {
-   // log ((double) (lhsPli->getNep() - jointPli->getNep()) / (double) relationData->getNumTuplePairs())
-    return (double) (lhsPli->getNep() - jointPli->getNep()) / (double) relationData->getNumTuplePairs();
+    //log ((double) (lhsPli->getNep() - jointPli->getNep()) / (double) relationData->getNumTuplePairs())
+    return (double) (lhsPli->getNep() - jointPli->getNep()) / static_cast<double>(relationData->getNumTuplePairs());
 }
 
 
 double Tane::calculateUccError(shared_ptr<PositionListIndex> pli, shared_ptr<ColumnLayoutRelationData> relationData) {
-    return pli->getNep() / (double) relationData->getNumTuplePairs();
+    //log(pli->getNep() / static_cast<double>(relationData->getNumTuplePairs()))
+    return pli->getNep() / static_cast<double>(relationData->getNumTuplePairs());
 }
 
 void Tane::registerFD(Vertical& lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> lhs_bitset = lhs.getColumnIndices();
-    //cout << "Discovered FD: ";
+    cout << "Discovered FD: ";
     for (int i = lhs_bitset.find_first(); i != -1; i = lhs_bitset.find_next(i)) {
         cout << schema->getColumn(i)->getName() << " ";
     }
     cout << "-> " << rhs->getName() << " - error equals " << error << endl;
+    countOfFD++;
 }
 
 void Tane::registerFD(shared_ptr<Vertical> lhs, shared_ptr<Column> rhs, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> lhs_bitset = lhs->getColumnIndices();
-    //cout << "Discovered FD: ";
+    cout << "Discovered FD: ";
     for (int i = lhs_bitset.find_first(); i != -1; i = lhs_bitset.find_next(i)) {
         cout << schema->getColumn(i)->getName() << " ";
     }
     cout << "-> " << rhs->getName() << " - error equals " << error << endl;
+    countOfFD++;
 }
 
 void Tane::registerUCC(Vertical& key, double error, shared_ptr<RelationalSchema> schema) {
     dynamic_bitset<> key_bitset = key.getColumnIndices();
-    cout << "Discovered UCC: ";
+    /*cout << "Discovered UCC: ";
     for (int i = key_bitset.find_first(); i != -1; i = key_bitset.find_next(i)) {
         cout << schema->getColumn(i)->getName() << " ";
     }
-    cout << "- error equals " << error << endl;
+    cout << "- error equals " << error << endl;*/
+    countOfUCC++;
 }
 
 
 void Tane::execute() {
 
   shared_ptr<ColumnLayoutRelationData> relation = ColumnLayoutRelationData::createFrom(inputGenerator, true);
-  //TODO: this row won't work at all, so dig into this topic (because of inputGen initialization absence) - FIXED
 
   shared_ptr<RelationalSchema> schema = relation->getSchema();
   cout << schema->getName() << " has " << relation->getNumColumns() << " columns, "
@@ -100,10 +104,9 @@ void Tane::execute() {
     level1->add(vertex);
 
     //check FDs: 0->A
-    double fdError = calculateZeroAryFdError(columnData, relation);;  //TODO: error
+    double fdError = calculateZeroAryFdError(columnData, relation);
     if (fdError <= maxFdError) {  //TODO: max_error
       zeroaryFdRhs.set(column->getIndex());
-      //TODO: registerFd
       registerFD(schema->emptyVertical, column, fdError, schema);
       //cout << "AAAA" << endl;
       vertex->getRhsCandidates().set(column->getIndex(), false);
@@ -122,35 +125,34 @@ void Tane::execute() {
     vertex->getRhsCandidates() &= ~zeroaryFdRhs;  //~ returns flipped copy <- removed already discovered zeroary FDs
 
     shared_ptr<ColumnData> columnData = relation->getColumnData(column.getColumnIndices().find_first());    //KOCTbIJlN!!! - this column has only one index
-    double uccError = calculateUccError(columnData->getPositionListIndex(), relation);;  //TODO: uccErrorMeasure
+    double uccError = calculateUccError(columnData->getPositionListIndex(), relation);
     if (uccError <= maxUccError) {
-      //TODO: do something with discovered UCC
       registerUCC(column, uccError, schema);
       vertex->setKeyCandidate(false);
       if (uccError == 0) {
         for (unsigned long rhsIndex = vertex->getRhsCandidates().find_first();
              rhsIndex < vertex->getRhsCandidates().size();              //Possible to do it faster?
-             rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)){
+             rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex)){
           if (rhsIndex != column.getColumnIndices().find_first()){                          //KOSTYL'!!
               registerFD(column, schema->getColumn(rhsIndex), 0, schema);
-            //TODO: do smth with registered FD
           }
         }
         vertex->getRhsCandidates() &= column.getColumnIndices();
         //set vertex invalid if we seek for exact dependencies
-        if (maxFdError == 0 && maxUccError == 0) {     //TODO: error constants
+        if (maxFdError == 0 && maxUccError == 0) {
           vertex->setInvalid(true);
         }
       }
     }
   }
+  //log(level1->getVertices().size())
   levels.push_back(level1);
 
-  //TODO: configuration.maxArity
   for (int arity = 2; arity <= maxArity || maxArity <= 0; arity++) {
       //Generate next level - CHECK if the method itself is correct
     //auto startTime = std::chrono::system_clock::now();
     LatticeLevel::clearLevelsBelow(levels, arity - 1);
+    //log(levels[1]->getVertices().size())
     LatticeLevel::generateNextLevel(levels);
     //std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
     //aprioriMillis += elapsed_milliseconds.count();
@@ -176,8 +178,8 @@ void Tane::execute() {
         xaVertex->setPositionListIndex(parentPLI1->intersect(parentPLI2));
       }
 
-      dynamic_bitset xaIndices = xa.getColumnIndices();
-      dynamic_bitset aCandidates = xaVertex->getRhsCandidates();
+      dynamic_bitset<> xaIndices = xa.getColumnIndices();
+      dynamic_bitset<> aCandidates = xaVertex->getRhsCandidates();
 
       for (const auto& xVertex : xaVertex->getParents()) {
         Vertical& lhs = xVertex->getVertical();
@@ -186,7 +188,7 @@ void Tane::execute() {
         // Find index of A in XA. If a is not a candidate, continue. TODO: possible to do it easier??
         //like "aIndex = xaIndices - xIndices;"
         int aIndex = xaIndices.find_first();
-        dynamic_bitset xIndices = lhs.getColumnIndices();
+        dynamic_bitset<> xIndices = lhs.getColumnIndices();
         while (aIndex >= 0 && xIndices[aIndex]) {
           aIndex = xaIndices.find_next(aIndex);
         }
@@ -212,6 +214,7 @@ void Tane::execute() {
     }
 
     //Prune
+    //cout << "Pruning level: " << level->getArity() << ". " << level->getVertices().size() << " vertices" << endl;
     list<shared_ptr<LatticeVertex>> keyVertices;
     for (auto [map_key, vertex] : level->getVertices()) {
       Vertical& columns = vertex->getVertical();            //Originally it's a ColumnCombination
@@ -227,7 +230,7 @@ void Tane::execute() {
               // Look at 185 for this cycle description in a nutshell
             for (unsigned long rhsIndex = vertex->getRhsCandidates().find_first();
                  rhsIndex < vertex->getRhsCandidates().size();      //TODO: check that it's a correct way to traverse bitset
-                 rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex + 1)) {
+                 rhsIndex = vertex->getRhsCandidates().find_next(rhsIndex)) {
               Vertical rhs = *(std::static_pointer_cast<Vertical>(schema->getColumn((int)rhsIndex)));        //TODO: KOSTYL' - upcast - should be OK
               if (!columns.contains(rhs)) {         //TODO: again this conversion (P.S. was)
                 bool isRhsCandidate = true;
@@ -246,8 +249,9 @@ void Tane::execute() {
                   registerFD(columns, schema->getColumn(rhsIndex), 0, schema);
                 }
               }
-              keyVertices.push_back(vertex);
             }
+            keyVertices.push_back(vertex);
+        //cout << "--------------------------" << endl << "KeyVert: " << *vertex;
           }
         }
       }
@@ -258,12 +262,16 @@ void Tane::execute() {
           keyVertex->setInvalid(true);
         }
       }
+
     }
 
+    //cout << "Pruned level: " << level->getArity() << ". " << level->getVertices().size() << " vertices" << endl;
       //TODO: printProfilingData
   }
   std::chrono::milliseconds elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
   aprioriMillis += elapsed_milliseconds.count();
 
   cout << "Time: " << aprioriMillis << " milliseconds" << endl;
+  cout << "Total FD count: " << countOfFD << endl;
+  cout << "Total UCC count: " << countOfUCC << endl;
 }
