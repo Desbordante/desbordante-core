@@ -8,7 +8,7 @@ const int RelationData::nullValueId = -1;
 
 RelationData::RelationData(shared_ptr<RelationalSchema>& schema): schema(schema) {}
 
-int RelationData::getNumColumns() {
+unsigned int RelationData::getNumColumns() {
     return schema->getNumColumns();
 }
 
