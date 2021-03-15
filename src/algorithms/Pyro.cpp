@@ -10,6 +10,8 @@ double Pyro::execute() {
     auto relation = ColumnLayoutRelationData::createFrom(inputGenerator_, configuration_.isNullEqualNull);
     auto schema = relation->getSchema();
 
+    // std::cout << "AYYY LMAO\n";
+
     /*for (auto col : schema->getColumns()) {
         LOG(DEBUG) << boost::format{"PLI for %1%: %2%"}
             % col->toString() % relation->getColumnData(col->getIndex())->getPositionListIndex()->toString();
