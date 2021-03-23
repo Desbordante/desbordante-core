@@ -11,7 +11,7 @@
 
 unsigned long long Fd_mine::execute() {
     // 1
-    relation = ColumnLayoutRelationData::createFrom(inputGenerator, true);
+    relation = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
     schema = relation->getSchema();
 
     r = dynamic_bitset<>(schema->getNumColumns());
