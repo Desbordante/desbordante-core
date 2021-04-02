@@ -31,5 +31,6 @@ class Fd_mine : public FDAlgorithm {
     
   public:
     Fd_mine(fs::path& path) : FDAlgorithm(path){};
+    ~Fd_mine() override {};
     unsigned long long execute();
 };
