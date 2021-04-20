@@ -148,7 +148,6 @@ std::string Vertical::toIndicesString() const {
     return result;
 }
 
-
 vector<shared_ptr<Vertical>> Vertical::getParents() {
     if (getArity() < 2) return vector<shared_ptr<Vertical>>();
     vector<shared_ptr<Vertical>> parents(getArity());
@@ -161,4 +160,13 @@ vector<shared_ptr<Vertical>> Vertical::getParents() {
         parents[i++] = getSchema()->getVertical(std::move(parentColumnIndices));
     }
     return parents;
+}
+
+bool Vertical::operator<(Vertical const& rhs) const {
+    assert(schema.lock().get() == rhs.schema.lock().get());
+    if (this->columnIndices == rhs.columnIndices)
+        return false;
+
+    dynamic_bitset<> const& lr_xor = (this->columnIndices ^ rhs.columnIndices);
+    return rhs.columnIndices.test(lr_xor.find_first());
 }
