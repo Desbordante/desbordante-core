@@ -36,6 +36,11 @@ public:
     string toString() const { return "[" + name + "]";}
     std::string toIndicesString() const { return std::to_string(index); }
     explicit operator std::string() const { return toString(); }
-    bool operator==(const Column& rhs) const;
-    bool operator!=(const Column& rhs) const;
+    /* We consider the lhs column to be less than rhs if
+     * lhs.index > rhs.index
+     */
+    bool operator<(Column const& rhs) const;
+    bool operator==(Column const& rhs) const;
+    bool operator!=(Column const& rhs) const;
+    bool operator>(Column const& rhs) const;
 };

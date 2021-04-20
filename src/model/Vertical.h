@@ -34,7 +34,17 @@ public:
     Vertical(Vertical&& other) = default;
     Vertical& operator=(Vertical&& rhs) = default;
     virtual ~Vertical() = default;
+
+    /* @return Returns true if lhs.columnIndices lexicographically less than
+     * rhs.columnIndices treating bitsets big endian.
+     * @brief We do not use directly boost::dynamic_bitset<> operator< because
+     * it treats bitsets little endian during comparison and this is not
+     * suitable for this case, check out operator< for Columns.
+     */
+    bool operator<(Vertical const& rhs) const;
     bool operator==(Vertical const& other) const { return columnIndices == other.columnIndices; }
+    bool operator!=(Vertical const& other) const { return columnIndices != other.columnIndices; }
+    bool operator>(Vertical const& rhs) const { return !(*this < rhs && *this == rhs); }
 
     dynamic_bitset<> getColumnIndices() const { return columnIndices; }
     shared_ptr<RelationalSchema> getSchema() const { return schema.lock(); }
@@ -59,4 +69,5 @@ public:
     // returns a Vertical as a string "[index_1,index_2,...,index_n]"
     std::string toIndicesString() const;
     explicit operator std::string() const { return toString(); }
+
 };
