@@ -46,13 +46,13 @@ public:
      * suitable for this case, check out operator< for Columns.
      */
     bool operator<(Vertical const& rhs) const;
-
     bool operator==(Vertical const& other) const { return columnIndices == other.columnIndices; }
     bool operator!=(Vertical const& other) const { return columnIndices != other.columnIndices; }
     bool operator>(Vertical const& rhs) const { return !(*this < rhs && *this == rhs); }
 
     boost::dynamic_bitset<> getColumnIndices() const { return columnIndices; }
     RelationalSchema const* getSchema() const { return schema; }
+
 
     bool contains(Vertical const& that) const;
     bool contains(Column const& that) const;

@@ -57,6 +57,9 @@ void Tane::registerUCC(Vertical const& key, double error, RelationalSchema const
 unsigned long long Tane::execute() {
     std::unique_ptr<ColumnLayoutRelationData> relation = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
     RelationalSchema const* schema = relation->getSchema();
+    if (relation->getColumnData().empty()) {
+        throw std::runtime_error("Got an empty .csv file: FD mining is meaningless.");
+    }
     std::cout << schema->getName() << " has " << relation->getNumColumns() << " columns, "
          << relation->getNumRows() << " rows, and a maximum NIP of " << std::setw(2)
          << relation->getMaximumNip() << "." << std::endl;
