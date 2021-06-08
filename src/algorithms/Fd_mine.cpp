@@ -12,7 +12,7 @@
 
 unsigned long long Fd_mine::execute() {
     // 1
-    relation = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
+    relation = ColumnLayoutRelationData::createUnstrippedFrom(inputGenerator_, true);
     schema = relation->getSchema();
     auto startTime = std::chrono::system_clock::now();
 
@@ -58,20 +58,22 @@ void Fd_mine::computeNonTrivialClosure(dynamic_bitset<> xi) {
             dynamic_bitset<> y(schema->getNumColumns());
             xiy[columnIndex] = 1;
             y[columnIndex] = 1;
-            shared_ptr<ColumnData> columnData;
 
-            if (!plis.count(xi)) {
-                columnData = relation->getColumnData(xi.find_first());
-                plis[xi] = columnData->getPositionListIndex();
-            }
+            if (xi.count() == 1) {
+                PositionListIndex const* xiPli = relation->getColumnData(xi.find_first()).getPositionListIndex();
+                PositionListIndex const* yPli = relation->getColumnData(columnIndex).getPositionListIndex();
+                plis[xiy] = xiPli->intersect(yPli);
 
-            if (!plis.count(y)) {
-                columnData = relation->getColumnData(columnIndex);
-                plis[y] = columnData->getPositionListIndex();
+                if (xiPli->getNumCluster() == plis[xiy]->getNumCluster()) {
+                    closure[xi][columnIndex] = 1;
+                }                    
+                
+                continue;
             }
 
             if (!plis.count(xiy)) {
-                plis[xiy] = plis[xi]->intersect(plis[y]);
+                PositionListIndex const* yPli = relation->getColumnData(y.find_first()).getPositionListIndex();
+                plis[xiy] = plis[xi]->intersect(yPli);
             }
 
             if (plis[xi]->getNumCluster() == plis[xiy]->getNumCluster()) {
@@ -159,18 +161,14 @@ void Fd_mine::generateCandidates() {
                 xij = xi | xj;
 
                 if (!(xj).is_subset_of(fdSet[xi]) && !(xi).is_subset_of(fdSet[xj])) {
-                    if (!plis.count(xi)) {
-                        shared_ptr<ColumnData> columnData =
-                            relation->getColumnData(xi.find_first());
-                        plis[xi] = columnData->getPositionListIndex();
+                    if(xi.count() == 1) {
+                        PositionListIndex const* xiPli = relation->getColumnData(xi.find_first()).getPositionListIndex();
+                        PositionListIndex const* xjPli = relation->getColumnData(xj.find_first()).getPositionListIndex();
+                        plis[xij] = xiPli->intersect(xjPli);
                     }
-                    if (!plis.count(xj)) {
-                        shared_ptr<ColumnData> columnData =
-                            relation->getColumnData(xj.find_first());
-                        plis[xj] = columnData->getPositionListIndex();
+                    else {
+                        plis[xij] = plis[xi]->intersect(plis[xj].get());
                     }
-
-                    plis[xij] = plis[xi]->intersect(plis[xj]);
 
                     dynamic_bitset<> closureXij = closure[xi] | closure[xj];
                     if (r == (xij | closureXij)) {
