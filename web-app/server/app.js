@@ -3,18 +3,27 @@ const cors = require('cors');
 var logger = require('morgan');
 
 var algorithmsRouter = require('./routes/algorithms.js');
+var createTaskRouter = require('./routes/createTask');
+// const { response } = require('express');
 
 const app = express()
+const jsonParser = express.json();
+
 
 app.use(cors());
 app.use(logger('dev'));
 app.use(express.json());
 
-app.use('/algorithms', algorithmsRouter);
 
+// POST requests
+app.post('/createTask', jsonParser, createTaskRouter);
+
+// GET requests
+app.use('/algorithms', algorithmsRouter);
 app.use('/', (req, res) => {
   res.send('Hello World!')
-})
+});
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

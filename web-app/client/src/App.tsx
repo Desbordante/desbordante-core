@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Switcher, Loader } from "@skbkontur/react-ui";
-import { CreateTaskButton } from "./components/CreateButtons";
+import { CreateTaskButtons } from "./components/CreateButtons";
 
 export const App = () => {
   const [error, setError] = useState<{message: string} | null>(null);
@@ -52,7 +52,7 @@ export const App = () => {
               )
             }
           </Loader>
-          <CreateTaskButton />
+          <CreateTaskButtons />
         </div>
       </header>
     </div>
