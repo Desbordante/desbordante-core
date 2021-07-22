@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import { Switcher, Loader } from "@skbkontur/react-ui";
+import { CreateTaskButton } from "./components/CreateButtons";
 
-const App = () => {
+export const App = () => {
   const [error, setError] = useState<{message: string} | null>(null);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
   const [algNames, setAlgNames] = useState<string[]|null>(null);
@@ -29,6 +30,7 @@ const App = () => {
     return (
       <div>
         Ошибка:
+        {" "}
         {error.message}
       </div>
     );
@@ -50,10 +52,9 @@ const App = () => {
               )
             }
           </Loader>
+          <CreateTaskButton />
         </div>
       </header>
     </div>
   );
 };
-
-export default App;
