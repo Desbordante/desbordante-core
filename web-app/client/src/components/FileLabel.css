@@ -1,0 +1,44 @@
+.wrapper {
+  padding: 0.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.wrapper.error {
+  background: var(--red);
+}
+
+.filename {
+  margin: 0;
+  text-align: left;
+  width: 30rem;
+  transition: 0.3s;
+  background-color: var(--dark-grey);
+  /* white-space: nowrap;
+  overflow: hidden; */
+}
+
+.filename.glow {
+  font-size: 1.1rem;
+  transform: translateX(4.1rem);
+}
+
+.inactive {
+  color: var(--text-dull);
+}
+
+.active {
+  color: var(--text-white);
+}
+
+.hilight-purple {
+  color: var(--text-hilight-purple);
+}
+
+.hilight-green {
+  color: var(--text-hilight-green);
+}
+
+.hilight-red {
+  color: var(--red);
+}

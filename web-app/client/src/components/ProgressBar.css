@@ -1,0 +1,19 @@
+@import url("../colors.css");
+
+.loading-progress-bar {
+  position: relative;
+  display: flex;
+  justify-content: left;
+}
+
+.progress-bg {
+  position: absolute;
+  z-index: 0;
+  background-color: var(--dark-grey);
+  display: flex;
+}
+
+.progress-accent {
+  position: absolute;
+  background: linear-gradient(210deg, var(--purple), var(--green));
+}

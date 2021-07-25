@@ -1,0 +1,19 @@
+{
+  "allowedAlgorithms": ["FastFDs", "Pyro", "TaneX"],
+  "allowedSeparators": [",", "\\t", "\\n"],
+  "maxFileSize": 50000000,
+  "tasks": [
+    {
+      "id": 1,
+      "file": "loooong string",
+      "progress": 0.8,
+      "dependencies": [
+        {
+          "sent": false,
+          "from": ["a", "b", "c"],
+          "to": "d"
+        }
+      ]
+    }
+  ]
+}

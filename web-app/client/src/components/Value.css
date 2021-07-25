@@ -1,0 +1,17 @@
+.value {
+  text-align: center;
+}
+
+.value:focus {
+  background-color: var(--background-lighter);
+  border-color: var(--light-grey);
+  outline: none;
+}
+
+.value.invalid {
+  border-color: var(--red);
+}
+
+.value.invalid:focus {
+  background-color: var(--background-lighter);
+}

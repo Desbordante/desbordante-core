@@ -1,0 +1,22 @@
+@import url("../colors.css");
+
+.content {
+  height: 100%;
+}
+
+.bg-gradient .bg-solid {
+  width: 100%;
+}
+
+.bg-gradient {
+  background: linear-gradient(to right, var(--pink), var(--purple));
+  height: 0.2rem;
+}
+
+.bg-solid {
+  height: 100%;
+  background-color: var(--background-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
