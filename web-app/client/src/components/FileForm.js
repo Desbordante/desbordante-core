@@ -7,37 +7,35 @@ import Radio from "./Radio";
 import Value from "./Value";
 import Slider from "./Slider";
 import UploadFile from "./UploadFile";
-import { serverURL, sendData } from "../APIFunctions";
+import { getData, submitDatasetWthParameters } from "../APIFunctions";
 
-function FileForm({ onSubmit }) {
+function FileForm({ onSubmit, onUploadProgress }) {
   // Allowed field values
-  const [allowedSeparators, setAllowedSeparators] = useState([
-    ",",
-    "\\t",
-    "\\n",
-  ]);
+  const [allowedSeparators, setAllowedSeparators] = useState([]);
   const [allowedAlgorithms, setAllowedAlgorithms] = useState([]);
   const [maxfilesize, setMaxFileSize] = useState(5e7);
 
   // Parameters, later sent to the server on execution as JSON
   const [file, setFile] = useState(null);
   const [hasHeader, setHasHeader] = useState(true);
-  const [separator, setSeparator] = useState(allowedSeparators[0]);
+  const [separator, setSeparator] = useState("");
   const [algorithm, setAlgorithm] = useState("");
   const [errorThreshold, setErrorThreshold] = useState(0.05);
   const [maxLHSAttributes, setMaxLHSAttributes] = useState(5);
 
+  // Getting allowed field values from server
   useEffect(() => {
-    fetch(`${serverURL}/algorithms`)
-      .then((res) => res.json())
-      .then((res) => res.algorithms.map(({ name }) => name))
+    getData("algsInfo")
       .then((res) => {
-        setAllowedAlgorithms(res);
-        setAlgorithm(res[0]);
+        setAllowedAlgorithms(res.allowedAlgorithms);
+        setAlgorithm(res.allowedAlgorithms[0]);
+
+        setAllowedSeparators(res.allowedSeparators);
+        setSeparator(res.allowedSeparators[0]);
+
+        setMaxFileSize(res.maxFileSize);
       });
   }, []);
-
-  // useEffect(() => setAlgorithm(allowedAlgorithms[0]))
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
@@ -56,7 +54,6 @@ function FileForm({ onSubmit }) {
       && maxLHSValidatorFunc(maxLHSAttributes)
     );
   }
-  console.log(algorithm);
 
   return (
     <form>
@@ -134,7 +131,7 @@ function FileForm({ onSubmit }) {
         text="Analyze"
         onClick={() => {
           onSubmit();
-          sendData(file, "createTask");
+          submitDatasetWthParameters(file, {algName: algorithm, semicolon: separator, errorPercent: errorThreshold}, onUploadProgress);
         }}
         validatorFunc={isValid}
       />

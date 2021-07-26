@@ -2,11 +2,8 @@ import React from "react";
 import "./Submit.css";
 
 function Submit({
-  // eslint-disable-next-line no-unused-vars
-  text, onClick, toggleObj, validatorFunc,
+  text, onClick, validatorFunc,
 }) {
-  // console.log(validatorFunc(toggleObj));
-
   return (
     <div className="gradient-glow">
       <div

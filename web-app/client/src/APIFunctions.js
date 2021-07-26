@@ -1,4 +1,6 @@
-export const serverURL = "http://localhost:5000";
+import axios from "axios";
+
+const serverURL = "http://localhost:5000";
 
 export async function getData(property) {
   const response = await fetch(`${serverURL}/${property}`);
@@ -7,24 +9,35 @@ export async function getData(property) {
   return data;
 }
 
-export function sendData(file, name) {
-  const formData = new FormData();
-  formData.append("myFile", file);
+export function submitDatasetWthParameters(dataSet, parameters, onProgress) {
+  const json = JSON.stringify(parameters);
+  const blob = new Blob([json], {
+    type: "application/json",
+  });
 
-  fetch(`${serverURL}/${name}`, {
-    method: "POST",
-    // headers: {
-    //   "content-type": "application/json",
-    // },
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then((data) => {
-      // eslint-disable-next-line no-console
-      console.log(data);
-    })
-    .catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
-    });
+  const data = new FormData();
+
+  // Update the formData object
+  if (dataSet) {
+    data.append(
+      "file",
+      dataSet,
+      dataSet.name,
+    );
+  }
+
+  data.append("document", blob);
+
+  // Request made to the backend api
+  // Send formData object
+  const config = {
+    headers: { "Content-Type": "text/csv" },
+    onUploadProgress: (progressEvent) => onProgress(progressEvent.loaded / progressEvent.total),
+  };
+
+  axios.post(
+    `${serverURL}/upload`,
+    data,
+    config,
+  );
 }

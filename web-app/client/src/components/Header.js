@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React from "react";
 import "./Header.css";
 
@@ -14,14 +13,16 @@ function Header() {
           <h1 className="name-main">Desbordante</h1>
         </div>
         <h2 className="description">
-          An{" "}
+          An
+          {" "}
           <a
             href="https://github.com/Mstrutov/Desbordante"
             rel="noreferrer"
             target="_blank"
           >
             open-source
-          </a>{" "}
+          </a>
+          {" "}
           data profiling tool
         </h2>
       </div>

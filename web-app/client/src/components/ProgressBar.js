@@ -2,9 +2,9 @@ import React from "react";
 import "./ProgressBar.css";
 
 function ProgressBar({
-  maxWidth, widthUnit, thickness, percent, rounded,
+  maxWidth, widthUnit, thickness, progress, rounded,
 }) {
-  const barWidth = maxWidth * percent;
+  const barWidth = maxWidth * progress;
 
   const styles = {
     width: maxWidth + widthUnit,
@@ -13,7 +13,6 @@ function ProgressBar({
   };
 
   return (
-    // <div className="progress-bar">
     <div className="progress-bar" style={styles}>
       <div className="progress-bg" style={styles} />
       <div
@@ -25,7 +24,6 @@ function ProgressBar({
         style={{ ...styles, width: barWidth + widthUnit }}
       />
     </div>
-    // </div>
   );
 }
 
