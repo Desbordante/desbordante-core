@@ -1,19 +1,17 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { Switch, Route } from "react-router-dom";
 import { TestPage } from "./TestPage";
-import { FileUpload } from "./Upload";
+import { CreateTask } from "./CreateTask";
 
-export const App = () => (
-  <Router>
-    <Switch>
-      <Route path="/test">
+export const App2 = () => (
+  <Switch>
+    <Route path="/experiments/upload">
+      <CreateTask />
+    </Route>
+    <Route path="/experiments">
+      <div>
         <TestPage />
-      </Route>
-      <Route path="/">
-        <div>
-          <FileUpload />
-        </div>
-      </Route>
-    </Switch>
-  </Router>
+      </div>
+    </Route>
+  </Switch>
 );
