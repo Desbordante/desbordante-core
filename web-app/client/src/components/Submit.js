@@ -1,15 +1,18 @@
 import React from "react";
 import "./Submit.css";
 
-function Submit({ text, onClick, toggleObj, validatorFunc }) {
+function Submit({
+  // eslint-disable-next-line no-unused-vars
+  text, onClick, toggleObj, validatorFunc,
+}) {
   // console.log(validatorFunc(toggleObj));
 
   return (
     <div className="gradient-glow">
       <div
         className={
-          "round-corners button gradient-fill glow" +
-          (validatorFunc() ? "" : " disabled")
+          `round-corners button gradient-fill glow${
+            validatorFunc() ? "" : " disabled"}`
         }
       >
         {text}
@@ -17,12 +20,12 @@ function Submit({ text, onClick, toggleObj, validatorFunc }) {
       <input
         type="button"
         className={
-          "round-corners button gradient-fill" +
-          (validatorFunc() ? " button" : " disabled")
+          `round-corners button gradient-fill${
+            validatorFunc() ? " button" : " disabled"}`
         }
         onClick={validatorFunc() ? onClick : () => {}}
         value={text}
-      ></input>
+      />
     </div>
   );
 }

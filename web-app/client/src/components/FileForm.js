@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import "./FileForm.css";
 import Checkbox from "./Checkbox";
@@ -40,8 +41,7 @@ function FileForm({ onSubmit }) {
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
-  const fileSizeValidatorFunc = (file) =>
-    file == null || file.size < maxfilesize;
+  const fileSizeValidatorFunc = (file) => file == null || file.size < maxfilesize;
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
   const maxLHSValidatorFunc = (n) => !isNaN(n) && n > 0 && n % 1 === 0;
@@ -49,11 +49,11 @@ function FileForm({ onSubmit }) {
   // Validator function that ensures every field is correct
   function isValid(options) {
     return (
-      fileExistenceValidatorFunc(file) &&
-      fileSizeValidatorFunc(file) &&
-      separatorValidatorFunc(separator) &&
-      errorValidatorFunc(errorThreshold) &&
-      maxLHSValidatorFunc(maxLHSAttributes)
+      fileExistenceValidatorFunc(file)
+      && fileSizeValidatorFunc(file)
+      && separatorValidatorFunc(separator)
+      && errorValidatorFunc(errorThreshold)
+      && maxLHSValidatorFunc(maxLHSAttributes)
     );
   }
   console.log(algorithm);
@@ -105,7 +105,7 @@ function FileForm({ onSubmit }) {
           min={0}
           max={1}
           step={0.001}
-          exponential={true}
+          exponential
           validatorFunc={errorValidatorFunc}
         />
       </div>
@@ -116,7 +116,7 @@ function FileForm({ onSubmit }) {
           onChange={setMaxLHSAttributes}
           min={1}
           max={100}
-          integer={true}
+          integer
           size={3}
           validatorFunc={maxLHSValidatorFunc}
         />

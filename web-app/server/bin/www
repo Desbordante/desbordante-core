@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
-var app = require('../app');
+require('dotenv').config();
+
+var app = require('../src/app');
 var debug = require('debug')('desbordante:server');
 var http = require('http');
 
-var port = normalizePort(process.env.PORT || '5000');
+var port = normalizePort(process.env.SERVER_PORT);
 app.set('port', port);
 
 var server = http.createServer(app);
@@ -19,17 +21,15 @@ function normalizePort(val) {
     var port = parseInt(val, 10);
   
     if (isNaN(port)) {
-      // named pipe
       return val;
     }
   
     if (port >= 0) {
-      // port number
       return port;
     }
   
     return false;
-}  
+}
 
 function onError(error) {
     if (error.syscall !== 'listen') {
@@ -62,4 +62,3 @@ function onListening() {
       : 'port ' + addr.port;
     debug('Listening on ' + bind);
 }
-  

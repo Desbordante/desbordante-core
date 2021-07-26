@@ -4,6 +4,7 @@ import ProgressBar from "./ProgressBar";
 
 function LoadingScreen({ onComplete, state }) {
   const [percent, setPercent] = useState(0);
+  // eslint-disable-next-line no-unused-vars
   const [complete, setComplete] = useState(false);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ function LoadingScreen({ onComplete, state }) {
         widthUnit="rem"
         percent={percent}
         thickness={0.8}
-        rounded={true}
+        rounded
       />
     </div>
   );

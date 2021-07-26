@@ -1,21 +1,28 @@
+/* eslint-disable */
 import React from "react";
 import "./FileLabel.css";
 
 function FileLabel({ file, validatorFunc }) {
-  const borderClass =
-    file === null ? "inactive" : validatorFunc(file) ? "active" : "error";
+  const borderClass = file === null
+    ? "inactive"
+    : validatorFunc(file)
+      ? "active"
+      : "error";
 
-  const fileTitle =
-    file === null ? (
-      <>
-        <span className="hilight-purple">Upload</span> your dataset, or
-        <span className="hilight-green"> choose</span> one of ours ...
-      </>
-    ) : validatorFunc(file) ? (
-      <>{file.name}</>
-    ) : (
-      <span className="hilight-red">Error: file is too large!</span>
-    );
+  const fileTitle = file === null ? (
+    <>
+      <span className="hilight-purple">Upload</span>
+      {" "}
+      your dataset, or
+      <span className="hilight-green"> choose</span>
+      {" "}
+      one of ours ...
+    </>
+  ) : validatorFunc(file) ? (
+    <>{file.name}</>
+  ) : (
+    <span className="hilight-red">Error: file is too large!</span>
+  );
 
   return (
     <>
