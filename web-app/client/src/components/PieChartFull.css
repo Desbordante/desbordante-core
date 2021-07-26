@@ -1,0 +1,6 @@
+@import url("../colors.css");
+
+.chart-title {
+  color: var(--text-black);
+  font-weight: 500;
+}

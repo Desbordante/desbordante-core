@@ -7,6 +7,13 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+<<<<<<< HEAD
+    "airbnb": "0.0.2",
+    "body-scroll-lock": "^4.0.0-beta.0",
+    "bootstrap": "^5.0.2",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.23.4",
+=======
     "axios": "^0.21.1",
     "body-scroll-lock": "^4.0.0-beta.0",
     "bootstrap": "^5.0.2",
@@ -14,7 +21,9 @@
     "eslint-config-airbnb-typescript-prettier": "^3.1.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-react": "7.22.0",
+>>>>>>> 75702549083fce789e414321ad9b32405ca6da37
     "json-server": "^0.16.3",
+    "lint": "^0.7.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-motion": "^0.5.2",

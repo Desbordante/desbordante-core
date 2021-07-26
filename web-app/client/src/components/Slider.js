@@ -21,17 +21,24 @@ function Slider({
       type="range"
       min={min}
       max={max}
-      value={
-        isNaN(+toggleObj)
-          ? toggleObj
-          : expToLinear(+toggleObj)
-      }
+      value={isNaN(+toggleObj) ? toggleObj : expToLinear(+toggleObj)}
       step={step}
       className="slider"
+<<<<<<< HEAD
+      onChange={(e) =>
+        onChange(
+          "" +
+            ((x) => (step === 1 ? parseInt(x) : +x))(
+              linearToExp(+e.target.value).toFixed(3)
+            )
+        )
+      }
+=======
       onChange={(e) => onChange(`${
         ((x) => (step === 1 ? parseInt(x) : +x))(
           linearToExp(+e.target.value).toFixed(3),
         )}`)}
+>>>>>>> 75702549083fce789e414321ad9b32405ca6da37
     />
   );
 }
