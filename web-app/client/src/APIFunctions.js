@@ -20,9 +20,11 @@ export function sendData(file, name) {
   })
     .then((response) => response.json())
     .then((data) => {
+      // eslint-disable-next-line no-console
       console.log(data);
     })
     .catch((error) => {
+      // eslint-disable-next-line no-console
       console.error(error);
     });
 }

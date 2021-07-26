@@ -12,13 +12,11 @@ function Value({
       type="text"
       value={toggleObj}
       className={
-        "round-corners unchecked value" +
-        (validatorFunc(toggleObj) ? "" : " invalid")
+        `round-corners unchecked value${
+          validatorFunc(toggleObj) ? "" : " invalid"}`
       }
       size={size}
-      onInput={(e) =>
-        onChange(e.target.value)
-        }
+      onInput={(e) => onChange(e.target.value)}
     />
   );
 }

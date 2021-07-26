@@ -9,10 +9,10 @@ function Checkbox({ text, onClick, toggleObj }) {
       type="button"
       value={text}
       className={
-        "round-corners button " + (deciderFunc() ? "checked" : "unchecked")
+        `round-corners button ${deciderFunc() ? "checked" : "unchecked"}`
       }
       onClick={() => onClick(text)}
-    ></input>
+    />
   );
 }
 

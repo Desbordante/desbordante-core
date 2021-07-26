@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React from "react";
 import "./Header.css";
 
@@ -6,7 +7,7 @@ function Header() {
     <>
       <div className="video-header">
         <video autoPlay loop muted id="video">
-          <source src="/videos/background.mp4" type="video/mp4"></source>
+          <source src="/videos/background.mp4" type="video/mp4" />
         </video>
         <div className="name-and-logo">
           <img src="/icons/logo.svg" className="logo-big" alt="logo" />
@@ -14,7 +15,7 @@ function Header() {
         </div>
         <h2 className="description">Open-source data profiling tool</h2>
       </div>
-      <div className="bg-gradient"></div>
+      <div className="bg-gradient" />
     </>
   );
 }

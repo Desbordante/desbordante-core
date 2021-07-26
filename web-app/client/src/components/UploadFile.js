@@ -3,7 +3,9 @@ import "./UploadFile.css";
 import FileLabel from "./FileLabel";
 import ButtonIcon from "./ButtonIcon";
 
-function UploadFile({ onClick, file, validatorFunc, color }) {
+function UploadFile({
+  onClick, file, validatorFunc, color,
+}) {
   const inputFile = useRef(null);
 
   const onButtonClick = () => {
