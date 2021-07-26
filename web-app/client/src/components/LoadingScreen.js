@@ -4,7 +4,7 @@ import ProgressBar from "./ProgressBar";
 
 function LoadingScreen({ onComplete, progress }) {
   if (progress === 1) {
-    onComplete(2);
+    onComplete();
   }
 
   return (
