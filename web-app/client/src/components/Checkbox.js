@@ -7,8 +7,7 @@ function Checkbox({ text, onClick, toggleObj }) {
       type="button"
       value={text}
       className={
-        "round-corners button " +
-        (toggleObj ? "checked" : "unchecked")
+        "round-corners button " + (toggleObj ? "checked" : "unchecked")
       }
       onClick={() => {
         onClick(!toggleObj);

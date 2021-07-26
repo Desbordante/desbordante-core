@@ -3,11 +3,7 @@ import "./FileLabel.css";
 
 function FileLabel({ file, validatorFunc }) {
   const borderClass =
-    file === null
-      ? "inactive"
-      : validatorFunc(file)
-      ? "active"
-      : "error";
+    file === null ? "inactive" : validatorFunc(file) ? "active" : "error";
 
   const fileTitle =
     file === null ? (

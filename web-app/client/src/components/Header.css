@@ -60,6 +60,10 @@
   letter-spacing: 0.13rem;
 }
 
+a {
+  color: var(--text-white);
+}
+
 #video.hidden {
   display: none;
 }

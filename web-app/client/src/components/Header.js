@@ -12,7 +12,17 @@ function Header() {
           <img src="/icons/logo.svg" className="logo-big" alt="logo" />
           <h1 className="name-main">Desbordante</h1>
         </div>
-        <h2 className="description">Open-source data profiling tool</h2>
+        <h2 className="description">
+          An{" "}
+          <a
+            href="https://github.com/Mstrutov/Desbordante"
+            rel="noreferrer"
+            target="_blank"
+          >
+            open-source
+          </a>{" "}
+          data profiling tool
+        </h2>
       </div>
       <div className="bg-gradient"></div>
     </>

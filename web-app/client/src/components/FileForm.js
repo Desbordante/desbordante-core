@@ -9,7 +9,7 @@ import UploadFile from "./UploadFile";
 import { serverURL, sendData } from "../APIFunctions";
 
 function FileForm({ onSubmit }) {
-  //Allowed field values
+  // Allowed field values
   const [allowedSeparators, setAllowedSeparators] = useState([
     ",",
     "\\t",
@@ -18,7 +18,7 @@ function FileForm({ onSubmit }) {
   const [allowedAlgorithms, setAllowedAlgorithms] = useState([]);
   const [maxfilesize, setMaxFileSize] = useState(5e7);
 
-  //Parameters, later sent to the server on execution as JSON
+  // Parameters, later sent to the server on execution as JSON
   const [file, setFile] = useState(null);
   const [hasHeader, setHasHeader] = useState(true);
   const [separator, setSeparator] = useState(allowedSeparators[0]);
@@ -38,7 +38,7 @@ function FileForm({ onSubmit }) {
 
   // useEffect(() => setAlgorithm(allowedAlgorithms[0]))
 
-  //Validator functions for fields
+  // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
   const fileSizeValidatorFunc = (file) =>
     file == null || file.size < maxfilesize;
@@ -46,7 +46,7 @@ function FileForm({ onSubmit }) {
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
   const maxLHSValidatorFunc = (n) => !isNaN(n) && n > 0 && n % 1 === 0;
 
-  //Validator function that ensures every field is correct
+  // Validator function that ensures every field is correct
   function isValid(options) {
     return (
       fileExistenceValidatorFunc(file) &&
