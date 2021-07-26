@@ -22,10 +22,14 @@ router.post('/createTask', function(req, res){
     } catch (err) {
         res.status(500).send(err);
     }
-            
+
+    // TODO: add try catch
+    // console.log('Adding to DB')
+    const json = JSON.parse(req.files.document.data);
+
     const dataset = 'user'
     const taskID = uuidv1()
-    const { algName, errorPercent, semicolon } = req.body
+    const { algName, errorPercent, semicolon } = json
     const progress = 0.0
     const fileName = req.files.file.name
     const datasetPath = '~/git_workspace/desbordante/build/target/inputData/' + fileName // TODO: FIX

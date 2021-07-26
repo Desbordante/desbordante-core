@@ -23,7 +23,7 @@ export const CreateTaskButtons = () => {
     <div>
       <Button onClick={createTask}>Create new task</Button>
       <div style={{
-        margin: "15px",
+        margin: "auto",
         padding: "10px",
         width: " 400px",
         display: "flex",

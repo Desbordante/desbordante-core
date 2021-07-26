@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Loader, Switcher } from "@skbkontur/react-ui";
+// eslint-disable-next-line no-unused-vars
 import { CreateTaskButtons } from "./CreateButtons";
 import "./TestPage.css";
-import { FileUpload } from "./Upload";
+import { CreateTask } from "./CreateTask";
 
 export const TestPage = () => (
   <div className="App-test">
     <header className="App-header-test">
       <div>
         <AlgList />
-        <CreateTaskButtons />
-        <FileUpload />
+        {/* <CreateTaskButtons /> */}
+        <CreateTask />
       </div>
     </header>
   </div>

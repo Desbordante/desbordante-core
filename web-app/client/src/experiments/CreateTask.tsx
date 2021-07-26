@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { Button } from "@skbkontur/react-ui";
 
 // export const FileUpload = () => {
 //   const [selectedFile, setSelectedFile] = useState<File>();
@@ -69,7 +70,7 @@ import React, { useState } from "react";
 //   );
 // };
 
-export const FileUpload = () => {
+export const CreateTask = () => {
   const [selectedFile, setSelectedFile] = useState<File>();
 
   // On file select (from the pop up)
@@ -102,7 +103,7 @@ export const FileUpload = () => {
     // Send formData object
     axios({
       method: "post",
-      url: "http://localhost:5000/upload",
+      url: "http://localhost:5000/createTask",
       data,
       headers: { "Content-Type": "text/csv" },
     });
@@ -136,15 +137,15 @@ export const FileUpload = () => {
   }
 
   return (
-    <div>
+    <div style={{ width: "400px" }}>
       <h3>
         File Upload using React!
       </h3>
       <div>
         <input type="file" onChange={onFileChange} />
-        <button type="button" onClick={onFileUpload}>
-          Upload!
-        </button>
+        <Button type="button" onClick={onFileUpload}>
+          Create new task
+        </Button>
       </div>
       {fileData()}
     </div>
