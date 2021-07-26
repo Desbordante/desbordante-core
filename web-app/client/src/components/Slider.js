@@ -18,11 +18,11 @@ function Slider({
       type="range"
       min={min}
       max={max}
-      value={isNaN(+toggleObj) ? toggleObj : expToLinear(+toggleObj)}
+      value={(+toggleObj).isNaN ? toggleObj : expToLinear(+toggleObj)}
       step={step}
       className="slider"
       onChange={(e) => onChange(`${
-        ((x) => (step === 1 ? parseInt(x) : +x))(
+        ((x) => (step === 1 ? parseInt(x, 10) : +x))(
           linearToExp(+e.target.value).toFixed(3),
         )}`)}
     />
