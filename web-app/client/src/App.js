@@ -1,7 +1,6 @@
 import "./App.css";
 import React, { useState, useRef, useEffect } from "react";
-// eslint-disable-next-line no-unused-vars
-import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
+// import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 import Header from "./components/Header";
 import LoadingScreen from "./components/LoadingScreen";
 import FileForm from "./components/FileForm";

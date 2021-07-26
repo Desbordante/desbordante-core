@@ -11,6 +11,7 @@ import { getData, submitDatasetWthParameters } from "../APIFunctions";
 
 function FileForm({ onSubmit, onUploadProgress }) {
   // Allowed field values
+  const [allowedFileFormats, setAllowedFileFormats] = useState([]);
   const [allowedSeparators, setAllowedSeparators] = useState([]);
   const [allowedAlgorithms, setAllowedAlgorithms] = useState([]);
   const [maxfilesize, setMaxFileSize] = useState(5e7);
@@ -27,6 +28,8 @@ function FileForm({ onSubmit, onUploadProgress }) {
   useEffect(() => {
     getData("algsInfo")
       .then((res) => {
+        setAllowedFileFormats(res.allowedFileFormats);
+
         setAllowedAlgorithms(res.allowedAlgorithms);
         setAlgorithm(res.allowedAlgorithms[0]);
 
@@ -39,16 +42,18 @@ function FileForm({ onSubmit, onUploadProgress }) {
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
-  const fileSizeValidatorFunc = (file) => file == null || file.size < maxfilesize;
+  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize;
+  const fileFormatValidatorFunc = (file) => allowedFileFormats.indexOf(file.type) !== -1;
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
   const maxLHSValidatorFunc = (n) => !isNaN(n) && n > 0 && n % 1 === 0;
 
   // Validator function that ensures every field is correct
-  function isValid(options) {
+  function isValid() {
     return (
       fileExistenceValidatorFunc(file)
       && fileSizeValidatorFunc(file)
+      && fileFormatValidatorFunc(file)
       && separatorValidatorFunc(separator)
       && errorValidatorFunc(errorThreshold)
       && maxLHSValidatorFunc(maxLHSAttributes)
@@ -62,8 +67,9 @@ function FileForm({ onSubmit, onUploadProgress }) {
         <UploadFile
           onClick={setFile}
           file={file}
-          validatorFunc={fileSizeValidatorFunc}
-          color="purple"
+          fileExistenceValidatorFunc={fileExistenceValidatorFunc}
+          fileSizeValidatorFunc={fileSizeValidatorFunc}
+          fileFormatValidatorFunc={fileFormatValidatorFunc}
         />
       </div>
       <div className="form-item">
