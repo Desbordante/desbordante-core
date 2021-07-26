@@ -1,7 +1,9 @@
 import React from "react";
 import "./Value.css";
 
-function Value({ toggleObj, onChange, size, validatorFunc }) {
+function Value({
+  toggleObj, onChange, size, validatorFunc,
+}) {
   return (
     <input
       type="text"
