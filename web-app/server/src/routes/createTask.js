@@ -1,8 +1,9 @@
 const express = require('express');
 const { v1: uuidv1 } = require('uuid');
 const router = express.Router();
-const eventTaskType = require('../kafka/eventTaskType');
-const stream = require('../kafka/index');
+const eventTaskType = require('../kafka-producer/eventTaskType');
+const stream = require('../kafka-producer/index');
+var path = require('path');
 
 router.post('/createTask', function(req, res){
     if(!req.body) return res.sendStatus(400)
@@ -14,25 +15,37 @@ router.post('/createTask', function(req, res){
             });
         } else {
             // Save file to ../uploads
-            let table = req.files.file;
-            
+            let table = req.files.file
+
+            // table.mimetype,
+            // table.size
+
             // Use the mv() method to place the file in upload directory (i.e. "uploads")
-            table.mv('./uploads/' + table.name);
+            table.mv('./uploads/' + table.name)
         }
     } catch (err) {
         res.status(500).send(err);
     }
 
     // TODO: add try catch
-    // console.log('Adding to DB')
-    const json = JSON.parse(req.files.document.data);
+
+    const json = JSON.parse(req.files.document.data)
 
     const dataset = 'user'
     const taskID = uuidv1()
     const { algName, errorPercent, semicolon } = json
     const progress = 0.0
     const fileName = req.files.file.name
-    const datasetPath = '~/git_workspace/desbordante/build/target/inputData/' + fileName // TODO: FIX
+
+    // get path to root file (www)
+    var rootPath = path.dirname(require.main.filename).split("/")
+
+    rootPath.pop()              // remove 'bin'
+    rootPath.push('uploads')    // add 'uploads'
+    rootPath.push(fileName)     // add '*.csv'
+
+    // TODO: datasetPath must have unique key
+    const datasetPath = rootPath.join('/') 
     const status = 'NOT IN PROCESS'
 
     // Add task to DB
@@ -47,8 +60,8 @@ router.post('/createTask', function(req, res){
         }
     )
     .catch(err => {
-        console.log(`Error (task wasn't added to DB)`)
-        throw err
+            console.log(`Error (task wasn't added to DB)`)
+            throw err
         }
     );
 

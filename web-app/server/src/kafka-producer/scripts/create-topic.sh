@@ -1,4 +1,4 @@
-docker exec -it kafka ~/Downloads/kafka_2.13-2.8.0/bin/kafka-topics.sh \
+docker exec -it kafka /opt/bitnami/kafka/bin/kafka-topics.sh \
     --create \
     --zookeeper zookeeper:2181 \
     --replication-factor 1 \

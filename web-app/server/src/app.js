@@ -15,7 +15,6 @@ const _ = require('lodash');
 var algsInfo = require('./routes/algsInfo');
 var chooseTaskRouter = require('./routes/chooseTask');
 var createTaskRouter = require('./routes/createTask');
-var uploadRouter = require('./routes/upload');
 
 // Confurating DB tables
 dropTableTasks(pool)
@@ -40,13 +39,9 @@ app.use(morgan('dev'));
 app.post('/chooseTask', jsonParser, chooseTaskRouter);
 app.post('/createTask', jsonParser, createTaskRouter);
 
-// Upload file
-app.post('/upload', uploadRouter);
-
 // GET requests
 app.use('/algsInfo', algsInfo);
 app.use('/', (req, res) => {
-    
   res.send('Hello World! (root route)')
 });
 

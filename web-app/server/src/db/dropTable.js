@@ -5,8 +5,8 @@ async function dropTableTasks(pool) {
         console.log(`Tables in DB 'desbordante' was successfully dropped`)
     })
     .catch((err) => {
-        console.log('Problem with dropping table tasks')
-        throw err
+            console.log('Problem with dropping table tasks')
+            throw err
         }
     )
 };
