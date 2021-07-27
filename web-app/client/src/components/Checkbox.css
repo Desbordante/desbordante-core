@@ -12,6 +12,10 @@
   margin: 0rem 0.8rem;
 }
 
+.button {
+  transition: 0.3s;
+}
+
 .button:active {
   outline: none;
 }

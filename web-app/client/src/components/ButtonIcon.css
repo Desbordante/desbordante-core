@@ -3,12 +3,36 @@
   width: 1.4rem;
 }
 
+.icon.huge {
+  height: 2.8rem;
+  width: 2.8rem;
+}
+
 .button-icon {
   padding: 0.8rem;
+}
+
+.button-icon.huge {
+  padding: 1.6rem;
 }
 
 .purple {
   background-color: var(--purple);
   border-color: var(--purple);
+  box-shadow: none;
+}
+
+.purple.glowing,
+.purple:hover {
   box-shadow: 0px 0px 1rem var(--purple);
+}
+
+.green {
+  background-color: var(--green);
+  border-color: var(--green);
+  box-shadow: none;
+}
+.green.glowing,
+.green:hover {
+  box-shadow: 0px 0px 1rem var(--green);
 }

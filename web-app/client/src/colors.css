@@ -11,7 +11,7 @@
   --background-dark: #17151a;
   --background-lighter: #1b181e;
   --background-light: #ffffff;
-
+  
   /* Elements */
   --purple: #7600d1;
   --dark-purple: #5a00a8;
@@ -22,6 +22,8 @@
   --dark-red: #c73232;
   --dark-grey: #2c2730;
   --light-grey: #403946;
+  --dark: #d0d0d0;
+  --light: #e5e5e5;
 
   /* Chart */
   --chart-0: #969696;

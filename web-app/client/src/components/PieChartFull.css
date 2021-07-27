@@ -1,6 +1,27 @@
 @import url("../colors.css");
 
+.pie-chart-full {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  justify-content: space-between;
+  align-items: center;
+  height: 80%;
+  width: 35vw;
+}
+
 .chart-title {
   color: var(--text-black);
   font-weight: 500;
+}
+
+.chart {
+  height: 30rem;
+  width: 100%;
+  position: relative;
+}
+
+.chart-canvas {
+  position: absolute;
+  z-index: 0;
 }

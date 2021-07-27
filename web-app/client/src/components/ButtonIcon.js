@@ -1,18 +1,27 @@
 import React from "react";
 import "./ButtonIcon.css";
 
-function Button({
-  src, alt, onClick,
+function ButtonIcon({
+  src,
+  alt,
+  onClick,
+  size = "normal",
+  glow = false,
+  color,
+  style,
 }) {
   return (
     <button
       type="button"
-      className="round-corners button button-icon checked purple"
+      className={`round-corners button button-icon ${color} ${
+        glow ? "glowing" : ""
+      } ${size}`}
+      style={style}
       onClick={onClick}
     >
-      <img src={src} alt={alt} className="icon" />
+      <img src={src} alt={alt} className={`icon ${size}`} />
     </button>
   );
 }
 
-export default Button;
+export default ButtonIcon;

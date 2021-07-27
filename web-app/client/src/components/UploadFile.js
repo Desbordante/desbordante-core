@@ -4,7 +4,11 @@ import FileLabel from "./FileLabel";
 import ButtonIcon from "./ButtonIcon";
 
 function UploadFile({
-  onClick, file, fileExistenceValidatorFunc, fileSizeValidatorFunc, fileFormatValidatorFunc,
+  onClick,
+  file,
+  fileExistenceValidatorFunc,
+  fileSizeValidatorFunc,
+  fileFormatValidatorFunc,
 }) {
   const inputFile = useRef(null);
 
@@ -32,6 +36,8 @@ function UploadFile({
         src="/icons/upload.svg"
         alt="Upload"
         onClick={onButtonClick}
+        color="green"
+        glow
       />
     </>
   );
