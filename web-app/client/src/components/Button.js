@@ -1,7 +1,7 @@
 import React from "react";
-import "./ButtonIcon.css";
+import "./Button.css";
 
-function ButtonIcon({
+function Button({
   src,
   alt,
   onClick,
@@ -9,6 +9,8 @@ function ButtonIcon({
   glow = false,
   color,
   style,
+  icon = false,
+  text,
 }) {
   return (
     <button
@@ -19,9 +21,9 @@ function ButtonIcon({
       style={style}
       onClick={onClick}
     >
-      <img src={src} alt={alt} className={`icon ${size}`} />
+      {icon ? <img src={src} alt={alt} className={`icon ${size}`} /> : text}
     </button>
   );
 }
 
-export default ButtonIcon;
+export default Button;

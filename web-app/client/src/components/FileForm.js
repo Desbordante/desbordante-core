@@ -9,7 +9,7 @@ import Slider from "./Slider";
 import UploadFile from "./UploadFile";
 import { getData, submitDatasetWthParameters } from "../APIFunctions";
 
-function FileForm({ onSubmit, onUploadProgress }) {
+function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
   // Allowed field values
   const [allowedFileFormats, setAllowedFileFormats] = useState([]);
   const [allowedSeparators, setAllowedSeparators] = useState([]);
@@ -26,24 +26,24 @@ function FileForm({ onSubmit, onUploadProgress }) {
 
   // Getting allowed field values from server
   useEffect(() => {
-    getData("algsInfo")
-      .then((res) => {
-        setAllowedFileFormats(res.allowedFileFormats);
+    getData("algsInfo").then((res) => {
+      setAllowedFileFormats(res.allowedFileFormats);
 
-        setAllowedAlgorithms(res.allowedAlgorithms);
-        setAlgorithm(res.allowedAlgorithms[0]);
+      setAllowedAlgorithms(res.allowedAlgorithms);
+      setAlgorithm(res.allowedAlgorithms[0]);
 
-        setAllowedSeparators(res.allowedSeparators);
-        setSeparator(res.allowedSeparators[0]);
+      setAllowedSeparators(res.allowedSeparators);
+      setSeparator(res.allowedSeparators[0]);
 
-        setMaxFileSize(res.maxFileSize);
-      });
+      setMaxFileSize(res.maxFileSize);
+    });
   }, []);
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
   const fileSizeValidatorFunc = (file) => file.size <= maxfilesize;
-  const fileFormatValidatorFunc = (file) => allowedFileFormats.indexOf(file.type) !== -1;
+  const fileFormatValidatorFunc = (file) =>
+    allowedFileFormats.indexOf(file.type) !== -1;
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
   const maxLHSValidatorFunc = (n) => !isNaN(n) && n > 0 && n % 1 === 0;
@@ -51,12 +51,12 @@ function FileForm({ onSubmit, onUploadProgress }) {
   // Validator function that ensures every field is correct
   function isValid() {
     return (
-      fileExistenceValidatorFunc(file)
-      && fileSizeValidatorFunc(file)
-      && fileFormatValidatorFunc(file)
-      && separatorValidatorFunc(separator)
-      && errorValidatorFunc(errorThreshold)
-      && maxLHSValidatorFunc(maxLHSAttributes)
+      fileExistenceValidatorFunc(file) &&
+      fileSizeValidatorFunc(file) &&
+      fileFormatValidatorFunc(file) &&
+      separatorValidatorFunc(separator) &&
+      errorValidatorFunc(errorThreshold) &&
+      maxLHSValidatorFunc(maxLHSAttributes)
     );
   }
 
@@ -137,7 +137,16 @@ function FileForm({ onSubmit, onUploadProgress }) {
         text="Analyze"
         onClick={() => {
           onSubmit();
-          submitDatasetWthParameters(file, {algName: algorithm, semicolon: separator, errorPercent: errorThreshold}, onUploadProgress);
+          submitDatasetWthParameters(
+            file,
+            {
+              algName: algorithm,
+              semicolon: separator,
+              errorPercent: errorThreshold,
+            },
+            onUploadProgress,
+            cancelTokenSource
+          );
         }}
         validatorFunc={isValid}
       />

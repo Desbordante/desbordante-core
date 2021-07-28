@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import "./UploadFile.css";
 import FileLabel from "./FileLabel";
-import ButtonIcon from "./ButtonIcon";
+import Button from "./Button";
 
 function UploadFile({
   onClick,
@@ -32,12 +32,12 @@ function UploadFile({
         multiple={false}
         accept=".csv, .CSV"
       />
-      <ButtonIcon
+      <Button
         src="/icons/upload.svg"
         alt="Upload"
         onClick={onButtonClick}
         color="green"
-        glow
+        icon
       />
     </>
   );

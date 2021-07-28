@@ -9,7 +9,12 @@ export async function getData(property) {
   return data;
 }
 
-export function submitDatasetWthParameters(dataSet, parameters, onProgress) {
+export function submitDatasetWthParameters(
+  dataSet,
+  parameters,
+  onProgress,
+  cancelTokenSource,
+) {
   const json = JSON.stringify(parameters);
   const blob = new Blob([json], {
     type: "application/json",
@@ -19,11 +24,7 @@ export function submitDatasetWthParameters(dataSet, parameters, onProgress) {
 
   // Update the formData object
   if (dataSet) {
-    data.append(
-      "file",
-      dataSet,
-      dataSet.name,
-    );
+    data.append("file", dataSet, dataSet.name);
   }
 
   data.append("document", blob);
@@ -33,11 +34,8 @@ export function submitDatasetWthParameters(dataSet, parameters, onProgress) {
   const config = {
     headers: { "Content-Type": "text/csv" },
     onUploadProgress: (progressEvent) => onProgress(progressEvent.loaded / progressEvent.total),
+    cancelToken: cancelTokenSource.token,
   };
 
-  axios.post(
-    `${serverURL}/upload`,
-    data,
-    config,
-  );
+  axios.post(`${serverURL}/upload`, data, config);
 }

@@ -1,8 +1,9 @@
 import React from "react";
 import "./LoadingScreen.css";
 import ProgressBar from "./ProgressBar";
+import Button from "./Button";
 
-function LoadingScreen({ onComplete, progress }) {
+function LoadingScreen({ onComplete, progress, onCancel }) {
   if (progress === 1) {
     onComplete();
   }
@@ -17,6 +18,7 @@ function LoadingScreen({ onComplete, progress }) {
         thickness={0.8}
         rounded
       />
+      <Button text="Cancel" color="green" onClick={onCancel} />
     </div>
   );
 }

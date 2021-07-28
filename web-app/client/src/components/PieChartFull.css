@@ -19,9 +19,37 @@
   height: 30rem;
   width: 100%;
   position: relative;
+  transition: 0.2s;
 }
 
 .chart-canvas {
-  position: absolute;
-  z-index: 0;
+  transition: 0.2s;
+}
+
+.selected-attributes {
+  width: 80%;
+  display: flex;
+  justify-content: left;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  /* height: 15rem; */
+  transition: 0.2s;
+}
+
+.attribute {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 3rem;
+  background-color: var(--light);
+  font-size: 0.8rem;
+  margin: 0.5rem;
+  transition: 0.3s;
+  border: 0.2rem solid var(--light);
+}
+
+.attribute:hover {
+  transform: scale(103%);
+  transition: 0.3s;
+  border: 0.2rem solid var(--dark);
 }

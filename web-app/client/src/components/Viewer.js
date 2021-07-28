@@ -1,16 +1,28 @@
 /* eslint-disable */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Viewer.css";
 import PieChartFull from "./PieChartFull";
 
 function Viewer() {
+  // Faking attributes update over time
   const [attributes, setAttributes] = useState(
-    [...Array(40)].map((value, index) => ({
+    [...Array(20)].map((value, index) => ({
       name: `Attr_${index}`,
-      value: Math.pow(index, 8),
+      value: index + 1,
     }))
   );
+
+  // let a = 0;
+  // useEffect(() => {
+  //   // if (a === 0) {
+  //   setAttributes(
+  //     attributes.map((attr) => ({ name: attr.name, value: attr.value + 1 }))
+  //   );
+  //   // }
+  //   a++;
+  //   a %= 1000;
+  // }, [attributes]);
 
   // console.log(attributes);
 

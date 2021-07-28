@@ -4,21 +4,31 @@ import React, { useState, useEffect } from "react";
 import "./PieChartFull.css";
 import SearchBar from "./SearchBar";
 import { Doughnut, Pie } from "react-chartjs-2";
-import ButtonIcon from "./ButtonIcon";
+import Button from "./Button";
 
 function PieChartFull({
   title,
   attributes,
   maxItemsShown = 9,
-  maxItemsSelected = 4,
+  maxItemsSelected = 10,
 }) {
+  // Get how much px is one rem, later used in chart dimensions
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
+  // Chart colors, evenly distributed on the color wheel
+  const startColor = parseInt(Math.random() * 360);
   let colors = [...Array(maxItemsShown)]
-    .map((_, index) => `hsla(${parseInt((index * 360) / 10)}, 75%, 50%, 0.7)`)
+    .map(
+      (_, index) =>
+        `hsla(${parseInt(startColor + (index * 360) / 10) %
+          360}, 75%, 50%, 0.7)`
+    )
     .sort(() => 0.5 - Math.random());
+
+  // Grey color for "Other" label
   colors.push("hsla(0, 0%, 50%, 0.7)");
 
+  // Pre-defined colors
   // const colors = [
   //   "#ff5757",
   //   "#575fff",
@@ -32,15 +42,17 @@ function PieChartFull({
   // ];
 
   const [searchString, setSearchString] = useState("");
-  const [selected, setSelected] = useState([]);
-
+  const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [foundAttributes, setFoundAttributes] = useState([]);
-
   const [depth, setDepth] = useState(0);
   const [otherValue, setOtherValue] = useState(0);
-
   const [displayAttributes, setDisplayAttributes] = useState([]);
 
+  // console.log(foundAttributes);
+  // console.log(depth);
+  // console.log(displayAttributes);
+
+  // Update found attributes if search string changes or attributes change. Keep found attributes sorted.
   useEffect(() => {
     const newFoundAttributes = searchString
       ? attributes.filter((attr) => attr.name.includes(searchString))
@@ -48,12 +60,14 @@ function PieChartFull({
       ? attributes
       : [];
 
-    // console.log(searchString);
-    // console.log(newFoundAttributes);
+    setFoundAttributes(
+      newFoundAttributes
+        .filter((attr) => !selectedAttributes.includes(attr))
+        .sort((a, b) => b.value - a.value)
+    );
+  }, [attributes, searchString, selectedAttributes]);
 
-    setFoundAttributes(newFoundAttributes.sort((a, b) => b.value - a.value));
-  }, [attributes, searchString]);
-
+  // Set DisplayAttributes to top-{maxItemsShown} of found attributes. Add the "Other" value, if needed.
   useEffect(() => {
     let newDisplayAttributes = foundAttributes.slice(
       maxItemsShown * depth,
@@ -70,7 +84,9 @@ function PieChartFull({
     }
 
     setDisplayAttributes(newDisplayAttributes);
-  }, [foundAttributes, foundAttributes]);
+  }, [foundAttributes, foundAttributes, depth]);
+
+  // console.log(selectedAttributes);
 
   return (
     <div className="pie-chart-full">
@@ -78,6 +94,7 @@ function PieChartFull({
       <SearchBar
         defaultText="Filter attributes..."
         setSearchString={setSearchString}
+        onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
       />
       <div className="chart">
         <Doughnut
@@ -99,6 +116,21 @@ function PieChartFull({
             ],
           }}
           options={{
+            onClick: (event, item) => {
+              if (item.length > 0) {
+                if (item[0].index == maxItemsShown) {
+                  setDepth(depth + 1);
+                } else {
+                  setSelectedAttributes(
+                    selectedAttributes
+                      .concat(
+                        item.length ? [displayAttributes[item[0].index]] : []
+                      )
+                      .slice(0, maxItemsSelected)
+                  );
+                }
+              }
+            },
             maintainAspectRatio: false,
             cutout: "50%",
             cutoutPercentage: 10,
@@ -107,8 +139,8 @@ function PieChartFull({
             },
             plugins: {
               legend: {
-                display: false,
-                position: "bottom",
+                // display: false,
+                position: "left",
                 onClick: () => {}, // TODO: do something useful on label click
                 labels: {
                   color: "#000000",
@@ -150,24 +182,25 @@ function PieChartFull({
                 },
               },
             },
-            // animation: {
-            //   animateRotate: false,
-            // },
+            animation: {
+              // animateRotate: false,
+            },
           }}
         />
-        <ButtonIcon
-          src="/icons/upload.svg"
-          alt="Q"
-          color="green"
-          size="huge"
-          style={{}}
-          onClick={() => console.log("CLICKED")}
-          style={{
-            position: "relative",
-            // zIndex: 1,
-            transform: "translate(calc(17.5vw - 3.8rem), calc(15rem - 2.8rem))",
-          }}
-        />
+      </div>
+      <div className="selected-attributes">
+        {selectedAttributes.map((attr, index) => (
+          <Button
+            onClick={() =>
+              setSelectedAttributes(
+                selectedAttributes.filter((_, idx) => index != idx)
+              )
+            }
+            key={index}
+            text={attr.name}
+            color="green"
+          />
+        ))}
       </div>
     </div>
   );
