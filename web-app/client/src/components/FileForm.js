@@ -41,9 +41,10 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
-  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize;
-  const fileFormatValidatorFunc = (file) =>
-    allowedFileFormats.indexOf(file.type) !== -1;
+  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize*100;
+  const fileFormatValidatorFunc = (file) => true;
+    // allowedFileFormats.indexOf(file.type) !== -1;
+
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
   const maxLHSValidatorFunc = (n) => !isNaN(n) && n > 0 && n % 1 === 0;
@@ -142,7 +143,7 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
             {
               algName: algorithm,
               semicolon: separator,
-              errorPercent: errorThreshold,
+              errorPercent: +errorThreshold,
             },
             onUploadProgress,
             cancelTokenSource

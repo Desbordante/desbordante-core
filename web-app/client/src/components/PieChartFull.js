@@ -11,22 +11,10 @@ function PieChartFull({
   attributes,
   maxItemsShown = 9,
   maxItemsSelected = 10,
+  colors,
 }) {
   // Get how much px is one rem, later used in chart dimensions
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
-  // Chart colors, evenly distributed on the color wheel
-  const startColor = parseInt(Math.random() * 360);
-  let colors = [...Array(maxItemsShown)]
-    .map(
-      (_, index) =>
-        `hsla(${parseInt(startColor + (index * 360) / 10) %
-          360}, 75%, 50%, 0.7)`
-    )
-    .sort(() => 0.5 - Math.random());
-
-  // Grey color for "Other" label
-  colors.push("hsla(0, 0%, 50%, 0.7)");
 
   // Pre-defined colors
   // const colors = [
@@ -183,7 +171,7 @@ function PieChartFull({
               },
             },
             animation: {
-              // animateRotate: false,
+              animateRotate: false,
             },
           }}
         />
@@ -198,7 +186,7 @@ function PieChartFull({
             }
             key={index}
             text={attr.name}
-            color="green"
+            color="black"
           />
         ))}
       </div>

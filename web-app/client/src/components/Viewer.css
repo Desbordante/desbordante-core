@@ -5,6 +5,16 @@
   width: 100%;
   height: 100%;
   display: flex;
+  flex-direction: column;
+}
+
+.charts {
+  width: 100%;
+  display: flex;
   justify-content: space-around;
   align-items: center;
+}
+
+h1.bottom-title {
+  color: var(--text-black);
 }
