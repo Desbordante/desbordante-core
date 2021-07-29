@@ -37,5 +37,5 @@ export function submitDatasetWthParameters(
     cancelToken: cancelTokenSource.token,
   };
 
-  axios.post(`${serverURL}/upload`, data, config);
+  axios.post(`${serverURL}/createTask`, data, config);
 }
