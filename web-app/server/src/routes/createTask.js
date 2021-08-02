@@ -78,7 +78,14 @@ router.post('/createTask', function(req, res){
         await producer.produce(topicName, partition, value, key, Date.now(), "", headers)
     }
 
-    sendMessage();
+    sendMessage()
+    .then((result) => {
+        res.send(JSON.stringify({taskID, status: 'OK'}));   
+    })
+    .catch(err => {
+        res.sendStatus(400)
+    });
+
 
 });
 

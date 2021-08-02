@@ -16,7 +16,6 @@ bool checkOptions(std::string const& alg, double error) {
 int main()
 {
     DBManager manager("localhost", "root", "5432", "desbordante", "postgres");
-    std::cout << "rofl\n";
 
     try {
         // Create a consumerManager instance by passing configuration object.

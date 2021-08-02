@@ -58,12 +58,14 @@ void process_task(taskConfig& task, DBManager& manager) {
 
         std::string FDs = algorithmInstance->getJsonFDs();
         std::cout << FDs << std::endl;
+        std::string JSONArrayNameValue = algorithmInstance->getJsonArrayNameValue();
+        std::cout << JSONArrayNameValue << std::endl;
 
         try {
-            query = "UPDATE tasks SET FDs = '" + FDs + "' WHERE taskID = '" + std::string(task.taskID) + "'";
+            query = "UPDATE tasks SET FDs = '" + FDs + "'" + ", JsonArrayNameValue = '" + JSONArrayNameValue + "' WHERE taskID = '" + std::string(task.taskID) + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
-            std::cout << "Unexpected exception (with changing task's FDs in DB) caught: " << e.what() << std::endl;
+            std::cout << "Unexpected exception (with changing task's props in DB) caught: " << e.what() << std::endl;
             throw e;
         }
         std::cout << "> ELAPSED TIME: " << elapsedTime << std::endl;

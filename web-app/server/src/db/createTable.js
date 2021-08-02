@@ -15,7 +15,8 @@ async function createTable(pool) {
         datasetPath char(120) not null,\n
         FDs varchar(2000),
         hasHeader bool not null,
-        maxLHS int not null)
+        maxLHS int not null,
+        JsonArrayNameValue varchar(2000))
         `
     )
     .then(res => {

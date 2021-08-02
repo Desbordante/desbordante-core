@@ -7,11 +7,11 @@ router.get('/', function(req, res, next) {
     try{
         // Get info about task from DB
         const pool = req.app.get('pool')
-        pool.query(`select progress, status, fds from tasks where taskid='${req.query.taskID}'`)
+        pool.query(`select progress, status, fds::json, JSONArrayNameValue::json from tasks where taskid='${req.query.taskID}'`)
         .then(result => {
                 if (result.rows[0] === undefined)
                     res.status(400).send("Invalid taskID");
-                console.log(result.rows[0]);
+                console.log(JSON.stringify(result.rows[0]));
                 res.send(JSON.stringify(result.rows[0]));   
             }
         )
