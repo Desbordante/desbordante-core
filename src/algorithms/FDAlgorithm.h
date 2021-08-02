@@ -39,6 +39,10 @@ public:
      * */
     std::string getJsonFDs();
 
+    std::vector<std::string> getColumnNames();
+
+    std::string getJsonArrayNameValue(int degree = 1, bool withAttr = true);
+
     // считает контрольную сумму Флетчера - нужно для тестирования по хешу
     unsigned int fletcher16();
 

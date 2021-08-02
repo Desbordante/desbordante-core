@@ -33,7 +33,8 @@ public:
     std::vector<std::string> parseNext();
     bool getHasNext() const { return hasNext;}
     char getSeparator() const { return separator;}
-    int getNumberOfColumns() const { return numberOfColumns; }
-    std::string getColumnName(int index) const { return columnNames[index]; }
+    int getNumberOfColumns() const { return numberOfColumns;}
+    std::vector<std::string> getColumnNames() const { return columnNames;}
+    std::string getColumnName(int index) const { return columnNames[index];}
     std::string getRelationName() const { return relationName; }
 };
