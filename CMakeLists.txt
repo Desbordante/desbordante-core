@@ -28,6 +28,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 # providing subdirectories for header inclusion
 include_directories(
+    "kafka-consumer/include"
     "src/algorithms"
     "src/model"
     "src/util"
@@ -46,6 +47,7 @@ add_subdirectory("lib/googletest")
 add_subdirectory("tests")
 add_subdirectory("datasets")
 add_subdirectory("cfg")
+add_subdirectory("kafka-consumer")
 
 #target_link_libraries(metanome_cpp PRIVATE "stdc++fs" gmock)
 #target_link_libraries(metanome_cpp PRIVATE "stdc++fs" Boost::container)
