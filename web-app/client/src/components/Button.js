@@ -11,6 +11,7 @@ function Button({
   icon = false,
   text,
   style,
+  sizeUnit = "rem",
 }) {
   return (
     <button
@@ -25,7 +26,7 @@ function Button({
         <img
           src={src}
           alt={alt}
-          style={{ height: `${size}rem`, width: `${size}rem` }}
+          style={{ height: size + sizeUnit, width: size + sizeUnit }}
         />
       ) : (
         text

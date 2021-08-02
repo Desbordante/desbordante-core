@@ -12,12 +12,12 @@
   padding: 0.3rem 0.7rem;
   margin: 0.3rem 0.3rem;
   transform: scale(1);
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
 .attribute:hover {
   transform: scale(1.04);
-  transition: 0.2s;
+  transition: 0.3s;
 }
 
 .attribute button {

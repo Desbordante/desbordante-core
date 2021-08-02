@@ -2,7 +2,10 @@
 
 .App {
   background-color: var(--background-dark);
-  height: 300vh;
+  height: calc(400vh - 6.5rem);
+  /* height: 400vh; */
+  display: flex;
+  flex-direction: column;
 }
 
 .screen {
@@ -19,12 +22,24 @@ header {
   width: 100%;
   height: 6rem;
   display: flex;
-  flex-direction: row;
   justify-content: left;
   align-items: center;
+  color: var(--text-white);
+  font-family: var(--font-content);
+  font-size: 2rem;
+  font-weight: 300;
 }
 
 .logo-medium {
   width: 4rem;
   margin: 0rem 1rem;
+}
+
+.top-bar {
+  width: 100%;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: var(--background-dark);
 }

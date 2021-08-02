@@ -1,7 +1,9 @@
 import React from "react";
 import "./Checkbox.css";
 
-function Checkbox({ text, onClick, toggleObj }) {
+function Checkbox({
+  text, onClick, toggleObj, style,
+}) {
   return (
     <input
       type="button"
@@ -13,6 +15,7 @@ function Checkbox({ text, onClick, toggleObj }) {
       onClick={() => {
         onClick(!toggleObj);
       }}
+      style={style}
     />
   );
 }
