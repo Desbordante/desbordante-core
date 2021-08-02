@@ -144,6 +144,8 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
               algName: algorithm,
               semicolon: separator,
               errorPercent: +errorThreshold,
+              hasHeader: hasHeader,
+              maxLHS: maxLHSAttributes
             },
             onUploadProgress,
             cancelTokenSource
