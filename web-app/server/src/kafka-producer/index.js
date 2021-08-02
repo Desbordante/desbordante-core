@@ -1,14 +1,28 @@
 var Kafka = require('node-rdkafka');
 
-const stream = Kafka.Producer.createWriteStream({
-    'metadata.broker.list': `${process.env.KAFKA_HOST}:${process.env.KAFKA_SERVER_PORT}`
-}, {}, {
-    topic: 'tasks'
+var producer = new Kafka.Producer({
+    //'debug' : 'all',
+    'metadata.broker.list': 'localhost:9092',
+    // 'dr_cb': true  
+    //delivery report callback
+  }, {}, {
+        topic: 'tasks'
 });
 
-stream.on('error', (error) => {
-    console.error('Error in our kafka stream');
-    console.error(error);
-})
+producer.on('event.log', function(log) {
+    console.log(log);
+});
 
-module.exports = stream;
+producer.on('event.error', function(err) {
+    console.error('Error from producer');
+    console.error(err);
+});
+
+producer.on('disconnected', function(arg) {
+    console.log('producer disconnected. ' + JSON.stringify(arg));
+  });
+  
+// starting the producer
+producer.connect();
+
+module.exports = producer;

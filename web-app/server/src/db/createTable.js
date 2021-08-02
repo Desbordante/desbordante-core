@@ -2,8 +2,7 @@ async function createTable(pool) {
 
     console.log(`Creating table(-es) in DB 'Desbordante'`)
 
-    // Table creation
-    // status -- COMPLETED/PROCESS/ERROR/NOT IN PROCESS
+    // status -- COMPLETED/IN PROCESS/ERROR/NOT IN PROCESS
     return await pool.query(
         `CREATE TABLE IF NOT EXISTS tasks(\n
         taskID char(40) not null primary key,\n
@@ -13,7 +12,11 @@ async function createTable(pool) {
         semicolon char(1) not null,\n
         progress real not null,\n
         status varchar(400) not null,\n
-        datasetPath char(100) not null)`
+        datasetPath char(120) not null,\n
+        FDs varchar(2000),
+        hasHeader bool not null,
+        maxLHS int not null)
+        `
     )
     .then(res => {
             if (res !== undefined) 
@@ -25,11 +28,6 @@ async function createTable(pool) {
         throw err
         }
     )
-
-    // fileID Oid not null,\n
-    // FDs varchar(2000)
-
-    // Todo: add trigger (time-to-leave)   
 }
 
 module.exports = createTable;

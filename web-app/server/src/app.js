@@ -13,12 +13,15 @@ const morgan = require('morgan');
 const _ = require('lodash');
 
 var algsInfo = require('./routes/algsInfo');
+var getTaskInfo = require('./routes/getTaskInfo');
 var chooseTaskRouter = require('./routes/chooseTask');
 var createTaskRouter = require('./routes/createTask');
 
 // Confurating DB tables
 dropTableTasks(pool)
-  .then((err, res) => createTable(pool))
+  .then((err, res) => 
+    createTable(pool)
+  )
 
 const app = express()
 app.set('pool', pool);
@@ -40,6 +43,7 @@ app.post('/chooseTask', jsonParser, chooseTaskRouter);
 app.post('/createTask', jsonParser, createTaskRouter);
 
 // GET requests
+app.use('/getTaskInfo', getTaskInfo)
 app.use('/algsInfo', algsInfo);
 app.use('/', (req, res) => {
   res.send('Hello World! (root route)')
