@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@benestudioco/react-scrollfade": "^1.0.2",
     "@skbkontur/react-ui": "^3.3.1",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",

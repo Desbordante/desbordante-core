@@ -13,26 +13,27 @@ function PieChartFull({
   attributes,
   maxItemsShown = 9,
   maxItemsSelected = 9,
-  colors,
+  selectedAttributes,
+  setSelectedAttributes,
 }) {
   // Get how much px is one rem, later used in chart dimensions
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
   // Pre-defined colors
-  // const colors = [
-  //   "#ff5757",
-  //   "#575fff",
-  //   "#4de3a2",
-  //   "#edc645",
-  //   "#d159de",
-  //   "#32bbc2",
-  //   "#ffa857",
-  //   "#8dd44a",
-  //   "#6298d1",
-  // ];
+  const colors = [
+    "#ff5757",
+    "#575fff",
+    "#4de3a2",
+    "#edc645",
+    "#d159de",
+    "#32bbc2",
+    "#ffa857",
+    "#8dd44a",
+    "#6298d1",
+    "#969696",
+  ];
 
   const [searchString, setSearchString] = useState("");
-  const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [foundAttributes, setFoundAttributes] = useState([]);
   const [depth, setDepth] = useState(0);
   const [otherValue, setOtherValue] = useState(0);
@@ -80,104 +81,111 @@ function PieChartFull({
 
   return (
     <div className="pie-chart-full">
-      <h1 className="chart-title">{title}</h1>
+      <h1 className="title">{title}</h1>
       <SearchBar
         defaultText="Filter attributes..."
         setSearchString={setSearchString}
       />
       <div className="chart">
         <div className="chart-legend">
-          {displayAttributes.map((attr, index) => (<AttributeLabel text={attr.name} labelColor={colors[index]}/>))}
+          {displayAttributes.map((attr, index) => (
+            <AttributeLabel
+              text={attr.name}
+              labelColor={colors[index]}
+              key={index}
+            />
+          ))}
         </div>
         <div className="chart-canvas">
           <Doughnut
-            style={{position: "absolute", zIndex: 0}}
-          // width={100}
-          // height={100}
-          data={{
-            labels: displayAttributes.map((attr) => attr.name),
-            datasets: [
-              {
-                data: displayAttributes.map((attr) => attr.value),
-                backgroundColor: colors,
-                borderColor: "#ffffff",
-                hoverBorderColor: "#ffffff",
-                borderWidth: 0.2 * rem,
-                hoverOffset: 1 * rem,
-                // borderAlign: "inner",
-              },
-            ],
-          }}
-          options={{
-            onClick: (event, item) => {
-              if (item.length > 0) {
-                if (item[0].index == maxItemsShown) {
-                  setDepth(depth + 1);
-                } else {
-                  setSelectedAttributes(
-                    selectedAttributes
-                      .concat(
-                        item.length ? [displayAttributes[item[0].index]] : []
-                      )
-                      .slice(0, maxItemsSelected)
-                  );
+            style={{ position: "absolute", zIndex: 0 }}
+            // width={100}
+            // height={100}
+            data={{
+              labels: displayAttributes.map((attr) => attr.name),
+              datasets: [
+                {
+                  data: displayAttributes.map((attr) => attr.value),
+                  backgroundColor: colors,
+                  borderColor: "#ffffff",
+                  hoverBorderColor: "#ffffff",
+                  borderWidth: 0.2 * rem,
+                  hoverOffset: 1 * rem,
+                  // borderAlign: "inner",
+                },
+              ],
+            }}
+            options={{
+              onClick: (event, item) => {
+                if (item.length > 0) {
+                  if (item[0].index == maxItemsShown) {
+                    setDepth(depth + 1);
+                  } else {
+                    setSelectedAttributes(
+                      selectedAttributes
+                        .concat(
+                          item.length ? [displayAttributes[item[0].index]] : []
+                        )
+                        .slice(0, maxItemsSelected)
+                    );
+                  }
                 }
-              }
-            },
-            maintainAspectRatio: false,
-            responsive: true,
-            cutout: "50%",
-            cutoutPercentage: 10,
-            layout: {
-              padding: 1 * rem,
-            },
-            plugins: {
-              legend: {
-                display: false,
               },
-              tooltip: {
-                displayColors: false,
-                cornerRadius: 1 * rem,
-                backgroundColor: "#e5e5e5",
-                // borderColor: "#7600d1",
-                // borderWidth: 0.2 * rem,
-                titleColor: "#000000",
-                titleAlign: "center",
-                titleFont: {
-                  family: "'Roboto', sans-serif",
-                  size: 1 * rem,
-                  weight: "600",
-                },
-                bodyColor: "#000000",
-                bodyAlign: "center",
-                bodyFont: {
-                  family: "'Roboto', sans-serif",
-                  size: 1 * rem,
-                  weight: "400",
-                },
-                titleMarginBottom: 0.5 * rem,
+              maintainAspectRatio: false,
+              responsive: true,
+              cutout: "50%",
+              cutoutPercentage: 10,
+              layout: {
                 padding: 1 * rem,
-                callbacks: {
-                  // title: (tooltipItem) => "" + tooltipItem[0].label,
-                  // label: (tooltipItem) => "" + tooltipItem.formattedValue,
-                  label: (tooltipItem) => "" + tooltipItem.label,
+              },
+              plugins: {
+                legend: {
+                  display: false,
+                },
+                tooltip: {
+                  displayColors: false,
+                  cornerRadius: 1 * rem,
+                  backgroundColor: "#e5e5e5",
+                  // borderColor: "#7600d1",
+                  // borderWidth: 0.2 * rem,
+                  titleColor: "#000000",
+                  titleAlign: "center",
+                  titleFont: {
+                    family: "'Roboto', sans-serif",
+                    size: 1 * rem,
+                    weight: "600",
+                  },
+                  bodyColor: "#000000",
+                  bodyAlign: "center",
+                  bodyFont: {
+                    family: "'Roboto', sans-serif",
+                    size: 1 * rem,
+                    weight: "400",
+                  },
+                  titleMarginBottom: 0.5 * rem,
+                  padding: 1 * rem,
+                  callbacks: {
+                    // title: (tooltipItem) => "" + tooltipItem[0].label,
+                    // label: (tooltipItem) => "" + tooltipItem.formattedValue,
+                    label: (tooltipItem) => "" + tooltipItem.label,
+                  },
                 },
               },
-            },
-            animation: {
-              animateRotate: false,
-            },
-          }}
-        />
-        <Button
-          src="/icons/search.svg"
-          alt="Search"
-          color="purple"
-          onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
-          size={5}
-          icon
-          style={{position: "relative", zIndex: 1}}
-        />
+              animation: {
+                animateRotate: false,
+              },
+            }}
+          />
+          <Button
+            src="/icons/search.svg"
+            alt="Search"
+            color="purple"
+            onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
+            size={5}
+            sizeUnit="vh"
+            icon
+            style={{ position: "relative", zIndex: 1 }}
+          />
         </div>
       </div>
       <div className="selected-attributes">

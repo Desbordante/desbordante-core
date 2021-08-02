@@ -12,10 +12,10 @@ button.button-icon {
   box-shadow: none;
 }
 
-.purple.glowing,
+/* .purple.glowing,
 .purple:hover {
-  /* box-shadow: 0px 0px 1rem var(--purple); */
-}
+  box-shadow: 0px 0px 1rem var(--purple);
+} */
 
 .green {
   background-color: var(--green);

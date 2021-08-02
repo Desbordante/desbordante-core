@@ -1,0 +1,11 @@
+@import url("../colors.css");
+
+input.button.radio-light.unchecked {
+  border-color: var(--text-dull);
+  color: var(--text-dull);
+}
+
+input.button.radio-light.unchecked:hover {
+  border-color: var(--text-dull);
+  background-color: rgba(0, 0, 0, 0);
+}

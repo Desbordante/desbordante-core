@@ -9,7 +9,12 @@ import Slider from "./Slider";
 import UploadFile from "./UploadFile";
 import { getData, submitDatasetWthParameters } from "../APIFunctions";
 
-function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
+function FileForm({
+  onSubmit,
+  onUploadProgress,
+  cancelTokenSource,
+  setFilename,
+}) {
   // Allowed field values
   const [allowedFileFormats, setAllowedFileFormats] = useState([]);
   const [allowedSeparators, setAllowedSeparators] = useState([]);
@@ -39,11 +44,13 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
     });
   }, []);
 
+  useEffect(() => setFilename(file ? file.name : ""), [file]);
+
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
-  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize * 1000;
-  const fileFormatValidatorFunc = (file) => true;
-  // allowedFileFormats.indexOf(file.type) !== -1;
+  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize;
+  const fileFormatValidatorFunc = (file) =>
+    allowedFileFormats.indexOf(file.type) !== -1;
 
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;
@@ -145,7 +152,7 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
               semicolon: separator,
               errorPercent: +errorThreshold,
               hasHeader: hasHeader,
-              maxLHS: maxLHSAttributes
+              maxLHS: maxLHSAttributes,
             },
             onUploadProgress,
             cancelTokenSource
