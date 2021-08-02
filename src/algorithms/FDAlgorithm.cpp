@@ -7,7 +7,6 @@ std::vector<std::string> FDAlgorithm::getColumnNames() {
 
 std::string FDAlgorithm::getJsonFDs() {
     nlohmann::json j = nlohmann::json::array();
-    // j["fds"] = nlohmann::json::array();    
 
     fdCollection_.sort();
     for (auto& fd : fdCollection_) {
