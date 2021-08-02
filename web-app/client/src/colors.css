@@ -1,4 +1,8 @@
 :root {
+  /* Fonts */
+  --font-display: "Patua One", cursive;
+  --font-content: "Roboto", sans-serif;
+
   /* Text */
   --text-white: #ffffff;
   --text-dull: #969696;
@@ -11,7 +15,7 @@
   --background-dark: #17151a;
   --background-lighter: #1b181e;
   --background-light: #ffffff;
-  
+
   /* Elements */
   --purple: #7600d1;
   --dark-purple: #5a00a8;

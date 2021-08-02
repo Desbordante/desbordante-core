@@ -5,12 +5,14 @@ import "./PieChartFull.css";
 import SearchBar from "./SearchBar";
 import { Doughnut, Pie } from "react-chartjs-2";
 import Button from "./Button";
+import SelectedAttribute from "./SelectedAttribute";
+import AttributeLabel from "./AttributeLabel";
 
 function PieChartFull({
   title,
   attributes,
   maxItemsShown = 9,
-  maxItemsSelected = 10,
+  maxItemsSelected = 9,
   colors,
 }) {
   // Get how much px is one rem, later used in chart dimensions
@@ -82,13 +84,16 @@ function PieChartFull({
       <SearchBar
         defaultText="Filter attributes..."
         setSearchString={setSearchString}
-        onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
       />
       <div className="chart">
-        <Doughnut
-          className="chart-canvas"
-          // width={30 * rem}
-          // height={30 * rem}
+        <div className="chart-legend">
+          {displayAttributes.map((attr, index) => (<AttributeLabel text={attr.name} labelColor={colors[index]}/>))}
+        </div>
+        <div className="chart-canvas">
+          <Doughnut
+            style={{position: "absolute", zIndex: 0}}
+          // width={100}
+          // height={100}
           data={{
             labels: displayAttributes.map((attr) => attr.name),
             datasets: [
@@ -120,6 +125,7 @@ function PieChartFull({
               }
             },
             maintainAspectRatio: false,
+            responsive: true,
             cutout: "50%",
             cutoutPercentage: 10,
             layout: {
@@ -127,19 +133,7 @@ function PieChartFull({
             },
             plugins: {
               legend: {
-                // display: false,
-                position: "left",
-                onClick: () => {}, // TODO: do something useful on label click
-                labels: {
-                  color: "#000000",
-                  font: {
-                    family: "'Roboto', sans-serif",
-                    size: 1 * rem,
-                    weight: "300",
-                  },
-                  boxWidth: 1 * rem,
-                  boxHeight: 1 * rem,
-                },
+                display: false,
               },
               tooltip: {
                 displayColors: false,
@@ -175,18 +169,27 @@ function PieChartFull({
             },
           }}
         />
+        <Button
+          src="/icons/search.svg"
+          alt="Search"
+          color="purple"
+          onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
+          size={5}
+          icon
+          style={{position: "relative", zIndex: 1}}
+        />
+        </div>
       </div>
       <div className="selected-attributes">
         {selectedAttributes.map((attr, index) => (
-          <Button
-            onClick={() =>
+          <SelectedAttribute
+            onDelete={() =>
               setSelectedAttributes(
                 selectedAttributes.filter((_, idx) => index != idx)
               )
             }
             key={index}
             text={attr.name}
-            color="black"
           />
         ))}
       </div>

@@ -1,8 +1,7 @@
 import React from "react";
 import "./SearchBar.css";
-import Button from "./Button";
 
-function SearchBar({ defaultText, setSearchString, onClick }) {
+function SearchBar({ defaultText, setSearchString }) {
   return (
     <div className="search-bar">
       <input
@@ -11,13 +10,6 @@ function SearchBar({ defaultText, setSearchString, onClick }) {
         size={20}
         placeholder={defaultText}
         onChange={(e) => setSearchString(e.target.value)}
-      />
-      <Button
-        src="/icons/search.svg"
-        alt="Search"
-        color="green"
-        onClick={onClick}
-        icon
       />
     </div>
   );

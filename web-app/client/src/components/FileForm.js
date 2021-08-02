@@ -41,9 +41,9 @@ function FileForm({ onSubmit, onUploadProgress, cancelTokenSource }) {
 
   // Validator functions for fields
   const fileExistenceValidatorFunc = (file) => !!file;
-  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize*100;
+  const fileSizeValidatorFunc = (file) => file.size <= maxfilesize * 1000;
   const fileFormatValidatorFunc = (file) => true;
-    // allowedFileFormats.indexOf(file.type) !== -1;
+  // allowedFileFormats.indexOf(file.type) !== -1;
 
   const separatorValidatorFunc = (n) => allowedSeparators.indexOf(n) !== -1;
   const errorValidatorFunc = (n) => !isNaN(n) && n >= 0 && n <= 1;

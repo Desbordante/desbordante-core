@@ -5,23 +5,31 @@ function Button({
   src,
   alt,
   onClick,
-  size = "normal",
+  size = 1.4,
   glow = false,
   color,
-  style,
   icon = false,
   text,
+  style,
 }) {
   return (
     <button
       type="button"
-      className={`round-corners button button-icon ${color} ${
+      className={`round-corners button ${icon ? "button-icon" : ""} ${color} ${
         glow ? "glowing" : ""
       } ${size}`}
-      style={style}
       onClick={onClick}
+      style={style}
     >
-      {icon ? <img src={src} alt={alt} className={`icon ${size}`} /> : text}
+      {icon ? (
+        <img
+          src={src}
+          alt={alt}
+          style={{ height: `${size}rem`, width: `${size}rem` }}
+        />
+      ) : (
+        text
+      )}
     </button>
   );
 }

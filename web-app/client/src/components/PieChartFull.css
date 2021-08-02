@@ -4,10 +4,15 @@
   display: flex;
   flex-direction: column;
   /* justify-content: space-between; */
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  height: 80%;
-  width: 35vw;
+  height: 95%;
+  width: 50%;
+  transition: 0.2s;
+}
+
+.pie-chart-full > * {
+  margin: 0.8rem 0;
 }
 
 .chart-title {
@@ -16,40 +21,46 @@
 }
 
 .chart {
-  height: 30rem;
-  width: 100%;
+  width: 80%;
+  height: 50%;
   position: relative;
   transition: 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.chart-canvas {
+/* .chart-canvas {
   transition: 0.2s;
-}
+} */
 
 .selected-attributes {
-  width: 80%;
+  width: 40%;
   display: flex;
-  justify-content: left;
+  justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
   /* height: 15rem; */
   transition: 0.2s;
 }
 
-.attribute {
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  width: 8rem;
+}
+
+.chart-canvas {
+  height: 35vh;
+  width: 35vh;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 3rem;
-  background-color: var(--light);
-  font-size: 0.8rem;
-  margin: 0.5rem;
-  transition: 0.3s;
-  border: 0.2rem solid var(--light);
+  position: relative;
 }
 
-.attribute:hover {
-  transform: scale(103%);
-  transition: 0.3s;
-  border: 0.2rem solid var(--dark);
+.chart-legend {
+  margin-right: 2rem;
 }

@@ -2,9 +2,14 @@
   padding: 0.2rem;
   position: relative;
   z-index: 1;
+  cursor: pointer;
 }
 
 .wrapper.error {
+  background: var(--red);
+}
+
+.error {
   background: var(--red);
 }
 
@@ -41,4 +46,13 @@
 
 .hilight-red {
   color: var(--red);
+}
+
+.file-name-wrapper {
+  position: relative;
+  transition: 0.2s;
+}
+
+.file-name-wrapper:hover {
+  transform: scale(1.005);
 }

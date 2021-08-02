@@ -19,10 +19,12 @@ function UploadFile({
   return (
     <>
       <FileLabel
+        onClick={onButtonClick}
         file={file}
         fileExistenceValidatorFunc={fileExistenceValidatorFunc}
         fileSizeValidatorFunc={fileSizeValidatorFunc}
         fileFormatValidatorFunc={fileFormatValidatorFunc}
+        setFile={onClick}
       />
       <input
         type="file"

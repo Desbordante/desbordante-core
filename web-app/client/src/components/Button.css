@@ -1,14 +1,4 @@
-.icon {
-  height: 1.4rem;
-  width: 1.4rem;
-}
-
-.icon.huge {
-  height: 2.8rem;
-  width: 2.8rem;
-}
-
-.button-icon {
+button.button-icon {
   padding: 0.8rem;
 }
 
@@ -24,7 +14,7 @@
 
 .purple.glowing,
 .purple:hover {
-  box-shadow: 0px 0px 1rem var(--purple);
+  /* box-shadow: 0px 0px 1rem var(--purple); */
 }
 
 .green {

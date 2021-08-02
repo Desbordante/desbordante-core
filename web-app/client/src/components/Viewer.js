@@ -3,13 +3,33 @@
 import React, { useState, useEffect } from "react";
 import "./Viewer.css";
 import PieChartFull from "./PieChartFull";
+import NavButton from "./NavButton";
 
 function Viewer() {
   // Faking attributes update over time
   const [attributes, setAttributes] = useState(
-    [...Array(20)].map((value, index) => ({
-      name: `Attr_${index}`,
-      value: index *2 + 1,
+    ["lawyer"
+    ,"offender"
+    ,"stereotype"
+    ,"host"
+    ,"plot"
+    ,"certain"
+    ,"panic"
+    ,"spill"
+    ,"tumour"
+    ,"wedding"
+    ,"deprive"
+    ,"tax"
+    ,"insistence"
+    ,"civilian"
+    ,"qualified"
+    ,"robot"
+    ,"reconcile"
+    ,"virus"
+    ,"still"
+    ,"refrigerator"].map((value, index) => ({
+      name: value,
+      value: parseInt(Math.random()*100),
     }))
   );
 
@@ -43,11 +63,25 @@ function Viewer() {
 
   return (
     <div className="bg-light">
-      <div className="charts">
-        <PieChartFull title="Left-hand side" attributes={attributes} colors={colors}/>
-        <PieChartFull title="Right-hand side" attributes={attributes} maxItemsSelected={1} colors={colors}/>
+      <div className="charts-with-controls">
+        <PieChartFull
+          title="Left-hand side"
+          attributes={attributes}
+          colors={colors}
+        />
+        <PieChartFull
+          title="Right-hand side"
+          attributes={attributes}
+          maxItemsSelected={1}
+          colors={colors}
+        />
       </div>
-      {/* <h1 className="bottom-title" style={{color: "#000", fontWeight: 500}}>View Dependencies</h1> */}
+      <footer>
+        <h1 className="bottom-title" style={{ color: "#000", fontWeight: 500 }}>
+          View Dependencies
+        </h1>
+        <NavButton src="/icons/nav-down.svg" alt="down" onClick={() => { }} />
+      </footer>
     </div>
   );
 }
