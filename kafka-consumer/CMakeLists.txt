@@ -7,7 +7,6 @@ set(run_sources "main.cpp")
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 find_library(PQXX_LIB pqxx)
-variable_watch(PQXX_LIB)
 
 add_executable(${BINARY}_kafka_consumer ${run_sources})
 

@@ -4,32 +4,33 @@
 #include <pqxx/nontransaction>
 
 class DBManager{
-    pqxx::connection connection;
+    std::unique_ptr<pqxx::connection> connection;
+    std::unique_ptr<pqxx::nontransaction> w;
+    std::unique_ptr<pqxx::work> l_work;
 
 public:
-    DBManager(std::string host, std::string password, std::string port, std::string DBName, std::string user)
-        : connection("host=" + host + " password=" + password + " port=" + port + " dbname=" + DBName + " user=" + user) {}
-    
-    ~DBManager() { }
-
-    pqxx::result defaultQuery(std::string query){
-        pqxx::nontransaction l_work(connection);
-        try {
-            pqxx::result R{l_work.exec(query)};
-            l_work.commit();
-            return R;
-        } catch (const std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            throw;
-        }
-        throw;
+    DBManager(std::string pg_connection) {
+        connection = std::make_unique<pqxx::connection>(pg_connection);
     }
 
-    void transactionQuery(std::string query){
-        pqxx::work l_work(connection);
+    pqxx::result defaultQuery(std::string query_text){
         try {
-            pqxx::result R{l_work.exec(query)};
-            l_work.commit();
+            w = std::make_unique<pqxx::nontransaction>(*connection);
+            pqxx::result r = w->exec(query_text);
+            w->commit();
+            return r;
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            throw e;
+        }
+    }
+    
+    pqxx::result transactionQuery(std::string query){
+        try {
+            l_work = std::make_unique<pqxx::work>(*connection);
+            pqxx::result r = l_work->exec(query);
+            l_work->commit();
+            return r;
         } catch (const std::exception& e) {
             std::cerr << e.what() << std::endl;
             throw;
