@@ -12,6 +12,7 @@ const fileUpload = require('express-fileupload'); // Simple Express middleware f
 const morgan = require('morgan');
 const _ = require('lodash');
 
+// Routes
 var algsInfo = require('./routes/algsInfo');
 var getTaskInfo = require('./routes/getTaskInfo');
 var chooseTaskRouter = require('./routes/chooseTask');
@@ -28,7 +29,7 @@ app.set('pool', pool);
 const jsonParser = express.json();
 
 app.use(cors());
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use(express.json());
 
 // enable files upload

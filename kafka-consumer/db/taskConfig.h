@@ -9,22 +9,20 @@ class taskConfig{
     double errorPercent;
     char semicolon;
     std::string datasetPath;
-    std::string datasetPathSource;
     bool hasHeader;
     unsigned int maxLHS;
 
 public:
     taskConfig(const std::string taskID, std::string algName, double errorPercent, char semicolon, 
-        std::string datasetPath, std::string datasetPathSource, bool hasHeader, unsigned int maxLHS)
+        std::string datasetPath, bool hasHeader, unsigned int maxLHS)
         :   taskID(taskID), algName(algName), errorPercent(errorPercent), semicolon(semicolon),
-            datasetPath(datasetPath), datasetPathSource(datasetPathSource), hasHeader(hasHeader), maxLHS(maxLHS) {}
+            datasetPath(datasetPath), hasHeader(hasHeader), maxLHS(maxLHS) {}
 
     std::string getAlgName() { return algName; }
     std::string getTaskID() { return taskID; }
     double getErrorPercent() { return errorPercent; }
     char getSemicolon() { return semicolon; }
     std::string getDatasetPath() { return datasetPath; }
-    std::string getDatasetPathSource() { return datasetPathSource; }
     bool getHasHeader() { return hasHeader; }
     unsigned int getMaxLHS() { return maxLHS; }
 

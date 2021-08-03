@@ -1,63 +1,86 @@
 var express = require('express');
 var router = express.Router();
 var path = require('path');
+
 const { v1: uuidv1 } = require('uuid');
 
 const eventTaskType = require('../kafka-producer/eventTaskType');
+const producer = require('../kafka-producer/index');
 
-// Choose tasks with server's dataset
+// TODO: make one route (/createTask with param)
+// Choose tasks with server's dataset (json must contain field fileName (*.csv) )
 router.post('/chooseTask', function(req, res){
-
     if(!req.body) return res.sendStatus(400)
 
-    // TODO: add try catch
-
-    const json = JSON.parse(req.files.document.data)
-
-    const dataset = 'server'
-    const taskID = uuidv1()
-    const { algName, errorPercent, semicolon, fileName, maxLHS, hasHeader } = json
-    const progress = 0.0
-
-    // get path to root file (www)
-    var rootPath = path.dirname(require.main.filename).split("/")
-
-    rootPath.pop()              // remove 'bin'
-    rootPath.push('target')     // add 'target'
-    rootPath.push('inputData')  // add 'inputData'
-    rootPath.push(fileName)     // add '*.csv'
-
-    const datasetPath = rootPath.join('/')
-    const status = 'NOT IN PROCESS'
-
-    // Add task to DB
     const pool = req.app.get('pool')
-    pool.query(
-        `insert into tasks(taskID, createdAt, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader) values\n
-        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`, [taskID, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader]
-    )
-    .then(res => {
-            if (res !== undefined) 
-                console.log(`Success (task was added to DB)`)
-        }
-    )
-    .catch(err => {
-            console.log(`Error (task wasn't added to DB)`)
-            throw err
-        }
-    );
+    const taskID = uuidv1()
+    
+    try {
+        const json = JSON.parse(req.files.document.data)
 
-    const event = { dataset, taskID };
-    const success = stream.write(eventTaskType.toBuffer(event));
+        console.log("Input data:", json)
 
-    if (success) {
-        console.log(`message queued (${JSON.stringify(event)})`);
-        res.json({ status: "OK", taskID: event.taskID });
-    } else {
-        console.log('Too many messages in the queue already..');
-        res.json({ status: "ERROR", message: "Too many tasks in the queue already"})
+        const { algName, errorPercent, semicolon, maxLHS, hasHeader, fileName } = json
+        const status = 'NOT IN PROCESS'
+        const progress = 0.0
+
+        // get path to root file (www)
+        var rootPath = path.dirname(require.main.filename).split("/")
+
+        rootPath.pop()              // remove dir 'bin'
+        rootPath.pop()              // remove dir 'server'
+        rootPath.pop()              // remove dir 'web-app'
+        rootPath.push('build')      // add dir 'build'
+        rootPath.push('target')     // add dir 'target'
+        rootPath.push('inputData')  // add dir 'inputData'
+        rootPath.push(fileName)     // add file '*.csv'
+
+        const datasetPath = rootPath.join('/')
+
+        var topicName = 'tasks'
+        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader) values\n
+        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`;
+        const params = [taskID, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader];
+    
+        // Add task to DB
+        (async () => {
+            await pool.query(query, params)
+            .then(result => {
+                if (result !== undefined) 
+                    console.log(`Success (task [${taskID}] was added to DB)`)
+                else
+                    throw error('Problem with adding task to DB')
+            })
+            .catch(err => {
+                console.log(`Error (task wasn't added to DB)`)
+                res.status(400).send('Problem with adding task to DB')
+            })
+            await sendEvent(topicName,taskID)
+            .then((result) => {
+                let json = JSON.stringify({taskID, status: 'OK'})
+                console.log("Record was added to kafka")
+                console.log("Response: " + json)
+                res.send(json)
+            })
+            .catch(err => {
+                console.log(err)
+                res.status(400).send('Problem with sending a response')
+            })
+        }) ()        
+    } catch(err) {
+        res.status(500).send('Unexpected problem caught: ' + err)
     }
-  }
-);
+});
+
+async function sendEvent(topicName, taskID) {
+    var value = Buffer.from(JSON.stringify({taskID}))
+    var key = taskID
+    // if partition is set to -1, librdkafka will use the default partitioner
+    var partition = -1
+    var headers = [
+        { header: "header value" }
+    ]
+    await producer.produce(topicName, partition, value, key, Date.now(), "", headers)
+}
 
 module.exports = router;

@@ -6,13 +6,8 @@ set(run_sources "main.cpp")
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
 find_library(PQXX_LIB pqxx)
-if (DEFINED ENV{LIBRDKAFKA_ROOT})
-    set(LIBRDKAFKA_ROOT $ENV{LIBRDKAFKA_ROOT})
-else ()
-    set(LIBRDKAFKA_ROOT /usr/local)
-endif ()
+variable_watch(PQXX_LIB)
 
 add_executable(${BINARY}_kafka_consumer ${run_sources})
 

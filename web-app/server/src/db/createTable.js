@@ -12,7 +12,7 @@ async function createTable(pool) {
         semicolon char(1) not null,\n
         progress real not null,\n
         status varchar(400) not null,\n
-        datasetPath char(120) not null,\n
+        datasetPath char(150) not null,\n
         FDs varchar(2000),
         hasHeader bool not null,
         maxLHS int not null,

@@ -49,11 +49,9 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
 
                 if (!record.error()) {
                     getNewRecordInfo(record);
-                    // get task's JSON -- {"dataset":"user","taskID":"4f829810-f192-11eb-96ec-9b0a4d5939a1"}
+                    // get task's JSON -- {"taskID":"4f829810-f192-11eb-96ec-9b0a4d5939a1"}
                     nlohmann::json task_json = nlohmann::json::parse(record.value().toString());
-
                     auto taskID = task_json["taskID"];
-                    auto datasetPathSource = task_json["dataset"];
 
                     std::string query = "SELECT taskid, algname, errorpercent, semicolon, datasetpath, maxlhs, hasheader FROM tasks WHERE taskID = '" + std::string(taskID) + "'";
                     auto rows = manager.defaultQuery(query);
@@ -73,7 +71,7 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
                     bool hasHeader = std::string(rows[0]["hasheader"].c_str()) == "t" ? true : false;
                     char semicolon = rows[0]["semicolon"].c_str()[0];
 
-                    taskConfig task(taskID, algName, errorPercent, semicolon, datasetPath, datasetPathSource, hasHeader, maxLHS);
+                    taskConfig task(taskID, algName, errorPercent, semicolon, datasetPath, hasHeader, maxLHS);
                     std::cout << "Config file for task was created, information about task:\n";
                     task.writeInfo(std::cout);
 
