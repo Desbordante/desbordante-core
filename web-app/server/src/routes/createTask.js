@@ -1,8 +1,8 @@
 const express = require('express');
 const { v1: uuidv1 } = require('uuid');
 const router = express.Router();
-const eventTaskType = require('../kafka-producer/eventTaskType');
-const producer = require('../kafka-producer/index');
+const eventTaskType = require('../producer/eventTaskType');
+const producer = require('../producer/index');
 var path = require('path');
 
 router.post('/createTask', function(req, res){

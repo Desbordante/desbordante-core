@@ -1,6 +1,5 @@
 const express = require('express')
 const cors = require('cors')
-var logger = require('morgan')
 
 // Pool init
 const pool = require('./db/createPool')
@@ -29,7 +28,6 @@ app.set('pool', pool);
 const jsonParser = express.json();
 
 app.use(cors());
-// app.use(logger('dev'));
 app.use(express.json());
 
 // enable files upload
