@@ -20,15 +20,14 @@ async function createTable(pool) {
         `
     )
     .then(res => {
-            if (res !== undefined) 
-                console.log(`Table 'task' was successfully created.`)
-            }
+        if (res !== undefined) 
+            console.log(`Table 'tasks' was successfully created.`)
+        }
     )
     .catch(err => {
         console.log('Error with table creation')
         throw err
-        }
-    )
+    })
 }
 
 module.exports = createTable;
