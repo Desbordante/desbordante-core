@@ -14,7 +14,7 @@ else ()
     set(LIBRDKAFKA_ROOT /usr/local)
 endif ()
 
-add_executable(${BINARY}_kafka_server ${run_sources})
+add_executable(${BINARY}_kafka_consumer ${run_sources})
 
-target_link_libraries(${BINARY}_kafka_server PUBLIC ${PQXX_LIB} ${CMAKE_PROJECT_NAME}_lib rdkafka pthread)
-target_link_libraries(${BINARY}_kafka_server LINK_PUBLIC ${Boost_LIBRARIES} Threads::Threads)
+target_link_libraries(${BINARY}_kafka_consumer PUBLIC ${PQXX_LIB} ${CMAKE_PROJECT_NAME}_lib rdkafka pthread)
+target_link_libraries(${BINARY}_kafka_consumer LINK_PUBLIC ${Boost_LIBRARIES} Threads::Threads)

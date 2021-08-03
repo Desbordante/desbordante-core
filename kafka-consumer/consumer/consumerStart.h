@@ -1,10 +1,12 @@
-#include "kafka/KafkaConsumer.h"
-#include "taskConfig.h"
-#include "processTask.h"
-#include "db/DBManager.h"
 #include <iostream>
 #include <string>
 #include <json.hpp>
+
+#include "kafka/KafkaConsumer.h"
+#include "processTask.h"
+
+#include "../db/taskConfig.h"
+#include "../db/DBManager.h"
 
 void getNewRecordInfo(const kafka::ConsumerRecord &record, bool isFull = false) {
     std::cout << "% Got a new message..." << std::endl;
@@ -17,6 +19,10 @@ void getNewRecordInfo(const kafka::ConsumerRecord &record, bool isFull = false) 
         std::cout << "    Key   [" << record.key().toString() << "]" << std::endl;
     }
     std::cout << "    Value [" << record.value().toString() << "]" << std::endl;
+}
+
+void removeSpaces(std::string& str) {
+    str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
 }
 
 void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& consumer, kafka::Topic topic) {
@@ -53,50 +59,36 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
                     auto rows = manager.defaultQuery(query);
 
                     if (rows.size() != 1) {
-                        std::cout << "This task not exists in DB" << std::endl; 
+                        std::cout << "This task ["+ std::string(taskID) + "] isn't in the database" << std::endl; 
                         throw;
                     }
 
-                    std::string algName = rows[0]["algname"].c_str();
-                    algName.erase(std::remove_if(algName.begin(), algName.end(), isspace), algName.end());
-                    double errorPercent = std::stod(rows[0]["errorpercent"].c_str());
-                    char semicolon = rows[0]["semicolon"].c_str()[0];
                     std::string datasetPath = rows[0]["datasetpath"].c_str();
-                    datasetPath.erase(std::remove_if(datasetPath.begin(), datasetPath.end(), isspace), datasetPath.end());
+                    std::string algName = rows[0]["algname"].c_str();
+                    removeSpaces(datasetPath);
+                    removeSpaces(algName);
                     
+                    double errorPercent = std::stod(rows[0]["errorpercent"].c_str());
                     unsigned int maxLHS = std::stoi(rows[0]["maxlhs"].c_str());
                     bool hasHeader = std::string(rows[0]["hasheader"].c_str()) == "t" ? true : false;
+                    char semicolon = rows[0]["semicolon"].c_str()[0];
 
                     taskConfig task(taskID, algName, errorPercent, semicolon, datasetPath, datasetPathSource, hasHeader, maxLHS);
-                    std::cout << "Config file for task was created, write information about task:\n";
+                    std::cout << "Config file for task was created, information about task:\n";
                     task.writeInfo(std::cout);
-                    std::cout << "maxLHS = " << maxLHS << std::endl;
-
-                    // change task's status in DB to "IN PROCESS"
-                    query = "UPDATE tasks SET status = 'IN PROCESS' progress = 10 WHERE taskID = '" + std::string(taskID) + "'";
-                    std::cout << query << std::endl;
-                    try {
-                        manager.transactionQuery(query);
-                    } catch(const std::exception& e) {
-                        std::cerr << "Unexpected exception (with changing task's status in DB) caught: " << e.what() << std::endl;
-                    }
 
                     try {
                         process_task(task, manager);
                     } catch (const std::exception& e) {
-                        std::cout << "Task wasn't processed" << std::endl;
-                        // TODO: Refresh task status in DB
+                        std::cout << "Task wasn't processed (skipped)" << std::endl;
+                        task.updateStatus(manager, "ERROR");
                         continue;
                     }
 
-                    // task was successfully processed
-                    // change task's status in DB to "COMPLETED"
-                    query = "UPDATE tasks SET status = 'COMPLETED', progress=100 WHERE taskID = '" + std::string(taskID) + "'";
-                    try {
-                        manager.transactionQuery(query);
-                    } catch(const std::exception& e) {
-                        std::cout << "Unexpected exception (with changing task's status in DB) caught: " << e.what() << std::endl;
-                    }
+                    task.updateStatus(manager, "COMPLETED");
+                    task.updateProgress(manager, 100);
+
+                    std::cout << "Task with ID '" << std::string(taskID) << "' was successfully processed." << std::endl;
                     
                     allCommitted = false;
                 } else {
@@ -119,5 +111,6 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
 
     } catch (const kafka::KafkaException& e) {
         std::cerr << "% Unexpected exception caught: " << e.what() << std::endl;
+        throw e;
     }
 }
