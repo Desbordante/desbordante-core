@@ -2,7 +2,12 @@ import React from "react";
 import "./ProgressBar.css";
 
 function ProgressBar({
-  maxWidth, widthUnit, thickness, progress, rounded,
+  maxWidth,
+  widthUnit,
+  thickness,
+  progress,
+  rounded,
+  transition = 0,
 }) {
   const barWidth = maxWidth * progress;
 
@@ -10,6 +15,7 @@ function ProgressBar({
     width: maxWidth + widthUnit,
     height: `${thickness}rem`,
     borderRadius: rounded ? `${1000}px` : 0,
+    transition: `${transition}s`,
   };
 
   return (
