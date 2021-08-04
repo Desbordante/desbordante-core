@@ -14,6 +14,7 @@ function FileForm({
   onUploadProgress,
   cancelTokenSource,
   setFilename,
+  setTaskID,
 }) {
   // Allowed field values
   const [allowedFileFormats, setAllowedFileFormats] = useState([]);
@@ -155,7 +156,8 @@ function FileForm({
               maxLHS: maxLHSAttributes,
             },
             onUploadProgress,
-            cancelTokenSource
+            cancelTokenSource,
+            setTaskID
           );
         }}
         validatorFunc={isValid}

@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./LoadingScreen.css";
 import ProgressBar from "./ProgressBar";
 import Button from "./Button";
 
 function LoadingScreen({ onComplete, progress, onCancel }) {
-  if (progress === 1) {
-    onComplete();
-  }
+  useEffect(() => {
+    if (progress >= 1) {
+      onComplete();
+    }
+  }, [progress, onComplete]);
 
   return (
     <div className="message-and-bar">

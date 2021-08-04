@@ -1,12 +1,14 @@
+/* eslint-disable */
+
 import axios from "axios";
 
 const serverURL = "http://localhost:5000";
 
-export async function getData(property) {
-  const response = await fetch(`${serverURL}/${property}`);
-  const data = await response.json();
+export async function getData(property, json = true) {
+  const response = await axios.get(`${serverURL}/${property}`);
+  // const data = await response.json();
   // console.log(data);
-  return data;
+  return response.data;
 }
 
 export function submitDatasetWthParameters(
@@ -14,6 +16,7 @@ export function submitDatasetWthParameters(
   parameters,
   onProgress,
   cancelTokenSource,
+  setTaskID
 ) {
   const json = JSON.stringify(parameters);
   const blob = new Blob([json], {
@@ -33,9 +36,13 @@ export function submitDatasetWthParameters(
   // Send formData object
   const config = {
     headers: { "Content-Type": "text/csv" },
-    onUploadProgress: (progressEvent) => onProgress(progressEvent.loaded / progressEvent.total),
+    onUploadProgress: (progressEvent) =>
+      onProgress(progressEvent.loaded / progressEvent.total),
     cancelToken: cancelTokenSource.token,
   };
 
-  axios.post(`${serverURL}/createTask`, data, config);
+  axios.post(`${serverURL}/createTask`, data, config).then((response) => {
+    setTaskID(response.data.taskID);
+    // console.log(response.data.taskID);
+  });
 }

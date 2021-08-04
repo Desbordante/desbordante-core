@@ -8,6 +8,7 @@
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
+  position: relative;
   /* overflow: scroll; */
 }
 
@@ -27,6 +28,7 @@ footer {
   justify-content: center;
   align-items: center;
   margin-bottom: 4.5vh;
+  transition: 0.3s;
 }
 
 .charts-with-controls {
@@ -35,6 +37,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  position: relative;
+  transition: 0.3s;
 }
 
 .bottom-title {

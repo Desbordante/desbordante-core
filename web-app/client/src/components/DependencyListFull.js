@@ -7,29 +7,41 @@ import RadioLight from "./RadioLight";
 import Dependency from "./Dependency";
 import SearchBar from "./SearchBar";
 
-function DependencyScreen({ dependencies, attributes }) {
+function DependencyScreen({
+  dependencies,
+  selectedAttributesLHS,
+  selectedAttributesRHS,
+}) {
   const [sortedDependencies, setSortedDependencies] = useState([]);
   const [chosenDependencyIndex, setChosenDependencyIndex] = useState(0);
   const [sortBy, setSortBy] = useState("None");
   const [searchString, setSearchString] = useState("");
 
-  // useEffect(() => setSearchString(""), []);
-
   useEffect(() => {
-    const foundDependencies =
-      searchString !== ""
-        ? dependencies.filter((dep) =>
-            searchString
-              .split(" ")
-              .filter((str) => str)
-              .every((elem) =>
-                dep.lhs
-                  .concat(dep.rhs)
-                  .join("")
-                  .includes(elem)
-              )
-          )
-        : [...dependencies];
+    const foundDependencies = (searchString !== ""
+      ? dependencies.filter((dep) =>
+          searchString
+            .split(" ")
+            .filter((str) => str)
+            .every((elem) =>
+              dep.lhs
+                .concat(dep.rhs)
+                .join("")
+                .includes(elem)
+            )
+        )
+      : [...dependencies]
+    )
+      .filter((dep) =>
+        selectedAttributesLHS.length > 0
+          ? selectedAttributesLHS.some((attr) => dep.lhs.includes(attr.name))
+          : true
+      )
+      .filter((dep) =>
+        selectedAttributesRHS.length > 0
+          ? selectedAttributesRHS.some((attr) => dep.rhs === attr.name)
+          : true
+      );
 
     const newSortedDependencies = foundDependencies.sort((d1, d2) => {
       if (sortBy === "None") {
@@ -53,37 +65,13 @@ function DependencyScreen({ dependencies, attributes }) {
     });
 
     setSortedDependencies(newSortedDependencies);
-    console.log(dependencies);
-    console.log(sortedDependencies);
-    console.log(sortBy);
-    console.log(searchString);
-    console.log(searchString.split(" ").filter((str) => str));
-  }, [dependencies, searchString, sortBy]);
-
-  // useEffect(() => {
-  //   setSortedDependencies(
-  //     foundDependencies.sort((d1, d2) => {
-  //       if (sortBy === "None") {
-  //         if (d1.lhs.length !== d2.lhs.length) {
-  //           return d1.lhs.length - d2.lhs.length;
-  //         }
-  //         return (d1.lhs.join("") + d1.rhs).localeCompare(
-  //           d2.lhs.join("") + d2.rhs
-  //         );
-  //       }
-
-  //       if (sortBy === "LHS") {
-  //         return (d1.lhs.join("") + d1.rhs).localeCompare(
-  //           d2.lhs.join("") + d2.rhs
-  //         );
-  //       }
-
-  //       if (sortBy === "RHS") {
-  //         return d1.rhs.localeCompare(d2.rhs);
-  //       }
-  //     })
-  //   );
-  // }, [foundDependencies, sortBy]);
+  }, [
+    dependencies,
+    selectedAttributesLHS,
+    selectedAttributesRHS,
+    searchString,
+    sortBy,
+  ]);
 
   return (
     <div className="dependency-list-full">

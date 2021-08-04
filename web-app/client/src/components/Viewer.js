@@ -5,51 +5,20 @@ import "./Viewer.css";
 import PieChartFull from "./PieChartFull";
 import NavButton from "./NavButton";
 import DependencyListFull from "./DependencyListFull";
+import OnscreenMessage from "./OnscreenMessage";
 
-function Viewer({ currentState }) {
+function Viewer({
+  currentState,
+  attributesLHS,
+  attributesRHS,
+  dependencies,
+  taskFinished,
+  taskStatus,
+}) {
   const [state, setState] = useState(0);
 
-  // Faking attributes update over time
-  const [attributes, setAttributes] = useState(
-    [
-      "lawyer",
-      "offender",
-      "stereotype",
-      "host",
-      "plot",
-      "certain",
-      "panic",
-      "spill",
-      "tumour",
-      "wedding",
-      "deprive",
-      "tax",
-      "insistence",
-      "civilian",
-      "qualified",
-      "robot",
-      "reconcile",
-      "virus",
-      "still",
-      "refrigerator",
-    ].map((value) => ({
-      name: value,
-      value: parseInt(Math.random() * 100),
-    }))
-  );
-
-  const [selectedAttributesLHS, setSelectedAttributesLHS] = useState([]);
   const [selectedAttributesRHS, setSelectedAttributesRHS] = useState([]);
-
-  const [dependencies, setDependencies] = useState(
-    [...Array(40)].map(() => ({
-      lhs: [...Array(parseInt(Math.random() * 7) + 1)]
-        .map(() => parseInt(Math.random() * 20))
-        .map((attrNumber) => attributes[attrNumber].name)
-        .sort((attr1, attr2) => attr1.localeCompare(attr2)),
-      rhs: attributes[parseInt(Math.random() * 20)].name,
-    }))
-  );
+  const [selectedAttributesLHS, setSelectedAttributesLHS] = useState([]);
 
   const attributePart = useRef();
   const dependencyPart = useRef();
@@ -64,40 +33,41 @@ function Viewer({ currentState }) {
   // Number of slices shown in charts (+1 for "Other")
   const maxItemsShown = 9;
 
-  // Chart colors, evenly distributed on the color wheel
-  const startColor = parseInt(Math.random() * 360);
-  let colors = [...Array(maxItemsShown)]
-    .map(
-      (_, index) =>
-        `hsla(${parseInt(startColor + (index * 360) / 10) %
-          360}, 75%, 50%, 0.7)`
-    )
-    .sort(() => 0.5 - Math.random());
+  // // Chart colors, evenly distributed on the color wheel
+  // const startColor = parseInt(Math.random() * 360);
+  // let colors = [...Array(maxItemsShown)]
+  //   .map(
+  //     (_, index) =>
+  //       `hsla(${parseInt(startColor + (index * 360) / 10) %
+  //         360}, 75%, 50%, 0.7)`
+  //   )
+  //   .sort(() => 0.5 - Math.random());
 
-  // Grey color for "Other" label
-  colors.push("hsla(0, 0%, 50%, 0.7)");
+  // // Grey color for "Other" label
+  // colors.push("hsla(0, 0%, 50%, 0.7)");
 
   return (
     <>
       <div className="bg-light" ref={attributePart}>
-        <div className="charts-with-controls">
+        <div
+          className="charts-with-controls"
+          style={{ opacity: taskFinished ? 1 : 0 }}
+        >
           <PieChartFull
             title="Left-hand side"
-            attributes={attributes}
-            colors={colors}
+            attributes={attributesLHS}
             selectedAttributes={selectedAttributesLHS}
             setSelectedAttributes={setSelectedAttributesLHS}
           />
           <PieChartFull
             title="Right-hand side"
-            attributes={attributes}
+            attributes={attributesRHS}
             maxItemsSelected={1}
-            colors={colors}
             selectedAttributes={selectedAttributesRHS}
             setSelectedAttributes={setSelectedAttributesRHS}
           />
         </div>
-        <footer>
+        <footer style={{ opacity: taskFinished ? 1 : 0 }}>
           <h1
             className="bottom-title"
             style={{ color: "#000000", fontWeight: 500 }}
@@ -109,7 +79,7 @@ function Viewer({ currentState }) {
             alt="down"
             onClick={() => setState(1)}
           />
-        </footer>
+        </footer>{" "}
       </div>
       <div
         className="bg-light"
@@ -118,7 +88,8 @@ function Viewer({ currentState }) {
       >
         <DependencyListFull
           dependencies={dependencies}
-          attributes={attributes}
+          selectedAttributesLHS={selectedAttributesLHS}
+          selectedAttributesRHS={selectedAttributesRHS}
         />
         <footer>
           <h1
