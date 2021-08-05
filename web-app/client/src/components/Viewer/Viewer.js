@@ -46,9 +46,6 @@ function Viewer({ attributesLHS, attributesRHS, dependencies, taskFinished }) {
         {taskFinished ? null : (
           <OnscreenMessage
             text="Loading"
-            // style={{
-            //   opacity: taskFinished ? 0 : 1,
-            // }}
           />
         )}
         <div

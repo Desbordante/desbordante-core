@@ -10,9 +10,10 @@ import FileForm from "./components/FileForm/FileForm";
 import Viewer from "./components/Viewer/Viewer";
 import ProgressBar from "./components/ProgressBar/ProgressBar";
 import { getData } from "./APIFunctions";
+import Button from "./components/Button/Button";
 
 function App() {
-  // disableBodyScroll(document);
+  disableBodyScroll(document);
 
   // State describes what screen should be seen at the moment
   const [state, setState] = useState(0);
@@ -26,6 +27,16 @@ function App() {
 
   const [dependencies, setDependencies] = useState([]);
   const [attributes, setAttributes] = useState({ lhs: [], rhs: [] });
+
+  const reset = () => {
+    setState(0);
+    setUploadProgress(0);
+    setTaskID("");
+    setTaskStatus("UNSCHEDULED");
+    setTaskProgress(0);
+    setDependencies([]);
+    setAttributes({ lhs: [], rhs: [] });
+  }
 
   const taskFinished = (status) => ["COMPLETED", "ERROR"].includes(status);
 
@@ -127,8 +138,12 @@ function App() {
       >
         <div className="top-bar">
           <header>
-            <img src="/icons/logo.svg" alt="logo" className="logo-medium" />
-            {`${filename} | ${taskStatus}`}
+            <div className="left">
+              <img src="/icons/logo.svg" alt="logo" className="logo-medium" />
+              <h1>File: "{filename}"</h1>
+              <h1>Status: {taskStatus}</h1>
+            </div>
+            <Button text="Cancel" style={{ backgroundColor: "var(--red)" }} onClick={reset}/>
           </header>
           <ProgressBar
             maxWidth={100}

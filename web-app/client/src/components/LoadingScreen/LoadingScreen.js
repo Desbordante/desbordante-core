@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import "./LoadingScreen.css";
 import ProgressBar from "../ProgressBar/ProgressBar";
-import Button from "../Button/Button";
 
-function LoadingScreen({ onComplete, progress, onCancel }) {
+function LoadingScreen({ onComplete, progress /* onCancel */ }) {
   useEffect(() => {
     if (progress >= 1) {
       onComplete();
@@ -20,7 +19,7 @@ function LoadingScreen({ onComplete, progress, onCancel }) {
         thickness={0.8}
         rounded
       />
-      <Button text="Cancel" color="green" onClick={onCancel} />
+      {/* <Button text="Cancel" color="green" onClick={onCancel} /> */}
     </div>
   );
 }

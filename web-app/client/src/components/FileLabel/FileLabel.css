@@ -20,9 +20,8 @@
   text-align: left;
   width: 30rem;
   transition: 0.3s;
+  white-space: normal;
   background-color: var(--dark-grey);
-  /* white-space: nowrap;
-  overflow: hidden; */
 }
 
 .filename.glow {

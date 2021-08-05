@@ -10,12 +10,12 @@
   font-weight: 400;
   font-size: 4rem;
   position: absolute;
-  z-index: 1000;
+  z-index: 1;
   transition: 0.3s;
 }
 
 .onscreen-message img {
-  height: 4rem;
-  width: 5rem;
+  height: 3rem;
+  width: 3.5rem;
   margin-left: 1rem;
 }
