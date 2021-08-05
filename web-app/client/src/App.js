@@ -4,13 +4,12 @@ import "./App.css";
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { disableBodyScroll } from "body-scroll-lock";
-import Header from "./components/Header";
-import LoadingScreen from "./components/LoadingScreen";
-import FileForm from "./components/FileForm";
-import Viewer from "./components/Viewer";
-import ProgressBar from "./components/ProgressBar";
+import Header from "./components/Header/Header";
+import LoadingScreen from "./components/LoadingScreen/LoadingScreen";
+import FileForm from "./components/FileForm/FileForm";
+import Viewer from "./components/Viewer/Viewer";
+import ProgressBar from "./components/ProgressBar/ProgressBar";
 import { getData } from "./APIFunctions";
-import OnscreenMessage from "./components/OnscreenMessage";
 
 function App() {
   // disableBodyScroll(document);

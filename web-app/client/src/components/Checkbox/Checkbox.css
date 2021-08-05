@@ -1,0 +1,53 @@
+@import url("../../colors.css");
+
+.round-corners {
+  box-sizing: border-box;
+  font-family: "Roboto", sans-serif;
+  border-radius: 1000px;
+  border: 0;
+  font-size: 1.1rem;
+  padding: 0.6rem 1.8rem;
+  letter-spacing: 0.02rem;
+  /* display: inline-block; */
+  margin: 0rem 0.8rem;
+}
+
+.button {
+  transition: 0.3s;
+  color: var(--text-white);
+}
+
+.button:active {
+  outline: none;
+}
+
+.button:hover {
+  cursor: pointer;
+  transform: scale(103%);
+}
+
+.button:focus {
+  outline: none;
+}
+
+.unchecked {
+  background-color: rgba(0, 0, 0, 0);
+  color: var(--text-dull);
+  border: 2px solid var(--dark-grey);
+  font-weight: 400;
+
+  transition: 0.3s;
+}
+.button.unchecked:hover {
+  background-color: var(--background-lighter);
+  border-color: var(--light-grey);
+}
+
+.checked {
+  background-color: var(--green);
+  color: var(--text-white);
+  border: 2px solid var(--green);
+  font-weight: 400;
+  box-shadow: 0px 0px 1rem var(--green);
+  transition: 0.3s;
+}

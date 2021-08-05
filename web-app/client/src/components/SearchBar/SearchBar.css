@@ -1,0 +1,20 @@
+@import url("../../colors.css");
+
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.search-input {
+  font-weight: 300;
+  background-color: var(--light);
+  /* border: 2px solid var(--light); */
+  /* transition: 0.3s; */
+}
+
+.search-input:focus {
+  outline: none;
+  /* border: 2px solid var(--purple); */
+  /* transition: 0.3s; */
+}

@@ -1,0 +1,66 @@
+@import url("../../colors.css");
+
+.pie-chart-full {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  justify-content: flex-start;
+  align-items: center;
+  height: 95%;
+  width: 50%;
+  transition: 0.3s;
+}
+
+.pie-chart-full > * {
+  margin: 0.8rem 0;
+}
+
+.title {
+  color: var(--text-black);
+  font-weight: 500;
+}
+
+.chart {
+  width: 80%;
+  height: 50%;
+  position: relative;
+  transition: 0.3s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* .chart-canvas {
+  transition: 0.3s;
+} */
+
+.selected-attributes {
+  width: 40%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  /* height: 15rem; */
+  transition: 0.3s;
+}
+
+.chart-legend {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  /* width: 8rem; */
+}
+
+.chart-canvas {
+  height: 35vh;
+  width: 35vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.chart-legend {
+  margin-right: 2rem;
+}

@@ -1,0 +1,33 @@
+@import url("../../colors.css");
+
+.nav-button {
+  position: relative;
+  transition: 0.3s;
+  margin-left: 1.5rem;
+}
+
+.nav-button:hover {
+  transform: scale(1.03);
+  transition: 0.3s;
+}
+
+.nav {
+  background: linear-gradient(210deg, var(--purple), var(--green));
+  border: none;
+  border-radius: 1000px;
+  padding: 1rem;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+.nav.glow {
+  position: absolute;
+  z-index: 0;
+  opacity: 80%;
+}
+
+.nav img {
+  width: 2.5rem;
+  height: 2.5rem;
+}

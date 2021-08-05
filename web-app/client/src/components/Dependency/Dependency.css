@@ -1,0 +1,43 @@
+@import url("../../colors.css");
+
+.attribute-name {
+  background-color: var(--light);
+  color: var(--text-black);
+  font-family: var(--font-content);
+  font-weight: 300;
+  font-size: 1.1rem;
+  border-radius: 1000px;
+  padding: 0.6rem 1.8rem;
+  margin: 0.4rem 0.5rem;
+  transition: 0.3s;
+}
+
+.attribute-name.active {
+  background-color: var(--purple);
+  color: var(--text-white);
+  transition: 0.3s;
+}
+
+.dependency {
+  display: flex;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.dependency:hover {
+  cursor: pointer;
+  transform: translateX(0.5rem);
+  transition: 0.3s;
+}
+
+.dependency svg {
+  width: 5rem;
+  margin: 0.3rem 0.5rem;
+  stroke: var(--text-black);
+  transition: 0.3s;
+}
+
+svg.active {
+  stroke: var(--purple);
+  transition: 0.3s;
+}

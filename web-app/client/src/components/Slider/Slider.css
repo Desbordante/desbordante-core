@@ -1,0 +1,34 @@
+@import url("../../colors.css");
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 2px;
+  background: var(--dark-grey);
+  outline: none;
+  opacity: 1;
+  margin: 0rem 0.8rem;
+  width: 15rem;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 0.4rem;
+  height: 1.5rem;
+  background: var(--purple);
+  cursor: pointer;
+  outline: none;
+  border: none;
+  border-radius: 1000px;
+}
+
+.slider::-moz-range-thumb {
+  width: 0.4rem;
+  height: 1.5rem;
+  background: var(--purple);
+  cursor: pointer;
+  outline: none;
+  border: none;
+  border-radius: 1000px;
+}

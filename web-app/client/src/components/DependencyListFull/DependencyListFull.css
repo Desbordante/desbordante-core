@@ -1,0 +1,46 @@
+@import url("../../colors.css");
+
+.dependency-list-full {
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  justify-content: flex-start;
+  height: 80%;
+  width: 95%;
+}
+
+.dependency-list-full > * {
+  margin: 0.8rem 0rem;
+}
+
+/* .dependency-list-full .title {
+  align-self: center;
+} */
+
+.sort h3 {
+  color: var(--text-black);
+  margin-left: 0;
+}
+
+.sort {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.dependency-list {
+  overflow-y: scroll;
+  /* height: 50%; */
+  /* box-shadow: inset 0px 0px 2rem var(--purple); */
+}
+
+/* hide scrollbar but allow scrolling */
+.dependency-list {
+  -ms-overflow-style: none; /* for Internet Explorer, Edge */
+  scrollbar-width: none; /* for Firefox */
+  overflow-y: scroll;
+}
+
+.dependency-list::-webkit-scrollbar {
+  display: none; /* for Chrome, Safari, and Opera */
+}
