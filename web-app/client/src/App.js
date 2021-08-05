@@ -31,7 +31,7 @@ function App() {
 
   useEffect(() => {
     // console.log(state);
-    console.log("taskID!!", taskID);
+    // console.log("taskID!!", taskID);
     // console.log("taskStatus!!", taskStatus);
     // console.log("Deps!!", dependencies);
     // console.log("Attrs!!", attributes);
@@ -68,7 +68,7 @@ function App() {
       if (taskID !== "" && !taskFinished(taskStatus)) {
         fetchData();
       }
-    }, 100);
+    }, 2000);
 
     return () => clearInterval(timer);
   });

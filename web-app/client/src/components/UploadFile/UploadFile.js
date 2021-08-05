@@ -4,11 +4,11 @@ import FileLabel from "../FileLabel/FileLabel";
 import Button from "../Button/Button";
 
 function UploadFile({
-  onClick,
-  file,
-  fileExistenceValidatorFunc,
-  fileSizeValidatorFunc,
-  fileFormatValidatorFunc,
+  onClick = () => {},
+  file = { name: "filename" },
+  fileExistenceValidatorFunc = () => true,
+  fileSizeValidatorFunc = () => true,
+  fileFormatValidatorFunc = () => true,
 }) {
   const inputFile = useRef(null);
 

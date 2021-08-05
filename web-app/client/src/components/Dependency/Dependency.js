@@ -3,7 +3,7 @@
 import React from "react";
 import "./Dependency.css";
 
-function Dependency({ lhs, rhs, isActive, onClick }) {
+function Dependency({ lhs = [], rhs = "", isActive = false, onClick }) {
   return (
     <div className="dependency" onClick={onClick}>
       {lhs.map((attr, index) => (

@@ -1,7 +1,11 @@
 import React from "react";
 import "./Submit.css";
 
-function Submit({ text, onClick, validatorFunc }) {
+function Submit({
+  text = "Submit button",
+  onClick = () => {},
+  validatorFunc = () => true,
+}) {
   return (
     <div className="gradient-glow">
       <div

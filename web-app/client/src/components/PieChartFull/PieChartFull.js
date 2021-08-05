@@ -9,11 +9,11 @@ import SelectedAttribute from "../SelectedAttribute/SelectedAttribute";
 import AttributeLabel from "../AttributeLabel/AttributeLabel";
 
 function PieChartFull({
-  title,
-  attributes,
+  title = "Chart title",
+  attributes = { lhs: [], rhs: [] },
   maxItemsShown = 9,
   maxItemsSelected = 9,
-  selectedAttributes,
+  selectedAttributes = [],
   setSelectedAttributes,
 }) {
   // Get how much px is one rem, later used in chart dimensions
@@ -100,7 +100,6 @@ function PieChartFull({
           <Doughnut
             style={{
               position: "absolute",
-              zIndex: 0,
               backgroundColor: "#00000000",
             }}
             // width={100}
@@ -193,6 +192,7 @@ function PieChartFull({
               zIndex: 1,
               padding: "2rem",
               opacity: depth > 0 ? 1 : 0,
+              cursor: depth > 0 ? "pointer" : "default"
             }}
           />
         </div>

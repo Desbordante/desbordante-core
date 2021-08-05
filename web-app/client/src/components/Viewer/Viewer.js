@@ -7,14 +7,7 @@ import NavButton from "../NavButton/NavButton";
 import DependencyListFull from "../DependencyListFull/DependencyListFull";
 import OnscreenMessage from "../OnscreenMessage/OnscreenMessage";
 
-function Viewer({
-  currentState,
-  attributesLHS,
-  attributesRHS,
-  dependencies,
-  taskFinished,
-  taskStatus,
-}) {
+function Viewer({ attributesLHS, attributesRHS, dependencies, taskFinished }) {
   const [state, setState] = useState(0);
 
   const [selectedAttributesRHS, setSelectedAttributesRHS] = useState([]);
@@ -24,7 +17,8 @@ function Viewer({
   const dependencyPart = useRef();
 
   useEffect(() => {
-    [attributePart, dependencyPart][state].current.scrollIntoView({
+    const views = [attributePart, dependencyPart];
+    views[state].current.scrollIntoView({
       behavior: "smooth",
       block: "end",
     });
@@ -61,7 +55,6 @@ function Viewer({
           className="charts-with-controls"
           style={{
             opacity: taskFinished ? 1 : 0,
-            zIndex: taskFinished ? 1000 : 0,
           }}
         >
           <PieChartFull
