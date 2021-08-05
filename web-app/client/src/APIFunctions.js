@@ -4,7 +4,7 @@ import axios from "axios";
 
 const serverURL = "http://localhost:5000";
 
-export async function getData(property, json = true) {
+export async function getData(property) {
   const response = await axios.get(`${serverURL}/${property}`);
   // const data = await response.json();
   // console.log(data);

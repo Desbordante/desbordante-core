@@ -98,7 +98,11 @@ function PieChartFull({
         </div>
         <div className="chart-canvas">
           <Doughnut
-            style={{ position: "absolute", zIndex: 0 }}
+            style={{
+              position: "absolute",
+              zIndex: 0,
+              backgroundColor: "#00000000",
+            }}
             // width={100}
             // height={100}
             data={{
@@ -177,14 +181,19 @@ function PieChartFull({
             }}
           />
           <Button
-            src="/icons/search.svg"
+            src="/icons/up-depth.svg"
             alt="Search"
             color="purple"
             onClick={() => setDepth(depth === 0 ? 0 : depth - 1)}
-            size={5}
+            size={4}
             sizeUnit="vh"
             icon
-            style={{ position: "relative", zIndex: 1 }}
+            style={{
+              position: "absolute",
+              zIndex: 1,
+              padding: "2rem",
+              opacity: depth > 0 ? 1 : 0,
+            }}
           />
         </div>
       </div>

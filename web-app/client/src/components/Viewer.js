@@ -49,9 +49,20 @@ function Viewer({
   return (
     <>
       <div className="bg-light" ref={attributePart}>
+        {taskFinished ? null : (
+          <OnscreenMessage
+            text="Loading"
+            // style={{
+            //   opacity: taskFinished ? 0 : 1,
+            // }}
+          />
+        )}
         <div
           className="charts-with-controls"
-          style={{ opacity: taskFinished ? 1 : 0 }}
+          style={{
+            opacity: taskFinished ? 1 : 0,
+            zIndex: taskFinished ? 1000 : 0,
+          }}
         >
           <PieChartFull
             title="Left-hand side"

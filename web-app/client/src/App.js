@@ -30,24 +30,28 @@ function App() {
 
   const taskFinished = (status) => ["COMPLETED", "ERROR"].includes(status);
 
-  // useEffect(() => {
-  //   console.log("taskID!!", taskID);
-  //   console.log("taskStatus!!", taskStatus);
-  //   console.log("Deps!!", dependencies);
-  //   console.log("Attrs!!", attributes);
-  //   console.log("===========================");
-  // });
+  useEffect(() => {
+    // console.log(state);
+    console.log("taskID!!", taskID);
+    // console.log("taskStatus!!", taskStatus);
+    // console.log("Deps!!", dependencies);
+    // console.log("Attrs!!", attributes);
+    // console.log("===========================");
+  });
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("UPDATE");
+      // console.log("UPDATE");
       const task = await getData(`getTaskInfo?taskID=${taskID}`);
       // console.log(task);
       setTaskStatus(task.status);
       setTaskProgress(task.progress / 100);
 
       if (taskFinished(task.status)) {
-        setAttributes(task.jsonarraynamevalue);
+        setAttributes({
+          lhs: task.jsonarraynamevalue.lhs.filter((attr) => attr.value > 0),
+          rhs: task.jsonarraynamevalue.rhs.filter((attr) => attr.value > 0),
+        });
         setDependencies(
           task.fds
             .filter((dep) => dep.lhs.length > 0)
@@ -83,7 +87,16 @@ function App() {
     [fileScreen, loadingScreen, viewerScreen][state].current.scrollIntoView({
       behavior: "smooth",
     });
+    // console.log(state);
   }, [state]);
+
+  useEffect(
+    () =>
+      fileScreen.current.scrollIntoView({
+        behavior: "smooth",
+      }),
+    []
+  );
 
   return (
     <div className="App">
@@ -124,6 +137,7 @@ function App() {
             progress={taskProgress}
             thickness={0.5}
             rounded={false}
+            transition={0.1}
           />
         </div>
         <Viewer
