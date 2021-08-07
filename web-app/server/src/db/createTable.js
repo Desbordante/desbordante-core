@@ -2,7 +2,7 @@ async function createTable(pool) {
 
     console.log(`Creating table(-es) in DB 'Desbordante'`)
 
-    // status -- COMPLETED/IN PROCESS/ERROR/NOT IN PROCESS
+    // status -- ADDED TO THE TASK QUEUE/IN PROCESS/COMPLETED/INCORRECT INPUT DATA/SERVER ERROR
     return await pool.query(
         `CREATE TABLE IF NOT EXISTS tasks(\n
         taskID char(40) not null primary key,\n
@@ -11,11 +11,13 @@ async function createTable(pool) {
         errorPercent real not null,\n
         semicolon char(1) not null,\n
         progress real not null,\n
-        status varchar(400) not null,\n
+        elapsedTime bigint CHECK (elapsedTime >= 0),\n
+        status varchar(30) not null,\n
+        errorStatus text,\n
         datasetPath text not null,\n
-        FDs text,
-        hasHeader bool not null,
-        maxLHS int not null,
+        FDs text,\n
+        hasHeader bool not null,\n
+        maxLHS int not null,\n
         JsonArrayNameValue text)
         `
     )

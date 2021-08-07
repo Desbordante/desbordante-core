@@ -2,27 +2,78 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
-    if(!req.query || !req.query.taskID) return res.sendStatus(400)
-
+    if(!req.query || !req.query.taskID) return res.sendStatus(400);
     try{
-        // Get info about task from DB
         const pool = req.app.get('pool')
-        pool.query(`select progress, status, fds::json, JSONArrayNameValue::json from tasks where taskid='${req.query.taskID}'`)
+        var answer;
+        pool.query(`select status from tasks where taskid = '${req.query.taskID}'`)
         .then(result => {
-                if (result.rows[0] === undefined) {
-                    res.status(400).send("Invalid taskID");
+            if (result.rows[0] === undefined) {
+                res.status(400).send("Invalid taskID");
+                return;
+            }
+            const status = result.rows[0].status;
+            if (status === 'SERVER ERROR') {
+                answer = JSON.stringify(result.rows[0]);
+                res.status(500).send(answer);
+                return;
+            }
+            return status;
+        })
+        .then(status => {
+            if (status === 'INCORRECT INPUT DATA') {
+                pool.query(`select status, errorStatus from tasks where taskid = '${req.query.taskID}'`)
+                .then(result => {
+                    answer = JSON.stringify(result.rows[0]);
+                    console.log(answer);
+                    res.status(400).send(answer); 
                     return;
-                }
-                console.log('Response:', JSON.stringify(result.rows[0]));
-                res.send(JSON.stringify(result.rows[0]));   
+                })
+                .catch(err => {
+                    answer = 'SERVER ERROR: ' + err;
+                    console.log(answer);
+                    res.status(500).send(answer);
+                    return;
+                });
+            } else if (status === 'COMPLETED') {
+                pool.query(`select progress, status, fds::json, JSONArrayNameValue::json, elapsedTime from tasks where taskid = '${req.query.taskID}'`)
+                .then(result => { 
+                    answer = JSON.stringify(result.rows[0]);
+                    console.log(answer);
+                    res.send(answer);
+                    return;
+                })
+                .catch(err => {
+                    answer = 'SERVER ERROR: ' + err;
+                    console.log(answer);
+                    res.status(500).send(answer);
+                    return;
+                });
+            } else if (status === 'IN PROCESS' || status === 'ADDED TO THE TASK QUEUE') {
+                console.log(status)
+                pool.query(`select progress, status from tasks where taskid = '${req.query.taskID}'`)
+                .then(result => { 
+                    answer = JSON.stringify(result.rows[0]);
+                    console.log(answer);
+                    res.send(answer);
+                    return;
+                })
+                .catch(err => {
+                    answer = 'SERVER ERROR: ' + err;
+                    res.status(500).send(answer);
+                    console.log(answer);
+                    return;
+                });
             }
-        )
+        })
         .catch(err => {
-                res.status(400).send('Invalid taskID', err)
-            }
-        );
+            answer = 'SERVER ERROR: ' + err;
+            console.log(answer);
+            res.status(500).send(answer);
+            return; 
+        })
     } catch(err) {
-        res.status(500).send(err);
+        throw ('Unexpected server behavior [getTaskInfo]: ' + err);
     }
 });
 

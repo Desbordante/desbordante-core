@@ -10,7 +10,7 @@ public:
     kafkaConsumerManager() = delete;
 
     kafkaConsumerManager(std::string brokers) 
-        : props({{ "bootstrap.servers", brokers}}), consumer(props) { }
+        : props({{ "bootstrap.servers", brokers}, {"max.poll.records", "1"} }), consumer(props) { }
 
     kafka::KafkaManualCommitConsumer& getConsumer() {
         return consumer;

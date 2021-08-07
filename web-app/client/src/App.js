@@ -38,7 +38,7 @@ function App() {
     setAttributes({ lhs: [], rhs: [] });
   }
 
-  const taskFinished = (status) => ["COMPLETED", "ERROR"].includes(status);
+  const taskFinished = (status) => ["COMPLETED", "SERVER ERROR", "INCORRECT INPUT DATA"].includes(status);
 
   useEffect(() => {
     // console.log(state);

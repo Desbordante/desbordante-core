@@ -44,8 +44,9 @@ void process_task(taskConfig& task, DBManager& manager) {
         task.updateStatus(manager, "IN PROCESS");
         task.updateProgress(manager, 10);
 
-        algorithmInstance->execute();
-
+        unsigned long long elapsedTime = algorithmInstance->execute();
+        
+        task.setElapsedTime(manager, elapsedTime);
         task.updateFDs(manager, algorithmInstance->getJsonFDs());
         task.updateJsonArrayNameValue(manager, algorithmInstance->getJsonArrayNameValue());
 

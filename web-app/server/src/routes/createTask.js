@@ -35,7 +35,7 @@ router.post('/createTask', function(req, res){
         console.log("File:", table)
 
         const { algName, errorPercent, semicolon, maxLHS, hasHeader } = json
-        const status = 'NOT IN PROCESS'
+        const status = 'ADDED TO THE TASK QUEUE'
         const progress = 0.0
 
         // get path to root file (www)

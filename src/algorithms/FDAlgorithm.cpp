@@ -32,7 +32,10 @@ std::string FDAlgorithm::getJsonArrayNameValue(int degree, bool withAttr) {
         }
         const auto &RhsColumn = fd.getRhs();
         size_t index = RhsColumn.getIndex();
-        RhsValues[index] += 1/divisor;
+        if (divisor != 0)
+            RhsValues[index] += 1/divisor;
+        else
+            RhsValues[index] = -1;
     }
     nlohmann::json j;
 
