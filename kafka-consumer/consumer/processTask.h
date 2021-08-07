@@ -12,6 +12,7 @@
 
 #include "algorithms/Pyro.h"
 #include "algorithms/TaneX.h"
+#include "algorithms/FastFDs.h"
 
 #include "../db/DBManager.h"
 #include "../db/taskConfig.h"
@@ -23,7 +24,6 @@ void process_task(taskConfig& task, DBManager& manager) {
     std::string datasetPath = task.getDatasetPath();
     char separator = task.getSemicolon();
     bool hasHeader = task.getHasHeader();
-    // TODO: For what we use seed?
     int seed = 0;
     double error = task.getErrorPercent();
     unsigned int maxLHS = task.getMaxLHS();
@@ -34,9 +34,12 @@ void process_task(taskConfig& task, DBManager& manager) {
     std::unique_ptr<FDAlgorithm> algorithmInstance;
     if (alg == "Pyro") {
         algorithmInstance = std::make_unique<Pyro>(datasetPath, separator, hasHeader, seed, error, maxLHS, parallelism);
-    } else if (alg == "TaneX"){
+    } else if (alg == "TaneX") {
         algorithmInstance = std::make_unique<Tane>(datasetPath, separator, hasHeader, error, maxLHS);
+    } else if (alg == "FastFDs") {
+        algorithmInstance = std::make_unique<FastFDs>(datasetPath, separator, hasHeader);
     }
+
     try {
         task.updateStatus(manager, "IN PROCESS");
         task.updateProgress(manager, 10);
