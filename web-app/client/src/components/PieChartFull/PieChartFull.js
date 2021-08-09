@@ -54,7 +54,6 @@ function PieChartFull({
     setFoundAttributes(
       newFoundAttributes
         .filter((attr) => !selectedAttributes.includes(attr))
-        .sort((a, b) => b.value - a.value)
     );
   }, [attributes, searchString, selectedAttributes]);
 

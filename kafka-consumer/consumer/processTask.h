@@ -47,8 +47,9 @@ void process_task(taskConfig& task, DBManager& manager) {
         unsigned long long elapsedTime = algorithmInstance->execute();
         
         task.setElapsedTime(manager, elapsedTime);
-        task.updateFDs(manager, algorithmInstance->getJsonFDs());
+        task.updateJsonFDs(manager, algorithmInstance->getJsonFDs(false));
         task.updateJsonArrayNameValue(manager, algorithmInstance->getJsonArrayNameValue());
+        task.updateJsonColumnNames(manager, algorithmInstance->getJsonColumnNames());
 
         return;
     } catch (std::runtime_error& e) {

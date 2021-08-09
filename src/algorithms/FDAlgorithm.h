@@ -37,9 +37,11 @@ public:
      * результатов разных алгоритмов. JSON - на всякий случай, если потом, например, понадобится загрузить список в
      * питон и как-нибудь его поанализировать
      * */
-    std::string getJsonFDs();
+    std::string getJsonFDs(bool withNullLhs = true);
 
     std::vector<std::string> getColumnNames();
+
+    std::string getJsonColumnNames();
 
     std::string getJsonArrayNameValue(int degree = 1, bool withAttr = true);
 

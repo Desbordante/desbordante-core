@@ -61,7 +61,7 @@ public:
     }
 
     // Send a request to DB with a set of FDs
-    void updateFDs(DBManager& manager, const std::string& FDs) {
+    void updateJsonFDs(DBManager& manager, const std::string& FDs) {
         try {
             std::string query = "UPDATE tasks SET FDs = '" + FDs + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
@@ -72,13 +72,25 @@ public:
     }
 
     // Send a request to DB with JSON array (data for pie chart for client)
-    void updateJsonArrayNameValue(DBManager& manager, const std::string& jsonArrayNameValue) {
+    void updateJsonArrayNameValue(DBManager& manager, const std::string& arrayNameValue) {
         try {
-            std::string query = "UPDATE tasks SET JsonArrayNameValue = '" + jsonArrayNameValue;
+            std::string query = "UPDATE tasks SET arrayNameValue = '" + arrayNameValue;
             query += "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
             std::cerr << "Unexpected exception (with sending data to DB) caught: " << e.what() << std::endl;
+            throw e;
+        }
+    }
+
+    // Send a request to DB with JSON array of column names
+    void updateJsonColumnNames(DBManager& manager, const std::string& columnNames) {
+        try {
+            std::string query = "UPDATE tasks SET columnNames = '" + columnNames;
+            query += "' WHERE taskID = '" + taskID + "'";
+            manager.transactionQuery(query);
+        } catch(const std::exception& e) {
+            std::cerr << "Unexpected exception (with updating task's attribute column names in the DB) caught: " << e.what() << std::endl;
             throw e;
         }
     }
@@ -98,7 +110,6 @@ public:
         try {
             std::string query = "UPDATE tasks SET elapsedTime = " + std::to_string(time);
             query += " WHERE taskID = '" + taskID + "'";
-            std::cout << (query);
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
             std::cerr << "Unexpected exception (with sending data to DB) caught: " << e.what() << std::endl;

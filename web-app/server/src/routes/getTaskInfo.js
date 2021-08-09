@@ -36,7 +36,7 @@ router.get('/', function(req, res, next) {
                     return;
                 });
             } else if (status === 'COMPLETED') {
-                pool.query(`select progress, status, fds::json, JSONArrayNameValue::json, elapsedTime from tasks where taskid = '${req.query.taskID}'`)
+                pool.query(`select progress, status, fds::json, arrayNameValue::json, columnNames::json, elapsedTime from tasks where taskid = '${req.query.taskID}'`)
                 .then(result => { 
                     answer = JSON.stringify(result.rows[0]);
                     console.log(answer);

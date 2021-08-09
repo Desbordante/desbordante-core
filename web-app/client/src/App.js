@@ -62,17 +62,17 @@ function App() {
 
       if (taskFinished(task.status)) {
         setAttributes({
-          lhs: task.jsonarraynamevalue.lhs.filter((attr) => attr.value > 0),
-          rhs: task.jsonarraynamevalue.rhs.filter((attr) => attr.value > 0),
+          lhs: task.arraynamevalue.lhs,
+          rhs: task.arraynamevalue.rhs,
         });
         setDependencies(
           task.fds
             .filter((dep) => dep.lhs.length > 0)
             .map((dep) => ({
               lhs: dep.lhs.map(
-                (attr) => task.jsonarraynamevalue.lhs[attr].name
+                (attr) => task.columnnames[attr]
               ),
-              rhs: task.jsonarraynamevalue.lhs[dep.rhs].name,
+              rhs: task.columnnames[dep.rhs],
             }))
         );
       }

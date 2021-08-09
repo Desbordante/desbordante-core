@@ -18,7 +18,8 @@ async function createTable(pool) {
         FDs text,\n
         hasHeader bool not null,\n
         maxLHS int not null,\n
-        JsonArrayNameValue text)
+        arrayNameValue text,
+        columnNames text)
         `
     )
     .then(res => {
