@@ -8,11 +8,11 @@
 }
 
 .wrapper.error {
-  background: var(--red);
+  background: var(--error);
 }
 
 .error {
-  background: var(--red);
+  background: var(--error);
 }
 
 .filename {
@@ -21,7 +21,7 @@
   width: 30rem;
   transition: 0.3s;
   white-space: normal;
-  background-color: var(--dark-grey);
+  background-color: var(--border);
 }
 
 .filename.glow {
@@ -30,7 +30,7 @@
 }
 
 .inactive {
-  color: var(--text-dull);
+  color: var(--text-grey);
 }
 
 .active {
@@ -38,15 +38,15 @@
 }
 
 .hilight-purple {
-  color: var(--text-hilight-purple);
+  color: var(--text-highlight-purple);
 }
 
 .hilight-green {
-  color: var(--text-hilight-green);
+  color: var(--text-highlight-green);
 }
 
 .hilight-red {
-  color: var(--red);
+  color: var(--error);
 }
 
 .file-name-wrapper {

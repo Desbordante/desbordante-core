@@ -13,7 +13,7 @@ import { getData } from "./APIFunctions";
 import Button from "./components/Button/Button";
 
 function App() {
-  disableBodyScroll(document);
+  // disableBodyScroll(document);
 
   // State describes what screen should be seen at the moment
   const [state, setState] = useState(0);
@@ -147,7 +147,7 @@ function App() {
               <h1>File: "{filename}"</h1>
               <h1>Status: {taskStatus}</h1>
             </div>
-            <Button text="Cancel" style={{ backgroundColor: "var(--red)" }} onClick={reset}/>
+            <Button text="Cancel" style={{ backgroundColor: "var(--error)" }} onClick={reset}/>
           </header>
           <ProgressBar
             maxWidth={100}

@@ -5,15 +5,15 @@
 }
 
 .value:focus {
-  background-color: var(--background-lighter);
-  border-color: var(--light-grey);
+  background-color: var(--background-active);
+  border-color: var(--border-active);
   outline: none;
 }
 
 .value.invalid {
-  border-color: var(--red);
+  border-color: var(--error);
 }
 
 .value.invalid:focus {
-  background-color: var(--background-lighter);
+  background-color: var(--background-active);
 }

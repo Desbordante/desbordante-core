@@ -15,6 +15,6 @@
 
 .search-input:focus {
   outline: none;
-  /* border: 2px solid var(--purple); */
+  /* border: 2px solid var(--primary-1); */
   /* transition: 0.3s; */
 }

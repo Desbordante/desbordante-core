@@ -13,7 +13,7 @@
 }
 
 .attribute-name.active {
-  background-color: var(--purple);
+  background-color: var(--primary-1);
   color: var(--text-white);
   transition: 0.3s;
 }
@@ -38,6 +38,6 @@
 }
 
 svg.active {
-  stroke: var(--purple);
+  stroke: var(--primary-1);
   transition: 0.3s;
 }

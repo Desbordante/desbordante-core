@@ -9,11 +9,11 @@
 .progress-bg {
   position: absolute;
   z-index: 0;
-  background-color: var(--dark-grey);
+  background-color: var(--border);
   display: flex;
 }
 
 .progress-accent {
   position: absolute;
-  background: linear-gradient(210deg, var(--purple), var(--green));
+  background: linear-gradient(210deg, var(--primary-1), var(--primary-0));
 }

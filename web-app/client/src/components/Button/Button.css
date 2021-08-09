@@ -9,24 +9,24 @@ button.button-icon {
 }
 
 .purple {
-  background-color: var(--purple);
-  border-color: var(--purple);
+  background-color: var(--primary-1);
+  border-color: var(--primary-1);
   box-shadow: none;
 }
 
 /* .purple.glowing,
 .purple:hover {
-  box-shadow: 0px 0px 1rem var(--purple);
+  box-shadow: 0px 0px 1rem var(--primary-1);
 } */
 
 .green {
-  background-color: var(--green);
-  border-color: var(--green);
+  background-color: var(--primary-0);
+  border-color: var(--primary-0);
   box-shadow: none;
 }
 .green.glowing,
 .green:hover {
-  box-shadow: 0px 0px 1rem var(--green);
+  box-shadow: 0px 0px 1rem var(--primary-0);
 }
 
 .button.black {
@@ -39,5 +39,5 @@ button.button-icon {
 }
 .black.glowing,
 .black:hover {
-  box-shadow: 0px 0px 1rem var(--dark);
+  box-shadow: 0px 0px 1rem var(--light);
 }

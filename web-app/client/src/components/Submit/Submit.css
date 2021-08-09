@@ -7,7 +7,7 @@
 .gradient-fill {
   color: var(--text-white);
   font-weight: 300;
-  background: linear-gradient(210deg, var(--purple), var(--green));
+  background: linear-gradient(210deg, var(--primary-1), var(--primary-0));
   font-size: 2.5rem;
   padding: 0.6rem 3rem;
   position: relative;

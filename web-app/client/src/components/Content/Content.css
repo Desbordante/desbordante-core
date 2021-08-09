@@ -9,7 +9,7 @@
 }
 
 .bg-gradient {
-  background: linear-gradient(to right, var(--pink), var(--purple));
+  background: linear-gradient(to right, var(--primary-2), var(--primary-1));
   height: 0.2rem;
 }
 

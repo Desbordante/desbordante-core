@@ -12,7 +12,7 @@
 }
 
 .nav {
-  background: linear-gradient(210deg, var(--purple), var(--green));
+  background: linear-gradient(210deg, var(--primary-1), var(--primary-0));
   border: none;
   border-radius: 1000px;
   padding: 1rem;

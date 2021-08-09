@@ -31,7 +31,7 @@
 .dependency-list {
   overflow-y: scroll;
   /* height: 50%; */
-  /* box-shadow: inset 0px 0px 2rem var(--purple); */
+  /* box-shadow: inset 0px 0px 2rem var(--primary-1); */
 }
 
 /* hide scrollbar but allow scrolling */

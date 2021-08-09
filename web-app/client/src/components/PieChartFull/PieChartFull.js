@@ -148,9 +148,7 @@ function PieChartFull({
                 tooltip: {
                   displayColors: false,
                   cornerRadius: 1 * rem,
-                  backgroundColor: "#e5e5e5",
-                  // borderColor: "#7600d1",
-                  // borderWidth: 0.2 * rem,
+                  backgroundColor: "var(--light)",
                   titleColor: "#000000",
                   titleAlign: "center",
                   titleFont: {

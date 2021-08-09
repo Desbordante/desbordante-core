@@ -32,22 +32,22 @@
 
 .unchecked {
   background-color: rgba(0, 0, 0, 0);
-  color: var(--text-dull);
-  border: 2px solid var(--dark-grey);
+  color: var(--text-grey);
+  border: 2px solid var(--border);
   font-weight: 400;
 
   transition: 0.3s;
 }
 .button.unchecked:hover {
-  background-color: var(--background-lighter);
-  border-color: var(--light-grey);
+  background-color: var(--background-active);
+  border-color: var(--border-active);
 }
 
 .checked {
-  background-color: var(--green);
+  background-color: var(--primary-0);
   color: var(--text-white);
-  border: 2px solid var(--green);
+  border: 2px solid var(--primary-0);
   font-weight: 400;
-  box-shadow: 0px 0px 1rem var(--green);
+  box-shadow: 0px 0px 1rem var(--primary-0);
   transition: 0.3s;
 }

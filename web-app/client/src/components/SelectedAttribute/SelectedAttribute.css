@@ -21,7 +21,7 @@
 }
 
 .attribute button {
-  background-color: var(--purple);
+  background-color: var(--primary-1);
   display: flex;
   justify-content: center;
   align-items: center;
