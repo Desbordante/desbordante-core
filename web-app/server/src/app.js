@@ -9,7 +9,6 @@ const dropTableTasks = require('./db/dropTable');
 // Uploading files:
 const fileUpload = require('express-fileupload'); // Simple Express middleware for uploading files
 const morgan = require('morgan');
-const _ = require('lodash');
 
 // Routes
 var algsInfo = require('./routes/algsInfo');

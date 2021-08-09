@@ -4,7 +4,6 @@ var path = require('path');
 
 const { v1: uuidv1 } = require('uuid');
 
-const eventTaskType = require('../producer/eventTaskType');
 const producer = require('../producer/index');
 
 // TODO: make one route (/createTask with param)
