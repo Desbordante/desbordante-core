@@ -53,12 +53,13 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
                     nlohmann::json task_json = nlohmann::json::parse(record.value().toString());
                     auto taskID = task_json["taskID"];
 
-                    std::string query = "SELECT taskid, algname, errorpercent, semicolon, datasetpath, maxlhs, hasheader FROM tasks WHERE taskID = '" + std::string(taskID) + "'";
+                    std::string query = "SELECT taskid, algname, errorpercent, semicolon, datasetpath, maxlhs, hasheader FROM tasks WHERE taskID = '" 
+                                        + std::string(taskID) + "'";
                     auto rows = manager.defaultQuery(query);
 
                     if (rows.size() != 1) {
-                        std::cout << "This task ["+ std::string(taskID) + "] isn't in the database" << std::endl; 
-                        throw;
+                        std::cout << "This task [" + std::string(taskID) + "] isn't in the database" << std::endl; 
+                        throw std::runtime_error("Incorrect server work, task isn't added to the DB");
                     }
 
                     std::string datasetPath = rows[0]["datasetpath"].c_str();
@@ -79,7 +80,7 @@ void tasksConsumerStart(DBManager& manager, kafka::KafkaManualCommitConsumer& co
                         process_task(task, manager);
                     } catch (const std::exception& e) {
                         std::cout << "Task wasn't processed (skipped)" << std::endl;
-                        task.updateStatus(manager, "ERROR");
+                        task.updateErrorStatus(manager, "SERVER ERROR", e.what()); // TODO
                         continue;
                     }
 

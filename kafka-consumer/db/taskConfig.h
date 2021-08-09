@@ -50,9 +50,9 @@ public:
     }
 
     // Send a request to DB for progress updating
-    void updateProgress(DBManager& manager, double progress) {
+    void updateProgress(DBManager& manager, double progressPercent) {
         try {
-            std::string query = "UPDATE tasks SET progress = " + std::to_string(progress) + " WHERE taskID = '" + taskID + "'";
+            std::string query = "UPDATE tasks SET progress = " + std::to_string(progressPercent) + " WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
             std::cerr << "Unexpected exception (with changing task's progress in DB) caught: " << e.what() << std::endl;
@@ -76,6 +76,29 @@ public:
         try {
             std::string query = "UPDATE tasks SET JsonArrayNameValue = '" + jsonArrayNameValue;
             query += "' WHERE taskID = '" + taskID + "'";
+            manager.transactionQuery(query);
+        } catch(const std::exception& e) {
+            std::cerr << "Unexpected exception (with sending data to DB) caught: " << e.what() << std::endl;
+            throw e;
+        }
+    }
+
+    // Send a request to DB for changing task's status to 'ERROR' and update errorStatus;
+    void updateErrorStatus(DBManager& manager, const std::string& error, const std::string& errorStatus) {
+        try {
+            std::string query = "UPDATE tasks SET status = '" + error + "', errorStatus = '" + errorStatus + "' WHERE taskID = '" + taskID + "'";
+            manager.transactionQuery(query);
+        } catch(const std::exception& e) {
+            std::cerr << "Unexpected exception (with changing task's error status in DB) caught: " << e.what() << std::endl;
+            throw e;
+        }
+    }
+
+    void setElapsedTime(DBManager& manager, const unsigned long long time) {
+        try {
+            std::string query = "UPDATE tasks SET elapsedTime = " + std::to_string(time);
+            query += " WHERE taskID = '" + taskID + "'";
+            std::cout << (query);
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
             std::cerr << "Unexpected exception (with sending data to DB) caught: " << e.what() << std::endl;
