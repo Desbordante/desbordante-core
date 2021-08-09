@@ -29,8 +29,8 @@ function FileLabel({
   // show error if can't process file
   let fileTitle = (
     <>
-      <span className="hilight-purple">Upload</span> your dataset, or
-      <span className="hilight-green"> choose</span> one of ours ...
+      <span className="hilight-green">Upload</span> your dataset, or
+      <span className="hilight-purple"> choose</span> one of ours ...
     </>
   );
   if (fileExistenceValidatorFunc(file)) {

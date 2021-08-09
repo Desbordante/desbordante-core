@@ -14,7 +14,7 @@ function DependencyScreen({
 }) {
   const [sortedDependencies, setSortedDependencies] = useState([]);
   const [chosenDependencyIndex, setChosenDependencyIndex] = useState(0);
-  const [sortBy, setSortBy] = useState("None");
+  const [sortBy, setSortBy] = useState("Default");
   const [searchString, setSearchString] = useState("");
 
   useEffect(() => {
@@ -44,7 +44,7 @@ function DependencyScreen({
       );
 
     const newSortedDependencies = foundDependencies.sort((d1, d2) => {
-      if (sortBy === "None") {
+      if (sortBy === "Default") {
         if (d1.lhs.length !== d2.lhs.length) {
           return d1.lhs.length - d2.lhs.length;
         }
@@ -78,7 +78,7 @@ function DependencyScreen({
       <h1 className="title">Dependencies</h1>
       <div className="sort">
         <h3>Sort by</h3>
-        {["None", "LHS", "RHS"].map((value, index) => (
+        {["Default", "LHS", "RHS"].map((value, index) => (
           <RadioLight
             text={value}
             onClick={() => setSortBy(value)}

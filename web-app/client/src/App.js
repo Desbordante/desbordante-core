@@ -28,7 +28,10 @@ function App() {
   const [dependencies, setDependencies] = useState([]);
   const [attributes, setAttributes] = useState({ lhs: [], rhs: [] });
 
+  const [resetNeeded, setResetNeeded] = useState(0);
+
   const reset = () => {
+    setResetNeeded((resetNeeded + 1) % 2);
     setState(0);
     setUploadProgress(0);
     setTaskID("");
@@ -38,7 +41,7 @@ function App() {
     setAttributes({ lhs: [], rhs: [] });
   }
 
-  const taskFinished = (status) => ["COMPLETED", "ERROR"].includes(status);
+  const taskFinished = (status) => ["COMPLETED", "SERVER ERROR", "INCORRECT INPUT DATA"].includes(status);
 
   useEffect(() => {
     // console.log(state);
@@ -79,7 +82,7 @@ function App() {
       if (taskID !== "" && !taskFinished(taskStatus)) {
         fetchData();
       }
-    }, 2000);
+    }, 1000);
 
     return () => clearInterval(timer);
   });
@@ -118,17 +121,18 @@ function App() {
           cancelTokenSource={cancelTokenSource}
           setFilename={setFilename}
           setTaskID={setTaskID}
+          resetNeeded={resetNeeded}
         />
       </div>
       <div className="screen" ref={loadingScreen}>
         <LoadingScreen
           onComplete={() => setState(2)}
           progress={uploadProgress}
-          onCancel={() => {
-            cancelTokenSource.cancel("Upload cancelled");
-            setUploadProgress(0.0);
-            setState(0);
-          }}
+          // onCancel={() => {
+          //   cancelTokenSource.cancel("Upload cancelled");
+          //   setUploadProgress(0.0);
+          //   setState(0);
+          // }}
         />
       </div>
       <div
@@ -161,6 +165,7 @@ function App() {
           dependencies={dependencies}
           taskFinished={taskFinished(taskStatus)}
           taskStatus={taskStatus}
+          resetNeeded={resetNeeded}
         />
       </div>
     </div>

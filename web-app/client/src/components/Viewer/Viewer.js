@@ -7,7 +7,7 @@ import NavButton from "../NavButton/NavButton";
 import DependencyListFull from "../DependencyListFull/DependencyListFull";
 import OnscreenMessage from "../OnscreenMessage/OnscreenMessage";
 
-function Viewer({ attributesLHS, attributesRHS, dependencies, taskFinished }) {
+function Viewer({ attributesLHS, attributesRHS, dependencies, taskFinished, resetNeeded }) {
   const [state, setState] = useState(0);
 
   const [selectedAttributesRHS, setSelectedAttributesRHS] = useState([]);
@@ -15,6 +15,11 @@ function Viewer({ attributesLHS, attributesRHS, dependencies, taskFinished }) {
 
   const attributePart = useRef();
   const dependencyPart = useRef();
+
+  useEffect(() => {
+    setSelectedAttributesLHS([]);
+    setSelectedAttributesRHS([]);
+  }, [resetNeeded])
 
   useEffect(() => {
     const views = [attributePart, dependencyPart];
