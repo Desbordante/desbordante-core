@@ -12,7 +12,7 @@
 
 #include "algorithms/Pyro.h"
 #include "algorithms/TaneX.h"
-#include "algorithms/DFD/DFD.h";
+#include "algorithms/DFD/DFD.h"
 
 namespace po = boost::program_options;
 
