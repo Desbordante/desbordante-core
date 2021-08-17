@@ -35,7 +35,4 @@ public:
     static std::unique_ptr<ColumnLayoutRelationData> createFrom(CSVParser& fileInput, bool isNullEqNull);
     static std::unique_ptr<ColumnLayoutRelationData> createFrom(
             CSVParser& fileInput, bool isNullEqNull, int maxCols, long maxRows);
-    static std::unique_ptr<ColumnLayoutRelationData> createUnstrippedFrom(CSVParser& fileInput, bool isNullEqNull);
-    static std::unique_ptr<ColumnLayoutRelationData> createUnstrippedFrom(
-            CSVParser& fileInput, bool isNullEqNull, int maxCols, long maxRows);
 };
