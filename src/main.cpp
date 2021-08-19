@@ -42,7 +42,7 @@ int main(int argc, char const *argv[]) {
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "print help")
-        ("algo", po::value<std::string>(&alg), "algorithm [pyro|tane]")
+        ("algo", po::value<std::string>(&alg), "algorithm [pyro|tane|dfd]")
         ("data", po::value<std::string>(&dataset), "path to CSV file, relative to ./inputData")
         ("sep", po::value<char>(&separator), "CSV separator")
         ("hasHeader", po::value<bool>(&hasHeader), "CSV header presence flag [true|false]. Default true")
