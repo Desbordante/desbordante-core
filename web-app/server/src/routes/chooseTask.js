@@ -19,7 +19,7 @@ router.post('/chooseTask', function(req, res){
 
         console.log("Input data:", json)
 
-        const { algName, errorPercent, semicolon, maxLHS, hasHeader, fileName } = json
+        const { algName, errorPercent, separator, maxLHS, hasHeader, fileName } = json
         const status = 'NOT IN PROCESS'
         const progress = 0.0
 
@@ -37,9 +37,9 @@ router.post('/chooseTask', function(req, res){
         const datasetPath = rootPath.join('/')
 
         var topicName = 'tasks'
-        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader) values\n
+        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader) values\n
         ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`;
-        const params = [taskID, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader];
+        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader];
     
         // Add task to DB
         (async () => {

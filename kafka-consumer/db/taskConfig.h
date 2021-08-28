@@ -1,37 +1,38 @@
 #pragma once
 #include <string>
 #include <iostream>
+
 #include "DBManager.h"
 
 class taskConfig{
     std::string taskID;
     std::string algName;
     double errorPercent;
-    char semicolon;
+    char separator;
     std::string datasetPath;
     bool hasHeader;
     unsigned int maxLHS;
 
 public:
-    taskConfig(const std::string taskID, std::string algName, double errorPercent, char semicolon, 
-        std::string datasetPath, bool hasHeader, unsigned int maxLHS)
-        :   taskID(taskID), algName(algName), errorPercent(errorPercent), semicolon(semicolon),
+    taskConfig(std::string taskID, std::string algName, double errorPercent, char separator, 
+               std::string datasetPath, bool hasHeader, unsigned int maxLHS)
+        :   taskID(taskID), algName(algName), errorPercent(errorPercent), separator(separator),
             datasetPath(datasetPath), hasHeader(hasHeader), maxLHS(maxLHS) {}
 
-    std::string getAlgName() { return algName; }
-    std::string getTaskID() { return taskID; }
-    double getErrorPercent() { return errorPercent; }
-    char getSemicolon() { return semicolon; }
-    std::string getDatasetPath() { return datasetPath; }
-    bool getHasHeader() { return hasHeader; }
-    unsigned int getMaxLHS() { return maxLHS; }
+    auto getAlgName()       const { return algName; }
+    auto getTaskID()        const { return taskID; }
+    auto getErrorPercent()  const { return errorPercent; }
+    auto getSeparator()     const { return separator; }
+    auto getDatasetPath()   const { return datasetPath; }
+    auto getHasHeader()     const { return hasHeader; }
+    auto getMaxLHS()        const { return maxLHS; }
 
     std::ostream& writeInfo(std::ostream& os) {
         os << "Task ID -- " << taskID
            << ", algorithm name -- " << algName
            << ", error percent -- " << errorPercent
            << ", datasetPath -- " << datasetPath
-           << ", semicolon -- '" << semicolon << "'"
+           << ", separator -- '" << separator << "'"
            << ", hasHeader -- " << hasHeader
            << ", maxLHS -- " << maxLHS
            << ".\n";
@@ -39,7 +40,7 @@ public:
     }
 
     // Send a request to DB for status updating
-    void updateStatus(DBManager& manager, std::string status) {
+    void updateStatus(DBManager const& manager, std::string status) const {
         try {
             std::string query = "UPDATE tasks SET status = '" + status + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
@@ -50,7 +51,7 @@ public:
     }
 
     // Send a request to DB for progress updating
-    void updateProgress(DBManager& manager, double progressPercent) {
+    void updateProgress(DBManager const& manager, double progressPercent) const {
         try {
             std::string query = "UPDATE tasks SET progress = " + std::to_string(progressPercent) + " WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
@@ -61,7 +62,7 @@ public:
     }
 
     // Send a request to DB with a set of FDs
-    void updateJsonFDs(DBManager& manager, const std::string& FDs) {
+    void updateJsonFDs(DBManager const& manager, const std::string& FDs) const {
         try {
             std::string query = "UPDATE tasks SET FDs = '" + FDs + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
@@ -72,7 +73,7 @@ public:
     }
 
     // Send a request to DB with JSON array (data for pie chart for client)
-    void updateJsonArrayNameValue(DBManager& manager, const std::string& arrayNameValue) {
+    void updateJsonArrayNameValue(DBManager const& manager, const std::string& arrayNameValue) const {
         try {
             std::string query = "UPDATE tasks SET arrayNameValue = '" + arrayNameValue;
             query += "' WHERE taskID = '" + taskID + "'";
@@ -84,7 +85,7 @@ public:
     }
 
     // Send a request to DB with JSON array of column names
-    void updateJsonColumnNames(DBManager& manager, const std::string& columnNames) {
+    void updateJsonColumnNames(DBManager const& manager, const std::string& columnNames) const {
         try {
             std::string query = "UPDATE tasks SET columnNames = '" + columnNames;
             query += "' WHERE taskID = '" + taskID + "'";
@@ -96,7 +97,7 @@ public:
     }
 
     // Send a request to DB for changing task's status to 'ERROR' and update errorStatus;
-    void updateErrorStatus(DBManager& manager, const std::string& error, const std::string& errorStatus) {
+    void updateErrorStatus(DBManager const& manager, std::string const& error, std::string const& errorStatus) const {
         try {
             std::string query = "UPDATE tasks SET status = '" + error + "', errorStatus = '" + errorStatus + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
@@ -106,7 +107,7 @@ public:
         }
     }
 
-    void setElapsedTime(DBManager& manager, const unsigned long long time) {
+    void setElapsedTime(DBManager const& manager, unsigned long long time) const {
         try {
             std::string query = "UPDATE tasks SET elapsedTime = " + std::to_string(time);
             query += " WHERE taskID = '" + taskID + "'";

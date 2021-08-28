@@ -9,7 +9,7 @@ async function createTable(pool) {
         createdAt timestamp not null,\n
         algName char(10) not null,\n 
         errorPercent real not null,\n
-        semicolon char(1) not null,\n
+        separator char(1) not null,\n
         progress real not null,\n
         elapsedTime bigint CHECK (elapsedTime >= 0),\n
         status varchar(30) not null,\n
@@ -18,7 +18,7 @@ async function createTable(pool) {
         FDs text,\n
         hasHeader bool not null,\n
         maxLHS int not null,\n
-        arrayNameValue text,
+        arrayNameValue text,\n
         columnNames text)
         `
     )

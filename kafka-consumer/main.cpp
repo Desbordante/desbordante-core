@@ -1,7 +1,10 @@
-#include "db/DBManager.h"
-#include "consumer/consumerManager.h"
-#include "consumer/consumerStart.h"
 #include "json.hpp"
+
+#include "db/DBManager.h"
+
+#include "consumer/consumerStart.h"
+#include "cppkafka/consumer.h"
+#include "cppkafka/configuration.h"
 
 static std::string pg_connection(std::string const &filename, std::string const &dbname) {
     
@@ -34,13 +37,17 @@ static std::string pg_connection(std::string const &filename, std::string const 
 int main()
 {
     try {
-        DBManager manager(pg_connection("pg_config.json", "desbordante"));
-        // Create a consumerManager instance by passing configuration object.
-        kafkaConsumerManager consumerManager("localhost:9092");
+        auto brokers = "localhost:9092";
+        auto topic_name = "tasks";
+        auto group_id = "tasks_1";
+
+        DBManager DBManager(pg_connection("pg_config.json", "desbordante"));
+        // Create a ConsumerManager instance by passing properties
+        ConsumerManager consumerManager(brokers, group_id);
         // Get consumer instance from object consumerManager
-        kafka::KafkaManualCommitConsumer& consumer = consumerManager.getConsumer();
-        // Start consumer for topic 'tasks'
-        tasksConsumerStart(manager, consumer, "tasks");
+        auto const consumer = consumerManager.getConsumer();
+        // Start consumer for topic with 'topic_name' name
+        consumerStart(DBManager, consumer, topic_name);
     } catch (const std::exception& e) {
         std::cerr << "% Unexpected exception caught: " << e.what() << std::endl;
     }

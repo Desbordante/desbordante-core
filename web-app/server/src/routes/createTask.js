@@ -33,7 +33,7 @@ router.post('/createTask', function(req, res){
         console.log("Input data:", json)
         console.log("File:", table)
 
-        const { algName, errorPercent, semicolon, maxLHS, hasHeader } = json
+        const { algName, errorPercent, separator, maxLHS, hasHeader } = json
         const status = 'ADDED TO THE TASK QUEUE'
         const progress = 0.0
 
@@ -47,9 +47,9 @@ router.post('/createTask', function(req, res){
         const datasetPath = rootPath.join('/') 
         
         var topicName = 'tasks'
-        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader) values\n
+        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader) values\n
         ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`;
-        const params = [taskID, algName, errorPercent, semicolon, progress, status, datasetPath, maxLHS, hasHeader];
+        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader];
     
         // Add task to DB
         (async () => {

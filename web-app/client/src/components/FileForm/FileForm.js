@@ -150,7 +150,7 @@ function FileForm({
             file,
             {
               algName: algorithm,
-              semicolon: separator,
+              separator: separator,
               errorPercent: +errorThreshold,
               hasHeader: hasHeader,
               maxLHS: maxLHSAttributes,

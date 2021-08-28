@@ -19,19 +19,21 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-void process_task(taskConfig& task, DBManager& manager) {
-    std::string alg = task.getAlgName();
-    std::string datasetPath = task.getDatasetPath();
-    char separator = task.getSemicolon();
-    bool hasHeader = task.getHasHeader();
-    int seed = 0;
-    double error = task.getErrorPercent();
-    unsigned int maxLHS = task.getMaxLHS();
+void process_task(taskConfig const& task, DBManager const& manager) {
+    auto alg = task.getAlgName();
+    auto datasetPath = task.getDatasetPath();
+    auto separator = task.getSeparator();
+    auto hasHeader = task.getHasHeader();
+    auto error = task.getErrorPercent();
+    auto maxLHS = task.getMaxLHS();
+    
+    auto seed = 0;
     unsigned int parallelism = 0;
 
     el::Loggers::configureFromGlobal("logging.conf");
     
     std::unique_ptr<FDAlgorithm> algorithmInstance;
+
     if (alg == "Pyro") {
         algorithmInstance = std::make_unique<Pyro>(datasetPath, separator, hasHeader, seed, error, maxLHS, parallelism);
     } else if (alg == "TaneX") {
@@ -44,7 +46,7 @@ void process_task(taskConfig& task, DBManager& manager) {
         task.updateStatus(manager, "IN PROCESS");
         task.updateProgress(manager, 10);
 
-        unsigned long long elapsedTime = algorithmInstance->execute();
+        auto elapsedTime = algorithmInstance->execute();
         
         task.setElapsedTime(manager, elapsedTime);
         task.updateJsonFDs(manager, algorithmInstance->getJsonFDs(false));
@@ -56,5 +58,5 @@ void process_task(taskConfig& task, DBManager& manager) {
         std::cout << e.what() << std::endl;
         throw e;
     }
-    throw std::runtime_error("Unexpected behavior during task processed");
+    throw std::runtime_error("Unexpected behavior during task executing");
 }

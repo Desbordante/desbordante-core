@@ -1,19 +1,29 @@
-#include "kafka/KafkaConsumer.h"
 #include <string>
+#include "cppkafka/consumer.h"
+#include "cppkafka/configuration.h"
 
-class kafkaConsumerManager{
-    kafka::Properties props;
-    kafka::KafkaManualCommitConsumer consumer;
+using cppkafka::Consumer;
+using cppkafka::Message;
+using cppkafka::TopicPartitionList;
+
+class ConsumerManager{
+    cppkafka::Configuration config;  
+    std::unique_ptr<cppkafka::Consumer> consumer;
 
 public:
 
-    kafkaConsumerManager() = delete;
+    explicit ConsumerManager(std::string brokers, std::string group_id) 
+        {
+            config = {
+                { "metadata.broker.list", brokers },
+                { "group.id", group_id },
+                { "enable.auto.commit", false }
+            };
+            consumer = std::make_unique<cppkafka::Consumer>(config);
+        }
 
-    kafkaConsumerManager(std::string brokers) 
-        : props({{ "bootstrap.servers", brokers}, {"max.poll.records", "1"} }), consumer(props) { }
-
-    kafka::KafkaManualCommitConsumer& getConsumer() {
-        return consumer;
+    auto getConsumer() {
+        return consumer.get();
     }
 
 };

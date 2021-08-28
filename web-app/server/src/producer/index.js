@@ -29,8 +29,6 @@ const client = Kafka.AdminClient.create({
 
 producer.connect()
   .on('ready', function(i, metadata) {
-    // console.log(i);
-    // console.log(metadata) 
     var is_topic_tasks_created = false
     metadata.topics.forEach((topic) => {
       if (topic.name === 'tasks') {
