@@ -27,7 +27,7 @@ public:
     auto getHasHeader()     const { return hasHeader; }
     auto getMaxLHS()        const { return maxLHS; }
 
-    std::ostream& writeInfo(std::ostream& os) {
+    auto& writeInfo(std::ostream& os) {
         os << "Task ID -- " << taskID
            << ", algorithm name -- " << algName
            << ", error percent -- " << errorPercent
@@ -39,9 +39,21 @@ public:
         return os;
     }
 
+    static void prepare_string(std::string& str) {
+        for(
+            auto pos = std::find(str.begin(), str.end(), '\''); 
+            pos != str.end(); 
+            pos = std::find(pos, str.end(), '\'')
+        ) {
+            pos = str.insert(pos + 1, '\'');
+            pos++;
+        }
+    }
+
     // Send a request to DB for status updating
     void updateStatus(DBManager const& manager, std::string status) const {
         try {
+            prepare_string(status);
             std::string query = "UPDATE tasks SET status = '" + status + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
@@ -97,8 +109,10 @@ public:
     }
 
     // Send a request to DB for changing task's status to 'ERROR' and update errorStatus;
-    void updateErrorStatus(DBManager const& manager, std::string const& error, std::string const& errorStatus) const {
+    void updateErrorStatus(DBManager const& manager, std::string error, std::string errorStatus) const {
         try {
+            prepare_string(error);
+            prepare_string(errorStatus);
             std::string query = "UPDATE tasks SET status = '" + error + "', errorStatus = '" + errorStatus + "' WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {

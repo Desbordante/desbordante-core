@@ -35,7 +35,8 @@ void consumerStart(DBManager const& manager, cppkafka::Consumer* const consumer,
                     auto payload = nlohmann::json::parse(msg.get_payload());
                     auto taskID = payload["taskID"];
 
-                    auto query = "SELECT taskid, algname, errorpercent, separator, datasetpath, maxlhs, hasheader FROM tasks WHERE taskID = '" 
+                    std::string query = "SELECT taskid, trim(algname) as algname, errorpercent, separator, datasetpath, maxlhs, hasheader\n"
+                                        "FROM tasks WHERE taskID = '" 
                                         + std::string(taskID) + "'";
                     auto rows = manager.defaultQuery(query);
 
@@ -46,8 +47,6 @@ void consumerStart(DBManager const& manager, cppkafka::Consumer* const consumer,
 
                     std::string datasetPath = rows[0]["datasetpath"].c_str();
                     std::string algName = rows[0]["algname"].c_str();
-                    removeSpaces(datasetPath);
-                    removeSpaces(algName);
                     
                     auto errorPercent = std::stod(rows[0]["errorpercent"].c_str());
                     auto hasHeader = std::string(rows[0]["hasheader"].c_str()) == "t" ? true : false;
