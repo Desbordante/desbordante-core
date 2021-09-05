@@ -25,9 +25,9 @@ jobs:
         key: ${{ runner.os }}-googletest
     - name: Install Boost
       run: |
-        wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.gz/download
-        tar xzvf boost_1_65_1.tar.gz
-        cd boost_1_65_1
+        wget -O boost_1_66_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.66.0/boost_1_66_0.tar.gz/download
+        tar xzvf boost_1_66_0.tar.gz
+        cd boost_1_66_0
         ./bootstrap.sh --prefix=/usr/boost
         ./b2
         sudo ./b2 install
