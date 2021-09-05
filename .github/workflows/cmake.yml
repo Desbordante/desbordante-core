@@ -37,7 +37,7 @@ jobs:
         mkdir lib
         cd lib
         git clone https://github.com/google/googletest/ --branch release-1.10.0
-        if: steps.cache-googletest.outputs.cache-hit != 'true'
+      if: steps.cache-googletest.outputs.cache-hit != 'true'
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBOOST_ROOT=/usr/boost/
     - name: Build
