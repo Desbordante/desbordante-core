@@ -14,9 +14,9 @@ jobs:
       run: |
         wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.gz/download
         tar xzvf boost_1_65_1.tar.gz
-        cd boost_1_65_1
     - name: Install Boost
       run: |
+        cd boost_1_65_1
         ./bootstrap.sh --prefix=/usr/
         ./b2
         sudo ./b2 install
