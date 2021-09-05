@@ -23,7 +23,7 @@ endif()
 
 # configuring boost
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost 1.66.0 REQUIRED COMPONENTS container program_options thread)
+find_package(Boost 1.72.0 REQUIRED COMPONENTS container program_options thread)
 include_directories(${Boost_INCLUDE_DIRS})
 message(${Boost_INCLUDE_DIRS})
 
