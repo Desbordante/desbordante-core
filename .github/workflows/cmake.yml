@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - setup-ci
   pull_request:
     types: [opened, edited, synchronize, reopened]
 env:
@@ -26,7 +27,7 @@ jobs:
       uses: actions/cache@v2
       id: cache-googletest
       with:
-        path: ~/lib/googletest
+        path: ${{github.workspace}}/lib/googletest
         key: ${{ runner.os }}-googletest
     - name: Install Boost
       run: |
