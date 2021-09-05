@@ -37,6 +37,7 @@
   The `<dataset_name>.csv`, which is a user-provided dataset, should be placed in the `/path/to/Desbordante/build/target` directory.
 
 * ## Windows
+  -- Unfortunately, Windows build is currently unavailable...
   The following instructions were tested on Windows 10 .
   ### Dependencies
   Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
