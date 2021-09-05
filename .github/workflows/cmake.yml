@@ -6,20 +6,20 @@ jobs:
   setup:
     runs-on: ubuntu-18.04
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
-      - name: Download Boost
-        run: |
-          wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
-          tar xzvf boost_1_65_1.tar.gz
-          cd boost_1_65_1
-      - name: Install Boost
-        run: |
-          ./bootstrap.sh --prefix=/usr/
-          ./b2
-          ./b2 install
+    - name: Install dependencies
+      run: |
+        apt-get update
+        apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+    - name: Download Boost
+      run: |
+        wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
+        tar xzvf boost_1_65_1.tar.gz
+        cd boost_1_65_1
+    - name: Install Boost
+      run: |
+        ./bootstrap.sh --prefix=/usr/
+        ./b2
+        ./b2 install
   build:
     runs-on: ubuntu-latest
     steps:
