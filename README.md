@@ -1,5 +1,3 @@
-https://github.com/cupertank implemented essential data structures presented in src/model, src/parser, src/tests and src/util
-
 # Installation guide
 * ## Ubuntu
   The following instructions were tested on Ubuntu 18.04.4 LTS.
