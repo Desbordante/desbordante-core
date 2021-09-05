@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@v2
-    - name: Install dependencies
+    - name: Install build tools
       run: |
         sudo apt-get update
         sudo apt-get install build-essential g++ cmake
@@ -17,6 +17,12 @@ jobs:
       with:
         path: /usr/boost
         key: ${{ runner.os }}-boost
+    - name: Cache googletest
+      uses: actions/cache@v2
+      id: cache-googletest
+      with:
+        path: ~/lib/googletest
+        key: ${{ runner.os }}-googletest
     - name: Install Boost
       run: |
         wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.65.1/boost_1_65_1.tar.gz/download
@@ -31,7 +37,8 @@ jobs:
         mkdir lib
         cd lib
         git clone https://github.com/google/googletest/ --branch release-1.10.0
+        if: steps.cache-googletest.outputs.cache-hit != 'true'
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBOOST_ROOT=/usr/boost/
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
