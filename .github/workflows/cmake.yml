@@ -8,8 +8,8 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        apt-get update
-        apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
+        sudo apt-get update
+        sudo apt-get install build-essential g++ python-dev autotools-dev libicu-dev libbz2-dev libboost-all-dev
     - name: Download Boost
       run: |
         wget -O boost_1_65_1.tar.gz https://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz/download
@@ -19,7 +19,7 @@ jobs:
       run: |
         ./bootstrap.sh --prefix=/usr/
         ./b2
-        ./b2 install
+        sudo ./b2 install
   build:
     runs-on: ubuntu-latest
     steps:
