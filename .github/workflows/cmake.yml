@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - setup-ci
   pull_request:
     types: [opened, edited, synchronize, reopened]
 env:
