@@ -65,9 +65,6 @@ void consumerStart(DBManager const& manager, cppkafka::Consumer* const consumer,
                         continue;
                     }
 
-                    task.updateStatus(manager, "COMPLETED");
-                    task.updateProgress(manager, 100);
-
                     std::cout << "Task with ID '" << std::string(taskID) << "' was successfully processed." << std::endl;
                     
                     consumer->commit(msg);
