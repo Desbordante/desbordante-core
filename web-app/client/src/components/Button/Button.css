@@ -1,43 +1,67 @@
 @import url("../../colors.css");
 
-button.button-icon {
-  padding: 0.8rem;
+.button-container {
+  margin: 0rem 0.8rem;
+  position: relative;
 }
 
-.button-icon.huge {
-  padding: 1.6rem;
+.button-container > * {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Roboto", sans-serif;
+  font-size: 1.2rem;
+  padding: 0.8rem 1.6rem;
+  height: 3rem;
+  font-weight: 300;
+  border-radius: 1000px;
+  border: none;
+  outline: none;
+  color: var(--text-white);
+  backface-visibility: hidden;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-.purple {
-  background-color: var(--primary-1);
-  border-color: var(--primary-1);
-  box-shadow: none;
+.button-container *:hover {
+  transform: scale(103%);
 }
 
-/* .purple.glowing,
-.purple:hover {
-  box-shadow: 0px 0px 1rem var(--primary-1);
-} */
-
-.green {
+.button-container *.color-0 {
   background-color: var(--primary-0);
-  border-color: var(--primary-0);
-  box-shadow: none;
 }
-.green.glowing,
-.green:hover {
-  box-shadow: 0px 0px 1rem var(--primary-0);
+.button-container *.color-1 {
+  background-color: var(--primary-1);
+}
+.button-container *.color-gradient {
+  background: linear-gradient(45deg, var(--primary-0), var(--primary-1));
 }
 
-.button.black {
-  color: var(--text-black);
-  background-color: var(--light);
-  border-color: var(--light);
-  box-shadow: none;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
+.button-container *.color-error {
+  background-color: var(--error);
 }
-.black.glowing,
-.black:hover {
-  box-shadow: 0px 0px 1rem var(--light);
+
+.button-container .glow {
+  /* content: ""; */
+  position: absolute;
+  z-index: 0; 
+  /* top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0; */
+}
+
+.button-container button {
+  filter: opacity(1);
+  transition: 0.3s;
+}
+
+.button-container button.disabled {
+  cursor: default;
+  /* filter: brightness(50%);
+  transform: scale(100%); */
+  filter: opacity(0.3);
+  transition: 0.3s;
 }

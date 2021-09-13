@@ -1,6 +1,6 @@
 @import url("../../colors.css");
 
-.background {
+.loading-screen-bg {
   width: 100%;
   height: 100vh;
   background-color: var(--background-dark);

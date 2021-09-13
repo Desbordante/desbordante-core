@@ -4,17 +4,18 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin: 0.8rem;
 }
 
 .search-input {
   font-weight: 300;
   background-color: var(--light);
-  /* border: 2px solid var(--light); */
-  /* transition: 0.3s; */
+  border: none;
+  padding: 0.8rem 1.6rem;
+  font-family: var(--font-content);
+  border-radius: 1000px;
 }
 
 .search-input:focus {
   outline: none;
-  /* border: 2px solid var(--primary-1); */
-  /* transition: 0.3s; */
 }

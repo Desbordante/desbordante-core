@@ -1,9 +1,10 @@
 @import url("../../colors.css");
 
-.loading-progress-bar {
+.progress-bar {
   position: relative;
   display: flex;
-  justify-content: left;
+  justify-content: center;
+  align-items: center;
 }
 
 .progress-bg {

@@ -3,7 +3,7 @@
 .slider {
   -webkit-appearance: none;
   appearance: none;
-  height: 2px;
+  height: 0.1rem;
   background: var(--border);
   outline: none;
   opacity: 1;

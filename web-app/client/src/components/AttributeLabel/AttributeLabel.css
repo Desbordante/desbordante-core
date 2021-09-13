@@ -2,13 +2,14 @@
 
 .attribute-label {
   font-family: var(--font-content);
-
+  color: var(--text-black);
   display: flex;
   justify-content: flex-start;
   align-items: center;
 }
 
-.circle {
+.attribute-label .circle {
+  background-color: ;
   width: 1rem;
   height: 1rem;
   border-radius: 1000px;

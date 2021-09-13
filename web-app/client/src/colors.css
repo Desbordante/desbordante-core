@@ -10,20 +10,22 @@
   --text-black: #000000;
   --text-highlight-1: #63a67e;
   --text-highlight-2: #8963a6;
-  
+
   /* Background */
   --background-dark: #17151a;
-  --background-active: #1b181e;
   --background-light: #ffffff;
+
+  /* Elements */
+  --background-active: #1b181e;
   --light: #e5e5e5;
   --border: #2c2730;
   --border-active: #403946;
 
   /* Primary */
-  --primary-0: #40c977;
+  --primary-0: #39b46b;
   --primary-1: #7600d1;
   --primary-2: #b700ff;
-  
+
   /* Semantics */
   --error: #f03c3c;
 

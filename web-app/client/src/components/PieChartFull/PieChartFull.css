@@ -15,9 +15,19 @@
   margin: 0.8rem 0;
 }
 
+.pie-chart-full .controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .title {
   color: var(--text-black);
   font-weight: 500;
+}
+
+.legend-and-canvas {
+  display: flex;
 }
 
 .chart {
@@ -26,6 +36,7 @@
   position: relative;
   transition: 0.3s;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
 }
@@ -36,9 +47,10 @@
 
 .selected-attributes {
   width: 40%;
+  height: 10rem;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: baseline;
   flex-wrap: wrap;
   /* height: 15rem; */
   transition: 0.3s;
@@ -60,6 +72,11 @@
   align-items: center;
   position: relative;
   z-index: 0;
+}
+
+.controls img {
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 .chart-legend {

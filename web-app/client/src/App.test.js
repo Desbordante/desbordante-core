@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import "jest-canvas-mock";
 
 import "./mocks";
-import App from "./App";
+import App from "./App.tsx.old";
 
 it("renders without crashing", () => {
   const div = document.createElement("div");

@@ -1,0 +1,1017 @@
+Attaching to kafka-server_zookeeper_1, kafka
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.82 [0m
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.82 [0m[1mWelcome to the Bitnami zookeeper container[0m
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.82 [0mSubscribe to project updates by watching [1mhttps://github.com/bitnami/bitnami-docker-zookeeper[0m
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.83 [0mSubmit issues and feature requests at [1mhttps://github.com/bitnami/bitnami-docker-zookeeper/issues[0m
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.83 [0m
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.83 [0m[38;5;2mINFO [0m ==> ** Starting ZooKeeper setup **
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.85 [0m[38;5;3mWARN [0m ==> You have set the environment variable ALLOW_ANONYMOUS_LOGIN=yes. For safety reasons, do not use this flag in a production environment.
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.87 [0m[38;5;2mINFO [0m ==> Initializing ZooKeeper...
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.88 [0m[38;5;2mINFO [0m ==> User injected custom configuration detected!
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.88 [0m[38;5;2mINFO [0m ==> Deploying ZooKeeper with persisted data...
+[33mzookeeper_1  |[0m 
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.88 [0m[38;5;2mINFO [0m ==> ** ZooKeeper setup finished! **
+[33mzookeeper_1  |[0m [38;5;6mzookeeper [38;5;5m14:47:36.90 [0m[38;5;2mINFO [0m ==> ** Starting ZooKeeper **
+[33mzookeeper_1  |[0m /opt/bitnami/java/bin/java
+[33mzookeeper_1  |[0m ZooKeeper JMX enabled by default
+[33mzookeeper_1  |[0m Using config: /opt/bitnami/zookeeper/bin/../conf/zoo.cfg
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.43 [0m
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.43 [0m[1mWelcome to the Bitnami kafka container[0m
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.43 [0mSubscribe to project updates by watching [1mhttps://github.com/bitnami/bitnami-docker-kafka[0m
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.43 [0mSubmit issues and feature requests at [1mhttps://github.com/bitnami/bitnami-docker-kafka/issues[0m
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.44 [0m
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.44 [0m[38;5;2mINFO [0m ==> ** Starting Kafka setup **
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.51 [0m[38;5;3mWARN [0m ==> You set the environment variable ALLOW_PLAINTEXT_LISTENER=yes. For safety reasons, do not use this flag in a production environment.
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.53 [0m[38;5;2mINFO [0m ==> Initializing Kafka...
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.53 [0m[38;5;2mINFO [0m ==> No injected configuration files found, creating default config files
+[36mkafka        |[0m 
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.65 [0m[38;5;2mINFO [0m ==> ** Kafka setup finished! **
+[36mkafka        |[0m [38;5;6mkafka [38;5;5m14:47:37.67 [0m[38;5;2mINFO [0m ==> ** Starting Kafka **
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,923 [myid:] - INFO  [main:QuorumPeerConfig@174] - Reading configuration from: /opt/bitnami/zookeeper/bin/../conf/zoo.cfg
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,941 [myid:] - INFO  [main:QuorumPeerConfig@444] - clientPortAddress is 0.0.0.0:2181
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,941 [myid:] - INFO  [main:QuorumPeerConfig@448] - secureClientPort is not set
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,942 [myid:] - INFO  [main:QuorumPeerConfig@464] - observerMasterPort is not set
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,943 [myid:] - INFO  [main:QuorumPeerConfig@481] - metricsProvider.className is org.apache.zookeeper.metrics.impl.DefaultMetricsProvider
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,950 [myid:1] - INFO  [main:DatadirCleanupManager@78] - autopurge.snapRetainCount set to 3
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,950 [myid:1] - INFO  [main:DatadirCleanupManager@79] - autopurge.purgeInterval set to 0
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,951 [myid:1] - INFO  [main:DatadirCleanupManager@101] - Purge task is not scheduled.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,951 [myid:1] - WARN  [main:QuorumPeerMain@139] - Either no config or no quorum defined in config, running in standalone mode
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,958 [myid:1] - INFO  [main:ManagedUtil@44] - Log4j 1.2 jmx support found and enabled.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,972 [myid:1] - INFO  [main:QuorumPeerConfig@174] - Reading configuration from: /opt/bitnami/zookeeper/bin/../conf/zoo.cfg
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,974 [myid:1] - INFO  [main:QuorumPeerConfig@444] - clientPortAddress is 0.0.0.0:2181
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,974 [myid:1] - INFO  [main:QuorumPeerConfig@448] - secureClientPort is not set
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,974 [myid:1] - INFO  [main:QuorumPeerConfig@464] - observerMasterPort is not set
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,974 [myid:1] - INFO  [main:QuorumPeerConfig@481] - metricsProvider.className is org.apache.zookeeper.metrics.impl.DefaultMetricsProvider
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,975 [myid:1] - INFO  [main:ZooKeeperServerMain@123] - Starting server
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,994 [myid:1] - INFO  [main:ServerMetrics@62] - ServerMetrics initialized with provider org.apache.zookeeper.metrics.impl.DefaultMetricsProvider@1018bde2
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,998 [myid:1] - INFO  [main:DigestAuthenticationProvider@47] - ACL digest algorithm is: SHA1
+[33mzookeeper_1  |[0m 2021-09-12 14:47:37,999 [myid:1] - INFO  [main:DigestAuthenticationProvider@61] - zookeeper.DigestAuthenticationProvider.enabled = true
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,003 [myid:1] - INFO  [main:FileTxnSnapLog@124] - zookeeper.snapshot.trust.empty : false
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,021 [myid:1] - INFO  [main:ZookeeperBanner@42] - 
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,021 [myid:1] - INFO  [main:ZookeeperBanner@42] -   ______                  _                                          
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,021 [myid:1] - INFO  [main:ZookeeperBanner@42] -  |___  /                 | |                                         
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,021 [myid:1] - INFO  [main:ZookeeperBanner@42] -     / /    ___     ___   | | __   ___    ___   _ __     ___   _ __   
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,021 [myid:1] - INFO  [main:ZookeeperBanner@42] -    / /    / _ \   / _ \  | |/ /  / _ \  / _ \ | '_ \   / _ \ | '__|
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,022 [myid:1] - INFO  [main:ZookeeperBanner@42] -   / /__  | (_) | | (_) | |   <  |  __/ |  __/ | |_) | |  __/ | |    
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,022 [myid:1] - INFO  [main:ZookeeperBanner@42] -  /_____|  \___/   \___/  |_|\_\  \___|  \___| | .__/   \___| |_|
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,022 [myid:1] - INFO  [main:ZookeeperBanner@42] -                                               | |                     
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,022 [myid:1] - INFO  [main:ZookeeperBanner@42] -                                               |_|                     
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,022 [myid:1] - INFO  [main:ZookeeperBanner@42] - 
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,025 [myid:1] - INFO  [main:Environment@98] - Server environment:zookeeper.version=3.7.0-e3704b390a6697bfdf4b0bef79e3da7a4f6bac4b, built on 2021-03-17 09:46 UTC
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,025 [myid:1] - INFO  [main:Environment@98] - Server environment:host.name=8d8e80e43599
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,025 [myid:1] - INFO  [main:Environment@98] - Server environment:java.version=11.0.12
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,025 [myid:1] - INFO  [main:Environment@98] - Server environment:java.vendor=BellSoft
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,025 [myid:1] - INFO  [main:Environment@98] - Server environment:java.home=/opt/bitnami/java
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,026 [myid:1] - INFO  [main:Environment@98] - Server environment:java.class.path=/opt/bitnami/zookeeper/bin/../zookeeper-server/target/classes:/opt/bitnami/zookeeper/bin/../build/classes:/opt/bitnami/zookeeper/bin/../zookeeper-server/target/lib/*.jar:/opt/bitnami/zookeeper/bin/../build/lib/*.jar:/opt/bitnami/zookeeper/bin/../lib/zookeeper-prometheus-metrics-3.7.0.jar:/opt/bitnami/zookeeper/bin/../lib/zookeeper-jute-3.7.0.jar:/opt/bitnami/zookeeper/bin/../lib/zookeeper-3.7.0.jar:/opt/bitnami/zookeeper/bin/../lib/snappy-java-1.1.7.7.jar:/opt/bitnami/zookeeper/bin/../lib/slf4j-log4j12-1.7.30.jar:/opt/bitnami/zookeeper/bin/../lib/slf4j-api-1.7.30.jar:/opt/bitnami/zookeeper/bin/../lib/simpleclient_servlet-0.9.0.jar:/opt/bitnami/zookeeper/bin/../lib/simpleclient_hotspot-0.9.0.jar:/opt/bitnami/zookeeper/bin/../lib/simpleclient_common-0.9.0.jar:/opt/bitnami/zookeeper/bin/../lib/simpleclient-0.9.0.jar:/opt/bitnami/zookeeper/bin/../lib/netty-transport-native-unix-common-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-transport-native-epoll-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-transport-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-resolver-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-handler-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-common-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-codec-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/netty-buffer-4.1.59.Final.jar:/opt/bitnami/zookeeper/bin/../lib/metrics-core-4.1.12.1.jar:/opt/bitnami/zookeeper/bin/../lib/log4j-1.2.17.jar:/opt/bitnami/zookeeper/bin/../lib/jline-2.14.6.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-util-ajax-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-util-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-servlet-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-server-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-security-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-io-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/jetty-http-9.4.38.v20210224.jar:/opt/bitnami/zookeeper/bin/../lib/javax.servlet-api-3.1.0.jar:/opt/bitnami/zookeeper/bin/../lib/jackson-databind-2.10.5.1.jar:/opt/bitnami/zookeeper/bin/../lib/jackson-core-2.10.5.jar:/opt/bitnami/zookeeper/bin/../lib/jackson-annotations-2.10.5.jar:/opt/bitnami/zookeeper/bin/../lib/commons-cli-1.4.jar:/opt/bitnami/zookeeper/bin/../lib/audience-annotations-0.12.0.jar:/opt/bitnami/zookeeper/bin/../zookeeper-*.jar:/opt/bitnami/zookeeper/bin/../zookeeper-server/src/main/resources/lib/*.jar:/opt/bitnami/zookeeper/bin/../conf:
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,026 [myid:1] - INFO  [main:Environment@98] - Server environment:java.library.path=/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,026 [myid:1] - INFO  [main:Environment@98] - Server environment:java.io.tmpdir=/tmp
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,026 [myid:1] - INFO  [main:Environment@98] - Server environment:java.compiler=<NA>
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,026 [myid:1] - INFO  [main:Environment@98] - Server environment:os.name=Linux
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:os.arch=amd64
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:os.version=5.13.14-200.fc34.x86_64
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:user.name=?
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:user.home=?
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:user.dir=/
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,027 [myid:1] - INFO  [main:Environment@98] - Server environment:os.memory.free=1009MB
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,028 [myid:1] - INFO  [main:Environment@98] - Server environment:os.memory.max=1024MB
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,028 [myid:1] - INFO  [main:Environment@98] - Server environment:os.memory.total=1024MB
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,028 [myid:1] - INFO  [main:ZooKeeperServer@138] - zookeeper.enableEagerACLCheck = false
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,028 [myid:1] - INFO  [main:ZooKeeperServer@151] - zookeeper.digest.enabled = true
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,028 [myid:1] - INFO  [main:ZooKeeperServer@155] - zookeeper.closeSessionTxn.enabled = true
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,029 [myid:1] - INFO  [main:ZooKeeperServer@1499] - zookeeper.flushDelay=0
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,029 [myid:1] - INFO  [main:ZooKeeperServer@1508] - zookeeper.maxWriteQueuePollTime=0
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,029 [myid:1] - INFO  [main:ZooKeeperServer@1517] - zookeeper.maxBatchSize=1000
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,029 [myid:1] - INFO  [main:ZooKeeperServer@260] - zookeeper.intBufferStartingSizeBytes = 1024
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,031 [myid:1] - INFO  [main:BlueThrottle@141] - Weighed connection throttling is disabled
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,033 [myid:1] - INFO  [main:ZooKeeperServer@1300] - minSessionTimeout set to 4000
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,033 [myid:1] - INFO  [main:ZooKeeperServer@1309] - maxSessionTimeout set to 40000
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,035 [myid:1] - INFO  [main:ResponseCache@45] - getData response cache size is initialized with value 400.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,035 [myid:1] - INFO  [main:ResponseCache@45] - getChildren response cache size is initialized with value 400.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,037 [myid:1] - INFO  [main:RequestPathMetricsCollector@109] - zookeeper.pathStats.slotCapacity = 60
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,037 [myid:1] - INFO  [main:RequestPathMetricsCollector@110] - zookeeper.pathStats.slotDuration = 15
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,038 [myid:1] - INFO  [main:RequestPathMetricsCollector@111] - zookeeper.pathStats.maxDepth = 6
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,038 [myid:1] - INFO  [main:RequestPathMetricsCollector@112] - zookeeper.pathStats.initialDelay = 5
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,038 [myid:1] - INFO  [main:RequestPathMetricsCollector@113] - zookeeper.pathStats.delay = 5
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,038 [myid:1] - INFO  [main:RequestPathMetricsCollector@114] - zookeeper.pathStats.enabled = false
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,042 [myid:1] - INFO  [main:ZooKeeperServer@1536] - The max bytes for all large requests are set to 104857600
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,042 [myid:1] - INFO  [main:ZooKeeperServer@1550] - The large request threshold is set to -1
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,043 [myid:1] - INFO  [main:AuthenticationHelper@66] - zookeeper.enforce.auth.enabled = false
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,043 [myid:1] - INFO  [main:AuthenticationHelper@67] - zookeeper.enforce.auth.schemes = []
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,044 [myid:1] - INFO  [main:ZooKeeperServer@361] - Created server with tickTime 2000 minSessionTimeout 4000 maxSessionTimeout 40000 clientPortListenBacklog -1 datadir /bitnami/zookeeper/data/version-2 snapdir /bitnami/zookeeper/data/version-2
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,105 [myid:1] - INFO  [main:Log@169] - Logging initialized @1120ms to org.eclipse.jetty.util.log.Slf4jLog
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,243 [myid:1] - WARN  [main:ContextHandler@1660] - o.e.j.s.ServletContextHandler@1c742ed4{/,null,STOPPED} contextPath ends with /*
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,244 [myid:1] - WARN  [main:ContextHandler@1671] - Empty contextPath
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,279 [myid:1] - INFO  [main:Server@375] - jetty-9.4.38.v20210224; built: 2021-02-24T20:25:07.675Z; git: 288f3cc74549e8a913bf363250b0744f2695b8e6; jvm 11.0.12+7-LTS
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,323 [myid:1] - INFO  [main:DefaultSessionIdManager@334] - DefaultSessionIdManager workerName=node0
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,324 [myid:1] - INFO  [main:DefaultSessionIdManager@339] - No SessionScavenger set, using defaults
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,326 [myid:1] - INFO  [main:HouseKeeper@132] - node0 Scavenging every 600000ms
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,331 [myid:1] - WARN  [main:ConstraintSecurityHandler@759] - ServletContext@o.e.j.s.ServletContextHandler@1c742ed4{/,null,STARTING} has uncovered http methods for path: /*
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,344 [myid:1] - INFO  [main:ContextHandler@916] - Started o.e.j.s.ServletContextHandler@1c742ed4{/,null,AVAILABLE}
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,369 [myid:1] - INFO  [main:AbstractConnector@331] - Started ServerConnector@5f049ea1{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,370 [myid:1] - INFO  [main:Server@415] - Started @1385ms
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,370 [myid:1] - INFO  [main:JettyAdminServer@181] - Started AdminServer on address 0.0.0.0, port 8080 and command URL /commands
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,380 [myid:1] - INFO  [main:ServerCnxnFactory@169] - Using org.apache.zookeeper.server.NIOServerCnxnFactory as server connection factory
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,382 [myid:1] - WARN  [main:ServerCnxnFactory@309] - maxCnxns is not configured, using default value 0.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,384 [myid:1] - INFO  [main:NIOServerCnxnFactory@652] - Configuring NIO connection handler with 10s sessionless connection timeout, 2 selector thread(s), 16 worker threads, and 64 kB direct buffers.
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,387 [myid:1] - INFO  [main:NIOServerCnxnFactory@660] - binding to port 0.0.0.0/0.0.0.0:2181
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,413 [myid:1] - INFO  [main:WatchManagerFactory@42] - Using org.apache.zookeeper.server.watch.WatchManager as watch manager
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,413 [myid:1] - INFO  [main:WatchManagerFactory@42] - Using org.apache.zookeeper.server.watch.WatchManager as watch manager
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,415 [myid:1] - INFO  [main:ZKDatabase@133] - zookeeper.snapshotSizeFactor = 0.33
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,416 [myid:1] - INFO  [main:ZKDatabase@153] - zookeeper.commitLogCount=500
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,426 [myid:1] - INFO  [main:SnapStream@61] - zookeeper.snapshot.compression.method = CHECKED
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,438 [myid:1] - INFO  [main:FileSnap@85] - Reading snapshot /bitnami/zookeeper/data/version-2/snapshot.2fa
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,449 [myid:1] - INFO  [main:DataTree@1709] - The digest in the snapshot has digest version of 2, , with zxid as 0x2fa, and digest value as 298077976266
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,477 [myid:1] - INFO  [main:FileTxnSnapLog@372] - 19 txns loaded in 15 ms
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,477 [myid:1] - INFO  [main:ZKDatabase@290] - Snapshot loaded in 61 ms, highest zxid is 0x30d, digest is 305510017337
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,480 [myid:1] - INFO  [main:FileTxnSnapLog@479] - Snapshotting: 0x30d to /bitnami/zookeeper/data/version-2/snapshot.30d
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,487 [myid:1] - INFO  [main:ZooKeeperServer@543] - Snapshot taken in 7 ms
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,501 [myid:1] - INFO  [ProcessThread(sid:0 cport:2181)::PrepRequestProcessor@137] - PrepRequestProcessor (sid:0) started, reconfigEnabled=false
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,502 [myid:1] - INFO  [main:RequestThrottler@75] - zookeeper.request_throttler.shutdownTimeout = 10000
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,528 [myid:1] - INFO  [main:ContainerManager@84] - Using checkIntervalMs=60000 maxPerMinute=10000 maxNeverUsedIntervalMs=0
+[33mzookeeper_1  |[0m 2021-09-12 14:47:38,529 [myid:1] - INFO  [main:ZKAuditProvider@42] - ZooKeeper audit is disabled.
+[36mkafka        |[0m [2021-09-12 14:47:39,356] INFO Registered kafka:type=kafka.Log4jController MBean (kafka.utils.Log4jControllerRegistration$)
+[36mkafka        |[0m [2021-09-12 14:47:40,140] INFO Setting -D jdk.tls.rejectClientInitiatedRenegotiation=true to disable client-initiated TLS renegotiation (org.apache.zookeeper.common.X509Util)
+[36mkafka        |[0m [2021-09-12 14:47:40,264] INFO Registered signal handlers for TERM, INT, HUP (org.apache.kafka.common.utils.LoggingSignalHandler)
+[36mkafka        |[0m [2021-09-12 14:47:40,270] INFO starting (kafka.server.KafkaServer)
+[36mkafka        |[0m [2021-09-12 14:47:40,270] INFO Connecting to zookeeper on zookeeper:2181 (kafka.server.KafkaServer)
+[36mkafka        |[0m [2021-09-12 14:47:40,299] INFO [ZooKeeperClient Kafka server] Initializing a new session to zookeeper:2181. (kafka.zookeeper.ZooKeeperClient)
+[36mkafka        |[0m [2021-09-12 14:47:40,307] INFO Client environment:zookeeper.version=3.5.9-83df9301aa5c2a5d284a9940177808c01bc35cef, built on 01/06/2021 20:03 GMT (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,307] INFO Client environment:host.name=2c646359d5a2 (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,307] INFO Client environment:java.version=11.0.11 (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,307] INFO Client environment:java.vendor=BellSoft (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:java.home=/opt/bitnami/java (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:java.class.path=/opt/bitnami/kafka/bin/../libs/activation-1.1.1.jar:/opt/bitnami/kafka/bin/../libs/aopalliance-repackaged-2.6.1.jar:/opt/bitnami/kafka/bin/../libs/argparse4j-0.7.0.jar:/opt/bitnami/kafka/bin/../libs/audience-annotations-0.5.0.jar:/opt/bitnami/kafka/bin/../libs/commons-cli-1.4.jar:/opt/bitnami/kafka/bin/../libs/commons-lang3-3.8.1.jar:/opt/bitnami/kafka/bin/../libs/connect-api-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-basic-auth-extension-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-file-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-json-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-mirror-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-mirror-client-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-runtime-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/connect-transforms-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/hk2-api-2.6.1.jar:/opt/bitnami/kafka/bin/../libs/hk2-locator-2.6.1.jar:/opt/bitnami/kafka/bin/../libs/hk2-utils-2.6.1.jar:/opt/bitnami/kafka/bin/../libs/jackson-annotations-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-core-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-databind-2.10.5.1.jar:/opt/bitnami/kafka/bin/../libs/jackson-dataformat-csv-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-datatype-jdk8-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-jaxrs-base-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-jaxrs-json-provider-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-module-jaxb-annotations-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-module-paranamer-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jackson-module-scala_2.12-2.10.5.jar:/opt/bitnami/kafka/bin/../libs/jakarta.activation-api-1.2.1.jar:/opt/bitnami/kafka/bin/../libs/jakarta.annotation-api-1.3.5.jar:/opt/bitnami/kafka/bin/../libs/jakarta.inject-2.6.1.jar:/opt/bitnami/kafka/bin/../libs/jakarta.validation-api-2.0.2.jar:/opt/bitnami/kafka/bin/../libs/jakarta.ws.rs-api-2.1.6.jar:/opt/bitnami/kafka/bin/../libs/jakarta.xml.bind-api-2.3.2.jar:/opt/bitnami/kafka/bin/../libs/javassist-3.27.0-GA.jar:/opt/bitnami/kafka/bin/../libs/javax.servlet-api-3.1.0.jar:/opt/bitnami/kafka/bin/../libs/javax.ws.rs-api-2.1.1.jar:/opt/bitnami/kafka/bin/../libs/jaxb-api-2.3.0.jar:/opt/bitnami/kafka/bin/../libs/jersey-client-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-common-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-container-servlet-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-container-servlet-core-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-hk2-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-media-jaxb-2.31.jar:/opt/bitnami/kafka/bin/../libs/jersey-server-2.31.jar:/opt/bitnami/kafka/bin/../libs/jetty-client-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-continuation-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-http-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-io-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-security-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-server-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-servlet-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-servlets-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-util-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jetty-util-ajax-9.4.39.v20210325.jar:/opt/bitnami/kafka/bin/../libs/jline-3.12.1.jar:/opt/bitnami/kafka/bin/../libs/jopt-simple-5.0.4.jar:/opt/bitnami/kafka/bin/../libs/kafka-clients-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-log4j-appender-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-metadata-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-raft-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-shell-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-streams-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-streams-examples-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-streams-scala_2.12-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-streams-test-utils-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka-tools-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/kafka_2.12-2.8.0-sources.jar:/opt/bitnami/kafka/bin/../libs/kafka_2.12-2.8.0.jar:/opt/bitnami/kafka/bin/../libs/log4j-1.2.17.jar:/opt/bitnami/kafka/bin/../libs/lz4-java-1.7.1.jar:/opt/bitnami/kafka/bin/../libs/maven-artifact-3.6.3.jar:/opt/bitnami/kafka/bin/../libs/metrics-core-2.2.0.jar:/opt/bitnami/kafka/bin/../libs/netty-buffer-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-codec-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-common-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-handler-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-resolver-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-transport-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-transport-native-epoll-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/netty-transport-native-unix-common-4.1.62.Final.jar:/opt/bitnami/kafka/bin/../libs/osgi-resource-locator-1.0.3.jar:/opt/bitnami/kafka/bin/../libs/paranamer-2.8.jar:/opt/bitnami/kafka/bin/../libs/plexus-utils-3.2.1.jar:/opt/bitnami/kafka/bin/../libs/reflections-0.9.12.jar:/opt/bitnami/kafka/bin/../libs/rocksdbjni-5.18.4.jar:/opt/bitnami/kafka/bin/../libs/scala-collection-compat_2.12-2.3.0.jar:/opt/bitnami/kafka/bin/../libs/scala-java8-compat_2.12-0.9.1.jar:/opt/bitnami/kafka/bin/../libs/scala-library-2.12.13.jar:/opt/bitnami/kafka/bin/../libs/scala-logging_2.12-3.9.2.jar:/opt/bitnami/kafka/bin/../libs/scala-reflect-2.12.13.jar:/opt/bitnami/kafka/bin/../libs/slf4j-api-1.7.30.jar:/opt/bitnami/kafka/bin/../libs/slf4j-log4j12-1.7.30.jar:/opt/bitnami/kafka/bin/../libs/snappy-java-1.1.8.1.jar:/opt/bitnami/kafka/bin/../libs/zookeeper-3.5.9.jar:/opt/bitnami/kafka/bin/../libs/zookeeper-jute-3.5.9.jar:/opt/bitnami/kafka/bin/../libs/zstd-jni-1.4.9-1.jar (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:java.library.path=/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:java.io.tmpdir=/tmp (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:java.compiler=<NA> (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:os.name=Linux (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:os.arch=amd64 (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,308] INFO Client environment:os.version=5.13.14-200.fc34.x86_64 (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:user.name=? (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:user.home=? (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:user.dir=/ (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:os.memory.free=1012MB (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:os.memory.max=1024MB (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,309] INFO Client environment:os.memory.total=1024MB (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,314] INFO Initiating client connection, connectString=zookeeper:2181 sessionTimeout=18000 watcher=kafka.zookeeper.ZooKeeperClient$ZooKeeperClientWatcher$@4372b9b6 (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:40,322] INFO jute.maxbuffer value is 4194304 Bytes (org.apache.zookeeper.ClientCnxnSocket)
+[36mkafka        |[0m [2021-09-12 14:47:40,330] INFO zookeeper.request.timeout value is 0. feature enabled= (org.apache.zookeeper.ClientCnxn)
+[36mkafka        |[0m [2021-09-12 14:47:40,333] INFO [ZooKeeperClient Kafka server] Waiting until connected. (kafka.zookeeper.ZooKeeperClient)
+[36mkafka        |[0m [2021-09-12 14:47:40,350] INFO Opening socket connection to server zookeeper/172.19.0.2:2181. Will not attempt to authenticate using SASL (unknown error) (org.apache.zookeeper.ClientCnxn)
+[36mkafka        |[0m [2021-09-12 14:47:40,361] INFO Socket connection established, initiating session, client: /172.19.0.3:50076, server: zookeeper/172.19.0.2:2181 (org.apache.zookeeper.ClientCnxn)
+[33mzookeeper_1  |[0m 2021-09-12 14:47:40,374 [myid:1] - INFO  [SyncThread:0:FileTxnLog@284] - Creating new log file: log.30e
+[36mkafka        |[0m [2021-09-12 14:47:40,384] INFO Session establishment complete on server zookeeper/172.19.0.2:2181, sessionid = 0x100003a57d20000, negotiated timeout = 18000 (org.apache.zookeeper.ClientCnxn)
+[36mkafka        |[0m [2021-09-12 14:47:40,390] INFO [ZooKeeperClient Kafka server] Connected. (kafka.zookeeper.ZooKeeperClient)
+[36mkafka        |[0m [2021-09-12 14:47:40,622] INFO [feature-zk-node-event-process-thread]: Starting (kafka.server.FinalizedFeatureChangeListener$ChangeNotificationProcessorThread)
+[36mkafka        |[0m [2021-09-12 14:47:40,845] INFO Updated cache from existing <empty> to latest FinalizedFeaturesAndEpoch(features=Features{}, epoch=0). (kafka.server.FinalizedFeatureCache)
+[36mkafka        |[0m [2021-09-12 14:47:40,853] INFO Cluster ID = _oRk5T5TT3C_zR7xieBZFA (kafka.server.KafkaServer)
+[36mkafka        |[0m [2021-09-12 14:47:41,017] INFO KafkaConfig values: 
+[36mkafka        |[0m 	advertised.host.name = null
+[36mkafka        |[0m 	advertised.listeners = PLAINTEXT://127.0.0.1:9092
+[36mkafka        |[0m 	advertised.port = null
+[36mkafka        |[0m 	alter.config.policy.class.name = null
+[36mkafka        |[0m 	alter.log.dirs.replication.quota.window.num = 11
+[36mkafka        |[0m 	alter.log.dirs.replication.quota.window.size.seconds = 1
+[36mkafka        |[0m 	authorizer.class.name = 
+[36mkafka        |[0m 	auto.create.topics.enable = true
+[36mkafka        |[0m 	auto.leader.rebalance.enable = true
+[36mkafka        |[0m 	background.threads = 10
+[36mkafka        |[0m 	broker.heartbeat.interval.ms = 2000
+[36mkafka        |[0m 	broker.id = 1
+[36mkafka        |[0m 	broker.id.generation.enable = true
+[36mkafka        |[0m 	broker.rack = null
+[36mkafka        |[0m 	broker.session.timeout.ms = 9000
+[36mkafka        |[0m 	client.quota.callback.class = null
+[36mkafka        |[0m 	compression.type = producer
+[36mkafka        |[0m 	connection.failed.authentication.delay.ms = 100
+[36mkafka        |[0m 	connections.max.idle.ms = 600000
+[36mkafka        |[0m 	connections.max.reauth.ms = 0
+[36mkafka        |[0m 	control.plane.listener.name = null
+[36mkafka        |[0m 	controlled.shutdown.enable = true
+[36mkafka        |[0m 	controlled.shutdown.max.retries = 3
+[36mkafka        |[0m 	controlled.shutdown.retry.backoff.ms = 5000
+[36mkafka        |[0m 	controller.listener.names = null
+[36mkafka        |[0m 	controller.quorum.append.linger.ms = 25
+[36mkafka        |[0m 	controller.quorum.election.backoff.max.ms = 1000
+[36mkafka        |[0m 	controller.quorum.election.timeout.ms = 1000
+[36mkafka        |[0m 	controller.quorum.fetch.timeout.ms = 2000
+[36mkafka        |[0m 	controller.quorum.request.timeout.ms = 2000
+[36mkafka        |[0m 	controller.quorum.retry.backoff.ms = 20
+[36mkafka        |[0m 	controller.quorum.voters = []
+[36mkafka        |[0m 	controller.quota.window.num = 11
+[36mkafka        |[0m 	controller.quota.window.size.seconds = 1
+[36mkafka        |[0m 	controller.socket.timeout.ms = 30000
+[36mkafka        |[0m 	create.topic.policy.class.name = null
+[36mkafka        |[0m 	default.replication.factor = 1
+[36mkafka        |[0m 	delegation.token.expiry.check.interval.ms = 3600000
+[36mkafka        |[0m 	delegation.token.expiry.time.ms = 86400000
+[36mkafka        |[0m 	delegation.token.master.key = null
+[36mkafka        |[0m 	delegation.token.max.lifetime.ms = 604800000
+[36mkafka        |[0m 	delegation.token.secret.key = null
+[36mkafka        |[0m 	delete.records.purgatory.purge.interval.requests = 1
+[36mkafka        |[0m 	delete.topic.enable = true
+[36mkafka        |[0m 	fetch.max.bytes = 57671680
+[36mkafka        |[0m 	fetch.purgatory.purge.interval.requests = 1000
+[36mkafka        |[0m 	group.initial.rebalance.delay.ms = 0
+[36mkafka        |[0m 	group.max.session.timeout.ms = 1800000
+[36mkafka        |[0m 	group.max.size = 2147483647
+[36mkafka        |[0m 	group.min.session.timeout.ms = 6000
+[36mkafka        |[0m 	host.name = 
+[36mkafka        |[0m 	initial.broker.registration.timeout.ms = 60000
+[36mkafka        |[0m 	inter.broker.listener.name = null
+[36mkafka        |[0m 	inter.broker.protocol.version = 2.8-IV1
+[36mkafka        |[0m 	kafka.metrics.polling.interval.secs = 10
+[36mkafka        |[0m 	kafka.metrics.reporters = []
+[36mkafka        |[0m 	leader.imbalance.check.interval.seconds = 300
+[36mkafka        |[0m 	leader.imbalance.per.broker.percentage = 10
+[36mkafka        |[0m 	listener.security.protocol.map = PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+[36mkafka        |[0m 	listeners = PLAINTEXT://:9092
+[36mkafka        |[0m 	log.cleaner.backoff.ms = 15000
+[36mkafka        |[0m 	log.cleaner.dedupe.buffer.size = 134217728
+[36mkafka        |[0m 	log.cleaner.delete.retention.ms = 86400000
+[36mkafka        |[0m 	log.cleaner.enable = true
+[36mkafka        |[0m 	log.cleaner.io.buffer.load.factor = 0.9
+[36mkafka        |[0m 	log.cleaner.io.buffer.size = 524288
+[36mkafka        |[0m 	log.cleaner.io.max.bytes.per.second = 1.7976931348623157E308
+[36mkafka        |[0m 	log.cleaner.max.compaction.lag.ms = 9223372036854775807
+[36mkafka        |[0m 	log.cleaner.min.cleanable.ratio = 0.5
+[36mkafka        |[0m 	log.cleaner.min.compaction.lag.ms = 0
+[36mkafka        |[0m 	log.cleaner.threads = 1
+[36mkafka        |[0m 	log.cleanup.policy = [delete]
+[36mkafka        |[0m 	log.dir = /tmp/kafka-logs
+[36mkafka        |[0m 	log.dirs = /bitnami/kafka/data
+[36mkafka        |[0m 	log.flush.interval.messages = 9223372036854775807
+[36mkafka        |[0m 	log.flush.interval.ms = null
+[36mkafka        |[0m 	log.flush.offset.checkpoint.interval.ms = 60000
+[36mkafka        |[0m 	log.flush.scheduler.interval.ms = 9223372036854775807
+[36mkafka        |[0m 	log.flush.start.offset.checkpoint.interval.ms = 60000
+[36mkafka        |[0m 	log.index.interval.bytes = 4096
+[36mkafka        |[0m 	log.index.size.max.bytes = 10485760
+[36mkafka        |[0m 	log.message.downconversion.enable = true
+[36mkafka        |[0m 	log.message.format.version = 2.8-IV1
+[36mkafka        |[0m 	log.message.timestamp.difference.max.ms = 9223372036854775807
+[36mkafka        |[0m 	log.message.timestamp.type = CreateTime
+[36mkafka        |[0m 	log.preallocate = false
+[36mkafka        |[0m 	log.retention.bytes = -1
+[36mkafka        |[0m 	log.retention.check.interval.ms = 300000
+[36mkafka        |[0m 	log.retention.hours = 168
+[36mkafka        |[0m 	log.retention.minutes = null
+[36mkafka        |[0m 	log.retention.ms = null
+[36mkafka        |[0m 	log.roll.hours = 168
+[36mkafka        |[0m 	log.roll.jitter.hours = 0
+[36mkafka        |[0m 	log.roll.jitter.ms = null
+[36mkafka        |[0m 	log.roll.ms = null
+[36mkafka        |[0m 	log.segment.bytes = 1073741824
+[36mkafka        |[0m 	log.segment.delete.delay.ms = 60000
+[36mkafka        |[0m 	max.connection.creation.rate = 2147483647
+[36mkafka        |[0m 	max.connections = 2147483647
+[36mkafka        |[0m 	max.connections.per.ip = 2147483647
+[36mkafka        |[0m 	max.connections.per.ip.overrides = 
+[36mkafka        |[0m 	max.incremental.fetch.session.cache.slots = 1000
+[36mkafka        |[0m 	message.max.bytes = 1048588
+[36mkafka        |[0m 	metadata.log.dir = null
+[36mkafka        |[0m 	metric.reporters = []
+[36mkafka        |[0m 	metrics.num.samples = 2
+[36mkafka        |[0m 	metrics.recording.level = INFO
+[36mkafka        |[0m 	metrics.sample.window.ms = 30000
+[36mkafka        |[0m 	min.insync.replicas = 1
+[36mkafka        |[0m 	node.id = -1
+[36mkafka        |[0m 	num.io.threads = 8
+[36mkafka        |[0m 	num.network.threads = 3
+[36mkafka        |[0m 	num.partitions = 1
+[36mkafka        |[0m 	num.recovery.threads.per.data.dir = 1
+[36mkafka        |[0m 	num.replica.alter.log.dirs.threads = null
+[36mkafka        |[0m 	num.replica.fetchers = 1
+[36mkafka        |[0m 	offset.metadata.max.bytes = 4096
+[36mkafka        |[0m 	offsets.commit.required.acks = -1
+[36mkafka        |[0m 	offsets.commit.timeout.ms = 5000
+[36mkafka        |[0m 	offsets.load.buffer.size = 5242880
+[36mkafka        |[0m 	offsets.retention.check.interval.ms = 600000
+[36mkafka        |[0m 	offsets.retention.minutes = 10080
+[36mkafka        |[0m 	offsets.topic.compression.codec = 0
+[36mkafka        |[0m 	offsets.topic.num.partitions = 50
+[36mkafka        |[0m 	offsets.topic.replication.factor = 1
+[36mkafka        |[0m 	offsets.topic.segment.bytes = 104857600
+[36mkafka        |[0m 	password.encoder.cipher.algorithm = AES/CBC/PKCS5Padding
+[36mkafka        |[0m 	password.encoder.iterations = 4096
+[36mkafka        |[0m 	password.encoder.key.length = 128
+[36mkafka        |[0m 	password.encoder.keyfactory.algorithm = null
+[36mkafka        |[0m 	password.encoder.old.secret = null
+[36mkafka        |[0m 	password.encoder.secret = null
+[36mkafka        |[0m 	port = 9092
+[36mkafka        |[0m 	principal.builder.class = null
+[36mkafka        |[0m 	process.roles = []
+[36mkafka        |[0m 	producer.purgatory.purge.interval.requests = 1000
+[36mkafka        |[0m 	queued.max.request.bytes = -1
+[36mkafka        |[0m 	queued.max.requests = 500
+[36mkafka        |[0m 	quota.consumer.default = 9223372036854775807
+[36mkafka        |[0m 	quota.producer.default = 9223372036854775807
+[36mkafka        |[0m 	quota.window.num = 11
+[36mkafka        |[0m 	quota.window.size.seconds = 1
+[36mkafka        |[0m 	replica.fetch.backoff.ms = 1000
+[36mkafka        |[0m 	replica.fetch.max.bytes = 1048576
+[36mkafka        |[0m 	replica.fetch.min.bytes = 1
+[36mkafka        |[0m 	replica.fetch.response.max.bytes = 10485760
+[36mkafka        |[0m 	replica.fetch.wait.max.ms = 500
+[36mkafka        |[0m 	replica.high.watermark.checkpoint.interval.ms = 5000
+[36mkafka        |[0m 	replica.lag.time.max.ms = 30000
+[36mkafka        |[0m 	replica.selector.class = null
+[36mkafka        |[0m 	replica.socket.receive.buffer.bytes = 65536
+[36mkafka        |[0m 	replica.socket.timeout.ms = 30000
+[36mkafka        |[0m 	replication.quota.window.num = 11
+[36mkafka        |[0m 	replication.quota.window.size.seconds = 1
+[36mkafka        |[0m 	request.timeout.ms = 30000
+[36mkafka        |[0m 	reserved.broker.max.id = 1000
+[36mkafka        |[0m 	sasl.client.callback.handler.class = null
+[36mkafka        |[0m 	sasl.enabled.mechanisms = [PLAIN, SCRAM-SHA-256, SCRAM-SHA-512]
+[36mkafka        |[0m 	sasl.jaas.config = null
+[36mkafka        |[0m 	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+[36mkafka        |[0m 	sasl.kerberos.min.time.before.relogin = 60000
+[36mkafka        |[0m 	sasl.kerberos.principal.to.local.rules = [DEFAULT]
+[36mkafka        |[0m 	sasl.kerberos.service.name = null
+[36mkafka        |[0m 	sasl.kerberos.ticket.renew.jitter = 0.05
+[36mkafka        |[0m 	sasl.kerberos.ticket.renew.window.factor = 0.8
+[36mkafka        |[0m 	sasl.login.callback.handler.class = null
+[36mkafka        |[0m 	sasl.login.class = null
+[36mkafka        |[0m 	sasl.login.refresh.buffer.seconds = 300
+[36mkafka        |[0m 	sasl.login.refresh.min.period.seconds = 60
+[36mkafka        |[0m 	sasl.login.refresh.window.factor = 0.8
+[36mkafka        |[0m 	sasl.login.refresh.window.jitter = 0.05
+[36mkafka        |[0m 	sasl.mechanism.controller.protocol = GSSAPI
+[36mkafka        |[0m 	sasl.mechanism.inter.broker.protocol = 
+[36mkafka        |[0m 	sasl.server.callback.handler.class = null
+[36mkafka        |[0m 	security.inter.broker.protocol = PLAINTEXT
+[36mkafka        |[0m 	security.providers = null
+[36mkafka        |[0m 	socket.connection.setup.timeout.max.ms = 30000
+[36mkafka        |[0m 	socket.connection.setup.timeout.ms = 10000
+[36mkafka        |[0m 	socket.receive.buffer.bytes = 102400
+[36mkafka        |[0m 	socket.request.max.bytes = 104857600
+[36mkafka        |[0m 	socket.send.buffer.bytes = 102400
+[36mkafka        |[0m 	ssl.cipher.suites = []
+[36mkafka        |[0m 	ssl.client.auth = none
+[36mkafka        |[0m 	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+[36mkafka        |[0m 	ssl.endpoint.identification.algorithm = https
+[36mkafka        |[0m 	ssl.engine.factory.class = null
+[36mkafka        |[0m 	ssl.key.password = null
+[36mkafka        |[0m 	ssl.keymanager.algorithm = SunX509
+[36mkafka        |[0m 	ssl.keystore.certificate.chain = null
+[36mkafka        |[0m 	ssl.keystore.key = null
+[36mkafka        |[0m 	ssl.keystore.location = null
+[36mkafka        |[0m 	ssl.keystore.password = null
+[36mkafka        |[0m 	ssl.keystore.type = JKS
+[36mkafka        |[0m 	ssl.principal.mapping.rules = DEFAULT
+[36mkafka        |[0m 	ssl.protocol = TLSv1.3
+[36mkafka        |[0m 	ssl.provider = null
+[36mkafka        |[0m 	ssl.secure.random.implementation = null
+[36mkafka        |[0m 	ssl.trustmanager.algorithm = PKIX
+[36mkafka        |[0m 	ssl.truststore.certificates = null
+[36mkafka        |[0m 	ssl.truststore.location = null
+[36mkafka        |[0m 	ssl.truststore.password = null
+[36mkafka        |[0m 	ssl.truststore.type = JKS
+[36mkafka        |[0m 	transaction.abort.timed.out.transaction.cleanup.interval.ms = 10000
+[36mkafka        |[0m 	transaction.max.timeout.ms = 900000
+[36mkafka        |[0m 	transaction.remove.expired.transaction.cleanup.interval.ms = 3600000
+[36mkafka        |[0m 	transaction.state.log.load.buffer.size = 5242880
+[36mkafka        |[0m 	transaction.state.log.min.isr = 1
+[36mkafka        |[0m 	transaction.state.log.num.partitions = 50
+[36mkafka        |[0m 	transaction.state.log.replication.factor = 1
+[36mkafka        |[0m 	transaction.state.log.segment.bytes = 104857600
+[36mkafka        |[0m 	transactional.id.expiration.ms = 604800000
+[36mkafka        |[0m 	unclean.leader.election.enable = false
+[36mkafka        |[0m 	zookeeper.clientCnxnSocket = null
+[36mkafka        |[0m 	zookeeper.connect = zookeeper:2181
+[36mkafka        |[0m 	zookeeper.connection.timeout.ms = 18000
+[36mkafka        |[0m 	zookeeper.max.in.flight.requests = 10
+[36mkafka        |[0m 	zookeeper.session.timeout.ms = 18000
+[36mkafka        |[0m 	zookeeper.set.acl = false
+[36mkafka        |[0m 	zookeeper.ssl.cipher.suites = null
+[36mkafka        |[0m 	zookeeper.ssl.client.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.crl.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.enabled.protocols = null
+[36mkafka        |[0m 	zookeeper.ssl.endpoint.identification.algorithm = HTTPS
+[36mkafka        |[0m 	zookeeper.ssl.keystore.location = null
+[36mkafka        |[0m 	zookeeper.ssl.keystore.password = null
+[36mkafka        |[0m 	zookeeper.ssl.keystore.type = null
+[36mkafka        |[0m 	zookeeper.ssl.ocsp.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.protocol = TLSv1.2
+[36mkafka        |[0m 	zookeeper.ssl.truststore.location = null
+[36mkafka        |[0m 	zookeeper.ssl.truststore.password = null
+[36mkafka        |[0m 	zookeeper.ssl.truststore.type = null
+[36mkafka        |[0m 	zookeeper.sync.time.ms = 2000
+[36mkafka        |[0m  (kafka.server.KafkaConfig)
+[36mkafka        |[0m [2021-09-12 14:47:41,037] INFO KafkaConfig values: 
+[36mkafka        |[0m 	advertised.host.name = null
+[36mkafka        |[0m 	advertised.listeners = PLAINTEXT://127.0.0.1:9092
+[36mkafka        |[0m 	advertised.port = null
+[36mkafka        |[0m 	alter.config.policy.class.name = null
+[36mkafka        |[0m 	alter.log.dirs.replication.quota.window.num = 11
+[36mkafka        |[0m 	alter.log.dirs.replication.quota.window.size.seconds = 1
+[36mkafka        |[0m 	authorizer.class.name = 
+[36mkafka        |[0m 	auto.create.topics.enable = true
+[36mkafka        |[0m 	auto.leader.rebalance.enable = true
+[36mkafka        |[0m 	background.threads = 10
+[36mkafka        |[0m 	broker.heartbeat.interval.ms = 2000
+[36mkafka        |[0m 	broker.id = 1
+[36mkafka        |[0m 	broker.id.generation.enable = true
+[36mkafka        |[0m 	broker.rack = null
+[36mkafka        |[0m 	broker.session.timeout.ms = 9000
+[36mkafka        |[0m 	client.quota.callback.class = null
+[36mkafka        |[0m 	compression.type = producer
+[36mkafka        |[0m 	connection.failed.authentication.delay.ms = 100
+[36mkafka        |[0m 	connections.max.idle.ms = 600000
+[36mkafka        |[0m 	connections.max.reauth.ms = 0
+[36mkafka        |[0m 	control.plane.listener.name = null
+[36mkafka        |[0m 	controlled.shutdown.enable = true
+[36mkafka        |[0m 	controlled.shutdown.max.retries = 3
+[36mkafka        |[0m 	controlled.shutdown.retry.backoff.ms = 5000
+[36mkafka        |[0m 	controller.listener.names = null
+[36mkafka        |[0m 	controller.quorum.append.linger.ms = 25
+[36mkafka        |[0m 	controller.quorum.election.backoff.max.ms = 1000
+[36mkafka        |[0m 	controller.quorum.election.timeout.ms = 1000
+[36mkafka        |[0m 	controller.quorum.fetch.timeout.ms = 2000
+[36mkafka        |[0m 	controller.quorum.request.timeout.ms = 2000
+[36mkafka        |[0m 	controller.quorum.retry.backoff.ms = 20
+[36mkafka        |[0m 	controller.quorum.voters = []
+[36mkafka        |[0m 	controller.quota.window.num = 11
+[36mkafka        |[0m 	controller.quota.window.size.seconds = 1
+[36mkafka        |[0m 	controller.socket.timeout.ms = 30000
+[36mkafka        |[0m 	create.topic.policy.class.name = null
+[36mkafka        |[0m 	default.replication.factor = 1
+[36mkafka        |[0m 	delegation.token.expiry.check.interval.ms = 3600000
+[36mkafka        |[0m 	delegation.token.expiry.time.ms = 86400000
+[36mkafka        |[0m 	delegation.token.master.key = null
+[36mkafka        |[0m 	delegation.token.max.lifetime.ms = 604800000
+[36mkafka        |[0m 	delegation.token.secret.key = null
+[36mkafka        |[0m 	delete.records.purgatory.purge.interval.requests = 1
+[36mkafka        |[0m 	delete.topic.enable = true
+[36mkafka        |[0m 	fetch.max.bytes = 57671680
+[36mkafka        |[0m 	fetch.purgatory.purge.interval.requests = 1000
+[36mkafka        |[0m 	group.initial.rebalance.delay.ms = 0
+[36mkafka        |[0m 	group.max.session.timeout.ms = 1800000
+[36mkafka        |[0m 	group.max.size = 2147483647
+[36mkafka        |[0m 	group.min.session.timeout.ms = 6000
+[36mkafka        |[0m 	host.name = 
+[36mkafka        |[0m 	initial.broker.registration.timeout.ms = 60000
+[36mkafka        |[0m 	inter.broker.listener.name = null
+[36mkafka        |[0m 	inter.broker.protocol.version = 2.8-IV1
+[36mkafka        |[0m 	kafka.metrics.polling.interval.secs = 10
+[36mkafka        |[0m 	kafka.metrics.reporters = []
+[36mkafka        |[0m 	leader.imbalance.check.interval.seconds = 300
+[36mkafka        |[0m 	leader.imbalance.per.broker.percentage = 10
+[36mkafka        |[0m 	listener.security.protocol.map = PLAINTEXT:PLAINTEXT,SSL:SSL,SASL_PLAINTEXT:SASL_PLAINTEXT,SASL_SSL:SASL_SSL
+[36mkafka        |[0m 	listeners = PLAINTEXT://:9092
+[36mkafka        |[0m 	log.cleaner.backoff.ms = 15000
+[36mkafka        |[0m 	log.cleaner.dedupe.buffer.size = 134217728
+[36mkafka        |[0m 	log.cleaner.delete.retention.ms = 86400000
+[36mkafka        |[0m 	log.cleaner.enable = true
+[36mkafka        |[0m 	log.cleaner.io.buffer.load.factor = 0.9
+[36mkafka        |[0m 	log.cleaner.io.buffer.size = 524288
+[36mkafka        |[0m 	log.cleaner.io.max.bytes.per.second = 1.7976931348623157E308
+[36mkafka        |[0m 	log.cleaner.max.compaction.lag.ms = 9223372036854775807
+[36mkafka        |[0m 	log.cleaner.min.cleanable.ratio = 0.5
+[36mkafka        |[0m 	log.cleaner.min.compaction.lag.ms = 0
+[36mkafka        |[0m 	log.cleaner.threads = 1
+[36mkafka        |[0m 	log.cleanup.policy = [delete]
+[36mkafka        |[0m 	log.dir = /tmp/kafka-logs
+[36mkafka        |[0m 	log.dirs = /bitnami/kafka/data
+[36mkafka        |[0m 	log.flush.interval.messages = 9223372036854775807
+[36mkafka        |[0m 	log.flush.interval.ms = null
+[36mkafka        |[0m 	log.flush.offset.checkpoint.interval.ms = 60000
+[36mkafka        |[0m 	log.flush.scheduler.interval.ms = 9223372036854775807
+[36mkafka        |[0m 	log.flush.start.offset.checkpoint.interval.ms = 60000
+[36mkafka        |[0m 	log.index.interval.bytes = 4096
+[36mkafka        |[0m 	log.index.size.max.bytes = 10485760
+[36mkafka        |[0m 	log.message.downconversion.enable = true
+[36mkafka        |[0m 	log.message.format.version = 2.8-IV1
+[36mkafka        |[0m 	log.message.timestamp.difference.max.ms = 9223372036854775807
+[36mkafka        |[0m 	log.message.timestamp.type = CreateTime
+[36mkafka        |[0m 	log.preallocate = false
+[36mkafka        |[0m 	log.retention.bytes = -1
+[36mkafka        |[0m 	log.retention.check.interval.ms = 300000
+[36mkafka        |[0m 	log.retention.hours = 168
+[36mkafka        |[0m 	log.retention.minutes = null
+[36mkafka        |[0m 	log.retention.ms = null
+[36mkafka        |[0m 	log.roll.hours = 168
+[36mkafka        |[0m 	log.roll.jitter.hours = 0
+[36mkafka        |[0m 	log.roll.jitter.ms = null
+[36mkafka        |[0m 	log.roll.ms = null
+[36mkafka        |[0m 	log.segment.bytes = 1073741824
+[36mkafka        |[0m 	log.segment.delete.delay.ms = 60000
+[36mkafka        |[0m 	max.connection.creation.rate = 2147483647
+[36mkafka        |[0m 	max.connections = 2147483647
+[36mkafka        |[0m 	max.connections.per.ip = 2147483647
+[36mkafka        |[0m 	max.connections.per.ip.overrides = 
+[36mkafka        |[0m 	max.incremental.fetch.session.cache.slots = 1000
+[36mkafka        |[0m 	message.max.bytes = 1048588
+[36mkafka        |[0m 	metadata.log.dir = null
+[36mkafka        |[0m 	metric.reporters = []
+[36mkafka        |[0m 	metrics.num.samples = 2
+[36mkafka        |[0m 	metrics.recording.level = INFO
+[36mkafka        |[0m 	metrics.sample.window.ms = 30000
+[36mkafka        |[0m 	min.insync.replicas = 1
+[36mkafka        |[0m 	node.id = -1
+[36mkafka        |[0m 	num.io.threads = 8
+[36mkafka        |[0m 	num.network.threads = 3
+[36mkafka        |[0m 	num.partitions = 1
+[36mkafka        |[0m 	num.recovery.threads.per.data.dir = 1
+[36mkafka        |[0m 	num.replica.alter.log.dirs.threads = null
+[36mkafka        |[0m 	num.replica.fetchers = 1
+[36mkafka        |[0m 	offset.metadata.max.bytes = 4096
+[36mkafka        |[0m 	offsets.commit.required.acks = -1
+[36mkafka        |[0m 	offsets.commit.timeout.ms = 5000
+[36mkafka        |[0m 	offsets.load.buffer.size = 5242880
+[36mkafka        |[0m 	offsets.retention.check.interval.ms = 600000
+[36mkafka        |[0m 	offsets.retention.minutes = 10080
+[36mkafka        |[0m 	offsets.topic.compression.codec = 0
+[36mkafka        |[0m 	offsets.topic.num.partitions = 50
+[36mkafka        |[0m 	offsets.topic.replication.factor = 1
+[36mkafka        |[0m 	offsets.topic.segment.bytes = 104857600
+[36mkafka        |[0m 	password.encoder.cipher.algorithm = AES/CBC/PKCS5Padding
+[36mkafka        |[0m 	password.encoder.iterations = 4096
+[36mkafka        |[0m 	password.encoder.key.length = 128
+[36mkafka        |[0m 	password.encoder.keyfactory.algorithm = null
+[36mkafka        |[0m 	password.encoder.old.secret = null
+[36mkafka        |[0m 	password.encoder.secret = null
+[36mkafka        |[0m 	port = 9092
+[36mkafka        |[0m 	principal.builder.class = null
+[36mkafka        |[0m 	process.roles = []
+[36mkafka        |[0m 	producer.purgatory.purge.interval.requests = 1000
+[36mkafka        |[0m 	queued.max.request.bytes = -1
+[36mkafka        |[0m 	queued.max.requests = 500
+[36mkafka        |[0m 	quota.consumer.default = 9223372036854775807
+[36mkafka        |[0m 	quota.producer.default = 9223372036854775807
+[36mkafka        |[0m 	quota.window.num = 11
+[36mkafka        |[0m 	quota.window.size.seconds = 1
+[36mkafka        |[0m 	replica.fetch.backoff.ms = 1000
+[36mkafka        |[0m 	replica.fetch.max.bytes = 1048576
+[36mkafka        |[0m 	replica.fetch.min.bytes = 1
+[36mkafka        |[0m 	replica.fetch.response.max.bytes = 10485760
+[36mkafka        |[0m 	replica.fetch.wait.max.ms = 500
+[36mkafka        |[0m 	replica.high.watermark.checkpoint.interval.ms = 5000
+[36mkafka        |[0m 	replica.lag.time.max.ms = 30000
+[36mkafka        |[0m 	replica.selector.class = null
+[36mkafka        |[0m 	replica.socket.receive.buffer.bytes = 65536
+[36mkafka        |[0m 	replica.socket.timeout.ms = 30000
+[36mkafka        |[0m 	replication.quota.window.num = 11
+[36mkafka        |[0m 	replication.quota.window.size.seconds = 1
+[36mkafka        |[0m 	request.timeout.ms = 30000
+[36mkafka        |[0m 	reserved.broker.max.id = 1000
+[36mkafka        |[0m 	sasl.client.callback.handler.class = null
+[36mkafka        |[0m 	sasl.enabled.mechanisms = [PLAIN, SCRAM-SHA-256, SCRAM-SHA-512]
+[36mkafka        |[0m 	sasl.jaas.config = null
+[36mkafka        |[0m 	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+[36mkafka        |[0m 	sasl.kerberos.min.time.before.relogin = 60000
+[36mkafka        |[0m 	sasl.kerberos.principal.to.local.rules = [DEFAULT]
+[36mkafka        |[0m 	sasl.kerberos.service.name = null
+[36mkafka        |[0m 	sasl.kerberos.ticket.renew.jitter = 0.05
+[36mkafka        |[0m 	sasl.kerberos.ticket.renew.window.factor = 0.8
+[36mkafka        |[0m 	sasl.login.callback.handler.class = null
+[36mkafka        |[0m 	sasl.login.class = null
+[36mkafka        |[0m 	sasl.login.refresh.buffer.seconds = 300
+[36mkafka        |[0m 	sasl.login.refresh.min.period.seconds = 60
+[36mkafka        |[0m 	sasl.login.refresh.window.factor = 0.8
+[36mkafka        |[0m 	sasl.login.refresh.window.jitter = 0.05
+[36mkafka        |[0m 	sasl.mechanism.controller.protocol = GSSAPI
+[36mkafka        |[0m 	sasl.mechanism.inter.broker.protocol = 
+[36mkafka        |[0m 	sasl.server.callback.handler.class = null
+[36mkafka        |[0m 	security.inter.broker.protocol = PLAINTEXT
+[36mkafka        |[0m 	security.providers = null
+[36mkafka        |[0m 	socket.connection.setup.timeout.max.ms = 30000
+[36mkafka        |[0m 	socket.connection.setup.timeout.ms = 10000
+[36mkafka        |[0m 	socket.receive.buffer.bytes = 102400
+[36mkafka        |[0m 	socket.request.max.bytes = 104857600
+[36mkafka        |[0m 	socket.send.buffer.bytes = 102400
+[36mkafka        |[0m 	ssl.cipher.suites = []
+[36mkafka        |[0m 	ssl.client.auth = none
+[36mkafka        |[0m 	ssl.enabled.protocols = [TLSv1.2, TLSv1.3]
+[36mkafka        |[0m 	ssl.endpoint.identification.algorithm = https
+[36mkafka        |[0m 	ssl.engine.factory.class = null
+[36mkafka        |[0m 	ssl.key.password = null
+[36mkafka        |[0m 	ssl.keymanager.algorithm = SunX509
+[36mkafka        |[0m 	ssl.keystore.certificate.chain = null
+[36mkafka        |[0m 	ssl.keystore.key = null
+[36mkafka        |[0m 	ssl.keystore.location = null
+[36mkafka        |[0m 	ssl.keystore.password = null
+[36mkafka        |[0m 	ssl.keystore.type = JKS
+[36mkafka        |[0m 	ssl.principal.mapping.rules = DEFAULT
+[36mkafka        |[0m 	ssl.protocol = TLSv1.3
+[36mkafka        |[0m 	ssl.provider = null
+[36mkafka        |[0m 	ssl.secure.random.implementation = null
+[36mkafka        |[0m 	ssl.trustmanager.algorithm = PKIX
+[36mkafka        |[0m 	ssl.truststore.certificates = null
+[36mkafka        |[0m 	ssl.truststore.location = null
+[36mkafka        |[0m 	ssl.truststore.password = null
+[36mkafka        |[0m 	ssl.truststore.type = JKS
+[36mkafka        |[0m 	transaction.abort.timed.out.transaction.cleanup.interval.ms = 10000
+[36mkafka        |[0m 	transaction.max.timeout.ms = 900000
+[36mkafka        |[0m 	transaction.remove.expired.transaction.cleanup.interval.ms = 3600000
+[36mkafka        |[0m 	transaction.state.log.load.buffer.size = 5242880
+[36mkafka        |[0m 	transaction.state.log.min.isr = 1
+[36mkafka        |[0m 	transaction.state.log.num.partitions = 50
+[36mkafka        |[0m 	transaction.state.log.replication.factor = 1
+[36mkafka        |[0m 	transaction.state.log.segment.bytes = 104857600
+[36mkafka        |[0m 	transactional.id.expiration.ms = 604800000
+[36mkafka        |[0m 	unclean.leader.election.enable = false
+[36mkafka        |[0m 	zookeeper.clientCnxnSocket = null
+[36mkafka        |[0m 	zookeeper.connect = zookeeper:2181
+[36mkafka        |[0m 	zookeeper.connection.timeout.ms = 18000
+[36mkafka        |[0m 	zookeeper.max.in.flight.requests = 10
+[36mkafka        |[0m 	zookeeper.session.timeout.ms = 18000
+[36mkafka        |[0m 	zookeeper.set.acl = false
+[36mkafka        |[0m 	zookeeper.ssl.cipher.suites = null
+[36mkafka        |[0m 	zookeeper.ssl.client.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.crl.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.enabled.protocols = null
+[36mkafka        |[0m 	zookeeper.ssl.endpoint.identification.algorithm = HTTPS
+[36mkafka        |[0m 	zookeeper.ssl.keystore.location = null
+[36mkafka        |[0m 	zookeeper.ssl.keystore.password = null
+[36mkafka        |[0m 	zookeeper.ssl.keystore.type = null
+[36mkafka        |[0m 	zookeeper.ssl.ocsp.enable = false
+[36mkafka        |[0m 	zookeeper.ssl.protocol = TLSv1.2
+[36mkafka        |[0m 	zookeeper.ssl.truststore.location = null
+[36mkafka        |[0m 	zookeeper.ssl.truststore.password = null
+[36mkafka        |[0m 	zookeeper.ssl.truststore.type = null
+[36mkafka        |[0m 	zookeeper.sync.time.ms = 2000
+[36mkafka        |[0m  (kafka.server.KafkaConfig)
+[36mkafka        |[0m [2021-09-12 14:47:41,096] INFO [ThrottledChannelReaper-Fetch]: Starting (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:41,097] INFO [ThrottledChannelReaper-Produce]: Starting (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:41,100] INFO [ThrottledChannelReaper-Request]: Starting (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:41,102] INFO [ThrottledChannelReaper-ControllerMutation]: Starting (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:41,164] INFO Loading logs from log dirs ArrayBuffer(/bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,168] INFO Attempting recovery for all logs in /bitnami/kafka/data since no clean shutdown file was found (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,297] INFO [Log partition=__consumer_offsets-0, dir=/bitnami/kafka/data] Recovering unflushed segment 8 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,300] INFO [Log partition=__consumer_offsets-0, dir=/bitnami/kafka/data] Loading producer state till offset 8 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,305] INFO [ProducerStateManager partition=__consumer_offsets-0] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-0/00000000000000000008.snapshot,8)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,337] INFO [ProducerStateManager partition=__consumer_offsets-0] Writing producer snapshot at offset 10 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,361] INFO [Log partition=__consumer_offsets-0, dir=/bitnami/kafka/data] Loading producer state till offset 10 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,361] INFO [ProducerStateManager partition=__consumer_offsets-0] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-0/00000000000000000010.snapshot,10)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,372] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-0, topic=__consumer_offsets, partition=0, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=10) with 2 segments in 173ms (1/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,376] INFO [Log partition=__consumer_offsets-29, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,377] INFO [Log partition=__consumer_offsets-29, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,385] INFO [ProducerStateManager partition=__consumer_offsets-29] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,390] INFO [Log partition=__consumer_offsets-29, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,390] INFO [ProducerStateManager partition=__consumer_offsets-29] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-29/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,394] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-29, topic=__consumer_offsets, partition=29, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 21ms (2/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,400] INFO [Log partition=__consumer_offsets-48, dir=/bitnami/kafka/data] Recovering unflushed segment 10 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,401] INFO [Log partition=__consumer_offsets-48, dir=/bitnami/kafka/data] Loading producer state till offset 10 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,402] INFO [ProducerStateManager partition=__consumer_offsets-48] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-48/00000000000000000010.snapshot,10)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,411] INFO [ProducerStateManager partition=__consumer_offsets-48] Writing producer snapshot at offset 13 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,416] INFO [Log partition=__consumer_offsets-48, dir=/bitnami/kafka/data] Loading producer state till offset 13 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,416] INFO [ProducerStateManager partition=__consumer_offsets-48] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-48/00000000000000000013.snapshot,13)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,421] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-48, topic=__consumer_offsets, partition=48, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=13) with 3 segments in 27ms (3/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,426] INFO [Log partition=__consumer_offsets-10, dir=/bitnami/kafka/data] Recovering unflushed segment 3 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,426] INFO [Log partition=__consumer_offsets-10, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,427] INFO [ProducerStateManager partition=__consumer_offsets-10] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-10/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,434] INFO [ProducerStateManager partition=__consumer_offsets-10] Writing producer snapshot at offset 5 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,439] INFO [Log partition=__consumer_offsets-10, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,439] INFO [ProducerStateManager partition=__consumer_offsets-10] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-10/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,444] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-10, topic=__consumer_offsets, partition=10, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=5) with 2 segments in 23ms (4/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,447] INFO [Log partition=__consumer_offsets-45, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,447] INFO [Log partition=__consumer_offsets-45, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,455] INFO [Log partition=__consumer_offsets-45, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,459] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-45, topic=__consumer_offsets, partition=45, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 15ms (5/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,462] INFO [Log partition=__consumer_offsets-26, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,462] INFO [Log partition=__consumer_offsets-26, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,468] INFO [Log partition=__consumer_offsets-26, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,472] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-26, topic=__consumer_offsets, partition=26, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 13ms (6/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,475] INFO [Log partition=__consumer_offsets-7, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,476] INFO [Log partition=__consumer_offsets-7, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,483] INFO [Log partition=__consumer_offsets-7, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,487] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-7, topic=__consumer_offsets, partition=7, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 14ms (7/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,490] INFO [Log partition=__consumer_offsets-42, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,491] INFO [Log partition=__consumer_offsets-42, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,497] INFO [Log partition=__consumer_offsets-42, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,501] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-42, topic=__consumer_offsets, partition=42, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 15ms (8/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,504] INFO [Log partition=__consumer_offsets-4, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,505] INFO [Log partition=__consumer_offsets-4, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,512] INFO [Log partition=__consumer_offsets-4, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,515] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-4, topic=__consumer_offsets, partition=4, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 13ms (9/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,519] INFO [Log partition=__consumer_offsets-23, dir=/bitnami/kafka/data] Recovering unflushed segment 21 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,520] INFO [Log partition=__consumer_offsets-23, dir=/bitnami/kafka/data] Loading producer state till offset 21 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,520] INFO [ProducerStateManager partition=__consumer_offsets-23] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-23/00000000000000000021.snapshot,21)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,538] INFO [ProducerStateManager partition=__consumer_offsets-23] Writing producer snapshot at offset 27 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,545] INFO [Log partition=__consumer_offsets-23, dir=/bitnami/kafka/data] Loading producer state till offset 27 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,545] INFO [ProducerStateManager partition=__consumer_offsets-23] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-23/00000000000000000027.snapshot,27)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,550] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-23, topic=__consumer_offsets, partition=23, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=27) with 3 segments in 35ms (10/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,553] INFO [Log partition=__consumer_offsets-1, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,554] INFO [Log partition=__consumer_offsets-1, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,563] INFO [ProducerStateManager partition=__consumer_offsets-1] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,568] INFO [Log partition=__consumer_offsets-1, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,568] INFO [ProducerStateManager partition=__consumer_offsets-1] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-1/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,572] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-1, topic=__consumer_offsets, partition=1, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 22ms (11/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,577] INFO [Log partition=__consumer_offsets-20, dir=/bitnami/kafka/data] Recovering unflushed segment 3 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,578] INFO [Log partition=__consumer_offsets-20, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,578] INFO [ProducerStateManager partition=__consumer_offsets-20] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-20/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,588] INFO [ProducerStateManager partition=__consumer_offsets-20] Writing producer snapshot at offset 6 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,594] INFO [Log partition=__consumer_offsets-20, dir=/bitnami/kafka/data] Loading producer state till offset 6 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,594] INFO [ProducerStateManager partition=__consumer_offsets-20] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-20/00000000000000000006.snapshot,6)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,598] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-20, topic=__consumer_offsets, partition=20, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=6) with 2 segments in 26ms (12/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,603] INFO [Log partition=__consumer_offsets-39, dir=/bitnami/kafka/data] Recovering unflushed segment 5 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,604] INFO [Log partition=__consumer_offsets-39, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,604] INFO [ProducerStateManager partition=__consumer_offsets-39] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-39/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,614] INFO [ProducerStateManager partition=__consumer_offsets-39] Writing producer snapshot at offset 7 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,620] INFO [Log partition=__consumer_offsets-39, dir=/bitnami/kafka/data] Loading producer state till offset 7 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,620] INFO [ProducerStateManager partition=__consumer_offsets-39] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-39/00000000000000000007.snapshot,7)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,624] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-39, topic=__consumer_offsets, partition=39, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=7) with 2 segments in 26ms (13/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,629] INFO [Log partition=__consumer_offsets-17, dir=/bitnami/kafka/data] Recovering unflushed segment 49 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,629] INFO [Log partition=__consumer_offsets-17, dir=/bitnami/kafka/data] Loading producer state till offset 49 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,630] INFO [ProducerStateManager partition=__consumer_offsets-17] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-17/00000000000000000049.snapshot,49)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,639] INFO [ProducerStateManager partition=__consumer_offsets-17] Writing producer snapshot at offset 51 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,645] INFO [Log partition=__consumer_offsets-17, dir=/bitnami/kafka/data] Loading producer state till offset 51 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,645] INFO [ProducerStateManager partition=__consumer_offsets-17] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-17/00000000000000000051.snapshot,51)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,649] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-17, topic=__consumer_offsets, partition=17, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=51) with 2 segments in 25ms (14/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,652] INFO [Log partition=__consumer_offsets-36, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,653] INFO [Log partition=__consumer_offsets-36, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,661] INFO [Log partition=__consumer_offsets-36, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,665] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-36, topic=__consumer_offsets, partition=36, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 15ms (15/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,668] INFO [Log partition=__consumer_offsets-14, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,668] INFO [Log partition=__consumer_offsets-14, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,676] INFO [Log partition=__consumer_offsets-14, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,678] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-14, topic=__consumer_offsets, partition=14, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 13ms (16/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,682] INFO [Log partition=__consumer_offsets-33, dir=/bitnami/kafka/data] Recovering unflushed segment 19 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,682] INFO [Log partition=__consumer_offsets-33, dir=/bitnami/kafka/data] Loading producer state till offset 19 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,683] INFO [ProducerStateManager partition=__consumer_offsets-33] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-33/00000000000000000019.snapshot,19)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,690] INFO [ProducerStateManager partition=__consumer_offsets-33] Writing producer snapshot at offset 21 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,695] INFO [Log partition=__consumer_offsets-33, dir=/bitnami/kafka/data] Loading producer state till offset 21 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,695] INFO [ProducerStateManager partition=__consumer_offsets-33] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-33/00000000000000000021.snapshot,21)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,699] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-33, topic=__consumer_offsets, partition=33, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=21) with 2 segments in 20ms (17/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,702] INFO [Log partition=__consumer_offsets-49, dir=/bitnami/kafka/data] Recovering unflushed segment 10 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,703] INFO [Log partition=__consumer_offsets-49, dir=/bitnami/kafka/data] Loading producer state till offset 10 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,703] INFO [ProducerStateManager partition=__consumer_offsets-49] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-49/00000000000000000010.snapshot,10)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,711] INFO [ProducerStateManager partition=__consumer_offsets-49] Writing producer snapshot at offset 12 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,716] INFO [Log partition=__consumer_offsets-49, dir=/bitnami/kafka/data] Loading producer state till offset 12 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,717] INFO [ProducerStateManager partition=__consumer_offsets-49] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-49/00000000000000000012.snapshot,12)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,720] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-49, topic=__consumer_offsets, partition=49, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=12) with 2 segments in 22ms (18/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,723] INFO [Log partition=__consumer_offsets-11, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,723] INFO [Log partition=__consumer_offsets-11, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,731] INFO [ProducerStateManager partition=__consumer_offsets-11] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,736] INFO [Log partition=__consumer_offsets-11, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,736] INFO [ProducerStateManager partition=__consumer_offsets-11] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-11/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,739] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-11, topic=__consumer_offsets, partition=11, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 19ms (19/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,742] INFO [Log partition=__consumer_offsets-30, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,743] INFO [Log partition=__consumer_offsets-30, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,751] INFO [ProducerStateManager partition=__consumer_offsets-30] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,755] INFO [Log partition=__consumer_offsets-30, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,756] INFO [ProducerStateManager partition=__consumer_offsets-30] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-30/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,759] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-30, topic=__consumer_offsets, partition=30, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 20ms (20/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,762] INFO [Log partition=__consumer_offsets-46, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,763] INFO [Log partition=__consumer_offsets-46, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,768] INFO [Log partition=__consumer_offsets-46, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,771] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-46, topic=__consumer_offsets, partition=46, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 11ms (21/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,774] INFO [Log partition=__consumer_offsets-27, dir=/bitnami/kafka/data] Recovering unflushed segment 16 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,774] INFO [Log partition=__consumer_offsets-27, dir=/bitnami/kafka/data] Loading producer state till offset 16 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,775] INFO [ProducerStateManager partition=__consumer_offsets-27] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-27/00000000000000000016.snapshot,16)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,781] INFO [ProducerStateManager partition=__consumer_offsets-27] Writing producer snapshot at offset 20 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,786] INFO [Log partition=__consumer_offsets-27, dir=/bitnami/kafka/data] Loading producer state till offset 20 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,786] INFO [ProducerStateManager partition=__consumer_offsets-27] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-27/00000000000000000020.snapshot,20)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,789] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-27, topic=__consumer_offsets, partition=27, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=20) with 2 segments in 18ms (22/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,792] INFO [Log partition=__consumer_offsets-8, dir=/bitnami/kafka/data] Recovering unflushed segment 3 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,793] INFO [Log partition=__consumer_offsets-8, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,793] INFO [ProducerStateManager partition=__consumer_offsets-8] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-8/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,800] INFO [ProducerStateManager partition=__consumer_offsets-8] Writing producer snapshot at offset 5 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,805] INFO [Log partition=__consumer_offsets-8, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,805] INFO [ProducerStateManager partition=__consumer_offsets-8] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-8/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,807] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-8, topic=__consumer_offsets, partition=8, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=5) with 2 segments in 18ms (23/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,811] INFO [Log partition=__consumer_offsets-24, dir=/bitnami/kafka/data] Recovering unflushed segment 3 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,811] INFO [Log partition=__consumer_offsets-24, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,812] INFO [ProducerStateManager partition=__consumer_offsets-24] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-24/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,819] INFO [ProducerStateManager partition=__consumer_offsets-24] Writing producer snapshot at offset 5 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,824] INFO [Log partition=__consumer_offsets-24, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,824] INFO [ProducerStateManager partition=__consumer_offsets-24] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-24/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,826] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-24, topic=__consumer_offsets, partition=24, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=5) with 2 segments in 19ms (24/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,829] INFO [Log partition=__consumer_offsets-43, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,829] INFO [Log partition=__consumer_offsets-43, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,835] INFO [Log partition=__consumer_offsets-43, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,837] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-43, topic=__consumer_offsets, partition=43, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 11ms (25/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,840] INFO [Log partition=__consumer_offsets-5, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,841] INFO [Log partition=__consumer_offsets-5, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,849] INFO [ProducerStateManager partition=__consumer_offsets-5] Writing producer snapshot at offset 5 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,853] INFO [Log partition=__consumer_offsets-5, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,853] INFO [ProducerStateManager partition=__consumer_offsets-5] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-5/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,856] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-5, topic=__consumer_offsets, partition=5, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=5) with 1 segments in 18ms (26/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,858] INFO [Log partition=__consumer_offsets-21, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,858] INFO [Log partition=__consumer_offsets-21, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,864] INFO [Log partition=__consumer_offsets-21, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,866] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-21, topic=__consumer_offsets, partition=21, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (27/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,868] INFO [Log partition=__consumer_offsets-40, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,869] INFO [Log partition=__consumer_offsets-40, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,875] INFO [ProducerStateManager partition=__consumer_offsets-40] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,879] INFO [Log partition=__consumer_offsets-40, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,880] INFO [ProducerStateManager partition=__consumer_offsets-40] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-40/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,882] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-40, topic=__consumer_offsets, partition=40, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 15ms (28/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,885] INFO [Log partition=__consumer_offsets-2, dir=/bitnami/kafka/data] Recovering unflushed segment 19 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,886] INFO [Log partition=__consumer_offsets-2, dir=/bitnami/kafka/data] Loading producer state till offset 19 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,886] INFO [ProducerStateManager partition=__consumer_offsets-2] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-2/00000000000000000019.snapshot,19)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,893] INFO [ProducerStateManager partition=__consumer_offsets-2] Writing producer snapshot at offset 23 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,897] INFO [Log partition=__consumer_offsets-2, dir=/bitnami/kafka/data] Loading producer state till offset 23 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,898] INFO [ProducerStateManager partition=__consumer_offsets-2] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-2/00000000000000000023.snapshot,23)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,900] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-2, topic=__consumer_offsets, partition=2, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=23) with 2 segments in 17ms (29/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,902] INFO [Log partition=__consumer_offsets-37, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,902] INFO [Log partition=__consumer_offsets-37, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,909] INFO [Log partition=__consumer_offsets-37, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,911] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-37, topic=__consumer_offsets, partition=37, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (30/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,913] INFO [Log partition=__consumer_offsets-18, dir=/bitnami/kafka/data] Recovering unflushed segment 16 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,914] INFO [Log partition=__consumer_offsets-18, dir=/bitnami/kafka/data] Loading producer state till offset 16 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,914] INFO [ProducerStateManager partition=__consumer_offsets-18] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-18/00000000000000000016.snapshot,16)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,921] INFO [ProducerStateManager partition=__consumer_offsets-18] Writing producer snapshot at offset 18 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,926] INFO [Log partition=__consumer_offsets-18, dir=/bitnami/kafka/data] Loading producer state till offset 18 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,926] INFO [ProducerStateManager partition=__consumer_offsets-18] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-18/00000000000000000018.snapshot,18)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,928] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-18, topic=__consumer_offsets, partition=18, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=18) with 2 segments in 18ms (31/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,931] INFO [Log partition=__consumer_offsets-34, dir=/bitnami/kafka/data] Recovering unflushed segment 6 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,932] INFO [Log partition=__consumer_offsets-34, dir=/bitnami/kafka/data] Loading producer state till offset 6 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,932] INFO [ProducerStateManager partition=__consumer_offsets-34] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-34/00000000000000000006.snapshot,6)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,940] INFO [ProducerStateManager partition=__consumer_offsets-34] Writing producer snapshot at offset 8 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,945] INFO [Log partition=__consumer_offsets-34, dir=/bitnami/kafka/data] Loading producer state till offset 8 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,945] INFO [ProducerStateManager partition=__consumer_offsets-34] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-34/00000000000000000008.snapshot,8)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,948] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-34, topic=__consumer_offsets, partition=34, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=8) with 2 segments in 19ms (32/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,950] INFO [Log partition=__consumer_offsets-15, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,951] INFO [Log partition=__consumer_offsets-15, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,957] INFO [Log partition=__consumer_offsets-15, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,959] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-15, topic=__consumer_offsets, partition=15, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (33/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,962] INFO [Log partition=__consumer_offsets-12, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,962] INFO [Log partition=__consumer_offsets-12, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,968] INFO [Log partition=__consumer_offsets-12, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,969] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-12, topic=__consumer_offsets, partition=12, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (34/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,973] INFO [Log partition=__consumer_offsets-31, dir=/bitnami/kafka/data] Recovering unflushed segment 4 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,974] INFO [Log partition=__consumer_offsets-31, dir=/bitnami/kafka/data] Loading producer state till offset 4 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,974] INFO [ProducerStateManager partition=__consumer_offsets-31] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-31/00000000000000000004.snapshot,4)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,983] INFO [ProducerStateManager partition=__consumer_offsets-31] Writing producer snapshot at offset 6 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,988] INFO [Log partition=__consumer_offsets-31, dir=/bitnami/kafka/data] Loading producer state till offset 6 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,988] INFO [ProducerStateManager partition=__consumer_offsets-31] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-31/00000000000000000006.snapshot,6)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,990] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-31, topic=__consumer_offsets, partition=31, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=6) with 2 segments in 20ms (35/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:41,992] INFO [Log partition=__consumer_offsets-9, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:41,993] INFO [Log partition=__consumer_offsets-9, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,001] INFO [ProducerStateManager partition=__consumer_offsets-9] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,006] INFO [Log partition=__consumer_offsets-9, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,006] INFO [ProducerStateManager partition=__consumer_offsets-9] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-9/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,008] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-9, topic=__consumer_offsets, partition=9, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 17ms (36/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,010] INFO [Log partition=__consumer_offsets-47, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,010] INFO [Log partition=__consumer_offsets-47, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,018] INFO [ProducerStateManager partition=__consumer_offsets-47] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,022] INFO [Log partition=__consumer_offsets-47, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,022] INFO [ProducerStateManager partition=__consumer_offsets-47] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-47/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,024] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-47, topic=__consumer_offsets, partition=47, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 15ms (37/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,026] INFO [Log partition=__consumer_offsets-19, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,026] INFO [Log partition=__consumer_offsets-19, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,032] INFO [Log partition=__consumer_offsets-19, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,034] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-19, topic=__consumer_offsets, partition=19, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (38/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,037] INFO [Log partition=__consumer_offsets-28, dir=/bitnami/kafka/data] Recovering unflushed segment 21 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,037] INFO [Log partition=__consumer_offsets-28, dir=/bitnami/kafka/data] Loading producer state till offset 21 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,038] INFO [ProducerStateManager partition=__consumer_offsets-28] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-28/00000000000000000021.snapshot,21)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,046] INFO [ProducerStateManager partition=__consumer_offsets-28] Writing producer snapshot at offset 23 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,050] INFO [Log partition=__consumer_offsets-28, dir=/bitnami/kafka/data] Loading producer state till offset 23 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,050] INFO [ProducerStateManager partition=__consumer_offsets-28] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-28/00000000000000000023.snapshot,23)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,052] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-28, topic=__consumer_offsets, partition=28, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=23) with 2 segments in 17ms (39/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,055] INFO [Log partition=__consumer_offsets-38, dir=/bitnami/kafka/data] Recovering unflushed segment 9 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,056] INFO [Log partition=__consumer_offsets-38, dir=/bitnami/kafka/data] Loading producer state till offset 9 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,056] INFO [ProducerStateManager partition=__consumer_offsets-38] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-38/00000000000000000009.snapshot,9)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,064] INFO [ProducerStateManager partition=__consumer_offsets-38] Writing producer snapshot at offset 11 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,068] INFO [Log partition=__consumer_offsets-38, dir=/bitnami/kafka/data] Loading producer state till offset 11 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,068] INFO [ProducerStateManager partition=__consumer_offsets-38] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-38/00000000000000000011.snapshot,11)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,070] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-38, topic=__consumer_offsets, partition=38, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=11) with 2 segments in 18ms (40/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,073] INFO [Log partition=__consumer_offsets-35, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,073] INFO [Log partition=__consumer_offsets-35, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,082] INFO [ProducerStateManager partition=__consumer_offsets-35] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,086] INFO [Log partition=__consumer_offsets-35, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,086] INFO [ProducerStateManager partition=__consumer_offsets-35] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-35/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,088] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-35, topic=__consumer_offsets, partition=35, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 18ms (41/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,091] INFO [Log partition=__consumer_offsets-6, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,091] INFO [Log partition=__consumer_offsets-6, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,097] INFO [Log partition=__consumer_offsets-6, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,099] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-6, topic=__consumer_offsets, partition=6, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 10ms (42/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,102] INFO [Log partition=__consumer_offsets-44, dir=/bitnami/kafka/data] Recovering unflushed segment 15 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,102] INFO [Log partition=__consumer_offsets-44, dir=/bitnami/kafka/data] Loading producer state till offset 15 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,103] INFO [ProducerStateManager partition=__consumer_offsets-44] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-44/00000000000000000015.snapshot,15)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,110] INFO [ProducerStateManager partition=__consumer_offsets-44] Writing producer snapshot at offset 18 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,115] INFO [Log partition=__consumer_offsets-44, dir=/bitnami/kafka/data] Loading producer state till offset 18 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,115] INFO [ProducerStateManager partition=__consumer_offsets-44] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-44/00000000000000000018.snapshot,18)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,117] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-44, topic=__consumer_offsets, partition=44, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=18) with 3 segments in 18ms (43/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,119] INFO [Log partition=__consumer_offsets-25, dir=/bitnami/kafka/data] Recovering unflushed segment 7 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,120] INFO [Log partition=__consumer_offsets-25, dir=/bitnami/kafka/data] Loading producer state till offset 7 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,120] INFO [ProducerStateManager partition=__consumer_offsets-25] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-25/00000000000000000007.snapshot,7)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,127] INFO [ProducerStateManager partition=__consumer_offsets-25] Writing producer snapshot at offset 9 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,131] INFO [Log partition=__consumer_offsets-25, dir=/bitnami/kafka/data] Loading producer state till offset 9 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,131] INFO [ProducerStateManager partition=__consumer_offsets-25] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-25/00000000000000000009.snapshot,9)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,133] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-25, topic=__consumer_offsets, partition=25, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=9) with 2 segments in 16ms (44/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,135] INFO [Log partition=__consumer_offsets-16, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,135] INFO [Log partition=__consumer_offsets-16, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,143] INFO [ProducerStateManager partition=__consumer_offsets-16] Writing producer snapshot at offset 3 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,147] INFO [Log partition=__consumer_offsets-16, dir=/bitnami/kafka/data] Loading producer state till offset 3 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,148] INFO [ProducerStateManager partition=__consumer_offsets-16] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-16/00000000000000000003.snapshot,3)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,149] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-16, topic=__consumer_offsets, partition=16, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=3) with 1 segments in 16ms (45/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,151] INFO [Log partition=__consumer_offsets-22, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,152] INFO [Log partition=__consumer_offsets-22, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,157] INFO [Log partition=__consumer_offsets-22, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,158] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-22, topic=__consumer_offsets, partition=22, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 9ms (46/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,160] INFO [Log partition=__consumer_offsets-41, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,161] INFO [Log partition=__consumer_offsets-41, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,166] INFO [Log partition=__consumer_offsets-41, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,167] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-41, topic=__consumer_offsets, partition=41, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 9ms (47/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,169] INFO [Log partition=__consumer_offsets-32, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,169] INFO [Log partition=__consumer_offsets-32, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,175] INFO [Log partition=__consumer_offsets-32, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,176] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-32, topic=__consumer_offsets, partition=32, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 9ms (48/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,178] INFO [Log partition=__consumer_offsets-3, dir=/bitnami/kafka/data] Recovering unflushed segment 5 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,179] INFO [Log partition=__consumer_offsets-3, dir=/bitnami/kafka/data] Loading producer state till offset 5 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,179] INFO [ProducerStateManager partition=__consumer_offsets-3] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-3/00000000000000000005.snapshot,5)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,186] INFO [ProducerStateManager partition=__consumer_offsets-3] Writing producer snapshot at offset 7 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,191] INFO [Log partition=__consumer_offsets-3, dir=/bitnami/kafka/data] Loading producer state till offset 7 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,191] INFO [ProducerStateManager partition=__consumer_offsets-3] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/__consumer_offsets-3/00000000000000000007.snapshot,7)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,192] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-3, topic=__consumer_offsets, partition=3, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=7) with 2 segments in 16ms (49/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,194] INFO [Log partition=__consumer_offsets-13, dir=/bitnami/kafka/data] Recovering unflushed segment 0 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,195] INFO [Log partition=__consumer_offsets-13, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,200] INFO [Log partition=__consumer_offsets-13, dir=/bitnami/kafka/data] Loading producer state till offset 0 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,202] INFO Completed load of Log(dir=/bitnami/kafka/data/__consumer_offsets-13, topic=__consumer_offsets, partition=13, highWatermark=0, lastStableOffset=0, logStartOffset=0, logEndOffset=0) with 1 segments in 9ms (50/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,204] INFO [Log partition=tasks-0, dir=/bitnami/kafka/data] Recovering unflushed segment 223 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,205] INFO [Log partition=tasks-0, dir=/bitnami/kafka/data] Loading producer state till offset 223 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,208] INFO [ProducerStateManager partition=tasks-0] Writing producer snapshot at offset 223 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,216] INFO [ProducerStateManager partition=tasks-0] Writing producer snapshot at offset 227 (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,221] INFO [Log partition=tasks-0, dir=/bitnami/kafka/data] Loading producer state till offset 227 with message format version 2 (kafka.log.Log)
+[36mkafka        |[0m [2021-09-12 14:47:42,221] INFO [ProducerStateManager partition=tasks-0] Loading producer state from snapshot file 'SnapshotFile(/bitnami/kafka/data/tasks-0/00000000000000000227.snapshot,227)' (kafka.log.ProducerStateManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,223] INFO Completed load of Log(dir=/bitnami/kafka/data/tasks-0, topic=tasks, partition=0, highWatermark=223, lastStableOffset=223, logStartOffset=223, logEndOffset=227) with 1 segments in 21ms (51/51 loaded in /bitnami/kafka/data) (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,227] INFO Loaded 51 logs in 1063ms. (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,229] INFO Starting log cleanup with a period of 300000 ms. (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,231] INFO Starting log flusher with a default period of 9223372036854775807 ms. (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:42,818] INFO Updated connection-accept-rate max connection creation rate to 2147483647 (kafka.network.ConnectionQuotas)
+[36mkafka        |[0m [2021-09-12 14:47:42,824] INFO Awaiting socket connections on 0.0.0.0:9092. (kafka.network.Acceptor)
+[36mkafka        |[0m [2021-09-12 14:47:42,871] INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Created data-plane acceptor and processors for endpoint : ListenerName(PLAINTEXT) (kafka.network.SocketServer)
+[36mkafka        |[0m [2021-09-12 14:47:42,914] INFO [broker-1-to-controller-send-thread]: Starting (kafka.server.BrokerToControllerRequestThread)
+[36mkafka        |[0m [2021-09-12 14:47:42,941] INFO [ExpirationReaper-1-Produce]: Starting (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:42,943] INFO [ExpirationReaper-1-Fetch]: Starting (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:42,945] INFO [ExpirationReaper-1-DeleteRecords]: Starting (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:42,946] INFO [ExpirationReaper-1-ElectLeader]: Starting (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:42,965] INFO [LogDirFailureHandler]: Starting (kafka.server.ReplicaManager$LogDirFailureHandler)
+[36mkafka        |[0m [2021-09-12 14:47:43,042] INFO Creating /brokers/ids/1 (is it secure? false) (kafka.zk.KafkaZkClient)
+[36mkafka        |[0m [2021-09-12 14:47:43,101] ERROR Error while creating ephemeral at /brokers/ids/1, node already exists and owner '72058622920425472' does not match current session '72057844619411456' (kafka.zk.KafkaZkClient$CheckedEphemeral)
+[36mkafka        |[0m [2021-09-12 14:47:43,110] ERROR [KafkaServer id=1] Fatal error during KafkaServer startup. Prepare to shutdown (kafka.server.KafkaServer)
+[36mkafka        |[0m org.apache.zookeeper.KeeperException$NodeExistsException: KeeperErrorCode = NodeExists
+[36mkafka        |[0m 	at org.apache.zookeeper.KeeperException.create(KeeperException.java:126)
+[36mkafka        |[0m 	at kafka.zk.KafkaZkClient$CheckedEphemeral.getAfterNodeExists(KafkaZkClient.scala:1904)
+[36mkafka        |[0m 	at kafka.zk.KafkaZkClient$CheckedEphemeral.create(KafkaZkClient.scala:1842)
+[36mkafka        |[0m 	at kafka.zk.KafkaZkClient.checkedEphemeralCreate(KafkaZkClient.scala:1809)
+[36mkafka        |[0m 	at kafka.zk.KafkaZkClient.registerBroker(KafkaZkClient.scala:96)
+[36mkafka        |[0m 	at kafka.server.KafkaServer.startup(KafkaServer.scala:308)
+[36mkafka        |[0m 	at kafka.Kafka$.main(Kafka.scala:109)
+[36mkafka        |[0m 	at kafka.Kafka.main(Kafka.scala)
+[36mkafka        |[0m [2021-09-12 14:47:43,116] INFO [KafkaServer id=1] shutting down (kafka.server.KafkaServer)
+[36mkafka        |[0m [2021-09-12 14:47:43,118] INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Stopping socket server request processors (kafka.network.SocketServer)
+[36mkafka        |[0m [2021-09-12 14:47:43,124] INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Stopped socket server request processors (kafka.network.SocketServer)
+[36mkafka        |[0m [2021-09-12 14:47:43,132] INFO [ReplicaManager broker=1] Shutting down (kafka.server.ReplicaManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,133] INFO [LogDirFailureHandler]: Shutting down (kafka.server.ReplicaManager$LogDirFailureHandler)
+[36mkafka        |[0m [2021-09-12 14:47:43,135] INFO [LogDirFailureHandler]: Stopped (kafka.server.ReplicaManager$LogDirFailureHandler)
+[36mkafka        |[0m [2021-09-12 14:47:43,135] INFO [LogDirFailureHandler]: Shutdown completed (kafka.server.ReplicaManager$LogDirFailureHandler)
+[36mkafka        |[0m [2021-09-12 14:47:43,136] INFO [ReplicaFetcherManager on broker 1] shutting down (kafka.server.ReplicaFetcherManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,139] INFO [ReplicaFetcherManager on broker 1] shutdown completed (kafka.server.ReplicaFetcherManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,140] INFO [ReplicaAlterLogDirsManager on broker 1] shutting down (kafka.server.ReplicaAlterLogDirsManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,141] INFO [ReplicaAlterLogDirsManager on broker 1] shutdown completed (kafka.server.ReplicaAlterLogDirsManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,141] INFO [ExpirationReaper-1-Fetch]: Shutting down (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,144] INFO [ExpirationReaper-1-Fetch]: Stopped (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,144] INFO [ExpirationReaper-1-Fetch]: Shutdown completed (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,144] INFO [ExpirationReaper-1-Produce]: Shutting down (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,341] INFO [ExpirationReaper-1-Produce]: Stopped (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,341] INFO [ExpirationReaper-1-Produce]: Shutdown completed (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,342] INFO [ExpirationReaper-1-DeleteRecords]: Shutting down (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,345] INFO [ExpirationReaper-1-DeleteRecords]: Stopped (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,345] INFO [ExpirationReaper-1-DeleteRecords]: Shutdown completed (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,346] INFO [ExpirationReaper-1-ElectLeader]: Shutting down (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,346] INFO [ExpirationReaper-1-ElectLeader]: Stopped (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,346] INFO [ExpirationReaper-1-ElectLeader]: Shutdown completed (kafka.server.DelayedOperationPurgatory$ExpiredOperationReaper)
+[36mkafka        |[0m [2021-09-12 14:47:43,359] INFO [ReplicaManager broker=1] Shut down completely (kafka.server.ReplicaManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,359] INFO [broker-1-to-controller-send-thread]: Shutting down (kafka.server.BrokerToControllerRequestThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,360] INFO [broker-1-to-controller-send-thread]: Stopped (kafka.server.BrokerToControllerRequestThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,361] INFO [broker-1-to-controller-send-thread]: Shutdown completed (kafka.server.BrokerToControllerRequestThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,372] INFO Broker to controller channel manager for alterIsrChannel shutdown (kafka.server.BrokerToControllerChannelManagerImpl)
+[36mkafka        |[0m [2021-09-12 14:47:43,375] INFO Shutting down. (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,448] INFO Shutdown complete. (kafka.log.LogManager)
+[36mkafka        |[0m [2021-09-12 14:47:43,449] INFO [feature-zk-node-event-process-thread]: Shutting down (kafka.server.FinalizedFeatureChangeListener$ChangeNotificationProcessorThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,450] INFO [feature-zk-node-event-process-thread]: Stopped (kafka.server.FinalizedFeatureChangeListener$ChangeNotificationProcessorThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,450] INFO [feature-zk-node-event-process-thread]: Shutdown completed (kafka.server.FinalizedFeatureChangeListener$ChangeNotificationProcessorThread)
+[36mkafka        |[0m [2021-09-12 14:47:43,452] INFO [ZooKeeperClient Kafka server] Closing. (kafka.zookeeper.ZooKeeperClient)
+[36mkafka        |[0m [2021-09-12 14:47:43,559] INFO Session: 0x100003a57d20000 closed (org.apache.zookeeper.ZooKeeper)
+[36mkafka        |[0m [2021-09-12 14:47:43,559] INFO EventThread shut down for session: 0x100003a57d20000 (org.apache.zookeeper.ClientCnxn)
+[36mkafka        |[0m [2021-09-12 14:47:43,561] INFO [ZooKeeperClient Kafka server] Closed. (kafka.zookeeper.ZooKeeperClient)
+[36mkafka        |[0m [2021-09-12 14:47:43,562] INFO [ThrottledChannelReaper-Fetch]: Shutting down (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,098] INFO [ThrottledChannelReaper-Fetch]: Stopped (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,098] INFO [ThrottledChannelReaper-Fetch]: Shutdown completed (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,098] INFO [ThrottledChannelReaper-Produce]: Shutting down (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,098] INFO [ThrottledChannelReaper-Produce]: Stopped (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,098] INFO [ThrottledChannelReaper-Produce]: Shutdown completed (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,099] INFO [ThrottledChannelReaper-Request]: Shutting down (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,100] INFO [ThrottledChannelReaper-Request]: Stopped (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,100] INFO [ThrottledChannelReaper-Request]: Shutdown completed (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,101] INFO [ThrottledChannelReaper-ControllerMutation]: Shutting down (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,102] INFO [ThrottledChannelReaper-ControllerMutation]: Stopped (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,103] INFO [ThrottledChannelReaper-ControllerMutation]: Shutdown completed (kafka.server.ClientQuotaManager$ThrottledChannelReaper)
+[36mkafka        |[0m [2021-09-12 14:47:44,104] INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Shutting down socket server (kafka.network.SocketServer)
+[36mkafka        |[0m [2021-09-12 14:47:44,179] INFO [SocketServer listenerType=ZK_BROKER, nodeId=1] Shutdown completed (kafka.network.SocketServer)
+[36mkafka        |[0m [2021-09-12 14:47:44,180] INFO Metrics scheduler closed (org.apache.kafka.common.metrics.Metrics)
+[36mkafka        |[0m [2021-09-12 14:47:44,180] INFO Closing reporter org.apache.kafka.common.metrics.JmxReporter (org.apache.kafka.common.metrics.Metrics)
+[36mkafka        |[0m [2021-09-12 14:47:44,181] INFO Metrics reporters closed (org.apache.kafka.common.metrics.Metrics)
+[36mkafka        |[0m [2021-09-12 14:47:44,183] INFO Broker and topic stats closed (kafka.server.BrokerTopicStats)
+[36mkafka        |[0m [2021-09-12 14:47:44,193] INFO App info kafka.server for 1 unregistered (org.apache.kafka.common.utils.AppInfoParser)
+[36mkafka        |[0m [2021-09-12 14:47:44,194] INFO [KafkaServer id=1] shut down completed (kafka.server.KafkaServer)
+[36mkafka        |[0m [2021-09-12 14:47:44,194] ERROR Exiting Kafka. (kafka.Kafka$)
+[36mkafka        |[0m [2021-09-12 14:47:44,194] INFO [KafkaServer id=1] shutting down (kafka.server.KafkaServer)
+[36mkafka exited with code 1
+[0m[33mzookeeper_1  |[0m 2021-09-12 14:47:56,920 [myid:1] - INFO  [SessionTracker:ZooKeeperServer@628] - Expiring session 0x10000ef8e2d0000, timeout of 18000ms exceeded
+Gracefully stopping... (press Ctrl+C again to force)

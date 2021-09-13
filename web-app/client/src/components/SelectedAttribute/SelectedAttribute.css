@@ -1,6 +1,6 @@
 @import url("../../colors.css");
 
-.attribute {
+.selected-attribute {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,12 +15,12 @@
   transition: 0.3s;
 }
 
-.attribute:hover {
+.selected-attribute:hover {
   transform: scale(1.04);
   transition: 0.3s;
 }
 
-.attribute button {
+.selected-attribute button {
   background-color: var(--primary-1);
   display: flex;
   justify-content: center;
@@ -31,4 +31,9 @@
   box-shadow: none;
   border: none;
   margin-left: 0.3rem;
+}
+
+.selected-attribute button img {
+  width: 0.3rem;
+  height: 0.3rem;
 }

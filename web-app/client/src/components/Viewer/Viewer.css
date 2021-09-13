@@ -6,7 +6,7 @@
   min-height: calc(100vh - 6.5rem);
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   position: relative;
   /* overflow: scroll; */
@@ -44,4 +44,9 @@ footer {
 .bottom-title {
   color: var(--text-black);
   font-weight: 500;
+}
+
+footer img {
+  width: 2rem;
+  height: 2rem;
 }

@@ -1,0 +1,10 @@
+@import url("../../colors.css");
+
+.home-screen {
+  background-color: var(--background-dark);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

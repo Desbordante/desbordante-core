@@ -3,7 +3,6 @@
 .dependency-list-full {
   display: flex;
   flex-direction: column;
-  /* justify-content: space-between; */
   justify-content: flex-start;
   height: 80%;
   width: 95%;
@@ -12,10 +11,6 @@
 .dependency-list-full > * {
   margin: 0.8rem 0rem;
 }
-
-/* .dependency-list-full .title {
-  align-self: center;
-} */
 
 .sort h3 {
   color: var(--text-black);
@@ -28,19 +23,14 @@
   align-items: center;
 }
 
-.dependency-list {
-  overflow-y: scroll;
-  /* height: 50%; */
-  /* box-shadow: inset 0px 0px 2rem var(--primary-1); */
-}
-
 /* hide scrollbar but allow scrolling */
 .dependency-list {
-  -ms-overflow-style: none; /* for Internet Explorer, Edge */
-  scrollbar-width: none; /* for Firefox */
+  height: 50vh;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   overflow-y: scroll;
 }
 
 .dependency-list::-webkit-scrollbar {
-  display: none; /* for Chrome, Safari, and Opera */
+  display: none;
 }

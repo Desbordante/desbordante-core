@@ -1,32 +1,41 @@
 @import url("../../colors.css");
 
-.wrapper {
-  padding: 0.2rem;
-  position: relative;
-  z-index: 1;
-  cursor: pointer;
+.file-name-wrapper .filename,
+.file-name-wrapper .glow {
+  width: 30rem;
+  padding: 0.8rem;
+  height: 2.7rem;
+  font-size: 1.2rem;
+  font-weight: 300;
+  border-radius: 1000px;
+  text-align: left;
+  font-family: "Roboto", sans-serif;
+  background-color: var(--border);
+  display: flex;
+  align-items: center;
+  white-space: pre;
+  transition: 0.3s;
 }
 
-.wrapper.error {
-  background: var(--error);
+.file-name-wrapper .outline {
+  padding: 0.15rem;
+  height: 3rem;
+  width: 30rem;
+}
+
+
+.file-name-wrapper .gradient-fill {
+  background: linear-gradient(210deg, var(--primary-1), var(--primary-0));
+  white-space: pre-wrap; /* css-3 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+  overflow-wrap: break-word;
 }
 
 .error {
   background: var(--error);
-}
-
-.filename {
-  margin: 0;
-  text-align: left;
-  width: 30rem;
-  transition: 0.3s;
-  white-space: normal;
-  background-color: var(--border);
-}
-
-.filename.glow {
-  font-size: 1.1rem;
-  transform: translateX(4.1rem);
 }
 
 .inactive {
@@ -37,23 +46,41 @@
   color: var(--text-white);
 }
 
-.hilight-purple {
-  color: var(--text-highlight-purple);
+.highlight-purple {
+  color: var(--text-highlight-2);
 }
 
-.hilight-green {
-  color: var(--text-highlight-green);
+.highlight-green {
+  color: var(--text-highlight-1);
 }
 
-.hilight-red {
+.highlight-red {
   color: var(--error);
 }
 
 .file-name-wrapper {
   position: relative;
   transition: 0.3s;
+  border-radius: 1000px;
 }
 
 .file-name-wrapper:hover {
   transform: scale(1.005);
+}
+
+.file-name-wrapper > * {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1000px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.file-name-wrapper .glow {
+  position: absolute;
+  z-index: 0;
+  filter: blur(0.6rem);
 }
