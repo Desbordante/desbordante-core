@@ -19,13 +19,13 @@ router.post('/chooseTask', function(req, res){
 
         console.log("Input data:", json)
 
-        const { algName, errorPercent, separator, maxLHS, hasHeader, fileName } = json
+        const { fileName } = req.body
+        const { algName, errorPercent, separator, maxLHS, hasHeader } = json
         const status = 'NOT IN PROCESS'
         const progress = 0.0
 
         // get path to root file (www)
         var rootPath = path.dirname(require.main.filename).split("/")
-
         rootPath.pop()              // remove dir 'bin'
         rootPath.pop()              // remove dir 'server'
         rootPath.pop()              // remove dir 'web-app'
