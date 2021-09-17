@@ -259,5 +259,3 @@ std::string PositionListIndex::toString() const {
     res.push_back(']');
     return res;
 }
-
-
