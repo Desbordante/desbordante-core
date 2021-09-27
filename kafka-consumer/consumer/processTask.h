@@ -55,18 +55,21 @@ void process_task(taskConfig const& task, DBManager const& manager) {
         
         unsigned long long elapsedTime;
 
+        const auto& phaseNames = algorithmInstance->getPhaseNames();
+
         if (alg == "FastFDs") {
-            std::thread progress_listener([&task, &manager, &algorithmInstance] {
-                double progress = 0;
-                while(progress != 100) {
+            std::thread progress_listener([&task, &manager, &algorithmInstance, &phaseNames] {
+                auto progress = algorithmInstance->getProgress();
+                while(progress.second != 100) {
                     progress = algorithmInstance->getProgress();
-                    task.updateProgress(manager, progress);
+                    task.updateProgress(manager, progress.second, phaseNames[0].data());
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             });
             elapsedTime = algorithmInstance->execute();
             progress_listener.join();
         } else {
+            task.updateProgress(manager, 5, phaseNames[0].data());
             elapsedTime = algorithmInstance->execute();
             task.updateProgress(manager, 100);
         }

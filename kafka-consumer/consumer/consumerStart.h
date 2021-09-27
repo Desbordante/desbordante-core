@@ -41,8 +41,9 @@ void consumerStart(DBManager const& manager, cppkafka::Consumer* const consumer,
                     auto rows = manager.defaultQuery(query);
 
                     if (rows.size() != 1) {
-                        std::cout << "This task [" + std::string(taskID) + "] isn't in the database" << std::endl; 
-                        throw std::runtime_error("Incorrect server work, task isn't added to the DB");
+                        std::cout << "This task [" + std::string(taskID) + "] isn't in the database [SKIPPED]" << std::endl;
+                        consumer->commit(msg); 
+                        continue;
                     }
 
                     std::string datasetPath = rows[0]["datasetpath"].c_str();

@@ -63,9 +63,13 @@ public:
     }
 
     // Send a request to DB for progress updating
-    void updateProgress(DBManager const& manager, double progressPercent) const {
+    void updateProgress(DBManager const& manager, double progressPercent, const std::string& phaseName = std::string()) const {
         try {
-            std::string query = "UPDATE tasks SET progress = " + std::to_string(progressPercent) + " WHERE taskID = '" + taskID + "'";
+            std::string query = "UPDATE tasks SET progress = " + std::to_string(progressPercent);
+            if (phaseName.length()) {
+                query += ", phaseName = '" + phaseName + "'";
+            }
+            query += " WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);
         } catch(const std::exception& e) {
             std::cerr << "Unexpected exception (with changing task's progress in DB) caught: " << e.what() << std::endl;

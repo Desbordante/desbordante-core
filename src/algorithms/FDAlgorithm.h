@@ -65,7 +65,6 @@ public:
      * результатов разных алгоритмов. JSON - на всякий случай, если потом, например, понадобится загрузить список в
      * питон и как-нибудь его поанализировать
      * */
-<<<<<<< HEAD
     std::string getJsonFDs(bool withNullLhs = true);
 
     std::vector<std::string> getColumnNames();
@@ -74,9 +73,6 @@ public:
 
     std::string getJsonArrayNameValue(int degree = 1, bool withAttr = true);
 
-    double getProgress() const noexcept;
-=======
-    std::string getJsonFDs();
     std::vector<std::string_view> const& getPhaseNames() const noexcept {
         return phase_names_;
     }
@@ -84,7 +80,6 @@ public:
      * Pair has the form <current phase id, current phase progess>
      */
     std::pair<uint8_t, double> getProgress() const noexcept;
->>>>>>> main
 
     // считает контрольную сумму Флетчера - нужно для тестирования по хешу
     unsigned int fletcher16();

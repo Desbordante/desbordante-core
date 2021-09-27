@@ -11,6 +11,7 @@ async function createTable(pool) {
         errorPercent real not null,\n
         separator char(1) not null,\n
         progress real not null,\n
+        phaseName text,\n
         elapsedTime bigint CHECK (elapsedTime >= 0),\n
         status varchar(30) not null,\n
         errorStatus text,\n
