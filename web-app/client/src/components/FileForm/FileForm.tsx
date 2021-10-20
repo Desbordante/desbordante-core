@@ -26,12 +26,16 @@ interface Props {
   onSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
   setUploadProgress: (n: number) => void;
   handleResponse: (res: AxiosResponse) => void;
+  file: File | null;
+  setFile: (file: File | null) => void;
 }
 
 const FileForm: React.FC<Props> = ({
   onSubmit,
   setUploadProgress,
   handleResponse,
+  file,
+  setFile,
 }) => {
   // Allowed field values
   const [allowedBuiltinDatasets, setAllowedBuiltinDatasets] = useState<
@@ -43,7 +47,7 @@ const FileForm: React.FC<Props> = ({
   const [maxfilesize, setMaxFileSize] = useState(5e7);
 
   // Parameters, later sent to the server on execution as JSON
-  const [file, setFile] = useState<File | null>(null);
+
   const [hasHeader, setHasHeader] = useState(true);
   const [separator, setSeparator] = useState("");
   const [algorithm, setAlgorithm] = useState("");

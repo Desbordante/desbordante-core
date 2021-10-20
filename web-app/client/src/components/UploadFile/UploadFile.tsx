@@ -29,6 +29,7 @@ const UploadFile: React.FC<Props> = ({
   // you can only use <input type="file" /> for choosing files,
   // so the reference is used to forward click action
   // from regular button to hidden input file
+
   const inputFile = useRef<HTMLInputElement>(null);
 
   return (
@@ -47,6 +48,8 @@ const UploadFile: React.FC<Props> = ({
         id="file"
         ref={inputFile}
         onChange={(e) => {
+          /* eslint no-console: 1 */
+          console.log(e.target.files);
           if (e.target.files) {
             onClick(e.target.files[0]);
           }

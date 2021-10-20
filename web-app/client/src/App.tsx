@@ -11,6 +11,7 @@ import Viewer from "./components/Viewer/Viewer";
 
 const App: React.FC = () => {
   const [uploadProgress, setUploadProgress] = useState(0.0);
+  const [file, setFile] = useState<File | null>(null);
 
   return (
     <Router>
@@ -38,7 +39,11 @@ const App: React.FC = () => {
 
           {/* Home Page */}
           <Route path="/" exact>
-            <HomeScreen setUploadProgress={setUploadProgress} />
+            <HomeScreen
+              file={file}
+              setFile={setFile}
+              setUploadProgress={setUploadProgress}
+            />
           </Route>
         </div>
       </Switch>
