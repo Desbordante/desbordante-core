@@ -7,7 +7,7 @@ import {
   Switch,
   Link,
   useParams,
-  useHistory
+  useHistory,
 } from "react-router-dom";
 import axios from "axios";
 
@@ -18,7 +18,12 @@ import StatusDisplay from "../StatusDisplay/StatusDisplay";
 import Button from "../Button/Button";
 import ProgressBar from "../ProgressBar/ProgressBar";
 import { serverURL } from "../../APIFunctions";
-import { taskStatus, attribute, dependency, dependencyEncoded } from "../../types";
+import {
+  taskStatus,
+  attribute,
+  dependency,
+  dependencyEncoded,
+} from "../../types";
 
 const Viewer: React.FC = () => {
   let { taskID } = useParams<{ taskID: string }>();
@@ -31,19 +36,23 @@ const Viewer: React.FC = () => {
   const [attributesLHS, setAttributesLHS] = useState<attribute[]>([]);
   const [attributesRHS, setAttributesRHS] = useState<attribute[]>([]);
 
-  const [selectedAttributesLHS, setSelectedAttributesLHS] = useState<attribute[]>([]);
-  const [selectedAttributesRHS, setSelectedAttributesRHS] = useState<attribute[]>([]);
+  const [selectedAttributesLHS, setSelectedAttributesLHS] = useState<
+    attribute[]
+  >([]);
+  const [selectedAttributesRHS, setSelectedAttributesRHS] = useState<
+    attribute[]
+  >([]);
 
   const [dependencies, setDependencies] = useState<dependency[]>([]);
 
-  const taskFinished = (status: taskStatus) => (status === "COMPLETED" || status === "SERVER ERROR");
-
-  console.log(dependencies);
+  const taskFinished = (status: taskStatus) =>
+    status === "COMPLETED" || status === "SERVER ERROR";
 
   useEffect(() => {
     const fetchData = async () => {
-      axios.get(`${serverURL}/getTaskInfo?taskID=${taskID}`, {timeout: 2000})
-        .then((task) => (task.data))
+      axios
+        .get(`${serverURL}/getTaskInfo?taskID=${taskID}`, { timeout: 2000 })
+        .then((task) => task.data)
         .then((data) => {
           console.log(data);
           setTaskProgress(data.progress);
@@ -51,10 +60,24 @@ const Viewer: React.FC = () => {
           if (taskFinished(data.status)) {
             setAttributesLHS(data.arraynamevalue.lhs);
             setAttributesRHS(data.arraynamevalue.rhs);
-            setDependencies(data.fds.map((dep: dependencyEncoded) => ({ lhs: dep.lhs.map((attrNum) => data.arraynamevalue.lhs[attrNum]), rhs: data.arraynamevalue.rhs[dep.rhs] })));
+            setDependencies(
+              data.fds.map((dep: dependencyEncoded) => ({
+                lhs: dep.lhs.map(
+                  (attrNum) =>
+                    data.arraynamevalue.lhs[attrNum] ||
+                    data.arraynamevalue.lhs[0]
+                ),
+                rhs:
+                  data.arraynamevalue.rhs[dep.rhs] ||
+                  data.arraynamevalue.rhs[0],
+              }))
+            );
           }
         })
-        .catch((error) => history.push("/error"));
+        .catch((error) => {
+          console.error(error);
+          history.push("/error");
+        });
     };
 
     const timer = setInterval(() => {
@@ -75,82 +98,90 @@ const Viewer: React.FC = () => {
             <h1>File: "{filename}"</h1>
             <h1>Status: {taskStatus}</h1>
           </div>
-            <Button
-              type="button"
-              onClick={() => history.push("/")}
-            >
-              Cancel
-            </Button>
+          <Button type="button" onClick={() => history.push("/")}>
+            Cancel
+          </Button>
         </header>
-        <ProgressBar progress={taskProgress/100} maxWidth={100} thickness={0.5} />
+        <ProgressBar
+          progress={taskProgress / 100}
+          maxWidth={100}
+          thickness={0.5}
+        />
       </div>
       <Router>
         {/* <Switch> */}
-          <Route path={`/attrs/${taskID}`}>
-            <div className="bg-light">
-              {taskFinished(taskStatus) ? null : (
-                <StatusDisplay type="loading" text="Loading" />
-                )}
-              <div
-                className="charts-with-controls"
-                style={{
-                  opacity: taskFinished(taskStatus) ? 1 : 0,
-                }}
-                >
-                <PieChartFull
-                  title="Left-hand side"
-                  attributes={attributesLHS}
-                  selectedAttributes={selectedAttributesLHS}
-                  setSelectedAttributes={setSelectedAttributesLHS}
-                  />
-                <PieChartFull
-                  title="Right-hand side"
-                  attributes={attributesRHS}
-                  maxItemsSelected={1}
-                  selectedAttributes={selectedAttributesRHS}
-                  setSelectedAttributes={setSelectedAttributesRHS}
-                />
-              </div>
-              <footer style={{ opacity: taskFinished(taskStatus) ? 1 : 0 }}>
-                <h1
-                  className="bottom-title"
-                  style={{ color: "#000000", fontWeight: 500 }}
-                >
-                  View Dependencies
+        <Route path={`/attrs/${taskID}`}>
+          <div className="bg-light">
+            {taskFinished(taskStatus) ? null : (
+              <StatusDisplay type="loading" text="Loading" />
+            )}
+            <div
+              className="charts-with-controls"
+              style={{
+                opacity: taskFinished(taskStatus) ? 1 : 0,
+              }}
+            >
+              <PieChartFull
+                title="Left-hand side"
+                attributes={attributesLHS}
+                selectedAttributes={selectedAttributesLHS}
+                setSelectedAttributes={setSelectedAttributesLHS}
+              />
+              <PieChartFull
+                title="Right-hand side"
+                attributes={attributesRHS}
+                maxItemsSelected={1}
+                selectedAttributes={selectedAttributesRHS}
+                setSelectedAttributes={setSelectedAttributesRHS}
+              />
+            </div>
+            <footer style={{ opacity: taskFinished(taskStatus) ? 1 : 0 }}>
+              <h1
+                className="bottom-title"
+                style={{ color: "#000000", fontWeight: 500 }}
+              >
+                View Dependencies
               </h1>
               <Link to={`/deps/${taskID}`}>
-                <Button type="button" color="gradient" glow="always" onClick={() => {}}>
+                <Button
+                  type="button"
+                  color="gradient"
+                  glow="always"
+                  onClick={() => {}}
+                >
                   <img src="/icons/nav-down.svg" alt="down" />
                 </Button>
               </Link>
-              </footer>
-            </div>
-          </Route>
-          <Route path={`/deps/${taskID}`}>
-            <div
-              className="bg-light"
-              style={{ justifyContent: "space-between" }}
-            >
+            </footer>
+          </div>
+        </Route>
+        <Route path={`/deps/${taskID}`}>
+          <div className="bg-light" style={{ justifyContent: "space-between" }}>
             <DependencyListFull
-                dependencies={dependencies}
-                selectedAttributesLHS={selectedAttributesLHS}
-                selectedAttributesRHS={selectedAttributesRHS}
-              />
-              <footer>
-                <h1
-                  className="bottom-title"
-                  style={{ color: "#000", fontWeight: 500 }}
-                >
-                  View Attributes
+              dependencies={dependencies}
+              selectedAttributesLHS={selectedAttributesLHS}
+              selectedAttributesRHS={selectedAttributesRHS}
+            />
+            <footer>
+              <h1
+                className="bottom-title"
+                style={{ color: "#000", fontWeight: 500 }}
+              >
+                View Attributes
               </h1>
               <Link to={`/attrs/${taskID}`}>
-                <Button type="button" color="gradient" glow="always" onClick={() => {}}>
+                <Button
+                  type="button"
+                  color="gradient"
+                  glow="always"
+                  onClick={() => {}}
+                >
                   <img src="/icons/nav-up.svg" alt="up" />
                 </Button>
-                </Link>
-              </footer>
-            </div>
-          </Route>
+              </Link>
+            </footer>
+          </div>
+        </Route>
         {/* </Switch> */}
       </Router>
     </>

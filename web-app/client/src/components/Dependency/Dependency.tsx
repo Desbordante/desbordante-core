@@ -9,11 +9,7 @@ interface Props {
   onClick: React.MouseEventHandler<HTMLDivElement>;
 }
 
-const Dependency: React.FC<Props> = ({
-  dep,
-  isActive,
-  onClick,
-}) => (
+const Dependency: React.FC<Props> = ({ dep, isActive, onClick }) => (
   <div className="dependency" role="button" tabIndex={0} onClick={onClick}>
     {dep.lhs.map((attr) => (
       <div className={`attribute-name ${isActive && "active"}`} key={attr.name}>
@@ -30,7 +26,9 @@ const Dependency: React.FC<Props> = ({
       <line x1="58.23" y1="10.05" x2="0.5" y2="10.05" />
     </svg>
 
-    <div className={`attribute-name ${isActive ? "active" : ""}`}>{dep.rhs.name}</div>
+    <div className={`attribute-name ${isActive ? "active" : ""}`}>
+      {dep.rhs.name}
+    </div>
   </div>
 );
 
