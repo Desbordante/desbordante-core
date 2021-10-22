@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <list>
 #include <stack>
+#include <boost/asio.hpp>
 
 #include "ColumnLayoutRelationData.h"
 #include "RelationalSchema.h"
@@ -34,47 +35,44 @@ unsigned long long DFD::execute() {
 
     double progressStep = 100.0 / schema->getNumColumns();
 
+    boost::asio::thread_pool pool(4);
+
     //second loop of DFD
     for (auto & rhs : schema->getColumns()) {
-        //тут строим новую решетку, соответственно нужно обнулить/завести некоторые структуры данных
-        minimalDeps.clear();
-        maximalNonDeps.clear();
-        dependenciesMap = DependenciesMap(relation->getSchema());
-        nonDependenciesMap = NonDependenciesMap(relation->getSchema());
-        observations.clear();
-        trace = std::stack<Vertical>();
 
-        ColumnData const& rhsData = relation->getColumnData(rhs->getIndex());
-        PositionListIndex const* const rhsPLI = rhsData.getPositionListIndex();
+        boost::asio::post(pool, [this, &rhs, schema, &progressStep, &uniqueVerticals]() {
+            //тут строим новую решетку, соответственно нужно завести некоторые структуры данных
+            //auto minimalDeps = std::unordered_set<Vertical>();
+            //auto maximalNonDeps = std::unordered_set<Vertical>();
+            //auto dependenciesMap = DependenciesMap(relation->getSchema());
+            //auto nonDependenciesMap = NonDependenciesMap(relation->getSchema());
+            //auto observations = LatticeObservations();
+            //auto trace = std::stack<Vertical>();
 
-        //если все строки имеют одинаковое значение, то добавляем зависимость с пустым lhs
-        if (rhsPLI->getNepAsLong() == relation->getNumTuplePairs()) {
-            this->registerFD(*(schema->emptyVertical), *rhs);
-            addProgress(progressStep);
-            continue;
-            //минимальная зависимость []->RHS, меньше точно не найти, поэтому берем следующий RHS
-        }
+            ColumnData const& rhsData = relation->getColumnData(rhs->getIndex());
+            PositionListIndex const *const rhsPLI = rhsData.getPositionListIndex();
 
-        //в метаноме немного по-другому, но суть такая же
-        //тут обрабатываем найденные уникальные столбцы
-        for (auto const& lhs : uniqueVerticals) {
-            if (!lhs.contains(*rhs)) {
-                observations[lhs] = NodeCategory::minimalDependency;
-                dependenciesMap.addNewDependency(lhs);
-                minimalDeps.insert(lhs); //вот теперь добавляем
+            //если все строки имеют одинаковое значение, то добавляем зависимость с пустым lhs
+            if (rhsPLI->getNepAsLong() == relation->getNumTuplePairs()) {
+                this->registerFD(*(schema->emptyVertical), *rhs);
+                addProgress(progressStep);
+                return;
+                //минимальная зависимость []->RHS, меньше точно не найти, поэтому берем следующий RHS
             }
-        }
 
-        //находим минимальные зависимости для текущего RHS
-        findLHSs(rhs.get());
+            //находим минимальные зависимости для текущего RHS
+            auto minimalDeps = findLHSs(rhs.get(), uniqueVerticals);
 
-        //регистрируем полученные зависимости
-        for (auto const& minimalDependencyLHS : minimalDeps) {
-            registerFD(minimalDependencyLHS, *rhs);
-        }
-        addProgress(progressStep);
-        std::cout << (int)getProgress().second << "%\n";
+            //регистрируем полученные зависимости
+            for (auto const &minimalDependencyLHS: minimalDeps) {
+                registerFD(minimalDependencyLHS, *rhs);
+            }
+            addProgress(progressStep);
+            std::cout << (int) getProgress().second << "%\n";
+        });
     }
+
+    pool.join();
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - startTime);
     long long aprioriMillis = elapsed_milliseconds.count();
@@ -97,8 +95,26 @@ Vertical const& DFD::takeRandom(std::unordered_set<Vertical> & nodeSet) {
     return node;
 }
 
-void DFD::findLHSs(Column const* const  rhs) {
+std::unordered_set<Vertical> DFD::findLHSs(Column const* const  rhs, std::vector<Vertical> const& uniqueVerticals) {
     RelationalSchema const* const schema = relation->getSchema();
+
+    std::unordered_set<Vertical> minimalDeps;
+    std::unordered_set<Vertical> maximalNonDeps;
+    auto dependenciesMap = DependenciesMap(schema);
+    auto nonDependenciesMap = NonDependenciesMap(schema);
+    auto observations = LatticeObservations();
+    auto trace = std::stack<Vertical>();
+
+    //в метаноме немного по-другому, но суть такая же
+    //тут обрабатываем найденные уникальные столбцы
+    for (auto const &lhs: uniqueVerticals) {
+        if (!lhs.contains(*rhs)) {
+            observations[lhs] = NodeCategory::minimalDependency;
+            dependenciesMap.addNewDependency(lhs);
+            minimalDeps.insert(lhs); //вот теперь добавляем
+        }
+    }
+
     std::stack<Vertical> seeds;
 
     for (int partitionIndex : columnOrder.getOrderHighDistinctCount(Vertical(*rhs).invert())) {
@@ -134,7 +150,7 @@ void DFD::findLHSs(Column const* const  rhs) {
                             maximalNonDeps.insert(node);
                         }
                     }
-                } else if (!inferCategory(node, rhs->getIndex())) {
+                } else if (!inferCategory(node, rhs->getIndex(), minimalDeps, maximalNonDeps, nonDependenciesMap, dependenciesMap, observations)) {
                     //не смогли определить категорию --- значит считаем партиции
                     auto nodePLI = partitionStorage->getOrCreateFor(node);
                     auto nodePliPointer = std::holds_alternative<PositionListIndex*>(nodePLI)
@@ -162,23 +178,31 @@ void DFD::findLHSs(Column const* const  rhs) {
                     }
                 }
 
-                node = pickNextNode(node, rhs->getIndex());
+                node = pickNextNode(node, rhs->getIndex(), minimalDeps, maximalNonDeps, nonDependenciesMap, dependenciesMap, observations, trace);
             } while (node != *node.getSchema()->emptyVertical);
         }
-        seeds = generateNextSeeds(rhs);
+        seeds = generateNextSeeds(rhs, minimalDeps, maximalNonDeps);
     } while (!seeds.empty());
+
+    return minimalDeps;
 }
 
 DFD::DFD(const std::filesystem::path &path, char separator, bool hasHeader)
-        : FDAlgorithm(path, separator, hasHeader), gen(rd()), observations() {
+        : FDAlgorithm(path, separator, hasHeader), gen(rd()) {
     relation = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
     partitionStorage = std::make_unique<PartitionStorage>(relation.get(), CachingMethod::ALLCACHING, CacheEvictionMethod::MEDAINUSAGE);
-    dependenciesMap = DependenciesMap(relation->getSchema());
-    nonDependenciesMap = NonDependenciesMap(relation->getSchema());
+    //dependenciesMap = DependenciesMap(relation->getSchema());
+    //nonDependenciesMap = NonDependenciesMap(relation->getSchema());
     columnOrder = ColumnOrder(relation.get());
 }
 
-Vertical DFD::pickNextNode(Vertical const &node, size_t rhsIndex) {
+Vertical DFD::pickNextNode(Vertical const &node, size_t rhsIndex,
+                           std::unordered_set<Vertical> & minimalDeps,
+                           std::unordered_set<Vertical> & maximalNonDeps,
+                           NonDependenciesMap & nonDependenciesMap,
+                           DependenciesMap & dependenciesMap,
+                           LatticeObservations & observations,
+                           std::stack<Vertical> & trace) {
     auto nodeIter = observations.find(node);
 
     if (nodeIter != observations.end()) {
@@ -236,7 +260,7 @@ Vertical DFD::pickNextNode(Vertical const &node, size_t rhsIndex) {
     return nextNode;
 }
 
-std::stack<Vertical> DFD::generateNextSeeds(Column const* const currentRHS) {
+std::stack<Vertical> DFD::generateNextSeeds(Column const* const currentRHS, std::unordered_set<Vertical> & minimalDeps, std::unordered_set<Vertical> & maximalNonDeps) {
     std::unordered_set<Vertical> seeds;
     std::unordered_set<Vertical> newSeeds;
 
@@ -347,7 +371,12 @@ void DFD::substractSets(std::unordered_set<Vertical> & set, std::unordered_set<V
     }
 }
 
-bool DFD::inferCategory(Vertical const& node, size_t rhsIndex) {
+bool DFD::inferCategory(Vertical const& node, size_t rhsIndex,
+                        std::unordered_set<Vertical> & minimalDeps,
+                        std::unordered_set<Vertical> & maximalNonDeps,
+                        NonDependenciesMap & nonDependenciesMap,
+                        DependenciesMap & dependenciesMap,
+                        LatticeObservations & observations) {
     if (nonDependenciesMap.canBePruned(node)) {
         observations.updateNonDependencyCategory(node, rhsIndex);
         nonDependenciesMap.addNewNonDependency(node);
@@ -366,3 +395,8 @@ bool DFD::inferCategory(Vertical const& node, size_t rhsIndex) {
 
     return false;
 }
+
+void DFD::registerFD(Vertical vertical, Column rhs) {
+    std::scoped_lock lock(register_fd_mutex_);
+    FDAlgorithm::registerFD(vertical, rhs);
+};
