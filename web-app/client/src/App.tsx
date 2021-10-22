@@ -33,7 +33,7 @@ const App: React.FC = () => {
           {/* View Page */}
           <Route path="/(attrs|deps)/:taskID/">
             <div className="screen">
-              <Viewer />
+              <Viewer file={file} />
             </div>
           </Route>
 

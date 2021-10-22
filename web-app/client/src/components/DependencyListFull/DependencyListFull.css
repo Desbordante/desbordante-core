@@ -8,6 +8,13 @@
   width: 95%;
 }
 
+.dependency-list-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
+  width: 100%;
+}
+
 .dependency-list-full > * {
   margin: 0.8rem 0rem;
 }

@@ -25,7 +25,11 @@ import {
   dependencyEncoded,
 } from "../../types";
 
-const Viewer: React.FC = () => {
+interface Props {
+  file: File | null;
+}
+
+const Viewer: React.FC<Props> = ({ file }) => {
   let { taskID } = useParams<{ taskID: string }>();
   const history = useHistory();
 
@@ -158,6 +162,7 @@ const Viewer: React.FC = () => {
         <Route path={`/deps/${taskID}`}>
           <div className="bg-light" style={{ justifyContent: "space-between" }}>
             <DependencyListFull
+              file={file}
               dependencies={dependencies}
               selectedAttributesLHS={selectedAttributesLHS}
               selectedAttributesRHS={selectedAttributesRHS}

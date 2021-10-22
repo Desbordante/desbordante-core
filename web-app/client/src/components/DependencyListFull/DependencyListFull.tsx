@@ -6,6 +6,7 @@ import "./DependencyListFull.css";
 import Dependency from "../Dependency/Dependency";
 import SearchBar from "../SearchBar/SearchBar";
 import Toggle from "../Toggle/Toggle";
+import Snippet from "../Snippet/Snippet";
 import { attribute, dependency } from "../../types";
 
 type sortMethod = "Default" | "LHS" | "RHS";
@@ -14,14 +15,15 @@ interface Props {
   dependencies: dependency[];
   selectedAttributesLHS: attribute[];
   selectedAttributesRHS: attribute[];
+  file: File | null;
 }
 
 const DependencyListFull: React.FC<Props> = ({
   dependencies,
   selectedAttributesLHS,
   selectedAttributesRHS,
+  file,
 }) => {
-
   const [sortedDependencies, setSortedDependencies] = useState<dependency[]>(
     []
   );
@@ -37,7 +39,11 @@ const DependencyListFull: React.FC<Props> = ({
           searchString
             .split(" ")
             .filter((str) => str)
-            .every((elem) => (dep.lhs.map(attr => attr.name).includes(elem) || dep.rhs.name === elem))
+            .every(
+              (elem) =>
+                dep.lhs.map((attr) => attr.name).includes(elem) ||
+                dep.rhs.name === elem
+            )
         )
       : [...dependencies]
     )
@@ -98,20 +104,25 @@ const DependencyListFull: React.FC<Props> = ({
             {value}
           </Toggle>
         ))}
-      <SearchBar
-        defaultText="Filter dependencies"
-        onChange={(str) => setSearchString(str)}
-      />
+        <SearchBar
+          defaultText="Filter dependencies"
+          onChange={(str) => setSearchString(str)}
+        />
       </div>
-      <div className="dependency-list">
-        {sortedDependencies.map((dep, index) => (
-          <Dependency
-            dep={dep}
-            key={index}
-            onClick={() => setChosenDependencyIndex(index)}
-            isActive={index == chosenDependencyIndex}
-          />
-        ))}
+      <div className="dependency-list-wrapper">
+        <div className="dependency-list">
+          {sortedDependencies.map((dep, index) => (
+            <Dependency
+              dep={dep}
+              key={index}
+              onClick={() => setChosenDependencyIndex(index)}
+              isActive={index == chosenDependencyIndex}
+            />
+          ))}
+        </div>
+        <div className="snippet">
+          <Snippet file={file} />
+        </div>
       </div>
     </div>
   );
