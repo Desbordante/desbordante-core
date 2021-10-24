@@ -18,6 +18,7 @@ async function createTable(pool) {
         status varchar(30) not null,\n
         errorStatus text,\n
         datasetPath text not null,\n
+        fileName text not null,
         FDs text,\n
         hasHeader bool not null,\n
         maxLHS int not null,\n

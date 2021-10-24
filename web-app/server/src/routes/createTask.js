@@ -44,12 +44,12 @@ router.post('/createTask', function(req, res){
         rootPath.push('uploads')    // add dir 'uploads'
         rootPath.push(fileName)     // add file '${taskID} + filename.csv'
 
-        const datasetPath = rootPath.join('/') 
+        const datasetPath = rootPath.join('/')
         
         var topicName = 'tasks'
-        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader) values\n
-        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`;
-        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader];
+        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, fileName) values\n
+        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, table.name];
     
         // Add task to DB
         (async () => {
