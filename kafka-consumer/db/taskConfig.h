@@ -62,12 +62,25 @@ public:
         }
     }
 
+    void setMaxPhase(DBManager const& manager, size_t maxPhase) const {
+        try {
+            std::string query = "UPDATE tasks SET maxPhase = " + std::to_string(maxPhase) + " WHERE taskID = '" + taskID + "'";
+            manager.transactionQuery(query);
+        } catch(const std::exception& e) {
+            std::cerr << "Unexpected exception (with changing maxPhase in DB) caught: " << e.what() << std::endl;
+            throw e;
+        }
+    }
+
     // Send a request to DB for progress updating
-    void updateProgress(DBManager const& manager, double progressPercent, const std::string& phaseName = std::string()) const {
+    void updateProgress(DBManager const& manager, double progressPercent, const std::string& phaseName = "", size_t curPhase = 0) const {
         try {
             std::string query = "UPDATE tasks SET progress = " + std::to_string(progressPercent);
             if (phaseName.length()) {
                 query += ", phaseName = '" + phaseName + "'";
+            }
+            if (curPhase != 0) {
+                query += ", currentPhase = " + std::to_string(curPhase);
             }
             query += " WHERE taskID = '" + taskID + "'";
             manager.transactionQuery(query);

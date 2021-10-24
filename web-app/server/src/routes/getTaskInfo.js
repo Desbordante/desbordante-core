@@ -36,7 +36,7 @@ router.get('/', function(req, res, next) {
                     return;
                 });
             } else if (status === 'COMPLETED') {
-                pool.query(`select phaseName, progress, status, fds::json, arrayNameValue::json, columnNames::json, elapsedTime from tasks where taskid = '${req.query.taskID}'`)
+                pool.query(`select phaseName, progress, currentPhase, maxPhase, status, fds::json, arrayNameValue::json, columnNames::json, elapsedTime from tasks where taskid = '${req.query.taskID}'`)
                 .then(result => { 
                     answer = JSON.stringify(result.rows[0]);
                     console.log(answer);
@@ -51,7 +51,7 @@ router.get('/', function(req, res, next) {
                 });
             } else if (status === 'IN PROCESS' || status === 'ADDED TO THE TASK QUEUE') {
                 console.log(status)
-                pool.query(`select phaseName, progress, status from tasks where taskid = '${req.query.taskID}'`)
+                pool.query(`select phaseName, progress, currentPhase, maxPhase, status from tasks where taskid = '${req.query.taskID}'`)
                 .then(result => { 
                     answer = JSON.stringify(result.rows[0]);
                     console.log(answer);
