@@ -31,20 +31,21 @@ const DependencyListFull: React.FC<Props> = ({
   const [sortBy, setSortBy] = useState<sortMethod>("Default");
   const [searchString, setSearchString] = useState("");
   const allowedSortMethods: sortMethod[] = ["Default", "LHS", "RHS"];
+  const [selectedDependency, setSelectedDependency] = useState<dependency>();
 
   // update displayed dependencies on search
   useEffect(() => {
     const foundDependencies = (searchString !== ""
       ? dependencies.filter((dep) =>
-          searchString
-            .split(" ")
-            .filter((str) => str)
-            .every(
-              (elem) =>
-                dep.lhs.map((attr) => attr.name).includes(elem) ||
-                dep.rhs.name === elem
-            )
-        )
+        searchString
+          .split(" ")
+          .filter((str) => str)
+          .every(
+            (elem) =>
+              dep.lhs.map((attr) => attr.name).includes(elem) ||
+              dep.rhs.name === elem
+          )
+      )
       : [...dependencies]
     )
       // filter by chosen LHS
@@ -115,13 +116,16 @@ const DependencyListFull: React.FC<Props> = ({
             <Dependency
               dep={dep}
               key={index}
-              onClick={() => setChosenDependencyIndex(index)}
+              onClick={() => {
+                setChosenDependencyIndex(index)
+                setSelectedDependency(dep)
+              }}
               isActive={index == chosenDependencyIndex}
             />
           ))}
         </div>
         <div className="snippet">
-          <Snippet file={file} />
+          <Snippet file={file} selectedDependency={selectedDependency} />
         </div>
       </div>
     </div>

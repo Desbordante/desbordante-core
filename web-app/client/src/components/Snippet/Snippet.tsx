@@ -1,9 +1,12 @@
-// import React, { useState, useEffect } from "react";
 /* eslint-disable no-console */
 import React, { useState, useEffect } from "react";
+import CSS from "csstype";
+import { dependency } from "../../types";
+import "./Snippet.css";
 
 interface Props {
   file: File | null;
+  selectedDependency: dependency | undefined;
 }
 
 /* eslint-disable prefer-template */
@@ -19,7 +22,7 @@ function convertCSVToArray(inputData: string, delimiter: string) {
     "([^\"\\" +
     delimiter +
     "\\r\\n]*))",
-    "gi"
+    "gi",
   );
 
   let arrMatches: any;
@@ -34,7 +37,7 @@ function convertCSVToArray(inputData: string, delimiter: string) {
     let strMatchedValue;
 
     if (arrMatches[2]) {
-      strMatchedValue = arrMatches[2].replace(new RegExp('""', "g"), '"');
+      strMatchedValue = arrMatches[2].replace(new RegExp("\"\"", "g"), "\"");
     } else {
       strMatchedValue = arrMatches[3];
     }
@@ -46,27 +49,58 @@ function convertCSVToArray(inputData: string, delimiter: string) {
   return arrData;
 }
 
-const Snippet: React.FC<Props> = ({ file }) => {
-  // const [text, setText] = useState("");
+function getSelectedIndices(dep: dependency | undefined, header: string[]): number[] {
+  const selectedIndices: number[] = [];
+  if (dep === undefined) {
+    return selectedIndices;
+  }
+  dep.lhs.forEach((lhs) => selectedIndices.push(header.indexOf(lhs.name)));
+  selectedIndices.push(header.indexOf(dep.rhs.name));
+  return selectedIndices;
+}
 
-  const [table, setTable] = useState<string[][]>();
+const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
+  const [table, setTable] = useState<string[][]>([[]]);
+  const selectedStyle: CSS.Properties = {
+    backgroundColor: "#8792C0",
+  };
+  const defaultStyle: CSS.Properties = {};
+  const selectedIndices: number[] = getSelectedIndices(selectedDependency, table[0]);
+  console.log(selectedIndices);
 
   useEffect(() => {
-    async function readFile() {
-      const buffer = await file!.text();
-      // setText(buffer);
-      setTable(convertCSVToArray(buffer, ","));
-      console.log(table);
+    function readFile() {
+      file!.text().then((buffer) => setTable(convertCSVToArray(buffer, ",")));
     }
     readFile();
   }, []);
 
-  {
-    table!.map((value) => {
-      return <td>{value}</td>;
-    });
-  }
-  return <div></div>;
+  return (
+    <table>
+      {
+        table === undefined ?
+          <></>
+          :
+          table!.map((value, index) => (
+            <tr
+              // eslint-disable-next-line react/no-array-index-key
+              key={index}
+            >
+              {value!.map((cell, idx) => (
+                <td
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={idx}
+                  style={selectedIndices.indexOf(idx) !== -1 ? selectedStyle : defaultStyle}
+                >
+                  {cell}
+                </td>
+              ))}
+            </tr>
+
+          ))
+      }
+    </table>
+  );
 };
 
 export default Snippet;

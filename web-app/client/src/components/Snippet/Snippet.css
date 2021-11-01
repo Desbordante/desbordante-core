@@ -1,0 +1,10 @@
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+td {
+    border: 1px solid black;
+    font-family: var(--font-content);
+    font-weight: 300;
+    font-size: 1.1rem;
+}
