@@ -22,15 +22,15 @@ private:
     std::stack<Vertical> trace;
     ColumnOrder const columnOrder;
 
-    std::vector<Vertical> const& uniqueVerticals;
+    std::vector<Vertical> const& uniqueColumns;
     ColumnLayoutRelationData const* const relation;
     PartitionStorage * const partitionStorage;
 
     std::random_device rd;
     std::mt19937 gen;
 
-    bool inferCategory(Vertical const& node, int rhsIndex);
-    Vertical pickNextNode(Vertical const &node, size_t rhsIndex);
+    bool inferCategory(Vertical const& node, unsigned int rhsIndex);
+    Vertical pickNextNode(Vertical const &node, unsigned int rhsIndex);
     std::stack<Vertical> generateNextSeeds(Column const* const currentRHS);
 
     std::list<Vertical> minimize(std::unordered_set<Vertical> const&) const;

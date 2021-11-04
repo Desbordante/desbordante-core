@@ -8,7 +8,7 @@ LatticeTraversal::LatticeTraversal(const Column *const rhs,
                                    const ColumnLayoutRelationData *const relation,
                                    const std::vector<Vertical> &uniqueVerticals,
                                    PartitionStorage *const partitionStorage)
-    : rhs(rhs), relation(relation), uniqueVerticals(uniqueVerticals), gen(rd()),
+    : rhs(rhs), relation(relation), uniqueColumns(uniqueVerticals), gen(rd()),
       dependenciesMap(relation->getSchema()), nonDependenciesMap(relation->getSchema()),
       columnOrder(relation), partitionStorage(partitionStorage)
     {}
@@ -16,13 +16,12 @@ LatticeTraversal::LatticeTraversal(const Column *const rhs,
 std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
     RelationalSchema const* const schema = relation->getSchema();
 
-    //в метаноме немного по-другому, но суть такая же
-    //тут обрабатываем найденные уникальные столбцы
-    for (auto const &lhs: uniqueVerticals) {
+    //processing of found unique columns
+    for (auto const &lhs: uniqueColumns) {
         if (!lhs.contains(*rhs)) {
             observations[lhs] = NodeCategory::minimalDependency;
             dependenciesMap.addNewDependency(lhs);
-            minimalDeps.insert(lhs); //вот теперь добавляем
+            minimalDeps.insert(lhs);
         }
     }
 
@@ -62,18 +61,18 @@ std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
                         }
                     }
                 } else if (!inferCategory(node, rhs->getIndex())) {
-                    //не смогли определить категорию --- значит считаем партиции
+                    //if we were not able to infer category, we calculate the partitions
                     auto nodePLI = partitionStorage->getOrCreateFor(node);
                     auto nodePliPointer = std::holds_alternative<PositionListIndex*>(nodePLI)
                                           ? std::get<PositionListIndex*>(nodePLI)
                                           : std::get<std::unique_ptr<PositionListIndex>>(nodePLI).get();
                     auto intersectedPLI = partitionStorage->getOrCreateFor(node.Union(*rhs));
-                    auto intersectrdPLIPointer = std::holds_alternative<PositionListIndex*>(intersectedPLI)
+                    auto intersectedPLIPointer = std::holds_alternative<PositionListIndex*>(intersectedPLI)
                                                  ? std::get<PositionListIndex*>(intersectedPLI)
                                                  : std::get<std::unique_ptr<PositionListIndex>>(intersectedPLI).get();
 
                     if (nodePliPointer->getNepAsLong() ==
-                        intersectrdPLIPointer->getNepAsLong()
+                        intersectedPLIPointer->getNepAsLong()
                     ) {
                         observations.updateDependencyCategory(node);
                         if (observations[node] == NodeCategory::minimalDependency) {
@@ -98,7 +97,7 @@ std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
     return minimalDeps;
 }
 
-bool LatticeTraversal::inferCategory(Vertical const& node, int rhsIndex) {
+bool LatticeTraversal::inferCategory(Vertical const& node, unsigned int rhsIndex) {
     if (nonDependenciesMap.canBePruned(node)) {
         observations.updateNonDependencyCategory(node, rhsIndex);
         nonDependenciesMap.addNewNonDependency(node);
@@ -126,7 +125,7 @@ Vertical const& LatticeTraversal::takeRandom(std::unordered_set<Vertical> & node
     return node;
 }
 
-Vertical LatticeTraversal::pickNextNode(Vertical const &node, size_t rhsIndex) {
+Vertical LatticeTraversal::pickNextNode(Vertical const &node, unsigned int rhsIndex) {
     auto nodeIter = observations.find(node);
 
     if (nodeIter != observations.end()) {
@@ -143,7 +142,6 @@ Vertical LatticeTraversal::pickNextNode(Vertical const &node, size_t rhsIndex) {
                 observations[node] = NodeCategory::minimalDependency;
             } else if (!uncheckedSubsets.empty()) {
                 auto const& nextNode = takeRandom(uncheckedSubsets);
-                //чтобы при каждом запуске выбирать одинаковый путь, нужно заменить строчку выше на строку ниже
                 //auto const& nextNode = *uncheckedSubsets.begin();
                 trace.push(node);
                 return nextNode;
@@ -168,7 +166,6 @@ Vertical LatticeTraversal::pickNextNode(Vertical const &node, size_t rhsIndex) {
                 observations[node] = NodeCategory::maximalNonDependency;
             } else if (!uncheckedSupersets.empty()) {
                 auto const& nextNode = takeRandom(uncheckedSupersets);
-                //чтобы при каждом запуске выбирать одинаковый путь, нужно заменить строчку выше на строку ниже
                 //auto const& nextNode = *uncheckedSupersets.begin();
                 trace.push(node);
                 return nextNode;

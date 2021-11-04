@@ -19,7 +19,7 @@ private:
     void registerFD(Vertical vertical, Column rhs) override;
 
 public:
-    explicit DFD(std::filesystem::path const& path, char separator = ',', bool hasHeader = true, unsigned int parallelism = 4);
+    explicit DFD(std::filesystem::path const& path, char separator = ',', bool hasHeader = true, unsigned int parallelism = 0);
 
     unsigned long long execute() override;
 };
