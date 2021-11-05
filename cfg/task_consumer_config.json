@@ -1,0 +1,5 @@
+{
+    "brokers": "localhost:9092",
+    "topic_name": "tasks",
+    "group_id": "tasks_1"
+}

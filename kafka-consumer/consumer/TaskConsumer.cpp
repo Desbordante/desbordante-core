@@ -1,3 +1,4 @@
+
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
@@ -18,12 +19,41 @@
 #include "algorithms/DFD/DFD.h"
 #include "algorithms/Fd_mine.h"
 
-#include "../db/DBManager.h"
-#include "../db/taskConfig.h"
+#include "TaskConsumer.h"
 
 INITIALIZE_EASYLOGGINGPP
 
-void process_task(taskConfig const& task, DBManager const& manager) {
+std::string TaskConfig::tableName = "tasks";
+
+void TaskConsumer::processMsg(nlohmann::json payload, 
+                              DBManager const &manager) const {
+    auto taskID = std::string(payload["taskID"]);
+    if (!TaskConfig::taskExists(manager, taskID)) {
+        std::cout << "Task with ID = '" << taskID 
+                  << "' isn't in the database (Task wasn't processed (skipped))" 
+                  << std::endl;
+    } else {
+        auto task = TaskConfig::getTaskConfig(manager, taskID);
+        task.writeInfo(std::cout);
+        try {
+            processTask(task, manager);
+        } catch (const std::exception& e) {
+            std::cout << "Unexpected behaviour in 'process_task()' (Task wasn't commited)" 
+                      << std::endl;
+            task.updateErrorStatus(manager, "SERVER ERROR", e.what());
+            return;
+        }
+        std::cout << "Task with ID = '" << taskID 
+                  << "' was successfully processed." << std::endl;
+    }
+}
+
+void TaskConsumer::processTask(TaskConfig const& task, 
+                               DBManager const& manager) const {
+    std::vector<std::string> algsWithProgress {
+        "FastFDs"
+    };
+
     auto alg = task.getAlgName();
     auto datasetPath = task.getDatasetPath();
     auto separator = task.getSeparator();
@@ -38,10 +68,21 @@ void process_task(taskConfig const& task, DBManager const& manager) {
     
     std::unique_ptr<FDAlgorithm> algorithmInstance;
 
+    std::cout << "Input: algorithm \"" << alg
+              << "\" with seed " << std::to_string(seed)
+              << ", error \"" << std::to_string(error)
+              << ", maxLHS \"" << std::to_string(maxLHS)
+              << "\" and dataset \"" << datasetPath
+              << "\" with separator \'" << separator
+              << "\'. Header is " << (hasHeader ? "" : "not ") << "present. " 
+              << std::endl;
+
     if (alg == "Pyro") {
-        algorithmInstance = std::make_unique<Pyro>(datasetPath, separator, hasHeader, seed, error, maxLHS, parallelism);
+        algorithmInstance = std::make_unique<Pyro>(datasetPath, separator, 
+                            hasHeader, seed, error, maxLHS, parallelism);
     } else if (alg == "TaneX") {
-        algorithmInstance = std::make_unique<Tane>(datasetPath, separator, hasHeader, error, maxLHS);
+        algorithmInstance = std::make_unique<Tane>(datasetPath, separator, 
+                            hasHeader, error, maxLHS);
     } else if (alg == "FastFDs") {
         algorithmInstance = std::make_unique<FastFDs>(datasetPath, separator, hasHeader);
     } else if (alg == "FD mine") {
@@ -59,12 +100,14 @@ void process_task(taskConfig const& task, DBManager const& manager) {
         task.setMaxPhase(manager, phaseNames.size());
         task.updateProgress(manager, 0, phaseNames[0].data(), 1);
 
-        if (alg == "FastFDs") {
+        if (std::find(algsWithProgress.begin(), algsWithProgress.end(), alg)
+            != algsWithProgress.end()) {
             std::thread progress_listener([&task, &manager, &algorithmInstance, &phaseNames] {
                 auto progress = algorithmInstance->getProgress();
                 while(progress.second != 100) {
                     progress = algorithmInstance->getProgress();
-                    task.updateProgress(manager, progress.second, phaseNames[progress.first].data(), progress.first + 1);
+                    task.updateProgress(manager, progress.second, 
+                                        phaseNames[progress.first].data(), progress.first + 1);
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             });

@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/', function(req, res, next) {
-
     const allowedFileFormats = ["text/csv", "application/vnd.ms-excel"]
     const allowedAlgorithms = ["Pyro", "TaneX", "FastFDs", "FD mine", "DFD"];
     const allowedSeparators = [",", "\\t", "\\n", "|", ";"];

@@ -1,8 +1,8 @@
 const express = require('express');
 const { v1: uuidv1 } = require('uuid');
 const router = express.Router();
-const producer = require('../producer/index');
 var path = require('path');
+const sendEvent = require('../producer/sendEvent');
 
 router.post('/createTask', function(req, res){
     if(!req.body) return res.sendStatus(400)
@@ -40,16 +40,19 @@ router.post('/createTask', function(req, res){
         // get path to root file (www)
         var rootPath = path.dirname(require.main.filename).split("/")
 
-        rootPath.pop()              // remove dir 'bin'
-        rootPath.push('uploads')    // add dir 'uploads'
+        rootPath.pop()              // remove folder 'bin'
+        rootPath.push('uploads')    // add folder 'uploads'
         rootPath.push(fileName)     // add file '${taskID} + filename.csv'
 
         const datasetPath = rootPath.join('/')
         
-        var topicName = 'tasks'
-        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, fileName) values\n
-        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
-        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, table.name];
+        var topicName = process.env.KAFKA_TOPIC_NAME;
+        const query = `insert into ${process.env.DB_TASKS_TABLE_NAME}
+            (taskID, createdAt, algName, errorPercent, separator, progress, 
+            status, datasetPath, maxLHS, hasHeader, fileName) values
+            ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+        const params = [taskID, algName, errorPercent, separator, progress, 
+                        status, datasetPath, maxLHS, hasHeader, table.name];
     
         // Add task to DB
         (async () => {
@@ -80,16 +83,5 @@ router.post('/createTask', function(req, res){
         res.status(500).send('Unexpected problem caught: ' + err)
     } 
 });
-
-async function sendEvent(topicName, taskID) {
-    var value = Buffer.from(JSON.stringify({taskID}))
-    var key = taskID
-    // if partition is set to -1, librdkafka will use the default partitioner
-    var partition = -1
-    var headers = [
-        { header: "header value" }
-    ]
-    await producer.produce(topicName, partition, value, key, Date.now(), "", headers)
-}
 
 module.exports = router;
