@@ -37,24 +37,24 @@ router.post('/chooseTask', function(req, res){
         const datasetPath = rootPath.join('/')
 
         var topicName = 'tasks'
-        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader) values\n
-        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9)`;
-        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader];
+        const query = `insert into tasks(taskID, createdAt, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, fileName) values\n
+        ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
+        const params = [taskID, algName, errorPercent, separator, progress, status, datasetPath, maxLHS, hasHeader, fileName];
     
         // Add task to DB
         (async () => {
             await pool.query(query, params)
             .then(result => {
-                if (result !== undefined) 
+                if (result !== undefined)
                     console.log(`Success (task [${taskID}] was added to DB)`)
                 else
                     throw error('Problem with adding task to DB')
             })
             .catch(err => {
-                console.log(`Error (task wasn't added to DB)`)
                 res.status(400).send('Problem with adding task to DB')
+                throw error('Problem with adding task to DB')
             })
-            await sendEvent(topicName,taskID)
+            await sendEvent(topicName, taskID)
             .then((result) => {
                 let json = JSON.stringify({taskID, status: 'OK'})
                 console.log("Record was added to kafka")
