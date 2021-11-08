@@ -74,7 +74,7 @@ const FileForm: React.FC<Props> = ({
         setAllowedBuiltinDatasets(data.availableDatasets);
 
         setAllowedAlgorithms(data.algorithmsInfo);
-        setAlgorithm(data.algorithmsInfo[0].name);
+        setAlgorithm(data.algorithmsInfo[0]);
 
         setAllowedSeparators(data.allowedSeparators);
         setSeparator(data.allowedSeparators[0]);
