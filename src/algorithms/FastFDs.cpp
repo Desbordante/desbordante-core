@@ -11,14 +11,15 @@
 
 #include "AgreeSetFactory.h"
 #include "logging/easylogging++.h"
+#include "ParallelFor.h"
 
 using std::vector, std::set;
 
 FastFDs::FastFDs(std::filesystem::path const& path,
                  char separator, bool hasHeader,
-                 ushort parallelism) :
+                 unsigned int max_lhs, ushort parallelism) :
     FDAlgorithm(path, separator, hasHeader,
-                { "Agree sets generation", "Finding minimal covers" }) {
+                { "Agree sets generation", "Finding minimal covers" }), max_lhs_(max_lhs) {
     if (parallelism == 0) {
         threads_num_ = std::thread::hardware_concurrency();
         if (threads_num_ == 0) {
@@ -125,6 +126,9 @@ bool FastFDs::columnContainsOnlyEqualValues(Column const& column) const {
 void FastFDs::findCovers(Column const& attribute, vector<DiffSet> const& diff_sets_mod,
                          vector<DiffSet> const& cur_diff_sets, Vertical const& path,
                          set<Column, OrderingComparator> const& ordering) {
+    if (path.getArity() > max_lhs_) {
+        return;
+    }
 
     if (ordering.size() == 0 && !cur_diff_sets.empty()) {
         return; // no FDs here
@@ -246,6 +250,9 @@ FastFDs::getNextOrdering(vector<DiffSet> const& diff_sets, Column const& attribu
     return ordering;
 }
 
+/* Metanome uses thread pool here. No need for it because main loop over columns in
+ * execute() is parallelized, this approach should be much better.
+ */
 vector<FastFDs::DiffSet> FastFDs::getDiffSetsMod(Column const& col) const {
     vector<DiffSet> diff_sets_mod;
 
@@ -284,7 +291,7 @@ void FastFDs::genDiffSets() {
     AgreeSetFactory::Configuration c;
     c.threads_num = threads_num_;
     if (threads_num_ > 1) {
-        // TODO: Need to fix data races first
+        // Not implemented properly, check the description of AgreeSetFactory::genMCParallel()
         //c.mc_gen_method = MCGenMethod::kParallel;
     }
     AgreeSetFactory factory(relation_.get(), c, this);
@@ -298,36 +305,14 @@ void FastFDs::genDiffSets() {
     // Complement agree sets to get difference sets
     diff_sets_.reserve(agree_sets.size());
     if (threads_num_ > 1) {
-        size_t agree_sets_per_thread = agree_sets.size() / threads_num_;
         std::mutex m;
-        std::vector<std::thread> threads;
-        auto task = [&m, this](AgreeSetFactory::SetOfAgreeSets::const_iterator first,
-                               AgreeSetFactory::SetOfAgreeSets::const_iterator last) {
-            for (; first != last; ++first) {
-                DiffSet diff_set = first->invert();
-                std::lock_guard lock(m);
-                diff_sets_.push_back(std::move(diff_set));
-            }
+        auto const task = [&m, this](AgreeSet const& as) {
+            DiffSet diff_set = as.invert();
+            std::lock_guard lock(m);
+            diff_sets_.push_back(std::move(diff_set));
         };
 
-        threads.reserve(threads_num_);
-
-        auto p = agree_sets.begin();
-        auto q = agree_sets.end();
-        for (ushort i = 0; i < threads_num_; ++i) {
-            auto prev = p;
-
-            if (i != threads_num_ - 1) {
-                std::advance(p, agree_sets_per_thread);
-            } else {
-                p = q;
-            }
-            threads.emplace_back(task, prev, p);
-        }
-
-        for (auto& thread : threads) {
-            thread.join();
-        }
+        util::parallel_foreach(agree_sets.begin(), agree_sets.end(), threads_num_, task);
     } else {
         for (AgreeSet const& agree_set : agree_sets) {
             diff_sets_.push_back(agree_set.invert());
