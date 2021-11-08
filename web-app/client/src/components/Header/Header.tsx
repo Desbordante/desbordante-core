@@ -1,12 +1,12 @@
 /* eslint-disable react/jsx-one-expression-per-line */
 
 import React from "react";
-import "./Header.css";
+import "./Header.scss";
 
 const Header: React.FC = () => (
   <>
     <div className="video-header">
-      <video autoPlay loop muted id="video">
+      <video autoPlay loop muted>
         <source src="/videos/background-min-cropped.webm" type="video/webm" />
       </video>
       <div className="name-and-logo">

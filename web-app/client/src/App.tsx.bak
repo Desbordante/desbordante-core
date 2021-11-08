@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import "./App.css";
+import "./App.scss";
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { disableBodyScroll } from "body-scroll-lock";
@@ -156,7 +156,7 @@ const App: React.FC = () => {
             </div>
             <Button
               text="Cancel"
-              style={{ backgroundColor: "var(--error)" }}
+              style={{ backgroundColor: "$error" }}
               onClick={reset}
             />
           </header>

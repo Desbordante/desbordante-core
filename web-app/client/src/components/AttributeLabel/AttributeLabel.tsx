@@ -1,5 +1,5 @@
 import React from "react";
-import "./AttributeLabel.css";
+import "./AttributeLabel.scss";
 
 interface Props {
   text: string;

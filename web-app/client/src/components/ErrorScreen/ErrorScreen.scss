@@ -1,0 +1,38 @@
+@import "../../variables.scss";
+
+.error-bg {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $background-dark;
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 8rem;
+
+    .error-message {
+      width: 40rem;
+      font-family: $font-content;
+      color: $text-white;
+      text-align: center;
+      font-weight: 300;
+      font-size: 2rem;
+
+      img {
+        width: 4rem;
+        height: 4rem;
+        margin-right: 1.5rem;
+      }
+
+      span {
+        color: $error;
+        font-weight: 400;
+      }
+    }
+  }
+}

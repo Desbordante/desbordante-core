@@ -1,4 +1,4 @@
-@import url("../../colors.css");
+@import "../../variables.scss";
 
 .status-display {
   width: 100%;
@@ -6,16 +6,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: var(--font-content);
+  font-family: $font-content;
   font-weight: 400;
   font-size: 4rem;
   position: absolute;
   z-index: 1;
   transition: 0.3s;
-}
 
-.status-display img {
-  height: 3rem;
-  width: 3.5rem;
-  margin-left: 1rem;
+  img {
+    height: 3rem;
+    width: 3.5rem;
+    margin-left: 1rem;
+  }
 }

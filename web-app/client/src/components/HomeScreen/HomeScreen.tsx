@@ -3,7 +3,7 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
 
-import "./HomeScreen.css";
+import "./HomeScreen.scss";
 import Header from "../Header/Header";
 import FileForm from "../FileForm/FileForm";
 

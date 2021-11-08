@@ -1,4 +1,4 @@
-@import url("../../colors.css");
+@import "../../variables.scss";
 
 .popup-window-bg {
   position: absolute;
@@ -11,12 +11,12 @@
   justify-content: center;
   align-items: center;
   background-color: #000000aa;
-}
 
-.popup-window {
-  padding: 2rem;
-  display: flex;
-  flex-wrap: wrap;
-  background-color: var(--background-dark);
-  border-radius: 2rem;
+  .popup-window {
+    padding: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    background-color: $background-dark;
+    border-radius: 2rem;
+  }
 }

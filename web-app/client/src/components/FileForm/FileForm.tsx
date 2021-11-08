@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useHistory } from "react-router-dom";
 
-import "./FileForm.css";
+import "./FileForm.scss";
 import Value from "../Value/Value";
 import Toggle from "../Toggle/Toggle";
 import Button from "../Button/Button";
 import Slider from "../Slider/Slider";
 import UploadFile from "../UploadFile/UploadFile";
 import PopupWindow from "../PopupWindow/PopupWindow";
+import FormItem from "../FormItem/FormItem";
 import {
   serverURL,
   submitCustomDataset,
@@ -46,7 +47,7 @@ const FileForm: React.FC<Props> = ({
   const [file, setFile] = useState<File | null>(null);
   const [hasHeader, setHasHeader] = useState(true);
   const [separator, setSeparator] = useState("");
-  const [algorithm, setAlgorithm] = useState("");
+  const [algorithm, setAlgorithm] = useState<algorithm | null>(null);
   const [errorThreshold, setErrorThreshold] = useState<string>("0.05");
   const [maxLHSAttributes, setMaxLHSAttributes] = useState<string>("5");
   const [threadsCount, setThreadsCount] = useState<string>("1");
@@ -79,8 +80,8 @@ const FileForm: React.FC<Props> = ({
         setSeparator(data.allowedSeparators[0]);
 
         setMaxFileSize(data.maxFileSize);
-      })
-      .catch((error) => history.push("/error"));
+      });
+    // .catch((error) => history.push("/error"));
   }, [history]);
 
   // Validator functions for fields
@@ -131,7 +132,7 @@ const FileForm: React.FC<Props> = ({
       )}
       <div className="form-column">
         <div className="form-row">
-          <div className="form-item">
+          <FormItem>
             <UploadFile
               onClick={setFile}
               file={file}
@@ -142,10 +143,11 @@ const FileForm: React.FC<Props> = ({
               openPopupWindow={() => setIsWindowShown(true)}
               disableBuiltinDataset={() => setBuiltinDataset(null)}
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem>
             <h3>File properties:</h3>
             <Toggle
+              color="1"
               onClick={() => setHasHeader(!hasHeader)}
               toggleCondition={hasHeader}
             >
@@ -158,8 +160,8 @@ const FileForm: React.FC<Props> = ({
               size={2}
               inputValidator={separatorValidator}
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem enabled={algorithm?.props.errorThreshold}>
             <h3>Error threshold:</h3>
             <Value
               value={errorThreshold}
@@ -173,8 +175,8 @@ const FileForm: React.FC<Props> = ({
               step={0.001}
               exponential
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem enabled={algorithm?.props.maxLHS}>
             <h3>Max LHS attributes:</h3>
             <Value
               value={maxLHSAttributes}
@@ -189,9 +191,9 @@ const FileForm: React.FC<Props> = ({
               onChange={setMaxLHSAttributes}
               step={1}
             />
-          </div>
+          </FormItem>
 
-          <div className="form-item">
+          <FormItem enabled={algorithm?.props.threads}>
             <h3>Threads:</h3>
             <Value
               value={threadsCount}
@@ -206,30 +208,30 @@ const FileForm: React.FC<Props> = ({
               onChange={setThreadsCount}
               step={1}
             />
-          </div>
+          </FormItem>
         </div>
 
         <div className="form-row">
-          <div className="form-item">
+          <FormItem>
             <h3>Algorithm:</h3>
             {allowedAlgorithms.map((algo) => (
               <Toggle
-                onClick={() => setAlgorithm(algo.name)}
-                toggleCondition={algorithm === algo.name}
+                color="1"
+                onClick={() => setAlgorithm(algo)}
+                toggleCondition={algorithm === algo}
                 key={algo.name}
               >
                 {algo.name}
               </Toggle>
             ))}
-          </div>
+          </FormItem>
         </div>
       </div>
 
       <div className="form-column">
         <Button
           type="submit"
-          color="gradient"
-          glow="always"
+          color="1"
           enabled={isValid()}
           onClick={(e) => {
             e.preventDefault();
@@ -237,7 +239,9 @@ const FileForm: React.FC<Props> = ({
               submitBuiltinDataset(
                 builtinDataset!,
                 {
-                  algName: algorithm,
+                  algName: algorithm
+                    ? algorithm.name
+                    : allowedAlgorithms[0].name,
                   separator,
                   errorPercent: +errorThreshold,
                   hasHeader,
@@ -250,7 +254,9 @@ const FileForm: React.FC<Props> = ({
               submitCustomDataset(
                 file as File,
                 {
-                  algName: algorithm,
+                  algName: algorithm
+                    ? algorithm.name
+                    : allowedAlgorithms[0].name,
                   separator,
                   errorPercent: +errorThreshold,
                   hasHeader,

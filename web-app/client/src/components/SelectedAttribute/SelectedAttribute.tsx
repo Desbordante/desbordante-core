@@ -1,5 +1,5 @@
 import React from "react";
-import "./SelectedAttribute.css";
+import "./SelectedAttribute.scss";
 
 /* eslint-disable no-unused-vars */
 interface Props {

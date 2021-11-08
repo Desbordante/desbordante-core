@@ -1,7 +1,7 @@
-@import url("../../colors.css");
+@import "../../variables.scss";
 
 .home-screen {
-  background-color: var(--background-dark);
+  background-color: $background-dark;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -1,0 +1,40 @@
+@import "../../variables.scss";
+
+button.toggle {
+  margin: 0rem 0.8rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: $font-content;
+  font-size: 1.2rem;
+  padding: 0.8rem 1.6rem;
+  height: 3rem;
+  font-weight: 300;
+  border-radius: 1000px;
+  cursor: pointer;
+  border: 0.12rem solid $border;
+  color: $text-grey;
+  background-color: #00000000;
+  backface-visibility: hidden;
+  transition: 0.3s;
+
+  &:hover {
+    transform: scale(103%);
+  }
+
+  &.enabled {
+    border-color: #0000;
+
+    &.color-0 {
+      background-color: $button-black;
+      color: $text-white;
+      // box-shadow: 0px 0px 10px $button-black;
+    }
+    &.color-1 {
+      background-color: $button-white;
+      color: $text-black;
+      // box-shadow: 0px 0px 10px rgba($button-white, 0.35);
+    }
+  }
+}

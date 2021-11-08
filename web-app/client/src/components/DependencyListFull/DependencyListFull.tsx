@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-import "./DependencyListFull.css";
+import "./DependencyListFull.scss";
 import Dependency from "../Dependency/Dependency";
 import SearchBar from "../SearchBar/SearchBar";
 import Toggle from "../Toggle/Toggle";
@@ -21,7 +21,6 @@ const DependencyListFull: React.FC<Props> = ({
   selectedAttributesLHS,
   selectedAttributesRHS,
 }) => {
-
   const [sortedDependencies, setSortedDependencies] = useState<dependency[]>(
     []
   );
@@ -37,7 +36,11 @@ const DependencyListFull: React.FC<Props> = ({
           searchString
             .split(" ")
             .filter((str) => str)
-            .every((elem) => (dep.lhs.map(attr => attr.name).includes(elem) || dep.rhs.name === elem))
+            .every(
+              (elem) =>
+                dep.lhs.map((attr) => attr.name).includes(elem) ||
+                dep.rhs.name === elem
+            )
         )
       : [...dependencies]
     )
@@ -98,10 +101,10 @@ const DependencyListFull: React.FC<Props> = ({
             {value}
           </Toggle>
         ))}
-      <SearchBar
-        defaultText="Filter dependencies"
-        onChange={(str) => setSearchString(str)}
-      />
+        <SearchBar
+          defaultText="Filter dependencies"
+          onChange={(str) => setSearchString(str)}
+        />
       </div>
       <div className="dependency-list">
         {sortedDependencies.map((dep, index) => (

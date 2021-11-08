@@ -1,5 +1,5 @@
 import React from "react";
-import "./Slider.css";
+import "./Slider.scss";
 
 /* eslint-disable no-unused-vars */
 interface Props {
