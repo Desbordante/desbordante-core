@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import "./UploadFile.css";
+import "./UploadFile.scss";
 import FileLabel from "../FileLabel/FileLabel";
 import Button from "../Button/Button";
 
@@ -57,7 +57,7 @@ const UploadFile: React.FC<Props> = ({
       />
       <Button
         onClick={() => inputFile?.current?.click()}
-        color="0"
+        color="1"
         type="button"
       >
         <img src="/icons/upload.svg" alt="upload" className="upload-icon" />

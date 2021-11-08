@@ -1,0 +1,20 @@
+@import "../../variables.scss";
+
+.progress-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .progress-bg {
+    position: absolute;
+    z-index: 0;
+    background-color: $border;
+    display: flex;
+  }
+
+  .progress-accent {
+    position: absolute;
+    background: linear-gradient(210deg, $primary-1, $primary-0);
+    transition: 0.3s;
+  }
+}

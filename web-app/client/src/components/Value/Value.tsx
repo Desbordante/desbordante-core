@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./Value.css";
+import "./Value.scss";
 
 /* eslint-disable no-unused-vars */
 interface Props {

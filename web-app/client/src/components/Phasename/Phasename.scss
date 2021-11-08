@@ -1,0 +1,21 @@
+@import "../../variables.scss";
+
+.phase-name-container {
+  position: absolute;
+
+  img {
+    transition: 0.3s;
+  }
+
+  .phase-name {
+    display: flex;
+    justify-content: center;
+    font-family: $font-content;
+    font-size: 1.2rem;
+    font-weight: 300;
+    color: $text-white;
+    background-color: $background-active;
+    padding: 1rem;
+    transition: 0.3s;
+  }
+}

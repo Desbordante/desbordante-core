@@ -1,5 +1,5 @@
 import React from "react";
-import "./StatusDisplay.css";
+import "./StatusDisplay.scss";
 
 interface Props {
   text: string;

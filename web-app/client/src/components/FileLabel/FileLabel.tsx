@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./FileLabel.css";
+import "./FileLabel.scss";
 import { useDropzone } from "react-dropzone";
 
 /* eslint-disable no-unused-vars */

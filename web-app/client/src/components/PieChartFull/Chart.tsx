@@ -3,7 +3,7 @@ import { Doughnut } from "react-chartjs-2";
 
 import AttributeLabel from "../AttributeLabel/AttributeLabel";
 import SelectedAttribute from "../SelectedAttribute/SelectedAttribute";
-import "./PieChartFull.css";
+import "./PieChartFull.scss";
 
 type attribute = { name: string; value: number };
 

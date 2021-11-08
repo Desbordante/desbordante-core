@@ -1,0 +1,74 @@
+@import "../../variables.scss";
+
+.pie-chart-full {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  height: 95%;
+  width: 50%;
+  transition: 0.3s;
+
+  & > * {
+    margin: 0.8rem 0;
+  }
+
+  .title {
+    color: $text-black;
+    font-weight: 500;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+      width: 1.4rem;
+      height: 1.4rem;
+    }
+  }
+
+  .chart {
+    width: 80%;
+    height: 50%;
+    position: relative;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .legend-and-canvas {
+      display: flex;
+
+      .chart-legend {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        margin-right: 2rem;
+      }
+
+      .chart-canvas {
+        height: 35vh;
+        width: 35vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        z-index: 0;
+      }
+    }
+
+    .selected-attributes {
+      width: 40%;
+      height: 10rem;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      flex-wrap: wrap;
+      transition: 0.3s;
+    }
+  }
+}

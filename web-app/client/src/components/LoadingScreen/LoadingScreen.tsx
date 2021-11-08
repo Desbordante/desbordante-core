@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ProgressBar from "../ProgressBar/ProgressBar";
-import "./LoadingScreen.css";
+import "./LoadingScreen.scss";
 
 interface Props {
   onComplete: () => void;
@@ -18,7 +18,12 @@ const LoadingScreen: React.FC<Props> = ({ onComplete, progress }) => {
     <div className="loading-screen-bg">
       <div className="message-and-bar">
         <h1>Uploading your file. Please, wait.</h1>
-        <ProgressBar maxWidth={100} progress={progress} thickness={0.8} rounded />
+        <ProgressBar
+          maxWidth={100}
+          progress={progress}
+          thickness={0.8}
+          rounded
+        />
       </div>
     </div>
   );

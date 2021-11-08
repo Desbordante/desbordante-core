@@ -1,0 +1,36 @@
+@import "../../variables.scss";
+
+.dependency-list-full {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  height: 80%;
+  width: 95%;
+
+  & > * {
+    margin: 0.8rem 0rem;
+  }
+
+  .sort {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    h3 {
+      color: $text-black;
+      margin-left: 0;
+    }
+  }
+
+  /* hide scrollbar but allow scrolling */
+  .dependency-list {
+    height: 50vh;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}

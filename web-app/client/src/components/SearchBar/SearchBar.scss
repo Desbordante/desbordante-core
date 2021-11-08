@@ -1,0 +1,21 @@
+@import "../../variables.scss";
+
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.8rem;
+
+  .search-input {
+    font-weight: 300;
+    background-color: $light;
+    border: none;
+    padding: 0.8rem 1.6rem;
+    font-family: $font-content;
+    border-radius: 1000px;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
