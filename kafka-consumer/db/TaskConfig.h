@@ -57,7 +57,7 @@ public:
     }
 
     static bool taskExists(DBManager const &manager, std::string taskID) {
-        std::string query = "SELECT COUNT(*) FROM " + tableName + 
+        std::string query = "SELECT * FROM " + tableName + 
                             " WHERE taskID = '" + taskID + "'";
         auto answer = manager.defaultQuery(query);
         return answer.size() == 1;
