@@ -14,8 +14,6 @@ using std::deque, std::vector, std::cout, std::endl, std::unique_ptr;
 
 namespace fs = std::filesystem;
 
-std::string get_selfpath();
-
 TEST(pliChecker, first){
     deque<vector<int>> ans = {
             {0, 2, 8, 11},
@@ -242,10 +240,12 @@ TEST(AgreeSetFactoryTest, UsingHandlePartition) {
     testAgreeSetFactory(c);
 }
 
+#if 0
 TEST(AgreeSetFactoryTest, MCGenParallel) {
     AgreeSetFactory::Configuration c(AgreeSetsGenMethod::kUsingVectorOfIDSets,
                                      MCGenMethod::kParallel,
                                      std::thread::hardware_concurrency());
     testAgreeSetFactory(c);
 }
+#endif
 
