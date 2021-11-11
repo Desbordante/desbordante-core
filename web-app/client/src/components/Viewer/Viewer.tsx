@@ -31,11 +31,11 @@ const Viewer: React.FC = () => {
   const history = useHistory();
 
   const [taskProgress, setTaskProgress] = useState(0.6);
-  const [phaseName, setPhaseName] = useState("Mining dependencies");
+  const [phaseName, setPhaseName] = useState("");
   const [currentPhase, setCurrentPhase] = useState(3);
   const [maxPhase, setMaxPhase] = useState(5);
   const [taskStatus, setTaskStatus] = useState<taskStatus>("UNSCHEDULED");
-  const [filename, setFilename] = useState<string>("Todo"); //TODO: add file name to taskInfo
+  const [filename, setFilename] = useState<string>("");
 
   const [attributesLHS, setAttributesLHS] = useState<attribute[]>([]);
   const [attributesRHS, setAttributesRHS] = useState<attribute[]>([]);
@@ -59,8 +59,11 @@ const Viewer: React.FC = () => {
         .then((task) => task.data)
         .then((data) => {
           console.log(data);
-          // setTaskProgress(data.progress);
-          setPhaseName(data.phasename);
+          setFilename(data.fileName);
+          setTaskProgress(data.progress);
+          setPhaseName(data.phaseName);
+          setCurrentPhase(data.currentPhase);
+          setMaxPhase(data.maxPhase);
           setTaskStatus(data.status);
           if (taskFinished(data.status)) {
             setAttributesLHS(data.arraynamevalue.lhs);
@@ -73,7 +76,10 @@ const Viewer: React.FC = () => {
             );
           }
         })
-        .catch((error) => history.push("/error"));
+        .catch((error) => {
+          console.error(error);
+          history.push("/error");
+        });
     };
 
     const timer = setInterval(() => {
