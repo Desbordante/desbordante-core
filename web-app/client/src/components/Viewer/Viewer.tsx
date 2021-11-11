@@ -59,9 +59,9 @@ const Viewer: React.FC = () => {
         .then((task) => task.data)
         .then((data) => {
           console.log(data);
-          setFilename(data.fileName);
+          setFilename(data.filename);
           setTaskProgress(data.progress / 100);
-          setPhaseName(data.phaseName);
+          setPhaseName(data.phasename);
           setCurrentPhase(data.currentphase);
           setMaxPhase(data.maxphase);
           setTaskStatus(data.status);
