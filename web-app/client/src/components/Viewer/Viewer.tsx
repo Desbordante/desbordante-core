@@ -52,8 +52,6 @@ const Viewer: React.FC = () => {
   const taskFinished = (status: taskStatus) =>
     status === "COMPLETED" || status === "SERVER ERROR";
 
-  // setInterval(() => setTaskProgress(taskProgress + 0.05), 300);
-
   useEffect(() => {
     const fetchData = async () => {
       axios
@@ -105,7 +103,14 @@ const Viewer: React.FC = () => {
               }
             />
           </div>
-          <Button type="button" color="1" onClick={() => history.push("/")}>
+          <Button
+            type="button"
+            color="1"
+            onClick={() => {
+              axios.post(`${serverURL}/cancelTask?taskID=${taskID}`);
+              history.push("/");
+            }}
+          >
             Cancel
           </Button>
         </header>
