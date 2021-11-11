@@ -62,8 +62,8 @@ const Viewer: React.FC = () => {
           setFilename(data.fileName);
           setTaskProgress(data.progress / 100);
           setPhaseName(data.phaseName);
-          setCurrentPhase(data.currentPhase);
-          setMaxPhase(data.maxPhase);
+          setCurrentPhase(data.currentphase);
+          setMaxPhase(data.maxphase);
           setTaskStatus(data.status);
           if (taskFinished(data.status)) {
             setAttributesLHS(data.arraynamevalue.lhs);
