@@ -230,7 +230,6 @@ const FileForm: React.FC<Props> = ({
 
       <div className="form-column">
         <Button
-          type="submit"
           color="1"
           enabled={isValid()}
           onClick={(e) => {

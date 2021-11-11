@@ -2,7 +2,6 @@ import React from "react";
 import "./Button.scss";
 
 interface Props {
-  type: "button" | "submit";
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   enabled?: boolean;
   color?: "0" | "1" | "error";
@@ -10,7 +9,6 @@ interface Props {
 }
 
 const Button: React.FC<Props> = ({
-  type,
   onClick,
   enabled = true,
   color = "0",
@@ -18,7 +16,7 @@ const Button: React.FC<Props> = ({
   size = 3,
 }) => (
   <button
-    type={type}
+    type="button"
     className={`button ${enabled ? "" : "disabled"} color-${color}`}
     style={{
       fontSize: `${size * 0.4}rem`,

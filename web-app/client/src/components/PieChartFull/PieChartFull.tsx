@@ -76,7 +76,6 @@ const PieChartFull: React.FC<Props> = ({
           onChange={setSearchString}
         />
         <Button
-          type="button"
           color="0"
           onClick={() => setDepth(depth - 1)}
           enabled={depth > 0}
