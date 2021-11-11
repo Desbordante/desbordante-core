@@ -30,7 +30,7 @@ const Viewer: React.FC = () => {
   let { taskID } = useParams<{ taskID: string }>();
   const history = useHistory();
 
-  const [taskProgress, setTaskProgress] = useState(0.6);
+  const [taskProgress, setTaskProgress] = useState(0);
   const [phaseName, setPhaseName] = useState("");
   const [currentPhase, setCurrentPhase] = useState(3);
   const [maxPhase, setMaxPhase] = useState(5);
