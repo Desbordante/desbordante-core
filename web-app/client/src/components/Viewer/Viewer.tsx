@@ -99,15 +99,6 @@ const Viewer: React.FC = () => {
             <img src="/icons/logo.svg" alt="logo" className="logo-medium" />
             <h1>File: "{filename}"</h1>
             <h1>Status: {taskStatus}</h1>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(e) =>
-                setTaskProgress(+(e.target as HTMLInputElement).value)
-              }
-            />
           </div>
           <Button
             type="button"
