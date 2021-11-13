@@ -38,7 +38,10 @@ const FileForm: React.FC<Props> = ({
   const [allowedBuiltinDatasets, setAllowedBuiltinDatasets] = useState<
     string[]
   >([]);
-  const [allowedFileFormats, setAllowedFileFormats] = useState<string[]>([]);
+  const [allowedFileFormats, setAllowedFileFormats] = useState<string[]>([
+    "text/csv",
+    "application/vnd.ms-excel",
+  ]);
   const [allowedSeparators, setAllowedSeparators] = useState<string[]>([]);
   const [allowedAlgorithms, setAllowedAlgorithms] = useState<algorithm[]>([]);
   const [maxfilesize, setMaxFileSize] = useState(5e7);
@@ -55,11 +58,6 @@ const FileForm: React.FC<Props> = ({
   // Builtin datasets
   const [isWindowShown, setIsWindowShown] = useState(false);
   const [builtinDataset, setBuiltinDataset] = useState<string | null>(null);
-
-  // Allowed properties
-  const [isErrorThresholdAllowed, setIsErrorThresholdAllowed] = useState(true);
-  const [isMaxLHSAllowed, setIsMaxLHSAllowed] = useState(true);
-  const [isThreadsCountAllowed, setIsThreadsCountAllowed] = useState(true);
 
   const history = useHistory();
 
@@ -80,8 +78,8 @@ const FileForm: React.FC<Props> = ({
         setSeparator(data.allowedSeparators[0]);
 
         setMaxFileSize(data.maxFileSize);
-      });
-    // .catch((error) => history.push("/error"));
+      })
+      .catch((error) => history.push("/error"));
   }, [history]);
 
   // Validator functions for fields

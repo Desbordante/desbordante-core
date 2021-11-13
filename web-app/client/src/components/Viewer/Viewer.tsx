@@ -101,7 +101,6 @@ const Viewer: React.FC = () => {
             <h1>Status: {taskStatus}</h1>
           </div>
           <Button
-            type="button"
             color="1"
             onClick={() => {
               axios.post(`${serverURL}/cancelTask?taskID=${taskID}`);
@@ -149,7 +148,7 @@ const Viewer: React.FC = () => {
             <footer style={{ opacity: taskFinished(taskStatus) ? 1 : 0 }}>
               <h1 className="bottom-title">View Dependencies</h1>
               <Link to={`/deps/${taskID}`}>
-                <Button type="button" color="0" onClick={() => {}}>
+                <Button color="0" onClick={() => {}}>
                   <img src="/icons/nav-down.svg" alt="down" />
                 </Button>
               </Link>
@@ -171,7 +170,7 @@ const Viewer: React.FC = () => {
                 View Attributes
               </h1>
               <Link to={`/attrs/${taskID}`}>
-                <Button type="button" color="0" onClick={() => {}}>
+                <Button color="0" onClick={() => {}}>
                   <img src="/icons/nav-up.svg" alt="up" />
                 </Button>
               </Link>
