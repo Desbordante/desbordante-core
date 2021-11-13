@@ -18,9 +18,13 @@ router.post('/chooseTask', function(req, res){
         console.log("Input data:", json);
 
         const { fileName } = req.body;
-        const { algName, errorPercent, separator, 
-                maxLHS, hasHeader, parallelism } = json;
-        const status = 'NOT IN PROCESS';
+        const { algName, errorPercent, hasHeader, parallelism } = json;
+        var maxLHS = 0;
+        if (json.maxLHS) {
+            maxLHS = json.maxLHS;
+        }
+        const separator = ',';
+        const status = 'ADDED TO THE TASK QUEUE';
         const progress = 0.0;
 
         // get path to root file (www)

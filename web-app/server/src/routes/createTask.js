@@ -34,7 +34,11 @@ router.post('/createTask', function(req, res){
         console.log("File:", table)
 
         const { algName, errorPercent, separator, 
-                maxLHS, hasHeader, parallelism } = json
+                hasHeader, parallelism } = json
+        var maxLHS = 0;
+        if (json.maxLHS) {
+            maxLHS = json.maxLHS;
+        }
         const status = 'ADDED TO THE TASK QUEUE'
         const progress = 0.0
 
