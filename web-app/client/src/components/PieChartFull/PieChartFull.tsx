@@ -4,8 +4,9 @@ import "./PieChartFull.css";
 import SearchBar from "../SearchBar/SearchBar";
 import Chart from "./Chart";
 import Button from "../Button/Button";
+import { coloredAttribute } from "../../types";
 
-type attribute = { name: string; value: number };
+type attribute = { name: string; value: number; color: string };
 
 /* eslint-disable no-unused-vars */
 interface Props {
@@ -27,9 +28,9 @@ const PieChartFull: React.FC<Props> = ({
   setSelectedAttributes,
 }) => {
   const [searchString, setSearchString] = useState("");
-  const [foundAttributes, setFoundAttributes] = useState<attribute[]>([]);
+  const [foundAttributes, setFoundAttributes] = useState<coloredAttribute[]>([]);
   const [depth, setDepth] = useState(0);
-  const [displayAttributes, setDisplayAttributes] = useState<attribute[]>([]);
+  const [displayAttributes, setDisplayAttributes] = useState<coloredAttribute[]>([]);
 
   // Update found attributes if search string changes or attributes change.
   // Keep found attributes sorted.
@@ -61,11 +62,11 @@ const PieChartFull: React.FC<Props> = ({
     });
 
     if (foundAttributes.length > maxItemsShown * (depth + 1)) {
-      newDisplayAttributes.push({ name: "Other", value: newOtherValue });
+      newDisplayAttributes.push({ name: "Other", value: newOtherValue, color: "#ffffff" });
     }
 
     setDisplayAttributes(newDisplayAttributes);
-  }, [foundAttributes, foundAttributes, depth]);
+  }, [foundAttributes, foundAttributes, depth, maxItemsShown]);
 
   return (
     <div className="pie-chart-full">

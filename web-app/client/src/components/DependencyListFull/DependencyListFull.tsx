@@ -7,14 +7,14 @@ import Dependency from "../Dependency/Dependency";
 import SearchBar from "../SearchBar/SearchBar";
 import Toggle from "../Toggle/Toggle";
 import Snippet from "../Snippet/Snippet";
-import { attribute, dependency } from "../../types";
+import { attribute, dependency, coloredDepedency, coloredAttribute } from "../../types";
 
 type sortMethod = "Default" | "LHS" | "RHS";
 
 interface Props {
-  dependencies: dependency[];
-  selectedAttributesLHS: attribute[];
-  selectedAttributesRHS: attribute[];
+  dependencies: coloredDepedency[];
+  selectedAttributesLHS: coloredAttribute[];
+  selectedAttributesRHS: coloredAttribute[];
   file: File | null;
 }
 
@@ -24,14 +24,16 @@ const DependencyListFull: React.FC<Props> = ({
   selectedAttributesRHS,
   file,
 }) => {
-  const [sortedDependencies, setSortedDependencies] = useState<dependency[]>(
+  const [sortedDependencies, setSortedDependencies] = useState<coloredDepedency[]>(
     []
   );
-  const [chosenDependencyIndex, setChosenDependencyIndex] = useState(0);
+  const [chosenDependencyIndex, setChosenDependencyIndex] = useState(-1);
   const [sortBy, setSortBy] = useState<sortMethod>("Default");
   const [searchString, setSearchString] = useState("");
   const allowedSortMethods: sortMethod[] = ["Default", "LHS", "RHS"];
-  const [selectedDependency, setSelectedDependency] = useState<dependency>();
+  const [selectedDependency, setSelectedDependency] = useState<coloredDepedency>();
+
+
 
   // update displayed dependencies on search
   useEffect(() => {
@@ -112,17 +114,19 @@ const DependencyListFull: React.FC<Props> = ({
       </div>
       <div className="dependency-list-wrapper">
         <div className="dependency-list">
-          {sortedDependencies.map((dep, index) => (
-            <Dependency
-              dep={dep}
-              key={index}
-              onClick={() => {
-                setChosenDependencyIndex(index)
-                setSelectedDependency(dep)
-              }}
-              isActive={index == chosenDependencyIndex}
-            />
-          ))}
+          {sortedDependencies.map((dep, index) => {
+            return (
+              <Dependency
+                dep={dep}
+                key={index}
+                onClick={() => {
+                  setChosenDependencyIndex(index)
+                  setSelectedDependency(dep)
+                }}
+                isActive={index == chosenDependencyIndex}
+              />
+            )
+          })}
         </div>
         <div className="snippet">
           <Snippet file={file} selectedDependency={selectedDependency} />

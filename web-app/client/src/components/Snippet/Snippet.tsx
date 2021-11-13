@@ -1,17 +1,27 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from "react";
-import CSS from "csstype";
-import { dependency } from "../../types";
+import { coloredDepedency } from "../../types";
 import "./Snippet.css";
 
 interface Props {
   file: File | null;
-  selectedDependency: dependency | undefined;
+  selectedDependency: coloredDepedency | undefined;
 }
 
 /* eslint-disable prefer-template */
 /* eslint-disable no-cond-assign */
 /* eslint-disable prefer-destructuring */
+
+// eslint-disable-next-line max-len
+function getSelectedIndices(dep: coloredDepedency | undefined, header: string[]): Map<number, string> {
+  const selectedIndices = new Map<number, string>();
+  if (dep === undefined) {
+    return selectedIndices;
+  }
+  dep.lhs.forEach((lhs) => selectedIndices.set(header.indexOf(lhs.name), lhs.color));
+  selectedIndices.set(header.indexOf(dep.rhs.name), dep.rhs.color);
+  return selectedIndices;
+}
 
 function convertCSVToArray(inputData: string, delimiter: string) {
   const objPattern = new RegExp(
@@ -49,31 +59,16 @@ function convertCSVToArray(inputData: string, delimiter: string) {
   return arrData;
 }
 
-function getSelectedIndices(dep: dependency | undefined, header: string[]): number[] {
-  const selectedIndices: number[] = [];
-  if (dep === undefined) {
-    return selectedIndices;
-  }
-  dep.lhs.forEach((lhs) => selectedIndices.push(header.indexOf(lhs.name)));
-  selectedIndices.push(header.indexOf(dep.rhs.name));
-  return selectedIndices;
-}
-
 const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
   const [table, setTable] = useState<string[][]>([[]]);
-  const selectedStyle: CSS.Properties = {
-    backgroundColor: "#8792C0",
-  };
-  const defaultStyle: CSS.Properties = {};
-  const selectedIndices: number[] = getSelectedIndices(selectedDependency, table[0]);
-  console.log(selectedIndices);
+  const selectedIndices: Map<number, string> = getSelectedIndices(selectedDependency, table[0]);
 
   useEffect(() => {
     function readFile() {
       file!.text().then((buffer) => setTable(convertCSVToArray(buffer, ",")));
     }
     readFile();
-  }, []);
+  });
 
   return (
     <table>
@@ -81,22 +76,26 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
         table === undefined ?
           <></>
           :
-          table!.map((value, index) => (
+          table.map((value, index) => (
             <tr
               // eslint-disable-next-line react/no-array-index-key
               key={index}
             >
-              {value!.map((cell, idx) => (
-                <td
-                  // eslint-disable-next-line react/no-array-index-key
-                  key={idx}
-                  style={selectedIndices.indexOf(idx) !== -1 ? selectedStyle : defaultStyle}
-                >
-                  {cell}
-                </td>
-              ))}
+              {value!.map((cell, idx) => {
+                if (cell !== "") {
+                  return (
+                    <td
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={idx}
+                      style={selectedIndices.get(idx) !== undefined ? { backgroundColor: selectedIndices.get(idx) } : { backgroundColor: "#ffffff" }}
+                    >
+                      {cell}
+                    </td>
+                  );
+                }
+                return <></>;
+              })}
             </tr>
-
           ))
       }
     </table>

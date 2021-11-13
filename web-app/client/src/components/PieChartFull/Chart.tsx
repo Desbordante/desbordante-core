@@ -1,18 +1,17 @@
 import React from "react";
 import { Doughnut } from "react-chartjs-2";
+import { coloredAttribute } from "../../types";
 
 import AttributeLabel from "../AttributeLabel/AttributeLabel";
 import SelectedAttribute from "../SelectedAttribute/SelectedAttribute";
 import "./PieChartFull.css";
 
-type attribute = { name: string; value: number };
-
 /* eslint-disable no-unused-vars */
 interface Props {
-  displayAttributes: attribute[];
+  displayAttributes: coloredAttribute[];
   onSelect: (a: any, b: any) => void;
-  selectedAttributes: attribute[];
-  setSelectedAttributes: (attr: attribute[]) => void;
+  selectedAttributes: coloredAttribute[];
+  setSelectedAttributes: (attr: coloredAttribute[]) => void;
 }
 /* eslint-enable no-unused-vars */
 

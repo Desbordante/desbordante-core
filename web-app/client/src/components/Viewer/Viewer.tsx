@@ -23,6 +23,8 @@ import {
   attribute,
   dependency,
   dependencyEncoded,
+  coloredAttribute,
+  coloredDepedency,
 } from "../../types";
 
 interface Props {
@@ -37,17 +39,52 @@ const Viewer: React.FC<Props> = ({ file }) => {
   const [taskStatus, setTaskStatus] = useState<taskStatus>("UNSCHEDULED");
   const [filename, setFilename] = useState<string | null>("Todo"); //TODO: add file name to taskInfo
 
-  const [attributesLHS, setAttributesLHS] = useState<attribute[]>([]);
-  const [attributesRHS, setAttributesRHS] = useState<attribute[]>([]);
+  const [attributesLHS, setAttributesLHS] = useState<coloredAttribute[]>([]);
+  const [attributesRHS, setAttributesRHS] = useState<coloredAttribute[]>([]);
 
   const [selectedAttributesLHS, setSelectedAttributesLHS] = useState<
-    attribute[]
+    coloredAttribute[]
   >([]);
   const [selectedAttributesRHS, setSelectedAttributesRHS] = useState<
-    attribute[]
+    coloredAttribute[]
   >([]);
 
   const [dependencies, setDependencies] = useState<dependency[]>([]);
+
+  const dependencyColors: string[] = [
+    "#ff5757",
+    "#575fff",
+    "#4de3a2",
+    "#edc645",
+    "#d159de",
+    "#32bbc2",
+    "#ffa857",
+    "#8dd44a",
+    "#6298d1",
+    "#969696",
+  ]
+
+  function createColoredDep(dep: dependency, colorsBuffer: string[]): coloredDepedency {
+    return {
+      lhs: dep.lhs.map((attr) => ({
+        name: attr.name,
+        value: attr.value,
+        color: pickRandomColor(colorsBuffer)
+      })),
+      rhs: {
+        name: dep.rhs.name,
+        value: dep.rhs.value,
+        color: pickRandomColor(colorsBuffer)
+      }
+    }
+  }
+
+  const pickRandomColor = (colors: string[]) => {
+    const pickedIndex = Math.floor(Math.random() * colors.length);
+    const pickedElement = colors[pickedIndex];
+    colors.splice(pickedIndex, 1)
+    return pickedElement;
+  }
 
   const taskFinished = (status: taskStatus) =>
     status === "COMPLETED" || status === "SERVER ERROR";
@@ -151,7 +188,7 @@ const Viewer: React.FC<Props> = ({ file }) => {
                   type="button"
                   color="gradient"
                   glow="always"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <img src="/icons/nav-down.svg" alt="down" />
                 </Button>
@@ -163,7 +200,9 @@ const Viewer: React.FC<Props> = ({ file }) => {
           <div className="bg-light" style={{ justifyContent: "space-between" }}>
             <DependencyListFull
               file={file}
-              dependencies={dependencies}
+              dependencies={dependencies.map((dep) => {
+                return createColoredDep(dep, dependencyColors.slice(0))
+              })}
               selectedAttributesLHS={selectedAttributesLHS}
               selectedAttributesRHS={selectedAttributesRHS}
             />
@@ -179,7 +218,7 @@ const Viewer: React.FC<Props> = ({ file }) => {
                   type="button"
                   color="gradient"
                   glow="always"
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <img src="/icons/nav-up.svg" alt="up" />
                 </Button>

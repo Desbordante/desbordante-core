@@ -18,7 +18,6 @@
   padding: 0.6rem 1.8rem;
   margin: 0.4rem 0.5rem;
   color: var(--text-black);
-  background-color: var(--light);
   cursor: pointer;
   transition: 0.3s;
 }
