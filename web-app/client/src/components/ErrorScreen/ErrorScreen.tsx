@@ -19,7 +19,7 @@ const ErrorScreen: React.FC<Props> = ({ code, message }) => {
           <span>Error {code}: </span>
           {message}
         </div>
-        <Button type="button" color="1" onClick={() => history.push("/")}>
+        <Button color="1" onClick={() => history.push("/")}>
           Try again
         </Button>
       </div>

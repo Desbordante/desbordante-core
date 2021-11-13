@@ -30,12 +30,12 @@ const Viewer: React.FC = () => {
   let { taskID } = useParams<{ taskID: string }>();
   const history = useHistory();
 
-  const [taskProgress, setTaskProgress] = useState(0.6);
-  const [phaseName, setPhaseName] = useState("Mining dependencies");
+  const [taskProgress, setTaskProgress] = useState(0);
+  const [phaseName, setPhaseName] = useState("");
   const [currentPhase, setCurrentPhase] = useState(3);
   const [maxPhase, setMaxPhase] = useState(5);
   const [taskStatus, setTaskStatus] = useState<taskStatus>("UNSCHEDULED");
-  const [filename, setFilename] = useState<string>("Todo"); //TODO: add file name to taskInfo
+  const [filename, setFilename] = useState<string>("");
 
   const [attributesLHS, setAttributesLHS] = useState<attribute[]>([]);
   const [attributesRHS, setAttributesRHS] = useState<attribute[]>([]);
@@ -59,8 +59,11 @@ const Viewer: React.FC = () => {
         .then((task) => task.data)
         .then((data) => {
           console.log(data);
-          // setTaskProgress(data.progress);
+          setFilename(data.filename);
+          setTaskProgress(data.progress / 100);
           setPhaseName(data.phasename);
+          setCurrentPhase(data.currentphase);
+          setMaxPhase(data.maxphase);
           setTaskStatus(data.status);
           if (taskFinished(data.status)) {
             setAttributesLHS(data.arraynamevalue.lhs);
@@ -73,7 +76,10 @@ const Viewer: React.FC = () => {
             );
           }
         })
-        .catch((error) => history.push("/error"));
+        .catch((error) => {
+          console.error(error);
+          history.push("/error");
+        });
     };
 
     const timer = setInterval(() => {
@@ -93,18 +99,8 @@ const Viewer: React.FC = () => {
             <img src="/icons/logo.svg" alt="logo" className="logo-medium" />
             <h1>File: "{filename}"</h1>
             <h1>Status: {taskStatus}</h1>
-            <input
-              type="range"
-              min={0}
-              max={1}
-              step={0.01}
-              onChange={(e) =>
-                setTaskProgress(+(e.target as HTMLInputElement).value)
-              }
-            />
           </div>
           <Button
-            type="button"
             color="1"
             onClick={() => {
               axios.post(`${serverURL}/cancelTask?taskID=${taskID}`);
@@ -152,7 +148,7 @@ const Viewer: React.FC = () => {
             <footer style={{ opacity: taskFinished(taskStatus) ? 1 : 0 }}>
               <h1 className="bottom-title">View Dependencies</h1>
               <Link to={`/deps/${taskID}`}>
-                <Button type="button" color="0" onClick={() => {}}>
+                <Button color="0" onClick={() => {}}>
                   <img src="/icons/nav-down.svg" alt="down" />
                 </Button>
               </Link>
@@ -174,7 +170,7 @@ const Viewer: React.FC = () => {
                 View Attributes
               </h1>
               <Link to={`/attrs/${taskID}`}>
-                <Button type="button" color="0" onClick={() => {}}>
+                <Button color="0" onClick={() => {}}>
                   <img src="/icons/nav-up.svg" alt="up" />
                 </Button>
               </Link>
