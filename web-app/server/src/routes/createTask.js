@@ -33,7 +33,8 @@ router.post('/createTask', function(req, res){
         console.log("Input data:", json)
         console.log("File:", table)
 
-        const { algName, errorPercent, separator, maxLHS, hasHeader } = json
+        const { algName, errorPercent, separator, 
+                maxLHS, hasHeader, parallelism } = json
         const status = 'ADDED TO THE TASK QUEUE'
         const progress = 0.0
 
@@ -49,10 +50,11 @@ router.post('/createTask', function(req, res){
         var topicName = process.env.KAFKA_TOPIC_NAME;
         const query = `insert into ${process.env.DB_TASKS_TABLE_NAME}
             (taskID, createdAt, algName, errorPercent, separator, progress, 
-            status, datasetPath, maxLHS, hasHeader, fileName) values
-            ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
-        const params = [taskID, algName, errorPercent, separator, progress, 
-                        status, datasetPath, maxLHS, hasHeader, table.name];
+            status, datasetPath, maxLHS, hasHeader, fileName, parallelism, cancelled) values
+            ($1, now(), $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, false)`;
+        const params = [taskID, algName, errorPercent, separator, 
+                        progress, status, datasetPath, maxLHS, 
+                        hasHeader, table.name, parallelism];
     
         // Add task to DB
         (async () => {

@@ -25,33 +25,38 @@ INITIALIZE_EASYLOGGINGPP
 
 std::string TaskConfig::tableName = "tasks";
 
-void TaskConsumer::processMsg(nlohmann::json payload, 
-                              DBManager const &manager) const {
+void TaskConsumer::processMsg(nlohmann::json payload,
+                             DBManager const &manager) const {
     auto taskID = std::string(payload["taskID"]);
-    if (TaskConfig::taskExists(manager, taskID)) {
-        auto task = TaskConfig::getTaskConfig(manager, taskID);
-        task.writeInfo(std::cout);
-        try {
-            processTask(task, manager);
-        } catch (const std::exception& e) {
-            std::cout << "Unexpected behaviour in 'process_task()' (Task wasn't commited)" 
-                      << std::endl;
-            task.updateErrorStatus(manager, "SERVER ERROR", e.what());
-            return;
-        }
-        std::cout << "Task with ID = '" << taskID 
-                  << "' was successfully processed." << std::endl;
-    } else {
-        std::cout << "Task with ID = '" << taskID 
-                  << "' isn't in the database (Task wasn't processed (skipped))" 
+    if (!TaskConfig::taskExists(manager, taskID)) {
+        std::cout << "Task with ID = '" << taskID
+                  << "' isn't in the database. (Task wasn't processed (skipped))"
                   << std::endl;
+    } else {
+        auto task = TaskConfig::getTaskConfig(manager, taskID);
+        if (TaskConfig::isTaskCancelled(manager, taskID)) {
+            std::cout << "Task with ID = '" << taskID
+                      << "' was cancelled." << std::endl;
+        } else {
+            task.writeInfo(std::cout);
+            try {
+                processTask(task, manager);
+            } catch (const std::exception& e) {
+                std::cout << "Unexpected behaviour in 'process_task()'. (Task wasn't commited)"
+                        << std::endl;
+                task.updateErrorStatus(manager, "SERVER ERROR", e.what());
+                return;
+            }
+            std::cout << "Task with ID = '" << taskID
+                    << "' was successfully processed." << std::endl;
+        }
     }
 }
 
 void TaskConsumer::processTask(TaskConfig const& task, 
                                DBManager const& manager) const {
     std::vector<std::string> algsWithProgressBar {
-        "FastFDs"
+        "FastFDs", "DFD", "Pyro", "TaneX"
     };
 
     auto algName = task.getAlgName();
@@ -62,7 +67,7 @@ void TaskConsumer::processTask(TaskConfig const& task,
     auto maxLHS = task.getMaxLHS();
     
     auto seed = 0;
-    unsigned int parallelism = 0;
+    unsigned int parallelism = task.getParallelism();
 
     el::Loggers::configureFromGlobal("logging.conf");
     

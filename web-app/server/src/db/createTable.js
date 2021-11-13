@@ -21,6 +21,8 @@ async function createTable(pool) {
         FDs text,\n
         hasHeader bool not null,\n
         maxLHS int not null,\n
+        parallelism int not null,\n
+        cancelled bool not null,\n
         arrayNameValue text,\n
         columnNames text)
         `

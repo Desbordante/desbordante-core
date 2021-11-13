@@ -20,6 +20,7 @@ type parameters = {
   errorPercent: number;
   hasHeader: boolean;
   maxLHS: number;
+  parallelism: string;
 };
 
 export function submitBuiltinDataset(

@@ -13,15 +13,16 @@ class TaskConfig{
     std::string const datasetPath;
     bool const hasHeader;
     unsigned int const maxLHS;
+    unsigned int const parallelism;
 
     static std::string tableName;
 
-    TaskConfig(std::string taskID, std::string algName, double errorPercent, 
-               char separator, std::string datasetPath, bool hasHeader, 
-               unsigned int maxLHS)
-        :   taskID(taskID), algName(algName), errorPercent(errorPercent), 
-            separator(separator), datasetPath(datasetPath), hasHeader(hasHeader), 
-            maxLHS(maxLHS) {}
+    TaskConfig(std::string taskID, std::string algName, double errorPercent,
+               char separator, std::string datasetPath, bool hasHeader,
+               unsigned int maxLHS, unsigned int parallelism)
+        :   taskID(taskID), algName(algName), errorPercent(errorPercent),
+            separator(separator), datasetPath(datasetPath), hasHeader(hasHeader),
+            maxLHS(maxLHS), parallelism(parallelism) {}
 public:
 
     auto getAlgName()      const { return algName;      }
@@ -31,6 +32,7 @@ public:
     auto getDatasetPath()  const { return datasetPath;  }
     auto getHasHeader()    const { return hasHeader;    }
     auto getMaxLHS()       const { return maxLHS;       }
+    auto getParallelism()  const { return parallelism;  }
 
     auto& writeInfo(std::ostream& os) const {
         os << "Task Config:\n"
@@ -63,22 +65,34 @@ public:
         return answer.size() == 1;
     }
 
-    static TaskConfig getTaskConfig(DBManager const &manager, std::string taskID) {
+    static bool isTaskCancelled(DBManager const &manager, std::string taskID) {
+        std::string query = "SELECT cancelled FROM " + tableName +
+                            " WHERE taskID = '" + taskID + "'";
+        auto answer = manager.defaultQuery(query);
+        bool cancelled;
+        answer[0]["cancelled"] >> cancelled;
+        std::cout << "cancelled " << cancelled << std::endl;
+        return cancelled;
+    }
+
+   static TaskConfig getTaskConfig(DBManager const &manager, std::string taskID) {
         std::string query = "SELECT taskid, trim(algname) as algname, errorpercent,\n"
-                            "separator, datasetpath, maxlhs, hasheader\n"
+                            "separator, datasetpath, maxlhs, hasheader, parallelism\n"
                             "FROM " + tableName + " WHERE taskID = '" + taskID + "'";
         auto rows = manager.defaultQuery(query);
-        
+
         auto algName      = rows[0]["algname"].c_str();
         auto errorPercent = std::stod(rows[0]["errorpercent"].c_str());
         char separator    = rows[0]["separator"].c_str()[0];
         auto datasetPath  = rows[0]["datasetpath"].c_str();
-        auto hasHeader    = rows[0]["hasheader"].c_str() == "t";
+        bool hasHeader;
+        rows[0]["hasheader"] >> hasHeader;
         auto maxLHS       = (unsigned int)std::stoi(rows[0]["maxlhs"].c_str());
+        auto parallelism  = (unsigned int)std::stoi(rows[0]["parallelism"].c_str());
 
-        return TaskConfig(taskID, algName, errorPercent, separator, datasetPath, 
-                          hasHeader, maxLHS);
-    }
+        return TaskConfig(taskID, algName, errorPercent, separator, datasetPath,
+                          hasHeader, maxLHS, parallelism);
+   }
 
     // Send a request to DB for status updating
     void updateStatus(DBManager const &manager, std::string status) const {
