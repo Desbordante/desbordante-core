@@ -125,8 +125,7 @@ const FileForm: React.FC<Props> = ({
     e.preventDefault();
     const sendAlgName = algorithm ? algorithm.name : allowedAlgorithms[0].name;
     const sendErrorThreshold = +errorThreshold;
-    const sendMaxLHS =
-      maxLHSAttributes === "inf" ? 2147483647 : +maxLHSAttributes;
+    const sendMaxLHS = maxLHSAttributes === "inf" ? -1 : +maxLHSAttributes;
     if (builtinDataset) {
       submitBuiltinDataset(
         builtinDataset!,
