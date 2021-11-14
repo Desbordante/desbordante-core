@@ -25,7 +25,7 @@ const App: React.FC = () => {
           {/* Loading Page */}
           <Route path="/loading" exact>
             <LoadingScreen
-              onComplete={() => {}} // TODO:
+              onComplete={() => { }} // TODO:
               progress={uploadProgress}
             />
           </Route>
@@ -33,7 +33,7 @@ const App: React.FC = () => {
           {/* View Page */}
           <Route path="/(attrs|deps)/:taskID/">
             <div className="screen">
-              <Viewer file={file} />
+              <Viewer file={file} setFile={setFile} />
             </div>
           </Route>
 

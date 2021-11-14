@@ -67,7 +67,10 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
     function readFile() {
       file!.text().then((buffer) => setTable(convertCSVToArray(buffer, ",")));
     }
-    readFile();
+
+    if (file !== null) {
+      readFile();
+    }
   });
 
   return (

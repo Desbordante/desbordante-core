@@ -29,9 +29,10 @@ import {
 
 interface Props {
   file: File | null;
+  setFile: (file: File | null) => void;
 }
 
-const Viewer: React.FC<Props> = ({ file }) => {
+const Viewer: React.FC<Props> = ({ file, setFile }) => {
   let { taskID } = useParams<{ taskID: string }>();
   const history = useHistory();
 
@@ -139,7 +140,10 @@ const Viewer: React.FC<Props> = ({ file }) => {
             <h1>File: "{filename}"</h1>
             <h1>Status: {taskStatus}</h1>
           </div>
-          <Button type="button" onClick={() => history.push("/")}>
+          <Button type="button" onClick={() => {
+            history.push("/")
+            setFile(null)
+          }}>
             Cancel
           </Button>
         </header>
