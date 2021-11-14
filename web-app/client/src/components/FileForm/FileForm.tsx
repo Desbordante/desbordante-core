@@ -82,6 +82,18 @@ const FileForm: React.FC<Props> = ({
       .catch((error) => history.push("/error"));
   }, [history]);
 
+  useEffect(() => {
+    if (!algorithm?.props.errorThreshold) {
+      setErrorThreshold("0");
+    }
+    if (!algorithm?.props.maxLHS) {
+      setMaxLHSAttributes("inf");
+    }
+    if (!algorithm?.props.threads) {
+      setThreadsCount("1");
+    }
+  }, [algorithm]);
+
   // Validator functions for fields
   const fileExistenceValidator = (file: File | null) => !!file;
   const fileSizeValidator = (file: File | null) =>
@@ -108,6 +120,37 @@ const FileForm: React.FC<Props> = ({
       maxLHSValidator(maxLHSAttributes)
     );
   }
+
+  const submit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    if (builtinDataset) {
+      submitBuiltinDataset(
+        builtinDataset!,
+        {
+          algName: algorithm ? algorithm.name : allowedAlgorithms[0].name,
+          errorPercent: +errorThreshold,
+          maxLHS: +maxLHSAttributes,
+          parallelism: threadsCount,
+        },
+        handleResponse
+      );
+    } else {
+      history.push("/loading");
+      submitCustomDataset(
+        file as File,
+        {
+          algName: algorithm ? algorithm.name : allowedAlgorithms[0].name,
+          separator,
+          errorPercent: +errorThreshold,
+          hasHeader,
+          maxLHS: +maxLHSAttributes,
+          parallelism: threadsCount,
+        },
+        setUploadProgress,
+        handleResponse
+      );
+    }
+  };
 
   return (
     <form>
@@ -142,7 +185,7 @@ const FileForm: React.FC<Props> = ({
               disableBuiltinDataset={() => setBuiltinDataset(null)}
             />
           </FormItem>
-          <FormItem>
+          <FormItem enabled={!builtinDataset}>
             <h3>File properties:</h3>
             <Toggle
               color="1"
@@ -227,46 +270,7 @@ const FileForm: React.FC<Props> = ({
       </div>
 
       <div className="form-column">
-        <Button
-          color="1"
-          enabled={isValid()}
-          onClick={(e) => {
-            e.preventDefault();
-            if (builtinDataset) {
-              submitBuiltinDataset(
-                builtinDataset!,
-                {
-                  algName: algorithm
-                    ? algorithm.name
-                    : allowedAlgorithms[0].name,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                  parallelism: threadsCount
-                },
-                handleResponse
-              );
-            } else {
-              history.push("/loading");
-              submitCustomDataset(
-                file as File,
-                {
-                  algName: algorithm
-                    ? algorithm.name
-                    : allowedAlgorithms[0].name,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                  parallelism: threadsCount
-                },
-                setUploadProgress,
-                handleResponse
-              );
-            }
-          }}
-        >
+        <Button color="1" enabled={isValid()} onClick={submit}>
           Analyze
         </Button>
       </div>
