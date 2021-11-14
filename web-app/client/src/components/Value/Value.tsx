@@ -32,7 +32,10 @@ const Value: React.FC<Props> = ({
       value={value}
       className={`value ${isValid ? "" : "invalid"}`}
       size={size}
-      onInput={(e) => inputHandler((e.target as HTMLTextAreaElement).value)}
+      onChange={(event) => {
+        // eslint-disable-next-line no-console
+        inputHandler(event.target.value);
+      }}
     />
   );
 };

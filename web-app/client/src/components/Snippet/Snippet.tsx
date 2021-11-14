@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { coloredDepedency } from "../../types";
+import { DelimeterContext } from "../DelimeterContext/DelimeterContext";
 import "./Snippet.css";
 
 interface Props {
@@ -62,10 +63,12 @@ function convertCSVToArray(inputData: string, delimiter: string) {
 const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
   const [table, setTable] = useState<string[][]>([[]]);
   const selectedIndices: Map<number, string> = getSelectedIndices(selectedDependency, table[0]);
+  const delimeterContext = useContext(DelimeterContext);
 
   useEffect(() => {
     function readFile() {
-      file!.text().then((buffer) => setTable(convertCSVToArray(buffer, ",")));
+      file!.text().then((buffer) =>
+        setTable(convertCSVToArray(buffer, delimeterContext?.delimeter!)));
     }
 
     if (file !== null) {
