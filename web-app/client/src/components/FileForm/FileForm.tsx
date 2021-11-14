@@ -82,6 +82,18 @@ const FileForm: React.FC<Props> = ({
       .catch((error) => history.push("/error"));
   }, [history]);
 
+  useEffect(() => {
+    if (!algorithm?.props.errorThreshold) {
+      setErrorThreshold("0");
+    }
+    if (!algorithm?.props.maxLHS) {
+      setMaxLHSAttributes("inf");
+    }
+    if (!algorithm?.props.threads) {
+      setThreadsCount("1");
+    }
+  }, [algorithm]);
+
   // Validator functions for fields
   const fileExistenceValidator = (file: File | null) => !!file;
   const fileSizeValidator = (file: File | null) =>
@@ -94,7 +106,7 @@ const FileForm: React.FC<Props> = ({
   const errorValidator = (err: string) =>
     !Number.isNaN(+err) && +err >= 0 && +err <= 1;
   const maxLHSValidator = (lhs: string) =>
-    !Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0;
+    lhs === "inf" || (!Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0);
 
   // Validator function that ensures every field is correct
   function isValid() {
@@ -108,6 +120,40 @@ const FileForm: React.FC<Props> = ({
       maxLHSValidator(maxLHSAttributes)
     );
   }
+
+  const submit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    const sendAlgName = algorithm ? algorithm.name : allowedAlgorithms[0].name;
+    const sendErrorThreshold = +errorThreshold;
+    const sendMaxLHS = maxLHSAttributes === "inf" ? -1 : +maxLHSAttributes;
+    if (builtinDataset) {
+      submitBuiltinDataset(
+        builtinDataset!,
+        {
+          algName: sendAlgName,
+          errorPercent: sendErrorThreshold,
+          maxLHS: sendMaxLHS,
+          parallelism: threadsCount,
+        },
+        handleResponse
+      );
+    } else {
+      history.push("/loading");
+      submitCustomDataset(
+        file as File,
+        {
+          algName: sendAlgName,
+          separator,
+          errorPercent: sendErrorThreshold,
+          hasHeader,
+          maxLHS: sendMaxLHS,
+          parallelism: threadsCount,
+        },
+        setUploadProgress,
+        handleResponse
+      );
+    }
+  };
 
   return (
     <form>
@@ -142,7 +188,7 @@ const FileForm: React.FC<Props> = ({
               disableBuiltinDataset={() => setBuiltinDataset(null)}
             />
           </FormItem>
-          <FormItem>
+          <FormItem enabled={!builtinDataset}>
             <h3>File properties:</h3>
             <Toggle
               color="1"
@@ -183,7 +229,7 @@ const FileForm: React.FC<Props> = ({
               inputValidator={maxLHSValidator}
             />
             <Slider
-              value={maxLHSAttributes}
+              value={maxLHSAttributes === "inf" ? "10" : maxLHSAttributes}
               min={1}
               max={10}
               onChange={setMaxLHSAttributes}
@@ -227,46 +273,7 @@ const FileForm: React.FC<Props> = ({
       </div>
 
       <div className="form-column">
-        <Button
-          color="1"
-          enabled={isValid()}
-          onClick={(e) => {
-            e.preventDefault();
-            if (builtinDataset) {
-              submitBuiltinDataset(
-                builtinDataset!,
-                {
-                  algName: algorithm
-                    ? algorithm.name
-                    : allowedAlgorithms[0].name,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                  parallelism: threadsCount
-                },
-                handleResponse
-              );
-            } else {
-              history.push("/loading");
-              submitCustomDataset(
-                file as File,
-                {
-                  algName: algorithm
-                    ? algorithm.name
-                    : allowedAlgorithms[0].name,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                  parallelism: threadsCount
-                },
-                setUploadProgress,
-                handleResponse
-              );
-            }
-          }}
-        >
+        <Button color="1" enabled={isValid()} onClick={submit}>
           Analyze
         </Button>
       </div>

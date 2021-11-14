@@ -25,6 +25,7 @@ module.exports = {
   },
   plugins: ["react", "@typescript-eslint", "react-hooks"],
   rules: {
+    "linebreak-style": "off",
     curly: ["error", "all"],
     "implicit-arrow-linebreak": "off",
     "comma-dangle": "off",
