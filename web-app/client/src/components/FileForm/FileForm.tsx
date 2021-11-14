@@ -226,7 +226,7 @@ const FileForm: React.FC<Props> = ({
               inputValidator={maxLHSValidator}
             />
             <Slider
-              value={maxLHSAttributes}
+              value={maxLHSAttributes === "inf" ? "10" : maxLHSAttributes}
               min={1}
               max={10}
               onChange={setMaxLHSAttributes}
