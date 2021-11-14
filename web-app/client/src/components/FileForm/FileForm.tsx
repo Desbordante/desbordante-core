@@ -106,7 +106,7 @@ const FileForm: React.FC<Props> = ({
   const errorValidator = (err: string) =>
     !Number.isNaN(+err) && +err >= 0 && +err <= 1;
   const maxLHSValidator = (lhs: string) =>
-    !Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0;
+    lhs === "inf" || (!Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0);
 
   // Validator function that ensures every field is correct
   function isValid() {
