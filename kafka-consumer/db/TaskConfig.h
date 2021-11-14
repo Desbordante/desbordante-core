@@ -71,7 +71,6 @@ public:
         auto answer = manager.defaultQuery(query);
         bool cancelled;
         answer[0]["cancelled"] >> cancelled;
-        std::cout << "cancelled " << cancelled << std::endl;
         return cancelled;
     }
 
