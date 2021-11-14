@@ -123,13 +123,17 @@ const FileForm: React.FC<Props> = ({
 
   const submit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
+    const sendAlgName = algorithm ? algorithm.name : allowedAlgorithms[0].name;
+    const sendErrorThreshold = +errorThreshold;
+    const sendMaxLHS =
+      maxLHSAttributes === "inf" ? 2147483647 : +maxLHSAttributes;
     if (builtinDataset) {
       submitBuiltinDataset(
         builtinDataset!,
         {
-          algName: algorithm ? algorithm.name : allowedAlgorithms[0].name,
-          errorPercent: +errorThreshold,
-          maxLHS: +maxLHSAttributes,
+          algName: sendAlgName,
+          errorPercent: sendErrorThreshold,
+          maxLHS: sendMaxLHS,
           parallelism: threadsCount,
         },
         handleResponse
@@ -139,11 +143,11 @@ const FileForm: React.FC<Props> = ({
       submitCustomDataset(
         file as File,
         {
-          algName: algorithm ? algorithm.name : allowedAlgorithms[0].name,
+          algName: sendAlgName,
           separator,
-          errorPercent: +errorThreshold,
+          errorPercent: sendErrorThreshold,
           hasHeader,
-          maxLHS: +maxLHSAttributes,
+          maxLHS: sendMaxLHS,
           parallelism: threadsCount,
         },
         setUploadProgress,
