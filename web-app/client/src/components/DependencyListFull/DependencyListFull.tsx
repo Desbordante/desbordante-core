@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-import "./DependencyListFull.css";
+import "./DependencyListFull.scss";
 import Dependency from "../Dependency/Dependency";
 import SearchBar from "../SearchBar/SearchBar";
 import Toggle from "../Toggle/Toggle";

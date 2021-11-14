@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./FileLabel.css";
+import "./FileLabel.scss";
 import { useDropzone } from "react-dropzone";
 
 /* eslint-disable no-unused-vars */
@@ -56,7 +56,7 @@ const FileLabel: React.FC<Props> = ({
         <div>
           {file && file.name.length > 40
             ? `${file?.name.slice(0, 40)}...`
-            : file?.name.length}
+            : file?.name}
         </div>
       );
     } else if (fileSizeValidator(file)) {

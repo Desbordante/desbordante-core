@@ -27,7 +27,9 @@
     "react-motion": "^0.5.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
+    "react-transition-group": "1.x",
     "recharts": "^2.0.10",
+    "sass": "^1.43.2",
     "typescript": "^4.3.5",
     "web-vitals": "^1.1.2"
   },
@@ -60,8 +62,9 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@types/body-scroll-lock": "^3.1.0",
-    "@types/react": "^17.0.17",
+    "@types/react": "^17.0.24",
     "@types/react-router-dom": "^5.1.8",
+    "@types/react-transition-group": "^4.4.3",
     "eslint": "^7.32.0",
     "react-test-renderer": "^17.0.2"
   }

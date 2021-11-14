@@ -4,7 +4,7 @@ import { coloredAttribute } from "../../types";
 
 import AttributeLabel from "../AttributeLabel/AttributeLabel";
 import SelectedAttribute from "../SelectedAttribute/SelectedAttribute";
-import "./PieChartFull.css";
+import "./PieChartFull.scss";
 
 /* eslint-disable no-unused-vars */
 interface Props {

@@ -1,0 +1,16 @@
+@import "../../variables.scss";
+
+.attribute-label {
+  font-family: $font-content;
+  color: $text-black;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  .circle {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 1000px;
+    margin-right: 0.7rem;
+  }
+}

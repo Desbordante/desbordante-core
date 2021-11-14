@@ -1,9 +1,9 @@
-const express = require('express')
-const cors = require('cors')
+const express = require('express');
+const cors = require('cors');
 
 // Pool init
-const pool = require('./db/createPool')
-const createTable = require('./db/createTable')
+const pool = require('./db/createPool');
+const createTable = require('./db/createTable');
 const dropTableTasks = require('./db/dropTable');
 
 // Uploading files:
@@ -15,12 +15,15 @@ var algsInfo = require('./routes/algsInfo');
 var getTaskInfo = require('./routes/getTaskInfo');
 var chooseTaskRouter = require('./routes/chooseTask');
 var createTaskRouter = require('./routes/createTask');
+var cancelTaskRouter = require('./routes/cancelTask');
 
-// Configurating DB tables
+// Configuring DB
 dropTableTasks(pool)
-.then((err, res) => 
-  createTable(pool)
-)
+.then(res => createTable(pool))
+.catch(err => {
+  console.log("[Error]: DB configuration incompleted")
+  throw err;
+})
 
 const app = express()
 app.set('pool', pool);
@@ -39,6 +42,7 @@ app.use(morgan('dev'));
 // POST requests
 app.post('/chooseTask', jsonParser, chooseTaskRouter);
 app.post('/createTask', jsonParser, createTaskRouter);
+app.post('/cancelTask', jsonParser, cancelTaskRouter);
 
 // GET requests
 app.use('/getTaskInfo', getTaskInfo)

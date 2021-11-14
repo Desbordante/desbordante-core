@@ -1,0 +1,44 @@
+@import "../../variables.scss";
+
+button.button {
+  margin: 0rem 0.8rem;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: $font-content;
+  font-size: 1.2rem;
+  padding: 0.8rem 1.6rem;
+  height: 3rem;
+  font-weight: 300;
+  border-radius: 1000px;
+  border: none;
+  outline: none;
+  backface-visibility: hidden;
+  cursor: pointer;
+  transition: 0.3s;
+
+  &:hover {
+    transform: scale(103%);
+    box-shadow: 0px 0px 10px #0005;
+  }
+
+  &.color-0 {
+    background-color: $button-black;
+    color: $text-white;
+  }
+  &.color-1 {
+    background-color: $button-white;
+    color: $text-black;
+  }
+  &.color-error {
+    background-color: $error;
+    color: $text-white;
+  }
+
+  &.disabled {
+    cursor: default;
+    filter: opacity(0.3);
+    transition: 0.3s;
+  }
+}

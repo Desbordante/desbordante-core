@@ -1,6 +1,6 @@
 import React from "react";
 
-import "./PopupWindow.css";
+import "./PopupWindow.scss";
 
 interface Props {
   children: React.ReactNode;

@@ -1,0 +1,87 @@
+@import "../../variables.scss";
+
+.file-name-wrapper {
+  margin: 0rem 0.8rem;
+  position: relative;
+  transition: 0.3s;
+  border-radius: 1000px;
+
+  &:hover {
+    transform: scale(1.005);
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1000px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .filename,
+  .glow {
+    width: 30rem;
+    padding: 0.8rem;
+    height: 2.7rem;
+    font-size: 1.2rem;
+    font-weight: 300;
+    border-radius: 1000px;
+    text-align: left;
+    font-family: $font-content;
+    background-color: $border;
+    display: flex;
+    align-items: center;
+    white-space: pre;
+    transition: 0.3s;
+  }
+
+  .outline {
+    padding: 0.15rem;
+    height: 3rem;
+    width: 30rem;
+  }
+
+  .gradient-fill {
+    // background: linear-gradient(210deg, $primary-1, $primary-0);
+    background-color: $button-white;
+    white-space: pre-wrap; /* css-3 */
+    white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+    white-space: -pre-wrap; /* Opera 4-6 */
+    white-space: -o-pre-wrap; /* Opera 7 */
+    word-wrap: break-word; /* Internet Explorer 5.5+ */
+    overflow-wrap: break-word;
+  }
+
+  .error {
+    background: $error;
+  }
+
+  .inactive {
+    color: $text-grey;
+  }
+
+  .active {
+    color: $text-white;
+  }
+
+  .highlight-purple {
+    color: $text-grey;
+  }
+
+  .highlight-green {
+    color: $text-grey;
+  }
+
+  .highlight-red {
+    color: $error;
+  }
+
+  .glow {
+    position: absolute;
+    z-index: 0;
+    filter: blur(0.6rem);
+  }
+}

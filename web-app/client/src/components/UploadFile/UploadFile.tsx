@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import "./UploadFile.css";
+import "./UploadFile.scss";
 import FileLabel from "../FileLabel/FileLabel";
 import Button from "../Button/Button";
 
@@ -58,14 +58,10 @@ const UploadFile: React.FC<Props> = ({
         multiple={false}
         accept=".csv, .CSV"
       />
-      <Button
-        onClick={() => inputFile?.current?.click()}
-        color="0"
-        type="button"
-      >
+      <Button onClick={() => inputFile?.current?.click()} color="1">
         <img src="/icons/upload.svg" alt="upload" className="upload-icon" />
       </Button>
-      <Button onClick={openPopupWindow} type="button" color="1">
+      <Button onClick={openPopupWindow} color="1">
         <img src="/icons/choose.svg" alt="choose" className="upload-icon" />
       </Button>
     </>

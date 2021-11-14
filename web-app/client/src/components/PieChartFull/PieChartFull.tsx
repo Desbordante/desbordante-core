@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import "./PieChartFull.css";
+import "./PieChartFull.scss";
 import SearchBar from "../SearchBar/SearchBar";
 import Chart from "./Chart";
 import Button from "../Button/Button";
@@ -76,7 +76,11 @@ const PieChartFull: React.FC<Props> = ({
           defaultText="Filter attributes..."
           onChange={setSearchString}
         />
-        <Button type="button" color="1" onClick={() => setDepth(depth - 1)} enabled={depth > 0}>
+        <Button
+          color="0"
+          onClick={() => setDepth(depth - 1)}
+          enabled={depth > 0}
+        >
           <img src="/icons/up-depth.svg" alt="Up" />
         </Button>
       </div>

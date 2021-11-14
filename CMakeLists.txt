@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
-project(fdtester)
+project(Desbordante)
+
+option(ENABLE_CONSUMER_COMPILE "Build the consumer for kafka" OFF)
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
@@ -29,7 +31,6 @@ message(${Boost_INCLUDE_DIRS})
 
 # providing subdirectories for header inclusion
 include_directories(
-    "kafka-consumer/include"
     "src/algorithms"
     "src/algorithms/DFD"
     "src/model"
@@ -43,13 +44,17 @@ include_directories(
     "src"
     )
 
+if (ENABLE_CONSUMER_COMPILE)
+    include_directories("kafka-consumer/include")
+    add_subdirectory("kafka-consumer")
+endif()
+
 # adding submodules
 add_subdirectory("src")
 add_subdirectory("lib/googletest")
 add_subdirectory("tests")
 add_subdirectory("datasets")
 add_subdirectory("cfg")
-add_subdirectory("kafka-consumer")
 
 #target_link_libraries(metanome_cpp PRIVATE "stdc++fs" gmock)
 #target_link_libraries(metanome_cpp PRIVATE "stdc++fs" Boost::container)

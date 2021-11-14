@@ -52,9 +52,6 @@ std::string FDAlgorithm::getJsonArrayNameValue(int degree, bool withAttr) {
         return a.first > b.first;
     };
 
-    std::sort(LhsValues.begin(), LhsValues.end(), pair_greater);
-    std::sort(RhsValues.begin(), RhsValues.end(), pair_greater);
-
     nlohmann::json j;
 
     std::vector<std::pair<nlohmann::json, nlohmann::json>> lhs_array;
@@ -62,13 +59,9 @@ std::string FDAlgorithm::getJsonArrayNameValue(int degree, bool withAttr) {
 
     for (size_t i = 0; i != numberOfColumns; ++i) {
         auto name = withAttr ? columnNames[LhsValues[i].second] : std::string("Attribute " + i);
-        if (LhsValues[i].first > 0) {
-            lhs_array.push_back({{"name", name}, {"value", LhsValues[i].first}});
-        }
+        lhs_array.push_back({{"name", name}, {"value", LhsValues[i].first}});
         name = withAttr ? columnNames[RhsValues[i].second] : std::string("Attribute " + i);
-        if (RhsValues[i].first > 0) {
-            rhs_array.push_back({{"name", name}, {"value", RhsValues[i].first}});
-        }
+        rhs_array.push_back({{"name", name}, {"value", RhsValues[i].first}});
     }
     
     j["lhs"] = lhs_array;

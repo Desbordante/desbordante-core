@@ -84,20 +84,15 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
               // eslint-disable-next-line react/no-array-index-key
               key={index}
             >
-              {value!.map((cell, idx) => {
-                if (cell !== "") {
-                  return (
-                    <td
-                      // eslint-disable-next-line react/no-array-index-key
-                      key={idx}
-                      style={selectedIndices.get(idx) !== undefined ? { backgroundColor: selectedIndices.get(idx) } : { backgroundColor: "#ffffff" }}
-                    >
-                      {cell}
-                    </td>
-                  );
-                }
-                return <></>;
-              })}
+              {value!.map((cell, idx) => (
+                <td
+                  // eslint-disable-next-line react/no-array-index-key
+                  key={idx}
+                  style={selectedIndices.get(idx) !== undefined ? { backgroundColor: selectedIndices.get(idx) } : { backgroundColor: "#ffffff" }}
+                >
+                  {cell}
+                </td>
+              ))}
             </tr>
           ))
       }

@@ -16,10 +16,11 @@ export async function getData(property: string) {
 
 type parameters = {
   algName: string;
-  separator: string;
+  separator?: string;
   errorPercent: number;
-  hasHeader: boolean;
+  hasHeader?: boolean;
   maxLHS: number;
+  parallelism: string;
 };
 
 export function submitBuiltinDataset(

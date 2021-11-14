@@ -11,16 +11,16 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 
-import "./Viewer.css";
+import "./Viewer.scss";
 import PieChartFull from "../PieChartFull/PieChartFull";
 import DependencyListFull from "../DependencyListFull/DependencyListFull";
 import StatusDisplay from "../StatusDisplay/StatusDisplay";
 import Button from "../Button/Button";
 import ProgressBar from "../ProgressBar/ProgressBar";
+import Phasename from "../Phasename/Phasename";
 import { serverURL } from "../../APIFunctions";
 import {
   taskStatus,
-  attribute,
   dependency,
   dependencyEncoded,
   coloredAttribute,
@@ -37,8 +37,11 @@ const Viewer: React.FC<Props> = ({ file, setFile }) => {
   const history = useHistory();
 
   const [taskProgress, setTaskProgress] = useState(0);
+  const [phaseName, setPhaseName] = useState("");
+  const [currentPhase, setCurrentPhase] = useState(3);
+  const [maxPhase, setMaxPhase] = useState(5);
   const [taskStatus, setTaskStatus] = useState<taskStatus>("UNSCHEDULED");
-  const [filename, setFilename] = useState<string | null>("Todo"); //TODO: add file name to taskInfo
+  const [filename, setFilename] = useState<string>("");
 
   const [attributesLHS, setAttributesLHS] = useState<coloredAttribute[]>([]);
   const [attributesRHS, setAttributesRHS] = useState<coloredAttribute[]>([]);
@@ -97,7 +100,11 @@ const Viewer: React.FC<Props> = ({ file, setFile }) => {
         .then((task) => task.data)
         .then((data) => {
           console.log(data);
-          setTaskProgress(data.progress);
+          setFilename(data.filename);
+          setTaskProgress(data.progress / 100);
+          setPhaseName(data.phasename);
+          setCurrentPhase(data.currentphase);
+          setMaxPhase(data.maxphase);
           setTaskStatus(data.status);
           if (taskFinished(data.status)) {
             setAttributesLHS(data.arraynamevalue.lhs);
@@ -140,18 +147,23 @@ const Viewer: React.FC<Props> = ({ file, setFile }) => {
             <h1>File: "{filename}"</h1>
             <h1>Status: {taskStatus}</h1>
           </div>
-          <Button type="button" onClick={() => {
-            history.push("/")
-            setFile(null)
-          }}>
+          <Button
+            color="1"
+            onClick={() => {
+              axios.post(`${serverURL}/cancelTask?taskID=${taskID}`);
+              history.push("/");
+            }}
+          >
             Cancel
           </Button>
         </header>
-        <ProgressBar
-          progress={taskProgress / 100}
-          maxWidth={100}
-          thickness={0.5}
-        />
+        <ProgressBar progress={taskProgress} maxWidth={100} thickness={0.5} />
+        <Phasename
+          currentPhase={currentPhase}
+          maxPhase={maxPhase}
+          phaseName={phaseName}
+          progress={taskProgress}
+        ></Phasename>
       </div>
       <Router>
         {/* <Switch> */}
@@ -181,19 +193,9 @@ const Viewer: React.FC<Props> = ({ file, setFile }) => {
               />
             </div>
             <footer style={{ opacity: taskFinished(taskStatus) ? 1 : 0 }}>
-              <h1
-                className="bottom-title"
-                style={{ color: "#000000", fontWeight: 500 }}
-              >
-                View Dependencies
-              </h1>
+              <h1 className="bottom-title">View Dependencies</h1>
               <Link to={`/deps/${taskID}`}>
-                <Button
-                  type="button"
-                  color="gradient"
-                  glow="always"
-                  onClick={() => { }}
-                >
+                <Button color="0" onClick={() => { }}>
                   <img src="/icons/nav-down.svg" alt="down" />
                 </Button>
               </Link>
@@ -218,12 +220,7 @@ const Viewer: React.FC<Props> = ({ file, setFile }) => {
                 View Attributes
               </h1>
               <Link to={`/attrs/${taskID}`}>
-                <Button
-                  type="button"
-                  color="gradient"
-                  glow="always"
-                  onClick={() => { }}
-                >
+                <Button color="0" onClick={() => { }}>
                   <img src="/icons/nav-up.svg" alt="up" />
                 </Button>
               </Link>

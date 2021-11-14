@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import axios, { AxiosResponse } from "axios";
 import { useHistory } from "react-router-dom";
 
-import "./FileForm.css";
+import "./FileForm.scss";
 import Value from "../Value/Value";
 import Toggle from "../Toggle/Toggle";
 import Button from "../Button/Button";
 import Slider from "../Slider/Slider";
 import UploadFile from "../UploadFile/UploadFile";
 import PopupWindow from "../PopupWindow/PopupWindow";
+import FormItem from "../FormItem/FormItem";
 import {
   serverURL,
   submitCustomDataset,
@@ -41,7 +42,10 @@ const FileForm: React.FC<Props> = ({
   const [allowedBuiltinDatasets, setAllowedBuiltinDatasets] = useState<
     string[]
   >([]);
-  const [allowedFileFormats, setAllowedFileFormats] = useState<string[]>([]);
+  const [allowedFileFormats, setAllowedFileFormats] = useState<string[]>([
+    "text/csv",
+    "application/vnd.ms-excel",
+  ]);
   const [allowedSeparators, setAllowedSeparators] = useState<string[]>([]);
   const [allowedAlgorithms, setAllowedAlgorithms] = useState<algorithm[]>([]);
   const [maxfilesize, setMaxFileSize] = useState(5e7);
@@ -50,7 +54,7 @@ const FileForm: React.FC<Props> = ({
 
   const [hasHeader, setHasHeader] = useState(true);
   const [separator, setSeparator] = useState("");
-  const [algorithm, setAlgorithm] = useState("");
+  const [algorithm, setAlgorithm] = useState<algorithm | null>(null);
   const [errorThreshold, setErrorThreshold] = useState<string>("0.05");
   const [maxLHSAttributes, setMaxLHSAttributes] = useState<string>("5");
   const [threadsCount, setThreadsCount] = useState<string>("1");
@@ -58,11 +62,6 @@ const FileForm: React.FC<Props> = ({
   // Builtin datasets
   const [isWindowShown, setIsWindowShown] = useState(false);
   const [builtinDataset, setBuiltinDataset] = useState<string | null>(null);
-
-  // Allowed properties
-  const [isErrorThresholdAllowed, setIsErrorThresholdAllowed] = useState(true);
-  const [isMaxLHSAllowed, setIsMaxLHSAllowed] = useState(true);
-  const [isThreadsCountAllowed, setIsThreadsCountAllowed] = useState(true);
 
   const history = useHistory();
 
@@ -77,7 +76,7 @@ const FileForm: React.FC<Props> = ({
         setAllowedBuiltinDatasets(data.availableDatasets);
 
         setAllowedAlgorithms(data.algorithmsInfo);
-        setAlgorithm(data.algorithmsInfo[0].name);
+        setAlgorithm(data.algorithmsInfo[0]);
 
         setAllowedSeparators(data.allowedSeparators);
         setSeparator(data.allowedSeparators[0]);
@@ -86,6 +85,18 @@ const FileForm: React.FC<Props> = ({
       })
       .catch((error) => history.push("/error"));
   }, [history]);
+
+  useEffect(() => {
+    if (!algorithm?.props.errorThreshold) {
+      setErrorThreshold("0");
+    }
+    if (!algorithm?.props.maxLHS) {
+      setMaxLHSAttributes("inf");
+    }
+    if (!algorithm?.props.threads) {
+      setThreadsCount("1");
+    }
+  }, [algorithm]);
 
   // Validator functions for fields
   const fileExistenceValidator = (file: File | null) => !!file;
@@ -99,7 +110,7 @@ const FileForm: React.FC<Props> = ({
   const errorValidator = (err: string) =>
     !Number.isNaN(+err) && +err >= 0 && +err <= 1;
   const maxLHSValidator = (lhs: string) =>
-    !Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0;
+    lhs === "inf" || (!Number.isNaN(+lhs) && +lhs > 0 && +lhs % 1 === 0);
 
   // Validator function that ensures every field is correct
   function isValid() {
@@ -113,6 +124,40 @@ const FileForm: React.FC<Props> = ({
       maxLHSValidator(maxLHSAttributes)
     );
   }
+
+  const submit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+    const sendAlgName = algorithm ? algorithm.name : allowedAlgorithms[0].name;
+    const sendErrorThreshold = +errorThreshold;
+    const sendMaxLHS = maxLHSAttributes === "inf" ? -1 : +maxLHSAttributes;
+    if (builtinDataset) {
+      submitBuiltinDataset(
+        builtinDataset!,
+        {
+          algName: sendAlgName,
+          errorPercent: sendErrorThreshold,
+          maxLHS: sendMaxLHS,
+          parallelism: threadsCount,
+        },
+        handleResponse
+      );
+    } else {
+      history.push("/loading");
+      submitCustomDataset(
+        file as File,
+        {
+          algName: sendAlgName,
+          separator,
+          errorPercent: sendErrorThreshold,
+          hasHeader,
+          maxLHS: sendMaxLHS,
+          parallelism: threadsCount,
+        },
+        setUploadProgress,
+        handleResponse
+      );
+    }
+  };
 
   return (
     <form>
@@ -136,7 +181,7 @@ const FileForm: React.FC<Props> = ({
       )}
       <div className="form-column">
         <div className="form-row">
-          <div className="form-item">
+          <FormItem>
             <UploadFile
               onClick={setFile}
               file={file}
@@ -147,10 +192,11 @@ const FileForm: React.FC<Props> = ({
               openPopupWindow={() => setIsWindowShown(true)}
               disableBuiltinDataset={() => setBuiltinDataset(null)}
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem enabled={!builtinDataset}>
             <h3>File properties:</h3>
             <Toggle
+              color="1"
               onClick={() => setHasHeader(!hasHeader)}
               toggleCondition={hasHeader}
             >
@@ -163,8 +209,8 @@ const FileForm: React.FC<Props> = ({
               size={2}
               inputValidator={separatorValidator}
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem enabled={algorithm?.props.errorThreshold}>
             <h3>Error threshold:</h3>
             <Value
               value={errorThreshold}
@@ -178,8 +224,8 @@ const FileForm: React.FC<Props> = ({
               step={0.001}
               exponential
             />
-          </div>
-          <div className="form-item">
+          </FormItem>
+          <FormItem enabled={algorithm?.props.maxLHS}>
             <h3>Max LHS attributes:</h3>
             <Value
               value={maxLHSAttributes}
@@ -188,15 +234,15 @@ const FileForm: React.FC<Props> = ({
               inputValidator={maxLHSValidator}
             />
             <Slider
-              value={maxLHSAttributes}
+              value={maxLHSAttributes === "inf" ? "10" : maxLHSAttributes}
               min={1}
               max={10}
               onChange={setMaxLHSAttributes}
               step={1}
             />
-          </div>
+          </FormItem>
 
-          <div className="form-item">
+          <FormItem enabled={algorithm?.props.threads}>
             <h3>Threads:</h3>
             <Value
               value={threadsCount}
@@ -211,62 +257,28 @@ const FileForm: React.FC<Props> = ({
               onChange={setThreadsCount}
               step={1}
             />
-          </div>
+          </FormItem>
         </div>
 
         <div className="form-row">
-          <div className="form-item">
+          <FormItem>
             <h3>Algorithm:</h3>
             {allowedAlgorithms.map((algo) => (
               <Toggle
-                onClick={() => setAlgorithm(algo.name)}
-                toggleCondition={algorithm === algo.name}
+                color="1"
+                onClick={() => setAlgorithm(algo)}
+                toggleCondition={algorithm === algo}
                 key={algo.name}
               >
                 {algo.name}
               </Toggle>
             ))}
-          </div>
+          </FormItem>
         </div>
       </div>
 
       <div className="form-column">
-        <Button
-          type="submit"
-          color="gradient"
-          glow="always"
-          enabled={isValid()}
-          onClick={(e) => {
-            e.preventDefault();
-            if (builtinDataset) {
-              submitBuiltinDataset(
-                builtinDataset!,
-                {
-                  algName: algorithm,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                },
-                handleResponse
-              );
-            } else {
-              history.push("/loading");
-              submitCustomDataset(
-                file as File,
-                {
-                  algName: algorithm,
-                  separator,
-                  errorPercent: +errorThreshold,
-                  hasHeader,
-                  maxLHS: +maxLHSAttributes,
-                },
-                setUploadProgress,
-                handleResponse
-              );
-            }
-          }}
-        >
+        <Button color="1" enabled={isValid()} onClick={submit}>
           Analyze
         </Button>
       </div>

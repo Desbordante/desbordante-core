@@ -1,0 +1,10 @@
+@import "../../variables.scss";
+
+.home-screen {
+  background-color: $background-dark;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}

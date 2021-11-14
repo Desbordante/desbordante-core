@@ -1,7 +1,7 @@
 import React from "react";
 
-import "./Dependency.css";
 import { coloredDepedency } from "../../types";
+import "./Dependency.scss";
 
 interface Props {
   dep: coloredDepedency | undefined;

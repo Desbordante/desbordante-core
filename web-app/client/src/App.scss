@@ -1,0 +1,49 @@
+@import "./variables.scss";
+
+header {
+  width: 100%;
+  height: 6rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: $text-white;
+  font-family: $font-content;
+  font-size: 2rem;
+  font-weight: 300;
+  padding: 0 1rem;
+
+  .left {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    * {
+      margin-left: 1rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 300;
+    }
+  }
+}
+
+.logo-medium {
+  width: 4rem;
+}
+
+.top-bar {
+  width: 100%;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: $background-dark;
+  font-family: $font-content;
+  font-weight: 200;
+}
+
+.value {
+  border-width: 0.15rem;
+  border-style: solid;
+}

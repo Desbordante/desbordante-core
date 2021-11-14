@@ -1,0 +1,39 @@
+@import "../../variables.scss";
+
+.selected-attribute {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1000px;
+  background-color: $light;
+  font-family: $font-content;
+  font-size: 0.8rem;
+  color: $text-black;
+  padding: 0.3rem 0.7rem;
+  margin: 0.3rem 0.3rem;
+  transform: scale(1);
+  transition: 0.3s;
+
+  &:hover {
+    transform: scale(1.04);
+    transition: 0.3s;
+  }
+
+  button {
+    background-color: $primary-1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1000px;
+    padding: 0.3rem;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    margin-left: 0.3rem;
+
+    img {
+      width: 0.3rem;
+      height: 0.3rem;
+    }
+  }
+}

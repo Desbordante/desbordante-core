@@ -16,6 +16,7 @@
 
 #include "IdentifierSet.h"
 #include "logging/easylogging++.h"
+#include "ParallelFor.h"
 
 using std::set, std::vector, std::unordered_set;
 
@@ -143,16 +144,76 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::genASUsingMapOfIDSets() const {
                                        FDAlgorithm::kTotalProgressPercent :
                                        FDAlgorithm::kTotalProgressPercent /
                                        max_representation.size();
-    for (auto const &cluster : max_representation) {
-        auto back_it = std::prev(cluster.end());
-        for (auto p = cluster.begin(); p != back_it; ++p) {
-            for (auto q = std::next(p); q != cluster.end(); ++q) {
-                IdentifierSet const& id_set1 = identifier_sets.at(*p);
-                IdentifierSet const& id_set2 = identifier_sets.at(*q);
-                agree_sets.insert(id_set1.intersect(id_set2));
+
+    if (config_.threads_num > 1) {
+        /* Not as fast and simple as it can be, need to use concurrent unordered_set.
+         * Without concurrent data structure need to create separate unordered_set<AgreeSet>
+         * for each thread, and as a consequence it is necessary to ensure the thread safety
+         * of threads_agree_sets initialization or to manually parallelize for loop over the
+         * max_representation. Leads to the bulky code with synchronization primitives or to
+         * the copying of util::parallel_foreach code.
+         */
+        std::map<std::thread::id, std::unordered_set<AgreeSet>> threads_agree_sets;
+        std::condition_variable map_init_cv;
+        bool map_initialized = false;
+        std::mutex map_init_mutex;
+        /* Need to know the exact number of threads used by util::parallel_foreach to identify
+         * when threads_agree_sets is initialized (when its size equals to the number
+         * of used threads).
+         * NOTE: if parallel_foreach fails to create exactly actual_threads_num threads when
+         *       threads_agree_sets.size() always will be not equal to actual_threads_num leading
+         *       to the infinite wait on cv.
+         */
+        ushort const actual_threads_num = std::min(max_representation.size(),
+                                                   (size_t)config_.threads_num);
+        auto task = [&identifier_sets, &agree_sets, percent_per_cluster, actual_threads_num,
+                     &map_init_mutex, this, &threads_agree_sets, &map_init_cv, &map_initialized]
+                    (SetOfVectors::value_type const& cluster) {
+            std::thread::id const thread_id = std::this_thread::get_id();
+
+            if (!map_initialized) {
+                std::unique_lock lock(map_init_mutex);
+                threads_agree_sets.insert({ thread_id, std::unordered_set<AgreeSet>() });
+                if (threads_agree_sets.size() != actual_threads_num) {
+                    map_init_cv.wait(lock, [&map_initialized]() { return map_initialized; });
+                } else {
+                    map_initialized = true;
+                    map_init_cv.notify_all();
+                }
             }
+
+            auto back_it = std::prev(cluster.cend());
+            for (auto p = cluster.cbegin(); p != back_it; ++p) {
+                for (auto q = std::next(p); q != cluster.end(); ++q) {
+                    IdentifierSet const& id_set1 = identifier_sets.at(*p);
+                    IdentifierSet const& id_set2 = identifier_sets.at(*q);
+                    threads_agree_sets[thread_id].insert(
+                        id_set1.intersect(id_set2)
+                    );
+                }
+            }
+            addProgress(percent_per_cluster);
+        };
+
+        util::parallel_foreach(max_representation.begin(), max_representation.end(),
+                               config_.threads_num, task);
+
+        for (auto& [thread_id, thread_as] : threads_agree_sets) {
+            agree_sets.insert(std::make_move_iterator(thread_as.begin()),
+                              std::make_move_iterator(thread_as.end()));
         }
-        addProgress(percent_per_cluster);
+    } else {
+        for (auto const &cluster : max_representation) {
+            auto back_it = std::prev(cluster.end());
+            for (auto p = cluster.begin(); p != back_it; ++p) {
+                for (auto q = std::next(p); q != cluster.end(); ++q) {
+                    IdentifierSet const& id_set1 = identifier_sets.at(*p);
+                    IdentifierSet const& id_set2 = identifier_sets.at(*q);
+                    agree_sets.insert(id_set1.intersect(id_set2));
+                }
+            }
+            addProgress(percent_per_cluster);
+        }
     }
 
     return agree_sets;
@@ -375,8 +436,14 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCUsingHandlePartition() const
     return max_representation;
 }
 
-// TODO: Fix helgrind data race errors
+/* This code has false positive helgrind data race error in the unique_future-packaged_task
+ * interaction. Also it is slow due to the way it enforces thread safety on index and
+ * max_representation access (shared_mutex.lock/unlock). Need to fix it first with
+ * concurrency hash map, check out libcds.
+ */
 AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCParallel() const {
+    throw std::runtime_error("MCParallel max representation method is not implemented yet.");
+#if 0
     if (config_.threads_num == 1) {
         LOG(WARNING) << "Using parallel max representation generation"
                         " method with 1 thread specified";
@@ -397,7 +464,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCParallel() const {
     boost::asio::thread_pool pool(config_.threads_num);
     boost::shared_mutex mutex;
     auto handle_partition = [this, &index, &max_representation, &mutex]
-                (vector<int>&& cur_eqv_class, size_t const eqv_class_index) {
+                            (vector<int>&& cur_eqv_class, size_t const eqv_class_index) {
         boost::shared_lock read_lock(mutex);
         bool is_subset = isSubset(cur_eqv_class, index);
         if (!is_subset) {
@@ -413,7 +480,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCParallel() const {
     };
 
     using Task = boost::packaged_task<void>;
-    std::vector<boost::unique_future<void>> futures;
+    std::vector<boost::unique_future<Task::result_type>> futures;
     size_t eqv_class_index = 0;
     size_t cur_size = 0;
     for (auto it = sorted_eqv_classes.begin();
@@ -421,13 +488,12 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCParallel() const {
          ++eqv_class_index) {
         if (cur_size != it->size()) {
             cur_size = it->size();
-            boost::when_all(futures.begin(), futures.end());
+            boost::wait_for_all(futures.begin(), futures.end());
             futures.clear();
         }
 
-        //Task t(std::bind(task, std::ref(eqv_class), eqv_class_index));
         Task t([eqv_class = std::move(sorted_eqv_classes.extract(it++).value()),
-                eqv_class_index, handle_partition] () mutable
+                eqv_class_index, &handle_partition] () mutable
                 { handle_partition(std::move(eqv_class), eqv_class_index); }
         );
         futures.push_back(t.get_future());
@@ -437,6 +503,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCParallel() const {
     pool.join();
 
     return max_representation;
+#endif
 }
 
 bool AgreeSetFactory::isSubset(vector<int> const& eqv_class,

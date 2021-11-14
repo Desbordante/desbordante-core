@@ -1,0 +1,19 @@
+@import "../../variables.scss";
+
+.form-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  row-gap: 1rem;
+  margin: 1.4rem 1rem;
+
+  .shadow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: rgba($background-dark, 65%);
+  }
+}
