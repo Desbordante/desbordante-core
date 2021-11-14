@@ -15,6 +15,7 @@ var algsInfo = require('./routes/algsInfo');
 var getTaskInfo = require('./routes/getTaskInfo');
 var chooseTaskRouter = require('./routes/chooseTask');
 var createTaskRouter = require('./routes/createTask');
+var cancelTaskRouter = require('./routes/cancelTask');
 
 // Configuring DB
 dropTableTasks(pool)
@@ -41,6 +42,7 @@ app.use(morgan('dev'));
 // POST requests
 app.post('/chooseTask', jsonParser, chooseTaskRouter);
 app.post('/createTask', jsonParser, createTaskRouter);
+app.post('/cancelTask', jsonParser, cancelTaskRouter);
 
 // GET requests
 app.use('/getTaskInfo', getTaskInfo)
