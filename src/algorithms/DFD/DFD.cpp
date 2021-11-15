@@ -47,13 +47,13 @@ unsigned long long DFD::execute() {
             }
 
             auto searchSpace = LatticeTraversal(rhs.get(), relation.get(), uniqueColumns, partitionStorage.get());
-            auto minimalDeps = searchSpace.findLHSs();
+            auto const minimalDeps = searchSpace.findLHSs();
 
             for (auto const& minimalDependencyLHS: minimalDeps) {
                 registerFD(minimalDependencyLHS, *rhs);
             }
             addProgress(progressStep);
-            std::cout << (int) getProgress().second << "%\n";
+            std::cout << static_cast<int>(getProgress().second) << "%\n";
         });
     }
 
