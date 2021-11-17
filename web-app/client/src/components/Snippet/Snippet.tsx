@@ -13,6 +13,8 @@ interface Props {
 /* eslint-disable no-cond-assign */
 /* eslint-disable prefer-destructuring */
 
+const MAX_LENGTH = 100;
+
 // eslint-disable-next-line max-len
 function getSelectedIndices(dep: coloredDepedency | undefined, header: string[]): Map<number, string> {
   const selectedIndices = new Map<number, string>();
@@ -82,24 +84,26 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
         table === undefined ?
           <></>
           :
-          table.map((value, index) => (
-            <tr
-              // eslint-disable-next-line react/no-array-index-key
-              key={index}
-            >
-              {value
-                .filter((cell, idx) => (idx !== value.length - 1) || (cell !== ""))
-                .map((cell, idx) => (
-                  <td
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={idx}
-                    style={selectedIndices.get(idx) !== undefined ? { backgroundColor: selectedIndices.get(idx) } : { backgroundColor: "#ffffff" }}
-                  >
-                    {cell}
-                  </td>
-                ))}
-            </tr>
-          ))
+          table
+            .filter((val, idx) => idx < MAX_LENGTH)
+            .map((value, index) => (
+              <tr
+                // eslint-disable-next-line react/no-array-index-key
+                key={index}
+              >
+                {value
+                  .filter((cell, idx) => (idx !== value.length - 1) || (cell !== ""))
+                  .map((cell, idx) => (
+                    <td
+                      // eslint-disable-next-line react/no-array-index-key
+                      key={idx}
+                      style={selectedIndices.get(idx) !== undefined ? { backgroundColor: selectedIndices.get(idx) } : { backgroundColor: "#ffffff" }}
+                    >
+                      {cell}
+                    </td>
+                  ))}
+              </tr>
+            ))
       }
     </table>
   );

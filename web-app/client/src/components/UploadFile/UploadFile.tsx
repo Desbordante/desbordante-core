@@ -48,8 +48,6 @@ const UploadFile: React.FC<Props> = ({
         id="file"
         ref={inputFile}
         onChange={(e) => {
-          /* eslint no-console: 1 */
-          console.log(e.target.files);
           if (e.target.files) {
             onClick(e.target.files[0]);
           }
