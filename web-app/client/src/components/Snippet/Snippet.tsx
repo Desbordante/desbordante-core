@@ -14,6 +14,7 @@ interface Props {
 /* eslint-disable prefer-destructuring */
 
 const MAX_LENGTH = 100;
+const DISTANCE_BETWEEN_CELLS = 1;
 
 // eslint-disable-next-line max-len
 function getSelectedIndices(dep: coloredDepedency | undefined, header: string[]): Map<number, string> {
@@ -24,6 +25,27 @@ function getSelectedIndices(dep: coloredDepedency | undefined, header: string[])
   dep.lhs.forEach((lhs) => selectedIndices.set(header.indexOf(lhs.name), lhs.color));
   selectedIndices.set(header.indexOf(dep.rhs.name), dep.rhs.color);
   return selectedIndices;
+}
+
+function range(start: number, end: number): number[] {
+  const numbers: number[] = [];
+  // eslint-disable-next-line no-plusplus
+  for (let i = start; i <= end; i++) {
+    numbers.push(i);
+  }
+  return numbers;
+}
+
+function getDotsIndicies(selectedIndices: Map<number, string>): number[] {
+  const buffer = Array.from(selectedIndices.keys()).sort();
+  let dotsIndicies: number[] = [];
+  // eslint-disable-next-line no-plusplus
+  for (let i = 0; i < buffer.length - 1; i++) {
+    if (buffer[i + 1] - buffer[i] > DISTANCE_BETWEEN_CELLS) {
+      dotsIndicies = dotsIndicies.concat(range(buffer[i] + 1, buffer[i + 1] - 1));
+    }
+  }
+  return dotsIndicies;
 }
 
 function convertCSVToArray(inputData: string, delimiter: string) {
@@ -76,7 +98,7 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
     if (file !== null) {
       readFile();
     }
-  });
+  }, []);
 
   return (
     <table>
@@ -92,7 +114,7 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
                 key={index}
               >
                 {value
-                  .filter((cell, idx) => (idx !== value.length - 1) || (cell !== ""))
+                  .filter((cell, idx) => ((idx !== value.length - 1) || (cell !== "")))
                   .map((cell, idx) => (
                     <td
                       // eslint-disable-next-line react/no-array-index-key
@@ -101,7 +123,8 @@ const Snippet: React.FC<Props> = ({ file, selectedDependency }) => {
                     >
                       {cell}
                     </td>
-                  ))}
+                  ))
+                  .filter((cell, idx) => (!getDotsIndicies(selectedIndices).includes(idx)))}
               </tr>
             ))
       }
