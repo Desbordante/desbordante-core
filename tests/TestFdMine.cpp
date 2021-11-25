@@ -16,8 +16,6 @@ using ::testing::ContainerEq, ::testing::Eq;
 
 using std::string, std::vector;
 
-
-
 std::unique_ptr<FDAlgorithm> createFD_MineAlgorithmInstance(
         std::filesystem::path const& path, char separator = ',', bool hasHeader = true) {
     return std::make_unique<Fd_mine>(path, separator, hasHeader);
@@ -52,11 +50,10 @@ testing::AssertionResult FD_Mine_checkFDListEquality(
     return actual.empty() ? testing::AssertionSuccess() : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
-TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnEmpty) {
+TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
     auto path = std::filesystem::current_path() / "inputData" / "TestEmpty.csv";
     auto algorithm = createFD_MineAlgorithmInstance(path, ',', true);
-    algorithm->execute();
-    ASSERT_TRUE(algorithm->fdList().empty());
+    ASSERT_THROW(algorithm->execute(), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
