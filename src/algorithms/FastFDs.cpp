@@ -18,7 +18,7 @@ using std::vector, std::set;
 FastFDs::FastFDs(std::filesystem::path const& path,
                  char separator, bool hasHeader,
                  unsigned int max_lhs, ushort parallelism) :
-    FDAlgorithm(path, separator, hasHeader,
+    PliBasedFDAlgorithm(path, separator, hasHeader, true,
                 { "Agree sets generation", "Finding minimal covers" }), max_lhs_(max_lhs) {
     if (parallelism == 0) {
         threads_num_ = std::thread::hardware_concurrency();
@@ -31,25 +31,9 @@ FastFDs::FastFDs(std::filesystem::path const& path,
     }
 }
 
-
-// Should be FDAlgorithm method I think
-void FastFDs::registerFD(Vertical lhs, Column rhs) {
-    if (threads_num_ > 1) {
-        boost::lock_guard<boost::mutex> lock(register_mutex_);
-        FDAlgorithm::registerFD(std::move(lhs), std::move(rhs));
-    } else {
-        FDAlgorithm::registerFD(std::move(lhs), std::move(rhs));
-    }
-}
-
-unsigned long long FastFDs::execute() {
-    relation_ = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
+unsigned long long FastFDs::executeInternal() {
     schema_ = relation_->getSchema();
     percent_per_col_ = kTotalProgressPercent / schema_->getNumColumns();
-
-    if (schema_->getNumColumns() == 0) {
-        throw std::runtime_error("Got an empty .csv file: FD mining is meaningless.");
-    }
 
     auto start_time = std::chrono::system_clock::now();
 
@@ -288,14 +272,14 @@ vector<FastFDs::DiffSet> FastFDs::getDiffSetsMod(Column const& col) const {
 }
 
 void FastFDs::genDiffSets() {
-    AgreeSetFactory::Configuration c;
+    util::AgreeSetFactory::Configuration c;
     c.threads_num = threads_num_;
     if (threads_num_ > 1) {
         // Not implemented properly, check the description of AgreeSetFactory::genMCParallel()
         //c.mc_gen_method = MCGenMethod::kParallel;
     }
-    AgreeSetFactory factory(relation_.get(), c, this);
-    AgreeSetFactory::SetOfAgreeSets agree_sets = factory.genAgreeSets();
+    util::AgreeSetFactory factory(relation_.get(), c, this);
+    util::AgreeSetFactory::SetOfAgreeSets agree_sets = factory.genAgreeSets();
 
     LOG(DEBUG) << "Agree sets:";
     for (auto const& agree_set : agree_sets) {
@@ -306,7 +290,7 @@ void FastFDs::genDiffSets() {
     diff_sets_.reserve(agree_sets.size());
     if (threads_num_ > 1) {
         std::mutex m;
-        auto const task = [&m, this](AgreeSet const& as) {
+        auto const task = [&m, this](util::AgreeSet const& as) {
             DiffSet diff_set = as.invert();
             std::lock_guard lock(m);
             diff_sets_.push_back(std::move(diff_set));
@@ -314,7 +298,7 @@ void FastFDs::genDiffSets() {
 
         util::parallel_foreach(agree_sets.begin(), agree_sets.end(), threads_num_, task);
     } else {
-        for (AgreeSet const& agree_set : agree_sets) {
+        for (util::AgreeSet const& agree_set : agree_sets) {
             diff_sets_.push_back(agree_set.invert());
         }
     }

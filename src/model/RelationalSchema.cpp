@@ -50,7 +50,7 @@ void RelationalSchema::appendColumn(Column column) {
     columns.push_back(std::make_unique<Column>(std::move(column)));
 }
 
-int RelationalSchema::getNumColumns() const {
+size_t RelationalSchema::getNumColumns() const {
     return columns.size();
 }
 
@@ -62,9 +62,9 @@ std::unordered_set<Vertical> RelationalSchema::calculateHittingSet(
         std::vector<Vertical> verticals, boost::optional<std::function<bool (Vertical const&)>> pruningFunction) const {
     std::sort(verticals.begin(), verticals.end(),
               [](auto& vertical1, auto& vertical2) { return vertical1.getArity() < vertical2.getArity(); });
-    VerticalMap<Vertical> consolidatedVerticals(this);
+    util::VerticalMap<Vertical> consolidatedVerticals(this);
 
-    VerticalMap<Vertical> hittingSet(this);
+    util::VerticalMap<Vertical> hittingSet(this);
     hittingSet.put(*emptyVertical, Vertical::emptyVertical(this));
 
     for (auto& vertical : verticals) {

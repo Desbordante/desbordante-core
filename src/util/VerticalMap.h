@@ -12,6 +12,8 @@
 #include "custom/CustomHashes.h"
 #include "ProfilingContext.h"
 
+namespace util {
+
 //difficulties with const methods
 
 //Value: PLI, AgreeSetSample, VerticalInfo, DependencyCandidate, Vertical <- all of these are shared_ptrs?
@@ -123,7 +125,8 @@ public:
      * !!! Untested yet - use carefully
      * */
     virtual void shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                        std::function<bool (Entry)> const& canRemove, ProfilingContext::ObjectToCache cacheObject);
+                        std::function<bool (Entry)> const& canRemove,
+                        ProfilingContext::ObjectToCache cacheObject);
     virtual void shrink(std::unordered_map<Vertical, unsigned int>& usageCounter, std::function<bool (Entry)> const& canRemove);
 
     virtual long long getShrinkInvocations() { return shrinkInvocations_; }
@@ -187,4 +190,6 @@ public:
 
     virtual ~BlockingVerticalMap() = default;
 };
+
+} // namespace util
 

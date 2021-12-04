@@ -18,6 +18,8 @@
 #include "logging/easylogging++.h"
 #include "ParallelFor.h"
 
+namespace util {
+
 using std::set, std::vector, std::unordered_set;
 
 AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::genAgreeSets() const {
@@ -327,7 +329,6 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::genMCUsingCalculateSupersets() co
     max_representation.insert(not_empty_pli->getPositionListIndex()->getIndex().begin(),
                               not_empty_pli->getPositionListIndex()->getIndex().end());
 
-    auto const dist = std::distance(not_empty_pli, columns_data.end());
     for (auto p = std::next(not_empty_pli); p != columns_data.end(); ++p) {
         PositionListIndex const* pli = p->getPositionListIndex();
         if (pli->getSize() != 0) {
@@ -604,4 +605,6 @@ void AgreeSetFactory::calculateSupersets(SetOfVectors& max_representation,
         max_representation.erase(it);
     }
 }
+
+} // namespace util
 

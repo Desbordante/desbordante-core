@@ -1,5 +1,11 @@
 #include "FDAlgorithm.h"
 
+unsigned long long FDAlgorithm::execute() {
+    initialize();
+
+    return executeInternal();
+}
+
 std::string FDAlgorithm::getJsonFDs() {
     std::string result = "{\"fds\": [";
     std::list<std::string> discoveredFDStrings;

@@ -17,6 +17,7 @@
 #include "PositionListIndex.h"
 #include "Vertical.h"
 
+namespace util {
 
 const int PositionListIndex::singletonValueId = 0;
 unsigned long long PositionListIndex::micros = 0;
@@ -148,7 +149,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::probe(std::shared_ptr<cons
     for (auto & positions : index){
         for (int position : positions){
             if (probingTable == nullptr) std::cout << "NULLPTR" << std::endl;
-            if (position < 0 || position >= probingTable->size()) {
+            if (position < 0 || static_cast<size_t>(position) >= probingTable->size()) {
                 std::cout << "position: " + std::to_string(position) +
                              ", size: " + std::to_string(probingTable->size()) << std::endl;
                 for (size_t i = 0; i < positions.size(); ++i) {
@@ -259,3 +260,6 @@ std::string PositionListIndex::toString() const {
     res.push_back(']');
     return res;
 }
+
+} // namespace util
+

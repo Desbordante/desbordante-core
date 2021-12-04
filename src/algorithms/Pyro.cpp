@@ -8,19 +8,15 @@
 
 std::mutex searchSpacesMutex;
 
-unsigned long long Pyro::execute() {
+unsigned long long Pyro::executeInternal() {
     using std::cout;
     auto startTime = std::chrono::system_clock::now();
 
-    auto relation = ColumnLayoutRelationData::createFrom(inputGenerator_, configuration_.isNullEqualNull);
-    auto schema = relation->getSchema();
-    if (relation->getColumnData().empty()) {
-        throw std::runtime_error("Got an empty .csv file: FD mining is meaningless.");
-    }
+    auto schema = relation_->getSchema();
 
     auto profilingContext = std::make_unique<ProfilingContext>(
             configuration_,
-            relation.get(),
+            relation_.get(),
             uccConsumer_,
             fdConsumer_,
             cachingMethod_,
@@ -86,7 +82,7 @@ unsigned long long Pyro::execute() {
             polledSpace->ensureInitialized();
             polledSpace->discover();
             addProgress(progressStep);
-            
+
             millis += std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - threadStartTime).count();
         }
         //cout << "Thread" << id << " stopped working, ELAPSED TIME: " << millis << "ms.\n";
@@ -111,19 +107,20 @@ unsigned long long Pyro::execute() {
     std::cout << "Error calculation count: " << totalErrorCalcCount << std::endl;
     std::cout << "Total ascension time: " << totalAscension << "ms" << std::endl;
     std::cout << "Total trickle time: " << totalTrickle << "ms" << std::endl;
-    std::cout << "Total intersection time: " << PositionListIndex::micros / 1000 << "ms" << std::endl;
+    std::cout << "Total intersection time: "
+              << util::PositionListIndex::micros / 1000 << "ms" << std::endl;
     /*std::cout << "====RESULTS-FD====\r\n" << fdsToString();
     std::cout << "====RESULTS-UCC====\r\n" << uccsToString();
     std::cout << "====JSON-FD========\r\n" << FDAlgorithm::getJsonFDs() << std::endl;*/
 
-    std::cout << "HASH: " << FDAlgorithm::fletcher16() << std::endl;
+    std::cout << "HASH: " << PliBasedFDAlgorithm::fletcher16() << std::endl;
     return elapsed_milliseconds.count();
 }
 
 
 Pyro::Pyro(std::filesystem::path const &path, char separator, bool hasHeader, int seed, double maxError,
            unsigned int maxLHS, int parallelism) :
-        FDAlgorithm(path, separator, hasHeader),
+        PliBasedFDAlgorithm(path, separator, hasHeader),
         cachingMethod_(CachingMethod::COIN),
         evictionMethod_(CacheEvictionMethod::DEFAULT) {
     uccConsumer_ = [this](auto const& key) { this->discoveredUCCs_.push_back(key); };
@@ -136,12 +133,3 @@ Pyro::Pyro(std::filesystem::path const &path, char separator, bool hasHeader, in
     configuration_.parallelism = parallelism <= 0 ? std::thread::hardware_concurrency() : parallelism;
 }
 
-void Pyro::registerFD(FD fdToRegister) {
-    std::scoped_lock lock(fdCollectionMutex_);
-    FDAlgorithm::registerFD(fdToRegister);
-}
-
-void Pyro::registerFD(Vertical lhs, Column rhs) {
-    std::scoped_lock lock(fdCollectionMutex_);
-    FDAlgorithm::registerFD(std::move(lhs), std::move(rhs));
-}

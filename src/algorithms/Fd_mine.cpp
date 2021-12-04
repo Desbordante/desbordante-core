@@ -4,10 +4,9 @@
 #include <queue>
 #include <vector>
 
-unsigned long long Fd_mine::execute() {
+unsigned long long Fd_mine::executeInternal() {
     // 1
-    relation = ColumnLayoutRelationData::createFrom(inputGenerator_, true);
-    schema = relation->getSchema();
+    schema = relation_->getSchema();
     auto startTime = std::chrono::system_clock::now();
 
     relationIndices = dynamic_bitset<>(schema->getNumColumns());
@@ -46,7 +45,7 @@ void Fd_mine::computeNonTrivialClosure(dynamic_bitset<> const& candidateX) {
     if (!closure.count(candidateX)) {
         closure[candidateX] = dynamic_bitset<>(candidateX.size());
     }
-    for (int columnIndex = 0; columnIndex < schema->getNumColumns(); columnIndex++) {
+    for (size_t columnIndex = 0; columnIndex < schema->getNumColumns(); columnIndex++) {
         if ((relationIndices - candidateX - closure[candidateX])[columnIndex]) {
             dynamic_bitset<> candidateXY = candidateX;
             dynamic_bitset<> candidateY(schema->getNumColumns());
@@ -54,8 +53,8 @@ void Fd_mine::computeNonTrivialClosure(dynamic_bitset<> const& candidateX) {
             candidateY[columnIndex] = 1;
 
             if (candidateX.count() == 1) {
-                auto candidateXPli = relation->getColumnData(candidateX.find_first()).getPositionListIndex();
-                auto candidateYPli = relation->getColumnData(columnIndex).getPositionListIndex();
+                auto candidateXPli = relation_->getColumnData(candidateX.find_first()).getPositionListIndex();
+                auto candidateYPli = relation_->getColumnData(columnIndex).getPositionListIndex();
 
                 plis[candidateXY] = candidateXPli->intersect(candidateYPli);
 
@@ -67,7 +66,7 @@ void Fd_mine::computeNonTrivialClosure(dynamic_bitset<> const& candidateX) {
             }
 
             if (!plis.count(candidateXY)) {
-                auto candidateYPli = relation->getColumnData(candidateY.find_first()).getPositionListIndex();
+                auto candidateYPli = relation_->getColumnData(candidateY.find_first()).getPositionListIndex();
                 plis[candidateXY] = plis[candidateX]->intersect(candidateYPli);
             }
 
@@ -138,9 +137,10 @@ void Fd_mine::generateNextLevelCandidates() {
 
             // apriori-gen
             bool similar = true;
-            int setBits = 0;
+            size_t setBits = 0;
 
-            for (int k = 0; setBits < candidateI.count() - 1; k++) {
+            assert(candidateI.count() != 0);
+            for (size_t k = 0; setBits < candidateI.count() - 1; k++) {
                 if (candidateI[k] == candidateJ[k]) {
                     if (candidateI[k]) {
                         setBits++;
@@ -157,8 +157,8 @@ void Fd_mine::generateNextLevelCandidates() {
 
                 if (!(candidateJ).is_subset_of(fdSet[candidateI]) && !(candidateI).is_subset_of(fdSet[candidateJ])) {
                     if (candidateI.count() == 1) {
-                        auto candidateIPli = relation->getColumnData(candidateI.find_first()).getPositionListIndex();
-                        auto candidateJPli = relation->getColumnData(candidateJ.find_first()).getPositionListIndex();
+                        auto candidateIPli = relation_->getColumnData(candidateI.find_first()).getPositionListIndex();
+                        auto candidateJPli = relation_->getColumnData(candidateJ.find_first()).getPositionListIndex();
                         plis[candidateIJ] = candidateIPli->intersect(candidateJPli);
                     } else {
                         plis[candidateIJ] = plis[candidateI]->intersect(plis[candidateJ].get());
@@ -202,7 +202,7 @@ void Fd_mine::reconstruct() {
         while (!queue.empty()) {
             dynamic_bitset<> currentLhs = queue.front();
             queue.pop();
-            int Rhs_count = Rhs.count();
+            size_t Rhs_count = Rhs.count();
             for (const auto &[eq, eqset] : eqSet) {
                 if (!rhsWillNotChange && eq.is_subset_of(Rhs)) {
                     for (const auto &eqRhs : eqset) {
@@ -243,10 +243,14 @@ void Fd_mine::display() {
 
     for (auto const& [lhs, rhs] : final_fdSet) {
         for (size_t j = 0; j < rhs.size(); j++) {
-            if (!rhs[j] || rhs[j] && lhs[j]) continue;
+            if (!rhs[j] || (rhs[j] && lhs[j])) {
+                continue;
+            }
             std::cout << "Discovered FD: ";
             for (size_t i = 0; i < lhs.size(); i++) {
-                if (lhs[i]) std::cout << schema->getColumn(i)->getName() << " ";
+                if (lhs[i]) {
+                    std::cout << schema->getColumn(i)->getName() << " ";
+                }
             }
             std::cout << "-> " << schema->getColumn(j)->getName() << "\n";
             registerFD(Vertical(schema, lhs), *schema->getColumn(j));
@@ -255,3 +259,4 @@ void Fd_mine::display() {
     }
     std::cout << "TOTAL FDs " << fd_counter << "\n";
 }
+

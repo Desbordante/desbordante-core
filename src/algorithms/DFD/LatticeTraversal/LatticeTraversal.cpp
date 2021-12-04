@@ -8,9 +8,10 @@ LatticeTraversal::LatticeTraversal(const Column *const rhs,
                                    const ColumnLayoutRelationData *const relation,
                                    const std::vector<Vertical> &uniqueVerticals,
                                    PartitionStorage *const partitionStorage)
-    : rhs(rhs), relation(relation), uniqueColumns(uniqueVerticals), gen(rd()),
-      dependenciesMap(relation->getSchema()), nonDependenciesMap(relation->getSchema()),
-      columnOrder(relation), partitionStorage(partitionStorage)
+    : rhs(rhs), dependenciesMap(relation->getSchema()),
+      nonDependenciesMap(relation->getSchema()), columnOrder(relation),
+      uniqueColumns(uniqueVerticals), relation(relation),
+      partitionStorage(partitionStorage), gen(rd())
     {}
 
 std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
@@ -27,7 +28,10 @@ std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
 
     std::stack<Vertical> seeds;
 
-    for (int partitionIndex : columnOrder.getOrderHighDistinctCount(Vertical(*rhs).invert())) {
+    /* Temporary fix. I think `getOrderHighDistinctCount` should return vector of
+     * unsigned integers since `order` sould be something non-negative.
+     */
+    for (unsigned partitionIndex : columnOrder.getOrderHighDistinctCount(Vertical(*rhs).invert())) {
         if (partitionIndex != rhs->getIndex()) {
             seeds.push(Vertical(*schema->getColumn(partitionIndex)));
         }
@@ -63,13 +67,13 @@ std::unordered_set<Vertical> LatticeTraversal::findLHSs() {
                 } else if (!inferCategory(node, rhs->getIndex())) {
                     //if we were not able to infer category, we calculate the partitions
                     auto nodePLI = partitionStorage->getOrCreateFor(node);
-                    auto nodePliPointer = std::holds_alternative<PositionListIndex*>(nodePLI)
-                                          ? std::get<PositionListIndex*>(nodePLI)
-                                          : std::get<std::unique_ptr<PositionListIndex>>(nodePLI).get();
+                    auto nodePliPointer = std::holds_alternative<util::PositionListIndex*>(nodePLI)
+                                          ? std::get<util::PositionListIndex*>(nodePLI)
+                                          : std::get<std::unique_ptr<util::PositionListIndex>>(nodePLI).get();
                     auto intersectedPLI = partitionStorage->getOrCreateFor(node.Union(*rhs));
-                    auto intersectedPLIPointer = std::holds_alternative<PositionListIndex*>(intersectedPLI)
-                                                 ? std::get<PositionListIndex*>(intersectedPLI)
-                                                 : std::get<std::unique_ptr<PositionListIndex>>(intersectedPLI).get();
+                    auto intersectedPLIPointer = std::holds_alternative<util::PositionListIndex*>(intersectedPLI)
+                                                 ? std::get<util::PositionListIndex*>(intersectedPLI)
+                                                 : std::get<std::unique_ptr<util::PositionListIndex>>(intersectedPLI).get();
 
                     if (nodePliPointer->getNepAsLong() ==
                         intersectedPLIPointer->getNepAsLong()

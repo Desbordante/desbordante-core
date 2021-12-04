@@ -1,15 +1,14 @@
 #pragma once
 #include <list>
 #include <mutex>
-#include "DependencyConsumer.h"
-#include "FDAlgorithm.h"
-#include "SearchSpace.h"
+
 #include "CSVParser.h"
+#include "DependencyConsumer.h"
+#include "PliBasedFDAlgorithm.h"
+#include "SearchSpace.h"
 
-class Pyro : public DependencyConsumer, public FDAlgorithm {
+class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
 private:
-    mutable std::mutex fdCollectionMutex_;
-
     std::list<std::unique_ptr<SearchSpace>> searchSpaces_;
 
     CachingMethod cachingMethod_;
@@ -18,11 +17,8 @@ private:
 
     Configuration configuration_;
 
-    virtual void registerFD(FD fdToRegister) override;
-    virtual void registerFD(Vertical lhs, Column rhs) override;
+    unsigned long long executeInternal() override;
 public:
     explicit Pyro(std::filesystem::path const& path, char separator = ',', bool hasHeader = true,
                   int seed = 0, double maxError = 0, unsigned int maxLHS = -1, int parallelism = 0);
-
-    unsigned long long execute() override;
 };

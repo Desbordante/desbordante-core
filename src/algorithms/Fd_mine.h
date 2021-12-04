@@ -1,3 +1,4 @@
+#pragma once
 
 #include <boost/unordered_map.hpp>
 #include <filesystem>
@@ -6,13 +7,12 @@
 #include "CSVParser.h"
 #include "ColumnCombination.h"
 #include "ColumnLayoutRelationData.h"
-#include "FDAlgorithm.h"
+#include "PliBasedFDAlgorithm.h"
 #include "PositionListIndex.h"
 #include "Vertical.h"
 
-class Fd_mine : public FDAlgorithm {
+class Fd_mine : public PliBasedFDAlgorithm {
    private:
-    std::shared_ptr<ColumnLayoutRelationData> relation;
     const RelationalSchema* schema;
 
     std::set<dynamic_bitset<>> candidateSet;
@@ -21,7 +21,7 @@ class Fd_mine : public FDAlgorithm {
     boost::unordered_map<dynamic_bitset<>, dynamic_bitset<>> final_fdSet;
     std::set<dynamic_bitset<>> keySet;
     boost::unordered_map<dynamic_bitset<>, dynamic_bitset<>> closure;
-    boost::unordered_map<dynamic_bitset<>, std::shared_ptr<PositionListIndex const>> plis;
+    boost::unordered_map<dynamic_bitset<>, std::shared_ptr<util::PositionListIndex const>> plis;
     dynamic_bitset<> relationIndices;
 
     void computeNonTrivialClosure(dynamic_bitset<> const& xi);
@@ -32,8 +32,9 @@ class Fd_mine : public FDAlgorithm {
     void reconstruct();
     void display();
 
-   public:
-    Fd_mine(std::filesystem::path const& path, char separator = ',', bool hasHeader = true) : FDAlgorithm(path, separator, hasHeader){};
+    unsigned long long executeInternal() override;
+public:
+    Fd_mine(std::filesystem::path const& path, char separator = ',', bool hasHeader = true)
+            : PliBasedFDAlgorithm(path, separator, hasHeader) {}
     ~Fd_mine() override {}
-    unsigned long long execute() override;
 };

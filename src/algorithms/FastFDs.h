@@ -4,19 +4,20 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "Vertical.h"
-#include "FDAlgorithm.h"
 #include "ColumnLayoutRelationData.h"
+#include "PliBasedFDAlgorithm.h"
+#include "Vertical.h"
 
-class FastFDs : public FDAlgorithm {
+class FastFDs : public PliBasedFDAlgorithm {
 public:
     explicit FastFDs(std::filesystem::path const& path,
                      char separator = ',', bool hasHeader = true,
                      unsigned int max_lhs = -1, ushort parallelism = 0);
-    unsigned long long execute() override;
 private:
     using OrderingComparator = std::function<bool (Column const&, Column const&)>;
     using DiffSet = Vertical;
+
+    unsigned long long executeInternal() override;
 
     // Computes all difference sets of `relation_` by complementing agree sets
     void genDiffSets();
@@ -58,14 +59,11 @@ private:
     bool orderingComp(std::vector<DiffSet> const& diff_sets,
                       Column const& l_col, Column const& r_col) const;
     bool columnContainsOnlyEqualValues(Column const& column) const;
-    void registerFD(Vertical lhs, Column rhs) override;
 
-    std::unique_ptr<ColumnLayoutRelationData> relation_;
     RelationalSchema const* schema_;
     std::vector<DiffSet> diff_sets_;
     ushort threads_num_;
     unsigned int const max_lhs_;
-    boost::mutex register_mutex_;
     double percent_per_col_;
 };
 
