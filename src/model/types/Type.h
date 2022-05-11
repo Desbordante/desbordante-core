@@ -58,7 +58,7 @@ public:
     public:
         explicit Comparator(Type const* type) noexcept : type_(type) {}
         size_t operator()(std::byte const* a, std::byte const* b) const {
-            return (type_->Compare(a, b) == CompareResult::kEqual);
+            return (type_->Compare(a, b) == CompareResult::kLess);
         }
     };
 
@@ -82,7 +82,7 @@ public:
     }
 
     [[nodiscard]] std::byte* Allocate(size_t count = 1) const {
-        return new std::byte[GetSize() * count];
+        return new std::byte[GetSize() * count]();
     }
 
     virtual void Free(std::byte const* val) const noexcept {

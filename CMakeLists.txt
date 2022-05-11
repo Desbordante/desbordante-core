@@ -34,6 +34,7 @@ include_directories(
     "src/algorithms/DFD"
     "src/algorithms/association-rules"
     "src/algorithms/depminer"
+    "src/statistics"
     "src/model"
     "src/model/types"
     "src/util"
