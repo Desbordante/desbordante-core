@@ -1,6 +1,6 @@
 
 <p>
-<img src="./desbordante-preview.png"/>
+<img src="./images/desbordante-preview.png"/>
 </p>
 
 # About
@@ -15,6 +15,14 @@ It also allows to run data cleaning scenarios using these algorithms. At the mom
 The algorithms of Desbordante are implemented in C++ to maximize the resulting performance. They can be run using either a console version or a web-application that features an easy-to-use web interface.
 
 You can try the deployed version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to a large demand various time and memory limits are enforced (and a task is killed if it goes outside of acceptable ranges).
+
+# How to use Desbordante
+
+Desbordante can help you gain insights into your dataset in several ways, so feel free to check out the guides for configuring and running various tasks, as well as interpreting their results:
+- [mining Functional Dependencies](guides/fd-mining.md);
+- [mining Conditional Functional Dependencies](guides/cfd-mining.md);
+- [mining Association Rules](guides/ar-mining.md);
+- [employing the Error detection pipeline](guides/error-detection-pipeline.md).
 
 # Installation guide
 
