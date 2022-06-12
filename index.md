@@ -1,6 +1,6 @@
 
 <p>
-<img src="./images/desbordante-preview.png"/>
+<img src="./desbordante-preview.png"/>
 </p>
 
 # About
