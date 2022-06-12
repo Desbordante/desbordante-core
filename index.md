@@ -22,7 +22,7 @@ Desbordante can help you gain insights into your dataset in several ways, so fee
 - [mining Functional Dependencies](guides/fd-mining.md);
 - [mining Conditional Functional Dependencies](guides/cfd-mining.md);
 - [mining Association Rules](guides/ar-mining.md);
-- [employing the Error detection pipeline](guides/error-detection-pipeline.md).
+- [employing the Error Detection Pipeline](guides/error-detection-pipeline.md).
 
 # Installation guide
 
