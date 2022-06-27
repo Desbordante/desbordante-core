@@ -46,14 +46,12 @@ Pick one of the existing tasks.
 Desbordante provides a built-in collection of datasets to test its functionality. It is not possible for unauthorized users to upload their own data, so you will need to sign up to be able to do so.
 After filling in the form you will only need to verify the provided email address.
 
-<div class="row">
- <div style="float: left; width: 60%;" class="column">
- <img style="height: auto;" src="./images/sign-up-button.png"/>
- </div>
- <div style="float: left; width: 40%;" class="column">
-<img style="padding: 10px; width: 60%; height: auto;" src="./images/sign-up-form.png"/>
- </div>
-</div>
+<p>
+<img src="./images/sign-up-button.png"/>
+</p>
+<p>
+<img style="width: 35%" src="./images/sign-up-form.png"/>
+</p>
 
 Choose an out-of-the-box dataset or upload your own. Currently, Desbordante accepts only .csv files.
 

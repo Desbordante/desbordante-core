@@ -2,9 +2,9 @@
 
 Conditional Functional Dependencies (CFD) can be seen as an unification of Functional Dependencies (FD) and Association Rules (AR) since they allow to mix attributes and attribute/value pairs in dependencies. Unlike FDs, CFDs are allowed to hold only on a part of relation. The core idea of CFDs is to define a subset of a relation on which some FDs will hold.
 
-CFD is defined as a pair consisting of FD and a pattern tuple. Consider the following CFD f = (CC, ZIP -> STR, (44, _ || \_)). The '\_' symbol represents any possible value and the ‘||’ symbol separates the left part of a pattern tuple from the right one. The CFD f can be considered as FD СС, ZIP -> STR, which is defined on all tuples of the relation where CC equals 44 (σ_{CC=44}(r), where r is the considered relation).
+CFD is defined as a pair consisting of FD and a pattern tuple. Consider the following CFD f = (CC, ZIP -> STR, (44, _ \|\| \_)). The '\_' symbol represents any possible value and the ‘\|\|’ symbol separates the left part of a pattern tuple from the right one. The CFD f can be considered as FD СС, ZIP -> STR, which is defined on all tuples of the relation where CC equals 44 (σ_{CC=44}(r), where r is the considered relation).
 
-It is important to mention that selection is performed using the LHS of the pattern tuple. For example, confsdsider the following CFD f2= (CC -> STR, (01 || “Tree ave.”)).
+It is important to mention that selection is performed using the LHS of the pattern tuple. For example, confsdsider the following CFD f2= (CC -> STR, (01 \|\| “Tree ave.”)).
 CFD f2 holds if:
 1. FD=CC -> STR holds on σ_{CC=01}(r), and
 2. STR is equal to “Tree ave.” for all tuples of σ_{CC=01}(r).
@@ -23,7 +23,7 @@ This table contains the "Employee" relation (denoted as ‘r’). Consider an FD
 FD φ1 means that workers from the same country, with the same last name, who have the same leave status, work for the same company.
 
 In fact, for r we can find several CFDs that refine φ1. Consider one of them:
-φ’1: (Surname, Country,  On vacation -> Company, (Moore, USA, _ || StuntSet))
+φ’1: (Surname, Country,  On vacation -> Company, (Moore, USA, _ \|\| StuntSet))
 
 <p>
 <img src="../images/cfd-illustration-refined.png"/>
@@ -31,12 +31,12 @@ In fact, for r we can find several CFDs that refine φ1. Consider one of them:
 
 This dependency is satisfied only on the part of the Employee relationship, namely: all workers with the last name Moore from the United States who have the same vacation status and who work for the company StuntSet.
 
-φ2: (Surname -> On vacation, (Lee || false))
+φ2: (Surname -> On vacation, (Lee \|\| false))
 
 The CFD φ2 does not refine the corresponding FD, since FD Surname -> On vacation does not hold. Indeed, the surname Moore violates the dependency for IDs 8 and 11. At the same time, it holds on a part of r. Thus, CFD φ2 says that employees with the same last name Lee are not on vacation.
 
 Unlike the FD, the CFD can be violated by a single tuple. For example, consider the CFD
-φ3: (ID -> Surname, (1 || Lee)). Indeed, the tuple with ID = 1 violates the given CFD (the person with ID 1 has the surname Moore).
+φ3: (ID -> Surname, (1 \|\| Lee)). Indeed, the tuple with ID = 1 violates the given CFD (the person with ID 1 has the surname Moore).
 
 It is possible to employ mining algorithms that will discover CFDs holding on a given relation. Such algorithms output a list of minimal dependencies. Dependency is called minimal if it is non-trivial, left-reduced and holds on the given dataset.
 

@@ -17,7 +17,7 @@ The second one is algorithm parameters. Each algorithm may have up to three diff
 - _error threshold_ affects Approximate FD discovery. The greater it is, the higher the number of rows violating the dependency can be. If it is equal to zero, the algorithm will search only for strict functional dependencies. The error is computed as follows:
 Basically, we calculate the ratio of all pairwise violations to the number of all pairs in the relation. The AFD X->Y is discovered if its error is less or equal to the threshold specified by the user.
 <p>
-<img src="../images/afd-error-formula.png"/>
+<img style="width: 50%" src="../images/afd-error-formula.png"/>
 </p>
 
 - _threads is simply_ the number of threads that will be available to the algorithm. Choosing a greater thread number may significantly reduce the processing time, but the algorithm will take up more memory.
