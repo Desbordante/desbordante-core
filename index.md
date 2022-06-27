@@ -18,11 +18,74 @@ You can try the deployed version [here](https://desbordante.unidata-platform.ru/
 
 # How to use Desbordante
 
-Desbordante can help you gain insights into your dataset in several ways, so feel free to check out the guides for configuring and running various tasks, as well as interpreting their results:
+## General
+Desbordante is a _data profiling_ tool. Its general usage scenario consists of five steps:
+1. Choose a profiling task.
+2. Choose the dataset.
+3. Configure the task.
+4. Run* the task.
+5. Analyze the results.
+
+\* Note that tasks are computationally expensive. Due to possible heavy workload, the deployed version has memory and run time limits for all users. If your task takes up more than 512MB RAM or 30 seconds of runtime, it will be killed. Contact us if you are interested in raising the limit.
+
+The current section covers the first two steps, while the remaining ones are specific for each profiling task.
+
+
+### Choosing the profiling task
+
+Pick one of the existing tasks.
+
+<p>
+<img src="./images/tasks-list.png"/>
+</p>
+
+
+### Choosing the dataset
+
+
+Desbordante provides a built-in collection of datasets to test its functionality. It is not possible for unauthorized users to upload their own data, so you will need to sign up to be able to do so.
+After filling in the form you will only need to verify the provided email address.
+
+<div class="row">
+ <div style="float: left; width: 60%;" class="column">
+ <img style="height: auto;" src="./images/sign-up-button.png"/>
+ </div>
+ <div style="float: left; width: 40%;" class="column">
+<img style="padding: 10px; width: 60%; height: auto;" src="./images/sign-up-form.png"/>
+ </div>
+</div>
+
+Choose an out-of-the-box dataset or upload your own. Currently, Desbordante accepts only .csv files.
+
+<p>
+<img src="./images/dataset-selection.png"/>
+</p>
+
+### Task-dependent analysis
+
+Check out the corresponding profiling task guide.
 - [mining Functional Dependencies](guides/fd-mining.md);
 - [mining Conditional Functional Dependencies](guides/cfd-mining.md);
 - [mining Association Rules](guides/ar-mining.md);
 - [employing the Error Detection Pipeline](guides/error-detection-pipeline.md).
+
+## Additional information
+* You can return to the main screen at any time by clicking the Desbordante logo or title.
+<p>
+<img src="./images/desbordante-clickable-logo.png"/>
+</p>
+
+* You can share the profiling results after the task execution finishes by copying the url with the task id.
+<p>
+<img src="./images/share-task-results.png"/>
+</p>
+
+
+* We would really appreciate reviews and opinions on our tool's usability and usefulness. We would be grateful if you provided your feedback using a dedicated form which can be accessed via the button on the right.
+<p>
+<img style="transform: scale(0.9)" src="./images/feedback-form.png"/>
+</p>
+
 
 # Installation guide
 
