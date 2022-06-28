@@ -26,17 +26,17 @@ Click “Analyze” to launch the task. This button immediately becomes availabl
 ### Analyzing the results
 An example output of the algorithm is presented below. It is a list of discovered association rules conforming to the specified parameters. Each rule has its confidence shown inside the arrow.
 
-<img src="../images/ar-list.png"/>
+<p><img src="../images/ar-list.png"/></p>
 
 Since the list of rules may be fairly large, we have provided an opportunity to sort it using various parameters, for example, by confidence in descending order. Desbordante also supports regular expressions for filtering.
 
-<img src="../images/ar-sorting-criteria.png"/>
+<p><img src="../images/ar-sorting-criteria.png"/></p>
 
 It is possible to select one of the found rules and switch to the Dataset tab. In this tab Desbordante displays the source dataset in the Tabular format, where items belonging to the rule are highlighted by various colors. The _Show non-selected_ parameter determines whether to show transactions (rows) which are not affected by the selected rule.
 
-<img src="../images/ar-selected.png"/>
+<p><img src="../images/ar-selected.png"/></p>
 
-<img src="../images/ar-snippet.png"/>
+<p><img src="../images/ar-snippet.png"/></p>
 
 ## Further Reading
 For detailed explanation of the association rule concept see:

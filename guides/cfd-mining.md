@@ -12,7 +12,7 @@ CFD f2 holds if:
 
 Let's look at a more illustrative example:
 
-<img src="../images/cfd-illustration.png"/>
+<p><img src="../images/cfd-illustration.png"/></p>
 
 This table contains the "Employee" relation (denoted as ‘r’). Consider an FD that holds on r:
 φ1: (Surname, Country, On vacation -> Company)
@@ -22,7 +22,7 @@ FD φ1 means that workers from the same country, with the same last name, who ha
 In fact, for r we can find several CFDs that refine φ1. Consider one of them:
 φ’1: (Surname, Country,  On vacation -> Company, (Moore, USA, _ \|\| StuntSet))
 
-<img src="../images/cfd-illustration-refined.png"/>
+<p><img src="../images/cfd-illustration-refined.png"/></p>
 
 This dependency is satisfied only on the part of the Employee relationship, namely: all workers with the last name Moore from the United States who have the same vacation status and who work for the company StuntSet.
 
@@ -56,31 +56,31 @@ Click “Analyze” to launch the task. This button immediately becomes availabl
 ## Analyzing the results
 You can check three tabs to analyze the results. The “Dependencies” tab allows a user to view a paginated list of all found dependencies.
 
-<img src="../images/cfd-list.png"/>
+<p><img src="../images/cfd-list.png"/></p>
 
 It is possible to sort the list of dependencies according to the _confidence_ parameter, in ascending lexicographical order of attribute names in the left or right part, or by the _support_ parameter. The “Show Patterns” button allows to hide (show) values that are assigned to attributes participating in CFD. If your dataset contains single-column keys, the algorithm would yield a set of FDs A→X for every column X and key A. To keep or filter such dependencies out you can select whether to show keys or not.
 
 The filter string offers several usage scenarios:
 
 1. It is possible to obtain a list of dependencies that contain attributes with the specified name. For example if filter string contains “C”, then “AC”, “CC” and others will be displayed as shown below;
-  <img src="../images/cfd-find-by-name.png"/>
+  <p><img src="../images/cfd-find-by-name.png"/></p>
 
 2. It is possible to obtain dependencies containing attributes with the specified value (in this case attribute name may be fully or partially specified). The filter string must be in the form of “Attribute=Pattern”. Pattern may either be a constant or a “_” symbol, which denotes a wildcard (any attribute value).
-  <img src="../images/cfd-regex.png"/>
+  <p><img src="../images/cfd-regex.png"/></p>
 
 The Attributes tab is useful when it is necessary to select dependencies which must contain user-specified attributes. Unlike filtering string, with pie chart representation users can select multiple attributes and can indicate which have to be present in the left and right parts. The attribute area size on the diagram is higher for the attributes which appear in the greater number of dependencies.
 
-<img src="../images/cfd-diagrams.png"/>
+<p><img src="../images/cfd-diagrams.png"/></p>
 
 
 In particular, suppose that we want to select dependencies which have “ZIP” attribute in the left part and “AC” in the right part. Below we set another constraint that specifies that we are interested in dependencies that have a particular value of ZIP.
 
-<img src="../images/cfd-selected.png"/>
+<p><img src="../images/cfd-selected.png"/></p>
 
 
 After selecting a dependency it will be highlighted as shown above. Then, it is possible to switch to the Dataset tab which contains table snippets with highlighted columns participating in this dependency.
 
-<img src="../images/cfd-selected-snippet.png"/>
+<p><img src="../images/cfd-selected-snippet.png"/></p>
 
 
 ## Further Reading

@@ -15,7 +15,7 @@ The first one is dataset parameters — you have to manually specify the csv del
 The second one is algorithm parameters. Each algorithm may have up to three different parameters: arity constraint, error threshold, and threads.
 - _arity constraint_ is a threshold on LHS size of mined dependencies, e.g. if its value is 3, the algorithm will find a dependency such as AB->C, but will not proceed to checking ABCD->E. “Shorter” dependencies are more valuable than “longer” ones, since they have a larger chance of holding on the whole (including unseen) data. Therefore, in the majority of cases the discovery of “short” dependencies is of priority . And setting the arity constraint reduces the volume of output. It also significantly reduces the time it takes to discover dependencies.
 - _error threshold_ affects Approximate FD discovery. The greater it is, the higher the number of rows violating the dependency can be. If it is equal to zero, the algorithm will search only for strict functional dependencies. The error is computed as follows:
-  <img style="width: 50%" src="../images/afd-error-formula.png"/>
+  <p><img style="width: 50%" src="../images/afd-error-formula.png"/></p>
 Basically, we calculate the ratio of all pairwise violations to the number of all pairs in the relation. The AFD X->Y is discovered if its error is less or equal to the threshold specified by the user.
 
 - _threads is simply_ the number of threads that will be available to the algorithm. Choosing a greater thread number may significantly reduce the processing time, but the algorithm will take up more memory.
@@ -27,7 +27,7 @@ Some parameters may be disabled depending on the chosen algorithm. _Error thresh
 
 Click “Analyze” to launch the task. The execution will start right after the dataset is uploaded. The progress bar will help you track the algorithm progress, however, some algorithms do not report on their progress — the bar will appear motionless in this case.
 
-<img src="../images/progress-bar.png"/>
+<p><img src="../images/progress-bar.png"/></p>
 
 ## Analyzing the results
 
@@ -37,15 +37,15 @@ First, pick the attributes you are interested in using the _Attributes_ tab. The
 
 Click on an attribute to select it. If the number of attributes is too large, the least interesting ones will be hidden in the _other_ section. Click on it to expand it and view those attributes. You can return to the previous diagram state by pressing the button above the diagram. You can also filter the attributes by name on-the-fly.
 
-<img src="../images/fd-diagram-filtering.png"/>
+<p><img src="../images/fd-diagram-filtering.png"/></p>
 
 Then, navigate to the _Dependencies_ tab to access the refined list of FDs. You can sort them lexicographically by LHS or RHS attribute names, and use a regex that goes through the list leaving only the matching FDs. If your dataset contains single-column keys, the algorithm would yield a set of FDs A→X for every column X and key A. To keep or filter such dependencies out, you can select whether to show keys or not. The list is paginated.
 
-<img src="../images/fd-selected.png"/>
+<p><img src="../images/fd-selected.png"/></p>
 
 Finally, choose a dependency you are interested in and switch to the _Dataset_ tab. You can view the analyzed dataset, whose columns that belong to the selected FD are highlighted. Click the “Show non-selected” button to hide the other columns.
 
-<img src="../images/fd-selected-snippet.png"/>
+<p><img src="../images/fd-selected-snippet.png"/></p>
 
 ## Further Reading
 

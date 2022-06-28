@@ -25,7 +25,7 @@ The current section covers the first two steps, while the remaining ones are spe
 
 Pick one of the existing tasks.
 
-<img style="width: 50%;" src="./images/tasks-list.png"/>
+<p><img style="width: 50%;" src="./images/tasks-list.png"/></p>
 
 
 ### Choosing the dataset
@@ -43,7 +43,7 @@ Pick one of the existing tasks.
 
 Choose an out-of-the-box dataset or upload your own. Currently, Desbordante accepts only .csv files.
 
-<img style="width: 30%;" src="./images/dataset-selection.png"/>
+<p><img style="width: 30%;" src="./images/dataset-selection.png"/></p>
 
 ### Task-dependent analysis
 
@@ -55,14 +55,15 @@ Check out the corresponding profiling task guide to continue your analysis:
 
 # Other features
 * You can return to the main screen at any time by clicking the Desbordante logo or title.
+  <p>
 	<img style="padding-top: 15px;" src="./images/desbordante-clickable-logo.png"/>
-
+  </p>
 * You can share the profiling results after the task execution finishes by copying the url with the task id.
-  <img style="width: 70%; padding-top: 15px;" src="./images/share-task-results.png"/>
+  <p><img style="width: 70%; padding-top: 15px;" src="./images/share-task-results.png"/></p>
 
 
 * We would really appreciate reviews and opinions on our tool's usability and usefulness. We would be grateful if you provided your feedback using a dedicated form which can be accessed via the button on the right.
-  <img style="width: 70%; padding-top: 15px;" src="./images/feedback-form.png"/>
+  <p><img style="width: 70%; padding-top: 15px;" src="./images/feedback-form.png"/></p>
 
 # Cite
 
