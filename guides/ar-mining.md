@@ -9,9 +9,9 @@ At the beginning you have to select an algorithm for association rule mining. Fo
 ### Input format
 After selecting an algorithm you have to upload the file with a dataset or select one of the built-in.
 
-Desbordante accepts CSV files which may come in two formats: _singular_ and _tabular_. They share two parameters – _Delimiter_ which sets a symbol that is used as a delimiter when a CSV file will be parsed, and _Has header row_ which indicates whether the first line of a dataset contains column names.
+Desbordante accepts CSV files which may come in two formats: _singular_ and _tabular_. They share two parameters — _Delimiter_ which sets a symbol that is used as a delimiter when a CSV file will be parsed, and _Has header row_ which indicates whether the first line of a dataset contains column names.
 
-The singular format describes a table that has only two columns. The first one – the _ID column_ – should contain an integer which is basically the unique id of a transaction. The second one – the _Itemset column_ – should be a string, containing the item which belongs to the transaction with the corresponding id. For uploaded datasets it is possible to manually specify both of them, which is useful if the table contains extra columns.
+The singular format describes a table that has only two columns. The first one — the _ID column_ — should contain an integer which is basically the unique id of a transaction. The second one — the _Itemset column_ — should be a string, containing the item which belongs to the transaction with the corresponding id. For uploaded datasets it is possible to manually specify both of them, which is useful if the table contains extra columns.
 
 The tabular format also describes a table. However, in this case each transaction is represented by a single table row. The first column of this table may contain transaction id, the boolean parameter _Has transaction ID_ indicates whether it is present. The rest of the columns contain names of items belonging to the corresponding transaction.
 
@@ -26,33 +26,24 @@ Click “Analyze” to launch the task. This button immediately becomes availabl
 ### Analyzing the results
 An example output of the algorithm is presented below. It is a list of discovered association rules conforming to the specified parameters. Each rule has its confidence shown inside the arrow.
 
-<p>
 <img src="../images/ar-list.png"/>
-</p>
 
 Since the list of rules may be fairly large, we have provided an opportunity to sort it using various parameters, for example, by confidence in descending order. Desbordante also supports regular expressions for filtering.
 
-<p>
 <img src="../images/ar-sorting-criteria.png"/>
-</p>
 
 It is possible to select one of the found rules and switch to the Dataset tab. In this tab Desbordante displays the source dataset in the Tabular format, where items belonging to the rule are highlighted by various colors. The _Show non-selected_ parameter determines whether to show transactions (rows) which are not affected by the selected rule.
 
-<p>
 <img src="../images/ar-selected.png"/>
-</p>
 
-<p>
 <img src="../images/ar-snippet.png"/>
-</p>
 
-
-## Additional information
+## Further Reading
 For detailed explanation of the association rule concept see:
 
-[1] Aggarwal Charu C. Data Mining: The Textbook. –– Springer Publishing Company, Incorporated, 2015. –– ISBN: 3319141414.
+[1] Aggarwal Charu C. Data Mining: The Textbook. —— Springer Publishing Company, Incorporated, 2015. —— ISBN: 3319141414.
 
-[2] Agrawal Rakesh and Srikant Ramakrishnan. Fast Algorithms for Mining Association Rules // Proc. 20th Int. Conf. Very Large Data Bases VLDB. –– 2000. –– 08. –– Vol. 1215.
+[2] Agrawal Rakesh and Srikant Ramakrishnan. Fast Algorithms for Mining Association Rules // Proc. 20th Int. Conf. Very Large Data Bases VLDB. —— 2000. —— 08. —— Vol. 1215.
 
 
-[Back to the main page](../index.md)
+## [Back to the main page](../index.md#task-dependent-analysis)

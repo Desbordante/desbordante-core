@@ -20,32 +20,22 @@ In the first case _radius_ parameter should be small (e.g. 1e-2 for numbers to c
 
 After a dataset is uploaded and parameters are specified, the Analyze button becomes available.
 
-<p>
 <img src="../images/main-screen.png"/>
-</p>
 
 Say that a number of real approximate functional dependencies was found, and they are displayed below. Next, the user selects one of interest. The dependency should be chosen based on the RHS, since errors will be looked for among the values of the RHS column. So, sorting by the RHS may come in handy. Let’s say that the user selects the workshop -> supervisor_name dependency by clicking on it.
 
-<p>
 <img src="../images/pipeline-fd-list.png"/>
-</p>
-
 
 Then go to the `Clusters` tab and look at the output.
 
-<p>
 <img src="../images/pipeline-full-snippet.png"/>
-</p>
-
 
 There is one cluster with one highlighted faulty row. Only the first few rows of the cluster are displayed to save space. To display the entire cluster, the user can click the “Load More” button. By default the cluster is sorted by the uniqueness of the RHS value (i.e. the fewer times a value occurs, the earlier it is in the cluster). To return the initial order from the table the user should click the Sorted button. The Squashed button  “compresses” the rows, displaying the number of their occurrences:
 
-<p>
 <img src="../images/pipeline-clusters-compressed.png"/>
-</p>
 
 
 Now we can see even more clearly that there is a typo in the “supervisor_name” column in the “Galen Calella” value.
 
 
-[Back to the main page](../index.md)
+## [Back to the main page](../index.md#task-dependent-analysis)
