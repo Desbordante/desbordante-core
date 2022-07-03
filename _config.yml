@@ -3,4 +3,4 @@ plugins:
 - jekyll-remote-theme
 title: [Desbordante user guide]
 description: [This manual explores the main Desbordante concepts and navigates
-  through the general usage scenario.<br><br> <a href="https://desbordante.unidata-platform.ru/">Use the deployed instance</a>]
+  through the general usage scenario.<br><br> <a href="https://desbordante.unidata-platform.ru/">Try the deployed instance</a>]
