@@ -163,7 +163,7 @@ template <typename ParamsMap>
 MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     MetricVerifier::Config c;
 
-    c.parameter = ExtractParamFromMap<double>(params, posr::Parameter);
+    c.parameter = ExtractParamFromMap<long double>(params, posr::Parameter);
     if (c.parameter < 0) {
         throw std::invalid_argument("Parameter should not be less than zero.");
     }
