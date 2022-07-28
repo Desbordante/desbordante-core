@@ -89,9 +89,9 @@ bool MetricVerifier::VerifyMetricFD() const {
 
     std::function<bool(util::PLI::Cluster const& cluster)> compare_function;
     switch (metric_) {
-    case Metric::euclidian:
+    case Metric::euclidean:
         if (!col.IsNumeric()) {
-            throw std::runtime_error("\"euclidian\" metric does not match RHS column type");
+            throw std::runtime_error("\"euclidean\" metric does not match RHS column type.");
         }
         compare_function = [this](util::PLI::Cluster const& cluster) {
             return CompareNumericValues(cluster);
