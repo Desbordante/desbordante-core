@@ -177,8 +177,19 @@ MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
     c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::EqualNulls);
     c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::LhsIndices);
-    c.rhs_index = ExtractParamFromMap<unsigned int>(params, posr::RhsIndex);
+    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::RhsIndices);
+    
     c.metric = ExtractParamFromMap<std::string>(params, posr::Metric);
+    if (c.rhs_indices.size() > 1 && c.metric != "euclidean") {
+        throw std::invalid_argument(
+            "More than one RHS columns are only allowed for \"euclidean\" metric.");
+    }
+    if (c.metric != "euclidean" || c.rhs_indices.size() != 1) {
+        c.algo = ExtractParamFromMap<std::string>(params, posr::MetricAlgorithm);
+    }
+    if (c.rhs_indices.size() != 2 && c.algo == "calipers") {
+        throw std::invalid_argument("\"calipers\" algo is only available for 2 dimensions.");
+    }
     c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, posr::DistToNullIsInfinity);
     return c;
 }
