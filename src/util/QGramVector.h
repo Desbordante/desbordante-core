@@ -18,7 +18,7 @@ namespace util {
  * Cosine distance between "abc" and "bcd" is equal to 1 - 0.5 = 0.5. */
 class QGramVector {
 private:
-    double length_ = -1;
+    long double length_ = -1;
     std::unordered_map<std::string, unsigned> q_grams_;
 
     void CalculateLength();
@@ -26,17 +26,17 @@ private:
 public:
     explicit QGramVector(std::string_view const& string, unsigned q);
 
-    double InnerProduct(QGramVector const& other) const;
+    long double InnerProduct(QGramVector const& other) const;
 
-    double GetLength() const {
+    long double GetLength() const {
         return length_;
     }
 
-    double CosineSimilarity(QGramVector& other) const {
+    long double CosineSimilarity(QGramVector& other) const {
         return InnerProduct(other) / (GetLength() * other.GetLength());
     }
 
-    double CosineDistance(QGramVector& other) const {
+    long double CosineDistance(QGramVector& other) const {
         return 1 - CosineSimilarity(other);
     }
 };

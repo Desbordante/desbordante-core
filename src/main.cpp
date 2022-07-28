@@ -90,7 +90,7 @@ int main(int argc, char const* argv[]) {
     std::string metric;
     std::vector<unsigned int> lhs_indices;
     unsigned int rhs_index = 0;
-    double parameter = 0;
+    long double parameter = 0;
     unsigned int q = 2;
     bool dist_to_null_infinity = false;
 
@@ -167,7 +167,7 @@ int main(int argc, char const* argv[]) {
          "LHS column indices for metric FD verification")
         (posr::RhsIndex, po::value<unsigned int>(&rhs_index),
          "RHS column index for metric FD verification")
-        (posr::Parameter, po::value<double>(&parameter), "metric FD parameter")
+        (posr::Parameter, po::value<long double>(&parameter), "metric FD parameter")
         (posr::DistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;

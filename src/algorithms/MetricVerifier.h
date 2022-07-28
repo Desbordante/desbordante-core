@@ -21,7 +21,7 @@ private:
     Metric metric_;
     std::vector<unsigned int> lhs_indices_;
     unsigned int rhs_index_;
-    double parameter_;
+    long double parameter_;
     unsigned int q_;
     bool dist_to_null_infinity_;
 
@@ -35,8 +35,9 @@ private:
     bool CompareStringValues(
         util::PLI::Cluster const& cluster,
         model::TypedColumnData const& col,
-        std::function<double(std::byte const*, std::byte const*)> const& distance_function) const;
-    std::function<double(std::byte const*, std::byte const*)> GetCosineDistFunction(
+        std::function<long double(std::byte const*,
+                                  std::byte const*)> const& distance_function) const;
+    std::function<long double(std::byte const*, std::byte const*)> GetCosineDistFunction(
         model::StringType const& type,
         std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
     bool VerifyMetricFD(model::TypedColumnData const& col) const;
@@ -48,7 +49,7 @@ public:
         bool has_header = true;         /* Indicates if input file has header */
         bool is_null_equal_null = true; /* Is NULL value equals another NULL value */
         std::string metric;             /* Metric to verify metric FD */
-        double parameter;               /* The max possible distance between 2 values in cluster
+        long double parameter;          /* The max possible distance between 2 values in cluster
                                          * at which metric FD holds */
         std::vector<unsigned int> lhs_indices; /* Indices of LHS columns */
         unsigned int rhs_index;         /* Index of RHS column */
@@ -63,7 +64,7 @@ public:
         return metric_fd_holds_;
     }
 
-    void SetParameter(double parameter) {
+    void SetParameter(long double parameter) {
         parameter_ = parameter;
     }
 

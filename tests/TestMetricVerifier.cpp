@@ -14,7 +14,7 @@ struct MetricVerifyingParams {
     bool const expected;
 
     MetricVerifyingParams(std::string const& metric,
-                          double const min_parameter,
+                          long double const min_parameter,
                           std::vector<unsigned int> const& lhs_indices,
                           unsigned int const rhs_index,
                           std::string const& dataset,
@@ -59,7 +59,7 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     }
     ASSERT_TRUE(GetResult(*verifier));
 
-    double new_parameter = boost::any_cast<double>(params.at(posr::Parameter));
+    auto new_parameter = boost::any_cast<long double>(params.at(posr::Parameter));
     new_parameter -= 1e-4;
     if (new_parameter < 0) return;
     verifier->SetParameter(new_parameter);
