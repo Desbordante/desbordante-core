@@ -1,11 +1,16 @@
 #include "MetricVerifier.h"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
+#include <cmath>
+#include <numeric>
 #include <stdexcept>
 #include <utility>
 
 #include <easylogging++.h>
+
+#include "ConvexHull.h"
 
 namespace algos {
 
@@ -13,10 +18,13 @@ MetricVerifier::MetricVerifier(Config const& config)
     : Primitive(config.data, config.separator, config.has_header, {}),
       metric_(Metric::_from_string(config.metric.c_str())),
       lhs_indices_(config.lhs_indices),
-      rhs_index_(config.rhs_index),
+      rhs_indices_(config.rhs_indices),
       parameter_(config.parameter),
       q_(config.q),
       dist_to_null_infinity_(config.dist_to_null_infinity) {
+    if (metric_ != +Metric::euclidean || rhs_indices_.size() != 1) {
+        algo_ = MetricAlgo::_from_string(config.algo.c_str());
+    }
     relation_ =
         ColumnLayoutRelationData::CreateFrom(input_generator_, config.is_null_equal_null);
     input_generator_.Reset();
@@ -31,42 +39,23 @@ MetricVerifier::MetricVerifier(Config const& config,
     : Primitive(config.data, config.separator, config.has_header, {}),
       metric_(Metric::_from_string(config.metric.c_str())),
       lhs_indices_(config.lhs_indices),
-      rhs_index_(config.rhs_index),
+      rhs_indices_(config.rhs_indices),
       parameter_(config.parameter),
       q_(config.q),
       dist_to_null_infinity_(config.dist_to_null_infinity),
       typed_relation_(std::move(typed_relation)),
-      relation_(std::move(relation)) {}
+      relation_(std::move(relation)) {
+    if (metric_ != +Metric::euclidean || rhs_indices_.size() != 1) {
+        algo_ = MetricAlgo::_from_string(config.algo.c_str());
+    }
+}
 
 unsigned long long MetricVerifier::Execute() {
     auto start_time = std::chrono::system_clock::now();
 
-    if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty .csv file: metric FD verifying is meaningless.");
-    }
+    ValidateParameters();
 
-    size_t cols_count = relation_->GetSchema()->GetNumColumns();
-    std::sort(lhs_indices_.begin(), lhs_indices_.end());
-    lhs_indices_.erase(std::unique(lhs_indices_.begin(), lhs_indices_.end()), lhs_indices_.end());
-
-    bool indices_out_of_range = rhs_index_ >= cols_count
-        || std::any_of(lhs_indices_.begin(), lhs_indices_.end(),
-                       [cols_count](unsigned int i) { return i >= cols_count; });
-    if (indices_out_of_range) {
-        throw std::runtime_error(
-            "Column index should be less than the number of columns in the dataset.");
-    }
-
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_index_);
-    auto type_id = col.GetTypeId();
-
-    if (type_id == +model::TypeId::kMixed) {
-        throw std::runtime_error("Column contains values of different types.");
-    }
-    metric_fd_holds_ = type_id == +model::TypeId::kUndefined
-                       ? !dist_to_null_infinity_
-                       : VerifyMetricFD();
-
+    metric_fd_holds_ = VerifyMetricFD();
     if (metric_fd_holds_) {
         LOG(INFO) << "Metric fd holds.";
     } else {
@@ -78,8 +67,42 @@ unsigned long long MetricVerifier::Execute() {
     return elapsed_milliseconds.count();
 }
 
+void MetricVerifier::ValidateParameters() const {
+    if (relation_->GetColumnData().empty()) {
+        throw std::runtime_error("Got an empty .csv file: metric FD verifying is meaningless.");
+    }
+
+    size_t cols_count = relation_->GetSchema()->GetNumColumns();
+    auto value_out_of_range = [cols_count](unsigned int i) { return i >= cols_count; };
+    bool indices_out_of_range =
+        std::any_of(rhs_indices_.begin(), rhs_indices_.end(), value_out_of_range)
+            || std::any_of(lhs_indices_.begin(), lhs_indices_.end(), value_out_of_range);
+    if (indices_out_of_range) {
+        throw std::runtime_error(
+            "Column index should be less than the number of columns in the dataset.");
+    }
+
+    assert(rhs_indices_.size() == 1 || metric_ == +Metric::euclidean);
+    for (unsigned i : rhs_indices_) {
+        model::TypedColumnData const& col = typed_relation_->GetColumnData(i);
+        auto type_id = col.GetTypeId();
+        if (type_id == +model::TypeId::kUndefined) {
+            throw std::runtime_error(
+                "Column with index \"" + std::to_string(i) + "\" type undefined.");
+        }
+        if (type_id == +model::TypeId::kMixed) {
+            throw std::runtime_error("Column with index \"" + std::to_string(i)
+                                         + "\" contains values of different types.");
+        }
+        if (rhs_indices_.size() > 1 && !col.IsNumeric()) {
+            throw std::runtime_error(
+                "\"euclidean\" metric does not match RHS column type with index \""
+                    + std::to_string(i) + "\".");
+        }
+    }
+}
+
 bool MetricVerifier::VerifyMetricFD() const {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::shared_ptr<util::PLI const>
         pli = relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
 
@@ -87,45 +110,53 @@ bool MetricVerifier::VerifyMetricFD() const {
         pli = pli->Intersect(relation_->GetColumnData(lhs_indices_[i]).GetPositionListIndex());
     }
 
-    std::function<bool(util::PLI::Cluster const& cluster)> compare_function;
-    switch (metric_) {
-    case Metric::euclidean:
-        if (!col.IsNumeric()) {
-            throw std::runtime_error("\"euclidean\" metric does not match RHS column type.");
-        }
-        compare_function = [this](util::PLI::Cluster const& cluster) {
-            return CompareNumericValues(cluster);
-        };
-        break;
-    case Metric::levenshtein:
-        if (col.GetTypeId() != +model::TypeId::kString) {
-            throw std::runtime_error("\"levenshtein\" metric does not match RHS column type.");
-        }
-        compare_function = [this, &col](util::PLI::Cluster const& cluster) {
-            auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
-            return CompareStringValues(
-                cluster, [&type](std::byte const* a, std::byte const* b) {
-                    return type.Dist(a, b);
-                });
-        };
-        break;
-    case Metric::cosine:
-        if (col.GetTypeId() != +model::TypeId::kString) {
-            throw std::runtime_error("\"cosine\" metric does not match RHS column type.");
-        }
-        compare_function = [this, &col](util::PLI::Cluster const& cluster) {
-            auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
-            std::unordered_map<std::string, util::QGramVector> q_gram_map;
-            return CompareStringValues(cluster, GetCosineDistFunction(type, q_gram_map));
-        };
-        break;
-    }
-
-    return std::all_of(pli->GetIndex().cbegin(), pli->GetIndex().cend(), compare_function);
+    return std::all_of(pli->GetIndex().cbegin(), pli->GetIndex().cend(), GetCompareFunction());
 }
 
-std::function<long double(std::byte const*,
-                          std::byte const*)> MetricVerifier::GetCosineDistFunction(
+MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
+    if (rhs_indices_.size() == 1) {
+        model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+        switch (metric_) {
+        case Metric::euclidean:
+            if (!col.IsNumeric()) {
+                throw std::runtime_error("\"euclidean\" metric does not match RHS column type.");
+            }
+            return [this](util::PLI::Cluster const& cluster) {
+                return CompareNumericValues(cluster);
+            };
+        case Metric::levenshtein:
+            if (col.GetTypeId() != +model::TypeId::kString) {
+                throw std::runtime_error("\"levenshtein\" metric does not match RHS column type.");
+            }
+            return [this, &col](util::PLI::Cluster const& cluster) {
+                auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
+                return CompareStringValues(
+                    cluster, [&type](std::byte const* a, std::byte const* b) {
+                        return type.Dist(a, b);
+                    });
+            };
+        case Metric::cosine:
+            if (col.GetTypeId() != +model::TypeId::kString) {
+                throw std::runtime_error("\"cosine\" metric does not match RHS column type.");
+            }
+            return [this, &col](util::PLI::Cluster const& cluster) {
+                auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
+                std::unordered_map<std::string, util::QGramVector> q_gram_map;
+                return CompareStringValues(cluster, GetCosineDistFunction(type, q_gram_map));
+            };
+        }
+    }
+    if (algo_ == +MetricAlgo::calipers) {
+        return [this](util::PLI::Cluster const& cluster) {
+            return CalipersCompareNumericValues(cluster);
+        };
+    }
+    return [this](util::PLI::Cluster const& cluster) {
+        return CompareNumericMultiDimensionalValues(cluster);
+    };
+}
+
+MetricVerifier::DistanceFunction MetricVerifier::GetCosineDistFunction(
     model::StringType const& type,
     std::unordered_map<std::string, util::QGramVector>& q_gram_map) const {
     return [this, &type, &q_gram_map](std::byte const* a, std::byte const* b) -> long double {
@@ -169,8 +200,7 @@ bool MetricVerifier::CompareNumericValues(util::PLI::Cluster const& cluster) con
 }
 
 bool MetricVerifier::CompareStringValues(
-    util::PLI::Cluster const& cluster,
-    std::function<long double(std::byte const*, std::byte const*)> const& distance_function) const {
+    util::PLI::Cluster const& cluster, DistanceFunction const& dist_func) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::vector<std::byte const*> const& data = col.GetData();
     for (size_t i = 0; i < cluster.size() - 1; ++i) {
@@ -178,15 +208,92 @@ bool MetricVerifier::CompareStringValues(
             if (dist_to_null_infinity_) return false;
             continue;
         }
+        long double max_dist = 0;
         for (size_t j = i + 1; j < cluster.size(); ++j) {
             if (col.IsNull(cluster[j]) || col.IsEmpty(cluster[j])) {
                 if (dist_to_null_infinity_) return false;
                 continue;
             }
-            if (distance_function(data[cluster[i]], data[cluster[j]]) > parameter_) return false;
+            max_dist = std::max(max_dist, dist_func(data[cluster[i]], data[cluster[j]]));
+            if (max_dist > parameter_) return false;
         }
+        if (algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_) return true;
     }
     return true;
+}
+
+static long double GetDistanceBetweenPoints(std::vector<long double> const& p1,
+                                            std::vector<long double> const& p2) {
+    assert(p1.size() == p2.size());
+    assert(!p1.empty());
+    return std::sqrt(std::inner_product(
+        p1.cbegin(), p1.cend(), p2.cbegin(), 0.0, std::plus<>(),
+        [](long double a, long double b) {
+            return (a - b) * (a - b);
+        }));
+}
+
+template <typename T>
+std::vector<T> MetricVerifier::GetVectorOfPoints(
+    util::PLI::Cluster const& cluster,
+    std::function<void(T&, long double, size_t)> const& assignment_func) const {
+    std::vector<T> points;
+    for (int i : cluster) {
+        bool has_values = false;
+        bool has_nulls = false;
+        T point;
+        for (size_t j = 0; j < rhs_indices_.size(); ++j) {
+            model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[j]);
+            if (col.IsNull(i) || col.IsEmpty(i)) {
+                if (dist_to_null_infinity_) {
+                    return {};
+                }
+                if (has_values)
+                    throw std::runtime_error("Some of the value coordinates are nulls.");
+                has_nulls = true;
+                continue;
+            }
+            if (has_nulls) throw std::runtime_error("Some of the value coordinates are nulls.");
+            long double coord =
+                col.GetType().GetTypeId() == +model::TypeId::kInt
+                ? (long double)model::Type::GetValue<long long>(col.GetData()[i])
+                : model::Type::GetValue<long double>(col.GetData()[i]);
+            assignment_func(point, coord, j);
+            has_values = true;
+        }
+        if (has_values) points.push_back(point);
+    }
+    return points;
+}
+
+bool MetricVerifier::CompareNumericMultiDimensionalValues(util::PLI::Cluster const& cluster) const {
+    auto points = GetVectorOfPoints<std::vector<long double>>(
+        cluster, [](auto& point, long double coord, [[maybe_unused]] size_t j) {
+            point.push_back(coord);
+        });
+    if (points.empty()) return !dist_to_null_infinity_;
+    for (size_t i = 0; i < points.size() - 1; ++i) {
+        long double max_dist = 0;
+        for (size_t j = i + 1; j < points.size(); ++j) {
+            max_dist = std::max(max_dist, GetDistanceBetweenPoints(points[i], points[j]));
+            if (max_dist > parameter_) return false;
+        }
+        if (algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_) return true;
+    }
+    return true;
+}
+
+bool MetricVerifier::CalipersCompareNumericValues(const util::PLI::Cluster& cluster) const {
+    auto points = GetVectorOfPoints<util::Point>(
+        cluster, [](auto& point, long double coord, size_t j) {
+            if (j == 0) point.x = coord;
+            else point.y = coord;
+        });
+    if (points.empty()) return !dist_to_null_infinity_;
+    auto pairs = util::GetAntipodalPairs(util::ConvexHull(points));
+    return std::all_of(pairs.cbegin(), pairs.cend(), [this](auto const& pair) {
+        return util::Point::EuclideanDistance(pair.first, pair.second) <= parameter_;
+    });
 }
 
 }  // namespace algos
