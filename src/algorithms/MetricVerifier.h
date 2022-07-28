@@ -16,7 +16,7 @@
 namespace algos {
 
 BETTER_ENUM(Metric, char,
-            euclidian = 0,  /* Standard metric for calculating the distance between numeric
+            euclidean = 0,  /* Standard metric for calculating the distance between numeric
                              * values */
             levenshtein,    /* Levenshtein distance between strings */
             cosine          /* Represent strings as q-gram vectors and calculate cosine distance
