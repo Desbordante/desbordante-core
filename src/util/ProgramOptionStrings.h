@@ -28,8 +28,9 @@ constexpr auto ItemColumnIndex = "item_column_index";
 constexpr auto FirstColumnTId = "has_tid";
 constexpr auto Metric = "metric";
 constexpr auto LhsIndices = "lhs_indices";
-constexpr auto RhsIndex = "rhs_index";
+constexpr auto RhsIndices = "rhs_indices";
 constexpr auto Parameter = "parameter";
 constexpr auto DistToNullIsInfinity = "dist_to_null_infinity";
 constexpr auto QGramLength = "q";
+constexpr auto MetricAlgorithm = "metric_algorithm";
 }  // namespace program_option_strings

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <iterator>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -35,7 +36,8 @@ static std::string EnumToAvailableValues() {
     return avail_values.str();
 }
 
-static bool CheckOptions(std::string const& task, std::string const& alg, std::string const& metric, double error) {
+static bool CheckOptions(std::string const& task, std::string const& alg, std::string const& metric,
+                         std::string const& metric_alg, size_t rhs_indices_count, double error) {
     if (!algos::AlgoMiningType::_is_valid(task.c_str())) {
         std::cout << "ERROR: no matching task."
                      " Available tasks (primitives to mine) are:\n" +
@@ -47,7 +49,19 @@ static bool CheckOptions(std::string const& task, std::string const& alg, std::s
         if (!algos::Metric::_is_valid(metric.c_str())) {
             std::cout << "ERROR: no matching metric."
                          " Available metrics are:\n" +
-                EnumToAvailableValues<algos::Metric>() + '\n';
+                         EnumToAvailableValues<algos::Metric>() + '\n';
+            return false;
+        }
+        if (rhs_indices_count == 1 && metric == "euclidean") {
+            if (!metric_alg.empty()) {
+                std::cout << "metric_algo is ignored for one-dimensional euclidean metric.\n";
+            }
+            return true;
+        }
+        if (!algos::MetricAlgo::_is_valid(metric_alg.c_str())) {
+            std::cout << "ERROR: no matching MFD algorithm."
+                         " Available MFD algorithms are:\n" +
+                         EnumToAvailableValues<algos::MetricAlgo>() + '\n';
             return false;
         }
         return true;
@@ -89,8 +103,9 @@ int main(int argc, char const* argv[]) {
 
     /*Options for metric verifier algorithm*/
     std::string metric;
+    std::string metric_algo;
     std::vector<unsigned int> lhs_indices;
-    unsigned int rhs_index = 0;
+    std::vector<unsigned int> rhs_indices;
     long double parameter = 0;
     unsigned int q = 2;
     bool dist_to_null_infinity = false;
@@ -102,6 +117,8 @@ int main(int argc, char const* argv[]) {
                                   EnumToAvailableValues<algos::AlgoMiningType>();
     std::string const metric_desc = "metric to use. Available metrics:\n" +
         EnumToAvailableValues<algos::Metric>();
+    std::string const metric_algo_desc = "MFD algorithm to use. Available algorithms:\n" +
+        EnumToAvailableValues<algos::MetricAlgo>();
 
     po::options_description info_options("Desbordante information options");
     info_options.add_options()
@@ -164,10 +181,11 @@ int main(int argc, char const* argv[]) {
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
         (posr::Metric, po::value<std::string>(&metric), metric_desc.c_str())
+        (posr::MetricAlgorithm, po::value<std::string>(&metric_algo), metric_algo_desc.c_str())
         (posr::LhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
          "LHS column indices for metric FD verification")
-        (posr::RhsIndex, po::value<unsigned int>(&rhs_index),
-         "RHS column index for metric FD verification")
+        (posr::RhsIndices, po::value<std::vector<unsigned int>>(&rhs_indices)->multitoken(),
+         "RHS column indices for metric FD verification")
         (posr::Parameter, po::value<long double>(&parameter), "metric FD parameter")
         (posr::DistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
@@ -205,7 +223,21 @@ int main(int argc, char const* argv[]) {
     std::transform(algo.begin(), algo.end(), algo.begin(),
                    [](unsigned char c) { return std::tolower(c); });
 
-    if (!CheckOptions(task, algo, metric, error)) {
+    if (task == "metric") {
+        auto remove_duplicates = [](std::vector<unsigned>& vec) {
+            if (vec.empty()) {
+                throw std::invalid_argument("Index vector should not be empty.");
+            }
+            std::sort(vec.begin(), vec.end());
+            vec.erase(std::unique(vec.begin(), vec.end()), vec.end());
+        };
+        remove_duplicates(lhs_indices);
+        remove_duplicates(rhs_indices);
+        vm.at("rhs_indices").value() = rhs_indices;
+        vm.at("lhs_indices").value() = lhs_indices;
+    }
+
+    if (!CheckOptions(task, algo, metric, metric_algo, rhs_indices.size(), error)) {
         std::cout << all_options << std::endl;
         return 1;
     }
@@ -228,15 +260,18 @@ int main(int argc, char const* argv[]) {
                   << "\'. Header is " << (has_header ? "" : "not ") << "present. " << std::endl;
     } else if (task == "metric") {
         algo = "metric";
-        std::stringstream stream;
-        copy(lhs_indices.begin(), lhs_indices.end(), std::ostream_iterator<int>(stream, " "));
-        string lhs_indices_str = stream.str();
-        boost::trim_right(lhs_indices_str);
+        auto get_str = [](std::vector<unsigned> const& vec) {
+            std::stringstream stream;
+            std::copy(vec.begin(), vec.end(), std::ostream_iterator<int>(stream, " "));
+            string lhs_indices_str = stream.str();
+            boost::trim_right(lhs_indices_str);
+            return lhs_indices_str;
+        };
         std::cout << "Input metric \"" << metric;
         if (metric == "cosine") std::cout << "\" with q \"" << q;
         std::cout << "\" with parameter \"" << parameter
-                  << "\" with LHS indices \"" << lhs_indices_str
-                  << "\" with RHS index\"" << rhs_index
+                  << "\" with LHS indices \"" << get_str(lhs_indices)
+                  << "\" with RHS indices \"" << get_str(rhs_indices)
                   << "\" and dataset \"" << dataset
                   << "\" with separator \'" << separator
                   << "\'. Header is " << (has_header ? "" : "not ") << "present. " << std::endl;
