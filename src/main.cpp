@@ -100,57 +100,88 @@ int main(int argc, char const* argv[]) {
     std::string const metric_desc = "metric to use. Available metrics:\n" +
         EnumToAvailableValues<algos::Metric>();
 
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help", "print this message and exit")
-        ("task", po::value<std::string>(&task),
-         task_desc.c_str())
-        ("algo", po::value<std::string>(&algo),
-         algo_desc.c_str())
+    po::options_description info_options("Desbordante information options");
+    info_options.add_options()
+        ("help", "print the help message and exit")
+        // --version, if needed, goes here too
+        ;
+
+    po::options_description general_options("General options");
+    general_options.add_options()
+        ("task", po::value<std::string>(&task), task_desc.c_str())
+        ("algo", po::value<std::string>(&algo), algo_desc.c_str())
         ("data", po::value<std::string>(&dataset),
          "path to CSV file, relative to ./inputData")
         ("separator,s", po::value<char>(&separator)->default_value(separator),
          "CSV separator")
         ("has_header", po::value<bool>(&has_header)->default_value(has_header),
          "CSV header presence flag [true|false]")
-        ("seed", po::value<int>(&seed)->default_value(seed), "RNG seed")
+        ("is_null_equal_null", po::value<bool>(&is_null_equal_null)->default_value(true),
+         "specify whether two nulls should be considered equal")
+        ("threads", po::value<ushort>(&threads)->default_value(threads),
+         "number of threads to use. If 0, then as many threads are used as "
+         "possible.")
+        ;
+
+    po::options_description typos_fd_options("Typo mining/FD options");
+    typos_fd_options.add_options()
         ("error", po::value<double>(&error)->default_value(error),
-         "error for AFD algorithms")
+         "error value for AFD algorithms")
         ("max_lhs", po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
          "max considered LHS size")
-        ("threads", po::value<ushort>(&threads)->default_value(threads),
-         "number of threads to use. If 0 is specified then as many threads are used as "
-         "the hardware can handle concurrently.")
-        ("is_null_equal_null", po::value<bool>(&is_null_equal_null)->default_value(true),
-         "Is NULL value equals another NULL value")
+        ("seed", po::value<int>(&seed)->default_value(seed), "RNG seed")
+        ;
 
-        /*Options for association rule mining algorithms*/
-        ("minsup", po::value<double>(&minsup), "minimal support value (between 0 and 1)")
-        ("minconf", po::value<double>(&minconf), "minimal confidence value (between 0 and 1)")
+    po::options_description ar_options("AR options");
+    ar_options.add_options()
+        ("minsup", po::value<double>(&minsup), "minimum support value (between 0 and 1)")
+        ("minconf", po::value<double>(&minconf), "minimum confidence value (between 0 and 1)")
         ("input_format", po::value<string>(&ar_input_format),
          "format of the input dataset. [singular|tabular] for AR mining")
-        ("tid_column_index", po::value<unsigned>(&tid_column_index)->default_value(0),
-         "index of the column where a tid is stored (only for \"singular\" input type)")
-        ("item_column_index", po::value<unsigned>(&item_column_index)->default_value(1),
-         "index of the column where an item name is stored (only for \"singular\" input type)")
-        ("has_tid", po::value<bool>(&has_transaction_id)->default_value(false),
-         "does the first column contain a transaction id (only for \"tabular\" input type)")
+        ;
 
-        /*Options for metric verifier algorithm*/
+    po::options_description ar_singular_options("AR \"singular\" input format options");
+    ar_singular_options.add_options()
+        ("tid_column_index", po::value<unsigned>(&tid_column_index)->default_value(0),
+         "index of the column where a TID is stored")
+        ("item_column_index", po::value<unsigned>(&item_column_index)->default_value(1),
+         "index of the column where an item name is stored")
+        ;
+
+    po::options_description ar_tabular_options("AR \"tabular\" input format options");
+    ar_tabular_options.add_options()
+        ("first_col_tid", po::value<bool>(&has_transaction_id)->default_value(false),
+         "indicates whether the first column contains a transaction id")
+        ;
+
+    ar_options.add(ar_singular_options).add(ar_tabular_options);
+
+    po::options_description mfd_options("MFD options");
+    mfd_options.add_options()
         ("metric", po::value<std::string>(&metric), metric_desc.c_str())
         ("lhs_indices", po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
          "LHS column indices for metric FD verification")
         ("rhs_index", po::value<unsigned int>(&rhs_index),
          "RHS column indices for metric FD verification")
         ("parameter", po::value<double>(&parameter), "metric FD parameter")
-        ("q", po::value<unsigned int>(&q)->default_value(2), "q-gram length for cosine metric")
         ("dist_to_null_infinity", po::value<bool>(&dist_to_null_infinity)->default_value(false),
-        "Determines whether distance to NULL value is infinity or zero")
+         "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;
+
+    po::options_description cosine_options("Cosine metric options");
+    cosine_options.add_options()
+        ("q", po::value<unsigned int>(&q)->default_value(2), "q-gram length for cosine metric")
+        ;
+
+    mfd_options.add(cosine_options);
+
+    po::options_description all_options("Allowed options");
+    all_options.add(info_options).add(general_options).add(typos_fd_options)
+        .add(mfd_options).add(ar_options);
 
     po::variables_map vm;
     try {
-        po::store(po::parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, all_options), vm);
         po::notify(vm);
     } catch (po::error &e) {
         std::cout << e.what() << std::endl;
@@ -159,7 +190,7 @@ int main(int argc, char const* argv[]) {
 
     if (vm.count("help"))
     {
-        std::cout << desc << std::endl;
+        std::cout << all_options << std::endl;
         return 0;
     }
 
@@ -169,13 +200,9 @@ int main(int argc, char const* argv[]) {
                    [](unsigned char c) { return std::tolower(c); });
 
     if (!CheckOptions(task, algo, metric, error)) {
-        std::cout << desc << std::endl;
+        std::cout << all_options << std::endl;
         return 1;
     }
-
-    /* Remove options that are not related to the algorithm configuration */
-    vm.erase("task");
-    vm.erase("algo");
 
     if (task == "fd" || task == "typos") {
         std::cout << "Input: algorithm \"" << algo
