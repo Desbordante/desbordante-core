@@ -1,9 +1,12 @@
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
-#include <utility>
-
-#include "MetricVerifier.h"
 #include "AlgoFactory.h"
+#include "MetricVerifier.h"
 #include "ProgramOptionStrings.h"
 
 namespace tests {
