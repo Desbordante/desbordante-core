@@ -1,8 +1,11 @@
 #include "MetricVerifier.h"
 
+#include <algorithm>
 #include <chrono>
+#include <stdexcept>
+#include <utility>
 
-#include "easylogging++.h"
+#include <easylogging++.h>
 
 namespace algos {
 
