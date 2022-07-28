@@ -65,7 +65,7 @@ unsigned long long MetricVerifier::Execute() {
     }
     metric_fd_holds_ = type_id == +model::TypeId::kUndefined
                        ? !dist_to_null_infinity_
-                       : VerifyMetricFD(col);
+                       : VerifyMetricFD();
 
     if (metric_fd_holds_) {
         LOG(INFO) << "Metric fd holds.";
@@ -78,7 +78,8 @@ unsigned long long MetricVerifier::Execute() {
     return elapsed_milliseconds.count();
 }
 
-bool MetricVerifier::VerifyMetricFD(model::TypedColumnData const& col) const {
+bool MetricVerifier::VerifyMetricFD() const {
+    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::shared_ptr<util::PLI const>
         pli = relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
 
@@ -92,30 +93,30 @@ bool MetricVerifier::VerifyMetricFD(model::TypedColumnData const& col) const {
         if (!col.IsNumeric()) {
             throw std::runtime_error("\"euclidian\" metric does not match RHS column type");
         }
-        compare_function = [this, &col](util::PLI::Cluster const& cluster) {
-            return CompareNumericValues(cluster, col);
+        compare_function = [this](util::PLI::Cluster const& cluster) {
+            return CompareNumericValues(cluster);
         };
         break;
     case Metric::levenshtein:
         if (col.GetTypeId() != +model::TypeId::kString) {
-            throw std::runtime_error("\"levenshtein\" metric does not match RHS column type");
+            throw std::runtime_error("\"levenshtein\" metric does not match RHS column type.");
         }
         compare_function = [this, &col](util::PLI::Cluster const& cluster) {
             auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
             return CompareStringValues(
-                cluster, col, [&type](std::byte const* a, std::byte const* b) {
+                cluster, [&type](std::byte const* a, std::byte const* b) {
                     return type.Dist(a, b);
                 });
         };
         break;
     case Metric::cosine:
         if (col.GetTypeId() != +model::TypeId::kString) {
-            throw std::runtime_error("\"cosine\" metric does not match RHS column type");
+            throw std::runtime_error("\"cosine\" metric does not match RHS column type.");
         }
         compare_function = [this, &col](util::PLI::Cluster const& cluster) {
             auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
             std::unordered_map<std::string, util::QGramVector> q_gram_map;
-            return CompareStringValues(cluster, col, GetCosineDistFunction(type, q_gram_map));
+            return CompareStringValues(cluster, GetCosineDistFunction(type, q_gram_map));
         };
         break;
     }
@@ -132,7 +133,7 @@ std::function<long double(std::byte const*,
         std::string str2 = type.ValueToString(b);
         if (str1.length() < q_ || str2.length() < q_) {
             throw std::runtime_error("q-gram length should not exceed the minimum string length "
-                                     "in the dataset");
+                                     "in the dataset.");
         }
         util::QGramVector& v1 = q_gram_map.try_emplace(str1, str1, q_).first->second;
         util::QGramVector& v2 = q_gram_map.try_emplace(str2, str2, q_).first->second;
@@ -140,8 +141,8 @@ std::function<long double(std::byte const*,
     };
 }
 
-bool MetricVerifier::CompareNumericValues(
-    util::PLI::Cluster const& cluster, model::TypedColumnData const& col) const {
+bool MetricVerifier::CompareNumericValues(util::PLI::Cluster const& cluster) const {
+    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     auto const& type = dynamic_cast<model::INumericType const&>(col.GetType());
     std::vector<std::byte const*> const& data = col.GetData();
     std::byte const* max_value = nullptr;
@@ -169,8 +170,8 @@ bool MetricVerifier::CompareNumericValues(
 
 bool MetricVerifier::CompareStringValues(
     util::PLI::Cluster const& cluster,
-    model::TypedColumnData const& col,
     std::function<long double(std::byte const*, std::byte const*)> const& distance_function) const {
+    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::vector<std::byte const*> const& data = col.GetData();
     for (size_t i = 0; i < cluster.size() - 1; ++i) {
         if (col.IsNull(cluster[i]) || col.IsEmpty(cluster[i])) {
