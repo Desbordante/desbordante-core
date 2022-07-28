@@ -37,17 +37,15 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<ColumnLayoutRelationData> relation_; // temporarily parsing twice
 
-    bool CompareNumericValues(
-        util::PLI::Cluster const& cluster, model::TypedColumnData const& col) const;
+    bool CompareNumericValues(util::PLI::Cluster const& cluster) const;
     bool CompareStringValues(
         util::PLI::Cluster const& cluster,
-        model::TypedColumnData const& col,
         std::function<long double(std::byte const*,
                                   std::byte const*)> const& distance_function) const;
     std::function<long double(std::byte const*, std::byte const*)> GetCosineDistFunction(
         model::StringType const& type,
         std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
-    bool VerifyMetricFD(model::TypedColumnData const& col) const;
+    bool VerifyMetricFD() const;
 
 public:
     struct Config {
