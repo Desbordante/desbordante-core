@@ -120,10 +120,11 @@ bool MetricVerifier::VerifyMetricFD(model::TypedColumnData const& col) const {
     return std::all_of(pli->GetIndex().cbegin(), pli->GetIndex().cend(), compare_function);
 }
 
-std::function<double(std::byte const*, std::byte const*)> MetricVerifier::GetCosineDistFunction(
+std::function<long double(std::byte const*,
+                          std::byte const*)> MetricVerifier::GetCosineDistFunction(
     model::StringType const& type,
     std::unordered_map<std::string, util::QGramVector>& q_gram_map) const {
-    return [this, &type, &q_gram_map](std::byte const* a, std::byte const* b) -> double {
+    return [this, &type, &q_gram_map](std::byte const* a, std::byte const* b) -> long double {
         std::string str1 = type.ValueToString(a);
         std::string str2 = type.ValueToString(b);
         if (str1.length() < q_ || str2.length() < q_) {
@@ -166,7 +167,7 @@ bool MetricVerifier::CompareNumericValues(
 bool MetricVerifier::CompareStringValues(
     util::PLI::Cluster const& cluster,
     model::TypedColumnData const& col,
-    std::function<double(std::byte const*, std::byte const*)> const& distance_function) const {
+    std::function<long double(std::byte const*, std::byte const*)> const& distance_function) const {
     std::vector<std::byte const*> const& data = col.GetData();
     for (size_t i = 0; i < cluster.size() - 1; ++i) {
         if (col.IsNull(cluster[i]) || col.IsEmpty(cluster[i])) {
