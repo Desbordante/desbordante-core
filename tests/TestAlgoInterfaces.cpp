@@ -6,6 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "Pyro.h"
+#include "ProgramOptionStrings.h"
+
+namespace tests {
 
 using ::testing::ContainerEq;
 
@@ -16,24 +19,23 @@ struct KeysTestParams {
     std::string_view const dataset;
     char const sep;
     bool const has_header;
-    KeysTestParams(std::vector<unsigned int> expected,
-                   std::string_view const dataset,
-                   char const sep = ',',
-                   bool const has_header = true) noexcept
-        : expected(std::move(expected)), dataset(dataset),
-          sep(sep), has_header(has_header) {}
+    KeysTestParams(std::vector<unsigned int> expected, std::string_view const dataset,
+                   char const sep = ',', bool const has_header = true) noexcept
+        : expected(std::move(expected)), dataset(dataset), sep(sep), has_header(has_header) {}
 };
 
 class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 
 template<typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
+    namespace posr = program_option_strings;
+
     auto const path = fs::current_path() / "inputData" / p.dataset;
     std::vector<unsigned int> actual;
     FDAlgorithm::Config c{.data = path,
                           .separator = p.sep,
                           .has_header = p.has_header,
-                          .special_params = {{"seed", 0}, {"error", 0.0}}};
+                          .special_params = {{posr::Seed, 0}, {posr::Error, 0.0}}};
     algos::Pyro pyro(c);
 
     pyro.Execute();
@@ -69,3 +71,4 @@ INSTANTIATE_TEST_SUITE_P(, KeysTest,
                                            KeysTestParams({0, 2}, "CIPublicHighway700.csv"),
                                            KeysTestParams({}, "abalone.csv", ',', false),
                                            KeysTestParams({}, "adult.csv", ';', false)));
+}  // namespace tests

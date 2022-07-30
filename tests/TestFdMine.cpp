@@ -11,6 +11,7 @@
 #include "algorithms/TaneX.h"
 #include "algorithms/Fd_mine.h"
 #include "RelationalSchema.h"
+#include "ProgramOptionStrings.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 
@@ -121,6 +122,8 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 }
 
 TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
+    namespace posr = program_option_strings;
+
     auto path = std::filesystem::current_path() / "inputData";
 
     try {
@@ -137,7 +140,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             FDAlgorithm::Config c{.data = path / LightDatasets::DatasetName(i),
                                   .separator = LightDatasets::Separator(i),
                                   .has_header = LightDatasets::HasHeader(i),
-                                  .special_params = {{"seed", 0}, {"error", 0.0}}};
+                                  .special_params = {{posr::Seed, 0}, {posr::Error, 0.0}}};
             auto pyro = algos::Pyro(c);
 
             algorithm->Execute();

@@ -7,6 +7,7 @@
 
 #include "Algorithms.h"
 #include "TypoMiner.h"
+#include "ProgramOptionStrings.h"
 
 namespace algos {
 
@@ -54,6 +55,8 @@ using AlgorithmTypesTuple = std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Py
 using ArAlgorithmTuplesType = std::tuple<Apriori>;
 
 namespace details {
+
+namespace posr = program_option_strings;
 
 template <typename AlgorithmBase = Primitive, typename AlgorithmsToSelect = AlgorithmTypesTuple,
           typename EnumType, typename... Args>
@@ -103,12 +106,12 @@ FDAlgorithm::Config CreateFDAlgorithmConfigFromMap(ParamsMap params) {
     FDAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "inputData" /
-             ExtractParamFromMap<std::string>(params, "data");
-    c.separator = ExtractParamFromMap<char>(params, "separator");
-    c.has_header = ExtractParamFromMap<bool>(params, "has_header");
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, "is_null_equal_null");
-    c.max_lhs = ExtractParamFromMap<unsigned int>(params, "max_lhs");
-    c.parallelism = ExtractParamFromMap<ushort>(params, "threads");
+             ExtractParamFromMap<std::string>(params, posr::Data);
+    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::EqualNulls);
+    c.max_lhs = ExtractParamFromMap<unsigned int>(params, posr::MaximumLhs);
+    c.parallelism = ExtractParamFromMap<ushort>(params, posr::Threads);
 
     /* Is it correct to insert all specified parameters into the algorithm config, and not just the
      * necessary ones? It is definitely simpler, so for now leaving it like this
@@ -131,21 +134,21 @@ ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
     ARAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "inputData" /
-             ExtractParamFromMap<std::string>(params, "data");
-    c.separator = ExtractParamFromMap<char>(params, "separator");
-    c.has_header = ExtractParamFromMap<bool>(params, "has_header");
-    c.minsup = ExtractParamFromMap<double>(params, "minsup");
-    c.minconf = ExtractParamFromMap<double>(params, "minconf");
+             ExtractParamFromMap<std::string>(params, posr::Data);
+    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
+    c.minsup = ExtractParamFromMap<double>(params, posr::MinimumSupport);
+    c.minconf = ExtractParamFromMap<double>(params, posr::MinimumConfidence);
 
     std::shared_ptr<model::InputFormat> input_format;
-    auto const input_format_arg = ExtractParamFromMap<std::string>(params, "input_format");
+    auto const input_format_arg = ExtractParamFromMap<std::string>(params, posr::InputFormat);
     if (input_format_arg == "singular") {
-        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, "tid_column_index");
+        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, posr::TIdColumnIndex);
         unsigned const item_column_index =
-            ExtractParamFromMap<unsigned>(params, "item_column_index");
+            ExtractParamFromMap<unsigned>(params, posr::ItemColumnIndex);
         input_format = std::make_shared<model::Singular>(tid_column_index, item_column_index);
     } else if (input_format_arg == "tabular") {
-        bool const has_header = ExtractParamFromMap<bool>(params, "has_tid");
+        bool const has_header = ExtractParamFromMap<bool>(params, posr::FirstColumnTId);
         input_format = std::make_shared<model::Tabular>(has_header);
     } else {
         throw std::invalid_argument(
@@ -160,23 +163,23 @@ template <typename ParamsMap>
 MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     MetricVerifier::Config c;
 
-    c.parameter = ExtractParamFromMap<double>(params, "parameter");
+    c.parameter = ExtractParamFromMap<double>(params, posr::Parameter);
     if (c.parameter < 0) {
         throw std::invalid_argument("Parameter should not be less than zero.");
     }
-    c.q = ExtractParamFromMap<unsigned>(params, "q");
+    c.q = ExtractParamFromMap<unsigned>(params, posr::QGramLength);
     if (c.q <= 0) {
         throw std::invalid_argument("Q-gram length should be greater than zero.");
     }
     c.data = std::filesystem::current_path() / "inputData" /
-        ExtractParamFromMap<std::string>(params, "data");
-    c.separator = ExtractParamFromMap<char>(params, "separator");
-    c.has_header = ExtractParamFromMap<bool>(params, "has_header");
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, "is_null_equal_null");
-    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, "lhs_indices");
-    c.rhs_index = ExtractParamFromMap<unsigned int>(params, "rhs_index");
-    c.metric = ExtractParamFromMap<std::string>(params, "metric");
-    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, "dist_to_null_infinity");
+        ExtractParamFromMap<std::string>(params, posr::Data);
+    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::EqualNulls);
+    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::LhsIndices);
+    c.rhs_index = ExtractParamFromMap<unsigned int>(params, posr::RhsIndex);
+    c.metric = ExtractParamFromMap<std::string>(params, posr::Metric);
+    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, posr::DistToNullIsInfinity);
     return c;
 }
 

@@ -7,8 +7,10 @@
 
 #include "AlgoFactory.h"
 #include "TypoMiner.h"
+#include "ProgramOptionStrings.h"
 
 namespace tests {
+namespace posr = program_option_strings;
 
 struct TestingParam {
     algos::StdParamsMap params;
@@ -16,14 +18,14 @@ struct TestingParam {
     TestingParam(std::string const& dataset,
                  char const separator, bool const has_header, bool const is_null_equal_null,
                  unsigned const max_lhs, double const error, ushort const threads)
-        : params({{"data", dataset},
-                  {"separator", separator},
-                  {"has_header", has_header},
-                  {"is_null_equal_null", is_null_equal_null},
-                  {"max_lhs", max_lhs},
-                  {"error", error},
-                  {"threads", threads},
-                  {"seed", 0}}) {}
+        : params({{posr::Data, dataset},
+                  {posr::SeparatorConfig, separator},
+                  {posr::HasHeader, has_header},
+                  {posr::EqualNulls, is_null_equal_null},
+                  {posr::MaximumLhs, max_lhs},
+                  {posr::Error, error},
+                  {posr::Threads, threads},
+                  {posr::Seed, 0}}) {}
 };
 
 /* FD represented as vector where all elements except last are lhs indices and

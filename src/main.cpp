@@ -11,8 +11,10 @@
 #include <easylogging++.h>
 
 #include "AlgoFactory.h"
+#include "ProgramOptionStrings.h"
 
 namespace po = boost::program_options;
+namespace posr = program_option_strings;
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -40,7 +42,7 @@ static bool CheckOptions(std::string const& task, std::string const& alg, std::s
         return false;
     }
 
-    if(task == "metric"){
+    if (task == "metric") {
         if (!algos::Metric::_is_valid(metric.c_str())) {
             std::cout << "ERROR: no matching metric."
                          " Available metrics are:\n" +
@@ -102,55 +104,57 @@ int main(int argc, char const* argv[]) {
 
     po::options_description info_options("Desbordante information options");
     info_options.add_options()
-        ("help", "print the help message and exit")
+        (posr::Help, "print the help message and exit")
         // --version, if needed, goes here too
         ;
 
     po::options_description general_options("General options");
     general_options.add_options()
-        ("task", po::value<std::string>(&task), task_desc.c_str())
-        ("algo", po::value<std::string>(&algo), algo_desc.c_str())
-        ("data", po::value<std::string>(&dataset),
-         "path to CSV file, relative to ./inputData")
-        ("separator,s", po::value<char>(&separator)->default_value(separator),
-         "CSV separator")
-        ("has_header", po::value<bool>(&has_header)->default_value(has_header),
+        (posr::Task, po::value<std::string>(&task), task_desc.c_str())
+        (posr::Algorithm, po::value<std::string>(&algo), algo_desc.c_str())
+        (posr::Data, po::value<std::string>(&dataset),
+            "path to CSV file, relative to ./inputData")
+        (posr::SeparatorLibArg, po::value<char>(&separator)->default_value(separator),
+            "CSV separator")
+        (posr::HasHeader, po::value<bool>(&has_header)->default_value(has_header),
          "CSV header presence flag [true|false]")
-        ("is_null_equal_null", po::value<bool>(&is_null_equal_null)->default_value(true),
-         "specify whether two nulls should be considered equal")
-        ("threads", po::value<ushort>(&threads)->default_value(threads),
+        (posr::EqualNulls, po::value<bool>(&is_null_equal_null)->default_value(true),
+         "specify whether two NULLs should be considered equal")
+        (posr::Threads, po::value<ushort>(&threads)->default_value(threads),
          "number of threads to use. If 0, then as many threads are used as "
-         "possible.")
+         "the hardware can handle concurrently.")
         ;
 
     po::options_description typos_fd_options("Typo mining/FD options");
     typos_fd_options.add_options()
-        ("error", po::value<double>(&error)->default_value(error),
+        (posr::Error, po::value<double>(&error)->default_value(error),
          "error value for AFD algorithms")
-        ("max_lhs", po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
+        (posr::MaximumLhs, po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
          "max considered LHS size")
-        ("seed", po::value<int>(&seed)->default_value(seed), "RNG seed")
+        (posr::Seed, po::value<int>(&seed)->default_value(seed), "RNG seed")
         ;
 
     po::options_description ar_options("AR options");
     ar_options.add_options()
-        ("minsup", po::value<double>(&minsup), "minimum support value (between 0 and 1)")
-        ("minconf", po::value<double>(&minconf), "minimum confidence value (between 0 and 1)")
-        ("input_format", po::value<string>(&ar_input_format),
+        (posr::MinimumSupport, po::value<double>(&minsup),
+            "minimum support value (between 0 and 1)")
+        (posr::MinimumConfidence, po::value<double>(&minconf),
+            "minimum confidence value (between 0 and 1)")
+        (posr::InputFormat, po::value<string>(&ar_input_format),
          "format of the input dataset. [singular|tabular] for AR mining")
         ;
 
     po::options_description ar_singular_options("AR \"singular\" input format options");
     ar_singular_options.add_options()
-        ("tid_column_index", po::value<unsigned>(&tid_column_index)->default_value(0),
+        (posr::TIdColumnIndex, po::value<unsigned>(&tid_column_index)->default_value(0),
          "index of the column where a TID is stored")
-        ("item_column_index", po::value<unsigned>(&item_column_index)->default_value(1),
+        (posr::ItemColumnIndex, po::value<unsigned>(&item_column_index)->default_value(1),
          "index of the column where an item name is stored")
         ;
 
     po::options_description ar_tabular_options("AR \"tabular\" input format options");
     ar_tabular_options.add_options()
-        ("first_col_tid", po::value<bool>(&has_transaction_id)->default_value(false),
+        (posr::FirstColumnTId, po::value<bool>(&has_transaction_id)->default_value(false),
          "indicates whether the first column contains a transaction id")
         ;
 
@@ -158,19 +162,20 @@ int main(int argc, char const* argv[]) {
 
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
-        ("metric", po::value<std::string>(&metric), metric_desc.c_str())
-        ("lhs_indices", po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
+        (posr::Metric, po::value<std::string>(&metric), metric_desc.c_str())
+        (posr::LhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
          "LHS column indices for metric FD verification")
-        ("rhs_index", po::value<unsigned int>(&rhs_index),
-         "RHS column indices for metric FD verification")
-        ("parameter", po::value<double>(&parameter), "metric FD parameter")
-        ("dist_to_null_infinity", po::value<bool>(&dist_to_null_infinity)->default_value(false),
+        (posr::RhsIndex, po::value<unsigned int>(&rhs_index),
+         "RHS column index for metric FD verification")
+        (posr::Parameter, po::value<double>(&parameter), "metric FD parameter")
+        (posr::DistToNullIsInfinity, po::value<bool>(&dist_to_null_infinity)->default_value(false),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;
 
     po::options_description cosine_options("Cosine metric options");
     cosine_options.add_options()
-        ("q", po::value<unsigned int>(&q)->default_value(2), "q-gram length for cosine metric")
+        (posr::QGramLength, po::value<unsigned int>(&q)->default_value(2),
+         "q-gram length for cosine metric")
         ;
 
     mfd_options.add(cosine_options);
@@ -188,7 +193,7 @@ int main(int argc, char const* argv[]) {
         return 0;
     }
 
-    if (vm.count("help"))
+    if (vm.count(posr::Help))
     {
         std::cout << all_options << std::endl;
         return 0;
