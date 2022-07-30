@@ -1,6 +1,7 @@
 #pragma once
 
 /* Functional dependency mining algorithms */
+#include "algorithms/AIDFD/Aid.h"
 #include "algorithms/depminer/Depminer.h"
 #include "algorithms/DFD/DFD.h"
 #include "algorithms/FastFDs.h"
