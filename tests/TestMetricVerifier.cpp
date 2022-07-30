@@ -4,8 +4,10 @@
 
 #include "MetricVerifier.h"
 #include "AlgoFactory.h"
+#include "ProgramOptionStrings.h"
 
 namespace tests {
+namespace posr = program_option_strings;
 
 struct MetricVerifyingParams {
     algos::StdParamsMap params;
@@ -21,16 +23,16 @@ struct MetricVerifyingParams {
                           bool const dist_to_null_infinity = false,
                           bool const expected = true,
                           unsigned const q = 2)
-        : params({{"parameter", min_parameter},
-                  {"lhs_indices", lhs_indices},
-                  {"rhs_index", rhs_index},
-                  {"data", dataset},
-                  {"separator", separator},
-                  {"has_header", has_header},
-                  {"is_null_equal_null", true},
-                  {"metric", metric},
-                  {"q", q},
-                  {"dist_to_null_infinity", dist_to_null_infinity}}),
+        : params({{posr::Parameter, min_parameter},
+                  {posr::LhsIndices, lhs_indices},
+                  {posr::RhsIndex, rhs_index},
+                  {posr::Data, dataset},
+                  {posr::SeparatorConfig, separator},
+                  {posr::HasHeader, has_header},
+                  {posr::EqualNulls, true},
+                  {posr::Metric, metric},
+                  {posr::QGramLength, q},
+                  {posr::DistToNullIsInfinity, dist_to_null_infinity}}),
           expected(expected) {}
 };
 
@@ -57,7 +59,7 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     }
     ASSERT_TRUE(GetResult(*verifier));
 
-    double new_parameter = boost::any_cast<double>(params.at("parameter"));
+    double new_parameter = boost::any_cast<double>(params.at(posr::Parameter));
     new_parameter -= 1e-4;
     if (new_parameter < 0) return;
     verifier->SetParameter(new_parameter);
