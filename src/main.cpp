@@ -154,8 +154,8 @@ int main(int argc, char const* argv[]) {
 
     po::options_description ar_tabular_options("AR \"tabular\" input format options");
     ar_tabular_options.add_options()
-        (posr::FirstColumnTId, po::value<bool>(&has_transaction_id)->default_value(false),
-         "indicates whether the first column contains a transaction id")
+        (posr::FirstColumnTId, po::bool_switch(&has_transaction_id),
+         "indicates that the first column contains the transaction IDs")
         ;
 
     ar_options.add(ar_singular_options).add(ar_tabular_options);
@@ -168,7 +168,7 @@ int main(int argc, char const* argv[]) {
         (posr::RhsIndex, po::value<unsigned int>(&rhs_index),
          "RHS column index for metric FD verification")
         (posr::Parameter, po::value<double>(&parameter), "metric FD parameter")
-        (posr::DistToNullIsInfinity, po::value<bool>(&dist_to_null_infinity)->default_value(false),
+        (posr::DistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;
 
