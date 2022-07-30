@@ -8,7 +8,7 @@
 namespace program_option_strings {
 constexpr auto Help = "help";
 constexpr auto Task = "task";
-constexpr auto Algorithm = "algo";
+constexpr auto Algorithm = "algorithm";
 constexpr auto Data = "data";
 #define SEPARATOR "separator"
 constexpr auto SeparatorConfig = SEPARATOR;
