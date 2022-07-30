@@ -159,6 +159,7 @@ bool SearchTree::Remove(const Bitset& set) {
 
     parent_node->left_ = another_child_node->left_;
     parent_node->right_ = another_child_node->right_;
+    parent_node->set_ = another_child_node->set_;
     parent_node->union_ = another_child_node->union_;
     parent_node->inter_ = another_child_node->inter_;
     if (!another_child_node->IsLeaf()){
