@@ -11,6 +11,7 @@ namespace util {
 struct Point {
     long double x;
     long double y;
+    int index;
 
     static long double EuclideanDistance(util::Point const& p1, util::Point const& p2) {
         return std::sqrt(std::pow((p1.x - p2.x), 2) + std::pow((p1.y - p2.y), 2));
