@@ -4,8 +4,10 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <stdexcept>
+#include <string>
 #include <utility>
 
 #include <easylogging++.h>
@@ -173,19 +175,54 @@ void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
 unsigned long long MetricVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
-    metric_fd_holds_ = VerifyMetricFD();
+    VerifyMetricFD();
+
     if (metric_fd_holds_) {
         LOG(INFO) << "Metric fd holds.";
     } else {
         LOG(INFO) << "Metric fd does not hold.";
     }
 
+    VisualizeHighlights();
+
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
 }
 
-bool MetricVerifier::VerifyMetricFD() const {
+void MetricVerifier::VisualizeHighlights() const {
+    if (highlights_.empty()) return;
+    LOG(INFO) << "-----------------------------------------";
+    for (auto const& cluster_highlight : highlights_) {
+        for (auto const& highlight : cluster_highlight) {
+            std::string value;
+            model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+            if (col.IsNullOrEmpty(highlight.data_index)) {
+                value = "NULL";
+            } else if (rhs_indices_.size() == 1) {
+                value = col.GetType().ValueToString(col.GetData()[highlight.data_index]);
+            } else {
+                value.push_back('(');
+                for (size_t j = 0; j < rhs_indices_.size(); ++j) {
+                    model::TypedColumnData const& coord_col =
+                        typed_relation_->GetColumnData(rhs_indices_[j]);
+                    value += coord_col.GetType().ValueToString(
+                        coord_col.GetData()[highlight.data_index]);
+                    if (j == rhs_indices_.size() - 1) break;
+                    value += ", ";
+                }
+                value.push_back(')');
+            }
+            LOG(INFO) << "[" << (highlight.max_distance <= parameter_ ? "✓" : "X")
+                      << "] | max dist: " << highlight.max_distance
+                      << "\t| i: " << highlight.data_index
+                      << "\t| value: " << value;
+        }
+        LOG(INFO) << "-----------------------------------------";
+    }
+}
+
+void MetricVerifier::VerifyMetricFD() {
     std::shared_ptr<util::PLI const>
         pli = relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
 
@@ -193,10 +230,16 @@ bool MetricVerifier::VerifyMetricFD() const {
         pli = pli->Intersect(relation_->GetColumnData(lhs_indices_[i]).GetPositionListIndex());
     }
 
-    return std::all_of(pli->GetIndex().cbegin(), pli->GetIndex().cend(), GetCompareFunction());
+    metric_fd_holds_ = true;
+    auto compare_func = GetCompareFunction();
+    for (auto const& cluster : pli->GetIndex()) {
+        if (!compare_func(cluster)) {
+            metric_fd_holds_ = false;
+        }
+    }
 }
 
-MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
+MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() {
     if (rhs_indices_.size() == 1) {
         model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
         switch (metric_) {
@@ -209,19 +252,20 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
             assert(col.GetTypeId() == +model::TypeId::kString);
             return [this, &col](util::PLI::Cluster const& cluster) {
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
-                auto points = GetVectorOfPoints(cluster);
+                auto [points, cluster_highlights] = GetVectorOfPoints(cluster);
                 return BruteVerifyCluster<std::byte const*>(
-                    points, [&type](std::byte const* a, std::byte const* b) {
+                    points, cluster_highlights, [&type](std::byte const* a, std::byte const* b) {
                         return type.Dist(a, b);
                     });
             };
         case Metric::cosine:
             assert(col.GetTypeId() == +model::TypeId::kString);
             return [this, &col](util::PLI::Cluster const& cluster) {
-                auto points = GetVectorOfPoints(cluster);
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
                 std::unordered_map<std::string, util::QGramVector> q_gram_map;
-                return BruteVerifyCluster(points, GetCosineDistFunction(type, q_gram_map));
+                auto [points, cluster_highlights] = GetVectorOfPoints(cluster);
+                return BruteVerifyCluster(points, cluster_highlights,
+                                          GetCosineDistFunction(type, q_gram_map));
             };
         }
     }
@@ -231,11 +275,13 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
         };
     }
     return [this](util::PLI::Cluster const& cluster) {
-        auto points = GetVectorOfMultidimensionalPoints<std::vector<long double>>(
-            cluster, [](auto& point, long double coord, [[maybe_unused]] size_t j) {
-                point.push_back(coord);
-            });
-        return BruteVerifyCluster<std::vector<long double>>(points, util::EuclideanDistance);
+        auto [points, cluster_highlights] =
+            GetVectorOfMultidimensionalPoints<IndexedPoint<std::vector<long double>>>(
+                cluster, [](auto& indexed_point, long double coord, [[maybe_unused]] size_t j) {
+                    indexed_point.point.push_back(coord);
+                });
+        return BruteVerifyCluster<std::vector<long double>>(points, cluster_highlights,
+                                                            util::EuclideanDistance);
     };
 }
 
@@ -255,34 +301,61 @@ MetricVerifier::DistanceFunction<std::byte const*> MetricVerifier::GetCosineDist
     };
 }
 
-bool MetricVerifier::CompareNumericValues(util::PLI::Cluster const& cluster) const {
+bool MetricVerifier::CompareNumericValues(util::PLI::Cluster const& cluster) {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     auto const& type = dynamic_cast<model::INumericType const&>(col.GetType());
-    auto points = GetVectorOfPoints(cluster);
+    auto [points, cluster_highlights] = GetVectorOfPoints(cluster);
+    bool mfd_failed = dist_to_null_infinity_ && !cluster_highlights.empty();
+    if (!mfd_failed && points.size() <= 1) {
+        return true;
+    }
     auto [min_value, max_value] =
-        std::minmax_element(points.begin(), points.end(), [&type](auto const* a, auto const* b) {
-            return type.Compare(a, b) == model::CompareResult::kLess;
+        std::minmax_element(points.begin(), points.end(), [&type](auto const& a, auto const& b) {
+            return type.Compare(a.point, b.point) == model::CompareResult::kLess;
         });
-    return type.Dist(*min_value, *max_value) <= parameter_;
+    if (!mfd_failed && type.Dist(min_value->point, max_value->point) <= parameter_) {
+        return true;
+    }
+    for (auto const& indexed_point : points) {
+        cluster_highlights.emplace(indexed_point.index,
+                                   std::max(type.Dist(indexed_point.point, max_value->point),
+                                            type.Dist(indexed_point.point, min_value->point)));
+    }
+    highlights_.push_back(std::move(cluster_highlights));
+    return false;
+}
+
+static void UpdateDistanceMap(std::unordered_map<int, long double>& distance_map, int index,
+                              long double dist) {
+    auto it = distance_map.find(index);
+    if (it == distance_map.end()) {
+        distance_map.emplace(index, dist);
+        return;
+    }
+    it->second = std::max(it->second, dist);
 }
 
 template <typename T>
-std::vector<T> MetricVerifier::GetVectorOfMultidimensionalPoints(
+MetricVerifier::PointsHighlightsPair<T> MetricVerifier::GetVectorOfMultidimensionalPoints(
     util::PLI::Cluster const& cluster,
     std::function<void(T&, long double, size_t)> const& assignment_func) const {
     std::vector<T> points;
+    std::multiset<Highlight> null_highlights;
     for (int i : cluster) {
         bool has_values = false;
         bool has_nulls = false;
         T point;
+        point.index = i;
         for (size_t j = 0; j < rhs_indices_.size(); ++j) {
             model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[j]);
             if (col.IsNullOrEmpty(i)) {
-                if (dist_to_null_infinity_) {
-                    return {};
-                }
                 if (has_values)
                     throw std::runtime_error("Some of the value coordinates are nulls.");
+                if (j == rhs_indices_.size() - 1) {
+                    null_highlights.emplace(i, dist_to_null_infinity_
+                                               ? std::numeric_limits<long double>::infinity()
+                                               : 0.0);
+                }
                 has_nulls = true;
                 continue;
             }
@@ -294,54 +367,86 @@ std::vector<T> MetricVerifier::GetVectorOfMultidimensionalPoints(
             assignment_func(point, coord, j);
             has_values = true;
         }
-        if (has_values) points.push_back(point);
+        if (has_values) points.push_back(std::move(point));
     }
-    return points;
+    return {std::move(points), std::move(null_highlights)};
 }
 
-std::vector<std::byte const*> MetricVerifier::GetVectorOfPoints(
+MetricVerifier::PointsHighlightsPair<MetricVerifier::IndexedPoint<std::byte const*>>
+MetricVerifier::GetVectorOfPoints(
     util::PLI::Cluster const& cluster) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::vector<std::byte const*> const& data = col.GetData();
-    std::vector<std::byte const*> points;
+    std::vector<IndexedPoint<std::byte const*>> points;
+    std::multiset<Highlight> null_highlights;
     for (int i : cluster) {
         if (col.IsNullOrEmpty(i)) {
-            if (dist_to_null_infinity_) {
-                return {};
-            }
+            null_highlights.emplace(i, dist_to_null_infinity_
+                                       ? std::numeric_limits<long double>::infinity() : 0.0);
             continue;
         }
-        points.push_back(data[i]);
+        points.emplace_back(data[i], i);
     }
-    return points;
+    return {std::move(points), std::move(null_highlights)};
 }
 
 template <typename T>
-bool MetricVerifier::BruteVerifyCluster(std::vector<T> const& points,
-                                        DistanceFunction<T> const& dist_func) const {
-    if (points.empty()) return !dist_to_null_infinity_;
-    for (size_t i = 0; i < points.size() - 1; ++i) {
+bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& indexed_points,
+                                        std::multiset<Highlight>& cluster_highlights,
+                                        DistanceFunction<T> const& dist_func) {
+    std::unordered_map<int, long double> distance_map;
+    bool mfd_failed = dist_to_null_infinity_ && !cluster_highlights.empty();
+
+    for (size_t i = 0; i + 1 < indexed_points.size(); ++i) {
         long double max_dist = 0;
-        for (size_t j = i + 1; j < points.size(); ++j) {
-            max_dist = std::max(max_dist, dist_func(points[i], points[j]));
-            if (max_dist > parameter_) return false;
+        for (size_t j = i + 1; j < indexed_points.size(); ++j) {
+            long double dist = dist_func(indexed_points[i].point, indexed_points[j].point);
+            max_dist = std::max(max_dist, dist);
+            UpdateDistanceMap(distance_map, indexed_points[j].index, dist);
+            if (max_dist > parameter_) mfd_failed = true;
+            else if (!mfd_failed && algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_)
+                return true;
         }
-        if (algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_) return true;
+        UpdateDistanceMap(distance_map, indexed_points[i].index, max_dist);
     }
-    return true;
+    if (mfd_failed) {
+        for (auto const& pair : distance_map) {
+            cluster_highlights.emplace(pair.first, pair.second);
+        }
+        if (indexed_points.size() == 1) {
+            cluster_highlights.emplace(indexed_points[0].index, 0);
+        }
+        highlights_.push_back(std::move(cluster_highlights));
+    }
+    return !mfd_failed;
 }
 
-bool MetricVerifier::CalipersCompareNumericValues(const util::PLI::Cluster& cluster) const {
-    auto points = GetVectorOfMultidimensionalPoints<util::Point>(
+bool MetricVerifier::CalipersCompareNumericValues(const util::PLI::Cluster& cluster) {
+    auto [points, cluster_highlights] = GetVectorOfMultidimensionalPoints<util::Point>(
         cluster, [](auto& point, long double coord, size_t j) {
             if (j == 0) point.x = coord;
             else point.y = coord;
         });
-    if (points.empty()) return !dist_to_null_infinity_;
+    bool mfd_failed = dist_to_null_infinity_ && !cluster_highlights.empty();
     auto pairs = util::GetAntipodalPairs(util::ConvexHull(points));
-    return std::all_of(pairs.cbegin(), pairs.cend(), [this](auto const& pair) {
-        return util::Point::EuclideanDistance(pair.first, pair.second) <= parameter_;
-    });
+    std::unordered_map<int, long double> distance_map;
+
+    for (auto const& pair : pairs) {
+        long double dist = util::Point::EuclideanDistance(pair.first, pair.second);
+        UpdateDistanceMap(distance_map, pair.first.index, dist);
+        UpdateDistanceMap(distance_map, pair.second.index, dist);
+        if (dist > parameter_) mfd_failed = true;
+    }
+    if (mfd_failed) {
+        for (auto const& pair : distance_map) {
+            cluster_highlights.emplace(pair.first, pair.second);
+        }
+        if (points.size() == 1) {
+            cluster_highlights.emplace(points[0].index, 0);
+        }
+        highlights_.push_back(std::move(cluster_highlights));
+    }
+    return !mfd_failed;
 }
 
 }  // namespace algos
