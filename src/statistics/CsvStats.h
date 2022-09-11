@@ -1,49 +1,58 @@
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-#include <unordered_set>
+#include "Statistic.h"
 
-#include "BuiltIn.h"
-#include "CSVParser.h"
 #include "ColumnLayoutTypedRelationData.h"
-#include "NumericType.h"
+#include "FDAlgorithm.h"
 
-namespace fs = std::filesystem;
-namespace mo = model;
+namespace statistics {
 
-class CsvStats {
+class CsvStats: public algos::Primitive {
 public:
-    CsvStats(std::string_view data, char sep, bool has_header);
+
+    explicit CsvStats(FDAlgorithm::Config const& config);
+    ~CsvStats();
 
     CsvStats(CsvStats&&) = delete;
     CsvStats(const CsvStats&) = delete;
     CsvStats& operator=(CsvStats&&) = delete;
     CsvStats& operator=(const CsvStats&) = delete;
 
-    std::vector<mo::TypedColumnData> const& GetData() const noexcept {
-        return col_data_;
-    }
+    const std::vector<model::TypedColumnData> & GetData() const noexcept;
 
-    int Count(int index);
-    int Distinct(int index);
-    bool isCategorial(int index, int quantity);
-    void ShowSample(int start_row, int end_row, int start_col, int end_col, int str_length = 10,
-                    int int_len = 5, int double_len = 10);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetAvg(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetSTD(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetSkewness(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetKurtosis(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> CountCentrlMomntOfDist(int index,
-                                                                                       int number);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> CountStndrtCentrlMomntOfDist(
-        int index, int number);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetMin(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetMax(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetSum(int index);
-    std::optional<std::pair<std::byte const*, mo::Type const*>> GetQuantile(double part, int index);
-    std::vector<std::byte const*> DeleteNullAndEmpties(int index);
+    int Count(unsigned index);
+    unsigned GetCountOfColumns();
+    int Distinct(unsigned index);
+    bool isCategorial(unsigned index, int quantity);
+    void ShowSample(unsigned start_row, unsigned end_row, unsigned start_col, unsigned end_col, 
+        unsigned str_length = 10, unsigned unsigned_len = 5, unsigned double_len = 10);
+    Statistic GetAvg(unsigned index);
+    Statistic GetSTD(unsigned index);
+    Statistic GetSkewness(unsigned index);
+    Statistic GetKurtosis(unsigned index);
+    Statistic CountCentralMomentOfDist(unsigned index, int number);
+    Statistic CountStandardizedCentralMomentOfDist(unsigned index, int number);
+    Statistic GetMin(unsigned index);
+    Statistic GetMax(unsigned index);
+    Statistic GetSum(unsigned index);
+    Statistic GetQuantile(double part, unsigned index);
+    std::vector<std::byte const*> DeleteNullAndEmpties(unsigned index);
+
+    const ColumnStats& GetAllStats(unsigned index) const;
+    const std::vector<ColumnStats>& GetAllStats() const;
+
+    ColumnStats& GetAllStats(unsigned index);
+    std::vector<ColumnStats>& GetAllStats();
+
+    std::string toString();
 
 private:
-    const std::vector<mo::TypedColumnData> col_data_;
+    unsigned long long Execute();
+    FDAlgorithm::Config config_;
+    const std::vector<model::TypedColumnData> col_data_;
+    std::vector<ColumnStats> allStats;
+    
+    Statistic STDAndCentrMomnt(unsigned index, int number, bool isForSTD);
 };
+
+}
