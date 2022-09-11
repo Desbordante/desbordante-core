@@ -12,7 +12,7 @@ public:
     explicit StringType(TypeId type_id = TypeId::kString) noexcept : IMetrizableType(type_id) {}
 
     void Free(std::byte const* value) const noexcept override {
-        Destruct(value);
+        //Destruct(value);
         Type::Free(value);
     }
 

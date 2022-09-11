@@ -1,40 +1,26 @@
 #include "CsvStats.h"
 
-#include <math.h>
+#include <iostream>
 
-#include <algorithm>
-#include <cmath>
-#include <iterator>
-#include <type_traits>
-#include <unordered_set>
-#include <utility>
+namespace statistics {
 
-#include "AbstractColumnData.h"
-#include "BuiltIn.h"
-#include "DoubleType.h"
-#include "EmptyType.h"
-#include "IntType.h"
-#include "NullType.h"
-#include "NumericType.h"
-#include "StringType.h"
-#include "Type.h"
-#include "TypedColumnData.h"
-#include "UndefinedType.h"
+namespace fs = std::filesystem;
+namespace mo = model;
 
-static inline std::vector<mo::TypedColumnData> CreateColumnData(std::string_view data, char sep,
-                                                                bool has_header) {
-    auto const path = fs::current_path() / "inputData" / data;
-    CSVParser input_generator(path, sep, has_header);
+static inline std::vector<mo::TypedColumnData> CreateColumnData(const FDAlgorithm::Config& config) {
+    CSVParser input_generator(config.data, config.separator, config.has_header);
     std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-        model::ColumnLayoutTypedRelationData::CreateFrom(input_generator, true, -1, -1);
+        model::ColumnLayoutTypedRelationData::CreateFrom(input_generator, config.is_null_equal_null, -1, -1);
     std::vector<mo::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }
 
-CsvStats::CsvStats(std::string_view data, char sep, bool has_header)
-    : col_data_(CreateColumnData(data, sep, has_header)) {}
+CsvStats::CsvStats(FDAlgorithm::Config const& config)
+        : Primitive(config.data, config.separator, config.has_header, {}),
+          config_(config), col_data_(CreateColumnData(config)), 
+          allStats(col_data_.size()) { Execute(); }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetMin(int index) {
+Statistic CsvStats::GetMin(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -57,10 +43,11 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetMin(int
             }
         }
     }
-    return std::make_pair(min, &col.GetType());
+    return Statistic(type.Clone(min), Statistic::getTypeClone(type, 
+        config_.is_null_equal_null));
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetMax(int index) {
+Statistic CsvStats::GetMax(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -83,10 +70,11 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetMax(int
             }
         }
     }
-    return std::make_pair(max, &col.GetType());
+    return Statistic(type.Clone(max), Statistic::getTypeClone(col.GetType(), 
+        config_.is_null_equal_null));
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetSum(int index) {
+Statistic CsvStats::GetSum(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -102,12 +90,13 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetSum(int
                 type.Add(sum, data[i], sum);
             }
         }
-        return std::make_pair(sum, &col.GetType());
+        return Statistic(sum, Statistic::getTypeClone(type, 
+            config_.is_null_equal_null));
     }
     return {};
 };
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetAvg(int index) {
+Statistic CsvStats::GetAvg(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -117,28 +106,25 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetAvg(int
     if (col.IsNumeric()) {
         mo::DoubleType type;
         mo::INumericType const& colType = static_cast<mo::INumericType const&>(col.GetType());
-        std::byte const* sum = GetSum(index)->first;
-        std::byte const* left;
-        if (col.GetType() != type) {
-            left = type.MakeValue(colType.GetValue<mo::Int>(sum));
-        } else {
-            left = sum;
-            sum = nullptr;
-        }
+        auto sumStat = GetSum(index);
+        bool isDoubleType = col.GetType() == mo::DoubleType();
+        std::byte const* left = isDoubleType ? sumStat.getData(): 
+            type.MakeValue(colType.GetValue<mo::Int>(sumStat.getData()));
         std::byte* avg = type.Allocate();
         std::byte const* countOfNums = type.MakeValue(this->Count(index));
         type.Div(left, countOfNums, avg);
 
-        type.Free(sum);
-        type.Free(left);
+        sumStat.Free();
+        if(!isDoubleType)
+            type.Free(left);
         type.Free(countOfNums);
 
-        return std::make_pair(avg, &type);
+        return Statistic(avg, new mo::DoubleType());
     }
     return {};
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetSTD(int index) {
+Statistic CsvStats::STDAndCentrMomnt(unsigned index, int number, bool isForSTD) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -149,62 +135,16 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetSTD(int
         auto data = col.GetData();
         mo::DoubleType type;
         mo::INumericType const& colType = static_cast<mo::INumericType const&>(col.GetType());
-        std::byte const* avg = GetAvg(index)->first;
+        std::byte const* avg = GetAvg(index).getDataAndFree();
         std::byte* negAvg = type.Allocate();
         type.Negate(avg, negAvg);
         std::byte* sum = type.Allocate();
         std::byte* dif = type.Allocate();
-        std::byte* tmp;
         bool notDoubleType = col.GetType() != type;
         for (unsigned i = 0; i < data.size(); ++i) {
             if (!col.IsNullOrEmpty(i)) {
-                if (notDoubleType) {
-                    tmp = type.MakeValue(colType.GetValue<mo::Int>(data[i]));
-                }
-                type.Add(tmp, negAvg, dif);
-                type.Power(dif, 2, dif);
-                type.Add(sum, dif, sum);
-                if (notDoubleType) {
-                    type.Free(tmp);
-                }
-            }
-        }
-        std::byte* countOfNums = type.MakeValue(this->Count(index) - 1);
-        std::byte* result = type.Allocate();
-        type.Div(sum, countOfNums, result);
-        type.Power(result, 0.5, result);
-
-        type.Free(avg);
-        type.Free(negAvg);
-        type.Free(sum);
-        type.Free(dif);
-        type.Free(countOfNums);
-
-        return std::make_pair(result, &type);
-    }
-    return {};
-}
-
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::CountCentrlMomntOfDist(
-    int index, int number) {
-    mo::TypedColumnData const& col = col_data_[index];
-    if (col.IsNumeric()) {
-        auto data = col.GetData();
-
-        mo::DoubleType type;
-        mo::INumericType const& colType = static_cast<mo::INumericType const&>(col.GetType());
-        std::byte const* avg = GetAvg(index)->first;
-        std::byte* negAvg = type.Allocate();
-        type.Negate(avg, negAvg);
-        std::byte* sum = type.Allocate();
-        std::byte* dif = type.Allocate();
-        std::byte* tmp;
-        bool notDoubleType = col.GetType() != type;
-        for (unsigned i = 0; i < data.size(); ++i) {
-            if (!col.IsNullOrEmpty(i)) {
-                if (notDoubleType) {
-                    tmp = type.MakeValue(colType.GetValue<mo::Int>(data[i]));
-                }
+                const std::byte *tmp = notDoubleType ? 
+                    type.MakeValue(colType.GetValue<mo::Int>(data[i])) : data[i];
                 type.Add(tmp, negAvg, dif);
                 type.Power(dif, number, dif);
                 type.Add(sum, dif, sum);
@@ -213,9 +153,11 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::CountCentr
                 }
             }
         }
-        std::byte* countOfNums = type.MakeValue(this->Count(index));
+        std::byte* countOfNums = type.MakeValue(this->Count(index) - (isForSTD ? 1 : 0));
         std::byte* result = type.Allocate();
         type.Div(sum, countOfNums, result);
+        if (isForSTD)
+            type.Power(result, 0.5, result);
 
         type.Free(avg);
         type.Free(negAvg);
@@ -223,16 +165,33 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::CountCentr
         type.Free(dif);
         type.Free(countOfNums);
 
-        return std::make_pair(result, &type);
+        return Statistic(result, new mo::DoubleType());
     }
     return {};
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::CountStndrtCentrlMomntOfDist(
-    int index, int number) {
+// This is corrected standard deviation!
+Statistic CsvStats::GetSTD(unsigned index) {
+    return STDAndCentrMomnt(index, 2, true);
+}
+
+Statistic CsvStats::CountCentralMomentOfDist(
+    unsigned index, int number) {
+    return  STDAndCentrMomnt(index, number, false);
+}
+
+Statistic CsvStats::CountStandardizedCentralMomentOfDist(
+    unsigned index, int number) {
     mo::DoubleType type;
-    std::byte const* left = CountCentrlMomntOfDist(index, number)->first;
-    std::byte const* right = GetSTD(index)->first;
+    auto std = GetSTD(index);
+    auto centralMoment = CountCentralMomentOfDist(index, number);
+    if(!centralMoment.hasValue() || ! std.hasValue()) {
+        std.Free();
+        centralMoment.Free();
+        return {};
+    }
+    std::byte const* left = centralMoment.getDataAndFree();
+    std::byte const* right = std.getDataAndFree();
     std::byte* result(type.Allocate());
     type.Power(right, number, result);
     type.Div(left, result, result);
@@ -240,35 +199,35 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::CountStndr
     type.Free(left);
     type.Free(right);
 
-    return std::make_pair(result, &type);
+    return Statistic(result, new mo::DoubleType());
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetSkewness(int index) {
+Statistic CsvStats::GetSkewness(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
         type_id == +mo::TypeId::kUndefined) {
         return {};
     }
-    return CountStndrtCentrlMomntOfDist(index, 3);
+    return CountStandardizedCentralMomentOfDist(index, 3);
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetKurtosis(int index) {
+Statistic CsvStats::GetKurtosis(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
         type_id == +mo::TypeId::kUndefined) {
         return {};
     }
-    return CountStndrtCentrlMomntOfDist(index, 4);
+    return CountStandardizedCentralMomentOfDist(index, 4);
 }
 
-int CsvStats::Count(int index) {
+int CsvStats::Count(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     return col.GetNumRows() - col.GetNumNulls() - col.GetNumEmpties();
 };
 
-int CsvStats::Distinct(int index) {
+int CsvStats::Distinct(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -287,11 +246,11 @@ int CsvStats::Distinct(int index) {
     return set.size();
 }
 
-void CsvStats::ShowSample(int start_row, int end_row, int start_col, int end_col, int str_len,
-                          int int_len, int double_len) {
+void CsvStats::ShowSample(unsigned start_row, unsigned end_row, unsigned start_col, unsigned end_col, unsigned str_len,
+                          unsigned int_len, unsigned double_len) {
     // int quantity_of_headers = end_col - start_col + 1;
-    for (int i = start_row - 1; i <= end_row - 1; ++i) {
-        for (int j = start_col - 1; j <= end_col - 1; ++j) {
+    for (unsigned i = start_row - 1; i <= end_row - 1; ++i) {
+        for (unsigned j = start_col - 1; j <= end_col - 1; ++j) {
             mo::TypedColumnData const& col = col_data_[j];
 
             mo::Type const& type = static_cast<mo::Type const&>(col.GetType());
@@ -347,11 +306,11 @@ void CsvStats::ShowSample(int start_row, int end_row, int start_col, int end_col
     }
 }
 
-bool CsvStats::isCategorial(int index, int quantity) {
-    return this->Distinct(index) <= quantity ? true : false;
+bool CsvStats::isCategorial(unsigned index, int quantity) {
+    return this->Distinct(index) <= quantity;
 }
 
-std::vector<std::byte const*> CsvStats::DeleteNullAndEmpties(int index) {
+std::vector<std::byte const*> CsvStats::DeleteNullAndEmpties(unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     auto data = col.GetData();
     std::vector<std::byte const*> vec = std::move(data);
@@ -363,8 +322,7 @@ std::vector<std::byte const*> CsvStats::DeleteNullAndEmpties(int index) {
     return vec;
 }
 
-std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetQuantile(double part,
-                                                                                  int index) {
+Statistic CsvStats::GetQuantile(double part, unsigned index) {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kEmpty || type_id == +mo::TypeId::kNull ||
@@ -382,5 +340,65 @@ std::optional<std::pair<std::byte const*, mo::Type const*>> CsvStats::GetQuantil
     }
     int quantile = data.size() * part;
     std::nth_element(data.begin(), data.begin() + quantile, data.end(), type.GetComparator());
-    return std::make_pair(data[quantile], &col.GetType());
+    return Statistic(type.Clone(data[quantile]), Statistic::getTypeClone(col.GetType(), 
+        config_.is_null_equal_null));
+}
+
+unsigned long long CsvStats::Execute() {
+    for(unsigned i = 0; i < allStats.size(); ++i) {
+        allStats[i].avg = GetAvg(i);
+        allStats[i].min = GetMin(i);
+        allStats[i].max = GetMax(i);
+        allStats[i].sum = GetSum(i);
+        allStats[i].count = Count(i);
+        allStats[i].distinct = Distinct(i);
+        allStats[i].kurtosis = GetKurtosis(i);
+        allStats[i].isCategorical = isCategorial(i, allStats[i].count);
+        allStats[i].skewness = GetSkewness(i);
+        allStats[i].quantile25 = GetQuantile(0.25, i);
+        allStats[i].quantile50 = GetQuantile(0.5, i);
+        allStats[i].quantile75 = GetQuantile(0.75, i);
+    }
+    return 0;
+}
+
+CsvStats::~CsvStats() {
+    for(auto &colStat : allStats) {
+        colStat.Free();
+    }
+}
+
+unsigned CsvStats::GetCountOfColumns() {
+    return col_data_.size();
+}
+
+const ColumnStats& CsvStats::GetAllStats(unsigned index) const {
+    return allStats[index];
+}
+
+const std::vector<ColumnStats>& CsvStats::GetAllStats() const {
+    return allStats;
+}
+
+ColumnStats& CsvStats::GetAllStats(unsigned index) {
+    return allStats[index];
+}
+
+std::vector<ColumnStats>& CsvStats::GetAllStats() {
+    return allStats;
+}
+
+const std::vector<model::TypedColumnData> & CsvStats::GetData() const noexcept {
+    return col_data_;
+}
+
+std::string CsvStats::toString() {
+    std::stringstream res;
+    for(unsigned i = 0; i < GetCountOfColumns(); ++i) {
+        res << "Column num = " << i << std::endl;
+        res << allStats[i].toString() << std::endl;
+    }
+    return res.str();
+}
+
 }
