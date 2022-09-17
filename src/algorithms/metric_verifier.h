@@ -84,6 +84,10 @@ private:
 
     bool CompareNumericValues(util::PLI::Cluster const& cluster);
     template <typename T>
+    bool ApproxVerifyCluster(std::vector<IndexedPoint<T>> const& indexed_points,
+                             std::multiset<Highlight>& cluster_highlights,
+                             DistanceFunction<T> const& dist_func);
+    template <typename T>
     bool BruteVerifyCluster(std::vector<IndexedPoint<T>> const& indexed_points,
                             std::multiset<Highlight>& cluster_highlights,
                             DistanceFunction<T> const& dist_func);

@@ -253,10 +253,19 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() {
             return [this, &col](util::PLI::Cluster const& cluster) {
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
                 auto [points, cluster_highlights] = GetVectorOfPoints(cluster);
-                return BruteVerifyCluster<std::byte const*>(
-                    points, cluster_highlights, [&type](std::byte const* a, std::byte const* b) {
-                        return type.Dist(a, b);
-                    });
+                if (algo_ == +MetricAlgo::brute) {
+                    return BruteVerifyCluster<std::byte const*>(
+                        points, cluster_highlights,
+                        [&type](std::byte const* a, std::byte const* b) {
+                            return type.Dist(a, b);
+                        });
+                } else {
+                    return ApproxVerifyCluster<std::byte const*>(
+                        points, cluster_highlights,
+                        [&type](std::byte const* a, std::byte const* b) {
+                            return type.Dist(a, b);
+                        });
+                }
             };
         case Metric::cosine:
             assert(col.GetTypeId() == +model::TypeId::kString);
@@ -264,8 +273,13 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() {
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
                 std::unordered_map<std::string, util::QGramVector> q_gram_map;
                 auto [points, cluster_highlights] = GetVectorOfPoints(cluster);
-                return BruteVerifyCluster(points, cluster_highlights,
-                                          GetCosineDistFunction(type, q_gram_map));
+                if (algo_ == +MetricAlgo::brute) {
+                    return BruteVerifyCluster(points, cluster_highlights,
+                                              GetCosineDistFunction(type, q_gram_map));
+                } else {
+                    return ApproxVerifyCluster(points, cluster_highlights,
+                                               GetCosineDistFunction(type, q_gram_map));
+                }
             };
         }
     }
@@ -280,8 +294,13 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() {
                 cluster, [](auto& indexed_point, long double coord, [[maybe_unused]] size_t j) {
                     indexed_point.point.push_back(coord);
                 });
-        return BruteVerifyCluster<std::vector<long double>>(points, cluster_highlights,
-                                                            util::EuclideanDistance);
+        if (algo_ == +MetricAlgo::brute) {
+            return BruteVerifyCluster<std::vector<long double>>(points, cluster_highlights,
+                                                                util::EuclideanDistance);
+        } else {
+            return ApproxVerifyCluster<std::vector<long double>>(points, cluster_highlights,
+                                                                 util::EuclideanDistance);
+        }
     };
 }
 
@@ -391,6 +410,27 @@ MetricVerifier::GetVectorOfPoints(
 }
 
 template <typename T>
+bool MetricVerifier::ApproxVerifyCluster(std::vector<IndexedPoint<T>> const& indexed_points,
+                                         std::multiset<Highlight>& cluster_highlights,
+                                         DistanceFunction<T> const& dist_func) {
+    bool mfd_failed = dist_to_null_infinity_ && !cluster_highlights.empty();
+    long double max_dist = 0;
+    for (size_t i = 1; i < indexed_points.size(); ++i) {
+        long double dist = dist_func(indexed_points[0].point, indexed_points[i].point);
+        cluster_highlights.emplace(indexed_points[i].index, dist);
+        max_dist = std::max(max_dist, dist);
+    }
+    if (mfd_failed || max_dist * 2 > parameter_) {
+        if (!indexed_points.empty()) {
+            cluster_highlights.emplace(indexed_points[0].index, max_dist);
+        }
+        highlights_.push_back(std::move(cluster_highlights));
+        return false;
+    }
+    return true;
+}
+
+template <typename T>
 bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& indexed_points,
                                         std::multiset<Highlight>& cluster_highlights,
                                         DistanceFunction<T> const& dist_func) {
@@ -404,8 +444,6 @@ bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& inde
             max_dist = std::max(max_dist, dist);
             UpdateDistanceMap(distance_map, indexed_points[j].index, dist);
             if (max_dist > parameter_) mfd_failed = true;
-            else if (!mfd_failed && algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_)
-                return true;
         }
         UpdateDistanceMap(distance_map, indexed_points[i].index, max_dist);
     }

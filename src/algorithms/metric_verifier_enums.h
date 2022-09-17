@@ -15,8 +15,8 @@ BETTER_ENUM(Metric, char,
 BETTER_ENUM(MetricAlgo, char,
     brute = 0,      /* Brute force algorithm. Calculates distance between all possible pairs
                      * of values and compares them with parameter */
-    approx,         /* 2-approximation brute force algorithm, that skips some distance
-                     * calculations, but may return false positive result */
+    approx,         /* 2-approximation linear time algorithm, which makes a prediction
+                     * based on the max distance of one point in cluster */
     calipers        /* Rotating calipers algorithm for 2d euclidean metric. Computes a
                      * convex hull of the points and calculates distances between
                      * antipodal pairs of convex hull, resulting in a significant
