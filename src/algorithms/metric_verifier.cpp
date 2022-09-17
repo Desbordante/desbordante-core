@@ -209,17 +209,19 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
             assert(col.GetTypeId() == +model::TypeId::kString);
             return [this, &col](util::PLI::Cluster const& cluster) {
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
-                return CompareStringValues(
-                    cluster, [&type](std::byte const* a, std::byte const* b) {
+                auto points = GetVectorOfPoints(cluster);
+                return BruteVerifyCluster<std::byte const*>(
+                    points, [&type](std::byte const* a, std::byte const* b) {
                         return type.Dist(a, b);
                     });
             };
         case Metric::cosine:
             assert(col.GetTypeId() == +model::TypeId::kString);
             return [this, &col](util::PLI::Cluster const& cluster) {
+                auto points = GetVectorOfPoints(cluster);
                 auto const& type = dynamic_cast<model::StringType const&>(col.GetType());
                 std::unordered_map<std::string, util::QGramVector> q_gram_map;
-                return CompareStringValues(cluster, GetCosineDistFunction(type, q_gram_map));
+                return BruteVerifyCluster(points, GetCosineDistFunction(type, q_gram_map));
             };
         }
     }
@@ -229,11 +231,15 @@ MetricVerifier::CompareFunction MetricVerifier::GetCompareFunction() const {
         };
     }
     return [this](util::PLI::Cluster const& cluster) {
-        return CompareNumericMultiDimensionalValues(cluster);
+        auto points = GetVectorOfMultidimensionalPoints<std::vector<long double>>(
+            cluster, [](auto& point, long double coord, [[maybe_unused]] size_t j) {
+                point.push_back(coord);
+            });
+        return BruteVerifyCluster<std::vector<long double>>(points, util::EuclideanDistance);
     };
 }
 
-MetricVerifier::DistanceFunction MetricVerifier::GetCosineDistFunction(
+MetricVerifier::DistanceFunction<std::byte const*> MetricVerifier::GetCosineDistFunction(
     model::StringType const& type,
     std::unordered_map<std::string, util::QGramVector>& q_gram_map) const {
     return [this, &type, &q_gram_map](std::byte const* a, std::byte const* b) -> long double {
@@ -252,66 +258,16 @@ MetricVerifier::DistanceFunction MetricVerifier::GetCosineDistFunction(
 bool MetricVerifier::CompareNumericValues(util::PLI::Cluster const& cluster) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     auto const& type = dynamic_cast<model::INumericType const&>(col.GetType());
-    std::vector<std::byte const*> const& data = col.GetData();
-    std::byte const* max_value = nullptr;
-    std::byte const* min_value = nullptr;
-    for (int row_index : cluster) {
-        if (col.IsNull(row_index) || col.IsEmpty(row_index)) {
-            if (dist_to_null_infinity_) return false;
-            continue;
-        }
-        if (max_value == nullptr) {
-            max_value = data[row_index];
-            min_value = data[row_index];
-            continue;
-        }
-        if (type.Compare(data[row_index], max_value) == model::CompareResult::kGreater) {
-            max_value = data[row_index];
-        } else if (type.Compare(data[row_index], min_value) == model::CompareResult::kLess) {
-            min_value = data[row_index];
-        }
-        if (type.Dist(max_value, min_value) > parameter_)
-            return false;
-    }
-    return true;
-}
-
-bool MetricVerifier::CompareStringValues(
-    util::PLI::Cluster const& cluster, DistanceFunction const& dist_func) const {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-    std::vector<std::byte const*> const& data = col.GetData();
-    for (size_t i = 0; i < cluster.size() - 1; ++i) {
-        if (col.IsNull(cluster[i]) || col.IsEmpty(cluster[i])) {
-            if (dist_to_null_infinity_) return false;
-            continue;
-        }
-        long double max_dist = 0;
-        for (size_t j = i + 1; j < cluster.size(); ++j) {
-            if (col.IsNull(cluster[j]) || col.IsEmpty(cluster[j])) {
-                if (dist_to_null_infinity_) return false;
-                continue;
-            }
-            max_dist = std::max(max_dist, dist_func(data[cluster[i]], data[cluster[j]]));
-            if (max_dist > parameter_) return false;
-        }
-        if (algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_) return true;
-    }
-    return true;
-}
-
-static long double GetDistanceBetweenPoints(std::vector<long double> const& p1,
-                                            std::vector<long double> const& p2) {
-    assert(p1.size() == p2.size());
-    assert(!p1.empty());
-    return std::sqrt(std::inner_product(
-        p1.cbegin(), p1.cend(), p2.cbegin(), 0.0, std::plus<>(),
-        [](long double a, long double b) {
-            return (a - b) * (a - b);
-        }));
+    auto points = GetVectorOfPoints(cluster);
+    auto [min_value, max_value] =
+        std::minmax_element(points.begin(), points.end(), [&type](auto const* a, auto const* b) {
+            return type.Compare(a, b) == model::CompareResult::kLess;
+        });
+    return type.Dist(*min_value, *max_value) <= parameter_;
 }
 
 template <typename T>
-std::vector<T> MetricVerifier::GetVectorOfPoints(
+std::vector<T> MetricVerifier::GetVectorOfMultidimensionalPoints(
     util::PLI::Cluster const& cluster,
     std::function<void(T&, long double, size_t)> const& assignment_func) const {
     std::vector<T> points;
@@ -321,7 +277,7 @@ std::vector<T> MetricVerifier::GetVectorOfPoints(
         T point;
         for (size_t j = 0; j < rhs_indices_.size(); ++j) {
             model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[j]);
-            if (col.IsNull(i) || col.IsEmpty(i)) {
+            if (col.IsNullOrEmpty(i)) {
                 if (dist_to_null_infinity_) {
                     return {};
                 }
@@ -343,16 +299,31 @@ std::vector<T> MetricVerifier::GetVectorOfPoints(
     return points;
 }
 
-bool MetricVerifier::CompareNumericMultiDimensionalValues(util::PLI::Cluster const& cluster) const {
-    auto points = GetVectorOfPoints<std::vector<long double>>(
-        cluster, [](auto& point, long double coord, [[maybe_unused]] size_t j) {
-            point.push_back(coord);
-        });
+std::vector<std::byte const*> MetricVerifier::GetVectorOfPoints(
+    util::PLI::Cluster const& cluster) const {
+    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+    std::vector<std::byte const*> const& data = col.GetData();
+    std::vector<std::byte const*> points;
+    for (int i : cluster) {
+        if (col.IsNullOrEmpty(i)) {
+            if (dist_to_null_infinity_) {
+                return {};
+            }
+            continue;
+        }
+        points.push_back(data[i]);
+    }
+    return points;
+}
+
+template <typename T>
+bool MetricVerifier::BruteVerifyCluster(std::vector<T> const& points,
+                                        DistanceFunction<T> const& dist_func) const {
     if (points.empty()) return !dist_to_null_infinity_;
     for (size_t i = 0; i < points.size() - 1; ++i) {
         long double max_dist = 0;
         for (size_t j = i + 1; j < points.size(); ++j) {
-            max_dist = std::max(max_dist, GetDistanceBetweenPoints(points[i], points[j]));
+            max_dist = std::max(max_dist, dist_func(points[i], points[j]));
             if (max_dist > parameter_) return false;
         }
         if (algo_ == +MetricAlgo::approx && max_dist * 2 < parameter_) return true;
@@ -361,7 +332,7 @@ bool MetricVerifier::CompareNumericMultiDimensionalValues(util::PLI::Cluster con
 }
 
 bool MetricVerifier::CalipersCompareNumericValues(const util::PLI::Cluster& cluster) const {
-    auto points = GetVectorOfPoints<util::Point>(
+    auto points = GetVectorOfMultidimensionalPoints<util::Point>(
         cluster, [](auto& point, long double coord, size_t j) {
             if (j == 0) point.x = coord;
             else point.y = coord;

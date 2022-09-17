@@ -19,7 +19,8 @@ namespace algos {
 
 class MetricVerifier : public algos::Primitive {
 private:
-    using DistanceFunction = std::function<long double(std::byte const*, std::byte const*)>;
+    template <typename T>
+    using DistanceFunction = std::function<long double(T, T)>;
     using CompareFunction = std::function<bool(util::PLI::Cluster const& cluster)>;
 
     Metric metric_ = Metric::_values()[0];
@@ -44,19 +45,20 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<ColumnLayoutRelationData> relation_; // temporarily parsing twice
 
-    bool CompareNumericValues(util::PLI::Cluster const& cluster) const;
-    bool CompareStringValues(util::PLI::Cluster const& cluster,
-                             DistanceFunction const& dist_func) const;
-    DistanceFunction GetCosineDistFunction(
+    DistanceFunction<std::byte const*> GetCosineDistFunction(
         model::StringType const& type,
         std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
 
+    std::vector<std::byte const*> GetVectorOfPoints(util::PLI::Cluster const& cluster) const;
     template <typename T>
-    std::vector<T> GetVectorOfPoints(
+    std::vector<T> GetVectorOfMultidimensionalPoints(
         util::PLI::Cluster const& cluster,
         std::function<void(T&, long double, size_t)> const& assignment_func) const;
 
-    bool CompareNumericMultiDimensionalValues(util::PLI::Cluster const& cluster) const;
+    bool CompareNumericValues(util::PLI::Cluster const& cluster) const;
+    template <typename T>
+    bool BruteVerifyCluster(std::vector<T> const& points,
+                            DistanceFunction<T> const& dist_func) const;
     bool CalipersCompareNumericValues(util::PLI::Cluster const& cluster) const;
     CompareFunction GetCompareFunction() const;
     bool VerifyMetricFD() const;
