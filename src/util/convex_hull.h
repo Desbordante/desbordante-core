@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -14,6 +16,15 @@ struct Point {
         return std::sqrt(std::pow((p1.x - p2.x), 2) + std::pow((p1.y - p2.y), 2));
     }
 };
+
+static long double EuclideanDistance(std::vector<long double> const& p1,
+                                     std::vector<long double> const& p2) {
+    assert(p1.size() == p2.size());
+    assert(!p1.empty());
+    return std::sqrt(
+        std::inner_product(p1.cbegin(), p1.cend(), p2.cbegin(), 0.0, std::plus<>(),
+                           [](long double a, long double b) { return (a - b) * (a - b); }));
+}
 
 /** Monotone chain convex hull algorithm.
  * https://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain
