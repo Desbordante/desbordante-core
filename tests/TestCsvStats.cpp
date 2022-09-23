@@ -107,7 +107,7 @@ TEST_P(TestCsvStats, TestDistinct) {
 TEST_P(TestCsvStats, TestIsCategorial) {
     CsvStatsParams const& p = GetParam();
     statistics::CsvStats stats(p.config);
-    auto distinct = stats.isCategorial(3, 5);
+    auto distinct = stats.isCategorical(3, 5);
     EXPECT_EQ(true, distinct);
 }
 
