@@ -23,7 +23,7 @@ public:
     int Count(unsigned index);
     unsigned GetCountOfColumns();
     int Distinct(unsigned index);
-    bool isCategorial(unsigned index, int quantity);
+    bool isCategorical(unsigned index, int quantity);
     void ShowSample(unsigned start_row, unsigned end_row, unsigned start_col, unsigned end_col, 
         unsigned str_length = 10, unsigned unsigned_len = 5, unsigned double_len = 10);
     Statistic GetAvg(unsigned index);
@@ -52,7 +52,7 @@ private:
     const std::vector<model::TypedColumnData> col_data_;
     std::vector<ColumnStats> allStats;
     
-    Statistic STDAndCentrMomnt(unsigned index, int number, bool isForSTD);
+    Statistic STDAndCentralMoment(unsigned index, int number, bool is_for_STD);
 };
 
 }
