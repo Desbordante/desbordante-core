@@ -33,4 +33,11 @@ constexpr auto Parameter = "parameter";
 constexpr auto DistToNullIsInfinity = "dist_to_null_infinity";
 constexpr auto QGramLength = "q";
 constexpr auto MetricAlgorithm = "metric_algorithm";
+constexpr auto BinaryOperation = "bin_operation";
+constexpr auto Fuzziness = "fuzziness";
+constexpr auto FuzzinessProbability = "p_fuzz";
+constexpr auto Weight = "weight";
+constexpr auto BumpsLimit = "bumps_limit";
+constexpr auto IterationsLimit = "iterations_limit";
+constexpr auto PairingRule = "pairing_rule";
 }  // namespace program_option_strings

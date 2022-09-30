@@ -15,3 +15,6 @@
 
 /* Metric FD verifier */
 #include "algorithms/MetricVerifier.h"
+
+/* Algebraic constraints mining algorithm */
+#include "algorithms/ACAlgorithm.h"
