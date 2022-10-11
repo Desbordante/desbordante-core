@@ -1,0 +1,36 @@
+name: clang-format
+on: [pull_request]
+jobs:
+  formatting-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Pull clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format 
+        
+    - name: Fetch branches
+      run: |
+        echo $GITHUB_BASE_REF
+        echo $GITHUB_HEAD_REF
+        git fetch origin $GITHUB_BASE_REF 
+        git fetch origin $GITHUB_HEAD_REF
+        
+    - name: Check formatting
+      run: |       
+        formatterOutput=$(git clang-format --diff origin/$GITHUB_BASE_REF origin/$GITHUB_HEAD_REF)
+        
+        if [ "$formatterOutput" != "clang-format did not modify any files" ] &&
+           [ "$formatterOutput" != "no modified files to format" ]
+        then
+          echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
+          echo "$formatterOutput" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "$formatterOutput"
+          exit 1
+        fi
+        
+        echo "$formatterOutput"
+        echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
