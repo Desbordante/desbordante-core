@@ -3,7 +3,7 @@
 void PliBasedFDAlgorithm::Initialize() {
     if (relation_ == nullptr) {
         relation_ =
-            ColumnLayoutRelationData::CreateFrom(input_generator_, config_.is_null_equal_null);
+            ColumnLayoutRelationData::CreateFrom(*input_generator_, config_.is_null_equal_null);
     }
 
     if (relation_->GetColumnData().empty()) {

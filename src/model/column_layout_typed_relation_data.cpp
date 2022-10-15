@@ -6,7 +6,8 @@ namespace model {
 
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
     CSVParser& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
+    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(),
+                                                     is_null_eq_null);
     int num_columns = file_input.GetNumberOfColumns();
 
     if (max_cols > 0) {

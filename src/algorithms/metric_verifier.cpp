@@ -26,10 +26,10 @@ MetricVerifier::MetricVerifier(Config const& config)
         algo_ = MetricAlgo::_from_string(config.algo.c_str());
     }
     relation_ =
-        ColumnLayoutRelationData::CreateFrom(input_generator_, config.is_null_equal_null);
-    input_generator_.Reset();
+        ColumnLayoutRelationData::CreateFrom(*input_generator_, config.is_null_equal_null);
+    input_generator_->Reset();
     typed_relation_ =
-        model::ColumnLayoutTypedRelationData::CreateFrom(input_generator_,
+        model::ColumnLayoutTypedRelationData::CreateFrom(*input_generator_,
                                                          config.is_null_equal_null);
 }
 
