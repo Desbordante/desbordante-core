@@ -35,7 +35,7 @@ static inline void GetKeysTestImpl(KeysTestParams const& p) {
     FDAlgorithm::Config c{.data = path,
                           .separator = p.sep,
                           .has_header = p.has_header,
-                          .special_params = {{posr::Seed, 0}, {posr::Error, 0.0}}};
+                          .special_params = {{posr::kSeed, 0}, {posr::kError, 0.0}}};
     algos::Pyro pyro(c);
 
     pyro.Execute();

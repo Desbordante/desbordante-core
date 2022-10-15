@@ -122,57 +122,57 @@ int main(int argc, char const* argv[]) {
 
     po::options_description info_options("Desbordante information options");
     info_options.add_options()
-        (posr::Help, "print the help message and exit")
+        (posr::kHelp, "print the help message and exit")
         // --version, if needed, goes here too
         ;
 
     po::options_description general_options("General options");
     general_options.add_options()
-        (posr::Task, po::value<std::string>(&task), task_desc.c_str())
-        (posr::Algorithm, po::value<std::string>(&algo), algo_desc.c_str())
-        (posr::Data, po::value<std::string>(&dataset),
+        (posr::kTask, po::value<std::string>(&task), task_desc.c_str())
+        (posr::kAlgorithm, po::value<std::string>(&algo), algo_desc.c_str())
+        (posr::kData, po::value<std::string>(&dataset),
             "path to CSV file, relative to ./input_data")
-        (posr::SeparatorLibArg, po::value<char>(&separator)->default_value(separator),
+        (posr::kSeparatorLibArg, po::value<char>(&separator)->default_value(separator),
             "CSV separator")
-        (posr::HasHeader, po::value<bool>(&has_header)->default_value(has_header),
+        (posr::kHasHeader, po::value<bool>(&has_header)->default_value(has_header),
          "CSV header presence flag [true|false]")
-        (posr::EqualNulls, po::value<bool>(&is_null_equal_null)->default_value(true),
+        (posr::kEqualNulls, po::value<bool>(&is_null_equal_null)->default_value(true),
          "specify whether two NULLs should be considered equal")
-        (posr::Threads, po::value<ushort>(&threads)->default_value(threads),
+        (posr::kThreads, po::value<ushort>(&threads)->default_value(threads),
          "number of threads to use. If 0, then as many threads are used as "
          "the hardware can handle concurrently.")
         ;
 
     po::options_description typos_fd_options("Typo mining/FD options");
     typos_fd_options.add_options()
-        (posr::Error, po::value<double>(&error)->default_value(error),
+        (posr::kError, po::value<double>(&error)->default_value(error),
          "error value for AFD algorithms")
-        (posr::MaximumLhs, po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
+        (posr::kMaximumLhs, po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
          "max considered LHS size")
-        (posr::Seed, po::value<int>(&seed)->default_value(seed), "RNG seed")
+        (posr::kSeed, po::value<int>(&seed)->default_value(seed), "RNG seed")
         ;
 
     po::options_description ar_options("AR options");
     ar_options.add_options()
-        (posr::MinimumSupport, po::value<double>(&minsup),
+        (posr::kMinimumSupport, po::value<double>(&minsup),
             "minimum support value (between 0 and 1)")
-        (posr::MinimumConfidence, po::value<double>(&minconf),
+        (posr::kMinimumConfidence, po::value<double>(&minconf),
             "minimum confidence value (between 0 and 1)")
-        (posr::InputFormat, po::value<string>(&ar_input_format),
+        (posr::kInputFormat, po::value<string>(&ar_input_format),
          "format of the input dataset. [singular|tabular] for AR mining")
         ;
 
     po::options_description ar_singular_options("AR \"singular\" input format options");
     ar_singular_options.add_options()
-        (posr::TIdColumnIndex, po::value<unsigned>(&tid_column_index)->default_value(0),
+        (posr::kTIdColumnIndex, po::value<unsigned>(&tid_column_index)->default_value(0),
          "index of the column where a TID is stored")
-        (posr::ItemColumnIndex, po::value<unsigned>(&item_column_index)->default_value(1),
+        (posr::kItemColumnIndex, po::value<unsigned>(&item_column_index)->default_value(1),
          "index of the column where an item name is stored")
         ;
 
     po::options_description ar_tabular_options("AR \"tabular\" input format options");
     ar_tabular_options.add_options()
-        (posr::FirstColumnTId, po::bool_switch(&has_transaction_id),
+        (posr::kFirstColumnTId, po::bool_switch(&has_transaction_id),
          "indicates that the first column contains the transaction IDs")
         ;
 
@@ -180,20 +180,20 @@ int main(int argc, char const* argv[]) {
 
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
-        (posr::Metric, po::value<std::string>(&metric), metric_desc.c_str())
-        (posr::MetricAlgorithm, po::value<std::string>(&metric_algo), metric_algo_desc.c_str())
-        (posr::LhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
+        (posr::kMetric, po::value<std::string>(&metric), metric_desc.c_str())
+        (posr::kMetricAlgorithm, po::value<std::string>(&metric_algo), metric_algo_desc.c_str())
+        (posr::kLhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
          "LHS column indices for metric FD verification")
-        (posr::RhsIndices, po::value<std::vector<unsigned int>>(&rhs_indices)->multitoken(),
+        (posr::kRhsIndices, po::value<std::vector<unsigned int>>(&rhs_indices)->multitoken(),
          "RHS column indices for metric FD verification")
-        (posr::Parameter, po::value<long double>(&parameter), "metric FD parameter")
-        (posr::DistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
+        (posr::kParameter, po::value<long double>(&parameter), "metric FD parameter")
+        (posr::kDistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;
 
     po::options_description cosine_options("Cosine metric options");
     cosine_options.add_options()
-        (posr::QGramLength, po::value<unsigned int>(&q)->default_value(2),
+        (posr::kQGramLength, po::value<unsigned int>(&q)->default_value(2),
          "q-gram length for cosine metric")
         ;
 
@@ -212,7 +212,7 @@ int main(int argc, char const* argv[]) {
         return 0;
     }
 
-    if (vm.count(posr::Help))
+    if (vm.count(posr::kHelp))
     {
         std::cout << all_options << std::endl;
         return 0;

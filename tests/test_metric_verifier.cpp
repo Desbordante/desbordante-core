@@ -27,17 +27,17 @@ struct MetricVerifyingParams {
                           bool const dist_to_null_infinity = false,
                           bool const expected = true,
                           unsigned const q = 2)
-        : params({{posr::Parameter, min_parameter},
-                  {posr::LhsIndices, std::move(lhs_indices)},
-                  {posr::RhsIndices, std::move(rhs_indices)},
-                  {posr::Data, dataset},
-                  {posr::SeparatorConfig, separator},
-                  {posr::HasHeader, has_header},
-                  {posr::EqualNulls, true},
-                  {posr::Metric, metric},
-                  {posr::QGramLength, q},
-                  {posr::MetricAlgorithm, algo},
-                  {posr::DistToNullIsInfinity, dist_to_null_infinity}}),
+        : params({{posr::kParameter, min_parameter},
+                  {posr::kLhsIndices, std::move(lhs_indices)},
+                  {posr::kRhsIndices, std::move(rhs_indices)},
+                  {posr::kData, dataset},
+                  {posr::kSeparatorConfig, separator},
+                  {posr::kHasHeader, has_header},
+                  {posr::kEqualNulls, true},
+                  {posr::kMetric, metric},
+                  {posr::kQGramLength, q},
+                  {posr::kMetricAlgorithm, algo},
+                  {posr::kDistToNullIsInfinity, dist_to_null_infinity}}),
           expected(expected) {}
 };
 
@@ -64,7 +64,7 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     }
     ASSERT_TRUE(GetResult(*verifier));
 
-    auto new_parameter = boost::any_cast<long double>(params.at(posr::Parameter));
+    auto new_parameter = boost::any_cast<long double>(params.at(posr::kParameter));
     new_parameter -= 1e-4;
     if (new_parameter < 0) return;
     verifier->SetParameter(new_parameter);

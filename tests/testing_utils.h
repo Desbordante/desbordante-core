@@ -17,8 +17,8 @@ protected:
         namespace posr = program_option_strings;
 
         FDAlgorithm::Config c{ .data = path, .separator = separator, .has_header = has_header };
-        c.special_params[posr::Error] = 0.0;
-        c.special_params[posr::Seed] = 0;
+        c.special_params[posr::kError] = 0.0;
+        c.special_params[posr::kSeed] = 0;
         return std::make_unique<T>(c);
     }
 };
