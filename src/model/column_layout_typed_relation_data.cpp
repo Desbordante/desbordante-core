@@ -5,9 +5,8 @@
 namespace model {
 
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
-    CSVParser& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(),
-                                                     is_null_eq_null);
+    IDatasetStream& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
+    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
     int num_columns = file_input.GetNumberOfColumns();
 
     if (max_cols > 0) {
@@ -19,7 +18,8 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     std::vector<std::string> row;
 
     /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
-     * Maybe we need column-based parsing in addition to row-based in CSVParser */
+     * Maybe we need column-based parsing in addition to row-based in CSVParser
+     * (now IDatasetStream) */
     while (file_input.HasLines()) {
         row = file_input.GetNextLine();
 
