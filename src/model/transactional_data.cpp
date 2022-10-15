@@ -6,31 +6,32 @@
 
 namespace model {
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream& file_input,
+std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream& data_stream,
                                                                  InputFormat const& input_type) {
     if (typeid(input_type) == typeid(Singular)) {
-        return TransactionalData::CreateFromSingular(file_input, input_type.tid_column_index(),
+        return TransactionalData::CreateFromSingular(data_stream, input_type.tid_column_index(),
                                                      input_type.item_column_index());
     } else if (typeid(input_type) == typeid(Tabular)) {
-        return TransactionalData::CreateFromTabular(file_input, input_type.tid_presence());
+        return TransactionalData::CreateFromTabular(data_stream, input_type.tid_presence());
     } else {
         throw std::logic_error("This input type is not maintained yet");
     }
 }
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(IDatasetStream& file_input,
-                                                                         unsigned tid_col_index,
-                                                                         unsigned item_col_index) {
+std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
+    IDatasetStream& data_stream,
+    unsigned tid_col_index,
+    unsigned item_col_index) {
     std::vector<std::string> item_universe;
     std::unordered_map<std::string, unsigned> item_universe_set;
     std::unordered_map<unsigned, Itemset> transactions;
     unsigned latest_item_id = 0;
 
-    assert(file_input.GetNumberOfColumns() >
+    assert(data_stream.GetNumberOfColumns() >
            static_cast<int>(std::max(tid_col_index, item_col_index)));
 
-    while (file_input.HasLines()) {
-        std::vector<std::string> row = file_input.GetNextLine();
+    while (data_stream.HasLines()) {
+        std::vector<std::string> row = data_stream.GetNextLine();
         if (row.empty()) {
             continue;
         }
@@ -61,7 +62,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(IDatase
                                                                     std::move(transactions)));
 }
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDatasetStream& file_input,
+std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDatasetStream& data_stream,
                                                                         bool has_tid) {
     std::vector<std::string> item_universe;
     std::unordered_map<std::string, unsigned> item_universe_set;
@@ -69,8 +70,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
     unsigned latest_item_id = 0;
     unsigned tid = 0;
 
-    while (file_input.HasLines()) {
-        std::vector<std::string> row = file_input.GetNextLine();
+    while (data_stream.HasLines()) {
+        std::vector<std::string> row = data_stream.GetNextLine();
         if (row.empty()) {
             continue;
         }

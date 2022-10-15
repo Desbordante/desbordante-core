@@ -5,9 +5,10 @@
 namespace model {
 
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
-    IDatasetStream& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
-    int num_columns = file_input.GetNumberOfColumns();
+    IDatasetStream& data_stream, bool is_null_eq_null, int max_cols, long max_rows) {
+    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
+                                                     is_null_eq_null);
+    int num_columns = data_stream.GetNumberOfColumns();
 
     if (max_cols > 0) {
         num_columns = std::min(num_columns, max_cols);
@@ -20,8 +21,8 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
      * Maybe we need column-based parsing in addition to row-based in CSVParser
      * (now IDatasetStream) */
-    while (file_input.HasLines()) {
-        row = file_input.GetNextLine();
+    while (data_stream.HasLines()) {
+        row = data_stream.GetNextLine();
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
@@ -49,7 +50,7 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
 
     std::vector<TypedColumnData> column_data;
     for (int i = 0; i < num_columns; ++i) {
-        Column column(schema.get(), file_input.GetColumnName(i), i);
+        Column column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         TypedColumnData typed_column_data = model::TypedColumnDataFactory::CreateFrom(
             schema->GetColumn(i), std::move(columns[i]), is_null_eq_null);

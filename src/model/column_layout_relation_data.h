@@ -27,7 +27,7 @@ public:
     }
     [[nodiscard]] std::vector<int> GetTuple(int tuple_index) const;
 
-    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& file_input,
+    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& data_stream,
                                                                 bool is_null_eq_null,
                                                                 int max_cols = -1,
                                                                 long max_rows = -1);

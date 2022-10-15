@@ -20,19 +20,20 @@ std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
 }
 
 std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
-    model::IDatasetStream& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
+    model::IDatasetStream& data_stream, bool is_null_eq_null, int max_cols, long max_rows) {
+    auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
+                                                     is_null_eq_null);
     std::unordered_map<std::string, int> value_dictionary;
     int next_value_id = 1;
     const int null_value_id = -1;
-    int num_columns = file_input.GetNumberOfColumns();
+    int num_columns = data_stream.GetNumberOfColumns();
     if (max_cols > 0) num_columns = std::min(num_columns, max_cols);
     std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
     int row_num = 0;
     std::vector<std::string> row;
 
-    while (file_input.HasLines()) {
-        row = file_input.GetNextLine();
+    while (data_stream.HasLines()) {
+        row = data_stream.GetNextLine();
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
@@ -70,7 +71,7 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
 
     std::vector<ColumnData> column_data;
     for (int i = 0; i < num_columns; ++i) {
-        auto column = Column(schema.get(), file_input.GetColumnName(i), i);
+        auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         auto pli = util::PositionListIndex::CreateFor(column_vectors[i], schema->IsNullEqualNull());
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
