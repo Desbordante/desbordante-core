@@ -223,8 +223,8 @@ void Aid::LoadData() {
         this->schema_->AppendColumn(column_name);
     }
 
-    while (input_generator_.GetHasNext()) {
-        const std::vector<std::string>& next_line = input_generator_.ParseNext();
+    while (input_generator_.HasLines()) {
+        const std::vector<std::string>& next_line = input_generator_.GetNextLine();
         if (next_line.empty()) {
             break;
         }
