@@ -42,7 +42,7 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     std::vector<Column const*> keys;
     std::map<Column const*, size_t> fds_count_per_col;
     unsigned int cols_of_equal_values = 0;
-    size_t const number_of_cols = input_generator_.GetNumberOfColumns();
+    size_t const number_of_cols = input_generator_->GetNumberOfColumns();
 
     for (FD const& fd : fd_collection_) {
         Vertical const& lhs = fd.GetLhs();

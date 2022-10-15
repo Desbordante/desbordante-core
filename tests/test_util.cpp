@@ -26,8 +26,8 @@ TEST(pliChecker, first) {
     auto path = fs::current_path().append("input_data").append("Test1.csv");
     deque<vector<int>> index;
     try {
-        CSVParser csv_parser(path);
-        auto test = ColumnLayoutRelationData::CreateFrom(csv_parser, true);
+        auto csv_parser = std::make_unique<CSVParser>(path);
+        auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, true);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
     }
@@ -48,8 +48,8 @@ TEST(pliChecker, second) {
     deque<vector<int>> index;
     try {
         auto path = fs::current_path().append("input_data").append("Test1.csv");
-        CSVParser csv_parser(path);
-        auto test = ColumnLayoutRelationData::CreateFrom(csv_parser, false);
+        auto csv_parser = std::make_unique<CSVParser>(path);
+        auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, false);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
     }
@@ -66,11 +66,11 @@ TEST(pliIntersectChecker, first) {
 
     try {
         auto path = fs::current_path().append("input_data");
-        CSVParser csv_parser_1(path / "ProbeTest1.csv");
-        CSVParser csv_parser_2(path / "ProbeTest2.csv");
+        auto csv_parser_1 = std::make_unique<CSVParser>(path / "ProbeTest1.csv");
+        auto csv_parser_2 = std::make_unique<CSVParser>(path / "ProbeTest2.csv");
 
-        auto test1 = ColumnLayoutRelationData::CreateFrom(csv_parser_1, false);
-        auto test2 = ColumnLayoutRelationData::CreateFrom(csv_parser_2, false);
+        auto test1 = ColumnLayoutRelationData::CreateFrom(*csv_parser_1, false);
+        auto test2 = ColumnLayoutRelationData::CreateFrom(*csv_parser_2, false);
         auto pli1 = test1->GetColumnData(0).GetPositionListIndex();
         auto pli2 = test2->GetColumnData(0).GetPositionListIndex();
 
@@ -106,8 +106,8 @@ TEST(IdentifierSetTest, Computation) {
 
     try {
         auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
-        CSVParser parser(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(parser, false);
+        auto parser = std::make_unique<CSVParser>(path);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
             id_sets.insert(util::IdentifierSet(relation.get(), i).ToString());
@@ -142,8 +142,8 @@ TEST(IdentifierSetTest, Intersection) {
 
     try {
         auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
-        CSVParser parser(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(parser, false);
+        auto parser = std::make_unique<CSVParser>(path);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
         std::vector<util::IdentifierSet> id_sets;
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
@@ -187,8 +187,8 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
 
     try {
         auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
-        CSVParser parser(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(parser, false);
+        auto parser = std::make_unique<CSVParser>(path);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
         AgreeSetFactory factory(relation.get(), c);
         for (util::AgreeSet const& agree_set : factory.GenAgreeSets()) {
             agree_sets_actual.insert(agree_set.ToString());
