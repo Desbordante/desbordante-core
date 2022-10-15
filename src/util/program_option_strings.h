@@ -6,31 +6,31 @@
 #pragma once
 
 namespace program_option_strings {
-constexpr auto Help = "help";
-constexpr auto Task = "task";
-constexpr auto Algorithm = "algorithm";
-constexpr auto Data = "data";
+constexpr auto kHelp = "help";
+constexpr auto kTask = "task";
+constexpr auto kAlgorithm = "algorithm";
+constexpr auto kData = "data";
 #define SEPARATOR "separator"
-constexpr auto SeparatorConfig = SEPARATOR;
-constexpr auto SeparatorLibArg = SEPARATOR ",s";
+constexpr auto kSeparatorConfig = SEPARATOR;
+constexpr auto kSeparatorLibArg = SEPARATOR ",s";
 #undef SEPARATOR
-constexpr auto HasHeader = "has_header";
-constexpr auto EqualNulls = "is_null_equal_null";
-constexpr auto Threads = "threads";
-constexpr auto Error = "error";
-constexpr auto MaximumLhs = "max_lhs";
-constexpr auto Seed = "seed";
-constexpr auto MinimumSupport = "minsup";
-constexpr auto MinimumConfidence = "minconf";
-constexpr auto InputFormat = "input_format";
-constexpr auto TIdColumnIndex = "tid_column_index";
-constexpr auto ItemColumnIndex = "item_column_index";
-constexpr auto FirstColumnTId = "has_tid";
-constexpr auto Metric = "metric";
-constexpr auto LhsIndices = "lhs_indices";
-constexpr auto RhsIndices = "rhs_indices";
-constexpr auto Parameter = "parameter";
-constexpr auto DistToNullIsInfinity = "dist_to_null_infinity";
-constexpr auto QGramLength = "q";
-constexpr auto MetricAlgorithm = "metric_algorithm";
+constexpr auto kHasHeader = "has_header";
+constexpr auto kEqualNulls = "is_null_equal_null";
+constexpr auto kThreads = "threads";
+constexpr auto kError = "error";
+constexpr auto kMaximumLhs = "max_lhs";
+constexpr auto kSeed = "seed";
+constexpr auto kMinimumSupport = "minsup";
+constexpr auto kMinimumConfidence = "minconf";
+constexpr auto kInputFormat = "input_format";
+constexpr auto kTIdColumnIndex = "tid_column_index";
+constexpr auto kItemColumnIndex = "item_column_index";
+constexpr auto kFirstColumnTId = "has_tid";
+constexpr auto kMetric = "metric";
+constexpr auto kLhsIndices = "lhs_indices";
+constexpr auto kRhsIndices = "rhs_indices";
+constexpr auto kParameter = "parameter";
+constexpr auto kDistToNullIsInfinity = "dist_to_null_infinity";
+constexpr auto kQGramLength = "q";
+constexpr auto kMetricAlgorithm = "metric_algorithm";
 }  // namespace program_option_strings

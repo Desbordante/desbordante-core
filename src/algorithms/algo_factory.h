@@ -107,12 +107,12 @@ FDAlgorithm::Config CreateFDAlgorithmConfigFromMap(ParamsMap params) {
     FDAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, posr::Data);
-    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::EqualNulls);
-    c.max_lhs = ExtractParamFromMap<unsigned int>(params, posr::MaximumLhs);
-    c.parallelism = ExtractParamFromMap<ushort>(params, posr::Threads);
+             ExtractParamFromMap<std::string>(params, posr::kData);
+    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::kEqualNulls);
+    c.max_lhs = ExtractParamFromMap<unsigned int>(params, posr::kMaximumLhs);
+    c.parallelism = ExtractParamFromMap<ushort>(params, posr::kThreads);
 
     /* Is it correct to insert all specified parameters into the algorithm config, and not just the
      * necessary ones? It is definitely simpler, so for now leaving it like this
@@ -135,21 +135,21 @@ ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
     ARAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, posr::Data);
-    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
-    c.minsup = ExtractParamFromMap<double>(params, posr::MinimumSupport);
-    c.minconf = ExtractParamFromMap<double>(params, posr::MinimumConfidence);
+             ExtractParamFromMap<std::string>(params, posr::kData);
+    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
+    c.minsup = ExtractParamFromMap<double>(params, posr::kMinimumSupport);
+    c.minconf = ExtractParamFromMap<double>(params, posr::kMinimumConfidence);
 
     std::shared_ptr<model::InputFormat> input_format;
-    auto const input_format_arg = ExtractParamFromMap<std::string>(params, posr::InputFormat);
+    auto const input_format_arg = ExtractParamFromMap<std::string>(params, posr::kInputFormat);
     if (input_format_arg == "singular") {
-        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, posr::TIdColumnIndex);
+        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, posr::kTIdColumnIndex);
         unsigned const item_column_index =
-            ExtractParamFromMap<unsigned>(params, posr::ItemColumnIndex);
+            ExtractParamFromMap<unsigned>(params, posr::kItemColumnIndex);
         input_format = std::make_shared<model::Singular>(tid_column_index, item_column_index);
     } else if (input_format_arg == "tabular") {
-        bool const has_header = ExtractParamFromMap<bool>(params, posr::FirstColumnTId);
+        bool const has_header = ExtractParamFromMap<bool>(params, posr::kFirstColumnTId);
         input_format = std::make_shared<model::Tabular>(has_header);
     } else {
         throw std::invalid_argument(
@@ -164,34 +164,34 @@ template <typename ParamsMap>
 MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     MetricVerifier::Config c;
 
-    c.parameter = ExtractParamFromMap<long double>(params, posr::Parameter);
+    c.parameter = ExtractParamFromMap<long double>(params, posr::kParameter);
     if (c.parameter < 0) {
         throw std::invalid_argument("Parameter should not be less than zero.");
     }
-    c.q = ExtractParamFromMap<unsigned>(params, posr::QGramLength);
+    c.q = ExtractParamFromMap<unsigned>(params, posr::kQGramLength);
     if (c.q <= 0) {
         throw std::invalid_argument("Q-gram length should be greater than zero.");
     }
     c.data = std::filesystem::current_path() / "input_data" /
-        ExtractParamFromMap<std::string>(params, posr::Data);
-    c.separator = ExtractParamFromMap<char>(params, posr::SeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::HasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::EqualNulls);
-    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::LhsIndices);
-    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::RhsIndices);
+        ExtractParamFromMap<std::string>(params, posr::kData);
+    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::kEqualNulls);
+    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::kLhsIndices);
+    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::kRhsIndices);
     
-    c.metric = ExtractParamFromMap<std::string>(params, posr::Metric);
+    c.metric = ExtractParamFromMap<std::string>(params, posr::kMetric);
     if (c.rhs_indices.size() > 1 && c.metric != "euclidean") {
         throw std::invalid_argument(
             "More than one RHS columns are only allowed for \"euclidean\" metric.");
     }
     if (c.metric != "euclidean" || c.rhs_indices.size() != 1) {
-        c.algo = ExtractParamFromMap<std::string>(params, posr::MetricAlgorithm);
+        c.algo = ExtractParamFromMap<std::string>(params, posr::kMetricAlgorithm);
     }
     if (c.rhs_indices.size() != 2 && c.algo == "calipers") {
         throw std::invalid_argument("\"calipers\" algo is only available for 2 dimensions.");
     }
-    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, posr::DistToNullIsInfinity);
+    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, posr::kDistToNullIsInfinity);
     return c;
 }
 
