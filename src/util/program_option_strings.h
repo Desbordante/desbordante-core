@@ -33,4 +33,6 @@ constexpr auto kParameter = "parameter";
 constexpr auto kDistToNullIsInfinity = "dist_to_null_infinity";
 constexpr auto kQGramLength = "q";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
+constexpr auto kRadius = "radius";
+constexpr auto kRatio = "ratio";
 }  // namespace program_option_strings
