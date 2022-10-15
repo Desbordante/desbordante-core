@@ -30,8 +30,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
     assert(data_stream.GetNumberOfColumns() >
            static_cast<int>(std::max(tid_col_index, item_col_index)));
 
-    while (data_stream.HasLines()) {
-        std::vector<std::string> row = data_stream.GetNextLine();
+    while (data_stream.HasNextRow()) {
+        std::vector<std::string> row = data_stream.GetNextRow();
         if (row.empty()) {
             continue;
         }
@@ -70,8 +70,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
     unsigned latest_item_id = 0;
     unsigned tid = 0;
 
-    while (data_stream.HasLines()) {
-        std::vector<std::string> row = data_stream.GetNextLine();
+    while (data_stream.HasNextRow()) {
+        std::vector<std::string> row = data_stream.GetNextRow();
         if (row.empty()) {
             continue;
         }

@@ -119,8 +119,8 @@ void FDep::LoadData() {
     }
 
     std::vector<std::string> next_line;
-    while (input_generator_->HasLines()) {
-        next_line = input_generator_->GetNextLine();
+    while (input_generator_->HasNextRow()) {
+        next_line = input_generator_->GetNextRow();
         if (next_line.empty()) break;
         this->tuples_.emplace_back(std::vector<size_t>(this->number_attributes_));
         for (size_t i = 0; i < this->number_attributes_; ++i) {

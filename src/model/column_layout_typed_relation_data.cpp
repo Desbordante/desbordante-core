@@ -21,8 +21,8 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
      * Maybe we need column-based parsing in addition to row-based in CSVParser
      * (now IDatasetStream) */
-    while (data_stream.HasLines()) {
-        row = data_stream.GetNextLine();
+    while (data_stream.HasNextRow()) {
+        row = data_stream.GetNextRow();
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
