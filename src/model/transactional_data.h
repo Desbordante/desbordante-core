@@ -16,11 +16,11 @@ private:
     std::vector<std::string> item_universe_;
     std::unordered_map<unsigned, Itemset> transactions_;
 
-    static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& file_input,
+    static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& data_stream,
                                                                  unsigned tid_col_index = 0,
                                                                  unsigned item_col_index = 1);
 
-    static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& file_input,
+    static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& data_stream,
                                                                 bool has_tid);
 
     TransactionalData(std::vector<std::string> item_universe,
@@ -44,7 +44,7 @@ public:
     size_t GetUniverseSize() const noexcept { return item_universe_.size(); }
     size_t GetNumTransactions() const noexcept { return transactions_.size(); }
 
-    static std::unique_ptr<TransactionalData> CreateFrom(IDatasetStream& file_input,
+    static std::unique_ptr<TransactionalData> CreateFrom(IDatasetStream& data_stream,
                                                          InputFormat const& input_type);
 };
 
