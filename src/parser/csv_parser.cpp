@@ -39,7 +39,7 @@ CSVParser::CSVParser(const std::filesystem::path& path, char separator, bool has
         PeekNext();
     }
 
-    std::vector<std::string> next_parsed = ParseNext();
+    std::vector<std::string> next_parsed = GetNextLine();
     number_of_columns_ = next_parsed.size();
     column_names_ = std::move(next_parsed);
 
@@ -103,7 +103,7 @@ std::string CSVParser::GetUnparsedLine(const unsigned long long line_index) {
     GetLine(line_index);
     std::string line = next_line_;
 
-    /* For correctness of ParseNext() after this method */
+    /* For correctness of GetNextLine() after this method */
     GetNextIfHas();
 
     return line;
@@ -127,7 +127,7 @@ std::vector<std::string> CSVParser::ParseLine(const unsigned long long line_inde
     return parsed;
 }
 
-std::vector<std::string> CSVParser::ParseNext() {
+std::vector<std::string> CSVParser::GetNextLine() {
     std::vector<std::string> result = ParseString(next_line_);
 
     GetNextIfHas();
