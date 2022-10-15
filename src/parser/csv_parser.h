@@ -39,10 +39,10 @@ public:
     explicit CSVParser(const std::filesystem::path& path);
     CSVParser(const std::filesystem::path& path, char separator, bool has_header);
 
-    std::vector<std::string> GetNextLine() override;
+    std::vector<std::string> GetNextRow() override;
     std::string GetUnparsedLine(const unsigned long long line_index);
     std::vector<std::string> ParseLine(const unsigned long long line_index);
-    bool HasLines() const override {
+    bool HasNextRow() const override {
         return has_next_;
     }
     char GetSeparator() const {
