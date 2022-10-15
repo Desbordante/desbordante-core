@@ -143,12 +143,12 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
 
     namespace posr = program_option_strings;
 
-    if (config.GetSpecialParam<double>(posr::Error) == 0.0) {
+    if (config.GetSpecialParam<double>(posr::kError) == 0.0) {
         throw std::invalid_argument("Typo mining with error = 0 is meaningless");
     }
 
     Config precise_config = config;
-    precise_config.special_params[posr::Error] = 0.0;
+    precise_config.special_params[posr::kError] = 0.0;
     CSVParser input_generator(config.data, config.separator, config.has_header);
     std::shared_ptr<ColumnLayoutRelationData> relation =
         ColumnLayoutRelationData::CreateFrom(input_generator, config.is_null_equal_null);
