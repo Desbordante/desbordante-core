@@ -49,7 +49,7 @@ private:
         assert(type.IsMetrizable());
         return static_cast<model::IMetrizableType const&>(type).Dist(l, r) < radius_;
     }
-    explicit TypoMiner(CSVParser input_generator, std::unique_ptr<FDAlgorithm> precise_algo,
+    explicit TypoMiner(std::unique_ptr<CSVParser> input_generator, std::unique_ptr<FDAlgorithm> precise_algo,
                        std::unique_ptr<FDAlgorithm> approx_algo,
                        std::shared_ptr<ColumnLayoutRelationData> relation,
                        std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
@@ -149,12 +149,12 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
 
     Config precise_config = config;
     precise_config.special_params[posr::kError] = 0.0;
-    CSVParser input_generator(config.data, config.separator, config.has_header);
+    auto input_generator = std::make_unique<CSVParser>(config.data, config.separator, config.has_header);
     std::shared_ptr<ColumnLayoutRelationData> relation =
-        ColumnLayoutRelationData::CreateFrom(input_generator, config.is_null_equal_null);
-    input_generator.Reset();
+        ColumnLayoutRelationData::CreateFrom(*input_generator, config.is_null_equal_null);
+    input_generator->Reset();
     auto typed_relation = model::ColumnLayoutTypedRelationData::CreateFrom(
-        input_generator, config.is_null_equal_null);
+        *input_generator, config.is_null_equal_null);
 
     double radius;
     double ratio;

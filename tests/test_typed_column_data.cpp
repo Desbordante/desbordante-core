@@ -32,9 +32,9 @@ class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};
 static inline std::vector<mo::TypedColumnData> CreateColumnData(std::string_view data, char sep,
                                                                 bool has_header) {
     auto const path = fs::current_path() / "input_data" / data;
-    CSVParser input_generator(path, sep, has_header);
+    auto input_generator = std::make_unique<CSVParser>(path, sep, has_header);
     std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-        model::ColumnLayoutTypedRelationData::CreateFrom(input_generator, true, -1, -1);
+        model::ColumnLayoutTypedRelationData::CreateFrom(*input_generator, true, -1, -1);
     std::vector<mo::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }

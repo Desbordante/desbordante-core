@@ -8,7 +8,7 @@
 namespace algos {
 
 unsigned long long ARAlgorithm::Execute() {
-    transactional_data_ = model::TransactionalData::CreateFrom(input_generator_, *input_format_);
+    transactional_data_ = model::TransactionalData::CreateFrom(*input_generator_, *input_format_);
     if (transactional_data_->GetNumTransactions() == 0) {
         throw std::runtime_error("Got an empty .csv file: AR mining is meaningless.");
     }

@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <mutex>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "csv_parser.h"
@@ -16,7 +17,7 @@ private:
     uint8_t cur_phase_id_ = 0;
 
 protected:
-    CSVParser input_generator_;
+    std::unique_ptr<CSVParser> input_generator_;
     /* Vector of names of algorithm phases, should be initialized in a constructor
      * if algorithm has more than one phase. This vector is used to determine the
      * total number of phases.
@@ -40,11 +41,11 @@ public:
 
     explicit Primitive(std::vector<std::string_view> phase_names)
         : phase_names_(std::move(phase_names)) {}
-    Primitive(CSVParser input_generator, std::vector<std::string_view> phase_names)
-        : input_generator_(std::move(input_generator)), phase_names_(std::move(phase_names)) {}
+    Primitive(std::unique_ptr<CSVParser> input_generator_ptr, std::vector<std::string_view> phase_names)
+        : input_generator_(std::move(input_generator_ptr)), phase_names_(std::move(phase_names)) {}
     Primitive(std::filesystem::path const& path, char const separator, bool const has_header,
               std::vector<std::string_view> phase_names)
-        : input_generator_(path, separator, has_header), phase_names_(std::move(phase_names)) {}
+        : input_generator_(std::make_unique<CSVParser>(path, separator, has_header)), phase_names_(std::move(phase_names)) {}
 
     virtual unsigned long long Execute() = 0;
 

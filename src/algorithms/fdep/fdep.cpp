@@ -105,22 +105,22 @@ void FDep::SpecializePositiveCover(std::bitset<FDTreeElement::kMaxAttrNum> const
 }
 
 void FDep::LoadData() {
-    this->number_attributes_ = input_generator_.GetNumberOfColumns();
+    this->number_attributes_ = input_generator_->GetNumberOfColumns();
     if (this->number_attributes_ == 0) {
         throw std::runtime_error("Unable to work on empty dataset. Check data file");
     }
     this->column_names_.resize(this->number_attributes_);
 
-    this->schema_ = std::make_unique<RelationalSchema>(input_generator_.GetRelationName(), true);
+    this->schema_ = std::make_unique<RelationalSchema>(input_generator_->GetRelationName(), true);
 
     for (size_t i = 0; i < this->number_attributes_; ++i) {
-        this->column_names_[i] = input_generator_.GetColumnName(static_cast<int>(i));
+        this->column_names_[i] = input_generator_->GetColumnName(static_cast<int>(i));
         this->schema_->AppendColumn(this->column_names_[i]);
     }
 
     std::vector<std::string> next_line;
-    while (input_generator_.HasLines()) {
-        next_line = input_generator_.GetNextLine();
+    while (input_generator_->HasLines()) {
+        next_line = input_generator_->GetNextLine();
         if (next_line.empty()) break;
         this->tuples_.emplace_back(std::vector<size_t>(this->number_attributes_));
         for (size_t i = 0; i < this->number_attributes_; ++i) {
