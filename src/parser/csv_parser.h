@@ -11,7 +11,9 @@
 #include <string>
 #include <vector>
 
-class CSVParser {
+#include "idataset_stream.h"
+
+class CSVParser : public model::IDatasetStream {
 private:
     std::ifstream source_;
     char separator_;
@@ -37,17 +39,17 @@ public:
     explicit CSVParser(const std::filesystem::path& path);
     CSVParser(const std::filesystem::path& path, char separator, bool has_header);
 
-    std::vector<std::string> ParseNext();
+    std::vector<std::string> GetNextLine() override;
     std::string GetUnparsedLine(const unsigned long long line_index);
     std::vector<std::string> ParseLine(const unsigned long long line_index);
-    bool GetHasNext() const {
+    bool HasLines() const override {
         return has_next_;
     }
     char GetSeparator() const {
         return separator_;
     }
-    int GetNumberOfColumns() const { return number_of_columns_; }
-    std::string GetColumnName(int index) const { return column_names_[index]; }
-    std::string GetRelationName() const { return relation_name_; }
-    void Reset();
+    int GetNumberOfColumns() const override { return number_of_columns_; }
+    std::string GetColumnName(int index) const override { return column_names_[index]; }
+    std::string GetRelationName() const override { return relation_name_; }
+    void Reset() override;
 };

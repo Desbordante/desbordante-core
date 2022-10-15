@@ -31,8 +31,8 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     int row_num = 0;
     std::vector<std::string> row;
 
-    while (file_input.GetHasNext()) {
-        row = file_input.ParseNext();
+    while (file_input.HasLines()) {
+        row = file_input.GetNextLine();
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");

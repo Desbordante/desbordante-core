@@ -28,8 +28,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(CSVPars
     assert(file_input.GetNumberOfColumns() >
            static_cast<int>(std::max(tid_col_index, item_col_index)));
 
-    while (file_input.GetHasNext()) {
-        std::vector<std::string> row = file_input.ParseNext();
+    while (file_input.HasLines()) {
+        std::vector<std::string> row = file_input.GetNextLine();
         if (row.empty()) {
             continue;
         }
@@ -68,8 +68,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(CSVParse
     unsigned latest_item_id = 0;
     unsigned tid = 0;
 
-    while (file_input.GetHasNext()) {
-        std::vector<std::string> row = file_input.ParseNext();
+    while (file_input.HasLines()) {
+        std::vector<std::string> row = file_input.GetNextLine();
         if (row.empty()) {
             continue;
         }

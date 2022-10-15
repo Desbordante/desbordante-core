@@ -19,8 +19,8 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
 
     /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
      * Maybe we need column-based parsing in addition to row-based in CSVParser */
-    while (file_input.GetHasNext()) {
-        row = file_input.ParseNext();
+    while (file_input.HasLines()) {
+        row = file_input.GetNextLine();
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
