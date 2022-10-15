@@ -158,11 +158,11 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
 
     double radius;
     double ratio;
-    if (config.HasParam("radius")) {
-        radius = VerifyRadius(config.GetSpecialParam<double>("radius"));
+    if (config.HasParam(posr::kRadius)) {
+        radius = VerifyRadius(config.GetSpecialParam<double>(posr::kRadius));
     }
-    if (config.HasParam("ratio")) {
-        ratio = VerifyRatio(config.GetSpecialParam<double>("ratio"));
+    if (config.HasParam(posr::kRatio)) {
+        ratio = VerifyRatio(config.GetSpecialParam<double>(posr::kRatio));
     } else {
         /* Should be good heuristic. Or set ratio to 1 by default? */
         ratio = (relation->GetNumRows() <= 1) ? 1 : 2.0 / relation->GetNumRows();
