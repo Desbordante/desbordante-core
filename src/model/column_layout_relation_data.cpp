@@ -20,9 +20,8 @@ std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
 }
 
 std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
-    CSVParser& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(),
-                                                     is_null_eq_null);
+    model::IDatasetStream& file_input, bool is_null_eq_null, int max_cols, long max_rows) {
+    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
     std::unordered_map<std::string, int> value_dictionary;
     int next_value_id = 1;
     const int null_value_id = -1;

@@ -1,10 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include "csv_parser.h"
+#include "idataset_stream.h"
 #include "itemset.h"
 #include "transactional_input_format.h"
 
@@ -15,11 +16,11 @@ private:
     std::vector<std::string> item_universe_;
     std::unordered_map<unsigned, Itemset> transactions_;
 
-    static std::unique_ptr<TransactionalData> CreateFromSingular(CSVParser& file_input,
+    static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& file_input,
                                                                  unsigned tid_col_index = 0,
                                                                  unsigned item_col_index = 1);
 
-    static std::unique_ptr<TransactionalData> CreateFromTabular(CSVParser& file_input,
+    static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& file_input,
                                                                 bool has_tid);
 
     TransactionalData(std::vector<std::string> item_universe,
@@ -43,7 +44,7 @@ public:
     size_t GetUniverseSize() const noexcept { return item_universe_.size(); }
     size_t GetNumTransactions() const noexcept { return transactions_.size(); }
 
-    static std::unique_ptr<TransactionalData> CreateFrom(CSVParser& file_input,
+    static std::unique_ptr<TransactionalData> CreateFrom(IDatasetStream& file_input,
                                                          InputFormat const& input_type);
 };
 

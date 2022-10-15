@@ -1,11 +1,12 @@
 #include "transactional_data.h"
 
 #include <cassert>
+#include <stdexcept>
 #include <unordered_map>
 
 namespace model {
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(CSVParser& file_input,
+std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream& file_input,
                                                                  InputFormat const& input_type) {
     if (typeid(input_type) == typeid(Singular)) {
         return TransactionalData::CreateFromSingular(file_input, input_type.tid_column_index(),
@@ -17,7 +18,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(CSVParser& file
     }
 }
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(CSVParser& file_input,
+std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(IDatasetStream& file_input,
                                                                          unsigned tid_col_index,
                                                                          unsigned item_col_index) {
     std::vector<std::string> item_universe;
@@ -60,7 +61,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(CSVPars
                                                                     std::move(transactions)));
 }
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(CSVParser& file_input,
+std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDatasetStream& file_input,
                                                                         bool has_tid) {
     std::vector<std::string> item_universe;
     std::unordered_map<std::string, unsigned> item_universe_set;

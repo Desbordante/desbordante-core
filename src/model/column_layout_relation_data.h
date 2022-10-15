@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "column_data.h"
-#include "csv_parser.h"
+#include "idataset_stream.h"
 #include "relational_schema.h"
 #include "relation_data.h"
 
@@ -27,7 +27,7 @@ public:
     }
     [[nodiscard]] std::vector<int> GetTuple(int tuple_index) const;
 
-    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(CSVParser& file_input,
+    static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& file_input,
                                                                 bool is_null_eq_null,
                                                                 int max_cols = -1,
                                                                 long max_rows = -1);

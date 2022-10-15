@@ -1,6 +1,6 @@
 #pragma once
 
-#include "csv_parser.h"
+#include "idataset_stream.h"
 #include "relation_data.h"
 #include "typed_column_data.h"
 
@@ -20,10 +20,11 @@ public:
         }
     }
 
-    static std::unique_ptr<ColumnLayoutTypedRelationData> CreateFrom(CSVParser& file_input,
-                                                                     bool is_null_eq_null,
-                                                                     int max_cols = -1,
-                                                                     long max_rows = -1);
+    static std::unique_ptr<ColumnLayoutTypedRelationData> CreateFrom(
+        model::IDatasetStream& file_input,
+        bool is_null_eq_null,
+        int max_cols = -1,
+        long max_rows = -1);
 };
 
 }  // namespace model

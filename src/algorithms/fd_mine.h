@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <set>
 
-#include "csv_parser.h"
 #include "column_combination.h"
 #include "column_layout_relation_data.h"
 #include "pli_based_fd_algorithm.h"

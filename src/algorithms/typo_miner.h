@@ -1,6 +1,8 @@
 #pragma once
 
 #include "column_layout_typed_relation_data.h"
+#include "idataset_stream.h"
+#include "csv_parser.h"
 #include "primitive.h"
 #include "pyro.h"
 #include "types.h"
@@ -49,7 +51,8 @@ private:
         assert(type.IsMetrizable());
         return static_cast<model::IMetrizableType const&>(type).Dist(l, r) < radius_;
     }
-    explicit TypoMiner(std::unique_ptr<CSVParser> input_generator, std::unique_ptr<FDAlgorithm> precise_algo,
+    explicit TypoMiner(std::unique_ptr<model::IDatasetStream> input_generator,
+                       std::unique_ptr<FDAlgorithm> precise_algo,
                        std::unique_ptr<FDAlgorithm> approx_algo,
                        std::shared_ptr<ColumnLayoutRelationData> relation,
                        std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation,

@@ -6,6 +6,7 @@
 #include <utility>
 #include <vector>
 
+#include "idataset_stream.h"
 #include "csv_parser.h"
 
 namespace algos {
@@ -17,7 +18,7 @@ private:
     uint8_t cur_phase_id_ = 0;
 
 protected:
-    std::unique_ptr<CSVParser> input_generator_;
+    std::unique_ptr<model::IDatasetStream> input_generator_;
     /* Vector of names of algorithm phases, should be initialized in a constructor
      * if algorithm has more than one phase. This vector is used to determine the
      * total number of phases.
@@ -41,7 +42,7 @@ public:
 
     explicit Primitive(std::vector<std::string_view> phase_names)
         : phase_names_(std::move(phase_names)) {}
-    Primitive(std::unique_ptr<CSVParser> input_generator_ptr, std::vector<std::string_view> phase_names)
+    Primitive(std::unique_ptr<model::IDatasetStream> input_generator_ptr, std::vector<std::string_view> phase_names)
         : input_generator_(std::move(input_generator_ptr)), phase_names_(std::move(phase_names)) {}
     Primitive(std::filesystem::path const& path, char const separator, bool const has_header,
               std::vector<std::string_view> phase_names)
