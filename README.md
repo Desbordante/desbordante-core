@@ -54,12 +54,12 @@ it doesn't run the following script:
 ### Launching the binaries
 The script generates the following file structure in `/path/to/Desbordante/build/target`:
 ```bash
-├───inputData
+├───input_data
 │   └───some-sample-csv\'s.csv
 ├───Desbordante_test
 ├───Desbordante_run
 ```
-The `inputData` directory contains several .csv files that may be used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
+The `input_data` directory contains several .csv files that may be used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
 ```
 cd build/target
 ./Desbordante_test
@@ -104,7 +104,7 @@ You should change the path in the script if it differs from the default one.
 ### Launching the binaries
 The script generates the following file structure in `\path\to\Desbordante\build\target`:
 ```bash
-├───inputData
+├───input_data
 │   └───some-sample-csv\'s.csv
 ├───fdtester_test.exe
 ├───fdtester_run.exe

@@ -15,8 +15,8 @@ target_link_libraries(${BINARY} LINK_PUBLIC gtest gmock Boost::thread easyloggin
 # copying sample csv's for testing
 add_custom_target(copy-files ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/tests/inputData
-        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/inputData
+        ${CMAKE_SOURCE_DIR}/tests/input_data
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/input_data
         )
 
 
