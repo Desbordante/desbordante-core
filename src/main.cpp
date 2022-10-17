@@ -12,8 +12,8 @@
 #include <boost/program_options.hpp>
 #include <easylogging++.h>
 
-#include "AlgoFactory.h"
-#include "ProgramOptionStrings.h"
+#include "algo_factory.h"
+#include "program_option_strings.h"
 
 namespace po = boost::program_options;
 namespace posr = program_option_strings;
@@ -131,7 +131,7 @@ int main(int argc, char const* argv[]) {
         (posr::Task, po::value<std::string>(&task), task_desc.c_str())
         (posr::Algorithm, po::value<std::string>(&algo), algo_desc.c_str())
         (posr::Data, po::value<std::string>(&dataset),
-            "path to CSV file, relative to ./inputData")
+            "path to CSV file, relative to ./input_data")
         (posr::SeparatorLibArg, po::value<char>(&separator)->default_value(separator),
             "CSV separator")
         (posr::HasHeader, po::value<bool>(&has_header)->default_value(has_header),
