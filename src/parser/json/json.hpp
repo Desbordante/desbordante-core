@@ -14151,7 +14151,7 @@ class basic_json
 
     @tparam BasicJsonType a type such that:
     - @a BasicJsonType is a @ref basic_json type.
-    - @a BasicJsonType has different template arguments than @ref basic_json_t.
+    - @a BasicJsontype.has different template arguments than @ref basic_json_t.
 
     @param[in] val the @ref basic_json value to be converted.
 

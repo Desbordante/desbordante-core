@@ -7,7 +7,7 @@ add_custom_command(
 	DEPENDS 
 		${CMAKE_SOURCE_DIR}/datasets/datasets.zip
 	WORKING_DIRECTORY 
-		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/inputData/
+		${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/input_data/
 	COMMENT "Unpacking datasets.zip"
 	VERBATIM
 )
