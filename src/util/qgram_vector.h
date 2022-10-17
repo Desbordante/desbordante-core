@@ -23,7 +23,7 @@ private:
     void CalculateLength();
 
 public:
-    explicit QGramVector(std::string_view const& string, unsigned q);
+    explicit QGramVector(std::string_view string, unsigned q);
 
     long double InnerProduct(QGramVector const& other) const;
 
