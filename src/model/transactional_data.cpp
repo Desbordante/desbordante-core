@@ -27,8 +27,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
     std::unordered_map<unsigned, Itemset> transactions;
     unsigned latest_item_id = 0;
 
-    assert(data_stream.GetNumberOfColumns() >
-           static_cast<int>(std::max(tid_col_index, item_col_index)));
+    assert(data_stream.GetNumberOfColumns() > std::max(tid_col_index, item_col_index));
 
     while (data_stream.HasNextRow()) {
         std::vector<std::string> row = data_stream.GetNextRow();

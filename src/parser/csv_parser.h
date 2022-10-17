@@ -48,7 +48,7 @@ public:
     char GetSeparator() const {
         return separator_;
     }
-    int GetNumberOfColumns() const override { return number_of_columns_; }
+    size_t GetNumberOfColumns() const override { return number_of_columns_; }
     std::string GetColumnName(int index) const override { return column_names_[index]; }
     std::string GetRelationName() const override { return relation_name_; }
     void Reset() override;
