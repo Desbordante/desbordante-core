@@ -1,4 +1,4 @@
-name: clang-format
+name: codestyle-checks
 on: [pull_request]
 jobs:
   clang-format-check:
