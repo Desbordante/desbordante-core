@@ -119,7 +119,7 @@ unsigned long long Tane::ExecuteInternal() {
         if (ucc_error <= max_ucc_error_) {
             RegisterUcc(column, ucc_error, schema);
             vertex->SetKeyCandidate(false);
-            if (ucc_error == 0) {
+            if (ucc_error == 0 && max_lhs_ != 0) {
                 for (unsigned long rhs_index = vertex->GetRhsCandidates().find_first();
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
@@ -138,7 +138,10 @@ unsigned long long Tane::ExecuteInternal() {
     levels.push_back(std::move(level1));
     AddProgress(progress_step);
 
-    for (unsigned int arity = 2; arity <= max_lhs_; arity++) {
+    unsigned int max_arity = max_lhs_ == std::numeric_limits<unsigned int>::max()
+                                 ? max_lhs_
+                                 : max_lhs_ + 1;
+    for (unsigned int arity = 2; arity <= max_arity; arity++) {
         //auto start_time = std::chrono::system_clock::now();
         util::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
         util::LatticeLevel::GenerateNextLevel(levels);
@@ -198,6 +201,10 @@ unsigned long long Tane::ExecuteInternal() {
                     }
                 }
             }
+        }
+
+        if (arity == max_arity) {
+            break;
         }
 
         //Prune
