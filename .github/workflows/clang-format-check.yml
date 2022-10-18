@@ -1,21 +1,49 @@
 name: clang-format
-on: [push, pull_request]
+on: [pull_request]
 jobs:
-  formatting-check:
+  clang-format-check:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - name: check-formatting
-      shell: bash
+    - name: Pull clang-format
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-format 
-        formatterOutput=$(git clang-format --diff HEAD~1 HEAD)
+        sudo apt-get install -y clang-format-12
+        
+    - name: Fetch branches
+      run: |
+        echo $GITHUB_BASE_REF
+        echo $GITHUB_HEAD_REF
+        git fetch origin $GITHUB_BASE_REF 
+        git fetch origin $GITHUB_HEAD_REF
+        
+    - name: Check formatting
+      run: |       
+        formatterOutput=$(git diff origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | clang-format-diff-12 -p 1)
+        
         if [ "$formatterOutput" != "clang-format did not modify any files" ] &&
            [ "$formatterOutput" != "no modified files to format" ]
         then
+          echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
+          echo "$formatterOutput" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "$formatterOutput"
           exit 1
         fi
         
         echo "$formatterOutput"
+        echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # Optionally generate compile_commands.json
+
+    - uses: ZedThree/clang-tidy-review@v0.10.0
+      id: review
+    # If there are any comments, fail the check
+    - if: steps.review.outputs.total_comments > 0
+      run: exit 1
