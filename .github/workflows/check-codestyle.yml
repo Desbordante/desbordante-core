@@ -22,7 +22,8 @@ jobs:
         formatterOutput=$(git diff origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | clang-format-diff-12 -p 1)
         
         if [ "$formatterOutput" != "clang-format did not modify any files" ] &&
-           [ "$formatterOutput" != "no modified files to format" ]
+           [ "$formatterOutput" != "no modified files to format" ] &&
+           [ "$formatterOutput" != "" ]
         then
           echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
