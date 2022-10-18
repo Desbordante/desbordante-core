@@ -8,20 +8,20 @@
 
 unsigned long long Fd_mine::ExecuteInternal() {
     // 1
-    schema_ = relation_->GetSchema();
-    auto start_time = std::chrono::system_clock::now();
+                 schema_ = relation_->GetSchema();
+                 auto start_time = std::chrono::system_clock::now();
 
-    relation_indices_ = dynamic_bitset<>(schema_->GetNumColumns());
+                 relation_indices_ = dynamic_bitset<>(schema_->GetNumColumns());
 
-    for (size_t column_index = 0; column_index < schema_->GetNumColumns(); column_index++) {
+                for (size_t column_index = 0; column_index < schema_->GetNumColumns(); column_index++) {
         dynamic_bitset<> tmp(schema_->GetNumColumns());
-        tmp[column_index] = 1;
+                     tmp[column_index] = 1;
         relation_indices_[column_index] = 1;
         candidate_set_.insert(std::move(tmp));
-    }
+                   }
 
     for (auto const& candidate : candidate_set_) {
-        closure_[candidate] = dynamic_bitset<>(schema_->GetNumColumns());
+                        closure_[candidate] = dynamic_bitset<>(schema_->GetNumColumns());
     }
 
     // 2
