@@ -37,4 +37,18 @@ std::unique_ptr<Type> CreateType(TypeId const type_id, bool const is_null_eq_nul
     }
 }
 
+std::unique_ptr<Type> CreateTypeClone(const Type& type) {
+    switch (type.GetTypeId())
+    {
+    case TypeId::kNull:
+        return CreateType(type.GetTypeId(), dynamic_cast<const NullType&>(type).IsNullEqNull());
+    case TypeId::kUndefined:
+        return CreateType(type.GetTypeId(), dynamic_cast<const UndefinedType&>(type).IsNullEqNull());
+    case TypeId::kMixed:
+        return CreateType(type.GetTypeId(), dynamic_cast<const MixedType&>(type).IsNullEqNull());
+    default:
+        return CreateType(type.GetTypeId(), true);
+    }
+}
+
 }  // namespace model
