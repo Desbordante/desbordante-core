@@ -1,9 +1,9 @@
 #pragma once
 
+#include <enum.h>
 
 #include <boost/any.hpp>
 #include <boost/mp11/algorithm.hpp>
-#include <enum.h>
 
 #include "algorithms.h"
 #include "typo_miner.h"
@@ -16,14 +16,16 @@ BETTER_ENUM(AlgoMiningType, char,
     fd = 0,
     typos,
     ar,
-    metric
+    metric,
+    stats
 #else
     fd = 0, /* Functional dependency mining */
     cfd,    /* Conditional functional dependency mining */
     ar,     /* Association rule mining */
     key,    /* Key mining */
     typos,  /* Typo mining */
-    metric  /* Metric functional dependency verifying */
+    metric, /* Metric functional dependency verifying */
+    stats   /* Statistic mining */
 #endif
 );
 
@@ -48,7 +50,10 @@ BETTER_ENUM(Algo, char,
     apriori,
 
     /* Metric verifier algorithm */
-    metric
+    metric,
+
+    /* Statistic algorithms */
+    stats
 );
 
 using StdParamsMap = std::unordered_map<std::string, boost::any>;
@@ -152,8 +157,8 @@ ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
         bool const has_header = ExtractParamFromMap<bool>(params, posr::kFirstColumnTId);
         input_format = std::make_shared<model::Tabular>(has_header);
     } else {
-        throw std::invalid_argument(
-            "\"" + input_format_arg + "\"" + " format is not supported in AR mining");
+        throw std::invalid_argument("\"" + input_format_arg + "\"" +
+                                    " format is not supported in AR mining");
     }
     c.input_format = std::move(input_format);
 
@@ -213,17 +218,17 @@ std::unique_ptr<Primitive> CreateTypoMinerInstance(Algo const algo, ParamsMap&& 
 }
 
 template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateArAlgorithmInstance(/*Algo const algo, */ParamsMap&& params) {
+std::unique_ptr<Primitive> CreateArAlgorithmInstance(/*Algo const algo, */ ParamsMap&& params) {
     ARAlgorithm::Config const config =
         CreateArAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
 
-    //return details::CreatePrimitiveInstanceImpl<Primitive, ArAlgorithmTuplesType>(algo, config);
+    // return details::CreatePrimitiveInstanceImpl<Primitive, ArAlgorithmTuplesType>(algo, config);
 
     /* Temporary fix. Template function CreatePrimitiveInstanceImpl does not compile with the new
      * config type ARAlgorithm::Config, even though Apriori algo has been added to Algo enum.
      * So I can suggest two solutions. The first is to implement some base class for the configs
-     * (but I'm  not sure if it will work properly) or for Algo enum (I think it is complicated too).
-     * The other solution is to add a new ArAlgo enum with an AR algorithms and change
+     * (but I'm  not sure if it will work properly) or for Algo enum (I think it is complicated
+     * too). The other solution is to add a new ArAlgo enum with an AR algorithms and change
      * CreateAlgorithmInstance function such that it could create enum instance depending on
      * the passed task type.
      */
@@ -237,7 +242,14 @@ std::unique_ptr<Primitive> CreateMetricVerifierInstance(ParamsMap&& params) {
     return std::make_unique<MetricVerifier>(config);
 }
 
-} // namespace details
+template <typename ParamsMap>
+std::unique_ptr<Primitive> CreateCsvStatsInstance(ParamsMap&& params) {
+    FDAlgorithm::Config const config =
+        CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
+    return std::make_unique<CsvStats>(config);
+}
+
+}  // namespace details
 
 template <typename ParamsMap>
 std::unique_ptr<Primitive> CreateAlgorithmInstance(AlgoMiningType const task, Algo const algo,
@@ -248,9 +260,11 @@ std::unique_ptr<Primitive> CreateAlgorithmInstance(AlgoMiningType const task, Al
     case AlgoMiningType::typos:
         return details::CreateTypoMinerInstance(algo, std::forward<ParamsMap>(params));
     case AlgoMiningType::ar:
-        return details::CreateArAlgorithmInstance(/*algo, */std::forward<ParamsMap>(params));
+        return details::CreateArAlgorithmInstance(/*algo, */ std::forward<ParamsMap>(params));
     case AlgoMiningType::metric:
         return details::CreateMetricVerifierInstance(std::forward<ParamsMap>(params));
+    case AlgoMiningType::stats:
+        return details::CreateCsvStatsInstance(std::forward<ParamsMap>(params));
     default:
         throw std::logic_error(task._to_string() + std::string(" task type is not supported yet."));
     }

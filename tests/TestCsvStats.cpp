@@ -98,6 +98,12 @@ TEST_P(TestCsvStats, TestDistinct) {
     EXPECT_EQ(5, distinct);
 }
 
+TEST_P(TestCsvStats, TestDistinctStringColumn) {
+    CsvStatsParams const& p = GetParam();
+    algos::CsvStats stats(p.config);
+    EXPECT_EQ(7, stats.Distinct(6));
+}
+
 TEST_P(TestCsvStats, TestIsCategorial) {
     CsvStatsParams const& p = GetParam();
     algos::CsvStats stats(p.config);
@@ -152,7 +158,7 @@ TEST_P(TestCsvStats, TestShowSample) {
 // }
 
 TEST_P(TestCsvStats, TestShowAllStats) {
-    //Mixed type statistics will be calculated here.
+    // Mixed type statistics will be calculated here.
     algos::CsvStats stats(GetParam().config);
     stats.Execute();
     std::cout << stats.ToString();
