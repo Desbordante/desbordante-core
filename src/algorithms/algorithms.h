@@ -9,6 +9,7 @@
 #include "algorithms/fdep/fdep.h"
 #include "algorithms/fun.h"
 #include "algorithms/pyro.h"
+#include "algorithms/statistics/csv_stats.h"
 #include "algorithms/tane.h"
 
 /*Association rule mining algorithms */
