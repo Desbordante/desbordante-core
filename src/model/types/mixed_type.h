@@ -35,6 +35,10 @@ public:
         return type->ValueToString(RetrieveValue(value));
     }
 
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<MixedType>(is_null_eq_null_);
+    }
+
     [[nodiscard]] CompareResult Compare(std::byte const* l, std::byte const* r) const final {
         TypeId l_type_id = RetrieveTypeId(l);
         TypeId r_type_id = RetrieveTypeId(r);
