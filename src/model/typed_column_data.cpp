@@ -73,9 +73,9 @@ TypedColumnData TypedColumnDataFactory::CreateMixedFromTypeMap(std::unique_ptr<T
 
     std::unordered_set<unsigned> const& nulls = type_map[TypeId::kNull];
     std::unordered_set<unsigned> const& empties = type_map[TypeId::kEmpty];
-    unsigned int const rows_num = unparsed_.size();
-    unsigned int const nulls_num = nulls.size();
-    unsigned int const empties_num = empties.size();
+    size_t const rows_num = unparsed_.size();
+    size_t const nulls_num = nulls.size();
+    size_t const empties_num = empties.size();
 
     TypeIdToType type_id_to_type = MapTypeIdsToTypes(type_map);
     size_t const buf_size = CalculateMixedBufSize(mixed_type, type_id_to_type, type_map);
@@ -112,9 +112,9 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
 
     std::unordered_set<unsigned> nulls = std::move(type_map[TypeId::kNull]);
     std::unordered_set<unsigned> empties = std::move(type_map[TypeId::kEmpty]);
-    unsigned int const rows_num = unparsed_.size();
-    unsigned int const nulls_num = nulls.size();
-    unsigned int const empties_num = empties.size();
+    size_t const rows_num = unparsed_.size();
+    size_t const nulls_num = nulls.size();
+    size_t const empties_num = empties.size();
     assert(rows_num >= nulls_num + empties_num);
 
     std::vector<std::byte const*> data(unparsed_.size());
