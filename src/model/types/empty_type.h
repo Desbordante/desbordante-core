@@ -20,6 +20,10 @@ public:
         return "";
     }
 
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<EmptyType>();
+    }
+
     CompareResult Compare([[maybe_unused]] std::byte const* l,
                           [[maybe_unused]] std::byte const* r) const override {
         ThrowUnsupportedOperation();

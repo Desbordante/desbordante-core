@@ -23,6 +23,10 @@ public:
         return Null::kValue.data();
     }
 
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<NullType>(is_null_eq_null_);
+    }
+
     [[nodiscard]] CompareResult Compare([[maybe_unused]] std::byte const* l,
                                         [[maybe_unused]] std::byte const* r) const override {
         if (is_null_eq_null_) {

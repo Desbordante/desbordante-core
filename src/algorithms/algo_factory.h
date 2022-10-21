@@ -1,9 +1,9 @@
 #pragma once
 
-#include <enum.h>
 
 #include <boost/any.hpp>
 #include <boost/mp11/algorithm.hpp>
+#include <enum.h>
 
 #include "algorithms.h"
 #include "typo_miner.h"
@@ -13,10 +13,10 @@ namespace algos {
 
 BETTER_ENUM(AlgoMiningType, char,
 #if 1
-    fd = 0,
-    typos,
-    ar,
-    metric,
+    fd = 0, 
+    typos, 
+    ar, 
+    metric, 
     stats
 #else
     fd = 0, /* Functional dependency mining */

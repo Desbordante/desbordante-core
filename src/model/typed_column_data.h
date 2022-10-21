@@ -13,9 +13,9 @@ namespace model {
 class TypedColumnData : public model::AbstractColumnData {
 private:
     std::unique_ptr<Type const> type_;
-    unsigned int rows_num_;
-    unsigned int nulls_num_;
-    unsigned int empties_num_;
+    size_t rows_num_;
+    size_t nulls_num_;
+    size_t empties_num_;
     std::unique_ptr<std::byte[]> buffer_;
     std::vector<std::byte const*> data_;
     /* For non-mixed type only */
@@ -23,7 +23,7 @@ private:
     std::unordered_set<unsigned> empties_;
 
     TypedColumnData(Column const* column, std::unique_ptr<Type const> type,
-                    unsigned int const rows_num, unsigned int nulls_num, unsigned int empties_num,
+                    size_t const rows_num, size_t nulls_num, size_t empties_num,
                     std::unique_ptr<std::byte[]> buffer, std::vector<std::byte const*> data,
                     std::unordered_set<unsigned> nulls,
                     std::unordered_set<unsigned> empties) noexcept
@@ -71,19 +71,19 @@ public:
         return data_;
     }
 
-    unsigned int GetNumNulls() const noexcept {
+    size_t GetNumNulls() const noexcept {
         return nulls_num_;
     }
 
-    unsigned int GetNumEmpties() const noexcept {
+    size_t GetNumEmpties() const noexcept {
         return empties_num_;
     }
 
-    unsigned int GetNumRows() const noexcept {
+    size_t GetNumRows() const noexcept {
         return rows_num_;
     }
 
-    bool IsNull(unsigned int index) const noexcept {
+    bool IsNull(size_t index) const noexcept {
         MixedType const* mixed = GetIfMixed();
         if (mixed != nullptr) {
             return mixed->RetrieveTypeId(data_[index]) == +TypeId::kNull;
@@ -92,7 +92,7 @@ public:
         }
     }
 
-    bool IsEmpty(unsigned int index) const noexcept {
+    bool IsEmpty(size_t index) const noexcept {
         MixedType const* mixed = GetIfMixed();
         if (mixed != nullptr) {
             return mixed->RetrieveTypeId(data_[index]) == +TypeId::kEmpty;
@@ -101,11 +101,11 @@ public:
         }
     }
 
-    bool IsNullOrEmpty(unsigned int index) const noexcept {
+    bool IsNullOrEmpty(size_t index) const noexcept {
         return IsNull(index) || IsEmpty(index);
     }
 
-    TypeId GetValueTypeId(unsigned int index) const noexcept {
+    TypeId GetValueTypeId(size_t index) const noexcept {
         TypeId const type_id = type_->GetTypeId();
         if (type_id == +TypeId::kMixed) {
             return static_cast<MixedType const*>(type_.get())->RetrieveTypeId(data_[index]);

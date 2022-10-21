@@ -7,6 +7,10 @@ namespace model {
 class BigIntType : public StringType {
 public:
     BigIntType() : StringType(TypeId::kBigInt){};
+
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<BigIntType>();
+    }
 };
 
 }  // namespace model

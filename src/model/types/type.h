@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <memory>
 
 #include "builtin.h"
 
@@ -89,6 +90,9 @@ public:
         delete[] val;
     }
     [[nodiscard]] virtual std::string ValueToString(std::byte const* value) const = 0;
+    [[nodiscard]] virtual std::unique_ptr<Type> CloneType() const {
+        return nullptr;
+    }
     [[nodiscard]] virtual CompareResult Compare(std::byte const* l, std::byte const* r) const = 0;
     [[nodiscard]] virtual size_t Hash(std::byte const* value) const = 0;
     [[nodiscard]] virtual size_t GetSize() const = 0;

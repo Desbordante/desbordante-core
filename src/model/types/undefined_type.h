@@ -19,6 +19,10 @@ public:
         ThrowUnsupportedOperation();
     }
 
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<UndefinedType>(NullType::IsNullEqNull());
+    }
+
     CompareResult Compare([[maybe_unused]] std::byte const* l,
                           [[maybe_unused]] std::byte const* r) const final {
         ThrowUnsupportedOperation();

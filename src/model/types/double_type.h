@@ -22,6 +22,21 @@ public:
 
         return CompareResult::kGreater;
     }
+
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+        return std::make_unique<DoubleType>();
+    }
+
+    static std::byte* MakeFrom(const std::byte* data, const Type& type) {
+        switch (type.GetTypeId()) {
+        case TypeId::kDouble:
+            return DoubleType().Clone(data);
+        case TypeId::kInt:
+            return DoubleType().MakeValue(Type::GetValue<Int>(data));
+        default:
+            return nullptr;
+        }
+    }
 };
 
 }  // namespace model
