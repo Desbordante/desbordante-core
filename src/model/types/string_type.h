@@ -20,6 +20,10 @@ public:
         return GetValue<String>(value);
     }
 
+    [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
+        return MakeValue(ValueToString(value));
+    }
+
     [[nodiscard]] CompareResult Compare(std::byte const* l, std::byte const* r) const override {
         auto const& l_val = GetValue<String>(l);
         auto const& r_val = GetValue<String>(r);
