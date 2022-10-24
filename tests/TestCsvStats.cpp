@@ -147,6 +147,12 @@ TEST(TestCsvStats, TestGetSkewness) {
     EXPECT_DOUBLE_EQ(s, expected);
 }
 
+TEST(TestCsvStats, CorrectExecutionEmpty) {
+    algos::CsvStats stats(MakeConfig("TestEmpty.csv"));
+    stats.Execute();
+    EXPECT_EQ(stats.GetAllStats().size(), 0);
+}
+
 //To measure performace of mining statistics in multiple threads.
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
