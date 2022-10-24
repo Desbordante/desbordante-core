@@ -31,11 +31,11 @@ public:
         return length_;
     }
 
-    long double CosineSimilarity(QGramVector& other) const {
+    long double CosineSimilarity(QGramVector const& other) const {
         return InnerProduct(other) / (GetLength() * other.GetLength());
     }
 
-    long double CosineDistance(QGramVector& other) const {
+    long double CosineDistance(QGramVector const& other) const {
         return 1 - CosineSimilarity(other);
     }
 };
