@@ -117,7 +117,7 @@ static void TestForEachAlgo(F&& test) {
              * current architecture)
              * Same issue with "metric" algorithm
              * */
-            if (algo != +algos::Algo::apriori && algo != +algos::Algo::metric) {
+            if (algo != +algos::Algo::apriori && algo != +algos::Algo::metric && algo != +algos::Algo::stats) {
                 test(algo);
             }
         } catch (std::runtime_error const& e) {
