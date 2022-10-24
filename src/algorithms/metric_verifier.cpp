@@ -366,8 +366,8 @@ MetricVerifier::DistanceFunction<std::byte const*> MetricVerifier::GetCosineDist
                     "q-gram length should not exceed the minimum string length "
                     "in the dataset.");
         }
-        util::QGramVector& v1 = q_gram_map.try_emplace(str1, str1, q_).first->second;
-        util::QGramVector& v2 = q_gram_map.try_emplace(str2, str2, q_).first->second;
+        util::QGramVector const& v1 = q_gram_map.try_emplace(str1, str1, q_).first->second;
+        util::QGramVector const& v2 = q_gram_map.try_emplace(str2, str2, q_).first->second;
         return v1.CosineDistance(v2);
     };
 }
