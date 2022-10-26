@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "Types.h"
+#include "types.h"
 
 namespace algos {
 class Statistic {

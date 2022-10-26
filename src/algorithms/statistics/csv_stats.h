@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ColumnLayoutTypedRelationData.h"
-#include "FDAlgorithm.h"
+#include "column_layout_typed_relation_data.h"
+#include "fd_algorithm.h"
 #include "statistic.h"
 
 namespace algos {
