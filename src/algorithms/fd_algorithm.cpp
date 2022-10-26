@@ -12,15 +12,16 @@ void FDAlgorithm::InitConfigParallelism() {
     if (config_.parallelism == 0) {
         config_.parallelism = std::thread::hardware_concurrency();
         if (config_.parallelism == 0) {
-            throw std::runtime_error("Unable to detect number of concurrent "
-                                     "threads supported by your system. "
-                                     "Please, specify it manually.");
+            throw std::runtime_error(
+                    "Unable to detect number of concurrent "
+                    "threads supported by your system. "
+                    "Please, specify it manually.");
         }
     }
 }
 
 std::string FDAlgorithm::GetJsonFDs() const {
-        return FDsToJson(fd_collection_);
+    return FDsToJson(fd_collection_);
 }
 
 unsigned int FDAlgorithm::Fletcher16() {
@@ -59,7 +60,7 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
         }
     }
 
-    for (auto const&[col, num] : fds_count_per_col) {
+    for (auto const& [col, num] : fds_count_per_col) {
         if (num + 1 + cols_of_equal_values == number_of_cols) {
             keys.push_back(col);
         }
@@ -68,3 +69,20 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     return keys;
 }
 
+std::vector<model::TypedColumnData> FDAlgorithm::CreateColumnData(
+        const FDAlgorithm::Config& config) {
+    CSVParser input_generator(config.data, config.separator, config.has_header);
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
+            model::ColumnLayoutTypedRelationData::CreateFrom(input_generator,
+                                                             config.is_null_equal_null, -1, -1);
+    std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
+    return col_data;
+}
+
+std::vector<model::TypedColumnData> FDAlgorithm::CreateColumnData(std::string_view data, char sep,
+                                                                  bool has_header) {
+    auto const path = std::filesystem::current_path() / "input_data" / data;
+    return CreateColumnData(Config{.data = std::filesystem::current_path() / "input_data" / data,
+                                   .separator = sep,
+                                   .has_header = has_header});
+}

@@ -20,7 +20,7 @@ public:
         return "";
     }
 
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<EmptyType>();
     }
 

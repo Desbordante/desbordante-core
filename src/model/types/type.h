@@ -90,9 +90,7 @@ public:
         delete[] val;
     }
     [[nodiscard]] virtual std::string ValueToString(std::byte const* value) const = 0;
-    [[nodiscard]] virtual std::unique_ptr<Type> CloneType() const {
-        return nullptr;
-    }
+    [[nodiscard]] virtual std::unique_ptr<Type> CloneType() const = 0;
     [[nodiscard]] virtual CompareResult Compare(std::byte const* l, std::byte const* r) const = 0;
     [[nodiscard]] virtual size_t Hash(std::byte const* value) const = 0;
     [[nodiscard]] virtual size_t GetSize() const = 0;
@@ -112,6 +110,11 @@ public:
     template <typename T>
     [[nodiscard]] static T& GetValue(std::byte* buf) {
         return *reinterpret_cast<T*>(buf);
+    }
+
+    static bool IsOrdered(const TypeId& type_id) {
+        return !(type_id == +TypeId::kEmpty || type_id == +TypeId::kNull ||
+                 type_id == +TypeId::kUndefined);
     }
 };
 

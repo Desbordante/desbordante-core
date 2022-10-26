@@ -19,7 +19,7 @@ public:
 
     using RelationData::AbstractRelationData;
 
-    [[nodiscard]] unsigned int GetNumRows() const final {
+    [[nodiscard]] size_t GetNumRows() const final {
         if (column_data_.empty()) {
             return 0;
         }
