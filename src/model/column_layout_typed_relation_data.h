@@ -21,10 +21,8 @@ public:
     }
 
     static std::unique_ptr<ColumnLayoutTypedRelationData> CreateFrom(
-        model::IDatasetStream& data_stream,
-        bool is_null_eq_null,
-        int max_cols = -1,
-        long max_rows = -1);
+            model::IDatasetStream& data_stream, bool is_null_eq_null, int max_cols = -1,
+            long max_rows = -1);
 };
 
 }  // namespace model
