@@ -1,12 +1,12 @@
 #pragma once
 
 #include "column_layout_typed_relation_data.h"
-#include "idataset_stream.h"
 #include "csv_parser.h"
+#include "idataset_stream.h"
 #include "primitive.h"
+#include "program_option_strings.h"
 #include "pyro.h"
 #include "types.h"
-#include "program_option_strings.h"
 
 namespace algos {
 
@@ -41,7 +41,7 @@ private:
     }
 
     std::unordered_map<int, unsigned> CreateFrequencies(
-        util::PLI::Cluster const& cluster, std::vector<int> const& probing_table) const;
+            util::PLI::Cluster const& cluster, std::vector<int> const& probing_table) const;
     std::map<int, unsigned> CreateFrequencyMap(Column const& cluster_col,
                                                util::PLI::Cluster const& cluster) const;
     unsigned GetMostFrequentValueIndex(Column const& cluster_col,
@@ -106,8 +106,8 @@ public:
     TyposVec FindLinesWithTypos(FD const& typos_fd, util::PLI::Cluster const& cluster) const;
     TyposVec FindLinesWithTypos(FD const& typos_fd, util::PLI::Cluster const& cluster,
                                 double new_radius, double new_ratio);
-    std::vector<ClusterTyposPair> FindClustersAndLinesWithTypos(
-        FD const& typos_fd, bool const sort_clusters = true);
+    std::vector<ClusterTyposPair> FindClustersAndLinesWithTypos(FD const& typos_fd,
+                                                                bool const sort_clusters = true);
 
     /* Returns vector of approximate fds only (there are no precise fds) */
     std::vector<FD> const& GetApproxFDs() const noexcept {
@@ -152,12 +152,13 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
 
     Config precise_config = config;
     precise_config.special_params[posr::kError] = 0.0;
-    auto input_generator = std::make_unique<CSVParser>(config.data, config.separator, config.has_header);
-    std::shared_ptr<ColumnLayoutRelationData> relation =
-        ColumnLayoutRelationData::CreateFrom(*input_generator, config.is_null_equal_null);
+    auto input_generator = std::make_unique<CSVParser>(config.data, config.separator,
+                                                       config.has_header);
+    std::shared_ptr<ColumnLayoutRelationData> relation = ColumnLayoutRelationData::CreateFrom(
+            *input_generator, config.is_null_equal_null);
     input_generator->Reset();
     auto typed_relation = model::ColumnLayoutTypedRelationData::CreateFrom(
-        *input_generator, config.is_null_equal_null);
+            *input_generator, config.is_null_equal_null);
 
     double radius;
     double ratio;

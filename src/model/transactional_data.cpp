@@ -19,9 +19,9 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream&
 }
 
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
-    IDatasetStream& data_stream,
-    unsigned tid_col_index,
-    unsigned item_col_index) {
+        IDatasetStream& data_stream,
+        unsigned tid_col_index,
+        unsigned item_col_index) {
     std::vector<std::string> item_universe;
     std::unordered_map<std::string, unsigned> item_universe_set;
     std::unordered_map<unsigned, Itemset> transactions;
@@ -89,7 +89,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
             }
             unsigned item_id = latest_item_id;
 
-            auto const [item_iter, was_inserted] = item_universe_set.try_emplace(item_name, item_id);
+            auto const [item_iter, was_inserted] = item_universe_set.try_emplace(item_name,
+                                                                                 item_id);
             if (was_inserted) {
                 // TODO(alexandrsmirn) попробовать избежать этого добавления.
                 item_universe.push_back(std::move(item_name));
@@ -112,4 +113,4 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
                                                                     std::move(transactions)));
 }
 
-} // namespace model
+}  // namespace model
