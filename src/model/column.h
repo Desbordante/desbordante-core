@@ -12,7 +12,7 @@ class Column {
 
 private:
     std::string name_;
-    unsigned int index_;
+    size_t index_;
     RelationalSchema const* schema_;
 
 public:
@@ -21,7 +21,7 @@ public:
         index_(index),
         schema_(schema) {}
 
-    unsigned int GetIndex() const { return index_; }
+    size_t GetIndex() const { return index_; }
 
     std::string GetName() const { return name_; }
     RelationalSchema const* GetSchema() const { return schema_; }

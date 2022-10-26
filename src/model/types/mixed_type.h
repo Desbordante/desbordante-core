@@ -35,7 +35,7 @@ public:
         return type->ValueToString(RetrieveValue(value));
     }
 
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<MixedType>(is_null_eq_null_);
     }
 
@@ -44,7 +44,9 @@ public:
         TypeId r_type_id = RetrieveTypeId(r);
 
         if (l_type_id != r_type_id) {
-            throw std::invalid_argument("Cannot compare values of different types");
+            if(l_type_id < r_type_id)
+                return CompareResult::kLess;
+            return CompareResult::kGreater;
         }
 
         std::unique_ptr<Type> type = RetrieveType(l);
@@ -72,7 +74,7 @@ public:
         std::unique_ptr<Type> type = RetrieveType(value);
         size_t size = GetMixedValueSize(type.get());
         auto* new_value = new std::byte[size];
-        std::memcpy(new_value, value, size);
+        ValueFromStr(new_value, ValueToString(value), type.get());
         return new_value;
     }
 
