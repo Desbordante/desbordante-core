@@ -12,7 +12,7 @@ class Statistic {
 
 public:
     Statistic() noexcept = default;
-    Statistic(const std::byte*, const model::Type*, bool clone_data = true);
+    Statistic(const std::byte*, const model::Type*, bool clone_data);
     Statistic(const Statistic&);
     Statistic(Statistic&&);
     ~Statistic();
@@ -34,7 +34,7 @@ struct ColumnStats {
     bool is_categorical;
     Statistic avg, STD, skewness, kurtosis, min, max, sum, quantile25, quantile50, quantile75;
     std::string ToString() const;
-    std::unordered_map<std::string, std::string> ToKeyValueStringPairs() const;
+    std::unordered_map<std::string, std::string> ToKeyValueMap() const;
 };
 
 }  // namespace algos

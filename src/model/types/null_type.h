@@ -23,7 +23,7 @@ public:
         return Null::kValue.data();
     }
 
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<NullType>(is_null_eq_null_);
     }
 

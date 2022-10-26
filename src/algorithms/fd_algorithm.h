@@ -8,6 +8,7 @@
 
 #include "fd.h"
 #include "primitive.h"
+#include "column_layout_typed_relation_data.h"
 
 namespace util {
 class AgreeSetFactory;
@@ -59,8 +60,8 @@ private:
 protected:
     /* Algorithm configuration */
     Config config_;
-    /* содержит множество найденных функциональных зависимостей. Это поле будет использоваться при тестировании,
-     * поэтому важно положить сюда все намайненные ФЗ
+    /* содержит множество найденных функциональных зависимостей. Это поле будет использоваться при
+     * тестировании, поэтому важно положить сюда все намайненные ФЗ
      * */
     std::list<FD> fd_collection_;
 
@@ -82,8 +83,8 @@ public:
         InitConfigParallelism();
     }
 
-    /* эти методы кладут зависимость в хранилище - можно пользоваться ими напрямую или override-нуть,
-     * если нужно какое-то кастомное поведение
+    /* эти методы кладут зависимость в хранилище - можно пользоваться ими напрямую или
+     * override-нуть, если нужно какое-то кастомное поведение
      * */
     virtual void RegisterFd(Vertical lhs, Column rhs) {
         std::scoped_lock lock(register_mutex_);
@@ -102,9 +103,9 @@ public:
         return fd_collection_;
     }
 
-    /* возвращает набор ФЗ в виде JSON-а. По сути, это просто представление фиксированного формата для сравнения
-     * результатов разных алгоритмов. JSON - на всякий случай, если потом, например, понадобится загрузить список в
-     * питон и как-нибудь его поанализировать
+    /* возвращает набор ФЗ в виде JSON-а. По сути, это просто представление фиксированного формата
+     * для сравнения результатов разных алгоритмов. JSON - на всякий случай, если потом, например,
+     * понадобится загрузить список в питон и как-нибудь его поанализировать
      * */
     std::string GetJsonFDs() const;
 
@@ -128,7 +129,7 @@ public:
 
     virtual ~FDAlgorithm() = default;
 
-    template<typename Container>
+    template <typename Container>
     static std::string FDsToJson(Container const& fds) {
         std::string result = "{\"fds\": [";
         std::vector<std::string> discovered_fd_strings;
@@ -145,4 +146,8 @@ public:
         result += "]}";
         return result;
     }
+
+    static std::vector<model::TypedColumnData> CreateColumnData(const Config& config);
+    static std::vector<model::TypedColumnData> CreateColumnData(std::string_view data, char sep,
+                                                                bool has_header);
 };

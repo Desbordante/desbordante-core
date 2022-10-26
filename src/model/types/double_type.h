@@ -23,7 +23,7 @@ public:
         return CompareResult::kGreater;
     }
 
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<DoubleType>();
     }
 

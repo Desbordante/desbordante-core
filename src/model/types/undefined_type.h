@@ -19,7 +19,7 @@ public:
         ThrowUnsupportedOperation();
     }
 
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<UndefinedType>(NullType::IsNullEqNull());
     }
 

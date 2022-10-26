@@ -4,8 +4,8 @@ namespace model {
 
 class InputFormat {
 public:
-    virtual unsigned tid_column_index() const noexcept { return 0; };
-    virtual unsigned item_column_index() const noexcept { return 0; };
+    virtual size_t tid_column_index() const noexcept { return 0; };
+    virtual size_t item_column_index() const noexcept { return 0; };
     virtual bool tid_presence() const noexcept = 0;
 
     virtual ~InputFormat() = default;
@@ -13,15 +13,15 @@ public:
 
 class Singular : public InputFormat {
 private:
-    unsigned tid_column_index_;
-    unsigned item_column_index_;
+    size_t tid_column_index_;
+    size_t item_column_index_;
 
 public:
-    explicit Singular(unsigned tid_column_index, unsigned item_column_index)
+    explicit Singular(size_t tid_column_index, size_t item_column_index)
         : tid_column_index_(tid_column_index), item_column_index_(item_column_index) {}
 
-    unsigned tid_column_index() const noexcept override { return tid_column_index_; }
-    unsigned item_column_index() const noexcept override { return  item_column_index_; }
+    size_t tid_column_index() const noexcept override { return tid_column_index_; }
+    size_t item_column_index() const noexcept override { return  item_column_index_; }
     bool tid_presence() const noexcept override { return true; }
 };
 

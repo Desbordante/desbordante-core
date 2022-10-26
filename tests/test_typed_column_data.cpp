@@ -6,6 +6,7 @@
 
 #include "column_layout_typed_relation_data.h"
 #include "csv_parser.h"
+#include "fd_algorithm.h"
 
 namespace tests {
 
@@ -29,19 +30,9 @@ struct TypeParsingParams {
 
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};
 
-static inline std::vector<mo::TypedColumnData> CreateColumnData(std::string_view data, char sep,
-                                                                bool has_header) {
-    auto const path = fs::current_path() / "input_data" / data;
-    auto input_generator = std::make_unique<CSVParser>(path, sep, has_header);
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-        model::ColumnLayoutTypedRelationData::CreateFrom(*input_generator, true, -1, -1);
-    std::vector<mo::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
-    return col_data;
-}
-
 TEST_P(TestTypeParsing, DefaultTest) {
     TypeParsingParams const& p = GetParam();
-    std::vector<mo::TypedColumnData> column_data = CreateColumnData(p.dataset, p.sep, p.has_header);
+    std::vector<mo::TypedColumnData> column_data = FDAlgorithm::CreateColumnData(p.dataset, p.sep, p.has_header);
 
     ASSERT_EQ(column_data.size(), p.expected.size());
 
@@ -87,7 +78,7 @@ INSTANTIATE_TEST_SUITE_P(
                           "SimpleTypes.csv")));
 
 TEST(TypeSystem, SumColumnDoubles) {
-    std::vector<mo::TypedColumnData> col_data = CreateColumnData("iris.csv", ',', false);
+    std::vector<mo::TypedColumnData> col_data = FDAlgorithm::CreateColumnData("iris.csv", ',', false);
     ASSERT_EQ(col_data.size(), 5);
     mo::TypedColumnData const& col = col_data.front();
     ASSERT_EQ(col.GetTypeId(), static_cast<TypeId>(TypeId::kDouble));

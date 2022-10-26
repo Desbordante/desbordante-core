@@ -12,7 +12,7 @@ class ColumnLayoutTypedRelationData final : public TypedRelationData {
 public:
     using TypedRelationData::AbstractRelationData;
 
-    unsigned int GetNumRows() const final {
+    size_t GetNumRows() const final {
         if (column_data_.empty()) {
             return 0;
         } else {

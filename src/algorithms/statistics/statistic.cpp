@@ -16,7 +16,7 @@ Statistic::Statistic(const std::byte* data, const model::Type* type, bool clone_
 }
 
 Statistic::Statistic(const Statistic& other)
-    : Statistic::Statistic(other.data_, other.type_.get()) {}
+    : Statistic::Statistic(other.data_, other.type_.get(), true) {}
 
 Statistic::Statistic(Statistic&& other)
     : has_value_(other.has_value_), data_(std::move(other.data_)), type_(std::move(other.type_)) {
@@ -73,16 +73,16 @@ std::string Statistic::ToString() const {
     return type_->ValueToString(data_);
 }
 
-std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueStringPairs() const {
+std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const {
     std::unordered_map<std::string, std::string> res;
-    res.insert(std::make_pair("count", std::to_string(count)));
+    res.emplace("count", std::to_string(count));
     if (is_distinct_correct) {
-        res.insert(std::make_pair("distinct", std::to_string(distinct)));
-        res.insert(std::make_pair("isCategorical", std::to_string(is_categorical)));
+        res.emplace("distinct", std::to_string(distinct));
+        res.emplace("isCategorical", std::to_string(is_categorical));
     }
 
     auto try_add_stat = [&res](const Statistic& stat, const std::string& statName) {
-        if (stat.HasValue()) res.insert(std::make_pair(statName, stat.ToString()));
+        if (stat.HasValue()) res.emplace(statName, stat.ToString());
     };
 
     try_add_stat(avg, "avg");
@@ -100,8 +100,8 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueStringPairs(
 
 std::string ColumnStats::ToString() const {
     std::stringstream res;
-    for (const auto& stat : ToKeyValueStringPairs()) {
-        res << stat.first << " = " << stat.second << '\n';
+    for (const auto& [statName, value] : ToKeyValueMap()) {
+        res << statName << " = " << value << '\n';
     }
     return res.str();
 }

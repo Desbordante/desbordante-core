@@ -14,17 +14,17 @@ namespace model {
 class TransactionalData {
 private:
     std::vector<std::string> item_universe_;
-    std::unordered_map<unsigned, Itemset> transactions_;
+    std::unordered_map<size_t, Itemset> transactions_;
 
     static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& data_stream,
-                                                                 unsigned tid_col_index = 0,
-                                                                 unsigned item_col_index = 1);
+                                                                 size_t tid_col_index = 0,
+                                                                 size_t item_col_index = 1);
 
     static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& data_stream,
                                                                 bool has_tid);
 
     TransactionalData(std::vector<std::string> item_universe,
-                      std::unordered_map<unsigned, Itemset> transactions)
+                      std::unordered_map<size_t, Itemset> transactions)
         : item_universe_(std::move(item_universe)), transactions_(std::move(transactions)) {}
 
 public:
@@ -37,7 +37,7 @@ public:
     TransactionalData& operator=(TransactionalData&& other) = default;
 
     std::vector<std::string> const& GetItemUniverse() const noexcept { return item_universe_; }
-    std::unordered_map<unsigned, Itemset> const& GetTransactions() const noexcept {
+    std::unordered_map<size_t, Itemset> const& GetTransactions() const noexcept {
         return transactions_;
     }
 

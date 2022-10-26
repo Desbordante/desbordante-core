@@ -20,12 +20,12 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream&
 
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
         IDatasetStream& data_stream,
-        unsigned tid_col_index,
-        unsigned item_col_index) {
+        size_t tid_col_index,
+        size_t item_col_index) {
     std::vector<std::string> item_universe;
-    std::unordered_map<std::string, unsigned> item_universe_set;
-    std::unordered_map<unsigned, Itemset> transactions;
-    unsigned latest_item_id = 0;
+    std::unordered_map<std::string, size_t> item_universe_set;
+    std::unordered_map<size_t, Itemset> transactions;
+    size_t latest_item_id = 0;
 
     assert(data_stream.GetNumberOfColumns() > std::max(tid_col_index, item_col_index));
 
@@ -35,9 +35,9 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
             continue;
         }
 
-        unsigned const tid = std::stoi(row[tid_col_index]);
+        size_t const tid = std::stoi(row[tid_col_index]);
         std::string& item_name = row[item_col_index];
-        unsigned item_id = latest_item_id;
+        size_t item_id = latest_item_id;
 
         auto const [item_iter, was_inserted] = item_universe_set.try_emplace(item_name, item_id);
         if (was_inserted) {
@@ -64,10 +64,10 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDatasetStream& data_stream,
                                                                         bool has_tid) {
     std::vector<std::string> item_universe;
-    std::unordered_map<std::string, unsigned> item_universe_set;
-    std::unordered_map<unsigned, Itemset> transactions;
-    unsigned latest_item_id = 0;
-    unsigned tid = 0;
+    std::unordered_map<std::string, size_t> item_universe_set;
+    std::unordered_map<size_t, Itemset> transactions;
+    size_t latest_item_id = 0;
+    size_t tid = 0;
 
     while (data_stream.HasNextRow()) {
         std::vector<std::string> row = data_stream.GetNextRow();
@@ -87,7 +87,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
             if (item_name.empty()) {
                 continue;
             }
-            unsigned item_id = latest_item_id;
+            size_t item_id = latest_item_id;
 
             auto const [item_iter, was_inserted] = item_universe_set.try_emplace(item_name,
                                                                                  item_id);

@@ -19,14 +19,14 @@ private:
     std::unique_ptr<std::byte[]> buffer_;
     std::vector<std::byte const*> data_;
     /* For non-mixed type only */
-    std::unordered_set<unsigned> nulls_;
-    std::unordered_set<unsigned> empties_;
+    std::unordered_set<size_t> nulls_;
+    std::unordered_set<size_t> empties_;
 
     TypedColumnData(Column const* column, std::unique_ptr<Type const> type,
                     size_t const rows_num, size_t nulls_num, size_t empties_num,
                     std::unique_ptr<std::byte[]> buffer, std::vector<std::byte const*> data,
-                    std::unordered_set<unsigned> nulls,
-                    std::unordered_set<unsigned> empties) noexcept
+                    std::unordered_set<size_t> nulls,
+                    std::unordered_set<size_t> empties) noexcept
         : AbstractColumnData(column),
           type_(std::move(type)),
           rows_num_(rows_num),
@@ -69,6 +69,10 @@ public:
 
     std::vector<std::byte const*> const& GetData() const noexcept {
         return data_;
+    }
+
+    std::byte const* GetValue(size_t index) const noexcept {
+        return data_[index];
     }
 
     size_t GetNumNulls() const noexcept {
@@ -142,7 +146,7 @@ public:
 
 class TypedColumnDataFactory {
 private:
-    using TypeMap = std::unordered_map<TypeId, std::unordered_set<unsigned>>;
+    using TypeMap = std::unordered_map<TypeId, std::unordered_set<size_t>>;
     using TypeIdToType = std::unordered_map<TypeId, std::unique_ptr<Type>>;
 
     Column const* column_;

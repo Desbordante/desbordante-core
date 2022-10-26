@@ -12,9 +12,6 @@ class CsvStats : public algos::Primitive {
     std::vector<ColumnStats> all_stats_;
     ushort threads_num_;
 
-    Statistic STDAndCentralMoment_(size_t index, int number, bool bessel_correction) const;
-    Statistic GetMinMax_(size_t index, bool is_for_max) const;
-
 public:
     explicit CsvStats(const FDAlgorithm::Config& config);
 
@@ -28,7 +25,8 @@ public:
     size_t Distinct(size_t index);
     // Check if quantity <= count of unique values in the column.
     bool IsCategorical(size_t index, size_t quantity);
-    // Show part of the table.
+    // Returns table slice from start_row to end_row and from start_col to end_col.
+    // Data values converted to string type.
     std::vector<std::vector<std::string>> ShowSample(size_t start_row, size_t end_row,
                                                      size_t start_col, size_t end_col,
                                                      size_t str_len = 10, size_t unsigned_len = 5,
@@ -45,9 +43,11 @@ public:
     Statistic GetCentralMomentOfDist(size_t index, int number) const;
     // Returns standardized moment of the column if it's numeric.
     Statistic GetStandardizedCentralMomentOfDist(size_t index, int number) const;
-    // Returns minimum value of the column.
-    Statistic GetMin(size_t index) const;
-    // Returns maximum value of the column.
+    // Returns central moment of the column if it's numeric.
+    Statistic CalculateCentralMoment(size_t index, int number, bool bessel_correction) const;
+    // Returns minimum (maximumin if order = mo::CompareResult::kGreater) value of the column.
+    Statistic GetMin(size_t index, model::CompareResult order = model::CompareResult::kLess) const;
+    // Returns maximumin value of the column.
     Statistic GetMax(size_t index) const;
     // Returns sum of the column's values if it's numeric.
     Statistic GetSum(size_t index) const;

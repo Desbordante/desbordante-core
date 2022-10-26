@@ -25,8 +25,8 @@ TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap() const {
     }
 
     if (type_map.count(TypeId::kBigInt) && type_map.count(TypeId::kInt)) {
-        std::unordered_set<unsigned>& big_ints = type_map[TypeId::kBigInt];
-        std::unordered_set<unsigned> ints = std::move(type_map.extract(TypeId::kInt).mapped());
+        std::unordered_set<size_t>& big_ints = type_map[TypeId::kBigInt];
+        std::unordered_set<size_t> ints = std::move(type_map.extract(TypeId::kInt).mapped());
         big_ints.insert(ints.begin(), ints.end());
     }
 
@@ -37,7 +37,7 @@ std::vector<TypeId> TypedColumnDataFactory::GetTypesLayout(TypeMap const& tm) co
     std::vector<TypeId> types_layout(unparsed_.size(), TypeId::kString);
 
     for (auto const& [type_id, indices] : tm) {
-        for (unsigned const index : indices) {
+        for (size_t const index : indices) {
             types_layout[index] = type_id;
         }
     }
@@ -71,8 +71,8 @@ TypedColumnData TypedColumnDataFactory::CreateMixedFromTypeMap(std::unique_ptr<T
     std::vector<std::byte const*> data;
     data.reserve(unparsed_.size());
 
-    std::unordered_set<unsigned> const& nulls = type_map[TypeId::kNull];
-    std::unordered_set<unsigned> const& empties = type_map[TypeId::kEmpty];
+    std::unordered_set<size_t> const& nulls = type_map[TypeId::kNull];
+    std::unordered_set<size_t> const& empties = type_map[TypeId::kEmpty];
     size_t const rows_num = unparsed_.size();
     size_t const nulls_num = nulls.size();
     size_t const empties_num = empties.size();
@@ -110,8 +110,8 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
         assert(0);
     }
 
-    std::unordered_set<unsigned> nulls = std::move(type_map[TypeId::kNull]);
-    std::unordered_set<unsigned> empties = std::move(type_map[TypeId::kEmpty]);
+    std::unordered_set<size_t> nulls = std::move(type_map[TypeId::kNull]);
+    std::unordered_set<size_t> empties = std::move(type_map[TypeId::kEmpty]);
     size_t const rows_num = unparsed_.size();
     size_t const nulls_num = nulls.size();
     size_t const empties_num = empties.size();
@@ -126,9 +126,9 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
 
     std::unique_ptr<std::byte[]> buf(type->Allocate(rows_num - nulls_num - empties_num));
 
-    unsigned buf_index = 0;
+    size_t buf_index = 0;
     size_t const value_size = type->GetSize();
-    for (unsigned i : type_map.at(type_id)) {
+    for (size_t i : type_map.at(type_id)) {
         assert(buf_index <= type->GetSize() * type_map.at(type_id).size());
         std::byte* next = buf.get() + buf_index;
         type->ValueFromStr(next, std::move(unparsed_[i]));

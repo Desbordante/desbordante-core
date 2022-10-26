@@ -12,7 +12,7 @@ public:
     explicit StringType(TypeId type_id = TypeId::kString) noexcept : IMetrizableType(type_id) {}
 
     void Free(std::byte const* value) const noexcept override {
-        //Destruct(value);
+        Destruct(value);
         Type::Free(value);
     }
 
@@ -23,8 +23,8 @@ public:
     [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
         return MakeValue(ValueToString(value));
     }
-    
-    [[nodiscard]] std::unique_ptr<Type> CloneType() const {
+
+    [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<StringType>();
     }
 
