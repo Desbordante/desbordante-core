@@ -22,6 +22,8 @@ public:
 
     [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
         return MakeValue(ValueToString(value));
+    }
+    
     [[nodiscard]] std::unique_ptr<Type> CloneType() const {
         return std::make_unique<StringType>();
     }

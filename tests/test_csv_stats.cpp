@@ -12,7 +12,7 @@ static FDAlgorithm::Config MakeConfig(std::string_view dataset, char const sep =
                                bool const has_header = true, bool const is_null_equal_null = true,
                                unsigned thread_num = 1) {
     FDAlgorithm::Config config;
-    config.data = std::filesystem::current_path() / "inputData" / dataset;
+    config.data = std::filesystem::current_path() / "input_data" / dataset;
     config.has_header = has_header;
     config.separator = sep;
     config.is_null_equal_null = is_null_equal_null;
