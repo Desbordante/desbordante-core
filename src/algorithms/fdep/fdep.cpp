@@ -107,7 +107,7 @@ void FDep::SpecializePositiveCover(std::bitset<FDTreeElement::kMaxAttrNum> const
 void FDep::LoadData() {
     this->number_attributes_ = input_generator_->GetNumberOfColumns();
     if (this->number_attributes_ == 0) {
-        throw std::runtime_error("Unable to work on empty dataset. Check data file");
+        throw std::runtime_error("Unable to work on an empty dataset.");
     }
     this->column_names_.resize(this->number_attributes_);
 

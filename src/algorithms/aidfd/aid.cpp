@@ -212,7 +212,7 @@ void Aid::InvertNegativeCover() {
 void Aid::LoadData() {
     this->number_of_attributes_ = input_generator_->GetNumberOfColumns();
     if (this->number_of_attributes_ == 0) {
-        throw std::runtime_error("Unable to work on empty dataset. Check data file");
+        throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
     this->schema_ = std::make_unique<RelationalSchema>(input_generator_->GetRelationName(), true);
