@@ -69,7 +69,7 @@ unsigned long long MetricVerifier::Execute() {
 
 void MetricVerifier::ValidateParameters() const {
     if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty .csv file: metric FD verifying is meaningless.");
+        throw std::runtime_error("Got an empty dataset: metric FD verifying is meaningless.");
     }
 
     size_t cols_count = relation_->GetSchema()->GetNumColumns();

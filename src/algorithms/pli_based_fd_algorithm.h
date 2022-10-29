@@ -13,7 +13,8 @@ protected:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 
     ColumnLayoutRelationData const& GetRelation() const noexcept {
-        // GetRelation should be called after input file is parsed i.e. after algorithm execution
+        // GetRelation should be called after the dataset has been parsed, i.e. after algorithm
+        // execution
         assert(relation_ != nullptr);
         return *relation_;
     }
