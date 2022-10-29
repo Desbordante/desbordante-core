@@ -7,7 +7,7 @@ void PliBasedFDAlgorithm::Initialize() {
     }
 
     if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty .csv file: FD mining is meaningless.");
+        throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
     }
 }
 
