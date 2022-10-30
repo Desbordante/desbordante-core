@@ -28,6 +28,7 @@ public:
 };
 
 struct ColumnStats {
+    std::string type;
     bool is_distinct_correct = false;
     size_t count;
     size_t distinct;

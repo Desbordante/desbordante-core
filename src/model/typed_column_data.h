@@ -75,6 +75,18 @@ public:
         return data_[index];
     }
 
+    std::string GetDataAsString(size_t index) const {
+        if(IsNull(index)) {
+            NullType null_type(true);
+            return null_type.ValueToString(GetValue(index));
+        } 
+        if(IsEmpty(index)) {
+            EmptyType empty_type;
+            return empty_type.ValueToString(GetValue(index));
+        }
+        return type_->ValueToString(GetValue(index));
+    }
+
     size_t GetNumNulls() const noexcept {
         return nulls_num_;
     }

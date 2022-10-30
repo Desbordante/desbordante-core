@@ -114,7 +114,7 @@ public:
 
     static bool IsOrdered(const TypeId& type_id) {
         return !(type_id == +TypeId::kEmpty || type_id == +TypeId::kNull ||
-                 type_id == +TypeId::kUndefined);
+                 type_id == +TypeId::kUndefined || type_id == +TypeId::kMixed);
     }
 };
 
