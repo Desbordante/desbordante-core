@@ -75,6 +75,7 @@ std::string Statistic::ToString() const {
 
 std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const {
     std::unordered_map<std::string, std::string> res;
+    res.emplace("type", type);
     res.emplace("count", std::to_string(count));
     if (is_distinct_correct) {
         res.emplace("distinct", std::to_string(distinct));

@@ -44,9 +44,7 @@ public:
         TypeId r_type_id = RetrieveTypeId(r);
 
         if (l_type_id != r_type_id) {
-            if(l_type_id < r_type_id)
-                return CompareResult::kLess;
-            return CompareResult::kGreater;
+            throw std::invalid_argument("Cannot compare values of different types");
         }
 
         std::unique_ptr<Type> type = RetrieveType(l);
@@ -70,6 +68,8 @@ public:
         throw std::logic_error("Mixed type does not have a fixed size");
     }
 
+    //It's correct, but not optimal, need to be rewrited later with other virtual
+    //Clone(std::byte const* value, std::byte const* new_value)
     [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
         std::unique_ptr<Type> type = RetrieveType(value);
         size_t size = GetMixedValueSize(type.get());

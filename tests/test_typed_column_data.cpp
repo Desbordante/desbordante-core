@@ -20,19 +20,22 @@ struct TypeParsingParams {
     std::string_view dataset;
     char const sep;
     bool const has_header;
-    TypeParsingParams(std::vector<mo::TypeId> expected,
-                      std::string_view dataset,
-                      char const sep = ',',
-                      bool const has_header = true) noexcept
-        : expected(std::move(expected)), dataset(dataset),
-          sep(sep), has_header(has_header) {}
+    TypeParsingParams(std::vector<mo::TypeId> expected, std::string_view dataset,
+                      char const sep = ',', bool const has_header = true) noexcept
+        : expected(std::move(expected)), dataset(dataset), sep(sep), has_header(has_header) {}
 };
 
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};
 
+static FDAlgorithm::Config MakeConfig(std::string_view dataset, char sep, bool has_header) {
+    return FDAlgorithm::Config{.data = std::filesystem::current_path() / "input_data" / dataset,
+                               .separator = sep, .has_header = has_header};
+}
+
 TEST_P(TestTypeParsing, DefaultTest) {
     TypeParsingParams const& p = GetParam();
-    std::vector<mo::TypedColumnData> column_data = FDAlgorithm::CreateColumnData(p.dataset, p.sep, p.has_header);
+    std::vector<mo::TypedColumnData> column_data =
+            FDAlgorithm::CreateColumnData(MakeConfig(p.dataset, p.sep, p.has_header));
 
     ASSERT_EQ(column_data.size(), p.expected.size());
 
@@ -78,7 +81,8 @@ INSTANTIATE_TEST_SUITE_P(
                           "SimpleTypes.csv")));
 
 TEST(TypeSystem, SumColumnDoubles) {
-    std::vector<mo::TypedColumnData> col_data = FDAlgorithm::CreateColumnData("iris.csv", ',', false);
+    std::vector<mo::TypedColumnData> col_data =
+            FDAlgorithm::CreateColumnData(MakeConfig("iris.csv", ',', false));
     ASSERT_EQ(col_data.size(), 5);
     mo::TypedColumnData const& col = col_data.front();
     ASSERT_EQ(col.GetTypeId(), static_cast<TypeId>(TypeId::kDouble));

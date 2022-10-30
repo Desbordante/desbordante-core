@@ -12,6 +12,8 @@ class CsvStats : public algos::Primitive {
     std::vector<ColumnStats> all_stats_;
     ushort threads_num_;
 
+    size_t MixedDistinct_(size_t index) const;
+
 public:
     explicit CsvStats(const FDAlgorithm::Config& config);
 

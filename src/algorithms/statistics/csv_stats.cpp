@@ -1,10 +1,7 @@
 #include "csv_stats.h"
 
-#include <iostream>
-
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
 
 namespace algos {
@@ -29,9 +26,11 @@ Statistic CsvStats::GetMin(size_t index, mo::CompareResult order) const {
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
         if (result != nullptr) {
-            if (type.Compare(data[i], result) == order) result = data[i];
-        } else
+            if (type.Compare(data[i], result) == order) 
+                result = data[i];
+        } else {
             result = data[i];
+        }
     }
     return Statistic(result, &type, true);
 }
@@ -148,14 +147,41 @@ static size_t inline CountDistinctInSortedData(const std::vector<const std::byte
                                                const mo::Type& type) {
     size_t distinct = data.size() == 0 ? 0 : 1;
     for (size_t i = 0; i + 1 < data.size(); ++i) {
-        if (type.Compare(data[i], data[i + 1]) != model::CompareResult::kEqual) ++distinct;
+        if (type.Compare(data[i], data[i + 1]) != model::CompareResult::kEqual) 
+            ++distinct;
     }
     return distinct;
+}
+
+size_t CsvStats::MixedDistinct_(size_t index) const {
+    const mo::TypedColumnData& col = col_data_[index];
+    const std::vector<const std::byte*>& data = col.GetData();
+    mo::MixedType mixed_type(config_.is_null_equal_null);
+
+    std::vector<std::vector<const std::byte*>> values_by_type_id(
+        mo::TypeId::_size(), std::vector<const std::byte*>(0));
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+        values_by_type_id[mixed_type.RetrieveTypeId(data[i])._to_index()].push_back(data[i]);
+    }
+
+    size_t result = 0;
+    for(std::vector<const std::byte*>& type_values : values_by_type_id) {
+        std::sort(type_values.begin(), type_values.end(), mixed_type.GetComparator());
+        result += CountDistinctInSortedData(type_values, mixed_type);
+    }
+    return result;
 }
 
 size_t CsvStats::Distinct(size_t index) {
     if (all_stats_[index].is_distinct_correct) return all_stats_[index].distinct;
     const mo::TypedColumnData& col = col_data_[index];
+    if(col.GetTypeId() == +mo::TypeId::kMixed) {
+        all_stats_[index].distinct = MixedDistinct_(index);
+        all_stats_[index].is_distinct_correct = true;
+        return all_stats_[index].distinct;
+    }
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
     const auto& type = col.GetType();
 
@@ -184,8 +210,8 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
         }
     };
 
-    std::vector<std::vector<std::string>> res(end_row - start_row + 1);
-    for (size_t i = 0; i < res.size(); ++i) res[i].resize(end_col - start_col + 1);
+    std::vector<std::vector<std::string>> res(end_row - start_row + 1, 
+        std::vector<std::string>(end_col - start_col + 1));
 
     for (size_t j = start_col - 1; j < end_col; ++j) {
         const mo::TypedColumnData& col = col_data_[j];
@@ -193,10 +219,7 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
         mo::NullType null_type(config_.is_null_equal_null);
         mo::EmptyType empty_type;
         for (size_t i = start_row - 1; i < end_row; ++i) {
-            res[i][j] = col.IsNull(i) ? null_type.ValueToString(col.GetValue(i))
-                                      : (col.IsEmpty(i) ? empty_type.ValueToString(col.GetValue(i))
-                                                        : cut_str(type.ValueToString(col.GetValue(i)),
-                                                                  get_max_len(type.GetTypeId())));
+            res[i][j] =   cut_str(col.GetDataAsString(i), get_max_len(type.GetTypeId()));
         }
     }
     return res;
@@ -228,7 +251,8 @@ Statistic CsvStats::GetQuantile(double part, size_t index, bool calc_all) {
         std::sort(data.begin(), data.end(), type.GetComparator());
         all_stats_[index].quantile25 =
                 Statistic(data[(size_t)(data.size() * 0.25)], &col.GetType(), true);
-        all_stats_[index].quantile50 = Statistic(data[(size_t)(data.size() * 0.5)], &col.GetType(), true);
+        all_stats_[index].quantile50 =
+                Statistic(data[(size_t)(data.size() * 0.5)], &col.GetType(), true);
         all_stats_[index].quantile75 =
                 Statistic(data[(size_t)(data.size() * 0.75)], &col.GetType(), true);
         all_stats_[index].min = Statistic(data[0], &col.GetType(), true);
@@ -246,17 +270,22 @@ unsigned long long CsvStats::Execute() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
-        all_stats_[index].sum = GetSum(index);
-        // will use all_stats_[index].sum
-        all_stats_[index].avg = GetAvg(index);
         all_stats_[index].count = NumberOfValues(index);
-        GetQuantile(0.25, index, true);  // distint is calculated here
-        // after distinct, for faster executing
+        if(this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
+            all_stats_[index].sum = GetSum(index);
+            // will use all_stats_[index].sum
+            all_stats_[index].avg = GetAvg(index);
+            
+            GetQuantile(0.25, index, true);  // distint is calculated here
+            // after distinct, for faster executing
+            all_stats_[index].kurtosis = GetKurtosis(index);
+            all_stats_[index].skewness = GetSkewness(index);
+            all_stats_[index].STD = GetCorrectedSTD(index);
+        }
+        //distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
-                index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
-        all_stats_[index].kurtosis = GetKurtosis(index);
-        all_stats_[index].skewness = GetSkewness(index);
-        all_stats_[index].STD = GetCorrectedSTD(index);
+            index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
+        all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
         AddProgress(percent_per_col);
     };
 
@@ -266,7 +295,7 @@ unsigned long long CsvStats::Execute() {
             boost::asio::post(pool, [i, task]() { return task(i); });
         pool.join();
     } else {
-        for (size_t i = 0; i < all_stats_.size(); ++i)
+        for (size_t i = 0; i < all_stats_.size(); ++i) 
             task(i);
     }
 

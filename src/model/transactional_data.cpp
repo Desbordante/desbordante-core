@@ -35,7 +35,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
             continue;
         }
 
-        size_t const tid = std::stoi(row[tid_col_index]);
+        size_t const tid = std::stoull(row[tid_col_index]);
         std::string& item_name = row[item_col_index];
         size_t item_id = latest_item_id;
 
@@ -77,7 +77,7 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
 
         auto row_iter = row.begin();
         if (has_tid) {
-            tid = std::stoi(*row_iter);
+            tid = std::stoull(*row_iter);
             row_iter++;
         }
 
