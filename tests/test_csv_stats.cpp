@@ -1,5 +1,7 @@
 #include <gmock/gmock.h>
 
+#include "easylogging++.h"
+
 #include "csv_stats.h"
 
 namespace tests {
@@ -79,6 +81,7 @@ TEST(TestCsvStats, TestDistinct) {
     algos::CsvStats stats(MakeConfig("TestCsvStats.csv",  ',', false));
     auto distinct = stats.Distinct(3);
     EXPECT_EQ(5, distinct);
+    EXPECT_EQ(6, stats.Distinct(5)); // mixed column
 }
 
 TEST(TestCsvStats, TestDistinctStringColumn) {
@@ -117,10 +120,11 @@ TEST(TestCsvStats, TestShowSample) {
     algos::CsvStats stats(MakeConfig("TestCsvStats.csv",  ',', false));
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
     for(const auto& row : sample) {
+        std::stringstream result;
         for(const auto& str : row) {
-            std::cout << str << " \t";
+            result << str << " \t";
         }
-        std::cout << '\n';
+        LOG(INFO) << result.str();
     }
 }
 
@@ -128,7 +132,7 @@ TEST(TestCsvStats, TestShowAllStats) {
     // Mixed type statistics will be calculated here.
     algos::CsvStats stats(MakeConfig("TestCsvStats.csv",  ',', false));
     stats.Execute();
-    std::cout << stats.ToString();
+    LOG(INFO) << stats.ToString();
 }
 
 TEST(TestCsvStats, TestGetSTD) {
@@ -157,17 +161,17 @@ TEST(TestCsvStats, CorrectExecutionEmpty) {
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
-        std::cout << "thread num = " << thread_num << "\n";
+        LOG(INFO) << "thread num = " << thread_num;
         auto start_time = std::chrono::system_clock::now();
         algos::CsvStats stats(MakeConfig("EpicMeds.csv", '|', true, true, thread_num));
         auto elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time
             );
-        std::cout << "Reading time = " << elapsed_milliseconds.count() << "\n";
+        LOG(INFO) << "Reading time = " << elapsed_milliseconds.count();
         unsigned time = stats.Execute();
-        std::cout << "Executing time = " << time << "\n";
-        //std::cout << stats.toString();
+        LOG(INFO) << "Executing time = " << time;
+        //LOG(INFO) << stats.toString();
     }
 }
 #endif

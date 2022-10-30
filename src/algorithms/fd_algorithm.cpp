@@ -78,11 +78,3 @@ std::vector<model::TypedColumnData> FDAlgorithm::CreateColumnData(
     std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }
-
-std::vector<model::TypedColumnData> FDAlgorithm::CreateColumnData(std::string_view data, char sep,
-                                                                  bool has_header) {
-    auto const path = std::filesystem::current_path() / "input_data" / data;
-    return CreateColumnData(Config{.data = std::filesystem::current_path() / "input_data" / data,
-                                   .separator = sep,
-                                   .has_header = has_header});
-}

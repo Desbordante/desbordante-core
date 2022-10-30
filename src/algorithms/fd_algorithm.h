@@ -148,6 +148,4 @@ public:
     }
 
     static std::vector<model::TypedColumnData> CreateColumnData(const Config& config);
-    static std::vector<model::TypedColumnData> CreateColumnData(std::string_view data, char sep,
-                                                                bool has_header);
 };
