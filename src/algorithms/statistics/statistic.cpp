@@ -77,10 +77,9 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     std::unordered_map<std::string, std::string> res;
     res.emplace("type", type);
     res.emplace("count", std::to_string(count));
-    if (is_distinct_correct) {
-        res.emplace("distinct", std::to_string(distinct));
+    res.emplace("distinct", std::to_string(distinct));
+    if (distinct != 0)
         res.emplace("isCategorical", std::to_string(is_categorical));
-    }
 
     auto try_add_stat = [&res](const Statistic& stat, const std::string& statName) {
         if (stat.HasValue()) res.emplace(statName, stat.ToString());

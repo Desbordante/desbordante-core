@@ -174,11 +174,10 @@ size_t CsvStats::MixedDistinct(size_t index) const {
 }
 
 size_t CsvStats::Distinct(size_t index) {
-    if (all_stats_[index].is_distinct_correct) return all_stats_[index].distinct;
+    if (all_stats_[index].distinct != 0) return all_stats_[index].distinct;
     const mo::TypedColumnData& col = col_data_[index];
     if (col.GetTypeId() == +mo::TypeId::kMixed) {
         all_stats_[index].distinct = MixedDistinct(index);
-        all_stats_[index].is_distinct_correct = true;
         return all_stats_[index].distinct;
     }
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
@@ -186,7 +185,6 @@ size_t CsvStats::Distinct(size_t index) {
 
     std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
     std::sort(data.begin(), data.end(), type.GetComparator());
-    all_stats_[index].is_distinct_correct = true;
     return all_stats_[index].distinct = CountDistinctInSortedData(data, type);
 }
 
@@ -257,7 +255,6 @@ Statistic CsvStats::GetQuantile(double part, size_t index, bool calc_all) {
         all_stats_[index].min = Statistic(data[0], &col.GetType(), true);
         all_stats_[index].max = Statistic(data.back(), &col.GetType(), true);
         all_stats_[index].distinct = CountDistinctInSortedData(data, type);
-        all_stats_[index].is_distinct_correct = true;
     } else {
         std::nth_element(data.begin(), data.begin() + quantile, data.end(), type.GetComparator());
     }
