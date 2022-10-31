@@ -166,7 +166,7 @@ size_t CsvStats::MixedDistinct(size_t index) const {
     }
 
     size_t result = 0;
-    for(std::vector<const std::byte*>& type_values : values_by_type_id) {
+    for (std::vector<const std::byte*>& type_values : values_by_type_id) {
         std::sort(type_values.begin(), type_values.end(), mixed_type.GetComparator());
         result += CountDistinctInSortedData(type_values, mixed_type);
     }
@@ -180,7 +180,6 @@ size_t CsvStats::Distinct(size_t index) {
         all_stats_[index].distinct = MixedDistinct(index);
         return all_stats_[index].distinct;
     }
-    if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
     const auto& type = col.GetType();
 
     std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
@@ -207,8 +206,8 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
         }
     };
 
-    std::vector<std::vector<std::string>> res(end_row - start_row + 1, 
-        std::vector<std::string>(end_col - start_col + 1));
+    std::vector<std::vector<std::string>> res(end_row - start_row + 1,
+                                              std::vector<std::string>(end_col - start_col + 1));
 
     for (size_t j = start_col - 1; j < end_col; ++j) {
         const mo::TypedColumnData& col = col_data_[j];
@@ -228,6 +227,10 @@ bool CsvStats::IsCategorical(size_t index, size_t quantity) {
 
 std::vector<const std::byte*> CsvStats::DeleteNullAndEmpties(size_t index) {
     const mo::TypedColumnData& col = col_data_[index];
+    mo::TypeId type_id = col.GetTypeId();
+    if (type_id == +mo::TypeId::kNull || type_id == +mo::TypeId::kEmpty ||
+        type_id == +mo::TypeId::kUndefined)
+        return {};
     const std::vector<const std::byte*>& data = col.GetData();
     std::vector<const std::byte*> res;
     res.reserve(data.size());
@@ -267,20 +270,20 @@ unsigned long long CsvStats::Execute() {
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
-        if(this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
+        if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
             all_stats_[index].sum = GetSum(index);
             // will use all_stats_[index].sum
             all_stats_[index].avg = GetAvg(index);
-            
+
             GetQuantile(0.25, index, true);  // distint is calculated here
             // after distinct, for faster executing
             all_stats_[index].kurtosis = GetKurtosis(index);
             all_stats_[index].skewness = GetSkewness(index);
             all_stats_[index].STD = GetCorrectedSTD(index);
         }
-        //distinct for mixed type will be calculated here
+        // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
-            index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
+                index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
         all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
         AddProgress(percent_per_col);
     };

@@ -8,7 +8,7 @@ namespace tests {
 namespace mo = model;
 
 // to run tests:
-//  ./Desbordante_test --gtest_filter="*TestCsvStats*"
+// ./Desbordante_test --gtest_filter="*TestCsvStats*"
 
 static FDAlgorithm::Config MakeConfig(std::string_view dataset, char const sep = ',',
                                bool const has_header = true, bool const is_null_equal_null = true,
