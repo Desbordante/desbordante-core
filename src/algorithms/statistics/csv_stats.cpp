@@ -153,13 +153,12 @@ static size_t inline CountDistinctInSortedData(const std::vector<const std::byte
     return distinct;
 }
 
-size_t CsvStats::MixedDistinct_(size_t index) const {
+size_t CsvStats::MixedDistinct(size_t index) const {
     const mo::TypedColumnData& col = col_data_[index];
     const std::vector<const std::byte*>& data = col.GetData();
     mo::MixedType mixed_type(config_.is_null_equal_null);
 
-    std::vector<std::vector<const std::byte*>> values_by_type_id(
-        mo::TypeId::_size(), std::vector<const std::byte*>(0));
+    std::vector<std::vector<const std::byte*>> values_by_type_id(mo::TypeId::_size());
 
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
@@ -177,8 +176,8 @@ size_t CsvStats::MixedDistinct_(size_t index) const {
 size_t CsvStats::Distinct(size_t index) {
     if (all_stats_[index].is_distinct_correct) return all_stats_[index].distinct;
     const mo::TypedColumnData& col = col_data_[index];
-    if(col.GetTypeId() == +mo::TypeId::kMixed) {
-        all_stats_[index].distinct = MixedDistinct_(index);
+    if (col.GetTypeId() == +mo::TypeId::kMixed) {
+        all_stats_[index].distinct = MixedDistinct(index);
         all_stats_[index].is_distinct_correct = true;
         return all_stats_[index].distinct;
     }
@@ -219,7 +218,7 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
         mo::NullType null_type(config_.is_null_equal_null);
         mo::EmptyType empty_type;
         for (size_t i = start_row - 1; i < end_row; ++i) {
-            res[i][j] =   cut_str(col.GetDataAsString(i), get_max_len(type.GetTypeId()));
+            res[i][j] = cut_str(col.GetDataAsString(i), get_max_len(type.GetTypeId()));
         }
     }
     return res;
