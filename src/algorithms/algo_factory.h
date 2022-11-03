@@ -13,10 +13,10 @@ namespace algos {
 
 BETTER_ENUM(AlgoMiningType, char,
 #if 1
-    fd = 0, 
-    typos, 
-    ar, 
-    metric, 
+    fd = 0,
+    typos,
+    ar,
+    metric,
     stats
 #else
     fd = 0, /* Functional dependency mining */
@@ -44,6 +44,7 @@ BETTER_ENUM(Algo, char,
     pyro,
     tane,
     fun,
+    hyfd,
     aidfd,
 
     /* Association rules mining algorithms */
@@ -57,7 +58,8 @@ BETTER_ENUM(Algo, char,
 );
 
 using StdParamsMap = std::unordered_map<std::string, boost::any>;
-using AlgorithmTypesTuple = std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, Aid>;
+using AlgorithmTypesTuple =
+        std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, hyfd::HyFD, Aid>;
 using ArAlgorithmTuplesType = std::tuple<Apriori>;
 
 namespace details {

@@ -12,6 +12,7 @@
 #include "fastfds.h"
 #include "fdep/fdep.h"
 #include "fun.h"
+#include "hyfd/hyfd.h"
 #include "pyro.h"
 #include "relational_schema.h"
 #include "tane.h"
@@ -143,5 +144,5 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             HeavyDatasetsConsistentHash);
 
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
-                                    algos::Depminer, algos::FDep, algos::FUN>;
-INSTANTIATE_TYPED_TEST_SUITE_P(, AlgorithmTest, Algorithms);
+                                    algos::Depminer, algos::FDep, algos::FUN, algos::hyfd::HyFD>;
+INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
