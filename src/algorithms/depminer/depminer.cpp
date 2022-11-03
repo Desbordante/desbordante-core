@@ -115,8 +115,7 @@ void Depminer::LhsForColumn(std::unique_ptr<Column> const& column,
     CMAXSet correct = GenFirstLevel(c_max_cets, *column, level);
 
     const auto pli = relation_->GetColumnData(column->GetIndex()).GetPositionListIndex();
-    bool column_contains_only_equal_values =
-        pli->GetNumNonSingletonCluster() == 1 && pli->GetSize() == relation_->GetNumRows();
+    bool column_contains_only_equal_values = pli->IsConstant();
     if (column_contains_only_equal_values) {
         RegisterFd(Vertical(), *column);
         return;
