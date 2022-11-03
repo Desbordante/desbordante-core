@@ -89,6 +89,9 @@ public:
     unsigned int GetSize() const {
         return size_;
     }
+    unsigned int getRelationSize() const {
+        return relation_size_;
+    }
     double GetEntropy() const {
         return entropy_;
     }
@@ -103,6 +106,10 @@ public:
     }
     double GetNip() const {
         return GetMaximumNip() - GetNepAsLong();
+    }
+
+    bool IsConstant() const {
+        return relation_size_ <= 1 || (GetNumNonSingletonCluster() == 1 && size_ == relation_size_);
     }
 
     void IncFreq() { freq_++; }

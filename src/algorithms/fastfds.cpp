@@ -98,8 +98,7 @@ unsigned long long FastFDs::ExecuteInternal() {
 
 bool FastFDs::ColumnContainsOnlyEqualValues(Column const& column) const {
     auto pli = relation_->GetColumnData(column.GetIndex()).GetPositionListIndex();
-    bool column_contains_only_equal_values =
-        pli->GetNumNonSingletonCluster() == 1 && pli->GetSize() == relation_->GetNumRows();
+    bool column_contains_only_equal_values = pli->IsConstant();
 
     return column_contains_only_equal_values;
 }
