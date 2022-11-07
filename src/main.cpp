@@ -144,7 +144,7 @@ int main(int argc, char const* argv[]) {
             (onam::kRhsIndices, po::value<std::vector<unsigned int>>()->multitoken(),
              desc::kDRhsIndices)
             (onam::kParameter, po::value<long double>(), desc::kDParameter)
-            (onam::kDistToNullIsInfinity, po::bool_switch(), desc::kDDistToNullIsInfinity)
+            (onam::kDistFromNullIsInfinity, po::bool_switch(), desc::kDDistFromNullIsInfinity)
             ;
 
     po::options_description cosine_options("Cosine metric options");

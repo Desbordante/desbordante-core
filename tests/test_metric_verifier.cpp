@@ -26,21 +26,21 @@ struct MetricVerifyingParams {
                           char const separator,
                           bool const has_header,
                           std::string const& algo = "brute",
-                          bool const dist_to_null_infinity = false,
+                          bool const dist_from_null_is_infinity = false,
                           bool const expected = true,
                           unsigned const q = 2)
-        : params({{onam::kParameter,            min_parameter},
-                  {onam::kLhsIndices,           std::move(lhs_indices)},
-                  {onam::kRhsIndices,           std::move(rhs_indices)},
-                  {onam::kData,                 std::string{std::filesystem::current_path() /
-                                                            "input_data" / dataset}},
-                  {onam::kSeparator,            separator},
-                  {onam::kHasHeader,            has_header},
-                  {onam::kEqualNulls,           true},
-                  {onam::kMetric,               algos::Metric::_from_string(metric.data())},
-                  {onam::kQGramLength,          q},
-                  {onam::kMetricAlgorithm,      algos::MetricAlgo::_from_string(algo.data())},
-                  {onam::kDistToNullIsInfinity, dist_to_null_infinity}}),
+        : params({{onam::kParameter,                min_parameter},
+                  {onam::kLhsIndices,               std::move(lhs_indices)},
+                  {onam::kRhsIndices,               std::move(rhs_indices)},
+                  {onam::kData,                     std::string{std::filesystem::current_path() /
+                                                                "input_data" / dataset}},
+                  {onam::kSeparator,                separator},
+                  {onam::kHasHeader,                has_header},
+                  {onam::kEqualNulls,               true},
+                  {onam::kMetric,                   algos::Metric::_from_string(metric.data())},
+                  {onam::kQGramLength,              q},
+                  {onam::kMetricAlgorithm,          algos::MetricAlgo::_from_string(algo.data())},
+                  {onam::kDistFromNullIsInfinity,   dist_from_null_is_infinity}}),
           expected(expected) {}
 };
 

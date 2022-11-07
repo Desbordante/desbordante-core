@@ -129,13 +129,14 @@ private:
     std::vector<unsigned int> rhs_indices_;
     long double parameter_;
     unsigned int q_;
-    bool dist_to_null_infinity_;
+    bool dist_from_null_is_infinity_;
     config::EqNullsType is_null_equal_null_;
 
     bool metric_fd_holds_ = false;
     std::vector<std::vector<Highlight>> highlights_;
 
-    static const config::OptionType<decltype(dist_to_null_infinity_)> DistToNullInfinityOpt;
+    static const config::OptionType<decltype(dist_from_null_is_infinity_)>
+            DistFromNullIsInfinityOpt;
     static const config::OptionType<decltype(parameter_)> ParameterOpt;
     static const config::OptionType<decltype(lhs_indices_)> LhsIndicesOpt;
     static const config::OptionType<decltype(rhs_indices_)> RhsIndicesOpt;
@@ -151,10 +152,10 @@ private:
             std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
 
     bool CheckMFDFailIfHasNulls(bool has_nulls) const {
-        return dist_to_null_infinity_ && has_nulls;
+        return dist_from_null_is_infinity_ && has_nulls;
     }
-    long double GetDistToNull() const {
-        return dist_to_null_infinity_ ? std::numeric_limits<long double>::infinity() : 0.0;
+    long double GetDistFromNull() const {
+        return dist_from_null_is_infinity_ ? std::numeric_limits<long double>::infinity() : 0.0;
     }
     long double GetCoordinate(bool& has_values, ClusterIndex row_index, bool& has_nulls,
                               unsigned col_index, bool& has_empties) const;
