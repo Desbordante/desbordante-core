@@ -11,20 +11,19 @@ namespace util {
 struct Point {
     long double x;
     long double y;
-    int index;
 
     static long double EuclideanDistance(util::Point const& p1, util::Point const& p2) {
         return std::sqrt(std::pow((p1.x - p2.x), 2) + std::pow((p1.y - p2.y), 2));
     }
 };
 
-static long double EuclideanDistance(std::vector<long double> const& p1,
-                                     std::vector<long double> const& p2) {
+[[maybe_unused]] static long double EuclideanDistance(std::vector<long double> const& p1,
+                                                      std::vector<long double> const& p2) {
     assert(p1.size() == p2.size());
     assert(!p1.empty());
     return std::sqrt(
-        std::inner_product(p1.cbegin(), p1.cend(), p2.cbegin(), 0.0, std::plus<>(),
-                           [](long double a, long double b) { return (a - b) * (a - b); }));
+            std::inner_product(p1.cbegin(), p1.cend(), p2.cbegin(), 0.0, std::plus<>(),
+                               [](long double a, long double b) { return (a - b) * (a - b); }));
 }
 
 /** Monotone chain convex hull algorithm.
