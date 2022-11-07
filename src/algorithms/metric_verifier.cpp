@@ -19,8 +19,9 @@ void TransformIndices(std::vector<unsigned int>& value) {
     value.erase(std::unique(value.begin(), value.end()), value.end());
 }
 
-decltype(MetricVerifier::DistToNullInfinityOpt) MetricVerifier::DistToNullInfinityOpt{
-        {config::names::kDistToNullIsInfinity, config::descriptions::kDDistToNullIsInfinity}, false
+decltype(MetricVerifier::DistFromNullIsInfinityOpt) MetricVerifier::DistFromNullIsInfinityOpt{
+        {config::names::kDistFromNullIsInfinity, config::descriptions::kDDistFromNullIsInfinity},
+        false
 };
 
 decltype(MetricVerifier::ParameterOpt) MetricVerifier::ParameterOpt{
@@ -136,7 +137,7 @@ void MetricVerifier::RegisterOptions() {
     };
 
     RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-    RegisterOption(DistToNullInfinityOpt.GetOption(&dist_to_null_infinity_));
+    RegisterOption(DistFromNullIsInfinityOpt.GetOption(&dist_from_null_is_infinity_));
     RegisterOption(ParameterOpt.GetOption(&parameter_));
     RegisterOption(LhsIndicesOpt.GetOption(&lhs_indices_).SetInstanceCheck(check_lhs));
     RegisterOption(MetricOpt.GetOption(&metric_).SetConditionalOpts(
@@ -153,8 +154,8 @@ void MetricVerifier::RegisterOptions() {
 }
 
 void MetricVerifier::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(DistToNullInfinityOpt, ParameterOpt, LhsIndicesOpt,
-                                                MetricOpt));
+    MakeOptionsAvailable(config::GetOptionNames(DistFromNullIsInfinityOpt, ParameterOpt,
+                                                LhsIndicesOpt, MetricOpt));
 }
 
 void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
@@ -506,7 +507,7 @@ MetricVerifier::CalculateMultidimensionalIndexedPoints(util::PLI::Cluster const&
             points.push_back(std::move(point));
         } else if (has_nulls) {
             has_nulls_in_cluster = true;
-            cluster_highlights.emplace_back(i, i, GetDistToNull());
+            cluster_highlights.emplace_back(i, i, GetDistFromNull());
         } else if (has_empties) {
             cluster_highlights.emplace_back(i, i, 0.0);
         }
@@ -524,7 +525,7 @@ MetricVerifier::CalculateIndexedPoints(util::PLI::Cluster const& cluster) const 
     for (auto i : cluster) {
         if (col.IsNull(i)) {
             has_nulls_in_cluster = true;
-            cluster_highlights.emplace_back(i, i, GetDistToNull());
+            cluster_highlights.emplace_back(i, i, GetDistFromNull());
             continue;
         }
         if (col.IsEmpty(i)) {
@@ -565,7 +566,7 @@ MetricVerifier::PointsCalculationResult<std::byte const*> MetricVerifier::Calcul
     bool has_nulls_in_cluster = false;
     for (auto i : cluster) {
         if (col.IsNull(i)) {
-            if (dist_to_null_infinity_) {
+            if (dist_from_null_is_infinity_) {
                 return {{}, true};
             }
             has_nulls_in_cluster = true;
