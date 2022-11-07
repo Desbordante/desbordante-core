@@ -47,8 +47,8 @@ const auto kDMetric = _kDMetric.c_str();
 constexpr auto kDLhsIndices = "LHS column indices for metric FD verification";
 constexpr auto kDRhsIndices = "RHS column indices for metric FD verification";
 constexpr auto kDParameter = "metric FD parameter";
-constexpr auto kDDistToNullIsInfinity = "specify whether distance to NULL value is infinity (if "
-                                        "not, it is 0)";
+constexpr auto kDDistFromNullIsInfinity = "specify whether distance from NULL value is infinity "
+                                          "(if not, it is 0)";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 const std::string _kDMetricAlgorithm = "MFD algorithm to use\n" +
                                        EnumToAvailableValues<algos::MetricAlgo>();
