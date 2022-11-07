@@ -31,7 +31,7 @@ struct Point {
  * @param points Vector of points, which can be modified as a result of the algorithm.
  * @return Convex hull sorted in counterclockwise order.
  */
-std::vector<Point> ConvexHull(std::vector<Point>& points);
+std::vector<Point> CalculateConvexHull(std::vector<Point>& points);
 
 /** Rotating calipers algorithm used to obtain antipodal pairs of convex hull
  * https://en.wikipedia.org/wiki/Rotating_calipers

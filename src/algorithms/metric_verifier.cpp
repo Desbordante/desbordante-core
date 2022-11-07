@@ -635,7 +635,7 @@ void MetricVerifier::BruteCalculateHighlights(std::vector<IndexedPoint<T>> const
 }
 
 bool MetricVerifier::CalipersCompareNumericValues(std::vector<util::Point>& points) const {
-    auto pairs = util::GetAntipodalPairs(util::ConvexHull(points));
+    auto pairs = util::GetAntipodalPairs(util::CalculateConvexHull(points));
     return std::all_of(pairs.cbegin(), pairs.cend(), [this](auto const& pair) {
         return util::Point::EuclideanDistance(pair.first, pair.second) <= parameter_;
     });
