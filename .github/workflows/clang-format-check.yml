@@ -50,8 +50,8 @@ jobs:
     - name: Get DEBUG info
       run: |
         cmake --version
-        apt-get update
-        apt-get install libboost-all-dev
+        sudo apt-get update
+        sudo apt-get install libboost-all-dev
     - uses: ZedThree/clang-tidy-review@v0.10.0
       id: review
       with:
