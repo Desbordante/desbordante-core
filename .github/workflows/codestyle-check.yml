@@ -1,4 +1,4 @@
-name: clang-format
+name: codestyle
 on: [pull_request]
 jobs:
   clang-format-check:
@@ -27,9 +27,9 @@ jobs:
         
         echo "$formatterOutput"
         echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+  
   clang-tidy-check:
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v3
     - name: Install build tools
@@ -101,28 +101,11 @@ jobs:
           -Dgtest_disable_pthreads=OFF \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
           . -B ${{github.workspace}}/build
-#       with:
-#         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-#         cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
-#         useVcpkgToolchainFile: true
-#         # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
-#         buildDirectory: '${{github.workspace}}/build'
-#         cmakeAppendedArgs: >-
-          
-          
-    - name: Get DEBUG info
-      run: |
-        cmake --version
+                    
     - uses: ZedThree/clang-tidy-review@v0.10.0
       id: review
       with:
         build_dir: build
-#         cmake_command: cmake . -B ${{github.workspace}}/build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
     # If there are any comments, fail the check
-    #- if: steps.review.outputs.total_comments > 0
-    #  run: exit 1
-    - name: Get DEBUG info2
-      run: |
-        cat /github/workspace/CMakeFiles/CMakeOutput.log compile_commands.json
-      if: always()
-        
+    - if: steps.review.outputs.total_comments > 0
+      run: exit 1        
