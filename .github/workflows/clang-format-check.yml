@@ -93,20 +93,22 @@ jobs:
       if: steps.cache-better-enums.outputs.cache-hit != 'true'
       
     - name: Generate compile_commands.json
-      uses: lukka/run-cmake@v3
-      with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
-        buildDirectory: '${{github.workspace}}/build'
-        cmakeAppendedArgs: >-
-          -DCMAKE_C_COMPILER=gcc-10
-          -DCMAKE_CXX_COMPILER=g++-10
-          -DBOOST_ROOT=${{github.workspace}}/lib/boost
-          -DCMAKE_BUILD_TYPE=Debug
-          -Dgtest_disable_pthreads=OFF
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      run: |
+        cmake -DCMAKE_C_COMPILER=gcc-10 \
+          -DCMAKE_CXX_COMPILER=g++-10 \
+          -DBOOST_ROOT=${{github.workspace}}/lib/boost \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -Dgtest_disable_pthreads=OFF \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+          . -B ${{github.workspace}}/build
+#       with:
+#         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+#         cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
+#         useVcpkgToolchainFile: true
+#         # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
+#         buildDirectory: '${{github.workspace}}/build'
+#         cmakeAppendedArgs: >-
+          
           
     - name: Get DEBUG info
       run: |
