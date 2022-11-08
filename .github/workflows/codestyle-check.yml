@@ -13,7 +13,7 @@ jobs:
         sudo apt-get install -y clang-format-12
     - name: Check formatting
       run: |       
-        formatterOutput=$(git diff origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | clang-format-diff-12 -p 1)
+        formatterOutput=$( git diff origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | clang-format-diff-12 -p 1)
         
         if [ "$formatterOutput" != "" ]
         then
