@@ -179,7 +179,7 @@ unsigned long long MetricVerifier::ExecuteInternal() {
         LOG(DEBUG) << "Metric fd does not hold.";
     }
 
-    SortHighlightsByDistance();
+    SortHighlightsByDistanceDescending();
 
     VisualizeHighlights();
 
@@ -667,6 +667,94 @@ void MetricVerifier::UpdateHighlightMap(HighlightMap& highlight_map, ClusterInde
         it->second.max_distance = dist;
         it->second.furthest_data_index = furthest_index;
     }
+}
+
+void MetricVerifier::SortHighlightsByDistanceAscending() {
+    SortHighlights([this](auto const& h1, auto const& h2) {
+        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+        if (col.IsEmpty(h1.data_index)) {
+            return false;
+        }
+        if (col.IsEmpty(h2.data_index)) {
+            return true;
+        }
+        if (h1.max_distance == 0 && h2.max_distance == 0) {
+            if (col.IsNull(h1.data_index)) {
+                return true;
+            }
+            if (col.IsNull(h2.data_index)) {
+                return false;
+            }
+        }
+        return h1.max_distance < h2.max_distance;
+    });
+}
+
+void MetricVerifier::SortHighlightsByDistanceDescending() {
+    SortHighlights([this](auto const& h1, auto const& h2) {
+        if (h1.max_distance == 0 && h2.max_distance == 0) {
+            auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+            if (col.IsEmpty(h1.data_index)) {
+                return false;
+            }
+            if (col.IsEmpty(h2.data_index)) {
+                return true;
+            }
+            if (col.IsNull(h1.data_index)) {
+                return false;
+            }
+            if (col.IsNull(h2.data_index)) {
+                return true;
+            }
+        }
+        return h1.max_distance > h2.max_distance;
+    });
+}
+
+void MetricVerifier::SortHighlightsByFurthestIndexAscending() {
+    SortHighlights([this](auto const& h1, auto const& h2) {
+        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+        if (col.IsEmpty(h1.data_index)) {
+            return false;
+        }
+        if (col.IsEmpty(h2.data_index)) {
+            return true;
+        }
+        if (col.IsNull(h1.data_index)) {
+            return false;
+        }
+        if (col.IsNull(h2.data_index)) {
+            return true;
+        }
+        return h1.furthest_data_index < h2.furthest_data_index;
+    });
+}
+
+void MetricVerifier::SortHighlightsByFurthestIndexDescending() {
+    SortHighlights([this](auto const& h1, auto const& h2) {
+        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
+        if (col.IsEmpty(h1.data_index)) {
+            return false;
+        }
+        if (col.IsEmpty(h2.data_index)) {
+            return true;
+        }
+        if (col.IsNull(h1.data_index)) {
+            return false;
+        }
+        if (col.IsNull(h2.data_index)) {
+            return true;
+        }
+        return h1.furthest_data_index > h2.furthest_data_index;
+    });
+}
+
+void MetricVerifier::SortHighlightsByIndexAscending() {
+    SortHighlights([](auto const& h1, auto const& h2) { return h1.data_index < h2.data_index; });
+}
+
+void MetricVerifier::SortHighlightsByIndexDescending() {
+    SortHighlights([](auto const& h1, auto const& h2) { return h1.data_index > h2.data_index; });
 }
 
 }  // namespace algos
