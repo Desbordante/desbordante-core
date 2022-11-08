@@ -37,25 +37,25 @@ jobs:
         sudo apt-get update
         sudo apt-get install gcc-10 g++-10 cmake build-essential
     - name: Cache Boost
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-boost
       with:
         path: ${{github.workspace}}/lib/boost
         key: ${{ runner.os }}-boost
     - name: Cache googletest
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-googletest
       with:
         path: ${{github.workspace}}/lib/googletest
         key: ${{ runner.os }}-googletest
     - name: Cache easyloggingpp
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-easyloggingpp
       with:
         path: ${{github.workspace}}/lib/easyloggingpp
         key: ${{ runner.os }}-easyloggingpp
     - name: Cache better-enums
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       id: cache-better-enums
       with:
         path: ${{github.workspace}}/lib/better-enums
