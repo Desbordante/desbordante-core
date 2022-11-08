@@ -47,6 +47,18 @@ jobs:
         ./b2
         sudo ./b2 install
       if: steps.cache-boost.outputs.cache-hit != 'true'
+    - name: Generate compile_commands.json
+      uses: lukka/run-cmake@v3
+      with:
+        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+        cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
+        useVcpkgToolchainFile: true
+        # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
+        buildDirectory: '${{github.workspace}}/build'
+        cmakeAppendedArgs: >-
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+        buildWithCMakeArgs: >-
+          --target autogen
     - name: Get DEBUG info
       run: |
         cmake --version
@@ -54,7 +66,7 @@ jobs:
       id: review
       with:
         build_dir: build
-        cmake_command: cmake -DBOOST_ROOT=${{github.workspace}}/lib/boost . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
+#         cmake_command: cmake -DBOOST_ROOT=${{github.workspace}}/lib/boost . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
     # If there are any comments, fail the check
     #- if: steps.review.outputs.total_comments > 0
     #  run: exit 1
