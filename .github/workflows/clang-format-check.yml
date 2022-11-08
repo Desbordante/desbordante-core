@@ -50,11 +50,12 @@ jobs:
     - name: Get DEBUG info
       run: |
         cmake --version
+        apt-get update
+        apt-get install libboost-all-dev
     - uses: ZedThree/clang-tidy-review@v0.10.0
       id: review
       with:
         build_dir: build
-        apt_packages: libboost-all-dev
         cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
     # If there are any comments, fail the check
     #- if: steps.review.outputs.total_comments > 0
