@@ -51,7 +51,7 @@ jobs:
       run: |
         cmake --version
         mkdir build
-        cd build
+        echo "base_dir=$(pwd)/build" >> $GITHUB_ENV
     - uses: ZedThree/clang-tidy-review@v0.10.0
       id: review
       with:
