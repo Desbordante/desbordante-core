@@ -240,14 +240,12 @@ public:
         parameter_ = parameter;
     }
 
-    void SortHighlightsByDistance() {
-        SortHighlights(
-                [](auto const& h1, auto const& h2) { return h1.max_distance > h2.max_distance; });
-    }
-    void SortHighlightsByIndex() {
-        SortHighlights(
-                [](auto const& h1, auto const& h2) { return h1.data_index < h2.data_index; });
-    }
+    void SortHighlightsByDistanceAscending();
+    void SortHighlightsByDistanceDescending();
+    void SortHighlightsByFurthestIndexAscending();
+    void SortHighlightsByFurthestIndexDescending();
+    void SortHighlightsByIndexAscending();
+    void SortHighlightsByIndexDescending();
 
     MetricVerifier();
 };
