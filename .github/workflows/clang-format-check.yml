@@ -54,7 +54,8 @@ jobs:
       id: review
       with:
         build_dir: build
-        cmake_command: cmake -DBOOST_ROOT=${{github.workspace}}/lib/boost . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
+        apt_packages: libboost-all-dev
+        cmake_command: cmake . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
     # If there are any comments, fail the check
     #- if: steps.review.outputs.total_comments > 0
     #  run: exit 1
