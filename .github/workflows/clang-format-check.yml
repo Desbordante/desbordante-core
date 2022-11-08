@@ -60,31 +60,7 @@ jobs:
       with:
         path: ${{github.workspace}}/lib/better-enums
         key: ${{ runner.os }}better-enums
-#     Uncomment this if we set up our own git lfs server
-#
-#     - name: Install git-lfs
-#       run: |
-#         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-#         git lfs install
-#     - name: Generate lfs file list
-#       run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-#     - name: Restore lfs cache
-#       uses: actions/cache@v2
-#       id: lfs-cache
-#       with:
-#         path: .git/lfs
-#         key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
 
-#     Also change this if we set up our own git lfs server
-    - name: Cache datasets
-      uses: actions/cache@v2
-      id: cache-datasets
-      with:
-        path: ${{github.workspace}}/datasets
-        key: ${{ runner.os }}datasets
-    - name: Pull datasets
-      run: bash pull_datasets.sh
-      if: steps.cache-datasets.outputs.cache-hit != 'true'
     - name: Install Boost
       run: |
         wget -O boost_1_72_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
@@ -116,23 +92,23 @@ jobs:
         git clone https://github.com/aantron/better-enums.git --branch 0.11.3
       if: steps.cache-better-enums.outputs.cache-hit != 'true'
       
-    - name: Generate compile_commands.json
-      uses: lukka/run-cmake@v3
-      with:
-        cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-        cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
-        useVcpkgToolchainFile: true
-        # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
-        buildDirectory: '${{github.workspace}}/build'
-        cmakeAppendedArgs: >-
-          -DCMAKE_C_COMPILER=gcc-10
-          -DCMAKE_CXX_COMPILER=g++-10
-          -DBOOST_ROOT=${{github.workspace}}/lib/boost
-          -DCMAKE_BUILD_TYPE=Debug
-          -Dgtest_disable_pthreads=OFF
-          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-        buildWithCMakeArgs: >-
-          --target autogen
+#     - name: Generate compile_commands.json
+#       uses: lukka/run-cmake@v3
+#       with:
+#         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+#         cmakeListsTxtPath: '${{github.workspace}}/CMakeLists.txt'
+#         useVcpkgToolchainFile: true
+#         # has to be the github workspace, not the runner workspace, for the docker-based clang-tidy-review
+#         buildDirectory: '${{github.workspace}}/build'
+#         cmakeAppendedArgs: >-
+#           -DCMAKE_C_COMPILER=gcc-10
+#           -DCMAKE_CXX_COMPILER=g++-10
+#           -DBOOST_ROOT=${{github.workspace}}/lib/boost
+#           -DCMAKE_BUILD_TYPE=Debug
+#           -Dgtest_disable_pthreads=OFF
+#           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+#         buildWithCMakeArgs: >-
+#           --target autogen
           
     - name: Get DEBUG info
       run: |
@@ -141,7 +117,13 @@ jobs:
       id: review
       with:
         build_dir: build
-#         cmake_command: cmake -DBOOST_ROOT=${{github.workspace}}/lib/boost . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
+        cmake_command: cmake \
+          -DCMAKE_C_COMPILER=gcc-10 \
+          -DCMAKE_CXX_COMPILER=g++-10 \
+          -DBOOST_ROOT=${{github.workspace}}/lib/boost \
+          -DCMAKE_BUILD_TYPE=Debug \
+          -Dgtest_disable_pthreads=OFF \
+          -DCMAKE_EXPORT_COMPILE_COMMANDS=ON . -B ${{github.workspace}}/build -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
     # If there are any comments, fail the check
     #- if: steps.review.outputs.total_comments > 0
     #  run: exit 1
