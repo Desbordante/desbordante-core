@@ -61,4 +61,5 @@ jobs:
       run: 
         cat /github/workspace/CMakeFiles/CMakeOutput.log
         cat compile_commands.json
+      if: always()
         
