@@ -56,6 +56,7 @@ jobs:
       id: review
       with:
         cmake_command: cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=on 
+        base_dir: ${{ env.base_dir }}
     # If there are any comments, fail the check
     #- if: steps.review.outputs.total_comments > 0
     #  run: exit 1
