@@ -11,7 +11,21 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y clang-format-12
-
+    - name: Cache Boost
+      uses: actions/cache@v2
+      id: cache-boost
+      with:
+        path: ${{github.workspace}}/lib/boost
+        key: ${{ runner.os }}-boost
+    - name: Install Boost
+      run: |
+        wget -O boost_1_72_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
+        tar xzvf boost_1_72_0.tar.gz
+        cd boost_1_72_0
+        ./bootstrap.sh --prefix=${{github.workspace}}/lib/boost
+        ./b2
+        sudo ./b2 install
+      if: steps.cache-boost.outputs.cache-hit != 'true'
     - name: Check formatting
       run: |       
         formatterOutput=$(git diff origin/$GITHUB_BASE_REF...origin/$GITHUB_HEAD_REF | clang-format-diff-12 -p 1)
