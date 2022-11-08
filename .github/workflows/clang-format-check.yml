@@ -48,8 +48,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Get DEBUG info
-      run: 
+      run: |
         cmake --version
+        mkdir build
+        cd build
     - uses: ZedThree/clang-tidy-review@v0.10.0
       id: review
       with:
@@ -58,7 +60,7 @@ jobs:
     #- if: steps.review.outputs.total_comments > 0
     #  run: exit 1
     - name: Get DEBUG info2
-      run: 
+      run: |
         cat /github/workspace/CMakeFiles/CMakeOutput.log
         cat compile_commands.json
       if: always()
