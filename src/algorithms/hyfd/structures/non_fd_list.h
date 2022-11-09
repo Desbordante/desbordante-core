@@ -1,8 +1,10 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <numeric>
+#include <utility>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 namespace algos::hyfd {
 
@@ -17,10 +19,7 @@ private:
     unsigned depth_ = 0;
 
 public:
-    explicit NonFDList(size_t num_attributes) noexcept : fds_(num_attributes + 1) {}
-
-    NonFDList(NonFDList&& other) = default;
-    NonFDList& operator=(NonFDList&& other) = default;
+    explicit NonFDList(size_t num_attributes) : fds_(num_attributes + 1) {}
 
     /**
      * Adds the column combination to the correspondent level. Does not check whether the level

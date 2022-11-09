@@ -1,27 +1,36 @@
 #include "fd_tree.h"
 
+#include <memory>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
 namespace algos::hyfd::fd_tree {
 
 std::shared_ptr<FDTreeVertex> FDTree::AddFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
-    std::shared_ptr<FDTreeVertex> cur_node = root_;
+    FDTreeVertex* cur_node = root_.get();
     cur_node->SetAttribute(rhs);
 
-    bool is_new = false;
     for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
          bit = lhs.find_next(bit)) {
-        is_new = cur_node->AddChild(bit);
+        bool is_new = cur_node->AddChild(bit);
+
+        if (is_new && lhs.find_next(bit) == boost::dynamic_bitset<>::npos) {
+            auto added_node = cur_node->GetChildPtr(bit);
+            added_node->SetAttribute(rhs);
+            added_node->SetFd(rhs);
+            return added_node;
+        }
+
         cur_node = cur_node->GetChild(bit);
         cur_node->SetAttribute(rhs);
     }
     cur_node->SetFd(rhs);
-    if (is_new) {
-        return cur_node;
-    }
     return nullptr;
 }
 
 bool FDTree::ContainsFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
-    std::shared_ptr<FDTreeVertex> cur_node = root_;
+    FDTreeVertex const* cur_node = root_.get();
 
     for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
          bit = lhs.find_next(bit)) {

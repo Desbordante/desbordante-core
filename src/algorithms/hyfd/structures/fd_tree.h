@@ -1,10 +1,12 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <memory>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "fd_tree_vertex.h"
-#include "hyfd/elements/raw_fd.h"
+#include "raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
 
@@ -30,12 +32,12 @@ public:
         return root_->GetNumAttributes();
     }
 
-    std::shared_ptr<FDTreeVertex> GetRoot() noexcept {
+    std::shared_ptr<FDTreeVertex> GetRootPtr() noexcept {
         return root_;
     }
 
-    [[nodiscard]] std::shared_ptr<const FDTreeVertex> GetRoot() const noexcept {
-        return root_;
+    [[nodiscard]] FDTreeVertex const& GetRoot() const noexcept {
+        return *root_;
     }
 
     std::shared_ptr<FDTreeVertex> AddFD(boost::dynamic_bitset<> const& lhs, size_t rhs);
@@ -59,7 +61,7 @@ public:
     /**
      * Checks if any FD has at least given lhs and rhs.
      */
-    bool FindFdOrGeneral(boost::dynamic_bitset<> const& lhs, size_t rhs) {
+    [[nodiscard]] bool FindFdOrGeneral(boost::dynamic_bitset<> const& lhs, size_t rhs) const {
         return root_->FindFdOrGeneralRecursive(lhs, rhs, lhs.find_first());
     }
 
@@ -74,8 +76,8 @@ public:
      */
     [[nodiscard]] std::vector<RawFD> FillFDs() const {
         std::vector<RawFD> result;
-        boost::dynamic_bitset<> lhs_for_traverse (GetRoot()->GetNumAttributes());
-        GetRoot()->FillFDs(result, lhs_for_traverse);
+        boost::dynamic_bitset<> lhs_for_traverse(GetRoot().GetNumAttributes());
+        GetRoot().FillFDs(result, lhs_for_traverse);
         return result;
     }
 };
