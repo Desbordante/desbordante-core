@@ -32,16 +32,22 @@ public:
     util::PositionListIndex const* GetPositionListIndex() const {
         return position_list_index_.get();
     }
+    util::PositionListIndex* GetPositionListIndex() {
+        return position_list_index_.get();
+    }
 
-    std::shared_ptr<util::PositionListIndex> GetPliOwnership() { return position_list_index_; }
+    std::shared_ptr<util::PositionListIndex> GetPliOwnership() {
+        return position_list_index_;
+    }
     std::shared_ptr<util::PositionListIndex const> GetPliOwnership() const {
         return position_list_index_;
     }
 
-    std::string ToString() const final { return "Data for " + column_->ToString(); }
+    std::string ToString() const final {
+        return "Data for " + column_->ToString();
+    }
 
     static bool IsValueSingleton(int value) noexcept {
         return value == util::PLI::singleton_value_id_;
     }
 };
-

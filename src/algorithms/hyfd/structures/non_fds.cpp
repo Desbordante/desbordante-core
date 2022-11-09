@@ -1,5 +1,9 @@
 #include "non_fds.h"
 
+#include <utility>
+
+#include <boost/dynamic_bitset.hpp>
+
 namespace algos::hyfd {
 
 void NonFds::Add(boost::dynamic_bitset<>&& column_set) {

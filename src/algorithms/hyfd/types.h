@@ -1,4 +1,5 @@
 #include <memory>
+#include <utility>
 #include <vector>
 
 namespace util {
@@ -9,7 +10,8 @@ class PositionListIndex;
 
 namespace algos::hyfd {
 
-using PLIs = std::vector<std::shared_ptr<util::PositionListIndex>>;
+using PLIs = std::vector<util::PositionListIndex*>;
+using PLIsPtr = std::shared_ptr<PLIs>;
 using Rows = std::vector<std::vector<size_t>>;
 using Columns = Rows;
 using RowsPtr = std::shared_ptr<Rows>;

@@ -1,5 +1,10 @@
 #include "fd_tree_vertex.h"
 
+#include <algorithm>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
 namespace algos::hyfd::fd_tree {
 
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
@@ -112,14 +117,12 @@ void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs
     }
 
     for (size_t i = 0; i < GetNumAttributes(); i++) {
-        auto const child = GetChild(i);
-
-        if (!child) {
+        if (!ContainsChildAt(i)) {
             continue;
         }
 
         lhs.set(i);
-        child->FillFDs(fds, lhs);
+        GetChild(i)->FillFDs(fds, lhs);
         lhs.reset(i);
     }
 }

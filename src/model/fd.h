@@ -3,6 +3,7 @@
 #include <string>
 
 #include "column.h"
+#include "raw_fd.h"
 #include "vertical.h"
 
 class FD {
@@ -17,8 +18,14 @@ public:
         return "{lhs: " + lhs_.ToIndicesString() + ", rhs: " + rhs_.ToIndicesString() + "}";
     }
 
-    Vertical const& GetLhs() const { return lhs_; }
-    Column const& GetRhs() const { return rhs_; }
+    Vertical const& GetLhs() const {
+        return lhs_;
+    }
+    Column const& GetRhs() const {
+        return rhs_;
+    }
 
-    // unsigned int Fletcher16() const;
+    [[nodiscard]] RawFD ToRawFD() const {
+        return {lhs_.GetColumnIndices(), rhs_.GetIndex()};
+    }
 };

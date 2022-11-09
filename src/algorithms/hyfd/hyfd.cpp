@@ -1,8 +1,15 @@
 #include "hyfd.h"
 
-#include <easylogging++.h>
+#include <algorithm>
+#include <chrono>
+#include <iterator>
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
 
-#include <iostream>
+#include <boost/dynamic_bitset.hpp>
+#include <easylogging++.h>
 
 #include "inductor.h"
 #include "sampler.h"
@@ -11,13 +18,13 @@
 
 namespace {
 
-std::vector<size_t> SortAndGetMapping(std::vector<std::shared_ptr<util::PositionListIndex>>& plis) {
+std::vector<size_t> SortAndGetMapping(algos::hyfd::PLIs& plis) {
     size_t id = 0;
-    std::vector<std::pair<std::shared_ptr<util::PositionListIndex>, size_t>> plis_sort_ids;
+    std::vector<std::pair<algos::hyfd::PLIs::value_type, size_t>> plis_sort_ids;
     std::transform(plis.begin(), plis.end(), std::back_inserter(plis_sort_ids),
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
-    static constexpr auto kClusterQuantityDescending = [](auto pli1, auto pli2) {
+    auto const kClusterQuantityDescending = [](auto const& pli1, auto const& pli2) {
         return pli1.first->GetNumCluster() > pli2.first->GetNumCluster();
     };
     std::sort(plis_sort_ids.begin(), plis_sort_ids.end(), kClusterQuantityDescending);
@@ -27,7 +34,7 @@ std::vector<size_t> SortAndGetMapping(std::vector<std::shared_ptr<util::Position
 
     std::vector<size_t> og_mapping(plis_sort_ids.size());
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), og_mapping.begin(),
-                   [](auto& pli_ext) { return pli_ext.second; });
+                   [](auto const& pli_ext) { return pli_ext.second; });
     return og_mapping;
 }
 
@@ -72,7 +79,7 @@ std::tuple<PLIs, Rows, std::vector<size_t>> HyFD::Preprocess() {
     PLIs plis;
     std::transform(relation_->GetColumnData().begin(), relation_->GetColumnData().end(),
                    std::back_inserter(plis),
-                   [](auto& columnData) { return columnData.GetPliOwnership(); });
+                   [](auto& columnData) { return columnData.GetPositionListIndex(); });
 
     auto og_mapping = SortAndGetMapping(plis);
 
@@ -84,33 +91,34 @@ std::tuple<PLIs, Rows, std::vector<size_t>> HyFD::Preprocess() {
 }
 
 unsigned long long HyFD::ExecuteInternal() {
-    LOG(INFO) << "Executing";
+    LOG(TRACE) << "Executing";
     auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess();
+    auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
     auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
 
-    Sampler sampler(plis, pli_records_shared);
+    Sampler sampler(plis_shared, pli_records_shared);
 
     auto const positive_cover_tree =
             std::make_shared<fd_tree::FDTree>(GetRelation().GetNumColumns());
     Inductor inductor(positive_cover_tree);
-    Validator validator(positive_cover_tree, plis, pli_records_shared);
+    Validator validator(positive_cover_tree, plis_shared, pli_records_shared);
 
-    std::vector<std::pair<size_t, size_t>> comparison_suggestions;
+    IdPairs comparison_suggestions;
 
     while (true) {
         auto non_fds = sampler.GetNonFDCandidates(comparison_suggestions);
 
         inductor.UpdateFdTree(std::move(non_fds));
 
-        comparison_suggestions = validator.Validate();
+        comparison_suggestions = validator.ValidateAndExtendCandidates();
 
         if (comparison_suggestions.empty()) {
             break;
         }
 
-        LOG(INFO) << "Cycle done";
+        LOG(TRACE) << "Cycle done";
     }
 
     auto fds = positive_cover_tree->FillFDs();
@@ -124,7 +132,7 @@ unsigned long long HyFD::ExecuteInternal() {
 }
 
 void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<size_t>& og_mapping) {
-    const auto schema = GetRelation().GetSchema();
+    const auto* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
         boost::dynamic_bitset<> mapped_lhs(schema->GetNumColumns());
         for (size_t i = lhs.find_first(); i != boost::dynamic_bitset<>::npos;
@@ -134,6 +142,8 @@ void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<size_t>& og_m
         Vertical lhs_v(schema, std::move(mapped_lhs));
 
         size_t const mapped_rhs = og_mapping[rhs];
+        // todo(strutovsky): make indices unsigned in core structures
+        // NOLINTNEXTLINE(*-narrowing-conversions)
         Column rhs_c(schema, schema->GetColumn(mapped_rhs)->GetName(), mapped_rhs);
 
         RegisterFd(std::move(lhs_v), std::move(rhs_c));

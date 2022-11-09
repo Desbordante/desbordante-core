@@ -1,10 +1,12 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <memory>
 #include <utility>
 #include <vector>
 
-#include "hyfd/elements/raw_fd.h"
+#include <boost/dynamic_bitset.hpp>
+
+#include "raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
 
@@ -46,6 +48,50 @@ private:
 
     friend class FDTree;
 
+    FDTreeVertex* GetChild(size_t pos) {
+        return children_.at(pos).get();
+    }
+
+    void SetFd(size_t pos) {
+        fds_.set(pos);
+    }
+
+    boost::dynamic_bitset<> GetAttributes() const noexcept {
+        return attributes_;
+    }
+
+    void SetAttribute(size_t pos) noexcept {
+        attributes_.set(pos);
+    }
+
+    void RemoveAttribute(size_t pos) noexcept {
+        attributes_.reset(pos);
+    }
+
+    bool IsAttribute(size_t pos) const noexcept {
+        return attributes_.test(pos);
+    }
+
+    /**
+     * Constructs empty child node at the given position. Does nothing if the child already exists.
+     *
+     * @param pos child position
+     * @return whether a child was constructed
+     */
+    bool AddChild(size_t pos) {
+        contains_children_ = true;
+        if (children_.empty()) {
+            children_.resize(num_attributes_);
+        }
+
+        if (!ContainsChildAt(pos)) {
+            children_[pos] = std::make_shared<FDTreeVertex>(num_attributes_);
+            return true;
+        }
+
+        return false;
+    }
+
     void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
@@ -74,10 +120,6 @@ public:
         return fds_;
     }
 
-    void SetFd(size_t pos) {
-        fds_.set(pos);
-    }
-
     /**
      * Replaces stored RHS with provided one.
      * @param new_fds RHS to replace with.
@@ -94,48 +136,12 @@ public:
         return fds_.test(pos);
     }
 
-    boost::dynamic_bitset<> GetAttributes() const noexcept {
-        return attributes_;
-    }
-
-    void SetAttribute(size_t pos) noexcept {
-        attributes_.set(pos);
-    }
-
-    void RemoveAttribute(size_t pos) noexcept {
-        attributes_.reset(pos);
-    }
-
-    bool IsAttribute(size_t pos) const noexcept {
-        return attributes_.test(pos);
-    }
-
-    std::shared_ptr<FDTreeVertex> GetChild(size_t pos) {
+    std::shared_ptr<FDTreeVertex> GetChildPtr(size_t pos) {
         return children_.at(pos);
     }
 
-    std::shared_ptr<const FDTreeVertex> GetChild(size_t pos) const {
-        return children_.at(pos);
-    }
-
-    /**
-     * Constructs empty child node at the given position. Does nothing if the child already exists.
-     *
-     * @param pos child position
-     * @return whether a child was constructed
-     */
-    bool AddChild(size_t pos) {
-        contains_children_ = true;
-        if (children_.empty()) {
-            children_.resize(num_attributes_);
-        }
-
-        if (!ContainsChildAt(pos)) {
-            children_[pos] = std::make_shared<FDTreeVertex>(num_attributes_);
-            return true;
-        }
-
-        return false;
+    FDTreeVertex const* GetChild(size_t pos) const {
+        return children_.at(pos).get();
     }
 
     bool ContainsChildAt(size_t pos) const {
