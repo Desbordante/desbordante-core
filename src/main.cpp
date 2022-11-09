@@ -81,6 +81,12 @@ static bool CheckOptions(std::string const& task, std::string const& alg, std::s
     return true;
 }
 
+
+void SussyRecursion()
+{
+    SussyRecursion();
+}
+
 int main(int argc, char const* argv[]) {
     std::string algo;
     std::string dataset;
@@ -287,6 +293,8 @@ int main(int argc, char const* argv[]) {
         std::cout << e.what() << std::endl;
         return 1;
     }
+
+    SussyRecursion();
 
     return 0;
 }
