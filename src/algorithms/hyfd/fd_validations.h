@@ -1,7 +1,8 @@
 #include <vector>
 
-#include "elements/raw_fd.h"
+#include "raw_fd.h"
 #include "types.h"
+#include "validator.h"
 
 namespace algos::hyfd {
 
@@ -9,10 +10,10 @@ struct Validator::FDValidations {
     std::vector<RawFD> invalid_fds_;
     IdPairs comparison_suggestions_;
 
-    int count_validations_ = 0;
-    int count_intersections_ = 0;
+    unsigned count_validations_ = 0;
+    unsigned count_intersections_ = 0;
 
-    void add(FDValidations&& other) noexcept {
+    void add(FDValidations&& other) {
         invalid_fds_.insert(invalid_fds_.end(), other.invalid_fds_.begin(),
                             other.invalid_fds_.end());
 

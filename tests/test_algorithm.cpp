@@ -1,10 +1,10 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <map>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "datasets.h"
 #include "depminer.h"

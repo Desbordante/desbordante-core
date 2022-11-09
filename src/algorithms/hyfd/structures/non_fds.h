@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
 #include <unordered_set>
 #include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "non_fd_list.h"
 
@@ -20,7 +21,7 @@ private:
     NonFDList new_non_fds_;
 
 public:
-    explicit NonFds(size_t num_attributes) noexcept
+    explicit NonFds(size_t num_attributes)
         : total_non_fds_(num_attributes + 1), new_non_fds_(num_attributes) {}
 
     /**

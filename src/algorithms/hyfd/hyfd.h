@@ -1,8 +1,13 @@
 #pragma once
 
-#include "elements/raw_fd.h"
+#include <memory>
+#include <tuple>
+#include <utility>
+#include <vector>
+
 #include "pli_based_fd_algorithm.h"
 #include "position_list_index.h"
+#include "raw_fd.h"
 #include "types.h"
 
 namespace algos::hyfd {
@@ -37,9 +42,9 @@ private:
     void RegisterFDs(std::vector<RawFD>&& fds, std::vector<size_t> const& og_mapping);
 
 public:
-    explicit HyFD(Config const& config) : PliBasedFDAlgorithm(config, {"FD mining"}) {}
+    explicit HyFD(Config const& config) : PliBasedFDAlgorithm(config, {}) {}
     explicit HyFD(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config, {"FD mining"}) {}
+        : PliBasedFDAlgorithm(std::move(relation), config, {}) {}
 };
 
 }  // namespace algos::hyfd

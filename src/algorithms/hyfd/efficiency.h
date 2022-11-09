@@ -1,3 +1,7 @@
+#include <cstddef>
+
+#include "sampler.h"
+
 namespace algos::hyfd {
 
 class Sampler::Efficiency {
@@ -11,7 +15,7 @@ private:
 public:
     explicit Efficiency(size_t column_id) noexcept : column_id_(column_id) {}
 
-    double CalcEfficiency() const noexcept {
+    [[nodiscard]] double CalcEfficiency() const noexcept {
         if (num_comparisons_ == 0) {
             return 0.0;
         }
@@ -39,7 +43,7 @@ public:
         return window_;
     }
 
-    inline bool operator<(Efficiency const& other) const noexcept {
+    bool operator<(Efficiency const& other) const noexcept {
         return CalcEfficiency() < other.CalcEfficiency();
     }
 };

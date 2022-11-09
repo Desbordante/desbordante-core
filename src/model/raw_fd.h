@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include <cstddef>
+#include <utility>
 
-namespace algos::hyfd {
+#include <boost/dynamic_bitset.hpp>
 
 struct RawFD {
     boost::dynamic_bitset<> lhs_;
@@ -10,5 +11,3 @@ struct RawFD {
 
     RawFD(boost::dynamic_bitset<> lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
 };
-
-}  // namespace algos::hyfd

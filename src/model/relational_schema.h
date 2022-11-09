@@ -9,11 +9,13 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/optional.hpp>
+
+#include "bitset_utils.h"
 
 class Column;
 
@@ -65,15 +67,10 @@ inline bool operator!=(RelationalSchema const& l, RelationalSchema const& r) {
 
 template <typename Container>
 boost::dynamic_bitset<> RelationalSchema::IndicesToBitset(Container const& indices) const {
-    return IndicesToBitset(indices.begin(), indices.end());
+    return util::IndicesToBitset(indices, GetNumColumns());
 }
 
 template <typename ForwardIt>
 boost::dynamic_bitset<> RelationalSchema::IndicesToBitset(ForwardIt begin, ForwardIt end) const {
-    boost::dynamic_bitset<> bitset(GetNumColumns());
-    for (auto it = begin; it != end; ++it) {
-        bitset.set(*it);
-    }
-    return bitset;
+    return util::IndicesToBitset(begin, end, GetNumColumns());
 }
-

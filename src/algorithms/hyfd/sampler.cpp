@@ -1,6 +1,9 @@
 #include "sampler.h"
 
+#include <algorithm>
 #include <utility>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "efficiency.h"
 #include "util/pli_util.h"
@@ -9,33 +12,56 @@ namespace {
 
 class ClusterComparator {
 private:
-    algos::hyfd::RowsPtr sort_keys_;
-    size_t active_key_1_;
-    size_t active_key_2_;
-
-    size_t Increment(size_t number) noexcept {
-        return (number == (*sort_keys_)[0].size() - 1) ? 0 : number + 1;
-    }
+    algos::hyfd::Rows* sort_keys_;
+    size_t comparison_column_1_;
+    size_t comparison_column_2_;
 
 public:
-    ClusterComparator(algos::hyfd::RowsPtr sort_keys, size_t active_key_1) noexcept
-        : sort_keys_(std::move(sort_keys)), active_key_1_(active_key_1), active_key_2_(1) {
-        assert((*sort_keys_)[0].size() >= 3);
-    }
-
-    void IncrementActiveKey() noexcept {
-        active_key_1_ = Increment(active_key_1_);
-        active_key_2_ = Increment(active_key_2_);
+    ClusterComparator(algos::hyfd::Rows* sort_keys, size_t comparison_column_1,
+                      size_t comparison_column_2) noexcept
+        : sort_keys_(sort_keys),
+          comparison_column_1_(comparison_column_1),
+          comparison_column_2_(comparison_column_2) {
+        assert(sort_keys_->front().size() >= 3);
     }
 
     bool operator()(size_t o1, size_t o2) noexcept {
-        size_t value1 = (*sort_keys_)[o1][active_key_1_];
-        size_t value2 = (*sort_keys_)[o2][active_key_1_];
+        size_t value1 = (*sort_keys_)[o1][comparison_column_1_];
+        size_t value2 = (*sort_keys_)[o2][comparison_column_1_];
         if (value1 == value2) {
-            value1 = (*sort_keys_)[o1][active_key_2_];
-            value2 = (*sort_keys_)[o2][active_key_2_];
+            value1 = (*sort_keys_)[o1][comparison_column_2_];
+            value2 = (*sort_keys_)[o2][comparison_column_2_];
         }
         return value1 > value2;
+    }
+};
+
+class ColumnSlider {
+private:
+    size_t num_attributes_;
+    size_t current_column_compared_ = 0;
+
+    [[nodiscard]] size_t GetIncrement(size_t i) const {
+        return (i == num_attributes_ - 1) ? 0 : i + 1;
+    }
+
+    [[nodiscard]] size_t GetDecrement(size_t i) const {
+        return (i == 0) ? num_attributes_ - 1 : i - 1;
+    }
+
+public:
+    explicit ColumnSlider(size_t num_attributes) : num_attributes_(num_attributes) {}
+
+    void ToNextColumn() {
+        current_column_compared_ = GetIncrement(current_column_compared_);
+    }
+
+    [[nodiscard]] size_t GetLeftNeighbor() const {
+        return GetDecrement(current_column_compared_);
+    }
+
+    [[nodiscard]] size_t GetRightNeighbor() const {
+        return GetDecrement(current_column_compared_);
     }
 };
 
@@ -72,7 +98,7 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
 }
 
 void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions) {
-    size_t const num_attributes = plis_.size();
+    size_t const num_attributes = plis_->size();
 
     for (auto [first_id, second_id] : comparison_suggestions) {
         boost::dynamic_bitset<> equal_attrs(num_attributes);
@@ -83,29 +109,33 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
 }
 
 void Sampler::InitializeEfficiencyQueue() {
-    size_t const num_attributes = plis_.size();
+    size_t const num_attributes = plis_->size();
 
     if (num_attributes >= 3) {
-        ClusterComparator cluster_comparator(compressed_records_, (*compressed_records_)[0].size() - 1);
-        for (auto& pli : plis_) {
+        ColumnSlider columnSlider(num_attributes);
+        for (auto& pli : *plis_) {
+            ClusterComparator cluster_comparator(compressed_records_.get(),
+                                                 columnSlider.GetLeftNeighbor(),
+                                                 columnSlider.GetRightNeighbor());
             for (auto& cluster : pli->GetIndex()) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
-            cluster_comparator.IncrementActiveKey();
+            columnSlider.ToNextColumn();
         }
     }
 
     for (size_t attr = 0; attr < num_attributes; ++attr) {
         Efficiency efficiency(attr);
 
-        RunWindow(efficiency, *plis_[attr]);
+        RunWindow(efficiency, *(*plis_)[attr]);
 
         if (efficiency.CalcEfficiency() > 0) {
             efficiency_queue_.push(efficiency);
         }
     }
     if (!efficiency_queue_.empty()) {
-        efficiency_threshold_ = std::min(0.01, efficiency_queue_.top().CalcEfficiency() * 0.5);
+        efficiency_threshold_ = std::min(HyFDConfig::kEfficiencyThreshold,
+                                         efficiency_queue_.top().CalcEfficiency() / 2);
     }
 }
 
@@ -115,8 +145,10 @@ NonFDList Sampler::GetNonFDCandidates(IdPairs const& comparison_suggestions) {
     if (efficiency_queue_.empty()) {
         InitializeEfficiencyQueue();
     } else {
+        double const threshold_decrease = 0.9;
         efficiency_threshold_ =
-                std::min(efficiency_threshold_ / 2, efficiency_queue_.top().CalcEfficiency() * 0.9);
+                std::min(efficiency_threshold_ / 2,
+                         efficiency_queue_.top().CalcEfficiency() * threshold_decrease);
     }
 
     while (!efficiency_queue_.empty() &&
@@ -124,7 +156,7 @@ NonFDList Sampler::GetNonFDCandidates(IdPairs const& comparison_suggestions) {
         Efficiency best_efficiency = efficiency_queue_.top();
         efficiency_queue_.pop();
 
-        RunWindow(best_efficiency, *plis_[best_efficiency.GetAttr()]);
+        RunWindow(best_efficiency, *(*plis_)[best_efficiency.GetAttr()]);
 
         if (best_efficiency.CalcEfficiency() > 0) {
             efficiency_queue_.push(best_efficiency);
@@ -139,7 +171,7 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
     assert(first_record_id < compressed_records_->size() &&
            second_record_id < compressed_records_->size());
 
-    for (size_t i = 0; i < (*compressed_records_)[0].size(); ++i) {
+    for (size_t i = 0; i < compressed_records_->front().size(); ++i) {
         size_t const val1 = (*compressed_records_)[first_record_id][i];
         size_t const val2 = (*compressed_records_)[second_record_id][i];
         if (!PLIUtil::IsSingletonCluster(val1) && !PLIUtil::IsSingletonCluster(val2) &&
@@ -149,9 +181,9 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
     }
 }
 
-Sampler::Sampler(PLIs const& plis, RowsPtr pli_records)
-    : plis_(plis), compressed_records_(std::move(pli_records)) {
-    non_fds_ = std::make_shared<NonFds>(plis.size());
+Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records)
+    : plis_(std::move(plis)), compressed_records_(std::move(pli_records)) {
+    non_fds_ = std::make_shared<NonFds>(plis_->size());
 }
 
 Sampler::~Sampler() = default;
