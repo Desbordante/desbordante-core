@@ -46,10 +46,9 @@ include_directories(
     "src/caching"
     "src/logging"
     "src"
-
-    "lib/easyloggingpp/src"
-    "lib/better-enums/"
     )
+
+include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
 
 # adding submodules
 add_subdirectory("lib/googletest")
