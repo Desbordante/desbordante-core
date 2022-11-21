@@ -106,6 +106,7 @@ jobs:
       id: review
       with:
         build_dir: build
+        config_file: '.clang-tidy'
         split_workflow: true
 
     - uses: actions/upload-artifact@v3
