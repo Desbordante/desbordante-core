@@ -1,5 +1,7 @@
 #pragma once
 
+// see ./LICENSE
+
 #include <map>
 
 #include "../../util/prefix_tree.h"

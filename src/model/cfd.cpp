@@ -1,5 +1,7 @@
 #include "cfd.h"
 
+// see ../algorithms/CFD/LICENSE
+
 #include "../util/set_util.h"
 
 [[maybe_unused]] bool IsValid(const Itemset& lhs, int rhs) {

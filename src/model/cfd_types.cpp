@@ -1,5 +1,7 @@
 #include <algorithm>
 
+// see ../algorithms/CFD/LICENSE
+
 #include "cfd_types.h"
 
 const int PartitionTidList::SEP = -1;

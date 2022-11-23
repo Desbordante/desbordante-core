@@ -1,5 +1,7 @@
 #include "partition_table.h"
 
+// see ./LICENSE
+
 #include "miner_node.h"
 
 int PartitionTable::database_row_number_;

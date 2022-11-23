@@ -1,5 +1,7 @@
 #include "cfd_relation_data.h"
 
+// see ./LICENSE
+
 #include <easylogging++.h>
 
 #include <algorithm>

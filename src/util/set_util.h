@@ -1,5 +1,7 @@
 #pragma once
 
+// see ../algorithms/CFD/LICENSE
+
 #include <cmath>
 #include <ctime>
 #include <bitset>

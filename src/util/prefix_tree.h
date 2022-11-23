@@ -1,5 +1,7 @@
 #pragma once
 
+// see ../algorithms/CFD/LICENSE
+
 #include <map>
 #include <unordered_set>
 #include <queue>

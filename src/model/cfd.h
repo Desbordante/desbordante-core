@@ -1,5 +1,7 @@
 #pragma once
 
+// see ../algorithms/CFD/LICENSE
+
 #include "cfd_types.h"
 
 typedef std::pair<Itemset, int> CFD;

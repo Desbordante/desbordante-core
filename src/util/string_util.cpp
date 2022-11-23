@@ -1,5 +1,7 @@
 #include "string_util.h"
 
+// see ../algorithms/CFD/LICENSE
+
 #include <algorithm>
 
 // trim from start

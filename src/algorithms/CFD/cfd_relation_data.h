@@ -1,5 +1,7 @@
 #pragma once
 
+// see ./LICENSE
+
 #include <utility>
 
 #include "../../model/relation_data.h"

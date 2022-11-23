@@ -1,5 +1,7 @@
 #pragma once
 
+// see ./LICENSE
+
 #include <map>
 #include <set>
 #include <string>

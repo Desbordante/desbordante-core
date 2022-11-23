@@ -1,5 +1,8 @@
 #include <utility>
 #include <vector>
+
+// see ./LICENSE
+
 #include "../../model/abstract_column_data.h"
 using NumToken = int;
 

@@ -1,5 +1,7 @@
 #include "miner_node.h"
 
+// see ./LICENSE
+
 int support(const SimpleTidList& tids) {
     return tids.size();
 }

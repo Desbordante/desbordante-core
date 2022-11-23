@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <numeric>
 
+// see ../algorithms/CFD/LICENSE
+
 #include "set_util.h"
 
 [[maybe_unused]] SubsetIterator::SubsetIterator(int size, int subSize)

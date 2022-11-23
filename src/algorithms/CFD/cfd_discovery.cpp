@@ -1,5 +1,7 @@
 #include "cfd_discovery.h"
 
+// see ./LICENSE
+
 #include <iterator>
 #include <thread>
 

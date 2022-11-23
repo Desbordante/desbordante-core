@@ -1,5 +1,7 @@
 #pragma once
 
+// see ./LICENSE
+
 #include <numeric>
 
 #include "../../model/cfd_types.h"

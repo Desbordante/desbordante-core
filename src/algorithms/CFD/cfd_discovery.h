@@ -1,5 +1,7 @@
 #pragma once
 
+// see ./LICENSE
+
 #include <boost/any.hpp>
 #include <filesystem>
 #include <list>
@@ -16,6 +18,7 @@
 #include "generator_store.h"
 #include "miner_node.h"
 #include "partition_table.h"
+
 
 namespace algos {
 
