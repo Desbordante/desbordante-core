@@ -34,4 +34,10 @@ extern TableConfig const kTestEmpty{"TestEmpty.csv", ',', true};
 extern TableConfig const kTestSingleColumn{"TestSingleColumn.csv", ',', true};
 extern TableConfig const kTestLong{"TestLong.csv", ',', true};
 extern TableConfig const kTestFD{"TestFD.csv", ',', true};
+extern TableConfig const kIndTestWide2{"ind_data/TestWide2.csv", ',', false};
+extern TableConfig const kIndTestEmpty{"ind_data/Empty.csv", ',', true};
+extern TableConfig const kIndTestPlanets{"ind_data/Planets.csv", ',', false};
+extern TableConfig const kIndTest3aryInds{"ind_data/Test-3ary-inds.csv", ',', false};
+extern TableConfig const kIndTestTableFirst{"ind_data/two_tables/first.csv", ',', false};
+extern TableConfig const kIndTestTableSecond{"ind_data/two_tables/second.csv", ',', false};
 }  // namespace tests
