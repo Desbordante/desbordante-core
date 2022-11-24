@@ -17,7 +17,8 @@ BETTER_ENUM(AlgoMiningType, char,
     typos,
     ar,
     metric,
-    stats
+    stats,
+    ac
 #else
     fd = 0, /* Functional dependency mining */
     cfd,    /* Conditional functional dependency mining */
@@ -25,7 +26,8 @@ BETTER_ENUM(AlgoMiningType, char,
     key,    /* Key mining */
     typos,  /* Typo mining */
     metric, /* Metric functional dependency verifying */
-    stats   /* Statistic mining */
+    stats,   /* Statistic mining */
+    ac      /* Algebraic constraints mining */
 #endif
 );
 
@@ -54,7 +56,10 @@ BETTER_ENUM(Algo, char,
     metric,
 
     /* Statistic algorithms */
-    stats
+    stats,
+
+    /* Algebraic constraints mining algorithm */
+    bumphunter
 );
 
 using StdParamsMap = std::unordered_map<std::string, boost::any>;
@@ -203,6 +208,39 @@ MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
 }
 
 template <typename ParamsMap>
+ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
+    ACAlgorithm::Config c;
+
+    c.data = std::filesystem::current_path() / "inputData" /
+        ExtractParamFromMap<std::string>(params, posr::kData);
+    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
+    c.bin_operation = ExtractParamFromMap<char>(params, posr::kBinaryOperation);
+    c.fuzziness = ExtractParamFromMap<double>(params, posr::kFuzziness);
+    if (c.fuzziness <= 0 || c.fuzziness > 1) {
+        throw std::invalid_argument(
+            "Fuzziness value must belong to the interval: (0, 1]");
+    }
+    c.p_fuzz = ExtractParamFromMap<double>(params, posr::kFuzzinessProbability);
+    if (c.p_fuzz <= 0 || c.p_fuzz > 1) {
+        throw std::invalid_argument(
+            "FuzzinessProbability value must belong to the interval: (0, 1]");
+    }
+    c.weight = ExtractParamFromMap<double>(params, posr::kWeight);
+    if (c.weight <= 0 || c.weight > 1) {
+        throw std::invalid_argument("Weight value must belong to the interval: (0, 1]");
+    }
+    c.bumps_limit = ExtractParamFromMap<size_t>(params, posr::kBumpsLimit);
+    c.iterations_limit = ExtractParamFromMap<size_t>(params, posr::kIterationsLimit);
+    if (c.iterations_limit < 1) {
+        throw std::invalid_argument("IterationsLimit value should not be less than one");
+    }
+    c.pairing_rule = ExtractParamFromMap<std::string>(params, posr::kPairingRule);
+    
+    return c;
+}
+
+template <typename ParamsMap>
 std::unique_ptr<Primitive> CreateFDAlgorithmInstance(Algo const algo, ParamsMap&& params) {
     FDAlgorithm::Config const config =
         CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
@@ -245,6 +283,13 @@ std::unique_ptr<Primitive> CreateMetricVerifierInstance(ParamsMap&& params) {
 }
 
 template <typename ParamsMap>
+std::unique_ptr<Primitive> CreateAcAlgorithmInstance(ParamsMap&& params) {
+    ACAlgorithm::Config const config =
+        CreateAcAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
+    return std::make_unique<ACAlgorithm>(config);
+}
+
+template <typename ParamsMap>
 std::unique_ptr<Primitive> CreateCsvStatsInstance(ParamsMap&& params) {
     FDAlgorithm::Config const config =
         CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
@@ -267,6 +312,8 @@ std::unique_ptr<Primitive> CreateAlgorithmInstance(AlgoMiningType const task, Al
         return details::CreateMetricVerifierInstance(std::forward<ParamsMap>(params));
     case AlgoMiningType::stats:
         return details::CreateCsvStatsInstance(std::forward<ParamsMap>(params));
+    case AlgoMiningType::ac:
+        return details::CreateAcAlgorithmInstance(std::forward<ParamsMap>(params));
     default:
         throw std::logic_error(task._to_string() + std::string(" task type is not supported yet."));
     }
