@@ -18,3 +18,6 @@
 
 /* Metric FD verifier */
 #include "algorithms/metric_verifier.h"
+
+/* Algebraic constraints mining algorithm */
+#include "algorithms/ac_algorithm.h"

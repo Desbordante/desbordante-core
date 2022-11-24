@@ -35,4 +35,11 @@ constexpr auto kQGramLength = "q";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kRadius = "radius";
 constexpr auto kRatio = "ratio";
+constexpr auto kBinaryOperation = "bin_operation";
+constexpr auto kFuzziness = "fuzziness";
+constexpr auto kFuzzinessProbability = "p_fuzz";
+constexpr auto kWeight = "weight";
+constexpr auto kBumpsLimit = "bumps_limit";
+constexpr auto kIterationsLimit = "iterations_limit";
+constexpr auto kPairingRule = "pairing_rule";
 }  // namespace program_option_strings

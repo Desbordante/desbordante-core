@@ -110,6 +110,15 @@ int main(int argc, char const* argv[]) {
     unsigned int q = 2;
     bool dist_to_null_infinity = false;
 
+    /*Options for algebraic constraints algorithm*/
+    char bin_operation = '+';
+    double fuzziness = 0.15; 
+    double p_fuzz = 0.9;
+    double weight = 0.05;
+    size_t bumps_limit = 5;
+    size_t iterations_limit = 10; 
+    std::string pairing_rule = "trivial";
+
     std::string const algo_desc = "algorithm to use. Available algorithms:\n" +
                                   EnumToAvailableValues<algos::Algo>() +
                                   " for FD mining.";
@@ -199,9 +208,29 @@ int main(int argc, char const* argv[]) {
 
     mfd_options.add(cosine_options);
 
+    po::options_description ac_options("AC options");
+    ac_options.add_options()
+        (posr::kBinaryOperation, po::value<char>(&bin_operation)->default_value(bin_operation),
+         "one of availible operations: /, *, +, - ")
+        (posr::kFuzziness, po::value<double>(&fuzziness)->default_value(0.15),
+         "fraction of exceptional records")
+        (posr::kFuzzinessProbability, po::value<double>(&p_fuzz)->default_value(p_fuzz),
+         "probability, the fraction of exceptional records that lie outside the "
+         "bump intervals is at most Fuzziness")
+        (posr::kWeight, po::value<double>(&weight)->default_value(weight),
+         "value between 0 and 1. Closer to 0 - many short intervals. "
+         "Closer to 1 - small number of long intervals")
+        (posr::kBumpsLimit, po::value<size_t>(&bumps_limit)->default_value(bumps_limit),
+         "max considered intervals amount. Pass 0 to remove limit")
+        (posr::kIterationsLimit, po::value<size_t>(&iterations_limit)->default_value(iterations_limit),
+         "limit for iterations of sampling")
+        (posr::kPairingRule, po::value<std::string>(&pairing_rule)->default_value(pairing_rule),
+         "one of available pairing rules: trivial")
+        ;
+
     po::options_description all_options("Allowed options");
     all_options.add(info_options).add(general_options).add(typos_fd_options)
-        .add(mfd_options).add(ar_options);
+        .add(mfd_options).add(ar_options).add(ac_options);
 
     po::variables_map vm;
     try {
@@ -272,6 +301,18 @@ int main(int argc, char const* argv[]) {
         std::cout << "\" with parameter \"" << parameter
                   << "\" with LHS indices \"" << get_str(lhs_indices)
                   << "\" with RHS indices \"" << get_str(rhs_indices)
+                  << "\" and dataset \"" << dataset
+                  << "\" with separator \'" << separator
+                  << "\'. Header is " << (has_header ? "" : "not ") << "present. " << std::endl;
+    } else if (task == "ac") {
+        std::cout << "Input: algorithm \"" << algo
+                  << "\" with binary operation \"" << bin_operation
+                  << "\", fuzziness \"" << std::to_string(fuzziness)
+                  << "\", fuzziness probability \"" << std::to_string(p_fuzz)
+                  << "\", weight \"" << std::to_string(weight)
+                  << "\", bumps limit \"" << std::to_string(bumps_limit)
+                  << "\", iterations limit \"" << std::to_string(iterations_limit)
+                  << "\", pairing rule \"" << pairing_rule
                   << "\" and dataset \"" << dataset
                   << "\" with separator \'" << separator
                   << "\'. Header is " << (has_header ? "" : "not ") << "present. " << std::endl;
