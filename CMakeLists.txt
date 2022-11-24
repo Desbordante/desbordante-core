@@ -40,7 +40,7 @@ if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  "${CMAKE_BINARY_DIR}/target")
 else()
     # -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-    set(BUILD_OPTS "-DELPP_THREAD_SAFE")
+    set(BUILD_OPTS "-DELPP_THREAD_SAFE;-march=native")
 
     # RELEASE build options
     string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}"
@@ -104,7 +104,7 @@ include_directories(
         "src/core/config"
 )
 
-include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
+include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include")
 
 # adding submodules
 if (COMPILE_TESTS)
