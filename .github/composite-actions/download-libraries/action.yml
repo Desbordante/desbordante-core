@@ -55,6 +55,16 @@ runs:
         directory: pybind11
         download-command: git clone https://github.com/pybind/pybind11.git --branch v2.10 --depth 1
       if: inputs.download-pybind != 'false'
+    - name: Download emhash
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: emhash
+        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
+    - name: Download atomicbitvector
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: atomicbitvector
+        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs

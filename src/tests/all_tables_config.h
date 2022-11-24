@@ -36,4 +36,10 @@ extern TableConfig const kTestEmpty;
 extern TableConfig const kTestSingleColumn;
 extern TableConfig const kTestLong;
 extern TableConfig const kTestFD;
+extern TableConfig const kIndTestWide2;
+extern TableConfig const kIndTestEmpty;
+extern TableConfig const kIndTestPlanets;
+extern TableConfig const kIndTest3aryInds;
+extern TableConfig const kIndTestTableFirst;
+extern TableConfig const kIndTestTableSecond;
 }  // namespace tests
