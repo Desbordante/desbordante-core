@@ -11,6 +11,8 @@ namespace model {
 
 class INumericType : public IMetrizableType {
 public:
+    using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*, std::byte*) const;
+
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
