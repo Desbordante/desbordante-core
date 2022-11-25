@@ -81,6 +81,10 @@ static bool CheckOptions(std::string const& task, std::string const& alg, std::s
     return true;
 }
 
+void cringe() {
+    cringe();
+}
+
 int main(int argc, char const* argv[]) {
     std::string algo;
     std::string dataset;
@@ -279,6 +283,9 @@ int main(int argc, char const* argv[]) {
 
     std::unique_ptr<algos::Primitive> algorithm_instance =
         algos::CreateAlgorithmInstance(task, algo, vm);
+
+    cringe();
+    int not_flex;
 
     try {
         unsigned long long elapsed_time = algorithm_instance->Execute();
