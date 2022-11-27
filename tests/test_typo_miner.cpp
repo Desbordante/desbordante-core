@@ -18,14 +18,14 @@ struct TestingParam {
     TestingParam(std::string const& dataset,
                  char const separator, bool const has_header, bool const is_null_equal_null,
                  unsigned const max_lhs, double const error, ushort const threads)
-        : params({{onam::kData,            dataset},
-                  {onam::kSeparatorConfig, separator},
-                  {onam::kHasHeader,       has_header},
-                  {onam::kEqualNulls,      is_null_equal_null},
-                  {onam::kMaximumLhs,      max_lhs},
-                  {onam::kError,           error},
-                  {onam::kThreads,         threads},
-                  {onam::kSeed,            0}}) {}
+        : params({{onam::kData,       dataset},
+                  {onam::kSeparator,  separator},
+                  {onam::kHasHeader,  has_header},
+                  {onam::kEqualNulls, is_null_equal_null},
+                  {onam::kMaximumLhs, max_lhs},
+                  {onam::kError,      error},
+                  {onam::kThreads,    threads},
+                  {onam::kSeed,       0}}) {}
 };
 
 /* FD represented as vector where all elements except last are lhs indices and

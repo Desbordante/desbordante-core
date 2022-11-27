@@ -120,7 +120,7 @@ FDAlgorithm::Config CreateFDAlgorithmConfigFromMap(ParamsMap params) {
 
     c.data = std::filesystem::current_path() / "input_data" /
              ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
     c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
     c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
     c.max_lhs = ExtractParamFromMap<unsigned int>(params, onam::kMaximumLhs);
@@ -148,7 +148,7 @@ ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
 
     c.data = std::filesystem::current_path() / "input_data" /
              ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
     c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
     c.minsup = ExtractParamFromMap<double>(params, onam::kMinimumSupport);
     c.minconf = ExtractParamFromMap<double>(params, onam::kMinimumConfidence);
@@ -186,7 +186,7 @@ MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     }
     c.data = std::filesystem::current_path() / "input_data" /
         ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
     c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
     c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
     c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, onam::kLhsIndices);
