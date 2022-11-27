@@ -1,10 +1,12 @@
-#include "pli_based_fd_algorithm.h"
+#include "algorithms/pli_based_fd_algorithm.h"
 
-void PliBasedFDAlgorithm::Initialize() {
-    if (relation_ == nullptr) {
-        relation_ =
-            ColumnLayoutRelationData::CreateFrom(*input_generator_, config_.is_null_equal_null);
-    }
+namespace algos {
+
+PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
+        : FDAlgorithm(std::move(phase_names)) {}
+
+void PliBasedFDAlgorithm::FitFd(model::IDatasetStream& data_stream) {
+    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
@@ -23,3 +25,14 @@ std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
 
     return keys;
 }
+
+void PliBasedFDAlgorithm::Fit(std::shared_ptr<ColumnLayoutRelationData> data) {
+    if (data->GetColumnData().empty()) {
+        throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
+    }  // TODO: this has to be repeated for every "alternative" Fit
+    number_of_columns_ = data->GetNumColumns();
+    relation_ = std::move(data);
+    ExecutePrepare();  // TODO: this has to be repeated for every "alternative" Fit
+}
+
+}  // namespace algos
