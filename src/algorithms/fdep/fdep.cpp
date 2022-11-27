@@ -1,7 +1,8 @@
+#include "algorithms/fdep/fdep.h"
+
 #include <chrono>
 
-#include "column_layout_relation_data.h"
-#include "fdep.h"
+#include "model/column_layout_relation_data.h"
 
 //#ifndef PRINT_FDS
 //#define PRINT_FDS
@@ -9,11 +10,35 @@
 
 namespace algos {
 
-FDep::FDep(Config const& config) : FDAlgorithm(config, {kDefaultPhaseName}) {}
+FDep::FDep() : FDAlgorithm({kDefaultPhaseName}) {}
+
+void FDep::FitFd(model::IDatasetStream& data_stream) {
+    number_attributes_ = data_stream.GetNumberOfColumns();
+    if (number_attributes_ == 0) {
+        throw std::runtime_error("Unable to work on an empty dataset.");
+    }
+    column_names_.resize(number_attributes_);
+
+    schema_ = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
+                                                 is_null_equal_null_);
+
+    for (size_t i = 0; i < number_attributes_; ++i) {
+        column_names_[i] = data_stream.GetColumnName(static_cast<int>(i));
+        schema_->AppendColumn(column_names_[i]);
+    }
+
+    std::vector<std::string> next_line;
+    while (data_stream.HasNextRow()) {
+        next_line = data_stream.GetNextRow();
+        if (next_line.empty()) break;
+        tuples_.emplace_back(std::vector<size_t>(number_attributes_));
+        for (size_t i = 0; i < number_attributes_; ++i) {
+            tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
+        }
+    }
+}
 
 unsigned long long FDep::ExecuteInternal() {
-    Initialize();
-
     auto start_time = std::chrono::system_clock::now();
 
     BuildNegativeCover();
@@ -36,10 +61,6 @@ unsigned long long FDep::ExecuteInternal() {
 #endif
 
     return elapsed_milliseconds.count();
-}
-
-void FDep::Initialize() {
-    LoadData();
 }
 
 void FDep::BuildNegativeCover() {
@@ -101,31 +122,6 @@ void FDep::SpecializePositiveCover(std::bitset<FDTreeElement::kMaxAttrNum> const
         }
 
         spec_lhs.reset();
-    }
-}
-
-void FDep::LoadData() {
-    this->number_attributes_ = input_generator_->GetNumberOfColumns();
-    if (this->number_attributes_ == 0) {
-        throw std::runtime_error("Unable to work on an empty dataset.");
-    }
-    this->column_names_.resize(this->number_attributes_);
-
-    this->schema_ = std::make_unique<RelationalSchema>(input_generator_->GetRelationName(), true);
-
-    for (size_t i = 0; i < this->number_attributes_; ++i) {
-        this->column_names_[i] = input_generator_->GetColumnName(static_cast<int>(i));
-        this->schema_->AppendColumn(this->column_names_[i]);
-    }
-
-    std::vector<std::string> next_line;
-    while (input_generator_->HasNextRow()) {
-        next_line = input_generator_->GetNextRow();
-        if (next_line.empty()) break;
-        this->tuples_.emplace_back(std::vector<size_t>(this->number_attributes_));
-        for (size_t i = 0; i < this->number_attributes_; ++i) {
-            this->tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
-        }
     }
 }
 
