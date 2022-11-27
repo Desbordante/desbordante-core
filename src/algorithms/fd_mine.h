@@ -4,11 +4,13 @@
 #include <filesystem>
 #include <set>
 
-#include "column_combination.h"
-#include "column_layout_relation_data.h"
-#include "pli_based_fd_algorithm.h"
-#include "position_list_index.h"
-#include "vertical.h"
+#include "algorithms/pli_based_fd_algorithm.h"
+#include "model/column_combination.h"
+#include "model/column_layout_relation_data.h"
+#include "model/vertical.h"
+#include "util/position_list_index.h"
+
+namespace algos {
 
 class Fd_mine : public PliBasedFDAlgorithm {
 private:
@@ -32,8 +34,9 @@ private:
     void Display();
 
     unsigned long long ExecuteInternal() override;
+
 public:
-    Fd_mine(Config const& config) : PliBasedFDAlgorithm(config, {kDefaultPhaseName}) {}
-    explicit Fd_mine(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config, {kDefaultPhaseName}) {}
+    Fd_mine();
 };
+
+}  // namespace algos
