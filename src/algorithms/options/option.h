@@ -8,6 +8,7 @@
 
 #include "algorithms/options/info.h"
 #include "algorithms/options/ioption.h"
+#include "algorithms/options/opt_add_func_type.h"
 
 namespace algos::config {
 template<typename T>
@@ -15,7 +16,6 @@ class Option : public IOption {
 public:
     using CondCheckFunc = std::function<bool(T const &val)>;
     using OptCondVector = std::vector<std::pair<CondCheckFunc, std::vector<std::string_view>>>;
-    using OptAddFunc = std::function<void(std::string_view, std::vector<std::string_view> const&)>;
     using DefaultFunc = std::function<T()>;
     using NormalizeFunc = std::function<void(T &)>;
     using InstanceCheckFunc = std::function<void(T const &)>;
