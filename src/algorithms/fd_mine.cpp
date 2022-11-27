@@ -1,10 +1,14 @@
-#include "fd_mine.h"
+#include "algorithms/fd_mine.h"
 
 #include <queue>
 #include <vector>
 
 #include <boost/unordered_map.hpp>
 #include <easylogging++.h>
+
+namespace algos {
+
+Fd_mine::Fd_mine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
 unsigned long long Fd_mine::ExecuteInternal() {
     // 1
@@ -267,3 +271,4 @@ void Fd_mine::Display() {
     LOG(DEBUG) << "TOTAL FDs " << fd_counter;
 }
 
+}  // namespace algos
