@@ -1,4 +1,4 @@
-#include "fun.h"
+#include "algorithms/fun.h"
 
 #include <easylogging++.h>
 
@@ -19,6 +19,8 @@ bool FunQuadruple::Contains(FunQuadruple const& that) const {
 bool FunQuadruple::Contains(Vertical const& that) const {
     return candidate_.Contains(that);
 }
+
+FUN::FUN() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
 bool FUN::IsKey(FunQuadruple const& l) const {
     return l.GetCount() == relation_->GetNumRows();
