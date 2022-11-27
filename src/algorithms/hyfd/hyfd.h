@@ -5,10 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "pli_based_fd_algorithm.h"
-#include "position_list_index.h"
-#include "raw_fd.h"
-#include "types.h"
+#include "algorithms/hyfd/types.h"
+#include "algorithms/pli_based_fd_algorithm.h"
+#include "model/raw_fd.h"
+#include "util/position_list_index.h"
 
 namespace algos::hyfd {
 
@@ -42,9 +42,7 @@ private:
     void RegisterFDs(std::vector<RawFD>&& fds, std::vector<size_t> const& og_mapping);
 
 public:
-    explicit HyFD(Config const& config) : PliBasedFDAlgorithm(config, {}) {}
-    explicit HyFD(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config, {}) {}
+    HyFD();
 };
 
 }  // namespace algos::hyfd
