@@ -2,38 +2,30 @@
 
 #include <string>
 
-#include "pli_based_fd_algorithm.h"
-#include "position_list_index.h"
-#include "relation_data.h"
+#include "algorithms/options/error_opt.h"
+#include "algorithms/options/max_lhs_opt.h"
+#include "algorithms/pli_based_fd_algorithm.h"
+#include "model/relation_data.h"
+#include "util/position_list_index.h"
 
 namespace algos {
 
 class Tane : public PliBasedFDAlgorithm {
 private:
-    /* Special config parameters */
-    constexpr static const char* kMaxError = "error";
+    void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
 
-    unsigned long long ExecuteInternal() override;
 public:
-    //TODO: these consts should go in class (or struct) Configuration
-    const double max_fd_error_ = 0.01;
-    const double max_ucc_error_ = 0.01;
-    const unsigned int max_lhs_ = -1;
+    config::ErrorType max_fd_error_;
+    config::ErrorType max_ucc_error_;
+    config::MaxLhsType max_lhs_;
 
     int count_of_fd_ = 0;
     int count_of_ucc_ = 0;
     long apriori_millis_ = 0;
 
-    explicit Tane(Config const& config)
-        : PliBasedFDAlgorithm(config, {kDefaultPhaseName}),
-          max_fd_error_(GetSpecialParam<double>(kMaxError)),
-          max_ucc_error_(GetSpecialParam<double>(kMaxError)),
-          max_lhs_(config_.max_lhs) {}
-    explicit Tane(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config, {kDefaultPhaseName}),
-          max_fd_error_(GetSpecialParam<double>(kMaxError)),
-          max_ucc_error_(GetSpecialParam<double>(kMaxError)),
-          max_lhs_(config_.max_lhs) {}
+    Tane();
 
     static double CalculateZeroAryFdError(ColumnData const* rhs,
                                           ColumnLayoutRelationData const* relation_data);
