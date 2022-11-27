@@ -1,21 +1,30 @@
 #pragma once
 
-#include "column_layout_typed_relation_data.h"
-#include "fd_algorithm.h"
-#include "statistic.h"
+#include "algorithms/fd_algorithm.h"
+#include "algorithms/options/equal_nulls_opt.h"
+#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/statistics/statistic.h"
+#include "model/column_layout_typed_relation_data.h"
 
 namespace algos {
 
-class CsvStats : public algos::Primitive {
-    FDAlgorithm::Config config_;
-    const std::vector<model::TypedColumnData> col_data_;
+class CsvStats : public Primitive {
+    config::EqNullsType is_null_equal_null_;
+    config::ThreadNumType threads_num_;
+
+    std::vector<model::TypedColumnData> col_data_;
     std::vector<ColumnStats> all_stats_;
-    ushort threads_num_;
 
     size_t MixedDistinct(size_t index) const;
+    void RegisterOptions();
+
+protected:
+    void FitInternal(model::IDatasetStream &data_stream) final;
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
 
 public:
-    explicit CsvStats(const FDAlgorithm::Config& config);
+    CsvStats();
 
     const std::vector<model::TypedColumnData>& GetData() const noexcept;
 
@@ -61,7 +70,6 @@ public:
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;
     std::string ToString() const;
-    unsigned long long Execute();
 };
 
 }  // namespace algos
