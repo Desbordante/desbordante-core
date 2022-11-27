@@ -1,4 +1,4 @@
-#include "csv_stats.h"
+#include "algorithms/statistics/csv_stats.h"
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -9,12 +9,19 @@ namespace algos {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-CsvStats::CsvStats(const FDAlgorithm::Config& config)
-    : Primitive(config.data, config.separator, config.has_header, {"Calculating statistics"}),
-      config_(config),
-      col_data_(FDAlgorithm::CreateColumnData(config)),
-      all_stats_(col_data_.size()),
-      threads_num_(config_.parallelism) {}
+CsvStats::CsvStats() : Primitive({"Calculating statistics"}) {
+    RegisterOptions();
+    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+}
+
+void CsvStats::RegisterOptions() {
+    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
+    RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
+}
+
+void CsvStats::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
+}
 
 Statistic CsvStats::GetMin(size_t index, mo::CompareResult order) const {
     const mo::TypedColumnData& col = col_data_[index];
@@ -156,7 +163,7 @@ static size_t inline CountDistinctInSortedData(const std::vector<const std::byte
 size_t CsvStats::MixedDistinct(size_t index) const {
     const mo::TypedColumnData& col = col_data_[index];
     const std::vector<const std::byte*>& data = col.GetData();
-    mo::MixedType mixed_type(config_.is_null_equal_null);
+    mo::MixedType mixed_type(is_null_equal_null_);
 
     std::vector<std::vector<const std::byte*>> values_by_type_id(mo::TypeId::_size());
 
@@ -212,7 +219,7 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
     for (size_t j = start_col - 1; j < end_col; ++j) {
         const mo::TypedColumnData& col = col_data_[j];
         const auto& type = col.GetType();
-        mo::NullType null_type(config_.is_null_equal_null);
+        mo::NullType null_type(is_null_equal_null_);
         mo::EmptyType empty_type;
         for (size_t i = start_row - 1; i < end_row; ++i) {
             res[i][j] = cut_str(col.GetDataAsString(i), get_max_len(type.GetTypeId()));
@@ -265,7 +272,7 @@ Statistic CsvStats::GetQuantile(double part, size_t index, bool calc_all) {
     return Statistic(data[quantile], &col.GetType(), true);
 }
 
-unsigned long long CsvStats::Execute() {
+unsigned long long CsvStats::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
@@ -327,6 +334,11 @@ std::string CsvStats::ToString() const {
         res << all_stats_[i].ToString() << '\n';
     }
     return res.str();
+}
+
+void CsvStats::FitInternal(model::IDatasetStream& data_stream) {
+    col_data_ = mo::CreateTypedColumnData(data_stream, is_null_equal_null_);
+    all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }
 
 }  // namespace algos
