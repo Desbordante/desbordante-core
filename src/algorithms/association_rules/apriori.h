@@ -5,10 +5,10 @@
 #include <stack>
 #include <vector>
 
-#include "ar_algorithm.h"
-#include "candidate_hash_tree.h"
-#include "itemset.h"
-#include "node.h"
+#include "algorithms/ar_algorithm.h"
+#include "algorithms/association_rules/candidate_hash_tree.h"
+#include "algorithms/association_rules/node.h"
+#include "model/itemset.h"
 
 namespace algos {
 
@@ -37,8 +37,7 @@ private:
     unsigned long long FindFrequent() override;
 
 public:
-    explicit Apriori(Config const& config)
-        : ARAlgorithm(config, {}) {}
+    Apriori();
 
     std::list<std::set<std::string>> GetFrequentList() const override;
 };

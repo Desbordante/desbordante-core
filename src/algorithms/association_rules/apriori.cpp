@@ -1,11 +1,13 @@
-#include "apriori.h"
+#include "algorithms/association_rules/apriori.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "easylogging++.h"
+#include <easylogging++.h>
 
 namespace algos {
+
+Apriori::Apriori() : ARAlgorithm({}) {}
 
 void Apriori::GenerateCandidates(std::vector<Node>& children) {
     auto const last_child_iter = std::prev(children.end());
