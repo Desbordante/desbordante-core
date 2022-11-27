@@ -9,7 +9,11 @@ bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view const& opt
     return false;
 }
 
-void Primitive::AddMoreNeededOptions(
+bool Primitive::FitCompleted() const {
+    return fit_completed_;
+}
+
+void Primitive::AddSpecificNeededOptions(
         [[maybe_unused]] std::unordered_set<std::string_view> &previous_options) const {}
 
 void Primitive::MakeExecuteOptsAvailable() {}
@@ -127,7 +131,7 @@ std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
             needed.insert(name);
         }
     }
-    AddMoreNeededOptions(needed);
+    AddSpecificNeededOptions(needed);
     return needed;
 }
 

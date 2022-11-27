@@ -1,8 +1,122 @@
-#include "typo_miner.h"
+#include "algorithms/typo_miner.h"
+
+#include "algorithms/options/descriptions.h"
+#include "algorithms/options/names.h"
 
 namespace algos {
 
-unsigned long long TypoMiner::Execute() {
+decltype(TypoMiner::RadiusOpt) TypoMiner::RadiusOpt{
+        {config::names::kRadius, config::descriptions::kDRadius}, -1, [](auto value) {
+            if (!(value == -1 || value >= 0)) {
+                throw std::invalid_argument(
+                        "Radius should be greater or equal to zero or equal to -1");
+            }
+        }};
+
+decltype(TypoMiner::RatioOpt) TypoMiner::RatioOpt{
+        {config::names::kRatio, config::descriptions::kDRatio}, {}, [](auto value) {
+            if (!(value >= 0 && value <= 1)) {
+                throw std::invalid_argument("Ratio should be between 0 and 1");
+            }
+        }};
+
+TypoMiner::TypoMiner(PrimitiveType precise, PrimitiveType approx)
+        : TypoMiner(CreatePrimitiveInstance<FDAlgorithm>(precise),
+                    CreatePrimitiveInstance<FDAlgorithm>(approx)) {}
+
+TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
+                     std::unique_ptr<FDAlgorithm> approx_algo)
+        : Primitive({/*"Precise fd algorithm execution", "Approximate fd algoritm execution",
+                     "Extracting fds with non-zero error"*/}),
+          precise_algo_(std::move(precise_algo)),
+          approx_algo_(std::move(approx_algo)) {
+    RegisterOptions();
+    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+}
+
+void TypoMiner::RegisterOptions() {
+    RegisterOption(RadiusOpt.GetOption(&radius_));
+    RegisterOption(RatioOpt.GetOption(&ratio_).OverrideDefaultFunction([this]() {
+        return (relation_->GetNumRows() <= 1) ? 1 : (2.0 / relation_->GetNumRows());
+    }));
+    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
+}
+
+void TypoMiner::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(RadiusOpt, RatioOpt));
+}
+
+bool TypoMiner::HandleUnknownOption(std::string_view const& option_name,
+                                    std::optional<boost::any> const& value) {
+    using config::ErrorType;
+    auto const& error_opt_type = config::ErrorOpt;
+    if (option_name == error_opt_type.GetName()) {
+        ErrorType val;
+        error_opt_type.GetOption(&val)
+                .OverrideDefaultValue({})
+                .SetInstanceCheck([](auto value) {
+                    if (value == 0.0)
+                        throw std::invalid_argument("Typo mining with error 0 is meaningless");
+                }).Set(value);
+        if (TrySetOption(option_name, boost::any{ErrorType{0.0}}, boost::any{val}) == 0)
+            return false;
+        return true;
+    }
+    return static_cast<bool>(TrySetOption(option_name, value, value));
+}
+
+int TypoMiner::TrySetOption(std::string_view const& option_name,
+                            std::optional<boost::any> const& value_precise,
+                            std::optional<boost::any> const& value_approx) {
+    int successes{};
+    try {
+        precise_algo_->SetOption(option_name, value_precise);
+        ++successes;
+    } catch (std::invalid_argument&) {}
+    try {
+        approx_algo_->SetOption(option_name, value_approx);
+        ++successes;
+    } catch (std::invalid_argument&) {}
+    return successes;
+}
+
+void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
+    auto precise_options = precise_algo_->GetNeededOptions();
+    auto approx_options = approx_algo_->GetNeededOptions();
+    if (!FitCompleted()) {
+        // blocked by TypoMiner's is_null_equal_null option
+        precise_options.erase(config::names::kEqualNulls);
+        approx_options.erase(config::names::kEqualNulls);
+    }
+    previous_options.insert(precise_options.begin(), precise_options.end());
+    previous_options.insert(approx_options.begin(), approx_options.end());
+}
+
+void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {
+    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
+    data_stream.Reset();
+    typed_relation_ =
+            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
+    data_stream.Reset();
+    auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
+    auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
+    std::optional<boost::any> null_opt_any{is_null_equal_null_};
+    TrySetOption(config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
+    if (!precise_algo_->FitCompleted()) {
+        if (precise_pli != nullptr)
+            precise_pli->Fit(relation_);
+        else
+            precise_algo_->Fit(data_stream);
+    }
+    if (!approx_algo_->FitCompleted()) {
+        if (approx_pli != nullptr)
+            approx_pli->Fit(relation_);
+        else
+            approx_algo_->Fit(data_stream);
+    }
+}
+
+unsigned long long TypoMiner::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
 
     precise_algo_->Execute();
