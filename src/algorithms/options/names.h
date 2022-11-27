@@ -1,8 +1,3 @@
-//
-// Created by Shlyonskikh Alexey on 2022-07-30.
-// https://github.com/BUYT-1
-//
-
 #pragma once
 
 namespace program_option_strings {

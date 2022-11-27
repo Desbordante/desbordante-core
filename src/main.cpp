@@ -12,8 +12,8 @@
 #include <boost/program_options.hpp>
 #include <easylogging++.h>
 
-#include "algo_factory.h"
-#include "program_option_strings.h"
+#include "algorithms/algo_factory.h"
+#include "algorithms/options/names.h"
 
 namespace po = boost::program_options;
 namespace posr = program_option_strings;
