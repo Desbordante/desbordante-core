@@ -6,11 +6,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column.h"
-#include "fd_algorithm.h"
-#include "relational_schema.h"
-#include "search_tree.h"
-#include "vertical.h"
+#include "algorithms/aidfd/search_tree.h"
+#include "algorithms/fd_algorithm.h"
+#include "model/column.h"
+#include "model/relational_schema.h"
+#include "model/vertical.h"
 
 namespace algos {
 
@@ -38,8 +38,8 @@ private:
 
     boost::dynamic_bitset<> constant_columns_;
 
-    void Initialize() override;
-    unsigned long long ExecuteInternal() override;
+    void FitFd(model::IDatasetStream &data_stream) final;
+    unsigned long long ExecuteInternal() final;
 
     void BuildClusters();
     void CreateNegativeCover();
@@ -61,10 +61,8 @@ private:
 
     boost::dynamic_bitset<> BuildAgreeSet(size_t t1, size_t t2);
 
-    void LoadData();
-
 public:
-    explicit Aid(Config const& config);
+    Aid();
 };
 
 }  // namespace algos

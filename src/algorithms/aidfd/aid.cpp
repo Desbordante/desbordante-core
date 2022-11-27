@@ -1,12 +1,44 @@
-#include "aid.h"
+#include "algorithms/aidfd/aid.h"
 
 namespace algos {
 
-Aid::Aid(const FDAlgorithm::Config& config) : FDAlgorithm(config, {kDefaultPhaseName}) {}
+Aid::Aid() : FDAlgorithm({kDefaultPhaseName}) {}
+
+void Aid::FitFd(model::IDatasetStream& data_stream) {
+    number_of_attributes_ = data_stream.GetNumberOfColumns();
+    if (number_of_attributes_ == 0) {
+        throw std::runtime_error("Unable to work on an empty dataset.");
+    }
+
+    schema_ = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
+                                                 is_null_equal_null_);
+
+    for (size_t i = 0; i < number_of_attributes_; ++i) {
+        const std::basic_string<char>& column_name = data_stream.GetColumnName(static_cast<int>(i));
+        schema_->AppendColumn(column_name);
+    }
+
+    while (data_stream.HasNextRow()) {
+        const std::vector<std::string>& next_line = data_stream.GetNextRow();
+        if (next_line.empty()) {
+            break;
+        }
+
+        tuples_.emplace_back(std::vector<size_t>(number_of_attributes_));
+        for (size_t i = 0; i < number_of_attributes_; ++i) {
+            tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
+        }
+    }
+    number_of_tuples_ = tuples_.size();
+    clusters_ = std::vector<std::unordered_map<size_t, Cluster>>(number_of_attributes_);
+    indices_in_clusters_ = std::vector<std::vector<size_t>>(
+            number_of_attributes_, std::vector<size_t>(number_of_tuples_));
+    constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
+    prev_ratios_ = std::vector<double>(window_size_, 1.0);
+    sum_ = static_cast<double>(window_size_);
+}
 
 unsigned long long Aid::ExecuteInternal() {
-    Initialize();
-
     auto start_time = std::chrono::system_clock::now();
 
     BuildClusters();
@@ -110,17 +142,6 @@ boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
     return equal_attr;
 }
 
-void Aid::Initialize() {
-    LoadData();
-    this->number_of_tuples_ = tuples_.size();
-    this->clusters_ = std::vector<std::unordered_map<size_t, Cluster>>(number_of_attributes_);
-    this->indices_in_clusters_ = std::vector<std::vector<size_t>>(
-        number_of_attributes_, std::vector<size_t>(number_of_tuples_));
-    this->constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
-    this->prev_ratios_ = std::vector<double>(window_size_, 1.0);
-    this->sum_ = (double)window_size_;
-}
-
 void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
     boost::dynamic_bitset<> empty_set(number_of_attributes_);
     Vertical lhs = *schema_->empty_vertical_;
@@ -209,33 +230,6 @@ void Aid::InvertNegativeCover() {
     }
 }
 
-void Aid::LoadData() {
-    this->number_of_attributes_ = input_generator_->GetNumberOfColumns();
-    if (this->number_of_attributes_ == 0) {
-        throw std::runtime_error("Unable to work on an empty dataset.");
-    }
-
-    this->schema_ = std::make_unique<RelationalSchema>(input_generator_->GetRelationName(), true);
-
-    for (size_t i = 0; i < this->number_of_attributes_; ++i) {
-        const std::basic_string<char>& column_name =
-            input_generator_->GetColumnName(static_cast<int>(i));
-        this->schema_->AppendColumn(column_name);
-    }
-
-    while (input_generator_->HasNextRow()) {
-        const std::vector<std::string>& next_line = input_generator_->GetNextRow();
-        if (next_line.empty()) {
-            break;
-        }
-
-        this->tuples_.emplace_back(std::vector<size_t>(this->number_of_attributes_));
-        for (size_t i = 0; i < this->number_of_attributes_; ++i) {
-            this->tuples_.back()[i] = std::hash<std::string>{}(next_line[i]);
-        }
-    }
-}
-
 void Aid::RegisterFDs(size_t rhs_attribute,
                       const std::vector<boost::dynamic_bitset<>>& list_of_lhs_attributes) {
     Column rhs = *schema_->GetColumn(rhs_attribute);
@@ -281,4 +275,5 @@ std::vector<size_t> Aid::GetAttributesSortedByFrequency(
 
     return attr_indices;
 }
+
 }  // namespace algos
