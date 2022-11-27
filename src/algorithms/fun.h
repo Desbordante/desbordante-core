@@ -1,6 +1,6 @@
 #pragma once
 
-#include "pli_based_fd_algorithm.h"
+#include "algorithms/pli_based_fd_algorithm.h"
 #include "custom/custom_hashes.h"
 
 namespace algos {
@@ -75,9 +75,7 @@ public:
 
 class FUN : public PliBasedFDAlgorithm {
 public:
-    explicit FUN(Config const& config) : PliBasedFDAlgorithm(config, {kDefaultPhaseName}) {}
-    explicit FUN(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config, {kDefaultPhaseName}) {}
+    FUN();
 
     // Entities from the algorithm itself
 private:
@@ -86,7 +84,7 @@ private:
 
     using Level = std::list<FunQuadruple>;
 
-    unsigned long long ExecuteInternal() override;
+    unsigned long long ExecuteInternal() final;
 
     Level GenerateCandidate(Level const& l_k) const;
 
