@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "algorithms/options/thread_number_opt.h"
+
 struct Configuration {
     bool is_find_keys = true;
     bool is_find_fds = true;
@@ -15,7 +17,7 @@ struct Configuration {
     double max_ucc_error = 0.01;          // both for FD and UCC actually
 
     //Traversal settings
-    int parallelism = 0;
+    algos::config::ThreadNumType parallelism = 0;
     int max_threads_per_search_space = -1;
     bool is_defer_failed_launch_pads = true;
     std::string launch_pad_order = "error";
