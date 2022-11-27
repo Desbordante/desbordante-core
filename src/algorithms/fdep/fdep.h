@@ -3,20 +3,18 @@
 #include <string>
 #include <vector>
 
-#include "fd_algorithm.h"
-#include "fd_tree_element.h"
-#include "relation_data.h"
-#include "relational_schema.h"
+#include "algorithms/fd_algorithm.h"
+#include "algorithms/fdep/fd_tree_element.h"
+#include "model/relation_data.h"
+#include "model/relational_schema.h"
 
 namespace algos {
 
 class FDep : public FDAlgorithm {
 public:
-    explicit FDep(Config const& config);
+    FDep();
 
     ~FDep() override = default;
-
-    unsigned long long ExecuteInternal() override;
 
 private:
     std::unique_ptr<RelationalSchema> schema_{};
@@ -29,8 +27,8 @@ private:
 
     std::vector<std::vector<size_t>> tuples_;
 
-    // Initializing the most common dependencies.
-    void Initialize() override;
+    unsigned long long ExecuteInternal() final;
+    void FitFd(model::IDatasetStream &data_stream) final;
 
     // Building negative cover via violated dependencies
     void BuildNegativeCover();
@@ -46,10 +44,6 @@ private:
     // Specializing general dependencies for not to be followed from violated dependencies of negative cover tree.
     void SpecializePositiveCover(const std::bitset<FDTreeElement::kMaxAttrNum>& lhs,
                                  const size_t& a);
-
-    // Loading the relation
-    // Presented as vector of vectors (tuples of the relation).
-    void LoadData();
 };
 
 }  // namespace algos
