@@ -1,18 +1,78 @@
-#include "ar_algorithm.h"
+#include "algorithms/ar_algorithm.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "easylogging++.h"
+#include <easylogging++.h>
+
+#include "algorithms/options/descriptions.h"
+#include "algorithms/options/names.h"
 
 namespace algos {
 
-unsigned long long ARAlgorithm::Execute() {
-    transactional_data_ = model::TransactionalData::CreateFrom(*input_generator_, *input_format_);
+decltype(ARAlgorithm::InputFormatOpt) ARAlgorithm::InputFormatOpt{
+        {config::names::kInputFormat, config::descriptions::kDInputFormat}};
+
+decltype(ARAlgorithm::TidColumnIndexOpt) ARAlgorithm::TidColumnIndexOpt{
+        {config::names::kTIdColumnIndex, config::descriptions::kDTIdColumnIndex}, 0};
+
+decltype(ARAlgorithm::ItemColumnIndexOpt) ARAlgorithm::ItemColumnIndexOpt{
+        {config::names::kItemColumnIndex, config::descriptions::kDItemColumnIndex}, 1};
+
+decltype(ARAlgorithm::FirstColumnTidOpt) ARAlgorithm::FirstColumnTidOpt{
+        {config::names::kFirstColumnTId, config::descriptions::kDFirstColumnTId}, false};
+
+decltype(ARAlgorithm::MinSupportOpt) ARAlgorithm::MinSupportOpt{
+        {config::names::kMinimumSupport, config::descriptions::kDMinimumSupport}, 0.0};
+
+decltype(ARAlgorithm::MinConfidenceOpt) ARAlgorithm::MinConfidenceOpt{
+        {config::names::kMinimumConfidence, config::descriptions::kDMinimumConfidence}, 0.0};
+
+ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
+        : Primitive(std::move(phase_names)) {
+    RegisterOptions();
+    MakeOptionsAvailable(config::GetOptionNames(InputFormatOpt));
+}
+
+void ARAlgorithm::RegisterOptions() {
+    auto sing_eq = [](InputFormat value) { return value == +InputFormat::singular; };
+    auto tab_eq = [](InputFormat value) { return value == +InputFormat::tabular; };
+    RegisterOption(InputFormatOpt.GetOption(&input_format_).SetConditionalOpts(
+            GetOptAvailFunc(),
+            {
+                    {sing_eq, config::GetOptionNames(TidColumnIndexOpt, ItemColumnIndexOpt)},
+                    {tab_eq, config::GetOptionNames(FirstColumnTidOpt)},
+            }));
+    RegisterOption(TidColumnIndexOpt.GetOption(&tid_column_index_));
+    RegisterOption(ItemColumnIndexOpt.GetOption(&item_column_index_));
+    RegisterOption(FirstColumnTidOpt.GetOption(&first_column_tid_));
+    RegisterOption(MinSupportOpt.GetOption(&minsup_));
+    RegisterOption(MinConfidenceOpt.GetOption(&minconf_));
+}
+
+void ARAlgorithm::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(MinSupportOpt, MinConfidenceOpt));
+}
+
+void ARAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
+    switch (input_format_) {
+        case InputFormat::singular:
+            transactional_data_ = model::TransactionalData::CreateFromSingular(
+                    data_stream, tid_column_index_, item_column_index_);
+            break;
+        case InputFormat::tabular:
+            transactional_data_ =
+                    model::TransactionalData::CreateFromTabular(data_stream, first_column_tid_);
+            break;
+        default:
+            assert(0);
+    }
     if (transactional_data_->GetNumTransactions() == 0) {
         throw std::runtime_error("Got an empty dataset: AR mining is meaningless.");
     }
+}
 
+unsigned long long ARAlgorithm::ExecuteInternal() {
     auto time = FindFrequent();
     time += GenerateAllRules();
 
