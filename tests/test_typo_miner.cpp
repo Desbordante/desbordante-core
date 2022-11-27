@@ -5,9 +5,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "typo_miner.h"
-#include "program_option_strings.h"
+#include "algorithms/algo_factory.h"
+#include "algorithms/typo_miner.h"
+#include "algorithms/options/names.h"
 
 namespace tests {
 namespace posr = program_option_strings;

@@ -8,10 +8,10 @@
 
 #include "algorithms/fd_mine.h"
 #include "algorithms/tane.h"
+#include "algorithms/options/names.h"
+#include "algorithms/pyro.h"
 #include "datasets.h"
-#include "program_option_strings.h"
-#include "pyro.h"
-#include "relational_schema.h"
+#include "model/relational_schema.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 

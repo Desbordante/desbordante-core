@@ -5,8 +5,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "pyro.h"
-#include "program_option_strings.h"
+#include "algorithms/pyro.h"
+#include "algorithms/options/names.h"
 
 namespace tests {
 
