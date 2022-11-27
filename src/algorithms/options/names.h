@@ -1,6 +1,6 @@
 #pragma once
 
-namespace program_option_strings {
+namespace algos::config::names {
 constexpr auto kHelp = "help";
 constexpr auto kTask = "task";
 constexpr auto kAlgorithm = "algorithm";
@@ -37,4 +37,4 @@ constexpr auto kWeight = "weight";
 constexpr auto kBumpsLimit = "bumps_limit";
 constexpr auto kIterationsLimit = "iterations_limit";
 constexpr auto kPairingRule = "pairing_rule";
-}  // namespace program_option_strings
+}  // namespace algos::config::names

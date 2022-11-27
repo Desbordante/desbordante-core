@@ -14,11 +14,11 @@ class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testi
 protected:
     std::unique_ptr<FDAlgorithm> CreateAlgorithmInstance(
         std::filesystem::path const& path, char separator = ',', bool has_header = true) {
-        namespace posr = program_option_strings;
+        namespace onam = algos::config::names;
 
         FDAlgorithm::Config c{ .data = path, .separator = separator, .has_header = has_header };
-        c.special_params[posr::kError] = 0.0;
-        c.special_params[posr::kSeed] = 0;
+        c.special_params[onam::kError] = 0.0;
+        c.special_params[onam::kSeed] = 0;
         return std::make_unique<T>(c);
     }
 };

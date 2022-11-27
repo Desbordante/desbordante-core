@@ -69,7 +69,7 @@ using ArAlgorithmTuplesType = std::tuple<Apriori>;
 
 namespace details {
 
-namespace posr = program_option_strings;
+namespace onam = algos::config::names;
 
 template <typename AlgorithmBase = Primitive, typename AlgorithmsToSelect = AlgorithmTypesTuple,
           typename EnumType, typename... Args>
@@ -119,12 +119,12 @@ FDAlgorithm::Config CreateFDAlgorithmConfigFromMap(ParamsMap params) {
     FDAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, posr::kData);
-    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::kEqualNulls);
-    c.max_lhs = ExtractParamFromMap<unsigned int>(params, posr::kMaximumLhs);
-    c.parallelism = ExtractParamFromMap<ushort>(params, posr::kThreads);
+             ExtractParamFromMap<std::string>(params, onam::kData);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
+    c.max_lhs = ExtractParamFromMap<unsigned int>(params, onam::kMaximumLhs);
+    c.parallelism = ExtractParamFromMap<ushort>(params, onam::kThreads);
 
     /* Is it correct to insert all specified parameters into the algorithm config, and not just the
      * necessary ones? It is definitely simpler, so for now leaving it like this
@@ -147,21 +147,21 @@ ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
     ARAlgorithm::Config c;
 
     c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, posr::kData);
-    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
-    c.minsup = ExtractParamFromMap<double>(params, posr::kMinimumSupport);
-    c.minconf = ExtractParamFromMap<double>(params, posr::kMinimumConfidence);
+             ExtractParamFromMap<std::string>(params, onam::kData);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
+    c.minsup = ExtractParamFromMap<double>(params, onam::kMinimumSupport);
+    c.minconf = ExtractParamFromMap<double>(params, onam::kMinimumConfidence);
 
     std::shared_ptr<model::InputFormat> input_format;
-    auto const input_format_arg = ExtractParamFromMap<std::string>(params, posr::kInputFormat);
+    auto const input_format_arg = ExtractParamFromMap<std::string>(params, onam::kInputFormat);
     if (input_format_arg == "singular") {
-        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, posr::kTIdColumnIndex);
+        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, onam::kTIdColumnIndex);
         unsigned const item_column_index =
-            ExtractParamFromMap<unsigned>(params, posr::kItemColumnIndex);
+            ExtractParamFromMap<unsigned>(params, onam::kItemColumnIndex);
         input_format = std::make_shared<model::Singular>(tid_column_index, item_column_index);
     } else if (input_format_arg == "tabular") {
-        bool const has_header = ExtractParamFromMap<bool>(params, posr::kFirstColumnTId);
+        bool const has_header = ExtractParamFromMap<bool>(params, onam::kFirstColumnTId);
         input_format = std::make_shared<model::Tabular>(has_header);
     } else {
         throw std::invalid_argument("\"" + input_format_arg + "\"" +
@@ -176,34 +176,34 @@ template <typename ParamsMap>
 MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
     MetricVerifier::Config c;
 
-    c.parameter = ExtractParamFromMap<long double>(params, posr::kParameter);
+    c.parameter = ExtractParamFromMap<long double>(params, onam::kParameter);
     if (c.parameter < 0) {
         throw std::invalid_argument("Parameter should not be less than zero.");
     }
-    c.q = ExtractParamFromMap<unsigned>(params, posr::kQGramLength);
+    c.q = ExtractParamFromMap<unsigned>(params, onam::kQGramLength);
     if (c.q <= 0) {
         throw std::invalid_argument("Q-gram length should be greater than zero.");
     }
     c.data = std::filesystem::current_path() / "input_data" /
-        ExtractParamFromMap<std::string>(params, posr::kData);
-    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, posr::kEqualNulls);
-    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::kLhsIndices);
-    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, posr::kRhsIndices);
+        ExtractParamFromMap<std::string>(params, onam::kData);
+    c.separator = ExtractParamFromMap<char>(params, onam::kSeparatorConfig);
+    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
+    c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
+    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, onam::kLhsIndices);
+    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, onam::kRhsIndices);
     
-    c.metric = ExtractParamFromMap<std::string>(params, posr::kMetric);
+    c.metric = ExtractParamFromMap<std::string>(params, onam::kMetric);
     if (c.rhs_indices.size() > 1 && c.metric != "euclidean") {
         throw std::invalid_argument(
             "More than one RHS columns are only allowed for \"euclidean\" metric.");
     }
     if (c.metric != "euclidean" || c.rhs_indices.size() != 1) {
-        c.algo = ExtractParamFromMap<std::string>(params, posr::kMetricAlgorithm);
+        c.algo = ExtractParamFromMap<std::string>(params, onam::kMetricAlgorithm);
     }
     if (c.rhs_indices.size() != 2 && c.algo == "calipers") {
         throw std::invalid_argument("\"calipers\" algo is only available for 2 dimensions.");
     }
-    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, posr::kDistToNullIsInfinity);
+    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, onam::kDistToNullIsInfinity);
     return c;
 }
 
