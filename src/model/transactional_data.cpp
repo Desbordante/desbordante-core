@@ -6,18 +6,6 @@
 
 namespace model {
 
-std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(IDatasetStream& data_stream,
-                                                                 InputFormat const& input_type) {
-    if (typeid(input_type) == typeid(Singular)) {
-        return TransactionalData::CreateFromSingular(data_stream, input_type.tid_column_index(),
-                                                     input_type.item_column_index());
-    } else if (typeid(input_type) == typeid(Tabular)) {
-        return TransactionalData::CreateFromTabular(data_stream, input_type.tid_presence());
-    } else {
-        throw std::logic_error("This input type is not maintained yet");
-    }
-}
-
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
         IDatasetStream& data_stream,
         size_t tid_col_index,

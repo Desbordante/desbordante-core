@@ -16,13 +16,6 @@ private:
     std::vector<std::string> item_universe_;
     std::unordered_map<size_t, Itemset> transactions_;
 
-    static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& data_stream,
-                                                                 size_t tid_col_index = 0,
-                                                                 size_t item_col_index = 1);
-
-    static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& data_stream,
-                                                                bool has_tid);
-
     TransactionalData(std::vector<std::string> item_universe,
                       std::unordered_map<size_t, Itemset> transactions)
         : item_universe_(std::move(item_universe)), transactions_(std::move(transactions)) {}
@@ -44,8 +37,12 @@ public:
     size_t GetUniverseSize() const noexcept { return item_universe_.size(); }
     size_t GetNumTransactions() const noexcept { return transactions_.size(); }
 
-    static std::unique_ptr<TransactionalData> CreateFrom(IDatasetStream& data_stream,
-                                                         InputFormat const& input_type);
+    static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& data_stream,
+                                                                 size_t tid_col_index = 0,
+                                                                 size_t item_col_index = 1);
+
+    static std::unique_ptr<TransactionalData> CreateFromTabular(IDatasetStream& data_stream,
+                                                                bool has_tid);
 };
 
 }  // namespace model
