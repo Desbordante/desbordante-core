@@ -64,9 +64,8 @@ protected:
     // possible_options_ map. Useful for pipelines.
     virtual bool HandleUnknownOption(std::string_view const& option_name,
                                      std::optional<boost::any> const& value);
-    virtual void AddMoreNeededOptions(std::unordered_set<std::string_view>& previous_options) const;
-
-    // Call this after if your primitive has an alternative Fit
+    virtual void AddSpecificNeededOptions(
+            std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
 
     // Overload this to add options after your primitive has processed the data
@@ -85,6 +84,7 @@ public:
     explicit Primitive(std::vector<std::string_view> phase_names);
 
     void Fit(model::IDatasetStream & data_stream);
+    bool FitCompleted() const;
 
     unsigned long long Execute();
 
