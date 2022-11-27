@@ -1,4 +1,5 @@
-#include "typed_column_data.h"
+#include "model/column_layout_typed_relation_data.h"
+#include "model/typed_column_data.h"
 
 #include "create_type.h"
 
@@ -167,6 +168,15 @@ TypedColumnData TypedColumnDataFactory::CreateFrom() {
     type_map.insert(std::move(empty_node));
 
     return CreateFromTypeMap(CreateType(type_id, is_null_equal_null_), std::move(type_map));
+}
+
+std::vector<TypedColumnData> CreateTypedColumnData(IDatasetStream& dataset_stream,
+                                                   bool is_null_equal_null) {
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
+            model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream,
+                                                             is_null_equal_null, -1, -1);
+    std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
+    return col_data;
 }
 
 }  // namespace model
