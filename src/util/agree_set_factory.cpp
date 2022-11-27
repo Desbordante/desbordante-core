@@ -95,8 +95,9 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     if (!identifier_sets.empty()) {
         size_t const size = identifier_sets.size();
         size_t const pairs_num = (size_t)(size * (size - 1) / 2);
-        double const percent_per_idset = (pairs_num == 0) ? FDAlgorithm::kTotalProgressPercent :
-                                         FDAlgorithm::kTotalProgressPercent / pairs_num;
+        double const percent_per_idset = (pairs_num == 0)
+                ? algos::FDAlgorithm::kTotalProgressPercent
+                : algos::FDAlgorithm::kTotalProgressPercent / pairs_num;
         auto back_it = std::prev(identifier_sets.end());
         for (auto p = identifier_sets.begin(); p != back_it; ++p) {
             for (auto q = std::next(p); q != identifier_sets.end(); ++q) {
@@ -134,8 +135,9 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
     // compute agree sets using identifier sets
     // metanome approach (using map of identifier sets)
     double const percent_per_cluster =
-        max_representation.empty() ? FDAlgorithm::kTotalProgressPercent
-                                   : FDAlgorithm::kTotalProgressPercent / max_representation.size();
+        max_representation.empty()
+        ? algos::FDAlgorithm::kTotalProgressPercent
+        : algos::FDAlgorithm::kTotalProgressPercent / max_representation.size();
 
     if (config_.threads_num > 1) {
         /* Not as fast and simple as it can be, need to use concurrent unordered_set.

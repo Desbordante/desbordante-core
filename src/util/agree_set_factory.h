@@ -139,7 +139,7 @@ public:
 
     explicit AgreeSetFactory(ColumnLayoutRelationData const* const rel,
                              Configuration const& c = Configuration(),
-                             FDAlgorithm* algo = nullptr)
+                             algos::FDAlgorithm* algo = nullptr)
         : relation_(rel), config_(c), algo_(algo) {}
 
     ColumnLayoutRelationData const* GetRelation() const { return relation_; }
@@ -193,7 +193,7 @@ private:
     ColumnLayoutRelationData const* const relation_;
 
     Configuration config_;
-    FDAlgorithm* algo_;
+    algos::FDAlgorithm* algo_;
 };
 
 } // namespace util

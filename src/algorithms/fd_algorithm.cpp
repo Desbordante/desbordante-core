@@ -1,23 +1,24 @@
-#include "fd_algorithm.h"
+#include "algorithms/fd_algorithm.h"
 
 #include <thread>
 
-unsigned long long FDAlgorithm::Execute() {
-    Initialize();
+#include "algorithms/options/equal_nulls_opt.h"
 
-    return ExecuteInternal();
+namespace algos {
+
+FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
+        : Primitive(std::move(phase_names)) {
+    RegisterOptions();
+    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
 }
 
-void FDAlgorithm::InitConfigParallelism() {
-    if (config_.parallelism == 0) {
-        config_.parallelism = std::thread::hardware_concurrency();
-        if (config_.parallelism == 0) {
-            throw std::runtime_error(
-                    "Unable to detect number of concurrent "
-                    "threads supported by your system. "
-                    "Please, specify it manually.");
-        }
-    }
+void FDAlgorithm::RegisterOptions() {
+    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
+}
+
+void FDAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
+    number_of_columns_ = data_stream.GetNumberOfColumns();
+    FitFd(data_stream);
 }
 
 std::string FDAlgorithm::GetJsonFDs() const {
@@ -43,7 +44,6 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     std::vector<Column const*> keys;
     std::map<Column const*, size_t> fds_count_per_col;
     unsigned int cols_of_equal_values = 0;
-    size_t const number_of_cols = input_generator_->GetNumberOfColumns();
 
     for (FD const& fd : fd_collection_) {
         Vertical const& lhs = fd.GetLhs();
@@ -60,8 +60,8 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
         }
     }
 
-    for (auto const& [col, num] : fds_count_per_col) {
-        if (num + 1 + cols_of_equal_values == number_of_cols) {
+    for (auto const& [col, num]: fds_count_per_col) {
+        if (num + 1 + cols_of_equal_values == number_of_columns_) {
             keys.push_back(col);
         }
     }
@@ -69,12 +69,4 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     return keys;
 }
 
-std::vector<model::TypedColumnData> FDAlgorithm::CreateColumnData(
-        const FDAlgorithm::Config& config) {
-    CSVParser input_generator(config.data, config.separator, config.has_header);
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-            model::ColumnLayoutTypedRelationData::CreateFrom(input_generator,
-                                                             config.is_null_equal_null, -1, -1);
-    std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
-    return col_data;
-}
+}  // namespace algos
