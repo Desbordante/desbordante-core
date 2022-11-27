@@ -1,10 +1,10 @@
 #pragma once
 
+#include "algorithms/options/names.h"
 #include "column_layout_typed_relation_data.h"
 #include "csv_parser.h"
 #include "idataset_stream.h"
 #include "primitive.h"
-#include "program_option_strings.h"
 #include "pyro.h"
 #include "types.h"
 

@@ -7,7 +7,7 @@
 
 #include <filesystem>
 
-#include "program_option_strings.h"
+#include "algorithms/options/names.h"
 
 template <typename T>
 class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
