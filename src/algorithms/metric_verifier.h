@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "algorithms/metric_verifier_enums.h"
+#include "algorithms/options/equal_nulls_opt.h"
 #include "algorithms/primitive.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
@@ -21,15 +22,24 @@ private:
     using DistanceFunction = std::function<long double(std::byte const*, std::byte const*)>;
     using CompareFunction = std::function<bool(util::PLI::Cluster const& cluster)>;
 
-    Metric metric_;
+    Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
     std::vector<unsigned int> lhs_indices_;
     std::vector<unsigned int> rhs_indices_;
     long double parameter_;
     unsigned int q_;
     bool dist_to_null_infinity_;
+    config::EqNullsType is_null_equal_null_;
 
     bool metric_fd_holds_ = false;
+
+    static const config::OptionType<decltype(dist_to_null_infinity_)> DistToNullInfinityOpt;
+    static const config::OptionType<decltype(parameter_)> ParameterOpt;
+    static const config::OptionType<decltype(lhs_indices_)> LhsIndicesOpt;
+    static const config::OptionType<decltype(rhs_indices_)> RhsIndicesOpt;
+    static const config::OptionType<decltype(metric_)> MetricOpt;
+    static const config::OptionType<decltype(algo_)> AlgoOpt;
+    static const config::OptionType<decltype(q_)> QGramLengthOpt;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<ColumnLayoutRelationData> relation_; // temporarily parsing twice
@@ -50,27 +60,18 @@ private:
     bool CalipersCompareNumericValues(util::PLI::Cluster const& cluster) const;
     CompareFunction GetCompareFunction() const;
     bool VerifyMetricFD() const;
-    void ValidateParameters() const;
+    static_assert(std::is_same<decltype(MetricVerifier::lhs_indices_),
+            decltype(MetricVerifier::rhs_indices_)>{}, "Types of indices must be the same");
+    void ValidateIndices(decltype(MetricVerifier::lhs_indices_) const& indices) const;
+    void ValidateRhs(decltype(MetricVerifier::rhs_indices_) const& indices);
+    void RegisterOptions();
+
+protected:
+    void FitInternal(model::IDatasetStream &data_stream) override;
+    void MakeExecuteOptsAvailable() override;
+    unsigned long long ExecuteInternal() override;
 
 public:
-    struct Config {
-        std::filesystem::path data{};   /* Path to input file */
-        char separator = ',';           /* Separator for csv */
-        bool has_header = true;         /* Indicates if input file has header */
-        bool is_null_equal_null = true; /* Is NULL value equals another NULL value */
-        std::string metric;             /* Metric to verify metric FD */
-        std::string algo;               /* MFD algorithm */
-        long double parameter;          /* The max possible distance between 2 values in cluster
-                                         * at which metric fd.holds */
-        std::vector<unsigned int> lhs_indices; /* Indices of LHS columns */
-        std::vector<unsigned int> rhs_indices; /* Indices of RHS columns */
-        bool dist_to_null_infinity;     /* Determines whether distance to NULL value is infinity
-                                         * or zero */
-        unsigned int q;                 /* Q-gram length for cosine metric */
-    };
-
-    unsigned long long Execute() override;
-
     bool GetResult() const {
         return metric_fd_holds_;
     }
@@ -79,11 +80,7 @@ public:
         parameter_ = parameter;
     }
 
-    explicit MetricVerifier(Config const& config);
-
-    explicit MetricVerifier(Config const& config,
-                            std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                            std::shared_ptr<ColumnLayoutRelationData> relation);
+    MetricVerifier();
 };
 
 }  // namespace algos
