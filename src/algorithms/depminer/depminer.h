@@ -1,8 +1,7 @@
 #pragma once
 
-#include "fd_algorithm.h"
-#include "pli_based_fd_algorithm.h"
-#include "depminer/cmax_set.h"
+#include "algorithms/depminer/cmax_set.h"
+#include "algorithms/pli_based_fd_algorithm.h"
 
 namespace algos {
 
@@ -18,18 +17,11 @@ private:
     std::vector<CMAXSet> GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets);
 
     double progress_step_ = 0;
+    RelationalSchema const* schema_ = nullptr;
+    unsigned long long ExecuteInternal() final;
 
 public:
-    explicit Depminer(Config const& config)
-        : PliBasedFDAlgorithm(config, {"AgreeSets generation", "Finding CMAXSets", "Finding LHS"}) {
-    }
-    explicit Depminer(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-        : PliBasedFDAlgorithm(std::move(relation), config,
-                              {"AgreeSets generation", "Finding CMAXSets", "Finding LHS"}) {}
-
-    unsigned long long ExecuteInternal() override;
-
-    const RelationalSchema* schema_ = nullptr;
+    Depminer();
 };
 
 }  // namespace algos
