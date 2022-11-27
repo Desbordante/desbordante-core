@@ -128,6 +128,7 @@ int main(int argc, char const* argv[]) {
         EnumToAvailableValues<algos::Metric>();
     std::string const metric_algo_desc = "MFD algorithm to use. Available algorithms:\n" +
         EnumToAvailableValues<algos::MetricAlgo>();
+    std::string const separator_arg = std::string{onam::kSeparator} + ",s";
 
     po::options_description info_options("Desbordante information options");
     info_options.add_options()
@@ -141,7 +142,7 @@ int main(int argc, char const* argv[]) {
         (onam::kAlgorithm, po::value<std::string>(&algo), algo_desc.c_str())
         (onam::kData, po::value<std::string>(&dataset),
          "path to CSV file, relative to ./input_data")
-        (onam::kSeparatorLibArg, po::value<char>(&separator)->default_value(separator),
+        (separator_arg.data(), po::value<char>(&separator)->default_value(separator),
          "CSV separator")
         (onam::kHasHeader, po::value<bool>(&has_header)->default_value(has_header),
          "CSV header presence flag [true|false]")

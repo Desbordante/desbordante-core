@@ -5,10 +5,7 @@ constexpr auto kHelp = "help";
 constexpr auto kTask = "task";
 constexpr auto kAlgorithm = "algorithm";
 constexpr auto kData = "data";
-#define SEPARATOR "separator"
-constexpr auto kSeparatorConfig = SEPARATOR;
-constexpr auto kSeparatorLibArg = SEPARATOR ",s";
-#undef SEPARATOR
+constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
 constexpr auto kEqualNulls = "is_null_equal_null";
 constexpr auto kThreads = "threads";

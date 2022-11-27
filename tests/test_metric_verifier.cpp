@@ -31,7 +31,7 @@ struct MetricVerifyingParams {
                   {onam::kLhsIndices,           std::move(lhs_indices)},
                   {onam::kRhsIndices,           std::move(rhs_indices)},
                   {onam::kData,                 dataset},
-                  {onam::kSeparatorConfig,      separator},
+                  {onam::kSeparator,            separator},
                   {onam::kHasHeader,            has_header},
                   {onam::kEqualNulls,           true},
                   {onam::kMetric,               metric},
