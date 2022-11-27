@@ -1,14 +1,26 @@
-#include "dfd.h"
+#include "algorithms/dfd/dfd.h"
 
 #include <boost/asio.hpp>
 #include <easylogging++.h>
 
-#include "column_layout_relation_data.h"
-#include "relational_schema.h"
-#include "position_list_index.h"
-#include "lattice_traversal/lattice_traversal.h"
+#include "algorithms/dfd/lattice_traversal/lattice_traversal.h"
+#include "model/column_layout_relation_data.h"
+#include "model/relational_schema.h"
+#include "util/position_list_index.h"
 
 namespace algos {
+
+DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+    RegisterOptions();
+}
+
+void DFD::RegisterOptions() {
+    RegisterOption(config::ThreadNumberOpt.GetOption(&number_of_threads_));
+}
+
+void DFD::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
+}
 
 unsigned long long DFD::ExecuteInternal() {
     partition_storage_ = std::make_unique<PartitionStorage>(relation_.get(),
@@ -72,12 +84,5 @@ unsigned long long DFD::ExecuteInternal() {
 
     return apriori_millis;
 }
-
-DFD::DFD(Config const& config)
-    : PliBasedFDAlgorithm(config, {kDefaultPhaseName}), number_of_threads_(config_.parallelism) {}
-
-DFD::DFD(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-    : PliBasedFDAlgorithm(std::move(relation), config, {kDefaultPhaseName}),
-      number_of_threads_(config_.parallelism) {}
 
 }  // namespace algos
