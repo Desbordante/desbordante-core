@@ -3,16 +3,16 @@
 #include <list>
 #include <mutex>
 
-#include "dependency_consumer.h"
-#include "pli_based_fd_algorithm.h"
-#include "search_space.h"
+#include "algorithms/options/type.h"
+#include "algorithms/pli_based_fd_algorithm.h"
+#include "core/dependency_consumer.h"
+#include "core/search_space.h"
 
 namespace algos {
 
 class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
 private:
-    constexpr static const char* kSeed = "seed";
-    constexpr static const char* kMaxError = "error";
+    static config::OptionType<decltype(Configuration::seed)> SeedOpt;
 
     std::list<std::unique_ptr<SearchSpace>> search_spaces_;
 
@@ -22,12 +22,12 @@ private:
 
     Configuration configuration_;
 
-    unsigned long long ExecuteInternal() override;
-    void init();
+    void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
 
 public:
-    explicit Pyro(Config const& config);
-    explicit Pyro(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config);
+    Pyro();
 };
 
 }  // namespace algos
