@@ -10,6 +10,8 @@
 #include <easylogging++.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/ar_algorithm_enums.h"
+#include "algorithms/metric_verifier_enums.h"
 #include "algorithms/options/descriptions.h"
 #include "algorithms/options/names.h"
 #include "algorithms/create_primitive.h"
@@ -37,6 +39,24 @@ void validate(boost::any& v, const std::vector<std::string>& values, MetricAlgo*
     const std::string& s = po::validators::get_single_string(values);
     try {
         v = boost::any(MetricAlgo::_from_string_nocase(s.c_str()));
+    } catch (std::runtime_error &e) {
+        throw po::validation_error(po::validation_error::invalid_option_value);
+    }
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values, PrimitiveType*, int) {
+    const std::string& s = po::validators::get_single_string(values);
+    try {
+        v = boost::any(PrimitiveType::_from_string_nocase(s.c_str()));
+    } catch (std::runtime_error &e) {
+        throw po::validation_error(po::validation_error::invalid_option_value);
+    }
+}
+
+void validate(boost::any& v, const std::vector<std::string>& values, InputFormat*, int) {
+    const std::string& s = po::validators::get_single_string(values);
+    try {
+        v = boost::any(InputFormat::_from_string_nocase(s.c_str()));
     } catch (std::runtime_error &e) {
         throw po::validation_error(po::validation_error::invalid_option_value);
     }
@@ -79,11 +99,20 @@ int main(int argc, char const* argv[]) {
             (onam::kThreads, po::value<ushort>(), desc::kDThreads)
             ;
 
-    po::options_description typos_fd_options("Typo mining/FD options");
-    typos_fd_options.add_options()
+    po::options_description fd_options("FD options");
+    fd_options.add_options()
             (onam::kError, po::value<double>(), desc::kDError)
             (onam::kMaximumLhs, po::value<unsigned int>(), desc::kDMaximumLhs)
             (onam::kSeed, po::value<int>(), desc::kDSeed)
+            ;
+
+    po::options_description typo_options("Typo mining options");
+    typo_options.add_options()
+            (onam::kRatio, po::value<double>(), desc::kDRatio)
+            (onam::kRadius, po::value<double>(), desc::kDRadius)
+            (onam::kApproximateAlgorithm, po::value<algos::PrimitiveType>(),
+             desc::kDApproximateAlgorithm)
+            (onam::kPreciseAlgorithm, po::value<algos::PrimitiveType>(), desc::kDPreciseAlgorithm)
             ;
 
     po::options_description ar_options("AR options");
@@ -146,8 +175,8 @@ int main(int argc, char const* argv[]) {
         ;
 
     po::options_description all_options("Allowed options");
-    all_options.add(info_options).add(general_options).add(typos_fd_options)
-        .add(mfd_options).add(ar_options).add(ac_options);
+    all_options.add(info_options).add(general_options).add(fd_options)
+        .add(mfd_options).add(ar_options).add(ac_options).add(typo_options);
 
     po::variables_map vm;
     try {
