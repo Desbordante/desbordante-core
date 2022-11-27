@@ -4,22 +4,25 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "column_layout_relation_data.h"
-#include "pli_based_fd_algorithm.h"
-#include "vertical.h"
+#include "algorithms/options/max_lhs_opt.h"
+#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/pli_based_fd_algorithm.h"
+#include "model/column_layout_relation_data.h"
+#include "model/vertical.h"
 
 namespace algos {
 
 class FastFDs : public PliBasedFDAlgorithm {
 public:
-    explicit FastFDs(Config const& config);
-    explicit FastFDs(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config);
+    FastFDs();
 
 private:
     using OrderingComparator = std::function<bool(Column const&, Column const&)>;
     using DiffSet = Vertical;
 
-    unsigned long long ExecuteInternal() override;
+    void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
 
     // Computes all difference sets of `relation_` by complementing agree sets
     void GenDiffSets();
@@ -64,8 +67,8 @@ private:
 
     RelationalSchema const* schema_;
     std::vector<DiffSet> diff_sets_;
-    ushort threads_num_;
-    unsigned int const max_lhs_;
+    config::ThreadNumType threads_num_;
+    config::MaxLhsType max_lhs_;
     double percent_per_col_;
 };
 

@@ -1,4 +1,4 @@
-#include "fastfds.h"
+#include "algorithms/fastfds.h"
 
 #include <easylogging++.h>
 
@@ -10,23 +10,25 @@
 #include <mutex>
 #include <thread>
 
-#include "agree_set_factory.h"
-#include "parallel_for.h"
+#include "util/agree_set_factory.h"
+#include "util/parallel_for.h"
 
 namespace algos {
 
 using std::vector, std::set;
 
-FastFDs::FastFDs(Config const& config)
-    : PliBasedFDAlgorithm(config, {"Agree sets generation", "Finding minimal covers"}),
-      threads_num_(config_.parallelism),
-      max_lhs_(config_.max_lhs) {}
+FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding minimal covers"}) {
+    RegisterOptions();
+}
 
-FastFDs::FastFDs(std::shared_ptr<ColumnLayoutRelationData> relation, Config const& config)
-    : PliBasedFDAlgorithm(std::move(relation), config,
-                          {"Agree sets generation", "Finding minimal covers"}),
-      threads_num_(config_.parallelism),
-      max_lhs_(config_.max_lhs) {}
+void FastFDs::RegisterOptions() {
+    RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
+    RegisterOption(config::MaxLhsOpt.GetOption(&max_lhs_));
+}
+
+void FastFDs::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ThreadNumberOpt));
+}
 
 unsigned long long FastFDs::ExecuteInternal() {
     schema_ = relation_->GetSchema();
