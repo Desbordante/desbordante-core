@@ -28,14 +28,14 @@ class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 
 template<typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
-    namespace posr = program_option_strings;
+    namespace onam = algos::config::names;
 
     auto const path = fs::current_path() / "input_data" / p.dataset;
     std::vector<unsigned int> actual;
     FDAlgorithm::Config c{.data = path,
                           .separator = p.sep,
                           .has_header = p.has_header,
-                          .special_params = {{posr::kSeed, 0}, {posr::kError, 0.0}}};
+                          .special_params = {{onam::kSeed, 0}, {onam::kError, 0.0}}};
     algos::Pyro pyro(c);
 
     pyro.Execute();

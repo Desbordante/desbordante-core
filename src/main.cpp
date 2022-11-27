@@ -16,7 +16,7 @@
 #include "algorithms/options/names.h"
 
 namespace po = boost::program_options;
-namespace posr = program_option_strings;
+namespace onam = algos::config::names;
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -131,57 +131,57 @@ int main(int argc, char const* argv[]) {
 
     po::options_description info_options("Desbordante information options");
     info_options.add_options()
-        (posr::kHelp, "print the help message and exit")
+        (onam::kHelp, "print the help message and exit")
         // --version, if needed, goes here too
         ;
 
     po::options_description general_options("General options");
     general_options.add_options()
-        (posr::kTask, po::value<std::string>(&task), task_desc.c_str())
-        (posr::kAlgorithm, po::value<std::string>(&algo), algo_desc.c_str())
-        (posr::kData, po::value<std::string>(&dataset),
-            "path to CSV file, relative to ./input_data")
-        (posr::kSeparatorLibArg, po::value<char>(&separator)->default_value(separator),
-            "CSV separator")
-        (posr::kHasHeader, po::value<bool>(&has_header)->default_value(has_header),
+        (onam::kTask, po::value<std::string>(&task), task_desc.c_str())
+        (onam::kAlgorithm, po::value<std::string>(&algo), algo_desc.c_str())
+        (onam::kData, po::value<std::string>(&dataset),
+         "path to CSV file, relative to ./input_data")
+        (onam::kSeparatorLibArg, po::value<char>(&separator)->default_value(separator),
+         "CSV separator")
+        (onam::kHasHeader, po::value<bool>(&has_header)->default_value(has_header),
          "CSV header presence flag [true|false]")
-        (posr::kEqualNulls, po::value<bool>(&is_null_equal_null)->default_value(true),
+        (onam::kEqualNulls, po::value<bool>(&is_null_equal_null)->default_value(true),
          "specify whether two NULLs should be considered equal")
-        (posr::kThreads, po::value<ushort>(&threads)->default_value(threads),
+        (onam::kThreads, po::value<ushort>(&threads)->default_value(threads),
          "number of threads to use. If 0, then as many threads are used as "
          "the hardware can handle concurrently.")
         ;
 
     po::options_description typos_fd_options("Typo mining/FD options");
     typos_fd_options.add_options()
-        (posr::kError, po::value<double>(&error)->default_value(error),
+        (onam::kError, po::value<double>(&error)->default_value(error),
          "error value for AFD algorithms")
-        (posr::kMaximumLhs, po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
+        (onam::kMaximumLhs, po::value<unsigned int>(&max_lhs)->default_value(max_lhs),
          "max considered LHS size")
-        (posr::kSeed, po::value<int>(&seed)->default_value(seed), "RNG seed")
+        (onam::kSeed, po::value<int>(&seed)->default_value(seed), "RNG seed")
         ;
 
     po::options_description ar_options("AR options");
     ar_options.add_options()
-        (posr::kMinimumSupport, po::value<double>(&minsup),
-            "minimum support value (between 0 and 1)")
-        (posr::kMinimumConfidence, po::value<double>(&minconf),
-            "minimum confidence value (between 0 and 1)")
-        (posr::kInputFormat, po::value<string>(&ar_input_format),
+        (onam::kMinimumSupport, po::value<double>(&minsup),
+         "minimum support value (between 0 and 1)")
+        (onam::kMinimumConfidence, po::value<double>(&minconf),
+         "minimum confidence value (between 0 and 1)")
+        (onam::kInputFormat, po::value<string>(&ar_input_format),
          "format of the input dataset. [singular|tabular] for AR mining")
         ;
 
     po::options_description ar_singular_options("AR \"singular\" input format options");
     ar_singular_options.add_options()
-        (posr::kTIdColumnIndex, po::value<unsigned>(&tid_column_index)->default_value(0),
+        (onam::kTIdColumnIndex, po::value<unsigned>(&tid_column_index)->default_value(0),
          "index of the column where a TID is stored")
-        (posr::kItemColumnIndex, po::value<unsigned>(&item_column_index)->default_value(1),
+        (onam::kItemColumnIndex, po::value<unsigned>(&item_column_index)->default_value(1),
          "index of the column where an item name is stored")
         ;
 
     po::options_description ar_tabular_options("AR \"tabular\" input format options");
     ar_tabular_options.add_options()
-        (posr::kFirstColumnTId, po::bool_switch(&has_transaction_id),
+        (onam::kFirstColumnTId, po::bool_switch(&has_transaction_id),
          "indicates that the first column contains the transaction IDs")
         ;
 
@@ -189,20 +189,20 @@ int main(int argc, char const* argv[]) {
 
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
-        (posr::kMetric, po::value<std::string>(&metric), metric_desc.c_str())
-        (posr::kMetricAlgorithm, po::value<std::string>(&metric_algo), metric_algo_desc.c_str())
-        (posr::kLhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
+        (onam::kMetric, po::value<std::string>(&metric), metric_desc.c_str())
+        (onam::kMetricAlgorithm, po::value<std::string>(&metric_algo), metric_algo_desc.c_str())
+        (onam::kLhsIndices, po::value<std::vector<unsigned int>>(&lhs_indices)->multitoken(),
          "LHS column indices for metric FD verification")
-        (posr::kRhsIndices, po::value<std::vector<unsigned int>>(&rhs_indices)->multitoken(),
+        (onam::kRhsIndices, po::value<std::vector<unsigned int>>(&rhs_indices)->multitoken(),
          "RHS column indices for metric FD verification")
-        (posr::kParameter, po::value<long double>(&parameter), "metric FD parameter")
-        (posr::kDistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
+        (onam::kParameter, po::value<long double>(&parameter), "metric FD parameter")
+        (onam::kDistToNullIsInfinity, po::bool_switch(&dist_to_null_infinity),
          "specify whether distance to NULL value is infinity (otherwise it is 0)")
         ;
 
     po::options_description cosine_options("Cosine metric options");
     cosine_options.add_options()
-        (posr::kQGramLength, po::value<unsigned int>(&q)->default_value(2),
+        (onam::kQGramLength, po::value<unsigned int>(&q)->default_value(2),
          "q-gram length for cosine metric")
         ;
 
@@ -210,21 +210,21 @@ int main(int argc, char const* argv[]) {
 
     po::options_description ac_options("AC options");
     ac_options.add_options()
-        (posr::kBinaryOperation, po::value<char>(&bin_operation)->default_value(bin_operation),
+        (onam::kBinaryOperation, po::value<char>(&bin_operation)->default_value(bin_operation),
          "one of availible operations: /, *, +, - ")
-        (posr::kFuzziness, po::value<double>(&fuzziness)->default_value(0.15),
+        (onam::kFuzziness, po::value<double>(&fuzziness)->default_value(0.15),
          "fraction of exceptional records")
-        (posr::kFuzzinessProbability, po::value<double>(&p_fuzz)->default_value(p_fuzz),
+        (onam::kFuzzinessProbability, po::value<double>(&p_fuzz)->default_value(p_fuzz),
          "probability, the fraction of exceptional records that lie outside the "
          "bump intervals is at most Fuzziness")
-        (posr::kWeight, po::value<double>(&weight)->default_value(weight),
+        (onam::kWeight, po::value<double>(&weight)->default_value(weight),
          "value between 0 and 1. Closer to 0 - many short intervals. "
          "Closer to 1 - small number of long intervals")
-        (posr::kBumpsLimit, po::value<size_t>(&bumps_limit)->default_value(bumps_limit),
+        (onam::kBumpsLimit, po::value<size_t>(&bumps_limit)->default_value(bumps_limit),
          "max considered intervals amount. Pass 0 to remove limit")
-        (posr::kIterationsLimit, po::value<size_t>(&iterations_limit)->default_value(iterations_limit),
+        (onam::kIterationsLimit, po::value<size_t>(&iterations_limit)->default_value(iterations_limit),
          "limit for iterations of sampling")
-        (posr::kPairingRule, po::value<std::string>(&pairing_rule)->default_value(pairing_rule),
+        (onam::kPairingRule, po::value<std::string>(&pairing_rule)->default_value(pairing_rule),
          "one of available pairing rules: trivial")
         ;
 
@@ -241,7 +241,7 @@ int main(int argc, char const* argv[]) {
         return 0;
     }
 
-    if (vm.count(posr::kHelp))
+    if (vm.count(onam::kHelp))
     {
         std::cout << all_options << std::endl;
         return 0;

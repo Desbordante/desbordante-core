@@ -122,7 +122,7 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 }
 
 TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
-    namespace posr = program_option_strings;
+    namespace onam = algos::config::names;
 
     auto path = std::filesystem::current_path() / "input_data";
 
@@ -140,7 +140,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             FDAlgorithm::Config c{.data = path / LightDatasets::DatasetName(i),
                                   .separator = LightDatasets::Separator(i),
                                   .has_header = LightDatasets::HasHeader(i),
-                                  .special_params = {{posr::kSeed, 0}, {posr::kError, 0.0}}};
+                                  .special_params = {{onam::kSeed, 0}, {onam::kError, 0.0}}};
             auto pyro = algos::Pyro(c);
 
             algorithm->Execute();
