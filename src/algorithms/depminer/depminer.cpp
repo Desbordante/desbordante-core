@@ -1,4 +1,4 @@
-#include "depminer.h"
+#include "algorithms/depminer/depminer.h"
 
 #include <chrono>
 #include <list>
@@ -6,19 +6,21 @@
 
 #include <easylogging++.h>
 
-#include "column_combination.h"
-#include "column_data.h"
-#include "column_layout_relation_data.h"
-#include "relational_schema.h"
-#include "agree_set_factory.h"
+#include "model/column_combination.h"
+#include "model/relational_schema.h"
+#include "util/agree_set_factory.h"
 
 namespace algos {
 
-using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list, std::dynamic_pointer_cast;
+Depminer::Depminer() : PliBasedFDAlgorithm(
+        {"AgreeSets generation", "Finding CMAXSets", "Finding LHS"}) {}
+
+using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list,
+        std::dynamic_pointer_cast;
 
 unsigned long long Depminer::ExecuteInternal() {
-
     const auto start_time = std::chrono::system_clock::now();
+
     schema_ = relation_->GetSchema();
 
     progress_step_ = kTotalProgressPercent / schema_->GetNumColumns();
