@@ -7,27 +7,30 @@
 
 #include <boost/any.hpp>
 
-#include "ar.h"
-#include "primitive.h"
-#include "transactional_data.h"
+#include "algorithms/ar_algorithm_enums.h"
+#include "algorithms/options/type.h"
+#include "algorithms/primitive.h"
+#include "model/ar.h"
+#include "model/transactional_data.h"
 
 namespace algos {
 
 class ARAlgorithm : public algos::Primitive {
-public:
-    struct Config {
-        std::filesystem::path data{}; /* Path to input file */
-        char separator = ',';         /* Separator for csv */
-        bool has_header = true;       /* Indicates if input file has header */
-        std::shared_ptr<model::InputFormat> input_format;
-        double minsup = 0;
-        double minconf = 0;
-    };
-
 private:
+    using MinSupType = double;
     double minconf_;
+    InputFormat input_format_ = InputFormat::singular;
+    unsigned int tid_column_index_;
+    unsigned int item_column_index_;
+    bool first_column_tid_;
     std::list<model::ArIDs> ar_collection_;
-    std::shared_ptr<model::InputFormat> input_format_;
+
+    static const config::OptionType<decltype(input_format_)> InputFormatOpt;
+    static const config::OptionType<decltype(tid_column_index_)> TidColumnIndexOpt;
+    static const config::OptionType<decltype(item_column_index_)> ItemColumnIndexOpt;
+    static const config::OptionType<decltype(first_column_tid_)> FirstColumnTidOpt;
+    static const config::OptionType<MinSupType> MinSupportOpt;
+    static const config::OptionType<decltype(minconf_)> MinConfidenceOpt;
 
     struct RuleNode {
         model::ArIDs rule;
@@ -47,23 +50,23 @@ private:
                            double support, unsigned level_number);
     bool MergeRules(std::vector<unsigned> const& frequent_itemset, double support, RuleNode* node);
     static void UpdatePath(std::stack<RuleNode*>& path, std::list<RuleNode>& vertices);
+    void RegisterOptions();
 
 protected:
     std::unique_ptr<model::TransactionalData> transactional_data_;
-    double minsup_;
+    MinSupType minsup_;
 
     void GenerateRulesFrom(std::vector<unsigned> const& frequent_itemset, double support);
 
     virtual double GetSupport(std::vector<unsigned> const& frequent_itemset) const = 0;
     virtual unsigned long long GenerateAllRules() = 0;
     virtual unsigned long long FindFrequent() = 0;
+    void FitInternal(model::IDatasetStream &data_stream) final;
+    void MakeExecuteOptsAvailable() final;
+    unsigned long long ExecuteInternal() final;
 
 public:
-    explicit ARAlgorithm(Config const& config, std::vector<std::string_view> phase_names)
-        : Primitive(config.data, config.separator, config.has_header, std::move(phase_names)),
-          minconf_(config.minconf),
-          input_format_(config.input_format),
-          minsup_(config.minsup) {}
+    explicit ARAlgorithm(std::vector<std::string_view> phase_names);
 
     std::list<model::ArIDs> const& GetArIDsList() const noexcept { return ar_collection_; };
     std::vector<std::string> const& GetItemNamesVector() const noexcept {
@@ -73,8 +76,7 @@ public:
     virtual std::list<std::set<std::string>> GetFrequentList() const = 0;  // for debugging and testing
     std::list<model::ARStrings> GetArStringsList() const;
 
-    unsigned long long Execute() override;
     virtual ~ARAlgorithm() = default;
 };
 
-} // namespace algos
+}  // namespace algos
