@@ -10,7 +10,7 @@
 #include "algorithms/options/names.h"
 
 namespace tests {
-namespace posr = program_option_strings;
+namespace onam = algos::config::names;
 
 struct MetricVerifyingParams {
     algos::StdParamsMap params;
@@ -27,17 +27,17 @@ struct MetricVerifyingParams {
                           bool const dist_to_null_infinity = false,
                           bool const expected = true,
                           unsigned const q = 2)
-        : params({{posr::kParameter, min_parameter},
-                  {posr::kLhsIndices, std::move(lhs_indices)},
-                  {posr::kRhsIndices, std::move(rhs_indices)},
-                  {posr::kData, dataset},
-                  {posr::kSeparatorConfig, separator},
-                  {posr::kHasHeader, has_header},
-                  {posr::kEqualNulls, true},
-                  {posr::kMetric, metric},
-                  {posr::kQGramLength, q},
-                  {posr::kMetricAlgorithm, algo},
-                  {posr::kDistToNullIsInfinity, dist_to_null_infinity}}),
+        : params({{onam::kParameter,            min_parameter},
+                  {onam::kLhsIndices,           std::move(lhs_indices)},
+                  {onam::kRhsIndices,           std::move(rhs_indices)},
+                  {onam::kData,                 dataset},
+                  {onam::kSeparatorConfig,      separator},
+                  {onam::kHasHeader,            has_header},
+                  {onam::kEqualNulls,           true},
+                  {onam::kMetric,               metric},
+                  {onam::kQGramLength,          q},
+                  {onam::kMetricAlgorithm,      algo},
+                  {onam::kDistToNullIsInfinity, dist_to_null_infinity}}),
           expected(expected) {}
 };
 
@@ -64,7 +64,7 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     }
     ASSERT_TRUE(GetResult(*verifier));
 
-    auto new_parameter = boost::any_cast<long double>(params.at(posr::kParameter));
+    auto new_parameter = boost::any_cast<long double>(params.at(onam::kParameter));
     new_parameter -= 1e-4;
     if (new_parameter < 0) return;
     verifier->SetParameter(new_parameter);

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "algorithms/options/names.h"
-#include "column_layout_typed_relation_data.h"
-#include "csv_parser.h"
-#include "idataset_stream.h"
-#include "primitive.h"
-#include "pyro.h"
+#include "algorithms/primitive.h"
+#include "algorithms/pyro.h"
+#include "model/column_layout_typed_relation_data.h"
+#include "model/idataset_stream.h"
+#include "parser/csv_parser.h"
 #include "types.h"
 
 namespace algos {
@@ -144,14 +144,14 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
     static_assert(std::is_base_of_v<PliBasedFDAlgorithm, ApproxAlgo>,
                   "Approximate algorithm must be relation based");
 
-    namespace posr = program_option_strings;
+    namespace onam = algos::config::names;
 
-    if (config.GetSpecialParam<double>(posr::kError) == 0.0) {
+    if (config.GetSpecialParam<double>(onam::kError) == 0.0) {
         throw std::invalid_argument("Typo mining with error = 0 is meaningless");
     }
 
     Config precise_config = config;
-    precise_config.special_params[posr::kError] = 0.0;
+    precise_config.special_params[onam::kError] = 0.0;
     auto input_generator = std::make_unique<CSVParser>(config.data, config.separator,
                                                        config.has_header);
     std::shared_ptr<ColumnLayoutRelationData> relation = ColumnLayoutRelationData::CreateFrom(
@@ -162,11 +162,11 @@ std::unique_ptr<TypoMiner> TypoMiner::CreateFrom(Config const& config) {
 
     double radius;
     double ratio;
-    if (config.HasParam(posr::kRadius)) {
-        radius = VerifyRadius(config.GetSpecialParam<double>(posr::kRadius));
+    if (config.HasParam(onam::kRadius)) {
+        radius = VerifyRadius(config.GetSpecialParam<double>(onam::kRadius));
     }
-    if (config.HasParam(posr::kRatio)) {
-        ratio = VerifyRatio(config.GetSpecialParam<double>(posr::kRatio));
+    if (config.HasParam(onam::kRatio)) {
+        ratio = VerifyRatio(config.GetSpecialParam<double>(onam::kRatio));
     } else {
         /* Should be good heuristic. Or set ratio to 1 by default? */
         ratio = (relation->GetNumRows() <= 1) ? 1 : 2.0 / relation->GetNumRows();
