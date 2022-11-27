@@ -1,285 +1,68 @@
 #pragma once
 
-
 #include <boost/any.hpp>
 #include <boost/mp11/algorithm.hpp>
 #include <enum.h>
 
 #include "algorithms/algorithms.h"
+#include "algorithms/create_primitive.h"
+#include "algorithms/legacy_algorithms.h"
 #include "algorithms/options/names.h"
 #include "algorithms/typo_miner.h"
 
 namespace algos {
 
-BETTER_ENUM(AlgoMiningType, char,
-#if 1
-    fd = 0,
-    typos,
-    ar,
-    metric,
-    stats,
-    ac
-#else
-    fd = 0, /* Functional dependency mining */
-    cfd,    /* Conditional functional dependency mining */
-    ar,     /* Association rule mining */
-    key,    /* Key mining */
-    typos,  /* Typo mining */
-    metric, /* Metric functional dependency verifying */
-    stats,   /* Statistic mining */
-    ac      /* Algebraic constraints mining */
-#endif
-);
-
-/* Enumeration of all supported algorithms. If you implemented new algorithm
- * please add new corresponding value to this enum.
- * NOTE: algorithm string name represenation is taken from value in this enum,
- * so name it appropriately (lowercase and without additional symbols).
- */
-BETTER_ENUM(Algo, char,
-    /* Functional dependency mining algorithms */
-    depminer = 0,
-    dfd,
-    fastfds,
-    fdep,
-    fdmine,
-    pyro,
-    tane,
-    fun,
-    hyfd,
-    aidfd,
-
-    /* Association rules mining algorithms */
-    apriori,
-
-    /* Metric verifier algorithm */
-    metric,
-
-    /* Statistic algorithms */
-    stats,
-
-    /* Algebraic constraints mining algorithm */
-    bumphunter
-);
-
 using StdParamsMap = std::unordered_map<std::string, boost::any>;
-using AlgorithmTypesTuple =
-        std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, hyfd::HyFD, Aid>;
-using ArAlgorithmTuplesType = std::tuple<Apriori>;
 
 namespace details {
 
-namespace onam = algos::config::names;
-
-template <typename AlgorithmBase = Primitive, typename AlgorithmsToSelect = AlgorithmTypesTuple,
-          typename EnumType, typename... Args>
-auto CreatePrimitiveInstanceImpl(EnumType const enum_value, Args&&... args) {
-    auto const create = [&args...](auto I) -> std::unique_ptr<AlgorithmBase> {
-        using AlgorithmType = std::tuple_element_t<I, AlgorithmsToSelect>;
-        return std::make_unique<AlgorithmType>(std::forward<Args>(args)...);
-    };
-
-    return boost::mp11::mp_with_index<std::tuple_size<AlgorithmsToSelect>>((size_t)enum_value,
-                                                                           create);
+template <typename OptionMap>
+boost::any ExtractAnyFromMap(OptionMap&& options, std::string_view const& option_name) {
+    const std::string string_opt{option_name};
+    auto it = options.find(string_opt);
+    if (it == options.end()) {
+        throw std::out_of_range("No option named \"" + string_opt + "\" in parameters.");
+    }
+    return options.extract(it).mapped();
 }
 
-template <typename Wrapper, typename AlgorithmBase = Primitive,
-          typename AlgorithmsToWrap = AlgorithmTypesTuple, typename EnumType, typename... Args>
-auto CreateAlgoWrapperInstanceImpl(EnumType const enum_value, Args&&... args) {
-    static_assert(std::is_base_of_v<AlgorithmBase, Wrapper>,
-                  "Wrapper should be derived from AlgorithmBase");
-    auto const create = [&args...](auto I) -> std::unique_ptr<AlgorithmBase> {
-        using AlgorithmType = std::tuple_element_t<I, AlgorithmsToWrap>;
-        return Wrapper::template CreateFrom<AlgorithmType>(std::forward<Args>(args)...);
-    };
-
-    return boost::mp11::mp_with_index<std::tuple_size<AlgorithmsToWrap>>((size_t)enum_value,
-                                                                         create);
-}
-
-template <typename T, typename ParamsMap>
-T ExtractParamFromMap(ParamsMap& params, std::string const& param_name) {
-    auto it = params.find(param_name);
-    if (it == params.end()) {
-        /* Throw an exception here? Or validate parameters somewhere else (main?)? */
-        assert(0);
-    }
-    if constexpr (std::is_same_v<ParamsMap, StdParamsMap>) {
-        return boost::any_cast<T>(params.extract(it).mapped());
-    } else {
-        return params.extract(it).mapped().template as<T>();
-    }
-}
-
-/* Really cumbersome, also copying parameter names and types throughout the project
- * (here, main, pyro and tane params). It will be really hard to maintain, need to fix this
- */
-template <typename ParamsMap>
-FDAlgorithm::Config CreateFDAlgorithmConfigFromMap(ParamsMap params) {
-    FDAlgorithm::Config c;
-
-    c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
-    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
-    c.max_lhs = ExtractParamFromMap<unsigned int>(params, onam::kMaximumLhs);
-    c.parallelism = ExtractParamFromMap<ushort>(params, onam::kThreads);
-
-    /* Is it correct to insert all specified parameters into the algorithm config, and not just the
-     * necessary ones? It is definitely simpler, so for now leaving it like this
-     */
-    for (auto it = params.begin(); it != params.end();) {
-        auto node = params.extract(it++);
-        if constexpr (std::is_same_v<ParamsMap, StdParamsMap>) {
-            c.special_params.emplace(std::move(node.key()), std::move(node.mapped()));
-        } else {
-            /* ParamsMap == boost::program_options::variable_map */
-            c.special_params.emplace(std::move(node.key()), std::move(node.mapped().value()));
-        }
-    }
-
-    return c;
-}
-
-template <typename ParamsMap>
-ARAlgorithm::Config CreateArAlgorithmConfigFromMap(ParamsMap params) {
-    ARAlgorithm::Config c;
-
-    c.data = std::filesystem::current_path() / "input_data" /
-             ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
-    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
-    c.minsup = ExtractParamFromMap<double>(params, onam::kMinimumSupport);
-    c.minconf = ExtractParamFromMap<double>(params, onam::kMinimumConfidence);
-
-    std::shared_ptr<model::InputFormat> input_format;
-    auto const input_format_arg = ExtractParamFromMap<std::string>(params, onam::kInputFormat);
-    if (input_format_arg == "singular") {
-        unsigned const tid_column_index = ExtractParamFromMap<unsigned>(params, onam::kTIdColumnIndex);
-        unsigned const item_column_index =
-            ExtractParamFromMap<unsigned>(params, onam::kItemColumnIndex);
-        input_format = std::make_shared<model::Singular>(tid_column_index, item_column_index);
-    } else if (input_format_arg == "tabular") {
-        bool const has_header = ExtractParamFromMap<bool>(params, onam::kFirstColumnTId);
-        input_format = std::make_shared<model::Tabular>(has_header);
-    } else {
-        throw std::invalid_argument("\"" + input_format_arg + "\"" +
-                                    " format is not supported in AR mining");
-    }
-    c.input_format = std::move(input_format);
-
-    return c;
-}
-
-template <typename ParamsMap>
-MetricVerifier::Config CreateMetricVerifierConfigFromMap(ParamsMap params) {
-    MetricVerifier::Config c;
-
-    c.parameter = ExtractParamFromMap<long double>(params, onam::kParameter);
-    if (c.parameter < 0) {
-        throw std::invalid_argument("Parameter should not be less than zero.");
-    }
-    c.q = ExtractParamFromMap<unsigned>(params, onam::kQGramLength);
-    if (c.q <= 0) {
-        throw std::invalid_argument("Q-gram length should be greater than zero.");
-    }
-    c.data = std::filesystem::current_path() / "input_data" /
-        ExtractParamFromMap<std::string>(params, onam::kData);
-    c.separator = ExtractParamFromMap<char>(params, onam::kSeparator);
-    c.has_header = ExtractParamFromMap<bool>(params, onam::kHasHeader);
-    c.is_null_equal_null = ExtractParamFromMap<bool>(params, onam::kEqualNulls);
-    c.lhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, onam::kLhsIndices);
-    c.rhs_indices = ExtractParamFromMap<std::vector<unsigned int>>(params, onam::kRhsIndices);
-    
-    c.metric = ExtractParamFromMap<std::string>(params, onam::kMetric);
-    if (c.rhs_indices.size() > 1 && c.metric != "euclidean") {
-        throw std::invalid_argument(
-            "More than one RHS columns are only allowed for \"euclidean\" metric.");
-    }
-    if (c.metric != "euclidean" || c.rhs_indices.size() != 1) {
-        c.algo = ExtractParamFromMap<std::string>(params, onam::kMetricAlgorithm);
-    }
-    if (c.rhs_indices.size() != 2 && c.algo == "calipers") {
-        throw std::invalid_argument("\"calipers\" algo is only available for 2 dimensions.");
-    }
-    c.dist_to_null_infinity = ExtractParamFromMap<bool>(params, onam::kDistToNullIsInfinity);
-    return c;
+template <typename T, typename OptionMap>
+T ExtractOptionValue(OptionMap&& options, std::string const& option_name) {
+    return boost::any_cast<T>(ExtractAnyFromMap(std::forward<OptionMap>(options), option_name));
 }
 
 template <typename ParamsMap>
 ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
+    namespace onam = config::names;
     ACAlgorithm::Config c;
 
-    c.data = std::filesystem::current_path() / "inputData" /
-        ExtractParamFromMap<std::string>(params, posr::kData);
-    c.separator = ExtractParamFromMap<char>(params, posr::kSeparatorConfig);
-    c.has_header = ExtractParamFromMap<bool>(params, posr::kHasHeader);
-    c.bin_operation = ExtractParamFromMap<char>(params, posr::kBinaryOperation);
-    c.fuzziness = ExtractParamFromMap<double>(params, posr::kFuzziness);
+    c.data = std::filesystem::current_path() / "input_data" /
+             ExtractOptionValue<std::string>(params, onam::kData);
+    c.separator = ExtractOptionValue<char>(params, onam::kSeparator);
+    c.has_header = ExtractOptionValue<bool>(params, onam::kHasHeader);
+    c.bin_operation = ExtractOptionValue<char>(params, onam::kBinaryOperation);
+    c.fuzziness = ExtractOptionValue<double>(params, onam::kFuzziness);
     if (c.fuzziness <= 0 || c.fuzziness > 1) {
         throw std::invalid_argument(
-            "Fuzziness value must belong to the interval: (0, 1]");
+                "Fuzziness value must belong to the interval: (0, 1]");
     }
-    c.p_fuzz = ExtractParamFromMap<double>(params, posr::kFuzzinessProbability);
+    c.p_fuzz = ExtractOptionValue<double>(params, onam::kFuzzinessProbability);
     if (c.p_fuzz <= 0 || c.p_fuzz > 1) {
         throw std::invalid_argument(
-            "FuzzinessProbability value must belong to the interval: (0, 1]");
+                "FuzzinessProbability value must belong to the interval: (0, 1]");
     }
-    c.weight = ExtractParamFromMap<double>(params, posr::kWeight);
+    c.weight = ExtractOptionValue<double>(params, onam::kWeight);
     if (c.weight <= 0 || c.weight > 1) {
         throw std::invalid_argument("Weight value must belong to the interval: (0, 1]");
     }
-    c.bumps_limit = ExtractParamFromMap<size_t>(params, posr::kBumpsLimit);
-    c.iterations_limit = ExtractParamFromMap<size_t>(params, posr::kIterationsLimit);
+    c.bumps_limit = ExtractOptionValue<size_t>(params, onam::kBumpsLimit);
+    c.iterations_limit = ExtractOptionValue<size_t>(params, onam::kIterationsLimit);
     if (c.iterations_limit < 1) {
         throw std::invalid_argument("IterationsLimit value should not be less than one");
     }
-    c.pairing_rule = ExtractParamFromMap<std::string>(params, posr::kPairingRule);
-    
+    c.pairing_rule = ExtractOptionValue<std::string>(params, onam::kPairingRule);
+
     return c;
-}
-
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateFDAlgorithmInstance(Algo const algo, ParamsMap&& params) {
-    FDAlgorithm::Config const config =
-        CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
-
-    return details::CreatePrimitiveInstanceImpl(algo, config);
-}
-
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateTypoMinerInstance(Algo const algo, ParamsMap&& params) {
-    /* Typos miner has FDAlgorithm configuration */
-    FDAlgorithm::Config const config =
-        CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
-
-    return details::CreateAlgoWrapperInstanceImpl<TypoMiner>(algo, config);
-}
-
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateArAlgorithmInstance(/*Algo const algo, */ ParamsMap&& params) {
-    ARAlgorithm::Config const config =
-        CreateArAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
-
-    // return details::CreatePrimitiveInstanceImpl<Primitive, ArAlgorithmTuplesType>(algo, config);
-
-    /* Temporary fix. Template function CreatePrimitiveInstanceImpl does not compile with the new
-     * config type ARAlgorithm::Config, even though Apriori algo has been added to Algo enum.
-     * So I can suggest two solutions. The first is to implement some base class for the configs
-     * (but I'm  not sure if it will work properly) or for Algo enum (I think it is complicated
-     * too). The other solution is to add a new ArAlgo enum with an AR algorithms and change
-     * CreateAlgorithmInstance function such that it could create enum instance depending on
-     * the passed task type.
-     */
-    return std::make_unique<Apriori>(config);
-}
-
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateMetricVerifierInstance(ParamsMap&& params) {
-    MetricVerifier::Config const config =
-        CreateMetricVerifierConfigFromMap(std::forward<ParamsMap>(params));
-    return std::make_unique<MetricVerifier>(config);
 }
 
 template <typename ParamsMap>
@@ -289,43 +72,48 @@ std::unique_ptr<Primitive> CreateAcAlgorithmInstance(ParamsMap&& params) {
     return std::make_unique<ACAlgorithm>(config);
 }
 
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateCsvStatsInstance(ParamsMap&& params) {
-    FDAlgorithm::Config const config =
-        CreateFDAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
-    return std::make_unique<CsvStats>(config);
-}
-
 }  // namespace details
 
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateAlgorithmInstance(AlgoMiningType const task, Algo const algo,
-                                                   ParamsMap&& params) {
-    switch (task) {
-    case AlgoMiningType::fd:
-        return details::CreateFDAlgorithmInstance(algo, std::forward<ParamsMap>(params));
-    case AlgoMiningType::typos:
-        return details::CreateTypoMinerInstance(algo, std::forward<ParamsMap>(params));
-    case AlgoMiningType::ar:
-        return details::CreateArAlgorithmInstance(/*algo, */ std::forward<ParamsMap>(params));
-    case AlgoMiningType::metric:
-        return details::CreateMetricVerifierInstance(std::forward<ParamsMap>(params));
-    case AlgoMiningType::stats:
-        return details::CreateCsvStatsInstance(std::forward<ParamsMap>(params));
-    case AlgoMiningType::ac:
-        return details::CreateAcAlgorithmInstance(std::forward<ParamsMap>(params));
-    default:
-        throw std::logic_error(task._to_string() + std::string(" task type is not supported yet."));
+template <typename OptionMap>
+void ConfigureFromMap(Primitive& primitive, OptionMap&& options) {
+    std::unordered_set<std::string_view> needed;
+    while (!(needed = primitive.GetNeededOptions()).empty()) {
+        for (std::string_view const& option_name : needed) {
+            if (options.find(std::string{option_name}) == options.end()) {
+                primitive.SetOption(option_name);
+            } else {
+                primitive.SetOption(option_name, details::ExtractAnyFromMap(options, option_name));
+            }
+        }
     }
 }
 
-template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateAlgorithmInstance(std::string const& task_name,
-                                                   std::string const& algo_name,
-                                                   ParamsMap&& params) {
-    AlgoMiningType const task = AlgoMiningType::_from_string(task_name.c_str());
-    Algo const algo = Algo::_from_string(algo_name.c_str());
-    return CreateAlgorithmInstance(task, algo, std::forward<ParamsMap>(params));
+template <typename OptionMap>
+void LoadPrimitive(Primitive& prim, OptionMap&& options) {
+    ConfigureFromMap(prim, options);
+    auto parser = CSVParser{
+            details::ExtractOptionValue<std::string>(options, config::names::kData),
+            details::ExtractOptionValue<char>(options, config::names::kSeparator),
+            details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
+    prim.Fit(parser);
+    ConfigureFromMap(prim, options);
+}
+
+template <typename OptionMap>
+std::unique_ptr<Primitive> CreatePrimitive(PrimitiveType primitive_enum, OptionMap&& options) {
+    std::unique_ptr<Primitive> primitive = CreatePrimitiveInstance(primitive_enum);
+    LoadPrimitive(*primitive, std::forward<OptionMap>(options));
+    return primitive;
+}
+
+template <typename OptionMap>
+std::unique_ptr<Primitive> CreatePrimitive(std::string const& primitive_name,
+                                           OptionMap&& options) {
+    if (primitive_name == "ac") {
+        return details::CreateAcAlgorithmInstance(std::forward<OptionMap>(options));
+    }
+    PrimitiveType const primitive_enum = PrimitiveType::_from_string(primitive_name.c_str());
+    return CreatePrimitive(primitive_enum, std::forward<OptionMap>(options));
 }
 
 }  // namespace algos
