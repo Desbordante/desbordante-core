@@ -1,9 +1,6 @@
 #pragma once
 
 namespace algos::config::names {
-constexpr auto kHelp = "help";
-constexpr auto kTask = "task";
-constexpr auto kAlgorithm = "algorithm";
 constexpr auto kData = "data";
 constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
