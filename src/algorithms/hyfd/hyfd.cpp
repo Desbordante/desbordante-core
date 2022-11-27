@@ -1,8 +1,7 @@
-#include "hyfd.h"
+#include "algorithms/hyfd/hyfd.h"
 
 #include <algorithm>
 #include <chrono>
-#include <iterator>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -11,10 +10,10 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "inductor.h"
-#include "sampler.h"
-#include "util/pli_util.h"
-#include "validator.h"
+#include "algorithms/hyfd/inductor.h"
+#include "algorithms/hyfd/sampler.h"
+#include "algorithms/hyfd/util/pli_util.h"
+#include "algorithms/hyfd/validator.h"
 
 namespace {
 
@@ -74,6 +73,8 @@ algos::hyfd::Rows BuildRecordRepresentation(algos::hyfd::Columns const& inverted
 }  // namespace
 
 namespace algos::hyfd {
+
+HyFD::HyFD() : PliBasedFDAlgorithm({}) {}
 
 std::tuple<PLIs, Rows, std::vector<size_t>> HyFD::Preprocess() {
     PLIs plis;
