@@ -6,6 +6,7 @@
 #include "../../model/abstract_column_data.h"
 using NumToken = int;
 
+// Column presentation class for CFDRelationData. It Inherits model::AbstractColumnData class
 class CFDColumnData : model::AbstractColumnData
 {
     std::vector<NumToken> values;

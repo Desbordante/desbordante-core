@@ -1,6 +1,6 @@
 #pragma once
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include <cmath>
 #include <ctime>
@@ -14,7 +14,7 @@
 
 struct [[maybe_unused]] SubsetIterator {
     SubsetIterator(int, int);
-    std::bitset<64> next();
+    std::bitset<64> Next();
     long int GetSubsNumber();
 
     long int seed;
@@ -27,8 +27,8 @@ struct [[maybe_unused]] SubsetIterator {
 [[maybe_unused]] std::vector<std::bitset<32>> AllSubsets(const int);
 [[maybe_unused]] std::vector<std::bitset<32>> AllSubsetsIncl(const int);
 [[maybe_unused]] void SubsetsLengthK(const int, const int, std::vector<std::bitset<32>>&);
-std::vector<int> range(int, int, int=1);
-std::vector<int> iota(int);
+std::vector<int> Range(int, int, int=1);
+std::vector<int> Iota(int);
 
 template <typename T>
 [[maybe_unused]] typename T::value_type product(const T& items) {
@@ -43,7 +43,7 @@ template <typename T>
 [[maybe_unused]] typename T::value_type implode(const T& collection) {
     typename T::value_type result;
     for (const auto& c : collection) {
-        result = join(result, c);
+        result = Join(result, c);
     }
     return result;
 }
@@ -83,7 +83,7 @@ template <typename T>
 }
 
 template<typename T>
-T subset(const T& items, const std::bitset<64> mask) {
+T Subset(const T& items, const std::bitset<64> mask) {
     T sub;
     sub.reserve(mask.count());
     for (unsigned mi = 0; mi < items.size(); mi++) {
@@ -95,7 +95,7 @@ T subset(const T& items, const std::bitset<64> mask) {
 }
 
 template<typename T>
-T subset(const T& items, const typename T::value_type leave_out) {
+T Subset(const T& items, const typename T::value_type leave_out) {
     if (items.size() == 1) return T();
     T sub;
     sub.reserve(items.size() - 1);
@@ -122,7 +122,7 @@ template<typename T>
 }
 
 template<typename T>
-T* intersection(const T* lhs, const T* rhs) {
+T* Intersection(const T* lhs, const T* rhs) {
     T* isect = new T(lhs->size());
     auto it = std::set_intersection(lhs->begin(), lhs->end(), rhs->begin(), rhs->end(), isect->begin());
     isect->resize((int)(it - isect->begin()));
@@ -130,7 +130,7 @@ T* intersection(const T* lhs, const T* rhs) {
 }
 
 template<typename T>
-T intersection(const T& lhs, const T& rhs) {
+T Intersection(const T& lhs, const T& rhs) {
     T isect(std::min(lhs.size(), rhs.size()));
     auto it = std::set_intersection(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), isect.begin());
     isect.resize((int)(it - isect.begin()));
@@ -152,7 +152,7 @@ T SetDiff(const T& lhs, const T& rhs) {
 }
 
 template<typename T>
-T* join(const T* lhs, const T* rhs) {
+T* Join(const T* lhs, const T* rhs) {
     T* uni = new T(lhs->size() + rhs->size());
     auto it = std::set_union(lhs->begin(), lhs->end(), rhs->begin(), rhs->end(), uni->begin());
     uni->resize((int)(it - uni->begin()));
@@ -160,7 +160,7 @@ T* join(const T* lhs, const T* rhs) {
 }
 
 template<typename T>
-T join(const T& lhs, const T& rhs) {
+T Join(const T& lhs, const T& rhs) {
     T uni(lhs.size() + rhs.size());
     auto it = std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), uni.begin());
     uni.resize((int)(it - uni.begin()));
@@ -168,15 +168,15 @@ T join(const T& lhs, const T& rhs) {
 }
 
 template<typename T>
-T join(const T& lhs, const typename T::value_type& rhs_item) {
+T Join(const T& lhs, const typename T::value_type& rhs) {
     T res;
     res.reserve(lhs.size() + 1);
-    InsertSorted(lhs, rhs_item, res);
+    InsertSorted(lhs, rhs, res);
     return res;
 }
 
 template<typename T>
-T* join(const T* lhs, const typename T::value_type& rhs_item) {
+T* Join(const T* lhs, const typename T::value_type& rhs_item) {
     T* res = new T();
     res->reserve(lhs->size() + 1);
     InsertSorted(*lhs, rhs_item, *res);
@@ -184,7 +184,7 @@ T* join(const T* lhs, const typename T::value_type& rhs_item) {
 }
 
 template<typename T>
-T remove(const T& lhs, const typename T::value_type& rhs_item) {
+T Remove(const T& lhs, const typename T::value_type& rhs_item) {
     T res;
     res.reserve(lhs.size() - 1);
     const auto& lower = std::lower_bound(lhs.begin(), lhs.end(), rhs_item);
@@ -194,25 +194,25 @@ T remove(const T& lhs, const typename T::value_type& rhs_item) {
 }
 
 template <typename T>
-[[maybe_unused]] bool contains(const T& collection, const typename T::value_type& item) {
+[[maybe_unused]] bool Contains(const T& collection, const typename T::value_type& item) {
     return std::find(collection.begin(), collection.end(), item) != collection.end();
 }
 
 template <typename T>
-[[maybe_unused]] bool containsKey(const T& collection, const typename T::key_type& item) {
-    return collection.find(item) != collection.end();
+[[maybe_unused]] bool ContainsKey(const T& collection, const typename T::key_type& item) {
+    return collection.Find(item) != collection.end();
 }
 
 template <typename T>
-[[maybe_unused]] typename T::value_type randElem(const T& collection) {
+[[maybe_unused]] typename T::value_type RandElem(const T& collection) {
     std::mt19937 gen(time(0));
     std::uniform_int_distribution<int> dis(0, collection.size()-1);
     return collection[dis(gen)];
 }
 
 template <typename T>
-[[maybe_unused]] T randSubset(const T& collection, int size) {
-    std::vector<int> indices = iota(collection.size());
+[[maybe_unused]] T RandSubset(const T& collection, int size) {
+    std::vector<int> indices = Iota(collection.size());
     std::mt19937 gen(time(0));
     std::shuffle(indices.begin(), indices.end(), gen);
     T res(size);
@@ -224,7 +224,7 @@ template <typename T>
 
 template <typename T>
 [[maybe_unused]] std::vector<T> RandPartitions(const T& collection, int nr) {
-    std::vector<int> indices = iota(collection.size());
+    std::vector<int> indices = Iota(collection.size());
     std::mt19937 gen(time(0));
     std::shuffle(indices.begin(), indices.end(), gen);
     std::vector<T> res(nr);
@@ -244,7 +244,7 @@ template <typename T>
 }
 
 template <typename T>
-bool has(const T& collection, std::function<bool(typename T::value_type)> f) {
+bool Has(const T& collection, std::function<bool(typename T::value_type)> f) {
     for (const auto& i : collection) {
         if (f(i)) {
             return true;
@@ -254,7 +254,7 @@ bool has(const T& collection, std::function<bool(typename T::value_type)> f) {
 }
 
 template <typename T>
-[[maybe_unused]] T where(const T& collection, std::function<bool(typename T::value_type)> f) {
+[[maybe_unused]] T Where(const T& collection, std::function<bool(typename T::value_type)> f) {
     T res;
     for (const auto& i : collection) {
         if (f(i)) {
@@ -265,19 +265,19 @@ template <typename T>
 }
 
 template<typename T>
-void shuffle(T& collection) {
+void Shuffle(T& collection) {
     std::mt19937 gen(time(0));
     std::shuffle(collection.begin(), collection.end(), gen);
 }
 
 template<typename T>
-void shuffle(T& collection, unsigned seed) {
+void Shuffle(T& collection, unsigned seed) {
     std::mt19937 gen(seed);
     std::shuffle(collection.begin(), collection.end(), gen);
 }
 
 template <typename T, typename S>
-T projection(const T& collection, const S& indices) {
+T Projection(const T& collection, const S& indices) {
     T res;
     for (int i : indices) {
         res.push_back(collection[i]);
@@ -286,7 +286,7 @@ T projection(const T& collection, const S& indices) {
 }
 
 template<typename T>
-[[maybe_unused]] T sorted(const T& collection) {
+[[maybe_unused]] T Sorted(const T& collection) {
     T copy = collection;
     std::sort(copy.begin(), copy.end());
     return copy;
@@ -306,7 +306,7 @@ template<typename T>
 }
 
 template<typename T>
-[[maybe_unused]] std::vector<T> split(const T& collection, const typename T::value_type& spl) {
+[[maybe_unused]] std::vector<T> Split(const T& collection, const typename T::value_type& spl) {
     std::vector<T> res(1);
     for (int i : collection) {
         if (i == spl) {

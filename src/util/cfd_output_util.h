@@ -1,12 +1,12 @@
 #pragma once
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include <iostream>
 #include <ostream>
 
-#include "../algorithms/CFD/cfd_relation_data.h"
-#include "../algorithms/CFD/miner_node.h"
+#include "../algorithms/cfd/cfd_relation_data.h"
+#include "../algorithms/cfd/miner_node.h"
 #include "../model/cfd.h"
 
 class Output {

@@ -16,10 +16,10 @@ public:
             if (gen_it->second.HasStrictSubset(new_set, supp)) {
                 return false;
             }
-            gen_it->second.insert(new_set, supp);
+            gen_it->second.Insert(new_set, supp);
         }
         else {
-            generator_map_[hash].insert(new_set, supp);
+            generator_map_[hash].Insert(new_set, supp);
         }
         return true;
     }
@@ -32,10 +32,10 @@ public:
                 subs.insert(subs.begin(), ptSubs.begin(), ptSubs.end());
                 return false;
             }
-            gen_it->second.insert(newset, supp);
+            gen_it->second.Insert(newset, supp);
         }
         else {
-            generator_map_[hash].insert(newset, supp);
+            generator_map_[hash].Insert(newset, supp);
         }
         return true;
     }

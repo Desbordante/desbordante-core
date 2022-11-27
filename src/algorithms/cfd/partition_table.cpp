@@ -4,11 +4,10 @@
 
 #include "miner_node.h"
 
-int PartitionTable::database_row_number_;
+[[maybe_unused]] int PartitionTable::database_row_number_;
 
-// Смысл в том, что мы реально пересекаем все PartitionTidList'ы справа с PartitionTidList'ом слева. Ну и делаем это аккуратно.
-// Возвращаем тоже список PartitionTidList'ов, но уже пересечённый с lhs.
-[[maybe_unused]] std::vector<PartitionTidList> PartitionTable::intersection(const PartitionTidList &lhs, const std::vector<PartitionTidList*> rhses) {
+// Computes intersection
+[[maybe_unused]] std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidList &lhs, const std::vector<PartitionTidList*> rhses) {
     std::unordered_map<int, int> eqIndices(support(lhs.tids));
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
     // Construct a lookup from tid to equivalence class
@@ -24,7 +23,6 @@ int PartitionTable::database_row_number_;
             eqIndices[lhs.tids[ix]] = eix + 1;
         }
     }
-    // По элементу мы теперь можем получить номер его класса эквивалентности из словаря eqIndices
     std::vector<PartitionTidList> res;
     for (const PartitionTidList* rhs : rhses) {
         res.emplace_back();
@@ -55,7 +53,7 @@ int PartitionTable::database_row_number_;
     return res;
 }
 
-std::vector<PartitionTidList> PartitionTable::intersection(const PartitionTidList &lhs, const std::vector<const PartitionTidList*> rhses) {
+std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidList &lhs, const std::vector<const PartitionTidList*> rhses) {
     std::unordered_map<int, int> eqIndices(support(lhs.tids));
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
     // Construct a lookup from tid to equivalence class
@@ -101,7 +99,7 @@ std::vector<PartitionTidList> PartitionTable::intersection(const PartitionTidLis
     return res;
 }
 
-[[maybe_unused]] PartitionTidList PartitionTable::intersection(const PartitionTidList &lhs, const PartitionTidList &rhs) {
+[[maybe_unused]] PartitionTidList PartitionTable::Intersection(const PartitionTidList &lhs, const PartitionTidList &rhs) {
     std::unordered_map<int, int> eqIndices;
     eqIndices.reserve(lhs.tids.size() + 1 - lhs.sets_number);
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);

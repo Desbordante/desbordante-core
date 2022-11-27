@@ -1,6 +1,6 @@
 #pragma once
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include "cfd_types.h"
 

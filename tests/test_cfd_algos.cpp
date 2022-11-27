@@ -5,15 +5,14 @@
 #include <filesystem>
 
 #include "algorithms/algo_factory.h"
-#include "../algorithms/CFD/cfd_discovery.h"
-#include "../util/cfd_output_util.h"
 #include "algorithms/options/names.h"
+#include "algorithms/cfd/cfd_discovery.h"
 #include "datasets.h"
 #include "gtest/gtest.h"
 
 namespace fs = std::filesystem;
 namespace tests {
-void CheckCFDSetsEquality(std::set<std::string> const& actual,
+void CheckCfdSetsEquality(std::set<std::string> const& actual,
                           std::set<std::string> const& expected) {
     ASSERT_EQ(actual.size(), expected.size()) << "count of cfds does not match: expected "
                                               << expected.size() << ", got " << actual.size();
@@ -30,7 +29,7 @@ class CFDAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::CFDDiscovery> CreateAlgorithmInstance(
         unsigned minsup, double minconf, std::string const& path,
-        algos::SUBSTRATEGY substrategy, std::string algo_choice, unsigned int max_lhs,
+            std::string algo_choice, unsigned int max_lhs,
         unsigned columns_number = 0, unsigned tuples_number = 0, char separator = ',',
         bool hasHeader = true) {
         using namespace algos::config::names;
@@ -42,7 +41,7 @@ protected:
             {kCfdMinimumSupport, minsup},
             {kCfdMinimumConfidence, minconf},
             {kCfdMaximumLhs, max_lhs},
-            //{"primitive", algo_choice},
+            {kCfdAlgo, algo_choice},
             {kCfdTuplesNumber, tuples_number},
             {kCfdColumnsNumber, columns_number}
         };
@@ -52,7 +51,7 @@ protected:
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
     auto const path = fs::current_path() / "input_data" / "cfd_data" / "tennis.csv";
-    auto algorithm = CreateAlgorithmInstance(2, 0.85, path, algos::kDfs,
+    auto algorithm = CreateAlgorithmInstance(2, 0.85, path,
                                              "fd_first_dfs_dfs", 3, 4, 5);
     algorithm->Execute();
     std::string expected_data =
@@ -63,7 +62,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
     auto const path = fs::current_path() / "input_data" / "cfd_data" / "tennis.csv";
-    auto algorithm = CreateAlgorithmInstance(8, 0.85, path, algos::kDfs,
+    auto algorithm = CreateAlgorithmInstance(8, 0.85, path,
                                         "fd_first_dfs_dfs", 3);
     algorithm->Execute();
     std::vector<int> tids = {0, 2, 4, 6};
@@ -76,7 +75,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
 TEST_F(CFDAlgorithmTest, FullTennisDataset) {
     auto const path = fs::current_path() / "input_data" / "cfd_data" / "tennis.csv";
     auto algorithm = CreateAlgorithmInstance(8, 0.85, path,
-                                             algos::kDfs, "fd_first_dfs_dfs", 3);
+                                              "fd_first_dfs_dfs", 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetCfds()) {
@@ -95,17 +94,16 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
                                            "(humidity, temp, outlook) => play",
                                            "(play, temp, outlook) => humidity",
                                            "(windy, humidity, outlook) => play"};
-    CheckCFDSetsEquality(actual_cfds, expected_cfds);
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
-    // kBfs test
-    /* algorithm = CreateAlgorithmInstance(8, 0.85, path, algos::kBfs, "fd_first_dfs_dfs", 4);
+    algorithm = CreateAlgorithmInstance(8, 0.85, path, "fd_first_dfs_bfs", 4);
     algorithm->Execute();
-    CheckCFDSetsEquality(actual_cfds, expected_cfds); */
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
 
 TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
     auto const path = fs::current_path() / "input_data" / "cfd_data" / "mushroom.csv";
-    auto algorithm = CreateAlgorithmInstance(4, 0.9, path, algos::kDfs,
+    auto algorithm = CreateAlgorithmInstance(4, 0.9, path,
                                               "fd_first_dfs_dfs", 4, 4, 50);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
@@ -132,6 +130,6 @@ TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
         "(cap-color, cap-shape, cap-surface=s) => edible",
         "(cap-color, cap-surface, cap-shape=x) => edible"};
 
-    CheckCFDSetsEquality(actual_cfds, expected_cfds);
+    CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
 }

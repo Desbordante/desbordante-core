@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <numeric>
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include "set_util.h"
 
@@ -10,7 +10,7 @@
 
 }
 
-[[maybe_unused]] std::bitset<64> SubsetIterator::next() {
+[[maybe_unused]] std::bitset<64> SubsetIterator::Next() {
     int x = seed;
     int u = x & (-x);
     int v = x + u;
@@ -22,7 +22,7 @@
     return subs_number;
 }
 
-[[maybe_unused]] std::vector<int> range(int min, int max, int step) {
+[[maybe_unused]] std::vector<int> Range(int min, int max, int step) {
     std::vector<int> res;
     res.reserve((max - min) / step);
     for (int i = min; i != max; i += step) {
@@ -32,7 +32,7 @@
 }
 
 // Возвращает список вида 0 1 2 ... размера max
-[[maybe_unused]] std::vector<int> iota(int max) {
+[[maybe_unused]] std::vector<int> Iota(int max) {
     std::vector<int> iotas(max);
     std::iota(iotas.begin(), iotas.end(), 0);
     return iotas;

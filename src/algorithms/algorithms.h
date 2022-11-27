@@ -16,8 +16,8 @@
 /*Association rule mining algorithms */
 #include "algorithms/association_rules/apriori.h"
 
-/* Conditional functional dependencies mining algorithms */
-#include "algorithms/CFD/cfd_discovery.h"
+/* Conditional functional dependency mining algorithms */
+#include "algorithms/cfd/cfd_discovery.h"
 
 /* Metric FD verifier */
 #include "algorithms/metric/metric_verifier.h"

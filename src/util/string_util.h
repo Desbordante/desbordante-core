@@ -1,12 +1,12 @@
 #pragma once
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include <sstream>
 #include <cstdarg>
 
-[[maybe_unused]] std::string& ltrim(std::string &s);
-[[maybe_unused]] std::string& rtrim(std::string &s);
-[[maybe_unused]] std::string& trim(std::string &s);
-[[maybe_unused]] std::string concat(int count, ...);
-[[maybe_unused]] std::string concatCsv(int count, ...);
+[[maybe_unused]] std::string& LeftTrim(std::string &s);
+[[maybe_unused]] std::string& RightTrim(std::string &s);
+[[maybe_unused]] std::string& Trim(std::string &s);
+[[maybe_unused]] std::string Concat(int count, ...);
+[[maybe_unused]] std::string ConcatCsv(int count, ...);

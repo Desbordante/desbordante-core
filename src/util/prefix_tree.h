@@ -1,6 +1,6 @@
 #pragma once
 
-// see ../algorithms/CFD/LICENSE
+// see ../algorithms/cfd/LICENSE
 
 #include <map>
 #include <unordered_set>
@@ -21,10 +21,10 @@ template <typename Key, typename Value>
 class PrefixTree {
 public:
 	PrefixTree();
-	void reserve(int);
-	void insert(const Key&, const Value&);
-	Value* find(const Key&) const;
-	void erase(const Key&) const;
+	void Reserve(int);
+	void Insert(const Key&, const Value&);
+	Value* Find(const Key&) const;
+	void Erase(const Key&) const;
 	bool HasSubset(const Key&, const Value&) const;
 	bool HasStrictSubset(const Key&, const Value&) const;
 	std::vector<Key> GetSubsets(const Key&, const Value&) const;
@@ -53,13 +53,13 @@ PrefixTree<Key,Value>::PrefixTree() {
 }
 
 template <typename Key, typename Value>
-void PrefixTree<Key,Value>::reserve(int r) {
+void PrefixTree<Key,Value>::Reserve(int r) {
     size_ = r;
 	//root_.sub_trees.reserve(r);
 }
 
 template <typename Key, typename Value>
-void PrefixTree<Key,Value>::insert(const Key& k, const Value& v) {
+void PrefixTree<Key,Value>::Insert(const Key& k, const Value& v) {
 	typename Key::const_iterator it = k.begin();
 	PrefixNode* insertion_point = &root_;
 	while (it != k.end()) {
@@ -78,7 +78,7 @@ void PrefixTree<Key,Value>::insert(const Key& k, const Value& v) {
 }
 
 template <typename Key, typename Value>
-Value* PrefixTree<Key,Value>::find(const Key& k) const {
+Value* PrefixTree<Key,Value>::Find(const Key& k) const {
 	const auto& elem = jumps_.find(HashCollection(k));
 	if (elem == jumps_.end()) return 0;
 
@@ -101,7 +101,7 @@ Value* PrefixTree<Key,Value>::find(const Key& k) const {
 }
 
 template <typename Key, typename Value>
-void PrefixTree<Key,Value>::erase(const Key& k) const {
+void PrefixTree<Key,Value>::Erase(const Key& k) const {
 	const auto& elem = jumps_.find(HashCollection(k));
 	if (elem == jumps_.end()) return;
 

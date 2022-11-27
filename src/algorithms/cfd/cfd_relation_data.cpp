@@ -9,8 +9,8 @@
 // #include <sstream>
 // #include <random>
 
-#include "../../util/cfd_output_util.h"
-#include "../../util/set_util.h"
+#include "util/cfd_output_util.h"
+#include "util/set_util.h"
 
 
 size_t CFDRelationData::GetNumRows() const
@@ -73,7 +73,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(
             return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data), 
             std::move(data_rows), std::move(item_dictionary), std::move(items));
         }
-        LOG(INFO) << "ALL GOOD";
     }
 
 std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(
@@ -90,9 +89,9 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(
     std::uniform_real_distribution<double> uni(0.0,1.0); // guaranteed unbiased */
     int num_columns = (int)file_input.GetNumberOfColumns();
 	std::vector<std::string> line;
-    std::vector<int> columns_numbers_list = range(0, num_columns);
+    std::vector<int> columns_numbers_list = Range(0, num_columns);
     int size = (int)((double)columns_numbers_list.size() * c_sample);
-    shuffle(columns_numbers_list);
+    Shuffle(columns_numbers_list);
     columns_numbers_list = std::vector<int>(columns_numbers_list.begin(), columns_numbers_list.begin() + size);
     std::sort(columns_numbers_list.begin(), columns_numbers_list.end());
     while (file_input.HasNextRow()) {
@@ -130,7 +129,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
     }
     schema->Init();
-    LOG(INFO) << "19";
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data), 
     std::move(data_rows), std::move(item_dictionary), std::move(items));
 }
@@ -203,7 +201,7 @@ std::string CFDRelationData::GetAttrName(int index) const
     return -1;
 }
 
-[[maybe_unused]] int CFDRelationData::GetItem(int attr, const std::string& str_value) const {
+[[maybe_unused]] [[maybe_unused]] int CFDRelationData::GetItem(int attr, const std::string& str_value) const {
     return item_dictionary_.at(std::make_pair(attr, str_value));
 }
 
