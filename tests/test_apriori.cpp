@@ -1,8 +1,10 @@
 #include <filesystem>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
-#include "apriori.h"
+#include "algorithms/algo_factory.h"
+#include "algorithms/association_rules/apriori.h"
+#include "algorithms/options/names.h"
 #include "datasets.h"
 
 namespace fs = std::filesystem;
@@ -44,23 +46,45 @@ void CheckAssociationRulesListsEquality(
 class ARAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, std::filesystem::path const& path,
-            std::shared_ptr<model::InputFormat> inputFormat,
-            char separator = ',', bool hasHeader = true) {
-        algos::ARAlgorithm::Config const config = {path,
-                                                   separator,
-                                                   hasHeader,
-                                                   std::move(inputFormat),
-                                                   minsup,
-                                                   minconf};
-        return std::make_unique<algos::Apriori>(config);
+            double minsup, double minconf, std::string const& path,
+            unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
+            bool hasHeader = true) {
+        using namespace algos::config::names;
+        using namespace algos::config::descriptions;
+        algos::StdParamsMap params{
+                {kData, path},
+                {kSeparator, separator},
+                {kHasHeader, hasHeader},
+                {kInputFormat, +algos::InputFormat::singular},
+                {kMinimumSupport, minsup},
+                {kMinimumConfidence, minconf},
+                {kTIdColumnIndex, tidColumnIndex},
+                {kItemColumnIndex, itemColumnIndex}
+        };
+        return algos::CreateAndLoadPrimitive<algos::Apriori>(params);
+    }
+
+    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
+            double minsup, double minconf, std::string const& path,
+            bool firstColumnTid, char separator = ',', bool hasHeader = true) {
+        using namespace algos::config::names;
+        using namespace algos::config::descriptions;
+        algos::StdParamsMap params{
+                {kData, path},
+                {kSeparator, separator},
+                {kHasHeader, hasHeader},
+                {kInputFormat, +algos::InputFormat::tabular},
+                {kMinimumSupport, minsup},
+                {kMinimumConfidence, minconf},
+                {kFirstColumnTId, firstColumnTid}
+        };
+        return algos::CreateAndLoadPrimitive<algos::Apriori>(params);
     }
 };
 
 TEST_F(ARAlgorithmTest, BookDataset) {
     auto const path = fs::current_path() / "input_data" / "transactional_data" / "rules-book.csv";
-    auto input_params = std::make_shared<model::Singular>(0, 1);
-    auto algorithm = CreateAlgorithmInstance(0.3, 0.5, path, std::move(input_params), ',', false);
+    auto algorithm = CreateAlgorithmInstance(0.3, 0.5, path, 0, 1, ',', false);
     algorithm->Execute();
     auto const actual_frequent = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected_frequent = {{"Bread"},
@@ -93,8 +117,7 @@ TEST_F(ARAlgorithmTest, BookDataset) {
 TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
     auto const path =
         fs::current_path() / "input_data" / "transactional_data" / "rules-presentation-extended.csv";
-    auto input_params = std::make_shared<model::Singular>(0, 1);
-    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, std::move(input_params), ',', false);
+    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
     algorithm->Execute();
     auto const actual = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected = {{"Bread"},
@@ -115,8 +138,7 @@ TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
 TEST_F(ARAlgorithmTest, PresentationDataset) {
     auto const path =
         fs::current_path() / "input_data" / "transactional_data" / "rules-presentation.csv";
-    auto input_params = std::make_shared<model::Singular>(0, 1);
-    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, std::move(input_params), ',', false);
+    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -138,9 +160,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
     auto const path =
         fs::current_path() / "input_data" / "transactional_data" / "rules-synthetic-2.csv";
-    auto input_params = std::make_shared<model::Singular>(0, 1);
-    auto algorithm =
-        CreateAlgorithmInstance(0.13, 1.00001, path, std::move(input_params), ',', false);
+    auto algorithm = CreateAlgorithmInstance(0.13, 1.00001, path, 0, 1, ',', false);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -175,8 +195,7 @@ TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
 TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
     auto const path =
         fs::current_path() / "input_data" / "transactional_data" / "rules-kaggle-rows.csv";
-    auto input_params = std::make_shared<model::Tabular>(true);
-    auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, std::move(input_params), ',', true);
+    auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
     algorithm->Execute();
 
     auto const actual_frequent = algorithm->GetFrequentList();
