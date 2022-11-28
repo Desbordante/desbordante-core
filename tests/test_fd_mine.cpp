@@ -6,6 +6,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "algorithms/algo_factory.h"
 #include "algorithms/fd_mine.h"
 #include "algorithms/tane.h"
 #include "algorithms/options/names.h"
@@ -15,12 +16,26 @@
 
 using ::testing::ContainerEq, ::testing::Eq;
 
+using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap;
+
 using std::string, std::vector;
 
+namespace onam = algos::config::names;
+
+std::unique_ptr<FDAlgorithm> ConfToFitFD_Mine() {
+    std::unique_ptr<FDAlgorithm> primitive = std::make_unique<Fd_mine>();
+    algos::ConfigureFromMap(*primitive, StdParamsMap{});
+    return primitive;
+}
+
 std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(
-    std::filesystem::path const& path, char separator = ',', bool has_header = true) {
-    FDAlgorithm::Config c{ .data = path, .separator = separator, .has_header = has_header };
-    return std::make_unique<Fd_mine>(c);
+        std::string const& path, char separator = ',', bool has_header = true) {
+    StdParamsMap params_map{
+            {onam::kData, path},
+            {onam::kSeparator, separator},
+            {onam::kHasHeader, has_header}
+    };
+    return algos::CreateAndLoadPrimitive<Fd_mine>(params_map);
 }
 
 class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
@@ -58,9 +73,10 @@ testing::AssertionResult FD_Mine_CheckFDListEquality(
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
+    auto primitive = ConfToFitFD_Mine();
     auto path = std::filesystem::current_path() / "input_data" / "TestEmpty.csv";
-    auto algorithm = CreateFD_MineAlgorithmInstance(path, ',', true);
-    ASSERT_THROW(algorithm->Execute(), std::runtime_error);
+    auto parser = CSVParser(path, ',', true);
+    ASSERT_THROW(primitive->Fit(parser), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
@@ -137,11 +153,15 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                 path / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
                 LightDatasets::HasHeader(i));
 
-            FDAlgorithm::Config c{.data = path / LightDatasets::DatasetName(i),
-                                  .separator = LightDatasets::Separator(i),
-                                  .has_header = LightDatasets::HasHeader(i),
-                                  .special_params = {{onam::kSeed, 0}, {onam::kError, 0.0}}};
-            auto pyro = algos::Pyro(c);
+            StdParamsMap params_map{
+                    {onam::kData, std::string{path / LightDatasets::DatasetName(i)}},
+                    {onam::kSeparator, LightDatasets::Separator(i)},
+                    {onam::kHasHeader, LightDatasets::HasHeader(i)},
+                    {onam::kSeed, decltype(Configuration::seed){0}},
+                    {onam::kError, algos::config::ErrorType{0.0}}
+            };
+            auto pyro_ptr = algos::CreateAndLoadPrimitive<algos::Pyro>(params_map);
+            auto& pyro = *pyro_ptr;
 
             algorithm->Execute();
             std::list<FD> fds = algorithm->FdList();
