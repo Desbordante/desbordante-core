@@ -6,16 +6,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "algorithms/depminer/depminer.h"
+#include "algorithms/dfd/dfd.h"
+#include "algorithms/fastfds.h"
+#include "algorithms/fdep/fdep.h"
+#include "algorithms/fun.h"
+#include "algorithms/hyfd/hyfd.h"
+#include "algorithms/pyro.h"
+#include "algorithms/tane.h"
 #include "datasets.h"
-#include "depminer.h"
-#include "dfd.h"
-#include "fastfds.h"
-#include "fdep/fdep.h"
-#include "fun.h"
-#include "hyfd/hyfd.h"
-#include "pyro.h"
-#include "relational_schema.h"
-#include "tane.h"
+#include "model/relational_schema.h"
 #include "testing_utils.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
@@ -67,8 +67,9 @@ TYPED_TEST_SUITE_P(AlgorithmTest);
 
 TYPED_TEST_P(AlgorithmTest, ThrowsOnEmpty) {
     auto const path = fs::current_path() / "input_data" / "TestEmpty.csv";
-    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
-    ASSERT_THROW(algorithm->Execute(), std::runtime_error);
+    auto primitive = TestFixture::CreateAndConfToFit();
+    auto parser = TestFixture::MakeCsvParser(path, ',', true);
+    ASSERT_THROW(primitive->Fit(parser), std::runtime_error);
 }
 
 TYPED_TEST_P(AlgorithmTest, ReturnsEmptyOnSingleNonKey) {
