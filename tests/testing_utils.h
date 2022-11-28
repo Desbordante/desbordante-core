@@ -7,18 +7,34 @@
 
 #include <filesystem>
 
+#include "algorithms/algo_factory.h"
 #include "algorithms/options/names.h"
 
 template <typename T>
 class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
 protected:
-    std::unique_ptr<FDAlgorithm> CreateAlgorithmInstance(
-        std::filesystem::path const& path, char separator = ',', bool has_header = true) {
-        namespace onam = algos::config::names;
+    CSVParser MakeCsvParser(std::string const& path, char separator = ',',
+                            bool has_header = true) {
+        return {path, separator, has_header};
+    }
 
-        FDAlgorithm::Config c{ .data = path, .separator = separator, .has_header = has_header };
-        c.special_params[onam::kError] = 0.0;
-        c.special_params[onam::kSeed] = 0;
-        return std::make_unique<T>(c);
+    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToFit() {
+        namespace onam = algos::config::names;
+        std::unique_ptr<algos::FDAlgorithm> prim = std::make_unique<T>();
+        algos::ConfigureFromMap(*prim, algos::StdParamsMap{});
+        return prim;
+    }
+
+    std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(
+            std::string const& path, char separator = ',', bool has_header = true) {
+        namespace onam = algos::config::names;
+        algos::StdParamsMap option_map = {
+                {onam::kData, path},
+                {onam::kSeparator, separator},
+                {onam::kHasHeader, has_header},
+                {onam::kError, algos::config::ErrorType{0.0}},
+                {onam::kSeed, decltype(Configuration::seed){0}},
+        };
+        return algos::CreateAndLoadPrimitive<T>(option_map);
     }
 };
