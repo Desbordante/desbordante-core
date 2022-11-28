@@ -18,7 +18,8 @@ struct TestingParam {
     TestingParam(std::string const& dataset,
                  char const separator, bool const has_header, bool const is_null_equal_null,
                  unsigned const max_lhs, double const error, ushort const threads)
-        : params({{onam::kData,       dataset},
+        : params({{onam::kData,       std::string{std::filesystem::current_path() / "input_data" /
+                                                  dataset}},
                   {onam::kSeparator,  separator},
                   {onam::kHasHeader,  has_header},
                   {onam::kEqualNulls, is_null_equal_null},
@@ -72,12 +73,18 @@ struct LinesParam : TestingParam {
           expected(std::move(expected)) {}
 };
 
-static std::unique_ptr<algos::TypoMiner> CreateTypoMiner(algos::Algo const algo,
+static std::unique_ptr<algos::TypoMiner> ConfToFitTypoMiner(
+        algos::PrimitiveType const primitive_type) {
+    auto typo_miner = std::make_unique<algos::TypoMiner>(primitive_type);
+    algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{});
+    return typo_miner;
+}
+
+static std::unique_ptr<algos::TypoMiner> CreateTypoMiner(algos::PrimitiveType const prim,
                                                          algos::StdParamsMap m) {
-    auto typo_miner =
-        algos::CreateAlgorithmInstance(algos::AlgoMiningType::typos, algo, std::move(m));
-    auto casted = static_cast<algos::TypoMiner*>(typo_miner.release());
-    return std::unique_ptr<algos::TypoMiner>(casted);
+    auto typo_miner = std::make_unique<algos::TypoMiner>(prim);
+    algos::LoadPrimitive(*typo_miner, m);
+    return typo_miner;
 }
 
 static std::string MakeJsonFromFds(std::vector<FdByIndices> const& fds) {
@@ -108,19 +115,10 @@ static std::string MakeJsonFromFds(std::vector<FdByIndices> const& fds) {
 
 template<typename F>
 static void TestForEachAlgo(F&& test) {
-    for (algos::Algo const algo : algos::Algo::_values()) {
+    for (algos::PrimitiveType const primitive_type
+            : algos::GetAllDerived<algos::PliBasedFDAlgorithm>()) {
         try {
-            /* Temporary fix. Currently, the Algo enum contains all the algorithms, including
-             * FD mining algorithms and Apriori AR mining algorithm. But the template
-             * TypoMiner class can be instantiated only with the classes that lies in the
-             * AlgorithmTypesTuple tuple, which can not contain Apriori algorithm class (due to the
-             * current architecture)
-             * Same issue with "metric" algorithm
-             * */
-            if (algo != +algos::Algo::apriori && algo != +algos::Algo::metric && 
-                algo != +algos::Algo::stats && algo != +algos::Algo::bumphunter) {
-                test(algo);
-            }
+            test(primitive_type);
         } catch (std::runtime_error const& e) {
             std::cout << "Exception raised in test: " << e.what() << std::endl;
             FAIL();
@@ -129,10 +127,11 @@ static void TestForEachAlgo(F&& test) {
 }
 
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
-    auto const test = [](algos::Algo const algo) {
-        TestingParam p("TestEmpty.csv", ',', true, true, -1, 0.1, 0);
-        auto typo_miner = CreateTypoMiner(algo, std::move(p.params));
-        ASSERT_THROW(typo_miner->Execute(), std::runtime_error);
+    auto const test = [](algos::PrimitiveType const algo) {
+        auto typo_miner = ConfToFitTypoMiner(algo);
+        std::string path = std::filesystem::current_path() / "input_data" / "TestEmpty.csv";
+        auto parser = CSVParser(path, ',', true);
+        ASSERT_THROW(typo_miner->Fit(parser), std::runtime_error);
     };
     TestForEachAlgo(test);
 }
@@ -140,7 +139,7 @@ TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
 class ApproxFdsMiningTest : public ::testing::TestWithParam<FDsParam> {};
 
 TEST_P(ApproxFdsMiningTest, SyntheticTest) {
-    auto const test = [&param = GetParam()](algos::Algo const algo) {
+    auto const test = [&param = GetParam()](algos::PrimitiveType const algo) {
         std::string const expected = MakeJsonFromFds(GetParam().expected);
         auto typo_miner = CreateTypoMiner(algo, GetParam().params);
         typo_miner->Execute();
@@ -170,7 +169,7 @@ static FdByIndices FDtoFdByIndices(FD const& fd) {
 }
 
 TEST_P(ClustersWithTyposMiningTest, FindClustersWithTypos) {
-    auto const test = [&param = GetParam()](algos::Algo const algo) {
+    auto const test = [&param = GetParam()](algos::PrimitiveType const algo) {
         ClustersParam::FdToClustersMap const& expected = GetParam().expected;
         auto typo_miner = CreateTypoMiner(algo, GetParam().params);
         typo_miner->Execute();
@@ -234,7 +233,7 @@ static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
 }
 
 TEST_P(SquashClusterTest, SquashCluster) {
-    auto typo_miner = CreateTypoMiner(algos::Algo::pyro, GetParam().params);
+    auto typo_miner = CreateTypoMiner(algos::PrimitiveType::pyro, GetParam().params);
     ColumnLayoutRelationData const& rel = typo_miner->GetRelationData();
     typo_miner->Execute();
 
@@ -260,7 +259,7 @@ class LinesWithTyposMiningTest : public ::testing::TestWithParam<LinesParam> {};
 
 TEST_P(LinesWithTyposMiningTest, FindLinesWithTypos) {
     auto const& p = GetParam();
-    auto typo_miner = CreateTypoMiner(algos::Algo::pyro, GetParam().params);
+    auto typo_miner = CreateTypoMiner(algos::PrimitiveType::pyro, GetParam().params);
     RelationalSchema const* schema = typo_miner->GetRelationData().GetSchema();
 
     for (auto const& [fd_by_indices, clusters_with_typos] : p.expected) {
