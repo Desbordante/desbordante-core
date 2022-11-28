@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <memory>
 #include <string>
 #include <utility>
@@ -7,6 +8,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/metric_verifier.h"
+#include "algorithms/metric_verifier_enums.h"
 #include "algorithms/options/names.h"
 
 namespace tests {
@@ -30,13 +32,14 @@ struct MetricVerifyingParams {
         : params({{onam::kParameter,            min_parameter},
                   {onam::kLhsIndices,           std::move(lhs_indices)},
                   {onam::kRhsIndices,           std::move(rhs_indices)},
-                  {onam::kData,                 dataset},
+                  {onam::kData,                 std::string{std::filesystem::current_path() /
+                                                            "input_data" / dataset}},
                   {onam::kSeparator,            separator},
                   {onam::kHasHeader,            has_header},
                   {onam::kEqualNulls,           true},
-                  {onam::kMetric,               metric},
+                  {onam::kMetric,               algos::Metric::_from_string(metric.data())},
                   {onam::kQGramLength,          q},
-                  {onam::kMetricAlgorithm,      algo},
+                  {onam::kMetricAlgorithm,      algos::MetricAlgo::_from_string(algo.data())},
                   {onam::kDistToNullIsInfinity, dist_to_null_infinity}}),
           expected(expected) {}
 };
@@ -44,9 +47,8 @@ struct MetricVerifyingParams {
 class TestMetricVerifying : public ::testing::TestWithParam<MetricVerifyingParams> {};
 
 static std::unique_ptr<algos::MetricVerifier> CreateMetricVerifier(algos::StdParamsMap const& map) {
-    auto verifier = algos::details::CreateMetricVerifierInstance(map);
-    auto casted = dynamic_cast<algos::MetricVerifier*>(verifier.release());
-    return std::unique_ptr<algos::MetricVerifier>(casted);
+    auto mp = algos::StdParamsMap(map);
+    return algos::CreateAndLoadPrimitive<algos::MetricVerifier>(mp);
 }
 
 static bool GetResult(algos::MetricVerifier& metric_verifier) {
