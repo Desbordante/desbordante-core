@@ -5,7 +5,7 @@
 #include <map>
 
 #include "../../util/prefix_tree.h"
-
+#include "../../model/cfd_types.h"
 
 template<typename T>
 class GeneratorStore {
