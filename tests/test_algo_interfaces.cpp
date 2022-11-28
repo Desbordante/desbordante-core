@@ -5,12 +5,14 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "algorithms/algo_factory.h"
 #include "algorithms/pyro.h"
 #include "algorithms/options/names.h"
 
 namespace tests {
 
 using ::testing::ContainerEq;
+using algos::FDAlgorithm, algos::PliBasedFDAlgorithm, algos::StdParamsMap;
 
 namespace fs = std::filesystem;
 
@@ -30,13 +32,17 @@ template<typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
     namespace onam = algos::config::names;
 
-    auto const path = fs::current_path() / "input_data" / p.dataset;
+    std::string const path{fs::current_path() / "input_data" / p.dataset};
     std::vector<unsigned int> actual;
-    FDAlgorithm::Config c{.data = path,
-                          .separator = p.sep,
-                          .has_header = p.has_header,
-                          .special_params = {{onam::kSeed, 0}, {onam::kError, 0.0}}};
-    algos::Pyro pyro(c);
+    StdParamsMap params_map{
+            {onam::kData, path},
+            {onam::kSeparator, p.sep},
+            {onam::kHasHeader, p.has_header},
+            {onam::kSeed, decltype(Configuration::seed){0}},
+            {onam::kError, algos::config::ErrorType{0.0}}
+    };
+    auto pyro_ptr = algos::CreateAndLoadPrimitive<algos::Pyro>(params_map);
+    auto &pyro = *pyro_ptr;
 
     pyro.Execute();
 
