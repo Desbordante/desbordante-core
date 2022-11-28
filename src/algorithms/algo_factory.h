@@ -99,6 +99,13 @@ void LoadPrimitive(Primitive& prim, OptionMap&& options) {
     ConfigureFromMap(prim, options);
 }
 
+template <typename T, typename OptionMap>
+std::unique_ptr<T> CreateAndLoadPrimitive(OptionMap&& options) {
+    std::unique_ptr<T> prim = std::make_unique<T>();
+    LoadPrimitive(*prim, std::forward<OptionMap>(options));
+    return prim;
+}
+
 template <typename OptionMap>
 std::unique_ptr<Primitive> CreatePrimitive(PrimitiveType primitive_enum, OptionMap&& options) {
     std::unique_ptr<Primitive> primitive = CreatePrimitiveInstance(primitive_enum);
