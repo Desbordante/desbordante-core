@@ -4,14 +4,15 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ac.h"
-#include "column_layout_typed_relation_data.h"
-#include "primitive.h"
+#include "algorithms/legacy_primitive.h"
+#include "algorithms/primitive.h"
+#include "model/ac.h"
+#include "model/column_layout_typed_relation_data.h"
 #include "types.h"
 
 namespace algos {
 
-class ACAlgorithm : public algos::Primitive {
+class ACAlgorithm : public LegacyPrimitive {
 public:
     enum class Binop : char { Plus = '+', Minus = '-', Multiplication = '*', Division = '/' };
     enum class PairingRule { Trivial };
@@ -81,7 +82,7 @@ public:
     };
 
     explicit ACAlgorithm(Config const& config, bool test_mode = false)
-        : Primitive(config.data, config.separator, config.has_header,
+        : LegacyPrimitive(config.data, config.separator, config.has_header,
                     std::vector<std::string_view>()),
           typed_relation_(TypedRelation::CreateFrom(*input_generator_, true)),
           fuzziness_(config.fuzziness),
@@ -91,7 +92,7 @@ public:
           iterations_limit(config.iterations_limit),
           pairing_rule_(config.pairing_rule),
           test_mode_(test_mode) {
-        
+
         bin_operation_ = InitializeBinop(config.bin_operation);
     }
 
@@ -101,7 +102,7 @@ public:
     }
     RangesCollection const& GetRangesByColumns(size_t lhs_i, size_t rhs_i) const;
     void PrintRanges(std::vector<model::TypedColumnData> const& data) const;
-    unsigned long long Execute() override;
+    unsigned long long ExecuteInternal() override;
 };
 
 }  // namespace algos
