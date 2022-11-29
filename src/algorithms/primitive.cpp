@@ -93,6 +93,7 @@ void Primitive::Fit(model::IDatasetStream& data) {
     if (!GetNeededOptions().empty()) throw std::logic_error(
                 "All options need to be set before starting processing.");
     FitInternal(data);
+    data.Reset();
     ExecutePrepare();
 }
 
