@@ -216,7 +216,7 @@ ACAlgorithm::Binop ACAlgorithm::InitializeBinop(char bin_operation) {
     return static_cast<Binop>(bin_operation);
 }
 
-unsigned long long ACAlgorithm::Execute() {
+unsigned long long ACAlgorithm::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
     if (data.empty()) {
         throw std::runtime_error("Empty table was given.");
