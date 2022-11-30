@@ -119,7 +119,7 @@ int main(int argc, char const* argv[]) {
     ar_options.add_options()
             (onam::kMinimumSupport, po::value<double>(), desc::kDMinimumSupport)
             (onam::kMinimumConfidence, po::value<double>(), desc::kDMinimumConfidence)
-            (onam::kInputFormat, po::value<string>(), desc::kDInputFormat)
+            (onam::kInputFormat, po::value<algos::InputFormat>(), desc::kDInputFormat)
             ;
 
     po::options_description ar_singular_options("AR \"singular\" input format options");
