@@ -4,6 +4,7 @@
 #include <mutex>
 #include <optional>
 #include <string_view>
+#include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -102,6 +103,10 @@ public:
 
     std::vector<std::string_view> const& GetPhaseNames() const noexcept {
         return phase_names_;
+    }
+
+    std::type_index GetTypeIndex(std::string_view option_name) const {
+        return possible_options_.at(option_name)->GetTypeIndex();
     }
 };
 
