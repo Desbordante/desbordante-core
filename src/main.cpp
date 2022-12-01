@@ -11,7 +11,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/ar_algorithm_enums.h"
-#include "algorithms/metric_verifier_enums.h"
+#include "algorithms/metric/enums.h"
 #include "algorithms/options/descriptions.h"
 #include "algorithms/options/names.h"
 #include "algorithms/create_primitive.h"
@@ -24,7 +24,7 @@ using algos::EnumToAvailableValues;
 
 INITIALIZE_EASYLOGGINGPP
 
-namespace algos {
+namespace algos::metric {
 
 void validate(boost::any& v, const std::vector<std::string>& values, Metric*, int) {
     const std::string& s = po::validators::get_single_string(values);
@@ -43,6 +43,10 @@ void validate(boost::any& v, const std::vector<std::string>& values, MetricAlgo*
         throw po::validation_error(po::validation_error::invalid_option_value);
     }
 }
+
+}  // namespace algos::metric
+
+namespace algos {
 
 void validate(boost::any& v, const std::vector<std::string>& values, PrimitiveType*, int) {
     const std::string& s = po::validators::get_single_string(values);
@@ -137,8 +141,8 @@ int main(int argc, char const* argv[]) {
 
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
-            (onam::kMetric, po::value<algos::Metric>(), desc::kDMetric)
-            (onam::kMetricAlgorithm, po::value<algos::MetricAlgo>(), desc::kDMetricAlgorithm)
+            (onam::kMetric, po::value<algos::metric::Metric>(), desc::kDMetric)
+            (onam::kMetricAlgorithm, po::value<algos::metric::MetricAlgo>(), desc::kDMetricAlgorithm)
             (onam::kLhsIndices, po::value<std::vector<unsigned int>>()->multitoken(),
              desc::kDLhsIndices)
             (onam::kRhsIndices, po::value<std::vector<unsigned int>>()->multitoken(),

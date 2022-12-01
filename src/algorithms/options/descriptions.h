@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 
-#include "algorithms/metric_verifier_enums.h"
+#include "algorithms/metric/enums.h"
 
 namespace algos {
 
@@ -42,7 +42,7 @@ constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
 const std::string _kDMetric = "metric to use\n" +
-                              EnumToAvailableValues<algos::Metric>();
+                              EnumToAvailableValues<algos::metric::Metric>();
 const auto kDMetric = _kDMetric.c_str();
 constexpr auto kDLhsIndices = "LHS column indices for metric FD verification";
 constexpr auto kDRhsIndices = "RHS column indices for metric FD verification";
@@ -51,7 +51,7 @@ constexpr auto kDDistFromNullIsInfinity = "specify whether distance from NULL va
                                           "(if not, it is 0)";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 const std::string _kDMetricAlgorithm = "MFD algorithm to use\n" +
-                                       EnumToAvailableValues<algos::MetricAlgo>();
+                                       EnumToAvailableValues<algos::metric::MetricAlgo>();
 const auto kDMetricAlgorithm = _kDMetricAlgorithm.c_str();
 constexpr auto kDRadius = "maximum difference between a value and the most common value in a "
                           "cluster";

@@ -2,7 +2,7 @@
 
 #include <enum.h>
 
-namespace algos {
+namespace algos::metric {
 
 BETTER_ENUM(Metric, char,
     euclidean = 0,  /* Standard metric for calculating the distance between numeric
@@ -23,4 +23,4 @@ BETTER_ENUM(MetricAlgo, char,
                      * reduction in the number of comparisons */
 )
 
-}  // namespace algos
+}  // namespace algos::metric

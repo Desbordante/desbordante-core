@@ -1,15 +1,16 @@
-#include "algorithms/metric_verifier.h"
+#include "algorithms/metric/metric_verifier.h"
 
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
 
 #include <easylogging++.h>
 
-namespace algos {
+namespace algos::metric {
 
 void TransformIndices(std::vector<unsigned int>& value) {
     if (value.empty()) {
@@ -164,12 +165,17 @@ void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: metric FD verifying is meaningless.");
     }
-    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(data_stream,
-                                                                       is_null_equal_null_);
+    typed_relation_ =
+            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
 }
 
 unsigned long long MetricVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
+
+    points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
+                                                            typed_relation_, rhs_indices_);
+    highlight_calculator_ = std::make_unique<HighlightCalculator>(typed_relation_, rhs_indices_);
+    assert(points_calculator_.get() != nullptr || highlight_calculator_.get() != nullptr);
 
     VerifyMetricFD();
 
@@ -214,10 +220,10 @@ std::string MetricVerifier::GetStringValue(std::vector<unsigned> const& index_ve
 }
 
 void MetricVerifier::VisualizeHighlights() const {
-    if (highlights_.empty()) {
+    if (highlight_calculator_->GetHighlights().empty()) {
         return;
     }
-    for (auto const& cluster_highlight : highlights_) {
+    for (auto const& cluster_highlight : highlight_calculator_->GetHighlights()) {
         LOG(DEBUG) << "----------------------------------------- LHS value: "
                    << GetStringValue(lhs_indices_, cluster_highlight[0].data_index);
         for (auto const& highlight : cluster_highlight) {
@@ -264,16 +270,19 @@ void MetricVerifier::VerifyMetricFD() {
     }
 }
 
-MetricVerifier::ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
+ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
 
     if (metric_ == +Metric::euclidean) {
         assert(col.IsNumeric());
         return CalculateClusterFunction<IndexedOneDimensionalPoint>(
-                [this](auto const& cluster) { return CalculateIndexedPoints(cluster); },
+                [this](auto const& cluster) {
+                    return points_calculator_->CalculateIndexedPoints(cluster);
+                },
                 [this](auto const& points) { return CompareNumericValues(points); },
                 [this](auto const& points, std::vector<Highlight>&& cluster_highlights) {
-                    return CalculateOneDimensionalHighlights(points, std::move(cluster_highlights));
+                    return highlight_calculator_->CalculateOneDimensionalHighlights(
+                            points, std::move(cluster_highlights));
                 });
     }
 
@@ -284,20 +293,25 @@ MetricVerifier::ClusterFunction MetricVerifier::GetClusterFunctionForOneDimensio
     if (algo_ == +MetricAlgo::brute) {
         verify_func = [this](auto dist_func) {
             return CalculateClusterFunction<IndexedOneDimensionalPoint>(
-                    [this](auto const& cluster) { return CalculateIndexedPoints(cluster); },
+                    [this](auto const& cluster) {
+                        return points_calculator_->CalculateIndexedPoints(cluster);
+                    },
                     [this, dist_func](auto const& points) {
                         return this->BruteVerifyCluster(points, dist_func);
                     },
                     [this, dist_func](auto const& points,
                                       std::vector<Highlight>&& cluster_highlights) {
-                        return this->BruteCalculateHighlights(points, std::move(cluster_highlights),
-                                                              dist_func);
+                        return highlight_calculator_->CalculateHighlightsForStrings(
+                                points, std::move(cluster_highlights), dist_func);
                     });
         };
     } else {
         verify_func = [this](auto const& dist_func) {
             return CalculateApproxClusterFunction<std::byte const*>(
-                    [this](auto const& cluster) { return CalculatePoints(cluster); }, dist_func);
+                    [this](auto const& cluster) {
+                        return points_calculator_->CalculatePoints(cluster);
+                    },
+                    dist_func);
         };
     }
 
@@ -312,51 +326,51 @@ MetricVerifier::ClusterFunction MetricVerifier::GetClusterFunctionForOneDimensio
     };
 }
 
-MetricVerifier::ClusterFunction MetricVerifier::GetClusterFunctionForSeveralDimensions() {
+ClusterFunction MetricVerifier::GetClusterFunctionForSeveralDimensions() {
     if (algo_ == +MetricAlgo::calipers) {
         return [this](util::PLI::Cluster const& cluster) {
-            auto result = CalculateMultidimensionalPointsForCalipers(cluster);
+            auto result = points_calculator_->CalculateMultidimensionalPointsForCalipers(cluster);
             if (!CheckMFDFailIfHasNulls(result.has_nulls) &&
                 CalipersCompareNumericValues(result.points)) {
                 return true;
             }
 
-            auto result_indexed = CalculateMultidimensionalIndexedPoints(cluster);
-            BruteCalculateHighlights<std::vector<long double>>(
-                    result_indexed.points, std::move(result_indexed.cluster_highlights),
-                    util::EuclideanDistance);
+            auto result_indexed =
+                    points_calculator_->CalculateMultidimensionalIndexedPoints(cluster);
+            highlight_calculator_->CalculateMultidimensionalHighlights(
+                    result_indexed.points, std::move(result_indexed.cluster_highlights));
             return false;
         };
     }
     if (algo_ == +MetricAlgo::brute) {
         return CalculateClusterFunction<IndexedVector>(
                 [this](auto const& cluster) {
-                    return CalculateMultidimensionalIndexedPoints(cluster);
+                    return points_calculator_->CalculateMultidimensionalIndexedPoints(cluster);
                 },
                 [this](auto const& points) {
                     return BruteVerifyCluster<std::vector<long double>>(points,
                                                                         util::EuclideanDistance);
                 },
                 [this](auto const& points, std::vector<Highlight>&& cluster_highlights) {
-                    return BruteCalculateHighlights<std::vector<long double>>(
-                            points, std::move(cluster_highlights), util::EuclideanDistance);
+                    return highlight_calculator_->CalculateMultidimensionalHighlights(
+                            points, std::move(cluster_highlights));
                 });
     }
     auto points_func = [this](auto const& cluster) {
-        return CalculateMultidimensionalPointsForApprox(cluster);
+        return points_calculator_->CalculateMultidimensionalPointsForApprox(cluster);
     };
     return CalculateApproxClusterFunction<std::vector<long double>>(points_func,
                                                                     util::EuclideanDistance);
 }
 
-MetricVerifier::ClusterFunction MetricVerifier::GetClusterFunction() {
+ClusterFunction MetricVerifier::GetClusterFunction() {
     if (rhs_indices_.size() == 1) {
         return GetClusterFunctionForOneDimension();
     }
     return GetClusterFunctionForSeveralDimensions();
 }
 
-MetricVerifier::DistanceFunction<std::byte const*> MetricVerifier::GetCosineDistFunction(
+DistanceFunction<std::byte const*> MetricVerifier::GetCosineDistFunction(
         model::StringType const& type,
         std::unordered_map<std::string, util::QGramVector>& q_gram_map) const {
     return [this, &type, &q_gram_map](std::byte const* a, std::byte const* b) -> long double {
@@ -374,7 +388,7 @@ MetricVerifier::DistanceFunction<std::byte const*> MetricVerifier::GetCosineDist
 }
 
 template <typename T>
-MetricVerifier::ClusterFunction MetricVerifier::CalculateClusterFunction(
+ClusterFunction MetricVerifier::CalculateClusterFunction(
         IndexedPointsFunction<T> points_func, CompareFunction<T> compare_func,
         HighlightFunction<T> highlight_func) const {
     return [this, points_func, compare_func, highlight_func](util::PLI::Cluster const& cluster) {
@@ -388,7 +402,7 @@ MetricVerifier::ClusterFunction MetricVerifier::CalculateClusterFunction(
 }
 
 template <typename T>
-MetricVerifier::ClusterFunction MetricVerifier::CalculateApproxClusterFunction(
+ClusterFunction MetricVerifier::CalculateApproxClusterFunction(
         PointsFunction<T> points_func, DistanceFunction<T> dist_func) const {
     return [points_func, dist_func, this](util::PLI::Cluster const& cluster) {
         auto result = points_func(cluster);
@@ -420,166 +434,6 @@ bool MetricVerifier::CompareNumericValues(
     return true;
 }
 
-void MetricVerifier::CalculateOneDimensionalHighlights(
-        std::vector<IndexedOneDimensionalPoint> const& indexed_points,
-        std::vector<Highlight>&& cluster_highlights) {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-    auto const& type = static_cast<model::INumericType const&>(col.GetType());
-
-    auto [min_value, max_value] = std::minmax_element(
-            indexed_points.begin(), indexed_points.end(), [&type](auto const& a, auto const& b) {
-                return type.Compare(a.point, b.point) == model::CompareResult::kLess;
-            });
-
-    for (auto const& indexed_point : indexed_points) {
-        long double dist_to_max_element = type.Dist(indexed_point.point, max_value->point);
-        long double dist_to_min_element = type.Dist(indexed_point.point, min_value->point);
-        long double max_dist = 0;
-        ClusterIndex furthest_point_index = 0;
-        if (dist_to_max_element > dist_to_min_element) {
-            max_dist = dist_to_max_element;
-            furthest_point_index = max_value->index;
-        } else {
-            max_dist = dist_to_min_element;
-            furthest_point_index = min_value->index;
-        }
-        cluster_highlights.emplace_back(indexed_point.index, furthest_point_index, max_dist);
-    }
-    highlights_.push_back(std::move(cluster_highlights));
-}
-
-long double MetricVerifier::GetCoordinate(bool& has_values, ClusterIndex row_index, bool& has_nulls,
-                                          unsigned col_index, bool& has_empties) const {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(col_index);
-
-    if (col.IsNull(row_index)) {
-        if (has_values) {
-            throw std::runtime_error("Some of the value coordinates are nulls.");
-        }
-        has_nulls = true;
-        return 0;
-    }
-    if (col.IsEmpty(row_index)) {
-        if (has_values) {
-            throw std::runtime_error("Some of the value coordinates are empties.");
-        }
-        has_empties = true;
-        return 0;
-    }
-    if (has_nulls || has_empties) {
-        throw std::runtime_error("Some of the value coordinates are nulls or empties.");
-    }
-
-    has_values = true;
-    return col.GetType().GetTypeId() == +model::TypeId::kInt
-                   ? (long double)model::Type::GetValue<model::Int>(col.GetData()[row_index])
-                   : model::Type::GetValue<model::Double>(col.GetData()[row_index]);
-}
-
-template <typename T>
-T MetricVerifier::GetPoint(ClusterIndex row_index, bool& has_values, bool& has_nulls,
-                           bool& has_empties, AssignmentFunction<T> const& assignment_func) const {
-    T point = {};
-    for (size_t j = 0; j < rhs_indices_.size(); ++j) {
-        long double coord =
-                GetCoordinate(has_values, row_index, has_nulls, rhs_indices_[j], has_empties);
-        if (!has_values) {
-            continue;
-        }
-        assignment_func(coord, point, j);
-    }
-    return point;
-}
-
-MetricVerifier::IndexedPointsCalculationResult<MetricVerifier::IndexedVector>
-MetricVerifier::CalculateMultidimensionalIndexedPoints(util::PLI::Cluster const& cluster) const {
-    std::vector<IndexedVector> points;
-    std::vector<Highlight> cluster_highlights;
-    bool has_nulls_in_cluster = false;
-    for (auto i : cluster) {
-        bool has_values = false;
-        bool has_nulls = false;
-        bool has_empties = false;
-        auto point = GetPoint<IndexedVector>(i, has_values, has_nulls, has_empties,
-                                             AssignToIndexedVector);
-        if (has_values) {
-            point.index = i;
-            points.push_back(std::move(point));
-        } else if (has_nulls) {
-            has_nulls_in_cluster = true;
-            cluster_highlights.emplace_back(i, i, GetDistFromNull());
-        } else if (has_empties) {
-            cluster_highlights.emplace_back(i, i, 0.0);
-        }
-    }
-    return {std::move(points), std::move(cluster_highlights), has_nulls_in_cluster};
-}
-
-MetricVerifier::IndexedPointsCalculationResult<MetricVerifier::IndexedOneDimensionalPoint>
-MetricVerifier::CalculateIndexedPoints(util::PLI::Cluster const& cluster) const {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-    std::vector<std::byte const*> const& data = col.GetData();
-    std::vector<IndexedPoint<std::byte const*>> points;
-    std::vector<Highlight> cluster_highlights;
-    bool has_nulls_in_cluster = false;
-    for (auto i : cluster) {
-        if (col.IsNull(i)) {
-            has_nulls_in_cluster = true;
-            cluster_highlights.emplace_back(i, i, GetDistFromNull());
-            continue;
-        }
-        if (col.IsEmpty(i)) {
-            cluster_highlights.emplace_back(i, i, 0.0);
-            continue;
-        }
-        points.emplace_back(data[i], i);
-    }
-    return {std::move(points), std::move(cluster_highlights), has_nulls_in_cluster};
-}
-
-template <typename T>
-MetricVerifier::PointsCalculationResult<T> MetricVerifier::CalculateMultidimensionalPoints(
-        util::PLI::Cluster const& cluster, AssignmentFunction<T> const& assignment_func) const {
-    std::vector<T> points;
-    bool has_nulls_in_cluster = false;
-    for (auto i : cluster) {
-        bool has_values = false;
-        bool has_nulls = false;
-        bool has_empties = false;
-        T point = GetPoint(i, has_values, has_nulls, has_empties, assignment_func);
-        if (CheckMFDFailIfHasNulls(has_nulls)) {
-            return {{}, true};
-        }
-        has_nulls_in_cluster |= has_nulls;
-        if (has_values) {
-            points.push_back(std::move(point));
-        }
-    }
-    return {std::move(points), has_nulls_in_cluster};
-}
-
-MetricVerifier::PointsCalculationResult<std::byte const*> MetricVerifier::CalculatePoints(
-        util::PLI::Cluster const& cluster) const {
-    model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-    std::vector<std::byte const*> const& data = col.GetData();
-    std::vector<std::byte const*> points;
-    bool has_nulls_in_cluster = false;
-    for (auto i : cluster) {
-        if (col.IsNull(i)) {
-            if (dist_from_null_is_infinity_) {
-                return {{}, true};
-            }
-            has_nulls_in_cluster = true;
-            continue;
-        }
-        if (col.IsEmpty(i)) {
-            continue;
-        }
-        points.emplace_back(data[i]);
-    }
-    return {std::move(points), has_nulls_in_cluster};
-}
-
 template <typename T>
 bool MetricVerifier::ApproxVerifyCluster(std::vector<T> const& points,
                                          DistanceFunction<T> const& dist_func) const {
@@ -605,36 +459,6 @@ bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& poin
     return true;
 }
 
-template <typename T>
-void MetricVerifier::BruteCalculateHighlights(std::vector<IndexedPoint<T>> const& indexed_points,
-                                              std::vector<Highlight>&& cluster_highlights,
-                                              DistanceFunction<T> const& dist_func) {
-    HighlightMap highlight_map;
-
-    for (size_t i = 0; i + 1 < indexed_points.size(); ++i) {
-        long double max_dist = 0;
-        ClusterIndex furthest_point_index = indexed_points[i].index;
-        for (size_t j = i + 1; j < indexed_points.size(); ++j) {
-            long double dist = dist_func(indexed_points[i].point, indexed_points[j].point);
-            if (dist > max_dist) {
-                max_dist = dist;
-                furthest_point_index = indexed_points[j].index;
-            }
-            UpdateHighlightMap(highlight_map, indexed_points[j].index, indexed_points[i].index,
-                               dist);
-        }
-        UpdateHighlightMap(highlight_map, indexed_points[i].index, furthest_point_index, max_dist);
-    }
-    if (indexed_points.size() == 1) {
-        cluster_highlights.emplace_back(indexed_points[0].index, indexed_points[0].index, 0);
-    } else {
-        for (auto const& pair : highlight_map) {
-            cluster_highlights.push_back(pair.second);
-        }
-    }
-    highlights_.push_back(std::move(cluster_highlights));
-}
-
 bool MetricVerifier::CalipersCompareNumericValues(std::vector<util::Point>& points) const {
     auto pairs = util::GetAntipodalPairs(util::CalculateConvexHull(points));
     return std::all_of(pairs.cbegin(), pairs.cend(), [this](auto const& pair) {
@@ -642,119 +466,4 @@ bool MetricVerifier::CalipersCompareNumericValues(std::vector<util::Point>& poin
     });
 }
 
-void MetricVerifier::AssignToVector(long double coord, std::vector<long double>& point,
-                                    [[maybe_unused]] size_t j) {
-    point.push_back(coord);
-}
-
-void MetricVerifier::AssignToIndexedVector(long double coord, IndexedVector& point,
-                                           [[maybe_unused]] size_t j) {
-    point.point.push_back(coord);
-}
-
-void MetricVerifier::AssignToPoint(long double coord, util::Point& point, size_t j) {
-    if (j == 0) {
-        point.x = coord;
-    } else {
-        point.y = coord;
-    }
-}
-
-void MetricVerifier::UpdateHighlightMap(HighlightMap& highlight_map, ClusterIndex index,
-                                        ClusterIndex furthest_index, long double dist) {
-    auto it = highlight_map.try_emplace(index, index, furthest_index, dist).first;
-    if (it->second.max_distance < dist) {
-        it->second.max_distance = dist;
-        it->second.furthest_data_index = furthest_index;
-    }
-}
-
-void MetricVerifier::SortHighlightsByDistanceAscending() {
-    SortHighlights([this](auto const& h1, auto const& h2) {
-        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-        if (col.IsEmpty(h1.data_index)) {
-            return false;
-        }
-        if (col.IsEmpty(h2.data_index)) {
-            return true;
-        }
-        if (h1.max_distance == 0 && h2.max_distance == 0) {
-            if (col.IsNull(h1.data_index)) {
-                return true;
-            }
-            if (col.IsNull(h2.data_index)) {
-                return false;
-            }
-        }
-        return h1.max_distance < h2.max_distance;
-    });
-}
-
-void MetricVerifier::SortHighlightsByDistanceDescending() {
-    SortHighlights([this](auto const& h1, auto const& h2) {
-        if (h1.max_distance == 0 && h2.max_distance == 0) {
-            auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-            if (col.IsEmpty(h1.data_index)) {
-                return false;
-            }
-            if (col.IsEmpty(h2.data_index)) {
-                return true;
-            }
-            if (col.IsNull(h1.data_index)) {
-                return false;
-            }
-            if (col.IsNull(h2.data_index)) {
-                return true;
-            }
-        }
-        return h1.max_distance > h2.max_distance;
-    });
-}
-
-void MetricVerifier::SortHighlightsByFurthestIndexAscending() {
-    SortHighlights([this](auto const& h1, auto const& h2) {
-        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-        if (col.IsEmpty(h1.data_index)) {
-            return false;
-        }
-        if (col.IsEmpty(h2.data_index)) {
-            return true;
-        }
-        if (col.IsNull(h1.data_index)) {
-            return false;
-        }
-        if (col.IsNull(h2.data_index)) {
-            return true;
-        }
-        return h1.furthest_data_index < h2.furthest_data_index;
-    });
-}
-
-void MetricVerifier::SortHighlightsByFurthestIndexDescending() {
-    SortHighlights([this](auto const& h1, auto const& h2) {
-        auto const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
-        if (col.IsEmpty(h1.data_index)) {
-            return false;
-        }
-        if (col.IsEmpty(h2.data_index)) {
-            return true;
-        }
-        if (col.IsNull(h1.data_index)) {
-            return false;
-        }
-        if (col.IsNull(h2.data_index)) {
-            return true;
-        }
-        return h1.furthest_data_index > h2.furthest_data_index;
-    });
-}
-
-void MetricVerifier::SortHighlightsByIndexAscending() {
-    SortHighlights([](auto const& h1, auto const& h2) { return h1.data_index < h2.data_index; });
-}
-
-void MetricVerifier::SortHighlightsByIndexDescending() {
-    SortHighlights([](auto const& h1, auto const& h2) { return h1.data_index > h2.data_index; });
-}
-
-}  // namespace algos
+}  // namespace algos::metric
