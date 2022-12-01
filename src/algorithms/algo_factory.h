@@ -1,7 +1,10 @@
 #pragma once
 
+#include <type_traits>
+
 #include <boost/any.hpp>
 #include <boost/mp11/algorithm.hpp>
+#include <boost/program_options.hpp>
 #include <enum.h>
 
 #include "algorithms/algorithms.h"
@@ -18,12 +21,17 @@ namespace details {
 
 template <typename OptionMap>
 boost::any ExtractAnyFromMap(OptionMap&& options, std::string_view const& option_name) {
+    using std::is_same_v, std::decay, boost::program_options::variables_map;
     const std::string string_opt{option_name};
     auto it = options.find(string_opt);
     if (it == options.end()) {
         throw std::out_of_range("No option named \"" + string_opt + "\" in parameters.");
     }
-    return options.extract(it).mapped();
+    if constexpr (is_same_v<typename decay<OptionMap>::type, variables_map>) {
+        return options.extract(it).mapped().value();
+    } else {
+        return options.extract(it).mapped();
+    }
 }
 
 template <typename T, typename OptionMap>
