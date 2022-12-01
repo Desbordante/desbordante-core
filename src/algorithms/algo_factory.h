@@ -141,7 +141,7 @@ std::unique_ptr<Primitive> CreatePrimitive(std::string const& primitive_name,
     if (primitive_name == "typo_miner") {
         return CreateTypoMiner(std::forward<OptionMap>(options));
     }
-    PrimitiveType const primitive_enum = PrimitiveType::_from_string(primitive_name.c_str());
+    PrimitiveType const primitive_enum = PrimitiveType::_from_string_nocase(primitive_name.c_str());
     return CreatePrimitive(primitive_enum, std::forward<OptionMap>(options));
 }
 
