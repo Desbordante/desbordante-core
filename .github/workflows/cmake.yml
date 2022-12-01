@@ -42,6 +42,12 @@ jobs:
       with:
         path: ${{github.workspace}}/lib/better-enums
         key: ${{ runner.os }}better-enums
+    - name: Cache pybind11
+      uses: actions/cache@v3
+      id: cache-pybind11
+      with:
+        path: ${{github.workspace}}/lib/pybind11
+        key: ${{ runner.os }}-pybind11
 #     Uncomment this if we set up our own git lfs server
 #
 #     - name: Install git-lfs
@@ -97,6 +103,13 @@ jobs:
         cd lib
         git clone https://github.com/aantron/better-enums.git --branch 0.11.3
       if: steps.cache-better-enums.outputs.cache-hit != 'true'
+    - name: Download pybind11
+      run: |
+        mkdir -p lib
+        sudo chown -R $USER lib
+        cd lib
+        git clone https://github.com/pybind/pybind11.git --branch v2.10
+      if: steps.cache-pybind11.outputs.cache-hit != 'true'
     - name: Configure CMake
       run: >
         cmake -B ${{github.workspace}}/build
