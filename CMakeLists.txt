@@ -53,6 +53,7 @@ include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
 
 # adding submodules
 add_subdirectory("lib/googletest")
+add_subdirectory("lib/pybind11")
 
 set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )
 set( CMAKE_BUILD_TYPE "Release" )
@@ -65,3 +66,5 @@ add_subdirectory("tests")
 
 add_subdirectory("datasets")
 add_subdirectory("cfg")
+
+add_subdirectory("python_bindings")
