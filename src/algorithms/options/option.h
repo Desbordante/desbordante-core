@@ -3,6 +3,8 @@
 #include <cassert>
 #include <functional>
 #include <optional>
+#include <typeindex>
+#include <typeinfo>
 
 #include <boost/any.hpp>
 
@@ -43,6 +45,10 @@ public:
 
     [[nodiscard]] std::string_view GetDescription() const {
         return info_.GetDescription();
+    }
+
+    [[nodiscard]] std::type_index GetTypeIndex() const override {
+        return typeid(T);
     }
 
     [[nodiscard]] bool IsSet() const override {
