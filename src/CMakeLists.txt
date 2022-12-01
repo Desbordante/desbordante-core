@@ -3,6 +3,7 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 file(GLOB_RECURSE lib_sources "*/*.h*" "*/*.cpp*" "*/*.cc*")
 
 add_library(${BINARY}_lib STATIC ${lib_sources})
+set_property(TARGET ${BINARY}_lib PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 option(SAFE_VERTICAL_HASHING
         "Enable safe vertical hashing. This feature allows to process\
