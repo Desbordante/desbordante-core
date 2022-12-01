@@ -23,7 +23,13 @@ boost::any ExtractAnyFromMap(OptionMap&& options, std::string_view const& option
     if (it == options.end()) {
         throw std::out_of_range("No option named \"" + string_opt + "\" in parameters.");
     }
-    return options.extract(it).mapped();
+    if constexpr (std::is_same_v<typename std::decay<OptionMap>::type,
+            boost::program_options::variables_map>) {
+        return options.extract(it).mapped().value();
+    }
+    else {
+        return options.extract(it).mapped();
+    }
 }
 
 template <typename T, typename OptionMap>
