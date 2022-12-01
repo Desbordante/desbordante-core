@@ -8,7 +8,7 @@
 namespace algos {
 
 using PrimitiveTypes = std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN,
-        hyfd::HyFD, Aid, Apriori, MetricVerifier, CsvStats>;
+        hyfd::HyFD, Aid, Apriori, metric::MetricVerifier, CsvStats>;
 
 /* Enumeration of all supported non-pipeline primitives. If you implement a new
  * primitive please add its corresponding value to this enum and to the type

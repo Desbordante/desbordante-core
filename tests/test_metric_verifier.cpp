@@ -8,8 +8,8 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/metric_verifier.h"
-#include "algorithms/metric_verifier_enums.h"
+#include "algorithms/metric/metric_verifier.h"
+#include "algorithms/metric/enums.h"
 #include "algorithms/options/names.h"
 
 namespace tests {
@@ -38,9 +38,9 @@ struct MetricVerifyingParams {
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},
-                  {onam::kMetric,                   algos::Metric::_from_string(metric)},
+                  {onam::kMetric,                   algos::metric::Metric::_from_string(metric)},
                   {onam::kQGramLength,              q},
-                  {onam::kMetricAlgorithm,          algos::MetricAlgo::_from_string(algo)},
+                  {onam::kMetricAlgorithm,          algos::metric::MetricAlgo::_from_string(algo)},
                   {onam::kDistFromNullIsInfinity,   dist_from_null_is_infinity}}),
           expected(expected) {}
 };
@@ -67,9 +67,9 @@ struct HighlightTestParams {
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},
-                  {onam::kMetric,                   algos::Metric::_from_string(metric)},
+                  {onam::kMetric,                   algos::metric::Metric::_from_string(metric)},
                   {onam::kQGramLength,              q},
-                  {onam::kMetricAlgorithm,          algos::MetricAlgo::_from_string(algo)},
+                  {onam::kMetricAlgorithm,          algos::metric::MetricAlgo::_from_string(algo)},
                   {onam::kDistFromNullIsInfinity,   dist_from_null_is_infinity}}),
           highlight_distances(std::move(highlight_distances)) {}
 };
@@ -78,18 +78,18 @@ class TestMetricVerifying : public ::testing::TestWithParam<MetricVerifyingParam
 
 class TestHighlights : public ::testing::TestWithParam<HighlightTestParams> {};
 
-static std::unique_ptr<algos::MetricVerifier> CreateMetricVerifier(algos::StdParamsMap const& map) {
+static std::unique_ptr<algos::metric::MetricVerifier> CreateMetricVerifier(algos::StdParamsMap const& map) {
     auto mp = algos::StdParamsMap(map);
-    return algos::CreateAndLoadPrimitive<algos::MetricVerifier>(mp);
+    return algos::CreateAndLoadPrimitive<algos::metric::MetricVerifier>(mp);
 }
 
-static bool GetResult(algos::MetricVerifier& metric_verifier) {
+static bool GetResult(algos::metric::MetricVerifier& metric_verifier) {
     metric_verifier.Execute();
     return metric_verifier.GetResult();
 }
 
-static std::vector<std::vector<algos::MetricVerifier::Highlight>> GetHighlights(
-        algos::MetricVerifier& metric_verifier) {
+static std::vector<std::vector<algos::metric::Highlight>> GetHighlights(
+        algos::metric::MetricVerifier& metric_verifier) {
     metric_verifier.Execute();
     return metric_verifier.GetHighlights();
 }
