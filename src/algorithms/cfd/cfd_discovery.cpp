@@ -101,17 +101,17 @@ void CFDDiscovery::CheckForIncorrectInput() {
                 "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_) + "\"" + " is less than 1");
     }
 
-    if ((columns_number_ != 0 && tuples_number_ == 0)) {
+    if (columns_number_ != 0 && tuples_number_ == 0) {
         throw std::invalid_argument(
                 "[ERROR] Illegal columns_number and tuples_number values: columns_number is " + std::to_string(columns_number_)
                 + " while tuples_number is 0");
     }
-    if ((tuples_number_ != 0 && columns_number_ == 0)) {
+    if (tuples_number_ != 0 && columns_number_ == 0) {
         throw std::invalid_argument(
                 "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " + std::to_string(tuples_number_)
                 + " while columnes_number is 0");
     }
-    if (columns_number_ != 0 != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
+    if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
         throw std::invalid_argument(
                 "[ERROR] Illegal Support value : " + std::to_string(min_supp_) + " is not in [1, " + std::to_string(tuples_number_) + "]");
     }
