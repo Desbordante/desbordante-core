@@ -10,7 +10,7 @@
 #include "algorithms/fun.h"
 #include "algorithms/hyfd/hyfd.h"
 #include "algorithms/pyro.h"
-#include "algorithms/statistics/csv_stats.h"
+#include "algorithms/statistics/data_stats.h"
 #include "algorithms/tane.h"
 
 /*Association rule mining algorithms */
