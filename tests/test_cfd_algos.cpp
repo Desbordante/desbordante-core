@@ -10,9 +10,10 @@
 #include "datasets.h"
 #include "gtest/gtest.h"
 
-namespace fs = std::filesystem;
 namespace tests {
-void CheckCfdSetsEquality(std::set<std::string> const& actual,
+namespace fs = std::filesystem;
+
+static void CheckCfdSetsEquality(std::set<std::string> const& actual,
                           std::set<std::string> const& expected) {
     ASSERT_EQ(actual.size(), expected.size()) << "count of cfds does not match: expected "
                                               << expected.size() << ", got " << actual.size();
@@ -28,23 +29,22 @@ void CheckCfdSetsEquality(std::set<std::string> const& actual,
 class CFDAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::CFDDiscovery> CreateAlgorithmInstance(
-        unsigned minsup, double minconf, std::string const& path,
+            unsigned minsup, double minconf, std::string const& path,
             std::string algo_choice, unsigned int max_lhs,
-        unsigned columns_number = 0, unsigned tuples_number = 0, char separator = ',',
-        bool hasHeader = true) {
+            unsigned columns_number = 0, unsigned tuples_number = 0,
+            char separator = ',', bool hasHeader = true) {
         using namespace algos::config::names;
         using namespace algos::config::descriptions;
         algos::StdParamsMap params{
-            {kData, path},
-            {kSeparator, separator},
-            {kHasHeader, hasHeader},
-            {kCfdMinimumSupport, minsup},
-            {kCfdMinimumConfidence, minconf},
-            {kCfdMaximumLhs, max_lhs},
-            {kCfdAlgo, algo_choice},
-            {kCfdTuplesNumber, tuples_number},
-            {kCfdColumnsNumber, columns_number}
-        };
+                {kData, path},
+                {kSeparator, separator},
+                {kHasHeader, hasHeader},
+                {kCfdMinimumSupport, minsup},
+                {kCfdMinimumConfidence, minconf},
+                {kCfdMaximumLhs, max_lhs},
+                {kCfdAlgo, algo_choice},
+                {kCfdTuplesNumber, tuples_number},
+                {kCfdColumnsNumber, columns_number}};
         return algos::CreateAndLoadPrimitive<algos::CFDDiscovery>(params);
     }
 };
@@ -96,7 +96,7 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
                                            "(windy, humidity, outlook) => play"};
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
-    algorithm = CreateAlgorithmInstance(8, 0.85, path, "fd_first_dfs_bfs", 4);
+    algorithm = CreateAlgorithmInstance(8, 0.85, path, "fd_first_dfs_bfs", 3);
     algorithm->Execute();
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
@@ -132,4 +132,4 @@ TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
 
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
-}
+} //namespace tests

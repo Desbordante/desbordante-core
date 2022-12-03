@@ -1,8 +1,8 @@
-#include "cfd.h"
+#include "model/cfd.h"
 
 // see ../algorithms/cfd/LICENSE
 
-#include "../util/set_util.h"
+#include "algorithms/cfd/util/set_util.h"
 
 [[maybe_unused]] bool IsValid(const Itemset& lhs, int rhs) {
     // Discard Variable -> Constant and Constant -> Variable CFDs

@@ -2,7 +2,7 @@
 
 // see ../algorithms/cfd/LICENSE
 
-#include "cfd_types.h"
+#include "model/cfd_types.h"
 
 typedef std::pair<Itemset, int> CFD;
 typedef std::vector<CFD> CFDList;

@@ -1,13 +1,14 @@
 #include "partition_table.h"
 
 // see ./LICENSE
-
-#include "miner_node.h"
+#include "algorithms/cfd/miner_node.h"
+namespace algos {
 
 [[maybe_unused]] int PartitionTable::database_row_number_;
 
 // Computes intersection
-[[maybe_unused]] std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidList &lhs, const std::vector<PartitionTidList*> rhses) {
+[[maybe_unused]] std::vector<PartitionTidList> PartitionTable::Intersection(
+        const PartitionTidList& lhs, const std::vector<PartitionTidList*> rhses) {
     std::unordered_map<int, int> eqIndices(support(lhs.tids));
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
     // Construct a lookup from tid to equivalence class
@@ -18,8 +19,7 @@
         if (ix == lhs.tids.size() || lhs.tids[ix] == PartitionTidList::SEP) {
             eqClasses[eix++].reserve(count);
             count = 0;
-        }
-        else {
+        } else {
             eqIndices[lhs.tids[ix]] = eix + 1;
         }
     }
@@ -32,14 +32,13 @@
             if (ix == rhs->tids.size() || rhs->tids[ix] == PartitionTidList::SEP) {
                 for (auto& eqcl : eqClasses) {
                     if (eqcl.size()) {
-                        res.back().tids.insert(res.back().tids.end(),eqcl.begin(),eqcl.end());
+                        res.back().tids.insert(res.back().tids.end(), eqcl.begin(), eqcl.end());
                         res.back().tids.push_back(PartitionTidList::SEP);
                         res.back().sets_number++;
                         eqcl.clear();
                     }
                 }
-            }
-            else {
+            } else {
                 const int jt = rhs->tids[ix];
                 if (eqIndices.count(jt)) {
                     eqClasses[eqIndices[jt] - 1].push_back(jt);
@@ -53,7 +52,8 @@
     return res;
 }
 
-std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidList &lhs, const std::vector<const PartitionTidList*> rhses) {
+std::vector<PartitionTidList> PartitionTable::Intersection(
+        const PartitionTidList& lhs, const std::vector<const PartitionTidList*> rhses) {
     std::unordered_map<int, int> eqIndices(support(lhs.tids));
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
     // Construct a lookup from tid to equivalence class
@@ -64,9 +64,8 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
         if (ix == lhs.tids.size() || lhs.tids[ix] == PartitionTidList::SEP) {
             eqClasses[eix++].reserve(count);
             count = 0;
-        }
-        else {
-            eqIndices[lhs.tids[ix]] = eix+1;
+        } else {
+            eqIndices[lhs.tids[ix]] = eix + 1;
         }
     }
     std::vector<PartitionTidList> res;
@@ -78,14 +77,13 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
             if (ix == rhs->tids.size() || rhs->tids[ix] == PartitionTidList::SEP) {
                 for (auto& eqcl : eqClasses) {
                     if (eqcl.size()) {
-                        res.back().tids.insert(res.back().tids.end(),eqcl.begin(),eqcl.end());
+                        res.back().tids.insert(res.back().tids.end(), eqcl.begin(), eqcl.end());
                         res.back().tids.push_back(PartitionTidList::SEP);
                         res.back().sets_number++;
                         eqcl.clear();
                     }
                 }
-            }
-            else {
+            } else {
                 const int jt = rhs->tids[ix];
                 if (eqIndices.count(jt)) {
                     eqClasses[eqIndices[jt] - 1].push_back(jt);
@@ -99,7 +97,8 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
     return res;
 }
 
-[[maybe_unused]] PartitionTidList PartitionTable::Intersection(const PartitionTidList &lhs, const PartitionTidList &rhs) {
+[[maybe_unused]] PartitionTidList PartitionTable::Intersection(const PartitionTidList& lhs,
+                                                               const PartitionTidList& rhs) {
     std::unordered_map<int, int> eqIndices;
     eqIndices.reserve(lhs.tids.size() + 1 - lhs.sets_number);
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
@@ -113,9 +112,8 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
             eqClasses[eix].reserve(count);
             count = 0;
             eix++;
-        }
-        else {
-            eqIndices[lhs.tids[ix]] = eix+1;
+        } else {
+            eqIndices[lhs.tids[ix]] = eix + 1;
         }
     }
     // For each rhs partition, for each eq class: spread all tids over eq classes in lhs
@@ -125,14 +123,13 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
         if (ix == rhs.tids.size() || rhs.tids[ix] == PartitionTidList::SEP) {
             for (auto& eqcl : eqClasses) {
                 if (eqcl.size()) {
-                    res.tids.insert(res.tids.end(),eqcl.begin(),eqcl.end());
+                    res.tids.insert(res.tids.end(), eqcl.begin(), eqcl.end());
                     res.tids.push_back(PartitionTidList::SEP);
                     res.sets_number++;
                     eqcl.clear();
                 }
             }
-        }
-        else {
+        } else {
             const int jt = rhs.tids[ix];
             if (eqIndices[jt]) {
                 eqClasses[eqIndices[jt] - 1].push_back(jt);
@@ -145,19 +142,19 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
     return res;
 }
 
-[[maybe_unused]] std::vector<int> PartitionTable::OtherPartitionMap(const PartitionTidList& x, const PartitionTidList& xa) {
+[[maybe_unused]] std::vector<int> PartitionTable::OtherPartitionMap(const PartitionTidList& x,
+                                                                    const PartitionTidList& xa) {
     std::vector<int> res;
 
     // Map all partitions in xa to their size; use a random tid as identifier
-    std::unordered_map<int,int> bigt;
+    std::unordered_map<int, int> bigt;
     bigt.reserve(xa.sets_number);
     int count = 0;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
         if (xa.tids[pi] == PartitionTidList::SEP || pi == xa.tids.size()) {
-            bigt[xa.tids[pi-1]] = count;
+            bigt[xa.tids[pi - 1]] = count;
             count = 0;
-        }
-        else {
+        } else {
             count++;
         }
     }
@@ -166,12 +163,11 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
     std::vector<int> bins;
     for (unsigned cix = 0; cix < x.tids.size(); cix++) {
         if (x.tids[cix] == PartitionTidList::SEP) {
-            //res[eix] = std::make_pair(rep, bins);
+            // res[eix] = std::make_pair(rep, bins);
             res.push_back(PartitionTidList::SEP);
             rep = -1;
             bins.clear();
-        }
-        else {
+        } else {
             int t = x.tids[cix];
             if (bigt.count(t)) {
                 if (rep < 0) {
@@ -179,27 +175,27 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
                     res.push_back(t);
                 }
                 res.push_back(bigt[t]);
-                //res[eix].first = t;
-                //res[eix].second.push_back(bigt[t]);
+                // res[eix].first = t;
+                // res[eix].second.push_back(bigt[t]);
             }
         }
     }
     return res;
 }
 
-[[maybe_unused]] std::vector<std::pair<int, std::vector<int> > > PartitionTable::PartitionMap(const PartitionTidList& x, const PartitionTidList& xa) {
+[[maybe_unused]] std::vector<std::pair<int, std::vector<int> > > PartitionTable::PartitionMap(
+        const PartitionTidList& x, const PartitionTidList& xa) {
     std::vector<std::pair<int, std::vector<int> > > res(x.sets_number);
 
     // Map all partitions in xa to their size; use a random tid as identifier
-    std::unordered_map<int,int> bigt;
+    std::unordered_map<int, int> bigt;
     bigt.reserve(xa.sets_number);
     int count = 0;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
         if (xa.tids[pi] == PartitionTidList::SEP || pi == xa.tids.size()) {
-            bigt[xa.tids[pi-1]] = count;
+            bigt[xa.tids[pi - 1]] = count;
             count = 0;
-        }
-        else {
+        } else {
             count++;
         }
     }
@@ -213,14 +209,13 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
             rep = -1;
             bins.clear();
             eix++;
-        }
-        else {
+        } else {
             int t = x.tids[cix];
             if (bigt.count(t)) {
                 rep = t;
                 bins.push_back(bigt[t]);
-                //res[eix].first = t;
-                //res[eix].second.push_back(bigt[t]);
+                // res[eix].first = t;
+                // res[eix].second.push_back(bigt[t]);
             }
         }
     }
@@ -230,15 +225,14 @@ std::vector<PartitionTidList> PartitionTable::Intersection(const PartitionTidLis
 int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTidList& xa) {
     int e = 0;
 
-    std::map<int,int> bigt;
-    //bigt.reserve(xa.sets_number);
+    std::map<int, int> bigt;
+    // bigt.reserve(xa.sets_number);
     int count = 0;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
         if (pi == xa.tids.size() || xa.tids[pi] == PartitionTidList::SEP) {
-            bigt[xa.tids[pi-1]] = count;
+            bigt[xa.tids[pi - 1]] = count;
             count = 0;
-        }
-        else {
+        } else {
             count++;
         }
     }
@@ -250,8 +244,7 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
             e += count - m;
             m = 0;
             count = 0;
-        }
-        else {
+        } else {
             count++;
             int t = x.tids[cix];
             if (bigt.count(t)) {
@@ -264,15 +257,15 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
     return e;
 }
 
-[[maybe_unused]] bool PartitionTable::ViolatedInCleaned(const PartitionTidList& x, const PartitionTidList& xa, int rep) {
-    std::unordered_map<int,int> bigt;
+[[maybe_unused]] bool PartitionTable::ViolatedInCleaned(const PartitionTidList& x,
+                                                        const PartitionTidList& xa, int rep) {
+    std::unordered_map<int, int> bigt;
     bigt.reserve(xa.sets_number);
     bool first = true;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
-        if (pi == xa.tids.size() || xa.tids[pi] == PartitionTidList::SEP ) {
+        if (pi == xa.tids.size() || xa.tids[pi] == PartitionTidList::SEP) {
             first = true;
-        }
-        else if (first) {
+        } else if (first) {
             bigt[xa.tids[pi]] = 1;
             first = false;
         }
@@ -280,16 +273,14 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
 
     bool inCleaned = false;
     for (unsigned cix = 0; cix <= x.tids.size(); cix++) {
-        if (cix == x.tids.size() || x.tids[cix] == PartitionTidList::SEP  ) {
+        if (cix == x.tids.size() || x.tids[cix] == PartitionTidList::SEP) {
             inCleaned = false;
-        }
-        else {
+        } else {
             int t = x.tids[cix];
             if (bigt.count(t)) {
                 if (inCleaned && t < rep) {
                     return true;
-                }
-                else if (t < rep) {
+                } else if (t < rep) {
                     inCleaned = true;
                 }
             }
@@ -298,13 +289,14 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
     return false;
 }
 
-[[maybe_unused]] SimpleTidList PartitionTable::Violations(const PartitionTidList& x, const PartitionTidList& xa) {
+[[maybe_unused]] SimpleTidList PartitionTable::Violations(const PartitionTidList& x,
+                                                          const PartitionTidList& xa) {
     SimpleTidList res;
 
     std::set<int> bigt;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
         if (pi == xa.tids.size() || xa.tids[pi] == PartitionTidList::SEP) {
-            bigt.insert(xa.tids[pi-1]);
+            bigt.insert(xa.tids[pi - 1]);
         }
     }
 
@@ -317,8 +309,7 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
             }
             part.clear();
             refs = 0;
-        }
-        else {
+        } else {
             int t = x.tids[cix];
             part.push_back(t);
             if (bigt.count(t)) {
@@ -330,18 +321,18 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
     return res;
 }
 
-[[maybe_unused]] SimpleTidList PartitionTable::Violations(const PartitionTidList& x, const PartitionTidList& xa, int& e) {
+[[maybe_unused]] SimpleTidList PartitionTable::Violations(const PartitionTidList& x,
+                                                          const PartitionTidList& xa, int& e) {
     SimpleTidList res;
     e = 0;
 
-    std::map<int,int> bigt;
+    std::map<int, int> bigt;
     int count = 0;
     for (unsigned pi = 0; pi <= xa.tids.size(); pi++) {
         if (pi == xa.tids.size() || xa.tids[pi] == PartitionTidList::SEP) {
-            bigt[xa.tids[pi-1]] = count;
+            bigt[xa.tids[pi - 1]] = count;
             count = 0;
-        }
-        else {
+        } else {
             count++;
         }
     }
@@ -360,8 +351,7 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
             e += count - m;
             m = 0;
             count = 0;
-        }
-        else {
+        } else {
             count++;
             int t = x.tids[cix];
             part.push_back(t);
@@ -378,9 +368,10 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
 }
 
 // Считает partition error?
-[[maybe_unused]] int PartitionTable::PartitionError(const std::vector<std::vector<int> >& x, const std::vector<std::vector<int> >& xa) {
+[[maybe_unused]] int PartitionTable::PartitionError(const std::vector<std::vector<int> >& x,
+                                                    const std::vector<std::vector<int> >& xa) {
     int e = 0;
-    std::map<int,int> bigt;
+    std::map<int, int> bigt;
     for (unsigned pi = 0; pi < xa.size(); pi++) {
         bigt[xa[pi][0]] = xa[pi].size();
     }
@@ -398,3 +389,4 @@ int PartitionTable::PartitionError(const PartitionTidList& x, const PartitionTid
     }
     return e;
 }
+} //namespace algos

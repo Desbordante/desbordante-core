@@ -3,7 +3,7 @@
 
 // see ../algorithms/cfd/LICENSE
 
-#include "set_util.h"
+#include "algorithms/cfd/util/set_util.h"
 
 [[maybe_unused]] SubsetIterator::SubsetIterator(int size, int subSize)
 : seed((1 << subSize) - 1), max_seed(1 << size), subs_number(BinomialCoeff(size, subSize)) {

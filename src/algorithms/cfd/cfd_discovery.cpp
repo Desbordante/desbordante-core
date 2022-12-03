@@ -1,14 +1,16 @@
-#include "cfd_discovery.h"
+#include "algorithms/cfd/cfd_discovery.h"
 
 // see ./LICENSE
 
 #include <iterator>
 #include <thread>
 
+#include <boost/unordered_map.hpp>
+
 #include "algorithms/algo_factory.h"
 #include "algorithms/cfd/partition_table.h"
-#include "util/set_util.h"
-#include "util/cfd_output_util.h"
+#include "algorithms/cfd/util/set_util.h"
+#include "algorithms/cfd/util/cfd_output_util.h"
 
 namespace algos {
 
@@ -27,9 +29,8 @@ decltype(CFDDiscovery::MinConfidenceOpt) CFDDiscovery::MinConfidenceOpt{
 decltype(CFDDiscovery::MaxLhsSizeOpt) CFDDiscovery::MaxLhsSizeOpt{
         {config::names::kCfdMaximumLhs, config::descriptions::kDCfdMaximumLhs}, 0};
 
-decltype(CFDDiscovery::AlgoStrOpt) CFDDiscovery::AlgoStrOpt{
-        {config::names::kCfdAlgo, "algorithm to use for data profiling\n" +
-                              EnumToAvailableValues<algos::PrimitiveType>() + " + [ac]"}};
+decltype(CFDDiscovery::AlgoOpt) CFDDiscovery::AlgoOpt{
+        {config::names::kCfdAlgo, config::descriptions::kDCfdAlgo}};
 
 CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
     : Primitive(std::move(phase_names)) {
@@ -58,25 +59,24 @@ void CFDDiscovery::RegisterOptions() {
     RegisterOption(TuplesNumberOpt.GetOption(&tuples_number_));
     RegisterOption(ColumnsNumberOpt.GetOption(&columns_number_));
     RegisterOption(MaxLhsSizeOpt.GetOption(&max_lhs_));
-    RegisterOption(AlgoStrOpt.GetOption(&algo_name_));
+    RegisterOption(AlgoOpt.GetOption(&algo_name_));
 }
 
 void CFDDiscovery::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(MinSupportOpt, MinConfidenceOpt, MaxLhsSizeOpt, AlgoStrOpt));
+    MakeOptionsAvailable(config::GetOptionNames(MinSupportOpt, MinConfidenceOpt, MaxLhsSizeOpt, AlgoOpt));
 }
 
-unsigned long long CFDDiscovery::ExecuteInternal()
-{
+unsigned long long CFDDiscovery::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
     CheckForIncorrectInput();
     auto start_time = std::chrono::system_clock::now();
+
     if (algo_name_ == "fd_first_dfs_dfs") {
         FdsFirstDFS(min_supp_, max_cfd_size_, kDfs, min_conf_);
     }
     else if (algo_name_ == "fd_first_dfs_bfs") {
         FdsFirstDFS(min_supp_, max_cfd_size_, kBfs, min_conf_);
     }
-
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now() - start_time);
     long long apriori_millis = elapsed_milliseconds.count();
@@ -88,32 +88,36 @@ unsigned long long CFDDiscovery::ExecuteInternal()
 void CFDDiscovery::CheckForIncorrectInput() {
     if (min_supp_ < 1) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Support value: \"" + std::to_string(min_supp_) + "\"" + " is less than 1");
+                "[ERROR] Illegal Support value: \"" + std::to_string(min_supp_)
+                + "\"" + " is less than 1");
     }
 
     if (min_conf_ < 0 || min_conf_ > 1) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Confidence value: \"" + std::to_string(min_conf_) + "\"" + " not in [0,1]");
+                "[ERROR] Illegal Confidence value: \"" + std::to_string(min_conf_)
+                + "\"" + " not in [0,1]");
     }
 
     if (max_cfd_size_ < 2) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_) + "\"" + " is less than 1");
+                "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_)
+                + "\"" + " is less than 1");
     }
 
     if (columns_number_ != 0 && tuples_number_ == 0) {
         throw std::invalid_argument(
-                "[ERROR] Illegal columns_number and tuples_number values: columns_number is " + std::to_string(columns_number_)
-                + " while tuples_number is 0");
+                "[ERROR] Illegal columns_number and tuples_number values: columns_number is "
+                + std::to_string(columns_number_) + " while tuples_number is 0");
     }
     if (tuples_number_ != 0 && columns_number_ == 0) {
         throw std::invalid_argument(
-                "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " + std::to_string(tuples_number_)
-                + " while columnes_number is 0");
+                "[ERROR] Illegal columns_number and tuples_number values: tuples_number is "
+                + std::to_string(tuples_number_) + " while columnes_number is 0");
     }
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) + " is not in [1, " + std::to_string(tuples_number_) + "]");
+                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) +
+                " is not in [1, " + std::to_string(tuples_number_) + "]");
     }
 }
 
@@ -162,7 +166,7 @@ bool CFDDiscovery::Precedes(const Itemset& a, const Itemset& b) {
 bool CFDDiscovery::IsConstRule(const PartitionTidList& items, int rhs_a) {
     int rhs_value;
     bool first = true;
-    for (unsigned pos_index = 0; pos_index <= items.tids.size(); pos_index++) {
+    for (size_t pos_index = 0; pos_index <= items.tids.size(); pos_index++) {
         if (pos_index == items.tids.size() || items.tids[pos_index] == PartitionTidList::SEP) {
             auto tup = relation_->GetRow(items.tids[pos_index - 1]);
             if (first) {
@@ -183,21 +187,21 @@ void CFDDiscovery::FdsFirstDFS(int min_supp, unsigned max_lhs_size, SUBSTRATEGY 
     min_conf_ = min_conf;
     max_cfd_size_ = max_lhs_size;
     all_attrs_ = Range(-(int)relation_->GetAttrsNumber(), 0);
-    PartitionTable::database_row_number_ = (int)relation_->size();
+    PartitionTable::database_row_number_ = (int)relation_->Size();
     std::vector<MinerNode<PartitionTidList> > items = GetPartitionSingletons();
     for (auto& a : items) {
         a.cands = all_attrs_;
-        free_map_[std::make_pair(support(a.tids),a.tids.sets_number)].push_back(itemset(a.item));
-        free_itemsets_.insert(itemset(a.item));
+        free_map_[std::make_pair(support(a.tids),a.tids.sets_number)].push_back(Itemset{a.item});
+        free_itemsets_.insert(Itemset{a.item});
     }
     cand_store_ = PrefixTree<Itemset, Itemset>();
-    store_[Itemset()] = convert(Iota((int)relation_->size()));
+    store_[Itemset()] = Convert(Iota((int)relation_->Size()));
     cand_store_.Insert(Itemset(), all_attrs_);
     FdsFirstDFS(Itemset(), items, ss);
 }
 
 void CFDDiscovery::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<PartitionTidList> > &items, SUBSTRATEGY ss) {
-    for (int ix = items.size()-1; ix >= 0; ix--) {
+    for (int ix = items.size() - 1; ix >= 0; ix--) {
         MinerNode<PartitionTidList>& inode = items[ix];
         const Itemset iset = Join(prefix, inode.item);
 
@@ -244,7 +248,7 @@ void CFDDiscovery::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<Part
         auto node_attrs = relation_->GetAttrVector(iset);
         std::vector<const PartitionTidList*> expands;
         std::vector<MinerNode<PartitionTidList> > tmp_suffix;
-        for (int jx = (int)items.size()-1; jx > ix; jx--) {
+        for (int jx = (int)items.size() - 1; jx > ix; jx--) {
             const auto &jnode = items[jx];
             if (std::binary_search(node_attrs.begin(), node_attrs.end(),
                                    relation_->GetAttrIndex(jnode.item))) continue;
@@ -270,7 +274,7 @@ void CFDDiscovery::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<Part
         const auto exps = PartitionTable::Intersection(items[ix].tids, expands);
         std::vector<MinerNode<PartitionTidList> > suffix;
 
-        for (unsigned e = 0; e < exps.size(); e++) {
+        for (size_t e = 0; e < exps.size(); e++) {
             bool gen = true;
             auto new_set = Join(tmp_suffix[e].prefix, tmp_suffix[e].item);
             auto sp = std::make_pair(support(exps[e]), exps[e].sets_number);
@@ -349,11 +353,11 @@ void CFDDiscovery::MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionT
     auto lhs_attrs = relation_->GetAttrVector(lhs);
     std::vector<std::pair<Itemset, std::vector<int> > > partitions;
     std::vector<std::vector<std::pair<int,int> > > rhses_pairs;
-    std::unordered_map<Itemset, int> rule_ixs;
+    boost::unordered_map<Itemset, int> rule_ixs;
     std::vector<int> rhses;
     int count = 0;
-    for (int pi = 0; pi <= (int)all_tids.tids.size(); pi++) {
-        if (pi == (int)all_tids.tids.size() || all_tids.tids[pi] == PartitionTidList::SEP ) {
+    for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
+        if (pi == all_tids.tids.size() || all_tids.tids[pi] == PartitionTidList::SEP ) {
             const Transaction& trans = relation_->GetRow(all_tids.tids[pi - 1]);
             Itemset lhs_constants = Projection(trans, lhs_attrs);
             auto rule_i = rule_ixs.find(lhs_constants);
@@ -392,7 +396,7 @@ void CFDDiscovery::MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionT
     for (const auto& item : pid_lists) {
         int p_supp = GetPartitionSupport(item.second, p_supps);
         if (p_supp >= (int)min_supp_) {
-            Itemset ns = Join(itemset(item.first),
+            Itemset ns = Join(Itemset{item.first},
                               Subset(lhs, -1 - relation_->GetAttrIndex(item.first)));
             std::set<Itemset> nr_parts;
             for (int pid : item.second) {
@@ -419,7 +423,7 @@ void CFDDiscovery::MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionT
     }
     while (!items.empty()) {
         std::vector<MinerNode<SimpleTidList> > suffix;
-        for (int i = 0; i < (int)items.size(); i++) {
+        for (size_t i = 0; i < items.size(); i++) {
             const auto &inode = items[i];
             Itemset iset = inode.prefix;
             iset.push_back(inode.item);
@@ -449,7 +453,7 @@ void CFDDiscovery::MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionT
                     }
                 }
             }
-            for (int j = i + 1; j < (int)items.size(); j++) {
+            for (size_t j = i + 1; j < items.size(); j++) {
                 const auto& jnode = items[j];
                 if (jnode.prefix != inode.prefix) continue;
                 if (std::binary_search(node_attrs.begin(), node_attrs.end(), -1 - relation_->GetAttrIndex(jnode.item))) continue;
@@ -496,10 +500,10 @@ void CFDDiscovery::MinePatternsDFS(const Itemset &lhs, int rhs, const PartitionT
     auto lhs_attrs = relation_->GetAttrVector(lhs);
     std::vector<std::pair<Itemset, std::vector<int> > > partitions;
     std::vector<std::vector<std::pair<int,int> > > pair_rhses;
-    std::unordered_map<Itemset, int> rule_ixs;
+    boost::unordered_map<Itemset, int> rule_ixs;
     std::vector<int> rhses;
     int count = 0;
-    for (unsigned pi = 0; pi <= all_tids.tids.size(); pi++) {
+    for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
         if (pi == all_tids.tids.size() || all_tids.tids[pi] == PartitionTidList::SEP ) {
             const Transaction& trans = relation_->GetRow(all_tids.tids[pi - 1]);
             std::vector<int> lhs_constants = Projection(trans, lhs_attrs);
@@ -539,7 +543,7 @@ void CFDDiscovery::MinePatternsDFS(const Itemset &lhs, int rhs, const PartitionT
     for (const auto& item : pid_lists) {
         int psupp = GetPartitionSupport(item.second, psupps);
         if (psupp >= (int)min_supp_) {
-            Itemset ns = Join(itemset(item.first),
+            Itemset ns = Join(Itemset{item.first},
                               Subset(lhs, -1 - relation_->GetAttrIndex(item.first)));
             std::set<Itemset> nr_parts;
             for (int pid : item.second) {
@@ -572,7 +576,7 @@ void CFDDiscovery::MinePatternsDFS(const Itemset &prefix, std::vector<MinerNode<
                                    std::vector<std::vector<std::pair<int, int> > > & rhses_pair,
                                    std::vector<std::pair<Itemset, std::vector<int> > > &partitions,
                                    std::vector<int> &psupps) {
-    for (int ix = items.size()-1; ix >= 0; ix--) {
+    for (int ix = (int)items.size() - 1; ix >= 0; ix--) {
         const auto &inode = items[ix];
         Itemset iset = Join(prefix, inode.item);
         auto node_attrs = relation_->GetAttrVectorItems(iset);
@@ -602,7 +606,7 @@ void CFDDiscovery::MinePatternsDFS(const Itemset &prefix, std::vector<MinerNode<
             }
         }
         std::vector<MinerNode<SimpleTidList> > suffix;
-        for (unsigned j = ix + 1; j < items.size(); j++) {
+        for (size_t j = ix + 1; j < items.size(); j++) {
             const auto &jnode = items[j];
             if (std::binary_search(node_attrs.begin(), node_attrs.end(), -1- relation_->GetAttrIndex(jnode.item))) continue;
             Itemset newset = Join(iset, jnode.item);
@@ -647,7 +651,7 @@ void CFDDiscovery::MinePatternsDFS(const Itemset &prefix, std::vector<MinerNode<
 std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetPartitionSingletons() {
     std::vector<std::vector<SimpleTidList> > partitions(relation_->GetAttrsNumber());
     std::unordered_map<int, std::pair<int,int> > attr_indices;
-    for (unsigned a = 0; a < relation_->GetAttrsNumber(); a++) {
+    for (size_t a = 0; a < relation_->GetAttrsNumber(); a++) {
         const auto& dom = relation_->GetDomain(a);
         partitions[a] = std::vector<SimpleTidList>(dom.size());
         for (unsigned i = 0; i < dom.size(); i++) {
@@ -655,7 +659,7 @@ std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetPartitionSingletons()
             attr_indices[dom[i]] = std::make_pair(a, i);
         }
     }
-    for (unsigned row = 0; row < relation_->size(); row++) {
+    for (size_t row = 0; row < relation_->Size(); row++) {
         const auto& tup = relation_->GetRow(row);
         for (int item : tup) {
             const auto& attr_node_ix = attr_indices.at(item);
@@ -663,11 +667,11 @@ std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetPartitionSingletons()
         }
     }
     std::vector<MinerNode<PartitionTidList> > singletons;
-    for (unsigned a = 0; a < relation_->GetAttrsNumber(); a++) {
+    for (size_t a = 0; a < relation_->GetAttrsNumber(); a++) {
         int attr_item = -1 - a;
         singletons.emplace_back(attr_item);
         const auto& dom = relation_->GetDomain(a);
-        singletons.back().tids.tids.reserve(relation_->size()+dom.size()-1);
+        singletons.back().tids.tids.reserve(relation_->Size()+dom.size()-1);
         singletons.back().tids.sets_number = dom.size();
         for (unsigned i = 0; i < dom.size(); i++) {
             auto& ts = singletons.back().tids.tids;
@@ -680,83 +684,4 @@ std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetPartitionSingletons()
     }
     return singletons;
 }
-
-// Constant analogue of the previous method
-std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetPartitionSingletons(const SimpleTidList& tids, const Itemset& attrs) {
-    std::vector<std::vector<SimpleTidList> > partitions(relation_->GetAttrsNumber());
-    std::unordered_map<int, std::pair<int,int> > attr_indices;
-    for (int a : attrs) {
-        const auto& dom = relation_->GetDomain(a);
-        partitions[a] = std::vector<SimpleTidList>(dom.size());
-        for (unsigned i = 0; i < dom.size(); i++) {
-            attr_indices[dom[i]] = std::make_pair(a, i);
-        }
-    }
-    for (int row: tids) {
-        const auto& tup = relation_->GetRow(row);
-        for (int a : attrs) {
-            int item = tup[a];
-            const auto& attr_node_ix = attr_indices.at(item);
-            partitions[attr_node_ix.first][attr_node_ix.second].push_back(row);
-        }
-    }
-    std::vector<MinerNode<PartitionTidList> > singletons;
-    for (int a : attrs) {
-        int attr_item = -1 - a;
-        singletons.emplace_back(attr_item);
-        const auto& dom = relation_->GetDomain(a);
-        singletons.back().tids.tids.reserve(tids.size()+dom.size()-1);
-        singletons.back().tids.sets_number = 0;//dom.size();
-        for (unsigned i = 0; i < dom.size(); i++) {
-            if (!partitions[a][i].empty()) {
-                singletons.back().tids.sets_number++;
-                auto &ts = singletons.back().tids.tids;
-                ts.insert(ts.end(), partitions[a][i].begin(), partitions[a][i].end());
-                ts.push_back(PartitionTidList::SEP);
-            }
-        }
-        singletons.back().tids.tids.pop_back();
-        singletons.back().HashTids();
-    }
-    return singletons;
-}
-
-std::vector<MinerNode<PartitionTidList> > CFDDiscovery::GetAllSingletons(int min_supp) {
-    auto parts = GetPartitionSingletons();
-    auto singles = GetSingletons(min_supp);
-    for (const auto& sing : singles) {
-        parts.emplace_back(sing.item);
-        parts.back().tids = {sing.tids, 1};
-    }
-    return parts;
-}
-
-// This method is collecting all singletons with suitable support
-std::vector<MinerNode<SimpleTidList> > CFDDiscovery::GetSingletons(int minsup) {
-    std::vector<MinerNode<SimpleTidList> > singletons;
-    std::unordered_map<int, int> node_indices;
-    for (int item = 1; item <= (int)relation_->GetItemsNumber(); item++) {
-        if (relation_->Frequency(item) >= minsup) {
-            singletons.emplace_back(item, relation_->Frequency(item));
-            node_indices[item] = (int)singletons.size() - 1;
-        }
-    }
-
-    for (unsigned row = 0; row < relation_->size(); row++) {
-        const auto& tup = relation_->GetRow((int)row);
-        for (int item : tup) {
-            const auto& it = node_indices.find(item);
-            if (it != node_indices.end()) {
-                singletons[it->second].tids.push_back((int)row);
-            }
-        }
-    }
-
-    //std::sort(singletons.begin(), singletons.end());
-    for (int i = (int)singletons.size() - 1; i >= 0; i--) {
-        auto& node = singletons[i];
-        node.HashTids();
-    }
-    return singletons;
-}
-}
+} //namespace algos

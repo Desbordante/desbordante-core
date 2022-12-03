@@ -4,7 +4,8 @@
 
 #include <numeric>
 
-#include "../../model/cfd_types.h"
+#include "model/cfd_types.h"
+namespace algos {
 
 int support(const SimpleTidList& tids);
 int support(const PartitionTidList& tids);
@@ -58,11 +59,11 @@ struct MinerNode {
     bool operator< (const MinerNode<T>& rhs) const {
         //return node_supp() < rhs.node_supp() || (node_supp() == rhs.Supp() && tidmap.size() > rhs.tidmap.size());
         //return cands.size() > rhs.cands.size();
-        return lessthan(tids, rhs.tids);
+        return LessThan(tids, rhs.tids);
     }
 
     bool operator== (const MinerNode<T>& rhs) const {
-        return item == rhs.item && prefix == rhs.prefix && equals(tids, rhs.tids);
+        return item == rhs.item && prefix == rhs.prefix && Equals(tids, rhs.tids);
     }
 
     int Supp() const {
@@ -88,3 +89,4 @@ struct MinerNode {
 };
 
 typedef std::vector<MinerNode<PartitionTidList> >::const_iterator MNIter;
+} //namespace algos

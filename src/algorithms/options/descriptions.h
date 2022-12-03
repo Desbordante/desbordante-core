@@ -73,5 +73,6 @@ constexpr auto kDCfdTuplesNumber = "Number of tuples in the part of the dataset 
         "want to use algo not on the full dataset, but on its part";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
+constexpr auto kDCfdAlgo = "cfd algorithm";
 }
 >>>>>>> 477ac12 (Add fd-first-DFS-dfs cfd algorithm implementation and tests)

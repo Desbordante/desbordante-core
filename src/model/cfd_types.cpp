@@ -2,7 +2,7 @@
 
 // see ../algorithms/cfd/LICENSE
 
-#include "cfd_types.h"
+#include "model/cfd_types.h"
 
 const int PartitionTidList::SEP = -1;
 
@@ -15,20 +15,14 @@ bool PartitionTidList::operator!=(const PartitionTidList& b) const {
 }
 
 bool PartitionTidList::operator<(const PartitionTidList& b) const {
-    return lessthan(*this, b);
+    return LessThan(*this, b);
 }
 
-Itemset itemset(int i) {
-    Itemset res(1);
-    res[0] = i;
-    return res;
-}
-
-PartitionTidList convert(const SimpleTidList& tids) {
+PartitionTidList Convert(const SimpleTidList& tids) {
     return { tids, 1 };
 }
 
-SimpleTidList convert(const PartitionTidList& tids) {
+SimpleTidList Convert(const PartitionTidList& tids) {
     auto res = tids.tids;
     if (tids.sets_number > 1) {
         std::sort(res.begin(), res.end());
@@ -37,14 +31,14 @@ SimpleTidList convert(const PartitionTidList& tids) {
     return res;
 }
 
-bool lessthan(const PartitionTidList& lhs, const PartitionTidList& rhs) {
+bool LessThan(const PartitionTidList& lhs, const PartitionTidList& rhs) {
     return lhs.sets_number < rhs.sets_number || (lhs.sets_number == rhs.sets_number && lhs.tids < rhs.tids);
 }
 
-bool lessthan(const SimpleTidList& lhs, const SimpleTidList& rhs) {
+bool LessThan(const SimpleTidList& lhs, const SimpleTidList& rhs) {
     return lhs.size() > rhs.size();
 }
 
-bool equals(const PartitionTidList& lhs, const PartitionTidList& rhs) {
+bool Equals(const PartitionTidList& lhs, const PartitionTidList& rhs) {
     return lhs.sets_number == rhs.sets_number && lhs.tids == rhs.tids;
 }
