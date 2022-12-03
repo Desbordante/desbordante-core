@@ -8,7 +8,7 @@
 
 namespace algos {
 
-class CsvStats : public Primitive {
+class DataStats : public Primitive {
     config::EqNullsType is_null_equal_null_;
     config::ThreadNumType threads_num_;
 
@@ -24,7 +24,7 @@ protected:
     unsigned long long ExecuteInternal() final;
 
 public:
-    CsvStats();
+    DataStats();
 
     const std::vector<model::TypedColumnData>& GetData() const noexcept;
 

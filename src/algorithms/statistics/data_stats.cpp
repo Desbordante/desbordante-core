@@ -1,4 +1,4 @@
-#include "algorithms/statistics/csv_stats.h"
+#include "algorithms/statistics/data_stats.h"
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -9,21 +9,21 @@ namespace algos {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-CsvStats::CsvStats() : Primitive({"Calculating statistics"}) {
+DataStats::DataStats() : Primitive({"Calculating statistics"}) {
     RegisterOptions();
     MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
 }
 
-void CsvStats::RegisterOptions() {
+void DataStats::RegisterOptions() {
     RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
     RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
 }
 
-void CsvStats::MakeExecuteOptsAvailable() {
+void DataStats::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
 }
 
-Statistic CsvStats::GetMin(size_t index, mo::CompareResult order) const {
+Statistic DataStats::GetMin(size_t index, mo::CompareResult order) const {
     const mo::TypedColumnData& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
 
@@ -42,11 +42,11 @@ Statistic CsvStats::GetMin(size_t index, mo::CompareResult order) const {
     return Statistic(result, &type, true);
 }
 
-Statistic CsvStats::GetMax(size_t index) const {
+Statistic DataStats::GetMax(size_t index) const {
     return GetMin(index, mo::CompareResult::kGreater);
 }
 
-Statistic CsvStats::GetSum(size_t index) const {
+Statistic DataStats::GetSum(size_t index) const {
     if (all_stats_[index].sum.HasValue()) return all_stats_[index].sum;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
@@ -60,7 +60,7 @@ Statistic CsvStats::GetSum(size_t index) const {
     return Statistic(sum, &type, false);
 };
 
-Statistic CsvStats::GetAvg(size_t index) const {
+Statistic DataStats::GetAvg(size_t index) const {
     if (all_stats_[index].avg.HasValue()) return all_stats_[index].avg;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
@@ -77,7 +77,7 @@ Statistic CsvStats::GetAvg(size_t index) const {
     return Statistic(avg, &double_type, false);
 }
 
-Statistic CsvStats::CalculateCentralMoment(size_t index, int number, bool bessel_correction) const {
+Statistic DataStats::CalculateCentralMoment(size_t index, int number, bool bessel_correction) const {
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     const std::vector<const std::byte*>& data = col.GetData();
@@ -107,7 +107,7 @@ Statistic CsvStats::CalculateCentralMoment(size_t index, int number, bool bessel
     return Statistic(result, &double_type, false);
 }
 
-Statistic CsvStats::GetCorrectedSTD(size_t index) const {
+Statistic DataStats::GetCorrectedSTD(size_t index) const {
     if (!col_data_[index].IsNumeric()) return {};
     mo::DoubleType double_type;
     std::byte* result = double_type.Allocate();
@@ -115,11 +115,11 @@ Statistic CsvStats::GetCorrectedSTD(size_t index) const {
     return Statistic(result, &double_type, false);
 }
 
-Statistic CsvStats::GetCentralMomentOfDist(size_t index, int number) const {
+Statistic DataStats::GetCentralMomentOfDist(size_t index, int number) const {
     return CalculateCentralMoment(index, number, false);
 }
 
-Statistic CsvStats::GetStandardizedCentralMomentOfDist(size_t index, int number) const {
+Statistic DataStats::GetStandardizedCentralMomentOfDist(size_t index, int number) const {
     mo::DoubleType double_type;
     Statistic std = GetCorrectedSTD(index);
     Statistic central_moment = GetCentralMomentOfDist(index, number);
@@ -131,21 +131,21 @@ Statistic CsvStats::GetStandardizedCentralMomentOfDist(size_t index, int number)
     return Statistic(result, &double_type, false);
 }
 
-Statistic CsvStats::GetSkewness(size_t index) const {
+Statistic DataStats::GetSkewness(size_t index) const {
     if (all_stats_[index].skewness.HasValue()) return all_stats_[index].skewness;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     return GetStandardizedCentralMomentOfDist(index, 3);
 }
 
-Statistic CsvStats::GetKurtosis(size_t index) const {
+Statistic DataStats::GetKurtosis(size_t index) const {
     if (all_stats_[index].kurtosis.HasValue()) return all_stats_[index].kurtosis;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     return GetStandardizedCentralMomentOfDist(index, 4);
 }
 
-size_t CsvStats::NumberOfValues(size_t index) const {
+size_t DataStats::NumberOfValues(size_t index) const {
     const mo::TypedColumnData& col = col_data_[index];
     return col.GetNumRows() - col.GetNumNulls() - col.GetNumEmpties();
 };
@@ -160,7 +160,7 @@ static size_t inline CountDistinctInSortedData(const std::vector<const std::byte
     return distinct;
 }
 
-size_t CsvStats::MixedDistinct(size_t index) const {
+size_t DataStats::MixedDistinct(size_t index) const {
     const mo::TypedColumnData& col = col_data_[index];
     const std::vector<const std::byte*>& data = col.GetData();
     mo::MixedType mixed_type(is_null_equal_null_);
@@ -180,7 +180,7 @@ size_t CsvStats::MixedDistinct(size_t index) const {
     return result;
 }
 
-size_t CsvStats::Distinct(size_t index) {
+size_t DataStats::Distinct(size_t index) {
     if (all_stats_[index].distinct != 0) return all_stats_[index].distinct;
     const mo::TypedColumnData& col = col_data_[index];
     if (col.GetTypeId() == +mo::TypeId::kMixed) {
@@ -194,10 +194,10 @@ size_t CsvStats::Distinct(size_t index) {
     return all_stats_[index].distinct = CountDistinctInSortedData(data, type);
 }
 
-std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, size_t end_row,
-                                                           size_t start_col, size_t end_col,
-                                                           size_t str_len, size_t unsigned_len,
-                                                           size_t double_len) const {
+std::vector<std::vector<std::string>> DataStats::ShowSample(size_t start_row, size_t end_row,
+                                                            size_t start_col, size_t end_col,
+                                                            size_t str_len, size_t unsigned_len,
+                                                            size_t double_len) const {
     auto cut_str = [](const std::string& str, size_t len) {
         return str.substr(0, std::min(len, str.length()));
     };
@@ -228,11 +228,11 @@ std::vector<std::vector<std::string>> CsvStats::ShowSample(size_t start_row, siz
     return res;
 }
 
-bool CsvStats::IsCategorical(size_t index, size_t quantity) {
+bool DataStats::IsCategorical(size_t index, size_t quantity) {
     return this->Distinct(index) <= quantity;
 }
 
-std::vector<const std::byte*> CsvStats::DeleteNullAndEmpties(size_t index) {
+std::vector<const std::byte*> DataStats::DeleteNullAndEmpties(size_t index) {
     const mo::TypedColumnData& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kNull || type_id == +mo::TypeId::kEmpty ||
@@ -247,7 +247,7 @@ std::vector<const std::byte*> CsvStats::DeleteNullAndEmpties(size_t index) {
     return res;
 }
 
-Statistic CsvStats::GetQuantile(double part, size_t index, bool calc_all) {
+Statistic DataStats::GetQuantile(double part, size_t index, bool calc_all) {
     const mo::TypedColumnData& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
     const mo::Type& type = col.GetType();
@@ -272,7 +272,7 @@ Statistic CsvStats::GetQuantile(double part, size_t index, bool calc_all) {
     return Statistic(data[quantile], &col.GetType(), true);
 }
 
-unsigned long long CsvStats::ExecuteInternal() {
+unsigned long long DataStats::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
@@ -311,23 +311,23 @@ unsigned long long CsvStats::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-size_t CsvStats::GetNumberOfColumns() const {
+size_t DataStats::GetNumberOfColumns() const {
     return col_data_.size();
 }
 
-const ColumnStats& CsvStats::GetAllStats(size_t index) const {
+const ColumnStats& DataStats::GetAllStats(size_t index) const {
     return all_stats_[index];
 }
 
-const std::vector<ColumnStats>& CsvStats::GetAllStats() const {
+const std::vector<ColumnStats>& DataStats::GetAllStats() const {
     return all_stats_;
 }
 
-const std::vector<model::TypedColumnData>& CsvStats::GetData() const noexcept {
+const std::vector<model::TypedColumnData>& DataStats::GetData() const noexcept {
     return col_data_;
 }
 
-std::string CsvStats::ToString() const {
+std::string DataStats::ToString() const {
     std::stringstream res;
     for (size_t i = 0; i < GetNumberOfColumns(); ++i) {
         res << "Column num = " << i << '\n';
@@ -336,7 +336,7 @@ std::string CsvStats::ToString() const {
     return res.str();
 }
 
-void CsvStats::FitInternal(model::IDatasetStream& data_stream) {
+void DataStats::FitInternal(model::IDatasetStream& data_stream) {
     col_data_ = mo::CreateTypedColumnData(data_stream, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }

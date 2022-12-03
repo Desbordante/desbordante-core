@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/statistics/csv_stats.h"
+#include "algorithms/statistics/data_stats.h"
 
 namespace tests {
 namespace mo = model;
@@ -10,11 +10,11 @@ namespace mo = model;
 // to run tests:
 // ./Desbordante_test --gtest_filter="*TestCsvStats*"
 
-static std::unique_ptr<algos::CsvStats> MakeStatPrimitive(std::string_view dataset,
-                                                          char const separator = ',',
-                                                          bool const has_header = true,
-                                                          bool const is_null_equal_null = true,
-                                                          ushort thread_num = 1) {
+static std::unique_ptr<algos::DataStats> MakeStatPrimitive(std::string_view dataset,
+                                                           char const separator = ',',
+                                                           bool const has_header = true,
+                                                           bool const is_null_equal_null = true,
+                                                           ushort thread_num = 1) {
     algos::StdParamsMap params{
             {algos::config::names::kData,
              std::string{std::filesystem::current_path() / "input_data" / dataset}},
@@ -22,14 +22,14 @@ static std::unique_ptr<algos::CsvStats> MakeStatPrimitive(std::string_view datas
             {algos::config::names::kSeparator, separator},
             {algos::config::names::kEqualNulls, is_null_equal_null},
             {algos::config::names::kThreads, thread_num}};
-    return algos::CreateAndLoadPrimitive<algos::CsvStats>(params);
+    return algos::CreateAndLoadPrimitive<algos::DataStats>(params);
 }
 
 class TestCsvStats : public ::testing::TestCase{};
 
 TEST(TestCsvStats, TestNullEmpties) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     EXPECT_FALSE(stats.GetMin(0).HasValue());
     EXPECT_FALSE(stats.GetMax(0).HasValue());
     EXPECT_FALSE(stats.GetSum(0).HasValue());
@@ -44,7 +44,7 @@ TEST(TestCsvStats, TestNullEmpties) {
 
 TEST(TestCsvStats, TestMinString) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(1);
     auto min = mo::Type::GetValue<mo::String>(min_stat.GetData());
     EXPECT_EQ("a", min);
@@ -52,7 +52,7 @@ TEST(TestCsvStats, TestMinString) {
 
 TEST(TestCsvStats, TestMaxString) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(1);
     auto max = mo::Type::GetValue<mo::String>(max_stat.GetData());
     EXPECT_EQ("abd", max);
@@ -60,7 +60,7 @@ TEST(TestCsvStats, TestMaxString) {
 
 TEST(TestCsvStats, TestMinDouble) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(2);
     auto min = mo::Type::GetValue<mo::Double>(min_stat.GetData());
     EXPECT_DOUBLE_EQ(1.07, min);
@@ -68,7 +68,7 @@ TEST(TestCsvStats, TestMinDouble) {
 
 TEST(TestCsvStats, TestMaxDouble) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(2);
     auto max = mo::Type::GetValue<mo::Double>(max_stat.GetData());
     EXPECT_DOUBLE_EQ(143.9, max);
@@ -76,20 +76,20 @@ TEST(TestCsvStats, TestMaxDouble) {
 
 TEST(TestCsvStats, TestSumDouble) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto sum_stat = stats.GetSum(2);
     EXPECT_DOUBLE_EQ(212.61, mo::Type::GetValue<mo::Double>(sum_stat.GetData()));
 }
 
 TEST(TestCsvStats, NumberOfValues) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(0, stats.NumberOfValues(0));
 }
 
 TEST(TestCsvStats, TestDistinct) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto distinct = stats.Distinct(3);
     EXPECT_EQ(5, distinct);
     EXPECT_EQ(6, stats.Distinct(5)); // mixed column
@@ -97,19 +97,19 @@ TEST(TestCsvStats, TestDistinct) {
 
 TEST(TestCsvStats, TestDistinctStringColumn) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(7, stats.Distinct(6));
 }
 
 TEST(TestCsvStats, TestIsCategorial) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     EXPECT_TRUE(stats.IsCategorical(3, 5));
 }
 
 TEST(TestCsvStats, TestGetQuantiles) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
 
     auto quantile_0_25 = stats.GetQuantile(0.25, 4);
     auto result1 = mo::Type::GetValue<mo::Int>(quantile_0_25.GetData());
@@ -125,7 +125,7 @@ TEST(TestCsvStats, TestGetQuantiles) {
 
 TEST(TestCsvStats, TestGetAvg) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto avg_stat = stats.GetAvg(2);
     auto s = mo::Type::GetValue<mo::Double>(avg_stat.GetData());
     EXPECT_DOUBLE_EQ(s, 53.1525);
@@ -133,7 +133,7 @@ TEST(TestCsvStats, TestGetAvg) {
 
 TEST(TestCsvStats, TestShowSample) {
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
     for(const auto& row : sample) {
         std::stringstream result;
@@ -147,14 +147,14 @@ TEST(TestCsvStats, TestShowSample) {
 TEST(TestCsvStats, TestShowAllStats) {
     // Mixed type statistics will be calculated here.
     auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
     LOG(INFO) << stats.ToString();
 }
 
 TEST(TestCsvStats, TestGetSTD) {
     auto stats_ptr = MakeStatPrimitive("BernoulliRelation.csv");
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto STD_stat = stats.GetCorrectedSTD(1);
     auto s = mo::Type::GetValue<mo::Double>(STD_stat.GetData());
     mo::Double expected = 0.547722557505166113456969782801;
@@ -163,7 +163,7 @@ TEST(TestCsvStats, TestGetSTD) {
 
 TEST(TestCsvStats, TestGetSkewness) {
     auto stats_ptr = MakeStatPrimitive("BernoulliRelation.csv");
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     auto skewness_stat = stats.GetSkewness(1);
     auto s = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
     mo::Double expected = 0.0;
@@ -172,7 +172,7 @@ TEST(TestCsvStats, TestGetSkewness) {
 
 TEST(TestCsvStats, CorrectExecutionEmpty) {
     auto stats_ptr = MakeStatPrimitive("TestEmpty.csv");
-    algos::CsvStats &stats = *stats_ptr;
+    algos::DataStats &stats = *stats_ptr;
     stats.Execute();
     EXPECT_EQ(stats.GetAllStats().size(), 0);
 }

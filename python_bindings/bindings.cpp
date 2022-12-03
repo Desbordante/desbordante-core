@@ -4,7 +4,7 @@
 #include "algorithms/algorithms.h"
 #include "model/ar.h"
 #include "py_ar_algorithm.h"
-#include "py_csv_stats.h"
+#include "py_data_stats.h"
 #include "py_fd_primitive.h"
 #include "py_metric_verifier.h"
 
@@ -58,7 +58,7 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("lhs_indices", &PyFD::GetLhs)
             .def_property_readonly("rhs_index", &PyFD::GetRhs);
 
-    DEFINE_PRIMITIVE_WITH_RES(CsvStats);
+    DEFINE_PRIMITIVE_WITH_RES(DataStats);
     DEFINE_PRIMITIVE_WITH_RES(Apriori);
     DEFINE_PRIMITIVE_WITH_RES(Tane);
     DEFINE_PRIMITIVE_WITH_RES(Pyro);
