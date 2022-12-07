@@ -6,11 +6,12 @@
 #include <thread>
 
 #include <boost/unordered_map.hpp>
+#include <easylogging++.h>
 
-#include "algorithms/algo_factory.h"
 #include "algorithms/cfd/partition_table.h"
 #include "algorithms/cfd/util/set_util.h"
 #include "algorithms/cfd/util/cfd_output_util.h"
+#include "algorithms/options/equal_nulls_opt.h"
 
 namespace algos {
 
@@ -48,7 +49,7 @@ void CFDDiscovery::FitInternal(model::IDatasetStream& data_stream) {
     }
 
     if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty .csv file: FD mining is meaningless.");
+        throw std::runtime_error("Got an empty .csv file: CFD mining is meaningless.");
     }
 }
 
@@ -59,7 +60,7 @@ void CFDDiscovery::RegisterOptions() {
     RegisterOption(TuplesNumberOpt.GetOption(&tuples_number_));
     RegisterOption(ColumnsNumberOpt.GetOption(&columns_number_));
     RegisterOption(MaxLhsSizeOpt.GetOption(&max_lhs_));
-    RegisterOption(AlgoOpt.GetOption(&algo_name_));
+    RegisterOption(AlgoOpt.GetOption(&algo_));
 }
 
 void CFDDiscovery::MakeExecuteOptsAvailable() {
@@ -71,10 +72,10 @@ unsigned long long CFDDiscovery::ExecuteInternal() {
     CheckForIncorrectInput();
     auto start_time = std::chrono::system_clock::now();
 
-    if (algo_name_ == "fd_first_dfs_dfs") {
+    if (algo_ == +CfdAlgo::fd_first_dfs_dfs) {
         FdsFirstDFS(min_supp_, max_cfd_size_, kDfs, min_conf_);
     }
-    else if (algo_name_ == "fd_first_dfs_bfs") {
+    else if (algo_ == +CfdAlgo::fd_first_dfs_bfs) {
         FdsFirstDFS(min_supp_, max_cfd_size_, kBfs, min_conf_);
     }
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -85,34 +86,34 @@ unsigned long long CFDDiscovery::ExecuteInternal() {
     return apriori_millis;
 }
 
-void CFDDiscovery::CheckForIncorrectInput() {
+void CFDDiscovery::CheckForIncorrectInput() const {
     if (min_supp_ < 1) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Support value: \"" + std::to_string(min_supp_)
-                + "\"" + " is less than 1");
+                "[ERROR] Illegal Support value: \"" + std::to_string(min_supp_) +
+                "\"" + " is less than 1");
     }
 
     if (min_conf_ < 0 || min_conf_ > 1) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Confidence value: \"" + std::to_string(min_conf_)
-                + "\"" + " not in [0,1]");
+                "[ERROR] Illegal Confidence value: \"" + std::to_string(min_conf_) +
+                "\"" + " not in [0,1]");
     }
 
     if (max_cfd_size_ < 2) {
         throw std::invalid_argument(
-                "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_)
-                + "\"" + " is less than 1");
+                "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_) +
+                "\"" + " is less than 1");
     }
 
     if (columns_number_ != 0 && tuples_number_ == 0) {
         throw std::invalid_argument(
-                "[ERROR] Illegal columns_number and tuples_number values: columns_number is "
-                + std::to_string(columns_number_) + " while tuples_number is 0");
+                "[ERROR] Illegal columns_number and tuples_number values: columns_number is " +
+                std::to_string(columns_number_) + " while tuples_number is 0");
     }
     if (tuples_number_ != 0 && columns_number_ == 0) {
         throw std::invalid_argument(
-                "[ERROR] Illegal columns_number and tuples_number values: tuples_number is "
-                + std::to_string(tuples_number_) + " while columnes_number is 0");
+                "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
+                std::to_string(tuples_number_) + " while columnes_number is 0");
     }
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
         throw std::invalid_argument(

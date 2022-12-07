@@ -22,7 +22,6 @@ boost::program_options::options_description InfoOptions() {
             ;
     return info_options;
 }
-}  // namespace
 
 int main(int argc, char const* argv[]) {
     namespace po = boost::program_options;

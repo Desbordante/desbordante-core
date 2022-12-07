@@ -5,6 +5,7 @@
 
 #include "algorithms/enums.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/cfd/enums.h"
 
 namespace algos {
 
@@ -62,9 +63,6 @@ constexpr auto kDRatio = "ratio between the number of deviating values in a clus
 constexpr auto kDPreciseAlgorithm = "Algorithm that gives exact FDs for typo miner to compare "
                                     "against approximate FDs";
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
-<<<<<<< HEAD
-}  // namespace algos::config::descriptions
-=======
 constexpr auto kDCfdMinimumSupport = "minimum support value (integer number "
         "between 1 and number of tuples in dataset)";
 constexpr auto kDCfdColumnsNumber = "Number of columns in the part of the dataset if you "
@@ -73,6 +71,7 @@ constexpr auto kDCfdTuplesNumber = "Number of tuples in the part of the dataset 
         "want to use algo not on the full dataset, but on its part";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
-constexpr auto kDCfdAlgo = "cfd algorithm";
-}
->>>>>>> 477ac12 (Add fd-first-DFS-dfs cfd algorithm implementation and tests)
+const std::string _kDCfdAlgo = "CFD algorithm to use\n" +
+                                       EnumToAvailableValues<algos::CfdAlgo>();
+const auto kDCfdAlgo = _kDCfdAlgo.c_str();
+} // namespace algos::config::descriptions

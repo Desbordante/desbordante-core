@@ -17,6 +17,7 @@
 #include "algorithms/cfd/generator_store.h"
 #include "algorithms/cfd/miner_node.h"
 #include "algorithms/cfd/partition_table.h"
+#include "algorithms/cfd/enums.h"
 
 
 namespace algos {
@@ -35,7 +36,7 @@ private:
     unsigned columns_number_;
     unsigned tuples_number_;
     bool is_null_equal_null_;
-    std::string algo_name_;
+    CfdAlgo algo_ = CfdAlgo::_values()[0];
 
     std::map<Itemset,PartitionTidList> store_;
     PrefixTree<Itemset, Itemset> cand_store_;
@@ -56,12 +57,12 @@ protected:
     static const config::OptionType<decltype(tuples_number_)> TuplesNumberOpt;
     static const config::OptionType<decltype(min_conf_)> MinConfidenceOpt;
     static const config::OptionType<decltype(max_lhs_)> MaxLhsSizeOpt;
-    static const config::OptionType<std::string> AlgoOpt;
+    static const config::OptionType<decltype(algo_)> AlgoOpt;
 
     unsigned long long ExecuteInternal() final;
     void MakeExecuteOptsAvailable() final;
     void RegisterOptions();
-    void CheckForIncorrectInput();
+    void CheckForIncorrectInput() const;
 
 public:
     constexpr static std::string_view kDefaultPhaseName = "CFD mining";

@@ -7,6 +7,7 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/options/names.h"
 #include "algorithms/cfd/cfd_discovery.h"
+#include "algorithms/cfd/enums.h"
 #include "datasets.h"
 #include "gtest/gtest.h"
 
@@ -30,7 +31,7 @@ class CFDAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::CFDDiscovery> CreateAlgorithmInstance(
             unsigned minsup, double minconf, std::string const& path,
-            std::string algo_choice, unsigned int max_lhs,
+            char const* algo_choice, unsigned int max_lhs,
             unsigned columns_number = 0, unsigned tuples_number = 0,
             char separator = ',', bool hasHeader = true) {
         using namespace algos::config::names;
@@ -42,7 +43,7 @@ protected:
                 {kCfdMinimumSupport, minsup},
                 {kCfdMinimumConfidence, minconf},
                 {kCfdMaximumLhs, max_lhs},
-                {kCfdAlgo, algo_choice},
+                {kCfdAlgo, algos::CfdAlgo::_from_string(algo_choice)},
                 {kCfdTuplesNumber, tuples_number},
                 {kCfdColumnsNumber, columns_number}};
         return algos::CreateAndLoadPrimitive<algos::CFDDiscovery>(params);
