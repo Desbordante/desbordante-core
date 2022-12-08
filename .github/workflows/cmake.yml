@@ -23,7 +23,7 @@ jobs:
       id: cache-boost
       with:
         path: ${{github.workspace}}/lib/boost
-        key: ${{ runner.os }}-boost
+        key: ${{ runner.os }}-boost-78
     - name: Cache googletest
       uses: actions/cache@v3
       id: cache-googletest
@@ -75,9 +75,9 @@ jobs:
       if: steps.cache-datasets.outputs.cache-hit != 'true'
     - name: Install Boost
       run: |
-        wget -O boost_1_72_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.72.0/boost_1_72_0.tar.gz/download
-        tar xzvf boost_1_72_0.tar.gz
-        cd boost_1_72_0
+        wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
+        tar xzvf boost_1_78_0.tar.gz
+        cd boost_1_78_0
         ./bootstrap.sh --prefix=${{github.workspace}}/lib/boost
         ./b2
         sudo ./b2 install
