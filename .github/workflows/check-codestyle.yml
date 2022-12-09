@@ -81,7 +81,7 @@ jobs:
         mkdir -p lib
         sudo chown -R $USER lib
         cd lib
-        git clone https://github.com/google/googletest/ --branch release-1.10.0
+        git clone https://github.com/google/googletest/ --branch release-1.12.1
       if: steps.cache-googletest.outputs.cache-hit != 'true'
     - name: Download easyloggingpp
       run: |
