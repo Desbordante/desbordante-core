@@ -154,7 +154,7 @@ George Chernishev   &mdash; product owner, consult, papers
 
 # Cite
 
-If you use this software for research, please cite the paper (https://fruct.org/publications/fruct29/files/Strut.pdf, https://ieeexplore.ieee.org/document/9435469) as follows:
+If you use this software for research, please cite the paper (https://fruct.org/publications/volume-29/fruct29/files/Strut.pdf, https://ieeexplore.ieee.org/document/9435469) as follows:
 
 M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354, doi: 10.23919/FRUCT52173.2021.9435469.
 
