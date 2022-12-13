@@ -3,6 +3,15 @@
 <img src="./images/desbordante-preview.png"/>
 </p>
 
+---
+# FOR EDBT REVIEWERS
+
+If you are coming from our EDBT Industrial submission, please check out the `edbt` branch to access the following features, which are not merged into main yet:
+- Discovery of association rules using ECLAT and FP-Growth algorithms adapted from Christian Borgelt’s implementations
+- Discovery of conditional functional dependencies using the CTANE algorithm and its variations
+
+---
+
 # About
 
 Desbordante is a high-performance data profiler that is capable of discovering many different patterns in data using various algorithms. The currently supported data patterns are:
