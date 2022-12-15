@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(Desbordante)
 
+option(ENABLE_PYBIND_COMPILE "Build the python bindings" ON)
+option(ENABLE_TESTS_COMPILE "Build tests and unpack datasets" ON)
+
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
@@ -42,7 +45,6 @@ include_directories(
     "src/util"
     "src/parser"
     "src/parser/json"
-    "src/tests"
     "src/core"
     "src/caching"
     "src/logging"
@@ -52,8 +54,12 @@ include_directories(
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
 
 # adding submodules
-add_subdirectory("lib/googletest")
-add_subdirectory("lib/pybind11")
+if (ENABLE_TESTS_COMPILE)
+    add_subdirectory("lib/googletest")
+endif()
+if (ENABLE_PYBIND_COMPILE)
+    add_subdirectory("lib/pybind11")
+endif()
 
 set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )
 set( CMAKE_BUILD_TYPE "Release" )
@@ -62,9 +68,13 @@ add_subdirectory("lib/easyloggingpp")
 set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
 
 add_subdirectory("src")
-add_subdirectory("tests")
 
-add_subdirectory("datasets")
+if (ENABLE_TESTS_COMPILE)
+    add_subdirectory("tests")
+    add_subdirectory("datasets")
+endif()
 add_subdirectory("cfg")
 
-add_subdirectory("python_bindings")
+if (ENABLE_PYBIND_COMPILE)
+    add_subdirectory("python_bindings")
+endif()
