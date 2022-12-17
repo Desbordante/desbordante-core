@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <filesystem>
 #include <functional>
@@ -104,6 +105,7 @@ public:
     }
 
     std::vector<std::vector<Highlight>> const& GetHighlights() const {
+        assert(highlight_calculator_);
         return highlight_calculator_->GetHighlights();
     }
 
@@ -112,21 +114,27 @@ public:
     }
 
     void SortHighlightsByDistanceAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByDistanceAscending();
     }
     void SortHighlightsByDistanceDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByDistanceDescending();
     }
     void SortHighlightsByFurthestIndexAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByFurthestIndexAscending();
     }
     void SortHighlightsByFurthestIndexDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByFurthestIndexDescending();
     }
     void SortHighlightsByIndexAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByIndexAscending();
     }
     void SortHighlightsByIndexDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByIndexDescending();
     }
 

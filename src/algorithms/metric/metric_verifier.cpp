@@ -175,7 +175,6 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
                                                             typed_relation_, rhs_indices_);
     highlight_calculator_ = std::make_unique<HighlightCalculator>(typed_relation_, rhs_indices_);
-    assert(points_calculator_.get() != nullptr || highlight_calculator_.get() != nullptr);
 
     VerifyMetricFD();
 
