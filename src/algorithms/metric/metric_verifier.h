@@ -54,6 +54,9 @@ private:
             model::StringType const& type,
             std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
 
+    bool IsGreaterThanParameter(long double value) const;
+    bool IsLessOrEqualThanParameter(long double value) const;
+
     bool CheckMFDFailIfHasNulls(bool has_nulls) const {
         return dist_from_null_is_infinity_ && has_nulls;
     }
