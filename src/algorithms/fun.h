@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "custom/custom_hashes.h"
 
