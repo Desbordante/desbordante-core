@@ -2,8 +2,8 @@
 
 #include <set>
 
-#include "ordered_partition.h"
 #include "column_layout_relation_data.h"
+#include "ordered_partition.h"
 #include "relational_schema.h"
 
 ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
