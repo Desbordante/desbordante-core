@@ -1,5 +1,7 @@
 #include "column_order.h"
 
+#include <set>
+
 #include "ordered_partition.h"
 #include "column_layout_relation_data.h"
 #include "relational_schema.h"
