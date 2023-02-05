@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <set>
 
 #include <boost/thread/mutex.hpp>
 
