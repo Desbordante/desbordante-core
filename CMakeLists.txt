@@ -1,13 +1,20 @@
 cmake_minimum_required(VERSION 3.10)
 project(Desbordante)
 
-option(ENABLE_PYBIND_COMPILE "Build the python bindings" ON)
-option(ENABLE_TESTS_COMPILE "Build tests and unpack datasets" ON)
+option(COMPILE_PYBIND "Build the python bindings" OFF)
+option(COMPILE_TESTS "Build tests" ON)
+option(UNPACK_DATASETS "Unpack datasets" ON)
+option(ASAN "Enable sanitizer" ON)
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
+
+if (ASAN AND COMPILE_PYBIND)
+    message(WARNING "Disabling ASAN with python bindings")
+    set(ASAN OFF)
+endif()
 
 # compiler and platform-dependent settings
 set(CMAKE_CXX_STANDARD 17)
@@ -20,8 +27,11 @@ if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  "${CMAKE_BINARY_DIR}/target")
 else()
     # -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-    add_compile_options("$<$<CONFIG:Debug>:-O0;-DELPP_THREAD_SAFE;-g;-Wall;-Wextra;-Werror;-fno-omit-frame-pointer;-fsanitize=address>")
-    add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+    add_compile_options("$<$<CONFIG:Debug>:-O0;-DELPP_THREAD_SAFE;-g;-Wall;-Wextra;-Werror;-fno-omit-frame-pointer>")
+    if (ASAN)
+        add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+        add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+    endif()
     add_compile_options("$<$<CONFIG:Release>:-O3;-DELPP_THREAD_SAFE>")
 endif()
 
@@ -54,10 +64,10 @@ include_directories(
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
 
 # adding submodules
-if (ENABLE_TESTS_COMPILE)
+if (COMPILE_TESTS)
     add_subdirectory("lib/googletest")
 endif()
-if (ENABLE_PYBIND_COMPILE)
+if (COMPILE_PYBIND)
     add_subdirectory("lib/pybind11")
 endif()
 
@@ -69,12 +79,14 @@ set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
 
 add_subdirectory("src")
 
-if (ENABLE_TESTS_COMPILE)
+if (COMPILE_TESTS)
     add_subdirectory("tests")
+endif()
+if (UNPACK_DATASETS)
     add_subdirectory("datasets")
 endif()
 add_subdirectory("cfg")
 
-if (ENABLE_PYBIND_COMPILE)
+if (COMPILE_PYBIND)
     add_subdirectory("python_bindings")
 endif()
