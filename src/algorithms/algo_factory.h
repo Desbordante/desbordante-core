@@ -44,8 +44,7 @@ ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
     namespace onam = config::names;
     ACAlgorithm::Config c;
 
-    c.data = std::filesystem::current_path() / "input_data" /
-             ExtractOptionValue<std::string>(params, onam::kData);
+    c.data = ExtractOptionValue<std::filesystem::path>(params, onam::kData);
     c.separator = ExtractOptionValue<char>(params, onam::kSeparator);
     c.has_header = ExtractOptionValue<bool>(params, onam::kHasHeader);
     c.bin_operation = ExtractOptionValue<char>(params, onam::kBinaryOperation);
@@ -100,7 +99,7 @@ template <typename OptionMap>
 void LoadPrimitive(Primitive& prim, OptionMap&& options) {
     ConfigureFromMap(prim, options);
     auto parser = CSVParser{
-            details::ExtractOptionValue<std::string>(options, config::names::kData),
+            details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
             details::ExtractOptionValue<char>(options, config::names::kSeparator),
             details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
     prim.Fit(parser);

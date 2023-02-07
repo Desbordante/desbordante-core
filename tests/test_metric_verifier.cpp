@@ -33,8 +33,8 @@ struct MetricVerifyingParams {
         : params({{onam::kParameter,                min_parameter},
                   {onam::kLhsIndices,               std::move(lhs_indices)},
                   {onam::kRhsIndices,               std::move(rhs_indices)},
-                  {onam::kData,                     std::string{std::filesystem::current_path() /
-                                                                "input_data" / dataset}},
+                  {onam::kData,
+                   std::filesystem::current_path() / "input_data" / dataset},
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},
@@ -62,8 +62,8 @@ struct HighlightTestParams {
         : params({{onam::kParameter,                (long double)0},
                   {onam::kLhsIndices,               std::move(lhs_indices)},
                   {onam::kRhsIndices,               std::move(rhs_indices)},
-                  {onam::kData,                     std::string{std::filesystem::current_path() /
-                                                                "input_data" / dataset}},
+                  {onam::kData,
+                   std::filesystem::current_path() / "input_data" / dataset},
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},

@@ -18,8 +18,7 @@ struct TestingParam {
     TestingParam(std::string const& dataset,
                  char const separator, bool const has_header, bool const is_null_equal_null,
                  unsigned const max_lhs, double const error, ushort const threads)
-        : params({{onam::kData,       std::string{std::filesystem::current_path() / "input_data" /
-                                                  dataset}},
+        : params({{onam::kData,       std::filesystem::current_path() / "input_data" / dataset},
                   {onam::kSeparator,  separator},
                   {onam::kHasHeader,  has_header},
                   {onam::kEqualNulls, is_null_equal_null},

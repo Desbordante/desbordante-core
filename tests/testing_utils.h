@@ -19,12 +19,13 @@ protected:
     }
 
     std::unique_ptr<algos::FDAlgorithm> CreateAndConfToFit() {
+        namespace onam = algos::config::names;
         std::unique_ptr<algos::FDAlgorithm> prim = std::make_unique<T>();
         algos::ConfigureFromMap(*prim, algos::StdParamsMap{});
         return prim;
     }
 
-    algos::StdParamsMap GetParamMap(std::string const& path, char separator = ',',
+    algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator = ',',
                                     bool has_header = true) {
         using namespace algos::config::names;
         return {
@@ -37,7 +38,7 @@ protected:
     }
 
     std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(
-            std::string const& path, char separator = ',', bool has_header = true) {
+            const std::filesystem::path& path, char separator = ',', bool has_header = true) {
         return algos::CreateAndLoadPrimitive<T>(GetParamMap(path, separator, has_header));
     }
 };
