@@ -1,8 +1,9 @@
 #pragma once
 
-#include <string>
 #include <sstream>
+#include <string>
 
+#include "algorithms/enums.h"
 #include "algorithms/metric/enums.h"
 
 namespace algos {
@@ -17,7 +18,7 @@ static std::string EnumToAvailableValues() {
         avail_values << name << '|';
     }
 
-    avail_values.seekp(-1, avail_values.cur);
+    avail_values.seekp(-1, std::stringstream::cur);
     avail_values << ']';
 
     return avail_values.str();
@@ -60,4 +61,4 @@ constexpr auto kDRatio = "ratio between the number of deviating values in a clus
 constexpr auto kDPreciseAlgorithm = "Algorithm that gives exact FDs for typo miner to compare "
                                     "against approximate FDs";
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
-}
+}  // namespace algos::config::descriptions

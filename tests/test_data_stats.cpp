@@ -19,7 +19,7 @@ static algos::StdParamsMap GetParamMap(std::string_view dataset, char const sepa
     using namespace algos::config::names;
     auto const path = std::filesystem::current_path() / "input_data" / dataset;
 
-    return {{kData, std::string{path}},
+    return {{kData, path},
             {kHasHeader, has_header},
             {kSeparator, separator},
             {kEqualNulls, is_null_equal_null},
