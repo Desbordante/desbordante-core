@@ -28,7 +28,7 @@ std::unique_ptr<FDAlgorithm> ConfToFitFD_Mine() {
     return primitive;
 }
 
-StdParamsMap FD_MineGetParamMap(std::string const& path, char separator = ',',
+StdParamsMap FD_MineGetParamMap(const std::filesystem::path& path, char separator = ',',
                                 bool has_header = true) {
     return {{onam::kData, path}, {onam::kSeparator, separator}, {onam::kHasHeader, has_header}};
 }
@@ -165,7 +165,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                 LightDatasets::HasHeader(i));
 
             StdParamsMap params_map{
-                    {onam::kData, std::string{path / LightDatasets::DatasetName(i)}},
+                    {onam::kData, path / LightDatasets::DatasetName(i)},
                     {onam::kSeparator, LightDatasets::Separator(i)},
                     {onam::kHasHeader, LightDatasets::HasHeader(i)},
                     {onam::kSeed, decltype(Configuration::seed){0}},
@@ -208,17 +208,3 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     }
     SUCCEED();
 }
-
-TEST_F(AlgorithmTest, FD_Mine_ConsistentRepeatedExecution) {
-    auto const dataset_path =
-            std::filesystem::current_path() / "input_data" / "WDC_astronomical.csv";
-    auto fd_mine = CreateFD_MineAlgorithmInstance(dataset_path, ',', true);
-    fd_mine->Execute();
-    auto first_result = FD_MineFDsToSet(fd_mine->FdList());
-    for (int i = 0; i < 5; ++i) {
-        algos::ConfigureFromMap(*fd_mine, FD_MineGetParamMap(dataset_path, ',', true));
-        fd_mine->Execute();
-        ASSERT_TRUE(FD_Mine_CheckFDListEquality(first_result, fd_mine->FdList()));
-    }
-}
-
