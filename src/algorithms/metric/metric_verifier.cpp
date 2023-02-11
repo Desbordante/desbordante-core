@@ -12,14 +12,6 @@
 
 namespace algos::metric {
 
-void TransformIndices(std::vector<unsigned int>& value) {
-    if (value.empty()) {
-        throw std::invalid_argument("Indices cannot be empty");
-    }
-    std::sort(value.begin(), value.end());
-    value.erase(std::unique(value.begin(), value.end()), value.end());
-}
-
 decltype(MetricVerifier::DistFromNullIsInfinityOpt) MetricVerifier::DistFromNullIsInfinityOpt{
         {config::names::kDistFromNullIsInfinity, config::descriptions::kDDistFromNullIsInfinity},
         false
@@ -29,14 +21,6 @@ decltype(MetricVerifier::ParameterOpt) MetricVerifier::ParameterOpt{
         {config::names::kParameter, config::descriptions::kDParameter}, {}, [](auto value) {
             if (value < 0) throw std::invalid_argument("Parameter out of range");
         }
-};
-
-decltype(MetricVerifier::LhsIndicesOpt) MetricVerifier::LhsIndicesOpt{
-        {config::names::kLhsIndices, config::descriptions::kDLhsIndices}, {}, TransformIndices
-};
-
-decltype(MetricVerifier::RhsIndicesOpt) MetricVerifier::RhsIndicesOpt{
-        {config::names::kRhsIndices, config::descriptions::kDRhsIndices}, {}, TransformIndices
 };
 
 decltype(MetricVerifier::MetricOpt) MetricVerifier::MetricOpt{
@@ -59,17 +43,8 @@ MetricVerifier::MetricVerifier() : Primitive({}) {
     MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
 }
 
-void MetricVerifier::ValidateIndices(decltype(MetricVerifier::lhs_indices_) const& value) const {
-    size_t cols_count = relation_->GetSchema()->GetNumColumns();
-    auto value_out_of_range = [cols_count](unsigned int i) { return i >= cols_count; };
-    if (std::any_of(value.begin(), value.end(), value_out_of_range)) {
-        throw std::runtime_error(
-                "Column index should be less than the number of columns in the dataset.");
-    }
-}
-
-void MetricVerifier::ValidateRhs(decltype(MetricVerifier::rhs_indices_) const& value) {
-    ValidateIndices(value);
+void MetricVerifier::ValidateRhs(config::IndicesType const& value) {
+    config::ValidateIndices(value, relation_->GetSchema()->GetNumColumns());
     if (value.size() == 1) {
         auto column_index = value[0];
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
@@ -119,12 +94,14 @@ void MetricVerifier::ValidateRhs(decltype(MetricVerifier::rhs_indices_) const& v
 }
 
 void MetricVerifier::RegisterOptions() {
-    auto check_lhs = [this](auto value) { ValidateIndices(value); };
+    auto check_lhs = [this](auto value) {
+        config::ValidateIndices(value, relation_->GetSchema()->GetNumColumns());
+    };
     auto check_rhs = [this](auto value) { ValidateRhs(value); };
     auto need_algo_and_q = [this](...) {
         return metric_ == +Metric::cosine;
     };
-    auto need_algo_only = [this](decltype(MetricVerifier::rhs_indices_) const& value) {
+    auto need_algo_only = [this](config::IndicesType const& value) {
         assert(metric_ == +Metric::levenshtein || metric_ == +Metric::euclidean);
         return metric_ == +Metric::levenshtein || value.size() != 1;
     };
@@ -140,11 +117,12 @@ void MetricVerifier::RegisterOptions() {
     RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
     RegisterOption(DistFromNullIsInfinityOpt.GetOption(&dist_from_null_is_infinity_));
     RegisterOption(ParameterOpt.GetOption(&parameter_));
-    RegisterOption(LhsIndicesOpt.GetOption(&lhs_indices_).SetInstanceCheck(check_lhs));
+    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetInstanceCheck(check_lhs));
     RegisterOption(MetricOpt.GetOption(&metric_).SetConditionalOpts(
-            GetOptAvailFunc(), {{{}, config::GetOptionNames(RhsIndicesOpt)}}));
+            GetOptAvailFunc(), {{{}, config::GetOptionNames(config::RhsIndicesOpt)}}));
     RegisterOption(
-            RhsIndicesOpt.GetOption(&rhs_indices_).SetInstanceCheck(check_rhs)
+            config::RhsIndicesOpt.GetOption(&rhs_indices_)
+                    .SetInstanceCheck(check_rhs)
                     .SetConditionalOpts(
                             GetOptAvailFunc(),
                             {{need_algo_and_q, config::GetOptionNames(AlgoOpt, QGramLengthOpt)},
@@ -156,7 +134,7 @@ void MetricVerifier::RegisterOptions() {
 
 void MetricVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(DistFromNullIsInfinityOpt, ParameterOpt,
-                                                LhsIndicesOpt, MetricOpt));
+                                                config::LhsIndicesOpt, MetricOpt));
 }
 
 void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
@@ -198,7 +176,7 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-std::string MetricVerifier::GetStringValue(std::vector<unsigned> const& index_vec,
+std::string MetricVerifier::GetStringValue(config::IndicesType const& index_vec,
                                            ClusterIndex row_index) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(index_vec[0]);
     if (col.IsNull(row_index)) {
