@@ -18,6 +18,7 @@ constexpr auto kFirstColumnTId = "has_tid";
 constexpr auto kMetric = "metric";
 constexpr auto kLhsIndices = "lhs_indices";
 constexpr auto kRhsIndices = "rhs_indices";
+constexpr auto kRhsIndex = "rhs_index";
 constexpr auto kParameter = "parameter";
 constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
 constexpr auto kQGramLength = "q";

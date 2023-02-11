@@ -45,8 +45,9 @@ constexpr auto kDFirstColumnTId = "indicates that the first column contains the 
 const std::string _kDMetric = "metric to use\n" +
                               EnumToAvailableValues<algos::metric::Metric>();
 const auto kDMetric = _kDMetric.c_str();
-constexpr auto kDLhsIndices = "LHS column indices for metric FD verification";
-constexpr auto kDRhsIndices = "RHS column indices for metric FD verification";
+constexpr auto kDLhsIndices = "LHS column indices";
+constexpr auto kDRhsIndices = "RHS column indices";
+constexpr auto kDRhsIndex = "RHS column index";
 constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDDistFromNullIsInfinity = "specify whether distance from NULL value is infinity "
                                           "(if not, it is 0)";
