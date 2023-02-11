@@ -15,6 +15,7 @@
 #include "algorithms/metric/points.h"
 #include "algorithms/metric/points_calculator.h"
 #include "algorithms/options/equal_nulls_opt.h"
+#include "algorithms/options/indices_opt.h"
 #include "algorithms/primitive.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
@@ -27,8 +28,8 @@ class MetricVerifier : public algos::Primitive {
 private:
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
-    std::vector<unsigned int> lhs_indices_;
-    std::vector<unsigned int> rhs_indices_;
+    config::IndicesType lhs_indices_;
+    config::IndicesType rhs_indices_;
     long double parameter_;
     unsigned int q_;
     bool dist_from_null_is_infinity_;
@@ -39,8 +40,6 @@ private:
     static const config::OptionType<decltype(dist_from_null_is_infinity_)>
             DistFromNullIsInfinityOpt;
     static const config::OptionType<decltype(parameter_)> ParameterOpt;
-    static const config::OptionType<decltype(lhs_indices_)> LhsIndicesOpt;
-    static const config::OptionType<decltype(rhs_indices_)> RhsIndicesOpt;
     static const config::OptionType<decltype(metric_)> MetricOpt;
     static const config::OptionType<decltype(algo_)> AlgoOpt;
     static const config::OptionType<decltype(q_)> QGramLengthOpt;
@@ -80,14 +79,9 @@ private:
     ClusterFunction GetClusterFunctionForOneDimension();
     ClusterFunction GetClusterFunction();
     void VerifyMetricFD();
-    std::string GetStringValue(std::vector<unsigned> const& index_vec,
-                               ClusterIndex row_index) const;
+    std::string GetStringValue(config::IndicesType const& index_vec, ClusterIndex row_index) const;
     void VisualizeHighlights() const;
-    static_assert(std::is_same<decltype(MetricVerifier::lhs_indices_),
-                               decltype(MetricVerifier::rhs_indices_)>{},
-                  "Types of indices must be the same");
-    void ValidateIndices(decltype(MetricVerifier::lhs_indices_) const& indices) const;
-    void ValidateRhs(decltype(MetricVerifier::rhs_indices_) const& indices);
+    void ValidateRhs(config::IndicesType const& indices);
     void RegisterOptions();
 
     void ResetState() final;
