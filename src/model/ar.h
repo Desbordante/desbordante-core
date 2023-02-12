@@ -1,5 +1,7 @@
 #pragma once
 
+#include <list>
+
 #include "itemset.h"
 #include "transactional_data.h"
 
