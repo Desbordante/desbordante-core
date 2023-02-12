@@ -40,7 +40,6 @@ private:
     void ResetStateFd() final {}
     unsigned long long ExecuteInternal() override;
 
-    std::tuple<PLIs, Columns, std::vector<size_t>> Preprocess();
     void RegisterFDs(std::vector<RawFD>&& fds, std::vector<size_t> const& og_mapping);
 
 public:
