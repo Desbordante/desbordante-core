@@ -22,12 +22,12 @@ void FDAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
 }
 
 void FDAlgorithm::ResetState() {
-    fd_collection_.clear();
+    fd_collection_.Clear();
     ResetStateFd();
 }
 
 std::string FDAlgorithm::GetJsonFDs() const {
-    return FDsToJson(fd_collection_);
+    return FDsToJson(FdList());
 }
 
 unsigned int FDAlgorithm::Fletcher16() {
@@ -50,7 +50,7 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     std::map<Column const*, size_t> fds_count_per_col;
     unsigned int cols_of_equal_values = 0;
 
-    for (FD const& fd : fd_collection_) {
+    for (FD const& fd : FdList()) {
         Vertical const& lhs = fd.GetLhs();
 
         if (lhs.GetArity() == 0) {

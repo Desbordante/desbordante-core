@@ -46,7 +46,7 @@ unsigned long long Depminer::ExecuteInternal() {
     const auto lhs_elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now() - lhs_time);
     LOG(INFO) << "> LHS FIND TIME: " << lhs_elapsed_milliseconds.count();
-    LOG(INFO) << "> FD COUNT: " << this->fd_collection_.size();
+    LOG(INFO) << "> FD COUNT: " << this->fd_collection_.Size();
     const auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();

@@ -9,6 +9,7 @@
 #include "algorithms/primitive.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/fd.h"
+#include "util/primitive_collection.h"
 
 namespace util {
 class AgreeSetFactory;
@@ -23,8 +24,6 @@ class FDAlgorithm : public algos::Primitive {
 private:
     friend util::AgreeSetFactory;
 
-    std::mutex mutable register_mutex_;
-
     void RegisterOptions();
 
     void ResetState() final;
@@ -32,11 +31,22 @@ private:
 
 protected:
     size_t number_of_columns_;
-    /* содержит множество найденных функциональных зависимостей. Это поле будет использоваться при
-     * тестировании, поэтому важно положить сюда все намайненные ФЗ
-     * */
-    std::list<FD> fd_collection_;
+    /* Collection of all discovered FDs
+     * Every FD mining algorithm should place discovered dependecies here. Don't add new FDs by
+     * accessing this field directly, use RegisterFd methods instead
+     */
+    util::PrimitiveCollection<FD> fd_collection_;
     bool is_null_equal_null_;
+
+    /* Registers new FD.
+     * Should be overrided if custom behavior is needed
+     */
+    virtual void RegisterFd(Vertical lhs, Column rhs) {
+        fd_collection_.Register(std::move(lhs), std::move(rhs));
+    }
+    virtual void RegisterFd(FD fd_to_register) {
+        fd_collection_.Register(std::move(fd_to_register));
+    }
 
     void FitInternal(model::IDatasetStream &data_stream) final;
     virtual void FitFd(model::IDatasetStream &data_stream) = 0;
@@ -46,24 +56,12 @@ public:
 
     explicit FDAlgorithm(std::vector<std::string_view> phase_names);
 
-    /* эти методы кладут зависимость в хранилище - можно пользоваться ими напрямую или
-     * override-нуть, если нужно какое-то кастомное поведение
-     * */
-    virtual void RegisterFd(Vertical lhs, Column rhs) {
-        std::scoped_lock lock(register_mutex_);
-        fd_collection_.emplace_back(std::move(lhs), std::move(rhs));
-    }
-    virtual void RegisterFd(FD fd_to_register) {
-        std::scoped_lock lock(register_mutex_);
-        fd_collection_.push_back(std::move(fd_to_register));
-    }
-
-    /* fd_collection_ getter and setter */
+    /* Returns the list of discovered FDs */
     std::list<FD> const& FdList() const noexcept {
-        return fd_collection_;
+        return fd_collection_.AsList();
     }
     std::list<FD>& FdList() noexcept {
-        return fd_collection_;
+        return fd_collection_.AsList();
     }
 
     /* возвращает набор ФЗ в виде JSON-а. По сути, это просто представление фиксированного формата
