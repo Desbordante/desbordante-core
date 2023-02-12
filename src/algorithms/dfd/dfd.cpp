@@ -83,7 +83,7 @@ unsigned long long DFD::ExecuteInternal() {
         std::chrono::system_clock::now() - start_time);
     long long apriori_millis = elapsed_milliseconds.count();
 
-    LOG(INFO) << "> FD COUNT: " << fd_collection_.size();
+    LOG(INFO) << "> FD COUNT: " << fd_collection_.Size();
     LOG(INFO) << "> HASH: " << PliBasedFDAlgorithm::Fletcher16();
 
     return apriori_millis;
