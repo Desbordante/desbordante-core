@@ -9,12 +9,9 @@ Usage: ./build.sh [-h|--help] [-p|--pybind] [-t|--tests] [-u|--unpack] [-jN|--jo
   -n,         --no-tests              Don't build tests
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --jobs[=N]              Allow N jobs at once (default [=1])
-  -b[=type],  --build_type[=type]     Set build type (Release or Debug, default [=Release])
+  -d,         --debug                 Set debug build type
 EOF
 }
-
-# Set default option values
-BUILD_TYPE="Release"
 
 for i in "$@"
     do
@@ -31,8 +28,8 @@ for i in "$@"
         -j*|--jobs=*) # Allow N jobs at once
             JOBS_OPTION=$i
             ;;
-        -b=*|--build_type=*) # Set build type
-            BUILD_TYPE="${i#*=}"
+        -d|--debug) # Set debug build type
+            DEBUG_MODE=true
             ;;
         -h|--help|*) # Display help.
             print_help
@@ -70,9 +67,13 @@ if [[ $PYBIND == true ]]; then
   PREFIX="$PREFIX -D COMPILE_PYBIND=ON"
 fi
 
+if [[ $DEBUG_MODE != true ]]; then
+  PREFIX="$PREFIX -D CMAKE_BUILD_TYPE=Release"
+fi
+
 cd ..
 mkdir -p build
 cd build
 rm CMakeCache.txt
-cmake $PREFIX .. "-DCMAKE_BUILD_TYPE=$BUILD_TYPE"
+cmake $PREFIX ..
 make $JOBS_OPTION
