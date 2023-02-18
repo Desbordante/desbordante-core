@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <mutex>
 #include <optional>
 #include <string_view>
 #include <typeindex>
@@ -17,15 +16,13 @@
 #include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
+#include "util/progress.h"
 
 namespace algos {
 
 class Primitive {
 private:
-    std::mutex mutable progress_mutex_;
-    double cur_phase_progress_ = 0;
-    uint8_t cur_phase_id_ = 0;
-
+    util::Progress progress_;
     // All options the algorithm may use
     std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_{};
     // All options that can be set at the moment
@@ -44,27 +41,23 @@ private:
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
-
-    void ResetProgress() noexcept;
-
     virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
-    /* Vector of names of algorithm phases, should be initialized in a constructor
-     * if algorithm has more than one phase. This vector is used to determine the
-     * total number of phases.
-     * Use empty vector to intialize this field if your algorithm does not have
-     * implemented progress bar.
-     */
-    std::vector<std::string_view> const phase_names_;
+    void AddProgress(double val) noexcept {
+        progress_.AddProgress(val);
+    }
+    void SetProgress(double val) noexcept {
+        progress_.SetProgress(val);
+    }
+    void ToNextProgressPhase() noexcept {
+        progress_.ToNextProgressPhase();
+    }
 
-    void AddProgress(double const val) noexcept;
-    void SetProgress(double const val) noexcept;
-    void ToNextProgressPhase() noexcept;
     void MakeOptionsAvailable(std::vector<std::string_view> const& option_names);
 
-    template<typename T>
+    template <typename T>
     void RegisterOption(config::Option<T> option) {
         auto name = option.GetName();
         assert(possible_options_.find(name) == possible_options_.end());
@@ -86,7 +79,7 @@ protected:
     virtual void MakeExecuteOptsAvailable();
 
 public:
-    constexpr static double kTotalProgressPercent = 100.0;
+    constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
 
     Primitive(Primitive const& other) = delete;
     Primitive& operator=(Primitive const& other) = delete;
@@ -94,6 +87,8 @@ public:
     Primitive& operator=(Primitive&& other) = delete;
     virtual ~Primitive() = default;
 
+    // The constructor accepts vector of names of the mining algorithm phases.
+    // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
     explicit Primitive(std::vector<std::string_view> phase_names);
 
     void Fit(model::IDatasetStream & data_stream);
@@ -108,13 +103,12 @@ public:
 
     void UnsetOption(std::string_view option_name) noexcept;
 
-    /* Returns pair with current progress state.
-     * Pair has the form <current phase id, current phase progess>
-     */
-    std::pair<uint8_t, double> GetProgress() const noexcept;
-
+    // See util::Progress::GetProgress description
+    std::pair<uint8_t, double> GetProgress() const noexcept {
+        return progress_.GetProgress();
+    }
     std::vector<std::string_view> const& GetPhaseNames() const noexcept {
-        return phase_names_;
+        return progress_.GetPhaseNames();
     }
 
     std::type_index GetTypeIndex(std::string_view option_name) const {
