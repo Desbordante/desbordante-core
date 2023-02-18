@@ -5,12 +5,22 @@ option(COMPILE_PYBIND "Build the python bindings" OFF)
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
-option(ASAN "Enable Address Sanitizer" ON)
+set(SANITIZER "" CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB")
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif(NOT CMAKE_BUILD_TYPE)
+
+if (SANITIZER)
+    if (SANITIZER STREQUAL "ADDRESS")
+        set(ASAN ON)
+    elseif (SANITIZER STREQUAL "UB")
+        set(UBSAN ON)
+    else ()
+        message(FATAL_ERROR "Unknown sanitizer '${SANITIZER}', try cmake -LH")
+    endif ()
+endif ()
 
 if (ASAN AND COMPILE_PYBIND)
     message(WARNING "Disabling ASAN with python bindings.")
@@ -42,7 +52,8 @@ else()
         "-Wall"
         "-Wextra"
         "-Werror"
-        "-fno-omit-frame-pointer")
+        "-fno-omit-frame-pointer"
+        "-fno-optimize-sibling-calls")
 
     if (ASAN)
         # Set DEBUG build options specific for build with ASAN
@@ -51,6 +62,21 @@ else()
             "-O0"
             "${ASAN_OPTS}")
         set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
+    elseif (UBSAN)
+        # Set DEBUG build options specific for build with UBSAN
+        string(JOIN ";" UBSAN_OPTS "-fsanitize=undefined"
+            "-fsanitize=float-divide-by-zero"
+            "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
+            "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
+            "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
+        string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
+            "-O1"
+            "${UBSAN_OPTS}")
+        set(DEBUG_LINK_OPTS "${UBSAN_OPTS}")
+    else ()
+        # No sanitizer, just debug build
+        string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
+            "-O0")
     endif()
 
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
