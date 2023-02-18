@@ -34,7 +34,7 @@ void Primitive::ExecutePrepare() {
 }
 
 Primitive::Primitive(std::vector<std::string_view> phase_names)
-        : phase_names_(std::move(phase_names)) {}
+    : progress_(std::move(phase_names)) {}
 
 void Primitive::MakeOptionsAvailable(config::IOption *parent,
                                      std::vector<std::string_view> const &option_names) {
@@ -68,19 +68,6 @@ void Primitive::UnsetOption(std::string_view option_name) noexcept {
     ExcludeOptions(it->first);
 }
 
-void Primitive::AddProgress(double const val) noexcept {
-    assert(val >= 0);
-    std::scoped_lock lock(progress_mutex_);
-    cur_phase_progress_ += val;
-    assert(cur_phase_progress_ < 101);
-}
-
-void Primitive::SetProgress(double const val) noexcept {
-    assert(0 <= val && val < 101);
-    std::scoped_lock lock(progress_mutex_);
-    cur_phase_progress_ = val;
-}
-
 void Primitive::MakeOptionsAvailable(const std::vector<std::string_view> &option_names) {
     for (std::string_view name: option_names) {
         auto it = possible_options_.find(name);
@@ -103,7 +90,7 @@ unsigned long long Primitive::Execute() {
     }
     if (!GetNeededOptions().empty())
         throw std::logic_error("All options need to be set before execution.");
-    ResetProgress();
+    progress_.ResetProgress();
     ResetState();
     auto time_ms = ExecuteInternal();
     for (auto const& opt_name : available_options_) {
@@ -142,26 +129,6 @@ std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
     }
     AddSpecificNeededOptions(needed);
     return needed;
-}
-
-std::pair<uint8_t, double> Primitive::GetProgress() const noexcept {
-    std::scoped_lock lock(progress_mutex_);
-    return std::make_pair(cur_phase_id_, cur_phase_progress_);
-}
-
-void Primitive::ToNextProgressPhase() noexcept {
-    /* Current phase done, ensure that this is displayed in the progress bar */
-    SetProgress(kTotalProgressPercent);
-
-    std::scoped_lock lock(progress_mutex_);
-    ++cur_phase_id_;
-    assert(cur_phase_id_ < phase_names_.size());
-    cur_phase_progress_ = 0;
-}
-
-void Primitive::ResetProgress() noexcept {
-    cur_phase_id_ = 0;
-    cur_phase_progress_ = 0;
 }
 
 }  // namespace algos
