@@ -11,7 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        BUILD_TYPE: [ Release, Debug ]
+        cfg:
+          - { BUILD_TYPE: Release  }
+          - { BUILD_TYPE: Debug }
+          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS }
+          - { BUILD_TYPE: Debug, SANITIZER : UB }
     steps:
     - uses: actions/checkout@v3
     - name: Download libraries
@@ -26,10 +30,11 @@ jobs:
         -DCMAKE_C_COMPILER=gcc-10
         -DCMAKE_CXX_COMPILER=g++-10
         -DBOOST_ROOT=${{github.workspace}}/lib/boost
-        -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
+        -DCMAKE_BUILD_TYPE=${{matrix.cfg.BUILD_TYPE}}
+        -DSANITIZER=${{matrix.cfg.SANITIZER}}
         -Dgtest_disable_pthreads=OFF
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build --config ${{matrix.cfg.BUILD_TYPE}}
     - name: Test
       working-directory: ${{github.workspace}}/build/target
       shell: bash
