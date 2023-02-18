@@ -5,7 +5,7 @@ option(COMPILE_PYBIND "Build the python bindings" OFF)
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
-option(ASAN "Enable sanitizer" ON)
+option(ASAN "Enable Address Sanitizer" ON)
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
@@ -13,7 +13,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif(NOT CMAKE_BUILD_TYPE)
 
 if (ASAN AND COMPILE_PYBIND)
-    message(WARNING "Disabling ASAN with python bindings")
+    message(WARNING "Disabling ASAN with python bindings.")
     set(ASAN OFF)
 endif()
 
@@ -28,12 +28,35 @@ if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  "${CMAKE_BINARY_DIR}/target")
 else()
     # -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-    add_compile_options("$<$<CONFIG:Debug>:-O0;-DELPP_THREAD_SAFE;-g;-Wall;-Wextra;-Werror;-fno-omit-frame-pointer>")
+    set(BUILD_OPTS "-DELPP_THREAD_SAFE")
+
+    # RELEASE build options
+    string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}"
+        "-O3")
+
+    set(DEBUG_BUILD_OPTS "${BUILD_OPTS}")
+
+    # Set common DEBUG build options
+    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
+        "-g"
+        "-Wall"
+        "-Wextra"
+        "-Werror"
+        "-fno-omit-frame-pointer")
+
     if (ASAN)
-        add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
-        add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+        # Set DEBUG build options specific for build with ASAN
+        set(ASAN_OPTS "-fsanitize=address")
+        string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
+            "-O0"
+            "${ASAN_OPTS}")
+        set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
     endif()
-    add_compile_options("$<$<CONFIG:Release>:-O3;-DELPP_THREAD_SAFE>")
+
+    add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
+    add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
+
+    add_compile_options("$<$<CONFIG:Release>:${RELEASE_BUILD_OPTS}>")
 endif()
 
 # configuring boost
