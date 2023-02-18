@@ -11,6 +11,10 @@ Usage: ./build.sh [-h|--help] [-p|--pybind] [-n|--no-test]
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --jobs[=N]              Allow N jobs at once (default [=1])
   -d,         --debug                 Set debug build type
+  -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
+                                      Possible values of S: ADDRESS, UB.
+                                      ADDRESS - Address Sanitizer
+                                      UB      - Undefined Behavior Sanitizer
 
 EOF
 }
@@ -18,10 +22,10 @@ EOF
 for i in "$@"
     do
     case $i in
-        -p|--pybind) # Enable python bindings compile
+        -p|--pybind) # Compile python bindings
             PYBIND=true
             ;;
-        -n|--no-tests) # Disable tests build
+        -n|--no-tests) # Don't build tests
             NO_TESTS=true
             ;;
         -u|--no-unpack) # Don't unpack datasets
@@ -33,7 +37,15 @@ for i in "$@"
         -d|--debug) # Set debug build type
             DEBUG_MODE=true
             ;;
-        -h|--help|*) # Display help.
+        # It's a nightmare, we should use getopts for args parsing or even use something else
+        # instead of bash
+        --sanitizer=*) # Build with sanitizer S, long option
+            SANITIZER="${i#*=}"
+            ;;
+        -s*) # Build with sanitizer S, short option
+            SANITIZER="${i#*s}"
+            ;;
+        -h|--help|*) # Display help
             print_help
             exit 0
             ;;
@@ -71,6 +83,10 @@ fi
 
 if [[ $DEBUG_MODE != true ]]; then
   PREFIX="$PREFIX -D CMAKE_BUILD_TYPE=Release"
+fi
+
+if [[ -v SANITIZER ]]; then
+  PREFIX="$PREFIX -D SANITIZER=${SANITIZER}"
 fi
 
 cd ..
