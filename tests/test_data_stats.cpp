@@ -12,19 +12,27 @@ namespace mo = model;
 
 static const std::string test_file_name = "TestDataStats.csv";
 
+static algos::StdParamsMap GetParamMap(std::string_view dataset, char const separator = ',',
+                                       bool const has_header = true,
+                                       bool const is_null_equal_null = true,
+                                       ushort thread_num = 1) {
+    using namespace algos::config::names;
+    auto const path = std::filesystem::current_path() / "input_data" / dataset;
+
+    return {{kData, std::string{path}},
+            {kHasHeader, has_header},
+            {kSeparator, separator},
+            {kEqualNulls, is_null_equal_null},
+            {kThreads, thread_num}};
+}
+
 static std::unique_ptr<algos::DataStats> MakeStatPrimitive(std::string_view dataset,
                                                            char const separator = ',',
                                                            bool const has_header = true,
                                                            bool const is_null_equal_null = true,
                                                            ushort thread_num = 1) {
-    algos::StdParamsMap params{
-            {algos::config::names::kData,
-             std::string{std::filesystem::current_path() / "input_data" / dataset}},
-            {algos::config::names::kHasHeader, has_header},
-            {algos::config::names::kSeparator, separator},
-            {algos::config::names::kEqualNulls, is_null_equal_null},
-            {algos::config::names::kThreads, thread_num}};
-    return algos::CreateAndLoadPrimitive<algos::DataStats>(params);
+    return algos::CreateAndLoadPrimitive<algos::DataStats>(
+            GetParamMap(dataset, separator, has_header, is_null_equal_null, thread_num));
 }
 
 class TestDataStats : public ::testing::TestCase{};
@@ -197,5 +205,17 @@ TEST(TestCsvStats, TestDiffThreadNum) {
     }
 }
 #endif
+
+TEST(TestDataStats, MultipleExecutionConsistentResults) {
+    auto dataset_filename = "BernoulliRelation.csv";
+    auto stats_ptr = MakeStatPrimitive(dataset_filename);
+    stats_ptr->Execute();
+    std::string first_res = stats_ptr->ToString();
+    for (int i = 0; i < 5; ++i) {
+        algos::ConfigureFromMap(*stats_ptr, GetParamMap(dataset_filename));
+        stats_ptr->Execute();
+        ASSERT_EQ(first_res, stats_ptr->ToString()) << "fail on run " << i;
+    }
+}
 
 };  // namespace tests
