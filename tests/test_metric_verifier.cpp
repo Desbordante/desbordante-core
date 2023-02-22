@@ -112,6 +112,15 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     ASSERT_FALSE(GetResult(*verifier));
 }
 
+TEST_P(TestMetricVerifying, ConsistentRepeatedExecution) {
+    auto const& params = GetParam().params;
+    auto verifier = CreateMetricVerifier(params);
+    for (int i = 0; i < 5; ++i) {
+        algos::ConfigureFromMap(*verifier, algos::StdParamsMap{params});
+        ASSERT_EQ(GetResult(*verifier), GetParam().expected);
+    }
+}
+
 TEST_P(TestHighlights, DefaultTest) {  // Assumes that highlights are sorted by distance in reverse
     auto const& params = GetParam().params;
     auto const& highlight_distances = GetParam().highlight_distances;
