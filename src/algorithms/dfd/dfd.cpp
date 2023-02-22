@@ -27,9 +27,8 @@ void DFD::ResetStateFd() {
 }
 
 unsigned long long DFD::ExecuteInternal() {
-    partition_storage_ = std::make_unique<PartitionStorage>(relation_.get(),
-                                                            CachingMethod::kAllCaching,
-                                                            CacheEvictionMethod::kMedainUsage);
+    auto partition_storage = std::make_unique<PartitionStorage>(
+            relation_.get(), CachingMethod::kAllCaching, CacheEvictionMethod::kMedainUsage);
     RelationalSchema const* const schema = relation_->GetSchema();
 
     auto start_time = std::chrono::system_clock::now();
@@ -50,7 +49,8 @@ unsigned long long DFD::ExecuteInternal() {
     boost::asio::thread_pool search_space_pool(number_of_threads_);
 
     for (auto& rhs : schema->GetColumns()) {
-        boost::asio::post(search_space_pool, [this, &rhs, schema, &progress_step]() {
+        boost::asio::post(
+                search_space_pool, [this, &rhs, schema, progress_step, &partition_storage]() {
             ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
             util::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
 
@@ -65,7 +65,7 @@ unsigned long long DFD::ExecuteInternal() {
             }
 
             auto search_space = LatticeTraversal(rhs.get(), relation_.get(), unique_columns_,
-                                                 partition_storage_.get());
+                                                 partition_storage.get());
             auto const minimal_deps = search_space.FindLHSs();
 
             for (auto const& minimal_dependency_lhs: minimal_deps) {

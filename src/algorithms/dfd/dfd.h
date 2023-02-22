@@ -12,7 +12,6 @@ namespace algos {
 
 class DFD : public PliBasedFDAlgorithm {
 private:
-    std::unique_ptr<PartitionStorage> partition_storage_;
     std::vector<Vertical> unique_columns_;
 
     config::ThreadNumType number_of_threads_;
