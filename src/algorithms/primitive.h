@@ -33,6 +33,8 @@ private:
     void MakeOptionsAvailable(config::IOption *parent_name,
                               std::vector<std::string_view> const& option_names);
 
+    virtual void ResetState() = 0;
+
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
 
