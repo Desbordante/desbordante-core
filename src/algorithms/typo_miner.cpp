@@ -46,6 +46,10 @@ void TypoMiner::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(RadiusOpt, RatioOpt));
 }
 
+void TypoMiner::ResetState() {
+    approx_fds_.clear();
+}
+
 bool TypoMiner::HandleUnknownOption(std::string_view const& option_name,
                                     std::optional<boost::any> const& value) {
     using config::ErrorType;
