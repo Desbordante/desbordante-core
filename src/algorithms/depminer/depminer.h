@@ -18,6 +18,8 @@ private:
 
     double progress_step_ = 0;
     RelationalSchema const* schema_ = nullptr;
+
+    void ResetStateFd() final {}
     unsigned long long ExecuteInternal() final;
 
 public:
