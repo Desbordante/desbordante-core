@@ -52,6 +52,9 @@ private:
     static void UpdatePath(std::stack<RuleNode*>& path, std::list<RuleNode>& vertices);
     void RegisterOptions();
 
+    void ResetState() final;
+    virtual void ResetStateAr() = 0;
+
 protected:
     std::unique_ptr<model::TransactionalData> transactional_data_;
     MinSupType minsup_;
