@@ -38,6 +38,8 @@ private:
 
     boost::dynamic_bitset<> constant_columns_;
 
+    void ResetStateFd() final;
+
     void FitFd(model::IDatasetStream &data_stream) final;
     unsigned long long ExecuteInternal() final;
 

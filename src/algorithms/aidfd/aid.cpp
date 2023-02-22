@@ -30,12 +30,14 @@ void Aid::FitFd(model::IDatasetStream& data_stream) {
         }
     }
     number_of_tuples_ = tuples_.size();
-    clusters_ = std::vector<std::unordered_map<size_t, Cluster>>(number_of_attributes_);
-    indices_in_clusters_ = std::vector<std::vector<size_t>>(
-            number_of_attributes_, std::vector<size_t>(number_of_tuples_));
-    constant_columns_ = boost::dynamic_bitset<>(number_of_attributes_);
-    prev_ratios_ = std::vector<double>(window_size_, 1.0);
-    sum_ = static_cast<double>(window_size_);
+}
+
+void Aid::ResetStateFd() {
+    clusters_.assign(number_of_attributes_, std::unordered_map<size_t, Cluster>{});
+    indices_in_clusters_.assign(number_of_attributes_, std::vector<size_t>{number_of_tuples_});
+    constant_columns_.reset();
+    prev_ratios_.assign(window_size_, 1.0);
+    sum_ = double{window_size_};
 }
 
 unsigned long long Aid::ExecuteInternal() {
