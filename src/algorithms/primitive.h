@@ -25,14 +25,21 @@ private:
     std::mutex mutable progress_mutex_;
     double cur_phase_progress_ = 0;
     uint8_t cur_phase_id_ = 0;
+
+    // All options the algorithm may use
     std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_{};
+    // All options that can be set at the moment
     std::unordered_set<std::string_view> available_options_;
+    // Maps a parameter that added other parameters to their names.
     std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
+
     bool fit_completed_ = false;
 
     void MakeOptionsAvailable(config::IOption *parent_name,
                               std::vector<std::string_view> const& option_names);
 
+    // Clear the necessary fields for Execute to run repeatedly with different
+    // configuration parameters on the same dataset.
     virtual void ResetState() = 0;
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
