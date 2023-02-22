@@ -27,6 +27,9 @@ private:
 
     void RegisterOptions();
 
+    void ResetState() final;
+    virtual void ResetStateFd() = 0;
+
 protected:
     size_t number_of_columns_;
     /* содержит множество найденных функциональных зависимостей. Это поле будет использоваться при

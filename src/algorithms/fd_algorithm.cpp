@@ -21,6 +21,11 @@ void FDAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
     FitFd(data_stream);
 }
 
+void FDAlgorithm::ResetState() {
+    fd_collection_.clear();
+    ResetStateFd();
+}
+
 std::string FDAlgorithm::GetJsonFDs() const {
     return FDsToJson(fd_collection_);
 }
