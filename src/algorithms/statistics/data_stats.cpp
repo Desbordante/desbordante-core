@@ -23,6 +23,10 @@ void DataStats::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
 }
 
+void DataStats::ResetState() {
+    all_stats_.assign(col_data_.size(), ColumnStats{});
+}
+
 Statistic DataStats::GetMin(size_t index, mo::CompareResult order) const {
     const mo::TypedColumnData& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
