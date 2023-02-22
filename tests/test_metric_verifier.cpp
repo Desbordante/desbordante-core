@@ -104,6 +104,7 @@ TEST_P(TestMetricVerifying, DefaultTest) {
     }
     ASSERT_TRUE(GetResult(*verifier));
 
+    algos::ConfigureFromMap(*verifier, algos::StdParamsMap{params});
     auto new_parameter = boost::any_cast<long double>(params.at(onam::kParameter));
     new_parameter -= 1e-4;
     if (new_parameter < 0) return;
