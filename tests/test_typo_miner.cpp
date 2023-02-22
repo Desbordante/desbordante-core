@@ -138,15 +138,34 @@ TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
 
 class ApproxFdsMiningTest : public ::testing::TestWithParam<FDsParam> {};
 
+static void TestEquality(std::string const& expected, std::string const& actual,
+                         algos::PrimitiveType const algo) {
+    EXPECT_EQ(std::hash<std::string>()(expected), std::hash<std::string>()(actual))
+            << "TypoMiner with " << algo._to_string() << " as precise algorithm\n"
+            << "Expected:\n\t" << expected << "\nActual:\n\t" << actual << std::endl;
+}
+
 TEST_P(ApproxFdsMiningTest, SyntheticTest) {
     auto const test = [&param = GetParam()](algos::PrimitiveType const algo) {
         std::string const expected = MakeJsonFromFds(GetParam().expected);
         auto typo_miner = CreateTypoMiner(algo, GetParam().params);
         typo_miner->Execute();
         std::string actual = typo_miner->GetApproxFDsAsJson();
-        EXPECT_EQ(std::hash<std::string>()(expected), std::hash<std::string>()(actual))
-            << "TyposMiner with " << algo._to_string() << " as precise algorithm\n"
-            << "Expected:\n\t" << expected << "\nActual:\n\t" << actual << std::endl;
+        TestEquality(expected, actual, algo);
+    };
+    TestForEachAlgo(test);
+}
+
+TEST_P(ApproxFdsMiningTest, ConsistentRepeatedExecution) {
+    auto const test = [&param = GetParam()](algos::PrimitiveType const algo) {
+        std::string const expected = MakeJsonFromFds(param.expected);
+        auto typo_miner = CreateTypoMiner(algo, param.params);
+        for (int i = 0; i < 5; ++i) {
+            algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{param.params});
+            typo_miner->Execute();
+            std::string actual = typo_miner->GetApproxFDsAsJson();
+            TestEquality(expected, actual, algo);
+        }
     };
     TestForEachAlgo(test);
 }
