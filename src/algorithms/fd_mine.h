@@ -33,6 +33,7 @@ private:
     void Reconstruct();
     void Display();
 
+    void ResetStateFd() final;
     unsigned long long ExecuteInternal() override;
 
 public:

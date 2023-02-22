@@ -10,6 +10,16 @@ namespace algos {
 
 Fd_mine::Fd_mine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
+void Fd_mine::ResetStateFd() {
+    candidate_set_.clear();
+    eq_set_.clear();
+    fd_set_.clear();
+    final_fd_set_.clear();
+    key_set_.clear();
+    closure_.clear();
+    plis_.clear();
+}
+
 unsigned long long Fd_mine::ExecuteInternal() {
     // 1
     schema_ = relation_->GetSchema();
