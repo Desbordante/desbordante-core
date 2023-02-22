@@ -36,6 +36,8 @@ private:
     unsigned long long GenerateAllRules() override;
     unsigned long long FindFrequent() override;
 
+    void ResetStateAr() final;
+
 public:
     Apriori();
 
