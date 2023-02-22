@@ -115,6 +115,12 @@ bool Apriori::CanBePruned(std::vector<unsigned> const& itemset) {
     return false;
 }
 
+void Apriori::ResetStateAr() {
+    level_num_ = 1;
+    candidates_.clear();
+    root_ = Node();
+}
+
 unsigned long long Apriori::FindFrequent() {
     auto start_time = std::chrono::system_clock::now();
 
