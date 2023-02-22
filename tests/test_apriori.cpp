@@ -37,7 +37,7 @@ void CheckAssociationRulesListsEquality(
         std::set<std::string> rhs(rule.right.begin(), rule.right.end());
 
         if (expected.find(std::make_pair(std::move(lhs), std::move(rhs))) == expected.end()) {
-            FAIL() << "generated rule does not present in expected";
+            FAIL() << "generated rule is not present in expected";
         }
     }
     SUCCEED();
