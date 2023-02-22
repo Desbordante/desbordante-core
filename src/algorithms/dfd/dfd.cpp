@@ -22,6 +22,10 @@ void DFD::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
 }
 
+void DFD::ResetStateFd() {
+    unique_columns_.clear();
+}
+
 unsigned long long DFD::ExecuteInternal() {
     partition_storage_ = std::make_unique<PartitionStorage>(relation_.get(),
                                                             CachingMethod::kAllCaching,

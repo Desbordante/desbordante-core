@@ -19,6 +19,8 @@ private:
 
     void MakeExecuteOptsAvailable() final;
     void RegisterOptions();
+
+    void ResetStateFd() final;
     unsigned long long ExecuteInternal() final;
 
 public:
