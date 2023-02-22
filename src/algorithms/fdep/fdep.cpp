@@ -38,6 +38,12 @@ void FDep::FitFd(model::IDatasetStream& data_stream) {
     }
 }
 
+void FDep::ResetStateFd() {
+    // Consider creating them here instead.
+    neg_cover_tree_.reset();
+    pos_cover_tree_.reset();
+}
+
 unsigned long long FDep::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
