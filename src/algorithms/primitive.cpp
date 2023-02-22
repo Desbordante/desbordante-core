@@ -23,7 +23,7 @@ config::OptAddFunc Primitive::GetOptAvailFunc() {
 }
 
 void Primitive::ClearOptions() noexcept {
-    available_options.clear();
+    available_options_.clear();
     opt_parents_.clear();
 }
 
@@ -53,7 +53,7 @@ void Primitive::ExcludeOptions(std::string_view parent_option) noexcept {
     for (auto const &option_name: it->second) {
         auto possible_opt_it = possible_options_.find(option_name);
         assert(possible_opt_it != possible_options_.end());
-        available_options.erase(possible_opt_it->first);
+        available_options_.erase(possible_opt_it->first);
         UnsetOption(possible_opt_it->first);
     }
     opt_parents_.erase(it);
@@ -62,7 +62,7 @@ void Primitive::ExcludeOptions(std::string_view parent_option) noexcept {
 void Primitive::UnsetOption(std::string_view option_name) noexcept {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()
-        || available_options.find(it->first) == available_options.end())
+        || available_options_.find(it->first) == available_options_.end())
         return;
     it->second->Unset();
     ExcludeOptions(it->first);
@@ -85,7 +85,7 @@ void Primitive::MakeOptionsAvailable(const std::vector<std::string_view> &option
     for (std::string_view name: option_names) {
         auto it = possible_options_.find(name);
         assert(it != possible_options_.end());
-        available_options.insert(it->first);
+        available_options_.insert(it->first);
     }
 }
 
@@ -114,7 +114,7 @@ void Primitive::SetOption(std::string_view const& option_name,
             throw std::invalid_argument("Unknown option \"" + std::string{option_name} + '"');
         }
         return;
-    } else if (available_options.find(it->first) == available_options.end()) {
+    } else if (available_options_.find(it->first) == available_options_.end()) {
         throw std::invalid_argument("Invalid option \"" + std::string{option_name} + '"');
     }
 
@@ -127,7 +127,7 @@ void Primitive::SetOption(std::string_view const& option_name,
 
 std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
     std::unordered_set<std::string_view> needed{};
-    for (std::string_view name : available_options) {
+    for (std::string_view name : available_options_) {
         if (!possible_options_.at(name)->IsSet()) {
             needed.insert(name);
         }
