@@ -90,6 +90,8 @@ private:
     void ValidateRhs(decltype(MetricVerifier::rhs_indices_) const& indices);
     void RegisterOptions();
 
+    void ResetState() final;
+
 protected:
     void FitInternal(model::IDatasetStream& data_stream) override;
     void MakeExecuteOptsAvailable() override;
