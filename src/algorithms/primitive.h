@@ -26,7 +26,7 @@ private:
     double cur_phase_progress_ = 0;
     uint8_t cur_phase_id_ = 0;
     std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_{};
-    std::unordered_set<std::string_view> available_options;
+    std::unordered_set<std::string_view> available_options_;
     std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
     bool fit_completed_ = false;
 
