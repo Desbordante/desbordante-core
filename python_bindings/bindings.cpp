@@ -1,3 +1,5 @@
+#include <filesystem>
+
 #include <easylogging++.h>
 #include <pybind11/pybind11.h>
 
@@ -43,6 +45,14 @@ using model::ARStrings;
 
 PYBIND11_MODULE(desbordante, module) {
     using namespace pybind11::literals;
+
+    if (std::filesystem::exists("logging.conf")) {
+        el::Loggers::configureFromGlobal("logging.conf");
+    } else {
+        el::Configurations conf;
+        conf.set(el::Level::Global, el::ConfigurationType::Enabled, "false");
+        el::Loggers::reconfigureAllLoggers(conf);
+    }
 
     module.doc() = "A data profiling library";
 
