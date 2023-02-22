@@ -29,6 +29,12 @@ void Tane::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ErrorOpt));
 }
 
+void Tane::ResetStateFd() {
+    count_of_fd_ = 0;
+    count_of_ucc_ = 0;
+    apriori_millis_ = 0;
+}
+
 double Tane::CalculateZeroAryFdError(ColumnData const* rhs,
                                      ColumnLayoutRelationData const* relation_data) {
     return 1 - rhs->GetPositionListIndex()->GetNepAsLong() /
