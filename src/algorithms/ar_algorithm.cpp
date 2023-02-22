@@ -50,6 +50,11 @@ void ARAlgorithm::RegisterOptions() {
     RegisterOption(MinConfidenceOpt.GetOption(&minconf_));
 }
 
+void ARAlgorithm::ResetState() {
+    ar_collection_.clear();
+    ResetStateAr();
+}
+
 void ARAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(MinSupportOpt, MinConfidenceOpt));
 }
