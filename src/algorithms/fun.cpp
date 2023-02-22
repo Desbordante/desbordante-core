@@ -22,6 +22,10 @@ bool FunQuadruple::Contains(Vertical const& that) const {
 
 FUN::FUN() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
+void FUN::ResetStateFd() {
+    fds_.clear();
+}
+
 bool FUN::IsKey(FunQuadruple const& l) const {
     return l.GetCount() == relation_->GetNumRows();
 }
