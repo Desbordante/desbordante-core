@@ -30,8 +30,11 @@ private:
     static config::OptionType<decltype(radius_)> RadiusOpt;
     static config::OptionType<decltype(ratio_)> RatioOpt;
 
+    void ResetState() final;
+
     void FitInternal(model::IDatasetStream &data_stream) final;
     unsigned long long ExecuteInternal() final;
+
     static bool FDLess(FD const& l, FD const& r);
     static auto MakeTuplesByIndicesComparator(std::map<int, unsigned> const& frequency_map);
 
