@@ -18,6 +18,8 @@ class DataStats : public Primitive {
     size_t MixedDistinct(size_t index) const;
     void RegisterOptions();
 
+    void ResetState() final;
+
 protected:
     void FitInternal(model::IDatasetStream &data_stream) final;
     void MakeExecuteOptsAvailable() final;
