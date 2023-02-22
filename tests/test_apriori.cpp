@@ -43,42 +43,58 @@ void CheckAssociationRulesListsEquality(
     SUCCEED();
 }
 
+static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
+        std::list<model::ARStrings> const& rules) {
+    std::set<std::pair<std::set<std::string>, std::set<std::string>>> set;
+    for (auto const& rule : rules) {
+        set.emplace(std::set<std::string>(rule.left.begin(), rule.left.end()),
+                    std::set<std::string>(rule.right.begin(), rule.right.end()));
+    }
+    return set;
+}
+
 class ARAlgorithmTest : public ::testing::Test {
 protected:
-    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, std::string const& path,
-            unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
-            bool hasHeader = true) {
+    static algos::StdParamsMap GetParamMap(double minsup, double minconf, std::string const& path,
+                                           unsigned int tidColumnIndex,
+                                           unsigned int itemColumnIndex, char separator = ',',
+                                           bool hasHeader = true) {
         using namespace algos::config::names;
-        using namespace algos::config::descriptions;
-        algos::StdParamsMap params{
-                {kData, path},
+        return {{kData, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kInputFormat, +algos::InputFormat::singular},
                 {kMinimumSupport, minsup},
                 {kMinimumConfidence, minconf},
                 {kTIdColumnIndex, tidColumnIndex},
-                {kItemColumnIndex, itemColumnIndex}
-        };
-        return algos::CreateAndLoadPrimitive<algos::Apriori>(params);
+                {kItemColumnIndex, itemColumnIndex}};
     }
 
-    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, std::string const& path,
-            bool firstColumnTid, char separator = ',', bool hasHeader = true) {
+    static algos::StdParamsMap GetParamMap(double minsup, double minconf, std::string const& path,
+                                           bool firstColumnTid, char separator = ',',
+                                           bool hasHeader = true) {
         using namespace algos::config::names;
-        using namespace algos::config::descriptions;
-        algos::StdParamsMap params{
-                {kData, path},
+        return {{kData, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kInputFormat, +algos::InputFormat::tabular},
                 {kMinimumSupport, minsup},
                 {kMinimumConfidence, minconf},
-                {kFirstColumnTId, firstColumnTid}
-        };
-        return algos::CreateAndLoadPrimitive<algos::Apriori>(params);
+                {kFirstColumnTId, firstColumnTid}};
+    }
+
+    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
+            double minsup, double minconf, std::string const& path, unsigned int tidColumnIndex,
+            unsigned int itemColumnIndex, char separator = ',', bool hasHeader = true) {
+        return algos::CreateAndLoadPrimitive<algos::Apriori>(GetParamMap(
+                minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, hasHeader));
+    }
+
+    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
+            double minsup, double minconf, std::string const& path, bool firstColumnTid,
+            char separator = ',', bool hasHeader = true) {
+        return algos::CreateAndLoadPrimitive<algos::Apriori>(
+                GetParamMap(minsup, minconf, path, firstColumnTid, separator, hasHeader));
     }
 };
 
@@ -319,6 +335,19 @@ TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
         {{"COCK"}, {"BISCUIT", "COFFEE", "CORNFLAKES"}}};
 
     CheckAssociationRulesListsEquality(actual_rules, expected_rules);
+}
+
+TEST_F(ARAlgorithmTest, RepeatedExecutionConsistentResult) {
+    auto const path =
+            fs::current_path() / "input_data" / "transactional_data" / "rules-kaggle-rows.csv";
+    auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
+    algorithm->Execute();
+    auto first_result = ToSet(algorithm->GetArStringsList());
+    for (int i = 0; i < 5; ++i) {
+        algos::ConfigureFromMap(*algorithm, GetParamMap(0.1, 0.5, path, true, ',', true));
+        algorithm->Execute();
+        CheckAssociationRulesListsEquality(algorithm->GetArStringsList(), first_result);
+    }
 }
 
 } // namespace tests
