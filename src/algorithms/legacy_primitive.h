@@ -17,6 +17,8 @@ class LegacyPrimitive : public Primitive {
 private:
     void FitInternal([[maybe_unused]] model::IDatasetStream &data_stream) override {}
 
+    void ResetState() final {}
+
 protected:
     std::unique_ptr<model::IDatasetStream> input_generator_;
 
