@@ -45,6 +45,10 @@ void Pyro::MakeExecuteOptsAvailable() {
                                                 config::ThreadNumberOpt, SeedOpt));
 }
 
+void Pyro::ResetStateFd() {
+    search_spaces_.clear();
+}
+
 unsigned long long Pyro::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
