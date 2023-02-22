@@ -10,6 +10,8 @@ namespace mo = model;
 // to run tests:
 // ./Desbordante_test --gtest_filter="*TestDataStats*"
 
+static const std::string test_file_name = "TestDataStats.csv";
+
 static std::unique_ptr<algos::DataStats> MakeStatPrimitive(std::string_view dataset,
                                                            char const separator = ',',
                                                            bool const has_header = true,
@@ -28,7 +30,7 @@ static std::unique_ptr<algos::DataStats> MakeStatPrimitive(std::string_view data
 class TestDataStats : public ::testing::TestCase{};
 
 TEST(TestDataStats, TestNullEmpties) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_FALSE(stats.GetMin(0).HasValue());
     EXPECT_FALSE(stats.GetMax(0).HasValue());
@@ -43,7 +45,7 @@ TEST(TestDataStats, TestNullEmpties) {
 }
 
 TEST(TestDataStats, TestMinString) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(1);
     auto min = mo::Type::GetValue<mo::String>(min_stat.GetData());
@@ -51,7 +53,7 @@ TEST(TestDataStats, TestMinString) {
 }
 
 TEST(TestDataStats, TestMaxString) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(1);
     auto max = mo::Type::GetValue<mo::String>(max_stat.GetData());
@@ -59,7 +61,7 @@ TEST(TestDataStats, TestMaxString) {
 }
 
 TEST(TestDataStats, TestMinDouble) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(2);
     auto min = mo::Type::GetValue<mo::Double>(min_stat.GetData());
@@ -67,7 +69,7 @@ TEST(TestDataStats, TestMinDouble) {
 }
 
 TEST(TestDataStats, TestMaxDouble) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(2);
     auto max = mo::Type::GetValue<mo::Double>(max_stat.GetData());
@@ -75,20 +77,20 @@ TEST(TestDataStats, TestMaxDouble) {
 }
 
 TEST(TestDataStats, TestSumDouble) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto sum_stat = stats.GetSum(2);
     EXPECT_DOUBLE_EQ(212.61, mo::Type::GetValue<mo::Double>(sum_stat.GetData()));
 }
 
 TEST(TestDataStats, NumberOfValues) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(0, stats.NumberOfValues(0));
 }
 
 TEST(TestDataStats, TestDistinct) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto distinct = stats.Distinct(3);
     EXPECT_EQ(5, distinct);
@@ -96,19 +98,19 @@ TEST(TestDataStats, TestDistinct) {
 }
 
 TEST(TestDataStats, TestDistinctStringColumn) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(7, stats.Distinct(6));
 }
 
 TEST(TestDataStats, TestIsCategorial) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_TRUE(stats.IsCategorical(3, 5));
 }
 
 TEST(TestDataStats, TestGetQuantiles) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
 
     auto quantile_0_25 = stats.GetQuantile(0.25, 4);
@@ -124,7 +126,7 @@ TEST(TestDataStats, TestGetQuantiles) {
 }
 
 TEST(TestDataStats, TestGetAvg) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     auto avg_stat = stats.GetAvg(2);
     auto s = mo::Type::GetValue<mo::Double>(avg_stat.GetData());
@@ -132,7 +134,7 @@ TEST(TestDataStats, TestGetAvg) {
 }
 
 TEST(TestDataStats, TestShowSample) {
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
     for(const auto& row : sample) {
@@ -146,7 +148,7 @@ TEST(TestDataStats, TestShowSample) {
 
 TEST(TestDataStats, TestShowAllStats) {
     // Mixed type statistics will be calculated here.
-    auto stats_ptr = MakeStatPrimitive("TestCsvStats.csv", ',', false);
+    auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
     LOG(INFO) << stats.ToString();
