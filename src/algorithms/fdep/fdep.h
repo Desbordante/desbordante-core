@@ -27,8 +27,10 @@ private:
 
     std::vector<std::vector<size_t>> tuples_;
 
-    unsigned long long ExecuteInternal() final;
     void FitFd(model::IDatasetStream &data_stream) final;
+
+    void ResetStateFd() final;
+    unsigned long long ExecuteInternal() final;
 
     // Building negative cover via violated dependencies
     void BuildNegativeCover();
