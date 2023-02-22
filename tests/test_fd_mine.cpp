@@ -28,14 +28,15 @@ std::unique_ptr<FDAlgorithm> ConfToFitFD_Mine() {
     return primitive;
 }
 
-std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(
-        std::string const& path, char separator = ',', bool has_header = true) {
-    StdParamsMap params_map{
-            {onam::kData, path},
-            {onam::kSeparator, separator},
-            {onam::kHasHeader, has_header}
-    };
-    return algos::CreateAndLoadPrimitive<Fd_mine>(params_map);
+StdParamsMap FD_MineGetParamMap(std::string const& path, char separator = ',',
+                                bool has_header = true) {
+    return {{onam::kData, path}, {onam::kSeparator, separator}, {onam::kHasHeader, has_header}};
+}
+
+std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(std::string const& path,
+                                                            char separator = ',',
+                                                            bool has_header = true) {
+    return algos::CreateAndLoadPrimitive<Fd_mine>(FD_MineGetParamMap(path, separator, has_header));
 }
 
 class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
@@ -70,6 +71,16 @@ testing::AssertionResult FD_Mine_CheckFDListEquality(
     }
     return actual.empty() ? testing::AssertionSuccess()
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
+        std::list<FD> const& fds) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : fds) {
+        auto const& raw_fd = fd.ToRawFD();
+        set.emplace(FD_MineBitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
+    }
+    return set;
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
@@ -197,3 +208,17 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     }
     SUCCEED();
 }
+
+TEST_F(AlgorithmTest, FD_Mine_ConsistentRepeatedExecution) {
+    auto const dataset_path =
+            std::filesystem::current_path() / "input_data" / "WDC_astronomical.csv";
+    auto fd_mine = CreateFD_MineAlgorithmInstance(dataset_path, ',', true);
+    fd_mine->Execute();
+    auto first_result = FD_MineFDsToSet(fd_mine->FdList());
+    for (int i = 0; i < 5; ++i) {
+        algos::ConfigureFromMap(*fd_mine, FD_MineGetParamMap(dataset_path, ',', true));
+        fd_mine->Execute();
+        ASSERT_TRUE(FD_Mine_CheckFDListEquality(first_result, fd_mine->FdList()));
+    }
+}
+
