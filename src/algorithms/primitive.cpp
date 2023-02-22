@@ -103,6 +103,7 @@ unsigned long long Primitive::Execute() {
     }
     if (!GetNeededOptions().empty())
         throw std::logic_error("All options need to be set before execution.");
+    ResetProgress();
     auto time_ms = ExecuteInternal();
     for (auto const& opt_name : available_options_) {
         possible_options_.at(opt_name)->Unset();
@@ -157,4 +158,10 @@ void Primitive::ToNextProgressPhase() noexcept {
     cur_phase_progress_ = 0;
 }
 
+void Primitive::ResetProgress() noexcept {
+    cur_phase_id_ = 0;
+    cur_phase_progress_ = 0;
+}
+
 }  // namespace algos
+

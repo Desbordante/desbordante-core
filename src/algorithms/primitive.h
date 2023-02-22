@@ -35,6 +35,9 @@ private:
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
+
+    void ResetProgress() noexcept;
+
     virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
