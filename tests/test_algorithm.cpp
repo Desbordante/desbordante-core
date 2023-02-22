@@ -63,6 +63,15 @@ testing::AssertionResult CheckFdListEquality(
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<FD> const& fds) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : fds) {
+        auto const& raw_fd = fd.ToRawFD();
+        set.emplace(BitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
+    }
+    return set;
+}
+
 TYPED_TEST_SUITE_P(AlgorithmTest);
 
 TYPED_TEST_P(AlgorithmTest, ThrowsOnEmpty) {
@@ -140,9 +149,21 @@ TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
     SUCCEED();
 }
 
+TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
+    auto const dataset_path = fs::current_path() / "input_data" / "WDC_astronomical.csv";
+    auto algorithm = TestFixture::CreateAlgorithmInstance(dataset_path, ',', true);
+    algorithm->Execute();
+    auto first_res = FDsToSet(algorithm->FdList());
+    for (int i = 0; i < 3; ++i) {
+        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(dataset_path, ',', true));
+        algorithm->Execute();
+        ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
+    }
+}
+
 REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
                             WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
-                            HeavyDatasetsConsistentHash);
+                            HeavyDatasetsConsistentHash, ConsistentRepeatedExecution);
 
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
                                     algos::Depminer, algos::FDep, algos::FUN, algos::hyfd::HyFD>;
