@@ -23,6 +23,8 @@ private:
 
     void RegisterOptions();
     void MakeExecuteOptsAvailable() final;
+
+    void ResetStateFd() final;
     unsigned long long ExecuteInternal() final;
 
     // Computes all difference sets of `relation_` by complementing agree sets

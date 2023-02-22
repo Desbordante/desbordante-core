@@ -30,6 +30,10 @@ void FastFDs::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ThreadNumberOpt));
 }
 
+void FastFDs::ResetStateFd() {
+    diff_sets_.clear();
+}
+
 unsigned long long FastFDs::ExecuteInternal() {
     schema_ = relation_->GetSchema();
     percent_per_col_ = kTotalProgressPercent / schema_->GetNumColumns();
