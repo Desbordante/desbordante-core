@@ -169,6 +169,10 @@ void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
             model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
 }
 
+void MetricVerifier::ResetState() {
+    metric_fd_holds_ = false;
+}
+
 unsigned long long MetricVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
