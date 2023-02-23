@@ -38,8 +38,6 @@ private:
     static bool FDLess(FD const& l, FD const& r);
     static auto MakeTuplesByIndicesComparator(std::map<int, unsigned> const& frequency_map);
 
-    std::unordered_map<int, unsigned> CreateFrequencies(
-            util::PLI::Cluster const& cluster, std::vector<int> const& probing_table) const;
     std::map<int, unsigned> CreateFrequencyMap(Column const& cluster_col,
                                                util::PLI::Cluster const& cluster) const;
     unsigned GetMostFrequentValueIndex(Column const& cluster_col,

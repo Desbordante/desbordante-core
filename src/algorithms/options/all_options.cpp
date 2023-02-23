@@ -88,18 +88,21 @@ boost::program_options::options_description AlgoOptions() {
 
     ar_options.add(ar_singular_options).add(ar_tabular_options);
 
-    po::options_description mfd_options("MFD options");
-    mfd_options.add_options()
-            (names::kMetric, po::value<algos::metric::Metric>(), desc::kDMetric)
-            (names::kMetricAlgorithm, po::value<algos::metric::MetricAlgo>(),
-             desc::kDMetricAlgorithm)
+    po::options_description fd_verification_options("FD verification options");
+    fd_verification_options.add_options()
             (names::kLhsIndices, po::value<std::vector<unsigned int>>()->multitoken(),
              desc::kDLhsIndices)
             (names::kRhsIndices, po::value<std::vector<unsigned int>>()->multitoken(),
              desc::kDRhsIndices)
+            (names::kRhsIndex, po::value<unsigned int>(), desc::kDRhsIndex)
+            ;
+
+    po::options_description mfd_options("MFD options");
+    mfd_options.add_options()
+            (names::kMetric, po::value<algos::metric::Metric>(), desc::kDMetric)
+            (names::kMetricAlgorithm, po::value<algos::metric::MetricAlgo>(), desc::kDMetricAlgorithm)
             (names::kParameter, po::value<long double>(), desc::kDParameter)
-            (names::kDistFromNullIsInfinity, po::value<bool>()->default_value(false),
-             desc::kDDistFromNullIsInfinity)
+            (names::kDistFromNullIsInfinity, po::bool_switch(), desc::kDDistFromNullIsInfinity)
             ;
 
     po::options_description cosine_options("Cosine metric options");
@@ -135,7 +138,8 @@ boost::program_options::options_description AlgoOptions() {
             .add(mfd_options)
             .add(ar_options)
             .add(ac_options)
-            .add(typo_options);
+            .add(typo_options)
+            .add(fd_verification_options);
     return algorithm_options;
 }
 }  // namespace algos::config

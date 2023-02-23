@@ -18,3 +18,6 @@
 
 /* Metric FD verifier */
 #include "algorithms/metric/metric_verifier.h"
+
+/* FD verifier */
+#include "algorithms/fd_verifier/fd_verifier.h"
