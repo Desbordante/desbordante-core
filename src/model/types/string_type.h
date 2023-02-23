@@ -53,7 +53,7 @@ public:
         return buf;
     }
 
-    CompareResult Compare(String const& l_val, String const& r_val) const {
+    static CompareResult Compare(String const& l_val, String const& r_val) {
         int const res = l_val.compare(r_val);
         if (res == 0) {
             return CompareResult::kEqual;
