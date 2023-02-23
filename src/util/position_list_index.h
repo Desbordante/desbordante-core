@@ -6,6 +6,7 @@
 #pragma once
 #include <deque>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "column.h"
@@ -50,6 +51,9 @@ public:
                       double gini_impurity = 0);
     static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data,
                                                         bool is_null_eq_null);
+
+    static std::unordered_map<int, unsigned> CreateFrequencies(
+            Cluster const& cluster, std::vector<int> const& probing_table);
 
     // если PT закеширована, выдаёт её, иначе предварительно вычисляет её -- тяжёлая операция
     std::shared_ptr<const std::vector<int>> CalculateAndGetProbingTable() const;

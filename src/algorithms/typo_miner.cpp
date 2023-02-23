@@ -331,27 +331,13 @@ std::vector<TypoMiner::ClusterTyposPair> TypoMiner::FindClustersAndLinesWithTypo
     return result;
 }
 
-std::unordered_map<int, unsigned> TypoMiner::CreateFrequencies(
-    util::PLI::Cluster const& cluster, std::vector<int> const& probing_table) const {
-    std::unordered_map<int, unsigned> frequencies;
-
-    for (int const tuple_index : cluster) {
-        int const probing_table_value = probing_table[tuple_index];
-
-        if (probing_table_value != 0) {
-            frequencies[probing_table_value]++;
-        }
-    }
-
-    return frequencies;
-}
-
 unsigned TypoMiner::GetMostFrequentValueIndex(Column const& cluster_col,
                                               util::PLI::Cluster const& cluster) const {
     assert(!cluster.empty());
     std::vector<int> const& probing_table =
         relation_->GetColumnData(cluster_col.GetIndex()).GetProbingTable();
-    std::unordered_map<int, unsigned> frequencies = CreateFrequencies(cluster, probing_table);
+    std::unordered_map<int, unsigned> frequencies =
+            util::PLI::CreateFrequencies(cluster, probing_table);
 
     unsigned most_frequent_index = cluster.size();
     unsigned largest_frequency = 0;
@@ -374,7 +360,8 @@ std::map<int, unsigned> TypoMiner::CreateFrequencyMap(Column const& cluster_col,
     std::map<int, unsigned> frequency_map;
     std::vector<int> const& probing_table =
         relation_->GetColumnData(cluster_col.GetIndex()).GetProbingTable();
-    std::unordered_map<int, unsigned> frequencies = CreateFrequencies(cluster, probing_table);
+    std::unordered_map<int, unsigned> frequencies =
+            util::PLI::CreateFrequencies(cluster, probing_table);
 
     for (int const tuple_index : cluster) {
         int const probing_table_value = probing_table[tuple_index];

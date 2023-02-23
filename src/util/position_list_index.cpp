@@ -91,6 +91,21 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
                                                gini_impurity);
 }
 
+std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
+        Cluster const& cluster, std::vector<int> const& probing_table) {
+    std::unordered_map<int, unsigned> frequencies;
+
+    for (int const tuple_index : cluster) {
+        int const probing_table_value = probing_table[tuple_index];
+
+        if (probing_table_value != singleton_value_id_) {
+            frequencies[probing_table_value]++;
+        }
+    }
+
+    return frequencies;
+}
+
 //unsigned long long PositionListIndex::CalculateNep(unsigned int numElements) {
 //
 //}

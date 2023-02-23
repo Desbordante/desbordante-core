@@ -31,8 +31,12 @@ BETTER_ENUM(PrimitiveType, char,
     metric,
 
 /* Statistic algorithms */
-    stats
+    stats,
+
+/* FD verifier algorithm */
+    fd_verifier
 )
+
 // clang-format on
 
 }  // namespace algos
