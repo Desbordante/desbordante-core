@@ -13,6 +13,8 @@ namespace fs = std::filesystem;
 
 class ACAlgorithmTest : public ::testing::Test {
 public:
+    using ACExceptions = std::vector<algos::ACAlgorithm::ACException>;
+
     static std::unique_ptr<algos::ACAlgorithm> CreateACAlgorithmInstance(
             std::string_view path, char separator = ',', bool hasHeader = true,
             char bin_operation = '+', double fuzziness = 0.1, double p_fuzz = 0.9,
@@ -27,19 +29,34 @@ public:
 };
 
 void AssertRanges(std::vector<std::string>& expected_ranges,
-                  const algos::ACAlgorithm::RangesCollection& byte_ranges) {
+                  algos::ACAlgorithm::RangesCollection const& byte_ranges) {
     ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
 
-    auto expected = std::unique_ptr<std::byte[]>(byte_ranges.num_type->Allocate());
+    auto expected = std::unique_ptr<std::byte[]>(byte_ranges.col_pair.num_type->Allocate());
     for (size_t i = 0; i < expected_ranges.size(); ++i) {
         // FIXME:
         /* Для значения "7.4": сравнение через num_type->Compare() значений в виде std::byte
          * (полученных с помощью num_type->ValueFromStr()) возвращает, что они не равны,
          * однако при использовании на этих же значениях num_type->ValueToString()
          * полученные строки оказываются равными */
-        byte_ranges.num_type->ValueFromStr(expected.get(), expected_ranges[i]);
-        EXPECT_EQ(byte_ranges.num_type->ValueToString(expected.get()),
-                  byte_ranges.num_type->ValueToString(byte_ranges.ranges[i]));
+        byte_ranges.col_pair.num_type->ValueFromStr(expected.get(), expected_ranges[i]);
+        EXPECT_EQ(byte_ranges.col_pair.num_type->ValueToString(expected.get()),
+                  byte_ranges.col_pair.num_type->ValueToString(byte_ranges.ranges[i]));
+    }
+}
+
+void AssertACExceptions(std::vector<algos::ACAlgorithm::ACException>& expected_ACexceptions,
+                        std::vector<algos::ACAlgorithm::ACException> const& actual_ACexceptions) {
+    ASSERT_EQ(expected_ACexceptions.size(), actual_ACexceptions.size());
+
+    for (size_t i = 0; i < expected_ACexceptions.size(); ++i) {
+        ASSERT_EQ(expected_ACexceptions[i].row_i, actual_ACexceptions[i].row_i);
+        size_t pairs_amount = expected_ACexceptions[i].column_pairs.size();
+        ASSERT_EQ(pairs_amount, actual_ACexceptions[i].column_pairs.size());
+        for (size_t pair_i = 0; pair_i < pairs_amount; ++pair_i) {
+            EXPECT_EQ(expected_ACexceptions[i].column_pairs[pair_i],
+                      actual_ACexceptions[i].column_pairs[pair_i]);
+        }
     }
 }
 
@@ -152,5 +169,28 @@ TEST_F(ACAlgorithmTest, ColumnTypesPairing) {
     a->Execute();
     auto& ranges = a->GetRangesCollections();
     EXPECT_EQ(ranges.size(), 1);
+}
+
+TEST_F(ACAlgorithmTest, CollectingACExceptions) {
+    auto a = CreateACAlgorithmInstance("TestLong.csv", ',', true, '+', 0.55, 0.41, 0.1);
+    a->Execute();
+    a->CollectACExceptions();
+
+    algos::ACAlgorithm::ACException e0(0, {{1, 2}});
+    algos::ACAlgorithm::ACException e1(1, {{0, 2}, {1, 2}});
+    algos::ACAlgorithm::ACException e2(2, {{0, 2}, {1, 2}});
+    algos::ACAlgorithm::ACException e3(3, {{0, 2}, {1, 2}});
+    ACAlgorithmTest::ACExceptions expected = {e0, e1, e2, e3};
+
+    AssertACExceptions(expected, a->GetACExceptions());
+}
+
+TEST_F(ACAlgorithmTest, RangesReconstruction) {
+    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, '-', 0.0, 1, 0.1);
+    a->Execute();
+    auto ranges_collection = a->ReconstructRangesByColumns(1, 3, 1);
+    std::vector<std::string> expected_ranges = {"0.3", "4.0"};
+
+    AssertRanges(expected_ranges, ranges_collection);
 }
 }  // namespace tests

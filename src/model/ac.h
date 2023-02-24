@@ -4,14 +4,19 @@
 
 namespace model {
 
-/* Stores two values from a table from two different columns,
- * indexes of those values in the table and the result
- * of an arithmetic operation between them */
-struct AC {
+/* Stores pair of values, indexes of values in the table
+ * and the result of an arithmetic operation between them */
+class ACPair {
 public:
     struct ColumnValueIndex {
         size_t column;
         size_t value_index;
+        bool operator==(ColumnValueIndex const& o) const {
+            return column == o.column && value_index == o.value_index;
+        }
+        bool operator!=(ColumnValueIndex const& o) const {
+            return !(o == *this);
+        }
     };
 
 private:
@@ -25,8 +30,8 @@ private:
     std::unique_ptr<std::byte[]> res;
 
 public:
-    AC(ColumnValueIndex l, ColumnValueIndex r, std::byte const* la, std::byte const* ra,
-       std::unique_ptr<std::byte[]> res)
+    ACPair(ColumnValueIndex l, ColumnValueIndex r, std::byte const* la, std::byte const* ra,
+           std::unique_ptr<std::byte[]> res)
         : lhs(l), lhs_val(la), rhs(r), rhs_val(ra), res(std::move(res)) {}
 
     ColumnValueIndex GetLhsColumnValueIndex() const {
