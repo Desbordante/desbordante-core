@@ -11,6 +11,26 @@
 
 namespace algos {
 
+namespace {
+bool ValueBelongsToRanges(ACAlgorithm::RangesCollection const& ranges_collection,
+                          std::byte const* val) {
+    model::INumericType* num_type = ranges_collection.col_pair.num_type.get();
+    for (size_t i = 0; i < ranges_collection.ranges.size() - 1; i += 2) {
+        std::byte const* l_border = ranges_collection.ranges[i];
+        std::byte const* r_border = ranges_collection.ranges[i + 1];
+        if (num_type->Compare(l_border, val) == model::CompareResult::kEqual ||
+            num_type->Compare(val, r_border) == model::CompareResult::kEqual) {
+            return true;
+        }
+        if (num_type->Compare(l_border, val) == model::CompareResult::kLess &&
+            num_type->Compare(val, r_border) == model::CompareResult::kLess) {
+            return true;
+        }
+    }
+    return false;
+}
+}  // namespace
+
 size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     /* Calculation of formula 26.2.23 from <<Mathematical Tables>>
     by Abramowitz & Stegun. Constants are given */
@@ -31,28 +51,28 @@ size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     double tmp1 = 2 / (9 * freedom_degree);
     double tmp2 = (1 - tmp1 + xp * sqrt(tmp1));
     double Xp_2 = freedom_degree * pow(tmp2, 3.0);
-    /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic Constraints
+    /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic ACPairs
      * in Relational Data>> by Paul G. Brown & Peter J. Haas*/
     size_t sample_size = (Xp_2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
     return sample_size;
 }
 
 std::vector<std::byte const*> ACAlgorithm::Sampling(std::vector<model::TypedColumnData> const& data,
-                                                    size_t lhs_i, size_t rhs_i,
-                                                    size_t k_bumps = 1) {
-    Constraints constraints;
+                                                    size_t lhs_i, size_t rhs_i) {
+    ACPairs ac_pairs;
     std::vector<std::byte const*> ranges;
+    size_t k_bumps = 1;
     size_t i = 0;
     size_t sample_size = CalculateSampleSize(k_bumps);
     size_t new_k_bumps = 1;
     size_t n_rows = data.at(lhs_i).GetData().size();
     double probability = sample_size / static_cast<double>(n_rows);
-    while (i < iterations_limit &&
+    while (i < iterations_limit_ &&
            (ranges.empty() || sample_size < CalculateSampleSize(new_k_bumps))) {
         k_bumps = new_k_bumps;
         sample_size = CalculateSampleSize(k_bumps);
         probability = sample_size / static_cast<double>(n_rows);
-        ranges = SamplingIteration(data, lhs_i, rhs_i, probability, constraints);
+        ranges = SamplingIteration(data, lhs_i, rhs_i, probability, ac_pairs);
         new_k_bumps = ranges.size() / 2;
         if (new_k_bumps == 0) {
             new_k_bumps = k_bumps + 1;
@@ -60,16 +80,18 @@ std::vector<std::byte const*> ACAlgorithm::Sampling(std::vector<model::TypedColu
         ++i;
     }
     RestrictRangesAmount(ranges);
-    alg_constraints_.emplace_back(std::move(constraints));
+    ac_pairs_.emplace_back(ACPairsCollection(
+            model::CreateSpecificType<model::INumericType>(data.at(lhs_i).GetTypeId(), true),
+            std::move(ac_pairs), lhs_i, rhs_i));
     return ranges;
 }
 
 std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
         std::vector<model::TypedColumnData> const& data, size_t lhs_i, size_t rhs_i,
-        double probability, Constraints& constraints) {
+        double probability, ACPairs& ac_pairs) {
     std::vector<std::byte const*> const& lhs = data.at(lhs_i).GetData();
     std::vector<std::byte const*> const& rhs = data.at(rhs_i).GetData();
-    constraints.clear();
+    ac_pairs.clear();
     std::random_device rd;
     std::mt19937 gen(rd());
 
@@ -92,20 +114,21 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
                 continue;
             }
             InvokeBinop(l, r, res.get());
-            auto ac = std::make_unique<model::AC>(model::AC::ColumnValueIndex{lhs_i, i},
-                                                  model::AC::ColumnValueIndex{rhs_i, i}, l, r,
-                                                  std::move(res));
-            constraints.emplace_back(std::move(ac));
+            auto ac = std::make_unique<model::ACPair>(model::ACPair::ColumnValueIndex{lhs_i, i},
+                                                      model::ACPair::ColumnValueIndex{rhs_i, i}, l,
+                                                      r, std::move(res));
+            ac_pairs.emplace_back(std::move(ac));
         }
     }
 
-    std::sort(constraints.begin(), constraints.end(),
-              [this](std::unique_ptr<model::AC> const& a, std::unique_ptr<model::AC> const& b) {
+    std::sort(ac_pairs.begin(), ac_pairs.end(),
+              [this](std::unique_ptr<model::ACPair> const& a,
+                     std::unique_ptr<model::ACPair> const& b) {
                   return model::CompareResult::kLess ==
                          this->num_type_->Compare(a->GetRes(), b->GetRes());
               });
 
-    return ConstructDisjunctiveRanges(constraints);
+    return ConstructDisjunctiveRanges(ac_pairs, weight_);
 }
 
 void ACAlgorithm::RestrictRangesAmount(std::vector<std::byte const*>& ranges) const {
@@ -139,7 +162,7 @@ ACAlgorithm::RangesCollection const& ACAlgorithm::GetRangesByColumns(size_t lhs_
                                                                      size_t rhs_i) const {
     auto res =
             std::find_if(ranges_.begin(), ranges_.end(), [lhs_i, rhs_i](RangesCollection const& r) {
-                return (r.column_indices.first == lhs_i && r.column_indices.second == rhs_i);
+                return (r.col_pair.col_i.first == lhs_i && r.col_pair.col_i.second == rhs_i);
             });
     if (res == ranges_.end()) {
         throw std::invalid_argument("No ranges for selected pair of columns");
@@ -147,16 +170,27 @@ ACAlgorithm::RangesCollection const& ACAlgorithm::GetRangesByColumns(size_t lhs_
     return *res;
 }
 
+ACAlgorithm::ACPairsCollection const& ACAlgorithm::GetACPairsByColumns(size_t lhs_i,
+                                                                       size_t rhs_i) const {
+    auto res = std::find_if(
+            ac_pairs_.begin(), ac_pairs_.end(), [lhs_i, rhs_i](ACPairsCollection const& c) {
+                return (c.col_pair.col_i.first == lhs_i && c.col_pair.col_i.second == rhs_i);
+            });
+    if (res == ac_pairs_.end()) {
+        throw std::invalid_argument("No ac_pairs for selected pair of columns");
+    }
+    return *res;
+}
 void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) const {
     for (size_t i = 0; i < ranges_.size(); ++i) {
-        LOG(DEBUG) << "lhs: " << data.at(ranges_[i].column_indices.first).ToString() << std::endl;
-        LOG(DEBUG) << "rhs: " << data.at(ranges_[i].column_indices.second).ToString() << std::endl;
+        LOG(DEBUG) << "lhs: " << data.at(ranges_[i].col_pair.col_i.first).ToString() << std::endl;
+        LOG(DEBUG) << "rhs: " << data.at(ranges_[i].col_pair.col_i.second).ToString() << std::endl;
         if (ranges_[i].ranges.empty()) {
             LOG(DEBUG) << "No intervals were found." << std::endl;
             continue;
         }
         for (size_t k = 0; k < ranges_[i].ranges.size() - 1; k += 2) {
-            auto* num_type = ranges_[i].num_type.get();
+            auto* num_type = ranges_[i].col_pair.num_type.get();
             LOG(DEBUG) << "[" << num_type->ValueToString(ranges_[i].ranges[k]) << ", "
                        << num_type->ValueToString(ranges_[i].ranges[k + 1]) << "]";
             if (k != ranges_[i].ranges.size() - 2) {
@@ -167,33 +201,88 @@ void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) c
     }
 }
 
-std::vector<std::byte const*> ACAlgorithm::ConstructDisjunctiveRanges(
-        Constraints& constraints) const {
+std::vector<std::byte const*> ACAlgorithm::ConstructDisjunctiveRanges(ACPairs const& ac_pairs,
+                                                                      double weight) const {
     std::vector<std::byte const*> ranges;
-    if (constraints.size() < 2) {
+    if (ac_pairs.size() < 2) {
         ranges = std::vector<std::byte const*>();
         return ranges;
     }
-    model::AC const* l_border = constraints.front().get();
-    model::AC const* r_border = nullptr;
-    double delta = num_type_->Dist(constraints.front()->GetRes(), constraints.back()->GetRes()) *
-                   (weight_ / (1 - weight_));
+    model::ACPair const* l_border = ac_pairs.front().get();
+    model::ACPair const* r_border = nullptr;
+    double delta = num_type_->Dist(ac_pairs.front()->GetRes(), ac_pairs.back()->GetRes()) *
+                   (weight / (1 - weight));
 
-    for (size_t i = 0; i < constraints.size() - 1; ++i) {
-        if (num_type_->Dist(constraints[i]->GetRes(), constraints[i + 1]->GetRes()) <= delta) {
-            r_border = constraints[i + 1].get();
+    for (size_t i = 0; i < ac_pairs.size() - 1; ++i) {
+        if (num_type_->Dist(ac_pairs[i]->GetRes(), ac_pairs[i + 1]->GetRes()) <= delta) {
+            r_border = ac_pairs[i + 1].get();
         } else {
             ranges.emplace_back(l_border->GetRes());
-            ranges.emplace_back(constraints[i]->GetRes());
-            l_border = constraints[i + 1].get();
-            r_border = constraints[i + 1].get();
+            ranges.emplace_back(ac_pairs[i]->GetRes());
+            l_border = ac_pairs[i + 1].get();
+            r_border = ac_pairs[i + 1].get();
         }
     }
-    if (r_border == constraints.back().get()) {
+    if (r_border == ac_pairs.back().get()) {
         ranges.emplace_back(l_border->GetRes());
         ranges.emplace_back(r_border->GetRes());
     }
     return ranges;
+}
+
+ACAlgorithm::RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i,
+                                                                      double weight) {
+    ACPairsCollection const& constraints_collection = GetACPairsByColumns(lhs_i, rhs_i);
+    ACPairs const& ac_pairs = constraints_collection.ac_pairs;
+    std::vector<std::byte const*> ranges = ConstructDisjunctiveRanges(ac_pairs, weight);
+    model::TypeId type_id = constraints_collection.col_pair.num_type->GetTypeId();
+    return RangesCollection{model::CreateSpecificType<model::INumericType>(type_id, true),
+                            std::move(ranges), lhs_i, rhs_i};
+}
+
+void ACAlgorithm::CollectACExceptions() {
+    std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
+    for (auto const& ranges_collection : ranges_) {
+        CollectColumnPairExceptions(data, ranges_collection);
+    }
+    auto comp = [](ACException const& a, ACException const& b) { return a.row_i < b.row_i; };
+    std::sort(exceptions_.begin(), exceptions_.end(), comp);
+}
+
+void ACAlgorithm::AddException(size_t row_i, std::pair<size_t, size_t> col_pair) {
+    auto equal = [row_i](ACException const& e) { return e.row_i == row_i; };
+    auto exception_i = std::find_if(exceptions_.begin(), exceptions_.end(), equal);
+    if (exception_i == exceptions_.end()) {
+        exceptions_.push_back(ACException(row_i, col_pair));
+    } else {
+        exception_i->column_pairs.push_back(col_pair);
+    }
+}
+
+void ACAlgorithm::CollectColumnPairExceptions(std::vector<model::TypedColumnData> const& data,
+                                              RangesCollection const& ranges_collection) {
+    size_t lhs_i = ranges_collection.col_pair.col_i.first;
+    size_t rhs_i = ranges_collection.col_pair.col_i.second;
+    std::vector<std::byte const*> const& lhs = data.at(lhs_i).GetData();
+    std::vector<std::byte const*> const& rhs = data.at(rhs_i).GetData();
+    num_type_ = model::CreateSpecificType<model::INumericType>(data.at(lhs_i).GetTypeId(), true);
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        std::byte const* l = lhs.at(i);
+        std::byte const* r = rhs.at(i);
+        if (data[lhs_i].IsNullOrEmpty(i) || data[rhs_i].IsNullOrEmpty(i)) {
+            continue;
+        }
+        auto res = std::unique_ptr<std::byte[]>(num_type_->Allocate());
+        num_type_->ValueFromStr(res.get(), "0");
+        if (bin_operation_ == Binop::Division &&
+            num_type_->Compare(r, res.get()) == model::CompareResult::kEqual) {
+            continue;
+        }
+        InvokeBinop(l, r, res.get());
+        if (!ValueBelongsToRanges(ranges_collection, res.get())) {
+            AddException(i, {lhs_i, rhs_i});
+        }
+    }
 }
 
 ACAlgorithm::Binop ACAlgorithm::InitializeBinop(char bin_operation) {
@@ -211,7 +300,7 @@ ACAlgorithm::Binop ACAlgorithm::InitializeBinop(char bin_operation) {
             binop_pointer_ = &model::INumericType::Div;
             break;
         default:
-            throw std::invalid_argument("Invalid operation for algebraic constraints discovery");
+            throw std::invalid_argument("Invalid operation for algebraic ac_pairs discovery");
     }
     return static_cast<Binop>(bin_operation);
 }
