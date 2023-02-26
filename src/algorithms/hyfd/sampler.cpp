@@ -61,7 +61,7 @@ public:
     }
 
     [[nodiscard]] size_t GetRightNeighbor() const {
-        return GetDecrement(current_column_compared_);
+        return GetIncrement(current_column_compared_);
     }
 };
 
