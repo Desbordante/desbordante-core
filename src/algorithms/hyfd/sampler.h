@@ -22,7 +22,7 @@ private:
     RowsPtr compressed_records_;
     std::priority_queue<Efficiency> efficiency_queue_;
 
-    std::shared_ptr<NonFds> non_fds_;
+    std::unique_ptr<NonFds> non_fds_;
 
     void ProcessComparisonSuggestions(IdPairs const& comparison_suggestions);
     void InitializeEfficiencyQueue();
