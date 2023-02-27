@@ -17,12 +17,12 @@ namespace algos::hyfd {
  */
 class NonFds {
 private:
-    std::vector<std::unordered_set<boost::dynamic_bitset<>>> total_non_fds_;
+    std::unordered_set<boost::dynamic_bitset<>> total_non_fds_;
     NonFDList new_non_fds_;
 
 public:
     explicit NonFds(size_t num_attributes)
-        : total_non_fds_(num_attributes + 1), new_non_fds_(num_attributes) {}
+        : new_non_fds_(num_attributes) {}
 
     /**
      * Adds given column combination to the lifetime storage.
@@ -46,7 +46,7 @@ public:
     NonFDList MoveOutNewNonFds();
 
     [[nodiscard]] size_t NumAttributes() const {
-        return total_non_fds_.size() - 1;
+        return new_non_fds_.GetNumAttributes();
     }
 };
 

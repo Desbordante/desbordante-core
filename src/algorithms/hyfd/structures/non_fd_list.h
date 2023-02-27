@@ -36,6 +36,8 @@ public:
         }
     }
 
+    size_t GetNumAttributes() const noexcept { return fds_.size() - 1; }
+
     /**
      * @return Highest level containing any number of combinations.
      */
