@@ -80,12 +80,12 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
 
     for (auto const& cluster : pli.GetIndex()) {
         for (size_t i = 0; window < cluster.size() && i < cluster.size() - window; ++i) {
-            int const pivotId = cluster[i];
-            int const partnerId = cluster[i + window];
+            int const pivot_id = cluster[i];
+            int const partner_id = cluster[i + window];
 
-            boost::dynamic_bitset<> equalAttrs(num_attributes);
-            Match(equalAttrs, pivotId, partnerId);
-            non_fds_->Add(std::move(equalAttrs));
+            boost::dynamic_bitset<> equal_attrs(num_attributes);
+            Match(equal_attrs, pivot_id, partner_id);
+            non_fds_->Add(std::move(equal_attrs));
 
             comparisons++;
         }
@@ -112,15 +112,15 @@ void Sampler::InitializeEfficiencyQueue() {
     size_t const num_attributes = plis_->size();
 
     if (num_attributes >= 3) {
-        ColumnSlider columnSlider(num_attributes);
+        ColumnSlider column_slider(num_attributes);
         for (auto& pli : *plis_) {
             ClusterComparator cluster_comparator(compressed_records_.get(),
-                                                 columnSlider.GetLeftNeighbor(),
-                                                 columnSlider.GetRightNeighbor());
+                                                 column_slider.GetLeftNeighbor(),
+                                                 column_slider.GetRightNeighbor());
             for (auto& cluster : pli->GetIndex()) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
-            columnSlider.ToNextColumn();
+            column_slider.ToNextColumn();
         }
     }
 
