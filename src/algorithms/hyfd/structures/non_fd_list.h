@@ -9,17 +9,19 @@
 namespace algos::hyfd {
 
 /**
- * Collection of fd-violating column combinations found by the Sampler.
+ * Collection of column combinations found by the Sampler module.
+ * In the HyFD algorithm column combination repesents a non-FD.
+ * In the HyUCC algorithm column combination repesents a non-UCC.
  *
  * Stores combinations with the same column count as a separate level.
  */
-class NonFDList {
+class ColumnCombinationList {
 private:
-    std::vector<std::vector<boost::dynamic_bitset<>>> fds_;
+    std::vector<std::vector<boost::dynamic_bitset<>>> ccs_;
     unsigned depth_ = 0;
 
 public:
-    explicit NonFDList(size_t num_attributes) : fds_(num_attributes + 1) {}
+    explicit ColumnCombinationList(size_t num_attributes) : ccs_(num_attributes + 1) {}
 
     /**
      * Adds the column combination to the correspondent level. Does not check whether the level
@@ -30,18 +32,20 @@ public:
     void Add(boost::dynamic_bitset<>&& column_set) {
         unsigned level = column_set.count();
 
-        fds_[level].push_back(std::move(column_set));
+        ccs_[level].push_back(std::move(column_set));
         if (level > depth_) {
             depth_ = level;
         }
     }
 
-    size_t GetNumAttributes() const noexcept { return fds_.size() - 1; }
+    size_t GetNumAttributes() const noexcept {
+        return ccs_.size() - 1;
+    }
 
     /**
      * @return Highest level containing any number of combinations.
      */
-    [[nodiscard]] unsigned GetDepth() const {
+    [[nodiscard]] unsigned GetDepth() const noexcept {
         return depth_;
     }
 
@@ -49,16 +53,18 @@ public:
      * @return Collection of column combination with given column count.
      */
     [[nodiscard]] std::vector<boost::dynamic_bitset<>> const& GetLevel(size_t level) const {
-        return fds_.at(level);
+        return ccs_.at(level);
     }
 
     /**
-     * @return Total count of column combination accross all levels.
+     * @return Total count of stored column combinations accross all levels.
      */
     [[nodiscard]] size_t GetTotalCount() const {
-        return std::accumulate(fds_.cbegin(), fds_.cend(), 0,
+        return std::accumulate(ccs_.cbegin(), ccs_.cend(), 0,
                                [](size_t res, auto const& v) { return res + v.size(); });
     }
 };
+
+using NonFDList = ColumnCombinationList;
 
 }  // namespace algos::hyfd

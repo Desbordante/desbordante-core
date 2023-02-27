@@ -10,19 +10,18 @@
 namespace algos::hyfd {
 
 /**
- * Collection of fd-violating column combinations found by the Sampler.
+ * Collection of column combinations found by the Sampler.
  *
  * Stores combinations found during the lifetime as well as combinations found since
  * the last access.
  */
-class NonFds {
+class AllColumnCombinations {
 private:
-    std::unordered_set<boost::dynamic_bitset<>> total_non_fds_;
-    NonFDList new_non_fds_;
+    std::unordered_set<boost::dynamic_bitset<>> total_ccs_;
+    ColumnCombinationList new_ccs_;
 
 public:
-    explicit NonFds(size_t num_attributes)
-        : new_non_fds_(num_attributes) {}
+    explicit AllColumnCombinations(size_t num_attributes) : new_ccs_(num_attributes) {}
 
     /**
      * Adds given column combination to the lifetime storage.
@@ -36,18 +35,20 @@ public:
      * @return Number of column sets stored in the last-access storage.
      */
     [[nodiscard]] size_t Count() const {
-        return new_non_fds_.GetTotalCount();
+        return new_ccs_.GetTotalCount();
     }
 
     /**
      * @return Collection of violating column sets found since this method previous call.
      * @see NonFDList
      */
-    NonFDList MoveOutNewNonFds();
+    ColumnCombinationList MoveOutNewColumnCombinations();
 
     [[nodiscard]] size_t NumAttributes() const {
-        return new_non_fds_.GetNumAttributes();
+        return new_ccs_.GetNumAttributes();
     }
 };
+
+using NonFds = AllColumnCombinations;
 
 }  // namespace algos::hyfd

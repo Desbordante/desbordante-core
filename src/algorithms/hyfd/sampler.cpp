@@ -163,7 +163,7 @@ NonFDList Sampler::GetNonFDCandidates(IdPairs const& comparison_suggestions) {
         }
     }
 
-    return non_fds_->MoveOutNewNonFds();
+    return non_fds_->MoveOutNewColumnCombinations();
 }
 
 void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
