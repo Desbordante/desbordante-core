@@ -182,9 +182,9 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
 }
 
 Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records)
-    : plis_(std::move(plis)), compressed_records_(std::move(pli_records)) {
-    non_fds_ = std::make_shared<NonFds>(plis_->size());
-}
+    : plis_(std::move(plis)),
+      compressed_records_(std::move(pli_records)),
+      non_fds_(std::make_unique<NonFds>(plis_->size())) {}
 
 Sampler::~Sampler() = default;
 
