@@ -7,20 +7,15 @@
 namespace algos::hyfd {
 
 void NonFds::Add(boost::dynamic_bitset<>&& column_set) {
-    assert(total_non_fds_.size() > column_set.count());
-
-    auto& level = total_non_fds_[column_set.count()];
-    if (level.find(column_set) != level.end()) {
-        return;
+    if (total_non_fds_.insert(column_set).second) {
+        new_non_fds_.Add(std::move(column_set));
     }
-
-    level.insert(column_set);
-    new_non_fds_.Add(std::move(column_set));
 }
 
 NonFDList NonFds::MoveOutNewNonFds() {
+    size_t num_attributes = NumAttributes();
     NonFDList old = std::move(new_non_fds_);
-    new_non_fds_ = NonFDList{total_non_fds_.size()};
+    new_non_fds_ = NonFDList{num_attributes};
     return old;
 }
 
