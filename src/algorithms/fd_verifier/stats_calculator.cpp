@@ -146,7 +146,7 @@ std::string StatsCalculator::GetStringValueByIndex(ClusterIndex row_index,
     return col.GetDataAsString(row_index);
 }
 
-model::CompareResult StatsCalculator::CompareTypes(ClusterIndex i1, ClusterIndex i2) const {
+model::CompareResult StatsCalculator::CompareTypedValues(ClusterIndex i1, ClusterIndex i2) const {
     for (auto index : lhs_indices_) {
         model::CompareResult result =
                 CompareTypesInCol(typed_relation_->GetColumnData(index), i1, i2);
@@ -199,13 +199,14 @@ auto StatsCalculator::CompareHighlightsBySizeDescending() -> HighlightCompareFun
 
 auto StatsCalculator::CompareHighlightsByLhsAscending() const -> HighlightCompareFunction {
     return [this](auto const& h1, auto const& h2) {
-        return CompareTypes(h1.GetCluster()[0], h2.GetCluster()[0]) == model::CompareResult::kLess;
+        return CompareTypedValues(h1.GetCluster()[0], h2.GetCluster()[0]) ==
+               model::CompareResult::kLess;
     };
 }
 
 auto StatsCalculator::CompareHighlightsByLhsDescending() const -> HighlightCompareFunction {
     return [this](auto const& h1, auto const& h2) {
-        return CompareTypes(h1.GetCluster()[0], h2.GetCluster()[0]) ==
+        return CompareTypedValues(h1.GetCluster()[0], h2.GetCluster()[0]) ==
                model::CompareResult::kGreater;
     };
 }
