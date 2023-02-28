@@ -22,8 +22,13 @@ Statistic::Statistic(Statistic&& other)
     : has_value_(other.has_value_), data_(std::move(other.data_)), type_(std::move(other.type_)) {
     other.has_value_ = false;
 }
+
 Statistic& Statistic::operator=(const Statistic& other) {
     if (this != &other) {
+        if (has_value_) {
+            type_->Free(data_);
+        }
+
         has_value_ = other.has_value_;
         if (has_value_) {
             type_ = other.type_->CloneType();
@@ -37,10 +42,16 @@ Statistic& Statistic::operator=(const Statistic& other) {
 }
 
 Statistic& Statistic::operator=(Statistic&& other) {
-    has_value_ = other.has_value_;
-    type_ = std::move(other.type_);
-    data_ = std::move(other.data_);
-    other.has_value_ = false;
+    if (this != &other) {
+        if (has_value_) {
+            type_->Free(data_);
+        }
+
+        has_value_ = other.has_value_;
+        type_ = std::move(other.type_);
+        data_ = std::move(other.data_);
+        other.has_value_ = false;
+    }
     return *this;
 }
 
