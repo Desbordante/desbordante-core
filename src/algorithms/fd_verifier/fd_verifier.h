@@ -77,6 +77,16 @@ public:
     void SortHighlightsByLhsAscending() const;
     void SortHighlightsByLhsDescending() const;
 
+    StatsCalculator::HighlightCompareFunction CompareHighlightsByLhsDescending() const {
+        assert(stats_calculator_);
+        return stats_calculator_->CompareHighlightsByLhsDescending();
+    }
+
+    StatsCalculator::HighlightCompareFunction CompareHighlightsByLhsAscending() const {
+        assert(stats_calculator_);
+        return stats_calculator_->CompareHighlightsByLhsAscending();
+    }
+
     FDVerifier();
 };
 

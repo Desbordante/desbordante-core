@@ -29,7 +29,6 @@ private:
     void VisualizeHighlights() const;
     std::string GetLhsStringValue(ClusterIndex row_index) const;
     std::string GetStringValueByIndex(ClusterIndex row_index, ClusterIndex col_index) const;
-    model::CompareResult CompareTypes(ClusterIndex i1, ClusterIndex i2) const;
 
     static size_t CalculateNumDifferentRhsValues(
             std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size);
@@ -39,6 +38,8 @@ private:
 
     static size_t CalculateNumMostFrequentRhsValue(
             std::unordered_map<ClusterIndex, unsigned> const& frequencies);
+
+    model::CompareResult CompareTypedValues(ClusterIndex i1, ClusterIndex i2) const;
 
 public:
     using HighlightCompareFunction = std::function<bool(Highlight const& h1, Highlight const& h2)>;
