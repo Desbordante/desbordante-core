@@ -1,11 +1,11 @@
 #include <filesystem>
 #include <memory>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "column_layout_typed_relation_data.h"
 #include "csv_parser.h"
+#include "datasets.h"
 #include "fd_algorithm.h"
 
 namespace tests {
@@ -29,7 +29,7 @@ struct TypeParsingParams {
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};
 
 static fs::path ConstructPath(std::string_view dataset) {
-    return std::filesystem::current_path() / "input_data" / dataset;
+    return test_data_dir / dataset;
 }
 
 TEST_P(TestTypeParsing, DefaultTest) {

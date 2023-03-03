@@ -2,12 +2,12 @@
 #include <utility>
 
 #include <boost/functional/hash.hpp>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/typo_miner.h"
 #include "algorithms/options/names.h"
+#include "algorithms/typo_miner.h"
+#include "datasets.h"
 
 namespace tests {
 namespace onam = algos::config::names;
@@ -18,7 +18,7 @@ struct TestingParam {
     TestingParam(std::string const& dataset,
                  char const separator, bool const has_header, bool const is_null_equal_null,
                  unsigned const max_lhs, double const error, ushort const threads)
-        : params({{onam::kData,       std::filesystem::current_path() / "input_data" / dataset},
+        : params({{onam::kData,       test_data_dir / dataset},
                   {onam::kSeparator,  separator},
                   {onam::kHasHeader,  has_header},
                   {onam::kEqualNulls, is_null_equal_null},
@@ -128,7 +128,7 @@ static void TestForEachAlgo(F&& test) {
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
     auto const test = [](algos::PrimitiveType const algo) {
         auto typo_miner = ConfToFitTypoMiner(algo);
-        std::string path = std::filesystem::current_path() / "input_data" / "TestEmpty.csv";
+        auto path = test_data_dir / "TestEmpty.csv";
         auto parser = CSVParser(path, ',', true);
         ASSERT_THROW(typo_miner->Fit(parser), std::runtime_error);
     };

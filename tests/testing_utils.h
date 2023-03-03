@@ -37,9 +37,10 @@ protected:
         };
     }
 
-    std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(
-            const std::filesystem::path& path, char separator = ',', bool has_header = true) {
-        return algos::CreateAndLoadPrimitive<T>(GetParamMap(path, separator, has_header));
+    std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(const std::string& filename,
+                                                                char separator = ',',
+                                                                bool has_header = true) {
+        return algos::CreateAndLoadPrimitive<T>(
+                GetParamMap(test_data_dir / filename, separator, has_header));
     }
 };
-

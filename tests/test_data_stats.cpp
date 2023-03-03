@@ -3,6 +3,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
+#include "datasets.h"
 
 namespace tests {
 namespace mo = model;
@@ -17,9 +18,7 @@ static algos::StdParamsMap GetParamMap(std::string_view dataset, char const sepa
                                        bool const is_null_equal_null = true,
                                        ushort thread_num = 1) {
     using namespace algos::config::names;
-    auto const path = std::filesystem::current_path() / "input_data" / dataset;
-
-    return {{kData, path},
+    return {{kData, test_data_dir / dataset},
             {kHasHeader, has_header},
             {kSeparator, separator},
             {kEqualNulls, is_null_equal_null},
@@ -35,7 +34,7 @@ static std::unique_ptr<algos::DataStats> MakeStatPrimitive(std::string_view data
             GetParamMap(dataset, separator, has_header, is_null_equal_null, thread_num));
 }
 
-class TestDataStats : public ::testing::TestCase{};
+class TestDataStats : public ::testing::TestCase {};
 
 TEST(TestDataStats, TestNullEmpties) {
     auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);

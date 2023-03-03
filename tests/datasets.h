@@ -1,7 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <filesystem>
 #include <string>
+#include <vector>
+
+static const auto test_data_dir = std::filesystem::current_path() / "input_data";
 
 struct Dataset {
     std::string name;
