@@ -159,16 +159,14 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                 continue;
             }
             auto algorithm = CreateFD_MineAlgorithmInstance(
-                test_data_dir / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
-                LightDatasets::HasHeader(i));
+                    test_data_dir / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
+                    LightDatasets::HasHeader(i));
 
-            StdParamsMap params_map{
-                    {onam::kData, test_data_dir / LightDatasets::DatasetName(i)},
-                    {onam::kSeparator, LightDatasets::Separator(i)},
-                    {onam::kHasHeader, LightDatasets::HasHeader(i)},
-                    {onam::kSeed, decltype(Configuration::seed){0}},
-                    {onam::kError, algos::config::ErrorType{0.0}}
-            };
+            StdParamsMap params_map{{onam::kData, test_data_dir / LightDatasets::DatasetName(i)},
+                                    {onam::kSeparator, LightDatasets::Separator(i)},
+                                    {onam::kHasHeader, LightDatasets::HasHeader(i)},
+                                    {onam::kSeed, decltype(Configuration::seed){0}},
+                                    {onam::kError, algos::config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadPrimitive<algos::Pyro>(params_map);
             auto& pyro = *pyro_ptr;
 
