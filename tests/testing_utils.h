@@ -19,7 +19,6 @@ protected:
     }
 
     std::unique_ptr<algos::FDAlgorithm> CreateAndConfToFit() {
-        namespace onam = algos::config::names;
         std::unique_ptr<algos::FDAlgorithm> prim = std::make_unique<T>();
         algos::ConfigureFromMap(*prim, algos::StdParamsMap{});
         return prim;
