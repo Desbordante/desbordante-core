@@ -1,13 +1,14 @@
-#include <iostream>
 #include <filesystem>
+#include <iostream>
 #include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/pyro.h"
 #include "algorithms/options/names.h"
+#include "algorithms/pyro.h"
+#include "datasets.h"
 
 namespace tests {
 
@@ -31,8 +32,7 @@ class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 template<typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
     namespace onam = algos::config::names;
-
-    std::filesystem::path const path{fs::current_path() / "input_data" / p.dataset};
+    auto path = test_data_dir / p.dataset;
     std::vector<unsigned int> actual;
     StdParamsMap params_map{
             {onam::kData, path},

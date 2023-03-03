@@ -8,9 +8,10 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/metric/metric_verifier.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/metric/metric_verifier.h"
 #include "algorithms/options/names.h"
+#include "datasets.h"
 
 namespace tests {
 namespace onam = algos::config::names;
@@ -33,8 +34,7 @@ struct MetricVerifyingParams {
         : params({{onam::kParameter,                min_parameter},
                   {onam::kLhsIndices,               std::move(lhs_indices)},
                   {onam::kRhsIndices,               std::move(rhs_indices)},
-                  {onam::kData,
-                   std::filesystem::current_path() / "input_data" / dataset},
+                  {onam::kData,                     test_data_dir / dataset},
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},
@@ -62,8 +62,7 @@ struct HighlightTestParams {
         : params({{onam::kParameter,                (long double)0},
                   {onam::kLhsIndices,               std::move(lhs_indices)},
                   {onam::kRhsIndices,               std::move(rhs_indices)},
-                  {onam::kData,
-                   std::filesystem::current_path() / "input_data" / dataset},
+                  {onam::kData,                     test_data_dir / dataset},
                   {onam::kSeparator,                separator},
                   {onam::kHasHeader,                has_header},
                   {onam::kEqualNulls,               true},

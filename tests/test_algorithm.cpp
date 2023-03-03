@@ -75,47 +75,39 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<
 TYPED_TEST_SUITE_P(AlgorithmTest);
 
 TYPED_TEST_P(AlgorithmTest, ThrowsOnEmpty) {
-    auto const path = fs::current_path() / "input_data" / "TestEmpty.csv";
     auto primitive = TestFixture::CreateAndConfToFit();
-    auto parser = TestFixture::MakeCsvParser(path, ',', true);
+    auto parser = TestFixture::MakeCsvParser(test_data_dir / "TestEmpty.csv", ',', true);
     ASSERT_THROW(primitive->Fit(parser), std::runtime_error);
 }
 
 TYPED_TEST_P(AlgorithmTest, ReturnsEmptyOnSingleNonKey) {
-    auto const path = fs::current_path() / "input_data" / "TestSingleColumn.csv";
-    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance("TestSingleColumn.csv", ',', true);
     algorithm->Execute();
     ASSERT_TRUE(algorithm->FdList().empty());
 }
 
 TYPED_TEST_P(AlgorithmTest, WorksOnLongDataset) {
-    auto const path = fs::current_path() / "input_data" / "TestLong.csv";
-
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
 
-    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance("TestLong.csv", ',', true);
     algorithm->Execute();
     ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
-    auto const path = fs::current_path() / "input_data" / "TestWide.csv";
-
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{
         {{0}, 2}, {{0}, 4}, {{2}, 0}, {{2}, 4}, {{4}, 0}, {{4}, 2}, {{}, 1}, {{}, 3}};
 
-    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance("TestWide.csv", ',', true);
     algorithm->Execute();
     ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
-    auto const path = fs::current_path() / "input_data";
-
     try {
         for (auto const& dataset : LightDatasets::datasets_) {
-            auto algorithm = TestFixture::CreateAlgorithmInstance(
-                path / dataset.name, dataset.separator, dataset.header_presence);
+            auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
+                                                                  dataset.header_presence);
             algorithm->Execute();
             std::cout << dataset.name << std::endl;
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
@@ -130,13 +122,10 @@ TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
 }
 
 TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
-    auto const path = fs::current_path() / "input_data";
-
     try {
         for (auto const& dataset : HeavyDatasets::datasets_) {
-            auto algorithm = TestFixture::CreateAlgorithmInstance(
-                path / dataset.name, dataset.separator,
-                dataset.header_presence);
+            auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
+                                                                  dataset.header_presence);
             algorithm->Execute();
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
                 << "The new algorithm and Pyro yield different results at " << dataset.name;
@@ -150,12 +139,12 @@ TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
 }
 
 TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
-    auto const dataset_path = fs::current_path() / "input_data" / "WDC_astronomical.csv";
-    auto algorithm = TestFixture::CreateAlgorithmInstance(dataset_path, ',', true);
+    auto const path = test_data_dir / "WDC_astronomical.csv";
+    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
     algorithm->Execute();
     auto first_res = FDsToSet(algorithm->FdList());
     for (int i = 0; i < 3; ++i) {
-        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(dataset_path, ',', true));
+        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(path, ',', true));
         algorithm->Execute();
         ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
     }
