@@ -33,6 +33,19 @@ public:
         Configure(kwargs);
         return primitive_.Execute();
     }
+
+    void SetOption(std::string const& option_name, pybind11::object option_value) {
+        if (option_value.is_none()) {
+            primitive_.SetOption(option_name);
+            return;
+        }
+        primitive_.SetOption(option_name,
+                             PyToAny(primitive_.GetTypeIndex(option_name), option_value));
+    }
+
+    std::unordered_set<std::string_view> GetNeededOptions() const {
+        return primitive_.GetNeededOptions();
+    }
 };
 
 template <typename PrimitiveType>

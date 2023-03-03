@@ -24,7 +24,11 @@ INITIALIZE_EASYLOGGINGPP
                          &Py##type::Fit),                                                         \
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
             .def("execute", &Py##type::Execute, "Process data")                                   \
-            .def("get_results", &Py##type::GetResults)
+            .def("get_needed_options", &Py##type::GetNeededOptions,                               \
+                 "Get names of options the primitive needs")                                      \
+            .def("set_option", &Py##type::SetOption, "option_name"_a,                             \
+                 "option_value"_a = pybind11::none(), "Set option value")                         \
+            .def("get_results", &Py##type::GetResults, "Get the algorithm's execution results")
 
 namespace python_bindings {
 
