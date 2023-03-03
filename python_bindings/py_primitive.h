@@ -1,11 +1,13 @@
 #pragma once
 
+#include <string>
 #include <unordered_map>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "algorithms/algo_factory.h"
+#include "get_py_type.h"
 #include "pandas_reader.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
@@ -45,6 +47,12 @@ public:
 
     std::unordered_set<std::string_view> GetNeededOptions() const {
         return primitive_.GetNeededOptions();
+    }
+
+    pybind11::tuple GetOptionType(std::string_view option_name) const {
+        auto type_index = primitive_.GetTypeIndex(option_name);
+        if (type_index == typeid(void)) return pybind11::make_tuple();
+        return GetPyType(type_index);
     }
 };
 

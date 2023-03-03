@@ -28,6 +28,8 @@ INITIALIZE_EASYLOGGINGPP
                  "Get names of options the primitive needs")                                      \
             .def("set_option", &Py##type::SetOption, "option_name"_a,                             \
                  "option_value"_a = pybind11::none(), "Set option value")                         \
+            .def("get_option_type", &Py##type::GetOptionType, "option_name"_a,                    \
+                 "Get Python type of option")                                                     \
             .def("get_results", &Py##type::GetResults, "Get the algorithm's execution results")
 
 namespace python_bindings {
