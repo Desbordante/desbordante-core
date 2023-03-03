@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include "ac_algorithm.h"
+#include "datasets.h"
 #include "types.h"
 
 namespace tests {
@@ -17,7 +18,7 @@ public:
             char bin_operation = '+', double fuzziness = 0.1, double p_fuzz = 0.9,
             double weight = 0.1, size_t bumps_limit = 0, size_t iterations_limit = 10,
             std::string pairing_rule = "trivial", bool test_mode = true) {
-        auto data = std::filesystem::current_path() / "input_data" / path;
+        auto data = test_data_dir / path;
         algos::ACAlgorithm::Config const config = {
                 data,   separator, hasHeader,   bin_operation,    fuzziness,
                 p_fuzz, weight,    bumps_limit, iterations_limit, pairing_rule};

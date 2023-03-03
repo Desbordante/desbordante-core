@@ -55,7 +55,8 @@ static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
 
 class ARAlgorithmTest : public ::testing::Test {
 protected:
-    static algos::StdParamsMap GetParamMap(double minsup, double minconf, const std::filesystem::path& path,
+    static algos::StdParamsMap GetParamMap(double minsup, double minconf,
+                                           const std::filesystem::path& path,
                                            unsigned int tidColumnIndex,
                                            unsigned int itemColumnIndex, char separator = ',',
                                            bool hasHeader = true) {
@@ -70,9 +71,9 @@ protected:
                 {kItemColumnIndex, itemColumnIndex}};
     }
 
-    static algos::StdParamsMap GetParamMap(double minsup, double minconf, const std::filesystem::path& path,
-                                           bool firstColumnTid, char separator = ',',
-                                           bool hasHeader = true) {
+    static algos::StdParamsMap GetParamMap(double minsup, double minconf,
+                                           const std::filesystem::path& path, bool firstColumnTid,
+                                           char separator = ',', bool hasHeader = true) {
         using namespace algos::config::names;
         return {{kData, path},
                 {kSeparator, separator},
@@ -84,8 +85,9 @@ protected:
     }
 
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, const std::filesystem::path& path, unsigned int tidColumnIndex,
-            unsigned int itemColumnIndex, char separator = ',', bool hasHeader = true) {
+            double minsup, double minconf, const std::filesystem::path& path,
+            unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
+            bool hasHeader = true) {
         return algos::CreateAndLoadPrimitive<algos::Apriori>(GetParamMap(
                 minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, hasHeader));
     }
@@ -99,7 +101,7 @@ protected:
 };
 
 TEST_F(ARAlgorithmTest, BookDataset) {
-    auto const path = fs::current_path() / "input_data" / "transactional_data" / "rules-book.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-book.csv";
     auto algorithm = CreateAlgorithmInstance(0.3, 0.5, path, 0, 1, ',', false);
     algorithm->Execute();
     auto const actual_frequent = algorithm->GetFrequentList();
@@ -131,8 +133,7 @@ TEST_F(ARAlgorithmTest, BookDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
-    auto const path =
-        fs::current_path() / "input_data" / "transactional_data" / "rules-presentation-extended.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-presentation-extended.csv";
     auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
     algorithm->Execute();
     auto const actual = algorithm->GetFrequentList();
@@ -152,8 +153,7 @@ TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationDataset) {
-    auto const path =
-        fs::current_path() / "input_data" / "transactional_data" / "rules-presentation.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-presentation.csv";
     auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
     algorithm->Execute();
 
@@ -174,8 +174,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 }
 
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
-    auto const path =
-        fs::current_path() / "input_data" / "transactional_data" / "rules-synthetic-2.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-synthetic-2.csv";
     auto algorithm = CreateAlgorithmInstance(0.13, 1.00001, path, 0, 1, ',', false);
     algorithm->Execute();
 
@@ -209,8 +208,7 @@ TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
 }
 
 TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
-    auto const path =
-        fs::current_path() / "input_data" / "transactional_data" / "rules-kaggle-rows.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-kaggle-rows.csv";
     auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
     algorithm->Execute();
 
@@ -338,8 +336,7 @@ TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
 }
 
 TEST_F(ARAlgorithmTest, RepeatedExecutionConsistentResult) {
-    auto const path =
-            fs::current_path() / "input_data" / "transactional_data" / "rules-kaggle-rows.csv";
+    auto const path = test_data_dir / "transactional_data" / "rules-kaggle-rows.csv";
     auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
     algorithm->Execute();
     auto first_result = ToSet(algorithm->GetArStringsList());

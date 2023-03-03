@@ -85,20 +85,20 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
     auto primitive = ConfToFitFD_Mine();
-    auto path = std::filesystem::current_path() / "input_data" / "TestEmpty.csv";
+    auto path = test_data_dir / "TestEmpty.csv";
     auto parser = CSVParser(path, ',', true);
     ASSERT_THROW(primitive->Fit(parser), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
-    auto path = std::filesystem::current_path() / "input_data" / "TestSingleColumn.csv";
+    auto path = test_data_dir / "TestSingleColumn.csv";
     auto algorithm = CreateFD_MineAlgorithmInstance(path, ',', true);
     algorithm->Execute();
     ASSERT_TRUE(algorithm->FdList().empty());
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
-    auto path = std::filesystem::current_path() / "input_data" / "TestLong.csv";
+    auto path = test_data_dir / "TestLong.csv";
 
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
 
@@ -151,8 +151,6 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     namespace onam = algos::config::names;
 
-    auto path = std::filesystem::current_path() / "input_data";
-
     try {
         for (size_t i = 0; i < LightDatasets::DatasetQuantity(); i++) {
             std::cout << LightDatasets::DatasetName(i) << std::endl;
@@ -161,11 +159,11 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                 continue;
             }
             auto algorithm = CreateFD_MineAlgorithmInstance(
-                path / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
+                test_data_dir / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
                 LightDatasets::HasHeader(i));
 
             StdParamsMap params_map{
-                    {onam::kData, path / LightDatasets::DatasetName(i)},
+                    {onam::kData, test_data_dir / LightDatasets::DatasetName(i)},
                     {onam::kSeparator, LightDatasets::Separator(i)},
                     {onam::kHasHeader, LightDatasets::HasHeader(i)},
                     {onam::kSeed, decltype(Configuration::seed){0}},

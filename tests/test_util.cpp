@@ -4,11 +4,12 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "column_layout_relation_data.h"
-#include "list_agree_set_sample.h"
-#include "identifier_set.h"
 #include "agree_set_factory.h"
+#include "column_layout_relation_data.h"
+#include "datasets.h"
+#include "identifier_set.h"
 #include "levenshtein_distance.h"
+#include "list_agree_set_sample.h"
 
 namespace tests {
 
@@ -23,7 +24,7 @@ TEST(pliChecker, first) {
         {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
     };
 
-    auto path = fs::current_path().append("input_data").append("Test1.csv");
+    auto path = test_data_dir / "Test1.csv";
     deque<vector<int>> index;
     try {
         auto csv_parser = std::make_unique<CSVParser>(path);
@@ -47,7 +48,7 @@ TEST(pliChecker, second) {
     };
     deque<vector<int>> index;
     try {
-        auto path = fs::current_path().append("input_data").append("Test1.csv");
+        auto path = test_data_dir / "Test1.csv";
         auto csv_parser = std::make_unique<CSVParser>(path);
         auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, false);
         auto column_data = test->GetColumnData(0);
@@ -65,9 +66,8 @@ TEST(pliIntersectChecker, first) {
     std::shared_ptr<util::PositionListIndex> intersection;
 
     try {
-        auto path = fs::current_path().append("input_data");
-        auto csv_parser_1 = std::make_unique<CSVParser>(path / "ProbeTest1.csv");
-        auto csv_parser_2 = std::make_unique<CSVParser>(path / "ProbeTest2.csv");
+        auto csv_parser_1 = std::make_unique<CSVParser>(test_data_dir / "ProbeTest1.csv");
+        auto csv_parser_2 = std::make_unique<CSVParser>(test_data_dir / "ProbeTest2.csv");
 
         auto test1 = ColumnLayoutRelationData::CreateFrom(*csv_parser_1, false);
         auto test2 = ColumnLayoutRelationData::CreateFrom(*csv_parser_2, false);
@@ -105,7 +105,7 @@ TEST(IdentifierSetTest, Computation) {
     };
 
     try {
-        auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
+        auto path = test_data_dir / "BernoulliRelation.csv";
         auto parser = std::make_unique<CSVParser>(path);
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
 
@@ -141,7 +141,7 @@ TEST(IdentifierSetTest, Intersection) {
     };
 
     try {
-        auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
+        auto path = test_data_dir / "BernoulliRelation.csv";
         auto parser = std::make_unique<CSVParser>(path);
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
         std::vector<util::IdentifierSet> id_sets;
@@ -186,7 +186,7 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
     };
 
     try {
-        auto path = fs::current_path().append("input_data").append("BernoulliRelation.csv");
+        auto path = test_data_dir / "BernoulliRelation.csv";
         auto parser = std::make_unique<CSVParser>(path);
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
         AgreeSetFactory factory(relation.get(), c);
