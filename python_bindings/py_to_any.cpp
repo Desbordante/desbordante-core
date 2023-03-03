@@ -10,7 +10,7 @@
 
 #define NORMAL_CONV(type)                         \
     std::make_pair(std::type_index(typeid(type)), \
-                   [](py::object const& value) { return boost::any(py::cast<type>(value)); })
+                   [](py::object const& value) { return py::cast<type>(value); })
 
 #define ENUM_CONV(enum_type)                                                         \
     std::make_pair(std::type_index(typeid(enum_type)), [](py::object const& value) { \
