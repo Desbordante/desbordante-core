@@ -23,9 +23,8 @@ INITIALIZE_EASYLOGGINGPP
                  py::overload_cast<pybind11::object, std::string, py::kwargs const&>(             \
                          &Py##type::Fit),                                                         \
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
-            .def("execute", &Py##type::Execute, "Process data")
-#define DEFINE_PRIMITIVE_WITH_RES(type) \
-    DEFINE_PRIMITIVE(type).def("get_results", &Py##type::GetResults)
+            .def("execute", &Py##type::Execute, "Process data")                                   \
+            .def("get_results", &Py##type::GetResults)
 
 namespace python_bindings {
 
@@ -68,21 +67,20 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("lhs_indices", &PyFD::GetLhs)
             .def_property_readonly("rhs_index", &PyFD::GetRhs);
 
-    DEFINE_PRIMITIVE_WITH_RES(DataStats);
-    DEFINE_PRIMITIVE_WITH_RES(Apriori);
-    DEFINE_PRIMITIVE_WITH_RES(Tane);
-    DEFINE_PRIMITIVE_WITH_RES(Pyro);
-    DEFINE_PRIMITIVE_WITH_RES(FUN);
-    DEFINE_PRIMITIVE_WITH_RES(FdMine);
-    DEFINE_PRIMITIVE_WITH_RES(FastFDs);
-    DEFINE_PRIMITIVE_WITH_RES(HyFD);
-    DEFINE_PRIMITIVE_WITH_RES(FDep);
-    DEFINE_PRIMITIVE_WITH_RES(DFD);
-    DEFINE_PRIMITIVE_WITH_RES(Depminer);
-    DEFINE_PRIMITIVE_WITH_RES(Aid);
-    DEFINE_PRIMITIVE_WITH_RES(MetricVerifier);
+    DEFINE_PRIMITIVE(DataStats);
+    DEFINE_PRIMITIVE(Apriori);
+    DEFINE_PRIMITIVE(Tane);
+    DEFINE_PRIMITIVE(Pyro);
+    DEFINE_PRIMITIVE(FUN);
+    DEFINE_PRIMITIVE(FdMine);
+    DEFINE_PRIMITIVE(FastFDs);
+    DEFINE_PRIMITIVE(HyFD);
+    DEFINE_PRIMITIVE(FDep);
+    DEFINE_PRIMITIVE(DFD);
+    DEFINE_PRIMITIVE(Depminer);
+    DEFINE_PRIMITIVE(Aid);
+    DEFINE_PRIMITIVE(MetricVerifier);
 }
-#undef DEFINE_PRIMITIVE_WITH_RES
 #undef DEFINE_PRIMITIVE
 
 }  // namespace python_bindings
