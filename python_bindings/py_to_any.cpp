@@ -25,7 +25,6 @@ static const std::unordered_map<std::type_index, ConvFunc> converters{
         NORMAL_CONV(bool),
         NORMAL_CONV(double),
         NORMAL_CONV(unsigned int),
-        NORMAL_CONV(bool),
         NORMAL_CONV(long double),
         NORMAL_CONV(std::vector<unsigned int>),
         NORMAL_CONV(ushort),
