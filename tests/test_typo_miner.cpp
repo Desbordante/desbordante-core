@@ -15,17 +15,17 @@ namespace onam = algos::config::names;
 struct TestingParam {
     algos::StdParamsMap params;
 
-    TestingParam(std::string const& dataset,
-                 char const separator, bool const has_header, bool const is_null_equal_null,
-                 unsigned const max_lhs, double const error, ushort const threads)
-        : params({{onam::kData,       test_data_dir / dataset},
-                  {onam::kSeparator,  separator},
-                  {onam::kHasHeader,  has_header},
+    TestingParam(std::string const& dataset, char const separator, bool const has_header,
+                 bool const is_null_equal_null, unsigned const max_lhs, double const error,
+                 ushort const threads)
+        : params({{onam::kData, test_data_dir / dataset},
+                  {onam::kSeparator, separator},
+                  {onam::kHasHeader, has_header},
                   {onam::kEqualNulls, is_null_equal_null},
                   {onam::kMaximumLhs, max_lhs},
-                  {onam::kError,      error},
-                  {onam::kThreads,    threads},
-                  {onam::kSeed,       0}}) {}
+                  {onam::kError, error},
+                  {onam::kThreads, threads},
+                  {onam::kSeed, 0}}) {}
 };
 
 /* FD represented as vector where all elements except last are lhs indices and
