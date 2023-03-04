@@ -27,7 +27,8 @@ static std::string EnumToAvailableValues() {
 }  // namespace algos
 
 namespace algos::config::descriptions {
-constexpr auto kDData = "path to CSV file, relative to ./input_data";
+constexpr auto kDData =
+        "path to CSV file (or to directory with CSV files), relative to ./input_data";
 constexpr auto kDSeparator = "CSV separator";
 constexpr auto kDHasHeader = "CSV header presence flag [true|false]";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";

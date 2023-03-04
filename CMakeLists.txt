@@ -49,6 +49,7 @@ include_directories(
     "src/algorithms/association_rules"
     "src/algorithms/depminer"
     "src/algorithms/statistics"
+    "src/algorithms/spider"
     "src/algorithms/options"
     "src/model"
     "src/model/types"

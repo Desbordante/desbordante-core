@@ -13,8 +13,11 @@
 #include "algorithms/statistics/data_stats.h"
 #include "algorithms/tane.h"
 
-/*Association rule mining algorithms */
+/* Association rule mining algorithms */
 #include "algorithms/association_rules/apriori.h"
 
 /* Metric FD verifier */
 #include "algorithms/metric/metric_verifier.h"
+
+/* Inclusion dependencies mining algorithms */
+#include "algorithms/spider/spider.h"

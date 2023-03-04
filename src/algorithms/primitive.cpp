@@ -97,6 +97,12 @@ void Primitive::Fit(model::IDatasetStream& data) {
     ExecutePrepare();
 }
 
+void Primitive::Fit() {
+    if (!GetNeededOptions().empty())
+        throw std::logic_error("All options need to be set before starting processing.");
+    ExecutePrepare();
+}
+
 unsigned long long Primitive::Execute() {
     if (!fit_completed_) {
         throw std::logic_error("Data must be processed before execution.");

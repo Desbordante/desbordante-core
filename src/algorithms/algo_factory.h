@@ -98,11 +98,16 @@ void ConfigureFromMap(Primitive& primitive, OptionMap&& options) {
 template <typename OptionMap>
 void LoadPrimitive(Primitive& prim, OptionMap&& options) {
     ConfigureFromMap(prim, options);
-    auto parser = CSVParser{
-            details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
-            details::ExtractOptionValue<char>(options, config::names::kSeparator),
-            details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
-    prim.Fit(parser);
+    if (dynamic_cast<Spider*>(&prim)) {
+        prim.Fit();
+    } else {
+        auto parser = CSVParser{
+                details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
+                details::ExtractOptionValue<char>(options, config::names::kSeparator),
+                details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
+        prim.Fit(parser);
+    }
+
     ConfigureFromMap(prim, options);
 }
 

@@ -128,6 +128,22 @@ boost::program_options::options_description AlgoOptions() {
             (names::kPairingRule, po::value<std::string>()->default_value("trivial"),
              "one of available pairing rules: trivial")
             ;
+
+    po::options_description id_options("ID options");
+    id_options.add_options()
+        (names::kTemp, po::value<std::filesystem::path>()->default_value("temp"),
+         "one of available operations: /, *, +, - ")
+        (names::kMemoryLimit, po::value<std::size_t>()->default_value((std::size_t)(std::pow(8,30))),
+         "fraction of exceptional records")
+        (names::kMemoryCheckFrequency, po::value<std::size_t>()->default_value(100000),
+         "probability, the fraction of exceptional records that lie outside the "
+         "bump intervals is at most Fuzziness")
+        (names::kColType, po::value<algos::ColType>()->default_value(algos::ColType::VECTOR),
+         "value between 0 and 1. Closer to 0 - many short intervals. "
+         "Closer to 1 - small number of long intervals")
+        (names::kValueType, po::value<algos::KeyType>()->default_value(algos::KeyType::STRING_VIEW),
+         "max considered intervals amount. Pass 0 to remove limit")
+        ;
     // clang-format on
 
     po::options_description algorithm_options("Algorithm options");
@@ -135,7 +151,8 @@ boost::program_options::options_description AlgoOptions() {
             .add(mfd_options)
             .add(ar_options)
             .add(ac_options)
-            .add(typo_options);
+            .add(typo_options)
+            .add(id_options);
     return algorithm_options;
 }
 }  // namespace algos::config

@@ -31,7 +31,10 @@ BETTER_ENUM(PrimitiveType, char,
     metric,
 
 /* Statistic algorithms */
-    stats
+    stats,
+
+/* Inclusion dependencies mining algorithms */
+    spider
 )
 // clang-format on
 

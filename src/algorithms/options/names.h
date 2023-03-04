@@ -1,6 +1,11 @@
 #pragma once
 
 namespace algos::config::names {
+constexpr auto kTemp = "temp";
+constexpr auto kMemoryLimit = "mem_limit";
+constexpr auto kMemoryCheckFrequency = "mem_check_frequency";
+constexpr auto kColType = "col_type";
+constexpr auto kValueType = "value_type";
 constexpr auto kData = "data";
 constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
