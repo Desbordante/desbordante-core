@@ -165,4 +165,3 @@ void Primitive::ResetProgress() noexcept {
 }
 
 }  // namespace algos
-
