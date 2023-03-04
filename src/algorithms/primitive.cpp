@@ -123,5 +123,11 @@ std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
     return needed;
 }
 
+std::type_index Primitive::GetTypeIndex(std::string_view option_name) const {
+    auto it = possible_options_.find(option_name);
+    if (it == possible_options_.end()) return typeid(void);
+    return it->second->GetTypeIndex();
+}
+
 }  // namespace algos
 
