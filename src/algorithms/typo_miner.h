@@ -14,7 +14,7 @@
 
 namespace algos {
 
-class TypoMiner : public Primitive {
+class TypoMiner : public CsvPrimitive {
 private:
     std::unique_ptr<FDAlgorithm> precise_algo_;
     std::unique_ptr<FDAlgorithm> approx_algo_;

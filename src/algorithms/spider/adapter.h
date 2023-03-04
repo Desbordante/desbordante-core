@@ -50,4 +50,5 @@ public:
         return std::string_view{val_ptr, size};
     };
 };
+
 }  // namespace algos::details

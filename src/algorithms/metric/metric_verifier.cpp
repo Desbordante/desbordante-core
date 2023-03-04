@@ -54,7 +54,7 @@ decltype(MetricVerifier::QGramLengthOpt) MetricVerifier::QGramLengthOpt{
         }
 };
 
-MetricVerifier::MetricVerifier() : Primitive({}) {
+MetricVerifier::MetricVerifier() : CsvPrimitive({}) {
     RegisterOptions();
     MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
 }

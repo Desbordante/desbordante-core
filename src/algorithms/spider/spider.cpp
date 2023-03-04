@@ -1,6 +1,5 @@
 #include "spider.h"
 
-#include <iostream>
 #include <set>
 
 #include <easylogging++.h>
@@ -34,10 +33,9 @@ void Spider::RegisterOptions() {
     RegisterOption(ValueTypeOpt.GetOption(&key_type_));
 }
 
-void Spider::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(SepOpt, HasHeaderOpt, DataOpt, TempOpt,
-                                                MemoryLimitOpt, config::ThreadNumberOpt, ColTypeOpt,
-                                                ValueTypeOpt));
+void Spider::MakePreprocessOptsAvailable() {
+    MakeOptionsAvailable(config::GetOptionNames(TempOpt, MemoryLimitOpt, config::ThreadNumberOpt,
+                                                ColTypeOpt, ValueTypeOpt));
 }
 
 template <ColTypeImpl col_type, typename... Args>
@@ -52,58 +50,34 @@ decltype(auto) CreateConcreteChunkProcessor(ColTypeImpl value, Args&&... args) {
 }
 
 std::unique_ptr<BaseTableProcessor> Spider::CreateChunkProcessor(
-        std::filesystem::path const& path, SpilledFilesManager& manager) const {
-    BaseTableProcessor::DatasetConfig dataset{
-            .path = path, .separator = separator_, .has_header = has_header_};
+        model::IDatasetStream::DataInfo const& data_info, SpilledFilesManager& manager) const {
     auto col_type_v = static_cast<ColTypeImpl>(col_type_._to_index());
-
     if (col_type_ == +ColType::SET) {
-        return CreateConcreteChunkProcessor<ColTypeImpl::SET>(col_type_v, manager, dataset,
+        return CreateConcreteChunkProcessor<ColTypeImpl::SET>(col_type_v, manager, data_info,
                                                               ram_limit_, mem_check_frequency_);
     } else {
-        return CreateConcreteChunkProcessor<ColTypeImpl::VECTOR>(col_type_v, manager, dataset,
+        return CreateConcreteChunkProcessor<ColTypeImpl::VECTOR>(col_type_v, manager, data_info,
                                                                  ram_limit_, threads_count_);
     }
 }
 
-void Spider::PreprocessData() {
-    SpilledFilesManager spilled_manager{temp_dir_};
-
-    for (const auto& path : GetPathsFromData(data_)) {
-        LOG(INFO) << "Process next dataset: " << path.filename();
-        auto processor = CreateChunkProcessor(path, spilled_manager);
-        processor->Execute();
-        state_.table_column_start_indexes.emplace_back(state_.n_cols);
-        state_.n_cols += processor->GetHeaderSize();
-        state_.number_of_columns.emplace_back(processor->GetHeaderSize());
-    }
-    state_.max_values = spilled_manager.GetMaxValues();
-}
-
 unsigned long long Spider::ExecuteInternal() {
-    auto preprocess_time = std::chrono::system_clock::now();
-    PreprocessData();
-    auto preprocessing_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - preprocess_time);
-
     LOG(INFO) << "Initialize attributes";
     auto init_time = std::chrono::system_clock::now();
     InitializeAttributes();
-    auto initializing_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+    timings_.initializing = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - init_time);
 
     LOG(INFO) << "Compute UIDs";
-    auto checking_time = std::chrono::system_clock::now();
+    auto compute_time = std::chrono::system_clock::now();
     ComputeUIDs();
-    auto checking = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - checking_time);
+    timings_.computing = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - compute_time);
 
     LOG(INFO) << std::endl << "SUMMARY INFO";
 
-    LOG(INFO) << "PreprocessingTime: " << preprocessing_time.count();
-    LOG(INFO) << "InitializeTime: " << initializing_time.count();
-    LOG(INFO) << "CompareTime: " << checking.count();
     Output();
+    timings_.Print();
     LOG(INFO) << "Deps: " << result_.size();
     return 0;
 }
@@ -134,11 +108,11 @@ void Spider::ComputeUIDs() {
         auto top_attribute = attribute_queue_.top();
         attribute_queue_.pop();
 
-        attr_ids.emplace(top_attribute->GetID());
+        attr_ids.emplace(top_attribute->GetId());
         while (!attribute_queue_.empty() &&
                top_attribute->GetCursor().GetValue() ==
                        (attribute_queue_.top()->GetCursor().GetValue())) {
-            attr_ids.emplace(attribute_queue_.top()->GetID());
+            attr_ids.emplace(attribute_queue_.top()->GetId());
             attribute_queue_.pop();
         }
         for (auto attr_id : attr_ids) {
@@ -166,7 +140,7 @@ void Spider::Output() {
 void Spider::PrintResult(std::ostream& out) const {
     std::vector<std::string> columns;
     columns.reserve(state_.n_cols);
-    for (std::size_t i = 0; i != paths_.size(); ++i) {
+    for (std::size_t i = 0; i != state_.number_of_columns.size(); ++i) {
         for (std::size_t j = 0; j != state_.number_of_columns[i]; ++j) {
             std::string name = std::to_string(i) + "." + std::to_string(j);
             columns.emplace_back(name);
@@ -177,6 +151,28 @@ void Spider::PrintResult(std::ostream& out) const {
         out << std::endl;
     }
     out << std::endl;
+}
+
+void Spider::Fit(model::IDatasetStream::DataInfo const& data_info) {
+    auto preprocess_time = std::chrono::system_clock::now();
+    ExecutePrepare();
+
+    SpilledFilesManager spilled_manager{temp_dir_};
+    auto paths = MultiCsvPrimitive::GetRegularFilesFromPath(data_info.path);
+    auto dataset_info{data_info};
+    for (const auto& path : paths) {
+        dataset_info.path = path;
+        LOG(INFO) << "Process next dataset: " << path.filename();
+        auto processor = CreateChunkProcessor(dataset_info, spilled_manager);
+        processor->Execute();
+        state_.table_column_start_indexes.emplace_back(state_.n_cols);
+        state_.n_cols += processor->GetHeaderSize();
+        state_.number_of_columns.emplace_back(processor->GetHeaderSize());
+    }
+    state_.max_values = spilled_manager.GetMaxValues();
+
+    timings_.preprocessing = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - preprocess_time);
 }
 
 }  // namespace algos

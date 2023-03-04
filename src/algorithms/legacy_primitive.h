@@ -13,7 +13,7 @@
 
 namespace algos {
 
-class LegacyPrimitive : public Primitive {
+class LegacyPrimitive : public CsvPrimitive {
 private:
     void FitInternal([[maybe_unused]] model::IDatasetStream &data_stream) override {}
 
@@ -32,20 +32,20 @@ public:
     virtual ~LegacyPrimitive() override = default;
 
     explicit LegacyPrimitive(std::vector<std::string_view> phase_names)
-            : Primitive(std::move(phase_names)) {
+        : CsvPrimitive(std::move(phase_names)) {
         ExecutePrepare();
     }
 
     LegacyPrimitive(std::unique_ptr<model::IDatasetStream> input_generator_ptr,
                     std::vector<std::string_view> phase_names)
-            : Primitive(std::move(phase_names)), input_generator_(std::move(input_generator_ptr)) {
+        : CsvPrimitive(std::move(phase_names)), input_generator_(std::move(input_generator_ptr)) {
         ExecutePrepare();
     }
 
-    LegacyPrimitive(std::filesystem::path const &path, char const separator, bool const has_header,
+    LegacyPrimitive(std::filesystem::path const& path, char const separator, bool const has_header,
                     std::vector<std::string_view> phase_names)
-            : Primitive(std::move(phase_names)),
-            input_generator_(std::make_unique<CSVParser>(path, separator, has_header)) {
+        : CsvPrimitive(std::move(phase_names)),
+          input_generator_(std::make_unique<CSVParser>(path, separator, has_header)) {
         ExecutePrepare();
     }
 };

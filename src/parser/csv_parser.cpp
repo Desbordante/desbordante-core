@@ -50,6 +50,9 @@ CSVParser::CSVParser(const std::filesystem::path& path, char separator, bool has
     }
 }
 
+CSVParser::CSVParser(model::IDatasetStream::DataInfo const& dataset_info)
+    : CSVParser(dataset_info.path, dataset_info.separator, dataset_info.has_header) {}
+
 void CSVParser::GetNext() {
     next_line_ = "";
     std::getline(source_, next_line_);

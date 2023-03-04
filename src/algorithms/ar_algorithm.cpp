@@ -29,7 +29,7 @@ decltype(ARAlgorithm::MinConfidenceOpt) ARAlgorithm::MinConfidenceOpt{
         {config::names::kMinimumConfidence, config::descriptions::kDMinimumConfidence}, 0.0};
 
 ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
-        : Primitive(std::move(phase_names)) {
+    : CsvPrimitive(std::move(phase_names)) {
     RegisterOptions();
     MakeOptionsAvailable(config::GetOptionNames(InputFormatOpt));
 }

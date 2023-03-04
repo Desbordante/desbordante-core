@@ -38,6 +38,7 @@ public:
     CSVParser() = default;
     explicit CSVParser(const std::filesystem::path& path);
     CSVParser(const std::filesystem::path& path, char separator, bool has_header);
+    explicit CSVParser(DataInfo const& dataset_info);
 
     std::vector<std::string> GetNextRow() override;
     std::string GetUnparsedLine(const unsigned long long line_index);

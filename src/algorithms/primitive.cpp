@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "parser/csv_parser.h"
+
 namespace algos {
 
 bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view const& option_name,
@@ -89,20 +91,6 @@ void Primitive::MakeOptionsAvailable(const std::vector<std::string_view> &option
     }
 }
 
-void Primitive::Fit(model::IDatasetStream& data) {
-    if (!GetNeededOptions().empty()) throw std::logic_error(
-                "All options need to be set before starting processing.");
-    FitInternal(data);
-    data.Reset();
-    ExecutePrepare();
-}
-
-void Primitive::Fit() {
-    if (!GetNeededOptions().empty())
-        throw std::logic_error("All options need to be set before starting processing.");
-    ExecutePrepare();
-}
-
 unsigned long long Primitive::Execute() {
     if (!fit_completed_) {
         throw std::logic_error("Data must be processed before execution.");
@@ -170,5 +158,47 @@ void Primitive::ResetProgress() noexcept {
     cur_phase_progress_ = 0;
 }
 
-}  // namespace algos
+void CsvPrimitive::Fit(model::IDatasetStream& data) {
+    if (!GetNeededOptions().empty()) {
+        throw std::logic_error("All options need to be set before starting processing.");
+    }
+    FitInternal(data);
+    data.Reset();
+    ExecutePrepare();
+}
 
+void CsvPrimitive::Fit(model::IDatasetStream::DataInfo const& data_info) {
+    CSVParser data{data_info};
+    Fit(data);
+}
+
+std::vector<std::filesystem::path> MultiCsvPrimitive::GetRegularFilesFromPath(
+        std::filesystem::path const& data) {
+    if (std::filesystem::is_regular_file(data)) {
+        return {data};
+    }
+
+    std::vector<std::filesystem::path> paths;
+    for (const auto& entry : std::filesystem::directory_iterator(data)) {
+        if (std::filesystem::is_regular_file(entry.path())) {
+            paths.emplace_back(entry);
+        }
+    }
+    std::sort(paths.begin(), paths.end());
+    return paths;
+}
+
+void MultiCsvPrimitive::Fit(model::IDatasetStream::DataInfo const& data_info) {
+    if (!GetNeededOptions().empty()) {
+        throw std::logic_error("All options need to be set before starting processing.");
+    }
+    const auto paths = GetRegularFilesFromPath(data_info.path);
+    for (const auto& path : paths) {
+        CSVParser data{data_info};
+        FitInternal(data);
+        data.Reset();
+    }
+    ExecutePrepare();
+}
+
+}  // namespace algos

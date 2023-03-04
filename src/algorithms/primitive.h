@@ -16,7 +16,6 @@
 #include "algorithms/options/opt_add_func_type.h"
 #include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
-#include "parser/csv_parser.h"
 
 namespace algos {
 
@@ -47,7 +46,6 @@ private:
 
     void ResetProgress() noexcept;
 
-    virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
@@ -96,8 +94,7 @@ public:
 
     explicit Primitive(std::vector<std::string_view> phase_names);
 
-    void Fit(model::IDatasetStream & data_stream);
-    void Fit();
+    virtual void Fit(model::IDatasetStream::DataInfo const& data_info) = 0;
     bool FitCompleted() const;
 
     unsigned long long Execute();
@@ -121,6 +118,31 @@ public:
     std::type_index GetTypeIndex(std::string_view option_name) const {
         return possible_options_.at(option_name)->GetTypeIndex();
     }
+};
+
+/* This could be the base class for all algorithms that use the CSVParser
+ * to process single dataset.
+ * */
+class CsvPrimitive : public Primitive {
+private:
+    virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
+
+public:
+    using Primitive::Primitive;
+    void Fit(model::IDatasetStream& data_stream);
+    void Fit(model::IDatasetStream::DataInfo const& data_info) override;
+};
+
+/* This class could create and use multiple instances of CSVParser, one for each dataset. */
+class MultiCsvPrimitive : public Primitive {
+private:
+    virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
+
+public:
+    using Primitive::Primitive;
+    void Fit(model::IDatasetStream::DataInfo const& data_info) override;
+    static std::vector<std::filesystem::path> GetRegularFilesFromPath(
+            std::filesystem::path const& data);
 };
 
 }  // namespace algos

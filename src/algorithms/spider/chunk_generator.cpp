@@ -1,6 +1,12 @@
 #include "chunk_generator.h"
 
+#include <cmath>
+#include <fcntl.h>
+#include <stdexcept>
+#include <string>
+#include <sys/mman.h>
 #include <unistd.h>
+#include <utility>
 
 #include <easylogging++.h>
 

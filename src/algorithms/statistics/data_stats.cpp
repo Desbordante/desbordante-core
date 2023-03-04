@@ -9,7 +9,7 @@ namespace algos {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-DataStats::DataStats() : Primitive({"Calculating statistics"}) {
+DataStats::DataStats() : CsvPrimitive({"Calculating statistics"}) {
     RegisterOptions();
     MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
 }

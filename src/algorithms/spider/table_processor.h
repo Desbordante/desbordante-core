@@ -25,6 +25,7 @@
 
 #include "adapter.h"
 #include "chunk_generator.h"
+#include "model/idataset_stream.h"
 #include "spilled_files_manager.h"
 
 #if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
@@ -47,13 +48,8 @@ using KeysTuple = std::tuple<std::string_view, PairOffset>;
 
 class BaseTableProcessor {
 public:
+    using DatasetConfig = model::IDatasetStream::DataInfo;
     using BufferPtr = ChunkGenerator::CharPtr;
-
-    struct DatasetConfig {
-        std::filesystem::path path;
-        char separator;
-        bool has_header;
-    };
 
 private:
     virtual void ProcessChunk(BufferPtr begin, BufferPtr end, bool is_chunk) = 0;

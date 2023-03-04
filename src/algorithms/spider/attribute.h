@@ -8,7 +8,6 @@
 #include "model/cursor.h"
 
 namespace algos {
-
 class Attribute {
 public:
     using SSet = std::set<std::size_t>;
@@ -22,7 +21,7 @@ private:
 public:
     Attribute(std::size_t id, std::size_t n_cols, StrCursor cursor,
               std::vector<std::string> const& max_values);
-    std::size_t GetID() const {
+    std::size_t GetId() const {
         return id_;
     }
     StrCursor& GetCursor() {
@@ -52,8 +51,7 @@ public:
         return !GetCursor().HasNext() || (GetRefs().empty() && GetDeps().empty());
     }
 
-    static int CompareID(std::size_t id_lhs, std::size_t id_rhs);
+    static int CompareId(std::size_t id_lhs, std::size_t id_rhs);
     int CompareTo(Attribute const& other) const;
 };
-
 }  // namespace algos

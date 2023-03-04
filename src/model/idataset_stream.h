@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -7,6 +8,12 @@ namespace model {
 
 class IDatasetStream {
 public:
+    struct DataInfo {
+        std::filesystem::path path;
+        char separator = ',';
+        bool has_header = true;
+    };
+
     virtual std::vector<std::string> GetNextRow() = 0;
     [[nodiscard]] virtual bool HasNextRow() const = 0;
     [[nodiscard]] virtual size_t GetNumberOfColumns() const = 0;

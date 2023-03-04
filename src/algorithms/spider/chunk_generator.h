@@ -1,12 +1,7 @@
-#include <algorithm>
-#include <cmath>
-#include <fcntl.h>
+#pragma once
+
 #include <filesystem>
-#include <fstream>
-#include <stdexcept>
-#include <string>
-#include <sys/mman.h>
-#include <utility>
+#include <functional>
 
 namespace algos {
 
