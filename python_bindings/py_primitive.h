@@ -37,10 +37,14 @@ public:
 
 template <typename PrimitiveType>
 void PyPrimitive<PrimitiveType>::Configure(const pybind11::kwargs& kwargs) {
+    static const auto void_index = std::type_index{typeid(void)};
+
     auto params = kwargs.cast<std::unordered_map<std::string, pybind11::object>>();
     std::unordered_map<std::string, boost::any> any_map{};
     for (auto const& [opt_name, obj] : params) {
-        any_map[opt_name] = PyToAny(primitive_.GetTypeIndex(opt_name), obj);
+        auto type_index = primitive_.GetTypeIndex(opt_name);
+        if (type_index == void_index) continue;
+        any_map[opt_name] = PyToAny(type_index, obj);
     }
     algos::ConfigureFromMap(primitive_, any_map);
 }
