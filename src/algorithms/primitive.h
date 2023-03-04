@@ -117,9 +117,7 @@ public:
         return phase_names_;
     }
 
-    std::type_index GetTypeIndex(std::string_view option_name) const {
-        return possible_options_.at(option_name)->GetTypeIndex();
-    }
+    std::type_index GetTypeIndex(std::string_view option_name) const;
 };
 
 }  // namespace algos
