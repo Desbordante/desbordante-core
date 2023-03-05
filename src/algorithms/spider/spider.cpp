@@ -13,36 +13,38 @@
 
 namespace algos {
 
-decltype(Spider::TempOpt) Spider::TempOpt{
-        {config::names::kTemp, config::descriptions::kDSeparator}};
+using namespace ind::details;
+using namespace ind::preproc;
+
+decltype(Spider::TempOpt) Spider::TempOpt{{config::names::kTemp, config::descriptions::kDTemp},
+                                          {"temp"}};
 
 decltype(Spider::MemoryLimitMBOpt) Spider::MemoryLimitMBOpt{
-        {config::names::kMemoryLimit, config::descriptions::kDHasHeader}};
+        {config::names::kMemoryLimit, config::descriptions::kDMemoryLimit}, 8 * 1024};
 
 decltype(Spider::MemoryCheckFreq) Spider::MemoryCheckFreq{
-        {config::names::kMemoryCheckFrequency, config::descriptions::kDHasHeader}};
+        {config::names::kMemoryCheckFrequency, config::descriptions::kDMemoryCheckFrequency},
+        {100000}};
 
 decltype(Spider::ColTypeOpt) Spider::ColTypeOpt{
-        {config::names::kColType, config::descriptions::kDData}};
+        {config::names::kColType, config::descriptions::kDColType}, {ColType::VECTOR}};
 
 decltype(Spider::KeyTypeOpt) Spider::KeyTypeOpt{
-        {config::names::kKeyType, config::descriptions::kDData}};
+        {config::names::kKeyType, config::descriptions::kDKeyType}, {KeyType::STRING_VIEW}};
 
 void Spider::RegisterOptions() {
     RegisterOption(TempOpt.GetOption(&temp_dir_));
     RegisterOption(MemoryLimitMBOpt.GetOption(&mem_limit_mb_));
+    RegisterOption(MemoryCheckFreq.GetOption(&mem_check_frequency_));
     RegisterOption(config::ThreadNumberOpt.GetOption(&threads_count_));
     RegisterOption(ColTypeOpt.GetOption(&col_type_));
     RegisterOption(KeyTypeOpt.GetOption(&key_type_));
 }
 
 void Spider::MakePreprocessOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(TempOpt, MemoryLimitMBOpt, config::ThreadNumberOpt,
-                                                ColTypeOpt, KeyTypeOpt));
+    MakeOptionsAvailable(config::GetOptionNames(TempOpt, MemoryLimitMBOpt, MemoryCheckFreq,
+                                                config::ThreadNumberOpt, ColTypeOpt, KeyTypeOpt));
 }
-
-using ColTypeImpl = ind::details::ColTypeImpl;
-using KeyTypeImpl = ind::details::KeyTypeImpl;
 
 template <ColTypeImpl col_type, typename... Args>
 decltype(auto) CreateConcreteChunkProcessor(ColTypeImpl value, Args&&... args) {
@@ -58,7 +60,7 @@ decltype(auto) CreateConcreteChunkProcessor(ColTypeImpl value, Args&&... args) {
 std::unique_ptr<BaseTableProcessor> Spider::CreateChunkProcessor(
         model::IDatasetStream::DataInfo const& data_info, SortedColumnWriter& writer) const {
     auto col_type = static_cast<ColTypeImpl>(col_type_._to_index());
-    if (col_type_ == +ind::ColType::SET) {
+    if (col_type_ == +ColType::SET) {
         return CreateConcreteChunkProcessor<ColTypeImpl::SET>(
                 col_type, writer, data_info, GetMemoryLimitInBytes(), mem_check_frequency_);
     } else {
@@ -173,7 +175,7 @@ void Spider::Fit(model::IDatasetStream::DataInfo const& data_info) {
         processor->Execute();
         stats_.n_cols += processor->GetHeaderSize();
         stats_.number_of_columns.emplace_back(processor->GetHeaderSize());
-        stats_.datasets_info.push_back(
+        stats_.datasets_order.push_back(
                 {.table_name = path.filename(), .header = processor->GetHeader()});
     }
     stats_.max_values = writer.GetMaxValues();

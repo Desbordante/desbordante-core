@@ -8,7 +8,7 @@
 
 #include <easylogging++.h>
 
-namespace algos {
+namespace algos::ind::preproc {
 
 /* A class that writes sorted columns to disk,
  * supporting partial column writes with final file merging.
@@ -86,4 +86,4 @@ public:
     }
 };
 
-}  // namespace algos
+}  // namespace algos::ind::preproc

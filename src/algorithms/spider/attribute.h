@@ -7,7 +7,7 @@
 
 #include "model/cursor.h"
 
-namespace algos {
+namespace algos::ind {
 
 /* A class containing an iterator to traverse through attribute column
  * and holding candidates for UINDs.
@@ -58,4 +58,4 @@ public:
     static int CompareId(std::size_t id_lhs, std::size_t id_rhs);
     int CompareTo(Attribute const& other) const;
 };
-}  // namespace algos
+}  // namespace algos::ind

@@ -13,11 +13,12 @@
 #include <boost/tokenizer.hpp>
 #include <easylogging++.h>
 
+#include "base_table_processor.h"
 #include "chunked_file_reader.h"
 #include "enums.h"
 #include "model/idataset_stream.h"
 #include "sorted_column_writer.h"
-#include "value_handler.h"
+#include "util/value_handler.h"
 
 #if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
 #define GLIBC_VERSION (__GLIBC__ * 1000 + __GLIBC_MINOR__)
@@ -25,78 +26,10 @@
 #define GLIBC_VERSION 0
 #endif
 
-namespace algos {
+namespace algos::ind::preproc {
 
 namespace details {
 using KeysTuple = std::tuple<std::string_view, PairOffset>;
-}
-
-class BaseTableProcessor {
-public:
-    using DatasetConfig = model::IDatasetStream::DataInfo;
-    using BufferPtr = ChunkedFileReader::ChunkPtr;
-
-private:
-    virtual void ProcessChunk(BufferPtr begin, BufferPtr end, bool is_chunk) = 0;
-
-    BufferPtr InitHeader(BufferPtr buffer) {
-        char const* pos = buffer;
-        while (*pos != '\0' && *pos != '\n') {
-            char const* next_pos = pos;
-            while (*next_pos != '\0' && *next_pos != dataset_.separator && *next_pos != '\n') {
-                next_pos++;
-            }
-            if (dataset_.has_header) {
-                header_.emplace_back(pos, next_pos - pos);
-            } else {
-                header_.emplace_back(std::to_string(GetHeaderSize()));
-            }
-            pos = next_pos + (*next_pos == dataset_.separator);
-        }
-        if (dataset_.has_header) {
-            buffer = (BufferPtr)pos;
-        }
-        return dataset_.has_header ? (BufferPtr)pos : buffer;
-    }
-
-    virtual void InitAdditionalChunkInfo(BufferPtr, BufferPtr) {}
-
-protected:
-    DatasetConfig dataset_;
-    SortedColumnWriter& writer_;
-    std::vector<std::string> header_;
-
-    std::size_t memory_limit_;
-    std::size_t chunk_m_limit_;
-
-public:
-    BaseTableProcessor(SortedColumnWriter& writer, DatasetConfig dataset, std::size_t memory_limit,
-                       std::size_t chunk_m_limit)
-        : dataset_(std::move(dataset)),
-          writer_(writer),
-          memory_limit_(memory_limit),
-          chunk_m_limit_(chunk_m_limit) {}
-    virtual ~BaseTableProcessor() = default;
-
-    std::size_t GetHeaderSize() const {
-        return header_.size();
-    }
-    std::vector<std::string> const& GetHeader() const {
-        return header_;
-    }
-    void Execute() {
-        ChunkedFileReader reader{dataset_.path, chunk_m_limit_};
-        while (reader.HasNext()) {
-            auto [start, end] = reader.GetNext();
-            if (reader.GetCurrentChunkId() == 0) {
-                start = InitHeader(start);
-            }
-            InitAdditionalChunkInfo(start, end);
-            ProcessChunk(start, end, reader.GetChunksNumber() > 1);
-        };
-        writer_.MergeFiles();
-    }
-};
 
 /* FIXME:
  * At the moment, we are restricted to using enum classes KeyTypeImpl and ColTypeImpl
@@ -112,24 +45,42 @@ protected:
     using KeyTypeImpl = ind::details::KeyTypeImpl;
     using ColTypeImpl = ind::details::ColTypeImpl;
     using ValueType = std::tuple_element_t<(int)key, details::KeysTuple>;
-    using ValueHandler = ind::details::ValueHandler<ValueType>;
+    using ValueHandler = util::ValueHandler<ValueType>;
     using Column = std::conditional_t<col_type == ColTypeImpl::SET,
                                       std::set<ValueType, typename ValueHandler::LessCmp>,
                                       std::vector<ValueType>>;
     using Columns = std::vector<Column>;
 
 private:
-    using EscapedList = boost::escaped_list_separator<char>;
-    using Tokenizer = boost::tokenizer<EscapedList, char const*>;
-    char escape_symbol = '\\';
-    char quote = '\"';
-    EscapedList escaped_list{escape_symbol, dataset_.separator, quote};
-
     static ValueHandler CreateHandler(BufferPtr start) {
         if constexpr (Is<KeyTypeImpl::PAIR>()) {
             return ValueHandler(start);
         } else {
             return ValueHandler();
+        }
+    }
+
+    void EmplaceValuesFromChunk(BufferPtr start, BufferPtr end, const ValueHandler& handler) {
+        auto line_begin = start, line_end = (BufferPtr)memchr(line_begin, '\n', end - line_begin);
+        std::size_t cur_attr = 0, current_row = 0;
+        while (line_end != nullptr && line_end < end) {
+            MemoryLimitProcess(handler, current_row++);
+            Tokenizer tokens{line_begin, line_end, escaped_list_};
+            for (std::string const& value : tokens) {
+                if (!value.empty()) {
+                    std::memcpy(line_begin, value.data(), value.size() + 1);
+                    if constexpr (Is<KeyTypeImpl::STRING_VIEW>()) {
+                        EmplaceValueToColumn(cur_attr, line_begin, value.size());
+                    } else if constexpr (Is<KeyTypeImpl::PAIR>()) {
+                        EmplaceValueToColumn(cur_attr, line_begin - start, value.size());
+                    }
+                    line_begin += value.size();
+                }
+                line_begin++, cur_attr++;
+            }
+            cur_attr = 0;
+            line_begin = line_end + 1;
+            line_end = (BufferPtr)memchr(line_begin, '\n', end - line_begin);
         }
     }
 
@@ -139,34 +90,7 @@ private:
         ReserveColumns(handler);
         auto insert_time = std::chrono::system_clock::now();
 
-        std::size_t length = end - start;
-        auto line_begin = start, next_pos = line_begin;
-        auto line_end = (char*)memchr(line_begin, '\n', length);
-        std::size_t cur_attr = 0, current_row = 0;
-        while (line_end != nullptr && line_end < end) {
-            MemoryLimitProcess(handler, current_row++);
-            Tokenizer tokens{line_begin, line_end, escaped_list};
-            for (std::string const& value : tokens) {
-                if (!value.empty()) {
-                    bool is_quoted = (*next_pos == '\"' && *(next_pos + value.size() + 1) == '\"');
-                    next_pos += is_quoted;
-                    if constexpr (Is<KeyTypeImpl::STRING_VIEW>()) {
-                        EmplaceValueToColumn(cur_attr, next_pos, value.size());
-                    } else if constexpr (Is<KeyTypeImpl::PAIR>()) {
-                        EmplaceValueToColumn(cur_attr, next_pos - start, value.size());
-                    }
-                    next_pos += value.size() + is_quoted;
-                }
-                next_pos++;
-                cur_attr++;
-            }
-            cur_attr = 0;
-
-            line_begin = line_end + 1;
-            next_pos = line_begin;
-            length = end - line_begin;
-            line_end = (char*)memchr(line_begin, '\n', length);
-        }
+        EmplaceValuesFromChunk(start, end, handler);
         auto inserting_time = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - insert_time);
 
@@ -261,7 +185,7 @@ private:
     }
 
 public:
-    SetBasedTableProcessor(SortedColumnWriter& writer, BaseTableProcessor::DatasetConfig config,
+    SetBasedTableProcessor(SortedColumnWriter& writer, BaseTableProcessor::DataConfig config,
                            std::size_t memory_limit, std::size_t mem_check_frequency)
         : ParentType(writer, std::move(config), memory_limit, memory_limit / 3 * 2),
           memory_check_frequency_(mem_check_frequency) {}
@@ -355,7 +279,7 @@ class VectorBasedTableProcessor final
 
 public:
     VectorBasedTableProcessor(SortedColumnWriter& writer,
-                              const BaseTableProcessor::DatasetConfig& config,
+                              const BaseTableProcessor::DataConfig& config,
                               std::size_t memory_limit, std::size_t threads_count)
         : ParentType(writer, config, memory_limit, memory_limit / 2),
           threads_count_(threads_count) {}
@@ -363,9 +287,11 @@ public:
     ~VectorBasedTableProcessor() final = default;
 };
 
-template <ind::details::KeyTypeImpl key, ind::details::ColTypeImpl col>
-using ChunkProcessor =
-        std::conditional_t<ind::details::ColTypeImpl::SET == col, SetBasedTableProcessor<key>,
-                           VectorBasedTableProcessor<key>>;
+}  // namespace details
 
-}  // namespace algos
+template <ind::details::KeyTypeImpl key, ind::details::ColTypeImpl col>
+using ChunkProcessor = std::conditional_t<ind::details::ColTypeImpl::SET == col,
+                                          details::SetBasedTableProcessor<key>,
+                                          details::VectorBasedTableProcessor<key>>;
+
+}  // namespace algos::ind::preproc

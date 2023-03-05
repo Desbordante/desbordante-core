@@ -6,7 +6,7 @@
 
 using PairOffset = std::pair<unsigned int, unsigned int>;
 
-namespace algos::ind::details {
+namespace algos::ind::util {
 
 /* A utility classes for working with values of various types */
 
@@ -53,4 +53,4 @@ public:
     };
 };
 
-}  // namespace algos::ind::details
+}  // namespace algos::ind::util

@@ -4,7 +4,7 @@
 #include <fstream>
 #include <functional>
 
-namespace algos {
+namespace algos::ind::preproc {
 
 class ChunkedFileReader {
 public:
@@ -48,4 +48,4 @@ public:
     std::pair<ChunkPtr, ChunkPtr> GetNext();
 };
 
-}  // namespace algos
+}  // namespace algos::ind::preproc

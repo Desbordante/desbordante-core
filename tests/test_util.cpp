@@ -10,6 +10,7 @@
 #include "identifier_set.h"
 #include "levenshtein_distance.h"
 #include "list_agree_set_sample.h"
+#include "parser/csv_parser.h"
 
 namespace tests {
 

@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace algos {
+namespace algos::ind {
 
 Attribute::Attribute(std::size_t id, std::size_t n_cols, StrCursor cursor,
                      std::vector<std::string> const& max_values)
@@ -55,4 +55,4 @@ int Attribute::CompareTo(Attribute const& other) const {
     }
     return order;
 }
-}  // namespace algos
+}  // namespace algos::ind

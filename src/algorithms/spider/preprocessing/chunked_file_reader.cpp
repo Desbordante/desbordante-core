@@ -6,7 +6,7 @@
 
 #include <easylogging++.h>
 
-namespace algos {
+namespace algos::ind::preproc {
 
 static std::size_t kOverlapSize = 4 << 10;
 
@@ -53,7 +53,6 @@ std::pair<ChunkPtr, ChunkPtr> ChunkedFileReader::GetNext() {
     if (!HasNext()) {
         throw std::runtime_error("Invalid function call, no more chunks");
     }
-    auto page_size = sysconf(_SC_PAGE_SIZE);
     current_chunk_++;
     auto offset = current_chunk_ * chunk_size_;
     if (current_chunk_ == chunks_n_ - 1) {
@@ -69,7 +68,7 @@ std::pair<ChunkPtr, ChunkPtr> ChunkedFileReader::GetNext() {
     if (current_chunk_ == 0) {
         data_ = std::make_unique<std::vector<char>>(specified_chunk_size_);
     } else {
-        file_.seekg(-page_size, std::ios::cur);
+        file_.seekg(-kOverlapSize, std::ios::cur);
     }
 
     file_.read(data_->data(), data_->size());
@@ -77,4 +76,4 @@ std::pair<ChunkPtr, ChunkPtr> ChunkedFileReader::GetNext() {
     return GetCurrent();
 }
 
-}  // namespace algos
+}  // namespace algos::ind::preproc

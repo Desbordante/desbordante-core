@@ -134,18 +134,12 @@ boost::program_options::options_description AlgoOptions() {
 
     po::options_description ind_options("IND options");
     ind_options.add_options()
-            (names::kTemp, po::value<std::filesystem::path>()->default_value("temp"),
-             descriptions::kDTemp)
-            (names::kMemoryLimit, po::value<std::size_t>()->default_value(4 * 1024),
-             descriptions::kDMemoryLimit)
-            (names::kMemoryCheckFrequency, po::value<std::size_t>()->default_value(100000),
+            (names::kTemp, po::value<std::filesystem::path>(), descriptions::kDTemp)
+            (names::kMemoryLimit, po::value<std::size_t>(), descriptions::kDMemoryLimit)
+            (names::kMemoryCheckFrequency, po::value<std::size_t>(),
              descriptions::kDMemoryCheckFrequency)
-            (names::kColType,
-             po::value<algos::ind::ColType>()->default_value(algos::ind::ColType::VECTOR),
-             descriptions::kDColType)
-            (names::kKeyType,
-             po::value<algos::ind::KeyType>()->default_value(algos::ind::KeyType::STRING_VIEW),
-             descriptions::kDKeyType)
+            (names::kColType, po::value<algos::ind::ColType>(), descriptions::kDColType)
+            (names::kKeyType, po::value<algos::ind::KeyType>(), descriptions::kDKeyType)
             ;
     // clang-format on
 

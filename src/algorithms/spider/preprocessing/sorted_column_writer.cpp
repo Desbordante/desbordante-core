@@ -8,7 +8,7 @@
 
 #include <easylogging++.h>
 
-namespace algos {
+namespace algos::ind::preproc {
 
 void SortedColumnWriter::Init(std::size_t cols_number) {
     if (attributes_spill_counters_.empty()) {
@@ -92,4 +92,4 @@ void SortedColumnWriter::MergeFiles() {
     Reset();
 }
 
-}  // namespace algos
+}  // namespace algos::ind::preproc

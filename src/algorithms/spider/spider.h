@@ -11,22 +11,25 @@
 #include "algorithms/ind_algorithm.h"
 #include "algorithms/options/thread_number_opt.h"
 #include "attribute.h"
-#include "sorted_column_writer.h"
-#include "table_processor.h"
+#include "enums.h"
+#include "preprocessing/sorted_column_writer.h"
+#include "preprocessing/table_processor.h"
 #include "type.h"
 
 namespace algos {
 
 class Spider : public INDAlgorithm<Primitive> {
     using UIND = std::pair<std::size_t, std::size_t>;
+    using Attribute = ind::Attribute;
     using AttrPtr = Attribute*;
     using AttrMap = Attribute::AttrMap;
     using ColType = ind::ColType;
     using KeyType = ind::KeyType;
 
 private:
-    std::unique_ptr<BaseTableProcessor> CreateChunkProcessor(
-            model::IDatasetStream::DataInfo const& data_info, SortedColumnWriter& writer) const;
+    std::unique_ptr<ind::preproc::BaseTableProcessor> CreateChunkProcessor(
+            model::IDatasetStream::DataInfo const& data_info,
+            ind::preproc::SortedColumnWriter& writer) const;
 
     std::filesystem::path temp_dir_ = "temp";
     std::size_t mem_limit_mb_;
@@ -49,7 +52,7 @@ private:
         std::vector<std::string> max_values{};
         std::vector<std::size_t> number_of_columns{};
         std::vector<std::filesystem::path> attribute_paths{};
-        DatasetsInfo datasets_info{};
+        DatasetsOrder datasets_order{};
     } stats_;
 
     /* Struct that stores information about the execution time of each stage of the algorithm.
@@ -107,8 +110,8 @@ public:
 
     void Fit(model::IDatasetStream::DataInfo const& data_info) final;
 
-    DatasetsInfo const& GetDatasetsInfo() const {
-        return stats_.datasets_info;
+    DatasetsOrder const& GetDatasetsOrder() const final {
+        return stats_.datasets_order;
     }
     INDList IndList() const;
 };
