@@ -103,7 +103,7 @@ protected:
     void PrintResult(std::ostream& out) const;
 
 public:
-    explicit Spider() : INDAlgorithm({}) {
+    explicit Spider() : INDAlgorithm(std::vector<std::string_view>{}) {
         RegisterOptions();
         MakePreprocessOptsAvailable();
     }

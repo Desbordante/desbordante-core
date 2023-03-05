@@ -1,6 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace model {
@@ -15,7 +17,6 @@ public:
 private:
     std::shared_ptr<ColumnCombination> lhs, rhs;
 
-
     std::string CCToString(ColumnCombination const& cc) const {
         std::stringstream ss;
         for (unsigned i : cc.column_indices) {
@@ -23,6 +24,7 @@ private:
         }
         return ss.str();
     }
+
 public:
     IND(std::shared_ptr<ColumnCombination> lhs, std::shared_ptr<ColumnCombination> rhs)
         : lhs(std::move(lhs)), rhs(std::move(rhs)) {}

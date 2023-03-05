@@ -10,7 +10,7 @@ BaseTableProcessor::BufferPtr BaseTableProcessor::InitHeader(BufferPtr start) {
         auto const& attr_name = dataset_.has_header ? value : std::to_string(GetHeaderSize());
         header_.emplace_back(attr_name);
     }
-    return dataset_.has_header ? start : line_end + 1;
+    return dataset_.has_header ? line_end + 1 : start;
 }
 
 void BaseTableProcessor::Execute() {

@@ -15,6 +15,7 @@ class INDAlgorithm : public BasePrimitive {
                           std::is_same_v<BasePrimitive, Primitive>,
                   "The INDAlgorithm can either process multiple tables at once using the "
                   "Desbordante standard parser, or use a custom parser.");
+
 public:
     struct DatasetInfo {
         std::string table_name;

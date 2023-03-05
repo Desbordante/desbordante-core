@@ -1,12 +1,14 @@
 #pragma once
 
+#include <cstring>
 #include <functional>
 #include <ostream>
 #include <string>
 
-using PairOffset = std::pair<unsigned int, unsigned int>;
-
 namespace algos::ind::util {
+
+using PairOffset = std::pair<unsigned int, unsigned int>;
+using KeysTuple = std::tuple<std::string_view, PairOffset>;
 
 /* A utility classes for working with values of various types */
 

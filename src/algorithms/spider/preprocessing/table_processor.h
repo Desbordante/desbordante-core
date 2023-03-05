@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmath>
-#include <malloc.h>
 #include <set>
 #include <string>
 #include <string_view>
@@ -15,21 +14,14 @@
 
 #include "base_table_processor.h"
 #include "chunked_file_reader.h"
-#include "enums.h"
 #include "model/idataset_stream.h"
 #include "sorted_column_writer.h"
+#include "spider/enums.h"
 #include "util/value_handler.h"
-
-#if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
-#define GLIBC_VERSION (__GLIBC__ * 1000 + __GLIBC_MINOR__)
-#else
-#define GLIBC_VERSION 0
-#endif
 
 namespace algos::ind::preproc {
 
 namespace details {
-using KeysTuple = std::tuple<std::string_view, PairOffset>;
 
 /* FIXME:
  * At the moment, we are restricted to using enum classes KeyTypeImpl and ColTypeImpl
@@ -44,7 +36,7 @@ class TableProcessor : public BaseTableProcessor {
 protected:
     using KeyTypeImpl = ind::details::KeyTypeImpl;
     using ColTypeImpl = ind::details::ColTypeImpl;
-    using ValueType = std::tuple_element_t<(int)key, details::KeysTuple>;
+    using ValueType = std::tuple_element_t<(int)key, util::KeysTuple>;
     using ValueHandler = util::ValueHandler<ValueType>;
     using Column = std::conditional_t<col_type == ColTypeImpl::SET,
                                       std::set<ValueType, typename ValueHandler::LessCmp>,
@@ -68,7 +60,7 @@ private:
             Tokenizer tokens{line_begin, line_end, escaped_list_};
             for (std::string const& value : tokens) {
                 if (!value.empty()) {
-                    std::memcpy(line_begin, value.data(), value.size() + 1);
+                    memcpy(line_begin, value.data(), value.size() + 1);
                     if constexpr (Is<KeyTypeImpl::STRING_VIEW>()) {
                         EmplaceValueToColumn(cur_attr, line_begin, value.size());
                     } else if constexpr (Is<KeyTypeImpl::PAIR>()) {
@@ -172,16 +164,12 @@ private:
     }
 
     std::size_t GetCurrentMemory() const final {
-#if GLIBC_VERSION >= 2033
-        return mallinfo2().uordblks;
-#else
         double coeff = 200.0 / 167;
-        std::size_t estimation = sizeof(T);
-        for (auto const& column : columns_) {
-            estimation += column.size() * sizeof(std::_Rb_tree_node<typename T::key_type>);
+        std::size_t estimation = sizeof(Columns);
+        for (auto const& column : this->columns_) {
+            estimation += column.size() * sizeof(std::_Rb_tree_node<ValueType>);
         }
         return (std::size_t)(coeff * (double)estimation);
-#endif
     }
 
 public:

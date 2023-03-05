@@ -194,7 +194,7 @@ void MultiCsvPrimitive::Fit(model::IDatasetStream::DataInfo const& data_info) {
     }
     const auto paths = GetRegularFilesFromPath(data_info.path);
     for (const auto& path : paths) {
-        CSVParser data{data_info};
+        CSVParser data{path, data_info.separator, data_info.has_header};
         FitInternal(data);
         data.Reset();
     }

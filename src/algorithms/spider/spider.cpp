@@ -20,7 +20,7 @@ decltype(Spider::TempOpt) Spider::TempOpt{{config::names::kTemp, config::descrip
                                           {"temp"}};
 
 decltype(Spider::MemoryLimitMBOpt) Spider::MemoryLimitMBOpt{
-        {config::names::kMemoryLimit, config::descriptions::kDMemoryLimit}, 8 * 1024};
+        {config::names::kMemoryLimit, config::descriptions::kDMemoryLimit}, 4 * 1024};
 
 decltype(Spider::MemoryCheckFreq) Spider::MemoryCheckFreq{
         {config::names::kMemoryCheckFrequency, config::descriptions::kDMemoryCheckFrequency},
@@ -53,7 +53,7 @@ decltype(auto) CreateConcreteChunkProcessor(ColTypeImpl value, Args&&... args) {
         using ConcreteChunkProcessor = ChunkProcessor<key_type_v, col_type>;
         return std::make_unique<ConcreteChunkProcessor>(std::forward<Args>(args)...);
     };
-    return boost::mp11::mp_with_index<std::tuple_size<details::KeysTuple>>(
+    return boost::mp11::mp_with_index<std::tuple_size<ind::util::KeysTuple>>(
             static_cast<std::size_t>(value), create);
 }
 

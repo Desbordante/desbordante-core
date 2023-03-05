@@ -1,35 +1,16 @@
 #pragma once
 
-#include <cmath>
-#include <malloc.h>
-#include <set>
 #include <string>
-#include <string_view>
-#include <thread>
 #include <utility>
 #include <vector>
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/tokenizer.hpp>
-#include <easylogging++.h>
 
 #include "chunked_file_reader.h"
-#include "enums.h"
 #include "model/idataset_stream.h"
 #include "sorted_column_writer.h"
-#include "util/value_handler.h"
-
-#if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
-#define GLIBC_VERSION (__GLIBC__ * 1000 + __GLIBC_MINOR__)
-#else
-#define GLIBC_VERSION 0
-#endif
 
 namespace algos::ind::preproc {
-
-namespace details {
-using KeysTuple = std::tuple<std::string_view, PairOffset>;
-}
 
 class BaseTableProcessor {
 public:
@@ -41,9 +22,7 @@ private:
 
     BufferPtr InitHeader(BufferPtr start);
 
-    virtual void InitAdditionalChunkInfo(BufferPtr, BufferPtr) {
-        /* by default do nothing */
-    }
+    virtual void InitAdditionalChunkInfo(BufferPtr, BufferPtr) {}
 
 protected:
     using EscapedList = boost::escaped_list_separator<char>;
