@@ -1,59 +1,60 @@
 #pragma once
 
 #include <map>
+#include <queue>
 #include <set>
 #include <string>
 #include <utility>
 
-#include <boost/mp11.hpp>
-#include <boost/mp11/algorithm.hpp>
 #include <easylogging++.h>
 
+#include "algorithms/ind_algorithm.h"
 #include "algorithms/options/thread_number_opt.h"
-#include "algorithms/primitive.h"
 #include "attribute.h"
-#include "ind_algorithm.h"
-#include "model/cursor.h"
+#include "sorted_column_writer.h"
 #include "table_processor.h"
+#include "type.h"
 
 namespace algos {
 
 class Spider : public INDAlgorithm<Primitive> {
-public:
-    using UID = std::pair<std::size_t, std::size_t>;
+    using UIND = std::pair<std::size_t, std::size_t>;
     using AttrPtr = Attribute*;
     using AttrMap = Attribute::AttrMap;
+    using ColType = ind::ColType;
+    using KeyType = ind::KeyType;
 
 private:
     std::unique_ptr<BaseTableProcessor> CreateChunkProcessor(
-            model::IDatasetStream::DataInfo const& data_info, SpilledFilesManager& manager) const;
+            model::IDatasetStream::DataInfo const& data_info, SortedColumnWriter& writer) const;
 
     std::filesystem::path temp_dir_ = "temp";
-    std::size_t ram_limit_ = 2 << 30;
-    std::size_t mem_check_frequency_ = 100000;
+    std::size_t mem_limit_mb_;
+    std::size_t mem_check_frequency_;
     config::ThreadNumType threads_count_ = 1;
     ColType col_type_ = +ColType::VECTOR;
     KeyType key_type_ = +KeyType::STRING_VIEW;
 
     static config::OptionType<decltype(temp_dir_)> TempOpt;
-    static config::OptionType<decltype(ram_limit_)> MemoryLimitOpt;
+    static config::OptionType<decltype(mem_limit_mb_)> MemoryLimitMBOpt;
     static config::OptionType<decltype(mem_check_frequency_)> MemoryCheckFreq;
     static config::OptionType<decltype(col_type_)> ColTypeOpt;
-    static config::OptionType<decltype(key_type_)> ValueTypeOpt;
+    static config::OptionType<decltype(key_type_)> KeyTypeOpt;
 
-    std::vector<UID> result_;
-    AttrMap attrs_;
-    std::priority_queue<AttrPtr, std::vector<AttrPtr>, std::function<bool(AttrPtr, AttrPtr)>>
-            attribute_queue_{[](auto lhs, auto rhs) { return lhs->CompareTo(*rhs) >= 0; }};
-
-    struct InnerState {
+    /* Preprocessed table information struct:
+     * contains metadata about preprocessed tables
+     */
+    struct TablesStats {
         std::size_t n_cols = 0;
         std::vector<std::string> max_values{};
         std::vector<std::size_t> number_of_columns{};
-        std::vector<std::size_t> table_column_start_indexes{};
-    } state_;
+        std::vector<std::filesystem::path> attribute_paths{};
+        DatasetsInfo datasets_info{};
+    } stats_;
 
-    struct Timings {
+    /* Struct that stores information about the execution time of each stage of the algorithm.
+     */
+    struct StageTimer {
         std::chrono::milliseconds preprocessing;
         std::chrono::milliseconds initializing;
         std::chrono::milliseconds computing;
@@ -65,21 +66,36 @@ private:
         }
     } timings_;
 
+    std::list<UIND> uinds_;
+    AttrMap attrs_;
+    std::priority_queue<AttrPtr, std::vector<AttrPtr>, std::function<bool(AttrPtr, AttrPtr)>>
+            attribute_queue_{[](auto lhs, auto rhs) { return lhs->CompareTo(*rhs) >= 0; }};
+
     void RegisterOptions();
     void MakePreprocessOptsAvailable();
 
     void ResetState() final {
-        result_.clear();
+        uinds_.clear();
         attrs_.clear();
+    }
+    std::size_t GetMemoryLimitInBytes() const {
+        return mem_limit_mb_ << 20;
+    }
+    IND::ColumnCombination GetCCByID(unsigned id) const {
+        unsigned table = 0;
+        while (stats_.number_of_columns[table] <= id) {
+            id -= stats_.number_of_columns[table++];
+        }
+        return {.table_index = table, .column_indices = {id}};
     }
 
 protected:
     unsigned long long ExecuteInternal() final;
-    void PreprocessData();
+
     void InitializeAttributes();
     void ComputeUIDs();
     void Output();
-    void RegisterUID(UID uid);
+    void RegisterUID(UIND uid);
 
     void PrintResult(std::ostream& out) const;
 
@@ -89,11 +105,12 @@ public:
         MakePreprocessOptsAvailable();
     }
 
-    const std::vector<UID>& GetUIDs() const {
-        return result_;
-    }
-
     void Fit(model::IDatasetStream::DataInfo const& data_info) final;
+
+    DatasetsInfo const& GetDatasetsInfo() const {
+        return stats_.datasets_info;
+    }
+    INDList IndList() const;
 };
 
 }  // namespace algos

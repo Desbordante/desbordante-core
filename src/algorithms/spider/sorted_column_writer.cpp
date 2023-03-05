@@ -1,4 +1,4 @@
-#include "spilled_files_manager.h"
+#include "sorted_column_writer.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -9,20 +9,21 @@
 #include <easylogging++.h>
 
 namespace algos {
-void SpilledFilesManager::Init(std::size_t cols_number) {
-    if (spill_count_.empty()) {
+
+void SortedColumnWriter::Init(std::size_t cols_number) {
+    if (attributes_spill_counters_.empty()) {
         max_values_.resize(max_values_.size() + cols_number);
-        spill_count_.assign(cols_number, 0);
+        attributes_spill_counters_.assign(cols_number, 0);
     }
 }
 
-std::filesystem::path SpilledFilesManager::GetResultDirectory(
+std::filesystem::path SortedColumnWriter::GetResultDirectory(
         std::optional<std::size_t> spilled_dir) {
     std::filesystem::path path;
     if (spilled_dir.has_value()) {
-        path = GetResultDirectory() / (std::to_string(spilled_dir.value()) + "-column");
+        path = GetResultDirectory() / (std::to_string(spilled_dir.value()) + "_col");
     } else {
-        path = std::filesystem::current_path() / "temp";
+        path = std::filesystem::current_path() / temp_dir_;
     }
     if (!std::filesystem::exists(path)) {
         std::filesystem::create_directory(path);
@@ -30,7 +31,7 @@ std::filesystem::path SpilledFilesManager::GetResultDirectory(
     return path;
 }
 
-std::filesystem::path SpilledFilesManager::GetResultColumnPath(
+std::filesystem::path SortedColumnWriter::GetResultColumnPath(
         std::size_t id, std::optional<std::size_t> spilled_file_id) {
     if (spilled_file_id.has_value()) {
         return GetResultDirectory(id) / std::to_string(spilled_file_id.value());
@@ -39,8 +40,8 @@ std::filesystem::path SpilledFilesManager::GetResultColumnPath(
     }
 }
 
-std::string SpilledFilesManager::MergeSpilledFiles(std::vector<std::ifstream> input,
-                                                   std::ofstream out) {
+std::string SortedColumnWriter::MergeSpilledFiles(std::vector<std::ifstream> input,
+                                                  std::ofstream out) {
     using ColumnElement = std::pair<std::string, std::size_t>;
     auto cmp = [](ColumnElement const& lhs, ColumnElement const& rhs) {
         return lhs.first > rhs.first;
@@ -66,21 +67,22 @@ std::string SpilledFilesManager::MergeSpilledFiles(std::vector<std::ifstream> in
     return prev;
 }
 
-void SpilledFilesManager::MergeFiles() {
-    if (!std::all_of(spill_count_.begin(), spill_count_.end(), [](auto i) { return i == 0; })) {
+void SortedColumnWriter::MergeFiles() {
+    auto& counters = attributes_spill_counters_;
+    if (!std::all_of(counters.begin(), counters.end(), [](auto i) { return i == 0; })) {
         auto merge_time = std::chrono::system_clock::now();
 
         for (std::size_t i = 0; i != GetCurrentColsNumber(); ++i) {
-            if (spill_count_[i] == 0) {
+            if (counters[i] == 0) {
                 continue;
             }
             std::vector<std::ifstream> input_files{};
-            for (std::size_t j = 0; j != spill_count_[i]; ++j) {
-                input_files.emplace_back(GetResultColumnPath(cur_offset_ + i, j));
+            for (std::size_t j = 0; j != counters[i]; ++j) {
+                input_files.emplace_back(GetResultColumnPath(processed_cols_number_ + i, j));
             }
-            max_values_[cur_offset_ + i] =
-                    MergeSpilledFiles(std::move(input_files), GetResultColumnPath(cur_offset_ + i));
-            std::filesystem::remove_all(GetResultDirectory(cur_offset_ + i));
+            max_values_[processed_cols_number_ + i] = MergeSpilledFiles(
+                    std::move(input_files), GetResultColumnPath(processed_cols_number_ + i));
+            std::filesystem::remove_all(GetResultDirectory(processed_cols_number_ + i));
         }
 
         auto merging_time = std::chrono::duration_cast<std::chrono::milliseconds>(

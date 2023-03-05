@@ -5,6 +5,7 @@
 
 #include "algorithms/enums.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/spider/enums.h"
 
 namespace algos {
 
@@ -62,4 +63,16 @@ constexpr auto kDRatio = "ratio between the number of deviating values in a clus
 constexpr auto kDPreciseAlgorithm = "Algorithm that gives exact FDs for typo miner to compare "
                                     "against approximate FDs";
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
+constexpr auto kDTemp =
+        "specify the path to a temporary directory to store intermediate results during the "
+        "execution of the program";
+constexpr auto kDMemoryLimit =
+        "set the maximum amount of memory (in MB) that can be used by the program";
+constexpr auto kDMemoryCheckFrequency = "specify the number of rows between memory usage checks";
+const std::string _kDColType = "specify the type of container to use for storing column values " +
+                               EnumToAvailableValues<algos::ind::ColType>();
+const auto kDColType = _kDColType.c_str();
+const std::string _kDKeyType = "specify the type of the key used in the column container " +
+                               EnumToAvailableValues<algos::ind::KeyType>();
+const auto kDKeyType = _kDKeyType.c_str();
 }  // namespace algos::config::descriptions

@@ -8,6 +8,10 @@
 #include "model/cursor.h"
 
 namespace algos {
+
+/* A class containing an iterator to traverse through attribute column
+ * and holding candidates for UINDs.
+ */
 class Attribute {
 public:
     using SSet = std::set<std::size_t>;

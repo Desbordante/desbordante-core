@@ -1,5 +1,7 @@
 #include "attribute.h"
 
+#include <vector>
+
 namespace algos {
 
 Attribute::Attribute(std::size_t id, std::size_t n_cols, StrCursor cursor,

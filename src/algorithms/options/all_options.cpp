@@ -24,6 +24,9 @@ void validate(boost::any& v, const std::vector<std::string>& values, T*, int) {
 namespace metric {
 using algos::validate;
 }  // namespace metric
+namespace ind {
+using algos::validate;
+}  // namespace ind
 }  // namespace algos
 
 namespace algos::config {
@@ -129,21 +132,21 @@ boost::program_options::options_description AlgoOptions() {
              "one of available pairing rules: trivial")
             ;
 
-    po::options_description id_options("ID options");
-    id_options.add_options()
-        (names::kTemp, po::value<std::filesystem::path>()->default_value("temp"),
-         "one of available operations: /, *, +, - ")
-        (names::kMemoryLimit, po::value<std::size_t>()->default_value((std::size_t)(std::pow(8,30))),
-         "fraction of exceptional records")
-        (names::kMemoryCheckFrequency, po::value<std::size_t>()->default_value(100000),
-         "probability, the fraction of exceptional records that lie outside the "
-         "bump intervals is at most Fuzziness")
-        (names::kColType, po::value<algos::ColType>()->default_value(algos::ColType::VECTOR),
-         "value between 0 and 1. Closer to 0 - many short intervals. "
-         "Closer to 1 - small number of long intervals")
-        (names::kValueType, po::value<algos::KeyType>()->default_value(algos::KeyType::STRING_VIEW),
-         "max considered intervals amount. Pass 0 to remove limit")
-        ;
+    po::options_description ind_options("IND options");
+    ind_options.add_options()
+            (names::kTemp, po::value<std::filesystem::path>()->default_value("temp"),
+             descriptions::kDTemp)
+            (names::kMemoryLimit, po::value<std::size_t>()->default_value(4 * 1024),
+             descriptions::kDMemoryLimit)
+            (names::kMemoryCheckFrequency, po::value<std::size_t>()->default_value(100000),
+             descriptions::kDMemoryCheckFrequency)
+            (names::kColType,
+             po::value<algos::ind::ColType>()->default_value(algos::ind::ColType::VECTOR),
+             descriptions::kDColType)
+            (names::kKeyType,
+             po::value<algos::ind::KeyType>()->default_value(algos::ind::KeyType::STRING_VIEW),
+             descriptions::kDKeyType)
+            ;
     // clang-format on
 
     po::options_description algorithm_options("Algorithm options");
@@ -152,7 +155,7 @@ boost::program_options::options_description AlgoOptions() {
             .add(ar_options)
             .add(ac_options)
             .add(typo_options)
-            .add(id_options);
+            .add(ind_options);
     return algorithm_options;
 }
 }  // namespace algos::config

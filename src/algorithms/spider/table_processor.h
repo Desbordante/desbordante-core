@@ -1,32 +1,23 @@
 #pragma once
 
-#include <algorithm>
 #include <cmath>
-#include <cstring>
-#include <enum.h>
-#include <fcntl.h>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <malloc.h>
-#include <optional>
-#include <queue>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <thread>
-#include <unistd.h>
 #include <utility>
 #include <vector>
 
 #include <boost/range/iterator_range.hpp>
 #include <boost/tokenizer.hpp>
+#include <easylogging++.h>
 
-#include "adapter.h"
-#include "chunk_generator.h"
+#include "chunked_file_reader.h"
+#include "enums.h"
 #include "model/idataset_stream.h"
-#include "spilled_files_manager.h"
+#include "sorted_column_writer.h"
+#include "value_handler.h"
 
 #if defined(__GLIBC__) && defined(__GLIBC_MINOR__)
 #define GLIBC_VERSION (__GLIBC__ * 1000 + __GLIBC_MINOR__)
@@ -36,12 +27,6 @@
 
 namespace algos {
 
-BETTER_ENUM(KeyType, char, STRING_VIEW, PAIR)
-BETTER_ENUM(ColType, char, SET, VECTOR)
-
-enum class KeyTypeImpl { STRING_VIEW, PAIR };
-enum class ColTypeImpl { SET, VECTOR };
-
 namespace details {
 using KeysTuple = std::tuple<std::string_view, PairOffset>;
 }
@@ -49,7 +34,7 @@ using KeysTuple = std::tuple<std::string_view, PairOffset>;
 class BaseTableProcessor {
 public:
     using DatasetConfig = model::IDatasetStream::DataInfo;
-    using BufferPtr = ChunkGenerator::CharPtr;
+    using BufferPtr = ChunkedFileReader::ChunkPtr;
 
 private:
     virtual void ProcessChunk(BufferPtr begin, BufferPtr end, bool is_chunk) = 0;
@@ -78,17 +63,17 @@ private:
 
 protected:
     DatasetConfig dataset_;
-    SpilledFilesManager& spilled_manager_;
+    SortedColumnWriter& writer_;
     std::vector<std::string> header_;
 
     std::size_t memory_limit_;
     std::size_t chunk_m_limit_;
 
 public:
-    BaseTableProcessor(SpilledFilesManager& spilled_manager, DatasetConfig dataset,
-                       std::size_t memory_limit, std::size_t chunk_m_limit)
+    BaseTableProcessor(SortedColumnWriter& writer, DatasetConfig dataset, std::size_t memory_limit,
+                       std::size_t chunk_m_limit)
         : dataset_(std::move(dataset)),
-          spilled_manager_(spilled_manager),
+          writer_(writer),
           memory_limit_(memory_limit),
           chunk_m_limit_(chunk_m_limit) {}
     virtual ~BaseTableProcessor() = default;
@@ -100,26 +85,36 @@ public:
         return header_;
     }
     void Execute() {
-        ChunkGenerator chunk_generator_{dataset_.path, chunk_m_limit_};
-        while (chunk_generator_.HasNext()) {
-            auto [start, end] = chunk_generator_.GetNext();
-            if (chunk_generator_.GetCurrentChunkId() == 0) {
+        ChunkedFileReader reader{dataset_.path, chunk_m_limit_};
+        while (reader.HasNext()) {
+            auto [start, end] = reader.GetNext();
+            if (reader.GetCurrentChunkId() == 0) {
                 start = InitHeader(start);
             }
             InitAdditionalChunkInfo(start, end);
-            ProcessChunk(start, end, chunk_generator_.GetChunksNumber() > 1);
+            ProcessChunk(start, end, reader.GetChunksNumber() > 1);
         };
-        spilled_manager_.MergeFiles();
+        writer_.MergeFiles();
     }
 };
 
-template <KeyTypeImpl key, ColTypeImpl col_type>
+/* FIXME:
+ * At the moment, we are restricted to using enum classes KeyTypeImpl and ColTypeImpl
+ * as non-type template parameters due to limitations in c++17.
+ * However, c++20 allows for the use of constexpr class values as non-type template
+ * parameters, which will resolve this issue.
+ * After upgrading to c++20 we need to use KeyType and ColType instead of 'Impl' enums
+ * */
+
+template <ind::details::KeyTypeImpl key, ind::details::ColTypeImpl col_type>
 class TableProcessor : public BaseTableProcessor {
 protected:
+    using KeyTypeImpl = ind::details::KeyTypeImpl;
+    using ColTypeImpl = ind::details::ColTypeImpl;
     using ValueType = std::tuple_element_t<(int)key, details::KeysTuple>;
-    using Adapter = details::Comparator<ValueType>;
+    using ValueHandler = ind::details::ValueHandler<ValueType>;
     using Column = std::conditional_t<col_type == ColTypeImpl::SET,
-                                      std::set<ValueType, typename Adapter::LessCmp>,
+                                      std::set<ValueType, typename ValueHandler::LessCmp>,
                                       std::vector<ValueType>>;
     using Columns = std::vector<Column>;
 
@@ -130,18 +125,18 @@ private:
     char quote = '\"';
     EscapedList escaped_list{escape_symbol, dataset_.separator, quote};
 
-    static Adapter CreateAdapter(BufferPtr start) {
-        if constexpr (is<KeyTypeImpl::PAIR>()) {
-            return Adapter(start);
+    static ValueHandler CreateHandler(BufferPtr start) {
+        if constexpr (Is<KeyTypeImpl::PAIR>()) {
+            return ValueHandler(start);
         } else {
-            return Adapter();
+            return ValueHandler();
         }
     }
 
     void ProcessChunk(BufferPtr start, BufferPtr end, bool is_chunk) override {
-        auto adapter = CreateAdapter(start);
+        auto handler = CreateHandler(start);
 
-        ReserveColumns(adapter);
+        ReserveColumns(handler);
         auto insert_time = std::chrono::system_clock::now();
 
         std::size_t length = end - start;
@@ -149,15 +144,15 @@ private:
         auto line_end = (char*)memchr(line_begin, '\n', length);
         std::size_t cur_attr = 0, current_row = 0;
         while (line_end != nullptr && line_end < end) {
-            MemoryLimitProcess(adapter, current_row++);
+            MemoryLimitProcess(handler, current_row++);
             Tokenizer tokens{line_begin, line_end, escaped_list};
             for (std::string const& value : tokens) {
                 if (!value.empty()) {
                     bool is_quoted = (*next_pos == '\"' && *(next_pos + value.size() + 1) == '\"');
                     next_pos += is_quoted;
-                    if constexpr (is<KeyTypeImpl::STRING_VIEW>()) {
+                    if constexpr (Is<KeyTypeImpl::STRING_VIEW>()) {
                         EmplaceValueToColumn(cur_attr, next_pos, value.size());
-                    } else if constexpr (is<KeyTypeImpl::PAIR>()) {
+                    } else if constexpr (Is<KeyTypeImpl::PAIR>()) {
                         EmplaceValueToColumn(cur_attr, next_pos - start, value.size());
                     }
                     next_pos += value.size() + is_quoted;
@@ -175,28 +170,28 @@ private:
         auto inserting_time = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - insert_time);
 
-        std::cout << "Inserting: " << inserting_time.count() << std::endl;
-        spilled_manager_.SpillColumnsToDisk(adapter.to_print_, GetSortedColumns(adapter), is_chunk);
+        LOG(INFO) << "Inserting: " << inserting_time.count();
+        writer_.SpillColumnsToDisk(handler.print_, GetSortedColumns(handler), is_chunk);
     }
 
-    virtual Columns& GetSortedColumns(Adapter const& adapter) = 0;
+    virtual Columns& GetSortedColumns(ValueHandler const& handler) = 0;
     virtual bool IsLimitReached(std::size_t current_row) = 0;
 
     template <typename... Ts>
     void EmplaceValueToColumn(std::size_t attr_id, Ts... args) {
         Column& column = columns_[attr_id];
-        if constexpr (isCol<ColTypeImpl::VECTOR>()) {
+        if constexpr (Is<ColTypeImpl::VECTOR>()) {
             column.emplace_back(std::forward<Ts>(args)...);
-        } else if constexpr (isCol<ColTypeImpl::SET>()) {
+        } else if constexpr (Is<ColTypeImpl::SET>()) {
             column.emplace(std::forward<Ts>(args)...);
         }
     }
 
-    virtual void ReserveColumns(const Adapter& adapter) = 0;
+    virtual void ReserveColumns(const ValueHandler& handler) = 0;
 
-    void MemoryLimitProcess(Adapter const& adapter, std::size_t current_row) {
+    void MemoryLimitProcess(ValueHandler const& handler, std::size_t current_row) {
         if (IsLimitReached(current_row)) {
-            spilled_manager_.SpillColumnsToDisk(adapter.to_print_, GetSortedColumns(adapter), true);
+            writer_.SpillColumnsToDisk(handler.print_, GetSortedColumns(handler), true);
         }
     }
     virtual std::size_t GetCurrentMemory() const = 0;
@@ -205,12 +200,12 @@ protected:
     Columns columns_;
 
     template <KeyTypeImpl key_value>
-    static constexpr bool is() {
+    static constexpr bool Is() {
         return (int)key == (int)key_value;
     }
 
     template <ColTypeImpl data_value>
-    static constexpr bool isCol() {
+    static constexpr bool Is() {
         return (int)col_type == (int)data_value;
     }
 
@@ -219,25 +214,26 @@ public:
 
     template <typename... Args>
     explicit TableProcessor(Args&&... args) : BaseTableProcessor(std::forward<Args>(args)...) {
-        if constexpr (is<KeyTypeImpl::PAIR>()) {
+        if constexpr (Is<KeyTypeImpl::PAIR>()) {
             chunk_m_limit_ = std::min((double)std::numeric_limits<unsigned int>::max(),
                                       (double)chunk_m_limit_);
         }
     }
 };
 
-template <KeyTypeImpl key>
-class SetBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::SET> {
+template <ind::details::KeyTypeImpl key>
+class SetBasedTableProcessor final : public TableProcessor<key, ind::details::ColTypeImpl::SET> {
+    using ColTypeImpl = ind::details::ColTypeImpl;
     using ParentType = TableProcessor<key, ColTypeImpl::SET>;
     using ValueType = typename ParentType::ValueType;
     using Columns = typename ParentType::Columns;
     using Column = typename ParentType::Column;
-    using Adapter = typename ParentType::Adapter;
+    using ValueHandler = typename ParentType::ValueHandler;
 
 private:
     std::size_t memory_check_frequency_;
 
-    Columns& GetSortedColumns(Adapter const&) final {
+    Columns& GetSortedColumns(ValueHandler const&) final {
         return this->columns_;
     }
     bool IsLimitReached(std::size_t current_row) final {
@@ -247,8 +243,8 @@ private:
         return false;
     }
 
-    void ReserveColumns(const Adapter& adapter) final {
-        this->columns_.assign(this->GetHeaderSize(), Column{adapter.less_});
+    void ReserveColumns(const ValueHandler& handler) final {
+        this->columns_.assign(this->GetHeaderSize(), Column{handler.less_});
     }
 
     std::size_t GetCurrentMemory() const final {
@@ -265,28 +261,29 @@ private:
     }
 
 public:
-    SetBasedTableProcessor(SpilledFilesManager& spilled_manager,
-                           BaseTableProcessor::DatasetConfig config, std::size_t memory_limit,
-                           std::size_t mem_check_frequency)
-        : ParentType(spilled_manager, std::move(config), memory_limit, memory_limit / 3 * 2),
+    SetBasedTableProcessor(SortedColumnWriter& writer, BaseTableProcessor::DatasetConfig config,
+                           std::size_t memory_limit, std::size_t mem_check_frequency)
+        : ParentType(writer, std::move(config), memory_limit, memory_limit / 3 * 2),
           memory_check_frequency_(mem_check_frequency) {}
 
     ~SetBasedTableProcessor() final = default;
 };
 
-template <KeyTypeImpl key>
-class VectorBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::VECTOR> {
+template <ind::details::KeyTypeImpl key>
+class VectorBasedTableProcessor final
+    : public TableProcessor<key, ind::details::ColTypeImpl::VECTOR> {
+    using ColTypeImpl = ind::details::ColTypeImpl;
     using ParentType = TableProcessor<key, ColTypeImpl::VECTOR>;
     using BufferPtr = typename ParentType::BufferPtr;
     using ValueType = typename ParentType::ValueType;
     using Columns = typename ParentType::Columns;
-    using Adapter = typename ParentType::Adapter;
+    using ValueHandler = typename ParentType::ValueHandler;
 
     std::size_t threads_count_;
     std::size_t rows_limit_;
     std::size_t rows_count_;
 
-    std::size_t GetRowsLimit(std::size_t rows_number) const {
+    std::size_t CalculateRowsLimit(std::size_t rows_number) const {
         std::size_t row_memory = this->GetHeaderSize() * sizeof(ValueType);
         std::size_t needed_memory = rows_number * row_memory;
         std::size_t data_memory_limit = this->memory_limit_ - this->chunk_m_limit_;
@@ -295,8 +292,6 @@ class VectorBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::
         if (needed_memory > data_memory_limit) {
             std::size_t times = std::ceil((double)needed_memory / (double)data_memory_limit);
             rows_limit = std::ceil((double)rows_number / (double)times);
-            std::cout << (needed_memory >> 20) << " > " << (data_memory_limit >> 20) << " ["
-                      << times << "]\n";
         } else {
             rows_limit = rows_number;
         }
@@ -311,25 +306,26 @@ class VectorBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::
         auto counting_time = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - count_time);
 
-        std::cout << "Counting time: " << counting_time.count() << std::endl;
+        LOG(INFO) << "Counting time: " << counting_time.count();
 
-        rows_limit_ = GetRowsLimit(rows_count_);
+        rows_limit_ = CalculateRowsLimit(rows_count_);
     }
 
-    void ReserveColumns(Adapter const&) final {
+    void ReserveColumns(ValueHandler const&) final {
         this->columns_.assign(this->GetHeaderSize(), {});
         for (auto& col : this->columns_) {
             col.reserve(rows_limit_);
         }
     }
 
-    void Sort(Adapter const& adapter) {
+    void Sort(ValueHandler const& handler) {
         auto sort_time = std::chrono::system_clock::now();
         std::vector<std::thread> threads;
         for (std::size_t j = 0; j < this->GetHeaderSize(); ++j) {
-            threads.emplace_back([&col = this->columns_[j], &adapter]() {
-                std::sort(col.begin(), col.end(), adapter.less_);
-                col.erase(unique(col.begin(), col.end(), adapter.eq_), col.end());
+            /* TODO: At this point it is preferable to use a thread pool */
+            threads.emplace_back([&col = this->columns_[j], &handler]() {
+                std::sort(col.begin(), col.end(), handler.less_);
+                col.erase(unique(col.begin(), col.end(), handler.eq_), col.end());
             });
             if ((j != 0 && j % threads_count_ == 0) || j == this->GetHeaderSize() - 1) {
                 for (auto& th : threads) {
@@ -340,11 +336,11 @@ class VectorBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::
         }
         auto sorting_time = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - sort_time);
-        std::cout << "Sorting: " << sorting_time.count() << std::endl;
+        LOG(INFO) << "Sorting: " << sorting_time.count();
     }
 
-    Columns& GetSortedColumns(Adapter const& adapter) final {
-        Sort(adapter);
+    Columns& GetSortedColumns(ValueHandler const& handler) final {
+        Sort(handler);
         return this->columns_;
     }
 
@@ -358,17 +354,18 @@ class VectorBasedTableProcessor final : public TableProcessor<key, ColTypeImpl::
     }
 
 public:
-    VectorBasedTableProcessor(SpilledFilesManager& spilled_manager,
+    VectorBasedTableProcessor(SortedColumnWriter& writer,
                               const BaseTableProcessor::DatasetConfig& config,
                               std::size_t memory_limit, std::size_t threads_count)
-        : ParentType(spilled_manager, config, memory_limit, memory_limit / 2),
+        : ParentType(writer, config, memory_limit, memory_limit / 2),
           threads_count_(threads_count) {}
 
     ~VectorBasedTableProcessor() final = default;
 };
 
-template <KeyTypeImpl key, ColTypeImpl col>
-using ChunkProcessor = std::conditional_t<ColTypeImpl::SET == col, SetBasedTableProcessor<key>,
-                                          VectorBasedTableProcessor<key>>;
+template <ind::details::KeyTypeImpl key, ind::details::ColTypeImpl col>
+using ChunkProcessor =
+        std::conditional_t<ind::details::ColTypeImpl::SET == col, SetBasedTableProcessor<key>,
+                           VectorBasedTableProcessor<key>>;
 
 }  // namespace algos

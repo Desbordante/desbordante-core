@@ -1,10 +1,11 @@
 #pragma once
 
-#include <filesystem>
 #include <list>
+#include <string>
+#include <unordered_map>
 
 #include "algorithms/primitive.h"
-#include "type.h"
+#include "model/ind.h"
 
 namespace algos {
 
@@ -15,18 +16,21 @@ class INDAlgorithm : public BasePrimitive {
                   "The INDAlgorithm can either process multiple tables at once using the "
                   "Desbordante standard parser, or use a custom parser.");
 
-    struct ColumnCombination {
-        unsigned table_index;
-        std::vector<unsigned> column_indices;
+protected:
+    using IND = model::IND;
+    using INDList = std::list<IND>;
+    struct DatasetInfo {
+        std::string table_name;
+        std::vector<std::string> header;
     };
 
-    using IND = std::pair<std::shared_ptr<ColumnCombination>, std::shared_ptr<ColumnCombination>>;
-    using INDList = std::list<IND>;
+    using DatasetsInfo = std::vector<DatasetInfo>;
 
 public:
     using BasePrimitive::BasePrimitive;
 
-    //    virtual INDList GetResult() const;
+    virtual DatasetsInfo const& GetDatasetsInfo() const = 0;
+    virtual INDList IndList() const = 0;
 };
 
 }  // namespace algos
