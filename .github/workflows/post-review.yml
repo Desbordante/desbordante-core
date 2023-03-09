@@ -37,6 +37,8 @@ jobs:
 
       - uses: ZedThree/clang-tidy-review/post@v0.10.0
         id: post
+        with:
+          lgtm_comment_body: ''
 
       # If there are any comments, fail the check
       - if: steps.post.outputs.total_comments > 0
