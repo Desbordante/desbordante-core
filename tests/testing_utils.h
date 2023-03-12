@@ -11,7 +11,7 @@
 #include "datasets.h"
 
 template <typename T>
-class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
+class AlgorithmTest : public ::testing::Test {
 protected:
     CSVParser MakeCsvParser(std::string const& path, char separator = ',',
                             bool has_header = true) {
