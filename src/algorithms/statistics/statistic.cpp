@@ -108,6 +108,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(quantile75, "quantile75");
     try_add_stat(num_zeros, "num_zeros");
     try_add_stat(num_negatives, "num_negatives");
+    try_add_stat(sum_of_squares, "sum_of_squares");
 
     return res;
 }

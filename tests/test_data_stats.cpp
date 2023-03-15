@@ -51,6 +51,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetQuantile(0.75, 0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfZeros(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfNegatives(0).HasValue());
+    EXPECT_FALSE(stats.GetSumOfSquares(0).HasValue());
+}
+
+TEST(TestDataStats, TestSumOfSquares) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatPrimitive(test_file_name);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic sum_stat = stats.GetSumOfSquares(7);
+    mo::Double sum = mo::Type::GetValue<mo::Double>(sum_stat.GetData());
+    EXPECT_DOUBLE_EQ(1096089.607224L, sum);
 }
 
 TEST(TestDataStats, TestNumberOfNegatives) {

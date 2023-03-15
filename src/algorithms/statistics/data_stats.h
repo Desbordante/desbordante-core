@@ -27,7 +27,6 @@ class DataStats : public Primitive {
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
-
 protected:
     void FitInternal(model::IDatasetStream &data_stream) final;
     void MakeExecuteOptsAvailable() final;
@@ -80,7 +79,9 @@ public:
     Statistic GetNumberOfZeros(size_t index) const;
     // Returns number of negative numbers in the column if it's numeric.
     Statistic GetNumberOfNegatives(size_t index) const;
-    
+    // Return sum of numbers' squares in the column if it's numeric.
+    Statistic GetSumOfSquares(size_t index) const;
+
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;
     std::string ToString() const;
