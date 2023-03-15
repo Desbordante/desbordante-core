@@ -285,6 +285,36 @@ Statistic DataStats::GetQuantile(double part, size_t index, bool calc_all) {
     return Statistic(data[quantile], &col.GetType(), true);
 }
 
+template <class Pred>
+size_t DataStats::CountIf(Pred pred, size_t index) const {
+    const mo::TypedColumnData& col = col_data_[index];
+    const std::vector<const std::byte*>& data = col.GetData();
+    size_t count = 0;
+    for (size_t i = 0; i < data.size(); i++)
+        if (pred(data[i])) count++;
+
+    return count;
+}
+
+Statistic DataStats::GetNumberOfZeros(size_t index) const {
+    if (all_stats_[index].num_zeros.HasValue()) return all_stats_[index].num_zeros;
+    const mo::TypedColumnData& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+
+    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    std::byte* zero = type.MakeValueOfInt(0);
+    mo::IntType int_type;
+
+    auto pred = [&zero, &type, &res](std::byte const* el) {
+        return el && type.Compare(el, zero) == res;
+    };
+
+    size_t count = CountIf(pred, index);
+    type.Free(zero);
+
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
@@ -300,6 +330,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].kurtosis = GetKurtosis(index);
             all_stats_[index].skewness = GetSkewness(index);
             all_stats_[index].STD = GetCorrectedSTD(index);
+            all_stats_[index].num_zeros = GetNumberOfZeros(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

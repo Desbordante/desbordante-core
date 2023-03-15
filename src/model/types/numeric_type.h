@@ -25,6 +25,8 @@ public:
     virtual std::byte* Power(std::byte const* num, long double pow, std::byte* res) const = 0;
     virtual std::byte* Abs(std::byte const* num, std::byte* res) const = 0;
 
+    virtual std::byte* MakeValueOfInt(int value) const = 0;
+
     [[nodiscard]] virtual std::byte const* Min() const = 0;
     [[nodiscard]] virtual std::byte const* Max() const = 0;
 };
@@ -59,6 +61,10 @@ public:
     std::byte* Max(std::byte const* l, std::byte const* r, std::byte* res) const override;
     std::byte* Power(std::byte const* num, long double pow, std::byte* res) const override;
     std::byte* Abs(std::byte const* num, std::byte* res) const override;
+
+    std::byte* MakeValueOfInt(int value) const override {
+        return MakeValue(value);
+    }
 
     double Dist(std::byte const* l, std::byte const* r) const override {
         return std::abs(GetValue(l) - GetValue(r));
