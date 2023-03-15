@@ -296,9 +296,9 @@ size_t DataStats::CountIf(Pred pred, size_t index) const {
     return count;
 }
 
-Statistic DataStats::GetNumberOfZeros(size_t index) const {
+Statistic DataStats::CountIfInBinaryRelationWithZero(size_t index, mo::CompareResult res) const {
     if (all_stats_[index].num_zeros.HasValue()) return all_stats_[index].num_zeros;
-    const mo::TypedColumnData& col = col_data_[index];
+    const mo::TypedColumnData& col = GetData()[index];
     if (!col.IsNumeric()) return {};
 
     const auto& type = static_cast<const mo::INumericType&>(col.GetType());
@@ -313,6 +313,14 @@ Statistic DataStats::GetNumberOfZeros(size_t index) const {
     type.Free(zero);
 
     return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
+Statistic DataStats::GetNumberOfZeros(size_t index) const {
+    return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kEqual);
+}
+
+Statistic DataStats::GetNumberOfNegatives(size_t index) const {
+    return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
 }
 
 unsigned long long DataStats::ExecuteInternal() {
@@ -331,6 +339,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].skewness = GetSkewness(index);
             all_stats_[index].STD = GetCorrectedSTD(index);
             all_stats_[index].num_zeros = GetNumberOfZeros(index);
+            all_stats_[index].num_negatives = GetNumberOfNegatives(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
