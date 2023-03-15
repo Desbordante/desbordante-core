@@ -20,6 +20,10 @@ class DataStats : public Primitive {
 
     void ResetState() final;
 
+    // Returns number of elements in the column satisfying the predicate
+    template <class Pred>
+    size_t CountIf(Pred pred, size_t index) const;
+
 protected:
     void FitInternal(model::IDatasetStream &data_stream) final;
     void MakeExecuteOptsAvailable() final;
@@ -68,6 +72,9 @@ public:
     Statistic GetQuantile(double part, size_t index, bool calc_all = false);
     // Deletes null and empty values in the column.
     std::vector<const std::byte*> DeleteNullAndEmpties(size_t index);
+    // Returns number of zeros in the column if it's numeric.
+    Statistic GetNumberOfZeros(size_t index) const;
+    // Returns number of negative numbers in the column if it's numeric.
 
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;
