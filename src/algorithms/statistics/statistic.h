@@ -33,7 +33,7 @@ struct ColumnStats {
     size_t distinct;
     bool is_categorical;
     Statistic avg, STD, skewness, kurtosis, min, max, sum, quantile25, quantile50, quantile75,
-            num_zeros, num_negatives;
+            num_zeros, num_negatives, sum_of_squares;
     std::string ToString() const;
     std::unordered_map<std::string, std::string> ToKeyValueMap() const;
 };
