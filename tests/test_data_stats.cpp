@@ -50,6 +50,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetQuantile(0.5, 0).HasValue());
     EXPECT_FALSE(stats.GetQuantile(0.75, 0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfZeros(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfNegatives(0).HasValue());
+}
+
+TEST(TestDataStats, TestNumberOfNegatives) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic num_negatives_stat = stats.GetNumberOfNegatives(8);
+    mo::Int num_negatives = mo::Type::GetValue<mo::Int>(num_negatives_stat.GetData());
+    EXPECT_EQ(3, num_negatives);
 }
 
 TEST(TestDataStats, TestGetNumberOfZeros) {

@@ -24,6 +24,10 @@ class DataStats : public Primitive {
     template <class Pred>
     size_t CountIf(Pred pred, size_t index) const;
 
+    // Base method for number of negatives and number of zeros statistics
+    Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
+
+
 protected:
     void FitInternal(model::IDatasetStream &data_stream) final;
     void MakeExecuteOptsAvailable() final;
@@ -75,7 +79,8 @@ public:
     // Returns number of zeros in the column if it's numeric.
     Statistic GetNumberOfZeros(size_t index) const;
     // Returns number of negative numbers in the column if it's numeric.
-
+    Statistic GetNumberOfNegatives(size_t index) const;
+    
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;
     std::string ToString() const;
