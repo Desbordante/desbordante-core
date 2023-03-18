@@ -109,6 +109,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_zeros, "num_zeros");
     try_add_stat(num_negatives, "num_negatives");
     try_add_stat(sum_of_squares, "sum_of_squares");
+    try_add_stat(geometric_mean, "geometric_mean");
 
     return res;
 }
