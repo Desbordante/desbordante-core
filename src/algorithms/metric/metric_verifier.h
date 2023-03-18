@@ -96,6 +96,18 @@ public:
         return metric_fd_holds_;
     }
 
+    config::IndicesType const& GetLhsIndices() const {
+        return lhs_indices_;
+    }
+
+    config::IndicesType const& GetRhsIndices() const {
+        return rhs_indices_;
+    }
+
+    long double GetParameter() const {
+        return parameter_;
+    }
+
     std::vector<std::vector<Highlight>> const& GetHighlights() const {
         return highlight_calculator_->GetHighlights();
     }
