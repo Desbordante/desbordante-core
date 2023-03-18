@@ -42,6 +42,7 @@ using PyFDep = PyFDPrimitive<algos::FDep>;
 using PyDFD = PyFDPrimitive<algos::DFD>;
 using PyDepminer = PyFDPrimitive<algos::Depminer>;
 using PyAid = PyFDPrimitive<algos::Aid>;
+using FDHighlight = algos::fd_verifier::Highlight;
 using model::ARStrings;
 
 PYBIND11_MODULE(desbordante, module) {
@@ -69,11 +70,18 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("lhs_indices", &PyFD::GetLhs)
             .def_property_readonly("rhs_index", &PyFD::GetRhs);
 
+    py::class_<FDHighlight>(module, "FDHighlight")
+            .def_property_readonly("cluster", &FDHighlight::GetCluster)
+            .def_property_readonly("num_distinct_rhs_values", &FDHighlight::GetNumDistinctRhsValues)
+            .def_property_readonly("most_frequent_rhs_value_proportion",
+                                   &FDHighlight::GetMostFrequentRhsValueProportion);
+
     DEFINE_PRIMITIVE(FDVerifier)
             .def("fd_holds", &PyFDVerifier::FDHolds)
             .def("get_error", &PyFDVerifier::GetError)
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
-            .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows);
+            .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
+            .def("get_highlights", &PyFDVerifier::GetHighlights);
 
     DEFINE_PRIMITIVE_WITH_RES(DataStats);
     DEFINE_PRIMITIVE_WITH_RES(Apriori);
