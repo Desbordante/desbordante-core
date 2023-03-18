@@ -52,6 +52,19 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfZeros(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfNegatives(0).HasValue());
     EXPECT_FALSE(stats.GetSumOfSquares(0).HasValue());
+    EXPECT_FALSE(stats.GetGeometricMean(0).HasValue());
+}
+
+TEST(TestDataStats, TestGeometricMean) {
+    auto test = [](int index) {
+        std::unique_ptr<algos::DataStats> stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
+        algos::DataStats &stats = *stats_ptr;
+        algos::Statistic geometric_mean_stat = stats.GetGeometricMean(index);
+        mo::Double geometric_mean = mo::Type::GetValue<mo::Double>(geometric_mean_stat.GetData());
+        return geometric_mean;
+    };
+    EXPECT_DOUBLE_EQ(2.4819630489759605, test(3));
+    EXPECT_DOUBLE_EQ(33.33024629230983, test(9));
 }
 
 TEST(TestDataStats, TestSumOfSquares) {
