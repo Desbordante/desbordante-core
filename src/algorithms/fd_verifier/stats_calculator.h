@@ -30,7 +30,7 @@ private:
     std::string GetLhsStringValue(ClusterIndex row_index) const;
     std::string GetStringValueByIndex(ClusterIndex row_index, ClusterIndex col_index) const;
 
-    static size_t CalculateNumDifferentRhsValues(
+    static size_t CalculateNumDistinctRhsValues(
             std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size);
 
     static size_t CalculateNumTuplesConflictingOnRhsInCluster(

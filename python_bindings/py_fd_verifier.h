@@ -22,6 +22,10 @@ public:
     long double GetError() const {
         return primitive_.GetError();
     }
+
+    std::vector<algos::fd_verifier::Highlight> const& GetHighlights() const {
+        return primitive_.GetHighlights();
+    }
 };
 
 }  // namespace python_bindings

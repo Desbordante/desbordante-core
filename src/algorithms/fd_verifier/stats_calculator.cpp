@@ -65,15 +65,14 @@ void StatsCalculator::CalculateStatistics(std::deque<util::PLI::Cluster> cluster
     for (auto& cluster : clusters) {
         std::unordered_map<ClusterIndex, unsigned> frequencies =
                 util::PLI::CreateFrequencies(cluster, pt);
-        size_t num_different_rhs_values =
-                CalculateNumDifferentRhsValues(frequencies, cluster.size());
-        if (num_different_rhs_values == 1) {
+        size_t num_distinct_rhs_values = CalculateNumDistinctRhsValues(frequencies, cluster.size());
+        if (num_distinct_rhs_values == 1) {
             continue;
         }
         num_tuples_conflicting_on_rhs +=
                 CalculateNumTuplesConflictingOnRhsInCluster(frequencies, cluster.size());
         num_error_rows_ += cluster.size();
-        highlights_.emplace_back(std::move(cluster), num_different_rhs_values,
+        highlights_.emplace_back(std::move(cluster), num_distinct_rhs_values,
                                  CalculateNumMostFrequentRhsValue(frequencies));
     }
     assert(!highlights_.empty());
@@ -103,7 +102,7 @@ size_t StatsCalculator::CalculateNumTuplesConflictingOnRhsInCluster(
     return num_tuples_conflicting_on_rhs;
 }
 
-size_t StatsCalculator::CalculateNumDifferentRhsValues(
+size_t StatsCalculator::CalculateNumDistinctRhsValues(
         std::unordered_map<ClusterIndex, unsigned> const& frequencies, size_t cluster_size) {
     size_t num_non_singleton_rhs_values =
             std::accumulate(frequencies.begin(), frequencies.end(), 0U,
@@ -115,9 +114,9 @@ void StatsCalculator::VisualizeHighlights() const {
     for (auto const& highlight : highlights_) {
         LOG(DEBUG) << "- LHS value: " << GetLhsStringValue(highlight.GetCluster()[0])
                    << ", Size: " << highlight.GetCluster().size()
-                   << ", Number of different RHS values: " << highlight.GetNumDifferentRhsValues()
+                   << ", Number of different RHS values: " << highlight.GetNumDistinctRhsValues()
                    << ", Proportion of most frequent RHS value: "
-                   << highlight.GetMostFrequentValueProportion();
+                   << highlight.GetMostFrequentRhsValueProportion();
         for (auto index : highlight.GetCluster()) {
             LOG(DEBUG) << GetStringValueByIndex(index, rhs_index_);
         }
@@ -163,25 +162,25 @@ void StatsCalculator::SortHighlights(HighlightCompareFunction const& compare) {
 
 auto StatsCalculator::CompareHighlightsByProportionAscending() -> HighlightCompareFunction {
     return [](auto const& h1, auto const& h2) {
-        return h1.GetMostFrequentValueProportion() < h2.GetMostFrequentValueProportion();
+        return h1.GetMostFrequentRhsValueProportion() < h2.GetMostFrequentRhsValueProportion();
     };
 }
 
 auto StatsCalculator::CompareHighlightsByProportionDescending() -> HighlightCompareFunction {
     return [](auto const& h1, auto const& h2) {
-        return h1.GetMostFrequentValueProportion() > h2.GetMostFrequentValueProportion();
+        return h1.GetMostFrequentRhsValueProportion() > h2.GetMostFrequentRhsValueProportion();
     };
 }
 
 auto StatsCalculator::CompareHighlightsByNumAscending() -> HighlightCompareFunction {
     return [](auto const& h1, auto const& h2) {
-        return h1.GetNumDifferentRhsValues() < h2.GetNumDifferentRhsValues();
+        return h1.GetNumDistinctRhsValues() < h2.GetNumDistinctRhsValues();
     };
 }
 
 auto StatsCalculator::CompareHighlightsByNumDescending() -> HighlightCompareFunction {
     return [](auto const& h1, auto const& h2) {
-        return h1.GetNumDifferentRhsValues() > h2.GetNumDifferentRhsValues();
+        return h1.GetNumDistinctRhsValues() > h2.GetNumDistinctRhsValues();
     };
 }
 
