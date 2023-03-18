@@ -8,6 +8,7 @@
 #include "py_ar_algorithm.h"
 #include "py_data_stats.h"
 #include "py_fd_primitive.h"
+#include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
 
 INITIALIZE_EASYLOGGINGPP
@@ -67,6 +68,12 @@ PYBIND11_MODULE(desbordante, module) {
             .def("__repr__", &PyFD::ToString)
             .def_property_readonly("lhs_indices", &PyFD::GetLhs)
             .def_property_readonly("rhs_index", &PyFD::GetRhs);
+
+    DEFINE_PRIMITIVE(FDVerifier)
+            .def("fd_holds", &PyFDVerifier::FDHolds)
+            .def("get_error", &PyFDVerifier::GetError)
+            .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
+            .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows);
 
     DEFINE_PRIMITIVE_WITH_RES(DataStats);
     DEFINE_PRIMITIVE_WITH_RES(Apriori);
