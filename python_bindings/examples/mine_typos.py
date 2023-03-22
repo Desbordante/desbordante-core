@@ -29,8 +29,7 @@ CONFIG_STRING = f"""Starting typo discovery scenario with parameters:
 {EXACT_ALGORITHM=}
 {APPROXIMATE_ALGORITHM=}
 {HEADER=}
-{SEPARATOR=}
-{FD_INDEX=}"""
+{SEPARATOR=}"""
 
 
 def setup_pandas_print():
