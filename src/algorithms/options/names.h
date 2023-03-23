@@ -39,5 +39,5 @@ constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdTuplesNumber = "tuples_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
-constexpr auto kCfdAlgo = "cfd_algo";
+constexpr auto kCfdSubstrategy = "cfd_substrategy";
 }  // namespace algos::config::names

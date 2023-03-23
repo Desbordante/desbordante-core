@@ -112,6 +112,16 @@ boost::program_options::options_description AlgoOptions() {
 
     mfd_options.add(cosine_options);
 
+    po::options_description cfd_options("CFD options");
+    cfd_options.add_options()
+        (names::kCfdMinimumSupport, po::value<unsigned>(),desc::kDCfdMinimumSupport)
+        (names::kCfdMinimumConfidence, po::value<double>(), desc::kDCfdMinimumConfidence)
+        (names::kCfdMaximumLhs, po::value<unsigned int>()->default_value(0), desc::kDCfdMaximumLhs)
+        (names::kCfdColumnsNumber, po::value<unsigned int>()->default_value(0), desc::kDCfdColumnsNumber)
+        (names::kCfdTuplesNumber, po::value<unsigned int>()->default_value(0), desc::kDCfdTuplesNumber)
+        (names::kCfdSubstrategy, po::value<algos::Substrategy>(), desc::kDCfdSubstrategy)
+    ;
+
     po::options_description ac_options("AC options");
     ac_options.add_options()
             (names::kBinaryOperation, po::value<char>()->default_value('+'),
@@ -139,7 +149,8 @@ boost::program_options::options_description AlgoOptions() {
             .add(ar_options)
             .add(ac_options)
             .add(typo_options)
-            .add(fd_verification_options);
+            .add(fd_verification_options)
+            .add(cfd_options);
     return algorithm_options;
 }
 }  // namespace algos::config

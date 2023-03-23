@@ -34,7 +34,10 @@ BETTER_ENUM(PrimitiveType, char,
     stats,
 
 /* FD verifier algorithm */
-    fd_verifier
+    fd_verifier,
+
+/* FD first dfs cfd mining algorithm */
+    fd_first_dfs
 )
 
 // clang-format on

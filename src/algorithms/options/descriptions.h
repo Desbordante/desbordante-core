@@ -71,7 +71,7 @@ constexpr auto kDCfdTuplesNumber = "Number of tuples in the part of the dataset 
         "want to use algo not on the full dataset, but on its part";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
-const std::string _kDCfdAlgo = "CFD algorithm to use\n" +
-                                       EnumToAvailableValues<algos::CfdAlgo>();
-const auto kDCfdAlgo = _kDCfdAlgo.c_str();
+const std::string _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
+                                       EnumToAvailableValues<algos::Substrategy>();
+const auto kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
 } // namespace algos::config::descriptions
