@@ -53,6 +53,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfNegatives(0).HasValue());
     EXPECT_FALSE(stats.GetSumOfSquares(0).HasValue());
     EXPECT_FALSE(stats.GetGeometricMean(0).HasValue());
+    EXPECT_FALSE(stats.GetMeanAD(0).HasValue());
+}
+
+TEST(TestDataStats, TestMeanAD) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic MeanAD_stat = stats.GetMeanAD(7);
+    mo::Double MeanAD = mo::Type::GetValue<mo::Double>(MeanAD_stat.GetData());
+    EXPECT_DOUBLE_EQ(258.263, MeanAD);
 }
 
 TEST(TestDataStats, TestGeometricMean) {
@@ -188,9 +197,9 @@ TEST(TestDataStats, TestShowSample) {
     auto stats_ptr = MakeStatPrimitive(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
-    for (const auto &row : sample) {
+    for(const auto& row : sample) {
         std::stringstream result;
-        for (const auto &str : row) {
+        for(const auto& str : row) {
             result << str << " \t";
         }
         LOG(INFO) << result.str();
