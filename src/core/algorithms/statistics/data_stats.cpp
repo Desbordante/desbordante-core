@@ -540,6 +540,25 @@ unsigned long long DataStats::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
+template <typename Pred>
+std::vector<size_t> DataStats::GetIndices(Pred pred) const {
+    std::vector<size_t> res;
+    res.reserve(col_data_.size());
+    for (size_t i = 0; i < col_data_.size(); i++) {
+        if (pred(i)) res.push_back(i);
+    }
+
+    res.shrink_to_fit();
+
+    return res;
+}
+
+std::vector<size_t> DataStats::GetColumnsWithNull() const {
+    auto pred = [this](size_t index) { return col_data_[index].GetNumNulls() != 0; };
+
+    return GetIndices(pred);
+}
+
 size_t DataStats::GetNumberOfColumns() const {
     return col_data_.size();
 }
