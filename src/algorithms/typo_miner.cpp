@@ -6,21 +6,6 @@
 
 namespace algos {
 
-decltype(TypoMiner::RadiusOpt) TypoMiner::RadiusOpt{
-        {config::names::kRadius, config::descriptions::kDRadius}, -1, [](auto value) {
-            if (!(value == -1 || value >= 0)) {
-                throw std::invalid_argument(
-                        "Radius should be greater or equal to zero or equal to -1");
-            }
-        }};
-
-decltype(TypoMiner::RatioOpt) TypoMiner::RatioOpt{
-        {config::names::kRatio, config::descriptions::kDRatio}, {}, [](auto value) {
-            if (!(value >= 0 && value <= 1)) {
-                throw std::invalid_argument("Ratio should be between 0 and 1");
-            }
-        }};
-
 TypoMiner::TypoMiner(PrimitiveType precise, PrimitiveType approx)
         : TypoMiner(CreatePrimitiveInstance<FDAlgorithm>(precise),
                     CreatePrimitiveInstance<FDAlgorithm>(approx)) {}
@@ -32,19 +17,36 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
-    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void TypoMiner::RegisterOptions() {
-    RegisterOption(RadiusOpt.GetOption(&radius_));
-    RegisterOption(RatioOpt.GetOption(&ratio_).OverrideDefaultFunction([this]() {
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
+
+    auto radius_check = [](double radius) {
+        if (!(radius == -1 || radius >= 0)) {
+            throw std::invalid_argument("Radius should be greater or equal to zero or equal to -1");
+        }
+    };
+    auto ratio_default = [this]() {
         return (relation_->GetNumRows() <= 1) ? 1 : (2.0 / relation_->GetNumRows());
-    }));
-    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
+    };
+    auto ratio_check = [](double ratio) {
+        if (!(ratio >= 0 && ratio <= 1)) {
+            throw std::invalid_argument("Ratio should be between 0 and 1");
+        }
+    };
+
+    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
+    RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
 }
 
 void TypoMiner::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(RadiusOpt, RatioOpt));
+    using namespace config::names;
+    MakeOptionsAvailable({kRadius, kRatio});
 }
 
 void TypoMiner::ResetState() {
@@ -52,19 +54,15 @@ void TypoMiner::ResetState() {
 }
 
 bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any const& value) {
-    using config::ErrorType;
-    auto const& error_opt_type = config::ErrorOpt;
-    if (option_name == error_opt_type.GetName()) {
-        ErrorType val;
-        error_opt_type.GetOption(&val)
-                .OverrideDefaultValue({})
-                .SetValueCheck([](auto value) {
-                    if (value == 0.0)
-                        throw std::invalid_argument("Typo mining with error 0 is meaningless");
-                }).Set(value);
-        if (TrySetOption(option_name, boost::any{ErrorType{0.0}}, boost::any{val}) == 0)
-            return false;
-        return true;
+    if (option_name == config::ErrorOpt.GetName()) {
+        if (value.empty()) {
+            throw std::invalid_argument("Must specify error value when mining typos.");
+        }
+        auto error = boost::any_cast<config::ErrorType>(value);
+        if (error == 0.0) {
+            throw std::invalid_argument("Typo mining with error 0 is meaningless");
+        }
+        return static_cast<bool>(TrySetOption(option_name, config::ErrorType{0.0}, value));
     }
     return static_cast<bool>(TrySetOption(option_name, value, value));
 }

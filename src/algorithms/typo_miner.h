@@ -1,8 +1,8 @@
 #pragma once
 
-#include "algorithms/options/names.h"
-#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/create_primitive.h"
+#include "algorithms/options/equal_nulls/type.h"
+#include "algorithms/options/names.h"
 #include "algorithms/primitive.h"
 #include "algorithms/pyro.h"
 #include "model/column_layout_typed_relation_data.h"
@@ -24,9 +24,6 @@ private:
     double ratio_;       /* Maximal fraction of deviations per cluster to flag the cluster as
                           * containing typos */
     config::EqNullsType is_null_equal_null_;
-
-    static config::CommonOption<decltype(radius_)> RadiusOpt;
-    static config::CommonOption<decltype(ratio_)> RatioOpt;
 
     void ResetState() final;
 
@@ -113,11 +110,11 @@ public:
         return ratio_;
     }
     double SetRadius(double radius) {
-        SetOption(RadiusOpt.GetName(), radius);
+        SetOption(config::names::kRadius, radius);
         return radius_;
     }
     double SetRatio(double ratio) {
-        SetOption(RatioOpt.GetName(), ratio);
+        SetOption(config::names::kRatio, ratio);
         return ratio_;
     }
     ColumnLayoutRelationData const& GetRelationData() const noexcept {
