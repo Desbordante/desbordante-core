@@ -58,6 +58,13 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetMedianAD(0).HasValue());
 }
 
+TEST(TestDataStats, TestGetColumnsWithNull) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm("TestMetric.csv", ',', false);
+    std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithNull();
+    std::vector<size_t> actual_cols = std::vector<size_t>{6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    EXPECT_EQ(expected_cols, actual_cols);
+}
+
 TEST(TestDataStats, TestMedianAD) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;

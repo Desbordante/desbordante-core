@@ -25,6 +25,10 @@ class DataStats : public Algorithm {
     template <class Pred>
     size_t CountIf(Pred pred, size_t index) const;
 
+    // Returns vector with indices satisfying the predicate
+    template <class Pred>
+    std::vector<size_t> GetIndices(Pred pred) const;
+
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
@@ -48,6 +52,8 @@ public:
     size_t NumberOfValues(size_t index) const;
     // Returns number of columns in table.
     size_t GetNumberOfColumns() const;
+    // Returns columns which contain a null value.
+    std::vector<size_t> GetColumnsWithNull() const;
     // Returns number of unique values in the column.
     size_t Distinct(size_t index);
     // Check if quantity <= count of unique values in the column.
