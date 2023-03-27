@@ -54,6 +54,8 @@ public:
     size_t GetNumberOfColumns() const;
     // Returns columns which contain a null value.
     std::vector<size_t> GetColumnsWithNull() const;
+    // Returns columns with only null values.
+    std::vector<size_t> GetNullColumns() const;
     // Returns number of unique values in the column.
     size_t Distinct(size_t index);
     // Check if quantity <= count of unique values in the column.
