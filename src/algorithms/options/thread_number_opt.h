@@ -2,13 +2,13 @@
 
 #include <thread>
 
+#include "algorithms/options/common_option.h"
 #include "algorithms/options/names_and_descriptions.h"
-#include "algorithms/options/type.h"
 
 namespace algos::config {
 
 using ThreadNumType = ushort;
-const OptionType<ThreadNumType> ThreadNumberOpt{
+const CommonOption<ThreadNumType> ThreadNumberOpt{
         {names::kThreads, descriptions::kDThreads}, 0, [](auto &value) {
             if (value == 0) {
                 value = std::thread::hardware_concurrency();

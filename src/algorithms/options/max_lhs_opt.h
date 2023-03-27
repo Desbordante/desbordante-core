@@ -2,13 +2,13 @@
 
 #include <limits>
 
+#include "algorithms/options/common_option.h"
 #include "algorithms/options/names_and_descriptions.h"
-#include "algorithms/options/type.h"
 
 namespace algos::config {
 
 using MaxLhsType = unsigned int;
-static const config::OptionType<MaxLhsType> MaxLhsOpt{
+static const config::CommonOption<MaxLhsType> MaxLhsOpt{
         {config::names::kMaximumLhs, config::descriptions::kDMaximumLhs},
         std::numeric_limits<MaxLhsType>::max()
 };
