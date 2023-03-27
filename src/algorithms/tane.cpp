@@ -1,11 +1,11 @@
 #include "algorithms/tane.h"
 
-#include <easylogging++.h>
-
 #include <chrono>
 #include <iomanip>
 #include <list>
 #include <memory>
+
+#include <easylogging++.h>
 
 #include "algorithms/options/error/option.h"
 #include "algorithms/options/max_lhs/option.h"
@@ -23,12 +23,12 @@ Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName})  {
 }
 
 void Tane::RegisterOptions() {
-    RegisterOption(config::MaxLhsOpt.GetOption(&max_lhs_));
-    RegisterOption(config::ErrorOpt.GetOption(&max_ucc_error_));
+    RegisterOption(config::ErrorOpt(&max_ucc_error_));
+    RegisterOption(config::MaxLhsOpt(&max_lhs_));
 }
 
 void Tane::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ErrorOpt));
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName()});
 }
 
 void Tane::ResetStateFd() {
