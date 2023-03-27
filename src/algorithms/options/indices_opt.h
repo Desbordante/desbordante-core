@@ -2,8 +2,8 @@
 
 #include <vector>
 
+#include "algorithms/options/common_option.h"
 #include "algorithms/options/names_and_descriptions.h"
-#include "algorithms/options/type.h"
 
 namespace algos::config {
 
@@ -16,13 +16,13 @@ void ValidateIndex(IndexType value, size_t cols_count);
 
 void ValidateIndices(IndicesType const& value, size_t cols_count);
 
-const OptionType<IndexType> RhsIndexOpt{
+const CommonOption<IndexType> RhsIndexOpt{
         {config::names::kRhsIndex, config::descriptions::kDRhsIndex}};
 
-const OptionType<IndicesType> LhsIndicesOpt{
+const CommonOption<IndicesType> LhsIndicesOpt{
         {config::names::kLhsIndices, config::descriptions::kDLhsIndices}, {}, TransformIndices};
 
-const OptionType<IndicesType> RhsIndicesOpt{
+const CommonOption<IndicesType> RhsIndicesOpt{
         {config::names::kRhsIndices, config::descriptions::kDRhsIndices}, {}, TransformIndices};
 
 }  // namespace algos::config

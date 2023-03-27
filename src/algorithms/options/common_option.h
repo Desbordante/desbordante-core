@@ -7,9 +7,9 @@
 namespace algos::config {
 
 template<typename T>
-struct OptionType {
-    explicit OptionType(OptionInfo const info, std::optional<T> default_value = {},
-                        typename Option<T>::NormalizeFunc normalize = {})
+struct CommonOption {
+    explicit CommonOption(OptionInfo const info, std::optional<T> default_value = {},
+                          typename Option<T>::NormalizeFunc normalize = {})
             : info_(info), default_value_(std::move(default_value)),
               normalize_(std::move(normalize)) {}
 
@@ -28,7 +28,7 @@ private:
 };
 
 template<typename... Types>
-std::vector<std::string_view> GetOptionNames(OptionType<Types> const &... options) {
+std::vector<std::string_view> GetOptionNames(CommonOption<Types> const &... options) {
     std::vector<std::string_view> names{};
     (names.emplace_back(options.GetName()), ...);
     return names;

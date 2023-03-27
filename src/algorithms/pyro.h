@@ -3,7 +3,7 @@
 #include <list>
 #include <mutex>
 
-#include "algorithms/options/type.h"
+#include "algorithms/options/common_option.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "core/dependency_consumer.h"
 #include "core/search_space.h"
@@ -12,7 +12,7 @@ namespace algos {
 
 class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
 private:
-    static config::OptionType<decltype(Configuration::seed)> SeedOpt;
+    static config::CommonOption<decltype(Configuration::seed)> SeedOpt;
 
     std::list<std::unique_ptr<SearchSpace>> search_spaces_;
 
