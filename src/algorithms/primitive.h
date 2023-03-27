@@ -11,7 +11,6 @@
 #include <boost/any.hpp>
 
 #include "algorithms/options/ioption.h"
-#include "algorithms/options/opt_add_func_type.h"
 #include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
@@ -30,9 +29,6 @@ private:
     std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
 
     bool fit_completed_ = false;
-
-    void MakeOptionsAvailable(config::IOption *parent_name,
-                              std::vector<std::string_view> const& option_names);
 
     // Clear the necessary fields for Execute to run repeatedly with different
     // configuration parameters on the same dataset.
@@ -62,8 +58,6 @@ protected:
         assert(possible_options_.find(name) == possible_options_.end());
         possible_options_[name] = std::make_unique<config::Option<T>>(std::move(option));
     }
-
-    config::OptAddFunc GetOptAvailFunc();
 
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.
