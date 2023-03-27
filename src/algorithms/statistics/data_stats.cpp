@@ -14,16 +14,16 @@ namespace mo = model;
 
 DataStats::DataStats() : Primitive({"Calculating statistics"}) {
     RegisterOptions();
-    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void DataStats::RegisterOptions() {
-    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-    RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
+    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::ThreadNumberOpt(&threads_num_));
 }
 
 void DataStats::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
+    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
 }
 
 void DataStats::ResetState() {
