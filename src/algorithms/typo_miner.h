@@ -25,8 +25,8 @@ private:
                           * containing typos */
     config::EqNullsType is_null_equal_null_;
 
-    static config::OptionType<decltype(radius_)> RadiusOpt;
-    static config::OptionType<decltype(ratio_)> RatioOpt;
+    static config::CommonOption<decltype(radius_)> RadiusOpt;
+    static config::CommonOption<decltype(ratio_)> RatioOpt;
 
     void ResetState() final;
 

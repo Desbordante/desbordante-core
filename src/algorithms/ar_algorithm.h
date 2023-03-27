@@ -8,7 +8,7 @@
 #include <boost/any.hpp>
 
 #include "algorithms/ar_algorithm_enums.h"
-#include "algorithms/options/type.h"
+#include "algorithms/options/common_option.h"
 #include "algorithms/primitive.h"
 #include "model/ar.h"
 #include "model/transactional_data.h"
@@ -25,12 +25,12 @@ private:
     bool first_column_tid_;
     std::list<model::ArIDs> ar_collection_;
 
-    static const config::OptionType<decltype(input_format_)> InputFormatOpt;
-    static const config::OptionType<decltype(tid_column_index_)> TidColumnIndexOpt;
-    static const config::OptionType<decltype(item_column_index_)> ItemColumnIndexOpt;
-    static const config::OptionType<decltype(first_column_tid_)> FirstColumnTidOpt;
-    static const config::OptionType<MinSupType> MinSupportOpt;
-    static const config::OptionType<decltype(minconf_)> MinConfidenceOpt;
+    static const config::CommonOption<decltype(input_format_)> InputFormatOpt;
+    static const config::CommonOption<decltype(tid_column_index_)> TidColumnIndexOpt;
+    static const config::CommonOption<decltype(item_column_index_)> ItemColumnIndexOpt;
+    static const config::CommonOption<decltype(first_column_tid_)> FirstColumnTidOpt;
+    static const config::CommonOption<MinSupType> MinSupportOpt;
+    static const config::CommonOption<decltype(minconf_)> MinConfidenceOpt;
 
     struct RuleNode {
         model::ArIDs rule;
