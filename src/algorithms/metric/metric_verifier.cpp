@@ -117,18 +117,18 @@ void MetricVerifier::RegisterOptions() {
     RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
     RegisterOption(DistFromNullIsInfinityOpt.GetOption(&dist_from_null_is_infinity_));
     RegisterOption(ParameterOpt.GetOption(&parameter_));
-    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetInstanceCheck(check_lhs));
+    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetValueCheck(check_lhs));
     RegisterOption(MetricOpt.GetOption(&metric_).SetConditionalOpts(
             GetOptAvailFunc(), {{{}, config::GetOptionNames(config::RhsIndicesOpt)}}));
     RegisterOption(
             config::RhsIndicesOpt.GetOption(&rhs_indices_)
-                    .SetInstanceCheck(check_rhs)
+                    .SetValueCheck(check_rhs)
                     .SetConditionalOpts(
                             GetOptAvailFunc(),
                             {{need_algo_and_q, config::GetOptionNames(AlgoOpt, QGramLengthOpt)},
                              {need_algo_only, config::GetOptionNames(AlgoOpt)}}));
 
-    RegisterOption(AlgoOpt.GetOption(&algo_).SetInstanceCheck(algo_check));
+    RegisterOption(AlgoOpt.GetOption(&algo_).SetValueCheck(algo_check));
     RegisterOption(QGramLengthOpt.GetOption(&q_));
 }
 
