@@ -56,7 +56,7 @@ bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any con
         ErrorType val;
         error_opt_type.GetOption(&val)
                 .OverrideDefaultValue({})
-                .SetInstanceCheck([](auto value) {
+                .SetValueCheck([](auto value) {
                     if (value == 0.0)
                         throw std::invalid_argument("Typo mining with error 0 is meaningless");
                 }).Set(value);

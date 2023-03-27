@@ -21,8 +21,8 @@ void FDVerifier::RegisterOptions() {
     };
 
     RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetInstanceCheck(check_lhs));
-    RegisterOption(config::RhsIndexOpt.GetOption(&rhs_index_).SetInstanceCheck(check_rhs));
+    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetValueCheck(check_lhs));
+    RegisterOption(config::RhsIndexOpt.GetOption(&rhs_index_).SetValueCheck(check_rhs));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
