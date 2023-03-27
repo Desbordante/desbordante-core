@@ -553,6 +553,14 @@ std::vector<size_t> DataStats::GetIndices(Pred pred) const {
     return res;
 }
 
+std::vector<size_t> DataStats::GetNullColumns() const {
+    auto pred = [this, num_rows = col_data_[0].GetNumRows()](size_t index) {
+        return col_data_[index].GetNumNulls() == num_rows;
+    };
+
+    return GetIndices(pred);
+}
+
 std::vector<size_t> DataStats::GetColumnsWithNull() const {
     auto pred = [this](size_t index) { return col_data_[index].GetNumNulls() != 0; };
 
