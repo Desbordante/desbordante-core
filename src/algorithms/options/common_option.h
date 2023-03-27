@@ -1,37 +1,46 @@
 #pragma once
 
 #include <optional>
+#include <string_view>
 
 #include "algorithms/options/option.h"
 
 namespace algos::config {
 
-template<typename T>
-struct CommonOption {
-    explicit CommonOption(OptionInfo const info, std::optional<T> default_value = {},
-                          typename Option<T>::NormalizeFunc normalize = {})
-            : info_(info), default_value_(std::move(default_value)),
-              normalize_(std::move(normalize)) {}
+// Aids in creating options that come up often in unrelated algorithms, like
+// null equality.
+template <typename T>
+class CommonOption {
+private:
+    std::string_view const name_;
+    std::string_view const description_;
+    std::optional<T> const default_value_;
+    typename Option<T>::NormalizeFunc const normalize_func_;
+    typename Option<T>::ValueCheckFunc const value_check_func_;
 
-    [[nodiscard]] Option<T> GetOption(T *value_ptr) const {
-        return {info_, value_ptr, normalize_, default_value_};
+public:
+    CommonOption(std::string_view name, std::string_view description,
+                 std::optional<T> default_value = std::nullopt,
+                 typename Option<T>::NormalizeFunc normalize_func = nullptr,
+                 typename Option<T>::ValueCheckFunc value_check_func = nullptr)
+        : name_(name),
+          description_(description),
+          default_value_(default_value),
+          normalize_func_(normalize_func),
+          value_check_func_(value_check_func) {}
+
+    [[nodiscard]] Option<T> operator()(T *value_ptr) const {
+        auto option = default_value_.has_value()
+                              ? Option{value_ptr, name_, description_, default_value_.value()}
+                              : Option{value_ptr, name_, description_};
+        if (normalize_func_) option.SetNormalizeFunc(normalize_func_);
+        if (value_check_func_) option.SetValueCheck(value_check_func_);
+        return option;
     }
 
     [[nodiscard]] std::string_view GetName() const {
-        return info_.GetName();
+        return name_;
     }
-
-private:
-    OptionInfo const info_;
-    std::optional<T> const default_value_;
-    std::function<void(T &)> const normalize_;
 };
 
-template<typename... Types>
-std::vector<std::string_view> GetOptionNames(CommonOption<Types> const &... options) {
-    std::vector<std::string_view> names{};
-    (names.emplace_back(options.GetName()), ...);
-    return names;
-}
-
-}
+}  // namespace algos::config
