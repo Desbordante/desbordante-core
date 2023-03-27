@@ -9,44 +9,27 @@
 
 namespace algos {
 
-decltype(ARAlgorithm::InputFormatOpt) ARAlgorithm::InputFormatOpt{
-        {config::names::kInputFormat, config::descriptions::kDInputFormat}};
-
-decltype(ARAlgorithm::TidColumnIndexOpt) ARAlgorithm::TidColumnIndexOpt{
-        {config::names::kTIdColumnIndex, config::descriptions::kDTIdColumnIndex}, 0};
-
-decltype(ARAlgorithm::ItemColumnIndexOpt) ARAlgorithm::ItemColumnIndexOpt{
-        {config::names::kItemColumnIndex, config::descriptions::kDItemColumnIndex}, 1};
-
-decltype(ARAlgorithm::FirstColumnTidOpt) ARAlgorithm::FirstColumnTidOpt{
-        {config::names::kFirstColumnTId, config::descriptions::kDFirstColumnTId}, false};
-
-decltype(ARAlgorithm::MinSupportOpt) ARAlgorithm::MinSupportOpt{
-        {config::names::kMinimumSupport, config::descriptions::kDMinimumSupport}, 0.0};
-
-decltype(ARAlgorithm::MinConfidenceOpt) ARAlgorithm::MinConfidenceOpt{
-        {config::names::kMinimumConfidence, config::descriptions::kDMinimumConfidence}, 0.0};
-
 ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
         : Primitive(std::move(phase_names)) {
+    using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable(config::GetOptionNames(InputFormatOpt));
+    MakeOptionsAvailable({kInputFormat});
 }
 
 void ARAlgorithm::RegisterOptions() {
-    auto sing_eq = [](InputFormat value) { return value == +InputFormat::singular; };
-    auto tab_eq = [](InputFormat value) { return value == +InputFormat::tabular; };
-    RegisterOption(InputFormatOpt.GetOption(&input_format_).SetConditionalOpts(
-            GetOptAvailFunc(),
-            {
-                    {sing_eq, config::GetOptionNames(TidColumnIndexOpt, ItemColumnIndexOpt)},
-                    {tab_eq, config::GetOptionNames(FirstColumnTidOpt)},
-            }));
-    RegisterOption(TidColumnIndexOpt.GetOption(&tid_column_index_));
-    RegisterOption(ItemColumnIndexOpt.GetOption(&item_column_index_));
-    RegisterOption(FirstColumnTidOpt.GetOption(&first_column_tid_));
-    RegisterOption(MinSupportOpt.GetOption(&minsup_));
-    RegisterOption(MinConfidenceOpt.GetOption(&minconf_));
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
+
+    auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
+    auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
+    RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
+    RegisterOption(Option{&item_column_index_, kItemColumnIndex, kDItemColumnIndex, 1u});
+    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
+    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0.0});
+    RegisterOption(Option{&tid_column_index_, kTIdColumnIndex, kDTIdColumnIndex, 0u});
+    RegisterOption(Option{&input_format_, kInputFormat, kDInputFormat}.SetConditionalOpts(
+            {{sing_eq, {kTIdColumnIndex, kItemColumnIndex}}, {tab_eq, {kFirstColumnTId}}}));
 }
 
 void ARAlgorithm::ResetState() {
@@ -55,7 +38,8 @@ void ARAlgorithm::ResetState() {
 }
 
 void ARAlgorithm::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(MinSupportOpt, MinConfidenceOpt));
+    using namespace config::names;
+    MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 
 void ARAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
