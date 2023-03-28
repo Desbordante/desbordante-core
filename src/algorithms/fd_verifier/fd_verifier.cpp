@@ -7,30 +7,33 @@
 #include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/options/indices/option.h"
 #include "algorithms/options/indices/validate_index.h"
+#include "algorithms/options/names_and_descriptions.h"
 
 namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Primitive({}) {
     RegisterOptions();
-    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void FDVerifier::RegisterOptions() {
-    auto check_lhs = [this](auto const& value) {
-        config::ValidateIndices(value, relation_->GetSchema()->GetNumColumns());
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
+
+    auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
+    auto check_rhs = [this](config::IndexType rhs_index) {
+        config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
     };
 
-    auto check_rhs = [this](auto value) {
-        config::ValidateIndex(value, relation_->GetSchema()->GetNumColumns());
-    };
-
-    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt.GetOption(&lhs_indices_).SetValueCheck(check_lhs));
-    RegisterOption(config::RhsIndexOpt.GetOption(&rhs_index_).SetValueCheck(check_rhs));
+    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
+    RegisterOption(Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::LhsIndicesOpt, config::RhsIndexOpt));
+    using namespace config::names;
+    MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), kRhsIndex});
 }
 
 void FDVerifier::FitInternal(model::IDatasetStream& data_stream) {
