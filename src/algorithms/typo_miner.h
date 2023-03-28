@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include "algorithms/options/names.h"
 #include "algorithms/options/equal_nulls_opt.h"
 #include "algorithms/create_primitive.h"
@@ -52,11 +50,9 @@ private:
     void MakeExecuteOptsAvailable() final;
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const final;
-    bool HandleUnknownOption(std::string_view const& option_name,
-                             std::optional<boost::any> const& value) final;
-    int TrySetOption(std::string_view const& option_name,
-                     std::optional<boost::any> const& value_precise,
-                     std::optional<boost::any> const& value_approx);
+    bool HandleUnknownOption(std::string_view const& option_name, boost::any const& value) final;
+    int TrySetOption(std::string_view const& option_name, boost::any const& value_precise,
+                     boost::any const& value_approx);
 
 public:
     using TyposVec = std::vector<util::PLI::Cluster::value_type>;
@@ -117,11 +113,11 @@ public:
         return ratio_;
     }
     double SetRadius(double radius) {
-        SetOption(RadiusOpt.GetName(), std::optional<boost::any>{radius});
+        SetOption(RadiusOpt.GetName(), radius);
         return radius_;
     }
     double SetRatio(double ratio) {
-        SetOption(RatioOpt.GetName(), std::optional<boost::any>{ratio});
+        SetOption(RatioOpt.GetName(), ratio);
         return ratio_;
     }
     ColumnLayoutRelationData const& GetRelationData() const noexcept {
