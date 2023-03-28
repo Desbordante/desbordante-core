@@ -50,8 +50,7 @@ void TypoMiner::ResetState() {
     approx_fds_.clear();
 }
 
-bool TypoMiner::HandleUnknownOption(std::string_view const& option_name,
-                                    std::optional<boost::any> const& value) {
+bool TypoMiner::HandleUnknownOption(std::string_view const& option_name, boost::any const& value) {
     using config::ErrorType;
     auto const& error_opt_type = config::ErrorOpt;
     if (option_name == error_opt_type.GetName()) {
@@ -69,9 +68,8 @@ bool TypoMiner::HandleUnknownOption(std::string_view const& option_name,
     return static_cast<bool>(TrySetOption(option_name, value, value));
 }
 
-int TypoMiner::TrySetOption(std::string_view const& option_name,
-                            std::optional<boost::any> const& value_precise,
-                            std::optional<boost::any> const& value_approx) {
+int TypoMiner::TrySetOption(std::string_view const& option_name, boost::any const& value_precise,
+                            boost::any const& value_approx) {
     int successes{};
     try {
         precise_algo_->SetOption(option_name, value_precise);
@@ -104,7 +102,7 @@ void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {
     data_stream.Reset();
     auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
     auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
-    std::optional<boost::any> null_opt_any{is_null_equal_null_};
+    boost::any null_opt_any{is_null_equal_null_};
     TrySetOption(config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
     if (!precise_algo_->FitCompleted()) {
         if (precise_pli != nullptr)
