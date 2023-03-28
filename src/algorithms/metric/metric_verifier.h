@@ -37,13 +37,6 @@ private:
 
     bool metric_fd_holds_ = false;
 
-    static const config::CommonOption<decltype(dist_from_null_is_infinity_)>
-            DistFromNullIsInfinityOpt;
-    static const config::CommonOption<decltype(parameter_)> ParameterOpt;
-    static const config::CommonOption<decltype(metric_)> MetricOpt;
-    static const config::CommonOption<decltype(algo_)> AlgoOpt;
-    static const config::CommonOption<decltype(q_)> QGramLengthOpt;
-
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<ColumnLayoutRelationData> relation_;  // temporarily parsing twice
     std::unique_ptr<PointsCalculator> points_calculator_;
@@ -81,7 +74,7 @@ private:
     void VerifyMetricFD();
     std::string GetStringValue(config::IndicesType const& index_vec, ClusterIndex row_index) const;
     void VisualizeHighlights() const;
-    void ValidateRhs(config::IndicesType const& indices);
+    void ValidateRhs(config::IndicesType const& rhs_indices);
     void RegisterOptions();
 
     void ResetState() final;
