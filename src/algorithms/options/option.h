@@ -31,9 +31,9 @@ public:
                             ? [default_value]() { return default_value.value(); }
                             : DefaultFunc{}) {}
 
-    void Set(std::optional<boost::any> value_holder) override;
+    void Set(boost::any value) override;
 
-    T GetValue(std::optional<boost::any> value_holder) const;
+    T ConvertValue(boost::any value) const;
 
     void Unset() override {
         is_set_ = false;
@@ -92,18 +92,18 @@ private:
 };
 
 template <typename T>
-void Option<T>::Set(std::optional<boost::any> value_holder) {
+void Option<T>::Set(boost::any value) {
     assert(!is_set_);
-    T value = GetValue(value_holder);
-    if (normalize_) normalize_(value);
-    if (instance_check_) instance_check_(value);
+    T converted_value = ConvertValue(value);
+    if (normalize_) normalize_(converted_value);
+    if (instance_check_) instance_check_(converted_value);
 
     assert(value_ptr_ != nullptr);
-    *value_ptr_ = value;
+    *value_ptr_ = converted_value;
     is_set_ = true;
     if (opt_add_func_) {
         for (auto const &[cond, opts]: opt_cond_) {
-            if (!cond || cond(value)) {
+            if (!cond || cond(converted_value)) {
                 opt_add_func_(this, opts);
                 break;
             }
@@ -112,15 +112,15 @@ void Option<T>::Set(std::optional<boost::any> value_holder) {
 }
 
 template <typename T>
-T Option<T>::GetValue(std::optional<boost::any> value_holder) const {
+T Option<T>::ConvertValue(boost::any value) const {
     std::string const no_value_no_default =
             std::string("No value was provided to an option without a default value (")
             + info_.GetName().data() + ")";
-    if (!value_holder.has_value()) {
+    if (value.empty()) {
         if (!default_func_) throw std::logic_error(no_value_no_default);
         return default_func_();
     } else {
-        return boost::any_cast<T>(value_holder.value());
+        return boost::any_cast<T>(value);
     }
 }
 
