@@ -7,7 +7,7 @@
 #include "model/ar.h"
 #include "py_ar_algorithm.h"
 #include "py_data_stats.h"
-#include "py_fd_primitive.h"
+#include "py_fd_algorithm.h"
 #include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
 
@@ -32,16 +32,16 @@ namespace python_bindings {
 
 namespace py = pybind11;
 using PyApriori = PyArAlgorithm<algos::Apriori>;
-using PyTane = PyFDPrimitive<algos::Tane>;
-using PyPyro = PyFDPrimitive<algos::Pyro>;
-using PyFUN = PyFDPrimitive<algos::FUN>;
-using PyFdMine = PyFDPrimitive<algos::Fd_mine>;
-using PyFastFDs = PyFDPrimitive<algos::FastFDs>;
-using PyHyFD = PyFDPrimitive<algos::hyfd::HyFD>;
-using PyFDep = PyFDPrimitive<algos::FDep>;
-using PyDFD = PyFDPrimitive<algos::DFD>;
-using PyDepminer = PyFDPrimitive<algos::Depminer>;
-using PyAid = PyFDPrimitive<algos::Aid>;
+using PyTane = PyFDAlgorithm<algos::Tane>;
+using PyPyro = PyFDAlgorithm<algos::Pyro>;
+using PyFUN = PyFDAlgorithm<algos::FUN>;
+using PyFdMine = PyFDAlgorithm<algos::Fd_mine>;
+using PyFastFDs = PyFDAlgorithm<algos::FastFDs>;
+using PyHyFD = PyFDAlgorithm<algos::hyfd::HyFD>;
+using PyFDep = PyFDAlgorithm<algos::FDep>;
+using PyDFD = PyFDAlgorithm<algos::DFD>;
+using PyDepminer = PyFDAlgorithm<algos::Depminer>;
+using PyAid = PyFDAlgorithm<algos::Aid>;
 using FDHighlight = algos::fd_verifier::Highlight;
 using model::ARStrings;
 
