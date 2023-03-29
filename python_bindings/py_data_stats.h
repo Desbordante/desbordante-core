@@ -7,7 +7,7 @@ namespace python_bindings {
 
 class PyDataStats : public PyPrimitive<algos::DataStats> {
 public:
-    [[nodiscard]] std::string GetResults() const {
+    [[nodiscard]] std::string GetResultString() const {
         return primitive_.ToString();
     }
 };

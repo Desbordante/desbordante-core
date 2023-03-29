@@ -25,8 +25,10 @@ INITIALIZE_EASYLOGGINGPP
                          &Py##type::Fit),                                                         \
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
             .def("execute", &Py##type::Execute, "Process data")
-#define DEFINE_PRIMITIVE_WITH_RES(type) \
-    DEFINE_PRIMITIVE(type).def("get_results", &Py##type::GetResults)
+#define DEFINE_FD_ALGORITHM(type) \
+    DEFINE_PRIMITIVE(type).def("get_fds", &Py##type::GetFDs)
+#define DEFINE_AR_ALGORITHM(type) \
+    DEFINE_PRIMITIVE(type).def("get_ars", &Py##type::GetARs)
 
 namespace python_bindings {
 
@@ -83,21 +85,25 @@ PYBIND11_MODULE(desbordante, module) {
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
 
-    DEFINE_PRIMITIVE_WITH_RES(DataStats);
-    DEFINE_PRIMITIVE_WITH_RES(Apriori);
-    DEFINE_PRIMITIVE_WITH_RES(Tane);
-    DEFINE_PRIMITIVE_WITH_RES(Pyro);
-    DEFINE_PRIMITIVE_WITH_RES(FUN);
-    DEFINE_PRIMITIVE_WITH_RES(FdMine);
-    DEFINE_PRIMITIVE_WITH_RES(FastFDs);
-    DEFINE_PRIMITIVE_WITH_RES(HyFD);
-    DEFINE_PRIMITIVE_WITH_RES(FDep);
-    DEFINE_PRIMITIVE_WITH_RES(DFD);
-    DEFINE_PRIMITIVE_WITH_RES(Depminer);
-    DEFINE_PRIMITIVE_WITH_RES(Aid);
-    DEFINE_PRIMITIVE_WITH_RES(MetricVerifier);
+    DEFINE_PRIMITIVE(DataStats).def("get_result_string", &PyDataStats::GetResultString);
+
+    DEFINE_PRIMITIVE(MetricVerifier).def("mfd_holds", &PyMetricVerifier::MfdHolds);
+
+    DEFINE_AR_ALGORITHM(Apriori);
+
+    DEFINE_FD_ALGORITHM(Aid);
+    DEFINE_FD_ALGORITHM(Depminer);
+    DEFINE_FD_ALGORITHM(DFD);
+    DEFINE_FD_ALGORITHM(FastFDs);
+    DEFINE_FD_ALGORITHM(FDep);
+    DEFINE_FD_ALGORITHM(FdMine);
+    DEFINE_FD_ALGORITHM(FUN);
+    DEFINE_FD_ALGORITHM(HyFD);
+    DEFINE_FD_ALGORITHM(Pyro);
+    DEFINE_FD_ALGORITHM(Tane);
 }
-#undef DEFINE_PRIMITIVE_WITH_RES
+#undef DEFINE_FD_ALGORITHM
+#undef DEFINE_AR_ALGORITHM
 #undef DEFINE_PRIMITIVE
 
 }  // namespace python_bindings
