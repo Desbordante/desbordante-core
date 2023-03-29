@@ -7,7 +7,7 @@ namespace python_bindings {
 
 class PyMetricVerifier : public PyPrimitive<algos::metric::MetricVerifier> {
 public:
-    bool GetResults() const {
+    [[nodiscard]] bool GetResults() const {
         return primitive_.GetResult();
     }
 };
