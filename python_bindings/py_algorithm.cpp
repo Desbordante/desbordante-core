@@ -7,16 +7,17 @@
 
 #include "algorithms/algo_factory.h"
 #include "dataframe_reader.h"
+#include "get_py_type.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
+
+static const auto void_index = std::type_index{typeid(void)};
 
 namespace python_bindings {
 
 namespace py = pybind11;
 
 void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
-    static const auto void_index = std::type_index{typeid(void)};
-
     auto params = kwargs.cast<std::unordered_map<std::string, py::object>>();
     std::unordered_map<std::string, boost::any> any_map{};
     for (auto const& [opt_name, obj] : params) {
@@ -38,6 +39,14 @@ void PyAlgorithmBase::SetOption(std::string const& option_name, py::object const
 
 std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
     return algorithm_->GetNeededOptions();
+}
+
+py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
+    auto type_index = algorithm_->GetTypeIndex(option_name);
+    if (type_index == void_index)
+        throw std::invalid_argument{std::string{"Option named \""} + option_name.data() +
+                                    "\" doesn't exist!"};
+    return GetPyType(type_index);
 }
 
 void PyAlgorithmBase::Fit(std::string const& path, char separator, bool has_header,
