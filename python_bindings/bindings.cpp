@@ -13,22 +13,11 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-#define DEFINE_ALGORITHM(type)                                                                    \
-    py::class_<Py##type>(module, #type)                                                           \
-            .def(py::init<>())                                                                    \
-            .def("fit",                                                                           \
-                 py::overload_cast<std::string const&, char, bool, py::kwargs const&>(            \
-                         &Py##type::Fit),                                                         \
-                 "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV") \
-            .def("fit",                                                                           \
-                 py::overload_cast<pybind11::object, std::string, py::kwargs const&>(             \
-                         &Py##type::Fit),                                                         \
-                 "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
-            .def("execute", &Py##type::Execute, "Process data")
-#define DEFINE_FD_ALGORITHM(type) \
-    DEFINE_ALGORITHM(type).def("get_fds", &Py##type::GetFDs)
-#define DEFINE_AR_ALGORITHM(type) \
-    DEFINE_ALGORITHM(type).def("get_ars", &Py##type::GetARs)
+#define DEFINE_ALGORITHM(type, base) \
+    py::class_<Py##type, Py##base##Base>(module, #type).def(py::init<>())
+#define DEFINE_ALGORITHM_BASE(base) py::class_<Py##base##Base, PyAlgorithmBase>(module, #base)
+#define DEFINE_FD_ALGORITHM(type) DEFINE_ALGORITHM(type, FdAlgorithm)
+#define DEFINE_AR_ALGORITHM(type) DEFINE_ALGORITHM(type, ArAlgorithm)
 
 namespace python_bindings {
 
@@ -78,16 +67,30 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("most_frequent_rhs_value_proportion",
                                    &FDHighlight::GetMostFrequentRhsValueProportion);
 
-    DEFINE_ALGORITHM(FDVerifier)
+    py::class_<PyAlgorithmBase>(module, "Algorithm")
+            .def("fit",
+                 py::overload_cast<std::string const &, char, bool, py::kwargs const &>(
+                         &PyAlgorithmBase::Fit),
+                 "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV")
+            .def("fit",
+                 py::overload_cast<pybind11::object, std::string, py::kwargs const &>(
+                         &PyAlgorithmBase::Fit),
+                 "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")
+            .def("execute", &PyAlgorithmBase::Execute, "Process data");
+
+    DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);
+    DEFINE_ALGORITHM_BASE(FdAlgorithm).def("get_fds", &PyFdAlgorithmBase::GetFDs);
+
+    DEFINE_ALGORITHM(FDVerifier, Algorithm)
             .def("fd_holds", &PyFDVerifier::FDHolds)
             .def("get_error", &PyFDVerifier::GetError)
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
 
-    DEFINE_ALGORITHM(DataStats).def("get_result_string", &PyDataStats::GetResultString);
+    DEFINE_ALGORITHM(DataStats, Algorithm).def("get_result_string", &PyDataStats::GetResultString);
 
-    DEFINE_ALGORITHM(MetricVerifier).def("mfd_holds", &PyMetricVerifier::MfdHolds);
+    DEFINE_ALGORITHM(MetricVerifier, Algorithm).def("mfd_holds", &PyMetricVerifier::MfdHolds);
 
     DEFINE_AR_ALGORITHM(Apriori);
 
@@ -104,6 +107,7 @@ PYBIND11_MODULE(desbordante, module) {
 }
 #undef DEFINE_FD_ALGORITHM
 #undef DEFINE_AR_ALGORITHM
+#undef DEFINE_ALGORITHM_BASE
 #undef DEFINE_ALGORITHM
 
 }  // namespace python_bindings
