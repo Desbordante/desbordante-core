@@ -14,7 +14,7 @@ class PyArAlgorithm : public PyPrimitive<T> {
     using Base::primitive_;
 
 public:
-    std::list<model::ARStrings> GetResults() {
+    std::list<model::ARStrings> GetARs() {
         return primitive_.GetArStringsList();
     }
 };

@@ -14,7 +14,7 @@ private:
     using Base::primitive_;
 
 public:
-    std::vector<PyFD> GetResults() {
+    std::vector<PyFD> GetFDs() {
         std::vector<PyFD> fd_vec;
         for (FD const& fd : primitive_.FdList()) {
             fd_vec.emplace_back(fd.ToRawFD());
