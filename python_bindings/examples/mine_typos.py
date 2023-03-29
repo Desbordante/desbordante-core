@@ -123,7 +123,7 @@ def get_result_set(df, algo_name, algo_config):
     algo = getattr(desb, algo_name)()
     algo.fit(df, **algo_config)
     algo.execute(**algo_config)
-    return {(tuple(fd.lhs_indices), fd.rhs_index) for fd in algo.get_results()}
+    return {(tuple(fd.lhs_indices), fd.rhs_index) for fd in algo.get_fds()}
 
 
 def make_display_df(squashed_sorted_clusters, original_df, lhs_indices, rhs_index):
