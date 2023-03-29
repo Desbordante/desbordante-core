@@ -80,6 +80,8 @@ PYBIND11_MODULE(desbordante, module) {
                  "Get names of options the algorithm needs")
             .def("set_option", &PyAlgorithmBase::SetOption, "option_name"_a,
                  "option_value"_a = pybind11::none(), "Set option value")
+            .def("get_option_type", &PyAlgorithmBase::GetOptionType, "option_name"_a,
+                 "Get info about the option's type")
             .def("execute", &PyAlgorithmBase::Execute, "Process data");
 
     DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);
