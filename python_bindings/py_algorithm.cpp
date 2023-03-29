@@ -27,6 +27,19 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
     algos::ConfigureFromMap(*algorithm_, any_map);
 }
 
+void PyAlgorithmBase::SetOption(std::string const& option_name, py::object const& option_value) {
+    if (option_value.is_none()) {
+        algorithm_->SetOption(option_name);
+        return;
+    }
+    algorithm_->SetOption(option_name,
+                          PyToAny(algorithm_->GetTypeIndex(option_name), option_value));
+}
+
+std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
+    return algorithm_->GetNeededOptions();
+}
+
 void PyAlgorithmBase::Fit(std::string const& path, char separator, bool has_header,
                           py::kwargs const& kwargs) {
     Configure(kwargs);
