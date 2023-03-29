@@ -76,6 +76,10 @@ PYBIND11_MODULE(desbordante, module) {
                  py::overload_cast<pybind11::object, std::string, py::kwargs const &>(
                          &PyAlgorithmBase::Fit),
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")
+            .def("get_needed_options", &PyAlgorithmBase::GetNeededOptions,
+                 "Get names of options the algorithm needs")
+            .def("set_option", &PyAlgorithmBase::SetOption, "option_name"_a,
+                 "option_value"_a = pybind11::none(), "Set option value")
             .def("execute", &PyAlgorithmBase::Execute, "Process data");
 
     DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);

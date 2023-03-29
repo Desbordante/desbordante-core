@@ -20,6 +20,10 @@ protected:
     void Configure(pybind11::kwargs const& kwargs);
 
 public:
+    void SetOption(std::string const& option_name, pybind11::object const& option_value);
+
+    [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
+
     // For pandas dataframes
     void Fit(pybind11::object dataframe, std::string name, pybind11::kwargs const& kwargs);
 
