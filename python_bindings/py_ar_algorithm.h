@@ -4,19 +4,22 @@
 
 #include <pybind11/pybind11.h>
 
-#include "py_primitive.h"
+#include "algorithms/ar_algorithm.h"
+#include "get_algorithm.h"
+#include "py_algorithm.h"
 
 namespace python_bindings {
 
-template <typename T>
-class PyArAlgorithm : public PyPrimitive<T> {
-    using Base = PyPrimitive<T>;
-    using Base::primitive_;
-
+class PyArAlgorithmBase : public PyAlgorithmBase {
 public:
-    std::list<model::ARStrings> GetARs() {
-        return primitive_.GetArStringsList();
+    using PyAlgorithmBase::PyAlgorithmBase;
+
+    [[nodiscard]] std::list<model::ARStrings> GetARs() const {
+        return GetAlgorithm<algos::ARAlgorithm>(algorithm_).GetArStringsList();
     }
 };
+
+template <typename T>
+using PyArAlgorithm = PyAlgorithm<T, PyArAlgorithmBase>;
 
 }  // namespace python_bindings
