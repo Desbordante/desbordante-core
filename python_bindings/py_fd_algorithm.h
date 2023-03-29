@@ -8,7 +8,7 @@
 namespace python_bindings {
 
 template <typename PrimitiveType>
-class PyFDPrimitive : public PyPrimitive<PrimitiveType> {
+class PyFDAlgorithm : public PyPrimitive<PrimitiveType> {
 private:
     using Base = PyPrimitive<PrimitiveType>;
     using Base::primitive_;
