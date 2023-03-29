@@ -17,10 +17,10 @@ public:
     PandasReaderBase(pybind11::object dataframe, std::string name = "Pandas dataframe");
 
     void Reset() final;
-    std::string GetRelationName() const final;
-    std::string GetColumnName(int index) const final;
-    size_t GetNumberOfColumns() const final;
-    bool HasNextRow() const final;
+    [[nodiscard]] std::string GetRelationName() const final;
+    [[nodiscard]] std::string GetColumnName(int index) const final;
+    [[nodiscard]] size_t GetNumberOfColumns() const final;
+    [[nodiscard]] bool HasNextRow() const final;
 };
 
 template <bool transform_to_string>
@@ -28,7 +28,7 @@ class PandasReader final : public PandasReaderBase {
 public:
     using PandasReaderBase::PandasReaderBase;
 
-    std::vector<std::string> GetNextRow() final;
+    [[nodiscard]] std::vector<std::string> GetNextRow() final;
 };
 
 }  // namespace python_bindings
