@@ -17,7 +17,7 @@ public:
     std::vector<PyFD> GetResults() {
         std::vector<PyFD> fd_vec;
         for (FD const& fd : primitive_.FdList()) {
-            fd_vec.emplace_back(PyFD(fd.ToRawFD()));
+            fd_vec.emplace_back(fd.ToRawFD());
         }
         return fd_vec;
     }
