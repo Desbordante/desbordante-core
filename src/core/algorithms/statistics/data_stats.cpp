@@ -567,6 +567,14 @@ std::vector<size_t> DataStats::GetColumnsWithNull() const {
     return GetIndices(pred);
 }
 
+std::vector<size_t> DataStats::GetColumnsWithUniqueValues() {
+    auto pred = [this, num_rows = col_data_[0].GetNumRows()](size_t index) {
+        return Distinct(index) == num_rows;
+    };
+
+    return GetIndices(pred);
+}
+
 size_t DataStats::GetNumberOfColumns() const {
     return col_data_.size();
 }
