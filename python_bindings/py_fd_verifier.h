@@ -1,30 +1,32 @@
 #pragma once
 
 #include "algorithms/fd_verifier/fd_verifier.h"
-#include "py_primitive.h"
+#include "py_algorithm.h"
 
 namespace python_bindings {
 
-class PyFDVerifier : public PyPrimitive<algos::fd_verifier::FDVerifier> {
+class PyFDVerifier : public PyAlgorithm<algos::fd_verifier::FDVerifier, PyAlgorithmBase> {
+    using PyAlgorithm<algos::fd_verifier::FDVerifier, PyAlgorithmBase>::GetAlgorithm;
+
 public:
     [[nodiscard]] bool FDHolds() const {
-        return primitive_.FDHolds();
+        return GetAlgorithm().FDHolds();
     }
 
     [[nodiscard]] size_t GetNumErrorClusters() const {
-        return primitive_.GetNumErrorClusters();
+        return GetAlgorithm().GetNumErrorClusters();
     }
 
     [[nodiscard]] size_t GetNumErrorRows() const {
-        return primitive_.GetNumErrorRows();
+        return GetAlgorithm().GetNumErrorRows();
     }
 
     [[nodiscard]] long double GetError() const {
-        return primitive_.GetError();
+        return GetAlgorithm().GetError();
     }
 
     [[nodiscard]] std::vector<algos::fd_verifier::Highlight> const& GetHighlights() const {
-        return primitive_.GetHighlights();
+        return GetAlgorithm().GetHighlights();
     }
 };
 
