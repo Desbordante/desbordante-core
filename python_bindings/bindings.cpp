@@ -13,7 +13,7 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-#define DEFINE_PRIMITIVE(type)                                                                    \
+#define DEFINE_ALGORITHM(type)                                                                    \
     py::class_<Py##type>(module, #type)                                                           \
             .def(py::init<>())                                                                    \
             .def("fit",                                                                           \
@@ -26,9 +26,9 @@ INITIALIZE_EASYLOGGINGPP
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
             .def("execute", &Py##type::Execute, "Process data")
 #define DEFINE_FD_ALGORITHM(type) \
-    DEFINE_PRIMITIVE(type).def("get_fds", &Py##type::GetFDs)
+    DEFINE_ALGORITHM(type).def("get_fds", &Py##type::GetFDs)
 #define DEFINE_AR_ALGORITHM(type) \
-    DEFINE_PRIMITIVE(type).def("get_ars", &Py##type::GetARs)
+    DEFINE_ALGORITHM(type).def("get_ars", &Py##type::GetARs)
 
 namespace python_bindings {
 
@@ -78,16 +78,16 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("most_frequent_rhs_value_proportion",
                                    &FDHighlight::GetMostFrequentRhsValueProportion);
 
-    DEFINE_PRIMITIVE(FDVerifier)
+    DEFINE_ALGORITHM(FDVerifier)
             .def("fd_holds", &PyFDVerifier::FDHolds)
             .def("get_error", &PyFDVerifier::GetError)
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
 
-    DEFINE_PRIMITIVE(DataStats).def("get_result_string", &PyDataStats::GetResultString);
+    DEFINE_ALGORITHM(DataStats).def("get_result_string", &PyDataStats::GetResultString);
 
-    DEFINE_PRIMITIVE(MetricVerifier).def("mfd_holds", &PyMetricVerifier::MfdHolds);
+    DEFINE_ALGORITHM(MetricVerifier).def("mfd_holds", &PyMetricVerifier::MfdHolds);
 
     DEFINE_AR_ALGORITHM(Apriori);
 
@@ -104,6 +104,6 @@ PYBIND11_MODULE(desbordante, module) {
 }
 #undef DEFINE_FD_ALGORITHM
 #undef DEFINE_AR_ALGORITHM
-#undef DEFINE_PRIMITIVE
+#undef DEFINE_ALGORITHM
 
 }  // namespace python_bindings
