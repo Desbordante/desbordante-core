@@ -24,6 +24,8 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
+    [[nodiscard]] pybind11::tuple GetOptionType(std::string_view option_name) const;
+
     // For pandas dataframes
     void Fit(pybind11::object dataframe, std::string name, pybind11::kwargs const& kwargs);
 
