@@ -50,7 +50,7 @@ void TypoMiner::ResetState() {
     approx_fds_.clear();
 }
 
-bool TypoMiner::HandleUnknownOption(std::string_view const& option_name, boost::any const& value) {
+bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any const& value) {
     using config::ErrorType;
     auto const& error_opt_type = config::ErrorOpt;
     if (option_name == error_opt_type.GetName()) {
@@ -68,7 +68,7 @@ bool TypoMiner::HandleUnknownOption(std::string_view const& option_name, boost::
     return static_cast<bool>(TrySetOption(option_name, value, value));
 }
 
-int TypoMiner::TrySetOption(std::string_view const& option_name, boost::any const& value_precise,
+int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& value_precise,
                             boost::any const& value_approx) {
     int successes{};
     try {
