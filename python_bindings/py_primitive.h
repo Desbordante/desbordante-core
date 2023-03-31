@@ -6,7 +6,7 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/algo_factory.h"
-#include "pandas_reader.h"
+#include "dataframe_reader.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
 
