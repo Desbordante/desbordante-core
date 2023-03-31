@@ -4,7 +4,7 @@
 
 namespace algos {
 
-bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view const& option_name,
+bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view option_name,
                                     [[maybe_unused]] boost::any const& value) {
     return false;
 }
@@ -101,7 +101,7 @@ unsigned long long Primitive::Execute() {
     return time_ms;
 }
 
-void Primitive::SetOption(std::string_view const& option_name, boost::any const& value) {
+void Primitive::SetOption(std::string_view option_name, boost::any const& value) {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()) {
         if (!HandleUnknownOption(option_name, value)) {

@@ -20,7 +20,7 @@ using StdParamsMap = std::unordered_map<std::string, boost::any>;
 namespace details {
 
 template <typename OptionMap>
-boost::any ExtractAnyFromMap(OptionMap&& options, std::string_view const& option_name) {
+boost::any ExtractAnyFromMap(OptionMap&& options, std::string_view option_name) {
     using std::is_same_v, std::decay, boost::program_options::variables_map;
     const std::string string_opt{option_name};
     auto it = options.find(string_opt);
@@ -85,7 +85,7 @@ template <typename OptionMap>
 void ConfigureFromMap(Primitive& primitive, OptionMap&& options) {
     std::unordered_set<std::string_view> needed;
     while (!(needed = primitive.GetNeededOptions()).empty()) {
-        for (std::string_view const& option_name : needed) {
+        for (std::string_view option_name : needed) {
             if (options.find(std::string{option_name}) == options.end()) {
                 primitive.SetOption(option_name);
             } else {
