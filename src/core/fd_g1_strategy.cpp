@@ -110,7 +110,7 @@ DependencyCandidate FdG1Strategy::CreateDependencyCandidate(Vertical const& vert
     util::ConfidenceInterval num_violating_tuple_pairs =
         agree_set_sample->EstimateMixed(vertical,
                                         static_cast<Vertical>(*rhs_),
-                                        context_->GetConfiguration().estimate_confidence)
+                                    context_->GetParameters().estimate_confidence)
             .Multiply(context_->GetColumnLayoutRelationData()->GetNumTuplePairs());
     //LOG(DEBUG) << boost::format{"Creating dependency candidate %1% with %2% violating pairs"}
     //    % vertical->ToString() % num_violating_tuple_pairs;

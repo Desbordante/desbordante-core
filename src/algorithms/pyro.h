@@ -17,7 +17,7 @@ private:
     CacheEvictionMethod eviction_method_ = CacheEvictionMethod::kDefault;
     double caching_method_value_;
 
-    Configuration configuration_;
+    Parameters parameters_;
 
     void RegisterOptions();
     void MakeExecuteOptsAvailable() final;
