@@ -7,7 +7,7 @@
 #include "algorithms/options/max_lhs/type.h"
 #include "algorithms/options/thread_number/type.h"
 
-struct Configuration {
+struct Parameters {
     bool is_find_keys = true;
     bool is_find_fds = true;
     algos::config::EqNullsType is_null_equal_null = true;

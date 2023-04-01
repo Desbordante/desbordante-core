@@ -38,7 +38,7 @@ static inline void GetKeysTestImpl(KeysTestParams const& p) {
     StdParamsMap params_map{{onam::kData, path},
                             {onam::kSeparator, p.sep},
                             {onam::kHasHeader, p.has_header},
-                            {onam::kSeed, decltype(Configuration::seed){0}},
+                            {onam::kSeed, decltype(Parameters::seed){0}},
                             {onam::kError, algos::config::ErrorType{0.0}}};
     auto pyro_ptr = algos::CreateAndLoadPrimitive<algos::Pyro>(params_map);
     auto &pyro = *pyro_ptr;

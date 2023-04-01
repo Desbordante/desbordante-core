@@ -32,7 +32,7 @@ protected:
                 {kSeparator, separator},
                 {kHasHeader, has_header},
                 {kError, algos::config::ErrorType{0.0}},
-                {kSeed, decltype(Configuration::seed){0}},
+                {kSeed, decltype(Parameters::seed){0}},
         };
     }
 

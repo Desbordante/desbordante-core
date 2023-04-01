@@ -33,10 +33,10 @@ void Pyro::RegisterOptions() {
     using namespace config::descriptions;
     using config::Option;
 
-    RegisterOption(config::ErrorOpt(&configuration_.max_ucc_error));
-    RegisterOption(config::MaxLhsOpt(&configuration_.max_lhs));
-    RegisterOption(config::ThreadNumberOpt(&configuration_.parallelism));
-    RegisterOption(Option{&configuration_.seed, kSeed, kDSeed, 0});
+    RegisterOption(config::ErrorOpt(&parameters_.max_ucc_error));
+    RegisterOption(config::MaxLhsOpt(&parameters_.max_lhs));
+    RegisterOption(config::ThreadNumberOpt(&parameters_.parallelism));
+    RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
@@ -55,36 +55,36 @@ unsigned long long Pyro::ExecuteInternal() {
     auto schema = relation_->GetSchema();
 
     auto profiling_context = std::make_unique<ProfilingContext>(
-        configuration_, relation_.get(), ucc_consumer_, fd_consumer_, caching_method_,
-        eviction_method_, caching_method_value_);
+            parameters_, relation_.get(), ucc_consumer_, fd_consumer_, caching_method_,
+            eviction_method_, caching_method_value_);
 
     std::function<bool(DependencyCandidate const&, DependencyCandidate const&)> launch_pad_order;
-    if (configuration_.launch_pad_order == "arity") {
+    if (parameters_.launch_pad_order == "arity") {
         launch_pad_order = DependencyCandidate::FullArityErrorComparator;
-    } else if (configuration_.launch_pad_order == "error") {
+    } else if (parameters_.launch_pad_order == "error") {
         launch_pad_order = DependencyCandidate::FullErrorArityComparator;
     } else {
         throw std::runtime_error("Unknown comparator type");
     }
 
     int next_id = 0;
-    if (configuration_.is_find_keys) {
+    if (parameters_.is_find_keys) {
         std::unique_ptr<DependencyStrategy> strategy;
-        if (configuration_.ucc_error_measure == "g1prime") {
-            strategy = std::make_unique<KeyG1Strategy>(configuration_.max_ucc_error,
-                                                       configuration_.error_dev);
+        if (parameters_.ucc_error_measure == "g1prime") {
+            strategy = std::make_unique<KeyG1Strategy>(parameters_.max_ucc_error,
+                                                       parameters_.error_dev);
         } else {
             throw std::runtime_error("Unknown key error measure.");
         }
         search_spaces_.push_back(std::make_unique<SearchSpace>(next_id++, std::move(strategy),
                                                                schema, launch_pad_order));
     }
-    if (configuration_.is_find_fds) {
+    if (parameters_.is_find_fds) {
         for (auto& rhs : schema->GetColumns()) {
             std::unique_ptr<DependencyStrategy> strategy;
-            if (configuration_.ucc_error_measure == "g1prime") {
-                strategy = std::make_unique<FdG1Strategy>(rhs.get(), configuration_.max_ucc_error,
-                                                          configuration_.error_dev);
+            if (parameters_.ucc_error_measure == "g1prime") {
+                strategy = std::make_unique<FdG1Strategy>(rhs.get(), parameters_.max_ucc_error,
+                                                          parameters_.error_dev);
             } else {
                 throw std::runtime_error("Unknown key error measure.");
             }
@@ -131,13 +131,13 @@ unsigned long long Pyro::ExecuteInternal() {
     };
 
     std::vector<std::thread> threads;
-    for (int i = 0; i < configuration_.parallelism; i++) {
+    for (int i = 0; i < parameters_.parallelism; i++) {
         //std::thread();
         threads.emplace_back(work_on_search_space, std::ref(search_spaces_),
                              profiling_context.get(), i);
     }
 
-    for (int i = 0; i < configuration_.parallelism; i++) {
+    for (int i = 0; i < parameters_.parallelism; i++) {
         threads[i].join();
     }
 
