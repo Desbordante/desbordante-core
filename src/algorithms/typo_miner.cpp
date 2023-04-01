@@ -69,7 +69,7 @@ bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any con
 
 int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& value_precise,
                             boost::any const& value_approx) {
-    int successes{};
+    int successes = 0;
     try {
         precise_algo_->SetOption(option_name, value_precise);
         ++successes;
@@ -98,22 +98,15 @@ void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {
     data_stream.Reset();
     typed_relation_ =
             model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
-    auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
-    auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
-    boost::any null_opt_any{is_null_equal_null_};
-    TrySetOption(config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
-    if (!precise_algo_->FitCompleted()) {
-        if (precise_pli != nullptr)
-            precise_pli->Fit(relation_);
-        else
+
+    for (PliBasedFDAlgorithm* algo : {dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get()),
+                                      dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get())}) {
+        if (algo == nullptr) {
+            data_stream.Reset();
             precise_algo_->Fit(data_stream);
-    }
-    if (!approx_algo_->FitCompleted()) {
-        if (approx_pli != nullptr)
-            approx_pli->Fit(relation_);
-        else
-            approx_algo_->Fit(data_stream);
+        } else {
+            algo->Fit(relation_);
+        }
     }
 }
 
