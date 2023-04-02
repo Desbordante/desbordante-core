@@ -22,7 +22,6 @@ class DataStats : public Primitive {
 
 protected:
     void FitInternal(model::IDatasetStream &data_stream) final;
-    void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 
 public:
