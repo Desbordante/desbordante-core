@@ -4,7 +4,6 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/primitive.h"
 #include "model/ucc.h"
@@ -37,7 +36,6 @@ protected:
     explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
         : Primitive(std::move(phase_names)) {
         RegisterOptions();
-        MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
     }
 
 public:
