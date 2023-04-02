@@ -24,12 +24,8 @@ FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding mini
 }
 
 void FastFDs::RegisterOptions() {
-    RegisterOption(config::MaxLhsOpt(&max_lhs_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
-}
-
-void FastFDs::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ThreadNumberOpt.GetName()});
+    RegisterInitialExecuteOption(config::MaxLhsOpt(&max_lhs_));
+    RegisterInitialExecuteOption(config::ThreadNumberOpt(&threads_num_));
 }
 
 void FastFDs::ResetStateFd() {
