@@ -13,7 +13,6 @@ namespace algos {
 class Tane : public PliBasedFDAlgorithm {
 private:
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
 
     void ResetStateFd() final;
     unsigned long long ExecuteInternal() final;
