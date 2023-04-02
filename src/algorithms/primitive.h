@@ -10,6 +10,7 @@
 
 #include <boost/any.hpp>
 
+#include "algorithms/options/configuration.h"
 #include "algorithms/options/ioption.h"
 #include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
@@ -21,12 +22,6 @@ namespace algos {
 class Primitive {
 private:
     util::Progress progress_;
-    // All options the algorithm may use
-    std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_{};
-    // All options that can be set at the moment
-    std::unordered_set<std::string_view> available_options_;
-    // Maps a parameter that added other parameters to their names.
-    std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
 
     bool fit_completed_ = false;
 
@@ -34,12 +29,12 @@ private:
     // configuration parameters on the same dataset.
     virtual void ResetState() = 0;
 
-    void ExcludeOptions(std::string_view parent_option) noexcept;
-    void ClearOptions() noexcept;
     virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
+    config::Configuration configuration_;
+
     void AddProgress(double val) noexcept {
         progress_.AddProgress(val);
     }
@@ -50,25 +45,20 @@ protected:
         progress_.ToNextProgressPhase();
     }
 
-    void MakeOptionsAvailable(std::vector<std::string_view> const& option_names);
-
     template <typename T>
     void RegisterOption(config::Option<T> option) {
-        auto name = option.GetName();
-        assert(possible_options_.find(name) == possible_options_.end());
-        possible_options_[name] = std::make_unique<config::Option<T>>(std::move(option));
+        configuration_.RegisterOption(option);
     }
 
-    // Overload this if you want to work with options outside of
-    // possible_options_ map. Useful for pipelines.
-    virtual bool HandleUnknownOption(std::string_view option_name, boost::any const& value);
-    virtual void AddSpecificNeededOptions(
-            std::unordered_set<std::string_view>& previous_options) const;
-    void ExecutePrepare();
+    template <typename T>
+    void RegisterInitialFitOption(config::Option<T> option) {
+        configuration_.RegisterOption(option, config::ConfigurationStage::fit);
+    }
 
-    // Overload this to add options after your primitive has processed the data
-    // given through Fit
-    virtual void MakeExecuteOptsAvailable();
+    template <typename T>
+    void RegisterInitialExecuteOption(config::Option<T> option) {
+        configuration_.RegisterOption(option, config::ConfigurationStage::execute);
+    }
 
 public:
     constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
@@ -88,11 +78,30 @@ public:
 
     unsigned long long Execute();
 
-    void SetOption(std::string_view option_name, boost::any const& value = {});
+    void SetOption(std::string_view option_name, boost::any const& value = {}) {
+        configuration_.SetOption(option_name, value);
+    }
 
-    [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
+    [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const {
+        return configuration_.GetNeededOptions();
+    }
 
-    void UnsetOption(std::string_view option_name) noexcept;
+    void UnsetOption(std::string_view option_name) noexcept {
+        configuration_.UnsetOption(option_name);
+    }
+
+    [[nodiscard]] std::type_index GetTypeIndex(std::string_view option_name) const {
+        return configuration_.GetTypeIndex(option_name);
+    }
+
+    [[nodiscard]] bool NeedsOption(std::string_view option_name) const {
+        return configuration_.NeedsOption(option_name);
+    }
+
+    [[nodiscard]] bool IsInitialAtStage(std::string_view option_name,
+                                        config::ConfigurationStage stage) const {
+        return configuration_.IsInitialAtStage(option_name, stage);
+    }
 
     // See util::Progress::GetProgress description
     std::pair<uint8_t, double> GetProgress() const noexcept {
@@ -101,8 +110,6 @@ public:
     std::vector<std::string_view> const& GetPhaseNames() const noexcept {
         return progress_.GetPhaseNames();
     }
-
-    std::type_index GetTypeIndex(std::string_view option_name) const;
 };
 
 }  // namespace algos

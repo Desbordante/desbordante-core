@@ -33,20 +33,20 @@ public:
 
     explicit LegacyPrimitive(std::vector<std::string_view> phase_names)
             : Primitive(std::move(phase_names)) {
-        ExecutePrepare();
+        configuration_.StartStage(config::ConfigurationStage::execute);
     }
 
     LegacyPrimitive(std::unique_ptr<model::IDatasetStream> input_generator_ptr,
                     std::vector<std::string_view> phase_names)
             : Primitive(std::move(phase_names)), input_generator_(std::move(input_generator_ptr)) {
-        ExecutePrepare();
+        configuration_.StartStage(config::ConfigurationStage::execute);
     }
 
     LegacyPrimitive(std::filesystem::path const &path, char const separator, bool const has_header,
                     std::vector<std::string_view> phase_names)
             : Primitive(std::move(phase_names)),
             input_generator_(std::make_unique<CSVParser>(path, separator, has_header)) {
-        ExecutePrepare();
+        configuration_.StartStage(config::ConfigurationStage::execute);
     }
 };
 
