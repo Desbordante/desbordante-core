@@ -43,4 +43,10 @@ constexpr auto kDRatio = "ratio between the number of deviating values in a clus
 constexpr auto kDPreciseAlgorithm = "Algorithm that gives exact FDs for typo miner to compare "
                                     "against approximate FDs";
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
+constexpr auto kDCfdColumnsNumber =
+        "Number of columns in the part of the dataset if you "
+        "want to use algo not on the full dataset, but on its part";
+constexpr auto kDCfdTuplesNumber =
+        "Number of tuples in the part of the dataset if you "
+        "want to use algo not on the full dataset, but on its part";
 }  // namespace util::config::descriptions

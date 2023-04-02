@@ -35,4 +35,6 @@ constexpr auto kPairingRule = "pairing_rule";
 constexpr auto kACSeed = "ac_seed";
 constexpr auto kPreciseAlgorithm = "precise_algorithm";
 constexpr auto kApproximateAlgorithm = "approximate_algorithm";
+constexpr auto kCfdColumnsNumber = "columns_number";
+constexpr auto kCfdTuplesNumber = "tuples_number";
 }  // namespace util::config::names
