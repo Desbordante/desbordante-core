@@ -14,7 +14,6 @@ namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Primitive({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void FDVerifier::RegisterOptions() {
@@ -25,14 +24,10 @@ void FDVerifier::RegisterOptions() {
         config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
     };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
-    RegisterOption(Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
-}
-
-void FDVerifier::MakeExecuteOptsAvailable() {
-    using namespace config::names;
-    MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), kRhsIndex});
+    RegisterInitialFitOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterInitialExecuteOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
+    RegisterInitialExecuteOption(
+            Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
 }
 
 void FDVerifier::FitInternal(model::IDatasetStream& data_stream) {
