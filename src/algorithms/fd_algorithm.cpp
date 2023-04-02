@@ -9,11 +9,10 @@ namespace algos {
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
         : Primitive(std::move(phase_names)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void FDAlgorithm::RegisterOptions() {
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterInitialFitOption(config::EqualNullsOpt(&is_null_equal_null_));
 }
 
 void FDAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
