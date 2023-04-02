@@ -50,6 +50,7 @@ include_directories(
     "src/algorithms/depminer"
     "src/algorithms/statistics"
     "src/algorithms/options"
+    "src/algorithms/ucc"
     "src/model"
     "src/model/types"
     "src/util"
