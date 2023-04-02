@@ -32,15 +32,15 @@ private:
 
 protected:
     size_t number_of_columns_;
-    /* Collection of all discovered FDs
-     * Every FD mining algorithm should place discovered dependecies here. Don't add new FDs by
-     * accessing this field directly, use RegisterFd methods instead
+    /* Collection of all discovered FDs.
+     * Every FD mining algorithm should place discovered dependencies here. Don't add new FDs by
+     * accessing this field directly, use RegisterFd methods instead.
      */
     util::PrimitiveCollection<FD> fd_collection_;
     config::EqNullsType is_null_equal_null_;
 
     /* Registers new FD.
-     * Should be overrided if custom behavior is needed
+     * Should be overriden if custom behavior is needed.
      */
     virtual void RegisterFd(Vertical lhs, Column rhs) {
         fd_collection_.Register(std::move(lhs), std::move(rhs));
