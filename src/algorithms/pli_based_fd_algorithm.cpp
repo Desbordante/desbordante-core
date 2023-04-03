@@ -27,12 +27,16 @@ std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
 }
 
 void PliBasedFDAlgorithm::Fit(std::shared_ptr<ColumnLayoutRelationData> data) {
+    // TODO: this has to be repeated for every "alternative" Fit
+    if (configuration_.GetCurrentStage() != +config::ConfigurationStage::fit)
+        throw std::logic_error("Incorrect algorithm execution order: Fit.");
     if (data->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
-    }  // TODO: this has to be repeated for every "alternative" Fit
+    }
     number_of_columns_ = data->GetNumColumns();
     relation_ = std::move(data);
-    ExecutePrepare();  // TODO: this has to be repeated for every "alternative" Fit
+    // TODO: this has to be repeated for every "alternative" Fit
+    configuration_.StartStage(config::ConfigurationStage::execute);
 }
 
 }  // namespace algos
