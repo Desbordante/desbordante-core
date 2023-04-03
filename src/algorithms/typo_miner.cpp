@@ -1,5 +1,8 @@
 #include "algorithms/typo_miner.h"
 
+#include <typeindex>
+#include <typeinfo>
+
 #include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/options/error/option.h"
 #include "algorithms/options/names_and_descriptions.h"
@@ -17,8 +20,72 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                      "Extracting fds with non-zero error"*/}),
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
+    ValidateAlgorithms();
+
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+
+    auto add_external_needed_opts = [this](std::unordered_set<std::string_view>& needed_options) {
+        std::unordered_set<std::string_view> precise_options = precise_algo_->GetNeededOptions();
+        std::unordered_set<std::string_view> approx_options = approx_algo_->GetNeededOptions();
+        needed_options.insert(precise_options.begin(), precise_options.end());
+        needed_options.insert(approx_options.begin(), approx_options.end());
+    };
+    auto set_external_opt = [this](std::string_view option_name, boost::any const& value) {
+        if (option_name == config::ErrorOpt.GetName()) {
+            if (value.type() != typeid(config::ErrorType)) {
+                throw std::invalid_argument("Incorrect error type.");
+            }
+            if (value.empty()) {
+                throw std::invalid_argument("Must specify error value when mining typos.");
+            }
+            auto error = boost::any_cast<config::ErrorType>(value);
+            if (error == 0.0) {
+                throw std::invalid_argument("Typo mining with error 0 is meaningless");
+            }
+            // Assumes if both have an option called `config::ErrorOpt.GetName()`,
+            // then these options share semantics.
+            return TrySetOption(option_name, config::ErrorType{0.0}, value);
+        }
+        return TrySetOption(option_name, value, value);
+    };
+    auto unset_external_opt = [this](std::string_view option_name) {
+        precise_algo_->UnsetOption(option_name);
+        approx_algo_->UnsetOption(option_name);
+    };
+    auto get_external_type_index = [this](std::string_view option_name) {
+        std::type_index void_index{typeid(void)};
+        std::type_index precise_index = precise_algo_->GetTypeIndex(option_name);
+        std::type_index approx_index = approx_algo_->GetTypeIndex(option_name);
+        if (precise_index != void_index) {
+            if (approx_index != void_index && !precise_algo_->NeedsOption(option_name))
+                return approx_index;
+            return precise_index;
+        }
+        return approx_index;
+    };
+    configuration_.SetExternalOptionFunctions(add_external_needed_opts, set_external_opt,
+                                              unset_external_opt, get_external_type_index);
+}
+
+void TypoMiner::ValidateAlgorithms() {
+    using config::ErrorType;
+    using config::names::kError;
+
+    static std::type_index error_type = typeid(ErrorType);
+    static std::type_index void_type = typeid(void);
+
+    if (!approx_algo_->IsInitialAtStage(kError, config::ConfigurationStage::execute)) {
+        throw std::logic_error("Approximate algorithm must have an error option.");
+    }
+
+    std::type_index approx_error_type = approx_algo_->GetTypeIndex(kError);
+    std::type_index precise_error_type = precise_algo_->GetTypeIndex(kError);
+    if (approx_error_type != error_type) {
+        throw std::logic_error("Unexpected error option type in the approximate algorithm.");
+    }
+    if (precise_error_type != void_type && precise_error_type != error_type) {
+        throw std::logic_error("Unexpected error option type in the precise algorithm.");
+    }
 }
 
 void TypoMiner::RegisterOptions() {
@@ -38,58 +105,35 @@ void TypoMiner::RegisterOptions() {
         }
     };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
-    RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
-}
-
-void TypoMiner::MakeExecuteOptsAvailable() {
-    using namespace config::names;
-    MakeOptionsAvailable({kRadius, kRatio});
+    RegisterInitialFitOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterInitialExecuteOption(
+            Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
+    RegisterInitialExecuteOption(
+            Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
 }
 
 void TypoMiner::ResetState() {
     approx_fds_.clear();
 }
 
-bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any const& value) {
-    if (option_name == config::ErrorOpt.GetName()) {
-        if (value.empty()) {
-            throw std::invalid_argument("Must specify error value when mining typos.");
-        }
-        auto error = boost::any_cast<config::ErrorType>(value);
-        if (error == 0.0) {
-            throw std::invalid_argument("Typo mining with error 0 is meaningless");
-        }
-        return static_cast<bool>(TrySetOption(option_name, config::ErrorType{0.0}, value));
-    }
-    return static_cast<bool>(TrySetOption(option_name, value, value));
-}
-
-int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& value_precise,
-                            boost::any const& value_approx) {
+std::pair<int, std::exception_ptr> TypoMiner::TrySetOption(std::string_view option_name,
+                                                           boost::any const& value_precise,
+                                                           boost::any const& value_approx) {
     int successes = 0;
-    try {
-        precise_algo_->SetOption(option_name, value_precise);
-        ++successes;
-    } catch (std::invalid_argument&) {}
-    try {
-        approx_algo_->SetOption(option_name, value_approx);
-        ++successes;
-    } catch (std::invalid_argument&) {}
-    return successes;
-}
-
-void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
-    auto precise_options = precise_algo_->GetNeededOptions();
-    auto approx_options = approx_algo_->GetNeededOptions();
-    if (!FitCompleted()) {
-        // blocked by TypoMiner's is_null_equal_null option
-        precise_options.erase(config::names::kEqualNulls);
-        approx_options.erase(config::names::kEqualNulls);
+    std::exception_ptr eptr = nullptr;
+    for (auto [algo, value] : {std::make_pair(precise_algo_.get(), value_precise),
+                               std::make_pair(approx_algo_.get(), value_approx)}) {
+        if (!algo->NeedsOption(option_name)) continue;
+        try {
+            algo->SetOption(option_name, value);
+            ++successes;
+        } catch (...) {
+            eptr = std::current_exception();
+        }
     }
-    previous_options.insert(precise_options.begin(), precise_options.end());
-    previous_options.insert(approx_options.begin(), approx_options.end());
+    if (successes) eptr = nullptr;
+
+    return {successes, eptr};
 }
 
 void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {

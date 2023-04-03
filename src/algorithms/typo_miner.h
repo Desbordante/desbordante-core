@@ -43,13 +43,13 @@ private:
     }
     explicit TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                        std::unique_ptr<FDAlgorithm> approx_algo);
+
+    void ValidateAlgorithms();
+
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
-    void AddSpecificNeededOptions(
-            std::unordered_set<std::string_view>& previous_options) const final;
-    bool HandleUnknownOption(std::string_view option_name, boost::any const& value) final;
-    int TrySetOption(std::string_view option_name, boost::any const& value_precise,
-                     boost::any const& value_approx);
+    std::pair<int, std::exception_ptr> TrySetOption(std::string_view option_name,
+                                                    boost::any const& value_precise,
+                                                    boost::any const& value_approx);
 
 public:
     using TyposVec = std::vector<util::PLI::Cluster::value_type>;
