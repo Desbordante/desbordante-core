@@ -2,10 +2,6 @@
 
 namespace algos {
 
-bool Primitive::FitCompleted() const {
-    return fit_completed_;
-}
-
 Primitive::Primitive(std::vector<std::string_view> phase_names)
     : progress_(std::move(phase_names)) {}
 

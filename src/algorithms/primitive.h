@@ -23,8 +23,6 @@ class Primitive {
 private:
     util::Progress progress_;
 
-    bool fit_completed_ = false;
-
     // Clear the necessary fields for Execute to run repeatedly with different
     // configuration parameters on the same dataset.
     virtual void ResetState() = 0;
@@ -74,7 +72,6 @@ public:
     explicit Primitive(std::vector<std::string_view> phase_names);
 
     void Fit(model::IDatasetStream & data_stream);
-    bool FitCompleted() const;
 
     unsigned long long Execute();
 
