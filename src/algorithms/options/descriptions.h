@@ -5,26 +5,7 @@
 
 #include "algorithms/enums.h"
 #include "algorithms/metric/enums.h"
-
-namespace algos {
-
-template<typename BetterEnumType>
-static std::string EnumToAvailableValues() {
-    std::stringstream avail_values;
-
-    avail_values << '[';
-
-    for (auto const& name : BetterEnumType::_names()) {
-        avail_values << name << '|';
-    }
-
-    avail_values.seekp(-1, std::stringstream::cur);
-    avail_values << ']';
-
-    return avail_values.str();
-}
-
-}  // namespace algos
+#include "algorithms/options/enum_to_available_values.h"
 
 namespace algos::config::descriptions {
 constexpr auto kDData = "path to CSV file, relative to ./input_data";
