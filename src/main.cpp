@@ -6,6 +6,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/options/all_options.h"
+#include "algorithms/options/enum_to_available_values.h"
 
 INITIALIZE_EASYLOGGINGPP
 
