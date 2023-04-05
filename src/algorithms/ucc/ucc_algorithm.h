@@ -4,7 +4,8 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/options/equal_nulls_opt.h"
+#include "algorithms/options/equal_nulls/type.h"
+#include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/primitive.h"
 #include "model/ucc.h"
 #include "util/primitive_collection.h"
