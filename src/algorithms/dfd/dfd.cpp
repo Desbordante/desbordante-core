@@ -4,6 +4,7 @@
 #include <easylogging++.h>
 
 #include "algorithms/dfd/lattice_traversal/lattice_traversal.h"
+#include "algorithms/options/thread_number/option.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
 #include "util/position_list_index.h"

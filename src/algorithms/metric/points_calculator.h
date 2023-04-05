@@ -1,7 +1,7 @@
 #pragma once
 
 #include "algorithms/metric/points.h"
-#include "algorithms/options/indices_opt.h"
+#include "algorithms/options/indices/type.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/convex_hull.h"
 

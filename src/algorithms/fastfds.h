@@ -5,8 +5,8 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "algorithms/options/max_lhs_opt.h"
-#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/options/max_lhs/type.h"
+#include "algorithms/options/thread_number/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/column_layout_relation_data.h"
 #include "model/vertical.h"

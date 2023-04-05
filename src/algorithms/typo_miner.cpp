@@ -1,5 +1,7 @@
 #include "algorithms/typo_miner.h"
 
+#include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/error/option.h"
 #include "algorithms/options/names_and_descriptions.h"
 
 namespace algos {

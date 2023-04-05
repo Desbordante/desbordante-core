@@ -1,7 +1,7 @@
 #pragma once
 
 #include "algorithms/options/names.h"
-#include "algorithms/options/equal_nulls_opt.h"
+#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/create_primitive.h"
 #include "algorithms/primitive.h"
 #include "algorithms/pyro.h"

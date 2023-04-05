@@ -4,6 +4,9 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
+#include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/thread_number/option.h"
+
 namespace algos {
 
 namespace fs = std::filesystem;
