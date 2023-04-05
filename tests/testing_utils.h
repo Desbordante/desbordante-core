@@ -6,6 +6,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd_algorithm.h"
+#include "algorithms/options/error/type.h"
 #include "algorithms/options/names.h"
 #include "datasets.h"
 

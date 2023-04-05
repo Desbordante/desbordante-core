@@ -6,7 +6,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd_verifier/fd_verifier.h"
-#include "algorithms/options/indices_opt.h"
+#include "algorithms/options/indices/type.h"
 #include "builtin.h"
 #include "datasets.h"
 #include "fd_verifier/stats_calculator.h"

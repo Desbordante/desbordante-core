@@ -4,7 +4,7 @@
 #include <stack>
 
 #include "algorithms/dfd/partition_storage/partition_storage.h"
-#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/options/thread_number/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/vertical.h"
 

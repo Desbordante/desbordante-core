@@ -6,6 +6,7 @@
 
 #include <boost/any.hpp>
 
+#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/primitive.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/fd.h"
@@ -36,7 +37,7 @@ protected:
      * accessing this field directly, use RegisterFd methods instead
      */
     util::PrimitiveCollection<FD> fd_collection_;
-    bool is_null_equal_null_;
+    config::EqNullsType is_null_equal_null_;
 
     /* Registers new FD.
      * Should be overrided if custom behavior is needed

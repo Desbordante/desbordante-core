@@ -6,10 +6,10 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/error_opt.h"
-#include "algorithms/options/max_lhs_opt.h"
+#include "algorithms/options/error/option.h"
+#include "algorithms/options/max_lhs/option.h"
 #include "algorithms/options/names_and_descriptions.h"
-#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/options/thread_number/option.h"
 #include "core/fd_g1_strategy.h"
 #include "core/key_g1_strategy.h"
 

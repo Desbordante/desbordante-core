@@ -7,6 +7,8 @@
 #include <list>
 #include <memory>
 
+#include "algorithms/options/error/option.h"
+#include "algorithms/options/max_lhs/option.h"
 #include "model/column_combination.h"
 #include "model/column_data.h"
 #include "model/column_layout_relation_data.h"

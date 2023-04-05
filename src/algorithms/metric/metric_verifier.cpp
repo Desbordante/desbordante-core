@@ -10,6 +10,10 @@
 
 #include <easylogging++.h>
 
+#include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/indices/option.h"
+#include "algorithms/options/names_and_descriptions.h"
+
 namespace algos::metric {
 
 decltype(MetricVerifier::DistFromNullIsInfinityOpt) MetricVerifier::DistFromNullIsInfinityOpt{

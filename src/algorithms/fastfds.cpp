@@ -10,6 +10,8 @@
 #include <mutex>
 #include <thread>
 
+#include "algorithms/options/thread_number/option.h"
+#include "algorithms/options/max_lhs/option.h"
 #include "util/agree_set_factory.h"
 #include "util/parallel_for.h"
 

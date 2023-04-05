@@ -4,6 +4,10 @@
 #include <memory>
 #include <stdexcept>
 
+#include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/indices/option.h"
+#include "algorithms/options/indices/validate_index.h"
+
 namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Primitive({}) {

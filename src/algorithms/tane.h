@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "algorithms/options/error_opt.h"
-#include "algorithms/options/max_lhs_opt.h"
+#include "algorithms/options/error/type.h"
+#include "algorithms/options/max_lhs/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/relation_data.h"
 #include "util/position_list_index.h"

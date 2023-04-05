@@ -2,7 +2,7 @@
 
 #include <thread>
 
-#include "algorithms/options/equal_nulls_opt.h"
+#include "algorithms/options/equal_nulls/option.h"
 
 namespace algos {
 
