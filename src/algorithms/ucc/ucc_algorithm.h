@@ -4,8 +4,8 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/primitive.h"
 #include "model/ucc.h"
 #include "util/primitive_collection.h"
@@ -22,6 +22,8 @@ private:
 
     virtual void ResetUCCAlgorithmState() = 0;
 
+    void RegisterOptions();
+
 protected:
     // Collection of all mined UCCs. Every UCC mining algorithm must register found uccs here.
     util::PrimitiveCollection<model::UCC> ucc_collection_;
@@ -34,8 +36,8 @@ protected:
 
     explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
         : Primitive(std::move(phase_names)) {
-        RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-        MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+        RegisterOptions();
+        MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
     }
 
 public:
