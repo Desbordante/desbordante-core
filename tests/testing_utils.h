@@ -1,14 +1,13 @@
 #pragma once
 
-#include "datasets.h"
-#include "fd_algorithm.h"
+#include <filesystem>
 
 #include <gtest/gtest.h>
 
-#include <filesystem>
-
 #include "algorithms/algo_factory.h"
+#include "algorithms/fd_algorithm.h"
 #include "algorithms/options/names.h"
+#include "datasets.h"
 
 template <typename T>
 class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
