@@ -5,8 +5,7 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/descriptions.h"
-#include "algorithms/options/names.h"
+#include "algorithms/options/names_and_descriptions.h"
 
 namespace algos {
 
