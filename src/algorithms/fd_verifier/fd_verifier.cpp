@@ -8,6 +8,7 @@
 #include "algorithms/options/indices/option.h"
 #include "algorithms/options/indices/validate_index.h"
 #include "algorithms/options/names_and_descriptions.h"
+#include "algorithms/options/new_options_shorthands.h"
 
 namespace algos::fd_verifier {
 
@@ -17,9 +18,7 @@ FDVerifier::FDVerifier() : Primitive({}) {
 }
 
 void FDVerifier::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    NEW_OPTIONS_SHORTHANDS
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
     auto check_rhs = [this](config::IndexType rhs_index) {

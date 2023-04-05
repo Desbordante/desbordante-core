@@ -3,6 +3,7 @@
 #include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/options/error/option.h"
 #include "algorithms/options/names_and_descriptions.h"
+#include "algorithms/options/new_options_shorthands.h"
 
 namespace algos {
 
@@ -21,9 +22,7 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
 }
 
 void TypoMiner::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    NEW_OPTIONS_SHORTHANDS
 
     auto radius_check = [](double radius) {
         if (!(radius == -1 || radius >= 0)) {
