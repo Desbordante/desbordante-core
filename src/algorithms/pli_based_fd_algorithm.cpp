@@ -5,12 +5,16 @@ namespace algos {
 PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
         : FDAlgorithm(std::move(phase_names)) {}
 
-void PliBasedFDAlgorithm::FitFd(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-
-    if (relation_->GetColumnData().empty()) {
+void PliBasedFDAlgorithm::SetData(std::shared_ptr<ColumnLayoutRelationData>&& data) {
+    if (data->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
     }
+    number_of_columns_ = data->GetNumColumns();
+    relation_ = std::move(data);
+}
+
+void PliBasedFDAlgorithm::FitFd(model::IDatasetStream& data_stream) {
+    SetData(ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_));
 }
 
 std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
@@ -27,16 +31,9 @@ std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
 }
 
 void PliBasedFDAlgorithm::Fit(std::shared_ptr<ColumnLayoutRelationData> data) {
-    // TODO: this has to be repeated for every "alternative" Fit
-    if (configuration_.GetCurrentStage() != +config::ConfigurationStage::fit)
-        throw std::logic_error("Incorrect algorithm execution order: Fit.");
-    if (data->GetColumnData().empty()) {
-        throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
-    }
-    number_of_columns_ = data->GetNumColumns();
-    relation_ = std::move(data);
-    // TODO: this has to be repeated for every "alternative" Fit
-    configuration_.StartStage(config::ConfigurationStage::execute);
+    FitCommon<std::shared_ptr<ColumnLayoutRelationData>&&, false>(
+            std::move(data),
+            [this](std::shared_ptr<ColumnLayoutRelationData>&& data) { SetData(std::move(data)); });
 }
 
 }  // namespace algos

@@ -6,6 +6,9 @@
 namespace algos {
 
 class PliBasedFDAlgorithm : public FDAlgorithm {
+private:
+    void SetData(std::shared_ptr<ColumnLayoutRelationData>&& data);
+
 protected:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <functional>
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>
@@ -58,6 +59,22 @@ protected:
         configuration_.RegisterOption(option, config::ConfigurationStage::execute);
     }
 
+    template <typename DataType, bool CheckConfig = true>
+    void FitCommon(DataType data, std::function<void(DataType)> process_data) {
+        if (configuration_.GetCurrentStage() != +config::ConfigurationStage::fit)
+            throw std::logic_error("Incorrect algorithm execution order: Fit.");
+        if constexpr (CheckConfig) {
+            if (!GetNeededOptions().empty())
+                throw std::logic_error("All options need to be set before starting processing.");
+        }
+        if constexpr (std::is_rvalue_reference_v<DataType>) {
+            process_data(std::move(data));
+        } else {
+            process_data(data);
+        }
+        configuration_.StartStage(config::ConfigurationStage::execute);
+    }
+
 public:
     constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
 
@@ -71,7 +88,7 @@ public:
     // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
     explicit Primitive(std::vector<std::string_view> phase_names);
 
-    void Fit(model::IDatasetStream & data_stream);
+    void Fit(model::IDatasetStream& data_stream);
 
     unsigned long long Execute();
 
