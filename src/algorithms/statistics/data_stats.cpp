@@ -149,7 +149,13 @@ Statistic DataStats::GetKurtosis(size_t index) const {
     if (all_stats_[index].kurtosis.HasValue()) return all_stats_[index].kurtosis;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
-    return GetStandardizedCentralMomentOfDist(index, 4);
+    Statistic result = GetStandardizedCentralMomentOfDist(index, 4);
+    mo::DoubleType double_type;
+    std::byte const* correction = double_type.MakeValue(-3);
+    std::byte* result_with_correction = double_type.Allocate();
+    double_type.Add(result.GetData(), correction, result_with_correction);
+    double_type.Free(correction);
+    return Statistic(result_with_correction, &double_type, false);
 }
 
 size_t DataStats::NumberOfValues(size_t index) const {
