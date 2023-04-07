@@ -179,6 +179,15 @@ TEST(TestDataStats, TestGetSkewness) {
     EXPECT_DOUBLE_EQ(s, expected);
 }
 
+TEST(TestDataStats, TestGetKurtosis) {
+    auto stats_ptr = MakeStatPrimitive("BernoulliRelation.csv");
+    algos::DataStats &stats = *stats_ptr;
+    auto kurtosis_stat = stats.GetKurtosis(1);
+    auto k = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
+    mo::Double expected = -2.305;
+    EXPECT_NEAR(k, expected, 0.001);
+}
+
 TEST(TestDataStats, CorrectExecutionEmpty) {
     auto stats_ptr = MakeStatPrimitive("TestEmpty.csv");
     algos::DataStats &stats = *stats_ptr;
