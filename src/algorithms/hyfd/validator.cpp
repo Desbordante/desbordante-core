@@ -69,14 +69,8 @@ using LhsRow = std::vector<size_t>;
 using RhsRowId = std::pair<std::vector<size_t>, size_t>;
 
 auto LhsRhsMap(size_t bucket_size) {
-    auto const kHasher = [](std::vector<size_t> const& v) {
-        return boost::hash_range(v.cbegin(), v.cend());
-    };
-    auto const kEq = [](std::vector<size_t> const& v1, std::vector<size_t> const& v2) {
-        return v1 == v2;
-    };
-    return std::unordered_map<LhsRow, RhsRowId, decltype(kHasher), decltype(kEq)>(bucket_size,
-                                                                                  kHasher, kEq);
+    auto const kHasher = boost::hash<std::vector<size_t>>();
+    return std::unordered_map<LhsRow, RhsRowId, decltype(kHasher)>(bucket_size, kHasher);
 }
 
 void ValidateRhss(RhsRowId const& rhs_record, algos::hyfd::Rows const& compressed_records,
