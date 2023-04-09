@@ -78,7 +78,7 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
     unsigned comparisons = 0;
     unsigned const window = efficiency.GetWindow();
 
-    for (auto const& cluster : pli.GetIndex()) {
+    for (util::PLI::Cluster const& cluster : pli.GetIndex()) {
         for (size_t i = 0; window < cluster.size() && i < cluster.size() - window; ++i) {
             int const pivot_id = cluster[i];
             int const partner_id = cluster[i + window];
@@ -113,11 +113,11 @@ void Sampler::InitializeEfficiencyQueue() {
 
     if (num_attributes >= 3) {
         ColumnSlider column_slider(num_attributes);
-        for (auto& pli : *plis_) {
+        for (util::PLI* pli : *plis_) {
             ClusterComparator cluster_comparator(compressed_records_.get(),
                                                  column_slider.GetLeftNeighbor(),
                                                  column_slider.GetRightNeighbor());
-            for (auto& cluster : pli->GetIndex()) {
+            for (util::PLI::Cluster& cluster : pli->GetIndex()) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
             column_slider.ToNextColumn();
