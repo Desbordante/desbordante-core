@@ -9,7 +9,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "fd_validations.h"
 #include "hyfd/util/pli_util.h"
 #include "hyfd_config.h"
 
@@ -207,14 +206,14 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     auto const rhs = vertex->GetFDs();
     size_t const rhs_count = rhs.count();
 
-    result.count_intersections_ = rhs_count;
-    result.count_validations_ = rhs_count;
+    result.set_count_validations(rhs_count);
+    result.set_count_intersections(rhs_count);
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
         if (!(*plis_)[attr]->IsConstant()) {
             vertex->RemoveFd(attr);
-            result.invalid_fds_.emplace_back(lhs, attr);
+            result.invalid_instances().emplace_back(lhs, attr);
         }
     }
 
@@ -233,9 +232,8 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
     }
 
     FDValidations result;
-
-    result.count_intersections_ = rhs_count;
-    result.count_validations_ = rhs_count;
+    result.set_count_intersections(rhs_count);
+    result.set_count_validations(rhs_count);
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
@@ -246,7 +244,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
                     return (*compressed_records_)[id][attr] != cluster_id;
                 })) {
                 vertex->RemoveFd(attr);
-                result.invalid_fds_.emplace_back(lhs, attr);
+                result.invalid_instances().emplace_back(lhs, attr);
                 break;
             }
         }
@@ -265,13 +263,13 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
     }
 
     FDValidations result;
-    result.count_validations_ = rhs_count;
-    result.count_intersections_ = 1;
+    result.set_count_validations(rhs_count);
+    result.set_count_intersections(1);
 
     size_t const first_attr = lhs.find_first();
 
     lhs.reset(first_attr);
-    boost::dynamic_bitset<> const valid_rhss = Refine(result.comparison_suggestions_, *plis_,
+    boost::dynamic_bitset<> const valid_rhss = Refine(result.comparison_suggestions(), *plis_,
                                                       *compressed_records_, lhs, rhs, first_attr);
     lhs.set(first_attr);
 
@@ -280,7 +278,7 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        result.invalid_fds_.emplace_back(lhs, attr);
+        result.invalid_instances().emplace_back(lhs, attr);
     }
 
     return result;
@@ -301,7 +299,7 @@ Validator::FDValidations Validator::GetValidations(LhsPair const& lhsPair) {
 Validator::FDValidations Validator::ValidateAndExtendSeq(std::vector<LhsPair> const& vertices) {
     FDValidations result;
     for (auto const& vertex : vertices) {
-        result.add(GetValidations(vertex));
+        result.Add(GetValidations(vertex));
     }
 
     return result;
@@ -327,20 +325,20 @@ IdPairs Validator::ValidateAndExtendCandidates() {
         auto const result = ValidateAndExtendSeq(cur_level_vertices);
 
         comparison_suggestions.insert(comparison_suggestions.end(),
-                                      result.comparison_suggestions_.begin(),
-                                      result.comparison_suggestions_.end());
+                                      result.comparison_suggestions().begin(),
+                                      result.comparison_suggestions().end());
         if (current_level_number_ >= fds_->GetNumAttributes()) {
             break;
         }
 
         std::vector<LhsPair> next_level =
                 CollectCurrentChildren(cur_level_vertices, num_attributes);
-        size_t candidates = AddExtendedCandidatesFromInvalid(next_level, *fds_, result.invalid_fds_,
-                                                             num_attributes);
+        size_t candidates = AddExtendedCandidatesFromInvalid(
+                next_level, *fds_, result.invalid_instances(), num_attributes);
         LogLevel(cur_level_vertices, result, candidates);
 
-        int const num_invalid_fds = result.invalid_fds_.size();
-        int const num_valid_fds = result.count_validations_ - num_invalid_fds;
+        int const num_invalid_fds = result.invalid_instances().size();
+        int const num_valid_fds = result.count_validations() - num_invalid_fds;
         cur_level_vertices = std::move(next_level);
         current_level_number_++;
 
@@ -356,13 +354,13 @@ IdPairs Validator::ValidateAndExtendCandidates() {
 
 void Validator::LogLevel(const std::vector<LhsPair>& cur_level_vertices,
                          const Validator::FDValidations& result, size_t candidates) const {
-    int const num_invalid_fds = result.invalid_fds_.size();
-    int const num_valid_fds = result.count_validations_ - num_invalid_fds;
+    int const num_invalid_fds = result.invalid_instances().size();
+    int const num_valid_fds = result.count_validations() - num_invalid_fds;
 
     LOG(INFO) << "LEVEL " + std::to_string(current_level_number_) + "(" +
                          std::to_string(cur_level_vertices.size()) + "): "
-              << std::to_string(result.count_intersections_) + " intersections; "
-              << std::to_string(result.count_validations_) + " validations; "
+              << std::to_string(result.count_intersections()) + " intersections; "
+              << std::to_string(result.count_validations()) + " validations; "
               << std::to_string(num_invalid_fds) + " invalid; "
               << std::to_string(candidates) + " new candidates; --> "
               << std::to_string(num_valid_fds) + " FDs";
