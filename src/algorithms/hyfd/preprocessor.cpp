@@ -68,7 +68,7 @@ std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData*
     PLIs plis;
     std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
                    std::back_inserter(plis),
-                   [](auto& columnData) { return columnData.GetPositionListIndex(); });
+                   [](auto& column_data) { return column_data.GetPositionListIndex(); });
 
     auto og_mapping = SortAndGetMapping(plis);
 
