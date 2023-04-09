@@ -116,6 +116,10 @@ public:
         return GetMaximumNip() - GetNepAsLong();
     }
 
+    bool AllValuesAreUnique() const noexcept {
+        return GetNumNonSingletonCluster() == 0;
+    }
+
     bool IsConstant() const {
         return relation_size_ <= 1 || (GetNumNonSingletonCluster() == 1 && size_ == relation_size_);
     }
