@@ -112,7 +112,7 @@ std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
 
 void PositionListIndex::SortClusters(std::deque<std::vector<int>>& clusters) {
     sort(clusters.begin(), clusters.end(),
-         [](std::vector<int>& a, std::vector<int>& b) { return a[0] < b[0]; });
+         [](std::vector<int> const& a, std::vector<int> const& b) { return a[0] < b[0]; });
 }
 
 std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbingTable() const {
