@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 
+#include "primitive_validations.h"
 #include "raw_fd.h"
 #include "structures/fd_tree.h"
 #include "structures/non_fds.h"
@@ -16,7 +17,7 @@ using LhsPair = fd_tree::LhsPair;
 
 class Validator {
 private:
-    struct FDValidations;
+    using FDValidations = PrimitiveValidations<RawFD>;
 
     std::shared_ptr<fd_tree::FDTree> fds_;
 
