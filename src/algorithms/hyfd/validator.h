@@ -38,9 +38,6 @@ private:
         return current_level_number_;
     }
 
-    void LogLevel(const std::vector<LhsPair>& cur_level_vertices, const FDValidations& result,
-                  size_t candidates) const;
-
 public:
     Validator(std::shared_ptr<fd_tree::FDTree> fds, PLIsPtr plis,
               RowsPtr compressed_records) noexcept

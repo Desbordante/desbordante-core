@@ -287,7 +287,7 @@ IdPairs Validator::ValidateAndExtendCandidates() {
                 algos::CollectCurrentChildren(cur_level_vertices, num_attributes);
         size_t candidates = AddExtendedCandidatesFromInvalid(
                 next_level, *fds_, result.invalid_instances(), num_attributes);
-        LogLevel(cur_level_vertices, result, candidates);
+        algos::LogLevel(cur_level_vertices, result, candidates, current_level_number_, "FD");
 
         int const num_invalid_fds = result.invalid_instances().size();
         int const num_valid_fds = result.count_validations() - num_invalid_fds;
@@ -302,20 +302,6 @@ IdPairs Validator::ValidateAndExtendCandidates() {
     }
 
     return {};
-}
-
-void Validator::LogLevel(const std::vector<LhsPair>& cur_level_vertices,
-                         const Validator::FDValidations& result, size_t candidates) const {
-    int const num_invalid_fds = result.invalid_instances().size();
-    int const num_valid_fds = result.count_validations() - num_invalid_fds;
-
-    LOG(INFO) << "LEVEL " + std::to_string(current_level_number_) + "(" +
-                         std::to_string(cur_level_vertices.size()) + "): "
-              << std::to_string(result.count_intersections()) + " intersections; "
-              << std::to_string(result.count_validations()) + " validations; "
-              << std::to_string(num_invalid_fds) + " invalid; "
-              << std::to_string(candidates) + " new candidates; --> "
-              << std::to_string(num_valid_fds) + " FDs";
 }
 
 // NOLINTEND(*-narrowing-conversions)
