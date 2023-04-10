@@ -2,6 +2,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "model/raw_ucc.h"
 #include "structures/non_ucc_list.h"
 #include "structures/ucc_tree.h"
 
@@ -11,7 +12,7 @@ class Inductor {
 private:
     UCCTree* tree_;
 
-    void SpecializeUCCTree(boost::dynamic_bitset<> const& non_ucc);
+    void SpecializeUCCTree(model::RawUCC const& non_ucc);
 
 public:
     explicit Inductor(UCCTree* tree) noexcept : tree_(tree) {}

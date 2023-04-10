@@ -6,14 +6,15 @@ void Inductor::UpdateUCCTree(NonUCCList&& non_uccs) {
     unsigned const max_level = non_uccs.GetDepth();
 
     for (unsigned level = max_level; level != 0; --level) {
-        for (auto const& non_ucc : non_uccs.GetLevel(level)) {
+        std::vector<model::RawUCC> cur_level = non_uccs.GetLevel(level);
+        for (auto const& non_ucc : cur_level) {
             SpecializeUCCTree(non_ucc);
         }
     }
 }
 
-void Inductor::SpecializeUCCTree(boost::dynamic_bitset<> const& non_ucc) {
-    std::vector<boost::dynamic_bitset<>> invalid_uccs = tree_->GetUCCAndGeneralizations(non_ucc);
+void Inductor::SpecializeUCCTree(model::RawUCC const& non_ucc) {
+    std::vector<model::RawUCC> invalid_uccs = tree_->GetUCCAndGeneralizations(non_ucc);
 
     for (auto& invalid_ucc : invalid_uccs) {
         tree_->Remove(invalid_ucc);
