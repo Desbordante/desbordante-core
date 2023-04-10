@@ -106,6 +106,15 @@ bool FDTreeVertex::IsLastNodeOf(size_t rhs) const noexcept {
     });
 }
 
+std::shared_ptr<FDTreeVertex> FDTreeVertex::GetChildIfExists(size_t pos) const {
+    if (children_.empty()) {
+        return nullptr;
+    }
+
+    assert(pos < children_.size());
+    return children_[pos];
+}
+
 void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs) const {
     for (size_t rhs = fds_.find_first(); rhs != boost::dynamic_bitset<>::npos;
          rhs = fds_.find_next(rhs)) {

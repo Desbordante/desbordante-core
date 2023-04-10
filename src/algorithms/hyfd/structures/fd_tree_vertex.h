@@ -144,6 +144,8 @@ public:
         return children_.at(pos).get();
     }
 
+    std::shared_ptr<FDTreeVertex> GetChildIfExists(size_t pos) const;
+
     bool ContainsChildAt(size_t pos) const {
         return children_.at(pos) != nullptr;
     }
