@@ -64,11 +64,8 @@ unsigned long long HyFD::ExecuteInternal() {
 void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<size_t>& og_mapping) {
     const auto* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
-        boost::dynamic_bitset<> mapped_lhs(schema->GetNumColumns());
-        for (size_t i = lhs.find_first(); i != boost::dynamic_bitset<>::npos;
-             i = lhs.find_next(i)) {
-            mapped_lhs.set(og_mapping[i]);
-        }
+        boost::dynamic_bitset<> mapped_lhs =
+                RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());
         Vertical lhs_v(schema, std::move(mapped_lhs));
 
         size_t const mapped_rhs = og_mapping[rhs];

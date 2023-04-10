@@ -79,4 +79,13 @@ std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData*
     return std::make_tuple(std::move(plis), std::move(pli_records), std::move(og_mapping));
 }
 
+boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
+                                        std::vector<size_t> const& og_mapping, size_t num_cols) {
+    boost::dynamic_bitset<> mapped_as(num_cols);
+    for (size_t i = as.find_first(); i != boost::dynamic_bitset<>::npos; i = as.find_next(i)) {
+        mapped_as.set(og_mapping[i]);
+    }
+    return mapped_as;
+}
+
 }  // namespace algos::hyfd
