@@ -43,11 +43,6 @@ std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
 using LhsRow = std::vector<size_t>;
 using RhsRowId = std::pair<std::vector<size_t>, size_t>;
 
-auto LhsRhsMap(size_t bucket_size) {
-    auto const kHasher = boost::hash<std::vector<size_t>>();
-    return std::unordered_map<LhsRow, RhsRowId, decltype(kHasher)>(bucket_size, kHasher);
-}
-
 void ValidateRhss(RhsRowId const& rhs_record, algos::hyfd::Rows const& compressed_records,
                   size_t row, std::vector<size_t> const& rhs_ranks,
                   std::unordered_set<size_t>& valid_rhs_ids,
@@ -91,7 +86,7 @@ boost::dynamic_bitset<> Refine(algos::hyfd::IdPairs& comparison_suggestions,
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
 
     for (auto const& cluster : plis[firstAttr]->GetIndex()) {
-        auto lhs_rhs_map = LhsRhsMap(cluster.size());
+        auto lhs_rhs_map = algos::MakeClusterIdentifierToTMap<RhsRowId>(cluster.size());
 
         for (size_t row : cluster) {
             auto lhs_row = algos::BuildClustersIdentifier(compressed_records[row], lhs_column_ids);
