@@ -8,7 +8,7 @@ static const auto test_data_dir = std::filesystem::current_path() / "input_data"
 
 struct Dataset {
     std::string name;
-    unsigned int hash;
+    size_t hash;
     char separator;
     bool header_presence;
 };
