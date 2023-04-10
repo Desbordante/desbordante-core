@@ -21,3 +21,6 @@
 
 /* FD verifier */
 #include "algorithms/fd_verifier/fd_verifier.h"
+
+/* Unique Column Combination mining algorithms */
+#include "algorithms/ucc/hyucc/hyucc.h"
