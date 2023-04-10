@@ -10,25 +10,10 @@
 #include <easylogging++.h>
 
 #include "hyfd/util/pli_util.h"
+#include "hyfd/validator_helpers.h"
 #include "hyfd_config.h"
 
 namespace {
-
-std::vector<size_t> BuildLhsRow(algos::hyfd::Rows const& compressed_records,
-                                std::vector<size_t> const& lhs_column_ids, size_t id) {
-    std::vector<size_t> sub_cluster;
-    sub_cluster.reserve(lhs_column_ids.size());
-    for (size_t attr : lhs_column_ids) {
-        size_t const lhs_cluster_id = compressed_records[id][attr];
-
-        if (!algos::hyfd::PLIUtil::IsSingletonCluster(lhs_cluster_id)) {
-            sub_cluster.push_back(lhs_cluster_id);
-        } else {
-            return {};
-        }
-    }
-    return sub_cluster;
-}
 
 std::unordered_set<size_t> AsSet(boost::dynamic_bitset<> const& bitset) {
     std::unordered_set<size_t> valid_rhss(bitset.count());
@@ -118,7 +103,7 @@ boost::dynamic_bitset<> Refine(algos::hyfd::IdPairs& comparison_suggestions,
         auto lhs_rhs_map = LhsRhsMap(cluster.size());
 
         for (size_t row : cluster) {
-            auto lhs_row = BuildLhsRow(compressed_records, lhs_column_ids, row);
+            auto lhs_row = algos::BuildClustersIdentifier(compressed_records[row], lhs_column_ids);
             if (lhs_row.empty()) {
                 continue;
             }
