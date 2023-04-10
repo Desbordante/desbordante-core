@@ -35,4 +35,10 @@ void LogLevel(const std::vector<VertexAndAgreeSet>& cur_level_vertices,
               << primitive << "s";
 }
 
+template <typename T>
+auto MakeClusterIdentifierToTMap(size_t bucket_size) {
+    auto const kHasher = boost::hash<std::vector<size_t>>();
+    return std::unordered_map<std::vector<size_t>, T, decltype(kHasher)>(bucket_size, kHasher);
+}
+
 }  // namespace algos
