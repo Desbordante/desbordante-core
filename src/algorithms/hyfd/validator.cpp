@@ -257,9 +257,6 @@ Validator::FDValidations Validator::ValidateAndExtendSeq(std::vector<LhsPair> co
     return result;
 }
 
-// todo(strutovsky): make indices unsigned in core structures
-// NOLINTBEGIN(*-narrowing-conversions)
-
 IdPairs Validator::ValidateAndExtendCandidates() {
     size_t const num_attributes = plis_->size();
 
@@ -271,7 +268,7 @@ IdPairs Validator::ValidateAndExtendCandidates() {
                                         boost::dynamic_bitset<>(num_attributes));
     }
 
-    int previous_num_invalid_fds = 0;
+    size_t previous_num_invalid_fds = 0;
     IdPairs comparison_suggestions;
     while (!cur_level_vertices.empty()) {
         auto const result = ValidateAndExtendSeq(cur_level_vertices);
@@ -289,12 +286,12 @@ IdPairs Validator::ValidateAndExtendCandidates() {
                 next_level, *fds_, result.invalid_instances(), num_attributes);
         algos::LogLevel(cur_level_vertices, result, candidates, current_level_number_, "FD");
 
-        int const num_invalid_fds = result.invalid_instances().size();
-        int const num_valid_fds = result.count_validations() - num_invalid_fds;
+        size_t const num_invalid_fds = result.invalid_instances().size();
+        size_t const num_valid_fds = result.count_validations() - num_invalid_fds;
         cur_level_vertices = std::move(next_level);
         current_level_number_++;
 
-        if (num_invalid_fds > hyfd::HyFDConfig::kEfficiencyThreshold * num_valid_fds &&
+        if (num_invalid_fds > (long double)hyfd::HyFDConfig::kEfficiencyThreshold * num_valid_fds &&
             previous_num_invalid_fds < num_invalid_fds) {
             return comparison_suggestions;
         }
@@ -303,7 +300,5 @@ IdPairs Validator::ValidateAndExtendCandidates() {
 
     return {};
 }
-
-// NOLINTEND(*-narrowing-conversions)
 
 }  // namespace algos::hyfd
