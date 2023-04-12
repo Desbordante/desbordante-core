@@ -28,7 +28,7 @@ private:
     ACAlgorithm const* ac_alg_;
 
     /* Creates new ACException and adds it to exceptions_ or adds col_pair to existing one */
-    void AddException(size_t row_i, std::pair<size_t, size_t> col_pair);
+    void AddException(size_t row_i, std::pair<size_t, size_t> const& col_pair);
     void CollectColumnPairExceptions(std::vector<model::TypedColumnData> const& data,
                                      RangesCollection const& ranges_collection);
 
