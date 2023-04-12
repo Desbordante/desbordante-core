@@ -72,12 +72,7 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
     std::vector<std::byte const*> const& lhs = data.at(lhs_i).GetData();
     std::vector<std::byte const*> const& rhs = data.at(rhs_i).GetData();
     ac_pairs.clear();
-    std::random_device rd;
-    std::mt19937 gen(rd());
-
-    if (test_mode_) {
-        gen = std::mt19937(0);
-    }
+    std::mt19937 gen(seed_);
 
     std::bernoulli_distribution d(probability);
     for (size_t i = 0; i < lhs.size(); ++i) {

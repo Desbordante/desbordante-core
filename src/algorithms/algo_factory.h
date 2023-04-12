@@ -68,6 +68,7 @@ ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
         throw std::invalid_argument("IterationsLimit value should not be less than one");
     }
     c.pairing_rule = ExtractOptionValue<std::string>(params, onam::kPairingRule);
+    c.seed = ExtractOptionValue<int>(params, onam::kACSeed);
 
     return c;
 }
