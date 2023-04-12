@@ -7,6 +7,41 @@
 #include "datasets.h"
 #include "types.h"
 
+namespace {
+void AssertRanges(std::vector<std::string>& expected_ranges,
+                  algos::RangesCollection const& byte_ranges) {
+    ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
+
+    auto expected = std::unique_ptr<std::byte[]>(byte_ranges.col_pair.num_type->Allocate());
+    for (size_t i = 0; i < expected_ranges.size(); ++i) {
+        // FIXME:
+        /* Для значения "7.4": сравнение через num_type->Compare() значений в виде std::byte
+         * (полученных с помощью num_type->ValueFromStr()) возвращает, что они не равны,
+         * однако при использовании на этих же значениях num_type->ValueToString()
+         * полученные строки оказываются равными */
+        byte_ranges.col_pair.num_type->ValueFromStr(expected.get(), expected_ranges[i]);
+        EXPECT_EQ(byte_ranges.col_pair.num_type->ValueToString(expected.get()),
+                  byte_ranges.col_pair.num_type->ValueToString(byte_ranges.ranges[i]));
+    }
+}
+
+void AssertACExceptions(
+        std::vector<algos::ACExceptionFinder::ACException>& expected_ac_exceptions,
+        std::vector<algos::ACExceptionFinder::ACException> const& actual_ac_exceptions) {
+    ASSERT_EQ(expected_ac_exceptions.size(), actual_ac_exceptions.size());
+
+    for (size_t i = 0; i < expected_ac_exceptions.size(); ++i) {
+        ASSERT_EQ(expected_ac_exceptions[i].row_i, actual_ac_exceptions[i].row_i);
+        size_t pairs_amount = expected_ac_exceptions[i].column_pairs.size();
+        ASSERT_EQ(pairs_amount, actual_ac_exceptions[i].column_pairs.size());
+        for (size_t pair_i = 0; pair_i < pairs_amount; ++pair_i) {
+            EXPECT_EQ(expected_ac_exceptions[i].column_pairs[pair_i],
+                      actual_ac_exceptions[i].column_pairs[pair_i]);
+        }
+    }
+}
+}  // namespace
+
 namespace tests {
 
 namespace fs = std::filesystem;
@@ -27,39 +62,6 @@ public:
         return std::make_unique<algos::ACAlgorithm>(config);
     }
 };
-
-void AssertRanges(std::vector<std::string>& expected_ranges,
-                  algos::RangesCollection const& byte_ranges) {
-    ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
-
-    auto expected = std::unique_ptr<std::byte[]>(byte_ranges.col_pair.num_type->Allocate());
-    for (size_t i = 0; i < expected_ranges.size(); ++i) {
-        // FIXME:
-        /* Для значения "7.4": сравнение через num_type->Compare() значений в виде std::byte
-         * (полученных с помощью num_type->ValueFromStr()) возвращает, что они не равны,
-         * однако при использовании на этих же значениях num_type->ValueToString()
-         * полученные строки оказываются равными */
-        byte_ranges.col_pair.num_type->ValueFromStr(expected.get(), expected_ranges[i]);
-        EXPECT_EQ(byte_ranges.col_pair.num_type->ValueToString(expected.get()),
-                  byte_ranges.col_pair.num_type->ValueToString(byte_ranges.ranges[i]));
-    }
-}
-
-void AssertACExceptions(
-        std::vector<algos::ACExceptionFinder::ACException>& expected_ACexceptions,
-        std::vector<algos::ACExceptionFinder::ACException> const& actual_ACexceptions) {
-    ASSERT_EQ(expected_ACexceptions.size(), actual_ACexceptions.size());
-
-    for (size_t i = 0; i < expected_ACexceptions.size(); ++i) {
-        ASSERT_EQ(expected_ACexceptions[i].row_i, actual_ACexceptions[i].row_i);
-        size_t pairs_amount = expected_ACexceptions[i].column_pairs.size();
-        ASSERT_EQ(pairs_amount, actual_ACexceptions[i].column_pairs.size());
-        for (size_t pair_i = 0; pair_i < pairs_amount; ++pair_i) {
-            EXPECT_EQ(expected_ACexceptions[i].column_pairs[pair_i],
-                      actual_ACexceptions[i].column_pairs[pair_i]);
-        }
-    }
-}
 
 TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
     auto a = CreateACAlgorithmInstance("iris.csv", ',', false, '+', 0.0, 1, 0.05);
