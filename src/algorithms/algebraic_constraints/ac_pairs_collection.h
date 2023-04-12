@@ -15,6 +15,7 @@ struct ACPairsCollection {
     ACPairsCollection(std::unique_ptr<model::INumericType> num_type, ACPairs&& ac_pairs,
                       size_t lhs_i, size_t rhs_i)
         : col_pair{{lhs_i, rhs_i}, std::move(num_type)}, ac_pairs(std::move(ac_pairs)) {}
+    /* Column pair indices and pointer to their type */
     TypedColumnPair col_pair;
     /* Vector with ACPairs */
     ACPairs ac_pairs;

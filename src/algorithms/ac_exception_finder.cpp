@@ -4,7 +4,7 @@
 
 namespace algos {
 
-void ACExceptionFinder::AddException(size_t row_i, std::pair<size_t, size_t> col_pair) {
+void ACExceptionFinder::AddException(size_t row_i, std::pair<size_t, size_t> const& col_pair) {
     auto equal = [row_i](ACException const& e) { return e.row_i == row_i; };
     auto exception_i = std::find_if(exceptions_.begin(), exceptions_.end(), equal);
     if (exception_i == exceptions_.end()) {

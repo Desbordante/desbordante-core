@@ -31,7 +31,7 @@ size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     double tmp1 = 2 / (9 * freedom_degree);
     double tmp2 = (1 - tmp1 + xp * sqrt(tmp1));
     double Xp_2 = freedom_degree * pow(tmp2, 3.0);
-    /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic ACPairs
+    /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic Constraints
      * in Relational Data>> by Paul G. Brown & Peter J. Haas*/
     size_t sample_size = (Xp_2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
     return sample_size;
@@ -203,7 +203,7 @@ std::vector<std::byte const*> ACAlgorithm::ConstructDisjunctiveRanges(ACPairs co
 }
 
 RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i,
-                                                         double weight) {
+                                                         double weight) const {
     ACPairsCollection const& constraints_collection = GetACPairsByColumns(lhs_i, rhs_i);
     ACPairs const& ac_pairs = constraints_collection.ac_pairs;
     std::vector<std::byte const*> ranges = ConstructDisjunctiveRanges(ac_pairs, weight);

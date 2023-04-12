@@ -116,7 +116,7 @@ public:
     }
     size_t CalculateSampleSize(size_t k_bumps) const;
     /* Returns ranges reconstucted with new weight for pair of columns */
-    RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight);
+    RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight) const;
     static bool ValueBelongsToRanges(RangesCollection const& ranges_collection,
                                      std::byte const* val);
     std::vector<RangesCollection> const& GetRangesCollections() const {
