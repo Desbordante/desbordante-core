@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 
 class ACAlgorithmTest : public ::testing::Test {
 public:
-    using ACExceptions = std::vector<algos::ACAlgorithm::ACException>;
+    using ACExceptions = std::vector<algos::ACExceptionFinder::ACException>;
 
     static std::unique_ptr<algos::ACAlgorithm> CreateACAlgorithmInstance(
             std::string_view path, char separator = ',', bool hasHeader = true,
@@ -29,7 +29,7 @@ public:
 };
 
 void AssertRanges(std::vector<std::string>& expected_ranges,
-                  algos::ACAlgorithm::RangesCollection const& byte_ranges) {
+                  algos::RangesCollection const& byte_ranges) {
     ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
 
     auto expected = std::unique_ptr<std::byte[]>(byte_ranges.col_pair.num_type->Allocate());
@@ -45,8 +45,9 @@ void AssertRanges(std::vector<std::string>& expected_ranges,
     }
 }
 
-void AssertACExceptions(std::vector<algos::ACAlgorithm::ACException>& expected_ACexceptions,
-                        std::vector<algos::ACAlgorithm::ACException> const& actual_ACexceptions) {
+void AssertACExceptions(
+        std::vector<algos::ACExceptionFinder::ACException>& expected_ACexceptions,
+        std::vector<algos::ACExceptionFinder::ACException> const& actual_ACexceptions) {
     ASSERT_EQ(expected_ACexceptions.size(), actual_ACexceptions.size());
 
     for (size_t i = 0; i < expected_ACexceptions.size(); ++i) {
@@ -176,10 +177,10 @@ TEST_F(ACAlgorithmTest, CollectingACExceptions) {
     a->Execute();
     a->CollectACExceptions();
 
-    algos::ACAlgorithm::ACException e0(0, {{1, 2}});
-    algos::ACAlgorithm::ACException e1(1, {{0, 2}, {1, 2}});
-    algos::ACAlgorithm::ACException e2(2, {{0, 2}, {1, 2}});
-    algos::ACAlgorithm::ACException e3(3, {{0, 2}, {1, 2}});
+    algos::ACExceptionFinder::ACException e0(0, {{1, 2}});
+    algos::ACExceptionFinder::ACException e1(1, {{0, 2}, {1, 2}});
+    algos::ACExceptionFinder::ACException e2(2, {{0, 2}, {1, 2}});
+    algos::ACExceptionFinder::ACException e3(3, {{0, 2}, {1, 2}});
     ACAlgorithmTest::ACExceptions expected = {e0, e1, e2, e3};
 
     AssertACExceptions(expected, a->GetACExceptions());
