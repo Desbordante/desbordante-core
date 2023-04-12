@@ -127,7 +127,7 @@ void ACAlgorithm::RestrictRangesAmount(std::vector<std::byte const*>& ranges) co
             }
         }
         ranges.erase(ranges.begin() + min_index);
-        ranges.erase(ranges.begin() + min_index + 1);
+        ranges.erase(ranges.begin() + min_index);
         --bumps;
     }
 }
