@@ -53,7 +53,7 @@ private:
     std::string pairing_rule_;
     std::unique_ptr<TypedRelation> typed_relation_;
     std::unique_ptr<ACExceptionFinder> ac_exception_finder_;
-    bool test_mode_;
+    double seed_;
     std::vector<ACPairsCollection> ac_pairs_;
     std::vector<RangesCollection> ranges_;
     model::INumericType::NumericBinop binop_pointer_ = nullptr;
@@ -93,9 +93,10 @@ public:
         size_t bumps_limit = 5;       /* to remove limit: pass value of 0 */
         size_t iterations_limit = 10; /* limit for iterations in Sampling() */
         std::string pairing_rule = "trivial";
+        double seed = 0;
     };
 
-    explicit ACAlgorithm(Config const& config, bool test_mode = false)
+    explicit ACAlgorithm(Config const& config)
         : LegacyPrimitive(config.data, config.separator, config.has_header,
                           std::vector<std::string_view>()),
           fuzziness_(config.fuzziness),
@@ -106,7 +107,7 @@ public:
           pairing_rule_(config.pairing_rule),
           typed_relation_(TypedRelation::CreateFrom(*input_generator_, true)),
           ac_exception_finder_(std::make_unique<ACExceptionFinder>()),
-          test_mode_(test_mode) {
+          seed_(config.seed) {
         bin_operation_ = InitializeBinop(config.bin_operation);
     }
 
