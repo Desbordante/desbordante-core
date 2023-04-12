@@ -2,7 +2,7 @@
 
 #include <memory>
 
-namespace model {
+namespace algos {
 
 /* Stores pair of values, indexes of values in the table
  * and the result of an arithmetic operation between them */
@@ -51,4 +51,4 @@ public:
     }
 };
 
-}  // namespace model
+}  // namespace algos
