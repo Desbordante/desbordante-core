@@ -5,8 +5,6 @@
 #include <iterator>
 #include <thread>
 
-#include <easylogging++.h>
-
 #include "algorithms/cfd/util/cfd_output_util.h"
 #include "algorithms/cfd/util/set_util.h"
 #include "algorithms/options/equal_nulls/option.h"
@@ -25,10 +23,8 @@ CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
 CFDDiscovery::CFDDiscovery() : CFDDiscovery({kDefaultPhaseName}) {}
 
 void CFDDiscovery::FitInternal(model::IDatasetStream& data_stream) {
-    if (relation_ == nullptr) {
-        relation_ = CFDRelationData::CreateFrom(data_stream, is_null_equal_null_, columns_number_,
-                                                tuples_number_);
-    }
+    relation_ = CFDRelationData::CreateFrom(data_stream, is_null_equal_null_, columns_number_,
+                                            tuples_number_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty .csv file: CFD mining is meaningless.");
@@ -44,13 +40,13 @@ void CFDDiscovery::RegisterOptions() {
     using namespace config::names;
     using namespace config::descriptions;
     using config::Option;
-    unsigned zero = 0;
-    RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, zero});
-    RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, zero});
+
+    RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
+    RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
     RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
 }
 
-[[maybe_unused]] int CFDDiscovery::NrCfds() const {
+int CFDDiscovery::NrCfds() const {
     return (int)cfd_list_.size();
 }
 

@@ -5,26 +5,13 @@
 #include <iostream>
 #include <ostream>
 
+#include <boost/algorithm/string.hpp>
+
 #include "model/cfd.h"
 #include "model/cfd_relation_data.h"
 
 class Output {
 public:
-    template <typename T>
-    static std::string CollectionToString(const T& items, const std::string& join) {
-        bool comma = false;
-        std::string answer;
-        for (const typename T::value_type& item : items) {
-            if (comma) {
-                answer += join;
-            } else {
-                comma = true;
-            }
-            answer += item;
-        }
-        return answer;
-    }
-
     static std::string ItemsetToString(const Itemset& items,
                                        std::shared_ptr<CFDRelationData const> const& db) {
         std::string answer;
@@ -41,7 +28,7 @@ public:
                 parts.push_back(db->GetAttrName(db->GetAttrIndex(item)) + "=" + db->GetValue(item));
             }
         }
-        answer += CollectionToString(parts, ", ");
+        answer += boost::join(parts, ", ");
         answer += ")";
         return answer;
     }

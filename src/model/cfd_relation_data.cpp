@@ -48,7 +48,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
                     it = ptr->second;
                 } else {
                     items.emplace_back(string_row[i], i);
-                    columns_values_dict[(size_t)i].push_back(unique_elems_number);
+                    columns_values_dict[(int)i].push_back(unique_elems_number);
                     item_dictionary[std::make_pair(i, string_row[i])] = unique_elems_number;
                     it = unique_elems_number++;
                 }
@@ -59,7 +59,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         }
 
         std::vector<CFDColumnData> column_data;
-        for (size_t i = 0; i < num_columns; ++i) {
+        for (int i = 0; (size_t)i < num_columns; ++i) {
             auto column = Column(schema.get(), parser.GetColumnName(i), i);
             schema->AppendColumn(std::move(column));
             column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
@@ -88,7 +88,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
     int num_columns = (int)file_input.GetNumberOfColumns();
     std::vector<std::string> line;
     std::vector<int> columns_numbers_list = Range(0, num_columns);
-    int size = columns_numbers_list.size() * c_sample;
+    int size = (int)((double)columns_numbers_list.size() * c_sample);
     Shuffle(columns_numbers_list);
     columns_numbers_list =
             std::vector<int>(columns_numbers_list.begin(), columns_numbers_list.begin() + size);
@@ -173,7 +173,7 @@ std::string CFDRelationData::GetAttrName(int index) const {
 }
 
 int CFDRelationData::GetAttr(const std::string& s) const {
-    for (size_t i = 0; i < GetNumColumns(); i++) {
+    for (int i = 0; (size_t)i < GetNumColumns(); i++) {
         const std::string ai = GetAttrName(i);
         if (ai == s) {
             return i;
@@ -204,8 +204,7 @@ int CFDRelationData::Frequency(int i) const {
 }
 
 int CFDRelationData::GetAttrIndex(int item_index) const {
-    if (item_index > 0) return items_[item_index - 1].attribute;
-    return -1 - item_index;
+    return (item_index > 0) ? items_[item_index - 1].attribute : -1 - item_index;
 }
 
 std::string CFDRelationData::GetStringFormat(char delim) const {
