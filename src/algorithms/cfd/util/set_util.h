@@ -20,13 +20,3 @@ void Shuffle(T& collection, unsigned seed) {
     std::mt19937 gen(seed);
     std::shuffle(collection.begin(), collection.end(), gen);
 }
-
-template <typename T>
-bool Has(const T& collection, std::function<bool(typename T::value_type)> f) {
-    for (const auto& i : collection) {
-        if (f(i)) {
-            return true;
-        }
-    }
-    return false;
-}
