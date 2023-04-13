@@ -16,7 +16,7 @@ typedef int Item;
 typedef std::vector<Item> Itemset;
 typedef std::vector<Item> SimpleTidList;
 typedef std::vector<int> Diffset;
-typedef boost::hash<std::pair<int, std::string> > pairhash;
+typedef boost::hash<std::pair<int, std::string>> pairhash;
 
 struct PartitionTidList {
     PartitionTidList() : sets_number(0) {}
