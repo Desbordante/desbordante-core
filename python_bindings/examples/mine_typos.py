@@ -163,7 +163,7 @@ def main():
     print(CONFIG_STRING)
     print()
 
-    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER)
+    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
     print('Dataset sample:')
     print(df)
     print()

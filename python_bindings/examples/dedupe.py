@@ -25,8 +25,8 @@ def get_1lhs_fds(df, algo_name, algo_config):
     algo = getattr(desb, algo_name)()
     algo.fit(df, **algo_config)
     algo.execute(**algo_config)
-    return sorted((lhs_indices[0], fd.rhs_index) for fd in algo.get_results() if
-                  len(lhs_indices := fd.lhs_indices) == 1)
+    return sorted((lhs_indices[0], fd.rhs_index) for fd in algo.get_fds()
+                  if len(lhs_indices := fd.lhs_indices) == 1)
 
 
 def get_lhs_from_sorted_fds(fds):
@@ -148,7 +148,7 @@ def main():
     setup_pandas_print()
     print(CONFIG_STRING)
 
-    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, dtype=str, index_col=False)
+    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, dtype='string', index_col=False, na_filter=False)
     print('Dataset sample:')
     print(df)
     print(f'Original records: {len(df)}')
