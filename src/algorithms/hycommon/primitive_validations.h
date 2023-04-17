@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 template <typename RawPrimitive>
 class PrimitiveValidations {
@@ -53,4 +53,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

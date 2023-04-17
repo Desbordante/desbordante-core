@@ -8,7 +8,7 @@ class PositionListIndex;
 
 }
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 // Represents a relation as a list of position list indexes. i-th PLI is a PLI built on i-th column
 // of the relation
@@ -22,4 +22,4 @@ using RowsPtr = std::shared_ptr<Rows>;
 // Pair of row numbers
 using IdPairs = std::vector<std::pair<size_t, size_t>>;
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

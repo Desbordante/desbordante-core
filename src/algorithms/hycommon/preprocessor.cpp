@@ -7,9 +7,9 @@
 
 namespace {
 
-std::vector<size_t> SortAndGetMapping(algos::hyfd::PLIs& plis) {
+std::vector<size_t> SortAndGetMapping(algos::hy::PLIs& plis) {
     size_t id = 0;
-    std::vector<std::pair<algos::hyfd::PLIs::value_type, size_t>> plis_sort_ids;
+    std::vector<std::pair<algos::hy::PLIs::value_type, size_t>> plis_sort_ids;
     std::transform(plis.begin(), plis.end(), std::back_inserter(plis_sort_ids),
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
@@ -27,13 +27,13 @@ std::vector<size_t> SortAndGetMapping(algos::hyfd::PLIs& plis) {
     return og_mapping;
 }
 
-algos::hyfd::Columns BuildInvertedPlis(algos::hyfd::PLIs const& plis) {
-    algos::hyfd::Columns inverted_plis;
+algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
+    algos::hy::Columns inverted_plis;
 
     for (auto const& pli : plis) {
         size_t cluster_id = 0;
         std::vector<size_t> current(pli->getRelationSize(),
-                                    algos::hyfd::PLIUtil::kSingletonClusterId);
+                                    algos::hy::PLIUtil::kSingletonClusterId);
         for (const auto& cluster : pli->GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
@@ -45,11 +45,11 @@ algos::hyfd::Columns BuildInvertedPlis(algos::hyfd::PLIs const& plis) {
     return inverted_plis;
 }
 
-algos::hyfd::Rows BuildRecordRepresentation(algos::hyfd::Columns const& inverted_plis) {
+algos::hy::Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
     size_t const num_columns = inverted_plis.size();
     size_t const num_rows = num_columns == 0 ? 0 : inverted_plis.begin()->size();
 
-    algos::hyfd::Rows pli_records(num_rows, std::vector<size_t>(num_columns));
+    algos::hy::Rows pli_records(num_rows, std::vector<size_t>(num_columns));
 
     for (size_t i = 0; i < num_rows; ++i) {
         for (size_t j = 0; j < num_columns; ++j) {
@@ -62,7 +62,7 @@ algos::hyfd::Rows BuildRecordRepresentation(algos::hyfd::Columns const& inverted
 
 }  // namespace
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData* relation) {
     PLIs plis;
@@ -88,4 +88,4 @@ boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
     return mapped_as;
 }
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

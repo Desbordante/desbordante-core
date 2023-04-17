@@ -1,46 +1,20 @@
 #pragma once
-
-#include <memory>
-#include <queue>
-#include <vector>
-
-#include <boost/dynamic_bitset.hpp>
-
-#include "hyfd_config.h"
-#include "structures/non_fds.h"
-#include "types.h"
-#include "util/position_list_index.h"
+#include "hycommon/sampler.h"
+#include "hyfd/structures/non_fd_list.h"
 
 namespace algos::hyfd {
 
 class Sampler {
 private:
-    class Efficiency;
-    double efficiency_threshold_ = HyFDConfig::kEfficiencyThreshold;
-
-    PLIsPtr plis_;
-    RowsPtr compressed_records_;
-    std::priority_queue<Efficiency> efficiency_queue_;
-
-    std::unique_ptr<NonFds> non_fds_;
-
-    void ProcessComparisonSuggestions(IdPairs const& comparison_suggestions);
-    void InitializeEfficiencyQueue();
-
-    void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
-               size_t second_record_id);
-    void RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli);
+    hy::Sampler sampler_;
 
 public:
-    Sampler(PLIsPtr plis, RowsPtr pli_records);
+    Sampler(hy::PLIsPtr plis, hy::RowsPtr pli_records)
+        : sampler_(std::move(plis), std::move(pli_records)) {}
 
-    Sampler(Sampler const& other)               = delete;
-    Sampler(Sampler && other)                   = delete;
-    Sampler& operator=(Sampler const& other)    = delete;
-    Sampler& operator=(Sampler && other)        = delete;
-    ~Sampler();
-
-    NonFDList GetNonFDCandidates(IdPairs const& comparison_suggestions);
+    NonFDList GetNonFDCandidates(hy::IdPairs const& comparison_suggestions) {
+        return sampler_.GetAgreeSets(comparison_suggestions);
+    }
 };
 
 }  // namespace algos::hyfd

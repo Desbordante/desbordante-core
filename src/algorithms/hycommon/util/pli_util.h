@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 class PLIUtil {
 public:
@@ -13,4 +13,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

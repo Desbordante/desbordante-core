@@ -8,7 +8,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-namespace algos {
+namespace algos::hy {
 
 // Builds a cluster's identifier of the agree set provided. Cluster's identifier is a vector
 // of size_t value where ith value of the vector is an identifier of a cluster of ith set
@@ -41,4 +41,4 @@ auto MakeClusterIdentifierToTMap(size_t bucket_size) {
     return std::unordered_map<std::vector<size_t>, T, decltype(kHasher)>(bucket_size, kHasher);
 }
 
-}  // namespace algos
+}  // namespace algos::hy

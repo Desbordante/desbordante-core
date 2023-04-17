@@ -5,7 +5,6 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/hyfd/types.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/raw_fd.h"
 #include "util/position_list_index.h"
