@@ -2,7 +2,7 @@
 
 #include "sampler.h"
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 class Sampler::Efficiency {
 private:
@@ -48,4 +48,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

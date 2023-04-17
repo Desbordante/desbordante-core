@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "primitive_validations.h"
+#include "hycommon/primitive_validations.h"
 #include "raw_fd.h"
 #include "structures/fd_tree.h"
 #include "structures/non_fds.h"
@@ -17,12 +17,12 @@ using LhsPair = fd_tree::LhsPair;
 
 class Validator {
 private:
-    using FDValidations = PrimitiveValidations<RawFD>;
+    using FDValidations = hy::PrimitiveValidations<RawFD>;
 
     std::shared_ptr<fd_tree::FDTree> fds_;
 
-    PLIsPtr plis_;
-    RowsPtr compressed_records_;
+    hy::PLIsPtr plis_;
+    hy::RowsPtr compressed_records_;
 
     unsigned current_level_number_ = 0;
 
@@ -39,13 +39,13 @@ private:
     }
 
 public:
-    Validator(std::shared_ptr<fd_tree::FDTree> fds, PLIsPtr plis,
-              RowsPtr compressed_records) noexcept
+    Validator(std::shared_ptr<fd_tree::FDTree> fds, hy::PLIsPtr plis,
+              hy::RowsPtr compressed_records) noexcept
         : fds_(std::move(fds)),
           plis_(std::move(plis)),
           compressed_records_(std::move(compressed_records)) {}
 
-    IdPairs ValidateAndExtendCandidates();
+    hy::IdPairs ValidateAndExtendCandidates();
 };
 
 }  // namespace algos::hyfd

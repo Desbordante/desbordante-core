@@ -1,10 +1,10 @@
-#include "non_fds.h"
+#include "all_column_combinations.h"
 
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 void AllColumnCombinations::Add(boost::dynamic_bitset<>&& column_set) {
     if (total_ccs_.insert(column_set).second) {
@@ -19,4 +19,4 @@ ColumnCombinationList AllColumnCombinations::MoveOutNewColumnCombinations() {
     return old;
 }
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

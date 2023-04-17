@@ -9,8 +9,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "hyfd/util/pli_util.h"
-#include "hyfd/validator_helpers.h"
+#include "hycommon/util/pli_util.h"
+#include "hycommon/validator_helpers.h"
 #include "hyfd_config.h"
 
 namespace {
@@ -43,17 +43,15 @@ std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
 using LhsRow = std::vector<size_t>;
 using RhsRowId = std::pair<std::vector<size_t>, size_t>;
 
-void ValidateRhss(RhsRowId const& rhs_record, algos::hyfd::Rows const& compressed_records,
-                  size_t row, std::vector<size_t> const& rhs_ranks,
-                  std::unordered_set<size_t>& valid_rhs_ids,
-                  algos::hyfd::IdPairs& comparison_suggestions) {
+void ValidateRhss(RhsRowId const& rhs_record, algos::hy::Rows const& compressed_records, size_t row,
+                  std::vector<size_t> const& rhs_ranks, std::unordered_set<size_t>& valid_rhs_ids,
+                  algos::hy::IdPairs& comparison_suggestions) {
     for (auto it = valid_rhs_ids.begin(); it != valid_rhs_ids.end();) {
         size_t const rhs_column = *it;
         size_t const value = compressed_records[row][rhs_column];
 
-        if (algos::hyfd::PLIUtil::IsSingletonCluster(value) ||
+        if (algos::hy::PLIUtil::IsSingletonCluster(value) ||
             value != rhs_record.first[rhs_ranks[rhs_column]]) {
-
             comparison_suggestions.emplace_back(row, rhs_record.second);
             it = valid_rhs_ids.erase(it);
             if (valid_rhs_ids.empty()) {
@@ -65,7 +63,7 @@ void ValidateRhss(RhsRowId const& rhs_record, algos::hyfd::Rows const& compresse
     }
 }
 
-RhsRowId BuildRhsRowId(algos::hyfd::Rows const& compressed_records,
+RhsRowId BuildRhsRowId(algos::hy::Rows const& compressed_records,
                        boost::dynamic_bitset<> const& rhs,
                        std::vector<size_t> const& rhs_column_ids, size_t row) {
     std::vector<size_t> rhs_sub_cluster(rhs.count());
@@ -76,9 +74,9 @@ RhsRowId BuildRhsRowId(algos::hyfd::Rows const& compressed_records,
     return std::make_pair(std::move(rhs_sub_cluster), row);
 }
 
-boost::dynamic_bitset<> Refine(algos::hyfd::IdPairs& comparison_suggestions,
-                               algos::hyfd::PLIs const& plis,
-                               algos::hyfd::Rows const& compressed_records,
+boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
+                               algos::hy::PLIs const& plis,
+                               algos::hy::Rows const& compressed_records,
                                boost::dynamic_bitset<> const& lhs,
                                boost::dynamic_bitset<> const& rhs, size_t firstAttr) {
     auto valid_rhs_ids = AsSet(rhs);
@@ -86,10 +84,11 @@ boost::dynamic_bitset<> Refine(algos::hyfd::IdPairs& comparison_suggestions,
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
 
     for (auto const& cluster : plis[firstAttr]->GetIndex()) {
-        auto lhs_rhs_map = algos::MakeClusterIdentifierToTMap<RhsRowId>(cluster.size());
+        auto lhs_rhs_map = algos::hy::MakeClusterIdentifierToTMap<RhsRowId>(cluster.size());
 
         for (size_t row : cluster) {
-            auto lhs_row = algos::BuildClustersIdentifier(compressed_records[row], lhs_column_ids);
+            auto lhs_row =
+                    algos::hy::BuildClustersIdentifier(compressed_records[row], lhs_column_ids);
             if (lhs_row.empty()) {
                 continue;
             }
@@ -186,7 +185,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
          attr = rhs.find_next(attr)) {
         for (const auto& cluster : (*plis_)[lhs_attr]->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
-            if (PLIUtil::IsSingletonCluster(cluster_id) ||
+            if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
                 std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {
                     return (*compressed_records_)[id][attr] != cluster_id;
                 })) {
@@ -252,7 +251,7 @@ Validator::FDValidations Validator::ValidateAndExtendSeq(std::vector<LhsPair> co
     return result;
 }
 
-IdPairs Validator::ValidateAndExtendCandidates() {
+algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
     size_t const num_attributes = plis_->size();
 
     std::vector<LhsPair> cur_level_vertices;
@@ -264,7 +263,7 @@ IdPairs Validator::ValidateAndExtendCandidates() {
     }
 
     size_t previous_num_invalid_fds = 0;
-    IdPairs comparison_suggestions;
+    algos::hy::IdPairs comparison_suggestions;
     while (!cur_level_vertices.empty()) {
         auto const result = ValidateAndExtendSeq(cur_level_vertices);
 
@@ -276,10 +275,10 @@ IdPairs Validator::ValidateAndExtendCandidates() {
         }
 
         std::vector<LhsPair> next_level =
-                algos::CollectCurrentChildren(cur_level_vertices, num_attributes);
+                algos::hy::CollectCurrentChildren(cur_level_vertices, num_attributes);
         size_t candidates = AddExtendedCandidatesFromInvalid(
                 next_level, *fds_, result.invalid_instances(), num_attributes);
-        algos::LogLevel(cur_level_vertices, result, candidates, current_level_number_, "FD");
+        algos::hy::LogLevel(cur_level_vertices, result, candidates, current_level_number_, "FD");
 
         size_t const num_invalid_fds = result.invalid_instances().size();
         size_t const num_valid_fds = result.count_validations() - num_invalid_fds;
