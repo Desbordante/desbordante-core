@@ -15,6 +15,8 @@ private:
     void LoadDataInternal(model::IDatasetStream& data_stream) override;
     unsigned long long ExecuteInternal() override;
     void ResetUCCAlgorithmState() override {}
+    void RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
+                      const std::vector<size_t>& og_mapping);
 
 public:
     HyUCC() : UCCAlgorithm({}) {}

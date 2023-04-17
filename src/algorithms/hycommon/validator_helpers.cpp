@@ -1,6 +1,7 @@
 #include "validator_helpers.h"
 
 #include "hyfd/structures/fd_tree_vertex.h"
+#include "ucc/hyucc/structures/ucc_tree_vertex.h"
 #include "util/pli_util.h"
 
 namespace algos::hy {
@@ -45,7 +46,10 @@ std::vector<VertexAndAgreeSet> CollectCurrentChildren(
     return next_level;
 }
 
+using UCCLhsPair = algos::LhsPair;
 using FDLhsPair = algos::hyfd::fd_tree::LhsPair;
+template std::vector<UCCLhsPair> CollectCurrentChildren<UCCLhsPair>(
+        std::vector<UCCLhsPair> const& cur_level_vertices, size_t num_attributes);
 template std::vector<FDLhsPair> CollectCurrentChildren<FDLhsPair>(
         std::vector<FDLhsPair> const& cur_level_vertices, size_t num_attributes);
 
