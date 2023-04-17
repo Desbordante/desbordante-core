@@ -3,6 +3,7 @@
 #include <chrono>
 
 #include "hycommon/types.h"
+#include "inductor.h"
 #include "preprocessor.h"
 #include "sampler.h"
 
@@ -24,6 +25,17 @@ unsigned long long HyUCC::ExecuteInternal() {
     auto const pli_records_shared = std::make_shared<hy::Rows>(std::move(pli_records));
 
     Sampler sampler(plis_shared, pli_records_shared);
+
+    auto ucc_tree = std::make_unique<UCCTree>(relation_->GetNumColumns());
+    Inductor inductor(ucc_tree.get());
+
+    hy::IdPairs comparison_suggestions;
+
+    while (true) {
+        auto non_uccs = sampler.GetNonUCCCandidates(comparison_suggestions);
+
+        inductor.UpdateUCCTree(std::move(non_uccs));
+    }
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
