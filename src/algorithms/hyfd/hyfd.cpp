@@ -10,10 +10,10 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
+#include "algorithms/hycommon/preprocessor.h"
+#include "algorithms/hycommon/util/pli_util.h"
 #include "algorithms/hyfd/inductor.h"
-#include "algorithms/hyfd/preprocessor.h"
 #include "algorithms/hyfd/sampler.h"
-#include "algorithms/hyfd/util/pli_util.h"
 #include "algorithms/hyfd/validator.h"
 
 namespace algos::hyfd {
@@ -21,6 +21,7 @@ namespace algos::hyfd {
 HyFD::HyFD() : PliBasedFDAlgorithm({}) {}
 
 unsigned long long HyFD::ExecuteInternal() {
+    using namespace hy;
     LOG(TRACE) << "Executing";
     auto const start_time = std::chrono::system_clock::now();
 
@@ -65,7 +66,7 @@ void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<size_t>& og_m
     const auto* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
         boost::dynamic_bitset<> mapped_lhs =
-                RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());
+                hy::RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());
         Vertical lhs_v(schema, std::move(mapped_lhs));
 
         size_t const mapped_rhs = og_mapping[rhs];

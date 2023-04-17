@@ -12,12 +12,12 @@ namespace {
 
 class ClusterComparator {
 private:
-    algos::hyfd::Rows* sort_keys_;
+    algos::hy::Rows* sort_keys_;
     size_t comparison_column_1_;
     size_t comparison_column_2_;
 
 public:
-    ClusterComparator(algos::hyfd::Rows* sort_keys, size_t comparison_column_1,
+    ClusterComparator(algos::hy::Rows* sort_keys, size_t comparison_column_1,
                       size_t comparison_column_2) noexcept
         : sort_keys_(sort_keys),
           comparison_column_1_(comparison_column_1),
@@ -67,13 +67,13 @@ public:
 
 }  // namespace
 
-namespace algos::hyfd {
+namespace algos::hy {
 
 void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli) {
     efficiency.IncrementWindow();
 
-    size_t const num_attributes = non_fds_->NumAttributes();
-    size_t const prev_num_non_fds = non_fds_->Count();
+    size_t const num_attributes = agree_sets_->NumAttributes();
+    size_t const prev_num_agree_sets = agree_sets_->Count();
 
     unsigned comparisons = 0;
     unsigned const window = efficiency.GetWindow();
@@ -85,13 +85,13 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
 
             boost::dynamic_bitset<> equal_attrs(num_attributes);
             Match(equal_attrs, pivot_id, partner_id);
-            non_fds_->Add(std::move(equal_attrs));
+            agree_sets_->Add(std::move(equal_attrs));
 
             comparisons++;
         }
     }
 
-    size_t const num_new_violations = non_fds_->Count() - prev_num_non_fds;
+    size_t const num_new_violations = agree_sets_->Count() - prev_num_agree_sets;
 
     efficiency.SetViolations(num_new_violations);
     efficiency.SetComparisons(comparisons);
@@ -104,7 +104,7 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
         boost::dynamic_bitset<> equal_attrs(num_attributes);
         Match(equal_attrs, first_id, second_id);
 
-        non_fds_->Add(std::move(equal_attrs));
+        agree_sets_->Add(std::move(equal_attrs));
     }
 }
 
@@ -134,12 +134,12 @@ void Sampler::InitializeEfficiencyQueue() {
         }
     }
     if (!efficiency_queue_.empty()) {
-        efficiency_threshold_ = std::min(HyFDConfig::kEfficiencyThreshold,
-                                         efficiency_queue_.top().CalcEfficiency() / 2);
+        efficiency_threshold_ =
+                std::min(kEfficiencyThreshold, efficiency_queue_.top().CalcEfficiency() / 2);
     }
 }
 
-NonFDList Sampler::GetNonFDCandidates(IdPairs const& comparison_suggestions) {
+ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison_suggestions) {
     ProcessComparisonSuggestions(comparison_suggestions);
 
     if (efficiency_queue_.empty()) {
@@ -163,7 +163,7 @@ NonFDList Sampler::GetNonFDCandidates(IdPairs const& comparison_suggestions) {
         }
     }
 
-    return non_fds_->MoveOutNewColumnCombinations();
+    return agree_sets_->MoveOutNewColumnCombinations();
 }
 
 void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
@@ -184,8 +184,8 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
 Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records)
     : plis_(std::move(plis)),
       compressed_records_(std::move(pli_records)),
-      non_fds_(std::make_unique<NonFds>(plis_->size())) {}
+      agree_sets_(std::make_unique<AllColumnCombinations>(plis_->size())) {}
 
 Sampler::~Sampler() = default;
 
-}  // namespace algos::hyfd
+}  // namespace algos::hy

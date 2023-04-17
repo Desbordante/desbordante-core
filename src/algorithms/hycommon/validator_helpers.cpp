@@ -1,9 +1,9 @@
 #include "validator_helpers.h"
 
 #include "hyfd/structures/fd_tree_vertex.h"
-#include "hyfd/util/pli_util.h"
+#include "util/pli_util.h"
 
-namespace algos {
+namespace algos::hy {
 
 std::vector<size_t> BuildClustersIdentifier(std::vector<size_t> const& compressed_record,
                                             std::vector<size_t> const& agree_set) {
@@ -12,7 +12,7 @@ std::vector<size_t> BuildClustersIdentifier(std::vector<size_t> const& compresse
     for (size_t attr : agree_set) {
         size_t const cluster_id = compressed_record[attr];
 
-        if (!algos::hyfd::PLIUtil::IsSingletonCluster(cluster_id)) {
+        if (!PLIUtil::IsSingletonCluster(cluster_id)) {
             sub_cluster.push_back(cluster_id);
         } else {
             return {};
@@ -49,4 +49,4 @@ using FDLhsPair = algos::hyfd::fd_tree::LhsPair;
 template std::vector<FDLhsPair> CollectCurrentChildren<FDLhsPair>(
         std::vector<FDLhsPair> const& cur_level_vertices, size_t num_attributes);
 
-}  // namespace algos
+}  // namespace algos::hy
