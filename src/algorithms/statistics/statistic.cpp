@@ -112,6 +112,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(geometric_mean, "geometric_mean");
     try_add_stat(mean_ad, "mean_ad");
     try_add_stat(median, "median");
+    try_add_stat(median_ad, "median_ad");
 
     return res;
 }

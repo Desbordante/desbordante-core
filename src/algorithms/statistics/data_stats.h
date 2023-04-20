@@ -91,6 +91,8 @@ public:
     Statistic GetMeanAD(size_t index) const;
     // Returns median of the column if it's numeric.
     Statistic GetMedian(size_t index) const;
+    // Returns meadian absolute deviation in the column if it's numeric.
+    Statistic GetMedianAD(size_t index) const;
 
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;

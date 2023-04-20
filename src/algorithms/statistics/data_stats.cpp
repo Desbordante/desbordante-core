@@ -457,6 +457,36 @@ Statistic DataStats::GetMedian(size_t index) const {
     return Statistic(median, &double_type, false);
 }
 
+Statistic DataStats::GetMedianAD(size_t index) const {
+    if (all_stats_[index].median_ad.HasValue()) {
+        return all_stats_[index].median_ad;
+    }
+    const mo::TypedColumnData& col = col_data_[index];
+    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    if (!col.IsNumeric()) return {};
+
+    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    std::byte* median = MedianOfNumericVector(data, type);
+    mo::DoubleType double_type;
+    std::byte* temp;
+
+    std::vector<const std::byte*> res;
+    res.reserve(data.size());
+
+    for (const std::byte* x : data) {
+        temp = mo::DoubleType::MakeFrom(x, col.GetType());
+        double_type.Sub(temp, median, temp);
+        double_type.Abs(temp, temp);
+        res.push_back(temp);
+    }
+
+    std::byte* median_ad = MedianOfNumericVector(res, double_type);
+    double_type.DeallocateContainer(res);
+    double_type.Free(median);
+
+    return Statistic(median_ad, &double_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
@@ -478,6 +508,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].geometric_mean = GetGeometricMean(index);
             all_stats_[index].mean_ad = GetMeanAD(index);
             all_stats_[index].median = GetMedian(index);
+            all_stats_[index].median_ad = GetMedianAD(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
