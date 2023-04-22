@@ -245,7 +245,7 @@ bool DataStats::IsCategorical(size_t index, size_t quantity) {
     return this->Distinct(index) <= quantity;
 }
 
-std::vector<const std::byte*> DataStats::DeleteNullAndEmpties(size_t index) {
+std::vector<const std::byte*> DataStats::DeleteNullAndEmpties(size_t index) const {
     const mo::TypedColumnData& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kNull || type_id == +mo::TypeId::kEmpty ||
