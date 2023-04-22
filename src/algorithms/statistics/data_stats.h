@@ -74,7 +74,7 @@ public:
     // Returns quantile of the column if it's type is comparable.
     Statistic GetQuantile(double part, size_t index, bool calc_all = false);
     // Deletes null and empty values in the column.
-    std::vector<const std::byte*> DeleteNullAndEmpties(size_t index);
+    std::vector<const std::byte*> DeleteNullAndEmpties(size_t index) const;
     // Returns number of zeros in the column if it's numeric.
     Statistic GetNumberOfZeros(size_t index) const;
     // Returns number of negative numbers in the column if it's numeric.
