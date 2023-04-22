@@ -54,6 +54,18 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetSumOfSquares(0).HasValue());
     EXPECT_FALSE(stats.GetGeometricMean(0).HasValue());
     EXPECT_FALSE(stats.GetMeanAD(0).HasValue());
+    EXPECT_FALSE(stats.GetMedian(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetMedian) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto test = [&stats = *stats_ptr](size_t index) {
+        algos::Statistic median_stat = stats.GetMedian(index);
+        mo::Double median = mo::Type::GetValue<mo::Double>(median_stat.GetData());
+        return median;
+    };
+    EXPECT_DOUBLE_EQ(test(8), 35.);
+    EXPECT_DOUBLE_EQ(test(9), 25.875);
 }
 
 TEST(TestDataStats, TestMeanAD) {
