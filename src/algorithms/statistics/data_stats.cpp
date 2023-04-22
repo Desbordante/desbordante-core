@@ -411,6 +411,52 @@ Statistic DataStats::GetMeanAD(size_t index) const {
     return Statistic(res, &double_type, false);
 }
 
+std::byte* DataStats::MedianOfNumericVector(const std::vector<const std::byte*>& data,
+                                            const mo::INumericType& type) {
+    std::vector<const std::byte*> data_copy = data;
+
+    size_t size = data_copy.size();
+    if (data_copy.empty()) return nullptr;
+
+    auto mid = data_copy.begin() + size / 2;
+
+    std::nth_element(data_copy.begin(), mid, data_copy.end(), type.GetComparator());
+
+    if (size % 2 != 0) {
+        return mo::DoubleType::MakeFrom(*mid, type);
+    } else {
+        mo::DoubleType double_type;
+        std::byte* two = double_type.MakeValue(2);
+        std::byte* res = type.Clone(*mid);
+        std::byte* temp;
+        auto prev_mid = std::prev(mid);
+
+        std::nth_element(data_copy.begin(), prev_mid, data_copy.end(), type.GetComparator());
+        type.Add(*prev_mid, res, res);
+        temp = res;
+        res = mo::DoubleType::MakeFrom(res, type);
+        double_type.Div(res, two, res);
+
+        double_type.Free(two);
+        type.Free(temp);
+
+        return res;
+    }
+}
+
+Statistic DataStats::GetMedian(size_t index) const {
+    if (all_stats_[index].median.HasValue()) return all_stats_[index].median;
+    const mo::TypedColumnData& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+
+    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    mo::DoubleType double_type;
+    std::byte* median = MedianOfNumericVector(data, type);
+
+    return Statistic(median, &double_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
@@ -431,6 +477,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].sum_of_squares = GetSumOfSquares(index);
             all_stats_[index].geometric_mean = GetGeometricMean(index);
             all_stats_[index].mean_ad = GetMeanAD(index);
+            all_stats_[index].median = GetMedian(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

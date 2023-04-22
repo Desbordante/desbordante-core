@@ -27,6 +27,10 @@ class DataStats : public Algorithm {
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
+    // Returns median value for numeric vector
+    static std::byte* MedianOfNumericVector(const std::vector<const std::byte*>& data,
+                                            const model::INumericType& type);
+
 protected:
     void LoadDataInternal(model::IDatasetStream& data_stream) final;
     void MakeExecuteOptsAvailable() final;
@@ -85,6 +89,8 @@ public:
     Statistic GetGeometricMean(size_t index) const;
     // Returns mean absolute deviation if it's numeric.
     Statistic GetMeanAD(size_t index) const;
+    // Returns median of the column if it's numeric.
+    Statistic GetMedian(size_t index) const;
 
     const ColumnStats& GetAllStats(size_t index) const;
     const std::vector<ColumnStats>& GetAllStats() const;
