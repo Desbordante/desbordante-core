@@ -58,6 +58,13 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetMedianAD(0).HasValue());
 }
 
+TEST(TestDataStats, TestGetNumberOfNulls) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    algos::Statistic num_nulls_stat = stats_ptr->GetNumNulls(0);
+    size_t num_nulls = mo::Type::GetValue<mo::Int>(num_nulls_stat.GetData());
+    EXPECT_EQ(num_nulls, 5);
+}
+
 TEST(TestDataStats, TestGetColumnsWithUniqueValues) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
     std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
