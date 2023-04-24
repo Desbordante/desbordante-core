@@ -489,6 +489,15 @@ Statistic DataStats::GetMedianAD(size_t index) const {
     return Statistic(median_ad, &double_type, false);
 }
 
+Statistic DataStats::GetNumNulls(size_t index) const {
+    if (all_stats_[index].num_nulls.HasValue()) return all_stats_[index].num_nulls;
+    const mo::TypedColumnData& col = col_data_[index];
+    size_t count = col.GetNumNulls();
+    mo::IntType int_type;
+
+    return Statistic(int_type.MakeValue(count), &int_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -516,6 +525,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].mean_ad = GetMeanAD(index);
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
+            all_stats_[index].num_nulls = GetNumNulls(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
