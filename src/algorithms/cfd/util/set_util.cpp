@@ -1,33 +1,26 @@
+#include "set_util.h"
+
 #include <algorithm>
 #include <numeric>
 
-// see ../algorithms/cfd/LICENSE
+// see algorithms/cfd/LICENSE
 
-#include "algorithms/cfd/util/set_util.h"
+namespace algos::cfd {
 
+// Returns a list that looks like this - min, min + step, min + 2 * step, ... max(not included)
+// Size of this list is operations_count
 std::vector<int> Range(int min, int max, int step) {
-    std::vector<int> res;
-    res.reserve((max - min) / step);
-    for (int i = min; i != max; i += step) {
-        res.push_back(i);
-    }
+    int operations_count = (max - min) % step == 0 ? (max - min) / step : ((max - min) / step) + 1;
+    std::vector<int> res(operations_count);
+    min -= step;
+    std::generate(res.begin(), res.end(), [&min, step] { return min += step; });
     return res;
 }
 
-// Возвращает список вида 0 1 2 ... размера max
-std::vector<int> Iota(int max) {
+// Returns list that looks like this - 0 1 2 ... Size of this list is max variable.
+std::vector<int> Iota(unsigned max) {
     std::vector<int> iotas(max);
     std::iota(iotas.begin(), iotas.end(), 0);
     return iotas;
 }
-
-void SubsetsLengthK(const int size, const int k, std::vector<std::bitset<32>>& subs) {
-    const int max_b = pow(2, size);
-    int x = pow(2, k) - 1;
-    while (x < max_b) {
-        subs.push_back(std::bitset<32>(x));
-        int u = x & (-x);
-        int v = x + u;
-        x = v + (((v ^ x) / u) >> 2);
-    }
-}
+}  // namespace algos::cfd

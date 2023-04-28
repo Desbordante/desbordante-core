@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
-#include "cfd_relation_data.h"
-#include "csv_parser.h"
+#include "algorithms/cfd/structures/cfd_relation_data.h"
 #include "datasets.h"
+#include "parser/csv_parser.h"
 
 namespace tests {
 
@@ -21,8 +21,8 @@ static fs::path ConstructPath(std::string_view dataset) {
 TEST(TestCFDRelationData, TennisDataSet) {
     std::string_view tennis_path = "tennis.csv";
     CSVParser parser{ConstructPath(tennis_path), ',', true};
-    std::shared_ptr<CFDRelationData> relation_ =
-            CFDRelationData::CreateFrom(parser, true, 0, 0, 1, 1);
+    std::shared_ptr<algos::cfd::CFDRelationData> relation_ =
+            algos::cfd::CFDRelationData::CreateFrom(parser, true, 0, 0, 1, 1);
 
     std::string tennis_string =
             "outlook temp humidity windy play\n"
@@ -53,8 +53,8 @@ TEST(TestCFDRelationData, TennisDataSet) {
     ASSERT_EQ(relation_->GetStringFormat(my_tidlist), tennis_partial_string);
 
     CSVParser new_parser{ConstructPath(tennis_path), ',', true};
-    std::shared_ptr<CFDRelationData> new_relation_ =
-            CFDRelationData::CreateFrom(new_parser, true, 3, 4, 1, 1);
+    std::shared_ptr<algos::cfd::CFDRelationData> new_relation_ =
+            algos::cfd::CFDRelationData::CreateFrom(new_parser, true, 3, 4, 1, 1);
 
     tennis_string =
             "outlook temp humidity\n"

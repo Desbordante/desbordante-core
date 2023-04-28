@@ -1,14 +1,16 @@
 #pragma once
 
-// see ../algorithms/cfd/LICENSE
-
 #include <iostream>
 #include <ostream>
 
 #include <boost/algorithm/string.hpp>
 
-#include "model/cfd.h"
-#include "model/cfd_relation_data.h"
+#include "algorithms/cfd/structures/cfd_relation_data.h"
+#include "algorithms/cfd/structures/cfd_types.h"
+
+// see algorithms/cfd/LICENSE
+
+namespace algos::cfd {
 
 class Output {
 public:
@@ -20,7 +22,6 @@ public:
         for (uint ix = 0; ix < items.size(); ix++) {
             int item = items[ix];
             if (item < 0) {
-                // parts.push_back(db.GetSchema()->GetColumn(-1-item)->GetName());
                 parts.push_back(db->GetAttrName(-1 - item));
             } else if (item == 0) {
                 parts.push_back(db->GetAttrName((int)ix) + "=N/A");
@@ -53,10 +54,10 @@ public:
         answer += " => ";
         if (rhs < 0) {
             answer += db->GetAttrName(-1 - rhs);
-            // out << db.GetSchema()->GetColumn(-1-rhs)->GetName();
         } else {
             answer += (db->GetAttrName(db->GetAttrIndex(rhs)) + "=" + db->GetValue(rhs));
         }
         return answer;
     }
 };
+}  // namespace algos::cfd

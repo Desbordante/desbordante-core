@@ -3,9 +3,11 @@
 #include <utility>
 #include <vector>
 
-// see ./LICENSE
-
 #include "model/abstract_column_data.h"
+
+// see algorithms/cfd/LICENSE
+
+namespace algos::cfd {
 
 // Column presentation class for CFDRelationData.
 class CFDColumnData : model::AbstractColumnData {
@@ -25,3 +27,4 @@ public:
         return "Cfd data for " + column_->ToString();
     }
 };
+}  // namespace algos::cfd
