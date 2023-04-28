@@ -1,42 +1,42 @@
-//
-// Created by mikhail on 14.03.23.
-//
-#include <iterator>
-#include <thread>
-
 #include "algorithms/cfd/fd_first_algorithm.h"
+
+#include <iterator>
 
 #include <boost/unordered_map.hpp>
 #include <easylogging++.h>
 
-#include "algorithms/cfd/partition_table.h"
+#include "algorithms/cfd/util/partition_tidlist_util.h"
+#include "algorithms/cfd/util/partition_util.h"
 #include "algorithms/cfd/util/set_util.h"
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "algorithms/cfd/util/tidlist_util.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/names_and_descriptions.h"
 
-namespace algos {
+// see algorithms/cfd/LICENSE
+
+namespace algos::cfd {
 
 FDFirstAlgorithm::FDFirstAlgorithm(std::vector<std::string_view> phase_names)
     : CFDDiscovery(std::move(phase_names)) {
-    using namespace config::names;
+    using namespace util::config::names;
 
     RegisterOptions();
     MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
-    using namespace config::names;
+    using namespace util::config::names;
 
     RegisterOptions();
-    MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber , kCfdColumnsNumber});
+    MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
-    algos::Substrategy default_val = Substrategy::dfs;
+    Substrategy default_val = Substrategy::dfs;
     RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
     RegisterOption(Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
     RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 0u});
@@ -56,10 +56,10 @@ unsigned long long FDFirstAlgorithm::ExecuteInternal() {
     max_cfd_size_ = max_lhs_ + 1;
     CheckForIncorrectInput();
     auto start_time = std::chrono::system_clock::now();
-    FdsFirstDFS(min_supp_, max_cfd_size_, substrategy_, min_conf_);
+    FdsFirstDFS();
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    long long apriori_millis = elapsed_milliseconds.count();
+    unsigned long long apriori_millis = elapsed_milliseconds.count();
     LOG(INFO) << "> CFD COUNT: " << cfd_list_.size();
 
     return apriori_millis;
@@ -67,21 +67,18 @@ unsigned long long FDFirstAlgorithm::ExecuteInternal() {
 
 void FDFirstAlgorithm::CheckForIncorrectInput() const {
     if (min_supp_ < 1) {
-        throw std::invalid_argument(
-                "[ERROR] Illegal Support value: \"" + std::to_string(min_supp_) +
-                "\"" + " is less than 1");
+        throw std::invalid_argument("[ERROR] Illegal Support value: \"" +
+                                    std::to_string(min_supp_) + "\"" + " is less than 1");
     }
 
     if (min_conf_ < 0 || min_conf_ > 1) {
-        throw std::invalid_argument(
-                "[ERROR] Illegal Confidence value: \"" + std::to_string(min_conf_) +
-                "\"" + " not in [0,1]");
+        throw std::invalid_argument("[ERROR] Illegal Confidence value: \"" +
+                                    std::to_string(min_conf_) + "\"" + " not in [0,1]");
     }
 
     if (max_cfd_size_ < 2) {
-        throw std::invalid_argument(
-                "[ERROR] Illegal Max size value: \"" + std::to_string(max_cfd_size_) +
-                "\"" + " is less than 1");
+        throw std::invalid_argument("[ERROR] Illegal Max size value: \"" +
+                                    std::to_string(max_cfd_size_) + "\"" + " is less than 1");
     }
 
     if (columns_number_ != 0 && tuples_number_ == 0) {
@@ -89,167 +86,183 @@ void FDFirstAlgorithm::CheckForIncorrectInput() const {
                 "[ERROR] Illegal columns_number and tuples_number values: columns_number is " +
                 std::to_string(columns_number_) + " while tuples_number is 0");
     }
+
     if (tuples_number_ != 0 && columns_number_ == 0) {
         throw std::invalid_argument(
                 "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
                 std::to_string(tuples_number_) + " while columnes_number is 0");
     }
+
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
-        throw std::invalid_argument(
-                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) +
-                " is not in [1, " + std::to_string(tuples_number_) + "]");
+        throw std::invalid_argument("[ERROR] Illegal Support value : " + std::to_string(min_supp_) +
+                                    " is not in [1, " + std::to_string(tuples_number_) + "]");
     }
 }
 
 void FDFirstAlgorithm::MakeExecuteOptsAvailable() {
-    using namespace config::names;
+    using namespace util::config::names;
 
-    MakeOptionsAvailable({kCfdMinimumSupport, kCfdMinimumConfidence, kCfdMaximumLhs, kCfdSubstrategy});
+    MakeOptionsAvailable(
+            {kCfdMinimumSupport, kCfdMinimumConfidence, kCfdMaximumLhs, kCfdSubstrategy});
 }
 
 bool FDFirstAlgorithm::Precedes(const Itemset& a, const Itemset& b) {
-    // Corrected mistake
     if (a.size() > b.size() || a == b) return false;
     Itemset pattern(relation_->GetAttrsNumber());
     for (int v : b) {
-        if (v > 0) pattern[relation_->GetAttrIndex(v)] = v;
-        else pattern[-1 - v] = v;
+        if (v > 0) {
+            pattern[relation_->GetAttrIndex(v)] = v;
+        } else {
+            pattern[-1 - v] = v;
+        }
     }
     for (int i : a) {
         if (i > 0) {
-            int bv = pattern[relation_->GetAttrIndex(i)];
-            if (bv != i) {
-                return false;
-            }
-        } else {
-            if (pattern[-1 - i] == 0) return false;
+            if (pattern[relation_->GetAttrIndex(i)] != i) return false;
+        } else if (pattern[-1 - i] == 0) {
+            return false;
         }
     }
     return true;
 }
 
-bool FDFirstAlgorithm::IsConstRule(const PartitionTidList& items, int rhs_a) {
+bool FDFirstAlgorithm::IsConstRule(const PartitionTIdList& items, int rhs_a) {
     int rhs_value;
     bool first = true;
     for (size_t pos_index = 0; pos_index <= items.tids.size(); pos_index++) {
-        if (pos_index == items.tids.size() || items.tids[pos_index] == PartitionTidList::SEP) {
-            auto tup = relation_->GetRow(items.tids[pos_index - 1]);
-            if (first) {
-                first = false;
-                rhs_value = tup[rhs_a];
+        if (pos_index != items.tids.size() && items.tids[pos_index] != PartitionTIdList::SEP) {
+            continue;
+        }
 
-            } else if (tup[rhs_a] != rhs_value) {
-                // Corrected else / if () -> else if ()
-                return false;
-            }
+        const auto tup = relation_->GetRow(items.tids[pos_index - 1]);
+        if (first) {
+            first = false;
+            rhs_value = tup[rhs_a];
+        } else if (tup[rhs_a] != rhs_value) {
+            return false;
         }
     }
     return true;
 }
 
+void FDFirstAlgorithm::MineFD(const MinerNode<PartitionTIdList>& inode, const Itemset& lhs,
+                              int rhs) {
+    if (inode.tids.sets_number == 1 || IsConstRule(inode.tids, -1 - rhs)) return;
+    const auto stored_sub = store_.find(lhs);
+    if (stored_sub == store_.end()) {
+        return;
+    }
+    bool lhs_gen = true;
+    if (free_itemsets_.find(lhs) == free_itemsets_.end()) {
+        lhs_gen = false;
+    }
+    if (rules_.find(rhs) != rules_.end()) {
+        for (const auto& sub_rule : rules_[rhs]) {
+            if (!std::any_of(sub_rule.begin(), sub_rule.end(),
+                             [](int si) -> bool { return si < 0; }))
+                continue;
+            if (Precedes(sub_rule, lhs)) {
+                lhs_gen = false;
+            }
+        }
+    }
+    if (lhs_gen) {
+        // Here the confidence computing method from the paper is used
+        double e = stored_sub->second.PartitionError(inode.tids);
+        double conf = 1 - (e / TIdUtil::Support(stored_sub->second));
+        if (conf >= min_conf_) {
+            cfd_list_.emplace_back(lhs, rhs);
+        }
+        if (conf >= 1) {
+            rules_[rhs].push_back(lhs);
+        }
+    }
+}
+
 // Initializing all objects that will be used in algorithm
-void FDFirstAlgorithm::FdsFirstDFS(int min_supp, unsigned max_lhs_size, Substrategy ss, double min_conf) {
-    min_supp_ = min_supp;
-    min_conf_ = min_conf;
-    max_cfd_size_ = max_lhs_size;
-    all_attrs_ = Range(-(int)relation_->GetAttrsNumber(), 0);
-    PartitionTable::database_row_number_ = (int)relation_->Size();
-    std::vector<MinerNode<PartitionTidList> > items = GetPartitionSingletons();
+void FDFirstAlgorithm::FdsFirstDFS() {
+    all_attrs_ = Range(-static_cast<int>(relation_->GetAttrsNumber()), 0);
+    PIdListMiners items = GetPartitionSingletons();
     for (auto& a : items) {
-        a.cands = all_attrs_;
-        free_map_[std::make_pair(support(a.tids),a.tids.sets_number)].push_back(Itemset{a.item});
+        a.candidates = all_attrs_;
+        free_map_[std::make_pair(TIdUtil::Support(a.tids), a.tids.sets_number)].push_back(
+                Itemset{a.item});
         free_itemsets_.insert(Itemset{a.item});
     }
     cand_store_ = PrefixTree<Itemset, Itemset>();
-    store_[Itemset()] = Convert(Iota((int)relation_->Size()));
+    store_[Itemset()] = PartitionTIdList(Iota(relation_->Size()));
     cand_store_.Insert(Itemset(), all_attrs_);
-    FdsFirstDFS(Itemset(), items, ss);
+    FdsFirstDFS(Itemset(), items, substrategy_);
 }
 
-void FDFirstAlgorithm::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<PartitionTidList> > &items,
-                                   Substrategy ss) {
-    for (int ix = items.size() - 1; ix >= 0; ix--) {
-        MinerNode<PartitionTidList>& inode = items[ix];
-        const Itemset iset = Join(prefix, inode.item);
-
-        auto insect = Intersection(iset, inode.cands);
-        for (int out : insect) {
-            Itemset sub = Subset(iset, out);
-            if (inode.tids.sets_number == 1 || IsConstRule(inode.tids, -1 - out)) continue;
-            auto stored_sub = store_.find(sub);
+std::pair<std::vector<const PartitionTIdList*>, FDFirstAlgorithm::PIdListMiners>
+FDFirstAlgorithm::ExpandMiningFd(const MinerNode<PartitionTIdList>& inode, int ix,
+                                 const Itemset& iset, const PIdListMiners& items) const {
+    const auto node_attrs = relation_->GetAttrVector(iset);
+    std::vector<const PartitionTIdList*> expands;
+    PIdListMiners tmp_suffix;
+    for (int jx = static_cast<int>(items.size()) - 1; jx > ix; jx--) {
+        const auto& jnode = items[jx];
+        if (std::binary_search(node_attrs.begin(), node_attrs.end(),
+                               relation_->GetAttrIndex(jnode.item)))
+            continue;
+        const Itemset newset = Join(iset, jnode.item);
+        auto c = ConstructIntersection(inode.candidates, jnode.candidates);
+        for (int zz : newset) {
+            const auto zsub = ConstructSubset(newset, zz);
+            const auto stored_sub = store_.find(zsub);
             if (stored_sub == store_.end()) {
-                continue;
+                c.clear();
+                break;
             }
-            bool lhs_gen = true;
-            if (free_itemsets_.find(sub) == free_itemsets_.end()) {
-                lhs_gen = false;
-            }
-            if (rules_.find(out) != rules_.end()) {
-                for (const auto& sub_rule : rules_[out]) {
-                    // if (!Has(sub_rule, [](int si) -> bool { return si < 0; })) continue;
-                    if (!std::any_of(sub_rule.begin(), sub_rule.end(), [](int si) -> bool { return si < 0; })) continue;
-                    if (Precedes(sub_rule, sub)) {
-                        lhs_gen = false;
-                    }
-                }
-            }
-            if (lhs_gen) {
-                // Here the confidence computing method from the paper is used
-                double e = PartitionTable::PartitionError(stored_sub->second, inode.tids);
-                double conf = 1 - (e / support(stored_sub->second));
-                if (conf >= min_conf_) {
-                    cfd_list_.emplace_back(sub, out);
-                }
-                if (conf >= 1) {
-                    rules_[out].push_back(sub);
-                }
-            }
-            if (ss == +Substrategy::dfs)
-                MinePatternsDFS(sub, out, inode.tids);
-            else if (ss == +Substrategy::bfs)
-                MinePatternsBFS(sub, out, inode.tids);
+            const Itemset& sub_cands = *cand_store_.Find(zsub);
+            c = ConstructIntersection(c, sub_cands);
         }
-        if (inode.cands.empty()) continue;
+        if (!c.empty()) {
+            expands.emplace_back(&items[jx].tids);
+            auto new_node = MinerNode<PartitionTIdList>(items[jx].item);
+            new_node.candidates = c;
+            new_node.prefix = ConstructSubset(newset, new_node.item);
+            tmp_suffix.push_back(std::move(new_node));
+        }
+    }
+    return {expands, tmp_suffix};
+}
+
+void FDFirstAlgorithm::FdsFirstDFS(const Itemset& prefix, const PIdListMiners& items,
+                                   Substrategy ss) {
+    for (int ix = static_cast<int>(items.size()) - 1; ix >= 0; ix--) {
+        const MinerNode<PartitionTIdList>& inode = items[ix];
+        const Itemset iset = Join(prefix, inode.item);
+        const auto insect = ConstructIntersection(iset, inode.candidates);
+        for (int out : insect) {
+            const Itemset sub = ConstructSubset(iset, out);
+            MineFD(inode, sub, out);
+
+            if (ss == +Substrategy::dfs) {
+                MinePatternsDFS(sub, out, inode.tids);
+            } else if (ss == +Substrategy::bfs) {
+                MinePatternsBFS(sub, out, inode.tids);
+            }
+        }
+
+        if (inode.candidates.empty()) continue;
         if (iset.size() == max_cfd_size_) continue;
         store_[iset] = inode.tids;
-        cand_store_.Insert(iset, inode.cands);
-        auto node_attrs = relation_->GetAttrVector(iset);
-        std::vector<const PartitionTidList*> expands;
-        std::vector<MinerNode<PartitionTidList> > tmp_suffix;
-        for (int jx = (int)items.size() - 1; jx > ix; jx--) {
-            const auto &jnode = items[jx];
-            if (std::binary_search(node_attrs.begin(), node_attrs.end(),
-                                   relation_->GetAttrIndex(jnode.item))) continue;
-            Itemset newset = Join(iset, jnode.item);
-            auto c = Intersection(inode.cands, jnode.cands);
-            for (int zz : newset) {
-                auto zsub = Subset(newset, zz);
-                auto stored_sub = store_.find(zsub);
-                if (stored_sub == store_.end()) {
-                    c.clear();
-                    break;
-                }
-                const Itemset & sub_cands = *cand_store_.Find(zsub);
-                c = Intersection(c, sub_cands);
-            }
-            if (c.size()) {
-                expands.push_back(&items[jx].tids);
-                tmp_suffix.emplace_back(items[jx].item);
-                tmp_suffix.back().cands = c;
-                tmp_suffix.back().prefix = Subset(newset, tmp_suffix.back().item);
-            }
-        }
-        const auto exps = PartitionTable::Intersection(items[ix].tids, expands);
-        std::vector<MinerNode<PartitionTidList> > suffix;
+        cand_store_.Insert(iset, inode.candidates);
 
+        const auto [expands, tmp_suffix] = ExpandMiningFd(inode, ix, iset, items);
+
+        const auto exps = PartitionTIdListUtil::ConstructIntersection(items[ix].tids, expands);
+        PIdListMiners suffix;
         for (size_t e = 0; e < exps.size(); e++) {
             bool gen = true;
-            auto new_set = Join(tmp_suffix[e].prefix, tmp_suffix[e].item);
-            auto sp = std::make_pair(support(exps[e]), exps[e].sets_number);
-            auto free_map_elem = free_map_.find(sp);
+            const auto new_set = Join(tmp_suffix[e].prefix, tmp_suffix[e].item);
+            const auto sp = std::make_pair(TIdUtil::Support(exps[e]), exps[e].sets_number);
+            const auto free_map_elem = free_map_.find(sp);
             if (free_map_elem != free_map_.end()) {
-                auto free_cands = free_map_elem->second;
-                for (const auto &sub_cand : free_cands) {
+                const auto free_cands = free_map_elem->second;
+                for (const auto& sub_cand : free_cands) {
                     if (IsSubsetOf(sub_cand, new_set)) {
                         gen = false;
                         break;
@@ -260,12 +273,13 @@ void FDFirstAlgorithm::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<
                 free_map_[sp].push_back(new_set);
                 free_itemsets_.insert(new_set);
             }
-            suffix.emplace_back(tmp_suffix[e].item, exps[e]);
-            suffix.back().cands = tmp_suffix[e].cands;
-            suffix.back().prefix = tmp_suffix[e].prefix;
+            auto new_node = MinerNode<PartitionTIdList>(tmp_suffix[e].item, exps[e]);
+            new_node.candidates = tmp_suffix[e].candidates;
+            new_node.prefix = tmp_suffix[e].prefix;
+            suffix.push_back(std::move(new_node));
         }
-        if (suffix.size()) {
-            std::sort(suffix.begin(), suffix.end(), [](const MinerNode<PartitionTidList>& a, const MinerNode<PartitionTidList>& b) {
+        if (!suffix.empty()) {
+            std::sort(suffix.begin(), suffix.end(), [](const auto& a, const auto& b) {
                 return a.tids.sets_number < b.tids.sets_number;
             });
             FdsFirstDFS(iset, suffix, ss);
@@ -273,342 +287,251 @@ void FDFirstAlgorithm::FdsFirstDFS(const Itemset &prefix, std::vector<MinerNode<
     }
 }
 
+void FDFirstAlgorithm::FillMinePatternsVars(PartitionList& partitions, RhsesPair2DList& pair_rhses,
+                                            RuleIxs& rule_ixs, std::vector<int>& rhses,
+                                            const Itemset& lhs, int rhs,
+                                            const PartitionTIdList& all_tids) const {
+    const auto lhs_attrs = relation_->GetAttrVector(lhs);
+    unsigned count = 0;
+    for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
+        if (pi != all_tids.tids.size() && all_tids.tids[pi] != PartitionTIdList::SEP) {
+            count++;
+            continue;
+        }
 
-
-int FDFirstAlgorithm::GetPartitionSupport(const SimpleTidList& pids, const std::vector<int>& psupps) {
-    int res = 0;
-    for (int p : pids) {
-        res += psupps[p];
+        const Transaction& trans = relation_->GetRow(all_tids.tids[pi - 1]);
+        const std::vector<int> lhs_constants = ConstructProjection(trans, lhs_attrs);
+        const auto rule_i = rule_ixs.find(lhs_constants);
+        if (rule_i == rule_ixs.end()) {
+            rhses.push_back(trans[-1 - rhs]);
+            auto rhses_pair_list = RhsesPairList();
+            rhses_pair_list.emplace_back(trans[-1 - rhs], count);
+            pair_rhses.push_back(std::move(rhses_pair_list));
+            rule_ixs[lhs_constants] = partitions.size();
+            partitions.emplace_back(lhs_constants, std::vector<unsigned>());
+            partitions.back().second.push_back(count);
+        } else {
+            partitions[rule_i->second].second.push_back(count);
+            pair_rhses[rule_i->second].emplace_back(trans[-1 - rhs], count);
+        }
+        count = 0;
     }
-    return res;
 }
 
-int FDFirstAlgorithm::GetPartitionError(const SimpleTidList& pids, const std::vector<std::pair<Itemset, std::vector<int> > >& partitions) {
-    int res = 0;
-    for (int p : pids) {
-        int max = 0;
-        int total = 0;
-        for (const auto& rhs : partitions[p].second) {
-            total += rhs;
-            if (rhs > max) {
-                max = rhs;
+void FDFirstAlgorithm::AddCFDToCFDList(const std::vector<int>& sub, int out,
+                                       const MinerNode<SimpleTIdList>& inode,
+                                       const PartitionList& partitions) {
+    bool lhs_gen = true;
+
+    if (rules_.find(out) != rules_.end()) {
+        for (const auto& sub_rule : rules_[out]) {
+            if (out < 0 && !std::any_of(sub_rule.begin(), sub_rule.end(),
+                                        [](int si) -> bool { return si < 0; }))
+                continue;
+            if (Precedes(sub_rule, sub)) {
+                lhs_gen = false;
             }
         }
-        res += total - max;
     }
-    return res;
+    if (lhs_gen) {
+        unsigned e = PartitionUtil::GetPartitionError(inode.tids, partitions);
+        double conf = 1.0 - (static_cast<double>(e) / static_cast<double>(inode.node_supp));
+        if (conf >= min_conf_) {
+            cfd_list_.emplace_back(sub, out);
+        }
+        if (conf >= 1) {
+            rules_[out].push_back(sub);
+            if (out > 0) {
+                rules_[-1 - relation_->GetAttrIndex(out)].push_back(sub);
+            }
+        }
+    }
 }
 
-bool FDFirstAlgorithm::IsConstRulePartition(const SimpleTidList &items,
-                                        const std::vector<std::vector<std::pair<int, int> > > &rhses) {
-    int rhs_value;
-    bool first = true;
-    for (int pi : items) {
-        if (first) {
-            first = false;
-            rhs_value = rhses[pi][0].first;
+void FDFirstAlgorithm::AnalyzeCFDFromPIdList(const std::pair<int, SimpleTIdList>& item,
+                                             const PartitionList& partitions,
+                                             const std::vector<unsigned>& p_supps,
+                                             TIdListMiners& items, const Itemset& lhs) {
+    unsigned p_supp = PartitionUtil::GetPartitionSupport(item.second, p_supps);
+    if (p_supp < min_supp_) {
+        return;
+    }
+    const Itemset ns = Join(Itemset{item.first},
+                            ConstructSubset(lhs, -1 - relation_->GetAttrIndex(item.first)));
+    std::set<Itemset> nr_parts;
+    for (int pid : item.second) {
+        nr_parts.insert(partitions[pid].first);
+    }
+    bool gen = true;
+    const auto sp = std::make_pair(p_supp, nr_parts.size());
+    const auto free_map_pair = free_map_.find(sp);
+    if (free_map_pair != free_map_.end()) {
+        const auto free_cands = free_map_pair->second;
+        for (const auto& sub_cand : free_cands) {
+            if (IsSubsetOf(sub_cand, ns)) {
+                gen = false;
+                break;
+            }
         }
-        for (auto rp : rhses[pi]) {
-            int r = rp.first;
-            if (r != rhs_value) return false;
+    }
+    if (gen) {
+        free_map_[sp].push_back(ns);
+        free_itemsets_.insert(ns);
+    }
+    items.emplace_back(item.first, item.second, p_supp);
+}
+
+bool FDFirstAlgorithm::FillFreeMapAndItemsets(const PartitionList& partitions, const Itemset& lhs,
+                                              const Itemset& new_set, const SimpleTIdList& ij_tids,
+                                              unsigned ij_supp) {
+    if (ij_supp < min_supp_) {
+        return false;
+    }
+
+    bool gen = true;
+    const auto nas = relation_->GetAttrVectorItems(new_set);
+    const Itemset ns = Join(new_set, SetDiff(lhs, nas));
+    std::set<Itemset> nr_parts;
+    for (int pid : ij_tids) {
+        nr_parts.insert(partitions[pid].first);
+    }
+    const auto sp = std::make_pair(ij_supp, nr_parts.size());
+    const auto free_map_pair = free_map_.find(sp);
+    if (free_map_pair != free_map_.end()) {
+        const auto free_cands = free_map_pair->second;
+        for (const auto& sub_cand : free_cands) {
+            if (IsSubsetOf(sub_cand, ns)) {
+                gen = false;
+                break;
+            }
         }
+    }
+    if (gen) {
+        free_map_[sp].push_back(ns);
+        free_itemsets_.insert(ns);
     }
     return true;
 }
 
-void FDFirstAlgorithm::MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionTidList & all_tids) {
-    std::map<int, SimpleTidList> pid_lists;
-    auto lhs_attrs = relation_->GetAttrVector(lhs);
-    std::vector<std::pair<Itemset, std::vector<int> > > partitions;
-    std::vector<std::vector<std::pair<int,int> > > rhses_pairs;
-    boost::unordered_map<Itemset, int> rule_ixs;
+void FDFirstAlgorithm::MinePatternsBFS(const Itemset& lhs, int rhs,
+                                       const PartitionTIdList& all_tids) {
+    std::map<int, SimpleTIdList> pid_lists;
+    PartitionList partitions;
+    RhsesPair2DList rhses_pairs;
+    RuleIxs rule_ixs;
     std::vector<int> rhses;
-    int count = 0;
-    for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
-        if (pi == all_tids.tids.size() || all_tids.tids[pi] == PartitionTidList::SEP ) {
-            const Transaction& trans = relation_->GetRow(all_tids.tids[pi - 1]);
-            Itemset lhs_constants = Projection(trans, lhs_attrs);
-            auto rule_i = rule_ixs.find(lhs_constants);
-            if (rule_i == rule_ixs.end()) {
-                rhses.push_back(trans[-1-rhs]);
-                rhses_pairs.emplace_back();
-                rhses_pairs.back().emplace_back(trans[-1 - rhs],count);
-                rule_ixs[lhs_constants] = partitions.size();
-                partitions.emplace_back(lhs_constants, std::vector<int>());
-                partitions.back().second.push_back(count);
-            }
-            else {
-                partitions[rule_i->second].second.push_back(count);
-                rhses_pairs[rule_i->second].emplace_back(trans[-1 - rhs], count);
-            }
-            count = 0;
-        }
-        else {
-            count++;
-        }
-    }
-    std::vector<MinerNode<SimpleTidList> > items;
-    std::vector<int> p_supps(partitions.size());
+    FillMinePatternsVars(partitions, rhses_pairs, rule_ixs, rhses, lhs, rhs, all_tids);
+    TIdListMiners items;
+    std::vector<unsigned> p_supps(partitions.size());
     int ri = 0;
     for (const auto& rule : partitions) {
         for (int i : rule.first) {
             pid_lists[i].push_back(ri);
         }
-        int s = 0;
-        for (const auto& rhs_int : rule.second) {
-            s += rhs_int;
-        }
+        unsigned s = std::accumulate(rule.second.begin(), rule.second.end(), 0u);
         p_supps[ri] = s;
         ri++;
     }
+
     for (const auto& item : pid_lists) {
-        int p_supp = GetPartitionSupport(item.second, p_supps);
-        if (p_supp >= (int)min_supp_) {
-            Itemset ns = Join(Itemset{item.first},
-                              Subset(lhs, -1 - relation_->GetAttrIndex(item.first)));
-            std::set<Itemset> nr_parts;
-            for (int pid : item.second) {
-                nr_parts.insert(partitions[pid].first);
-            }
-            bool gen = true;
-            auto sp = std::make_pair(p_supp, nr_parts.size());
-            auto free_map_pair = free_map_.find(sp);
-            if (free_map_pair != free_map_.end()) {
-                auto free_cands = free_map_pair->second;
-                for (const auto & sub_cand : free_cands) {
-                    if (IsSubsetOf(sub_cand, ns)) {
-                        gen = false;
-                        break;
-                    }
-                }
-            }
-            if (gen) {
-                free_map_[sp].push_back(ns);
-                free_itemsets_.insert(ns);
-            }
-            items.emplace_back(item.first, item.second, p_supp);
-        }
+        AnalyzeCFDFromPIdList(item, partitions, p_supps, items, lhs);
     }
+
     while (!items.empty()) {
-        std::vector<MinerNode<SimpleTidList> > suffix;
+        TIdListMiners suffix;
         for (size_t i = 0; i < items.size(); i++) {
-            const auto &inode = items[i];
+            const auto& inode = items[i];
             Itemset iset = inode.prefix;
             iset.push_back(inode.item);
-            auto node_attrs = relation_->GetAttrVectorItems(iset);
-            bool lhs_gen = true;
+            const auto node_attrs = relation_->GetAttrVectorItems(iset);
             int out = (iset.size() == lhs.size()) ? GetMaxElem(rhses_pairs[inode.tids[0]]) : rhs;
-            auto sub = Join(iset, SetDiff(lhs, node_attrs));
+            const auto sub = Join(iset, SetDiff(lhs, node_attrs));
 
-            if (out > 0 || !IsConstRulePartition(inode.tids, rhses_pairs)) {
-                if (rules_.find(out) != rules_.end()) {
-                    for (const auto & sub_rule : rules_[out]) {
-                        if (out < 0 && !std::any_of(sub_rule.begin(), sub_rule.end(), [](int si) -> bool { return si < 0; })) continue;
-                        if (Precedes(sub_rule, sub)) {
-                            lhs_gen = false;
-                        }
-                    }
-                }
-                if (lhs_gen) {
-                    int e = GetPartitionError(inode.tids, partitions);
-                    double conf = 1.0 - ((double) e / (double) inode.node_supp);
-                    if (conf >= min_conf_) {
-                        cfd_list_.emplace_back(sub, out);
-                    }
-                    if (conf >= 1) {
-                        rules_[out].push_back(sub);
-                        if (out > 0) rules_[-1 - relation_->GetAttrIndex(out)].push_back(sub);
-                    }
-                }
+            if (out > 0 || !PartitionUtil::IsConstRulePartition(inode.tids, rhses_pairs)) {
+                AddCFDToCFDList(sub, out, inode, partitions);
             }
             for (size_t j = i + 1; j < items.size(); j++) {
                 const auto& jnode = items[j];
                 if (jnode.prefix != inode.prefix) continue;
-                if (std::binary_search(node_attrs.begin(), node_attrs.end(), -1 - relation_->GetAttrIndex(jnode.item))) continue;
+                if (std::binary_search(node_attrs.begin(), node_attrs.end(),
+                                       -1 - relation_->GetAttrIndex(jnode.item)))
+                    continue;
                 Itemset jset = jnode.prefix;
                 jset.push_back(jnode.item);
                 Itemset new_set = Join(jset, inode.item);
-                SimpleTidList ij_tids = Intersection(inode.tids, jnode.tids);
-                int ij_supp = GetPartitionSupport(ij_tids, p_supps);
-                if (ij_supp >= (int)min_supp_){
-                    bool gen = true;
-                    auto nas = relation_->GetAttrVectorItems(new_set);
-                    Itemset ns = Join(new_set, SetDiff(lhs, nas));
-                    std::set<Itemset> nr_parts;
-                    for (int pid : ij_tids) {
-                        nr_parts.insert(partitions[pid].first);
-                    }
-                    auto sp = std::make_pair(ij_supp, nr_parts.size());
-                    auto free_map_pair = free_map_.find(sp);
-                    if (free_map_pair != free_map_.end()) {
-                        auto free_cands = free_map_pair->second;
-                        for (const auto & sub_cand : free_cands) {
-                            if (IsSubsetOf(sub_cand, ns)) {
-                                gen = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (gen) {
-                        free_map_[sp].push_back(ns);
-                        free_itemsets_.insert(ns);
-                    }
-                    int jtem = new_set.back();
-                    new_set.pop_back();
-                    suffix.emplace_back(jtem, std::move(ij_tids), ij_supp, new_set);
-                }
+                SimpleTIdList ij_tids = ConstructIntersection(inode.tids, jnode.tids);
+                unsigned ij_supp = PartitionUtil::GetPartitionSupport(ij_tids, p_supps);
+                bool result = FillFreeMapAndItemsets(partitions, lhs, new_set, ij_tids, ij_supp);
+                if (!result) continue;
+                int jtem = new_set.back();
+                new_set.pop_back();
+                suffix.emplace_back(jtem, std::move(ij_tids), ij_supp, new_set);
             }
         }
         items.swap(suffix);
     }
 }
 
-void FDFirstAlgorithm::MinePatternsDFS(const Itemset &lhs, int rhs, const PartitionTidList & all_tids) {
-    std::map<int, SimpleTidList> pid_lists;
-    auto lhs_attrs = relation_->GetAttrVector(lhs);
-    std::vector<std::pair<Itemset, std::vector<int> > > partitions;
-    std::vector<std::vector<std::pair<int,int> > > pair_rhses;
-    boost::unordered_map<Itemset, int> rule_ixs;
+void FDFirstAlgorithm::MinePatternsDFS(const Itemset& lhs, int rhs,
+                                       const PartitionTIdList& all_tids) {
+    std::map<int, SimpleTIdList> pid_lists;
+    PartitionList partitions;
+    RhsesPair2DList rhses_pairs;
+    RuleIxs rule_ixs;
     std::vector<int> rhses;
-    int count = 0;
-    for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
-        if (pi == all_tids.tids.size() || all_tids.tids[pi] == PartitionTidList::SEP ) {
-            const Transaction& trans = relation_->GetRow(all_tids.tids[pi - 1]);
-            std::vector<int> lhs_constants = Projection(trans, lhs_attrs);
-            auto rule_i = rule_ixs.find(lhs_constants);
-            if (rule_i == rule_ixs.end()) {
-                rhses.push_back(trans[-1-rhs]);
-                pair_rhses.emplace_back();
-                pair_rhses.back().emplace_back(trans[-1-rhs],count);
-                rule_ixs[lhs_constants] = (int)partitions.size();
-                partitions.emplace_back(lhs_constants, std::vector<int>());
-                partitions.back().second.push_back(count);
-            }
-            else {
-                partitions[rule_i->second].second.push_back(count);
-                pair_rhses[rule_i->second].emplace_back(trans[-1-rhs], count);
-            }
-            count = 0;
-        }
-        else {
-            count++;
-        }
-    }
-    std::vector<MinerNode<SimpleTidList> > items;
-    std::vector<int> psupps(partitions.size());
+    FillMinePatternsVars(partitions, rhses_pairs, rule_ixs, rhses, lhs, rhs, all_tids);
+    TIdListMiners items;
+    std::vector<unsigned> p_supps(partitions.size());
     int ri = 0;
     for (const auto& rule : partitions) {
         for (int i : rule.first) {
             pid_lists[i].push_back(ri);
         }
-        int s = 0;
-        for (const auto& rhs_items : rule.second) {
-            s += rhs_items;
-        }
-        psupps[ri] = s;
+        unsigned s = std::accumulate(rule.second.begin(), rule.second.end(), 0u);
+        p_supps[ri] = s;
         ri++;
     }
+
     for (const auto& item : pid_lists) {
-        int psupp = GetPartitionSupport(item.second, psupps);
-        if (psupp >= (int)min_supp_) {
-            Itemset ns = Join(Itemset{item.first},
-                              Subset(lhs, -1 - relation_->GetAttrIndex(item.first)));
-            std::set<Itemset> nr_parts;
-            for (int pid : item.second) {
-                nr_parts.insert(partitions[pid].first);
-            }
-            bool gen = true;
-            auto sp = std::make_pair(psupp, nr_parts.size());
-            auto free_map_pair = free_map_.find(sp);
-            if (free_map_pair != free_map_.end()) {
-                auto free_cands = free_map_pair->second;
-                for (const auto &sub_cand : free_cands) {
-                    if (IsSubsetOf(sub_cand, ns)) {
-                        gen = false;
-                        break;
-                    }
-                }
-            }
-            if (gen) {
-                free_map_[sp].push_back(ns);
-                free_itemsets_.insert(ns);
-            }
-            items.emplace_back(item.first, item.second, psupp);
-        }
+        AnalyzeCFDFromPIdList(item, partitions, p_supps, items, lhs);
     }
-    MinePatternsDFS(Itemset(), items, lhs, rhs, pair_rhses, partitions, psupps);
+
+    MinePatternsDFS(Itemset(), items, lhs, rhs, rhses_pairs, partitions, p_supps);
 }
 
-void FDFirstAlgorithm::MinePatternsDFS(const Itemset &prefix, std::vector<MinerNode<SimpleTidList> > &items,
-                                   const Itemset &lhs, int rhs,
-                                   std::vector<std::vector<std::pair<int, int> > > & rhses_pair,
-                                   std::vector<std::pair<Itemset, std::vector<int> > > &partitions,
-                                   std::vector<int> &psupps) {
-    for (int ix = (int)items.size() - 1; ix >= 0; ix--) {
-        const auto &inode = items[ix];
-        Itemset iset = Join(prefix, inode.item);
-        auto node_attrs = relation_->GetAttrVectorItems(iset);
-        bool lhs_gen = true;
+void FDFirstAlgorithm::MinePatternsDFS(const Itemset& prefix, TIdListMiners& items,
+                                       const Itemset& lhs, int rhs, RhsesPair2DList& rhses_pair,
+                                       PartitionList& partitions, std::vector<unsigned>& psupps) {
+    for (int ix = static_cast<int>(items.size()) - 1; ix >= 0; ix--) {
+        const auto& inode = items[ix];
+        if (inode.tids.empty() && items[ix].tids.empty()) {
+            LOG(INFO) << ix;
+        }
+        const Itemset iset = Join(prefix, inode.item);
+        const auto node_attrs = relation_->GetAttrVectorItems(iset);
         int out = (iset.size() == lhs.size()) ? GetMaxElem(rhses_pair[inode.tids[0]]) : rhs;
-        auto sub = Join(iset, SetDiff(lhs, node_attrs));
+        const auto sub = Join(iset, SetDiff(lhs, node_attrs));
 
-        if (out > 0 || !IsConstRulePartition(inode.tids, rhses_pair)) {
-            if (rules_.find(out) != rules_.end()) {
-                for (const auto & sub_rule : rules_[out]) {
-                    if (out < 0 && !std::any_of(sub_rule.begin(), sub_rule.end(), [](int si) -> bool { return si < 0; })) continue;
-                    if (Precedes(sub_rule, sub)) {
-                        lhs_gen = false;
-                    }
-                }
-            }
-            if (lhs_gen) {
-                int e = GetPartitionError(inode.tids, partitions);
-                double conf = 1.0 - ((double) e / (double) inode.node_supp);
-                if (conf >= min_conf_) {
-                    cfd_list_.emplace_back(sub, out);
-                }
-                if (conf >= 1) {
-                    rules_[out].push_back(sub);
-                    if (out > 0) rules_[-1 - relation_->GetAttrIndex(out)].push_back(sub);
-                }
-            }
+        if (out > 0 || !PartitionUtil::IsConstRulePartition(inode.tids, rhses_pair)) {
+            AddCFDToCFDList(sub, out, inode, partitions);
         }
-        std::vector<MinerNode<SimpleTidList> > suffix;
+        TIdListMiners suffix;
         for (size_t j = ix + 1; j < items.size(); j++) {
-            const auto &jnode = items[j];
-            if (std::binary_search(node_attrs.begin(), node_attrs.end(), -1- relation_->GetAttrIndex(jnode.item))) continue;
-            Itemset newset = Join(iset, jnode.item);
-            SimpleTidList ij_tids = Intersection(inode.tids, jnode.tids);
-            int ij_supp = GetPartitionSupport(ij_tids, psupps);
-            if (ij_supp >= (int)min_supp_){
-                bool gen = true;
-                auto nas = relation_->GetAttrVectorItems(newset);
-                Itemset ns = Join(newset, SetDiff(lhs, nas));
-                std::set<Itemset> nr_parts;
-                for (int pid : ij_tids) {
-                    nr_parts.insert(partitions[pid].first);
-                }
-                auto sp = std::make_pair(ij_supp, nr_parts.size());
-                auto free_map_pair = free_map_.find(sp);
-                if (free_map_pair != free_map_.end()) {
-                    auto free_cands = free_map_pair->second;
-                    for (const auto &sub_cand : free_cands) {
-                        if (IsSubsetOf(sub_cand, ns)) {
-                            gen = false;
-                            break;
-                        }
-                    }
-                }
-                if (gen) {
-                    free_map_[sp].push_back(ns);
-                    free_itemsets_.insert(ns);
-                }
-                suffix.emplace_back(jnode.item, std::move(ij_tids), ij_supp);
-            }
+            const auto& jnode = items[j];
+            if (std::binary_search(node_attrs.begin(), node_attrs.end(),
+                                   -1 - relation_->GetAttrIndex(jnode.item)))
+                continue;
+            const Itemset new_set = Join(iset, jnode.item);
+            SimpleTIdList ij_tids = ConstructIntersection(inode.tids, jnode.tids);
+            unsigned ij_supp = PartitionUtil::GetPartitionSupport(ij_tids, psupps);
+
+            bool result = FillFreeMapAndItemsets(partitions, lhs, new_set, ij_tids, ij_supp);
+            if (!result) continue;
+            suffix.emplace_back(jnode.item, ij_tids, ij_supp);
         }
-        if (suffix.size()) {
-            std::sort(suffix.begin(), suffix.end(), [](const MinerNode<SimpleTidList>& a, const MinerNode<SimpleTidList>& b) {
-                return support(a.tids) < support(b.tids);
+        if (!suffix.empty()) {
+            std::sort(suffix.begin(), suffix.end(), [](const auto& a, const auto& b) {
+                return TIdUtil::Support(a.tids) < TIdUtil::Support(b.tids);
             });
             MinePatternsDFS(iset, suffix, lhs, rhs, rhses_pair, partitions, psupps);
         }
@@ -616,12 +539,13 @@ void FDFirstAlgorithm::MinePatternsDFS(const Itemset &prefix, std::vector<MinerN
 }
 
 // This method is used to get all partition singletons using MinerNode<PartitionTidList>
-std::vector<MinerNode<PartitionTidList> > FDFirstAlgorithm::GetPartitionSingletons() {
-    std::vector<std::vector<SimpleTidList> > partitions(relation_->GetAttrsNumber());
-    std::unordered_map<int, std::pair<int,int> > attr_indices;
+FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
+    std::vector<std::vector<std::vector<unsigned>>> partitions(relation_->GetAttrsNumber());
+    std::unordered_map<int, std::pair<int, int>> attr_indices;
+
     for (size_t a = 0; a < relation_->GetAttrsNumber(); a++) {
         const auto& dom = relation_->GetDomain(a);
-        partitions[a] = std::vector<SimpleTidList>(dom.size());
+        partitions[a] = std::vector<std::vector<unsigned>>(dom.size());
         for (unsigned i = 0; i < dom.size(); i++) {
             partitions[a][i].reserve(relation_->Frequency(dom[i]));
             attr_indices[dom[i]] = std::make_pair(a, i);
@@ -634,22 +558,24 @@ std::vector<MinerNode<PartitionTidList> > FDFirstAlgorithm::GetPartitionSingleto
             partitions[attr_node_ix.first][attr_node_ix.second].push_back(row);
         }
     }
-    std::vector<MinerNode<PartitionTidList> > singletons;
+
+    PIdListMiners singletons;
     for (size_t a = 0; a < relation_->GetAttrsNumber(); a++) {
-        int attr_item = -1 - a;
-        singletons.emplace_back(attr_item);
+        int attr_item = -1 - static_cast<int>(a);
+        auto new_node = MinerNode<PartitionTIdList>(attr_item);
         const auto& dom = relation_->GetDomain(a);
-        singletons.back().tids.tids.reserve(relation_->Size()+dom.size()-1);
-        singletons.back().tids.sets_number = dom.size();
+        new_node.tids.tids.reserve(relation_->Size() + dom.size() - 1);
+        new_node.tids.sets_number = dom.size();
         for (unsigned i = 0; i < dom.size(); i++) {
-            auto& ts = singletons.back().tids.tids;
+            auto& ts = new_node.tids.tids;
             ts.insert(ts.end(), partitions[a][i].begin(), partitions[a][i].end());
-            if (i < dom.size() - 1) {
-                ts.push_back(PartitionTidList::SEP);
+            if (i != dom.size() - 1) {
+                ts.push_back(PartitionTIdList::SEP);
             }
         }
-        singletons.back().HashTids();
+
+        singletons.push_back(std::move(new_node));
     }
     return singletons;
 }
-}
+}  // namespace algos::cfd

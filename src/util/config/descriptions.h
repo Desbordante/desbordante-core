@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "algorithms/cfd/enums.h"
 #include "algorithms/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/config/enum_to_available_values.h"
@@ -49,4 +50,12 @@ constexpr auto kDCfdColumnsNumber =
 constexpr auto kDCfdTuplesNumber =
         "Number of tuples in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
+constexpr auto kDCfdMinimumSupport =
+        "minimum support value (integer number "
+        "between 1 and number of tuples in dataset)";
+constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
+constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
+const std::string _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
+                                      EnumToAvailableValues<algos::cfd::Substrategy>();
+const auto kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
 }  // namespace util::config::descriptions
