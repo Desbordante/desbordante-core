@@ -35,6 +35,10 @@ constexpr auto kPairingRule = "pairing_rule";
 constexpr auto kACSeed = "ac_seed";
 constexpr auto kPreciseAlgorithm = "precise_algorithm";
 constexpr auto kApproximateAlgorithm = "approximate_algorithm";
+constexpr auto kCfdMinimumSupport = "cfd_minsup";
+constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdTuplesNumber = "tuples_number";
+constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
+constexpr auto kCfdSubstrategy = "cfd_substrategy";
 }  // namespace util::config::names

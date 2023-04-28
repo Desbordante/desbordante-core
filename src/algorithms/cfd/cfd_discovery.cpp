@@ -1,20 +1,20 @@
 #include "algorithms/cfd/cfd_discovery.h"
 
-// see ./LICENSE
-
 #include <iterator>
 #include <thread>
 
 #include "algorithms/cfd/util/cfd_output_util.h"
 #include "algorithms/cfd/util/set_util.h"
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/names_and_descriptions.h"
 
-namespace algos {
+// see algorithms/cfd/LICENSE
+
+namespace algos::cfd {
 
 CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
-    : Primitive(std::move(phase_names)) {
-    using namespace config::names;
+    : Algorithm(std::move(phase_names)) {
+    using namespace util::config::names;
 
     RegisterOptions();
     MakeOptionsAvailable({kEqualNulls, kCfdColumnsNumber, kCfdTuplesNumber});
@@ -22,7 +22,7 @@ CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
 
 CFDDiscovery::CFDDiscovery() : CFDDiscovery({kDefaultPhaseName}) {}
 
-void CFDDiscovery::FitInternal(model::IDatasetStream& data_stream) {
+void CFDDiscovery::LoadDataInternal(model::IDatasetStream& data_stream) {
     relation_ = CFDRelationData::CreateFrom(data_stream, is_null_equal_null_, columns_number_,
                                             tuples_number_);
 
@@ -37,13 +37,13 @@ void CFDDiscovery::ResetState() {
 }
 
 void CFDDiscovery::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
     RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
     RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
 }
 
 int CFDDiscovery::NrCfds() const {
@@ -62,8 +62,7 @@ std::string CFDDiscovery::GetRelationString(char delim) const {
     return relation_->GetStringFormat(delim);
 }
 
-std::string CFDDiscovery::GetRelationString(const SimpleTidList& subset, char delim) const {
+std::string CFDDiscovery::GetRelationString(const SimpleTIdList& subset, char delim) const {
     return relation_->GetStringFormat(subset, delim);
 }
-
-}  // namespace algos
+}  // namespace algos::cfd

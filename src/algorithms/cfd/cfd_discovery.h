@@ -1,7 +1,5 @@
 #pragma once
 
-// see ./LICENSE
-
 #include <filesystem>
 #include <list>
 #include <map>
@@ -10,13 +8,15 @@
 
 #include <boost/any.hpp>
 
-#include "algorithms/primitive.h"
-#include "model/cfd.h"
-#include "model/cfd_relation_data.h"
+#include "algorithms/algorithm.h"
+#include "algorithms/cfd/structures/cfd_relation_data.h"
+#include "algorithms/cfd/structures/cfd_types.h"
 
-namespace algos {
+// see algorithms/cfd/LICENSE
 
-class CFDDiscovery : public algos::Primitive {
+namespace algos::cfd {
+
+class CFDDiscovery : public algos::Algorithm {
 private:
     bool is_null_equal_null_;
     void RegisterOptions();
@@ -33,11 +33,11 @@ public:
     constexpr static std::string_view kDefaultPhaseName = "CFD mining";
     explicit CFDDiscovery(std::vector<std::string_view> phase_names);
     explicit CFDDiscovery();
-    void FitInternal(model::IDatasetStream& data_stream) final;
+    void LoadDataInternal(model::IDatasetStream& data_stream) final;
     int NrCfds() const;
     CFDList GetCfds() const;
     std::string GetRelationString(char delim = ' ') const;
-    std::string GetRelationString(const SimpleTidList& subset, char delim = ' ') const;
+    std::string GetRelationString(const SimpleTIdList& subset, char delim = ' ') const;
     std::string GetCfdString(CFD const& cfd) const;
 };
-}  // namespace algos
+}  // namespace algos::cfd
