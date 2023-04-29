@@ -23,6 +23,9 @@ public:
     [[nodiscard]] bool HasNextRow() const final;
 };
 
+// If a DataFrame only consists of Python strings, then there is no need to get
+// string representations of every value, and we can get away with the normal
+// pybind11's conversions, which speeds up the reading process.
 class StringDataframeReader final : public DataframeReaderBase {
 public:
     using DataframeReaderBase::DataframeReaderBase;
@@ -30,6 +33,13 @@ public:
     std::vector<std::string> GetNextRow() final;
 };
 
+// If a dataframe consists of arbitrary Python objects, we have to first check
+// for nullity and switch it out for Desbordante's null value if it is null.
+// Pandas uses several Python objects for its null value representation, so the
+// most robust way to check for a DataFrame's value nullity is to use the
+// `pandas.isna` function.
+// If the value is not null, then we have to convert it to std::string, which
+// involves converting it to a Python str first.
 class ArbitraryDataframeReader final : public DataframeReaderBase {
 private:
     // Used in GetNextRow to check arbitrary dataframe values for nullity.
