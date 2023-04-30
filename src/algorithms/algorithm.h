@@ -36,7 +36,7 @@ private:
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
-    virtual void LoadDataInternal(model::IDatasetStream& data_stream) = 0;
+    virtual void LoadDataInternal() = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
@@ -67,7 +67,6 @@ protected:
     void ExecutePrepare();
 
     // Overload this to add options after your algorithm has processed the data
-    // given through LoadData
     virtual void MakeExecuteOptsAvailable();
 
 public:
@@ -83,7 +82,7 @@ public:
     // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
     explicit Algorithm(std::vector<std::string_view> phase_names);
 
-    void LoadData(model::IDatasetStream & data_stream);
+    void LoadData();
     bool DataLoaded() const;
 
     unsigned long long Execute();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/fd_algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "algorithms/statistics/statistic.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/config/equal_nulls/type.h"
@@ -8,7 +8,7 @@
 
 namespace algos {
 
-class DataStats : public Algorithm {
+class DataStats : public RelationalAlgorithm {
     util::config::EqNullsType is_null_equal_null_;
     util::config::ThreadNumType threads_num_;
 
@@ -28,7 +28,7 @@ class DataStats : public Algorithm {
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
 protected:
-    void LoadDataInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 

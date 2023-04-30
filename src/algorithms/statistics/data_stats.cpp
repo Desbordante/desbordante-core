@@ -12,7 +12,7 @@ namespace algos {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-DataStats::DataStats() : Algorithm({"Calculating statistics"}) {
+DataStats::DataStats() : RelationalAlgorithm({"Calculating statistics"}) {
     RegisterOptions();
     MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
@@ -480,8 +480,8 @@ std::string DataStats::ToString() const {
     return res.str();
 }
 
-void DataStats::LoadDataInternal(model::IDatasetStream& data_stream) {
-    col_data_ = mo::CreateTypedColumnData(data_stream, is_null_equal_null_);
+void DataStats::LoadDataInternal() {
+    col_data_ = mo::CreateTypedColumnData(*data_, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }
 

@@ -23,9 +23,9 @@ using std::string, std::vector;
 
 namespace onam = util::config::names;
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine() {
+std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(algos::RelationStream parser) {
     std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
-    algos::ConfigureFromMap(*algorithm, StdParamsMap{});
+    algos::ConfigureFromMap(*algorithm, StdParamsMap{{util::config::names::kData, parser}});
     return algorithm;
 }
 
@@ -85,10 +85,9 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
-    auto algorithm = ConfToLoadFD_Mine();
     auto path = test_data_dir / "TestEmpty.csv";
-    auto parser = CSVParser(path, ',', true);
-    ASSERT_THROW(algorithm->LoadData(parser), std::runtime_error);
+    auto algorithm = ConfToLoadFD_Mine(std::make_shared<CSVParser>(path, ',', true));
+    ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {

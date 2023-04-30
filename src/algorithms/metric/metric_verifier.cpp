@@ -17,7 +17,7 @@
 
 namespace algos::metric {
 
-MetricVerifier::MetricVerifier() : Algorithm({}) {
+MetricVerifier::MetricVerifier() : RelationalAlgorithm({}) {
     RegisterOptions();
     MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
@@ -120,14 +120,13 @@ void MetricVerifier::MakeExecuteOptsAvailable() {
             {kDistFromNullIsInfinity, kParameter, kMetric, util::config::LhsIndicesOpt.GetName()});
 }
 
-void MetricVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
+void MetricVerifier::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*data_, is_null_equal_null_);
+    data_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: metric FD verifying is meaningless.");
     }
-    typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*data_, is_null_equal_null_);
 }
 
 void MetricVerifier::ResetState() {

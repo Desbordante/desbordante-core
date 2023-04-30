@@ -8,13 +8,13 @@
 #include <boost/any.hpp>
 
 #include "algorithms/ar_algorithm_enums.h"
-#include "algorithms/algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "model/ar.h"
 #include "model/transactional_data.h"
 
 namespace algos {
 
-class ARAlgorithm : public algos::Algorithm {
+class ARAlgorithm : public RelationalAlgorithm {
 private:
     using MinSupType = double;
     double minconf_;
@@ -56,7 +56,7 @@ protected:
     virtual double GetSupport(std::vector<unsigned> const& frequent_itemset) const = 0;
     virtual unsigned long long GenerateAllRules() = 0;
     virtual unsigned long long FindFrequent() = 0;
-    void LoadDataInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 

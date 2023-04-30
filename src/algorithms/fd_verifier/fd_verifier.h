@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "algorithms/fd_verifier/stats_calculator.h"
-#include "algorithms/algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/indices/type.h"
 
@@ -14,7 +14,7 @@ namespace algos::fd_verifier {
 
 /* Algorithm used for verifying a particular FD and retrieving useful information about this FD in
  * case it doesn't hold */
-class FDVerifier : public Algorithm {
+class FDVerifier : public RelationalAlgorithm {
 private:
     util::config::IndicesType lhs_indices_;
     util::config::IndexType rhs_index_;
@@ -33,7 +33,7 @@ private:
     }
 
 protected:
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 

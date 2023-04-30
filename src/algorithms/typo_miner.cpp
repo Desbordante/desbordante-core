@@ -13,8 +13,8 @@ TypoMiner::TypoMiner(AlgorithmType precise, AlgorithmType approx)
 
 TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                      std::unique_ptr<FDAlgorithm> approx_algo)
-        : Algorithm({/*"Precise fd algorithm execution", "Approximate fd algoritm execution",
-                     "Extracting fds with non-zero error"*/}),
+    : RelationalAlgorithm({/*"Precise fd algorithm execution", "Approximate fd algoritm execution",
+                           "Extracting fds with non-zero error"*/}),
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
@@ -92,12 +92,11 @@ void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& p
     previous_options.insert(approx_options.begin(), approx_options.end());
 }
 
-void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
-    typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
+void TypoMiner::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*data_, is_null_equal_null_);
+    data_->Reset();
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*data_, is_null_equal_null_);
+    data_->Reset();
     auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
     auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
     boost::any null_opt_any{is_null_equal_null_};
@@ -106,13 +105,14 @@ void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
         if (precise_pli != nullptr)
             precise_pli->LoadPreparedData(relation_);
         else
-            precise_algo_->LoadData(data_stream);
+            precise_algo_->LoadData();
     }
+    data_->Reset();
     if (!approx_algo_->DataLoaded()) {
         if (approx_pli != nullptr)
             approx_pli->LoadPreparedData(relation_);
         else
-            approx_algo_->LoadData(data_stream);
+            approx_algo_->LoadData();
     }
 }
 

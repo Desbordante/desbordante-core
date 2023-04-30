@@ -86,22 +86,32 @@ void ConfigureFromFunction(Algorithm& algorithm,
                            std::function<boost::any(std::string_view)> const& get_value);
 
 template <typename OptionMap>
+boost::any GetOrEmpty(OptionMap const& options, std::string_view option_name) {
+    auto it = options.find(std::string{option_name});
+    return it == options.end() ? boost::any{} : it->second;
+}
+
+template <typename OptionMap>
 void ConfigureFromMap(Algorithm& algorithm, OptionMap&& options) {
     ConfigureFromFunction(algorithm, [&options](std::string_view option_name) -> boost::any {
-        auto it = options.find(std::string{option_name});
-        return it == options.end() ? boost::any{} : details::ExtractAnyFromMap(options,
-                                                                               option_name);
+        return GetOrEmpty(options, option_name);
     });
 }
 
 template <typename OptionMap>
 void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
-    ConfigureFromMap(algorithm, options);
-    auto parser = CSVParser{
-            details::ExtractOptionValue<std::filesystem::path>(options, util::config::names::kData),
-            details::ExtractOptionValue<char>(options, util::config::names::kSeparator),
-            details::ExtractOptionValue<bool>(options, util::config::names::kHasHeader)};
-    algorithm.LoadData(parser);
+    ConfigureFromFunction(algorithm, [&options](std::string_view option_name) {
+        using namespace util::config::names;
+        if (option_name == kData) {
+            RelationStream parser = std::make_shared<CSVParser>(
+                    details::ExtractOptionValue<std::filesystem::path>(options, kData),
+                    details::ExtractOptionValue<char>(options, kSeparator),
+                    details::ExtractOptionValue<bool>(options, kHasHeader));
+            return boost::any{parser};
+        }
+        return GetOrEmpty(options, option_name);
+    });
+    algorithm.LoadData();
     ConfigureFromMap(algorithm, options);
 }
 

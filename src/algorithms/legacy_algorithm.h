@@ -7,15 +7,15 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
 
 namespace algos {
 
-class LegacyAlgorithm : public Algorithm {
+class LegacyAlgorithm : public RelationalAlgorithm {
 private:
-    void LoadDataInternal([[maybe_unused]] model::IDatasetStream &data_stream) override {}
+    void LoadDataInternal() override {}
 
     void ResetState() final {}
 
@@ -32,20 +32,21 @@ public:
     virtual ~LegacyAlgorithm() override = default;
 
     explicit LegacyAlgorithm(std::vector<std::string_view> phase_names)
-            : Algorithm(std::move(phase_names)) {
+        : RelationalAlgorithm(std::move(phase_names)) {
         ExecutePrepare();
     }
 
     LegacyAlgorithm(std::unique_ptr<model::IDatasetStream> input_generator_ptr,
                     std::vector<std::string_view> phase_names)
-            : Algorithm(std::move(phase_names)), input_generator_(std::move(input_generator_ptr)) {
+        : RelationalAlgorithm(std::move(phase_names)),
+          input_generator_(std::move(input_generator_ptr)) {
         ExecutePrepare();
     }
 
-    LegacyAlgorithm(std::filesystem::path const &path, char const separator, bool const has_header,
+    LegacyAlgorithm(std::filesystem::path const& path, char const separator, bool const has_header,
                     std::vector<std::string_view> phase_names)
-            : Algorithm(std::move(phase_names)),
-              input_generator_(std::make_unique<CSVParser>(path, separator, has_header)) {
+        : RelationalAlgorithm(std::move(phase_names)),
+          input_generator_(std::make_unique<CSVParser>(path, separator, has_header)) {
         ExecutePrepare();
     }
 };

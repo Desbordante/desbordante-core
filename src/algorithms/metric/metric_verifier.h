@@ -14,7 +14,7 @@
 #include "algorithms/metric/highlight_calculator.h"
 #include "algorithms/metric/points.h"
 #include "algorithms/metric/points_calculator.h"
-#include "algorithms/algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/config/equal_nulls/type.h"
@@ -24,7 +24,7 @@
 
 namespace algos::metric {
 
-class MetricVerifier : public algos::Algorithm {
+class MetricVerifier : public RelationalAlgorithm {
 private:
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
@@ -81,7 +81,7 @@ private:
     void ResetState() final;
 
 protected:
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 

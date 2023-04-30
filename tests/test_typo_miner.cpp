@@ -73,9 +73,9 @@ struct LinesParam : TestingParam {
 };
 
 static std::unique_ptr<algos::TypoMiner> ConfToLoadTypoMiner(
-        algos::AlgorithmType const algorithm_type) {
+        algos::AlgorithmType const algorithm_type, algos::RelationStream parser) {
     auto typo_miner = std::make_unique<algos::TypoMiner>(algorithm_type);
-    algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{});
+    algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{{util::config::names::kData, parser}});
     return typo_miner;
 }
 
@@ -127,10 +127,10 @@ static void TestForEachAlgo(F&& test) {
 
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
     auto const test = [](algos::AlgorithmType const algo) {
-        auto typo_miner = ConfToLoadTypoMiner(algo);
         auto path = test_data_dir / "TestEmpty.csv";
-        auto parser = CSVParser(path, ',', true);
-        ASSERT_THROW(typo_miner->LoadData(parser), std::runtime_error);
+        auto parser = std::make_shared<CSVParser>(path, ',', true);
+        auto typo_miner = ConfToLoadTypoMiner(algo, parser);
+        ASSERT_THROW(typo_miner->LoadData(), std::runtime_error);
     };
     TestForEachAlgo(test);
 }

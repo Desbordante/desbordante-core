@@ -4,7 +4,7 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/algorithm.h"
+#include "algorithms/relational_algorithm.h"
 #include "model/ucc.h"
 #include "util/config/equal_nulls/option.h"
 #include "util/config/equal_nulls/type.h"
@@ -13,7 +13,7 @@
 namespace algos {
 
 // Base class for all algorithms that mine UCCs
-class UCCAlgorithm : public Algorithm {
+class UCCAlgorithm : public RelationalAlgorithm {
 private:
     void ResetState() final {
         ucc_collection_.Clear();
@@ -35,7 +35,7 @@ protected:
     constexpr static std::string_view kDefaultPhaseName = "UCC mining";
 
     explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
-        : Algorithm(std::move(phase_names)) {
+        : RelationalAlgorithm(std::move(phase_names)) {
         RegisterOptions();
         MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
     }

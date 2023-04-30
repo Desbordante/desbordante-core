@@ -4,22 +4,21 @@ namespace algos {
 
 Aid::Aid() : FDAlgorithm({kDefaultPhaseName}) {}
 
-void Aid::LoadDataFd(model::IDatasetStream& data_stream) {
-    number_of_attributes_ = data_stream.GetNumberOfColumns();
+void Aid::LoadDataInternal() {
+    number_of_attributes_ = data_->GetNumberOfColumns();
     if (number_of_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
-                                                 is_null_equal_null_);
+    schema_ = std::make_unique<RelationalSchema>(data_->GetRelationName(), is_null_equal_null_);
 
     for (size_t i = 0; i < number_of_attributes_; ++i) {
-        const std::basic_string<char>& column_name = data_stream.GetColumnName(static_cast<int>(i));
+        const std::basic_string<char>& column_name = data_->GetColumnName(static_cast<int>(i));
         schema_->AppendColumn(column_name);
     }
 
-    while (data_stream.HasNextRow()) {
-        const std::vector<std::string>& next_line = data_stream.GetNextRow();
+    while (data_->HasNextRow()) {
+        const std::vector<std::string>& next_line = data_->GetNextRow();
         if (next_line.empty()) {
             break;
         }

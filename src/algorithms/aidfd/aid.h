@@ -40,7 +40,7 @@ private:
 
     void ResetStateFd() final;
 
-    void LoadDataFd(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
 
     void BuildClusters();

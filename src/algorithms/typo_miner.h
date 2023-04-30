@@ -1,8 +1,8 @@
 #pragma once
 
 #include "algorithms/create_algorithm.h"
-#include "algorithms/algorithm.h"
 #include "algorithms/pyro.h"
+#include "algorithms/relational_algorithm.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
@@ -12,7 +12,7 @@
 
 namespace algos {
 
-class TypoMiner : public Algorithm {
+class TypoMiner : public RelationalAlgorithm {
 private:
     std::unique_ptr<FDAlgorithm> precise_algo_;
     std::unique_ptr<FDAlgorithm> approx_algo_;
@@ -27,7 +27,7 @@ private:
 
     void ResetState() final;
 
-    void LoadDataInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
 
     static bool FDLess(FD const& l, FD const& r);

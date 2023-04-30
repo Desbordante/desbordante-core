@@ -11,7 +11,7 @@
 namespace algos {
 
 ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
-        : Algorithm(std::move(phase_names)) {
+    : RelationalAlgorithm(std::move(phase_names)) {
     using namespace util::config::names;
     RegisterOptions();
     MakeOptionsAvailable({kInputFormat});
@@ -41,15 +41,15 @@ void ARAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 
-void ARAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
+void ARAlgorithm::LoadDataInternal() {
     switch (input_format_) {
         case InputFormat::singular:
             transactional_data_ = model::TransactionalData::CreateFromSingular(
-                    data_stream, tid_column_index_, item_column_index_);
+                    *data_, tid_column_index_, item_column_index_);
             break;
         case InputFormat::tabular:
             transactional_data_ =
-                    model::TransactionalData::CreateFromTabular(data_stream, first_column_tid_);
+                    model::TransactionalData::CreateFromTabular(*data_, first_column_tid_);
             break;
         default:
             assert(0);
