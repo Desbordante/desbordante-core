@@ -5,21 +5,21 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/names_and_descriptions.h"
 
 namespace algos {
 
 ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
-    using namespace config::names;
+    using namespace util::config::names;
     RegisterOptions();
     MakeOptionsAvailable({kInputFormat});
 }
 
 void ARAlgorithm::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
     auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
     auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
@@ -38,7 +38,7 @@ void ARAlgorithm::ResetState() {
 }
 
 void ARAlgorithm::MakeExecuteOptsAvailable() {
-    using namespace config::names;
+    using namespace util::config::names;
     MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 

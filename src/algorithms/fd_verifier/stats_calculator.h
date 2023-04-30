@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "algorithms/fd_verifier/highlight.h"
-#include "algorithms/options/indices/type.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "util/config/indices/type.h"
 
 namespace algos::fd_verifier {
 
@@ -19,8 +19,8 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    config::IndicesType lhs_indices_;
-    config::IndexType rhs_index_;
+    util::config::IndicesType lhs_indices_;
+    util::config::IndexType rhs_index_;
 
     size_t num_error_rows_ = 0;
     long double error_ = 0;
@@ -87,7 +87,8 @@ public:
 
     explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                             config::IndicesType lhs_indices, config::IndexType rhs_index)
+                             util::config::IndicesType lhs_indices,
+                             util::config::IndexType rhs_index)
         : relation_(std::move(relation)),
           typed_relation_(std::move(typed_relation)),
           lhs_indices_(std::move(lhs_indices)),

@@ -5,8 +5,8 @@
 #include <easylogging++.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/options/all_options.h"
-#include "algorithms/options/enum_to_available_values.h"
+#include "util/config/all_options.h"
+#include "util/config/enum_to_available_values.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -27,11 +27,11 @@ boost::program_options::options_description InfoOptions() {
 
 int main(int argc, char const* argv[]) {
     namespace po = boost::program_options;
-    using namespace algos::config;
+    using namespace util::config;
 
     std::string algorithm;
     std::string const algo_desc = "algorithm to use for data profiling\n" +
-                                  algos::EnumToAvailableValues<algos::AlgorithmType>() + " + [ac]";
+                                  util::EnumToAvailableValues<algos::AlgorithmType>() + " + [ac]";
     auto general_options = GeneralOptions();
 
     // clang-format off

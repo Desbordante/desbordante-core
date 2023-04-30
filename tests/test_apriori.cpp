@@ -4,8 +4,8 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/association_rules/apriori.h"
-#include "algorithms/options/names.h"
 #include "datasets.h"
+#include "util/config/names.h"
 
 namespace fs = std::filesystem;
 
@@ -60,7 +60,7 @@ protected:
                                            unsigned int tidColumnIndex,
                                            unsigned int itemColumnIndex, char separator = ',',
                                            bool hasHeader = true) {
-        using namespace algos::config::names;
+        using namespace util::config::names;
         return {{kData, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
@@ -74,7 +74,7 @@ protected:
     static algos::StdParamsMap GetParamMap(double minsup, double minconf,
                                            const std::filesystem::path& path, bool firstColumnTid,
                                            char separator = ',', bool hasHeader = true) {
-        using namespace algos::config::names;
+        using namespace util::config::names;
         return {{kData, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},

@@ -96,7 +96,7 @@ void Algorithm::SetOption(std::string_view option_name, boost::any const& value)
         return;
     }
     std::string_view name = it->first;
-    config::IOption& option = *it->second;
+    util::config::IOption& option = *it->second;
     if (available_options_.find(name) == available_options_.end()) {
         throw std::invalid_argument("Invalid option \"" + std::string{name} + '"');
     }

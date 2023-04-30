@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include "algorithms/options/error/type.h"
-#include "algorithms/options/max_lhs/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/relation_data.h"
+#include "util/config/error/type.h"
+#include "util/config/max_lhs/type.h"
 #include "util/position_list_index.h"
 
 namespace algos {
@@ -19,9 +19,9 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    config::ErrorType max_fd_error_;
-    config::ErrorType max_ucc_error_;
-    config::MaxLhsType max_lhs_;
+    util::config::ErrorType max_fd_error_;
+    util::config::ErrorType max_ucc_error_;
+    util::config::MaxLhsType max_lhs_;
 
     int count_of_fd_ = 0;
     int count_of_ucc_ = 0;

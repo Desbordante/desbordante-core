@@ -4,8 +4,8 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/thread_number/option.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/thread_number/option.h"
 
 namespace algos {
 
@@ -14,16 +14,16 @@ namespace mo = model;
 
 DataStats::DataStats() : Algorithm({"Calculating statistics"}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
 void DataStats::RegisterOptions() {
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::ThreadNumberOpt(&threads_num_));
 }
 
 void DataStats::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
+    MakeOptionsAvailable({util::config::ThreadNumberOpt.GetName()});
 }
 
 void DataStats::ResetState() {

@@ -2,18 +2,18 @@
 
 #include <thread>
 
-#include "algorithms/options/equal_nulls/option.h"
+#include "util/config/equal_nulls/option.h"
 
 namespace algos {
 
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
 void FDAlgorithm::RegisterOptions() {
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
 }
 
 void FDAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {

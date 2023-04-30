@@ -6,9 +6,9 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd_algorithm.h"
-#include "algorithms/options/error/type.h"
-#include "algorithms/options/names.h"
 #include "datasets.h"
+#include "util/config/error/type.h"
+#include "util/config/names.h"
 
 template <typename T>
 class AlgorithmTest : public ::testing::Test {
@@ -26,12 +26,12 @@ protected:
 
     algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator = ',',
                                     bool has_header = true) {
-        using namespace algos::config::names;
+        using namespace util::config::names;
         return {
                 {kData, path},
                 {kSeparator, separator},
                 {kHasHeader, has_header},
-                {kError, algos::config::ErrorType{0.0}},
+                {kError, util::config::ErrorType{0.0}},
                 {kSeed, decltype(Configuration::seed){0}},
         };
     }

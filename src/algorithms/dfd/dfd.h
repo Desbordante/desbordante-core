@@ -4,9 +4,9 @@
 #include <stack>
 
 #include "algorithms/dfd/partition_storage/partition_storage.h"
-#include "algorithms/options/thread_number/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/vertical.h"
+#include "util/config/thread_number/type.h"
 
 namespace algos {
 
@@ -14,7 +14,7 @@ class DFD : public PliBasedFDAlgorithm {
 private:
     std::vector<Vertical> unique_columns_;
 
-    config::ThreadNumType number_of_threads_;
+    util::config::ThreadNumType number_of_threads_;
 
     void MakeExecuteOptsAvailable() final;
     void RegisterOptions();

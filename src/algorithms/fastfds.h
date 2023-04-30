@@ -5,11 +5,11 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "algorithms/options/max_lhs/type.h"
-#include "algorithms/options/thread_number/type.h"
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/column_layout_relation_data.h"
 #include "model/vertical.h"
+#include "util/config/max_lhs/type.h"
+#include "util/config/thread_number/type.h"
 
 namespace algos {
 
@@ -70,8 +70,8 @@ private:
 
     RelationalSchema const* schema_;
     std::vector<DiffSet> diff_sets_;
-    config::ThreadNumType threads_num_;
-    config::MaxLhsType max_lhs_;
+    util::config::ThreadNumType threads_num_;
+    util::config::MaxLhsType max_lhs_;
     double percent_per_col_;
 };
 

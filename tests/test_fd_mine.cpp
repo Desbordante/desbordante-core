@@ -8,12 +8,12 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd_mine.h"
-#include "algorithms/options/error/type.h"
-#include "algorithms/options/names.h"
 #include "algorithms/pyro.h"
 #include "algorithms/tane.h"
 #include "datasets.h"
 #include "model/relational_schema.h"
+#include "util/config/error/type.h"
+#include "util/config/names.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 
@@ -21,7 +21,7 @@ using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap;
 
 using std::string, std::vector;
 
-namespace onam = algos::config::names;
+namespace onam = util::config::names;
 
 std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine() {
     std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
@@ -150,7 +150,7 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 }
 
 TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
-    namespace onam = algos::config::names;
+    namespace onam = util::config::names;
 
     try {
         for (size_t i = 0; i < LightDatasets::DatasetQuantity(); i++) {
@@ -167,7 +167,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                                     {onam::kSeparator, LightDatasets::Separator(i)},
                                     {onam::kHasHeader, LightDatasets::HasHeader(i)},
                                     {onam::kSeed, decltype(Configuration::seed){0}},
-                                    {onam::kError, algos::config::ErrorType{0.0}}};
+                                    {onam::kError, util::config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
             auto& pyro = *pyro_ptr;
 

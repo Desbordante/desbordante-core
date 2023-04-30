@@ -17,7 +17,7 @@ static algos::StdParamsMap GetParamMap(std::string_view dataset, char const sepa
                                        bool const has_header = true,
                                        bool const is_null_equal_null = true,
                                        ushort thread_num = 1) {
-    using namespace algos::config::names;
+    using namespace util::config::names;
     return {{kData, test_data_dir / dataset},
             {kHasHeader, has_header},
             {kSeparator, separator},
