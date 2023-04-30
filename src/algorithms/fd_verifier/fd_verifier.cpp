@@ -8,6 +8,7 @@
 #include "util/config/indices/option.h"
 #include "util/config/indices/validate_index.h"
 #include "util/config/names_and_descriptions.h"
+#include "util/config/option_using.h"
 
 namespace algos::fd_verifier {
 
@@ -17,9 +18,7 @@ FDVerifier::FDVerifier() : Algorithm({}) {
 }
 
 void FDVerifier::RegisterOptions() {
-    using namespace util::config::names;
-    using namespace util::config::descriptions;
-    using util::config::Option;
+    DESBORDANTE_OPTION_USING;
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
     auto check_rhs = [this](util::config::IndexType rhs_index) {

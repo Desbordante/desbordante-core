@@ -13,6 +13,7 @@
 #include "util/config/equal_nulls/option.h"
 #include "util/config/indices/option.h"
 #include "util/config/names_and_descriptions.h"
+#include "util/config/option_using.h"
 
 namespace algos::metric {
 
@@ -71,9 +72,7 @@ void MetricVerifier::ValidateRhs(util::config::IndicesType const& rhs_indices) {
 }
 
 void MetricVerifier::RegisterOptions() {
-    using namespace util::config::names;
-    using namespace util::config::descriptions;
-    using util::config::Option;
+    DESBORDANTE_OPTION_USING;
 
     auto check_parameter = [](long double parameter) {
         if (parameter < 0) throw std::invalid_argument("Parameter out of range");
