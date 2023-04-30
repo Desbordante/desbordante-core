@@ -12,7 +12,7 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace {
 constexpr auto kHelp = "help";
-constexpr auto kPrimitive = "primitive";
+constexpr auto kAlgorithm = "algorithm";
 constexpr auto kDHelp = "print the help message and exit";
 
 boost::program_options::options_description InfoOptions() {
@@ -29,14 +29,14 @@ int main(int argc, char const* argv[]) {
     namespace po = boost::program_options;
     using namespace algos::config;
 
-    std::string primitive;
-    std::string const prim_desc = "algorithm to use for data profiling\n" +
-                                  algos::EnumToAvailableValues<algos::PrimitiveType>() + " + [ac]";
+    std::string algorithm;
+    std::string const algo_desc = "algorithm to use for data profiling\n" +
+                                  algos::EnumToAvailableValues<algos::AlgorithmType>() + " + [ac]";
     auto general_options = GeneralOptions();
 
     // clang-format off
     general_options.add_options()
-            (kPrimitive, po::value<std::string>(&primitive)->required(), prim_desc.c_str());
+            (kAlgorithm, po::value<std::string>(&algorithm)->required(), algo_desc.c_str());
     // clang-format on
 
     auto all_options = InfoOptions().add(general_options).add(AlgoOptions());
@@ -60,9 +60,9 @@ int main(int argc, char const* argv[]) {
 
     el::Loggers::configureFromGlobal("logging.conf");
 
-    std::unique_ptr<algos::Primitive> algorithm_instance;
+    std::unique_ptr<algos::Algorithm> algorithm_instance;
     try {
-        algorithm_instance = algos::CreatePrimitive(primitive, vm);
+        algorithm_instance = algos::CreateAlgorithm(algorithm, vm);
     } catch (std::exception& e) {
         std::cout << e.what() << std::endl;
         return 1;

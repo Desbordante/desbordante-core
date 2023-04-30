@@ -1,38 +1,38 @@
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 
 #include <cassert>
 
 namespace algos {
 
-bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view option_name,
+bool Algorithm::HandleUnknownOption([[maybe_unused]] std::string_view option_name,
                                     [[maybe_unused]] boost::any const& value) {
     return false;
 }
 
-bool Primitive::FitCompleted() const {
+bool Algorithm::FitCompleted() const {
     return fit_completed_;
 }
 
-void Primitive::AddSpecificNeededOptions(
-        [[maybe_unused]] std::unordered_set<std::string_view> &previous_options) const {}
+void Algorithm::AddSpecificNeededOptions(
+        [[maybe_unused]] std::unordered_set<std::string_view>& previous_options) const {}
 
-void Primitive::MakeExecuteOptsAvailable() {}
+void Algorithm::MakeExecuteOptsAvailable() {}
 
-void Primitive::ClearOptions() noexcept {
+void Algorithm::ClearOptions() noexcept {
     available_options_.clear();
     opt_parents_.clear();
 }
 
-void Primitive::ExecutePrepare() {
+void Algorithm::ExecutePrepare() {
     fit_completed_ = true;
     ClearOptions();
     MakeExecuteOptsAvailable();
 }
 
-Primitive::Primitive(std::vector<std::string_view> phase_names)
+Algorithm::Algorithm(std::vector<std::string_view> phase_names)
     : progress_(std::move(phase_names)) {}
 
-void Primitive::ExcludeOptions(std::string_view parent_option) noexcept {
+void Algorithm::ExcludeOptions(std::string_view parent_option) noexcept {
     auto it = opt_parents_.find(parent_option);
     if (it == opt_parents_.end()) return;
 
@@ -45,7 +45,7 @@ void Primitive::ExcludeOptions(std::string_view parent_option) noexcept {
     opt_parents_.erase(it);
 }
 
-void Primitive::UnsetOption(std::string_view option_name) noexcept {
+void Algorithm::UnsetOption(std::string_view option_name) noexcept {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()
         || available_options_.find(it->first) == available_options_.end())
@@ -54,7 +54,7 @@ void Primitive::UnsetOption(std::string_view option_name) noexcept {
     ExcludeOptions(it->first);
 }
 
-void Primitive::MakeOptionsAvailable(const std::vector<std::string_view> &option_names) {
+void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option_names) {
     for (std::string_view name: option_names) {
         auto it = possible_options_.find(name);
         assert(it != possible_options_.end());
@@ -62,15 +62,15 @@ void Primitive::MakeOptionsAvailable(const std::vector<std::string_view> &option
     }
 }
 
-void Primitive::Fit(model::IDatasetStream& data) {
+void Algorithm::Fit(model::IDatasetStream& data_stream) {
     if (!GetNeededOptions().empty()) throw std::logic_error(
                 "All options need to be set before starting processing.");
-    FitInternal(data);
-    data.Reset();
+    FitInternal(data_stream);
+    data_stream.Reset();
     ExecutePrepare();
 }
 
-unsigned long long Primitive::Execute() {
+unsigned long long Algorithm::Execute() {
     if (!fit_completed_) {
         throw std::logic_error("Data must be processed before execution.");
     }
@@ -87,7 +87,7 @@ unsigned long long Primitive::Execute() {
     return time_ms;
 }
 
-void Primitive::SetOption(std::string_view option_name, boost::any const& value) {
+void Algorithm::SetOption(std::string_view option_name, boost::any const& value) {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()) {
         if (!HandleUnknownOption(option_name, value)) {
@@ -112,7 +112,7 @@ void Primitive::SetOption(std::string_view option_name, boost::any const& value)
     child_opts.insert(child_opts.end(), new_opts.begin(), new_opts.end());
 }
 
-std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
+std::unordered_set<std::string_view> Algorithm::GetNeededOptions() const {
     std::unordered_set<std::string_view> needed{};
     for (std::string_view name : available_options_) {
         if (!possible_options_.at(name)->IsSet()) {
@@ -123,7 +123,7 @@ std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
     return needed;
 }
 
-std::type_index Primitive::GetTypeIndex(std::string_view option_name) const {
+std::type_index Algorithm::GetTypeIndex(std::string_view option_name) const {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()) return typeid(void);
     return it->second->GetTypeIndex();

@@ -7,7 +7,7 @@
 namespace algos {
 
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
-        : Primitive(std::move(phase_names)) {
+        : Algorithm(std::move(phase_names)) {
     RegisterOptions();
     MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }

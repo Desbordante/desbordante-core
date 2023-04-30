@@ -8,13 +8,13 @@
 #include "algorithms/fd_verifier/stats_calculator.h"
 #include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/options/indices/type.h"
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 
 namespace algos::fd_verifier {
 
-/* Primitive used for verifying a particular FD and retrieving useful information about this FD in
+/* Algorithm used for verifying a particular FD and retrieving useful information about this FD in
  * case it doesn't hold */
-class FDVerifier : public Primitive {
+class FDVerifier : public Algorithm {
 private:
     config::IndicesType lhs_indices_;
     config::IndexType rhs_index_;

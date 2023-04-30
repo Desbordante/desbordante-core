@@ -18,7 +18,7 @@
 
 namespace algos {
 
-class Primitive {
+class Algorithm {
 private:
     util::Progress progress_;
     // All options the algorithm may use
@@ -66,22 +66,22 @@ protected:
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
 
-    // Overload this to add options after your primitive has processed the data
+    // Overload this to add options after your algorithm has processed the data
     // given through Fit
     virtual void MakeExecuteOptsAvailable();
 
 public:
     constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
 
-    Primitive(Primitive const& other) = delete;
-    Primitive& operator=(Primitive const& other) = delete;
-    Primitive(Primitive&& other) = delete;
-    Primitive& operator=(Primitive&& other) = delete;
-    virtual ~Primitive() = default;
+    Algorithm(Algorithm const& other) = delete;
+    Algorithm& operator=(Algorithm const& other) = delete;
+    Algorithm(Algorithm&& other) = delete;
+    Algorithm& operator=(Algorithm&& other) = delete;
+    virtual ~Algorithm() = default;
 
     // The constructor accepts vector of names of the mining algorithm phases.
     // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
-    explicit Primitive(std::vector<std::string_view> phase_names);
+    explicit Algorithm(std::vector<std::string_view> phase_names);
 
     void Fit(model::IDatasetStream & data_stream);
     bool FitCompleted() const;

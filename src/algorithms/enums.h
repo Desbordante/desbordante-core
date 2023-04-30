@@ -5,13 +5,13 @@
 namespace algos {
 
 // clang-format off
-/* Enumeration of all supported non-pipeline primitives. If you implement a new
- * primitive please add its corresponding value to this enum and to the type
+/* Enumeration of all supported non-pipeline algorithms. If you implement a new
+ * algorithm please add its corresponding value to this enum and to the type
  * tuple above.
  * NOTE: algorithm string name representation is taken from the value in this
  * enum, so name it appropriately (lowercase and without additional symbols).
  */
-BETTER_ENUM(PrimitiveType, char,
+BETTER_ENUM(AlgorithmType, char,
 /* Functional dependency mining algorithms */
     depminer = 0,
     dfd,

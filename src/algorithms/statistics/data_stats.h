@@ -8,7 +8,7 @@
 
 namespace algos {
 
-class DataStats : public Primitive {
+class DataStats : public Algorithm {
     config::EqNullsType is_null_equal_null_;
     config::ThreadNumType threads_num_;
 

@@ -7,7 +7,7 @@
 #include <boost/any.hpp>
 
 #include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/fd.h"
 #include "util/primitive_collection.h"
@@ -21,7 +21,7 @@ namespace algos {
 /* It is highly recommended to inherit your Algorithm from this class.
  * Consider TANE as an example of such a FDAlgorithm usage.
  * */
-class FDAlgorithm : public algos::Primitive {
+class FDAlgorithm : public algos::Algorithm {
 private:
     friend util::AgreeSetFactory;
 

@@ -8,13 +8,13 @@
 #include <boost/any.hpp>
 
 #include "algorithms/ar_algorithm_enums.h"
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 #include "model/ar.h"
 #include "model/transactional_data.h"
 
 namespace algos {
 
-class ARAlgorithm : public algos::Primitive {
+class ARAlgorithm : public algos::Algorithm {
 private:
     using MinSupType = double;
     double minconf_;

@@ -75,9 +75,9 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<
 TYPED_TEST_SUITE_P(AlgorithmTest);
 
 TYPED_TEST_P(AlgorithmTest, ThrowsOnEmpty) {
-    auto primitive = TestFixture::CreateAndConfToFit();
+    auto algorithm = TestFixture::CreateAndConfToFit();
     auto parser = TestFixture::MakeCsvParser(test_data_dir / "TestEmpty.csv", ',', true);
-    ASSERT_THROW(primitive->Fit(parser), std::runtime_error);
+    ASSERT_THROW(algorithm->Fit(parser), std::runtime_error);
 }
 
 TYPED_TEST_P(AlgorithmTest, ReturnsEmptyOnSingleNonKey) {
