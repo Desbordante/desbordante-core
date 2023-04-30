@@ -6,6 +6,7 @@
 #include <easylogging++.h>
 
 #include "util/config/names_and_descriptions.h"
+#include "util/config/new_options_shorthands.h"
 
 namespace algos {
 
@@ -17,9 +18,7 @@ ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
 }
 
 void ARAlgorithm::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    NEW_OPTIONS_SHORTHANDS
 
     auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
     auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };

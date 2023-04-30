@@ -11,6 +11,7 @@
 #include "util/config/error/option.h"
 #include "util/config/max_lhs/option.h"
 #include "util/config/names_and_descriptions.h"
+#include "util/config/new_options_shorthands.h"
 #include "util/config/thread_number/option.h"
 
 namespace algos {
@@ -29,9 +30,7 @@ Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 }
 
 void Pyro::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    NEW_OPTIONS_SHORTHANDS
 
     RegisterOption(util::config::ErrorOpt(&configuration_.max_ucc_error));
     RegisterOption(util::config::MaxLhsOpt(&configuration_.max_lhs));
