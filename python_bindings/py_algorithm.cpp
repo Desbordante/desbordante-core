@@ -18,14 +18,12 @@ namespace python_bindings {
 namespace py = pybind11;
 
 void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
-    auto params = kwargs.cast<std::unordered_map<std::string, py::object>>();
-    std::unordered_map<std::string, boost::any> any_map{};
-    for (auto const& [opt_name, obj] : params) {
-        std::type_index type_index = algorithm_->GetTypeIndex(opt_name);
-        if (type_index == void_index) continue;
-        any_map[opt_name] = PyToAny(type_index, obj);
-    }
-    algos::ConfigureFromMap(*algorithm_, any_map);
+    algos::ConfigureFromFunction(*algorithm_, [this, &kwargs](std::string_view option_name) {
+        std::type_index type_index = algorithm_->GetTypeIndex(option_name);
+        assert(type_index != void_index);
+        return kwargs.contains(option_name) ? PyToAny(type_index, kwargs[py::str{option_name}])
+                                            : boost::any{};
+    });
 }
 
 void PyAlgorithmBase::SetOption(std::string_view option_name, py::handle option_value) {
