@@ -11,7 +11,7 @@
 
 namespace algos::fd_verifier {
 
-FDVerifier::FDVerifier() : Primitive({}) {
+FDVerifier::FDVerifier() : Algorithm({}) {
     RegisterOptions();
     MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }

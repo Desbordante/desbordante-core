@@ -2,12 +2,12 @@
 
 #include <memory>
 
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 
 namespace python_bindings {
 
 template <typename T>
-[[nodiscard]] T const& GetAlgorithm(std::unique_ptr<algos::Primitive> const& ptr) {
+[[nodiscard]] T const& GetAlgorithm(std::unique_ptr<algos::Algorithm> const& ptr) {
     return dynamic_cast<T const&>(*ptr);
 }
 

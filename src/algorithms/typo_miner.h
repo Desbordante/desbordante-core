@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/create_primitive.h"
+#include "algorithms/algorithm.h"
+#include "algorithms/create_algorithm.h"
 #include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/options/names.h"
-#include "algorithms/primitive.h"
 #include "algorithms/pyro.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/idataset_stream.h"
@@ -12,7 +12,7 @@
 
 namespace algos {
 
-class TypoMiner : public Primitive {
+class TypoMiner : public Algorithm {
 private:
     std::unique_ptr<FDAlgorithm> precise_algo_;
     std::unique_ptr<FDAlgorithm> approx_algo_;
@@ -61,7 +61,7 @@ public:
                            * following immediately after the given */
     };
 
-    explicit TypoMiner(PrimitiveType precise, PrimitiveType approx = PrimitiveType::pyro);
+    explicit TypoMiner(AlgorithmType precise, AlgorithmType approx = AlgorithmType::pyro);
 
     std::vector<util::PLI::Cluster> FindClustersWithTypos(FD const& typos_fd,
                                                           bool const sort_clusters = true) const;

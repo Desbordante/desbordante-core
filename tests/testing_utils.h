@@ -19,9 +19,9 @@ protected:
     }
 
     std::unique_ptr<algos::FDAlgorithm> CreateAndConfToFit() {
-        std::unique_ptr<algos::FDAlgorithm> prim = std::make_unique<T>();
-        algos::ConfigureFromMap(*prim, algos::StdParamsMap{});
-        return prim;
+        std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
+        algos::ConfigureFromMap(*algorithm, algos::StdParamsMap{});
+        return algorithm;
     }
 
     algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator = ',',
@@ -39,7 +39,7 @@ protected:
     std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(const std::string& filename,
                                                                 char separator = ',',
                                                                 bool has_header = true) {
-        return algos::CreateAndLoadPrimitive<T>(
+        return algos::CreateAndLoadAlgorithm<T>(
                 GetParamMap(test_data_dir / filename, separator, has_header));
     }
 };

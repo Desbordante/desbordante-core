@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "algorithms/algorithm.h"
 #include "algorithms/metric/aliases.h"
 #include "algorithms/metric/enums.h"
 #include "algorithms/metric/highlight_calculator.h"
@@ -16,7 +17,6 @@
 #include "algorithms/metric/points_calculator.h"
 #include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/options/indices/type.h"
-#include "algorithms/primitive.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/convex_hull.h"
@@ -24,7 +24,7 @@
 
 namespace algos::metric {
 
-class MetricVerifier : public algos::Primitive {
+class MetricVerifier : public algos::Algorithm {
 private:
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];

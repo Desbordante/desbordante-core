@@ -7,15 +7,15 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
 
 namespace python_bindings {
 
 class PyAlgorithmBase {
 protected:
-    std::unique_ptr<algos::Primitive> algorithm_;
+    std::unique_ptr<algos::Algorithm> algorithm_;
 
-    explicit PyAlgorithmBase(std::unique_ptr<algos::Primitive> ptr) : algorithm_(std::move(ptr)) {}
+    explicit PyAlgorithmBase(std::unique_ptr<algos::Algorithm> ptr) : algorithm_(std::move(ptr)) {}
 
     void Configure(pybind11::kwargs const& kwargs);
 
