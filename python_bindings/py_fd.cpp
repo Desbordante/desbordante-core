@@ -14,7 +14,7 @@ PyFD::PyFD(RawFD const& fd) : rhs_index_(fd.rhs_) {
 std::string PyFD::ToString() const {
     std::stringstream stream;
     stream << "( ";
-    for (algos::config::IndexType index : lhs_indices_) {
+    for (util::config::IndexType index : lhs_indices_) {
         stream << index << " ";
     }
     stream << ") -> ";

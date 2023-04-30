@@ -1,8 +1,8 @@
 #include "algorithms/typo_miner.h"
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/error/option.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/error/option.h"
+#include "util/config/names_and_descriptions.h"
 
 namespace algos {
 
@@ -17,13 +17,13 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
 void TypoMiner::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
     auto radius_check = [](double radius) {
         if (!(radius == -1 || radius >= 0)) {
@@ -39,13 +39,13 @@ void TypoMiner::RegisterOptions() {
         }
     };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
     RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
 }
 
 void TypoMiner::MakeExecuteOptsAvailable() {
-    using namespace config::names;
+    using namespace util::config::names;
     MakeOptionsAvailable({kRadius, kRatio});
 }
 
@@ -54,15 +54,15 @@ void TypoMiner::ResetState() {
 }
 
 bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any const& value) {
-    if (option_name == config::ErrorOpt.GetName()) {
+    if (option_name == util::config::ErrorOpt.GetName()) {
         if (value.empty()) {
             throw std::invalid_argument("Must specify error value when mining typos.");
         }
-        auto error = boost::any_cast<config::ErrorType>(value);
+        auto error = boost::any_cast<util::config::ErrorType>(value);
         if (error == 0.0) {
             throw std::invalid_argument("Typo mining with error 0 is meaningless");
         }
-        return static_cast<bool>(TrySetOption(option_name, config::ErrorType{0.0}, value));
+        return static_cast<bool>(TrySetOption(option_name, util::config::ErrorType{0.0}, value));
     }
     return static_cast<bool>(TrySetOption(option_name, value, value));
 }
@@ -86,8 +86,8 @@ void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& p
     auto approx_options = approx_algo_->GetNeededOptions();
     if (!DataLoaded()) {
         // blocked by TypoMiner's is_null_equal_null option
-        precise_options.erase(config::names::kEqualNulls);
-        approx_options.erase(config::names::kEqualNulls);
+        precise_options.erase(util::config::names::kEqualNulls);
+        approx_options.erase(util::config::names::kEqualNulls);
     }
     previous_options.insert(precise_options.begin(), precise_options.end());
     previous_options.insert(approx_options.begin(), approx_options.end());
@@ -102,7 +102,7 @@ void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
     auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
     auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
     boost::any null_opt_any{is_null_equal_null_};
-    TrySetOption(config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
+    TrySetOption(util::config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
     if (!precise_algo_->DataLoaded()) {
         if (precise_pli != nullptr)
             precise_pli->LoadData(relation_);

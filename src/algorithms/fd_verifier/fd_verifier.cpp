@@ -4,36 +4,36 @@
 #include <memory>
 #include <stdexcept>
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/indices/option.h"
-#include "algorithms/options/indices/validate_index.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/indices/option.h"
+#include "util/config/indices/validate_index.h"
+#include "util/config/names_and_descriptions.h"
 
 namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
 void FDVerifier::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
-    auto check_rhs = [this](config::IndexType rhs_index) {
-        config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
+    auto check_rhs = [this](util::config::IndexType rhs_index) {
+        util::config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
     };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
-    using namespace config::names;
-    MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), kRhsIndex});
+    using namespace util::config::names;
+    MakeOptionsAvailable({util::config::LhsIndicesOpt.GetName(), kRhsIndex});
 }
 
 void FDVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {

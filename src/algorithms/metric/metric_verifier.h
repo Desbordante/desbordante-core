@@ -15,10 +15,10 @@
 #include "algorithms/metric/highlight_calculator.h"
 #include "algorithms/metric/points.h"
 #include "algorithms/metric/points_calculator.h"
-#include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/options/indices/type.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "util/config/equal_nulls/type.h"
+#include "util/config/indices/type.h"
 #include "util/convex_hull.h"
 #include "util/qgram_vector.h"
 
@@ -28,12 +28,12 @@ class MetricVerifier : public algos::Algorithm {
 private:
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
-    config::IndicesType lhs_indices_;
-    config::IndicesType rhs_indices_;
+    util::config::IndicesType lhs_indices_;
+    util::config::IndicesType rhs_indices_;
     long double parameter_;
     unsigned int q_;
     bool dist_from_null_is_infinity_;
-    config::EqNullsType is_null_equal_null_;
+    util::config::EqNullsType is_null_equal_null_;
 
     bool metric_fd_holds_ = false;
 
@@ -72,9 +72,10 @@ private:
     ClusterFunction GetClusterFunctionForOneDimension();
     ClusterFunction GetClusterFunction();
     void VerifyMetricFD();
-    std::string GetStringValue(config::IndicesType const& index_vec, ClusterIndex row_index) const;
+    std::string GetStringValue(util::config::IndicesType const& index_vec,
+                               ClusterIndex row_index) const;
     void VisualizeHighlights() const;
-    void ValidateRhs(config::IndicesType const& rhs_indices);
+    void ValidateRhs(util::config::IndicesType const& rhs_indices);
     void RegisterOptions();
 
     void ResetState() final;
@@ -89,11 +90,11 @@ public:
         return metric_fd_holds_;
     }
 
-    config::IndicesType const& GetLhsIndices() const {
+    util::config::IndicesType const& GetLhsIndices() const {
         return lhs_indices_;
     }
 
-    config::IndicesType const& GetRhsIndices() const {
+    util::config::IndicesType const& GetRhsIndices() const {
         return rhs_indices_;
     }
 

@@ -10,10 +10,10 @@
 
 #include <boost/any.hpp>
 
-#include "algorithms/options/ioption.h"
-#include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
+#include "util/config/ioption.h"
+#include "util/config/option.h"
 #include "util/progress.h"
 
 namespace algos {
@@ -22,11 +22,11 @@ class Algorithm {
 private:
     util::Progress progress_;
     // All options the algorithm may use
-    std::unordered_map<std::string_view, std::unique_ptr<config::IOption>> possible_options_{};
+    std::unordered_map<std::string_view, std::unique_ptr<util::config::IOption>> possible_options_;
     // All options that can be set at the moment
     std::unordered_set<std::string_view> available_options_;
     // Maps a parameter that added other parameters to their names.
-    std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
+    std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_;
 
     bool data_loaded_ = false;
 
@@ -53,10 +53,10 @@ protected:
     void MakeOptionsAvailable(std::vector<std::string_view> const& option_names);
 
     template <typename T>
-    void RegisterOption(config::Option<T> option) {
+    void RegisterOption(util::config::Option<T> option) {
         auto name = option.GetName();
         assert(possible_options_.find(name) == possible_options_.end());
-        possible_options_[name] = std::make_unique<config::Option<T>>(std::move(option));
+        possible_options_[name] = std::make_unique<util::config::Option<T>>(std::move(option));
     }
 
     // Overload this if you want to work with options outside of
