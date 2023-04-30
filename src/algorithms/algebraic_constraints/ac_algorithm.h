@@ -8,8 +8,8 @@
 #include "ac_exception.h"
 #include "ac_exception_finder.h"
 #include "ac_pairs_collection.h"
-#include "algorithms/legacy_primitive.h"
-#include "algorithms/primitive.h"
+#include "algorithms/algorithm.h"
+#include "algorithms/legacy_algorithm.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
 #include "ranges_collection.h"
@@ -27,7 +27,7 @@ namespace algos {
  * Also allows discovering exceptions, where exception is a (a_i, b_k) value pair
  * from columns A and B, that has result of binary operation not belonging to any
  * range discovered for (A, B) column pair */
-class ACAlgorithm : public LegacyPrimitive {
+class ACAlgorithm : public LegacyAlgorithm {
 private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;
 
@@ -98,7 +98,7 @@ public:
     };
 
     explicit ACAlgorithm(Config const& config)
-        : LegacyPrimitive(config.data, config.separator, config.has_header,
+        : LegacyAlgorithm(config.data, config.separator, config.has_header,
                           std::vector<std::string_view>()),
           fuzziness_(config.fuzziness),
           weight_(config.weight),

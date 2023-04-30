@@ -16,7 +16,7 @@
 
 namespace algos::metric {
 
-MetricVerifier::MetricVerifier() : Primitive({}) {
+MetricVerifier::MetricVerifier() : Algorithm({}) {
     RegisterOptions();
     MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
