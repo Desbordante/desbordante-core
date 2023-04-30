@@ -49,8 +49,8 @@ protected:
         fd_collection_.Register(std::move(fd_to_register));
     }
 
-    void FitInternal(model::IDatasetStream &data_stream) final;
-    virtual void FitFd(model::IDatasetStream &data_stream) = 0;
+    void LoadDataInternal(model::IDatasetStream &data_stream) final;
+    virtual void LoadDataFd(model::IDatasetStream &data_stream) = 0;
 
 public:
     constexpr static std::string_view kDefaultPhaseName = "FD mining";

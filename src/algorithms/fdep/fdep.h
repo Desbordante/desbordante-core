@@ -27,7 +27,7 @@ private:
 
     std::vector<std::vector<size_t>> tuples_;
 
-    void FitFd(model::IDatasetStream &data_stream) final;
+    void LoadDataFd(model::IDatasetStream &data_stream) final;
 
     void ResetStateFd() final;
     unsigned long long ExecuteInternal() final;

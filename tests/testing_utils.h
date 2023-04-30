@@ -18,7 +18,7 @@ protected:
         return {path, separator, has_header};
     }
 
-    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToFit() {
+    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad() {
         std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
         algos::ConfigureFromMap(*algorithm, algos::StdParamsMap{});
         return algorithm;

@@ -27,7 +27,7 @@ private:
 
     void ResetState() final;
 
-    void FitInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal(model::IDatasetStream &data_stream) final;
     unsigned long long ExecuteInternal() final;
 
     static bool FDLess(FD const& l, FD const& r);

@@ -80,7 +80,7 @@ private:
     void ResetState() final;
 
 protected:
-    void FitInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal(model::IDatasetStream& data_stream) override;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 

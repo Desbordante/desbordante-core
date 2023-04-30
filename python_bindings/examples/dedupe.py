@@ -23,7 +23,7 @@ CONFIG_STRING = f"""Deduplication parameters:
 
 def get_1lhs_fds(df, algo_name, algo_config):
     algo = getattr(desb, algo_name)()
-    algo.fit(df, **algo_config)
+    algo.load_data(df, **algo_config)
     algo.execute(**algo_config)
     return sorted((lhs_indices[0], fd.rhs_index) for fd in algo.get_fds()
                   if len(lhs_indices := fd.lhs_indices) == 1)

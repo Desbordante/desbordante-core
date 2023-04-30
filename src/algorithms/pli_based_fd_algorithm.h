@@ -9,7 +9,7 @@ class PliBasedFDAlgorithm : public FDAlgorithm {
 protected:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 
-    void FitFd(model::IDatasetStream& data_stream) final;
+    void LoadDataFd(model::IDatasetStream& data_stream) final;
 
     ColumnLayoutRelationData const& GetRelation() const noexcept {
         // GetRelation should be called after the dataset has been parsed, i.e. after algorithm
@@ -23,8 +23,7 @@ public:
 
     std::vector<Column const*> GetKeys() const override;
 
-    using Algorithm::Fit;
-    void Fit(std::shared_ptr<ColumnLayoutRelationData> data);
+    void LoadPreparedData(std::shared_ptr<ColumnLayoutRelationData> data);
 };
 
 }  // namespace algos

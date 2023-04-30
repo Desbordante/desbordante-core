@@ -84,7 +84,7 @@ int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& valu
 void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
     auto precise_options = precise_algo_->GetNeededOptions();
     auto approx_options = approx_algo_->GetNeededOptions();
-    if (!FitCompleted()) {
+    if (!DataLoaded()) {
         // blocked by TypoMiner's is_null_equal_null option
         precise_options.erase(config::names::kEqualNulls);
         approx_options.erase(config::names::kEqualNulls);
@@ -93,7 +93,7 @@ void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& p
     previous_options.insert(approx_options.begin(), approx_options.end());
 }
 
-void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {
+void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
     relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
     data_stream.Reset();
     typed_relation_ =
@@ -103,17 +103,17 @@ void TypoMiner::FitInternal(model::IDatasetStream& data_stream) {
     auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
     boost::any null_opt_any{is_null_equal_null_};
     TrySetOption(config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
-    if (!precise_algo_->FitCompleted()) {
+    if (!precise_algo_->DataLoaded()) {
         if (precise_pli != nullptr)
-            precise_pli->Fit(relation_);
+            precise_pli->LoadPreparedData(relation_);
         else
-            precise_algo_->Fit(data_stream);
+            precise_algo_->LoadData(data_stream);
     }
-    if (!approx_algo_->FitCompleted()) {
+    if (!approx_algo_->DataLoaded()) {
         if (approx_pli != nullptr)
-            approx_pli->Fit(relation_);
+            approx_pli->LoadPreparedData(relation_);
         else
-            approx_algo_->Fit(data_stream);
+            approx_algo_->LoadData(data_stream);
     }
 }
 

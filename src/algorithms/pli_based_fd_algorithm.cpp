@@ -5,7 +5,7 @@ namespace algos {
 PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
         : FDAlgorithm(std::move(phase_names)) {}
 
-void PliBasedFDAlgorithm::FitFd(model::IDatasetStream& data_stream) {
+void PliBasedFDAlgorithm::LoadDataFd(model::IDatasetStream& data_stream) {
     relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
 
     if (relation_->GetColumnData().empty()) {
@@ -26,7 +26,7 @@ std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
     return keys;
 }
 
-void PliBasedFDAlgorithm::Fit(std::shared_ptr<ColumnLayoutRelationData> data) {
+void PliBasedFDAlgorithm::LoadPreparedData(std::shared_ptr<ColumnLayoutRelationData> data) {
     if (data->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
     }  // TODO: this has to be repeated for every "alternative" Fit
