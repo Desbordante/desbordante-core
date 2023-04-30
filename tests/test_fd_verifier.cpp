@@ -76,7 +76,7 @@ class TestFDVerifying : public ::testing::TestWithParam<FDVerifyingParams> {};
 TEST_P(TestFDVerifying, DefaultTest) {
     auto const& p = GetParam();
     auto mp = algos::StdParamsMap(p.params);
-    auto verifier = algos::CreateAndLoadPrimitive<algos::fd_verifier::FDVerifier>(mp);
+    auto verifier = algos::CreateAndLoadAlgorithm<algos::fd_verifier::FDVerifier>(mp);
     verifier->Execute();
     EXPECT_EQ(verifier->FDHolds(), p.num_error_clusters == 0);
     EXPECT_DOUBLE_EQ(verifier->GetError(), p.error);

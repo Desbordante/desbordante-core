@@ -88,14 +88,14 @@ protected:
             double minsup, double minconf, const std::filesystem::path& path,
             unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
             bool hasHeader = true) {
-        return algos::CreateAndLoadPrimitive<algos::Apriori>(GetParamMap(
+        return algos::CreateAndLoadAlgorithm<algos::Apriori>(GetParamMap(
                 minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, hasHeader));
     }
 
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
             double minsup, double minconf, const std::filesystem::path& path, bool firstColumnTid,
             char separator = ',', bool hasHeader = true) {
-        return algos::CreateAndLoadPrimitive<algos::Apriori>(
+        return algos::CreateAndLoadAlgorithm<algos::Apriori>(
                 GetParamMap(minsup, minconf, path, firstColumnTid, separator, hasHeader));
     }
 };

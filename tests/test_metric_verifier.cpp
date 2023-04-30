@@ -70,7 +70,7 @@ class TestHighlights : public ::testing::TestWithParam<HighlightTestParams> {};
 
 static std::unique_ptr<algos::metric::MetricVerifier> CreateMetricVerifier(algos::StdParamsMap const& map) {
     auto mp = algos::StdParamsMap(map);
-    return algos::CreateAndLoadPrimitive<algos::metric::MetricVerifier>(mp);
+    return algos::CreateAndLoadAlgorithm<algos::metric::MetricVerifier>(mp);
 }
 
 static bool GetResult(algos::metric::MetricVerifier& metric_verifier) {

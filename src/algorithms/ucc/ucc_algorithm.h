@@ -4,16 +4,16 @@
 #include <string_view>
 #include <vector>
 
+#include "algorithms/algorithm.h"
 #include "algorithms/options/equal_nulls/option.h"
 #include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/primitive.h"
 #include "model/ucc.h"
 #include "util/primitive_collection.h"
 
 namespace algos {
 
 // Base class for all algorithms that mine UCCs
-class UCCAlgorithm : public Primitive {
+class UCCAlgorithm : public Algorithm {
 private:
     void ResetState() final {
         ucc_collection_.Clear();
@@ -35,7 +35,7 @@ protected:
     constexpr static std::string_view kDefaultPhaseName = "UCC mining";
 
     explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
-        : Primitive(std::move(phase_names)) {
+        : Algorithm(std::move(phase_names)) {
         RegisterOptions();
         MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
     }

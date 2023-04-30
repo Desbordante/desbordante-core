@@ -6,13 +6,13 @@
 
 namespace algos {
 
-TypoMiner::TypoMiner(PrimitiveType precise, PrimitiveType approx)
-        : TypoMiner(CreatePrimitiveInstance<FDAlgorithm>(precise),
-                    CreatePrimitiveInstance<FDAlgorithm>(approx)) {}
+TypoMiner::TypoMiner(AlgorithmType precise, AlgorithmType approx)
+    : TypoMiner(CreateAlgorithmInstance<FDAlgorithm>(precise),
+                CreateAlgorithmInstance<FDAlgorithm>(approx)) {}
 
 TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                      std::unique_ptr<FDAlgorithm> approx_algo)
-        : Primitive({/*"Precise fd algorithm execution", "Approximate fd algoritm execution",
+        : Algorithm({/*"Precise fd algorithm execution", "Approximate fd algoritm execution",
                      "Extracting fds with non-zero error"*/}),
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {

@@ -42,7 +42,7 @@ static inline void GetKeysTestImpl(KeysTestParams const& p) {
             {onam::kSeed, decltype(Configuration::seed){0}},
             {onam::kError, algos::config::ErrorType{0.0}}
     };
-    auto pyro_ptr = algos::CreateAndLoadPrimitive<algos::Pyro>(params_map);
+    auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
     auto &pyro = *pyro_ptr;
 
     pyro.Execute();

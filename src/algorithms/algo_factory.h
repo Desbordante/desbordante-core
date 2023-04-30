@@ -8,7 +8,7 @@
 #include <enum.h>
 
 #include "algorithms/algorithms.h"
-#include "algorithms/create_primitive.h"
+#include "algorithms/create_algorithm.h"
 #include "algorithms/legacy_algorithms.h"
 #include "algorithms/options/names.h"
 #include "algorithms/typo_miner.h"
@@ -74,7 +74,7 @@ ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
 }
 
 template <typename ParamsMap>
-std::unique_ptr<Primitive> CreateAcAlgorithmInstance(ParamsMap&& params) {
+std::unique_ptr<Algorithm> CreateAcAlgorithmInstance(ParamsMap&& params) {
     ACAlgorithm::Config const config =
         CreateAcAlgorithmConfigFromMap(std::forward<ParamsMap>(params));
     return std::make_unique<ACAlgorithm>(config);
@@ -83,66 +83,65 @@ std::unique_ptr<Primitive> CreateAcAlgorithmInstance(ParamsMap&& params) {
 }  // namespace details
 
 template <typename OptionMap>
-void ConfigureFromMap(Primitive& primitive, OptionMap&& options) {
+void ConfigureFromMap(Algorithm& algorithm, OptionMap&& options) {
     std::unordered_set<std::string_view> needed;
-    while (!(needed = primitive.GetNeededOptions()).empty()) {
+    while (!(needed = algorithm.GetNeededOptions()).empty()) {
         for (std::string_view option_name : needed) {
             if (options.find(std::string{option_name}) == options.end()) {
-                primitive.SetOption(option_name);
+                algorithm.SetOption(option_name);
             } else {
-                primitive.SetOption(option_name, details::ExtractAnyFromMap(options, option_name));
+                algorithm.SetOption(option_name, details::ExtractAnyFromMap(options, option_name));
             }
         }
     }
 }
 
 template <typename OptionMap>
-void LoadPrimitive(Primitive& prim, OptionMap&& options) {
-    ConfigureFromMap(prim, options);
+void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
+    ConfigureFromMap(algorithm, options);
     auto parser = CSVParser{
             details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
             details::ExtractOptionValue<char>(options, config::names::kSeparator),
             details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
-    prim.Fit(parser);
-    ConfigureFromMap(prim, options);
+    algorithm.Fit(parser);
+    ConfigureFromMap(algorithm, options);
 }
 
 template <typename T, typename OptionMap>
-std::unique_ptr<T> CreateAndLoadPrimitive(OptionMap&& options) {
-    std::unique_ptr<T> prim = std::make_unique<T>();
-    LoadPrimitive(*prim, std::forward<OptionMap>(options));
-    return prim;
+std::unique_ptr<T> CreateAndLoadAlgorithm(OptionMap&& options) {
+    std::unique_ptr<T> algorithm = std::make_unique<T>();
+    LoadAlgorithm(*algorithm, std::forward<OptionMap>(options));
+    return algorithm;
 }
 
 template <typename OptionMap>
-std::unique_ptr<Primitive> CreatePrimitive(PrimitiveType primitive_enum, OptionMap&& options) {
-    std::unique_ptr<Primitive> primitive = CreatePrimitiveInstance(primitive_enum);
-    LoadPrimitive(*primitive, std::forward<OptionMap>(options));
-    return primitive;
+std::unique_ptr<Algorithm> CreateAlgorithm(AlgorithmType algorithm_enum, OptionMap&& options) {
+    std::unique_ptr<Algorithm> algorithm = CreateAlgorithmInstance(algorithm_enum);
+    LoadAlgorithm(*algorithm, std::forward<OptionMap>(options));
+    return algorithm;
 }
 
 template <typename OptionMap>
-std::unique_ptr<Primitive> CreateTypoMiner(OptionMap&& options) {
-    PrimitiveType precise_algo = details::ExtractOptionValue<PrimitiveType>(
-            options, config::names::kPreciseAlgorithm);
-    PrimitiveType approx_algo = details::ExtractOptionValue<PrimitiveType>(
-            options, config::names::kApproximateAlgorithm);
+std::unique_ptr<Algorithm> CreateTypoMiner(OptionMap&& options) {
+    using config::names::kPreciseAlgorithm, config::names::kApproximateAlgorithm;
+    using details::ExtractOptionValue;
+    AlgorithmType precise_algo = ExtractOptionValue<AlgorithmType>(options, kPreciseAlgorithm);
+    AlgorithmType approx_algo = ExtractOptionValue<AlgorithmType>(options, kApproximateAlgorithm);
     std::unique_ptr<TypoMiner> typo_miner = std::make_unique<TypoMiner>(precise_algo, approx_algo);
-    LoadPrimitive(*typo_miner, std::forward<OptionMap>(options));
+    LoadAlgorithm(*typo_miner, std::forward<OptionMap>(options));
     return typo_miner;
 }
 
 template <typename OptionMap>
-std::unique_ptr<Primitive> CreatePrimitive(std::string const& primitive_name,
-                                           OptionMap&& options) {
-    if (primitive_name == "ac") {
+std::unique_ptr<Algorithm> CreateAlgorithm(std::string const& algorithm_name, OptionMap&& options) {
+    if (algorithm_name == "ac") {
         return details::CreateAcAlgorithmInstance(std::forward<OptionMap>(options));
     }
-    if (primitive_name == "typo_miner") {
+    if (algorithm_name == "typo_miner") {
         return CreateTypoMiner(std::forward<OptionMap>(options));
     }
-    PrimitiveType const primitive_enum = PrimitiveType::_from_string_nocase(primitive_name.c_str());
-    return CreatePrimitive(primitive_enum, std::forward<OptionMap>(options));
+    AlgorithmType const algorithm_enum = AlgorithmType::_from_string_nocase(algorithm_name.c_str());
+    return CreateAlgorithm(algorithm_enum, std::forward<OptionMap>(options));
 }
 
 }  // namespace algos

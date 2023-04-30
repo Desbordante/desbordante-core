@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "algorithms/ar_algorithm_enums.h"
-#include "algorithms/create_primitive.h"
+#include "algorithms/create_algorithm.h"
 #include "algorithms/metric/enums.h"
 #include "algorithms/options/names_and_descriptions.h"
 
@@ -62,9 +62,9 @@ boost::program_options::options_description AlgoOptions() {
     typo_options.add_options()
             (names::kRatio, po::value<double>(), desc::kDRatio)
             (names::kRadius, po::value<double>(), desc::kDRadius)
-            (names::kApproximateAlgorithm, po::value<algos::PrimitiveType>(),
+            (names::kApproximateAlgorithm, po::value<algos::AlgorithmType>(),
              desc::kDApproximateAlgorithm)
-            (names::kPreciseAlgorithm, po::value<algos::PrimitiveType>(), desc::kDPreciseAlgorithm)
+            (names::kPreciseAlgorithm, po::value<algos::AlgorithmType>(), desc::kDPreciseAlgorithm)
             ;
 
     po::options_description ar_options("AR options");

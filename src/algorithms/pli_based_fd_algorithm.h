@@ -23,7 +23,7 @@ public:
 
     std::vector<Column const*> GetKeys() const override;
 
-    using Primitive::Fit;
+    using Algorithm::Fit;
     void Fit(std::shared_ptr<ColumnLayoutRelationData> data);
 };
 
