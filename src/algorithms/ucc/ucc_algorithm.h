@@ -4,10 +4,10 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/equal_nulls/type.h"
 #include "algorithms/algorithm.h"
 #include "model/ucc.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/equal_nulls/type.h"
 #include "util/primitive_collection.h"
 
 namespace algos {
@@ -27,7 +27,7 @@ private:
 protected:
     // Collection of all mined UCCs. Every UCC mining algorithm must register found uccs here.
     util::PrimitiveCollection<model::UCC> ucc_collection_;
-    config::EqNullsType is_null_equal_null_{};
+    util::config::EqNullsType is_null_equal_null_{};
 
     // Pass this value as phase_names to the constructor if your algorithm has only one progress bar
     // phase.
@@ -37,7 +37,7 @@ protected:
     explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
         : Algorithm(std::move(phase_names)) {
         RegisterOptions();
-        MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+        MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
     }
 
 public:

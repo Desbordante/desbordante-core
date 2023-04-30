@@ -1,14 +1,14 @@
 #pragma once
 
 #include "algorithms/create_algorithm.h"
-#include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/options/names.h"
 #include "algorithms/algorithm.h"
 #include "algorithms/pyro.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
 #include "types.h"
+#include "util/config/equal_nulls/type.h"
+#include "util/config/names.h"
 
 namespace algos {
 
@@ -23,7 +23,7 @@ private:
     double radius_;      /* Maximal distance between two values to consider one of them a typo */
     double ratio_;       /* Maximal fraction of deviations per cluster to flag the cluster as
                           * containing typos */
-    config::EqNullsType is_null_equal_null_;
+    util::config::EqNullsType is_null_equal_null_;
 
     void ResetState() final;
 
@@ -110,11 +110,11 @@ public:
         return ratio_;
     }
     double SetRadius(double radius) {
-        SetOption(config::names::kRadius, radius);
+        SetOption(util::config::names::kRadius, radius);
         return radius_;
     }
     double SetRatio(double ratio) {
-        SetOption(config::names::kRatio, ratio);
+        SetOption(util::config::names::kRatio, ratio);
         return ratio_;
     }
     ColumnLayoutRelationData const& GetRelationData() const noexcept {

@@ -6,12 +6,12 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/error/option.h"
-#include "algorithms/options/max_lhs/option.h"
-#include "algorithms/options/names_and_descriptions.h"
-#include "algorithms/options/thread_number/option.h"
 #include "core/fd_g1_strategy.h"
 #include "core/key_g1_strategy.h"
+#include "util/config/error/option.h"
+#include "util/config/max_lhs/option.h"
+#include "util/config/names_and_descriptions.h"
+#include "util/config/thread_number/option.h"
 
 namespace algos {
 
@@ -33,16 +33,16 @@ void Pyro::RegisterOptions() {
     using namespace config::descriptions;
     using config::Option;
 
-    RegisterOption(config::ErrorOpt(&configuration_.max_ucc_error));
-    RegisterOption(config::MaxLhsOpt(&configuration_.max_lhs));
-    RegisterOption(config::ThreadNumberOpt(&configuration_.parallelism));
+    RegisterOption(util::config::ErrorOpt(&configuration_.max_ucc_error));
+    RegisterOption(util::config::MaxLhsOpt(&configuration_.max_lhs));
+    RegisterOption(util::config::ThreadNumberOpt(&configuration_.parallelism));
     RegisterOption(Option{&configuration_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
-    using namespace config::names;
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(),
-                          config::ThreadNumberOpt.GetName(), kSeed});
+    using namespace util::config::names;
+    MakeOptionsAvailable({util::config::MaxLhsOpt.GetName(), util::config::ErrorOpt.GetName(),
+                          util::config::ThreadNumberOpt.GetName(), kSeed});
 }
 
 void Pyro::ResetStateFd() {

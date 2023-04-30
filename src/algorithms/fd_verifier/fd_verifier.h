@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "algorithms/fd_verifier/stats_calculator.h"
-#include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/options/indices/type.h"
 #include "algorithms/algorithm.h"
+#include "util/config/equal_nulls/type.h"
+#include "util/config/indices/type.h"
 
 namespace algos::fd_verifier {
 
@@ -16,9 +16,9 @@ namespace algos::fd_verifier {
  * case it doesn't hold */
 class FDVerifier : public Algorithm {
 private:
-    config::IndicesType lhs_indices_;
-    config::IndexType rhs_index_;
-    config::EqNullsType is_null_equal_null_;
+    util::config::IndicesType lhs_indices_;
+    util::config::IndexType rhs_index_;
+    util::config::EqNullsType is_null_equal_null_;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
