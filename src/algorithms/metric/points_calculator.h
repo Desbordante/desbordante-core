@@ -1,8 +1,8 @@
 #pragma once
 
 #include "algorithms/metric/points.h"
-#include "algorithms/options/indices/type.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "util/config/indices/type.h"
 #include "util/convex_hull.h"
 
 namespace algos::metric {
@@ -11,7 +11,7 @@ class PointsCalculator {
 private:
     bool dist_from_null_is_infinity_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    config::IndicesType rhs_indices_;
+    util::config::IndicesType rhs_indices_;
 
     long double GetCoordinate(bool& has_values, ClusterIndex row_index, bool& has_nulls,
                               unsigned col_index, bool& has_empties) const;
@@ -45,7 +45,7 @@ public:
 
     explicit PointsCalculator(bool dist_from_null_is_infinity,
                               std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                              config::IndicesType rhs_indices)
+                              util::config::IndicesType rhs_indices)
         : dist_from_null_is_infinity_(dist_from_null_is_infinity),
           typed_relation_(std::move(typed_relation)),
           rhs_indices_(std::move(rhs_indices)){};

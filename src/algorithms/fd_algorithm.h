@@ -7,9 +7,9 @@
 #include <boost/any.hpp>
 
 #include "algorithms/algorithm.h"
-#include "algorithms/options/equal_nulls/type.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/fd.h"
+#include "util/config/equal_nulls/type.h"
 #include "util/primitive_collection.h"
 
 namespace util {
@@ -37,7 +37,7 @@ protected:
      * accessing this field directly, use RegisterFd methods instead
      */
     util::PrimitiveCollection<FD> fd_collection_;
-    config::EqNullsType is_null_equal_null_;
+    util::config::EqNullsType is_null_equal_null_;
 
     /* Registers new FD.
      * Should be overrided if custom behavior is needed

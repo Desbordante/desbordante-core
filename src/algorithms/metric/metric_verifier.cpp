@@ -10,21 +10,21 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/indices/option.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/indices/option.h"
+#include "util/config/names_and_descriptions.h"
 
 namespace algos::metric {
 
 MetricVerifier::MetricVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
-void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
+void MetricVerifier::ValidateRhs(util::config::IndicesType const& rhs_indices) {
     assert(!rhs_indices.empty());
     if (rhs_indices.size() == 1) {
-        config::IndexType column_index = rhs_indices[0];
+        util::config::IndexType column_index = rhs_indices[0];
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
         if (type_id == +model::TypeId::kUndefined) {
@@ -47,7 +47,7 @@ void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
         throw std::invalid_argument("The chosen metric is available only for string columns.");
     }
     if (metric_ == +Metric::euclidean) {
-        for (config::IndexType column_index : rhs_indices) {
+        for (util::config::IndexType column_index : rhs_indices) {
             model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
             model::TypeId type_id = column.GetTypeId();
             if (type_id == +model::TypeId::kUndefined) {
@@ -71,19 +71,21 @@ void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
 }
 
 void MetricVerifier::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
 
     auto check_parameter = [](long double parameter) {
         if (parameter < 0) throw std::invalid_argument("Parameter out of range");
     };
     auto get_schema_columns = [this]() { return relation_->GetSchema()->GetNumColumns(); };
-    auto check_rhs = [this](config::IndicesType const& rhs_indices) { ValidateRhs(rhs_indices); };
-    auto need_algo_and_q = [this]([[maybe_unused]] config::IndicesType const& _) {
+    auto check_rhs = [this](util::config::IndicesType const& rhs_indices) {
+        ValidateRhs(rhs_indices);
+    };
+    auto need_algo_and_q = [this]([[maybe_unused]] util::config::IndicesType const& _) {
         return metric_ == +Metric::cosine;
     };
-    auto need_algo_only = [this](config::IndicesType const& rhs_indices) {
+    auto need_algo_only = [this](util::config::IndicesType const& rhs_indices) {
         assert(metric_ == +Metric::levenshtein || metric_ == +Metric::euclidean);
         return metric_ == +Metric::levenshtein || rhs_indices.size() != 1;
     };
@@ -99,24 +101,24 @@ void MetricVerifier::RegisterOptions() {
         if (q <= 0) throw std::invalid_argument("Q-gram length should be greater than zero.");
     };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_columns));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::LhsIndicesOpt(&lhs_indices_, get_schema_columns));
     RegisterOption(Option{&algo_, kMetricAlgorithm, kDMetricAlgorithm}.SetValueCheck(algo_check));
     RegisterOption(Option{&dist_from_null_is_infinity_, kDistFromNullIsInfinity,
                           kDDistFromNullIsInfinity, false});
     RegisterOption(Option{&parameter_, kParameter, kDParameter}.SetValueCheck(check_parameter));
     RegisterOption(Option{&q_, kQGramLength, kDQGramLength, 2u}.SetValueCheck(q_check));
-    RegisterOption(config::RhsIndicesOpt(&rhs_indices_, get_schema_columns, check_rhs)
+    RegisterOption(util::config::RhsIndicesOpt(&rhs_indices_, get_schema_columns, check_rhs)
                            .SetConditionalOpts({{need_algo_and_q, {kMetricAlgorithm, kQGramLength}},
                                                 {need_algo_only, {kMetricAlgorithm}}}));
     RegisterOption(Option{&metric_, kMetric, kDMetric}.SetConditionalOpts(
-            {{{}, {config::RhsIndicesOpt.GetName()}}}));
+            {{{}, {util::config::RhsIndicesOpt.GetName()}}}));
 }
 
 void MetricVerifier::MakeExecuteOptsAvailable() {
-    using namespace config::names;
+    using namespace util::config::names;
     MakeOptionsAvailable(
-            {kDistFromNullIsInfinity, kParameter, kMetric, config::LhsIndicesOpt.GetName()});
+            {kDistFromNullIsInfinity, kParameter, kMetric, util::config::LhsIndicesOpt.GetName()});
 }
 
 void MetricVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
@@ -158,7 +160,7 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-std::string MetricVerifier::GetStringValue(config::IndicesType const& index_vec,
+std::string MetricVerifier::GetStringValue(util::config::IndicesType const& index_vec,
                                            ClusterIndex row_index) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(index_vec[0]);
     if (col.IsNull(row_index)) {

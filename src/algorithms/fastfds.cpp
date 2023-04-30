@@ -10,9 +10,9 @@
 #include <boost/thread.hpp>
 #include <easylogging++.h>
 
-#include "algorithms/options/max_lhs/option.h"
-#include "algorithms/options/thread_number/option.h"
 #include "util/agree_set_factory.h"
+#include "util/config/max_lhs/option.h"
+#include "util/config/thread_number/option.h"
 #include "util/parallel_for.h"
 
 namespace algos {
@@ -24,12 +24,13 @@ FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding mini
 }
 
 void FastFDs::RegisterOptions() {
-    RegisterOption(config::MaxLhsOpt(&max_lhs_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
+    RegisterOption(util::config::MaxLhsOpt(&max_lhs_));
+    RegisterOption(util::config::ThreadNumberOpt(&threads_num_));
 }
 
 void FastFDs::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ThreadNumberOpt.GetName()});
+    MakeOptionsAvailable(
+            {util::config::MaxLhsOpt.GetName(), util::config::ThreadNumberOpt.GetName()});
 }
 
 void FastFDs::ResetStateFd() {

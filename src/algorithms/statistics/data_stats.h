@@ -1,16 +1,16 @@
 #pragma once
 
 #include "algorithms/fd_algorithm.h"
-#include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/options/thread_number/type.h"
 #include "algorithms/statistics/statistic.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "util/config/equal_nulls/type.h"
+#include "util/config/thread_number/type.h"
 
 namespace algos {
 
 class DataStats : public Algorithm {
-    config::EqNullsType is_null_equal_null_;
-    config::ThreadNumType threads_num_;
+    util::config::EqNullsType is_null_equal_null_;
+    util::config::ThreadNumType threads_num_;
 
     std::vector<model::TypedColumnData> col_data_;
     std::vector<ColumnStats> all_stats_;

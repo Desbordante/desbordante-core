@@ -10,8 +10,8 @@
 #include "algorithms/algorithms.h"
 #include "algorithms/create_algorithm.h"
 #include "algorithms/legacy_algorithms.h"
-#include "algorithms/options/names.h"
 #include "algorithms/typo_miner.h"
+#include "util/config/names.h"
 
 namespace algos {
 
@@ -41,7 +41,7 @@ T ExtractOptionValue(OptionMap&& options, std::string const& option_name) {
 
 template <typename ParamsMap>
 ACAlgorithm::Config CreateAcAlgorithmConfigFromMap(ParamsMap params) {
-    namespace onam = config::names;
+    namespace onam = util::config::names;
     ACAlgorithm::Config c;
 
     c.data = ExtractOptionValue<std::filesystem::path>(params, onam::kData);
@@ -100,9 +100,9 @@ template <typename OptionMap>
 void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
     ConfigureFromMap(algorithm, options);
     auto parser = CSVParser{
-            details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
-            details::ExtractOptionValue<char>(options, config::names::kSeparator),
-            details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
+            details::ExtractOptionValue<std::filesystem::path>(options, util::config::names::kData),
+            details::ExtractOptionValue<char>(options, util::config::names::kSeparator),
+            details::ExtractOptionValue<bool>(options, util::config::names::kHasHeader)};
     algorithm.LoadData(parser);
     ConfigureFromMap(algorithm, options);
 }
@@ -123,8 +123,8 @@ std::unique_ptr<Algorithm> CreateAlgorithm(AlgorithmType algorithm_enum, OptionM
 
 template <typename OptionMap>
 std::unique_ptr<Algorithm> CreateTypoMiner(OptionMap&& options) {
-    using config::names::kPreciseAlgorithm, config::names::kApproximateAlgorithm;
     using details::ExtractOptionValue;
+    using util::config::names::kPreciseAlgorithm, util::config::names::kApproximateAlgorithm;
     AlgorithmType precise_algo = ExtractOptionValue<AlgorithmType>(options, kPreciseAlgorithm);
     AlgorithmType approx_algo = ExtractOptionValue<AlgorithmType>(options, kApproximateAlgorithm);
     std::unique_ptr<TypoMiner> typo_miner = std::make_unique<TypoMiner>(precise_algo, approx_algo);
