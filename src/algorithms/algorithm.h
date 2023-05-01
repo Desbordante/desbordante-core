@@ -69,6 +69,8 @@ protected:
     // Overload this to add options after your algorithm has processed the data
     virtual void MakeExecuteOptsAvailable();
 
+    void LoadData(std::function<void()> const& load_data, bool check_config);
+
 public:
     constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
 

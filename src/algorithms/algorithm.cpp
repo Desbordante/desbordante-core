@@ -29,6 +29,14 @@ void Algorithm::ExecutePrepare() {
     MakeExecuteOptsAvailable();
 }
 
+void Algorithm::LoadData(std::function<void()> const& load_data, bool check_config) {
+    if (data_loaded_) throw std::logic_error("Data has already been loaded.");
+    if (check_config && !GetNeededOptions().empty())
+        throw std::logic_error("All options need to be set before starting processing.");
+    load_data();
+    ExecutePrepare();
+}
+
 Algorithm::Algorithm(std::vector<std::string_view> phase_names)
     : progress_(std::move(phase_names)) {}
 
@@ -63,10 +71,7 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
 }
 
 void Algorithm::LoadData() {
-    if (!GetNeededOptions().empty()) throw std::logic_error(
-                "All options need to be set before starting processing.");
-    LoadDataInternal();
-    ExecutePrepare();
+    LoadData([this]() { LoadDataInternal(); }, true);
 }
 
 unsigned long long Algorithm::Execute() {
