@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "ac_algorithm.h"
+#include "algorithms/algebraic_constraints/ac_algorithm.h"
 #include "datasets.h"
 #include "types.h"
 

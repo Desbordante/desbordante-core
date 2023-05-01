@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "algorithms/algebraic_constraints/ranges_collection.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "ranges_collection.h"
 
 namespace algos {
 
