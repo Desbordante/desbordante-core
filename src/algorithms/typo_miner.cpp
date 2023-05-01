@@ -96,23 +96,19 @@ void TypoMiner::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*data_, is_null_equal_null_);
     data_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*data_, is_null_equal_null_);
-    data_->Reset();
-    auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
-    auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
-    boost::any null_opt_any{is_null_equal_null_};
-    TrySetOption(util::config::EqualNullsOpt.GetName(), null_opt_any, null_opt_any);
-    if (!precise_algo_->DataLoaded()) {
-        if (precise_pli != nullptr)
-            precise_pli->LoadPreparedData(relation_);
-        else
-            precise_algo_->LoadData();
-    }
-    data_->Reset();
-    if (!approx_algo_->DataLoaded()) {
-        if (approx_pli != nullptr)
-            approx_pli->LoadPreparedData(relation_);
-        else
-            approx_algo_->LoadData();
+
+    TrySetOption(util::config::EqualNullsOpt.GetName(), is_null_equal_null_, is_null_equal_null_);
+    TrySetOption(util::config::names::kData, data_, data_);
+
+    for (RelationalAlgorithm* algo : {precise_algo_.get(), approx_algo_.get()}) {
+        auto pli_algo = dynamic_cast<PliBasedFDAlgorithm*>(algo);
+        if (pli_algo == nullptr) {
+            // The algorithms have the same object.
+            data_->Reset();
+            algo->LoadData();
+        } else {
+            pli_algo->LoadPreparedData(relation_);
+        }
     }
 }
 
