@@ -14,7 +14,7 @@ protected:
     std::vector<std::string> column_names_;
 
 public:
-    explicit DataframeReaderBase(pybind11::object dataframe, std::string name = "Pandas dataframe");
+    explicit DataframeReaderBase(pybind11::handle dataframe, std::string name = "Pandas dataframe");
 
     void Reset() final;
     [[nodiscard]] std::string GetRelationName() const final;
