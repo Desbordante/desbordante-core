@@ -25,9 +25,8 @@ void AssertRanges(std::vector<std::string>& expected_ranges,
     }
 }
 
-void AssertACExceptions(
-        std::vector<algos::ACExceptionFinder::ACException>& expected_ac_exceptions,
-        std::vector<algos::ACExceptionFinder::ACException> const& actual_ac_exceptions) {
+void AssertACExceptions(std::vector<algos::ACException>& expected_ac_exceptions,
+                        std::vector<algos::ACException> const& actual_ac_exceptions) {
     ASSERT_EQ(expected_ac_exceptions.size(), actual_ac_exceptions.size());
 
     for (size_t i = 0; i < expected_ac_exceptions.size(); ++i) {
@@ -48,7 +47,7 @@ namespace fs = std::filesystem;
 
 class ACAlgorithmTest : public ::testing::Test {
 public:
-    using ACExceptions = std::vector<algos::ACExceptionFinder::ACException>;
+    using ACExceptions = std::vector<algos::ACException>;
 
     static std::unique_ptr<algos::ACAlgorithm> CreateACAlgorithmInstance(
             std::string_view path, char separator = ',', bool hasHeader = true,
@@ -179,10 +178,10 @@ TEST_F(ACAlgorithmTest, CollectingACExceptions) {
     a->Execute();
     a->CollectACExceptions();
 
-    algos::ACExceptionFinder::ACException e0(0, {{1, 2}});
-    algos::ACExceptionFinder::ACException e1(1, {{0, 2}, {1, 2}});
-    algos::ACExceptionFinder::ACException e2(2, {{0, 2}, {1, 2}});
-    algos::ACExceptionFinder::ACException e3(3, {{0, 2}, {1, 2}});
+    algos::ACException e0(0, {{1, 2}});
+    algos::ACException e1(1, {{0, 2}, {1, 2}});
+    algos::ACException e2(2, {{0, 2}, {1, 2}});
+    algos::ACException e3(3, {{0, 2}, {1, 2}});
     ACAlgorithmTest::ACExceptions expected = {e0, e1, e2, e3};
 
     AssertACExceptions(expected, a->GetACExceptions());

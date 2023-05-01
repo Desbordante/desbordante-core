@@ -2,31 +2,22 @@
 
 #include <vector>
 
+#include "ac_exception.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "ranges_collection.h"
 
 namespace algos {
-
 class ACAlgorithm;
+}  // namespace algos
+
+namespace algos::algebraic_constraints {
 
 class ACExceptionFinder {
-public:
-    /* Row that has value pairs, that are exceptions */
-    struct ACException {
-        ACException(size_t row_i, std::pair<size_t, size_t> col_pair)
-            : row_i(row_i), column_pairs{col_pair} {}
-        ACException(size_t row_i, std::vector<std::pair<size_t, size_t>> column_pairs)
-            : row_i(row_i), column_pairs(std::move(column_pairs)) {}
-        /* Row index */
-        size_t row_i;
-        /* Column pairs, where exception was found in this row */
-        std::vector<std::pair<size_t, size_t>> column_pairs;
-    };
-
 private:
     std::vector<ACException> exceptions_;
     ACAlgorithm const* ac_alg_;
-
+    static bool ValueBelongsToRanges(RangesCollection const& ranges_collection,
+                                     std::byte const* val);
     /* Creates new ACException and adds it to exceptions_ or adds col_pair to existing one */
     void AddException(size_t row_i, std::pair<size_t, size_t> const& col_pair);
     void CollectColumnPairExceptions(std::vector<model::TypedColumnData> const& data,
@@ -39,4 +30,4 @@ public:
     }
 };
 
-}  // namespace algos
+}  // namespace algos::algebraic_constraints
