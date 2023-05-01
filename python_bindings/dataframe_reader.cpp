@@ -15,7 +15,7 @@ namespace python_bindings {
 
 namespace py = pybind11;
 
-static std::vector<std::string> GetColumnNames(pybind11::object const& dataframe) {
+static std::vector<std::string> GetColumnNames(pybind11::handle dataframe) {
     std::vector<std::string> names;
     py::list name_lst = dataframe.attr("columns").attr("to_list")();
     for (py::handle element : name_lst) {
@@ -24,8 +24,8 @@ static std::vector<std::string> GetColumnNames(pybind11::object const& dataframe
     return names;
 }
 
-DataframeReaderBase::DataframeReaderBase(pybind11::object dataframe, std::string name)
-    : dataframe_(std::move(dataframe)),
+DataframeReaderBase::DataframeReaderBase(pybind11::handle dataframe, std::string name)
+    : dataframe_(py::reinterpret_borrow<py::object>(dataframe)),
       df_iter_(dataframe_.attr("itertuples")(false, py::none{})),
       name_(std::move(name)),
       column_names_(GetColumnNames(dataframe_)) {}

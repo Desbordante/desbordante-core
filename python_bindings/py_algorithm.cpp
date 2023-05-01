@@ -28,7 +28,7 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
     algos::ConfigureFromMap(*algorithm_, any_map);
 }
 
-void PyAlgorithmBase::SetOption(std::string const& option_name, py::object const& option_value) {
+void PyAlgorithmBase::SetOption(std::string_view option_name, py::handle option_value) {
     if (option_value.is_none()) {
         algorithm_->SetOption(option_name);
         return;
@@ -49,23 +49,23 @@ py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     return GetPyType(type_index);
 }
 
-void PyAlgorithmBase::Fit(std::string const& path, char separator, bool has_header,
+void PyAlgorithmBase::Fit(std::string_view path, char separator, bool has_header,
                           py::kwargs const& kwargs) {
     Configure(kwargs);
     CSVParser parser{path, separator, has_header};
     algorithm_->Fit(parser);
 }
 
-void PyAlgorithmBase::Fit(py::object dataframe, std::string name, py::kwargs const& kwargs) {
+void PyAlgorithmBase::Fit(py::handle dataframe, std::string name, py::kwargs const& kwargs) {
     Configure(kwargs);
 
     py::handle const& dtypes = dataframe.attr("dtypes");
     if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>()) {
         // All columns are python strings, no need to transform.
-        StringDataframeReader reader{std::move(dataframe), std::move(name)};
+        StringDataframeReader reader{dataframe, std::move(name)};
         algorithm_->Fit(reader);
     } else {
-        ArbitraryDataframeReader reader{std::move(dataframe), std::move(name)};
+        ArbitraryDataframeReader reader{dataframe, std::move(name)};
         algorithm_->Fit(reader);
     }
 }

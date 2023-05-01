@@ -100,11 +100,11 @@ PYBIND11_MODULE(desbordante, module) {
 
     py::class_<PyAlgorithmBase>(module, "Algorithm")
             .def("fit",
-                 py::overload_cast<std::string const &, char, bool, py::kwargs const &>(
+                 py::overload_cast<std::string_view, char, bool, py::kwargs const &>(
                          &PyAlgorithmBase::Fit),
                  "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV")
             .def("fit",
-                 py::overload_cast<pybind11::object, std::string, py::kwargs const &>(
+                 py::overload_cast<pybind11::handle, std::string, py::kwargs const &>(
                          &PyAlgorithmBase::Fit),
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")
             .def("get_needed_options", &PyAlgorithmBase::GetNeededOptions,
