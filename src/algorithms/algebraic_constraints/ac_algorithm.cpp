@@ -212,24 +212,6 @@ RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rh
                             std::move(ranges), lhs_i, rhs_i};
 }
 
-bool ACAlgorithm::ValueBelongsToRanges(RangesCollection const& ranges_collection,
-                                       std::byte const* val) {
-    model::INumericType* num_type = ranges_collection.col_pair.num_type.get();
-    for (size_t i = 0; i < ranges_collection.ranges.size() - 1; i += 2) {
-        std::byte const* l_border = ranges_collection.ranges[i];
-        std::byte const* r_border = ranges_collection.ranges[i + 1];
-        if (num_type->Compare(l_border, val) == model::CompareResult::kEqual ||
-            num_type->Compare(val, r_border) == model::CompareResult::kEqual) {
-            return true;
-        }
-        if (num_type->Compare(l_border, val) == model::CompareResult::kLess &&
-            num_type->Compare(val, r_border) == model::CompareResult::kLess) {
-            return true;
-        }
-    }
-    return false;
-}
-
 ACAlgorithm::Binop ACAlgorithm::InitializeBinop(char bin_operation) {
     switch (static_cast<Binop>(bin_operation)) {
         case Binop::Plus:

@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "ac.h"
+#include "ac_exception.h"
 #include "ac_exception_finder.h"
 #include "ac_pairs_collection.h"
 #include "algorithms/legacy_primitive.h"
@@ -52,7 +53,7 @@ private:
     size_t iterations_limit_;
     std::string pairing_rule_;
     std::unique_ptr<TypedRelation> typed_relation_;
-    std::unique_ptr<ACExceptionFinder> ac_exception_finder_;
+    std::unique_ptr<algebraic_constraints::ACExceptionFinder> ac_exception_finder_;
     double seed_;
     std::vector<ACPairsCollection> ac_pairs_;
     std::vector<RangesCollection> ranges_;
@@ -106,7 +107,7 @@ public:
           iterations_limit_(config.iterations_limit),
           pairing_rule_(config.pairing_rule),
           typed_relation_(TypedRelation::CreateFrom(*input_generator_, true)),
-          ac_exception_finder_(std::make_unique<ACExceptionFinder>()),
+          ac_exception_finder_(std::make_unique<algebraic_constraints::ACExceptionFinder>()),
           seed_(config.seed) {
         bin_operation_ = InitializeBinop(config.bin_operation);
     }
@@ -117,12 +118,10 @@ public:
     size_t CalculateSampleSize(size_t k_bumps) const;
     /* Returns ranges reconstucted with new weight for pair of columns */
     RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight) const;
-    static bool ValueBelongsToRanges(RangesCollection const& ranges_collection,
-                                     std::byte const* val);
     std::vector<RangesCollection> const& GetRangesCollections() const {
         return ranges_;
     }
-    std::vector<ACExceptionFinder::ACException> const& GetACExceptions() const {
+    std::vector<ACException> const& GetACExceptions() const {
         return ac_exception_finder_->GetACExceptions();
     }
     RangesCollection const& GetRangesByColumns(size_t lhs_i, size_t rhs_i) const;

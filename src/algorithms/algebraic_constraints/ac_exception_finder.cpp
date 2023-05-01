@@ -2,7 +2,25 @@
 
 #include "ac_algorithm.h"
 
-namespace algos {
+namespace algos::algebraic_constraints {
+
+bool ACExceptionFinder::ValueBelongsToRanges(RangesCollection const& ranges_collection,
+                                             std::byte const* val) {
+    model::INumericType* num_type = ranges_collection.col_pair.num_type.get();
+    for (size_t i = 0; i < ranges_collection.ranges.size() - 1; i += 2) {
+        std::byte const* l_border = ranges_collection.ranges[i];
+        std::byte const* r_border = ranges_collection.ranges[i + 1];
+        if (num_type->Compare(l_border, val) == model::CompareResult::kEqual ||
+            num_type->Compare(val, r_border) == model::CompareResult::kEqual) {
+            return true;
+        }
+        if (num_type->Compare(l_border, val) == model::CompareResult::kLess &&
+            num_type->Compare(val, r_border) == model::CompareResult::kLess) {
+            return true;
+        }
+    }
+    return false;
+}
 
 void ACExceptionFinder::AddException(size_t row_i, std::pair<size_t, size_t> const& col_pair) {
     auto equal = [row_i](ACException const& e) { return e.row_i == row_i; };
@@ -35,13 +53,13 @@ void ACExceptionFinder::CollectColumnPairExceptions(std::vector<model::TypedColu
             continue;
         }
         ac_alg_->InvokeBinop(l, r, res.get());
-        if (!ac_alg_->ValueBelongsToRanges(ranges_collection, res.get())) {
+        if (!ValueBelongsToRanges(ranges_collection, res.get())) {
             AddException(i, {lhs_i, rhs_i});
         }
     }
 }
 
-void ACExceptionFinder::CollectExceptions(ACAlgorithm const* ac_alg) {
+void ACExceptionFinder::CollectExceptions(algos::ACAlgorithm const* ac_alg) {
     ac_alg_ = ac_alg;
     std::vector<model::TypedColumnData> const& data = ac_alg_->GetTypedData();
     std::vector<RangesCollection> const& ranges = ac_alg_->GetRangesCollections();
@@ -52,4 +70,4 @@ void ACExceptionFinder::CollectExceptions(ACAlgorithm const* ac_alg) {
     std::sort(exceptions_.begin(), exceptions_.end(), comp);
 }
 
-}  // namespace algos
+}  // namespace algos::algebraic_constraints
