@@ -1,6 +1,6 @@
 #include "ac_exception_finder.h"
 
-#include "algorithms/ac_algorithm.h"
+#include "ac_algorithm.h"
 
 namespace algos {
 

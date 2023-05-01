@@ -4,15 +4,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include "ac.h"
 #include "ac_exception_finder.h"
-#include "algorithms/algebraic_constraints/ac.h"
-#include "algorithms/algebraic_constraints/ac_pairs_collection.h"
-#include "algorithms/algebraic_constraints/ranges_collection.h"
-#include "algorithms/algebraic_constraints/typed_column_pair.h"
+#include "ac_pairs_collection.h"
 #include "algorithms/legacy_primitive.h"
 #include "algorithms/primitive.h"
 #include "model/column_layout_typed_relation_data.h"
-#include "types.h"
+#include "model/types/types.h"
+#include "ranges_collection.h"
+#include "typed_column_pair.h"
 
 namespace algos {
 /* Discovers Algebraic Constraints (AC). In theory AC consists of: 1) Set of value
