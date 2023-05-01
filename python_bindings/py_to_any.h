@@ -4,5 +4,5 @@
 #include <pybind11/pybind11.h>
 
 namespace python_bindings {
-[[nodiscard]] boost::any PyToAny(std::type_index index, pybind11::object const& obj);
+[[nodiscard]] boost::any PyToAny(std::type_index index, pybind11::handle obj);
 }  // namespace python_bindings

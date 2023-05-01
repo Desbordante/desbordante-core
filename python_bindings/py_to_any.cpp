@@ -10,16 +10,15 @@
 
 namespace python_bindings {
 namespace py = pybind11;
-using ConvFunc = std::function<boost::any(py::object const&)>;
+using ConvFunc = std::function<boost::any(py::handle)>;
 
 template <typename Type>
 static std::pair<std::type_index, ConvFunc> const NormalConvPair{
-        std::type_index(typeid(Type)),
-        [](py::object const& value) { return py::cast<Type>(value); }};
+        std::type_index(typeid(Type)), [](py::handle value) { return py::cast<Type>(value); }};
 
 template <typename EnumType>
 static std::pair<std::type_index, ConvFunc> const EnumConvPair{
-        std::type_index(typeid(EnumType)), [](py::object const& value) {
+        std::type_index(typeid(EnumType)), [](py::handle value) {
             return EnumType::_from_string_nocase(py::cast<std::string>(value).data());
         }};
 
@@ -36,7 +35,7 @@ static const std::unordered_map<std::type_index, ConvFunc> converters{
         EnumConvPair<algos::InputFormat>,
 };
 
-boost::any PyToAny(std::type_index index, py::object const& obj) {
+boost::any PyToAny(std::type_index index, py::handle obj) {
     return converters.at(index)(obj);
 }
 

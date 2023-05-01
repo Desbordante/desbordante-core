@@ -1,7 +1,7 @@
 #include "py_algorithm.h"
 
 #include <string>
-#include <unordered_map>
+#include <utility>
 
 #include <boost/any.hpp>
 
@@ -26,7 +26,7 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
     });
 }
 
-void PyAlgorithmBase::SetOption(std::string const& option_name, py::object const& option_value) {
+void PyAlgorithmBase::SetOption(std::string_view option_name, py::handle option_value) {
     if (option_value.is_none()) {
         algorithm_->SetOption(option_name);
         return;
@@ -47,23 +47,23 @@ py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     return GetPyType(type_index);
 }
 
-void PyAlgorithmBase::LoadData(std::string const& path, char separator, bool has_header,
+void PyAlgorithmBase::LoadData(std::string_view path, char separator, bool has_header,
                                py::kwargs const& kwargs) {
     Configure(kwargs);
     CSVParser parser{path, separator, has_header};
     algorithm_->LoadData(parser);
 }
 
-void PyAlgorithmBase::LoadData(py::object dataframe, std::string name, py::kwargs const& kwargs) {
+void PyAlgorithmBase::LoadData(py::handle dataframe, std::string name, py::kwargs const& kwargs) {
     Configure(kwargs);
 
     py::handle const& dtypes = dataframe.attr("dtypes");
     if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>()) {
         // All columns are python strings, no need to transform.
-        StringDataframeReader reader{std::move(dataframe), std::move(name)};
+        StringDataframeReader reader{dataframe, std::move(name)};
         algorithm_->LoadData(reader);
     } else {
-        ArbitraryDataframeReader reader{std::move(dataframe), std::move(name)};
+        ArbitraryDataframeReader reader{dataframe, std::move(name)};
         algorithm_->LoadData(reader);
     }
 }
