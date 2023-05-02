@@ -52,7 +52,7 @@ void TypoMiner::ResetState() {
     approx_fds_.clear();
 }
 
-bool TypoMiner::HandleUnknownOption(std::string_view option_name, boost::any const& value) {
+bool TypoMiner::SetExternalOption(std::string_view option_name, boost::any const& value) {
     if (option_name == util::config::ErrorOpt.GetName()) {
         if (value.empty()) {
             throw std::invalid_argument("Must specify error value when mining typos.");
@@ -83,11 +83,6 @@ int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& valu
 void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
     auto precise_options = precise_algo_->GetNeededOptions();
     auto approx_options = approx_algo_->GetNeededOptions();
-    if (!DataLoaded()) {
-        // blocked by TypoMiner's is_null_equal_null option
-        precise_options.erase(util::config::names::kEqualNulls);
-        approx_options.erase(util::config::names::kEqualNulls);
-    }
     previous_options.insert(precise_options.begin(), precise_options.end());
     previous_options.insert(approx_options.begin(), approx_options.end());
 }
@@ -96,9 +91,6 @@ void TypoMiner::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*data_, is_null_equal_null_);
     data_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*data_, is_null_equal_null_);
-
-    TrySetOption(util::config::EqualNullsOpt.GetName(), is_null_equal_null_, is_null_equal_null_);
-    TrySetOption(util::config::names::kData, data_, data_);
 
     for (RelationalAlgorithm* algo : {precise_algo_.get(), approx_algo_.get()}) {
         auto pli_algo = dynamic_cast<PliBasedFDAlgorithm*>(algo);

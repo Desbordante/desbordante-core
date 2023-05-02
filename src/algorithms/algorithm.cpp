@@ -4,8 +4,8 @@
 
 namespace algos {
 
-bool Algorithm::HandleUnknownOption([[maybe_unused]] std::string_view option_name,
-                                    [[maybe_unused]] boost::any const& value) {
+bool Algorithm::SetExternalOption([[maybe_unused]] std::string_view option_name,
+                                  [[maybe_unused]] boost::any const& value) {
     return false;
 }
 
@@ -92,16 +92,16 @@ unsigned long long Algorithm::Execute() {
 }
 
 void Algorithm::SetOption(std::string_view option_name, boost::any const& value) {
+    bool ext_opt_set = SetExternalOption(option_name, value);
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()) {
-        if (!HandleUnknownOption(option_name, value)) {
-            throw std::invalid_argument("Unknown option \"" + std::string{option_name} + '"');
-        }
-        return;
+        if (ext_opt_set) return;
+        throw std::invalid_argument("Unknown option \"" + std::string{option_name} + '"');
     }
     std::string_view name = it->first;
     util::config::IOption& option = *it->second;
     if (available_options_.find(name) == available_options_.end()) {
+        if (ext_opt_set) return;
         throw std::invalid_argument("Invalid option \"" + std::string{name} + '"');
     }
 
