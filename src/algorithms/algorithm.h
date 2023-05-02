@@ -84,7 +84,6 @@ public:
     explicit Algorithm(std::vector<std::string_view> phase_names);
 
     void LoadData(model::IDatasetStream& data_stream);
-    bool DataLoaded() const;
 
     unsigned long long Execute();
 
