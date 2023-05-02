@@ -18,13 +18,15 @@
 namespace algos {
 /* Discovers Algebraic Constraints (AC). In theory AC consists of: 1) Set of value
  * pairs (a_i, b_k), where a_i from column A and b_k from column B. 2) Pairing
- * rule - bijection beetwen columns A and B. 3) Binary operation. 4) Ranges -
- * set of ranges/intervals that was constructed by grouping results of binary
- * operation between a_i and b_k, boundary elements of a group become range
- * borders. For further reading: https://vldb.org/conf/2003/papers/S20P03.pdf
+ * rule - bijection beetwen columns A and B. Algorithm was implemented with Trivial
+ * pairing rule. Trivial pairing rule creates (a_i, b_i) pairs, both values are from
+ * the same row.  3) Binary operation. 4) Ranges - set of ranges/intervals that was
+ * constructed by grouping results of binary operation between a_i and b_k, boundary
+ * elements of a group become range borders.
+ * For further reading: https://vldb.org/conf/2003/papers/S20P03.pdf
  * Algorithm chooses pairs of columns with data of same numeric type. Randomly
  * creates sample selection of value pairs and constructs ranges using that sample.
- * Also allows discovering exceptions, where exception is a (a_i, b_k) value pair
+ * Also allows discovering exceptions, where exception is a (a_i, b_i) value pair
  * from columns A and B, that has result of binary operation not belonging to any
  * range discovered for (A, B) column pair */
 class ACAlgorithm : public LegacyAlgorithm {
@@ -33,9 +35,6 @@ private:
 
 public:
     enum class Binop : char { Plus = '+', Minus = '-', Multiplication = '*', Division = '/' };
-    /* Pairing rules: 1) Trivial: a value from column A_1 corresponds to a value in the
-     * same row from column A_2 */
-    enum class PairingRule { Trivial };
 
 private:
     Binop bin_operation_;
@@ -51,7 +50,6 @@ private:
      * by ratio of exceptional records */
     double p_fuzz_;
     size_t iterations_limit_;
-    std::string pairing_rule_;
     std::unique_ptr<TypedRelation> typed_relation_;
     std::unique_ptr<algebraic_constraints::ACExceptionFinder> ac_exception_finder_;
     double seed_;
@@ -93,7 +91,6 @@ public:
                                          To 1 - small number of long intervals */
         size_t bumps_limit = 5;       /* to remove limit: pass value of 0 */
         size_t iterations_limit = 10; /* limit for iterations in Sampling() */
-        std::string pairing_rule = "trivial";
         double seed = 0;
     };
 
@@ -105,7 +102,6 @@ public:
           bumps_limit_(config.bumps_limit),
           p_fuzz_(config.p_fuzz),
           iterations_limit_(config.iterations_limit),
-          pairing_rule_(config.pairing_rule),
           typed_relation_(TypedRelation::CreateFrom(*input_generator_, true)),
           ac_exception_finder_(std::make_unique<algebraic_constraints::ACExceptionFinder>()),
           seed_(config.seed) {

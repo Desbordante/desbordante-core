@@ -142,8 +142,6 @@ boost::program_options::options_description AlgoOptions() {
              "max considered intervals amount. Pass 0 to remove limit")
             (names::kIterationsLimit, po::value<size_t>()->default_value(10),
              "limit for iterations of sampling")
-            (names::kPairingRule, po::value<std::string>()->default_value("trivial"),
-             "one of available pairing rules: trivial")
             (names::kACSeed, po::value<int>()->default_value(0), desc::kDSeed)
             ;
     // clang-format on
