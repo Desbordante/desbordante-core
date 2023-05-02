@@ -61,7 +61,7 @@ protected:
 
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.
-    virtual bool HandleUnknownOption(std::string_view option_name, boost::any const& value);
+    virtual bool SetExternalOption(std::string_view option_name, boost::any const& value);
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
