@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <optional>
 #include <string_view>
 #include <typeindex>
 
@@ -11,7 +10,7 @@ namespace algos::config {
 
 class IOption {
 public:
-    virtual void Set(std::optional<boost::any> value_holder) = 0;
+    virtual std::vector<std::string_view> Set(boost::any const& value) = 0;
     virtual void Unset() = 0;
     [[nodiscard]] virtual bool IsSet() const = 0;
     [[nodiscard]] virtual std::string_view GetName() const = 0;

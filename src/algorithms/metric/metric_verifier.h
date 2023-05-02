@@ -14,8 +14,8 @@
 #include "algorithms/metric/highlight_calculator.h"
 #include "algorithms/metric/points.h"
 #include "algorithms/metric/points_calculator.h"
-#include "algorithms/options/equal_nulls_opt.h"
-#include "algorithms/options/indices_opt.h"
+#include "algorithms/options/equal_nulls/type.h"
+#include "algorithms/options/indices/type.h"
 #include "algorithms/primitive.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
@@ -36,13 +36,6 @@ private:
     config::EqNullsType is_null_equal_null_;
 
     bool metric_fd_holds_ = false;
-
-    static const config::OptionType<decltype(dist_from_null_is_infinity_)>
-            DistFromNullIsInfinityOpt;
-    static const config::OptionType<decltype(parameter_)> ParameterOpt;
-    static const config::OptionType<decltype(metric_)> MetricOpt;
-    static const config::OptionType<decltype(algo_)> AlgoOpt;
-    static const config::OptionType<decltype(q_)> QGramLengthOpt;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<ColumnLayoutRelationData> relation_;  // temporarily parsing twice
@@ -81,7 +74,7 @@ private:
     void VerifyMetricFD();
     std::string GetStringValue(config::IndicesType const& index_vec, ClusterIndex row_index) const;
     void VisualizeHighlights() const;
-    void ValidateRhs(config::IndicesType const& indices);
+    void ValidateRhs(config::IndicesType const& rhs_indices);
     void RegisterOptions();
 
     void ResetState() final;

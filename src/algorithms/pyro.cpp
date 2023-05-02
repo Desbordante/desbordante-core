@@ -6,19 +6,14 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/options/descriptions.h"
-#include "algorithms/options/error_opt.h"
-#include "algorithms/options/max_lhs_opt.h"
-#include "algorithms/options/names.h"
-#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/options/error/option.h"
+#include "algorithms/options/max_lhs/option.h"
+#include "algorithms/options/names_and_descriptions.h"
+#include "algorithms/options/thread_number/option.h"
 #include "core/fd_g1_strategy.h"
 #include "core/key_g1_strategy.h"
 
 namespace algos {
-
-decltype(Pyro::SeedOpt) Pyro::SeedOpt{
-        {config::names::kSeed, config::descriptions::kDSeed}, 0
-};
 
 std::mutex searchSpacesMutex;
 
@@ -34,15 +29,20 @@ Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 }
 
 void Pyro::RegisterOptions() {
-    RegisterOption(config::MaxLhsOpt.GetOption(&configuration_.max_lhs));
-    RegisterOption(config::ErrorOpt.GetOption(&configuration_.max_ucc_error));
-    RegisterOption(config::ThreadNumberOpt.GetOption(&configuration_.parallelism));
-    RegisterOption(SeedOpt.GetOption(&configuration_.seed));
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
+
+    RegisterOption(config::ErrorOpt(&configuration_.max_ucc_error));
+    RegisterOption(config::MaxLhsOpt(&configuration_.max_lhs));
+    RegisterOption(config::ThreadNumberOpt(&configuration_.parallelism));
+    RegisterOption(Option{&configuration_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ErrorOpt,
-                                                config::ThreadNumberOpt, SeedOpt));
+    using namespace config::names;
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(),
+                          config::ThreadNumberOpt.GetName(), kSeed});
 }
 
 void Pyro::ResetStateFd() {

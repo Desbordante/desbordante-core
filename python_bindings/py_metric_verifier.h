@@ -1,14 +1,17 @@
 #pragma once
 
 #include "algorithms/metric/metric_verifier.h"
-#include "py_primitive.h"
+#include "get_algorithm.h"
+#include "py_algorithm.h"
 
 namespace python_bindings {
 
-class PyMetricVerifier : public PyPrimitive<algos::metric::MetricVerifier> {
+class PyMetricVerifier : public PyAlgorithm<algos::metric::MetricVerifier, PyAlgorithmBase> {
+    using PyAlgorithmBase::algorithm_;
+
 public:
-    bool GetResults() const {
-        return primitive_.GetResult();
+    [[nodiscard]] bool MfdHolds() const {
+        return GetAlgorithm<algos::metric::MetricVerifier>(algorithm_).GetResult();
     }
 };
 

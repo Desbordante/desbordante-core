@@ -1,3 +1,34 @@
+// This file exposes Desbordante algorithm classes to Python.
+// This Python library heavily uses trampoline classes, which share a lot of
+// methods. In theory, it all can be done with fewer classes, but pybind11
+// requires each Python class to have a corresponding C++ class, which is why
+// all algorithms use the PyAlgorithm template.
+// The classes which algorithms inherit from ("bases") like `FDAlgorithm` are
+// also exposed to Python to allow for `isinstance` and `issubclass` checks.
+// This file defines several macros that help reduce code repetition. These are:
+// DEFINE_ALGORITHM: register a Python class `type` inherited from `base`. All
+// algorithm trampoline classes are named using the scheme `Py[name]`, and
+// [name] is also used as the corresponding Python class's name.
+// DEFINE_ALGORITHM_BASE: register an algorithm base class. All algorithm base
+// trampoline class are named using the scheme `Py[name]Base`, where [name] is
+// the name of the corresponding Python class. An algorithm base is expected to
+// implement methods that get execution results of the algorithms. The main base
+// `PyAlgorithmBase` is defined separately before any usages of this macro, and
+// it exposes methods common to all algorithms.
+// DEFINE_{FD,AR}_ALGORITHM: register a class inherited from the corresponding
+// base class. These base classes implement methods for getting results. Do note
+// that some algorithms are inherited directly from `Algorithm`, as they don't
+// belong to the "normal" algorithm types like FDAlgorithm. One example of such
+// a class is `FDVerifier`.
+// If you want to add your own algorithm, you need to either use the one of the
+// already existing bases if applicable or inherit from
+// PyAlgorithm<YourAlgorithmType, PyAlgorithmBase> and implement your own result
+// getter methods. To be able to use the aforementioned macros, you have to name
+// your class using the scheme Py[PythonClassName]. If you want to return custom
+// result classes, you need to register them using
+// `py::class<YourResultClass>(module, "PythonClassName")`.
+// Consult pybind11's documentation for details.
+
 #include <filesystem>
 
 #include <easylogging++.h>
@@ -7,41 +38,32 @@
 #include "model/ar.h"
 #include "py_ar_algorithm.h"
 #include "py_data_stats.h"
-#include "py_fd_primitive.h"
+#include "py_fd_algorithm.h"
 #include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
 
 INITIALIZE_EASYLOGGINGPP
 
-#define DEFINE_PRIMITIVE(type)                                                                    \
-    py::class_<Py##type>(module, #type)                                                           \
-            .def(py::init<>())                                                                    \
-            .def("fit",                                                                           \
-                 py::overload_cast<std::string const&, char, bool, py::kwargs const&>(            \
-                         &Py##type::Fit),                                                         \
-                 "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV") \
-            .def("fit",                                                                           \
-                 py::overload_cast<pybind11::object, std::string, py::kwargs const&>(             \
-                         &Py##type::Fit),                                                         \
-                 "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")   \
-            .def("execute", &Py##type::Execute, "Process data")
-#define DEFINE_PRIMITIVE_WITH_RES(type) \
-    DEFINE_PRIMITIVE(type).def("get_results", &Py##type::GetResults)
+#define DEFINE_ALGORITHM(type, base) \
+    py::class_<Py##type, Py##base##Base>(module, #type).def(py::init<>())
+#define DEFINE_ALGORITHM_BASE(base) py::class_<Py##base##Base, PyAlgorithmBase>(module, #base)
+#define DEFINE_FD_ALGORITHM(type) DEFINE_ALGORITHM(type, FdAlgorithm)
+#define DEFINE_AR_ALGORITHM(type) DEFINE_ALGORITHM(type, ArAlgorithm)
 
 namespace python_bindings {
 
 namespace py = pybind11;
 using PyApriori = PyArAlgorithm<algos::Apriori>;
-using PyTane = PyFDPrimitive<algos::Tane>;
-using PyPyro = PyFDPrimitive<algos::Pyro>;
-using PyFUN = PyFDPrimitive<algos::FUN>;
-using PyFdMine = PyFDPrimitive<algos::Fd_mine>;
-using PyFastFDs = PyFDPrimitive<algos::FastFDs>;
-using PyHyFD = PyFDPrimitive<algos::hyfd::HyFD>;
-using PyFDep = PyFDPrimitive<algos::FDep>;
-using PyDFD = PyFDPrimitive<algos::DFD>;
-using PyDepminer = PyFDPrimitive<algos::Depminer>;
-using PyAid = PyFDPrimitive<algos::Aid>;
+using PyTane = PyFDAlgorithm<algos::Tane>;
+using PyPyro = PyFDAlgorithm<algos::Pyro>;
+using PyFUN = PyFDAlgorithm<algos::FUN>;
+using PyFdMine = PyFDAlgorithm<algos::Fd_mine>;
+using PyFastFDs = PyFDAlgorithm<algos::FastFDs>;
+using PyHyFD = PyFDAlgorithm<algos::hyfd::HyFD>;
+using PyFDep = PyFDAlgorithm<algos::FDep>;
+using PyDFD = PyFDAlgorithm<algos::DFD>;
+using PyDepminer = PyFDAlgorithm<algos::Depminer>;
+using PyAid = PyFDAlgorithm<algos::Aid>;
 using FDHighlight = algos::fd_verifier::Highlight;
 using model::ARStrings;
 
@@ -76,28 +98,53 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("most_frequent_rhs_value_proportion",
                                    &FDHighlight::GetMostFrequentRhsValueProportion);
 
-    DEFINE_PRIMITIVE(FDVerifier)
+    py::class_<PyAlgorithmBase>(module, "Algorithm")
+            .def("fit",
+                 py::overload_cast<std::string const &, char, bool, py::kwargs const &>(
+                         &PyAlgorithmBase::Fit),
+                 "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV")
+            .def("fit",
+                 py::overload_cast<pybind11::object, std::string, py::kwargs const &>(
+                         &PyAlgorithmBase::Fit),
+                 "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")
+            .def("get_needed_options", &PyAlgorithmBase::GetNeededOptions,
+                 "Get names of options the algorithm needs")
+            .def("set_option", &PyAlgorithmBase::SetOption, "option_name"_a,
+                 "option_value"_a = pybind11::none(), "Set option value")
+            .def("get_option_type", &PyAlgorithmBase::GetOptionType, "option_name"_a,
+                 "Get info about the option's type")
+            .def("execute", &PyAlgorithmBase::Execute, "Process data");
+
+    DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);
+    DEFINE_ALGORITHM_BASE(FdAlgorithm).def("get_fds", &PyFdAlgorithmBase::GetFDs);
+
+    DEFINE_ALGORITHM(FDVerifier, Algorithm)
             .def("fd_holds", &PyFDVerifier::FDHolds)
             .def("get_error", &PyFDVerifier::GetError)
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
 
-    DEFINE_PRIMITIVE_WITH_RES(DataStats);
-    DEFINE_PRIMITIVE_WITH_RES(Apriori);
-    DEFINE_PRIMITIVE_WITH_RES(Tane);
-    DEFINE_PRIMITIVE_WITH_RES(Pyro);
-    DEFINE_PRIMITIVE_WITH_RES(FUN);
-    DEFINE_PRIMITIVE_WITH_RES(FdMine);
-    DEFINE_PRIMITIVE_WITH_RES(FastFDs);
-    DEFINE_PRIMITIVE_WITH_RES(HyFD);
-    DEFINE_PRIMITIVE_WITH_RES(FDep);
-    DEFINE_PRIMITIVE_WITH_RES(DFD);
-    DEFINE_PRIMITIVE_WITH_RES(Depminer);
-    DEFINE_PRIMITIVE_WITH_RES(Aid);
-    DEFINE_PRIMITIVE_WITH_RES(MetricVerifier);
+    DEFINE_ALGORITHM(DataStats, Algorithm).def("get_result_string", &PyDataStats::GetResultString);
+
+    DEFINE_ALGORITHM(MetricVerifier, Algorithm).def("mfd_holds", &PyMetricVerifier::MfdHolds);
+
+    DEFINE_AR_ALGORITHM(Apriori);
+
+    DEFINE_FD_ALGORITHM(Aid);
+    DEFINE_FD_ALGORITHM(Depminer);
+    DEFINE_FD_ALGORITHM(DFD);
+    DEFINE_FD_ALGORITHM(FastFDs);
+    DEFINE_FD_ALGORITHM(FDep);
+    DEFINE_FD_ALGORITHM(FdMine);
+    DEFINE_FD_ALGORITHM(FUN);
+    DEFINE_FD_ALGORITHM(HyFD);
+    DEFINE_FD_ALGORITHM(Pyro);
+    DEFINE_FD_ALGORITHM(Tane);
 }
-#undef DEFINE_PRIMITIVE_WITH_RES
-#undef DEFINE_PRIMITIVE
+#undef DEFINE_FD_ALGORITHM
+#undef DEFINE_AR_ALGORITHM
+#undef DEFINE_ALGORITHM_BASE
+#undef DEFINE_ALGORITHM
 
 }  // namespace python_bindings

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "algorithms/fd_algorithm.h"
-#include "algorithms/options/equal_nulls_opt.h"
-#include "algorithms/options/thread_number_opt.h"
+#include "algorithms/options/equal_nulls/type.h"
+#include "algorithms/options/thread_number/type.h"
 #include "algorithms/statistics/statistic.h"
 #include "model/column_layout_typed_relation_data.h"
 

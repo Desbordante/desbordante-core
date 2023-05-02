@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <optional>
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>
@@ -12,7 +11,6 @@
 #include <boost/any.hpp>
 
 #include "algorithms/options/ioption.h"
-#include "algorithms/options/opt_add_func_type.h"
 #include "algorithms/options/option.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
@@ -31,9 +29,6 @@ private:
     std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
 
     bool fit_completed_ = false;
-
-    void MakeOptionsAvailable(config::IOption *parent_name,
-                              std::vector<std::string_view> const& option_names);
 
     // Clear the necessary fields for Execute to run repeatedly with different
     // configuration parameters on the same dataset.
@@ -64,12 +59,9 @@ protected:
         possible_options_[name] = std::make_unique<config::Option<T>>(std::move(option));
     }
 
-    config::OptAddFunc GetOptAvailFunc();
-
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.
-    virtual bool HandleUnknownOption(std::string_view const& option_name,
-                                     std::optional<boost::any> const& value);
+    virtual bool HandleUnknownOption(std::string_view option_name, boost::any const& value);
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
@@ -96,8 +88,7 @@ public:
 
     unsigned long long Execute();
 
-    void SetOption(std::string_view const& option_name,
-                   std::optional<boost::any> const& value = {});
+    void SetOption(std::string_view option_name, boost::any const& value = {});
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
@@ -111,9 +102,7 @@ public:
         return progress_.GetPhaseNames();
     }
 
-    std::type_index GetTypeIndex(std::string_view option_name) const {
-        return possible_options_.at(option_name)->GetTypeIndex();
-    }
+    std::type_index GetTypeIndex(std::string_view option_name) const;
 };
 
 }  // namespace algos

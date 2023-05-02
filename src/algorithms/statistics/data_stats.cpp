@@ -4,6 +4,9 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
+#include "algorithms/options/equal_nulls/option.h"
+#include "algorithms/options/thread_number/option.h"
+
 namespace algos {
 
 namespace fs = std::filesystem;
@@ -11,16 +14,16 @@ namespace mo = model;
 
 DataStats::DataStats() : Primitive({"Calculating statistics"}) {
     RegisterOptions();
-    MakeOptionsAvailable(config::GetOptionNames(config::EqualNullsOpt));
+    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
 }
 
 void DataStats::RegisterOptions() {
-    RegisterOption(config::EqualNullsOpt.GetOption(&is_null_equal_null_));
-    RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
+    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::ThreadNumberOpt(&threads_num_));
 }
 
 void DataStats::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
+    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
 }
 
 void DataStats::ResetState() {
@@ -146,7 +149,13 @@ Statistic DataStats::GetKurtosis(size_t index) const {
     if (all_stats_[index].kurtosis.HasValue()) return all_stats_[index].kurtosis;
     const mo::TypedColumnData& col = col_data_[index];
     if (!col.IsNumeric()) return {};
-    return GetStandardizedCentralMomentOfDist(index, 4);
+    Statistic result = GetStandardizedCentralMomentOfDist(index, 4);
+    mo::DoubleType double_type;
+    std::byte const* correction = double_type.MakeValue(-3);
+    std::byte* result_with_correction = double_type.Allocate();
+    double_type.Add(result.GetData(), correction, result_with_correction);
+    double_type.Free(correction);
+    return Statistic(result_with_correction, &double_type, false);
 }
 
 size_t DataStats::NumberOfValues(size_t index) const {

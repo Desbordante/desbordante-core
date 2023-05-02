@@ -4,8 +4,8 @@
 
 namespace algos {
 
-bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view const& option_name,
-                                    [[maybe_unused]] std::optional<boost::any> const& value) {
+bool Primitive::HandleUnknownOption([[maybe_unused]] std::string_view option_name,
+                                    [[maybe_unused]] boost::any const& value) {
     return false;
 }
 
@@ -17,10 +17,6 @@ void Primitive::AddSpecificNeededOptions(
         [[maybe_unused]] std::unordered_set<std::string_view> &previous_options) const {}
 
 void Primitive::MakeExecuteOptsAvailable() {}
-
-config::OptAddFunc Primitive::GetOptAvailFunc() {
-    return [this](auto parent_opt, auto children) { MakeOptionsAvailable(parent_opt, children); };
-}
 
 void Primitive::ClearOptions() noexcept {
     available_options_.clear();
@@ -35,16 +31,6 @@ void Primitive::ExecutePrepare() {
 
 Primitive::Primitive(std::vector<std::string_view> phase_names)
     : progress_(std::move(phase_names)) {}
-
-void Primitive::MakeOptionsAvailable(config::IOption *parent,
-                                     std::vector<std::string_view> const &option_names) {
-    MakeOptionsAvailable(option_names);
-    auto it = possible_options_.find(parent->GetName());
-    assert(it != possible_options_.end());
-    for (const auto &option_name: option_names) {
-        opt_parents_[it->first].emplace_back(option_name);
-    }
-}
 
 void Primitive::ExcludeOptions(std::string_view parent_option) noexcept {
     auto it = opt_parents_.find(parent_option);
@@ -101,23 +87,29 @@ unsigned long long Primitive::Execute() {
     return time_ms;
 }
 
-void Primitive::SetOption(std::string_view const& option_name,
-                          std::optional<boost::any> const& value) {
+void Primitive::SetOption(std::string_view option_name, boost::any const& value) {
     auto it = possible_options_.find(option_name);
     if (it == possible_options_.end()) {
         if (!HandleUnknownOption(option_name, value)) {
             throw std::invalid_argument("Unknown option \"" + std::string{option_name} + '"');
         }
         return;
-    } else if (available_options_.find(it->first) == available_options_.end()) {
-        throw std::invalid_argument("Invalid option \"" + std::string{option_name} + '"');
+    }
+    std::string_view name = it->first;
+    config::IOption& option = *it->second;
+    if (available_options_.find(name) == available_options_.end()) {
+        throw std::invalid_argument("Invalid option \"" + std::string{name} + '"');
     }
 
-    if (it->second->IsSet()) {
-        UnsetOption(it->first);
+    if (option.IsSet()) {
+        UnsetOption(name);
     }
 
-    it->second->Set(value);
+    std::vector<std::string_view> const& new_opts = option.Set(value);
+    if (new_opts.empty()) return;
+    MakeOptionsAvailable(new_opts);
+    std::vector<std::string_view>& child_opts = opt_parents_[name];
+    child_opts.insert(child_opts.end(), new_opts.begin(), new_opts.end());
 }
 
 std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
@@ -129,6 +121,12 @@ std::unordered_set<std::string_view> Primitive::GetNeededOptions() const {
     }
     AddSpecificNeededOptions(needed);
     return needed;
+}
+
+std::type_index Primitive::GetTypeIndex(std::string_view option_name) const {
+    auto it = possible_options_.find(option_name);
+    if (it == possible_options_.end()) return typeid(void);
+    return it->second->GetTypeIndex();
 }
 
 }  // namespace algos

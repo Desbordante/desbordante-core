@@ -4,6 +4,7 @@
 #include <easylogging++.h>
 
 #include "algorithms/dfd/lattice_traversal/lattice_traversal.h"
+#include "algorithms/options/thread_number/option.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
 #include "util/position_list_index.h"
@@ -15,11 +16,11 @@ DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 }
 
 void DFD::RegisterOptions() {
-    RegisterOption(config::ThreadNumberOpt.GetOption(&number_of_threads_));
+    RegisterOption(config::ThreadNumberOpt(&number_of_threads_));
 }
 
 void DFD::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::ThreadNumberOpt));
+    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
 }
 
 void DFD::ResetStateFd() {

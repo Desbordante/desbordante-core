@@ -1,10 +1,8 @@
 #pragma once
 
-#include <optional>
-
-#include "algorithms/options/names.h"
-#include "algorithms/options/equal_nulls_opt.h"
 #include "algorithms/create_primitive.h"
+#include "algorithms/options/equal_nulls/type.h"
+#include "algorithms/options/names.h"
 #include "algorithms/primitive.h"
 #include "algorithms/pyro.h"
 #include "model/column_layout_typed_relation_data.h"
@@ -26,9 +24,6 @@ private:
     double ratio_;       /* Maximal fraction of deviations per cluster to flag the cluster as
                           * containing typos */
     config::EqNullsType is_null_equal_null_;
-
-    static config::OptionType<decltype(radius_)> RadiusOpt;
-    static config::OptionType<decltype(ratio_)> RatioOpt;
 
     void ResetState() final;
 
@@ -52,11 +47,9 @@ private:
     void MakeExecuteOptsAvailable() final;
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const final;
-    bool HandleUnknownOption(std::string_view const& option_name,
-                             std::optional<boost::any> const& value) final;
-    int TrySetOption(std::string_view const& option_name,
-                     std::optional<boost::any> const& value_precise,
-                     std::optional<boost::any> const& value_approx);
+    bool HandleUnknownOption(std::string_view option_name, boost::any const& value) final;
+    int TrySetOption(std::string_view option_name, boost::any const& value_precise,
+                     boost::any const& value_approx);
 
 public:
     using TyposVec = std::vector<util::PLI::Cluster::value_type>;
@@ -117,11 +110,11 @@ public:
         return ratio_;
     }
     double SetRadius(double radius) {
-        SetOption(RadiusOpt.GetName(), std::optional<boost::any>{radius});
+        SetOption(config::names::kRadius, radius);
         return radius_;
     }
     double SetRatio(double ratio) {
-        SetOption(RatioOpt.GetName(), std::optional<boost::any>{ratio});
+        SetOption(config::names::kRatio, ratio);
         return ratio_;
     }
     ColumnLayoutRelationData const& GetRelationData() const noexcept {

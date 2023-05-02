@@ -2,49 +2,54 @@
 
 #include <cassert>
 #include <functional>
-#include <optional>
 #include <typeindex>
 #include <typeinfo>
 
 #include <boost/any.hpp>
 
-#include "algorithms/options/info.h"
 #include "algorithms/options/ioption.h"
-#include "algorithms/options/opt_add_func_type.h"
 
 namespace algos::config {
-template<typename T>
+
+// This class is responsible for configuration values. It is provided with a
+// pointer to a field of an algorithm object, option name, and option
+// description.
+// It can also normalize the provided value and check it for correctness.
+// Some options may have a default value, which can be provided as well.
+// However, some defaults may depend on internal state of an algorithms, so a
+// function that returns that default value may be passed instead.
+template <typename T>
 class Option : public IOption {
 public:
+    using DefaultFunc = std::function<T()>;
+    using ValueCheckFunc = std::function<void(T const &)>;
     using CondCheckFunc = std::function<bool(T const &val)>;
     using OptCondVector = std::vector<std::pair<CondCheckFunc, std::vector<std::string_view>>>;
-    using DefaultFunc = std::function<T()>;
     using NormalizeFunc = std::function<void(T &)>;
-    using InstanceCheckFunc = std::function<void(T const &)>;
 
-    Option(OptionInfo const info, T *value_ptr, NormalizeFunc normalize,
-           std::optional<T> default_value)
-            : info_(info),
-              value_ptr_(value_ptr),
-              normalize_(normalize),
-              default_func_(default_value.has_value()
-                            ? [default_value]() { return default_value.value(); }
-                            : DefaultFunc{}) {}
+    Option(T *value_ptr, std::string_view name, std::string_view description,
+           DefaultFunc default_func = nullptr)
+        : value_ptr_(value_ptr),
+          name_(name),
+          description_(description),
+          default_func_(std::move(default_func)) {}
 
-    void Set(std::optional<boost::any> value_holder) override;
+    Option(T *value_ptr, std::string_view name, std::string_view description, T default_value)
+        : Option(value_ptr, name, description,
+                 [default_value = std::move(default_value)]() { return default_value; }) {}
 
-    T GetValue(std::optional<boost::any> value_holder) const;
+    std::vector<std::string_view> Set(boost::any const &value) override;
 
     void Unset() override {
         is_set_ = false;
     }
 
     [[nodiscard]] std::string_view GetName() const override {
-        return info_.GetName();
+        return name_;
     }
 
     [[nodiscard]] std::string_view GetDescription() const {
-        return info_.GetDescription();
+        return description_;
     }
 
     [[nodiscard]] std::type_index GetTypeIndex() const override {
@@ -55,72 +60,78 @@ public:
         return is_set_;
     }
 
-    Option &SetInstanceCheck(InstanceCheckFunc instance_check) {
-        instance_check_ = instance_check;
+    Option &SetValueCheck(ValueCheckFunc value_check) {
+        assert(!value_check_);
+        value_check_ = std::move(value_check);
         return *this;
     }
 
-    Option &SetConditionalOpts(OptAddFunc const &add_opts, OptCondVector opt_cond) {
-        assert(add_opts);
+    // Some options may become required depending on this option's value and/or
+    // their correctness may depend on the value. If that is the case, a vector
+    // of {predicate, option names} pairs may be provided to this method.
+    // If after a predicate in one of the pairs holds for the provided value,
+    // then the corresponding option names will be returned, which will then
+    // become required options of the algorithm.
+    // Order matters: predicates are checked first-to-last, and `Set` returns
+    // only the names of the first pair where the predicate holds. An empty
+    // predicate is equivalent to an always-true predicate, and thus must
+    // always be last.
+    Option &SetConditionalOpts(OptCondVector opt_cond) {
+        assert(opt_cond_.empty());
         assert(!opt_cond.empty());
         opt_cond_ = std::move(opt_cond);
-        opt_add_func_ = add_opts;
         return *this;
     }
 
-    Option &OverrideDefaultValue(std::optional<T> new_default) {
-        default_func_ = new_default.has_value()
-                        ? [new_default]() { return new_default.value(); }
-                        : DefaultFunc{};
-        return *this;
-    }
-
-    Option &OverrideDefaultFunction(DefaultFunc default_func) {
-        default_func_ = default_func;
+    Option &SetNormalizeFunc(NormalizeFunc normalize_func) {
+        assert(!normalize_func_);
+        normalize_func_ = std::move(normalize_func);
         return *this;
     }
 
 private:
+    T ConvertValue(boost::any const &value) const;
+
     bool is_set_ = false;
-    OptionInfo const info_;
     T *value_ptr_;
-    NormalizeFunc normalize_{};
+    std::string_view name_;
+    std::string_view description_;
     DefaultFunc default_func_;
-    InstanceCheckFunc instance_check_{};
+    ValueCheckFunc value_check_{};
     OptCondVector opt_cond_{};
-    OptAddFunc opt_add_func_{};
+    NormalizeFunc normalize_func_{};
 };
 
 template <typename T>
-void Option<T>::Set(std::optional<boost::any> value_holder) {
+std::vector<std::string_view> Option<T>::Set(boost::any const &value) {
     assert(!is_set_);
-    T value = GetValue(value_holder);
-    if (normalize_) normalize_(value);
-    if (instance_check_) instance_check_(value);
+    T converted_value = ConvertValue(value);
+    if (normalize_func_) normalize_func_(converted_value);
+    if (value_check_) value_check_(converted_value);
 
     assert(value_ptr_ != nullptr);
-    *value_ptr_ = value;
     is_set_ = true;
-    if (opt_add_func_) {
-        for (auto const &[cond, opts]: opt_cond_) {
-            if (!cond || cond(value)) {
-                opt_add_func_(this, opts);
-                break;
-            }
+    std::vector<std::string_view> new_options{};
+    for (auto const &[cond, opts] : opt_cond_) {
+        if (!cond || cond(converted_value)) {
+            new_options = opts;
+            break;
         }
     }
+    *value_ptr_ = std::move(converted_value);
+    return new_options;
 }
 
 template <typename T>
-T Option<T>::GetValue(std::optional<boost::any> value_holder) const {
+T Option<T>::ConvertValue(boost::any const &value) const {
     std::string const no_value_no_default =
-            std::string("No value was provided to an option without a default value (")
-            + info_.GetName().data() + ")";
-    if (!value_holder.has_value()) {
+            std::string("No value was provided to an option without a default value (") +
+            GetName().data() + ")";
+    if (value.empty()) {
         if (!default_func_) throw std::logic_error(no_value_no_default);
         return default_func_();
     } else {
-        return boost::any_cast<T>(value_holder.value());
+        return boost::any_cast<T>(value);
     }
 }
 

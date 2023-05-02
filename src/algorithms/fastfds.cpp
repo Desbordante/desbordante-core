@@ -1,15 +1,17 @@
 #include "algorithms/fastfds.h"
 
-#include <easylogging++.h>
-
 #include <algorithm>
+#include <mutex>
+#include <thread>
+
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
-#include <mutex>
-#include <thread>
+#include <easylogging++.h>
 
+#include "algorithms/options/max_lhs/option.h"
+#include "algorithms/options/thread_number/option.h"
 #include "util/agree_set_factory.h"
 #include "util/parallel_for.h"
 
@@ -22,12 +24,12 @@ FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding mini
 }
 
 void FastFDs::RegisterOptions() {
-    RegisterOption(config::ThreadNumberOpt.GetOption(&threads_num_));
-    RegisterOption(config::MaxLhsOpt.GetOption(&max_lhs_));
+    RegisterOption(config::MaxLhsOpt(&max_lhs_));
+    RegisterOption(config::ThreadNumberOpt(&threads_num_));
 }
 
 void FastFDs::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(config::GetOptionNames(config::MaxLhsOpt, config::ThreadNumberOpt));
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ThreadNumberOpt.GetName()});
 }
 
 void FastFDs::ResetStateFd() {
