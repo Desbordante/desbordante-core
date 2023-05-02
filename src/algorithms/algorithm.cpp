@@ -9,10 +9,6 @@ bool Algorithm::SetExternalOption([[maybe_unused]] std::string_view option_name,
     return false;
 }
 
-bool Algorithm::DataLoaded() const {
-    return data_loaded_;
-}
-
 void Algorithm::AddSpecificNeededOptions(
         [[maybe_unused]] std::unordered_set<std::string_view>& previous_options) const {}
 
