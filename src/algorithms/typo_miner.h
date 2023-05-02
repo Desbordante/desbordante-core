@@ -47,7 +47,7 @@ private:
     void MakeExecuteOptsAvailable() final;
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const final;
-    bool HandleUnknownOption(std::string_view option_name, boost::any const& value) final;
+    bool SetExternalOption(std::string_view option_name, boost::any const& value) final;
     int TrySetOption(std::string_view option_name, boost::any const& value_precise,
                      boost::any const& value_approx);
 
