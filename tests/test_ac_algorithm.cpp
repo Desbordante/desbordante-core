@@ -53,11 +53,11 @@ public:
             std::string_view path, char separator = ',', bool hasHeader = true,
             char bin_operation = '+', double fuzziness = 0.1, double p_fuzz = 0.9,
             double weight = 0.1, size_t bumps_limit = 0, size_t iterations_limit = 10,
-            std::string pairing_rule = "trivial", double seed = 0) {
+            double seed = 0) {
         auto data = test_data_dir / path;
         algos::ACAlgorithm::Config const config = {
-                data,   separator,   hasHeader,        bin_operation, fuzziness, p_fuzz,
-                weight, bumps_limit, iterations_limit, pairing_rule,  seed};
+                data,   separator, hasHeader,   bin_operation,    fuzziness,
+                p_fuzz, weight,    bumps_limit, iterations_limit, seed};
         return std::make_unique<algos::ACAlgorithm>(config);
     }
 };
