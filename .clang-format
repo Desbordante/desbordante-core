@@ -6,7 +6,7 @@ ContinuationIndentWidth: 8
 ColumnLimit: 100
 AllowShortFunctionsOnASingleLine: Empty
 IncludeCategories:
-  - Regex: '<(easylogging|boost|better-enums|gmock|gtest|pybind11|Python).+>'
+  - Regex: '<(easylogging|boost|enum|gmock|gtest|pybind11|Python).+>'
     Priority: 2
   - Regex: '<.+>'
     Priority: 1
