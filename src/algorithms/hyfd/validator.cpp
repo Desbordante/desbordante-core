@@ -114,30 +114,6 @@ boost::dynamic_bitset<> Refine(algos::hyfd::IdPairs& comparison_suggestions,
     return util::IndicesToBitset(valid_rhs_ids, rhs.size());
 }
 
-std::vector<algos::hyfd::LhsPair> CollectCurrentChildren(
-        std::vector<algos::hyfd::LhsPair> const& cur_level_vertices, size_t num_attributes) {
-    std::vector<algos::hyfd::LhsPair> next_level;
-    for (auto const& [vertex, lhs] : cur_level_vertices) {
-        if (!vertex->HasChildren()) {
-            continue;
-        }
-
-        for (size_t i = 0; i < num_attributes; ++i) {
-            if (!vertex->ContainsChildAt(i)) {
-                continue;
-            }
-
-            auto child = vertex->GetChildPtr(i);
-
-            boost::dynamic_bitset<> child_lhs = lhs;
-            child_lhs.set(i);
-            next_level.emplace_back(std::move(child), std::move(child_lhs));
-        }
-    }
-
-    return next_level;
-}
-
 size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_level,
                                         algos::hyfd::fd_tree::FDTree& fds_tree,
                                         std::vector<RawFD> const& invalid_fds,
@@ -308,7 +284,7 @@ IdPairs Validator::ValidateAndExtendCandidates() {
         }
 
         std::vector<LhsPair> next_level =
-                CollectCurrentChildren(cur_level_vertices, num_attributes);
+                algos::CollectCurrentChildren(cur_level_vertices, num_attributes);
         size_t candidates = AddExtendedCandidatesFromInvalid(
                 next_level, *fds_, result.invalid_instances(), num_attributes);
         LogLevel(cur_level_vertices, result, candidates);

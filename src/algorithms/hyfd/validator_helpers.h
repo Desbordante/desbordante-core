@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <vector>
 
+#include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 namespace algos {
@@ -12,5 +13,9 @@ namespace algos {
 // attribute of the agree set.
 std::vector<size_t> BuildClustersIdentifier(std::vector<size_t> const& compressed_record,
                                             std::vector<size_t> const& agree_set);
+
+template <typename VertexAndAgreeSet>
+std::vector<VertexAndAgreeSet> CollectCurrentChildren(
+        std::vector<VertexAndAgreeSet> const& cur_level_vertices, size_t num_attributes);
 
 }  // namespace algos
