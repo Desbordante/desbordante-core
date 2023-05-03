@@ -16,4 +16,15 @@ boost::dynamic_bitset<> IndicesToBitset(Container const& indices, size_t num_col
     return IndicesToBitset(indices.cbegin(), indices.cend(), num_columns);
 }
 
+template <typename Index>
+std::vector<Index> BitsetToIndices(boost::dynamic_bitset<> const& bitset) {
+    std::vector<Index> indices;
+    indices.reserve(bitset.count());
+    for (Index i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
+         i = bitset.find_next(i)) {
+        indices.push_back(i);
+    }
+    return indices;
+}
+
 }  // namespace util
