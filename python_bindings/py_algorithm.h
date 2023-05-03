@@ -34,6 +34,10 @@ public:
     // For pandas dataframes
     void LoadData(pybind11::handle dataframe, std::string name, pybind11::kwargs const& kwargs);
 
+    // CSVParser(path)
+    void LoadData(std::string_view path, pybind11::kwargs const& kwargs);
+
+    // CSVParser(path, separator, has_header)
     void LoadData(std::string_view path, char separator, bool has_header,
                   pybind11::kwargs const& kwargs);
 

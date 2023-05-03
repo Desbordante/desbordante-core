@@ -9,6 +9,7 @@
 #include "algorithms/relational_algorithm.h"
 #include "dataframe_reader.h"
 #include "get_py_type.h"
+#include "make_csv_parser.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
 #include "util/config/names.h"
@@ -68,9 +69,12 @@ void PyAlgorithmBase::LoadProvidedData(pybind11::kwargs const& kwargs,
 void PyAlgorithmBase::LoadData(std::string_view path, char separator, bool has_header,
                                py::kwargs const& kwargs) {
     LoadProvidedData(kwargs, [path, separator, has_header]() {
-        RelationStream parser = std::make_shared<CSVParser>(path, separator, has_header);
-        return boost::any{parser};
+        return MakeCsvParser(path, separator, has_header);
     });
+}
+
+void PyAlgorithmBase::LoadData(std::string_view path, py::kwargs const& kwargs) {
+    LoadProvidedData(kwargs, [path]() { return MakeCsvParser(path); });
 }
 
 void PyAlgorithmBase::LoadData(py::handle dataframe, std::string name, py::kwargs const& kwargs) {
