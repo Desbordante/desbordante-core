@@ -25,7 +25,8 @@ std::unordered_set<size_t> AsSet(boost::dynamic_bitset<> const& bitset) {
 }
 
 std::vector<size_t> AsVector(boost::dynamic_bitset<> const& bitset) {
-    std::vector<size_t> valid_rhss(bitset.count());
+    std::vector<size_t> valid_rhss;
+    valid_rhss.reserve(bitset.count());
     for (size_t attr = bitset.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = bitset.find_next(attr)) {
         valid_rhss.push_back(attr);
