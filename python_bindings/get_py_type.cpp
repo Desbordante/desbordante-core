@@ -9,6 +9,7 @@
 
 #include "algorithms/ar_algorithm_enums.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/relational_algorithm.h"
 
 namespace py = pybind11;
 
@@ -19,6 +20,7 @@ constexpr static PyTypeObject* const py_bool = &PyBool_Type;
 constexpr static PyTypeObject* const py_float = &PyFloat_Type;
 constexpr static PyTypeObject* const py_str = &PyUnicode_Type;
 constexpr static PyTypeObject* const py_list = &PyList_Type;
+constexpr static PyTypeObject* const py_tuple = &PyTuple_Type;
 
 template <typename T>
 static py::handle MakeType(T* py_type_ptr) {
@@ -56,7 +58,19 @@ py::frozenset GetPyType(std::type_index type_index) {
             SimplePyTypeInfoPair<algos::metric::MetricAlgo, py_str>,
             SimplePyTypeInfoPair<algos::InputFormat, py_str>,
             SimplePyTypeInfoPair<std::vector<unsigned int>, py_list, py_int>,
-    };
+            {typeid(algos::RelationStream), []() {
+                 std::vector<py::tuple> types;
+                 try {
+                     PyObject* df_type = py::module::import("pandas").attr("DataFrame").ptr();
+                     types = {MakeTypeTuple(df_type), MakeTypeTuple(py_tuple, df_type, py_str),
+                              MakeTypeTuple(py_tuple, py_str),
+                              MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
+                 } catch (py::error_already_set&) {
+                     types = {MakeTypeTuple(py_tuple, py_str),
+                              MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
+                 }
+                 return py::frozenset(py::make_iterator(types.begin(), types.end()));
+             }}};
     return type_map.at(type_index)();
 }
 

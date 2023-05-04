@@ -7,6 +7,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/relational_algorithm.h"
+#include "create_dataframe_reader.h"
 #include "dataframe_reader.h"
 #include "get_py_type.h"
 #include "make_csv_parser.h"
@@ -27,8 +28,7 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs,
                                 std::function<boost::any()> const& create_data_reader) {
     algos::ConfigureFromFunction(*algorithm_, [this, &kwargs,
                                                create_data_reader](std::string_view option_name) {
-        if (option_name == kData) {
-            assert(create_data_reader);
+        if (option_name == kData && create_data_reader) {
             return create_data_reader();
         }
         std::type_index type_index = algorithm_->GetTypeIndex(option_name);
@@ -51,7 +51,7 @@ std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
     return algorithm_->GetNeededOptions();
 }
 
-py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
+py::frozenset PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     auto type_index = algorithm_->GetTypeIndex(option_name);
     if (type_index == void_index)
         throw std::invalid_argument{std::string{"Option named \""} + option_name.data() +
@@ -79,14 +79,12 @@ void PyAlgorithmBase::LoadData(std::string_view path, py::kwargs const& kwargs) 
 
 void PyAlgorithmBase::LoadData(py::handle dataframe, std::string name, py::kwargs const& kwargs) {
     LoadProvidedData(kwargs, [dataframe, &name]() {
-        std::shared_ptr<model::IDatasetStream> reader;
-        py::object dtypes = dataframe.attr("dtypes");
-        if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>())
-            reader = std::make_shared<StringDataframeReader>(dataframe, std::move(name));
-        else
-            reader = std::make_shared<ArbitraryDataframeReader>(dataframe, std::move(name));
-        return boost::any{reader};
+        return CreateDataFrameReader(dataframe, std::move(name));
     });
+}
+
+void PyAlgorithmBase::LoadData() {
+    algorithm_->LoadData();
 }
 
 py::int_ PyAlgorithmBase::Execute(py::kwargs const& kwargs) {

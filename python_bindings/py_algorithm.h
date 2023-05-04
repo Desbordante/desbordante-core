@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
-    [[nodiscard]] pybind11::tuple GetOptionType(std::string_view option_name) const;
+    [[nodiscard]] pybind11::frozenset GetOptionType(std::string_view option_name) const;
 
     // For pandas dataframes
     void LoadData(pybind11::handle dataframe, std::string name, pybind11::kwargs const& kwargs);
@@ -40,6 +40,9 @@ public:
     // CSVParser(path, separator, has_header)
     void LoadData(std::string_view path, char separator, bool has_header,
                   pybind11::kwargs const& kwargs);
+
+    // For the case when all options have been set by SetOption
+    void LoadData();
 
     pybind11::int_ Execute(pybind11::kwargs const& kwargs);
 };
