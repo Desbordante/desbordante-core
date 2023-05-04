@@ -9,18 +9,20 @@
 
 #include "algorithms/ar_algorithm_enums.h"
 #include "algorithms/metric/enums.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace py = pybind11;
 
-namespace python_bindings {
+namespace {
 
 constexpr static PyTypeObject* const py_int = &PyLong_Type;
 constexpr static PyTypeObject* const py_bool = &PyBool_Type;
 constexpr static PyTypeObject* const py_float = &PyFloat_Type;
 constexpr static PyTypeObject* const py_str = &PyUnicode_Type;
 constexpr static PyTypeObject* const py_list = &PyList_Type;
+constexpr static PyTypeObject* const py_tuple = &PyTuple_Type;
 
-static py::handle MakeType(PyTypeObject* py_type_ptr) {
+py::handle MakeType(PyTypeObject* py_type_ptr) {
     // Does the same as `&py_type_ptr->ob_base.ob_base`: Python API simulates
     // inheritance here. There is also the `_PyObject_CAST` macro that does a
     // C-style cast, but, as indicated by the underscore, it's an internal
@@ -28,19 +30,39 @@ static py::handle MakeType(PyTypeObject* py_type_ptr) {
     return reinterpret_cast<PyObject*>(py_type_ptr);
 }
 
-static py::handle MakeType(PyObject* py_type_ptr) {
+py::handle MakeType(PyObject* py_type_ptr) {
     return py_type_ptr;
 }
 
 template <typename... TypePtrs>
-static py::tuple MakeTypeTuple(TypePtrs... type_ptrs) {
+py::tuple MakeTypeTuple(TypePtrs... type_ptrs) {
     return py::make_tuple(MakeType(type_ptrs)...);
 }
 
 template <typename CppType, PyTypeObject*... PyTypes>
-static std::pair<std::type_index, std::function<py::frozenset()>> const SimplePyTypeInfoPair{
+std::pair<std::type_index, std::function<py::frozenset()>> const SimplePyTypeInfoPair{
         std::type_index{typeid(CppType)},
         []() { return py::frozenset{py::make_tuple(MakeTypeTuple(PyTypes...))}; }};
+
+py::frozenset GetPyInputTableType() {
+    std::vector<py::tuple> types;
+    try {
+        PyObject* df_type = py::module::import("pandas").attr("DataFrame").ptr();
+        types = {MakeTypeTuple(df_type), MakeTypeTuple(py_tuple, df_type, py_str),
+                 MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
+    } catch (py::error_already_set& e) {
+        if (e.matches(PyExc_ImportError)) {
+            types = {MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
+        } else {
+            throw;
+        }
+    }
+    return {py::make_iterator(types.begin(), types.end())};
+}
+
+}  // namespace
+
+namespace python_bindings {
 
 py::frozenset GetPyType(std::type_index type_index) {
     // Type indexes are mapped to frozensets of Python type tuples. The first
@@ -62,6 +84,7 @@ py::frozenset GetPyType(std::type_index type_index) {
             SimplePyTypeInfoPair<algos::metric::MetricAlgo, py_str>,
             SimplePyTypeInfoPair<algos::InputFormat, py_str>,
             SimplePyTypeInfoPair<std::vector<unsigned int>, py_list, py_int>,
+            {typeid(util::config::InputTable), GetPyInputTableType},
     };
     return type_map.at(type_index)();
 }
