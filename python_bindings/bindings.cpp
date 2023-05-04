@@ -119,6 +119,8 @@ PYBIND11_MODULE(desbordante, module) {
                  py::overload_cast<pybind11::handle, std::string, py::kwargs const&>(
                          &PyAlgorithmBase::LoadData),
                  "df"_a, "name"_a = "Pandas dataframe", "Load data from pandas dataframe")
+            .def("load_data", py::overload_cast<>(&PyAlgorithmBase::LoadData),
+                 "Load data after all options have been set by SetOption calls")
             .def("get_needed_options", &PyAlgorithmBase::GetNeededOptions,
                  "Get names of options the algorithm needs")
             .def("set_option", &PyAlgorithmBase::SetOption, "option_name"_a,
