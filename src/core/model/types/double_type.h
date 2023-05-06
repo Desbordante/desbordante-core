@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "numeric_type.h"
 
 namespace model {
@@ -28,13 +30,24 @@ public:
     }
 
     static std::byte* MakeFrom(const std::byte* data, const Type& type) {
+        std::byte* dest = DoubleType().Allocate();
+        MakeFrom(data, type, dest);
+
+        return dest;
+    }
+
+    // Unlike MakeFrom above does put a converted value in the already allocated memory
+    static void MakeFrom(const std::byte* data, const Type& type, std::byte* dest) {
         switch (type.GetTypeId()) {
-        case TypeId::kDouble:
-            return DoubleType().Clone(data);
-        case TypeId::kInt:
-            return DoubleType().MakeValue(Type::GetValue<Int>(data));
-        default:
-            return nullptr;
+            case TypeId::kDouble:
+                GetValue(dest) = GetValue(data);
+                break;
+            case TypeId::kInt:
+                GetValue(dest) = Type::GetValue<Int>(data);
+                break;
+            default:
+                assert(false);
+                __builtin_unreachable();
         }
     }
 };
