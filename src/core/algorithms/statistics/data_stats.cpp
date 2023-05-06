@@ -386,7 +386,7 @@ Statistic DataStats::GetMeanAD(size_t index) const {
     const std::vector<const std::byte*> data = col.GetData();
     mo::DoubleType double_type;
     std::byte* difference = double_type.MakeValue(0);  // data[i] - comparable
-    std::byte* temp = nullptr;                         // For converting data[i] to double
+    std::byte* temp = nullptr;          // For converting data[i] to double
     std::byte* res = double_type.MakeValue(0);
     Statistic avg_stat = GetAvg(index);
     const std::byte* comparable = mo::DoubleType::MakeFrom(avg_stat.GetData(), *avg_stat.GetType());
