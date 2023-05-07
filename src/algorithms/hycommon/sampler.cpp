@@ -1,9 +1,13 @@
 #include "sampler.h"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/thread/future.hpp>
 
 #include "efficiency.h"
 #include "util/pli_util.h"
@@ -108,31 +112,64 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
     }
 }
 
+void Sampler::SortClustersParallel() {
+    ColumnSlider column_slider(plis_->size());
+    std::vector<boost::unique_future<void>> sort_futures;
+    for (util::PLI* pli : *plis_) {
+        ClusterComparator cluster_comparator(compressed_records_.get(),
+                                             column_slider.GetLeftNeighbor(),
+                                             column_slider.GetRightNeighbor());
+        auto sort = [pli, cluster_comparator]() {
+            for (util::PLI::Cluster& cluster : pli->GetIndex()) {
+                std::sort(cluster.begin(), cluster.end(), cluster_comparator);
+            }
+        };
+        boost::packaged_task<void> task(std::move(sort));
+        sort_futures.push_back(task.get_future());
+        boost::asio::post(*pool_, std::move(task));
+        column_slider.ToNextColumn();
+    }
+    boost::wait_for_all(sort_futures.begin(), sort_futures.end());
+}
+
+void Sampler::SortClustersSeq() {
+    ColumnSlider column_slider(plis_->size());
+    for (util::PLI* pli : *plis_) {
+        ClusterComparator cluster_comparator(compressed_records_.get(),
+                                             column_slider.GetLeftNeighbor(),
+                                             column_slider.GetRightNeighbor());
+        for (util::PLI::Cluster& cluster : pli->GetIndex()) {
+            std::sort(cluster.begin(), cluster.end(), cluster_comparator);
+        }
+        column_slider.ToNextColumn();
+    }
+}
+
+void Sampler::SortClusters() {
+    if (threads_num_ > 1) {
+        SortClustersParallel();
+    } else {
+        assert(threads_num_ == 1);
+        SortClustersSeq();
+    }
+}
+
 void Sampler::InitializeEfficiencyQueue() {
     size_t const num_attributes = plis_->size();
 
     if (num_attributes >= 3) {
-        ColumnSlider column_slider(num_attributes);
-        for (util::PLI* pli : *plis_) {
-            ClusterComparator cluster_comparator(compressed_records_.get(),
-                                                 column_slider.GetLeftNeighbor(),
-                                                 column_slider.GetRightNeighbor());
-            for (util::PLI::Cluster& cluster : pli->GetIndex()) {
-                std::sort(cluster.begin(), cluster.end(), cluster_comparator);
-            }
-            column_slider.ToNextColumn();
-        }
+        SortClusters();
     }
 
-    for (size_t attr = 0; attr < num_attributes; ++attr) {
+    for (size_t attr = 0; attr < plis_->size(); ++attr) {
         Efficiency efficiency(attr);
-
         RunWindow(efficiency, *(*plis_)[attr]);
 
         if (efficiency.CalcEfficiency() > 0) {
             efficiency_queue_.push(efficiency);
         }
     }
+
     if (!efficiency_queue_.empty()) {
         efficiency_threshold_ =
                 std::min(kEfficiencyThreshold, efficiency_queue_.top().CalcEfficiency() / 2);
@@ -143,6 +180,11 @@ ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison_suggestion
     ProcessComparisonSuggestions(comparison_suggestions);
 
     if (efficiency_queue_.empty()) {
+        if (threads_num_ > 1) {
+            assert(pool_ == nullptr);
+            pool_ = std::make_unique<boost::asio::thread_pool>(threads_num_);
+        }
+
         InitializeEfficiencyQueue();
     } else {
         double const threshold_decrease = 0.9;
@@ -181,11 +223,17 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
     }
 }
 
-Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records)
+Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records, util::config::ThreadNumType threads)
     : plis_(std::move(plis)),
       compressed_records_(std::move(pli_records)),
-      agree_sets_(std::make_unique<AllColumnCombinations>(plis_->size())) {}
+      agree_sets_(std::make_unique<AllColumnCombinations>(plis_->size())),
+      threads_num_(threads) {}
 
-Sampler::~Sampler() = default;
+Sampler::~Sampler() {
+    assert(threads_num_ != 0);
+    if (threads_num_ != 1 && pool_ != nullptr) {
+        pool_->join();
+    }
+}
 
 }  // namespace algos::hy
