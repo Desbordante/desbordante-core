@@ -73,7 +73,9 @@ public:
 
 namespace algos::hy {
 
-void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli) {
+template <typename F>
+void Sampler::RunWindowImpl(Efficiency& efficiency, util::PositionListIndex const& pli,
+                            F store_match) {
     efficiency.IncrementWindow();
 
     size_t const num_attributes = agree_sets_->NumAttributes();
@@ -90,7 +92,7 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
 
             Match(equal_attrs, pivot_id, partner_id);
             assert(equal_attrs.any());
-            agree_sets_->Add(equal_attrs);
+            store_match(equal_attrs);
             equal_attrs.reset();
 
             comparisons++;
@@ -101,6 +103,23 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
 
     efficiency.SetViolations(num_new_violations);
     efficiency.SetComparisons(comparisons);
+}
+
+std::vector<boost::dynamic_bitset<>> Sampler::RunWindowRet(Efficiency& efficiency,
+                                                           util::PositionListIndex const& pli) {
+    std::vector<boost::dynamic_bitset<>> matched;
+    auto store_match = [&matched](boost::dynamic_bitset<> const& equal_attrs) {
+        matched.push_back(equal_attrs);
+    };
+    RunWindowImpl(efficiency, pli, store_match);
+    return matched;
+}
+
+void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli) {
+    auto store_match = [this](boost::dynamic_bitset<> const& equal_attrs) {
+        agree_sets_->Add(equal_attrs);
+    };
+    RunWindowImpl(efficiency, pli, store_match);
 }
 
 void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions) {
@@ -156,13 +175,41 @@ void Sampler::SortClusters() {
     }
 }
 
-void Sampler::InitializeEfficiencyQueue() {
-    size_t const num_attributes = plis_->size();
-
-    if (num_attributes >= 3) {
-        SortClusters();
+void Sampler::InitializeEfficiencyQueueParallel() {
+    using EfficiencyAndMatches = std::pair<Efficiency, std::vector<boost::dynamic_bitset<>>>;
+    std::vector<boost::unique_future<EfficiencyAndMatches>> futures;
+    for (size_t attr = 0; attr < plis_->size(); ++attr) {
+        auto run_window = [attr, this]() {
+            Efficiency efficiency(attr);
+            return std::make_pair(efficiency, RunWindowRet(efficiency, *(*plis_)[attr]));
+        };
+        boost::packaged_task<EfficiencyAndMatches> task(std::move(run_window));
+        futures.push_back(task.get_future());
+        boost::asio::post(*pool_, std::move(task));
     }
 
+    // TODO(polyntsov): this waiting causes significant overhead on some datasets (on flight_1k
+    // it's probably the highest one). However removing this waiting fully removes overhead on
+    // these problematic datasets, it adds overhead on all other datasets :/
+    // It seems that all problematic datasets spend most of the time on the validation phase, so
+    // multithreading here may add some overhead, but I don't really understand how the explicit
+    // waiting causes it. Further investigation is needed.
+    boost::wait_for_all(futures.begin(), futures.end());
+
+    for (auto& future : futures) {
+        auto [efficiency, matches] = future.get();
+
+        for (auto& match : matches) {
+            agree_sets_->Add(std::move(match));
+        }
+
+        if (efficiency.CalcEfficiency() > 0) {
+            efficiency_queue_.push(efficiency);
+        }
+    }
+}
+
+void Sampler::InitializeEfficiencyQueueSeq() {
     for (size_t attr = 0; attr < plis_->size(); ++attr) {
         Efficiency efficiency(attr);
         RunWindow(efficiency, *(*plis_)[attr]);
@@ -171,6 +218,24 @@ void Sampler::InitializeEfficiencyQueue() {
             efficiency_queue_.push(efficiency);
         }
     }
+}
+
+void Sampler::InitializeEfficiencyQueueImpl() {
+    if (threads_num_ > 1) {
+        InitializeEfficiencyQueueParallel();
+    } else {
+        InitializeEfficiencyQueueSeq();
+    }
+}
+
+void Sampler::InitializeEfficiencyQueue() {
+    size_t const num_attributes = plis_->size();
+
+    if (num_attributes >= 3) {
+        SortClusters();
+    }
+
+    InitializeEfficiencyQueueImpl();
 
     if (!efficiency_queue_.empty()) {
         efficiency_threshold_ =
