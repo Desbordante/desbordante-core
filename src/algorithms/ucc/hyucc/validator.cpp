@@ -58,7 +58,8 @@ bool Validator::IsUnique(util::PLI const& pivot_pli, RawUCC const& ucc,
                 continue;
             }
 
-            auto const [it, inserted] = cluster_to_record.try_emplace(cluster_id, record_id);
+            auto const [it, inserted] =
+                    cluster_to_record.try_emplace(std::move(cluster_id), record_id);
             if (!inserted) {
                 comparison_suggestions.emplace_back(record_id, it->second);
                 return false;
