@@ -46,7 +46,14 @@ void LogLevel(const std::vector<VertexAndAgreeSet>& cur_level_vertices,
 
 template <typename T>
 auto MakeClusterIdentifierToTMap(size_t bucket_size) {
-    auto const kHasher = boost::hash<std::vector<ClusterId>>();
+    auto const kHasher = [](std::vector<ClusterId> const& v) noexcept {
+        size_t hash = 1;
+        for (auto it = v.rbegin(); it != v.rend(); ++it) {
+            hash = 31 * hash + *it;
+        }
+        return hash;
+    };
+
 #if UNORDERED_FLAT_MAP_AVAILABLE
     using UnorderedMap = boost::unordered_flat_map<std::vector<ClusterId>, T, decltype(kHasher)>;
 #else
