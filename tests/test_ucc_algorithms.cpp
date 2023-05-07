@@ -12,6 +12,7 @@
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "datasets.h"
 #include "model/ucc.h"
+#include "util/config/thread_number/type.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();
@@ -28,11 +29,22 @@ namespace {
 // ARAlgorithmTest for example).
 template <typename AlgorithmUnderTest>
 class UCCAlgorithmTest : public ::testing::Test {
+    static util::config::ThreadNumType threads_;
+
+protected:
+    static void SetThreadsParam(util::config::ThreadNumType threads) noexcept {
+        assert(threads > 0);
+        threads_ = threads;
+    }
+
 public:
     static algos::StdParamsMap GetParamMap(std::filesystem::path const& path, char separator = ',',
                                            bool has_header = true) {
         using namespace util::config::names;
-        return {{kData, path}, {kSeparator, separator}, {kHasHeader, has_header}};
+        return {{kData, path},
+                {kSeparator, separator},
+                {kHasHeader, has_header},
+                {kThreads, threads_}};
     }
 
     static std::unique_ptr<algos::UCCAlgorithm> CreateAlgorithmInstance(std::string const& filename,
@@ -81,6 +93,9 @@ public:
 #endif
     };
 };
+
+template <typename AlgorithmUnderTest>
+util::config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
 
 // Implement custom hash functions since implementation of `std::hash` or `boost::hash` may change
 // depending on the library version/architecture/os/whatever leading to tests failing.
@@ -133,15 +148,28 @@ void PerformConsistentHashTestOn(std::vector<Dataset> const& datasets) {
 TYPED_TEST_SUITE_P(UCCAlgorithmTest);
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets) {
+    TestFixture::SetThreadsParam(1);
     PerformConsistentHashTestOn<TestFixture>(TestFixture::light_datasets_);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasets) {
+    TestFixture::SetThreadsParam(1);
+    PerformConsistentHashTestOn<TestFixture>(TestFixture::heavy_datasets_);
+}
+
+TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasetsParallel) {
+    TestFixture::SetThreadsParam(4);
+    PerformConsistentHashTestOn<TestFixture>(TestFixture::light_datasets_);
+}
+
+TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasetsParallel) {
+    TestFixture::SetThreadsParam(4);
     PerformConsistentHashTestOn<TestFixture>(TestFixture::heavy_datasets_);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,
-                            ConsistentHashOnHeavyDatasets);
+                            ConsistentHashOnHeavyDatasets, ConsistentHashOnLightDatasetsParallel,
+                            ConsistentHashOnHeavyDatasetsParallel);
 
 using Algorithms = ::testing::Types<algos::HyUCC>;
 INSTANTIATE_TYPED_TEST_SUITE_P(UCCAlgorithmTest, UCCAlgorithmTest, Algorithms);
