@@ -1,5 +1,10 @@
 #include "validator.h"
 
+#include <future>
+
+#include <boost/asio/post.hpp>
+#include <boost/asio/thread_pool.hpp>
+
 #include "hycommon/efficiency_threshold.h"
 #include "hycommon/validator_helpers.h"
 #include "ucc/hyucc/structures/ucc_tree_vertex.h"
@@ -110,6 +115,42 @@ Validator::UCCValidations Validator::ValidateAndExtendSeq(
     return result;
 }
 
+Validator::UCCValidations Validator::ValidateAndExtendParallel(
+        std::vector<LhsPair> const& current_level) {
+    UCCValidations result;
+    boost::asio::thread_pool pool(threads_num_);
+    std::vector<std::future<UCCValidations>> validation_futures;
+
+    for (auto const& vertex_and_ucc : current_level) {
+        if (!vertex_and_ucc.first->IsUCC()) {
+            continue;
+        }
+
+        std::packaged_task<UCCValidations()> task(
+                [this, &vertex_and_ucc]() { return GetValidations(vertex_and_ucc); });
+        validation_futures.push_back(task.get_future());
+        boost::asio::post(pool, std::move(task));
+    }
+
+    pool.join();
+
+    for (auto& future : validation_futures) {
+        assert(future.valid());
+        result.Add(future.get());
+    }
+
+    return result;
+}
+
+Validator::UCCValidations Validator::ValidateAndExtend(std::vector<LhsPair> const& current_level) {
+    assert(threads_num_ > 0);
+    if (threads_num_ > 1) {
+        return ValidateAndExtendParallel(current_level);
+    } else {
+        return ValidateAndExtendSeq(current_level);
+    }
+}
+
 // This function is similar to hyfd::Validator::ValidateAndExtendCandidates(), but with some key
 // differences in the way it initializes the current_level and handles loop conditions. While there
 // is some shared structure, attempting to refactor the functions to eliminate duplication
@@ -123,7 +164,7 @@ hy::IdPairs Validator::ValidateAndExtendCandidates() {
     std::vector<LhsPair> current_level = tree_->GetLevel(current_level_number_);
     hy::IdPairs comparison_suggestions;
     while (!current_level.empty()) {
-        UCCValidations result = ValidateAndExtendSeq(current_level);
+        UCCValidations result = ValidateAndExtend(current_level);
         comparison_suggestions.insert(comparison_suggestions.end(),
                                       result.comparison_suggestions().begin(),
                                       result.comparison_suggestions().end());
