@@ -31,10 +31,17 @@ private:
     void SortClustersSeq();
     void SortClustersParallel();
     void SortClusters();
+    void InitializeEfficiencyQueueSeq();
+    void InitializeEfficiencyQueueParallel();
+    void InitializeEfficiencyQueueImpl();
     void InitializeEfficiencyQueue();
 
     void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
                size_t second_record_id);
+    template <typename F>
+    void RunWindowImpl(Efficiency& efficiency, util::PositionListIndex const& pli, F store_match);
+    std::vector<boost::dynamic_bitset<>> RunWindowRet(Efficiency& efficiency,
+                                                      util::PositionListIndex const& pli);
     void RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli);
 
 public:
