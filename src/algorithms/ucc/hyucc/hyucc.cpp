@@ -29,7 +29,7 @@ unsigned long long HyUCC::ExecuteInternal() {
     auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
     auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
 
-    hyucc::Sampler sampler(plis_shared, pli_records_shared);
+    hyucc::Sampler sampler(plis_shared, pli_records_shared, threads_num_);
 
     auto ucc_tree = std::make_unique<UCCTree>(relation_->GetNumColumns());
     Inductor inductor(ucc_tree.get());
