@@ -62,14 +62,14 @@ unsigned long long HyFD::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<size_t>& og_mapping) {
+void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<hy::ClusterId>& og_mapping) {
     const auto* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
         boost::dynamic_bitset<> mapped_lhs =
                 hy::RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());
         Vertical lhs_v(schema, std::move(mapped_lhs));
 
-        size_t const mapped_rhs = og_mapping[rhs];
+        auto const mapped_rhs = og_mapping[rhs];
         // todo(strutovsky): make indices unsigned in core structures
         // NOLINTNEXTLINE(*-narrowing-conversions)
         Column rhs_c(schema, schema->GetColumn(mapped_rhs)->GetName(), mapped_rhs);

@@ -172,8 +172,8 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
            second_record_id < compressed_records_->size());
 
     for (size_t i = 0; i < compressed_records_->front().size(); ++i) {
-        size_t const val1 = (*compressed_records_)[first_record_id][i];
-        size_t const val2 = (*compressed_records_)[second_record_id][i];
+        TablePos const val1 = (*compressed_records_)[first_record_id][i];
+        TablePos const val2 = (*compressed_records_)[second_record_id][i];
         if (!PLIUtil::IsSingletonCluster(val1) && !PLIUtil::IsSingletonCluster(val2) &&
             val1 == val2) {
             attributes.set(i);

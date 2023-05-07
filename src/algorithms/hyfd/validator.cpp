@@ -25,8 +25,7 @@ std::unordered_set<size_t> AsSet(boost::dynamic_bitset<> const& bitset) {
 }
 
 std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
-        boost::dynamic_bitset<> const& rhs,
-        std::vector<std::vector<size_t>> const& compressed_records) {
+        boost::dynamic_bitset<> const& rhs, algos::hy::Rows const& compressed_records) {
     std::vector<size_t> rhs_column_ids;
     rhs_column_ids.reserve(rhs.count());
     std::vector<size_t> rhs_ranks(compressed_records[0].size());
@@ -80,7 +79,7 @@ boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
                                boost::dynamic_bitset<> const& lhs,
                                boost::dynamic_bitset<> const& rhs, size_t firstAttr) {
     auto valid_rhs_ids = AsSet(rhs);
-    auto const lhs_column_ids = util::BitsetToIndices<size_t>(lhs);
+    auto const lhs_column_ids = util::BitsetToIndices<algos::hy::ClusterId>(lhs);
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
 
     for (auto const& cluster : plis[firstAttr]->GetIndex()) {

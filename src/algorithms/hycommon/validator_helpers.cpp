@@ -6,18 +6,18 @@
 
 namespace algos::hy {
 
-std::vector<size_t> BuildClustersIdentifier(std::vector<size_t> const& compressed_record,
-                                            std::vector<size_t> const& agree_set) {
-    std::vector<size_t> sub_cluster;
+std::vector<ClusterId> BuildClustersIdentifier(Row const& compressed_record,
+                                               std::vector<ClusterId> const& agree_set) {
+    std::vector<ClusterId> sub_cluster;
     sub_cluster.reserve(agree_set.size());
-    for (size_t attr : agree_set) {
-        size_t const cluster_id = compressed_record[attr];
+    for (auto attr : agree_set) {
+        ClusterId const cluster_id = compressed_record[attr];
 
-        if (!PLIUtil::IsSingletonCluster(cluster_id)) {
-            sub_cluster.push_back(cluster_id);
-        } else {
+        if (PLIUtil::IsSingletonCluster(cluster_id)) {
             return {};
         }
+
+        sub_cluster.push_back(cluster_id);
     }
     return sub_cluster;
 }

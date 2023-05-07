@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "algorithms/pli_based_fd_algorithm.h"
+#include "hycommon/types.h"
 #include "model/raw_fd.h"
 #include "util/position_list_index.h"
 
@@ -39,7 +40,7 @@ private:
     void ResetStateFd() final {}
     unsigned long long ExecuteInternal() override;
 
-    void RegisterFDs(std::vector<RawFD>&& fds, std::vector<size_t> const& og_mapping);
+    void RegisterFDs(std::vector<RawFD>&& fds, std::vector<algos::hy::ClusterId> const& og_mapping);
 
 public:
     HyFD();

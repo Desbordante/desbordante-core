@@ -65,7 +65,7 @@ unsigned long long HyUCC::ExecuteInternal() {
 }
 
 void HyUCC::RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
-                         const std::vector<size_t>& og_mapping) {
+                         const std::vector<hy::ClusterId>& og_mapping) {
     const auto* const schema = relation_->GetSchema();
     for (auto&& ucc : uccs) {
         boost::dynamic_bitset<> mapped_ucc =
