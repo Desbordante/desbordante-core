@@ -7,9 +7,9 @@
 
 namespace {
 
-std::vector<size_t> SortAndGetMapping(algos::hy::PLIs& plis) {
-    size_t id = 0;
-    std::vector<std::pair<algos::hy::PLIs::value_type, size_t>> plis_sort_ids;
+std::vector<algos::hy::ClusterId> SortAndGetMapping(algos::hy::PLIs& plis) {
+    algos::hy::ClusterId id = 0;
+    std::vector<std::pair<algos::hy::PLIs::value_type, algos::hy::ClusterId>> plis_sort_ids;
     std::transform(plis.begin(), plis.end(), std::back_inserter(plis_sort_ids),
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
@@ -21,7 +21,7 @@ std::vector<size_t> SortAndGetMapping(algos::hy::PLIs& plis) {
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), plis.begin(),
                    [](auto& pli_ext) { return std::move(pli_ext.first); });
 
-    std::vector<size_t> og_mapping(plis_sort_ids.size());
+    std::vector<algos::hy::ClusterId> og_mapping(plis_sort_ids.size());
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), og_mapping.begin(),
                    [](auto const& pli_ext) { return pli_ext.second; });
     return og_mapping;
@@ -31,9 +31,9 @@ algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
     algos::hy::Columns inverted_plis;
 
     for (auto const& pli : plis) {
-        size_t cluster_id = 0;
-        std::vector<size_t> current(pli->getRelationSize(),
-                                    algos::hy::PLIUtil::kSingletonClusterId);
+        algos::hy::ClusterId cluster_id = 0;
+        std::vector<algos::hy::ClusterId> current(pli->getRelationSize(),
+                                                  algos::hy::PLIUtil::kSingletonClusterId);
         for (const auto& cluster : pli->GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
@@ -49,7 +49,7 @@ algos::hy::Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_pli
     size_t const num_columns = inverted_plis.size();
     size_t const num_rows = num_columns == 0 ? 0 : inverted_plis.begin()->size();
 
-    algos::hy::Rows pli_records(num_rows, std::vector<size_t>(num_columns));
+    algos::hy::Rows pli_records(num_rows, algos::hy::Row(num_columns));
 
     for (size_t i = 0; i < num_rows; ++i) {
         for (size_t j = 0; j < num_columns; ++j) {
@@ -64,7 +64,7 @@ algos::hy::Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_pli
 
 namespace algos::hy {
 
-std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData* relation) {
+std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation) {
     PLIs plis;
     std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
                    std::back_inserter(plis),
@@ -80,7 +80,7 @@ std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData*
 }
 
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
-                                        std::vector<size_t> const& og_mapping, size_t num_cols) {
+                                        std::vector<ClusterId> const& og_mapping, size_t num_cols) {
     boost::dynamic_bitset<> mapped_as(num_cols);
     for (size_t i = as.find_first(); i != boost::dynamic_bitset<>::npos; i = as.find_next(i)) {
         mapped_as.set(og_mapping[i]);

@@ -9,8 +9,8 @@
 
 namespace algos::hy {
 
-std::tuple<PLIs, Rows, std::vector<size_t>> Preprocess(ColumnLayoutRelationData* relation);
+std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation);
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
-                                        std::vector<size_t> const& og_mapping, size_t num_cols);
+                                        std::vector<ClusterId> const& og_mapping, size_t num_cols);
 
 }  // namespace algos::hy

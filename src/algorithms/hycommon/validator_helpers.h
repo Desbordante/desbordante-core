@@ -8,13 +8,15 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
+#include "types.h"
+
 namespace algos::hy {
 
 // Builds a cluster's identifier of the agree set provided. Cluster's identifier is a vector
 // of size_t value where ith value of the vector is an identifier of a cluster of ith set
 // attribute of the agree set.
-std::vector<size_t> BuildClustersIdentifier(std::vector<size_t> const& compressed_record,
-                                            std::vector<size_t> const& agree_set);
+std::vector<ClusterId> BuildClustersIdentifier(Row const& compressed_record,
+                                               std::vector<ClusterId> const& agree_set);
 
 // Builds the next level of the prefix tree traversal
 template <typename VertexAndAgreeSet>
@@ -37,8 +39,8 @@ void LogLevel(const std::vector<VertexAndAgreeSet>& cur_level_vertices,
 
 template <typename T>
 auto MakeClusterIdentifierToTMap(size_t bucket_size) {
-    auto const kHasher = boost::hash<std::vector<size_t>>();
-    return std::unordered_map<std::vector<size_t>, T, decltype(kHasher)>(bucket_size, kHasher);
+    auto const kHasher = boost::hash<std::vector<ClusterId>>();
+    return std::unordered_map<std::vector<ClusterId>, T, decltype(kHasher)>(bucket_size, kHasher);
 }
 
 }  // namespace algos::hy
