@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "hycommon/types.h"
 #include "model/column_layout_relation_data.h"
 #include "model/idataset_stream.h"
 #include "ucc/ucc_algorithm.h"
@@ -16,7 +17,7 @@ private:
     unsigned long long ExecuteInternal() override;
     void ResetUCCAlgorithmState() override {}
     void RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
-                      const std::vector<size_t>& og_mapping);
+                      const std::vector<hy::ClusterId>& og_mapping);
 
 public:
     HyUCC() : UCCAlgorithm({}) {}

@@ -47,12 +47,12 @@ using model::RawUCC;
 
 bool Validator::IsUnique(util::PLI const& pivot_pli, RawUCC const& ucc,
                          hy::IdPairs& comparison_suggestions) {
-    std::vector<size_t> indices = util::BitsetToIndices<size_t>(ucc);
+    std::vector<hy::ClusterId> indices = util::BitsetToIndices<hy::ClusterId>(ucc);
     for (util::PLI::Cluster const& cluster : pivot_pli.GetIndex()) {
         auto cluster_to_record =
                 hy::MakeClusterIdentifierToTMap<util::PLI::Cluster::value_type>(cluster.size());
         for (auto const record_id : cluster) {
-            std::vector<size_t> cluster_id =
+            std::vector<hy::ClusterId> cluster_id =
                     hy::BuildClustersIdentifier((*compressed_records_)[record_id], indices);
             if (cluster_id.empty()) {
                 continue;
