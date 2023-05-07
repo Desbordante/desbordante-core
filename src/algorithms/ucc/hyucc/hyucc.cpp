@@ -33,7 +33,7 @@ unsigned long long HyUCC::ExecuteInternal() {
 
     auto ucc_tree = std::make_unique<UCCTree>(relation_->GetNumColumns());
     Inductor inductor(ucc_tree.get());
-    Validator validator(ucc_tree.get(), plis_shared, pli_records_shared);
+    Validator validator(ucc_tree.get(), plis_shared, pli_records_shared, threads_num_);
 
     IdPairs comparison_suggestions;
 
