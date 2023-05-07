@@ -6,9 +6,16 @@
 
 #include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/version.hpp>
 #include <easylogging++.h>
 
 #include "types.h"
+
+#define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
+
+#if UNORDERED_FLAT_MAP_AVAILABLE
+#include <boost/unordered/unordered_flat_map.hpp>
+#endif
 
 namespace algos::hy {
 
@@ -40,7 +47,14 @@ void LogLevel(const std::vector<VertexAndAgreeSet>& cur_level_vertices,
 template <typename T>
 auto MakeClusterIdentifierToTMap(size_t bucket_size) {
     auto const kHasher = boost::hash<std::vector<ClusterId>>();
-    return std::unordered_map<std::vector<ClusterId>, T, decltype(kHasher)>(bucket_size, kHasher);
+#if UNORDERED_FLAT_MAP_AVAILABLE
+    using UnorderedMap = boost::unordered_flat_map<std::vector<ClusterId>, T, decltype(kHasher)>;
+#else
+    using UnorderedMap = std::unordered_map<std::vector<ClusterId>, T, decltype(kHasher)>;
+#endif
+    return UnorderedMap(bucket_size, kHasher);
 }
+
+#undef UNORDERED_FLAT_MAP_AVAILABLE
 
 }  // namespace algos::hy
