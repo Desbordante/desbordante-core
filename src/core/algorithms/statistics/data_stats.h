@@ -108,6 +108,8 @@ public:
     Statistic GetMedianAD(size_t index) const;
     // Returns number of nulls in the column.
     Statistic GetNumNulls(size_t index) const;
+    // Returns all distinct symbols of the column as a sorted string.
+    Statistic GetVocab(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

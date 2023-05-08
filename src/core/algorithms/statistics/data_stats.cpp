@@ -514,6 +514,27 @@ Statistic DataStats::GetNumNulls(size_t index) const {
     return Statistic(int_type.MakeValue(count), &int_type, false);
 }
 
+Statistic DataStats::GetVocab(size_t index) const {
+    if (all_stats_[index].vocab.HasValue()) return all_stats_[index].vocab;
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    mo::StringType string_type;
+    std::string string_data;
+    std::set<char> vocab;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+        auto const& string_data = mo::Type::GetValue<std::string>(col.GetValue(i));
+        vocab.insert(string_data.begin(), string_data.end());
+    }
+    std::string temp(vocab.begin(), vocab.end());
+
+    std::byte const* res = string_type.MakeValue(temp);
+
+    return Statistic(res, &string_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -542,6 +563,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
             all_stats_[index].num_nulls = GetNumNulls(index);
+            all_stats_[index].vocab = GetVocab(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
