@@ -58,4 +58,15 @@ constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
 const std::string _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
                                       EnumToAvailableValues<algos::cfd::Substrategy>();
 const auto kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
+constexpr auto kDBinaryOperation = "one of available operations: /, *, +, -";
+constexpr auto kDFuzziness = "fraction of exceptional records, lies in (0, 1]";
+constexpr auto kDFuzzinessProbability =
+        "probability, the fraction of exceptional records that "
+        "lie outside the bump intervals is at most Fuzziness, lies in (0, 1]";
+constexpr auto kDWeight =
+        "value lies in (0, 1]. Closer to 0 - many short intervals. "
+        "Closer to 1 - small number of long intervals";
+constexpr auto kDBumpsLimit = "max considered intervals amount. Pass 0 to remove limit";
+constexpr auto kDIterationsLimit = "limit for iterations of sampling";
+constexpr auto kDACSeed = "seed, needed for choosing a data sample";
 }  // namespace util::config::descriptions

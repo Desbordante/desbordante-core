@@ -7,9 +7,10 @@
 
 namespace algos {
 
-using AlgorithmTypes = std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN,
-                                  hyfd::HyFD, Aid, Apriori, metric::MetricVerifier, DataStats,
-                                  fd_verifier::FDVerifier, HyUCC, cfd::FDFirstAlgorithm>;
+using AlgorithmTypes =
+        std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, hyfd::HyFD, Aid, Apriori,
+                   metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
+                   cfd::FDFirstAlgorithm, ACAlgorithm>;
 
 template <typename AlgorithmBase = Algorithm>
 std::unique_ptr<AlgorithmBase> CreateAlgorithmInstance(AlgorithmType algorithm) {

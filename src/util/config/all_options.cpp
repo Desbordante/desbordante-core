@@ -128,21 +128,13 @@ boost::program_options::options_description AlgoOptions() {
 
     po::options_description ac_options("AC options");
     ac_options.add_options()
-            (names::kBinaryOperation, po::value<char>()->default_value('+'),
-             "one of available operations: /, *, +, - ")
-            (names::kFuzziness, po::value<double>()->default_value(0.15),
-             "fraction of exceptional records")
-            (names::kFuzzinessProbability, po::value<double>()->default_value(0.9),
-             "probability, the fraction of exceptional records that lie outside the "
-             "bump intervals is at most Fuzziness")
-            (names::kWeight, po::value<double>()->default_value(0.05),
-             "value between 0 and 1. Closer to 0 - many short intervals. "
-             "Closer to 1 - small number of long intervals")
-            (names::kBumpsLimit, po::value<size_t>()->default_value(5),
-             "max considered intervals amount. Pass 0 to remove limit")
-            (names::kIterationsLimit, po::value<size_t>()->default_value(10),
-             "limit for iterations of sampling")
-            (names::kACSeed, po::value<int>()->default_value(0), desc::kDSeed)
+            (names::kBinaryOperation, po::value<algos::Binop>()->default_value(algos::Binop::Plus), desc::kDBinaryOperation)
+            (names::kFuzziness, po::value<double>()->default_value(0.15), desc::kDFuzziness)
+            (names::kFuzzinessProbability, po::value<double>()->default_value(0.9), desc::kDFuzzinessProbability)
+            (names::kWeight, po::value<double>()->default_value(0.05), desc::kDWeight)
+            (names::kBumpsLimit, po::value<size_t>()->default_value(5), desc::kDBumpsLimit)
+            (names::kIterationsLimit, po::value<size_t>()->default_value(10), desc::kDIterationsLimit)
+            (names::kACSeed, po::value<double>()->default_value(0.0), desc::kDACSeed)
             ;
     // clang-format on
 
