@@ -4,18 +4,22 @@
 #include <unordered_map>
 #include <vector>
 
+#include <enum.h>
+
 #include "ac.h"
 #include "ac_exception.h"
 #include "ac_exception_finder.h"
 #include "ac_pairs_collection.h"
 #include "algorithms/algorithm.h"
 #include "algorithms/legacy_algorithm.h"
+#include "bin_operation_enum.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
 #include "ranges_collection.h"
 #include "typed_column_pair.h"
 
 namespace algos {
+
 /* Discovers Algebraic Constraints (AC). In theory AC consists of: 1) Set of value
  * pairs (a_i, b_k), where a_i from column A and b_k from column B. 2) Pairing
  * rule - bijection beetwen columns A and B. Algorithm was implemented with Trivial
@@ -29,15 +33,11 @@ namespace algos {
  * Also allows discovering exceptions, where exception is a (a_i, b_i) value pair
  * from columns A and B, that has result of binary operation not belonging to any
  * range discovered for (A, B) column pair */
-class ACAlgorithm : public LegacyAlgorithm {
+class ACAlgorithm : public Algorithm {
 private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;
 
-public:
-    enum class Binop : char { Plus = '+', Minus = '-', Multiplication = '*', Division = '/' };
-
-private:
-    Binop bin_operation_;
+    Binop bin_operation_ = Binop::_values()[0];
     /* Desired ratio of exceptions. Value lies in (0, 1] */
     double fuzziness_;
     /* Value lies in (0, 1]. Closer to 0 - many short intervals.
@@ -58,7 +58,6 @@ private:
     model::INumericType::NumericBinop binop_pointer_ = nullptr;
     std::unique_ptr<model::INumericType> num_type_;
 
-    Binop InitializeBinop(char bin_operation);
     /* Returns vector with ranges boundaries constructed for columns with lhs_i and rhs_i indices.
      * Value pairs (by which ranges constructed) fall into sample selection with chosen probability.
      */
@@ -77,37 +76,12 @@ private:
                                                              double weight) const;
     /* Greedily combines ranges if there is more than bumps_limit_ */
     void RestrictRangesAmount(std::vector<std::byte const*>& ranges) const;
+    void RegisterOptions();
+    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void MakeExecuteOptsAvailable() override;
+    void ResetState() override;
 
 public:
-    struct Config {
-        std::filesystem::path data{}; /* Path to input file */
-        char separator = ',';         /* Separator for csv */
-        bool has_header = true;       /* Indicates if input file has header */
-        char bin_operation = '+';
-        double fuzziness = 0.15;      /* Desired exceptions ratio */
-        double p_fuzz = 0.9;          /* Probability of not exceeding fuzziness ratio
-                                          by ratio of exceptional records */
-        double weight = 0.05;         /* between 0 and 1. Closer to 0 - many short intervals.
-                                         To 1 - small number of long intervals */
-        size_t bumps_limit = 5;       /* to remove limit: pass value of 0 */
-        size_t iterations_limit = 10; /* limit for iterations in Sampling() */
-        double seed = 0;
-    };
-
-    explicit ACAlgorithm(Config const& config)
-        : LegacyAlgorithm(config.data, config.separator, config.has_header,
-                          std::vector<std::string_view>()),
-          fuzziness_(config.fuzziness),
-          weight_(config.weight),
-          bumps_limit_(config.bumps_limit),
-          p_fuzz_(config.p_fuzz),
-          iterations_limit_(config.iterations_limit),
-          typed_relation_(TypedRelation::CreateFrom(*input_generator_, true)),
-          ac_exception_finder_(std::make_unique<algebraic_constraints::ACExceptionFinder>()),
-          seed_(config.seed) {
-        bin_operation_ = InitializeBinop(config.bin_operation);
-    }
-
     void InvokeBinop(std::byte const* l, std::byte const* r, std::byte* res) const {
         std::invoke(binop_pointer_, num_type_, l, r, res);
     }
@@ -133,6 +107,8 @@ public:
         ac_exception_finder_->CollectExceptions(this);
     }
     unsigned long long ExecuteInternal() override;
+
+    ACAlgorithm();
 };
 
 }  // namespace algos

@@ -40,7 +40,10 @@ BETTER_ENUM(AlgorithmType, char,
     hyucc,
 
 /* CFD mining algorithms */
-    fd_first_dfs
+    fd_first_dfs,
+
+/* Algebraic constraints mining algorithm*/
+    ac
 )
 
 // clang-format on

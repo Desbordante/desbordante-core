@@ -1,6 +1,7 @@
 #include "ac_exception_finder.h"
 
 #include "ac_algorithm.h"
+#include "bin_operation_enum.h"
 
 namespace algos::algebraic_constraints {
 
@@ -48,7 +49,7 @@ void ACExceptionFinder::CollectColumnPairExceptions(std::vector<model::TypedColu
         }
         auto res = std::unique_ptr<std::byte[]>(num_type->Allocate());
         num_type->ValueFromStr(res.get(), "0");
-        if (ac_alg_->GetBinOperation() == ACAlgorithm::Binop::Division &&
+        if (ac_alg_->GetBinOperation() == +Binop::Division &&
             num_type->Compare(r, res.get()) == model::CompareResult::kEqual) {
             continue;
         }
