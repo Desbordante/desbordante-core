@@ -20,9 +20,10 @@ template <typename Index>
 std::vector<Index> BitsetToIndices(boost::dynamic_bitset<> const& bitset) {
     std::vector<Index> indices;
     indices.reserve(bitset.count());
-    for (Index i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
+    for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
          i = bitset.find_next(i)) {
-        indices.push_back(i);
+        assert(i <= std::numeric_limits<Index>::max());
+        indices.push_back(static_cast<Index>(i));
     }
     return indices;
 }
