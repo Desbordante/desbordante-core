@@ -27,3 +27,6 @@
 
 /* CFD mining algorithms */
 #include "algorithms/cfd/fd_first_algorithm.h"
+
+/* Algebraic constraints*/
+#include "algorithms/algebraic_constraints/ac_algorithm.h"

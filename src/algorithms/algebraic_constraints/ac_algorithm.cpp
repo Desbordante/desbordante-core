@@ -8,8 +8,82 @@
 #include <easylogging++.h>
 
 #include "types/create_type.h"
+#include "util/config/names_and_descriptions.h"
 
 namespace algos {
+
+ACAlgorithm::ACAlgorithm() : Algorithm({}) {
+    RegisterOptions();
+    ac_exception_finder_ = std::make_unique<algebraic_constraints::ACExceptionFinder>();
+}
+
+void ACAlgorithm::RegisterOptions() {
+    using namespace util::config::names;
+    using namespace util::config::descriptions;
+    using util::config::Option;
+
+    auto check_and_set_binop = [this](Binop bin_operation) {
+        switch (bin_operation) {
+            case +Binop::Plus:
+                binop_pointer_ = &model::INumericType::Add;
+                break;
+            case +Binop::Minus:
+                binop_pointer_ = &model::INumericType::Sub;
+                break;
+            case +Binop::Multiplication:
+                binop_pointer_ = &model::INumericType::Mul;
+                break;
+            case +Binop::Division:
+                binop_pointer_ = &model::INumericType::Div;
+                break;
+            default:
+                throw std::invalid_argument(
+                        "Invalid operation for algebraic constraints discovery");
+        }
+    };
+    auto check_double_parameter = [](double parameter) {
+        if (parameter <= 0 || parameter > 1) throw std::invalid_argument("Parameter out of range");
+    };
+    auto check_fuzziness = [](double parameter) {
+        if (parameter < 0 || parameter > 1) throw std::invalid_argument("Parameter out of range");
+    };
+    auto check_non_negative = [](int parameter) {
+        if (parameter < 0) throw std::invalid_argument("Parameter out of range");
+    };
+    auto check_positive = [](int parameter) {
+        if (parameter <= 0) throw std::invalid_argument("Parameter out of range");
+    };
+
+    RegisterOption(Option{&bin_operation_, kBinaryOperation, kDBinaryOperation}.SetValueCheck(
+            check_and_set_binop));
+    RegisterOption(Option{&fuzziness_, kFuzziness, kDFuzziness}.SetValueCheck(check_fuzziness));
+    RegisterOption(Option{&p_fuzz_, kFuzzinessProbability, kDFuzzinessProbability}.SetValueCheck(
+            check_double_parameter));
+    RegisterOption(Option{&weight_, kWeight, kDWeight}.SetValueCheck(check_double_parameter));
+    RegisterOption(
+            Option{&bumps_limit_, kBumpsLimit, kDBumpsLimit}.SetValueCheck(check_non_negative));
+    RegisterOption(Option{&iterations_limit_, kIterationsLimit, kDIterationsLimit}.SetValueCheck(
+            check_positive));
+    RegisterOption(Option{&seed_, kACSeed, kDACSeed});
+}
+
+void ACAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(data_stream,
+                                                                       false);  // nulls are ignored
+    data_stream.Reset();
+}
+
+void ACAlgorithm::MakeExecuteOptsAvailable() {
+    using namespace util::config::names;
+    MakeOptionsAvailable({kFuzziness, kFuzzinessProbability, kWeight, kBumpsLimit, kIterationsLimit,
+                          kACSeed, kBinaryOperation});
+}
+
+void ACAlgorithm::ResetState() {
+    ac_pairs_.clear();
+    ranges_.clear();
+    ac_exception_finder_->ResetState();
+}
 
 size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     /* Calculation of formula 26.2.23 from <<Mathematical Tables>>
@@ -84,7 +158,7 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
             }
             auto res = std::unique_ptr<std::byte[]>(num_type_->Allocate());
             num_type_->ValueFromStr(res.get(), "0");
-            if (bin_operation_ == Binop::Division &&
+            if (bin_operation_ == +Binop::Division &&
                 num_type_->Compare(r, res.get()) == model::CompareResult::kEqual) {
                 continue;
             }
@@ -212,26 +286,6 @@ RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rh
                             std::move(ranges), lhs_i, rhs_i};
 }
 
-ACAlgorithm::Binop ACAlgorithm::InitializeBinop(char bin_operation) {
-    switch (static_cast<Binop>(bin_operation)) {
-        case Binop::Plus:
-            binop_pointer_ = &model::INumericType::Add;
-            break;
-        case Binop::Minus:
-            binop_pointer_ = &model::INumericType::Sub;
-            break;
-        case Binop::Multiplication:
-            binop_pointer_ = &model::INumericType::Mul;
-            break;
-        case Binop::Division:
-            binop_pointer_ = &model::INumericType::Div;
-            break;
-        default:
-            throw std::invalid_argument("Invalid operation for algebraic ac_pairs discovery");
-    }
-    return static_cast<Binop>(bin_operation);
-}
-
 unsigned long long ACAlgorithm::ExecuteInternal() {
     std::vector<model::TypedColumnData> const& data = typed_relation_->GetColumnData();
     if (data.empty()) {
@@ -252,7 +306,7 @@ unsigned long long ACAlgorithm::ExecuteInternal() {
                 /* Because of asymmetry and division by 0, we need to rediscover ranges.
                  * We don't need to do that for minus: (column1 - column2) lies in *some ranges*
                  * there we can express one column through another without possible problems */
-                if (bin_operation_ == Binop::Division) {
+                if (bin_operation_ == +Binop::Division) {
                     ranges_.emplace_back(
                             RangesCollection{model::CreateSpecificType<model::INumericType>(
                                                      data.at(col_i).GetTypeId(), true),
