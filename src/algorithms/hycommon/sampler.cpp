@@ -83,13 +83,15 @@ void Sampler::RunWindow(Efficiency& efficiency, util::PositionListIndex const& p
     unsigned const window = efficiency.GetWindow();
 
     for (util::PLI::Cluster const& cluster : pli.GetIndex()) {
+        boost::dynamic_bitset<> equal_attrs(num_attributes);
         for (size_t i = 0; window < cluster.size() && i < cluster.size() - window; ++i) {
             int const pivot_id = cluster[i];
             int const partner_id = cluster[i + window];
 
-            boost::dynamic_bitset<> equal_attrs(num_attributes);
             Match(equal_attrs, pivot_id, partner_id);
-            agree_sets_->Add(std::move(equal_attrs));
+            assert(equal_attrs.any());
+            agree_sets_->Add(equal_attrs);
+            equal_attrs.reset();
 
             comparisons++;
         }

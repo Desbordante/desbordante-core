@@ -30,6 +30,7 @@ public:
      * @param column_set column combination
      */
     void Add(boost::dynamic_bitset<>&& column_set);
+    void Add(boost::dynamic_bitset<> const& column_set);
 
     /**
      * @return Number of column sets stored in the last-access storage.
