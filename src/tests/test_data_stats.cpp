@@ -50,6 +50,14 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetMedianAD(0).HasValue());
 }
 
+TEST(TestDataStats, TestGetVocab) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic vocab_stat = stats.GetVocab(1);
+    std::string str = mo::Type::GetValue<mo::String>(vocab_stat.GetData());
+    EXPECT_EQ(str, "abd");
+}
+
 TEST(TestDataStats, TestGetNumberOfNulls) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::Statistic num_nulls_stat = stats_ptr->GetNumNulls(0);
