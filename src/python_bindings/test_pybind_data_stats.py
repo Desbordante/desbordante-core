@@ -41,7 +41,7 @@ class TestDataStats(unittest.TestCase):
 
     def test_get_number_of_columns(self) -> None:
         res = self.data_stats.get_number_of_columns()
-        expected = 10
+        expected = 11
         self.assertEqual(expected, res)
 
     def test_get_null_columns(self) -> None:
@@ -56,7 +56,7 @@ class TestDataStats(unittest.TestCase):
 
     def test_get_columns_with_all_unique_values(self) -> None:
         res = self.data_stats.get_columns_with_all_unique_values()
-        expected = [6, 8, 9]
+        expected = [6, 8, 9, 10]
         self.assertEqual(expected, res)
 
     def test_get_number_of_distinct(self) -> None:

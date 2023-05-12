@@ -535,6 +535,36 @@ Statistic DataStats::GetVocab(size_t index) const {
     return Statistic(res, &string_type, false);
 }
 
+Statistic DataStats::GetNumberOfNonLetterChars(size_t index) const {
+    if (all_stats_[index].num_non_letter_chars.HasValue())
+        return all_stats_[index].num_non_letter_chars;
+
+    auto pred = [](unsigned int symbol) { return !std::isalpha(symbol); };
+
+    return CountIfInColumn(pred, index);
+}
+
+template <class Pred>
+Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    size_t count = 0;
+    std::string string_data;
+    mo::IntType int_type;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+        auto const& string_data = mo::Type::GetValue<std::string>(col.GetValue(i));
+        for (size_t j = 0; j < string_data.size(); j++)
+            if (pred(string_data[j])) count++;
+    }
+
+    std::byte const* res = int_type.MakeValue(count);
+
+    return Statistic(res, &int_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -564,6 +594,8 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].median_ad = GetMedianAD(index);
             all_stats_[index].num_nulls = GetNumNulls(index);
             all_stats_[index].vocab = GetVocab(index);
+            all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
+            all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

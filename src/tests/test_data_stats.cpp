@@ -48,6 +48,16 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetMeanAD(0).HasValue());
     EXPECT_FALSE(stats.GetMedian(0).HasValue());
     EXPECT_FALSE(stats.GetMedianAD(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfNonLetterChars(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfDigitChars(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetNumberOfNonLetterChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic non_letter_chars_stat = stats.GetNumberOfNonLetterChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
+    EXPECT_EQ(count, 8);
 }
 
 TEST(TestDataStats, TestGetVocab) {
@@ -68,7 +78,7 @@ TEST(TestDataStats, TestGetNumberOfNulls) {
 TEST(TestDataStats, TestGetColumnsWithUniqueValues) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
-    std::vector<size_t> actual_cols = std::vector<size_t>{8, 9};
+    std::vector<size_t> actual_cols = std::vector<size_t>{8, 9, 10};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
