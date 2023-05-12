@@ -29,6 +29,10 @@ class DataStats : public Algorithm {
     template <class Pred, class Data>
     std::vector<size_t> FilterIndices(Pred pred, Data const& data) const;
 
+    // Returns number of chars in a column satisfying the predicate
+    template <class Pred>
+    Statistic CountIfInColumn(Pred pred, size_t index) const;
+
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
@@ -110,6 +114,8 @@ public:
     Statistic GetNumNulls(size_t index) const;
     // Returns all distinct symbols of the column as a sorted string.
     Statistic GetVocab(size_t index) const;
+    // Returns number of non-letter chars in a string column.
+    Statistic GetNumberOfNonLetterChars(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;
