@@ -552,6 +552,15 @@ Statistic DataStats::GetNumberOfDigitChars(size_t index) const {
     return CountIfInColumn(pred, index);
 }
 
+Statistic DataStats::GetNumberOfLowercaseChars(size_t index) const {
+    if (all_stats_[index].num_lowercase_chars.HasValue())
+        return all_stats_[index].num_lowercase_chars;
+
+    auto pred = [](int symbol) { return std::islower(symbol); };
+
+    return CountIfInColumn(pred, index);
+}
+
 template <class Pred>
 Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
@@ -604,6 +613,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].vocab = GetVocab(index);
             all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
             all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
+            all_stats_[index].num_lowercase_chars = GetNumberOfLowercaseChars(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(

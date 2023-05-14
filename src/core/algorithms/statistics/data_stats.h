@@ -118,6 +118,9 @@ public:
     Statistic GetNumberOfNonLetterChars(size_t index) const;
     // Returns number of digit chars in a string column.
     Statistic GetNumberOfDigitChars(size_t index) const;
+    // Returns number of digit chars in a string column.
+    Statistic GetNumberOfLowercaseChars(size_t index) const;
+    
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

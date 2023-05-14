@@ -50,6 +50,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetMedianAD(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfNonLetterChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfDigitChars(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfLowercaseChars(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetNumberOfLowercaseChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic num_lowercase_chars = stats.GetNumberOfLowercaseChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(num_lowercase_chars.GetData());
+    EXPECT_EQ(count, 33);
 }
 
 TEST(TestDataStats, TestGetNumberOfDigitChars) {
