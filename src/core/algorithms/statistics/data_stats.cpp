@@ -299,7 +299,6 @@ size_t DataStats::CountIf(Pred pred, size_t index) const {
 }
 
 Statistic DataStats::CountIfInBinaryRelationWithZero(size_t index, mo::CompareResult res) const {
-    if (all_stats_[index].num_zeros.HasValue()) return all_stats_[index].num_zeros;
     const mo::TypedColumnData& col = GetData()[index];
     if (!col.IsNumeric()) return {};
 
@@ -318,10 +317,12 @@ Statistic DataStats::CountIfInBinaryRelationWithZero(size_t index, mo::CompareRe
 }
 
 Statistic DataStats::GetNumberOfZeros(size_t index) const {
+    if (all_stats_[index].num_zeros.HasValue()) return all_stats_[index].num_zeros;
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kEqual);
 }
 
 Statistic DataStats::GetNumberOfNegatives(size_t index) const {
+    if (all_stats_[index].num_negatives.HasValue()) return all_stats_[index].num_negatives;
     return CountIfInBinaryRelationWithZero(index, mo::CompareResult::kLess);
 }
 
