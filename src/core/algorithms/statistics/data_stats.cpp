@@ -591,6 +591,25 @@ Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
     return Statistic(res, &int_type, false);
 }
 
+Statistic DataStats::GetNumberOfChars(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    size_t count = 0;
+    std::string string_data;
+    mo::IntType int_type;
+
+    for (size_t i = 0; i < col.GetNumRows(); i++) {
+        if (col.IsNullOrEmpty(i)) continue;
+        auto const& string_data = mo::Type::GetValue<std::string>(col.GetValue(i));
+        count += string_data.length();
+    }
+
+    std::byte const* res = int_type.MakeValue(count);
+
+    return Statistic(res, &int_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -624,6 +643,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
             all_stats_[index].num_lowercase_chars = GetNumberOfLowercaseChars(index);
             all_stats_[index].num_uppercase_chars = GetNumberOfUppercaseChars(index);
+            all_stats_[index].num_chars = GetNumberOfChars(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
