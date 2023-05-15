@@ -116,6 +116,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_non_letter_chars, "num_non_letter_chars");
     try_add_stat(num_digit_chars, "num_digit_chars");
     try_add_stat(num_lowercase_chars, "num_lowercase_chars");
+    try_add_stat(num_uppercase_chars, "num_uppercase_chars");
 
     return res;
 }
