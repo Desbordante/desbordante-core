@@ -122,6 +122,8 @@ public:
     Statistic GetNumberOfLowercaseChars(size_t index) const;
     // Returns number of digit chars in a string column.
     Statistic GetNumberOfUppercaseChars(size_t index) const;
+    // Returns total number of characters in a string column.
+    Statistic GetNumberOfChars(size_t index) const;
     
 
     ColumnStats const& GetAllStats(size_t index) const;
