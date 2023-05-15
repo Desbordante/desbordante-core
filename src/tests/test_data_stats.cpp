@@ -51,6 +51,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfNonLetterChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfDigitChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfLowercaseChars(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfUppercaseChars(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetNumberOfUppercaseChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic num_uppercase_chars = stats.GetNumberOfUppercaseChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(num_uppercase_chars.GetData());
+    EXPECT_EQ(count, 6);
 }
 
 TEST(TestDataStats, TestGetNumberOfLowercaseChars) {
