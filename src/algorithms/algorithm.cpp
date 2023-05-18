@@ -9,8 +9,8 @@ bool Algorithm::HandleUnknownOption([[maybe_unused]] std::string_view option_nam
     return false;
 }
 
-bool Algorithm::FitCompleted() const {
-    return fit_completed_;
+bool Algorithm::DataLoaded() const {
+    return data_loaded_;
 }
 
 void Algorithm::AddSpecificNeededOptions(
@@ -24,7 +24,7 @@ void Algorithm::ClearOptions() noexcept {
 }
 
 void Algorithm::ExecutePrepare() {
-    fit_completed_ = true;
+    data_loaded_ = true;
     ClearOptions();
     MakeExecuteOptsAvailable();
 }
@@ -62,16 +62,16 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
     }
 }
 
-void Algorithm::Fit(model::IDatasetStream& data_stream) {
+void Algorithm::LoadData(model::IDatasetStream& data_stream) {
     if (!GetNeededOptions().empty()) throw std::logic_error(
                 "All options need to be set before starting processing.");
-    FitInternal(data_stream);
+    LoadDataInternal(data_stream);
     data_stream.Reset();
     ExecutePrepare();
 }
 
 unsigned long long Algorithm::Execute() {
-    if (!fit_completed_) {
+    if (!data_loaded_) {
         throw std::logic_error("Data must be processed before execution.");
     }
     if (!GetNeededOptions().empty())

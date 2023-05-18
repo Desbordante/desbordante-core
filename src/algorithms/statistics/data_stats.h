@@ -28,7 +28,7 @@ class DataStats : public Algorithm {
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
 protected:
-    void FitInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal(model::IDatasetStream& data_stream) final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 

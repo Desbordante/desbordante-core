@@ -480,7 +480,7 @@ std::string DataStats::ToString() const {
     return res.str();
 }
 
-void DataStats::FitInternal(model::IDatasetStream& data_stream) {
+void DataStats::LoadDataInternal(model::IDatasetStream& data_stream) {
     col_data_ = mo::CreateTypedColumnData(data_stream, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }

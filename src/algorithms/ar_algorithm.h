@@ -56,7 +56,7 @@ protected:
     virtual double GetSupport(std::vector<unsigned> const& frequent_itemset) const = 0;
     virtual unsigned long long GenerateAllRules() = 0;
     virtual unsigned long long FindFrequent() = 0;
-    void FitInternal(model::IDatasetStream &data_stream) final;
+    void LoadDataInternal(model::IDatasetStream& data_stream) final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 

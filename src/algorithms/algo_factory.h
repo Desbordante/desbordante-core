@@ -103,7 +103,7 @@ void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
             details::ExtractOptionValue<std::filesystem::path>(options, config::names::kData),
             details::ExtractOptionValue<char>(options, config::names::kSeparator),
             details::ExtractOptionValue<bool>(options, config::names::kHasHeader)};
-    algorithm.Fit(parser);
+    algorithm.LoadData(parser);
     ConfigureFromMap(algorithm, options);
 }
 

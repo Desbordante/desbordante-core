@@ -121,7 +121,7 @@ def fd_to_string(dataset: pd.DataFrame, fd: tuple[tuple[int], int]):
 
 def get_result_set(df, algo_name, algo_config):
     algo = getattr(desb, algo_name)()
-    algo.fit(df, **algo_config)
+    algo.load_data(df, **algo_config)
     algo.execute(**algo_config)
     return {(tuple(fd.lhs_indices), fd.rhs_index) for fd in algo.get_fds()}
 
