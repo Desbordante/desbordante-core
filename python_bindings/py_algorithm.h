@@ -27,10 +27,10 @@ public:
     [[nodiscard]] pybind11::tuple GetOptionType(std::string_view option_name) const;
 
     // For pandas dataframes
-    void Fit(pybind11::object dataframe, std::string name, pybind11::kwargs const& kwargs);
+    void LoadData(pybind11::object dataframe, std::string name, pybind11::kwargs const& kwargs);
 
-    void Fit(std::string const& path, char separator, bool has_header,
-             pybind11::kwargs const& kwargs);
+    void LoadData(std::string const& path, char separator, bool has_header,
+                  pybind11::kwargs const& kwargs);
 
     pybind11::int_ Execute(pybind11::kwargs const& kwargs);
 };

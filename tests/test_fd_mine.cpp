@@ -23,7 +23,7 @@ using std::string, std::vector;
 
 namespace onam = algos::config::names;
 
-std::unique_ptr<FDAlgorithm> ConfToFitFD_Mine() {
+std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine() {
     std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
     algos::ConfigureFromMap(*algorithm, StdParamsMap{});
     return algorithm;
@@ -85,10 +85,10 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
-    auto algorithm = ConfToFitFD_Mine();
+    auto algorithm = ConfToLoadFD_Mine();
     auto path = test_data_dir / "TestEmpty.csv";
     auto parser = CSVParser(path, ',', true);
-    ASSERT_THROW(algorithm->Fit(parser), std::runtime_error);
+    ASSERT_THROW(algorithm->LoadData(parser), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {

@@ -28,7 +28,7 @@ private:
     // Maps a parameter that added other parameters to their names.
     std::unordered_map<std::string_view, std::vector<std::string_view>> opt_parents_{};
 
-    bool fit_completed_ = false;
+    bool data_loaded_ = false;
 
     // Clear the necessary fields for Execute to run repeatedly with different
     // configuration parameters on the same dataset.
@@ -36,7 +36,7 @@ private:
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
     void ClearOptions() noexcept;
-    virtual void FitInternal(model::IDatasetStream& data_stream) = 0;
+    virtual void LoadDataInternal(model::IDatasetStream& data_stream) = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
@@ -67,7 +67,7 @@ protected:
     void ExecutePrepare();
 
     // Overload this to add options after your algorithm has processed the data
-    // given through Fit
+    // given through LoadData
     virtual void MakeExecuteOptsAvailable();
 
 public:
@@ -83,8 +83,8 @@ public:
     // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
     explicit Algorithm(std::vector<std::string_view> phase_names);
 
-    void Fit(model::IDatasetStream & data_stream);
-    bool FitCompleted() const;
+    void LoadData(model::IDatasetStream& data_stream);
+    bool DataLoaded() const;
 
     unsigned long long Execute();
 

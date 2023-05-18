@@ -119,7 +119,7 @@ void MetricVerifier::MakeExecuteOptsAvailable() {
             {kDistFromNullIsInfinity, kParameter, kMetric, config::LhsIndicesOpt.GetName()});
 }
 
-void MetricVerifier::FitInternal(model::IDatasetStream& data_stream) {
+void MetricVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
     relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
     data_stream.Reset();
     if (relation_->GetColumnData().empty()) {
