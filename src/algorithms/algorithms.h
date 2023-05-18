@@ -21,3 +21,6 @@
 
 /* FD verifier */
 #include "algorithms/fd_verifier/fd_verifier.h"
+
+/* UCC verifier */
+#include "algorithms/ucc_verifier/ucc_verifier.h"
