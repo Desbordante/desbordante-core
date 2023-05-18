@@ -15,7 +15,7 @@ namespace algos {
 
 class LegacyAlgorithm : public Algorithm {
 private:
-    void FitInternal([[maybe_unused]] model::IDatasetStream& data_stream) override {}
+    void LoadDataInternal([[maybe_unused]] model::IDatasetStream& data_stream) override {}
 
     void ResetState() final {}
 

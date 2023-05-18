@@ -36,7 +36,7 @@ void FDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), kRhsIndex});
 }
 
-void FDVerifier::FitInternal(model::IDatasetStream& data_stream) {
+void FDVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
     relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
     data_stream.Reset();
     if (relation_->GetColumnData().empty()) {

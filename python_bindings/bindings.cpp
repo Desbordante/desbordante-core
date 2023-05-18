@@ -99,13 +99,13 @@ PYBIND11_MODULE(desbordante, module) {
                                    &FDHighlight::GetMostFrequentRhsValueProportion);
 
     py::class_<PyAlgorithmBase>(module, "Algorithm")
-            .def("fit",
+            .def("load_data",
                  py::overload_cast<std::string const &, char, bool, py::kwargs const &>(
-                         &PyAlgorithmBase::Fit),
+                         &PyAlgorithmBase::LoadData),
                  "path"_a, "separator"_a = ',', "has_header"_a = true, "Transform data from CSV")
-            .def("fit",
+            .def("load_data",
                  py::overload_cast<pybind11::object, std::string, py::kwargs const &>(
-                         &PyAlgorithmBase::Fit),
+                         &PyAlgorithmBase::LoadData),
                  "df"_a, "name"_a = "Pandas dataframe", "Transform data from pandas dataframe")
             .def("get_needed_options", &PyAlgorithmBase::GetNeededOptions,
                  "Get names of options the algorithm needs")

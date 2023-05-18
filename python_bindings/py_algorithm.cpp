@@ -49,24 +49,24 @@ py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     return GetPyType(type_index);
 }
 
-void PyAlgorithmBase::Fit(std::string const& path, char separator, bool has_header,
-                          py::kwargs const& kwargs) {
+void PyAlgorithmBase::LoadData(std::string const& path, char separator, bool has_header,
+                               py::kwargs const& kwargs) {
     Configure(kwargs);
     CSVParser parser{path, separator, has_header};
-    algorithm_->Fit(parser);
+    algorithm_->LoadData(parser);
 }
 
-void PyAlgorithmBase::Fit(py::object dataframe, std::string name, py::kwargs const& kwargs) {
+void PyAlgorithmBase::LoadData(py::object dataframe, std::string name, py::kwargs const& kwargs) {
     Configure(kwargs);
 
     py::handle const& dtypes = dataframe.attr("dtypes");
     if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>()) {
         // All columns are python strings, no need to transform.
         StringDataframeReader reader{std::move(dataframe), std::move(name)};
-        algorithm_->Fit(reader);
+        algorithm_->LoadData(reader);
     } else {
         ArbitraryDataframeReader reader{std::move(dataframe), std::move(name)};
-        algorithm_->Fit(reader);
+        algorithm_->LoadData(reader);
     }
 }
 

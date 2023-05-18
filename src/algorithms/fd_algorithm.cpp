@@ -16,9 +16,9 @@ void FDAlgorithm::RegisterOptions() {
     RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
 }
 
-void FDAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
+void FDAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
     number_of_columns_ = data_stream.GetNumberOfColumns();
-    FitFd(data_stream);
+    LoadDataFd(data_stream);
 }
 
 void FDAlgorithm::ResetState() {

@@ -72,7 +72,7 @@ struct LinesParam : TestingParam {
           expected(std::move(expected)) {}
 };
 
-static std::unique_ptr<algos::TypoMiner> ConfToFitTypoMiner(
+static std::unique_ptr<algos::TypoMiner> ConfToLoadTypoMiner(
         algos::AlgorithmType const algorithm_type) {
     auto typo_miner = std::make_unique<algos::TypoMiner>(algorithm_type);
     algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{});
@@ -127,10 +127,10 @@ static void TestForEachAlgo(F&& test) {
 
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
     auto const test = [](algos::AlgorithmType const algo) {
-        auto typo_miner = ConfToFitTypoMiner(algo);
+        auto typo_miner = ConfToLoadTypoMiner(algo);
         auto path = test_data_dir / "TestEmpty.csv";
         auto parser = CSVParser(path, ',', true);
-        ASSERT_THROW(typo_miner->Fit(parser), std::runtime_error);
+        ASSERT_THROW(typo_miner->LoadData(parser), std::runtime_error);
     };
     TestForEachAlgo(test);
 }

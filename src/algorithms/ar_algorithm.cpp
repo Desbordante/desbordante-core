@@ -42,7 +42,7 @@ void ARAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 
-void ARAlgorithm::FitInternal(model::IDatasetStream& data_stream) {
+void ARAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
     switch (input_format_) {
         case InputFormat::singular:
             transactional_data_ = model::TransactionalData::CreateFromSingular(
