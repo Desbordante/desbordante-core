@@ -27,3 +27,6 @@
 
 /* CFD mining algorithms */
 #include "algorithms/cfd/fd_first_algorithm.h"
+
+/* UCC verifier */
+#include "algorithms/ucc_verifier/ucc_verifier.h"

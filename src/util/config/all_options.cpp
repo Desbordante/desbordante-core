@@ -101,6 +101,12 @@ boost::program_options::options_description AlgoOptions() {
             (names::kRhsIndex, po::value<unsigned int>(), desc::kDRhsIndex)
             ;
 
+    po::options_description ucc_verification_options("UCC verification options");
+ucc_verification_options.add_options()
+        (names::kIndices, po::value<std::vector<unsigned int>>()->multitoken(),
+         desc::kDIndices)
+        ;
+
     po::options_description mfd_options("MFD options");
     mfd_options.add_options()
             (names::kMetric, po::value<algos::metric::Metric>(), desc::kDMetric)
@@ -155,7 +161,8 @@ boost::program_options::options_description AlgoOptions() {
             .add(ac_options)
             .add(typo_options)
             .add(fd_verification_options)
-            .add(cfd_search_options);
+            .add(cfd_search_options)
+            .add(ucc_verification_options);
     return algorithm_options;
 }
 }  // namespace util::config
