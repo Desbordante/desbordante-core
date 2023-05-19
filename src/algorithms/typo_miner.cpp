@@ -92,20 +92,15 @@ void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
     data_stream.Reset();
     typed_relation_ =
             model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
-    auto precise_pli = dynamic_cast<PliBasedFDAlgorithm*>(precise_algo_.get());
-    auto approx_pli = dynamic_cast<PliBasedFDAlgorithm*>(approx_algo_.get());
-    if (!precise_algo_->DataLoaded()) {
-        if (precise_pli != nullptr)
-            precise_pli->LoadData(relation_);
-        else
-            precise_algo_->LoadData(data_stream);
-    }
-    if (!approx_algo_->DataLoaded()) {
-        if (approx_pli != nullptr)
-            approx_pli->LoadData(relation_);
-        else
-            approx_algo_->LoadData(data_stream);
+
+    for (Algorithm* algo : {precise_algo_.get(), approx_algo_.get()}) {
+        auto pli_algo = dynamic_cast<PliBasedFDAlgorithm*>(algo);
+        if (pli_algo == nullptr) {
+            data_stream.Reset();
+            algo->LoadData(data_stream);
+        } else {
+            pli_algo->LoadData(relation_);
+        }
     }
 }
 
