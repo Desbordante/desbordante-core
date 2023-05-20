@@ -12,7 +12,7 @@ public:
     Sampler(hy::PLIsPtr plis, hy::RowsPtr pli_records)
         : sampler_(std::move(plis), std::move(pli_records)) {}
 
-    NonFDList GetNonFDCandidates(hy::IdPairs const& comparison_suggestions) {
+    NonFDList GetNonFDs(hy::IdPairs const& comparison_suggestions) {
         return sampler_.GetAgreeSets(comparison_suggestions);
     }
 };
