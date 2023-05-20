@@ -1,6 +1,6 @@
 #include "inductor.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 void Inductor::UpdateUCCTree(NonUCCList&& non_uccs) {
     unsigned const max_level = non_uccs.GetDepth();
@@ -32,4 +32,4 @@ void Inductor::SpecializeUCCTree(model::RawUCC const& non_ucc) {
     }
 }
 
-}  // namespace algos
+}  // namespace algos::hyucc

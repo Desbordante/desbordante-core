@@ -10,7 +10,7 @@
 #include "position_list_index.h"
 #include "structures/ucc_tree.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 class Validator {
 private:
@@ -33,4 +33,4 @@ public:
     hy::IdPairs ValidateAndExtendCandidates();
 };
 
-}  // namespace algos
+}  // namespace algos::hyucc
