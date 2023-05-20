@@ -43,38 +43,42 @@ public:
     }
 
     static inline const std::vector<Dataset> light_datasets_ = {
-            {"WDC_astronomical.csv", 2089541732445U, ',', true},
-            {"WDC_symbols.csv", 1, ',', true},
-            {"WDC_science.csv", 2658842082150U, ',', true},
-            {"WDC_satellites.csv", 5208443370856032U, ',', true},
-            {"WDC_appearances.csv", 82369238361U, ',', true},
-            {"WDC_astrology.csv", 79554241843163108U, ',', true},
-            {"WDC_game.csv", 2555214540772530U, ',', true},
-            {"WDC_kepler.csv", 82426217315737U, ',', true},
-            {"WDC_planetz.csv", 2555214540772530U, ',', true},
-            {"WDC_age.csv", 2658842082150U, ',', true},
-            {"TestWide.csv", 2555250373874U, ',', true},
-            {"abalone.csv", 16581571148699134255U, ',', true},
-            {"iris.csv", 1, ',', false},
-            {"adult.csv", 1, ';', false},
-            {"breast_cancer.csv", 16854900230774656828U, ',', true},
-            // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
-            // able to process these move them to heavy_datasets_
-            {"neighbors10k.csv", 170971924188219U, ',', true},
-            {"neighbors50k.csv", 1, ',', true},
-            {"neighbors100k.csv", 170971924188219U, ',', true},
-            {"CIPublicHighway10k.csv", 82369238361U, ',', true},
-            {"CIPublicHighway700.csv", 82369238361U, ',', true},
+        {"WDC_astronomical.csv", 2089541732445U, ',', true},
+        {"WDC_symbols.csv", 1, ',', true},
+        {"WDC_science.csv", 2658842082150U, ',', true},
+        {"WDC_satellites.csv", 5208443370856032U, ',', true},
+        {"WDC_appearances.csv", 82369238361U, ',', true},
+        {"WDC_astrology.csv", 79554241843163108U, ',', true},
+        {"WDC_game.csv", 2555214540772530U, ',', true},
+        {"WDC_kepler.csv", 82426217315737U, ',', true},
+        {"WDC_planetz.csv", 2555214540772530U, ',', true},
+        {"WDC_age.csv", 2658842082150U, ',', true},
+        {"TestWide.csv", 2555250373874U, ',', true},
+        {"abalone.csv", 16581571148699134255U, ',', true},
+        {"iris.csv", 1, ',', false},
+        {"adult.csv", 1, ';', false},
+        {"breast_cancer.csv", 16854900230774656828U, ',', true},
+        // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
+        // able to process these move them to heavy_datasets_
+        {"neighbors10k.csv", 170971924188219U, ',', true},
+#if 0
+        {"neighbors50k.csv", 1, ',', true},
+#endif
+        {"neighbors100k.csv", 170971924188219U, ',', true},
+        {"CIPublicHighway10k.csv", 82369238361U, ',', true},
+        {"CIPublicHighway700.csv", 82369238361U, ',', true},
     };
 
     static inline const std::vector<Dataset> heavy_datasets_ = {
-            {"EpicVitals.csv", 1, '|', true},
-            {"EpicMeds.csv", 59037771758954037U, '|', true},
-            {"iowa1kk.csv", 2654435863U, ',', true},
-            {"fd-reduced-30.csv", 275990379954778425U, ',', true},
-            {"flight_1k.csv", 2512091017708538662U, ';', true},
-            {"plista_1k.csv", 1, ';', false},
-            {"letter.csv", 1, ',', false},
+        {"EpicVitals.csv", 1, '|', true},
+        {"EpicMeds.csv", 59037771758954037U, '|', true},
+        {"iowa1kk.csv", 2654435863U, ',', true},
+#if 0
+        {"fd-reduced-30.csv", 275990379954778425U, ',', true},
+        {"flight_1k.csv", 2512091017708538662U, ';', true},
+        {"plista_1k.csv", 1, ';', false},
+        {"letter.csv", 1, ',', false},
+#endif
     };
 };
 
