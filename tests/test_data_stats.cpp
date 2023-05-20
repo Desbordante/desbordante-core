@@ -80,9 +80,9 @@ TEST(TestDataStats, TestGetMedian) {
 TEST(TestDataStats, TestMeanAD) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
-    algos::Statistic MeanAD_stat = stats.GetMeanAD(7);
-    mo::Double MeanAD = mo::Type::GetValue<mo::Double>(MeanAD_stat.GetData());
-    EXPECT_DOUBLE_EQ(258.263, MeanAD);
+    algos::Statistic mean_ad_stat = stats.GetMeanAD(7);
+    mo::Double mean_ad = mo::Type::GetValue<mo::Double>(mean_ad_stat.GetData());
+    EXPECT_DOUBLE_EQ(258.263, mean_ad);
 }
 
 TEST(TestDataStats, TestGeometricMean) {
