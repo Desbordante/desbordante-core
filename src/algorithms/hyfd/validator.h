@@ -7,7 +7,6 @@
 #include "hycommon/primitive_validations.h"
 #include "raw_fd.h"
 #include "structures/fd_tree.h"
-#include "structures/non_fds.h"
 #include "types.h"
 #include "util/position_list_index.h"
 
