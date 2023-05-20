@@ -40,6 +40,7 @@
 #include "py_data_stats.h"
 #include "py_fd_algorithm.h"
 #include "py_fd_verifier.h"
+#include "py_ucc_verifier.h"
 #include "py_metric_verifier.h"
 #include "py_ucc_algorithm.h"
 
@@ -137,6 +138,12 @@ PYBIND11_MODULE(desbordante, module) {
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
+
+    DEFINE_ALGORITHM(UCCVerifier, Algorithm)
+            .def("ucc_holds", &PyUCCVerifier::UCCHolds)
+            .def("get_num_error_clusters", &PyUCCVerifier::GetNumErrorClusters)
+            .def("get_num_error_rows", &PyUCCVerifier::GetNumErrorRows)
+            .def("get_error_clusters", &PyUCCVerifier::GetErrorClusters);
 
     DEFINE_ALGORITHM(DataStats, Algorithm).def("get_result_string", &PyDataStats::GetResultString);
 
