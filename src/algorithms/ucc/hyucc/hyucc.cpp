@@ -22,13 +22,14 @@ void HyUCC::LoadDataInternal(model::IDatasetStream& data_stream) {
 
 unsigned long long HyUCC::ExecuteInternal() {
     using namespace hy;
+    using namespace hyucc;
     auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
     auto const plis_shared = std::make_shared<PLIs>(std::move(plis));
     auto const pli_records_shared = std::make_shared<Rows>(std::move(pli_records));
 
-    algos::Sampler sampler(plis_shared, pli_records_shared);
+    hyucc::Sampler sampler(plis_shared, pli_records_shared);
 
     auto ucc_tree = std::make_unique<UCCTree>(relation_->GetNumColumns());
     Inductor inductor(ucc_tree.get());

@@ -6,7 +6,7 @@
 #include "structures/non_ucc_list.h"
 #include "structures/ucc_tree.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 class Inductor {
 private:
@@ -20,4 +20,4 @@ public:
     void UpdateUCCTree(NonUCCList&& non_uccs);
 };
 
-}  // namespace algos
+}  // namespace algos::hyucc
