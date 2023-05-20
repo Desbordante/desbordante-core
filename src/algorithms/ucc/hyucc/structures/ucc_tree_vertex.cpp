@@ -1,6 +1,6 @@
 #include "ucc_tree_vertex.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 void UCCTreeVertex::InitChildren(bool is_ucc) {
     assert(children_.empty());
@@ -132,4 +132,4 @@ void UCCTreeVertex::FillUCCsRecursive(std::vector<boost::dynamic_bitset<>>& uccs
     return level;
 }
 
-}  // namespace algos
+}  // namespace algos::hyucc

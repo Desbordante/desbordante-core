@@ -10,8 +10,8 @@ using model::RawUCC;
 
 // Check out comment for Validator::ValidateAndExtendCandidates, it's appropriate for this function
 // too
-size_t AddExtendedCandidatesFromInvalid(std::vector<algos::LhsPair>& next_level,
-                                        algos::UCCTree& ucc_tree,
+size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyucc::LhsPair>& next_level,
+                                        algos::hyucc::UCCTree& ucc_tree,
                                         std::vector<RawUCC> const& invalid_uccs,
                                         size_t num_attributes) {
     size_t candidates = 0;
@@ -28,7 +28,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::LhsPair>& next_level,
                 continue;
             }
 
-            algos::UCCTreeVertex* child = ucc_tree.AddUCCGetIfNew(ucc_ext);
+            algos::hyucc::UCCTreeVertex* child = ucc_tree.AddUCCGetIfNew(ucc_ext);
             if (child == nullptr) {
                 continue;
             }
@@ -41,7 +41,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::LhsPair>& next_level,
 
 }  // namespace
 
-namespace algos {
+namespace algos::hyucc {
 
 using model::RawUCC;
 
@@ -149,4 +149,4 @@ hy::IdPairs Validator::ValidateAndExtendCandidates() {
     return {};
 }
 
-}  // namespace algos
+}  // namespace algos::hyucc

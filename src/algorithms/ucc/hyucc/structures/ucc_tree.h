@@ -6,7 +6,7 @@
 
 #include "ucc_tree_vertex.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 class UCCTree {
 private:
@@ -43,4 +43,4 @@ public:
     [[nodiscard]] std::vector<boost::dynamic_bitset<>> FillUCCs() const;
 };
 
-}  // namespace algos
+}  // namespace algos::hyucc

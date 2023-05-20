@@ -1,6 +1,6 @@
 #include "ucc_tree.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 UCCTreeVertex* UCCTree::AddUCC(boost::dynamic_bitset<> const& ucc, bool* is_new_out) {
     UCCTreeVertex* cur_node = root_.get();
@@ -36,4 +36,4 @@ std::vector<boost::dynamic_bitset<>> UCCTree::FillUCCs() const {
     return result;
 }
 
-}  // namespace algos
+}  // namespace algos::hyucc

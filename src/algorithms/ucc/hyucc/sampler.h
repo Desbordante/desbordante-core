@@ -4,7 +4,7 @@
 #include "hycommon/types.h"
 #include "ucc/hyucc/structures/non_ucc_list.h"
 
-namespace algos {
+namespace algos::hyucc {
 
 class Sampler {
 private:
@@ -19,4 +19,4 @@ public:
     }
 };
 
-}  // namespace algos
+}  // namespace algos::hyucc

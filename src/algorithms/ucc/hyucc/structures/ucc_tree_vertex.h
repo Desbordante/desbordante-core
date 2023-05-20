@@ -6,7 +6,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-namespace algos {
+namespace algos::hyucc {
 
 class UCCTreeVertex;
 
@@ -86,4 +86,4 @@ public:
     [[nodiscard]] std::vector<LhsPair> GetLevelRecursive(unsigned target_level);
 };
 
-}  // namespace algos
+}  // namespace algos::hyucc
