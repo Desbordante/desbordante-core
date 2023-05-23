@@ -39,7 +39,7 @@ unsigned long long DFD::ExecuteInternal() {
         ColumnData& column_data = relation_->GetColumnData(column->GetIndex());
         util::PositionListIndex const* const column_pli = column_data.GetPositionListIndex();
 
-        if (column_pli->GetNumNonSingletonCluster() == 0) {
+        if (column_pli->AllValuesAreUnique()) {
             Vertical const lhs = Vertical(*column);
             unique_columns_.push_back(lhs);
             //we do not register an FD at once, because we check for FDs with empty LHS later
