@@ -18,7 +18,7 @@ std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
 
     std::vector<Column const*> keys;
     for (ColumnData const& col : relation_->GetColumnData()) {
-        if (col.GetPositionListIndex()->GetNumNonSingletonCluster() == 0) {
+        if (col.GetPositionListIndex()->AllValuesAreUnique()) {
             keys.push_back(col.GetColumn());
         }
     }
