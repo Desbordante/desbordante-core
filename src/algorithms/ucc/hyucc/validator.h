@@ -4,8 +4,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/asio/thread_pool.hpp>
-
 #include "hycommon/primitive_validations.h"
 #include "hycommon/types.h"
 #include "model/raw_ucc.h"
