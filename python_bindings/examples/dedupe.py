@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from typing import Deque, List, Tuple
 
 import desbordante as desb
 import pandas as pd
@@ -39,7 +40,7 @@ def get_lhs_from_sorted_fds(fds):
     return lhs
 
 
-def count_matches(row1, row2, rhs: list[int]):
+def count_matches(row1, row2, rhs: List[int]):
     return sum(row1[index] == row2[index] for index in rhs)
 
 
@@ -49,7 +50,7 @@ def setup_pandas_print():
     pd.set_option('display.max_colwidth', None)
 
 
-def print_fd_info(df: pd.DataFrame, fds: list[tuple[int, int]]):
+def print_fd_info(df: pd.DataFrame, fds: List[Tuple[int, int]]):
     fd_dict = defaultdict(list)
     for lhs, rhs in fds:
         fd_dict[lhs].append(df.columns[rhs])
@@ -92,7 +93,7 @@ def unknown_handler(df, new_rows, remaining_rows, used_rows):
     print('Unknown command.')
 
 
-def ask_rows(df: pd.DataFrame, window: deque[tuple[int, object]]) -> list:
+def ask_rows(df: pd.DataFrame, window: Deque[Tuple[int, object]]) -> list:
     commands = {
         'keepall': keepall_handler,
         'drop': drop_handler,
@@ -118,8 +119,8 @@ def is_similar(row_info, window, chosen_cols, matches_required):
                for prev_row_info in window)
 
 
-def get_deduped_rows(df: pd.DataFrame, chosen_cols: list[int], matches_required: int,
-                     fds: list[tuple[int, int]]):
+def get_deduped_rows(df: pd.DataFrame, chosen_cols: List[int], matches_required: int,
+                     fds: List[Tuple[int, int]]):
     df.sort_values([df.columns[rhs_col] for _, rhs_col in fds if rhs_col in chosen_cols],
                    inplace=True)
     df.reset_index(inplace=True, drop=True)

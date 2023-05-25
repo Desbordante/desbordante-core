@@ -1,6 +1,7 @@
 """Typo mining example using Desbordante algorithms."""
 
 from itertools import groupby, islice
+from typing import Tuple
 
 from colorama import Style, Fore
 from jellyfish import levenshtein_distance
@@ -111,7 +112,7 @@ def filter_squashed_sorted_clusters(squashed_sorted_clusters):
     return filter_ratio(squashed_sorted_clusters)
 
 
-def fd_to_string(dataset: pd.DataFrame, fd: tuple[tuple[int], int]):
+def fd_to_string(dataset: pd.DataFrame, fd: Tuple[Tuple[int], int]):
     def get_col_name(col_index):
         return str(dataset.columns[col_index])
 
