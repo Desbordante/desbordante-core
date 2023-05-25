@@ -2,14 +2,13 @@
 
 #include <sstream>
 
+#include "util/bitset_utils.h"
+
 namespace python_bindings {
 
-PyFD::PyFD(RawFD const& fd) : rhs_index_(fd.rhs_) {
-    for (size_t index = fd.lhs_.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = fd.lhs_.find_next(index)) {
-        lhs_indices_.emplace_back(index);
-    }
-}
+PyFD::PyFD(RawFD const& fd)
+    : lhs_indices_(util::BitsetToIndices<decltype(lhs_indices_)::value_type>(fd.lhs_)),
+      rhs_index_(fd.rhs_) {}
 
 std::string PyFD::ToString() const {
     std::stringstream stream;
