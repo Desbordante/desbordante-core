@@ -22,7 +22,7 @@ public:
         return rhs_index_;
     }
 
-    [[nodiscard]] util::config::IndicesType GetLhs() const {
+    [[nodiscard]] util::config::IndicesType const& GetLhs() const noexcept {
         return lhs_indices_;
     }
 };
