@@ -41,6 +41,7 @@
 #include "py_fd_algorithm.h"
 #include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
+#include "py_ucc_algorithm.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -49,11 +50,14 @@ INITIALIZE_EASYLOGGINGPP
 #define DEFINE_ALGORITHM_BASE(base) py::class_<Py##base##Base, PyAlgorithmBase>(module, #base)
 #define DEFINE_FD_ALGORITHM(type) DEFINE_ALGORITHM(type, FdAlgorithm)
 #define DEFINE_AR_ALGORITHM(type) DEFINE_ALGORITHM(type, ArAlgorithm)
+#define DEFINE_UCC_ALGORITHM(type) DEFINE_ALGORITHM(type, UCCAlgorithm)
 
 namespace python_bindings {
 
 namespace py = pybind11;
+// AR mining algorithms
 using PyApriori = PyArAlgorithm<algos::Apriori>;
+// FD mining algorithms
 using PyTane = PyFDAlgorithm<algos::Tane>;
 using PyPyro = PyFDAlgorithm<algos::Pyro>;
 using PyFUN = PyFDAlgorithm<algos::FUN>;
@@ -64,6 +68,9 @@ using PyFDep = PyFDAlgorithm<algos::FDep>;
 using PyDFD = PyFDAlgorithm<algos::DFD>;
 using PyDepminer = PyFDAlgorithm<algos::Depminer>;
 using PyAid = PyFDAlgorithm<algos::Aid>;
+// UCC mining algorithms
+using PyHyUCC = PyUCCAlgorithm<algos::HyUCC>;
+
 using FDHighlight = algos::fd_verifier::Highlight;
 using model::ARStrings;
 
@@ -92,6 +99,11 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("lhs_indices", &PyFD::GetLhs)
             .def_property_readonly("rhs_index", &PyFD::GetRhs);
 
+    py::class_<PyUCC>(module, "UCC")
+            .def("__str__", &PyUCC::ToString)
+            .def("__repr__", &PyUCC::ToString)
+            .def_property_readonly("indices", &PyUCC::GetUCC);
+
     py::class_<FDHighlight>(module, "FDHighlight")
             .def_property_readonly("cluster", &FDHighlight::GetCluster)
             .def_property_readonly("num_distinct_rhs_values", &FDHighlight::GetNumDistinctRhsValues)
@@ -117,6 +129,7 @@ PYBIND11_MODULE(desbordante, module) {
 
     DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);
     DEFINE_ALGORITHM_BASE(FdAlgorithm).def("get_fds", &PyFdAlgorithmBase::GetFDs);
+    DEFINE_ALGORITHM_BASE(UCCAlgorithm).def("get_uccs", &PyUCCAlgorithmBase::GetUCCs);
 
     DEFINE_ALGORITHM(FDVerifier, Algorithm)
             .def("fd_holds", &PyFDVerifier::FDHolds)
@@ -141,9 +154,12 @@ PYBIND11_MODULE(desbordante, module) {
     DEFINE_FD_ALGORITHM(HyFD);
     DEFINE_FD_ALGORITHM(Pyro);
     DEFINE_FD_ALGORITHM(Tane);
+
+    DEFINE_UCC_ALGORITHM(HyUCC);
 }
 #undef DEFINE_FD_ALGORITHM
 #undef DEFINE_AR_ALGORITHM
+#undef DEFINE_UCC_ALGORITHM
 #undef DEFINE_ALGORITHM_BASE
 #undef DEFINE_ALGORITHM
 
