@@ -4,7 +4,6 @@
 #include <queue>
 #include <vector>
 
-#include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 #include "all_column_combinations.h"
@@ -12,6 +11,12 @@
 #include "types.h"
 #include "util/config/thread_number/type.h"
 #include "util/position_list_index.h"
+
+namespace boost::asio {
+// Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since
+// it's not needed here and to avoid transitevly pollute all other files with it
+class thread_pool;
+}  // namespace boost::asio
 
 namespace algos::hy {
 
