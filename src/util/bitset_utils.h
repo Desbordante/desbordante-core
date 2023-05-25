@@ -1,3 +1,5 @@
+#pragma once
+
 #include <boost/dynamic_bitset.hpp>
 
 namespace util {
