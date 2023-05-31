@@ -11,9 +11,9 @@
 #include "algorithms/algorithm.h"
 
 namespace algos::ucc_verifier {
-//add actual description <<--
-/* Primitive used for verifying a particular FD and retrieving useful information about this FD in
- * case it doesn't hold */
+
+/* Primitive used for verifying a particular UCC and retrieving useful information about this UCC in
+ * case it's not valid */
 class UCCVerifier : public Algorithm {
 private:
     util::config::IndicesType column_indices_;
@@ -54,30 +54,10 @@ public:
         return stats_calculator_->GetNumErrorRows();
     }
 
-    //
     std::vector<util::PLI::Cluster> const& GetErrorClusters() const {
         return stats_calculator_->GetErrorClusters();
     }
 
-    void SortHighlightsByProportionAscending() const;
-    void SortHighlightsByProportionDescending() const;
-    void SortHighlightsByNumAscending() const;
-    void SortHighlightsByNumDescending() const;
-    void SortHighlightsBySizeAscending() const;
-    void SortHighlightsBySizeDescending() const;
-    void SortHighlightsByLhsAscending() const;
-    void SortHighlightsByLhsDescending() const;
-    /*
-    StatsCalculator::ClusterCompareFunction CompareHighlightsByLhsDescending() const {
-    //    assert(stats_calculator_);
-    //    return stats_calculator_->CompareHighlightsByLhsDescending();
-    }
-
-    StatsCalculator::ClusterCompareFunction CompareHighlightsByLhsAscending() const {
-    //    assert(stats_calculator_);
-    //    return stats_calculator_->CompareHighlightsByLhsAscending();
-    }
-    */
     UCCVerifier();
 };
 

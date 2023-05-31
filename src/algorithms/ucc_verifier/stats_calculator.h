@@ -28,9 +28,6 @@ private:
     std::string GetStringValueByIndex(ClusterIndex row_index, ClusterIndex col_index) const;
 
 public:
-    using ClusterCompareFunction =
-            std::function<bool(util::PLI::Cluster const& h1, util::PLI::Cluster const& h2)>;
-
     void CalculateStatistics(std::deque<util::PLI::Cluster> clusters);
 
     void PrintStatistics() const;

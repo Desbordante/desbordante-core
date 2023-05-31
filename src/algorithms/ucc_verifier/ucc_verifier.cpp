@@ -10,8 +10,6 @@
 #include "util/config/names_and_descriptions.h"
 #include "util/config/option_using.h"
 
-#include <easylogging++.h>
-
 namespace algos::ucc_verifier {
 
 UCCVerifier::UCCVerifier() : Algorithm({}) {
@@ -63,8 +61,6 @@ unsigned long long UCCVerifier::ExecuteInternal() {
 }
 
 void UCCVerifier::VerifyUCC() const {
-
-    //SORT PARTITIONS BY NUMBER OF CLUSTERS
     std::shared_ptr<util::PLI const> pli =
             relation_->GetColumnData(column_indices_[0]).GetPliOwnership();
 

@@ -1,7 +1,6 @@
 #include "algorithms/ucc_verifier/stats_calculator.h"
 
 #include <algorithm>
-#include <cassert>
 #include <numeric>
 #include <unordered_map>
 
@@ -42,14 +41,14 @@ void StatsCalculator::VisualizeClusters() const {
 
 std::string StatsCalculator::GetStringValue(ClusterIndex row_index) const {
     std::string value;
-    for (size_t j = 0; j < /*lhs_indices_*/column_indices_.size(); ++j) {
-        value += GetStringValueByIndex(row_index, /*lhs_indices_*/column_indices_[j]);
+    for (size_t j = 0; j < column_indices_.size(); ++j) {
+        value += GetStringValueByIndex(row_index, column_indices_[j]);
         if (j == /*lhs_indices_*/column_indices_.size() - 1) {
             break;
         }
         value += ", ";
     }
-    if (/*lhs_indices_*/column_indices_.size() > 1) {
+    if (column_indices_.size() > 1) {
         value.insert(0, "(");
         value.push_back(')');
     }
