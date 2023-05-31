@@ -4,37 +4,36 @@
 #include <memory>
 #include <stdexcept>
 
-#include "algorithms/options/equal_nulls/option.h"
-#include "algorithms/options/indices/option.h"
-#include "algorithms/options/indices/validate_index.h"
-#include "algorithms/options/names_and_descriptions.h"
+#include "util/config/equal_nulls/option.h"
+#include "util/config/indices/option.h"
+#include "util/config/indices/validate_index.h"
+#include "util/config/names_and_descriptions.h"
+#include "util/config/option_using.h"
 
 #include <easylogging++.h>
 
 namespace algos::ucc_verifier {
 
-UCCVerifier::UCCVerifier() : Primitive({}) {
+UCCVerifier::UCCVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
 }
 
 void UCCVerifier::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    DESBORDANTE_OPTION_USING;
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::IndicesOption{kIndices, kDIndices}(&column_indices_, get_schema_cols));
+    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(util::config::IndicesOption{kIndices, kDIndices}(&column_indices_, get_schema_cols));
 }
 
 void UCCVerifier::MakeExecuteOptsAvailable() {
-    using namespace config::names;
+    using namespace util::config::names;
     MakeOptionsAvailable({kIndices});
 }
 
-void UCCVerifier::FitInternal(model::IDatasetStream& data_stream) {
+void UCCVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
     relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
     data_stream.Reset();
     if (relation_->GetColumnData().empty()) {

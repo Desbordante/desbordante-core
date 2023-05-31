@@ -5,8 +5,7 @@
 #include <string>
 #include <vector>
 
-//#include "algorithms/ucc_verifier/highlight.h"
-#include "algorithms/options/indices/type.h"
+#include "util/config/indices/type.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
 
@@ -19,7 +18,7 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    config::IndicesType column_indices_;
+    util::config::IndicesType column_indices_;
 
     size_t num_error_rows_ = 0;
     std::vector<util::PLI::Cluster> err_clusters_;
@@ -58,7 +57,7 @@ public:
     }
     explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                             config::IndicesType column_indices)
+                             util::config::IndicesType column_indices)
         : relation_(std::move(relation)),
           typed_relation_(std::move(typed_relation)),
           column_indices_(std::move(column_indices))

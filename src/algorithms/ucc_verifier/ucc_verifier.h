@@ -6,18 +6,18 @@
 #include <vector>
 
 #include "algorithms/ucc_verifier/stats_calculator.h"
-#include "algorithms/options/equal_nulls/type.h"
-#include "algorithms/options/indices/type.h"
-#include "algorithms/primitive.h"
+#include "util/config/equal_nulls/type.h"
+#include "util/config/indices/type.h"
+#include "algorithms/algorithm.h"
 
 namespace algos::ucc_verifier {
 //add actual description <<--
 /* Primitive used for verifying a particular FD and retrieving useful information about this FD in
  * case it doesn't hold */
-class UCCVerifier : public Primitive {
+class UCCVerifier : public Algorithm {
 private:
-    config::IndicesType column_indices_;
-    config::EqNullsType is_null_equal_null_;
+    util::config::IndicesType column_indices_;
+    util::config::EqNullsType is_null_equal_null_;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -32,7 +32,7 @@ private:
     }
 
 protected:
-    void FitInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal(model::IDatasetStream& data_stream) override;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 
