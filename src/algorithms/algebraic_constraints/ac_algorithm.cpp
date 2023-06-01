@@ -24,10 +24,10 @@ void ACAlgorithm::RegisterOptions() {
 
     auto check_and_set_binop = [this](Binop bin_operation) {
         switch (bin_operation) {
-            case +Binop::Plus:
+            case +Binop::Addition:
                 binop_pointer_ = &model::INumericType::Add;
                 break;
-            case +Binop::Minus:
+            case +Binop::Subtraction:
                 binop_pointer_ = &model::INumericType::Sub;
                 break;
             case +Binop::Multiplication:
