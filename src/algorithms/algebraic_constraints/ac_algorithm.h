@@ -11,7 +11,6 @@
 #include "ac_exception_finder.h"
 #include "ac_pairs_collection.h"
 #include "algorithms/algorithm.h"
-#include "algorithms/legacy_algorithm.h"
 #include "bin_operation_enum.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
