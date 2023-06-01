@@ -9,7 +9,6 @@
 
 #include "algorithms/algorithms.h"
 #include "algorithms/create_algorithm.h"
-#include "algorithms/legacy_algorithms.h"
 #include "algorithms/typo_miner.h"
 #include "util/config/names.h"
 
