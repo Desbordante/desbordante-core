@@ -128,7 +128,7 @@ boost::program_options::options_description AlgoOptions() {
 
     po::options_description ac_options("AC options");
     ac_options.add_options()
-            (names::kBinaryOperation, po::value<algos::Binop>()->default_value(algos::Binop::Plus), desc::kDBinaryOperation)
+            (names::kBinaryOperation, po::value<algos::Binop>()->default_value(algos::Binop::Addition), desc::kDBinaryOperation)
             (names::kFuzziness, po::value<double>()->default_value(0.15), desc::kDFuzziness)
             (names::kFuzzinessProbability, po::value<double>()->default_value(0.9), desc::kDFuzzinessProbability)
             (names::kWeight, po::value<double>()->default_value(0.05), desc::kDWeight)

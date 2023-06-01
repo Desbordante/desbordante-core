@@ -4,6 +4,6 @@
 
 namespace algos {
 
-BETTER_ENUM(Binop, char, Plus = '+', Minus = '-', Multiplication = '*', Division = '/');
+BETTER_ENUM(Binop, char, Addition = '+', Subtraction = '-', Multiplication = '*', Division = '/');
 
 }  // namespace algos
