@@ -72,7 +72,7 @@ public:
 
     static std::unique_ptr<algos::ACAlgorithm> CreateACAlgorithmInstance(
             std::string_view path, char separator = ',', bool hasHeader = true,
-            algos::Binop bin_operation = algos::Binop::Plus, double fuzziness = 0.1,
+            algos::Binop bin_operation = algos::Binop::Addition, double fuzziness = 0.1,
             double p_fuzz = 0.9, double weight = 0.1, size_t bumps_limit = 0,
             size_t iterations_limit = 10, double seed = 0) {
         auto data = test_data_dir / path;
@@ -83,7 +83,8 @@ public:
 };
 
 TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
-    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Plus, 0.0, 1, 0.05);
+    auto a =
+            CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Addition, 0.0, 1, 0.05);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(0, 2);
 
@@ -93,7 +94,8 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
 }
 
 TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
-    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Plus, 0.0, 1, 0.05);
+    auto a =
+            CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Addition, 0.0, 1, 0.05);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(2, 3);
 
@@ -103,14 +105,16 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
 }
 
 TEST_F(ACAlgorithmTest, SampleSizeCalculation) {
-    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Plus, 0.1, 0.8, 0.05);
+    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Addition, 0.1, 0.8,
+                                       0.05);
     ASSERT_EQ(28, a->CalculateSampleSize(1));
     ASSERT_EQ(168, a->CalculateSampleSize(13));
     ASSERT_EQ(331, a->CalculateSampleSize(28));
 }
 
 TEST_F(ACAlgorithmTest, SubNonFuzzy) {
-    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Minus, 0.0, 1, 0.1);
+    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Subtraction, 0.0, 1,
+                                       0.1);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(1, 3);
 
@@ -154,8 +158,8 @@ TEST_F(ACAlgorithmTest, DivNonFuzzy) {
 }
 
 TEST_F(ACAlgorithmTest, FuzzyBumpsDetection) {
-    auto a = CreateACAlgorithmInstance("TestLong.csv", ',', true, algos::Binop::Plus, 0.55, 0.41,
-                                       0.1);
+    auto a = CreateACAlgorithmInstance("TestLong.csv", ',', true, algos::Binop::Addition, 0.55,
+                                       0.41, 0.1);
     a->Execute();
     auto& ranges_collection01 = a->GetRangesByColumns(0, 1);
     auto& ranges_collection02 = a->GetRangesByColumns(0, 2);
@@ -172,7 +176,8 @@ TEST_F(ACAlgorithmTest, FuzzyBumpsDetection) {
 }
 
 TEST_F(ACAlgorithmTest, NullAndEmptyIgnoring) {
-    auto a = CreateACAlgorithmInstance("NullEmpty.csv", ',', true, algos::Binop::Plus, 0.0, 1, 0.1);
+    auto a = CreateACAlgorithmInstance("NullEmpty.csv", ',', true, algos::Binop::Addition, 0.0, 1,
+                                       0.1);
     a->Execute();
     auto& ranges = a->GetRangesCollections();
     EXPECT_EQ(ranges.size(), 6);
@@ -190,7 +195,7 @@ TEST_F(ACAlgorithmTest, NullAndEmptyIgnoring) {
 }
 
 TEST_F(ACAlgorithmTest, ColumnTypesPairing) {
-    auto a = CreateACAlgorithmInstance("SimpleTypes.csv", ',', true, algos::Binop::Plus, 0.0, 1,
+    auto a = CreateACAlgorithmInstance("SimpleTypes.csv", ',', true, algos::Binop::Addition, 0.0, 1,
                                        0.1);
     a->Execute();
     auto& ranges = a->GetRangesCollections();
@@ -198,8 +203,8 @@ TEST_F(ACAlgorithmTest, ColumnTypesPairing) {
 }
 
 TEST_F(ACAlgorithmTest, CollectingACExceptions) {
-    auto a = CreateACAlgorithmInstance("TestLong.csv", ',', true, algos::Binop::Plus, 0.55, 0.41,
-                                       0.1);
+    auto a = CreateACAlgorithmInstance("TestLong.csv", ',', true, algos::Binop::Addition, 0.55,
+                                       0.41, 0.1);
     a->Execute();
     a->CollectACExceptions();
 
@@ -213,7 +218,8 @@ TEST_F(ACAlgorithmTest, CollectingACExceptions) {
 }
 
 TEST_F(ACAlgorithmTest, RangesReconstruction) {
-    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Minus, 0.0, 1, 0.1);
+    auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Subtraction, 0.0, 1,
+                                       0.1);
     a->Execute();
     auto ranges_collection = a->ReconstructRangesByColumns(1, 3, 1);
     std::vector<std::string> expected_ranges = {"0.3", "4.0"};
