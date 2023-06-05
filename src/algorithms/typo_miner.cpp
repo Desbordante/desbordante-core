@@ -4,6 +4,7 @@
 #include "util/config/error/option.h"
 #include "util/config/names_and_descriptions.h"
 #include "util/config/option_using.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
@@ -18,7 +19,7 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
 }
 
 void TypoMiner::RegisterOptions() {
@@ -38,6 +39,7 @@ void TypoMiner::RegisterOptions() {
         }
     };
 
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
     RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
@@ -87,17 +89,17 @@ void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& p
     previous_options.insert(approx_options.begin(), approx_options.end());
 }
 
-void TypoMiner::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
+void TypoMiner::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    input_table_->Reset();
     typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
+            model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 
     for (Algorithm* algo : {precise_algo_.get(), approx_algo_.get()}) {
         auto pli_algo = dynamic_cast<PliBasedFDAlgorithm*>(algo);
         if (pli_algo == nullptr) {
-            data_stream.Reset();
-            algo->LoadData(data_stream);
+            input_table_->Reset();
+            algo->LoadData();
         } else {
             pli_algo->LoadData(relation_);
         }

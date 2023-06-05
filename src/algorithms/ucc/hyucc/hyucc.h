@@ -16,7 +16,7 @@ private:
     std::unique_ptr<ColumnLayoutRelationData> relation_;
     util::config::ThreadNumType threads_num_ = 1;
 
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;
     void ResetUCCAlgorithmState() override {}
     void RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,

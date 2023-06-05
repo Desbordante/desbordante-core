@@ -5,6 +5,7 @@
 #include <boost/thread.hpp>
 
 #include "util/config/equal_nulls/option.h"
+#include "util/config/tabular_data/input_table/option.h"
 #include "util/config/thread_number/option.h"
 
 namespace algos {
@@ -14,10 +15,11 @@ namespace mo = model;
 
 DataStats::DataStats() : Algorithm({"Calculating statistics"}) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
 }
 
 void DataStats::RegisterOptions() {
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(util::config::ThreadNumberOpt(&threads_num_));
 }
@@ -558,8 +560,8 @@ std::string DataStats::ToString() const {
     return res.str();
 }
 
-void DataStats::LoadDataInternal(model::IDatasetStream& data_stream) {
-    col_data_ = mo::CreateTypedColumnData(data_stream, is_null_equal_null_);
+void DataStats::LoadDataInternal() {
+    col_data_ = mo::CreateTypedColumnData(*input_table_, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }
 

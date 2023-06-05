@@ -58,11 +58,10 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
     }
 }
 
-void Algorithm::LoadData(model::IDatasetStream& data_stream) {
+void Algorithm::LoadData() {
     if (!GetNeededOptions().empty()) throw std::logic_error(
                 "All options need to be set before starting processing.");
-    LoadDataInternal(data_stream);
-    data_stream.Reset();
+    LoadDataInternal();
     ExecutePrepare();
 }
 

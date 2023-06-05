@@ -9,7 +9,7 @@ class PliBasedFDAlgorithm : public FDAlgorithm {
 protected:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
 
-    void LoadDataFd(model::IDatasetStream& data_stream) final;
+    void LoadDataInternal() final;
 
     ColumnLayoutRelationData const& GetRelation() const noexcept {
         // GetRelation should be called after the dataset has been parsed, i.e. after algorithm

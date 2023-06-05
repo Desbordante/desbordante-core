@@ -12,8 +12,8 @@
 
 namespace algos {
 
-void HyUCC::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
+void HyUCC::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: UCC mining is meaningless.");

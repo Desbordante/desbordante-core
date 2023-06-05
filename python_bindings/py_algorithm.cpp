@@ -10,15 +10,26 @@
 #include "get_py_type.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
-
-static const auto void_index = std::type_index{typeid(void)};
+#include "util/config/names.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace python_bindings {
 
+using util::config::InputTable;
+using util::config::names::kTable;
+
+static const auto void_index = std::type_index{typeid(void)};
+
 namespace py = pybind11;
 
-void PyAlgorithmBase::Configure(py::kwargs const& kwargs) {
-    algos::ConfigureFromFunction(*algorithm_, [this, &kwargs](std::string_view option_name) {
+void PyAlgorithmBase::Configure(py::kwargs const& kwargs,
+                                std::function<boost::any()> const& create_data_reader) {
+    algos::ConfigureFromFunction(*algorithm_, [this, &kwargs,
+                                               create_data_reader](std::string_view option_name) {
+        if (option_name == kTable) {
+            assert(create_data_reader);
+            return create_data_reader();
+        }
         std::type_index type_index = algorithm_->GetTypeIndex(option_name);
         assert(type_index != void_index);
         return kwargs.contains(option_name) ? PyToAny(type_index, kwargs[py::str{option_name}])
@@ -47,25 +58,31 @@ py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     return GetPyType(type_index);
 }
 
+void PyAlgorithmBase::LoadProvidedData(pybind11::kwargs const& kwargs,
+                                       std::function<boost::any()> const& create_data_reader) {
+    algorithm_->UnsetOption(kTable);
+    Configure(kwargs, create_data_reader);
+    algorithm_->LoadData();
+}
+
 void PyAlgorithmBase::LoadData(std::string_view path, char separator, bool has_header,
                                py::kwargs const& kwargs) {
-    Configure(kwargs);
-    CSVParser parser{path, separator, has_header};
-    algorithm_->LoadData(parser);
+    LoadProvidedData(kwargs, [path, separator, has_header]() {
+        InputTable parser = std::make_shared<CSVParser>(path, separator, has_header);
+        return boost::any{parser};
+    });
 }
 
 void PyAlgorithmBase::LoadData(py::handle dataframe, std::string name, py::kwargs const& kwargs) {
-    Configure(kwargs);
-
-    py::handle const& dtypes = dataframe.attr("dtypes");
-    if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>()) {
-        // All columns are python strings, no need to transform.
-        StringDataframeReader reader{dataframe, std::move(name)};
-        algorithm_->LoadData(reader);
-    } else {
-        ArbitraryDataframeReader reader{dataframe, std::move(name)};
-        algorithm_->LoadData(reader);
-    }
+    LoadProvidedData(kwargs, [dataframe, &name]() {
+        InputTable reader;
+        py::object dtypes = dataframe.attr("dtypes");
+        if (dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>())
+            reader = std::make_shared<StringDataframeReader>(dataframe, std::move(name));
+        else
+            reader = std::make_shared<ArbitraryDataframeReader>(dataframe, std::move(name));
+        return boost::any{reader};
+    });
 }
 
 py::int_ PyAlgorithmBase::Execute(py::kwargs const& kwargs) {

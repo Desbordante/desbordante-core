@@ -14,12 +14,13 @@
 #include "util/config/indices/option.h"
 #include "util/config/names_and_descriptions.h"
 #include "util/config/option_using.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos::metric {
 
 MetricVerifier::MetricVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
 }
 
 void MetricVerifier::ValidateRhs(util::config::IndicesType const& rhs_indices) {
@@ -100,6 +101,7 @@ void MetricVerifier::RegisterOptions() {
         if (q <= 0) throw std::invalid_argument("Q-gram length should be greater than zero.");
     };
 
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(util::config::LhsIndicesOpt(&lhs_indices_, get_schema_columns));
     RegisterOption(Option{&algo_, kMetricAlgorithm, kDMetricAlgorithm}.SetValueCheck(algo_check));
@@ -120,14 +122,14 @@ void MetricVerifier::MakeExecuteOptsAvailable() {
             {kDistFromNullIsInfinity, kParameter, kMetric, util::config::LhsIndicesOpt.GetName()});
 }
 
-void MetricVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
+void MetricVerifier::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    input_table_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: metric FD verifying is meaningless.");
     }
     typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
+            model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
 void MetricVerifier::ResetState() {

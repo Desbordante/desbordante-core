@@ -7,6 +7,7 @@
 
 #include "util/config/names_and_descriptions.h"
 #include "util/config/option_using.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
@@ -14,7 +15,7 @@ ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     using namespace util::config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kInputFormat});
+    MakeOptionsAvailable({kTable, kInputFormat});
 }
 
 void ARAlgorithm::RegisterOptions() {
@@ -22,6 +23,8 @@ void ARAlgorithm::RegisterOptions() {
 
     auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
     auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
+
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
     RegisterOption(Option{&item_column_index_, kItemColumnIndex, kDItemColumnIndex, 1u});
     RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
@@ -41,15 +44,15 @@ void ARAlgorithm::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 
-void ARAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
+void ARAlgorithm::LoadDataInternal() {
     switch (input_format_) {
         case InputFormat::singular:
             transactional_data_ = model::TransactionalData::CreateFromSingular(
-                    data_stream, tid_column_index_, item_column_index_);
+                    *input_table_, tid_column_index_, item_column_index_);
             break;
         case InputFormat::tabular:
             transactional_data_ =
-                    model::TransactionalData::CreateFromTabular(data_stream, first_column_tid_);
+                    model::TransactionalData::CreateFromTabular(*input_table_, first_column_tid_);
             break;
         default:
             assert(0);

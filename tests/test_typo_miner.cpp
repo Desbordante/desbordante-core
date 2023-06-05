@@ -12,13 +12,20 @@
 namespace tests {
 namespace onam = util::config::names;
 
+static util::config::InputTable MakeCsvParser(std::string const& dataset_filename,
+                                              char const separator, bool const has_header) {
+    return std::make_shared<CSVParser>(test_data_dir / dataset_filename, separator, has_header);
+}
+
 struct TestingParam {
     algos::StdParamsMap params;
 
-    TestingParam(std::string const& dataset, char const separator, bool const has_header,
+    TestingParam(std::string const& dataset_filename, char const separator, bool const has_header,
                  bool const is_null_equal_null, unsigned const max_lhs, double const error,
                  ushort const threads)
-        : params({{onam::kData, test_data_dir / dataset},
+        // This dictionary is only created once, so if we put the relation itself here, it
+        // won't be reset between different algorithms.
+        : params({{onam::kData, test_data_dir / dataset_filename},
                   {onam::kSeparator, separator},
                   {onam::kHasHeader, has_header},
                   {onam::kEqualNulls, is_null_equal_null},
@@ -73,9 +80,12 @@ struct LinesParam : TestingParam {
 };
 
 static std::unique_ptr<algos::TypoMiner> ConfToLoadTypoMiner(
-        algos::AlgorithmType const algorithm_type) {
+        algos::AlgorithmType const algorithm_type, std::string const& dataset_path,
+        char const separator, bool const has_header) {
     auto typo_miner = std::make_unique<algos::TypoMiner>(algorithm_type);
-    algos::ConfigureFromMap(*typo_miner, algos::StdParamsMap{});
+    algos::ConfigureFromMap(
+            *typo_miner, algos::StdParamsMap{{onam::kTable,
+                                              MakeCsvParser(dataset_path, separator, has_header)}});
     return typo_miner;
 }
 
@@ -127,10 +137,8 @@ static void TestForEachAlgo(F&& test) {
 
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
     auto const test = [](algos::AlgorithmType const algo) {
-        auto typo_miner = ConfToLoadTypoMiner(algo);
-        auto path = test_data_dir / "TestEmpty.csv";
-        auto parser = CSVParser(path, ',', true);
-        ASSERT_THROW(typo_miner->LoadData(parser), std::runtime_error);
+        auto typo_miner = ConfToLoadTypoMiner(algo, test_data_dir / "TestEmpty.csv", ',', true);
+        ASSERT_THROW(typo_miner->LoadData(), std::runtime_error);
     };
     TestForEachAlgo(test);
 }

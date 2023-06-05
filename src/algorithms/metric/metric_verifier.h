@@ -19,13 +19,16 @@
 #include "model/column_layout_typed_relation_data.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/indices/type.h"
+#include "util/config/tabular_data/input_table_type.h"
 #include "util/convex_hull.h"
 #include "util/qgram_vector.h"
 
 namespace algos::metric {
 
-class MetricVerifier : public algos::Algorithm {
+class MetricVerifier : public Algorithm {
 private:
+    util::config::InputTable input_table_;
+
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
     util::config::IndicesType lhs_indices_;
@@ -81,7 +84,7 @@ private:
     void ResetState() final;
 
 protected:
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 

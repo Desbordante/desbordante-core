@@ -9,11 +9,13 @@
 
 #include "types/create_type.h"
 #include "util/config/names_and_descriptions.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
 ACAlgorithm::ACAlgorithm() : Algorithm({}) {
     RegisterOptions();
+    MakeOptionsAvailable({util::config::TableOpt.GetName()});
     ac_exception_finder_ = std::make_unique<algebraic_constraints::ACExceptionFinder>();
 }
 
@@ -54,6 +56,7 @@ void ACAlgorithm::RegisterOptions() {
         if (parameter <= 0) throw std::invalid_argument("Parameter out of range");
     };
 
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(Option{&bin_operation_, kBinaryOperation, kDBinaryOperation}.SetValueCheck(
             check_and_set_binop));
     RegisterOption(Option{&fuzziness_, kFuzziness, kDFuzziness}.SetValueCheck(check_fuzziness));
@@ -67,10 +70,9 @@ void ACAlgorithm::RegisterOptions() {
     RegisterOption(Option{&seed_, kACSeed, kDACSeed});
 }
 
-void ACAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
-    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(data_stream,
+void ACAlgorithm::LoadDataInternal() {
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
                                                                        false);  // nulls are ignored
-    data_stream.Reset();
 }
 
 void ACAlgorithm::MakeExecuteOptsAvailable() {

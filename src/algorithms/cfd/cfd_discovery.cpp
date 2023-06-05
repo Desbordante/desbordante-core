@@ -7,6 +7,8 @@
 #include "algorithms/cfd/util/set_util.h"
 #include "util/config/equal_nulls/option.h"
 #include "util/config/names_and_descriptions.h"
+#include "util/config/option_using.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 // see algorithms/cfd/LICENSE
 
@@ -15,15 +17,14 @@ namespace algos::cfd {
 CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     using namespace util::config::names;
-
     RegisterOptions();
-    MakeOptionsAvailable({kEqualNulls, kCfdColumnsNumber, kCfdTuplesNumber});
+    MakeOptionsAvailable({kTable, kEqualNulls, kCfdColumnsNumber, kCfdTuplesNumber});
 }
 
 CFDDiscovery::CFDDiscovery() : CFDDiscovery({kDefaultPhaseName}) {}
 
-void CFDDiscovery::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = CFDRelationData::CreateFrom(data_stream, is_null_equal_null_, columns_number_,
+void CFDDiscovery::LoadDataInternal() {
+    relation_ = CFDRelationData::CreateFrom(*input_table_, is_null_equal_null_, columns_number_,
                                             tuples_number_);
 
     if (relation_->GetColumnData().empty()) {
@@ -37,10 +38,9 @@ void CFDDiscovery::ResetState() {
 }
 
 void CFDDiscovery::RegisterOptions() {
-    using namespace util::config::names;
-    using namespace util::config::descriptions;
-    using util::config::Option;
+    DESBORDANTE_OPTION_USING;
 
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
     RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
