@@ -16,6 +16,7 @@
 #include "model/types/types.h"
 #include "ranges_collection.h"
 #include "typed_column_pair.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos {
 
@@ -35,6 +36,8 @@ namespace algos {
 class ACAlgorithm : public Algorithm {
 private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;
+
+    util::config::InputTable input_table_;
 
     Binop bin_operation_ = Binop::_values()[0];
     /* Desired ratio of exceptions. Value lies in (0, 1] */
@@ -76,7 +79,7 @@ private:
     /* Greedily combines ranges if there is more than bumps_limit_ */
     void RestrictRangesAmount(std::vector<std::byte const*>& ranges) const;
     void RegisterOptions();
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
     void ResetState() override;
 

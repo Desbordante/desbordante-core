@@ -11,12 +11,14 @@
 #include "algorithms/ar_algorithm_enums.h"
 #include "model/ar.h"
 #include "model/transactional_data.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos {
 
-class ARAlgorithm : public algos::Algorithm {
+class ARAlgorithm : public Algorithm {
 private:
-    using MinSupType = double;
+    util::config::InputTable input_table_;
+
     double minconf_;
     InputFormat input_format_ = InputFormat::singular;
     unsigned int tid_column_index_;
@@ -49,14 +51,14 @@ private:
 
 protected:
     std::unique_ptr<model::TransactionalData> transactional_data_;
-    MinSupType minsup_;
+    double minsup_;
 
     void GenerateRulesFrom(std::vector<unsigned> const& frequent_itemset, double support);
 
     virtual double GetSupport(std::vector<unsigned> const& frequent_itemset) const = 0;
     virtual unsigned long long GenerateAllRules() = 0;
     virtual unsigned long long FindFrequent() = 0;
-    void LoadDataInternal(model::IDatasetStream& data_stream) final;
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 

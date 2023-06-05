@@ -12,15 +12,19 @@
 
 template <typename T>
 class AlgorithmTest : public ::testing::Test {
-protected:
-    CSVParser MakeCsvParser(std::string const& path, char separator = ',',
-                            bool has_header = true) {
-        return {path, separator, has_header};
+    util::config::InputTable MakeCsvParser(std::string const& path, char separator,
+                                           bool has_header) {
+        return std::make_shared<CSVParser>(path, separator, has_header);
     }
 
-    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad() {
+protected:
+    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(std::string const& path,
+                                                            char separator = ',',
+                                                            bool has_header = true) {
+        using util::config::InputTable, algos::ConfigureFromMap, algos::StdParamsMap;
         std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
-        algos::ConfigureFromMap(*algorithm, algos::StdParamsMap{});
+        auto parser = MakeCsvParser(path, separator, has_header);
+        ConfigureFromMap(*algorithm, StdParamsMap{{util::config::names::kTable, parser}});
         return algorithm;
     }
 
@@ -28,9 +32,7 @@ protected:
                                     bool has_header = true) {
         using namespace util::config::names;
         return {
-                {kData, path},
-                {kSeparator, separator},
-                {kHasHeader, has_header},
+                {kTable, MakeCsvParser(path, separator, has_header)},
                 {kError, util::config::ErrorType{0.0}},
                 {kSeed, decltype(Configuration::seed){0}},
         };

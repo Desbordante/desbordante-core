@@ -9,12 +9,13 @@
 #include "util/config/indices/validate_index.h"
 #include "util/config/names_and_descriptions.h"
 #include "util/config/option_using.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
 }
 
 void FDVerifier::RegisterOptions() {
@@ -25,6 +26,7 @@ void FDVerifier::RegisterOptions() {
         util::config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
     };
 
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(util::config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
@@ -35,14 +37,14 @@ void FDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({util::config::LhsIndicesOpt.GetName(), kRhsIndex});
 }
 
-void FDVerifier::LoadDataInternal(model::IDatasetStream& data_stream) {
-    relation_ = ColumnLayoutRelationData::CreateFrom(data_stream, is_null_equal_null_);
-    data_stream.Reset();
+void FDVerifier::LoadDataInternal() {
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
+    input_table_->Reset();
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD verifying is meaningless.");
     }
     typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(data_stream, is_null_equal_null_);
+            model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
 unsigned long long FDVerifier::ExecuteInternal() {

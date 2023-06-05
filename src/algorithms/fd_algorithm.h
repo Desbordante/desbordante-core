@@ -10,6 +10,7 @@
 #include "model/column_layout_typed_relation_data.h"
 #include "model/fd.h"
 #include "util/config/equal_nulls/type.h"
+#include "util/config/tabular_data/input_table_type.h"
 #include "util/primitive_collection.h"
 
 namespace util {
@@ -21,7 +22,7 @@ namespace algos {
 /* It is highly recommended to inherit your Algorithm from this class.
  * Consider TANE as an example of such a FDAlgorithm usage.
  * */
-class FDAlgorithm : public algos::Algorithm {
+class FDAlgorithm : public Algorithm {
 private:
     friend util::AgreeSetFactory;
 
@@ -31,7 +32,8 @@ private:
     virtual void ResetStateFd() = 0;
 
 protected:
-    size_t number_of_columns_;
+    util::config::InputTable input_table_;
+
     /* Collection of all discovered FDs
      * Every FD mining algorithm should place discovered dependecies here. Don't add new FDs by
      * accessing this field directly, use RegisterFd methods instead
@@ -48,9 +50,6 @@ protected:
     virtual void RegisterFd(FD fd_to_register) {
         fd_collection_.Register(std::move(fd_to_register));
     }
-
-    void LoadDataInternal(model::IDatasetStream& data_stream) final;
-    virtual void LoadDataFd(model::IDatasetStream& data_stream) = 0;
 
 public:
     constexpr static std::string_view kDefaultPhaseName = "FD mining";
