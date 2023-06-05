@@ -9,11 +9,14 @@
 #include "types.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/names.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos {
 
 class TypoMiner : public Algorithm {
 private:
+    util::config::InputTable input_table_;
+
     std::unique_ptr<FDAlgorithm> precise_algo_;
     std::unique_ptr<FDAlgorithm> approx_algo_;
     std::vector<FD> approx_fds_;
@@ -27,7 +30,7 @@ private:
 
     void ResetState() final;
 
-    void LoadDataInternal(model::IDatasetStream& data_stream) final;
+    void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;
 
     static bool FDLess(FD const& l, FD const& r);

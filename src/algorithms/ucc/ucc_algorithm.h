@@ -6,8 +6,8 @@
 
 #include "algorithms/algorithm.h"
 #include "model/ucc.h"
-#include "util/config/equal_nulls/option.h"
 #include "util/config/equal_nulls/type.h"
+#include "util/config/tabular_data/input_table_type.h"
 #include "util/primitive_collection.h"
 
 namespace algos {
@@ -25,6 +25,8 @@ private:
     void RegisterOptions();
 
 protected:
+    util::config::InputTable input_table_;
+
     // Collection of all mined UCCs. Every UCC mining algorithm must register found uccs here.
     util::PrimitiveCollection<model::UCC> ucc_collection_;
     util::config::EqNullsType is_null_equal_null_{};
@@ -34,11 +36,7 @@ protected:
     // If your algorithm has no progress bar implemented, pass an empty vector.
     constexpr static std::string_view kDefaultPhaseName = "UCC mining";
 
-    explicit UCCAlgorithm(std::vector<std::string_view> phase_names)
-        : Algorithm(std::move(phase_names)) {
-        RegisterOptions();
-        MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
-    }
+    explicit UCCAlgorithm(std::vector<std::string_view> phase_names);
 
 public:
     std::list<model::UCC> const& UCCList() const noexcept {

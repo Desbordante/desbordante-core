@@ -9,6 +9,7 @@
 #include "algorithms/fd_verifier/stats_calculator.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/indices/type.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos::fd_verifier {
 
@@ -16,6 +17,8 @@ namespace algos::fd_verifier {
  * case it doesn't hold */
 class FDVerifier : public Algorithm {
 private:
+    util::config::InputTable input_table_;
+
     util::config::IndicesType lhs_indices_;
     util::config::IndexType rhs_index_;
     util::config::EqNullsType is_null_equal_null_;
@@ -33,7 +36,7 @@ private:
     }
 
 protected:
-    void LoadDataInternal(model::IDatasetStream& data_stream) override;
+    void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
 

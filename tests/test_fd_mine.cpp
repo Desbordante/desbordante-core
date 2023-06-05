@@ -17,21 +17,23 @@
 
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap;
+using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap, util::config::InputTable;
 
 using std::string, std::vector;
 
 namespace onam = util::config::names;
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine() {
-    std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
-    algos::ConfigureFromMap(*algorithm, StdParamsMap{});
-    return algorithm;
-}
-
 StdParamsMap FD_MineGetParamMap(const std::filesystem::path& path, char separator = ',',
                                 bool has_header = true) {
-    return {{onam::kData, path}, {onam::kSeparator, separator}, {onam::kHasHeader, has_header}};
+    InputTable parser = std::make_unique<CSVParser>(path, separator, has_header);
+    return {{util::config::names::kTable, parser}};
+}
+
+std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(std::string const& path, char separator = ',',
+                                               bool has_header = true) {
+    std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
+    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(path, separator, has_header));
+    return algorithm;
 }
 
 std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(std::string const& path,
@@ -85,10 +87,9 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
-    auto algorithm = ConfToLoadFD_Mine();
     auto path = test_data_dir / "TestEmpty.csv";
-    auto parser = CSVParser(path, ',', true);
-    ASSERT_THROW(algorithm->LoadData(parser), std::runtime_error);
+    auto algorithm = ConfToLoadFD_Mine(test_data_dir / "TestEmpty.csv", ',', true);
+    ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {

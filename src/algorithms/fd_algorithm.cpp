@@ -3,22 +3,19 @@
 #include <thread>
 
 #include "util/config/equal_nulls/option.h"
+#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
 }
 
 void FDAlgorithm::RegisterOptions() {
+    RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
-}
-
-void FDAlgorithm::LoadDataInternal(model::IDatasetStream& data_stream) {
-    number_of_columns_ = data_stream.GetNumberOfColumns();
-    LoadDataFd(data_stream);
 }
 
 void FDAlgorithm::ResetState() {
@@ -65,8 +62,9 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
         }
     }
 
+    size_t const number_of_columns = input_table_->GetNumberOfColumns();
     for (auto const& [col, num]: fds_count_per_col) {
-        if (num + 1 + cols_of_equal_values == number_of_columns_) {
+        if (num + 1 + cols_of_equal_values == number_of_columns) {
             keys.push_back(col);
         }
     }

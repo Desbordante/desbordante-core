@@ -12,24 +12,24 @@ namespace algos {
 
 FDep::FDep() : FDAlgorithm({kDefaultPhaseName}) {}
 
-void FDep::LoadDataFd(model::IDatasetStream& data_stream) {
-    number_attributes_ = data_stream.GetNumberOfColumns();
+void FDep::LoadDataInternal() {
+    number_attributes_ = input_table_->GetNumberOfColumns();
     if (number_attributes_ == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
     column_names_.resize(number_attributes_);
 
-    schema_ = std::make_unique<RelationalSchema>(data_stream.GetRelationName(),
+    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName(),
                                                  is_null_equal_null_);
 
     for (size_t i = 0; i < number_attributes_; ++i) {
-        column_names_[i] = data_stream.GetColumnName(static_cast<int>(i));
+        column_names_[i] = input_table_->GetColumnName(static_cast<int>(i));
         schema_->AppendColumn(column_names_[i]);
     }
 
     std::vector<std::string> next_line;
-    while (data_stream.HasNextRow()) {
-        next_line = data_stream.GetNextRow();
+    while (input_table_->HasNextRow()) {
+        next_line = input_table_->GetNextRow();
         if (next_line.empty()) break;
         tuples_.emplace_back(std::vector<size_t>(number_attributes_));
         for (size_t i = 0; i < number_attributes_; ++i) {

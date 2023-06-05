@@ -4,6 +4,7 @@
 #include "algorithms/statistics/statistic.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/config/equal_nulls/type.h"
+#include "util/config/tabular_data/input_table_type.h"
 #include "util/config/thread_number/type.h"
 
 namespace algos {
@@ -32,7 +33,9 @@ class DataStats : public Algorithm {
                                             const model::INumericType& type);
 
 protected:
-    void LoadDataInternal(model::IDatasetStream& data_stream) final;
+    util::config::InputTable input_table_;
+
+    void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
 
