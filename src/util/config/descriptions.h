@@ -8,6 +8,7 @@
 #include "util/config/enum_to_available_values.h"
 
 namespace util::config::descriptions {
+constexpr auto kDTable = "table processed by the algorithm";
 constexpr auto kDData = "path to CSV file, relative to ./input_data";
 constexpr auto kDSeparator = "CSV separator";
 constexpr auto kDHasHeader = "CSV header presence flag [true|false]";
