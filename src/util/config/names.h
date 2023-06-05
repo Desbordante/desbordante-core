@@ -1,6 +1,7 @@
 #pragma once
 
 namespace util::config::names {
+constexpr auto kTable = "table";
 constexpr auto kData = "data";
 constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
