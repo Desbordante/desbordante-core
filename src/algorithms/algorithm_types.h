@@ -2,7 +2,14 @@
 
 #include <enum.h>
 
+#include "algorithms/algorithms.h"
+
 namespace algos {
+
+using AlgorithmTypes =
+        std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, hyfd::HyFD, Aid, Apriori,
+                   metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
+                   cfd::FDFirstAlgorithm, ACAlgorithm>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -45,7 +52,6 @@ BETTER_ENUM(AlgorithmType, char,
 /* Algebraic constraints mining algorithm*/
     ac
 )
-
 // clang-format on
 
 }  // namespace algos
