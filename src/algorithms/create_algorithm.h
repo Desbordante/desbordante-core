@@ -2,8 +2,7 @@
 
 #include <boost/mp11.hpp>
 
-#include "algorithms/algorithms.h"
-#include "algorithms/enums.h"
+#include "algorithms/algorithm_types.h"
 
 namespace algos {
 
