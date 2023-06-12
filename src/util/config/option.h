@@ -60,10 +60,14 @@ public:
         return is_set_;
     }
 
-    Option &SetValueCheck(ValueCheckFunc value_check) {
+    std::unique_ptr<IOption> MoveToHeap() override {
+        return std::make_unique<Option>(std::move(*this));
+    }
+
+    Option &&SetValueCheck(ValueCheckFunc value_check) {
         assert(!value_check_);
         value_check_ = std::move(value_check);
-        return *this;
+        return std::move(*this);
     }
 
     // Some options may become required depending on this option's value and/or
@@ -76,17 +80,17 @@ public:
     // only the names of the first pair where the predicate holds. An empty
     // predicate is equivalent to an always-true predicate, and thus must
     // always be last.
-    Option &SetConditionalOpts(OptCondVector opt_cond) {
+    Option &&SetConditionalOpts(OptCondVector opt_cond) {
         assert(opt_cond_.empty());
         assert(!opt_cond.empty());
         opt_cond_ = std::move(opt_cond);
-        return *this;
+        return std::move(*this);
     }
 
-    Option &SetNormalizeFunc(NormalizeFunc normalize_func) {
+    Option &&SetNormalizeFunc(NormalizeFunc normalize_func) {
         assert(!normalize_func_);
         normalize_func_ = std::move(normalize_func);
-        return *this;
+        return std::move(*this);
     }
 
 private:

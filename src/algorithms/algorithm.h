@@ -52,12 +52,7 @@ protected:
 
     void MakeOptionsAvailable(std::vector<std::string_view> const& option_names);
 
-    template <typename T>
-    void RegisterOption(util::config::Option<T> option) {
-        auto name = option.GetName();
-        assert(possible_options_.find(name) == possible_options_.end());
-        possible_options_[name] = std::make_unique<util::config::Option<T>>(std::move(option));
-    }
+    void RegisterOption(util::config::IOption&& option);
 
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.

@@ -58,6 +58,12 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
     }
 }
 
+void Algorithm::RegisterOption(util::config::IOption&& option) {
+    auto name = option.GetName();
+    assert(possible_options_.find(name) == possible_options_.end());
+    possible_options_[name] = option.MoveToHeap();
+}
+
 void Algorithm::LoadData() {
     if (!GetNeededOptions().empty()) throw std::logic_error(
                 "All options need to be set before starting processing.");
