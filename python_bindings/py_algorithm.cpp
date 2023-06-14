@@ -24,6 +24,8 @@ static const auto void_index = std::type_index{typeid(void)};
 namespace py = pybind11;
 
 void PyAlgorithmBase::Configure(py::kwargs const& kwargs, InputTable table) {
+    algorithm_->ResetConfiguration();
+    set_option_used_on_stage_ = false;
     algos::ConfigureFromFunction(
             *algorithm_,
             [this, &kwargs, table = std::move(table)](std::string_view option_name) -> boost::any {
@@ -43,6 +45,7 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs, InputTable table) {
 }
 
 void PyAlgorithmBase::SetOption(std::string_view option_name, py::handle option_value) {
+    set_option_used_on_stage_ = true;
     if (option_value.is_none()) {
         algorithm_->SetOption(option_name);
         return;
@@ -64,7 +67,6 @@ py::frozenset PyAlgorithmBase::GetOptionType(std::string_view option_name) const
 }
 
 void PyAlgorithmBase::LoadProvidedData(pybind11::kwargs const& kwargs, InputTable table) {
-    algorithm_->UnsetOption(kTable);
     Configure(kwargs, std::move(table));
     algorithm_->LoadData();
 }
@@ -80,11 +82,16 @@ void PyAlgorithmBase::LoadData(py::handle dataframe, std::string name, py::kwarg
 
 void PyAlgorithmBase::LoadData() {
     algorithm_->LoadData();
+    set_option_used_on_stage_ = false;
 }
 
 py::int_ PyAlgorithmBase::Execute(py::kwargs const& kwargs) {
-    Configure(kwargs);
-    return algorithm_->Execute();
+    if (!(set_option_used_on_stage_ && kwargs.empty())) {
+        Configure(kwargs);
+    }
+    py::int_ time = algorithm_->Execute();
+    set_option_used_on_stage_ = false;
+    return time;
 }
 
 }  // namespace python_bindings
