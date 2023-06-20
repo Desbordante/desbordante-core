@@ -58,7 +58,7 @@ public:
                                            size_t bumps_limit, size_t iterations_limit,
                                            double seed) {
         using namespace util::config::names;
-        return {{kData, path},
+        return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kBinaryOperation, bin_operation},

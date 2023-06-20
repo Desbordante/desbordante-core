@@ -62,7 +62,7 @@ struct FDVerifyingParams {
                       bool const has_header = true)
         : params({{onam::kLhsIndices, std::move(lhs_indices)},
                   {onam::kRhsIndex, rhs_index},
-                  {onam::kData, test_data_dir / dataset},
+                  {onam::kCsvPath, test_data_dir / dataset},
                   {onam::kSeparator, separator},
                   {onam::kHasHeader, has_header},
                   {onam::kEqualNulls, true}}),

@@ -41,7 +41,7 @@ public:
     static algos::StdParamsMap GetParamMap(std::filesystem::path const& path, char separator = ',',
                                            bool has_header = true) {
         using namespace util::config::names;
-        return {{kData, path},
+        return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, has_header},
                 {kThreads, threads_}};

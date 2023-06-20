@@ -164,7 +164,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                     test_data_dir / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
                     LightDatasets::HasHeader(i));
 
-            StdParamsMap params_map{{onam::kData, test_data_dir / LightDatasets::DatasetName(i)},
+            StdParamsMap params_map{{onam::kCsvPath, test_data_dir / LightDatasets::DatasetName(i)},
                                     {onam::kSeparator, LightDatasets::Separator(i)},
                                     {onam::kHasHeader, LightDatasets::HasHeader(i)},
                                     {onam::kSeed, decltype(Configuration::seed){0}},

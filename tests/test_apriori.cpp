@@ -61,7 +61,7 @@ protected:
                                            unsigned int itemColumnIndex, char separator = ',',
                                            bool hasHeader = true) {
         using namespace util::config::names;
-        return {{kData, path},
+        return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kInputFormat, +algos::InputFormat::singular},
@@ -75,7 +75,7 @@ protected:
                                            const std::filesystem::path& path, bool firstColumnTid,
                                            char separator = ',', bool hasHeader = true) {
         using namespace util::config::names;
-        return {{kData, path},
+        return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kInputFormat, +algos::InputFormat::tabular},

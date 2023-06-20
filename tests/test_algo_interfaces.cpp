@@ -35,7 +35,7 @@ static inline void GetKeysTestImpl(KeysTestParams const& p) {
     namespace onam = util::config::names;
     auto path = test_data_dir / p.dataset;
     std::vector<unsigned int> actual;
-    StdParamsMap params_map{{onam::kData, path},
+    StdParamsMap params_map{{onam::kCsvPath, path},
                             {onam::kSeparator, p.sep},
                             {onam::kHasHeader, p.has_header},
                             {onam::kSeed, decltype(Configuration::seed){0}},

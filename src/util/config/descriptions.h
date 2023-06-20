@@ -9,7 +9,7 @@
 
 namespace util::config::descriptions {
 constexpr auto kDTable = "table processed by the algorithm";
-constexpr auto kDData = "path to CSV file, relative to ./input_data";
+constexpr auto kDCsvPath = "path to the CSV table";
 constexpr auto kDSeparator = "CSV separator";
 constexpr auto kDHasHeader = "CSV header presence flag [true|false]";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";
