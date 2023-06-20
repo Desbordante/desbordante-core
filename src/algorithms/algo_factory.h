@@ -69,7 +69,7 @@ void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
         using namespace util::config::names;
         if (option_name == kTable && options.find(std::string{kTable}) == options.end()) {
             util::config::InputTable parser = std::make_shared<CSVParser>(
-                    details::ExtractOptionValue<std::filesystem::path>(options, kData),
+                    details::ExtractOptionValue<std::filesystem::path>(options, kCsvPath),
                     details::ExtractOptionValue<char>(options, kSeparator),
                     details::ExtractOptionValue<bool>(options, kHasHeader));
             return boost::any{parser};

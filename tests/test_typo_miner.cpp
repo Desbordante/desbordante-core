@@ -25,7 +25,7 @@ struct TestingParam {
                  ushort const threads)
         // This dictionary is only created once, so if we put the relation itself here, it
         // won't be reset between different algorithms.
-        : params({{onam::kData, test_data_dir / dataset_filename},
+        : params({{onam::kCsvPath, test_data_dir / dataset_filename},
                   {onam::kSeparator, separator},
                   {onam::kHasHeader, has_header},
                   {onam::kEqualNulls, is_null_equal_null},
