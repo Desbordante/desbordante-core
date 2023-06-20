@@ -2,7 +2,7 @@
 
 namespace util::config::names {
 constexpr auto kTable = "table";
-constexpr auto kData = "data";
+constexpr auto kCsvPath = "csv_path";
 constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
 constexpr auto kEqualNulls = "is_null_equal_null";

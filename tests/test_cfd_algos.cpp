@@ -36,7 +36,7 @@ protected:
         using namespace util::config::names;
 
         algos::StdParamsMap params{
-                {kData, path},
+                {kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},
                 {kCfdMinimumSupport, minsup},

@@ -41,7 +41,7 @@ boost::program_options::options_description GeneralOptions() {
     // clang-format off
     po::options_description general_options("General options");
     general_options.add_options()
-            (kData, po::value<std::filesystem::path>()->required(), kDData)
+            (kCsvPath, po::value<std::filesystem::path>()->required(), kDCsvPath)
             (kSeparatorOpt.c_str(), po::value<char>()->default_value(','), kDSeparator)
             (kHasHeader, po::value<bool>()->default_value(true), kDHasHeader)
             (kEqualNulls, po::value<bool>(), kDEqualNulls)
