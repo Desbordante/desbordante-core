@@ -53,6 +53,15 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfLowercaseChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfUppercaseChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfChars(0).HasValue());
+    EXPECT_FALSE(stats.GetAvgNumberOfChars(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetAvgNumberOfChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic avg_num_chars_stat = stats.GetAvgNumberOfChars(10);
+    double count = mo::Type::GetValue<mo::Double>(avg_num_chars_stat.GetData());
+    EXPECT_DOUBLE_EQ(count, 5.875);
 }
 
 TEST(TestDataStats, TestGetNumberOfChars) {
