@@ -610,6 +610,28 @@ Statistic DataStats::GetNumberOfChars(size_t index) const {
     return Statistic(res, &int_type, false);
 }
 
+Statistic DataStats::GetAvgNumberOfChars(size_t index) const {
+    if (all_stats_[index].num_avg_chars.HasValue()) return all_stats_[index].num_avg_chars;
+
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+
+    mo::DoubleType double_type;
+    mo::IntType int_type;
+    std::byte* res = double_type.Allocate();
+    Statistic num_stat = GetNumberOfChars(index);
+    std::byte const* num = num_stat.GetData();
+    std::byte const* count = double_type.MakeValueOfInt(col.GetNumRows() - col.GetNumNulls());
+
+    num = double_type.MakeFrom(num, int_type);
+    double_type.Div(num, count, res);
+
+    double_type.Free(num);
+    double_type.Free(count);
+
+    return Statistic(res, &double_type, false);
+}
+
 unsigned long long DataStats::ExecuteInternal() {
     if (all_stats_.empty()) {
         // Table has 0 columns, nothing to do
@@ -644,6 +666,7 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].num_lowercase_chars = GetNumberOfLowercaseChars(index);
             all_stats_[index].num_uppercase_chars = GetNumberOfUppercaseChars(index);
             all_stats_[index].num_chars = GetNumberOfChars(index);
+            all_stats_[index].num_avg_chars = GetAvgNumberOfChars(index);
         }
         // distinct for mixed type will be calculated here
         all_stats_[index].is_categorical = IsCategorical(
