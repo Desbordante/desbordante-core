@@ -124,7 +124,8 @@ public:
     Statistic GetNumberOfUppercaseChars(size_t index) const;
     // Returns total number of characters in a string column.
     Statistic GetNumberOfChars(size_t index) const;
-    
+    // Returns average number of chars in a string column.
+    Statistic GetAvgNumberOfChars(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;
