@@ -97,22 +97,25 @@ Statistic DataStats::CalculateCentralMoment(size_t index, int number, bool besse
     double_type.Negate(avg.GetData(), neg_avg);
     std::byte* sum_of_difs = double_type.MakeValueOfInt(0);
     std::byte* dif = double_type.Allocate();
+    std::byte* double_num = double_type.Allocate();
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-        const std::byte* double_num = mo::DoubleType::MakeFrom(data[i], col.GetType());
+        mo::DoubleType::MakeFrom(data[i], col.GetType(), double_num);
         double_type.Add(double_num, neg_avg, dif);
         double_type.Power(dif, number, dif);
         double_type.Add(sum_of_difs, dif, sum_of_difs);
-        double_type.Free(double_num);
     }
     std::byte* count_of_nums =
             double_type.MakeValue(this->NumberOfValues(index) - (bessel_correction ? 1 : 0));
     std::byte* result = double_type.Allocate();
     double_type.Div(sum_of_difs, count_of_nums, result);
+
+    double_type.Free(double_num);
     double_type.Free(neg_avg);
     double_type.Free(sum_of_difs);
     double_type.Free(dif);
     double_type.Free(count_of_nums);
+
     return Statistic(result, &double_type, false);
 }
 
@@ -387,7 +390,7 @@ Statistic DataStats::GetMeanAD(size_t index) const {
     const std::vector<const std::byte*> data = col.GetData();
     mo::DoubleType double_type;
     std::byte* difference = double_type.MakeValue(0);  // data[i] - comparable
-    std::byte* temp = nullptr;          // For converting data[i] to double
+    std::byte* temp = double_type.Allocate();          // For converting data[i] to double
     std::byte* res = double_type.MakeValue(0);
     Statistic avg_stat = GetAvg(index);
     const std::byte* comparable = mo::DoubleType::MakeFrom(avg_stat.GetData(), *avg_stat.GetType());
@@ -396,17 +399,17 @@ Statistic DataStats::GetMeanAD(size_t index) const {
     for (size_t i = 0; i < data.size(); i++) {
         if (col.IsNullOrEmpty(i)) continue;
 
-        temp = mo::DoubleType::MakeFrom(data[i], col_type);
+        mo::DoubleType::MakeFrom(data[i], col_type, temp);
         double_type.Sub(temp, comparable, difference);
         double_type.Abs(difference, difference);  // |data[i] - comparable|
         double_type.Add(res, difference, res);
-        double_type.Free(temp);
     }
 
     size_t number_of_values = NumberOfValues(index);
     std::byte* num = double_type.MakeValue(number_of_values);
     double_type.Div(res, num, res);
 
+    double_type.Free(temp);
     double_type.Free(num);
     double_type.Free(comparable);
     double_type.Free(difference);
