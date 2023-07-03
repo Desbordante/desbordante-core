@@ -36,6 +36,7 @@
 
 #include "algorithms/algorithms.h"
 #include "model/ar.h"
+#include "py_ac_algorithm.h"
 #include "py_ar_algorithm.h"
 #include "py_data_stats.h"
 #include "py_fd_algorithm.h"
@@ -72,6 +73,8 @@ using PyAid = PyFDAlgorithm<algos::Aid>;
 using PyHyUCC = PyUCCAlgorithm<algos::HyUCC>;
 
 using FDHighlight = algos::fd_verifier::Highlight;
+using algos::ACException;
+using algos::RangesCollection;
 using model::ARStrings;
 
 PYBIND11_MODULE(desbordante, module) {
@@ -110,6 +113,14 @@ PYBIND11_MODULE(desbordante, module) {
             .def_property_readonly("most_frequent_rhs_value_proportion",
                                    &FDHighlight::GetMostFrequentRhsValueProportion);
 
+    py::class_<PyRangesCollection>(module, "ACRanges")
+            .def_property_readonly("column_indices", &PyRangesCollection::GetColumnIndices)
+            .def_property_readonly("ranges", &PyRangesCollection::GetRanges);
+
+    py::class_<ACException>(module, "ACException")
+            .def_readonly("row_index", &ACException::row_i)
+            .def_readonly("column_pairs", &ACException::column_pairs);
+
     py::class_<PyAlgorithmBase>(module, "Algorithm")
             .def("load_data",
                  py::overload_cast<std::string_view, char, bool, py::kwargs const&>(
@@ -145,6 +156,10 @@ PYBIND11_MODULE(desbordante, module) {
     DEFINE_ALGORITHM(MetricVerifier, Algorithm).def("mfd_holds", &PyMetricVerifier::MfdHolds);
 
     DEFINE_AR_ALGORITHM(Apriori);
+
+    DEFINE_ALGORITHM(ACAlgorithm, Algorithm)
+            .def("get_ac_ranges", &PyACAlgorithm::GetACRanges)
+            .def("get_ac_exceptions", &PyACAlgorithm::GetACExceptions);
 
     DEFINE_FD_ALGORITHM(Aid);
     DEFINE_FD_ALGORITHM(Depminer);
