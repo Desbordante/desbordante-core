@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/ar_algorithm_enums.h"
 #include "algorithms/metric/enums.h"
 #include "create_dataframe_reader.h"
@@ -33,6 +34,11 @@ static std::pair<std::type_index, ConvFunc> const EnumConvPair{
             return EnumType::_from_string_nocase(py::cast<std::string>(value).data());
         }};
 
+template <typename EnumType>
+static std::pair<std::type_index, ConvFunc> const CharEnumConvPair{
+        std::type_index(typeid(EnumType)),
+        [](py::handle value) { return EnumType::_from_integral(py::cast<char>(value)); }};
+
 static boost::any InputTableToAny(py::handle obj) {
     if (py::isinstance<py::tuple>(obj)) {
         return CreateCsvParser(py::cast<py::tuple>(obj));
@@ -48,9 +54,11 @@ static const std::unordered_map<std::type_index, ConvFunc> converters{
         NormalConvPair<std::vector<unsigned int>>,
         NormalConvPair<ushort>,
         NormalConvPair<int>,
+        NormalConvPair<size_t>,
         EnumConvPair<algos::metric::Metric>,
         EnumConvPair<algos::metric::MetricAlgo>,
         EnumConvPair<algos::InputFormat>,
+        CharEnumConvPair<algos::Binop>,
         {typeid(util::config::InputTable), InputTableToAny},
 };
 
