@@ -105,7 +105,7 @@ public:
         return bin_operation_;
     }
     void PrintRanges(std::vector<model::TypedColumnData> const& data) const;
-    void CollectACExceptions() {
+    void CollectACExceptions() const {
         ac_exception_finder_->CollectExceptions(this);
     }
     unsigned long long ExecuteInternal() override;
