@@ -47,12 +47,9 @@ private:
     explicit TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                        std::unique_ptr<FDAlgorithm> approx_algo);
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
-    void AddSpecificNeededOptions(
-            std::unordered_set<std::string_view>& previous_options) const final;
-    bool SetExternalOption(std::string_view option_name, boost::any const& value) final;
-    int TrySetOption(std::string_view option_name, boost::any const& value_precise,
-                     boost::any const& value_approx);
+    std::pair<bool, std::string> TrySetOption(std::string_view option_name,
+                                              boost::any const& value_precise,
+                                              boost::any const& value_approx);
 
 public:
     using TyposVec = std::vector<util::PLI::Cluster::value_type>;
@@ -65,6 +62,8 @@ public:
     };
 
     explicit TypoMiner(AlgorithmType precise, AlgorithmType approx = AlgorithmType::pyro);
+
+    void ValidateAlgorithms();
 
     std::vector<util::PLI::Cluster> FindClustersWithTypos(FD const& typos_fd,
                                                           bool const sort_clusters = true) const;

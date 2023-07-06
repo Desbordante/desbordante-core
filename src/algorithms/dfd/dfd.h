@@ -16,7 +16,6 @@ private:
 
     util::config::ThreadNumType number_of_threads_;
 
-    void MakeExecuteOptsAvailable() final;
     void RegisterOptions();
 
     void ResetStateFd() final;

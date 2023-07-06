@@ -16,11 +16,7 @@ DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 }
 
 void DFD::RegisterOptions() {
-    RegisterOption(util::config::ThreadNumberOpt(&number_of_threads_));
-}
-
-void DFD::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({util::config::ThreadNumberOpt.GetName()});
+    RegisterInitialExecOption(util::config::ThreadNumberOpt(&number_of_threads_));
 }
 
 void DFD::ResetStateFd() {

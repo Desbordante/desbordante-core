@@ -20,7 +20,6 @@ private:
     Parameters parameters_;
 
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
 
     void ResetStateFd() final;
     unsigned long long ExecuteInternal() final;
