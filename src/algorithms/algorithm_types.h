@@ -54,4 +54,8 @@ BETTER_ENUM(AlgorithmType, char,
 )
 // clang-format on
 
+static_assert(std::tuple_size_v<AlgorithmTypes> == AlgorithmType::_size(),
+              "The AlgorithmTypes tuple and the AlgorithmType enum sizes must be the same. Did you "
+              "forget to add your new algorithm to either of those?");
+
 }  // namespace algos
