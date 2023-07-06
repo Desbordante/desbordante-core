@@ -23,16 +23,21 @@ std::unique_ptr<AlgorithmBase> CreateAlgorithmInstance(AlgorithmType algorithm) 
             static_cast<size_t>(algorithm), create);
 }
 
+template <typename DerivedFrom>
+bool IsDerived(AlgorithmType algorithm) {
+    auto const is_derived = [](auto I) -> bool {
+        using AlgoType = std::tuple_element_t<I, AlgorithmTypes>;
+        return std::is_base_of_v<DerivedFrom, AlgoType>;
+    };
+    return boost::mp11::mp_with_index<std::tuple_size<AlgorithmTypes>>(
+            static_cast<size_t>(algorithm), is_derived);
+}
+
 template <typename AlgorithmBase>
 std::vector<AlgorithmType> GetAllDerived() {
-    auto const is_derived = [](auto I) -> bool {
-        using AlgorithmType = std::tuple_element_t<I, AlgorithmTypes>;
-        return std::is_base_of_v<AlgorithmBase, AlgorithmType>;
-    };
     std::vector<AlgorithmType> derived_from_base{};
     for (AlgorithmType algo : AlgorithmType::_values()) {
-        if (boost::mp11::mp_with_index<std::tuple_size<AlgorithmTypes>>(static_cast<size_t>(algo),
-                                                                        is_derived)) {
+        if (IsDerived<AlgorithmBase>(algo)) {
             derived_from_base.push_back(algo);
         }
     }
