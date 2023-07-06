@@ -15,7 +15,7 @@ namespace algos {
 
 class FastFDs : public PliBasedFDAlgorithm {
 public:
-    FastFDs();
+    FastFDs(bool request_prepared_data = false);
 
 private:
     using OrderingComparator = std::function<bool(Column const&, Column const&)>;

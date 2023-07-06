@@ -18,7 +18,8 @@
 
 namespace algos {
 
-Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName})  {
+Tane::Tane(bool request_prepared_data)
+    : PliBasedFDAlgorithm({kDefaultPhaseName}, request_prepared_data) {
     RegisterOptions();
 }
 

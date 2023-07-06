@@ -22,7 +22,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    DFD();
+    DFD(bool request_prepared_data = false);
 };
 
 }  // namespace algos

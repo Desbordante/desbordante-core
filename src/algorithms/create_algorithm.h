@@ -6,12 +6,13 @@
 
 namespace algos {
 
-template <typename AlgorithmBase = Algorithm>
-std::unique_ptr<AlgorithmBase> CreateAlgorithmInstance(AlgorithmType algorithm) {
-    auto const create = [](auto I) -> std::unique_ptr<AlgorithmBase> {
+template <typename AlgorithmBase = Algorithm, typename... ConstructorArgs>
+std::unique_ptr<AlgorithmBase> CreateAlgorithmInstance(AlgorithmType algorithm,
+                                                       ConstructorArgs... args) {
+    auto const create = [args...](auto I) -> std::unique_ptr<AlgorithmBase> {
         using AlgorithmType = std::tuple_element_t<I, AlgorithmTypes>;
         if constexpr (std::is_convertible_v<AlgorithmType *, AlgorithmBase *>) {
-            return std::make_unique<AlgorithmType>();
+            return std::make_unique<AlgorithmType>(args...);
         } else {
             throw std::invalid_argument(
                     "Cannot use " + boost::typeindex::type_id<AlgorithmType>().pretty_name() +

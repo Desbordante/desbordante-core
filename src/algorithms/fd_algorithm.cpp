@@ -7,8 +7,9 @@
 
 namespace algos {
 
-FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names,
+                         util::config::ConfigurationStage initial_stage)
+    : Algorithm(std::move(phase_names), initial_stage) {
     RegisterOptions();
 }
 

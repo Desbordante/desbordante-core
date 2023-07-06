@@ -26,7 +26,7 @@ public:
     int count_of_ucc_ = 0;
     long apriori_millis_ = 0;
 
-    Tane();
+    Tane(bool request_prepared_data = false);
 
     static double CalculateZeroAryFdError(ColumnData const* rhs,
                                           ColumnLayoutRelationData const* relation_data);

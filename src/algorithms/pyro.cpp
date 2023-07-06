@@ -18,7 +18,8 @@ namespace algos {
 
 std::mutex searchSpacesMutex;
 
-Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+Pyro::Pyro(bool request_prepared_data)
+    : PliBasedFDAlgorithm({kDefaultPhaseName}, request_prepared_data) {
     RegisterOptions();
     ucc_consumer_ = [this](auto const& key) {
         this->DiscoverUcc(key);

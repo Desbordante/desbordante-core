@@ -22,6 +22,7 @@ namespace algos {
 class Algorithm {
 private:
     util::Progress progress_;
+    util::config::Configuration configuration_;
 
     // Clear the necessary fields for Execute to run repeatedly with different
     // configuration parameters on the same dataset.
@@ -31,8 +32,6 @@ private:
     virtual unsigned long long ExecuteInternal() = 0;
 
 protected:
-    util::config::Configuration configuration_;
-
     void AddProgress(double val) noexcept {
         progress_.AddProgress(val);
     }
@@ -43,8 +42,17 @@ protected:
         progress_.ToNextProgressPhase();
     }
 
+    util::config::ConfigurationStage GetCurrentStage() {
+        return configuration_.GetCurrentStage();
+    }
+
     void RegisterOption(util::config::IOption&& option) {
         configuration_.RegisterOption(std::move(option));
+    }
+
+    void RegisterPrepLoadOption(util::config::IOption&& option) {
+        configuration_.RegisterOption(std::move(option),
+                                      +util::config::ConfigurationStage::load_prepared_data);
     }
 
     void RegisterInitialLoadOption(util::config::IOption&& option) {
@@ -57,6 +65,15 @@ protected:
                                       +util::config::ConfigurationStage::execute);
     }
 
+    // The constructor accepts vector of names of the mining algorithm phases.
+    // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
+    explicit Algorithm(std::vector<std::string_view> phase_names,
+                       util::config::ConfigurationStage starting_stage =
+                               util::config::ConfigurationStage::load_data);
+
+    explicit Algorithm(std::vector<std::string_view> phase_names,
+                       util::config::Configuration::FuncTuple funcTuple);
+
 public:
     constexpr static double kTotalProgressPercent = util::Progress::kTotalProgressPercent;
 
@@ -66,10 +83,6 @@ public:
     Algorithm& operator=(Algorithm&& other) = delete;
     virtual ~Algorithm() = default;
 
-    // The constructor accepts vector of names of the mining algorithm phases.
-    // NOTE: Pass an empty vector here if your algorithm does not have an implemented progress bar.
-    explicit Algorithm(std::vector<std::string_view> phase_names);
-
     void LoadData();
 
     unsigned long long Execute();
@@ -78,7 +91,8 @@ public:
         configuration_.SetOption(option_name, value);
     }
 
-    std::string SetOptionNoThrow(std::string_view option_name, boost::any const& value = {}) {
+    std::pair<bool, std::string> SetOptionNoThrow(std::string_view option_name,
+                                                  boost::any const& value = {}) {
         return configuration_.SetOptionNoThrow(option_name, value);
     }
 
@@ -104,6 +118,10 @@ public:
 
     [[nodiscard]] bool NeedsOption(std::string_view option_name) const {
         return configuration_.NeedsOption(option_name);
+    }
+
+    [[nodiscard]] bool OptionSettable(std::string_view option_name) const {
+        return configuration_.OptionSettable(option_name);
     }
 
     [[nodiscard]] bool IsInitialAtStage(std::string_view option_name,

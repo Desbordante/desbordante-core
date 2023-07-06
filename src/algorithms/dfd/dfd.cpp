@@ -11,7 +11,8 @@
 
 namespace algos {
 
-DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+DFD::DFD(bool request_prepared_data)
+    : PliBasedFDAlgorithm({kDefaultPhaseName}, request_prepared_data) {
     RegisterOptions();
 }
 

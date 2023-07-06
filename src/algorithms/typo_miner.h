@@ -50,6 +50,7 @@ private:
     std::pair<bool, std::string> TrySetOption(std::string_view option_name,
                                               boost::any const& value_precise,
                                               boost::any const& value_approx);
+    util::config::Configuration::FuncTuple MakeConfigFunctions();
 
 public:
     using TyposVec = std::vector<util::PLI::Cluster::value_type>;

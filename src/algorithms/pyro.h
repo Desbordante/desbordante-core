@@ -25,7 +25,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    Pyro();
+    Pyro(bool request_prepared_data = false);
 };
 
 }  // namespace algos
