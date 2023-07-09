@@ -4,7 +4,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "algorithms/ar_algorithm.h"
+#include "association_rules/ar_algorithm.h"
 #include "get_algorithm.h"
 #include "py_algorithm.h"
 

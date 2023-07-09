@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/fd_algorithm.h"
+#include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/statistics/statistic.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "util/config/equal_nulls/type.h"

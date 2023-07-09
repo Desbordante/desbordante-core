@@ -1,17 +1,17 @@
 #pragma once
 
 /* Functional dependency mining algorithms */
-#include "algorithms/aidfd/aid.h"
-#include "algorithms/depminer/depminer.h"
-#include "algorithms/dfd/dfd.h"
-#include "algorithms/fastfds.h"
-#include "algorithms/fd_mine.h"
-#include "algorithms/fdep/fdep.h"
-#include "algorithms/fun.h"
-#include "algorithms/hyfd/hyfd.h"
-#include "algorithms/pyro/pyro.h"
+#include "algorithms/fd/aidfd/aid.h"
+#include "algorithms/fd/depminer/depminer.h"
+#include "algorithms/fd/dfd/dfd.h"
+#include "algorithms/fd/fastfds.h"
+#include "algorithms/fd/fd_mine.h"
+#include "algorithms/fd/fdep/fdep.h"
+#include "algorithms/fd/fun.h"
+#include "algorithms/fd/hyfd/hyfd.h"
+#include "algorithms/fd/pyro/pyro.h"
+#include "algorithms/fd/tane.h"
 #include "algorithms/statistics/data_stats.h"
-#include "algorithms/tane.h"
 
 /*Association rule mining algorithms */
 #include "algorithms/association_rules/apriori.h"
@@ -20,13 +20,13 @@
 #include "algorithms/metric/metric_verifier.h"
 
 /* FD verifier */
-#include "algorithms/fd_verifier/fd_verifier.h"
+#include "algorithms/fd/fd_verifier/fd_verifier.h"
 
 /* Unique Column Combination mining algorithms */
-#include "algorithms/ucc/hyucc/hyucc.h"
+#include "algorithms/fd/ucc/hyucc/hyucc.h"
 
 /* CFD mining algorithms */
-#include "algorithms/cfd/fd_first_algorithm.h"
+#include "algorithms/fd/cfd/fd_first_algorithm.h"
 
 /* Algebraic constraints*/
 #include "algorithms/algebraic_constraints/ac_algorithm.h"

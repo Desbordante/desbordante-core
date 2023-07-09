@@ -5,9 +5,9 @@
 #include <stack>
 #include <vector>
 
-#include "algorithms/ar_algorithm.h"
 #include "algorithms/association_rules/candidate_hash_tree.h"
 #include "algorithms/association_rules/node.h"
+#include "ar_algorithm.h"
 #include "model/itemset.h"
 
 namespace algos {
