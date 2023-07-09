@@ -23,7 +23,7 @@ static bool AllColumnsAreStrings(py::handle dataframe) {
     return dtypes[dtypes.attr("__ne__")(py::str{"string"})].attr("empty").cast<bool>();
 }
 
-util::config::InputTable CreateDataFrameReader(py::handle dataframe, std::string name) {
+config::InputTable CreateDataFrameReader(py::handle dataframe, std::string name) {
     if (!IsDataFrame(dataframe)) throw std::invalid_argument("Passed object is not a dataframe");
     if (AllColumnsAreStrings(dataframe)) {
         return std::make_shared<StringDataframeReader>(dataframe, std::move(name));

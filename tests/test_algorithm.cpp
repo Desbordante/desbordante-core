@@ -6,27 +6,29 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/depminer/depminer.h"
-#include "algorithms/dfd/dfd.h"
-#include "algorithms/fastfds.h"
-#include "algorithms/fdep/fdep.h"
-#include "algorithms/fun.h"
-#include "algorithms/hyfd/hyfd.h"
-#include "algorithms/pyro/pyro.h"
-#include "algorithms/tane.h"
+#include "algorithms/functional/depminer/depminer.h"
+#include "algorithms/functional/dfd/dfd.h"
+#include "algorithms/functional/fastfds.h"
+#include "algorithms/functional/fdep/fdep.h"
+#include "algorithms/functional/fun.h"
+#include "algorithms/functional/hyfd/hyfd.h"
+#include "algorithms/functional/pyro/pyro.h"
+#include "algorithms/functional/tane/tane.h"
 #include "datasets.h"
 #include "model/relational_schema.h"
 #include "testing_utils.h"
 
-using ::testing::ContainerEq, ::testing::Eq;
 using std::string, std::vector;
+using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;
 
-/* This is a test suite for algorithm verification. It should be possible to run these tests for any algorithm that:
+/* This is a test suite for algorithm verification. It should be possible to run these tests for any
+ * algorithm that:
  * 1. extends FDAlgorithm
  * 2. stores the results in FDAlgorithm::fd_collection_
- * 3. has a constructor with signature: myAlgorithm(fs::path const& path, char separator, bool hasHeader)
+ * 3. has a constructor with signature: myAlgorithm(fs::path const& path, char separator, bool
+ * hasHeader)
  *
  * To test your algorithm, just:
  * 1. include the header

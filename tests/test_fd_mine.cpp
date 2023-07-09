@@ -7,26 +7,26 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/fd_mine.h"
-#include "algorithms/pyro/pyro.h"
-#include "algorithms/tane.h"
+#include "algorithms/functional/fd_mine.h"
+#include "algorithms/functional/pyro/pyro.h"
+#include "algorithms/functional/tane/tane.h"
+#include "config/error/type.h"
+#include "config/names.h"
 #include "datasets.h"
 #include "model/relational_schema.h"
-#include "util/config/error/type.h"
-#include "util/config/names.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap, util::config::InputTable;
+using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap, config::InputTable;
 
 using std::string, std::vector;
 
-namespace onam = util::config::names;
+namespace onam = config::names;
 
 StdParamsMap FD_MineGetParamMap(const std::filesystem::path& path, char separator = ',',
                                 bool has_header = true) {
     InputTable parser = std::make_unique<CSVParser>(path, separator, has_header);
-    return {{util::config::names::kTable, parser}};
+    return {{config::names::kTable, parser}};
 }
 
 std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(std::string const& path, char separator = ',',
@@ -151,7 +151,7 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 }
 
 TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
-    namespace onam = util::config::names;
+    namespace onam = config::names;
 
     try {
         for (size_t i = 0; i < LightDatasets::DatasetQuantity(); i++) {
@@ -168,7 +168,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
                                     {onam::kSeparator, LightDatasets::Separator(i)},
                                     {onam::kHasHeader, LightDatasets::HasHeader(i)},
                                     {onam::kSeed, decltype(pyro::Parameters::seed){0}},
-                                    {onam::kError, util::config::ErrorType{0.0}}};
+                                    {onam::kError, config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
             auto& pyro = *pyro_ptr;
 

@@ -14,14 +14,14 @@ namespace python_bindings {
 
 class PyAlgorithmBase {
 private:
-    void LoadProvidedData(pybind11::kwargs const& kwargs, util::config::InputTable table);
+    void LoadProvidedData(pybind11::kwargs const& kwargs, config::InputTable table);
 
 protected:
     std::unique_ptr<algos::Algorithm> algorithm_;
 
     explicit PyAlgorithmBase(std::unique_ptr<algos::Algorithm> ptr) : algorithm_(std::move(ptr)) {}
 
-    void Configure(pybind11::kwargs const& kwargs, util::config::InputTable table = nullptr);
+    void Configure(pybind11::kwargs const& kwargs, config::InputTable table = nullptr);
 
 public:
     void SetOption(std::string_view option_name, pybind11::handle option_value);

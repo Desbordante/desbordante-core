@@ -6,15 +6,15 @@
 
 #include "column_layout_relation_data.h"
 #include "datasets.h"
+#include "functional/pyro/structures/list_agree_set_sample.h"
 #include "levenshtein_distance.h"
-#include "list_agree_set_sample.h"
 #include "structures/agree_set_factory.h"
 #include "structures/identifier_set.h"
 
 namespace tests {
 
-using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, util::AgreeSetFactory,
-        util::MCGenMethod, util::AgreeSetsGenMethod;
+using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, structures::AgreeSetFactory,
+        structures::MCGenMethod, structures::AgreeSetsGenMethod;
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;
@@ -63,7 +63,7 @@ TEST(pliChecker, second) {
 
 TEST(pliIntersectChecker, first) {
     deque<vector<int>> ans = {{2, 5}};
-    std::shared_ptr<util::PositionListIndex> intersection;
+    std::shared_ptr<structures::PositionListIndex> intersection;
 
     try {
         auto csv_parser_1 = std::make_unique<CSVParser>(test_data_dir / "ProbeTest1.csv");
@@ -87,7 +87,7 @@ TEST(testingBitsetToLonglong, first) {
     size_t encoded_num = 1254;
     boost::dynamic_bitset<> simple_bitset{20, encoded_num};
 
-    auto res_vector = *util::ListAgreeSetSample::BitSetToLongLongVector(simple_bitset);
+    auto res_vector = *structures::ListAgreeSetSample::BitSetToLongLongVector(simple_bitset);
     ASSERT_EQ(res_vector.size(), 1);
     for (auto long_long_repr : res_vector)
         ASSERT_EQ(encoded_num, long_long_repr);
@@ -110,7 +110,7 @@ TEST(IdentifierSetTest, Computation) {
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
-            id_sets.insert(util::IdentifierSet(relation.get(), i).ToString());
+            id_sets.insert(structures::IdentifierSet(relation.get(), i).ToString());
         }
     }
     catch (std::runtime_error const& e) {
@@ -144,7 +144,7 @@ TEST(IdentifierSetTest, Intersection) {
         auto path = test_data_dir / "BernoulliRelation.csv";
         auto parser = std::make_unique<CSVParser>(path);
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
-        std::vector<util::IdentifierSet> id_sets;
+        std::vector<structures::IdentifierSet> id_sets;
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
             id_sets.emplace_back(relation.get(), i);
@@ -190,7 +190,7 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
         auto parser = std::make_unique<CSVParser>(path);
         auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
         AgreeSetFactory factory(relation.get(), c);
-        for (util::AgreeSet const& agree_set : factory.GenAgreeSets()) {
+        for (structures::AgreeSet const& agree_set : factory.GenAgreeSets()) {
             agree_sets_actual.insert(agree_set.ToString());
         }
     }

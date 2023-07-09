@@ -6,9 +6,9 @@
 #include "algorithms/algebraic_constraints/ac_algorithm.h"
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/algo_factory.h"
+#include "config/names.h"
 #include "datasets.h"
 #include "types.h"
-#include "util/config/names.h"
 
 namespace {
 void AssertRanges(std::vector<std::string>& expected_ranges,
@@ -57,7 +57,7 @@ public:
                                            double fuzziness, double p_fuzz, double weight,
                                            size_t bumps_limit, size_t iterations_limit,
                                            double seed) {
-        using namespace util::config::names;
+        using namespace config::names;
         return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, hasHeader},

@@ -71,7 +71,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::metric::MetricAlgo, py_str>,
             PyTypePair<algos::InputFormat, py_str>,
             PyTypePair<std::vector<unsigned int>, py_list, py_int>,
-            {typeid(util::config::InputTable),
+            {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
     };
     return type_map.at(type_index)();

@@ -5,11 +5,11 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/fd_verifier/fd_verifier.h"
+#include "algorithms/functional/fd_verifier/fd_verifier.h"
 #include "builtin.h"
+#include "config/indices/type.h"
 #include "datasets.h"
 #include "fd_verifier/stats_calculator.h"
-#include "util/config/indices/type.h"
 
 namespace {
 using namespace algos::fd_verifier;
@@ -47,7 +47,7 @@ void TestSorting(std::unique_ptr<FDVerifier> verifier) {
 }  // namespace
 
 namespace tests {
-namespace onam = util::config::names;
+namespace onam = config::names;
 
 struct FDVerifyingParams {
     algos::StdParamsMap params;
@@ -55,7 +55,7 @@ struct FDVerifyingParams {
     size_t const num_error_clusters = 0;
     size_t const num_error_rows = 0;
 
-    FDVerifyingParams(util::config::IndicesType lhs_indices, util::config::IndicesType rhs_indices,
+    FDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
                       size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
                       long double const error = 0., char const* dataset = "TestFD.csv",
                       char const separator = ',', bool const has_header = true)

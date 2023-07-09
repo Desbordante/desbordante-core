@@ -29,7 +29,7 @@ T CastAndReplaceCastError(std::string_view option_name, py::handle value) {
     }
 }
 
-util::config::InputTable CreateCsvParser(std::string_view option_name, py::tuple const& arguments) {
+config::InputTable CreateCsvParser(std::string_view option_name, py::tuple const& arguments) {
     if (py::len(arguments) != 3) {
         throw std::invalid_argument("Cannot create a csv parser from passed tuple.");
     }
@@ -105,7 +105,7 @@ const std::unordered_map<std::type_index, ConvFunc> converters{
         EnumConvPair<algos::metric::MetricAlgo>,
         EnumConvPair<algos::InputFormat>,
         CharEnumConvPair<algos::Binop>,
-        {typeid(util::config::InputTable), InputTableToAny},
+        {typeid(config::InputTable), InputTableToAny},
 };
 
 }  // namespace
