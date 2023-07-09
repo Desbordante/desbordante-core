@@ -6,13 +6,13 @@
 #include <boost/any.hpp>
 
 #include "algorithms/algo_factory.h"
+#include "config/names.h"
+#include "config/tabular_data/input_table_type.h"
 #include "create_dataframe_reader.h"
 #include "dataframe_reader.h"
 #include "get_py_type.h"
 #include "parser/csv_parser.h"
 #include "py_to_any.h"
-#include "util/config/names.h"
-#include "util/config/tabular_data/input_table_type.h"
 
 namespace python_bindings {
 

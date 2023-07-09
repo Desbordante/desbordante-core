@@ -12,7 +12,8 @@ structures::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
 
 PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data,
                                    CachingMethod caching_method,
-                                   CacheEvictionMethod eviction_method) : relation_data_(relation_data),
+                                   CacheEvictionMethod eviction_method)
+    : relation_data_(relation_data),
       index_(std::make_unique<structures::BlockingVerticalMap<structures::PositionListIndex>>(
               relation_data->GetSchema())),
       caching_method_(caching_method),
@@ -36,7 +37,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     if (pli != nullptr) {
         pli->IncFreq();
         LOG(DEBUG) << boost::format{"Served from PLI cache."};
-        //addToUsageCounter
+        // addToUsageCounter
         return pli;
     }
     // look for cached PLIs to construct the requested one
@@ -55,7 +56,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
             smallest_pli_rank = pli_rank;
         }
     }
-    assert(smallest_pli_rank);            // check if smallest_pli_rank is initialized
+    assert(smallest_pli_rank);  // check if smallest_pli_rank is initialized
 
     std::vector<PositionListIndexRank> operands;
     boost::dynamic_bitset<> cover(relation_data_->GetNumColumns());
@@ -67,7 +68,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
 
         while (cover.count() < vertical.GetArity() && !ranks.empty()) {
             boost::optional<PositionListIndexRank> best_rank;
-            //erase ranks with low added_arity_
+            // erase ranks with low added_arity_
             ranks.erase(std::remove_if(ranks.begin(), ranks.end(),
                                        [&cover_tester, &cover](auto& rank) {
                                            cover_tester.reset();
@@ -120,7 +121,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     if (operands.size() >= 4) {
         PositionListIndexRank base_pli_rank = operands[0];
         auto intersection_pli = base_pli_rank.pli_->ProbeAll(
-            vertical.Without(*base_pli_rank.vertical_), *relation_data_);
+                vertical.Without(*base_pli_rank.vertical_), *relation_data_);
         variant_intersection_pli = CachingProcess(vertical, std::move(intersection_pli));
     } else {
         Vertical current_vertical = *operands.begin()->vertical_;
@@ -143,7 +144,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     }
 
     LOG(DEBUG) << boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-                      operands.size() % (vertical.GetArity() - operands.size());
+                          operands.size() % (vertical.GetArity() - operands.size());
 
     return variant_intersection_pli;
 }
