@@ -2,9 +2,9 @@
 
 #include <vector>
 
+#include "algorithms/fd/model/fd.h"
 #include "algorithms/fd_algorithm.h"
 #include "get_algorithm.h"
-#include "model/fd.h"
 #include "py_algorithm.h"
 #include "py_fd.h"
 

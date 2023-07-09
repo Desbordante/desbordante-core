@@ -7,8 +7,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "position_list_index.h"
 #include "relational_schema.h"
+#include "structures/position_list_index.h"
 #include "vertical.h"
 
 namespace util {

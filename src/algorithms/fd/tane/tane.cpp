@@ -1,4 +1,4 @@
-#include "algorithms/fd/tane.h"
+#include "tane.h"
 
 #include <chrono>
 #include <iomanip>
@@ -7,12 +7,12 @@
 
 #include <easylogging++.h>
 
+#include "lattice_level.h"
+#include "lattice_vertex.h"
 #include "model/column_combination.h"
 #include "model/column_data.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
-#include "structures/lattice_level.h"
-#include "structures/lattice_vertex.h"
 #include "util/config/error/option.h"
 #include "util/config/max_lhs/option.h"
 

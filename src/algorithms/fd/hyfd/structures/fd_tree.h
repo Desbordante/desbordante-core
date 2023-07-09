@@ -5,8 +5,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "algorithms/fd/model/raw_fd.h"
 #include "fd_tree_vertex.h"
-#include "raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
 
