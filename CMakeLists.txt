@@ -43,22 +43,21 @@ message(${Boost_INCLUDE_DIRS})
 
 # providing subdirectories for header inclusion
 include_directories(
-    "src/algorithms"
-    "src/algorithms/aidfd"
-        "src/algorithms/dfd"
+        "src"
+        "src/algorithms"
         "src/algorithms/association_rules"
-        "src/algorithms/depminer"
+        "src/algorithms/fd/"
+        "src/algorithms/fd/aidfd"
+        "src/algorithms/fd/depminer"
+        "src/algorithms/fd/dfd"
         "src/algorithms/statistics"
+        "src/caching"
         "src/model"
         "src/model/types"
-        "src/util"
-        "src/util/config"
         "src/parser"
         "src/parser/json"
-        "src/algorithms/pyro/core" # todo: exclude
-        "src/caching"
-        "src/logging"
-        "src"
+        "src/util"
+        "src/util/config"
 )
 
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")

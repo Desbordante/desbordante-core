@@ -7,8 +7,8 @@
 
 #include <Python.h>
 
-#include "algorithms/ar_algorithm_enums.h"
 #include "algorithms/metric/enums.h"
+#include "association_rules/ar_algorithm_enums.h"
 #include "util/config/tabular_data/input_table_type.h"
 
 namespace py = pybind11;

@@ -7,8 +7,8 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
-#include "algorithms/ar_algorithm_enums.h"
 #include "algorithms/metric/enums.h"
+#include "association_rules/ar_algorithm_enums.h"
 #include "create_dataframe_reader.h"
 #include "csv_parser.h"
 #include "util/config/enum_to_available_values.h"
