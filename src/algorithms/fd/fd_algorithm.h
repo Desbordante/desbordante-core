@@ -13,7 +13,7 @@
 #include "model/column_layout_typed_relation_data.h"
 #include "util/primitive_collection.h"
 
-namespace util {
+namespace structures {
 class AgreeSetFactory;
 }
 
@@ -24,7 +24,7 @@ namespace algos {
  * */
 class FDAlgorithm : public Algorithm {
 private:
-    friend util::AgreeSetFactory;
+    friend structures::AgreeSetFactory;
 
     void RegisterOptions();
 

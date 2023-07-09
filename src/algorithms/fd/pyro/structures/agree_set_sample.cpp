@@ -7,7 +7,7 @@
 #include <random>
 #include <utility>
 
-namespace util {
+namespace structures {
 
 using namespace std;
 
@@ -143,5 +143,4 @@ double AgreeSetSample::ProbitFunction(double quantile) const {
     }
 }
 
-} // namespace util
-
+}  // namespace structures

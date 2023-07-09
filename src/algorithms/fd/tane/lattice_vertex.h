@@ -11,7 +11,7 @@
 #include "structures/position_list_index.h"
 #include "vertical.h"
 
-namespace util {
+namespace structures {
 
 class LatticeVertex {
 private:
@@ -59,5 +59,4 @@ public:
     friend std::ostream& operator<<(std::ostream& os, LatticeVertex& lv);
 };
 
-} // namespace util
-
+}  // namespace structures

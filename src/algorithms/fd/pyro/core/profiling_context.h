@@ -9,9 +9,9 @@
 #include "dependency_consumer.h"
 #include "pyro/model/partial_fd.h"
 #include "pyro/model/partial_key.h"
-#include "pyro/util/agree_set_sample.h"
+#include "pyro/structures/agree_set_sample.h"
 
-namespace util {
+namespace structures {
 
 // forward declaration
 class PLICache;
@@ -19,20 +19,20 @@ class PLICache;
 template <class Value>
 class VerticalMap;
 
-}  // namespace util
+}  // namespace structures
 
 // Dependency Consumer?
 class ProfilingContext : public DependencyConsumer {
 private:
     pyro::Parameters parameters_;
-    std::unique_ptr<util::PLICache> pli_cache_;
-    std::unique_ptr<util::VerticalMap<util::AgreeSetSample>> agree_set_samples_;  // unique_ptr?
+    std::unique_ptr<structures::PLICache> pli_cache_;
+    std::unique_ptr<structures::VerticalMap<structures::AgreeSetSample>> agree_set_samples_;
     ColumnLayoutRelationData* relation_data_;
     std::mt19937 random_;
     CustomRandom custom_random_;
 
-    util::AgreeSetSample const* CreateColumnFocusedSample(
-            Vertical const& focus, util::PositionListIndex const* restriction_pli,
+    structures::AgreeSetSample const* CreateColumnFocusedSample(
+            Vertical const& focus, structures::PositionListIndex const* restriction_pli,
             double boost_factor);
 
 public:
@@ -45,12 +45,14 @@ public:
                      CacheEvictionMethod const& eviction_method, double caching_method_value);
 
     // Non-const as RandomGenerator state gets changed
-    util::AgreeSetSample const* CreateFocusedSample(Vertical const& focus, double boost_factor);
-    std::shared_ptr<util::AgreeSetSample const> GetAgreeSetSample(Vertical const& focus) const;
-    util::PLICache* GetPliCache() {
+    structures::AgreeSetSample const* CreateFocusedSample(Vertical const& focus,
+                                                          double boost_factor);
+    std::shared_ptr<structures::AgreeSetSample const> GetAgreeSetSample(
+            Vertical const& focus) const;
+    structures::PLICache* GetPliCache() {
         return pli_cache_.get();
-    }
-    bool IsAgreeSetSamplesEmpty() const {
+
+    }bool IsAgreeSetSamplesEmpty() const {
         return agree_set_samples_ == nullptr;
     }
     RelationalSchema const* GetSchema() const {
@@ -63,7 +65,7 @@ public:
     ColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
         return relation_data_;
     }
-    util::PLICache const* GetPliCache() const {
+    structures::PLICache const* GetPliCache() const {
         return pli_cache_.get();
     }
 
@@ -72,6 +74,7 @@ public:
     // upper_bound}(random_); }
     int NextInt(int upper_bound) {
         return custom_random_.NextInt(upper_bound);
+
     }
     double NextDouble() {
         return custom_random_.NextDouble();

@@ -18,7 +18,7 @@
 #include "position_list_index.h"
 #include "vertical.h"
 
-namespace util {
+namespace structures {
 
 const int PositionListIndex::singleton_value_id_ = 0;
 unsigned long long PositionListIndex::micros_ = 0;
@@ -269,16 +269,13 @@ std::string PositionListIndex::ToString() const {
         for (int v : cluster) {
             res.append(std::to_string(v) + ",");
         }
-        if (res.find(',') != std::string::npos)
-            res.erase(res.find_last_of(','));
+        if (res.find(',') != std::string::npos) res.erase(res.find_last_of(','));
         res.push_back(']');
         res.push_back(',');
     }
-    if (res.find(',') != std::string::npos)
-        res.erase(res.find_last_of(','));
+    if (res.find(',') != std::string::npos) res.erase(res.find_last_of(','));
     res.push_back(']');
     return res;
 }
 
-} // namespace util
-
+}  // namespace structures

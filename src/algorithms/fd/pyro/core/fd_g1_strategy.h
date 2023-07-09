@@ -7,9 +7,11 @@ class FdG1Strategy : public DependencyStrategy {
 private:
     Column const* rhs_;
 
-    double CalculateG1(util::PositionListIndex* lhs_pli) const;
+    double CalculateG1(structures::PositionListIndex* lhs_pli) const;
     double CalculateG1(double num_violating_tuple_pairs) const;
-    util::ConfidenceInterval CalculateG1(util::ConfidenceInterval const& num_violations) const;
+    structures::ConfidenceInterval CalculateG1(
+            structures::ConfidenceInterval const& num_violations) const;
+
 public:
     static unsigned long long nanos_;
 

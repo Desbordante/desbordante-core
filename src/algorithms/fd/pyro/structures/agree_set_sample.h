@@ -12,17 +12,16 @@
 #include "custom/custom_random.h"
 #include "vertical.h"
 
-namespace util {
+namespace structures {
 
-//abstract base class for Agree Set Sample implementations (trie <- not used, list)
+// abstract base class for Agree Set Sample implementations (trie <- not used, list)
 class AgreeSetSample {
 public:
-
     virtual unsigned long long GetNumAgreeSupersets(Vertical const& agreement) const = 0;
     virtual unsigned long long GetNumAgreeSupersets(Vertical const& agreement,
                                                     Vertical const& disagreement) const = 0;
     virtual std::unique_ptr<std::vector<unsigned long long>> GetNumAgreeSupersetsExt(
-        Vertical const& agreement, Vertical const& disagreement) const;
+            Vertical const& agreement, Vertical const& disagreement) const;
 
     double EstimateAgreements(Vertical const& agreement) const;
     ConfidenceInterval EstimateAgreements(Vertical const& agreement, double confidence) const;
@@ -66,8 +65,7 @@ private:
     double ProbitFunction(double quantile) const;
 };
 
-} // namespace util
+}  // namespace structures
 
-//include template implementation
+// include template implementation
 #include "agree_set_sample_impl.h"
-

@@ -63,9 +63,9 @@ std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
     std::sort(verticals.begin(), verticals.end(), [](auto& vertical1, auto& vertical2) {
         return vertical1.GetArity() < vertical2.GetArity();
     });
-    util::VerticalMap<Vertical> consolidated_verticals(this);
+    structures::VerticalMap<Vertical> consolidated_verticals(this);
 
-    util::VerticalMap<Vertical> hitting_set(this);
+    structures::VerticalMap<Vertical> hitting_set(this);
     hitting_set.Put(*empty_vertical_, Vertical::EmptyVertical(this));
 
     for (auto& vertical : verticals) {

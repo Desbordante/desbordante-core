@@ -44,10 +44,11 @@ private:
     void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
                size_t second_record_id);
     template <typename F>
-    void RunWindowImpl(Efficiency& efficiency, util::PositionListIndex const& pli, F store_match);
+    void RunWindowImpl(Efficiency& efficiency, structures::PositionListIndex const& pli,
+                       F store_match);
     std::vector<boost::dynamic_bitset<>> RunWindowRet(Efficiency& efficiency,
-                                                      util::PositionListIndex const& pli);
-    void RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli);
+                                                      structures::PositionListIndex const& pli);
+    void RunWindow(Efficiency& efficiency, structures::PositionListIndex const& pli);
 
 public:
     Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads = 1);

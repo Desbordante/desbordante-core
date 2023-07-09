@@ -16,7 +16,7 @@ template <typename T>
 struct PointsCalculationResult;
 struct Highlight;
 
-using ClusterIndex = util::PLI::Cluster::value_type;
+using ClusterIndex = structures::PLI::Cluster::value_type;
 
 using IndexedOneDimensionalPoint = IndexedPoint<std::byte const*>;
 using IndexedVector = IndexedPoint<std::vector<long double>>;
@@ -28,12 +28,13 @@ using CompareFunction = std::function<bool(std::vector<T> const& points)>;
 template <typename T>
 using HighlightFunction = std::function<void(std::vector<T> const& points,
                                              std::vector<Highlight>&& cluster_highlights)>;
-using ClusterFunction = std::function<bool(util::PLI::Cluster const& cluster)>;
+using ClusterFunction = std::function<bool(structures::PLI::Cluster const& cluster)>;
 template <typename T>
 using IndexedPointsFunction =
-        std::function<IndexedPointsCalculationResult<T>(util::PLI::Cluster const& cluster)>;
+        std::function<IndexedPointsCalculationResult<T>(structures::PLI::Cluster const& cluster)>;
 template <typename T>
-using PointsFunction = std::function<PointsCalculationResult<T>(util::PLI::Cluster const& cluster)>;
+using PointsFunction =
+        std::function<PointsCalculationResult<T>(structures::PLI::Cluster const& cluster)>;
 template <typename T>
 using AssignmentFunction = std::function<void(long double, T&, size_t)>;
 

@@ -31,17 +31,18 @@ public:
 
     static double CalculateZeroAryFdError(ColumnData const* rhs,
                                           ColumnLayoutRelationData const* relation_data);
-    static double CalculateFdError(util::PositionListIndex const* lhs_pli,
-                                   util::PositionListIndex const* joint_pli,
+    static double CalculateFdError(structures::PositionListIndex const* lhs_pli,
+                                   structures::PositionListIndex const* joint_pli,
                                    ColumnLayoutRelationData const* relation_data);
-    static double CalculateUccError(util::PositionListIndex const* pli,
+    static double CalculateUccError(structures::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
 
-    //static double round(double error) { return ((int)(error * 32768) + 1)/ 32768.0; }
+    // static double round(double error) { return ((int)(error * 32768) + 1)/ 32768.0; }
 
-    void RegisterFd(Vertical const& lhs, Column const* rhs,
-                    double error, RelationalSchema const* schema);
-    // void RegisterFd(Vertical const* lhs, Column const* rhs, double error, RelationalSchema const* schema);
+    void RegisterFd(Vertical const& lhs, Column const* rhs, double error,
+                    RelationalSchema const* schema);
+    // void RegisterFd(Vertical const* lhs, Column const* rhs, double error, RelationalSchema const*
+    // schema);
     void RegisterUcc(Vertical const& key, double error, RelationalSchema const* schema);
 };
 

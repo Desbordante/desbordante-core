@@ -8,7 +8,7 @@
 
 #include "agree_set_sample.h"
 
-namespace util {
+namespace structures {
 
 template <typename T>
 std::unique_ptr<T> AgreeSetSample::CreateFor(ColumnLayoutRelationData* relation_data,
@@ -54,9 +54,9 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
                                                     unsigned int sample_size,
                                                     CustomRandom& random) {
     static_assert(std::is_base_of<AgreeSetSample, T>::value);
-    //std::random_device rd;
-    //std::mt19937 gen(rd());
-    //std::uniform_real_distribution<> random_double;
+    // std::random_device rd;
+    // std::mt19937 gen(rd());
+    // std::uniform_real_distribution<> random_double;
 
     boost::dynamic_bitset<> free_column_indices(relation->GetNumColumns());
     free_column_indices.set();
@@ -147,8 +147,8 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
     /*string agreeSetCountersStr = "{";
     for (auto& [key, value] : agree_set_counters) {
         agreeSetCountersStr += '\"';
-        for (unsigned int columnIndex = key.find_first(); columnIndex < key.size(); columnIndex = key.find_next(columnIndex)){
-            agreeSetCountersStr += std::to_string(columnIndex) + ' ';
+        for (unsigned int columnIndex = key.find_first(); columnIndex < key.size(); columnIndex =
+    key.find_next(columnIndex)){ agreeSetCountersStr += std::to_string(columnIndex) + ' ';
         }
         agreeSetCountersStr += '\"';
         agreeSetCountersStr += " : "+ std::to_string(value) + ',';
@@ -156,11 +156,11 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
     agreeSetCountersStr.erase(agreeSetCountersStr.end()-1);
     agreeSetCountersStr += '}';
 
-    LOG(DEBUG) << boost::format {"Created sample focused on %1%: %2%"} % restriction_vertical->ToString() % agreeSetCountersStr;
+    LOG(DEBUG) << boost::format {"Created sample focused on %1%: %2%"} %
+    restriction_vertical->ToString() % agreeSetCountersStr;
     */
     return std::make_unique<T>(relation, restriction_vertical, sample_size, restriction_nep,
                                std::move(agree_set_counters));
 }
 
-} // namespace util
-
+}  // namespace structures
