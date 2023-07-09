@@ -13,7 +13,7 @@ PyFD::PyFD(RawFD const& fd)
 std::string PyFD::ToString() const {
     std::stringstream stream;
     stream << "( ";
-    for (util::config::IndexType index : lhs_indices_) {
+    for (config::IndexType index : lhs_indices_) {
         stream << index << " ";
     }
     stream << ") -> ";

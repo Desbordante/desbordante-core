@@ -6,15 +6,15 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/pyro/pyro.h"
+#include "algorithms/functional/pyro/pyro.h"
+#include "config/error/type.h"
+#include "config/names.h"
 #include "datasets.h"
-#include "util/config/error/type.h"
-#include "util/config/names.h"
 
 namespace tests {
 
-using ::testing::ContainerEq;
 using algos::FDAlgorithm, algos::PliBasedFDAlgorithm, algos::StdParamsMap;
+using ::testing::ContainerEq;
 
 namespace fs = std::filesystem;
 
@@ -32,14 +32,14 @@ class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 
 template<typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
-    namespace onam = util::config::names;
+    namespace onam = config::names;
     auto path = test_data_dir / p.dataset;
     std::vector<unsigned int> actual;
     StdParamsMap params_map{{onam::kCsvPath, path},
                             {onam::kSeparator, p.sep},
                             {onam::kHasHeader, p.has_header},
                             {onam::kSeed, decltype(pyro::Parameters::seed){0}},
-                            {onam::kError, util::config::ErrorType{0.0}}};
+                            {onam::kError, config::ErrorType{0.0}}};
     auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
     auto &pyro = *pyro_ptr;
 

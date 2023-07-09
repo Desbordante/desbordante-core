@@ -6,10 +6,10 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/cfd/enums.h"
-#include "algorithms/cfd/fd_first_algorithm.h"
+#include "algorithms/functional/cfd/enums.h"
+#include "algorithms/functional/cfd/fd_first_algorithm.h"
+#include "config/names.h"
 #include "datasets.h"
-#include "util/config/names.h"
 
 namespace tests {
 namespace fs = std::filesystem;
@@ -33,7 +33,7 @@ protected:
             unsigned minsup, double minconf, const std::filesystem::path& path,
             char const* substrategy, unsigned int max_lhs, unsigned columns_number = 0,
             unsigned tuples_number = 0, char separator = ',', bool hasHeader = true) {
-        using namespace util::config::names;
+        using namespace config::names;
 
         algos::StdParamsMap params{
                 {kCsvPath, path},

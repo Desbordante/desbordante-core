@@ -7,12 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/fd/model/ucc.h"
-#include "algorithms/pyro.h"
-#include "algorithms/ucc/hyucc/hyucc.h"
-#include "algorithms/ucc/ucc_algorithm.h"
+#include "algorithms/functional/model/ucc.h"
+#include "algorithms/functional/ucc/hyucc/hyucc.h"
+#include "algorithms/functional/ucc/ucc_algorithm.h"
+#include "config/thread_number/type.h"
 #include "datasets.h"
-#include "util/config/thread_number/type.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();
@@ -29,10 +28,10 @@ namespace {
 // ARAlgorithmTest for example).
 template <typename AlgorithmUnderTest>
 class UCCAlgorithmTest : public ::testing::Test {
-    static util::config::ThreadNumType threads_;
+    static config::ThreadNumType threads_;
 
 protected:
-    static void SetThreadsParam(util::config::ThreadNumType threads) noexcept {
+    static void SetThreadsParam(config::ThreadNumType threads) noexcept {
         assert(threads > 0);
         threads_ = threads;
     }
@@ -40,7 +39,7 @@ protected:
 public:
     static algos::StdParamsMap GetParamMap(std::filesystem::path const& path, char separator = ',',
                                            bool has_header = true) {
-        using namespace util::config::names;
+        using namespace config::names;
         return {{kCsvPath, path},
                 {kSeparator, separator},
                 {kHasHeader, has_header},
@@ -95,7 +94,7 @@ public:
 };
 
 template <typename AlgorithmUnderTest>
-util::config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
+config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
 
 // Implement custom hash functions since implementation of `std::hash` or `boost::hash` may change
 // depending on the library version/architecture/os/whatever leading to tests failing.

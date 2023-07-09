@@ -10,11 +10,11 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/metric/enums.h"
 #include "algorithms/metric/metric_verifier.h"
+#include "config/names.h"
 #include "datasets.h"
-#include "util/config/names.h"
 
 namespace tests {
-namespace onam = util::config::names;
+namespace onam = config::names;
 
 struct MetricVerifyingParams {
     algos::StdParamsMap params;
