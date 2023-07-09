@@ -10,7 +10,7 @@
 #include "algorithms/fd/fun.h"
 #include "algorithms/fd/hyfd/hyfd.h"
 #include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane.h"
+#include "algorithms/fd/tane/tane.h"
 #include "algorithms/statistics/data_stats.h"
 
 /*Association rule mining algorithms */

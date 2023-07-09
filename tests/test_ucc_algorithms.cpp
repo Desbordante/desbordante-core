@@ -7,11 +7,11 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/fd/model/ucc.h"
 #include "algorithms/pyro.h"
 #include "algorithms/ucc/hyucc/hyucc.h"
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "datasets.h"
-#include "model/ucc.h"
 #include "util/config/thread_number/type.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {

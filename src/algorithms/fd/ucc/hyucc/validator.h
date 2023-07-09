@@ -4,9 +4,9 @@
 #include <utility>
 #include <vector>
 
+#include "algorithms/fd/model/raw_ucc.h"
 #include "hycommon/primitive_validations.h"
 #include "hycommon/types.h"
-#include "model/raw_ucc.h"
 #include "structures/position_list_index.h"
 #include "structures/ucc_tree.h"
 #include "util/config/thread_number/type.h"

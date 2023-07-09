@@ -2,7 +2,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "model/raw_ucc.h"
+#include "algorithms/fd/model/raw_ucc.h"
 #include "structures/non_ucc_list.h"
 #include "structures/ucc_tree.h"
 

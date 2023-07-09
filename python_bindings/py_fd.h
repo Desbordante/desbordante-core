@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "model/raw_fd.h"
+#include "algorithms/fd/model/raw_fd.h"
 #include "util/config/indices/type.h"
 
 namespace python_bindings {

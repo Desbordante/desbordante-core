@@ -6,7 +6,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "raw_fd.h"
+#include "algorithms/fd/model/raw_fd.h"
 
 namespace algos::hyfd::fd_tree {
 

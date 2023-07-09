@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/raw_ucc.h"
-#include "model/ucc.h"
+#include "algorithms/fd/model/raw_ucc.h"
+#include "algorithms/fd/model/ucc.h"
 #include "util/config/indices/type.h"
 
 namespace python_bindings {

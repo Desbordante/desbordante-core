@@ -6,11 +6,11 @@
 #include <list>
 
 // For printing Dependencies
-#include <string>
 #include <fstream>
+#include <string>
 
+#include "algorithms/fd/model/fd.h"
 #include "relational_schema.h"
-#include "fd.h"
 
 class FDTreeElement {
 public:
