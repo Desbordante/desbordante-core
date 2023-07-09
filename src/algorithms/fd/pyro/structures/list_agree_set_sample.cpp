@@ -2,17 +2,17 @@
 
 #include <easylogging++.h>
 
-namespace util {
+namespace structures {
 
 std::unique_ptr<ListAgreeSetSample> ListAgreeSetSample::CreateFocusedFor(
-    ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
-    PositionListIndex const* restriction_p_li, unsigned int sample_size, CustomRandom& random) {
+        ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+        PositionListIndex const* restriction_p_li, unsigned int sample_size, CustomRandom& random) {
     return AgreeSetSample::CreateFocusedFor<ListAgreeSetSample>(
-        relation, restriction_vertical, restriction_p_li, sample_size, random);
+            relation, restriction_vertical, restriction_p_li, sample_size, random);
 }
 
 std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::BitSetToLongLongVector(
-    boost::dynamic_bitset<> const& bitset) {
+        boost::dynamic_bitset<> const& bitset) {
     auto result = std::make_unique<std::vector<unsigned long long>>(
         std::vector<unsigned long long>((bitset.size() + 63) / 64, 0));
     for (size_t i = 0; i < bitset.size(); i++) {
@@ -131,11 +131,11 @@ std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::GetNumAgree
         }
 
         count += agree_set_counter.count;
-        Entries:
+    Entries:
         continue;
     }
     return std::make_unique<std::vector<unsigned long long>>(
-        std::vector<unsigned long long>{count_agreements, count});
+            std::vector<unsigned long long>{count_agreements, count});
 }
 
-} // namespace util
+}  // namespace structures

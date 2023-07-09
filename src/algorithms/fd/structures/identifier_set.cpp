@@ -1,9 +1,9 @@
 #include "identifier_set.h"
 
-namespace util {
+namespace structures {
 
-IdentifierSet::IdentifierSet(ColumnLayoutRelationData const* const relation,
-                             int index) : relation_(relation), tuple_index_(index) {
+IdentifierSet::IdentifierSet(ColumnLayoutRelationData const* const relation, int index)
+    : relation_(relation), tuple_index_(index) {
     data_.reserve(relation_->GetNumColumns());
     for (ColumnData const& col : relation_->GetColumnData()) {
         data_.push_back({.attribute = col.GetColumn(),
@@ -25,5 +25,4 @@ std::string IdentifierSet::ToString() const {
     return str;
 }
 
-} // namespace util
-
+}  // namespace structures

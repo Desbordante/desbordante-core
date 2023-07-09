@@ -13,7 +13,7 @@
 #include "custom/custom_hashes.h"
 #include "fd_algorithm.h"
 
-namespace util {
+namespace structures {
 
 using AgreeSet = Vertical;
 
@@ -196,5 +196,4 @@ private:
     algos::FDAlgorithm* algo_;
 };
 
-} // namespace util
-
+}  // namespace structures

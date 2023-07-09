@@ -62,10 +62,10 @@ unsigned long long FDVerifier::ExecuteInternal() {
 }
 
 void FDVerifier::VerifyFD() const {
-    std::shared_ptr<util::PLI const> lhs_pli = CalculatePLI(lhs_indices_);
+    std::shared_ptr<structures::PLI const> lhs_pli = CalculatePLI(lhs_indices_);
     std::shared_ptr<util::PLI const> rhs_pli = CalculatePLI(rhs_indices_);
 
-    std::unique_ptr<util::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
+    std::unique_ptr<structures::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
     if (lhs_pli->GetNumCluster() == intersection_pli->GetNumCluster()) {
         return;
     }

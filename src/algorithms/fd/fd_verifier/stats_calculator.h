@@ -14,7 +14,7 @@ namespace algos::fd_verifier {
 
 class StatsCalculator {
 private:
-    using ClusterIndex = util::PLI::Cluster::value_type;
+    using ClusterIndex = structures::PLI::Cluster::value_type;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -44,7 +44,7 @@ private:
 public:
     using HighlightCompareFunction = std::function<bool(Highlight const& h1, Highlight const& h2)>;
 
-    void CalculateStatistics(util::PLI const* lhs_pli, util::PLI const* rhs_pli);
+    void CalculateStatistics(structures::PLI const* lhs_pli, structures::PLI const* rhs_pli);
 
     void PrintStatistics() const;
 

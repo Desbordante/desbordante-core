@@ -10,11 +10,11 @@ namespace algos::fd_verifier {
  * that cluster */
 class Highlight {
 private:
-    util::PLI::Cluster cluster;                /* cluster that violate the FD */
+    structures::PLI::Cluster cluster;          /* cluster that violate the FD */
     size_t num_distinct_rhs_values;            /* number of different RHS values within a cluster */
     double most_frequent_rhs_value_proportion; /* proportion of most frequent RHS value */
 public:
-    util::PLI::Cluster const& GetCluster() const {
+    structures::PLI::Cluster const& GetCluster() const {
         return cluster;
     }
 
@@ -26,7 +26,7 @@ public:
         return most_frequent_rhs_value_proportion;
     }
 
-    Highlight(util::PLI::Cluster const& cluster, size_t num_distinct_rhs_values,
+    Highlight(structures::PLI::Cluster const& cluster, size_t num_distinct_rhs_values,
               size_t num_most_frequent_rhs_value)
         : cluster(cluster),
           num_distinct_rhs_values(num_distinct_rhs_values),

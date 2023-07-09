@@ -23,7 +23,8 @@ private:
     boost::unordered_map<dynamic_bitset<>, dynamic_bitset<>> final_fd_set_;
     std::set<dynamic_bitset<>> key_set_;
     boost::unordered_map<dynamic_bitset<>, dynamic_bitset<>> closure_;
-    boost::unordered_map<dynamic_bitset<>, std::shared_ptr<util::PositionListIndex const>> plis_;
+    boost::unordered_map<dynamic_bitset<>, std::shared_ptr<structures::PositionListIndex const>>
+            plis_;
     dynamic_bitset<> relation_indices_;
 
     void ComputeNonTrivialClosure(dynamic_bitset<> const& xi);

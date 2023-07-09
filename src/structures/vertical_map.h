@@ -11,17 +11,17 @@
 
 #include "custom/custom_hashes.h"
 
-namespace util {
+namespace structures {
 
-//difficulties with const methods
+// difficulties with const methods
 
-//Value: PLI, AgreeSetSample, VerticalInfo, DependencyCandidate, Vertical <- all of these are shared_ptrs?
-//Use template specialization for shared_ptr<Value>?
+// Value: PLI, AgreeSetSample, VerticalInfo, DependencyCandidate, Vertical <- all of these are
+// shared_ptrs? Use template specialization for shared_ptr<Value>?
 template <class Value>
 class VerticalMap {
 protected:
     using Bitset = boost::dynamic_bitset<>;
-    //typename std::shared_ptr<Value> shared_ptr<Value>;
+    // typename std::shared_ptr<Value> shared_ptr<Value>;
 
     // Each node corresponds to a bit in a bitset. Each node also has a vector of the possible consequent set bits.
     class SetTrie {
@@ -207,5 +207,4 @@ public:
     virtual ~BlockingVerticalMap() = default;
 };
 
-} // namespace util
-
+}  // namespace structures
