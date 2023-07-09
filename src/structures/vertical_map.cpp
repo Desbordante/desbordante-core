@@ -410,15 +410,14 @@ std::shared_ptr<Value> VerticalMap<Value>::Remove(const VerticalMap::Bitset& key
     return removed_value;
 }
 
-//comparator is of Compare type - check ascending/descending issues
+// comparator is of Compare type - check ascending/descending issues
 template <class Value>
 void VerticalMap<Value>::Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                                std::function<bool(Entry)> const& can_remove,
-                                [[maybe_unused]] ProfilingContext::ObjectToCache cache_object) {
-    //some logging
+                                std::function<bool(Entry)> const& can_remove) {
+    // some logging
 
     std::priority_queue<Entry, std::vector<Entry>, std::function<bool(Entry, Entry)>> key_queue(
-        compare, std::vector<Entry>(size_));
+            compare, std::vector<Entry>(size_));
     Bitset subset_key(relation_->GetNumColumns());
     set_trie_.TraverseEntries(subset_key, [&key_queue, this, &can_remove](auto& k, auto v) {
         if (Entry entry(relation_->GetVertical(k), v); can_remove(entry)) {
@@ -668,10 +667,9 @@ bool BlockingVerticalMap<V>::RemoveSubsetEntries(const Vertical& key) {
 
 template <class V>
 void BlockingVerticalMap<V>::Shrink(double factor, const std::function<bool(Entry, Entry)>& compare,
-                                    const std::function<bool(Entry)>& can_remove,
-                                    ProfilingContext::ObjectToCache cache_object) {
+                                    const std::function<bool(Entry)>& can_remove) {
     std::scoped_lock write_lock(read_write_mutex_);
-    VerticalMap<V>::Shrink(factor, compare, can_remove, cache_object);
+    VerticalMap<V>::Shrink(factor, compare, can_remove);
 }
 
 template <class V>

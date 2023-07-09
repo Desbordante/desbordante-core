@@ -1,13 +1,14 @@
 #pragma once
 
+#include <random>
 #include <stack>
 
-#include "vertical.h"
 #include "dfd/column_order/column_order.h"
 #include "dfd/lattice_observations/lattice_observations.h"
+#include "dfd/partition_storage/partition_storage.h"
 #include "dfd/pruning_maps/dependencies_map.h"
 #include "dfd/pruning_maps/non_dependencies_map.h"
-#include "dfd/partition_storage/partition_storage.h"
+#include "vertical.h"
 
 class LatticeTraversal {
 private:
