@@ -10,7 +10,6 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "custom/custom_hashes.h"
-#include "profiling_context.h"
 
 namespace util {
 
@@ -140,8 +139,7 @@ public:
      * !!! Untested yet - use carefully
      * */
     virtual void Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                        std::function<bool(Entry)> const& can_remove,
-                        ProfilingContext::ObjectToCache cache_object);
+                        std::function<bool(Entry)> const& can_remove);
     virtual void Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
                         std::function<bool(Entry)> const& can_remove);
 
@@ -199,8 +197,7 @@ public:
     virtual bool RemoveSubsetEntries(Vertical const& key) override;
 
     virtual void Shrink(double factor, std::function<bool(Entry, Entry)> const& compare,
-                        std::function<bool(Entry)> const& can_remove,
-                        ProfilingContext::ObjectToCache cache_object) override;
+                        std::function<bool(Entry)> const& can_remove) override;
     virtual void Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
                         std::function<bool(Entry)> const& can_remove) override;
 
