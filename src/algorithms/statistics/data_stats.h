@@ -10,8 +10,8 @@
 namespace algos {
 
 class DataStats : public Algorithm {
-    util::config::EqNullsType is_null_equal_null_;
-    util::config::ThreadNumType threads_num_;
+    config::EqNullsType is_null_equal_null_;
+    config::ThreadNumType threads_num_;
 
     std::vector<model::TypedColumnData> col_data_;
     std::vector<ColumnStats> all_stats_;
@@ -33,7 +33,7 @@ class DataStats : public Algorithm {
                                             const model::INumericType& type);
 
 protected:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() final;

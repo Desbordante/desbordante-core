@@ -2,7 +2,7 @@
 
 #include "config/names_and_descriptions.h"
 
-namespace util::config {
+namespace config {
 using names::kEqualNulls, descriptions::kDEqualNulls;
 extern const CommonOption<EqNullsType> EqualNullsOpt{kEqualNulls, kDEqualNulls, true};
-}  // namespace util::config
+}  // namespace config

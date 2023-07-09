@@ -30,16 +30,16 @@ Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 void Pyro::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(util::config::ErrorOpt(&parameters_.max_ucc_error));
-    RegisterOption(util::config::MaxLhsOpt(&parameters_.max_lhs));
-    RegisterOption(util::config::ThreadNumberOpt(&parameters_.parallelism));
+    RegisterOption(config::ErrorOpt(&parameters_.max_ucc_error));
+    RegisterOption(config::MaxLhsOpt(&parameters_.max_lhs));
+    RegisterOption(config::ThreadNumberOpt(&parameters_.parallelism));
     RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
-    using namespace util::config::names;
-    MakeOptionsAvailable({util::config::MaxLhsOpt.GetName(), util::config::ErrorOpt.GetName(),
-                          util::config::ThreadNumberOpt.GetName(), kSeed});
+    using namespace config::names;
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(),
+                          config::ThreadNumberOpt.GetName(), kSeed});
 }
 
 void Pyro::ResetStateFd() {

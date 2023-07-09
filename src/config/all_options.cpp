@@ -30,7 +30,7 @@ using algos::validate;
 }  // namespace cfd
 }  // namespace algos
 
-namespace util::config {
+namespace config {
 boost::program_options::options_description GeneralOptions() {
     namespace po = boost::program_options;
     using namespace config::names;
@@ -148,4 +148,4 @@ boost::program_options::options_description AlgoOptions() {
             .add(cfd_search_options);
     return algorithm_options;
 }
-}  // namespace util::config
+}  // namespace config

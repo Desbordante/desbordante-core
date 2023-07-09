@@ -19,8 +19,8 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    util::config::IndicesType lhs_indices_;
-    util::config::IndicesType rhs_indices_;
+    config::IndicesType lhs_indices_;
+    config::IndicesType rhs_indices_;
 
     size_t num_error_rows_ = 0;
     long double error_ = 0;
@@ -87,8 +87,7 @@ public:
 
     explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-                             util::config::IndicesType lhs_indices,
-                             util::config::IndicesType rhs_indices)
+                             config::IndicesType lhs_indices, config::IndicesType rhs_indices)
         : relation_(std::move(relation)),
           typed_relation_(std::move(typed_relation)),
           lhs_indices_(std::move(lhs_indices)),

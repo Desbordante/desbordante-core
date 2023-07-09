@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace util::config {
+namespace config {
 
 void ValidateIndex(IndexType value, size_t cols_count) {
     if (value >= cols_count) {
@@ -11,4 +11,4 @@ void ValidateIndex(IndexType value, size_t cols_count) {
     }
 }
 
-}  // namespace util::config
+}  // namespace config

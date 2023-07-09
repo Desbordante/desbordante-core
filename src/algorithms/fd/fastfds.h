@@ -64,14 +64,14 @@ private:
      * `l_col` and `r_col` cover the same number of sets but
      * `l_col` index less than `r_col` index
      */
-    bool OrderingComp(std::vector<DiffSet> const& diff_sets,
-                      Column const& l_col, Column const& r_col) const;
+    bool OrderingComp(std::vector<DiffSet> const& diff_sets, Column const& l_col,
+                      Column const& r_col) const;
     bool ColumnContainsOnlyEqualValues(Column const& column) const;
 
     RelationalSchema const* schema_;
     std::vector<DiffSet> diff_sets_;
-    util::config::ThreadNumType threads_num_;
-    util::config::MaxLhsType max_lhs_;
+    config::ThreadNumType threads_num_;
+    config::MaxLhsType max_lhs_;
     double percent_per_col_;
 };
 

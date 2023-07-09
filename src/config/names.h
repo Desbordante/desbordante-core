@@ -1,6 +1,6 @@
 #pragma once
 
-namespace util::config::names {
+namespace config::names {
 constexpr auto kTable = "table";
 constexpr auto kCsvPath = "csv_path";
 constexpr auto kSeparator = "separator";
@@ -41,4 +41,4 @@ constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdTuplesNumber = "tuples_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
-}  // namespace util::config::names
+}  // namespace config::names

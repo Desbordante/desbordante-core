@@ -6,7 +6,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "config/all_options.h"
-#include "config/enum_to_available_values.h"
+#include "util/enum_to_available_values.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -27,7 +27,7 @@ boost::program_options::options_description InfoOptions() {
 
 int main(int argc, char const* argv[]) {
     namespace po = boost::program_options;
-    using namespace util::config;
+    using namespace config;
 
     std::string algorithm;
     std::string const algo_desc = "algorithm to use for data profiling\n" +

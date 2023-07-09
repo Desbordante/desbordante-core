@@ -17,11 +17,11 @@ namespace algos::fd_verifier {
  * case it doesn't hold */
 class FDVerifier : public Algorithm {
 private:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
-    util::config::IndicesType lhs_indices_;
-    util::config::IndicesType rhs_indices_;
-    util::config::EqNullsType is_null_equal_null_;
+    config::IndicesType lhs_indices_;
+    config::IndicesType rhs_indices_;
+    config::EqNullsType is_null_equal_null_;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;

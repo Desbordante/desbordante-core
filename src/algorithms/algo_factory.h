@@ -70,9 +70,9 @@ void ConfigureFromMap(Algorithm& algorithm, OptionMap&& options) {
 template <typename OptionMap>
 void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
     ConfigureFromFunction(algorithm, [&options](std::string_view option_name) {
-        using namespace util::config::names;
+        using namespace config::names;
         if (option_name == kTable && options.find(std::string{kTable}) == options.end()) {
-            util::config::InputTable parser = std::make_shared<CSVParser>(
+            config::InputTable parser = std::make_shared<CSVParser>(
                     details::ExtractOptionValue<std::filesystem::path>(options, kCsvPath),
                     details::ExtractOptionValue<char>(options, kSeparator),
                     details::ExtractOptionValue<bool>(options, kHasHeader));
@@ -100,8 +100,8 @@ std::unique_ptr<Algorithm> CreateAlgorithm(AlgorithmType algorithm_enum, OptionM
 
 template <typename OptionMap>
 std::unique_ptr<Algorithm> CreateTypoMiner(OptionMap&& options) {
+    using config::names::kPreciseAlgorithm, config::names::kApproximateAlgorithm;
     using details::ExtractOptionValue;
-    using util::config::names::kPreciseAlgorithm, util::config::names::kApproximateAlgorithm;
     AlgorithmType precise_algo = ExtractOptionValue<AlgorithmType>(options, kPreciseAlgorithm);
     AlgorithmType approx_algo = ExtractOptionValue<AlgorithmType>(options, kApproximateAlgorithm);
     std::unique_ptr<TypoMiner> typo_miner = std::make_unique<TypoMiner>(precise_algo, approx_algo);

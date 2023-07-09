@@ -6,7 +6,7 @@
 #include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
 
-namespace util::config {
+namespace config {
 
 static void NormalizeIndices(config::IndicesType& indices) {
     std::sort(indices.begin(), indices.end());
@@ -44,4 +44,4 @@ using config::names::kRhsIndices, config::descriptions::kDRhsIndices;
 extern const IndicesOption LhsIndicesOpt{kLhsIndices, kDLhsIndices};
 extern const IndicesOption RhsIndicesOpt{kRhsIndices, kDRhsIndices};
 
-}  // namespace util::config
+}  // namespace config

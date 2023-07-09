@@ -17,7 +17,7 @@ namespace algos {
 
 class ARAlgorithm : public Algorithm {
 private:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     double minconf_;
     InputFormat input_format_ = InputFormat::singular;

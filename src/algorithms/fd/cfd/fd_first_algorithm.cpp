@@ -18,23 +18,23 @@ namespace algos::cfd {
 
 FDFirstAlgorithm::FDFirstAlgorithm(std::vector<std::string_view> phase_names)
     : CFDDiscovery(std::move(phase_names)) {
-    using namespace util::config::names;
+    using namespace config::names;
 
     RegisterOptions();
     MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
-    using namespace util::config::names;
+    using namespace config::names;
 
     RegisterOptions();
     MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
-    using namespace util::config::names;
-    using namespace util::config::descriptions;
-    using util::config::Option;
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
 
     Substrategy default_val = Substrategy::dfs;
     RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
@@ -100,7 +100,7 @@ void FDFirstAlgorithm::CheckForIncorrectInput() const {
 }
 
 void FDFirstAlgorithm::MakeExecuteOptsAvailable() {
-    using namespace util::config::names;
+    using namespace config::names;
 
     MakeOptionsAvailable(
             {kCfdMinimumSupport, kCfdMinimumConfidence, kCfdMaximumLhs, kCfdSubstrategy});

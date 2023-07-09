@@ -19,7 +19,7 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::TableOpt.GetName(), util::config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
 }
 
 void TypoMiner::RegisterOptions() {
@@ -39,14 +39,14 @@ void TypoMiner::RegisterOptions() {
         }
     };
 
-    RegisterOption(util::config::TableOpt(&input_table_));
-    RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
     RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
 }
 
 void TypoMiner::MakeExecuteOptsAvailable() {
-    using namespace util::config::names;
+    using namespace config::names;
     MakeOptionsAvailable({kRadius, kRatio});
 }
 
@@ -55,15 +55,15 @@ void TypoMiner::ResetState() {
 }
 
 bool TypoMiner::SetExternalOption(std::string_view option_name, boost::any const& value) {
-    if (option_name == util::config::ErrorOpt.GetName()) {
+    if (option_name == config::ErrorOpt.GetName()) {
         if (value.empty()) {
             throw std::invalid_argument("Must specify error value when mining typos.");
         }
-        auto error = boost::any_cast<util::config::ErrorType>(value);
+        auto error = boost::any_cast<config::ErrorType>(value);
         if (error == 0.0) {
             throw std::invalid_argument("Typo mining with error 0 is meaningless");
         }
-        return TrySetOption(option_name, util::config::ErrorType{0.0}, value) != 0;
+        return TrySetOption(option_name, config::ErrorType{0.0}, value) != 0;
     }
     return TrySetOption(option_name, value, value) != 0;
 }

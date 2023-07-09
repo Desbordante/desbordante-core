@@ -1,5 +1,5 @@
 #pragma once
 
-namespace util::config {
+namespace config {
 using EqNullsType = bool;
-}  // namespace util::config
+}  // namespace config

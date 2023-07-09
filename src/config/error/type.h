@@ -1,5 +1,5 @@
 #pragma once
 
-namespace util::config {
+namespace config {
 using ErrorType = double;
-}  // namespace util::config
+}  // namespace config

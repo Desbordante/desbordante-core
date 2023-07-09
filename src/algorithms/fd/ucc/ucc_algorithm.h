@@ -25,11 +25,11 @@ private:
     void RegisterOptions();
 
 protected:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     // Collection of all mined UCCs. Every UCC mining algorithm must register found uccs here.
     util::PrimitiveCollection<model::UCC> ucc_collection_;
-    util::config::EqNullsType is_null_equal_null_{};
+    config::EqNullsType is_null_equal_null_{};
 
     // Pass this value as phase_names to the constructor if your algorithm has only one progress bar
     // phase.

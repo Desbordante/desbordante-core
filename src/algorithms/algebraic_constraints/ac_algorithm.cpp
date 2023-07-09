@@ -15,14 +15,14 @@ namespace algos {
 
 ACAlgorithm::ACAlgorithm() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({util::config::TableOpt.GetName()});
+    MakeOptionsAvailable({config::TableOpt.GetName()});
     ac_exception_finder_ = std::make_unique<algebraic_constraints::ACExceptionFinder>();
 }
 
 void ACAlgorithm::RegisterOptions() {
-    using namespace util::config::names;
-    using namespace util::config::descriptions;
-    using util::config::Option;
+    using namespace config::names;
+    using namespace config::descriptions;
+    using config::Option;
 
     auto check_and_set_binop = [this](Binop bin_operation) {
         switch (bin_operation) {
@@ -56,7 +56,7 @@ void ACAlgorithm::RegisterOptions() {
         if (parameter <= 0) throw std::invalid_argument("Parameter out of range");
     };
 
-    RegisterOption(util::config::TableOpt(&input_table_));
+    RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(Option{&bin_operation_, kBinaryOperation, kDBinaryOperation}.SetValueCheck(
             check_and_set_binop));
     RegisterOption(Option{&fuzziness_, kFuzziness, kDFuzziness}.SetValueCheck(check_fuzziness));
@@ -76,7 +76,7 @@ void ACAlgorithm::LoadDataInternal() {
 }
 
 void ACAlgorithm::MakeExecuteOptsAvailable() {
-    using namespace util::config::names;
+    using namespace config::names;
     MakeOptionsAvailable({kFuzziness, kFuzzinessProbability, kWeight, kBumpsLimit, kIterationsLimit,
                           kACSeed, kBinaryOperation});
 }

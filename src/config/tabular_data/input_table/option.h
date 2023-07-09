@@ -6,6 +6,6 @@
 #include "config/common_option.h"
 #include "config/tabular_data/input_table_type.h"
 
-namespace util::config {
+namespace config {
 extern const CommonOption<InputTable> TableOpt;
-}  // namespace util::config
+}  // namespace config

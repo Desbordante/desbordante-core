@@ -14,7 +14,7 @@ class DFD : public PliBasedFDAlgorithm {
 private:
     std::vector<Vertical> unique_columns_;
 
-    util::config::ThreadNumType number_of_threads_;
+    config::ThreadNumType number_of_threads_;
 
     void MakeExecuteOptsAvailable() final;
     void RegisterOptions();

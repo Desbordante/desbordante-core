@@ -5,7 +5,7 @@
 #include "config/common_option.h"
 #include "config/indices/type.h"
 
-namespace util::config {
+namespace config {
 
 // This class is meant for creating options that are collections of indices.
 struct IndicesOption {
@@ -26,4 +26,4 @@ private:
 extern const IndicesOption LhsIndicesOpt;
 extern const IndicesOption RhsIndicesOpt;
 
-}  // namespace util::config
+}  // namespace config
