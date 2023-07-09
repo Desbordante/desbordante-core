@@ -7,7 +7,7 @@ class ProfilingContext;
 #include "cache_eviction_method.h"
 #include "caching_method.h"
 #include "column_layout_relation_data.h"
-#include "profiling_context.h"
+#include "pyro/core/profiling_context.h"
 
 namespace util {
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "position_list_index.h"
+#include "structures/position_list_index.h"
 
 class OrderedPartition {
 private:

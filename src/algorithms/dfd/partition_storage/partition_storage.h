@@ -1,14 +1,11 @@
 #pragma once
 
-class ProfilingContext;
+#include <mutex>
 
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "profiling_context.h"
 #include "column_layout_relation_data.h"
-#include "util/vertical_map.h"
-
-#include <mutex>
+#include "structures/vertical_map.h"
 
 class PartitionStorage {
 private:

@@ -1,9 +1,13 @@
+#include "vertical_map.h"
+
 #include <exception>
 #include <queue>
 #include <unordered_set>
-#include "vertical_map.h"
-#include "vertical_info.h"
-#include "dependency_candidate.h"
+
+#include "pyro/core/dependency_candidate.h"
+#include "pyro/core/vertical_info.h"
+#include "pyro/util/agree_set_sample.h"
+#include "structures/position_list_index.h"
 
 namespace util {
 

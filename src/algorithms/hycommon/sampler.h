@@ -8,9 +8,9 @@
 
 #include "all_column_combinations.h"
 #include "efficiency_threshold.h"
+#include "structures/position_list_index.h"
 #include "types.h"
 #include "util/config/thread_number/type.h"
-#include "util/position_list_index.h"
 
 namespace boost::asio {
 // Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since

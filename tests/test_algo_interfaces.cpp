@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/pyro.h"
+#include "algorithms/pyro/pyro.h"
 #include "datasets.h"
 #include "util/config/error/type.h"
 #include "util/config/names.h"
