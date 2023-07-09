@@ -1,3 +1,4 @@
+#include <stdexcept>
 
 #pragma once
 

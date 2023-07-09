@@ -30,24 +30,24 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
     switch (config_.as_gen_method) {
         case AgreeSetsGenMethod::kUsingVectorOfIDSets: {
             method_str = "`kUsingVectorOfIDSets`";
-        agree_sets = GenAsUsingVectorOfIdSets();
-        break;
-    }
-    case AgreeSetsGenMethod::kUsingMapOfIDSets: {
-        method_str = "`kUsingMapOfIDSets`";
-        agree_sets = GenAsUsingMapOfIdSets();
-        break;
-    }
-    case AgreeSetsGenMethod::kUsingMCAndGetAgreeSet: {
-        method_str = "`kUsingMCAndGetAgreeSet`";
-        agree_sets = GenAsUsingMcAndGetAgreeSets();
-        break;
-    }
-    case AgreeSetsGenMethod::kUsingGetAgreeSet: {
-        method_str = "`kUsingGetAgreeSet`";
-        agree_sets = GenAsUsingGetAgreeSets();
-        break;
-    }
+            agree_sets = GenAsUsingVectorOfIdSets();
+            break;
+        }
+        case AgreeSetsGenMethod::kUsingMapOfIDSets: {
+            method_str = "`kUsingMapOfIDSets`";
+            agree_sets = GenAsUsingMapOfIdSets();
+            break;
+        }
+        case AgreeSetsGenMethod::kUsingMCAndGetAgreeSet: {
+            method_str = "`kUsingMCAndGetAgreeSet`";
+            agree_sets = GenAsUsingMcAndGetAgreeSets();
+            break;
+        }
+        case AgreeSetsGenMethod::kUsingGetAgreeSet: {
+            method_str = "`kUsingGetAgreeSet`";
+            agree_sets = GenAsUsingGetAgreeSets();
+            break;
+        }
     }
 
     // metanome kostil, doesn't work properly in general

@@ -214,8 +214,8 @@ TEST_P(ClustersWithTyposMiningTest, FindClustersWithTypos) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypoMinerTestSuite, ClustersWithTyposMiningTest,
-    ::testing::Values(
+        TypoMinerTestSuite, ClustersWithTyposMiningTest,
+        ::testing::Values(
                 /* Expected clusters should be sorted with respect to TyposMiner::SortCluster
                    sorting. */
                 ClustersParam({{FdByIndices{1, 2}, {structures::PLI::Cluster{7, 9}}}},
@@ -231,7 +231,6 @@ INSTANTIATE_TEST_SUITE_P(
                                {FdByIndices{0},
                                 {structures::PLI::Cluster{8, 2, 3, 7, 9, 0, 1, 4, 5, 6}}}},
                               "SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
-
 
 class SquashClusterTest : public ::testing::TestWithParam<TestingParam> {};
 
@@ -282,7 +281,6 @@ INSTANTIATE_TEST_SUITE_P(
                       TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
                       TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
 
-
 class LinesWithTyposMiningTest : public ::testing::TestWithParam<LinesParam> {};
 
 TEST_P(LinesWithTyposMiningTest, FindLinesWithTypos) {
@@ -292,8 +290,8 @@ TEST_P(LinesWithTyposMiningTest, FindLinesWithTypos) {
 
     for (auto const& [fd_by_indices, clusters_with_typos] : p.expected) {
         assert(fd_by_indices.size() > 1);
-        auto bitset = schema->IndicesToBitset(fd_by_indices.cbegin(),
-                                              std::prev(fd_by_indices.cend()));
+        auto bitset =
+                schema->IndicesToBitset(fd_by_indices.cbegin(), std::prev(fd_by_indices.cend()));
         FD fd(schema->GetVertical(std::move(bitset)), *schema->GetColumn(fd_by_indices.back()));
         for (auto const& [cluster, typos] : clusters_with_typos) {
             std::vector<structures::PLI::Cluster::value_type> const actual =
@@ -304,12 +302,12 @@ TEST_P(LinesWithTyposMiningTest, FindLinesWithTypos) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypoMinerTestSuite, LinesWithTyposMiningTest,
-    ::testing::Values(
-        LinesParam({{FdByIndices{1, 2},
+        TypoMinerTestSuite, LinesWithTyposMiningTest,
+        ::testing::Values(
+                LinesParam({{FdByIndices{1, 2},
                              {std::pair(structures::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
                            1, -1, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-        LinesParam({{FdByIndices{0, 1},
+                LinesParam({{FdByIndices{0, 1},
                              {std::pair(structures::PLI::Cluster{4, 0, 1, 5, 6}, std::vector{4})}},
                             {FdByIndices{1, 2},
                              {std::pair(structures::PLI::Cluster{7, 9}, std::vector{7, 9})}}},

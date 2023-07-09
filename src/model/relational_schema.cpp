@@ -7,8 +7,7 @@
 #include "vertical.h"
 
 RelationalSchema::RelationalSchema(std::string name, bool is_null_eq_null)
-    : columns_(), name_(std::move(name)), is_null_eq_null_(is_null_eq_null),
-    empty_vertical_() {
+    : columns_(), name_(std::move(name)), is_null_eq_null_(is_null_eq_null), empty_vertical_() {
     Init();
 }
 

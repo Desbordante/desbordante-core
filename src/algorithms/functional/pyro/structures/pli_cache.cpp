@@ -183,12 +183,12 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::C
         case CachingMethod::kCoin:
             if (profiling_context->NextDouble() <
                 profiling_context->GetParameters().caching_probability) {
-            index_->Put(vertical, std::move(pli));
-            return pli_pointer;
-        } else {
-            return pli;
-        }
-    case CachingMethod::kNoCaching:
+                index_->Put(vertical, std::move(pli));
+                return pli_pointer;
+            } else {
+                return pli;
+            }
+        case CachingMethod::kNoCaching:
         return pli;
     case CachingMethod::kAllCaching:
         index_->Put(vertical, std::move(pli));

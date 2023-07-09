@@ -8,7 +8,7 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/algorithm.h"
-#include "util/config/tabular_data/input_table_type.h"
+#include "config/tabular_data/input_table_type.h"
 
 namespace python_bindings {
 

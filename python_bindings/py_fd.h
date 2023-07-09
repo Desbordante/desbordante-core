@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "algorithms/functional/model/raw_fd.h"
-#include "util/config/indices/type.h"
+#include "config/indices/type.h"
 
 namespace python_bindings {
 
