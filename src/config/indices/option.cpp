@@ -1,10 +1,10 @@
-#include "util/config/indices/option.h"
+#include "config/indices/option.h"
 
 #include <algorithm>
 #include <stdexcept>
 
-#include "util/config/indices/validate_index.h"
-#include "util/config/names_and_descriptions.h"
+#include "config/indices/validate_index.h"
+#include "config/names_and_descriptions.h"
 
 namespace util::config {
 

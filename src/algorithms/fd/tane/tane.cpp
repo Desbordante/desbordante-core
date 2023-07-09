@@ -7,14 +7,14 @@
 
 #include <easylogging++.h>
 
+#include "config/error/option.h"
+#include "config/max_lhs/option.h"
 #include "lattice_level.h"
 #include "lattice_vertex.h"
 #include "model/column_combination.h"
 #include "model/column_data.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
-#include "util/config/error/option.h"
-#include "util/config/max_lhs/option.h"
 
 namespace algos {
 

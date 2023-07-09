@@ -5,11 +5,11 @@
 
 #include <boost/thread/mutex.hpp>
 
+#include "config/max_lhs/type.h"
+#include "config/thread_number/type.h"
 #include "model/column_layout_relation_data.h"
 #include "model/vertical.h"
 #include "pli_based_fd_algorithm.h"
-#include "util/config/max_lhs/type.h"
-#include "util/config/thread_number/type.h"
 
 namespace algos {
 

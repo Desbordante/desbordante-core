@@ -2,10 +2,10 @@
 
 #include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/statistics/statistic.h"
+#include "config/equal_nulls/type.h"
+#include "config/tabular_data/input_table_type.h"
+#include "config/thread_number/type.h"
 #include "model/column_layout_typed_relation_data.h"
-#include "util/config/equal_nulls/type.h"
-#include "util/config/tabular_data/input_table_type.h"
-#include "util/config/thread_number/type.h"
 
 namespace algos {
 

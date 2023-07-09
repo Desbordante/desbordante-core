@@ -10,10 +10,10 @@
 
 #include <boost/any.hpp>
 
+#include "config/ioption.h"
+#include "config/option.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"
-#include "util/config/ioption.h"
-#include "util/config/option.h"
 #include "util/progress.h"
 
 namespace algos {

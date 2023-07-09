@@ -2,12 +2,12 @@
 
 #include <memory>
 
+#include "config/thread_number/option.h"
+#include "config/thread_number/type.h"
 #include "hycommon/types.h"
 #include "model/column_layout_relation_data.h"
 #include "model/idataset_stream.h"
 #include "ucc/ucc_algorithm.h"
-#include "util/config/thread_number/option.h"
-#include "util/config/thread_number/type.h"
 
 namespace algos {
 

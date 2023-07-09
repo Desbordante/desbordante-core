@@ -5,11 +5,11 @@
 #include <vector>
 
 #include "algorithms/fd/model/raw_ucc.h"
+#include "config/thread_number/type.h"
 #include "hycommon/primitive_validations.h"
 #include "hycommon/types.h"
 #include "structures/position_list_index.h"
 #include "structures/ucc_tree.h"
-#include "util/config/thread_number/type.h"
 
 namespace algos::hyucc {
 

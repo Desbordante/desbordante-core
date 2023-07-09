@@ -1,6 +1,6 @@
-#include "util/config/tabular_data/input_table/option.h"
+#include "config/tabular_data/input_table/option.h"
 
-#include "util/config/names_and_descriptions.h"
+#include "config/names_and_descriptions.h"
 
 namespace util::config {
 using names::kTable, descriptions::kDTable;

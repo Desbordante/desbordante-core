@@ -15,13 +15,13 @@
 #include "algorithms/metric/highlight_calculator.h"
 #include "algorithms/metric/points.h"
 #include "algorithms/metric/points_calculator.h"
+#include "config/equal_nulls/type.h"
+#include "config/indices/type.h"
+#include "config/tabular_data/input_table_type.h"
 #include "convex_hull.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "qgram_vector.h"
-#include "util/config/equal_nulls/type.h"
-#include "util/config/indices/type.h"
-#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos::metric {
 

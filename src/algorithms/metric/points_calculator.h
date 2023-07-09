@@ -1,9 +1,9 @@
 #pragma once
 
 #include "algorithms/metric/points.h"
+#include "config/indices/type.h"
 #include "convex_hull.h"
 #include "model/column_layout_typed_relation_data.h"
-#include "util/config/indices/type.h"
 
 namespace algos::metric {
 

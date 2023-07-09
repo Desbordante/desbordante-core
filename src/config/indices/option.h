@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "util/config/common_option.h"
-#include "util/config/indices/type.h"
+#include "config/common_option.h"
+#include "config/indices/type.h"
 
 namespace util::config {
 

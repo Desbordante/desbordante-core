@@ -7,10 +7,10 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "all_column_combinations.h"
+#include "config/thread_number/type.h"
 #include "efficiency_threshold.h"
 #include "structures/position_list_index.h"
 #include "types.h"
-#include "util/config/thread_number/type.h"
 
 namespace boost::asio {
 // Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since

@@ -12,11 +12,11 @@
 #include "ac_pairs_collection.h"
 #include "algorithms/algorithm.h"
 #include "bin_operation_enum.h"
+#include "config/tabular_data/input_table_type.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
 #include "ranges_collection.h"
 #include "typed_column_pair.h"
-#include "util/config/tabular_data/input_table_type.h"
 
 namespace algos {
 
