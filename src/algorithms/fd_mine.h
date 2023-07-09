@@ -1,14 +1,15 @@
 #pragma once
 
-#include <boost/unordered_map.hpp>
 #include <filesystem>
 #include <set>
+
+#include <boost/unordered_map.hpp>
 
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/column_combination.h"
 #include "model/column_layout_relation_data.h"
 #include "model/vertical.h"
-#include "util/position_list_index.h"
+#include "structures/position_list_index.h"
 
 namespace algos {
 

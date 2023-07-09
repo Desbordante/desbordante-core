@@ -17,10 +17,10 @@
 #include "algorithms/metric/points_calculator.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "structures/convex_hull.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/indices/type.h"
 #include "util/config/tabular_data/input_table_type.h"
-#include "util/convex_hull.h"
 #include "util/qgram_vector.h"
 
 namespace algos::metric {

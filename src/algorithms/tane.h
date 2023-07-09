@@ -4,9 +4,9 @@
 
 #include "algorithms/pli_based_fd_algorithm.h"
 #include "model/relation_data.h"
+#include "structures/position_list_index.h"
 #include "util/config/error/type.h"
 #include "util/config/max_lhs/type.h"
-#include "util/position_list_index.h"
 
 namespace algos {
 

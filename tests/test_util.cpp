@@ -4,17 +4,17 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "agree_set_factory.h"
 #include "column_layout_relation_data.h"
 #include "datasets.h"
-#include "identifier_set.h"
 #include "levenshtein_distance.h"
 #include "list_agree_set_sample.h"
+#include "structures/agree_set_factory.h"
+#include "structures/identifier_set.h"
 
 namespace tests {
 
 using std::deque, std::vector, std::cout, std::endl, std::unique_ptr, util::AgreeSetFactory,
-    util::MCGenMethod, util::AgreeSetsGenMethod;
+        util::MCGenMethod, util::AgreeSetsGenMethod;
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;

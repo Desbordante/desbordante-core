@@ -8,7 +8,7 @@
 
 #include "model/column_combination.h"
 #include "model/relational_schema.h"
-#include "util/agree_set_factory.h"
+#include "structures/agree_set_factory.h"
 
 namespace algos {
 

@@ -7,8 +7,8 @@
 #include "hycommon/primitive_validations.h"
 #include "raw_fd.h"
 #include "structures/fd_tree.h"
+#include "structures/position_list_index.h"
 #include "types.h"
-#include "util/position_list_index.h"
 
 namespace algos::hyfd {
 

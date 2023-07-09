@@ -1,22 +1,22 @@
 #pragma once
 
 #include <list>
-#include <set>
 #include <memory>
+#include <set>
 #include <utility>
 
-#include <util/vertical_map.h>
-#include "profiling_context.h"
-#include "dependency_strategy.h"
-#include "vertical_info.h"
 #include "dependency_candidate.h"
-#include "vertical.h"
+#include "dependency_strategy.h"
+#include "profiling_context.h"
 #include "relational_schema.h"
+#include "structures/vertical_map.h"
+#include "vertical.h"
+#include "vertical_info.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
 private:
     using DependencyCandidateComp =
-        std::function<bool(DependencyCandidate const&, DependencyCandidate const&)>;
+            std::function<bool(DependencyCandidate const&, DependencyCandidate const&)>;
     ProfilingContext* context_;
     std::unique_ptr<DependencyStrategy> strategy_;
     std::unique_ptr<util::VerticalMap<VerticalInfo>> local_visitees_ = nullptr;

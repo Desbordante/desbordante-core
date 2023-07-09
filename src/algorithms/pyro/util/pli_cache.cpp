@@ -3,7 +3,7 @@
 #include <boost/optional.hpp>
 #include <easylogging++.h>
 
-#include "vertical_map.h"
+#include "structures/vertical_map.h"
 
 namespace util {
 

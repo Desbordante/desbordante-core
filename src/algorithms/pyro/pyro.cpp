@@ -1,4 +1,4 @@
-#include "algorithms/pyro.h"
+#include "pyro.h"
 
 #include <chrono>
 #include <mutex>

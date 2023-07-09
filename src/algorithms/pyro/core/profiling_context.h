@@ -3,14 +3,13 @@
 #include <random>
 #include <string>
 
-#include "agree_set_sample.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
 #include "custom/custom_random.h"
 #include "dependency_consumer.h"
-#include "parameters.h"
-#include "partial_fd.h"
-#include "partial_key.h"
+#include "pyro/model/partial_fd.h"
+#include "pyro/model/partial_key.h"
+#include "pyro/util/agree_set_sample.h"
 
 namespace util {
 

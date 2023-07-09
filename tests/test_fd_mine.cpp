@@ -8,7 +8,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd_mine.h"
-#include "algorithms/pyro.h"
+#include "algorithms/pyro/pyro.h"
 #include "algorithms/tane.h"
 #include "datasets.h"
 #include "model/relational_schema.h"

@@ -12,7 +12,7 @@
 #include "algorithms/fdep/fdep.h"
 #include "algorithms/fun.h"
 #include "algorithms/hyfd/hyfd.h"
-#include "algorithms/pyro.h"
+#include "algorithms/pyro/pyro.h"
 #include "algorithms/tane.h"
 #include "datasets.h"
 #include "model/relational_schema.h"

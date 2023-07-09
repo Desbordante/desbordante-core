@@ -2,8 +2,8 @@
 
 #include "algorithms/metric/points.h"
 #include "model/column_layout_typed_relation_data.h"
+#include "structures/convex_hull.h"
 #include "util/config/indices/type.h"
-#include "util/convex_hull.h"
 
 namespace algos::metric {
 

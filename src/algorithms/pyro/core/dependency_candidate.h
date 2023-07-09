@@ -1,8 +1,9 @@
 #pragma once
 #include <functional>
 #include <utility>
+
+#include "pyro/util/confidence_interval.h"
 #include "vertical.h"
-#include "confidence_interval.h"
 
 class DependencyCandidate {
 private:

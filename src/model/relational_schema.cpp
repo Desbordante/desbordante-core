@@ -1,14 +1,13 @@
+#include "relational_schema.h"
+
 #include <memory>
 #include <utility>
 
-#include "relational_schema.h"
+#include "structures/vertical_map.h"
 #include "vertical.h"
-#include "vertical_map.h"
 
-RelationalSchema::RelationalSchema(std::string name, bool is_null_eq_null) :
-    columns_(),
-    name_(std::move(name)),
-    is_null_eq_null_(is_null_eq_null),
+RelationalSchema::RelationalSchema(std::string name, bool is_null_eq_null)
+    : columns_(), name_(std::move(name)), is_null_eq_null_(is_null_eq_null),
     empty_vertical_() {
     Init();
 }

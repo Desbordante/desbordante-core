@@ -1,8 +1,9 @@
+#include "partition_storage.h"
+
 #include <boost/optional.hpp>
 #include <easylogging++.h>
 
-#include "partition_storage.h"
-#include "vertical_map.h"
+#include "structures/vertical_map.h"
 
 util::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
