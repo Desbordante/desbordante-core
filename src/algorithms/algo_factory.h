@@ -9,7 +9,7 @@
 
 #include "algorithms/algorithms.h"
 #include "algorithms/create_algorithm.h"
-#include "algorithms/fd/typo_miner.h"
+#include "algorithms/functional/typo_miner.h"
 #include "config/names.h"
 
 namespace algos {

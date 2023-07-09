@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/fd/fd_algorithm.h"
+#include "algorithms/functional/fd_algorithm.h"
 #include "algorithms/statistics/statistic.h"
 #include "config/equal_nulls/type.h"
 #include "config/tabular_data/input_table_type.h"
