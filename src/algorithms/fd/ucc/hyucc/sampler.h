@@ -1,9 +1,9 @@
 #pragma once
 
+#include "config/thread_number/type.h"
 #include "hycommon/sampler.h"
 #include "hycommon/types.h"
 #include "ucc/hyucc/structures/non_ucc_list.h"
-#include "util/config/thread_number/type.h"
 
 namespace algos::hyucc {
 

@@ -4,9 +4,9 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
-#include "util/config/equal_nulls/option.h"
-#include "util/config/tabular_data/input_table/option.h"
-#include "util/config/thread_number/option.h"
+#include "config/equal_nulls/option.h"
+#include "config/tabular_data/input_table/option.h"
+#include "config/thread_number/option.h"
 
 namespace algos {
 

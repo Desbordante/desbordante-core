@@ -1,8 +1,8 @@
-#include "util/config/thread_number/option.h"
+#include "config/thread_number/option.h"
 
 #include <thread>
 
-#include "util/config/names_and_descriptions.h"
+#include "config/names_and_descriptions.h"
 
 namespace util::config {
 using names::kThreads, descriptions::kDThreads;

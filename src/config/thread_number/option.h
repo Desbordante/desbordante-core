@@ -2,8 +2,8 @@
 
 #include <thread>
 
-#include "util/config/common_option.h"
-#include "util/config/thread_number/type.h"
+#include "config/common_option.h"
+#include "config/thread_number/type.h"
 
 namespace util::config {
 extern const CommonOption<ThreadNumType> ThreadNumberOpt;

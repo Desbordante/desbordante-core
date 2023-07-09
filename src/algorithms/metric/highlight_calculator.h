@@ -2,8 +2,8 @@
 
 #include "algorithms/metric/highlight.h"
 #include "algorithms/metric/points.h"
+#include "config/indices/type.h"
 #include "model/column_layout_typed_relation_data.h"
-#include "util/config/indices/type.h"
 
 namespace algos::metric {
 

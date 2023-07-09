@@ -2,11 +2,11 @@
 
 #include <string>
 
+#include "config/error/type.h"
+#include "config/max_lhs/type.h"
 #include "model/relation_data.h"
 #include "pli_based_fd_algorithm.h"
 #include "structures/position_list_index.h"
-#include "util/config/error/type.h"
-#include "util/config/max_lhs/type.h"
 
 namespace algos {
 

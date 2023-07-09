@@ -1,6 +1,6 @@
-#include "util/config/error/option.h"
+#include "config/error/option.h"
 
-#include "util/config/names_and_descriptions.h"
+#include "config/names_and_descriptions.h"
 
 namespace util::config {
 using names::kError, descriptions::kDError;

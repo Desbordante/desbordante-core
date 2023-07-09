@@ -1,4 +1,4 @@
-#include "util/config/indices/validate_index.h"
+#include "config/indices/validate_index.h"
 
 #include <stdexcept>
 

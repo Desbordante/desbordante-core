@@ -1,6 +1,6 @@
-#include "util/config/equal_nulls/option.h"
+#include "config/equal_nulls/option.h"
 
-#include "util/config/names_and_descriptions.h"
+#include "config/names_and_descriptions.h"
 
 namespace util::config {
 using names::kEqualNulls, descriptions::kDEqualNulls;

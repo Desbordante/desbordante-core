@@ -7,9 +7,9 @@
 
 #include "algorithms/algorithm.h"
 #include "algorithms/fd/fd_verifier/stats_calculator.h"
-#include "util/config/equal_nulls/type.h"
-#include "util/config/indices/type.h"
-#include "util/config/tabular_data/input_table_type.h"
+#include "config/equal_nulls/type.h"
+#include "config/indices/type.h"
+#include "config/tabular_data/input_table_type.h"
 
 namespace algos::fd_verifier {
 

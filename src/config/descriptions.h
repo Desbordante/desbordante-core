@@ -5,7 +5,7 @@
 
 #include "algorithms/fd/cfd/enums.h"
 #include "algorithms/metric/enums.h"
-#include "util/config/enum_to_available_values.h"
+#include "config/enum_to_available_values.h"
 
 namespace util::config::descriptions {
 constexpr auto kDTable = "table processed by the algorithm";

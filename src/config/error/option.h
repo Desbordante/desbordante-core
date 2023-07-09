@@ -1,7 +1,7 @@
 #pragma once
 
-#include "util/config/common_option.h"
-#include "util/config/error/type.h"
+#include "config/common_option.h"
+#include "config/error/type.h"
 
 namespace util::config {
 

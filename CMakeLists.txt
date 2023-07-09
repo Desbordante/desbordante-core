@@ -57,7 +57,7 @@ include_directories(
         "src/parser"
         "src/parser/json"
         "src/util"
-        "src/util/config"
+        "src/config"
 )
 
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")

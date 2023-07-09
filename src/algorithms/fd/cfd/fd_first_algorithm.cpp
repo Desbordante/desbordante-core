@@ -5,12 +5,12 @@
 #include <boost/unordered_map.hpp>
 #include <easylogging++.h>
 
+#include "config/equal_nulls/option.h"
+#include "config/names_and_descriptions.h"
 #include "fd/cfd/util/partition_tidlist_util.h"
 #include "fd/cfd/util/partition_util.h"
 #include "fd/cfd/util/set_util.h"
 #include "fd/cfd/util/tidlist_util.h"
-#include "util/config/equal_nulls/option.h"
-#include "util/config/names_and_descriptions.h"
 
 // see algorithms/cfd/LICENSE
 

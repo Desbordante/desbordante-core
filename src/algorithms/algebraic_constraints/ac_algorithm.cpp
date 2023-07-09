@@ -7,9 +7,9 @@
 
 #include <easylogging++.h>
 
+#include "config/names_and_descriptions.h"
+#include "config/tabular_data/input_table/option.h"
 #include "types/create_type.h"
-#include "util/config/names_and_descriptions.h"
-#include "util/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
