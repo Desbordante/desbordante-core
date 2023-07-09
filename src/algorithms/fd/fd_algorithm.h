@@ -32,14 +32,14 @@ private:
     virtual void ResetStateFd() = 0;
 
 protected:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     /* Collection of all discovered FDs
      * Every FD mining algorithm should place discovered dependecies here. Don't add new FDs by
      * accessing this field directly, use RegisterFd methods instead
      */
     util::PrimitiveCollection<FD> fd_collection_;
-    util::config::EqNullsType is_null_equal_null_;
+    config::EqNullsType is_null_equal_null_;
 
     /* Registers new FD.
      * Should be overrided if custom behavior is needed

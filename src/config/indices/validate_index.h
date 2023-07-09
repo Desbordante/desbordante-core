@@ -4,6 +4,6 @@
 
 #include "config/indices/type.h"
 
-namespace util::config {
+namespace config {
 void ValidateIndex(IndexType value, size_t cols_count);
-}  // namespace util::config
+}  // namespace config

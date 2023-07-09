@@ -9,7 +9,7 @@
 
 #include "config/ioption.h"
 
-namespace util::config {
+namespace config {
 
 // This class is responsible for configuration values. It is provided with a
 // pointer to a field of an algorithm object, option name, and option
@@ -135,4 +135,4 @@ T Option<T>::ConvertValue(boost::any const &value) const {
     }
 }
 
-}  // namespace util::config
+}  // namespace config

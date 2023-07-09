@@ -29,7 +29,7 @@ private:
     RowsPtr compressed_records_;
     std::priority_queue<Efficiency> efficiency_queue_;
     std::unique_ptr<AllColumnCombinations> agree_sets_;
-    util::config::ThreadNumType threads_num_;
+    config::ThreadNumType threads_num_;
     std::unique_ptr<boost::asio::thread_pool> pool_;
 
     void ProcessComparisonSuggestions(IdPairs const& comparison_suggestions);
@@ -50,7 +50,7 @@ private:
     void RunWindow(Efficiency& efficiency, util::PositionListIndex const& pli);
 
 public:
-    Sampler(PLIsPtr plis, RowsPtr pli_records, util::config::ThreadNumType threads = 1);
+    Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads = 1);
 
     Sampler(Sampler const& other) = delete;
     Sampler(Sampler&& other) = delete;

@@ -290,7 +290,7 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
     }
 }
 
-Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records, util::config::ThreadNumType threads)
+Sampler::Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads)
     : plis_(std::move(plis)),
       compressed_records_(std::move(pli_records)),
       agree_sets_(std::make_unique<AllColumnCombinations>(plis_->size())),

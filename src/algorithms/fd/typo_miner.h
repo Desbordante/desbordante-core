@@ -15,7 +15,7 @@ namespace algos {
 
 class TypoMiner : public Algorithm {
 private:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     std::unique_ptr<FDAlgorithm> precise_algo_;
     std::unique_ptr<FDAlgorithm> approx_algo_;
@@ -26,7 +26,7 @@ private:
     double radius_;      /* Maximal distance between two values to consider one of them a typo */
     double ratio_;       /* Maximal fraction of deviations per cluster to flag the cluster as
                           * containing typos */
-    util::config::EqNullsType is_null_equal_null_;
+    config::EqNullsType is_null_equal_null_;
 
     void ResetState() final;
 
@@ -113,11 +113,11 @@ public:
         return ratio_;
     }
     double SetRadius(double radius) {
-        SetOption(util::config::names::kRadius, radius);
+        SetOption(config::names::kRadius, radius);
         return radius_;
     }
     double SetRatio(double ratio) {
-        SetOption(util::config::names::kRatio, ratio);
+        SetOption(config::names::kRatio, ratio);
         return ratio_;
     }
     ColumnLayoutRelationData const& GetRelationData() const noexcept {

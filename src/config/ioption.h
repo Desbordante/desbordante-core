@@ -6,7 +6,7 @@
 
 #include "boost/any.hpp"
 
-namespace util::config {
+namespace config {
 
 class IOption {
 public:
@@ -18,4 +18,4 @@ public:
     virtual ~IOption() = default;
 };
 
-}  // namespace util::config
+}  // namespace config

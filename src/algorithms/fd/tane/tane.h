@@ -19,9 +19,9 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    util::config::ErrorType max_fd_error_;
-    util::config::ErrorType max_ucc_error_;
-    util::config::MaxLhsType max_lhs_;
+    config::ErrorType max_fd_error_;
+    config::ErrorType max_ucc_error_;
+    config::MaxLhsType max_lhs_;
 
     int count_of_fd_ = 0;
     int count_of_ucc_ = 0;

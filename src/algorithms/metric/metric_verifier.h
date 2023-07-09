@@ -27,16 +27,16 @@ namespace algos::metric {
 
 class MetricVerifier : public Algorithm {
 private:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     Metric metric_ = Metric::_values()[0];
     MetricAlgo algo_ = MetricAlgo::_values()[0];
-    util::config::IndicesType lhs_indices_;
-    util::config::IndicesType rhs_indices_;
+    config::IndicesType lhs_indices_;
+    config::IndicesType rhs_indices_;
     long double parameter_;
     unsigned int q_;
     bool dist_from_null_is_infinity_;
-    util::config::EqNullsType is_null_equal_null_;
+    config::EqNullsType is_null_equal_null_;
 
     bool metric_fd_holds_ = false;
 
@@ -75,10 +75,9 @@ private:
     ClusterFunction GetClusterFunctionForOneDimension();
     ClusterFunction GetClusterFunction();
     void VerifyMetricFD();
-    std::string GetStringValue(util::config::IndicesType const& index_vec,
-                               ClusterIndex row_index) const;
+    std::string GetStringValue(config::IndicesType const& index_vec, ClusterIndex row_index) const;
     void VisualizeHighlights() const;
-    void ValidateRhs(util::config::IndicesType const& rhs_indices);
+    void ValidateRhs(config::IndicesType const& rhs_indices);
     void RegisterOptions();
 
     void ResetState() final;
@@ -93,11 +92,11 @@ public:
         return metric_fd_holds_;
     }
 
-    util::config::IndicesType const& GetLhsIndices() const {
+    config::IndicesType const& GetLhsIndices() const {
         return lhs_indices_;
     }
 
-    util::config::IndicesType const& GetRhsIndices() const {
+    config::IndicesType const& GetRhsIndices() const {
         return rhs_indices_;
     }
 

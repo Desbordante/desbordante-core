@@ -1,5 +1,5 @@
 #pragma once
 
-namespace util::config {
+namespace config {
 using MaxLhsType = unsigned int;
-}  // namespace util::config
+}  // namespace config
