@@ -1,5 +1,6 @@
 #include "partition_storage.h"
 
+#include <boost/format.hpp>
 #include <boost/optional.hpp>
 #include <easylogging++.h>
 
