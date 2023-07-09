@@ -21,7 +21,7 @@ private:
     hy::PLIsPtr plis_;
     hy::RowsPtr compressed_records_;
     unsigned current_level_number_ = 1;
-    util::config::ThreadNumType threads_num_ = 1;
+    config::ThreadNumType threads_num_ = 1;
 
     bool IsUnique(util::PLI const& pivot_pli, model::RawUCC const& ucc,
                   hy::IdPairs& comparison_suggestions);
@@ -32,7 +32,7 @@ private:
 
 public:
     Validator(UCCTree* tree, hy::PLIsPtr plis, hy::RowsPtr compressed_records,
-              util::config::ThreadNumType threads_num) noexcept
+              config::ThreadNumType threads_num) noexcept
         : tree_(tree),
           plis_(std::move(plis)),
           compressed_records_(std::move(compressed_records)),

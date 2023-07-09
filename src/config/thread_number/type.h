@@ -1,5 +1,5 @@
 #pragma once
 
-namespace util::config {
+namespace config {
 using ThreadNumType = unsigned short;
-}  // namespace util::config
+}  // namespace config

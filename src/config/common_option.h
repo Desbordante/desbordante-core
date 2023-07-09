@@ -5,7 +5,7 @@
 
 #include "config/option.h"
 
-namespace util::config {
+namespace config {
 
 // Aids in creating options that come up often in unrelated algorithms, like
 // null equality.
@@ -43,4 +43,4 @@ public:
     }
 };
 
-}  // namespace util::config
+}  // namespace config

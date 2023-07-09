@@ -13,7 +13,7 @@ namespace algos {
 
 ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
-    using namespace util::config::names;
+    using namespace config::names;
     RegisterOptions();
     MakeOptionsAvailable({kTable, kInputFormat});
 }
@@ -24,7 +24,7 @@ void ARAlgorithm::RegisterOptions() {
     auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
     auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
 
-    RegisterOption(util::config::TableOpt(&input_table_));
+    RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
     RegisterOption(Option{&item_column_index_, kItemColumnIndex, kDItemColumnIndex, 1u});
     RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
@@ -40,7 +40,7 @@ void ARAlgorithm::ResetState() {
 }
 
 void ARAlgorithm::MakeExecuteOptsAvailable() {
-    using namespace util::config::names;
+    using namespace config::names;
     MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
 }
 

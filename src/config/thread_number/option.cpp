@@ -4,7 +4,7 @@
 
 #include "config/names_and_descriptions.h"
 
-namespace util::config {
+namespace config {
 using names::kThreads, descriptions::kDThreads;
 extern const CommonOption<ThreadNumType> ThreadNumberOpt{
         kThreads, kDThreads, 0, [](auto &value) {
@@ -18,4 +18,4 @@ extern const CommonOption<ThreadNumType> ThreadNumberOpt{
                 }
             }
         }};
-}  // namespace util::config
+}  // namespace config

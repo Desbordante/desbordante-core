@@ -11,7 +11,7 @@ class HighlightCalculator {
 private:
     std::vector<std::vector<Highlight>> highlights_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    util::config::IndicesType rhs_indices_;
+    config::IndicesType rhs_indices_;
 
     template <typename Compare>
     void SortHighlights(Compare compare) {
@@ -52,7 +52,7 @@ public:
 
     explicit HighlightCalculator(
             std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
-            util::config::IndicesType rhs_indices)
+            config::IndicesType rhs_indices)
         : typed_relation_(std::move(typed_relation)), rhs_indices_(std::move(rhs_indices)){};
 };
 

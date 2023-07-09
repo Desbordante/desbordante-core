@@ -37,7 +37,7 @@ class ACAlgorithm : public Algorithm {
 private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;
 
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     Binop bin_operation_ = Binop::_values()[0];
     /* Desired ratio of exceptions. Value lies in (0, 1] */

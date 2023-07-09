@@ -25,7 +25,7 @@ private:
     virtual void ResetStateCFD() = 0;
 
 protected:
-    util::config::InputTable input_table_;
+    config::InputTable input_table_;
 
     unsigned columns_number_;
     unsigned tuples_number_;

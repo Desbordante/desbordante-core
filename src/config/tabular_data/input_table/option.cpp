@@ -2,7 +2,7 @@
 
 #include "config/names_and_descriptions.h"
 
-namespace util::config {
+namespace config {
 using names::kTable, descriptions::kDTable;
 extern const CommonOption<InputTable> TableOpt{kTable, kDTable};
-}  // namespace util::config
+}  // namespace config
