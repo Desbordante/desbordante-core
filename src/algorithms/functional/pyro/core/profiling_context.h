@@ -74,7 +74,6 @@ public:
     // upper_bound}(random_); }
     int NextInt(int upper_bound) {
         return custom_random_.NextInt(upper_bound);
-
     }
     double NextDouble() {
         return custom_random_.NextDouble();

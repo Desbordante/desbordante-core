@@ -9,6 +9,7 @@
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
+#include "config/tabular_data/input_table_type.h"
 #include "create_dataframe_reader.h"
 #include "csv_parser.h"
 #include "util/enum_to_available_values.h"

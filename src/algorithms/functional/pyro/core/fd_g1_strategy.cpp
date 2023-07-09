@@ -25,19 +25,9 @@ double FdG1Strategy::CalculateG1(structures::PositionListIndex* lhs_pli) const {
         value_counts.clear();
         for (int position : cluster) {
             probing_table_value_id = probing_table[position];
-            //    auto now = std::chrono::system_clock::now();
             if (probing_table_value_id != structures::PositionListIndex::singleton_value_id_) {
                 value_counts[probing_table_value_id] += 1;
-                /*auto location = value_counts.find(probing_table_value_id);
-                if (location == value_counts.end()) {
-                    value_counts.emplace_hint(location, probing_table_value_id, 1);
-                } else {
-                    location->second += 1;
-                }*/
             }
-            //    nanos_ +=
-            //    std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now()
-            //    - now).count();
         }
 
         unsigned long long num_violations_in_cluster = cluster.size() * (cluster.size() - 1) / 2;
@@ -113,11 +103,7 @@ DependencyCandidate FdG1Strategy::CreateDependencyCandidate(Vertical const& vert
                     ->EstimateMixed(vertical, static_cast<Vertical>(*rhs_),
                                     context_->GetParameters().estimate_confidence)
                     .Multiply(context_->GetColumnLayoutRelationData()->GetNumTuplePairs());
-    // LOG(DEBUG) << boost::format{"Creating dependency candidate %1% with %2% violating pairs"}
-    //     % vertical->ToString() % num_violating_tuple_pairs;
     structures::ConfidenceInterval g1 = CalculateG1(num_violating_tuple_pairs);
-    // LOG(DEBUG) << boost::format {"Creating dependency candidate %1% with error ~ %2%"}
-    //     % vertical->ToString() % g1;
     return DependencyCandidate(vertical, g1, false);
 }
 
