@@ -16,7 +16,7 @@ void SearchSpace::Discover() {
 
         if (local_visitees_ == nullptr) {
             local_visitees_ =
-                    std::make_unique<util::VerticalMap<VerticalInfo>>(context_->GetSchema());
+                    std::make_unique<structures::VerticalMap<VerticalInfo>>(context_->GetSchema());
         }
 
         bool is_dependency_found = Ascend(*launch_pad);
@@ -310,13 +310,13 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
 
     std::unordered_set<Vertical> maximal_non_deps;
     auto alleged_min_deps =
-            std::make_unique<util::VerticalMap<VerticalInfo>>(context_->GetSchema());
+            std::make_unique<structures::VerticalMap<VerticalInfo>>(context_->GetSchema());
     auto peaks_comparator = [](auto& candidate1, auto& candidate2) -> bool {
         return DependencyCandidate::ArityComparator(candidate1, candidate2);
     };
     std::vector<DependencyCandidate> peaks;
     std::make_heap(peaks.begin(), peaks.end(), peaks_comparator);
-    peaks.emplace_back(main_peak, util::ConfidenceInterval(main_peak_error), true);
+    peaks.emplace_back(main_peak, structures::ConfidenceInterval(main_peak_error), true);
     std::push_heap(peaks.begin(), peaks.end(), peaks_comparator);
     std::unordered_set<Vertical> alleged_non_deps;
 
@@ -444,7 +444,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             local_visitees_->Put(alleged_max_non_dep,
                                  std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
         } else {
-            peaks.emplace_back(alleged_max_non_dep, util::ConfidenceInterval(error), true);
+            peaks.emplace_back(alleged_max_non_dep, structures::ConfidenceInterval(error), true);
             std::push_heap(peaks.begin(), peaks.end(), peaks_comparator);
         }
     }
@@ -469,7 +469,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
                                    .count();
     } else {
         LOG(DEBUG) << boost::format{"* %1% new peaks (%2%)"} % peaks.size() % "UNIMPLEMENTED";
-        auto new_scope = std::make_unique<util::VerticalMap<Vertical>>(context_->GetSchema());
+        auto new_scope = std::make_unique<structures::VerticalMap<Vertical>>(context_->GetSchema());
         std::sort_heap(peaks.begin(), peaks.end(), peaks_comparator);
         for (auto& peak : peaks) {
             new_scope->Put(peak.vertical_, std::make_unique<Vertical>(peak.vertical_));
@@ -532,9 +532,9 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
 
 std::optional<Vertical> SearchSpace::TrickleDownFrom(
         DependencyCandidate min_dep_candidate, DependencyStrategy* strategy,
-        util::VerticalMap<VerticalInfo>* alleged_min_deps,
+        structures::VerticalMap<VerticalInfo>* alleged_min_deps,
         std::unordered_set<Vertical>& alleged_non_deps,
-        util::VerticalMap<VerticalInfo>* global_visitees, double boost_factor) {
+        structures::VerticalMap<VerticalInfo>* global_visitees, double boost_factor) {
     auto now = std::chrono::system_clock::now();
     if (min_dep_candidate.error_.GetMin() > strategy->max_dependency_error_) {
         throw std::runtime_error(
@@ -601,8 +601,8 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                 double error = strategy->CalculateError(min_dep_candidate.vertical_);
                 // TODO: careful with reference shenanigans - looks like it works this way in the
                 // original
-                min_dep_candidate = DependencyCandidate(min_dep_candidate.vertical_,
-                                                        util::ConfidenceInterval(error), true);
+                min_dep_candidate = DependencyCandidate(
+                        min_dep_candidate.vertical_, structures::ConfidenceInterval(error), true);
                 if (error > strategy->min_non_dependency_error_) break;
             }
         }
@@ -658,8 +658,8 @@ void SearchSpace::RequireMinimalDependency(DependencyStrategy* strategy,
     }
 }
 
-std::vector<Vertical> SearchSpace::GetSubsetDeps(Vertical const& vertical,
-                                                 util::VerticalMap<VerticalInfo>* vertical_infos) {
+std::vector<Vertical> SearchSpace::GetSubsetDeps(
+        Vertical const& vertical, structures::VerticalMap<VerticalInfo>* vertical_infos) {
     auto subset_entries = vertical_infos->GetSubsetEntries(vertical);
     auto subset_entries_end =
             std::remove_if(subset_entries.begin(), subset_entries.end(),
@@ -674,7 +674,7 @@ std::vector<Vertical> SearchSpace::GetSubsetDeps(Vertical const& vertical,
 }
 
 bool SearchSpace::IsImpliedByMinDep(Vertical const& vertical,
-                                    util::VerticalMap<VerticalInfo>* vertical_infos) {
+                                    structures::VerticalMap<VerticalInfo>* vertical_infos) {
     // TODO: function<bool(Vertical, ...)> --> function<bool(Vertical&, ...)>
     return vertical_infos
                    ->GetAnySubsetEntry(vertical,
@@ -685,7 +685,7 @@ bool SearchSpace::IsImpliedByMinDep(Vertical const& vertical,
 }
 
 bool SearchSpace::IsKnownNonDependency(Vertical const& vertical,
-                                       util::VerticalMap<VerticalInfo>* vertical_infos) {
+                                       structures::VerticalMap<VerticalInfo>* vertical_infos) {
     return vertical_infos
                    ->GetAnySupersetEntry(vertical, []([[maybe_unused]] auto vertical,
                                                       auto info) { return !info->is_dependency_; })

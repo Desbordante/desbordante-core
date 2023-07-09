@@ -5,7 +5,7 @@
 
 #include "structures/vertical_map.h"
 
-namespace util {
+namespace structures {
 
 PositionListIndex* PLICache::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
@@ -183,20 +183,20 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::C
         case CachingMethod::kCoin:
             if (profiling_context->NextDouble() <
                 profiling_context->GetParameters().caching_probability) {
-                index_->Put(vertical, std::move(pli));
-                return pli_pointer;
-            } else {
-                return pli;
-            }
-        case CachingMethod::kNoCaching:
-            return pli;
-        case CachingMethod::kAllCaching:
             index_->Put(vertical, std::move(pli));
             return pli_pointer;
-        default:
-            throw std::runtime_error(
-                    "Only kNoCaching and kAllCaching strategies are currently available");
+        } else {
+            return pli;
+        }
+    case CachingMethod::kNoCaching:
+        return pli;
+    case CachingMethod::kAllCaching:
+        index_->Put(vertical, std::move(pli));
+        return pli_pointer;
+    default:
+        throw std::runtime_error(
+                "Only kNoCaching and kAllCaching strategies are currently available");
     }
 }
 
-}  // namespace util
+}  // namespace structures

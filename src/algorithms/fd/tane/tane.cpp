@@ -43,14 +43,14 @@ double Tane::CalculateZeroAryFdError(ColumnData const* rhs,
                    static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-double Tane::CalculateFdError(util::PositionListIndex const* lhs_pli,
-                              util::PositionListIndex const* joint_pli,
+double Tane::CalculateFdError(structures::PositionListIndex const* lhs_pli,
+                              structures::PositionListIndex const* joint_pli,
                               ColumnLayoutRelationData const* relation_data) {
     return (double)(lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
            static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-double Tane::CalculateUccError(util::PositionListIndex const* pli,
+double Tane::CalculateUccError(structures::PositionListIndex const* pli,
                                ColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
@@ -84,30 +84,32 @@ unsigned long long Tane::ExecuteInternal() {
               << relation_->GetMaximumNip() << ".";
 
     for (auto& column : schema->GetColumns()) {
-        double avg_partners = relation_->GetColumnData(column->GetIndex()).
-            GetPositionListIndex()->GetNepAsLong() * 2.0 / relation_->GetNumRows();
+        double avg_partners = relation_->GetColumnData(column->GetIndex())
+                                      .GetPositionListIndex()
+                                      ->GetNepAsLong() *
+                              2.0 / relation_->GetNumRows();
         LOG(INFO) << "* " << column->ToString() << ": every tuple has " << std::setw(2)
                   << avg_partners << " partners on average.";
     }
     auto start_time = std::chrono::system_clock::now();
     double progress_step = 100.0 / (schema->GetNumColumns() + 1);
 
-    //Initialize level 0
-    std::vector<std::unique_ptr<util::LatticeLevel>> levels;
-    auto level0 = std::make_unique<util::LatticeLevel>(0);
+    // Initialize level 0
+    std::vector<std::unique_ptr<structures::LatticeLevel>> levels;
+    auto level0 = std::make_unique<structures::LatticeLevel>(0);
     // TODO: через указатели кажется надо переделать
-    level0->Add(std::make_unique<util::LatticeVertex>(*(schema->empty_vertical_)));
-    util::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
+    level0->Add(std::make_unique<structures::LatticeVertex>(*(schema->empty_vertical_)));
+    structures::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
     AddProgress(progress_step);
 
-    //Initialize level1
+    // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    auto level1 = std::make_unique<util::LatticeLevel>(1);
+    auto level1 = std::make_unique<structures::LatticeLevel>(1);
     for (auto& column : schema->GetColumns()) {
-        //for each attribute set vertex
+        // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column->GetIndex());
-        auto vertex = std::make_unique<util::LatticeVertex>(static_cast<Vertical>(*column));
+        auto vertex = std::make_unique<structures::LatticeVertex>(static_cast<Vertical>(*column));
 
         vertex->AddRhsCandidates(schema->GetColumns());
         vertex->GetParents().push_back(empty_vertex);
@@ -164,15 +166,16 @@ unsigned long long Tane::ExecuteInternal() {
                                  ? max_lhs_
                                  : max_lhs_ + 1;
     for (unsigned int arity = 2; arity <= max_arity; arity++) {
-        //auto start_time = std::chrono::system_clock::now();
-        util::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
-        util::LatticeLevel::GenerateNextLevel(levels);
-        //std::chrono::duration<double> elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start_time);
-        //apriori_millis_ += elapsed_milliseconds.count();
+        // auto start_time = std::chrono::system_clock::now();
+        structures::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
+        structures::LatticeLevel::GenerateNextLevel(levels);
+        // std::chrono::duration<double> elapsed_milliseconds =
+        // std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
+        // start_time); apriori_millis_ += elapsed_milliseconds.count();
 
-        util::LatticeLevel* level = levels[arity].get();
-        LOG(TRACE) << "Checking " << level->GetVertices().size() << " "
-                  << arity << "-ary lattice vertices.";
+        structures::LatticeLevel* level = levels[arity].get();
+        LOG(TRACE) << "Checking " << level->GetVertices().size() << " " << arity
+                   << "-ary lattice vertices.";
         if (level->GetVertices().empty()) {
             break;
         }
@@ -231,7 +234,7 @@ unsigned long long Tane::ExecuteInternal() {
 
         //Prune
         //cout << "Pruning level: " << level->GetArity() << ". " << level->GetVertices().size() << " vertices_" << endl;
-        std::list<util::LatticeVertex*> key_vertices;
+        std::list<structures::LatticeVertex*> key_vertices;
         for (auto& [map_key, vertex] : level->GetVertices()) {
             Vertical columns = vertex->GetVertical();  // Originally it's a ColumnCombination
 
@@ -290,14 +293,13 @@ unsigned long long Tane::ExecuteInternal() {
 
     SetProgress(100);
     std::chrono::milliseconds elapsed_milliseconds =
-        std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
-                                                              start_time);
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
+                                                                  start_time);
     apriori_millis_ += elapsed_milliseconds.count();
 
     LOG(INFO) << "Time: " << apriori_millis_ << " milliseconds";
-    LOG(INFO) << "Intersection time: " << util::PositionListIndex::micros_ / 1000
-              << "ms";
-    LOG(INFO) << "Total intersections: " << util::PositionListIndex::intersection_count_
+    LOG(INFO) << "Intersection time: " << structures::PositionListIndex::micros_ / 1000 << "ms";
+    LOG(INFO) << "Total intersections: " << structures::PositionListIndex::intersection_count_
               << std::endl;
     LOG(INFO) << "Total FD count: " << count_of_fd_;
     LOG(INFO) << "Total UCC count: " << count_of_ucc_;

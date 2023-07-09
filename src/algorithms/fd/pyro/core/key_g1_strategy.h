@@ -4,9 +4,11 @@
 
 class KeyG1Strategy : public DependencyStrategy {
 private:
-    double CalculateKeyError(util::PositionListIndex* pli) const;
+    double CalculateKeyError(structures::PositionListIndex* pli) const;
     double CalculateKeyError(double num_violating_tuple_pairs) const;
-    util::ConfidenceInterval CalculateKeyError(util::ConfidenceInterval const& num_violations) const;
+    structures::ConfidenceInterval CalculateKeyError(
+            structures::ConfidenceInterval const& num_violations) const;
+
 public:
     KeyG1Strategy(double max_error, double deviation) : DependencyStrategy(max_error, deviation) {}
 

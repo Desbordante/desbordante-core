@@ -73,15 +73,18 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                     //if we were not able to infer category, we calculate the partitions
                     auto node_pli = partition_storage_->GetOrCreateFor(node);
                     auto node_pli_pointer =
-                        std::holds_alternative<util::PositionListIndex*>(node_pli)
-                            ? std::get<util::PositionListIndex*>(node_pli)
-                            : std::get<std::unique_ptr<util::PositionListIndex>>(node_pli).get();
+                            std::holds_alternative<structures::PositionListIndex*>(node_pli)
+                                    ? std::get<structures::PositionListIndex*>(node_pli)
+                                    : std::get<std::unique_ptr<structures::PositionListIndex>>(
+                                              node_pli)
+                                              .get();
                     auto intersected_pli = partition_storage_->GetOrCreateFor(node.Union(*rhs_));
                     auto intersected_pli_pointer =
-                        std::holds_alternative<util::PositionListIndex*>(intersected_pli)
-                            ? std::get<util::PositionListIndex*>(intersected_pli)
-                            : std::get<std::unique_ptr<util::PositionListIndex>>(intersected_pli)
-                                  .get();
+                            std::holds_alternative<structures::PositionListIndex*>(intersected_pli)
+                                    ? std::get<structures::PositionListIndex*>(intersected_pli)
+                                    : std::get<std::unique_ptr<structures::PositionListIndex>>(
+                                              intersected_pli)
+                                              .get();
 
                     if (node_pli_pointer->GetNepAsLong() ==
                         intersected_pli_pointer->GetNepAsLong()) {

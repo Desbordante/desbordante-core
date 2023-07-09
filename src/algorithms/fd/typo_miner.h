@@ -37,9 +37,9 @@ private:
     static auto MakeTuplesByIndicesComparator(std::map<int, unsigned> const& frequency_map);
 
     std::map<int, unsigned> CreateFrequencyMap(Column const& cluster_col,
-                                               util::PLI::Cluster const& cluster) const;
+                                               structures::PLI::Cluster const& cluster) const;
     unsigned GetMostFrequentValueIndex(Column const& cluster_col,
-                                       util::PLI::Cluster const& cluster) const;
+                                       structures::PLI::Cluster const& cluster) const;
     bool ValuesAreClose(std::byte const* l, std::byte const* r, model::Type const& type) const {
         assert(type.IsMetrizable());
         return static_cast<model::IMetrizableType const&>(type).Dist(l, r) < radius_;
@@ -55,35 +55,35 @@ private:
                      boost::any const& value_approx);
 
 public:
-    using TyposVec = std::vector<util::PLI::Cluster::value_type>;
-    using ClusterTyposPair = std::pair<util::PLI::Cluster, TyposVec>;
+    using TyposVec = std::vector<structures::PLI::Cluster::value_type>;
+    using ClusterTyposPair = std::pair<structures::PLI::Cluster, TyposVec>;
 
     struct SquashedElement {
-        int tuple_index;  /* Tuple index */
-        unsigned amount;  /* The number of tuples equal to the given and
-                           * following immediately after the given */
+        int tuple_index; /* Tuple index */
+        unsigned amount; /* The number of tuples equal to the given and
+                          * following immediately after the given */
     };
 
     explicit TypoMiner(AlgorithmType precise, AlgorithmType approx = AlgorithmType::pyro);
 
-    std::vector<util::PLI::Cluster> FindClustersWithTypos(FD const& typos_fd,
-                                                          bool const sort_clusters = true) const;
+    std::vector<structures::PLI::Cluster> FindClustersWithTypos(
+            FD const& typos_fd, bool const sort_clusters = true) const;
     /* Returns squashed representation of a cluster with respect to given fd.
      * Check description of SquashedElement. Two tuples are considered equal if they are
      * equal in rhs attribute of given fd (they are automatically equal in lhs too if clusters
      * were retrieved from FindClustersWithTypos()).
      */
     std::vector<SquashedElement> SquashCluster(FD const& squash_on,
-                                               util::PLI::Cluster const& cluster) const;
+                                               structures::PLI::Cluster const& cluster) const;
     /* Sorts given cluster in ascending order by uniqueness of the values in rhs of sort_on fd.
      * More strictly:
      * t1 tuple is considered less than t2 tuple iff t1[sort_on.rhs] is less frequent value
      * in rhs column than t2[sort_on.rhs].
      */
-    void SortCluster(FD const& sort_on, util::PLI::Cluster& cluster) const;
+    void SortCluster(FD const& sort_on, structures::PLI::Cluster& cluster) const;
 
     /* Sorts given cluster in ascending order of the indices */
-    void RestoreLineOrder(util::PLI::Cluster& cluster) const;
+    void RestoreLineOrder(structures::PLI::Cluster& cluster) const;
     /* Sorts given squashed cluster in ascending order of the indices */
     void RestoreLineOrder(std::vector<TypoMiner::SquashedElement>& squashed_cluster) const;
 
@@ -96,8 +96,8 @@ public:
      * Most likely you want to pass to this method as arguments pure approximate FD some_fd and
      * a cluster retrieved from the FindClustersWithTypos(some_fd).
      */
-    TyposVec FindLinesWithTypos(FD const& typos_fd, util::PLI::Cluster const& cluster) const;
-    TyposVec FindLinesWithTypos(FD const& typos_fd, util::PLI::Cluster const& cluster,
+    TyposVec FindLinesWithTypos(FD const& typos_fd, structures::PLI::Cluster const& cluster) const;
+    TyposVec FindLinesWithTypos(FD const& typos_fd, structures::PLI::Cluster const& cluster,
                                 double new_radius, double new_ratio);
     std::vector<ClusterTyposPair> FindClustersAndLinesWithTypos(
             FD const& typos_fd, bool const sort_clusters = true) const;

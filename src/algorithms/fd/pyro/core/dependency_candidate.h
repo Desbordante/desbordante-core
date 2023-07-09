@@ -2,7 +2,7 @@
 #include <functional>
 #include <utility>
 
-#include "pyro/util/confidence_interval.h"
+#include "pyro/structures/confidence_interval.h"
 #include "vertical.h"
 
 class DependencyCandidate {
@@ -10,11 +10,11 @@ private:
     bool is_exact_;
 
 public:
-    util::ConfidenceInterval error_;
+    structures::ConfidenceInterval error_;
     Vertical vertical_;
 
-    DependencyCandidate(Vertical vertical, util::ConfidenceInterval error, bool is_exact) :
-        is_exact_(is_exact), error_(error), vertical_(std::move(vertical)) {}
+    DependencyCandidate(Vertical vertical, structures::ConfidenceInterval error, bool is_exact)
+        : is_exact_(is_exact), error_(error), vertical_(std::move(vertical)) {}
     bool operator<(DependencyCandidate const& other) const;
 
     //TODO: implement if used

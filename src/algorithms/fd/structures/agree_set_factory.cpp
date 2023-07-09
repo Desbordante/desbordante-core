@@ -18,7 +18,7 @@
 #include "identifier_set.h"
 #include "parallel_for.h"
 
-namespace util {
+namespace structures {
 
 using std::set, std::vector, std::unordered_set;
 
@@ -28,8 +28,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
     SetOfAgreeSets agree_sets;
 
     switch (config_.as_gen_method) {
-    case AgreeSetsGenMethod::kUsingVectorOfIDSets: {
-        method_str = "`kUsingVectorOfIDSets`";
+        case AgreeSetsGenMethod::kUsingVectorOfIDSets: {
+            method_str = "`kUsingVectorOfIDSets`";
         agree_sets = GenAsUsingVectorOfIdSets();
         break;
     }
@@ -599,5 +599,4 @@ void AgreeSetFactory::CalculateSupersets(
     }
 }
 
-} // namespace util
-
+}  // namespace structures

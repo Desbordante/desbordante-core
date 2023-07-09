@@ -149,8 +149,8 @@ unsigned long long Pyro::ExecuteInternal() {
     LOG(INFO) << "Error calculation count: " << total_error_calc_count;
     LOG(INFO) << "Total ascension time: " << total_ascension << "ms";
     LOG(INFO) << "Total trickle time: " << total_trickle << "ms";
-    LOG(INFO) << "Total intersection time: "
-              << util::PositionListIndex::micros_ / 1000 << "ms";
+    LOG(INFO) << "Total intersection time: " << structures::PositionListIndex::micros_ / 1000
+              << "ms";
     LOG(INFO) << "HASH: " << PliBasedFDAlgorithm::Fletcher16();
     return elapsed_milliseconds.count();
 }

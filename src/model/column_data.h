@@ -12,10 +12,11 @@
 #include "structures/position_list_index.h"
 
 class ColumnData final : public model::AbstractColumnData {
-    std::shared_ptr<util::PositionListIndex> position_list_index_;
+    std::shared_ptr<structures::PositionListIndex> position_list_index_;
 
 public:
-    ColumnData(Column const* column, std::unique_ptr<util::PositionListIndex> position_list_index)
+    ColumnData(Column const* column,
+               std::unique_ptr<structures::PositionListIndex> position_list_index)
         : AbstractColumnData(column), position_list_index_(std::move(position_list_index)) {
         position_list_index_->ForceCacheProbingTable();
     }
@@ -27,19 +28,19 @@ public:
         return (*position_list_index_->GetCachedProbingTable())[tuple_index];
     }
     bool IsSingleton(int tuple_index) const noexcept {
-        return GetProbingTableValue(tuple_index) == util::PLI::singleton_value_id_;
+        return GetProbingTableValue(tuple_index) == structures::PLI::singleton_value_id_;
     }
-    util::PositionListIndex const* GetPositionListIndex() const {
+    structures::PositionListIndex const* GetPositionListIndex() const {
         return position_list_index_.get();
     }
-    util::PositionListIndex* GetPositionListIndex() {
+    structures::PositionListIndex* GetPositionListIndex() {
         return position_list_index_.get();
     }
 
-    std::shared_ptr<util::PositionListIndex> GetPliOwnership() {
+    std::shared_ptr<structures::PositionListIndex> GetPliOwnership() {
         return position_list_index_;
     }
-    std::shared_ptr<util::PositionListIndex const> GetPliOwnership() const {
+    std::shared_ptr<structures::PositionListIndex const> GetPliOwnership() const {
         return position_list_index_;
     }
 
@@ -48,6 +49,6 @@ public:
     }
 
     static bool IsValueSingleton(int value) noexcept {
-        return value == util::PLI::singleton_value_id_;
+        return value == structures::PLI::singleton_value_id_;
     }
 };

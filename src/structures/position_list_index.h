@@ -13,7 +13,7 @@
 
 class ColumnLayoutRelationData;
 
-namespace util {
+namespace structures {
 
 class PositionListIndex {
 public:
@@ -138,4 +138,4 @@ public:
 
 using PLI = PositionListIndex;
 
-}  // namespace util
+}  // namespace structures

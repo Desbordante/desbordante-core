@@ -23,7 +23,7 @@ private:
     unsigned current_level_number_ = 1;
     config::ThreadNumType threads_num_ = 1;
 
-    bool IsUnique(util::PLI const& pivot_pli, model::RawUCC const& ucc,
+    bool IsUnique(structures::PLI const& pivot_pli, model::RawUCC const& ucc,
                   hy::IdPairs& comparison_suggestions);
     UCCValidations GetValidations(LhsPair const& vertex_and_ucc);
     UCCValidations ValidateAndExtendSeq(std::vector<LhsPair> const& current_level);

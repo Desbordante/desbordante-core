@@ -25,17 +25,17 @@ unsigned long long Depminer::ExecuteInternal() {
 
     progress_step_ = kTotalProgressPercent / schema_->GetNumColumns();
 
-    //Agree sets
-    const util::AgreeSetFactory agree_set_factory =
-        util::AgreeSetFactory(relation_.get(), util::AgreeSetFactory::Configuration(), this);
+    // Agree sets
+    const structures::AgreeSetFactory agree_set_factory = structures::AgreeSetFactory(
+            relation_.get(), structures::AgreeSetFactory::Configuration(), this);
     const auto agree_sets = agree_set_factory.GenAgreeSets();
     ToNextProgressPhase();
 
-    //maximal sets
+    // maximal sets
     const std::vector<CMAXSet> c_max_cets = GenerateCmaxSets(agree_sets);
     ToNextProgressPhase();
 
-    //LHS
+    // LHS
     const auto lhs_time = std::chrono::system_clock::now();
     // 1
     for (auto const& column : schema_->GetColumns()) {

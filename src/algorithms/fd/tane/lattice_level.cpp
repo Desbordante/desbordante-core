@@ -5,7 +5,7 @@
 #include "column_combination.h"
 #include "lattice_level.h"
 
-namespace util {
+namespace structures {
 
 using std::move, std::min, std::shared_ptr, std::vector, std::sort, std::make_shared;
 
@@ -13,7 +13,8 @@ void LatticeLevel::Add(std::unique_ptr<LatticeVertex> vertex) {
     vertices_.emplace(vertex->GetVertical().GetColumnIndices(), std::move(vertex));
 }
 
-LatticeVertex const* LatticeLevel::GetLatticeVertex(const boost::dynamic_bitset<>& column_indices) const {
+LatticeVertex const* LatticeLevel::GetLatticeVertex(
+        const boost::dynamic_bitset<>& column_indices) const {
     auto it = vertices_.find(column_indices);
     if (it != vertices_.end()) {
         return it->second.get();
@@ -121,7 +122,7 @@ void LatticeLevel::ClearLevelsBelow(std::vector<std::unique_ptr<LatticeLevel>>& 
         (*(it++))->GetVertices().clear();
     }
 
-    //Clear child references
+    // Clear child references
     if (arity < levels.size()) {
         for (auto& [map_key, retained_vertex] : levels[arity]->GetVertices()) {
             retained_vertex->GetParents().clear();
@@ -129,5 +130,4 @@ void LatticeLevel::ClearLevelsBelow(std::vector<std::unique_ptr<LatticeLevel>>& 
     }
 }
 
-} // namespace util
-
+}  // namespace structures

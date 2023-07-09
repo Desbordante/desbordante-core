@@ -12,16 +12,16 @@ private:
     class PositionListIndexRank {
     public:
         Vertical const* vertical_;
-        std::shared_ptr<util::PositionListIndex> pli_;
+        std::shared_ptr<structures::PositionListIndex> pli_;
         int added_arity_;
 
         PositionListIndexRank(Vertical const* vertical,
-                              std::shared_ptr<util::PositionListIndex> pli, int initial_arity)
+                              std::shared_ptr<structures::PositionListIndex> pli, int initial_arity)
             : vertical_(vertical), pli_(pli), added_arity_(initial_arity) {}
     };
 
     ColumnLayoutRelationData* relation_data_;
-    std::unique_ptr<util::VerticalMap<util::PositionListIndex>> index_;
+    std::unique_ptr<structures::VerticalMap<structures::PositionListIndex>> index_;
 
     int saved_intersections_ = 0;
 
@@ -33,14 +33,15 @@ private:
 
     double median_inverted_entropy_;
 
-    std::variant<util::PositionListIndex*, std::unique_ptr<util::PositionListIndex>>
-    CachingProcess(Vertical const& vertical, std::unique_ptr<util::PositionListIndex> pli);
-public:
-    PartitionStorage(ColumnLayoutRelationData* relation_data,
-                     CachingMethod caching_method, CacheEvictionMethod eviction_method);
+    std::variant<structures::PositionListIndex*, std::unique_ptr<structures::PositionListIndex>>
+    CachingProcess(Vertical const& vertical, std::unique_ptr<structures::PositionListIndex> pli);
 
-    util::PositionListIndex* Get(Vertical const& vertical);
-    std::variant<util::PositionListIndex*, std::unique_ptr<util::PositionListIndex>>
+public:
+    PartitionStorage(ColumnLayoutRelationData* relation_data, CachingMethod caching_method,
+                     CacheEvictionMethod eviction_method);
+
+    structures::PositionListIndex* Get(Vertical const& vertical);
+    std::variant<structures::PositionListIndex*, std::unique_ptr<structures::PositionListIndex>>
     GetOrCreateFor(Vertical const& vertical);
 
     size_t Size() const;

@@ -10,8 +10,8 @@
 namespace {
 
 model::CompareResult CompareTypesInCol(model::TypedColumnData const& col,
-                                       util::PLI::Cluster::value_type i1,
-                                       util::PLI::Cluster::value_type i2) {
+                                       structures::PLI::Cluster::value_type i1,
+                                       structures::PLI::Cluster::value_type i2) {
     if (col.IsEmpty(i1)) {
         if (col.IsEmpty(i2)) {
             return model::CompareResult::kEqual;
@@ -59,14 +59,14 @@ void StatsCalculator::PrintStatistics() const {
 }
 
 void StatsCalculator::CalculateStatistics(util::PLI const* lhs_pli, util::PLI const* rhs_pli) {
-    std::deque<util::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
+    std::deque<structures::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
     std::shared_ptr<util::PLI::Cluster const> pt_shared = rhs_pli->CalculateAndGetProbingTable();
     util::PLI::Cluster const& pt = *pt_shared.get();
     size_t num_tuples_conflicting_on_rhs = 0.;
 
     for (auto& cluster : lhs_clusters) {
         std::unordered_map<ClusterIndex, unsigned> frequencies =
-                util::PLI::CreateFrequencies(cluster, pt);
+                structures::PLI::CreateFrequencies(cluster, pt);
         size_t num_distinct_rhs_values = CalculateNumDistinctRhsValues(frequencies, cluster.size());
         if (num_distinct_rhs_values == 1) {
             continue;

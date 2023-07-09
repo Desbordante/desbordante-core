@@ -5,13 +5,12 @@
 #include <vector>
 #include "agree_set_sample.h"
 
-namespace util {
+namespace structures {
 
-//TODO: Java long ~ C++ long long => consider replacing ints with longlongs
+// TODO: Java long ~ C++ long long => consider replacing ints with longlongs
 class ListAgreeSetSample : public AgreeSetSample {
 private:
     struct Entry {
-
         unsigned int count;
         std::shared_ptr<std::vector<unsigned long long>> agree_set;
 
@@ -37,8 +36,7 @@ public:
     unsigned long long GetNumAgreeSupersets(Vertical const& agreement,
                                             Vertical const& disagreement) const override;
     std::unique_ptr<std::vector<unsigned long long>> GetNumAgreeSupersetsExt(
-        Vertical const& agreement, Vertical const& disagreement) const override;
+            Vertical const& agreement, Vertical const& disagreement) const override;
 };
 
-} // namespace util
-
+}  // namespace structures

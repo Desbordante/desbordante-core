@@ -69,7 +69,8 @@ T PointsCalculator::GetPoint(ClusterIndex row_index, bool& has_values, bool& has
 }
 
 IndexedPointsCalculationResult<IndexedVector>
-PointsCalculator::CalculateMultidimensionalIndexedPoints(util::PLI::Cluster const& cluster) const {
+PointsCalculator::CalculateMultidimensionalIndexedPoints(
+        structures::PLI::Cluster const& cluster) const {
     std::vector<IndexedVector> points;
     std::vector<Highlight> cluster_highlights;
     bool has_nulls_in_cluster = false;
@@ -93,7 +94,7 @@ PointsCalculator::CalculateMultidimensionalIndexedPoints(util::PLI::Cluster cons
 }
 
 IndexedPointsCalculationResult<IndexedOneDimensionalPoint> PointsCalculator::CalculateIndexedPoints(
-        util::PLI::Cluster const& cluster) const {
+        structures::PLI::Cluster const& cluster) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::vector<std::byte const*> const& data = col.GetData();
     std::vector<IndexedPoint<std::byte const*>> points;
@@ -116,7 +117,8 @@ IndexedPointsCalculationResult<IndexedOneDimensionalPoint> PointsCalculator::Cal
 
 template <typename T>
 PointsCalculationResult<T> PointsCalculator::CalculateMultidimensionalPoints(
-        util::PLI::Cluster const& cluster, AssignmentFunction<T> const& assignment_func) const {
+        structures::PLI::Cluster const& cluster,
+        AssignmentFunction<T> const& assignment_func) const {
     std::vector<T> points;
     bool has_nulls_in_cluster = false;
     for (auto i : cluster) {
@@ -136,18 +138,18 @@ PointsCalculationResult<T> PointsCalculator::CalculateMultidimensionalPoints(
 }
 
 PointsCalculationResult<util::Point> PointsCalculator::CalculateMultidimensionalPointsForCalipers(
-        util::PLI::Cluster const& cluster) const {
+        structures::PLI::Cluster const& cluster) const {
     return CalculateMultidimensionalPoints<util::Point>(cluster, AssignToPoint);
 }
 
 PointsCalculationResult<std::vector<long double>>
 PointsCalculator::CalculateMultidimensionalPointsForApprox(
-        util::PLI::Cluster const& cluster) const {
+        structures::PLI::Cluster const& cluster) const {
     return CalculateMultidimensionalPoints<std::vector<long double>>(cluster, AssignToVector);
 }
 
 PointsCalculationResult<std::byte const*> PointsCalculator::CalculatePoints(
-        util::PLI::Cluster const& cluster) const {
+        structures::PLI::Cluster const& cluster) const {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
     std::vector<std::byte const*> const& data = col.GetData();
     std::vector<std::byte const*> points;

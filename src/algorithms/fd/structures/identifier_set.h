@@ -7,7 +7,7 @@
 #include "vertical.h"
 #include "column_layout_relation_data.h"
 
-namespace util {
+namespace structures {
 
 /* Class which represents the relationship between a tuple and
  * all partitions containing it. Given the tuple t, IdentifierSet
@@ -63,5 +63,4 @@ inline Vertical IdentifierSet::Intersect(IdentifierSet const& other) const {
     return relation_->GetSchema()->GetVertical(intersection);
 }
 
-} // namespace util
-
+}  // namespace structures
