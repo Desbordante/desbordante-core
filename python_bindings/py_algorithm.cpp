@@ -16,8 +16,8 @@
 
 namespace python_bindings {
 
-using util::config::InputTable;
-using util::config::names::kTable;
+using config::InputTable;
+using config::names::kTable;
 
 static const auto void_index = std::type_index{typeid(void)};
 
