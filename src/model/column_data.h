@@ -9,7 +9,7 @@
 
 #include "abstract_column_data.h"
 #include "column.h"
-#include "position_list_index.h"
+#include "structures/position_list_index.h"
 
 class ColumnData final : public model::AbstractColumnData {
     std::shared_ptr<util::PositionListIndex> position_list_index_;

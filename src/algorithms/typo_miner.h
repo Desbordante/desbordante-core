@@ -2,7 +2,7 @@
 
 #include "algorithms/algorithm.h"
 #include "algorithms/create_algorithm.h"
-#include "algorithms/pyro.h"
+#include "algorithms/pyro/pyro.h"
 #include "model/column_layout_typed_relation_data.h"
 #include "model/idataset_stream.h"
 #include "parser/csv_parser.h"

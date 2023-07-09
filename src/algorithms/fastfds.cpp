@@ -10,7 +10,7 @@
 #include <boost/thread.hpp>
 #include <easylogging++.h>
 
-#include "util/agree_set_factory.h"
+#include "structures/agree_set_factory.h"
 #include "util/config/max_lhs/option.h"
 #include "util/config/thread_number/option.h"
 #include "util/parallel_for.h"

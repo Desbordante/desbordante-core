@@ -11,14 +11,14 @@
 #include "model/column_data.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
+#include "structures/lattice_level.h"
+#include "structures/lattice_vertex.h"
 #include "util/config/error/option.h"
 #include "util/config/max_lhs/option.h"
-#include "util/lattice_level.h"
-#include "util/lattice_vertex.h"
 
 namespace algos {
 
-Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName})  {
+Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
 }
 

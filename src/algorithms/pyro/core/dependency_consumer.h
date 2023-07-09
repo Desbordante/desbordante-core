@@ -3,8 +3,8 @@
 #include <list>
 #include <mutex>
 
-#include "partial_fd.h"
-#include "partial_key.h"
+#include "pyro/model/partial_fd.h"
+#include "pyro/model/partial_key.h"
 
 class DependencyConsumer {
 private:

@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "position_list_index.h"
+#include "structures/position_list_index.h"
 
 LatticeTraversal::LatticeTraversal(const Column* const rhs,
                                    const ColumnLayoutRelationData* const relation,

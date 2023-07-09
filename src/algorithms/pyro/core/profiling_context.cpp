@@ -4,9 +4,9 @@
 
 #include <easylogging++.h>
 
-#include "list_agree_set_sample.h"
-#include "pli_cache.h"
-#include "vertical_map.h"
+#include "pyro/util/list_agree_set_sample.h"
+#include "pyro/util/pli_cache.h"
+#include "structures/vertical_map.h"
 
 using std::shared_ptr;
 
