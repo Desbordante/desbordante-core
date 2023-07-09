@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
-#include "model/ucc.h"
+#include "algorithms/fd/model/ucc.h"
 #include "util/config/equal_nulls/type.h"
 #include "util/config/tabular_data/input_table_type.h"
 #include "util/primitive_collection.h"

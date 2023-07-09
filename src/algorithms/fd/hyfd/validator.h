@@ -4,8 +4,8 @@
 #include <utility>
 #include <vector>
 
+#include "algorithms/fd/model/raw_fd.h"
 #include "hycommon/primitive_validations.h"
-#include "raw_fd.h"
 #include "structures/fd_tree.h"
 #include "structures/position_list_index.h"
 #include "types.h"

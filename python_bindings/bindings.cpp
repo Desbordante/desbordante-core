@@ -35,7 +35,7 @@
 #include <pybind11/pybind11.h>
 
 #include "algorithms/algorithms.h"
-#include "model/ar.h"
+#include "algorithms/association_rules/ar.h"
 #include "py_ac_algorithm.h"
 #include "py_ar_algorithm.h"
 #include "py_data_stats.h"
