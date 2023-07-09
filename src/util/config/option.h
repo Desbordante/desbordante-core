@@ -128,9 +128,10 @@ T Option<T>::ConvertValue(boost::any const &value) const {
             std::string("No value was provided to an option without a default value (") +
             GetName().data() + ")";
     if (value.empty()) {
-        if (!default_func_) throw std::logic_error(no_value_no_default);
+        if (!default_func_) throw std::invalid_argument(no_value_no_default);
         return default_func_();
     } else {
+        if (value.type() != typeid(T)) throw std::invalid_argument("Incorrect option value type");
         return boost::any_cast<T>(value);
     }
 }
