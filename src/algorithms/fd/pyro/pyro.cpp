@@ -6,13 +6,13 @@
 
 #include <easylogging++.h>
 
+#include "config/error/option.h"
+#include "config/max_lhs/option.h"
+#include "config/names_and_descriptions.h"
+#include "config/option_using.h"
+#include "config/thread_number/option.h"
 #include "core/fd_g1_strategy.h"
 #include "core/key_g1_strategy.h"
-#include "util/config/error/option.h"
-#include "util/config/max_lhs/option.h"
-#include "util/config/names_and_descriptions.h"
-#include "util/config/option_using.h"
-#include "util/config/thread_number/option.h"
 
 namespace algos {
 
@@ -20,9 +20,7 @@ std::mutex searchSpacesMutex;
 
 Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
-    ucc_consumer_ = [this](auto const& key) {
-        this->DiscoverUcc(key);
-    };
+    ucc_consumer_ = [this](auto const& key) { this->DiscoverUcc(key); };
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
         this->FDAlgorithm::RegisterFd(fd.lhs_, fd.rhs_);

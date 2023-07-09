@@ -5,8 +5,8 @@
 #include <easylogging++.h>
 
 #include "algorithms/algo_factory.h"
-#include "util/config/all_options.h"
-#include "util/config/enum_to_available_values.h"
+#include "config/all_options.h"
+#include "config/enum_to_available_values.h"
 
 INITIALIZE_EASYLOGGINGPP
 

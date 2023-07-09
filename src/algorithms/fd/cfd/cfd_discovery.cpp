@@ -3,12 +3,12 @@
 #include <iterator>
 #include <thread>
 
+#include "config/equal_nulls/option.h"
+#include "config/names_and_descriptions.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
 #include "fd/cfd/util/cfd_output_util.h"
 #include "fd/cfd/util/set_util.h"
-#include "util/config/equal_nulls/option.h"
-#include "util/config/names_and_descriptions.h"
-#include "util/config/option_using.h"
-#include "util/config/tabular_data/input_table/option.h"
 
 // see algorithms/cfd/LICENSE
 

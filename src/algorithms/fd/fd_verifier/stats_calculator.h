@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "algorithms/fd/fd_verifier/highlight.h"
+#include "config/indices/type.h"
 #include "model/column_layout_relation_data.h"
 #include "model/column_layout_typed_relation_data.h"
-#include "util/config/indices/type.h"
 
 namespace algos::fd_verifier {
 

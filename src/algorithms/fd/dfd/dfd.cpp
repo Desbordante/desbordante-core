@@ -4,10 +4,10 @@
 #include <easylogging++.h>
 
 #include "algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
+#include "config/thread_number/option.h"
 #include "model/column_layout_relation_data.h"
 #include "model/relational_schema.h"
 #include "structures/position_list_index.h"
-#include "util/config/thread_number/option.h"
 
 namespace algos {
 

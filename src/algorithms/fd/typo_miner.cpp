@@ -1,10 +1,10 @@
 #include "algorithms/fd/typo_miner.h"
 
-#include "util/config/equal_nulls/option.h"
-#include "util/config/error/option.h"
-#include "util/config/names_and_descriptions.h"
-#include "util/config/option_using.h"
-#include "util/config/tabular_data/input_table/option.h"
+#include "config/equal_nulls/option.h"
+#include "config/error/option.h"
+#include "config/names_and_descriptions.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
 
 namespace algos {
 
