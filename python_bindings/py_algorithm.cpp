@@ -58,6 +58,14 @@ std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
     return algorithm_->GetNeededOptions();
 }
 
+std::unordered_set<std::string_view> PyAlgorithmBase::GetPossibleOptions() const {
+    return algorithm_->GetPossibleOptions();
+}
+
+std::string_view PyAlgorithmBase::GetDescription(std::string_view option_name) const {
+    return algorithm_->GetDescription(option_name);
+}
+
 py::frozenset PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     auto type_index = algorithm_->GetTypeIndex(option_name);
     if (type_index == void_index)
