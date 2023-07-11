@@ -1,0 +1,35 @@
+name: Python
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  test-python-bindings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download libraries
+        uses: ./.github/composite-actions/download-libraries
+        with:
+          download-pybind: true
+      - name: Configure CMake
+        run: >
+          cmake -B ${{github.workspace}}/build
+          -DCMAKE_C_COMPILER=gcc-10
+          -DCMAKE_CXX_COMPILER=g++-10
+          -DBOOST_ROOT=${{github.workspace}}/lib/boost
+          -DCMAKE_BUILD_TYPE=Release
+          -Dgtest_disable_pthreads=OFF
+          -DASAN=OFF
+          -DCOMPILE_PYBIND=ON
+          -DCOMPILE_TESTS=OFF
+          -DUNPACK_DATASETS=OFF
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config Release
+      - name: Test
+        working-directory: ${{github.workspace}}/build/src/python_bindings
+        shell: bash
+        run: python test_bindings.py
