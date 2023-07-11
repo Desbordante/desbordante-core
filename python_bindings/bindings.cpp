@@ -43,6 +43,7 @@
 #include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
 #include "py_ucc_algorithm.h"
+#include "util/config/tabular_data/input_table_type.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -89,6 +90,8 @@ PYBIND11_MODULE(desbordante, module) {
     }
 
     module.doc() = "A data profiling library";
+
+    py::class_<util::config::InputTable>(module, "Table");
 
     py::class_<ARStrings>(module, "AssociativeRule")
             .def("__str__", &ARStrings::ToString)

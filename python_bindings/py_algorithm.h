@@ -28,7 +28,7 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
-    [[nodiscard]] pybind11::frozenset GetOptionType(std::string_view option_name) const;
+    [[nodiscard]] pybind11::tuple GetOptionType(std::string_view option_name) const;
 
     // For pandas dataframes
     void LoadData(pybind11::handle dataframe, std::string name, pybind11::kwargs const& kwargs);
