@@ -15,12 +15,12 @@ namespace py = pybind11;
 
 namespace {
 
-constexpr static PyTypeObject* const py_int = &PyLong_Type;
-constexpr static PyTypeObject* const py_bool = &PyBool_Type;
-constexpr static PyTypeObject* const py_float = &PyFloat_Type;
-constexpr static PyTypeObject* const py_str = &PyUnicode_Type;
-constexpr static PyTypeObject* const py_list = &PyList_Type;
-constexpr static PyTypeObject* const py_tuple = &PyTuple_Type;
+constexpr PyTypeObject* const py_int = &PyLong_Type;
+constexpr PyTypeObject* const py_bool = &PyBool_Type;
+constexpr PyTypeObject* const py_float = &PyFloat_Type;
+constexpr PyTypeObject* const py_str = &PyUnicode_Type;
+constexpr PyTypeObject* const py_list = &PyList_Type;
+constexpr PyTypeObject* const py_tuple = &PyTuple_Type;
 
 py::handle MakeType(PyTypeObject* py_type_ptr) {
     // Does the same as `&py_type_ptr->ob_base.ob_base`: Python API simulates
