@@ -55,7 +55,7 @@ std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
     return algorithm_->GetNeededOptions();
 }
 
-py::frozenset PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
+py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     auto type_index = algorithm_->GetTypeIndex(option_name);
     if (type_index == void_index)
         throw std::invalid_argument{std::string{"Option named \""} + option_name.data() +
