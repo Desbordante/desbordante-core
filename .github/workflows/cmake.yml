@@ -68,7 +68,7 @@ jobs:
       uses: actions/cache@v3
       id: cache-datasets
       with:
-        path: ${{github.workspace}}/datasets
+        path: ${{github.workspace}}/datasets/datasets.zip
         key: ${{ runner.os }}datasets
     - name: Pull datasets
       run: bash pull_datasets.sh
