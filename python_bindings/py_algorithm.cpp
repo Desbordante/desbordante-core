@@ -37,7 +37,7 @@ void PyAlgorithmBase::Configure(py::kwargs const& kwargs, InputTable table) {
                 std::type_index type_index = algorithm_->GetTypeIndex(option_name);
                 assert(type_index != void_index);
                 return kwargs.contains(option_name)
-                               ? PyToAny(type_index, kwargs[py::str{option_name}])
+                               ? PyToAny(option_name, type_index, kwargs[py::str{option_name}])
                                : boost::any{};
             });
 }
@@ -47,8 +47,8 @@ void PyAlgorithmBase::SetOption(std::string_view option_name, py::handle option_
         algorithm_->SetOption(option_name);
         return;
     }
-    algorithm_->SetOption(option_name,
-                          PyToAny(algorithm_->GetTypeIndex(option_name), option_value));
+    algorithm_->SetOption(
+            option_name, PyToAny(option_name, algorithm_->GetTypeIndex(option_name), option_value));
 }
 
 std::unordered_set<std::string_view> PyAlgorithmBase::GetNeededOptions() const {
