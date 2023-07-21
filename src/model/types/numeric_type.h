@@ -6,7 +6,7 @@
 
 #include "imetrizable_type.h"
 #include "type.h"
-
+#include "cast_numeric_to_builtin.h"
 namespace model {
 
 class INumericType : public IMetrizableType {
