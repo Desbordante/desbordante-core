@@ -6,7 +6,9 @@ namespace model {
 
 class DoubleType final : public NumericType<Double> {
 public:
-    DoubleType() noexcept : NumericType<Double>(TypeId::kDouble) {}
+    DoubleType() /*noexcept*/ : NumericType<Double>(TypeId::kDouble) {
+        this->cast_to_cpp.reset(static_cast<model::ICastToCppType *>(new CastToDoubleType()));
+    }
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const final {
         Double l_val = GetValue(l);

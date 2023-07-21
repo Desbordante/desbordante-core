@@ -29,6 +29,8 @@ public:
 
     [[nodiscard]] virtual std::byte const* Min() const = 0;
     [[nodiscard]] virtual std::byte const* Max() const = 0;
+
+    std::unique_ptr<model::ICastToCppType> cast_to_cpp;
 };
 
 template <typename T>
