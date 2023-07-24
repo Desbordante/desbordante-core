@@ -18,6 +18,14 @@ using StdParamsMap = std::unordered_map<std::string, boost::any>;
 
 namespace details {
 
+inline boost::any GetAny(boost::program_options::variable_value const& value) {
+    return value.value();
+}
+
+inline boost::any GetAny(boost::any const& value) {
+    return value;
+}
+
 template <typename OptionMap>
 boost::any ExtractAnyFromMap(OptionMap& options, std::string_view option_name) {
     using std::is_same_v, std::decay, boost::program_options::variables_map;
@@ -26,11 +34,7 @@ boost::any ExtractAnyFromMap(OptionMap& options, std::string_view option_name) {
     if (it == options.end()) {
         throw std::out_of_range("No option named \"" + string_opt + "\" in parameters.");
     }
-    if constexpr (is_same_v<typename decay<OptionMap>::type, variables_map>) {
-        return options.extract(it).mapped().value();
-    } else {
-        return options.extract(it).mapped();
-    }
+    return GetAny(options.extract(it).mapped());
 }
 
 template <typename T, typename OptionMap>
@@ -41,7 +45,7 @@ T ExtractOptionValue(OptionMap&& options, std::string const& option_name) {
 template <typename OptionMap>
 boost::any GetOrEmpty(OptionMap const& options, std::string_view option_name) {
     auto it = options.find(std::string{option_name});
-    return it == options.end() ? boost::any{} : it->second;
+    return it == options.end() ? boost::any{} : GetAny(it->second);
 }
 
 }  // namespace details
