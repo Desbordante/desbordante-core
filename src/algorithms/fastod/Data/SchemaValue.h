@@ -17,6 +17,13 @@ public:
 
     std::string AsString() const;
     std::byte const* AsBytes() const noexcept;
+
+    friend bool operator==(SchemaValue const& x, SchemaValue const& y);
+    friend bool operator!=(SchemaValue const& x, SchemaValue const& y);
+    friend bool operator<(SchemaValue const& x, SchemaValue const& y);
+    friend bool operator<=(SchemaValue const& x, SchemaValue const& y);
+    friend bool operator>(SchemaValue const& x, SchemaValue const& y);
+    friend bool operator>=(SchemaValue const& x, SchemaValue const& y);
 };
 
 } // namespace algos::fastod

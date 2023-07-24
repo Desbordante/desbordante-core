@@ -20,3 +20,27 @@ std::string SchemaValue::AsString() const {
 std::byte const* SchemaValue::AsBytes() const noexcept {
     return column_data_.GetValue(index_in_column_);
 }
+
+bool algos::fastod::operator==(SchemaValue const& x, SchemaValue const& y) {
+    return false; // TODO
+}
+
+bool algos::fastod::operator!=(SchemaValue const& x, SchemaValue const& y) {
+    return !(x == y);
+}
+
+bool algos::fastod::operator<(SchemaValue const& x, SchemaValue const& y) {
+    return false; // TODO
+}
+
+bool algos::fastod::operator<=(SchemaValue const& x, SchemaValue const& y) {
+    return (x < y) || (x == y);
+}
+
+bool algos::fastod::operator>(SchemaValue const& x, SchemaValue const& y) {
+    return !(x <= y);
+}
+
+bool algos::fastod::operator>=(SchemaValue const& x, SchemaValue const& y) {
+    return !(x < y);
+}
