@@ -1,8 +1,8 @@
 #include <string>
 
-#include "Operator.h"
 #include "SchemaValue.h"
 #include "OperatorType.h"
+#include "Operator.h"
 
 using namespace algos::fastod;
 
@@ -143,10 +143,14 @@ std::vector<Operator> Operator::SupportedOperators() noexcept {
     };
 }
 
-bool algos::fastod::operator==(Operator const& x, Operator const& y) {
+namespace algos::fastod {
+
+bool operator==(Operator const& x, Operator const& y) {
     return x.GetType() == y.GetType();
 }
 
-bool algos::fastod::operator!=(Operator const& x, Operator const& y) {
+bool operator!=(Operator const& x, Operator const& y) {
     return !(x == y);
 }
+
+} // namespace algos::fastod
