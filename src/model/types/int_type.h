@@ -11,7 +11,7 @@ public:
     [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<IntType>();
     }
-    virtual ICastToCppType & CastToBuitin(){
+    virtual ICastToCppType & CastToBuiltin(){
         return this->caster_to_builtin_;
     }
     protected:

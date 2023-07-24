@@ -37,7 +37,7 @@ public:
             return nullptr;
         }
     }
-    virtual ICastToCppType & CastToBuitin(){
+    virtual ICastToCppType & CastToBuiltin(){
         return this->caster_to_builtin_;
     }
     protected:

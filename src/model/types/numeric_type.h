@@ -15,7 +15,7 @@ public:
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
-    virtual model::ICastToCppType & CastToBuitin() = 0;
+    virtual model::ICastToCppType & CastToBuiltin() = 0;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -47,7 +47,7 @@ protected:
     }
 
 public:
-    virtual ICastToCppType & CastToBuitin() override{
+    virtual ICastToCppType & CastToBuiltin() override{
         return this->caster_to_builtin_;
     }
     using UnderlyingType = T;
