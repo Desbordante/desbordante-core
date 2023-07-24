@@ -16,7 +16,7 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept
     : columns_data_(std::move(columns_data)) { }
 
 SchemaValue DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
-    return SchemaValue(columns_data_.at(attribute_index), tuple_index);
+    return SchemaValue::FromTypedColumnData(columns_data_.at(attribute_index), tuple_index);
 }
 
 size_t DataFrame::GetColumnCount() const noexcept {
