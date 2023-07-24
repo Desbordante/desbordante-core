@@ -58,11 +58,13 @@ void StatsCalculator::PrintStatistics() const {
     }
 }
 
-void StatsCalculator::CalculateStatistics(std::deque<util::PLI::Cluster> clusters) {
-    auto const& pt = relation_->GetColumnData(rhs_index_).GetProbingTable();
+void StatsCalculator::CalculateStatistics(util::PLI const* lhs_pli, util::PLI const* rhs_pli) {
+    std::deque<util::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
+    std::shared_ptr<util::PLI::Cluster const> pt_shared = rhs_pli->CalculateAndGetProbingTable();
+    util::PLI::Cluster const& pt = *pt_shared.get();
     size_t num_tuples_conflicting_on_rhs = 0.;
 
-    for (auto& cluster : clusters) {
+    for (auto& cluster : lhs_clusters) {
         std::unordered_map<ClusterIndex, unsigned> frequencies =
                 util::PLI::CreateFrequencies(cluster, pt);
         size_t num_distinct_rhs_values = CalculateNumDistinctRhsValues(frequencies, cluster.size());
@@ -117,8 +119,10 @@ void StatsCalculator::VisualizeHighlights() const {
                    << ", Number of different RHS values: " << highlight.GetNumDistinctRhsValues()
                    << ", Proportion of most frequent RHS value: "
                    << highlight.GetMostFrequentRhsValueProportion();
-        for (auto index : highlight.GetCluster()) {
-            LOG(DEBUG) << GetStringValueByIndex(index, rhs_index_);
+        if (rhs_indices_.size() == 1) {
+            for (auto index : highlight.GetCluster()) {
+                LOG(DEBUG) << GetStringValueByIndex(index, rhs_indices_[0]);
+            }
         }
     }
 }
