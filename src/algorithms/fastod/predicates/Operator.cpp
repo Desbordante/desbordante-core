@@ -2,7 +2,7 @@
 
 #include "Operator.h"
 #include "OperatorType.h"
-#include "../Data/SchemaValue.h"
+#include "SchemaValue.h"
 
 using namespace algos::fastod;
 
