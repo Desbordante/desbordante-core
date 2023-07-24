@@ -4,10 +4,10 @@ namespace algos::fastod {
 
 class Fastod {
 private:
-    int _myValue;
+    int my_value_;
 
 public:
-    Fastod() = default;
+    Fastod() noexcept = default;
 };
 
 } // namespace algos::fatod
