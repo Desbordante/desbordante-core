@@ -1,6 +1,6 @@
 #include <vector>
 #include <string>
-#include <algorithm>
+#include <utility>
 #include <filesystem>
 
 #include "parser/csv_parser.h"
@@ -15,7 +15,7 @@ using namespace algos::fastod;
 DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept
     : columns_data_(std::move(columns_data)) { }
 
-SchemaValue const& DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
+SchemaValue DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
     return SchemaValue(columns_data_.at(attribute_index), tuple_index);
 }
 
@@ -24,12 +24,9 @@ size_t DataFrame::GetColumnCount() const noexcept {
 }
 
 size_t DataFrame::GetTupleCount() const noexcept {
-    auto minimum = std::min(columns_data_.cbegin(), columns_data_.cend(),
-        [](model::TypedColumnData const& x, model::TypedColumnData const& y) {
-            return x.GetNumRows() < y.GetNumRows();
-    });
-
-    return minimum->GetNumRows();
+    return columns_data_.size() > 0
+        ? columns_data_.at(0).GetNumRows()
+        : 0;
 }
 
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path) {
