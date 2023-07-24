@@ -20,7 +20,7 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
     util::config::IndicesType lhs_indices_;
-    util::config::IndexType rhs_index_;
+    util::config::IndicesType rhs_indices_;
 
     size_t num_error_rows_ = 0;
     long double error_ = 0;
@@ -44,7 +44,7 @@ private:
 public:
     using HighlightCompareFunction = std::function<bool(Highlight const& h1, Highlight const& h2)>;
 
-    void CalculateStatistics(std::deque<util::PLI::Cluster> clusters);
+    void CalculateStatistics(util::PLI const* lhs_pli, util::PLI const* rhs_pli);
 
     void PrintStatistics() const;
 
@@ -88,11 +88,11 @@ public:
     explicit StatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
                              std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,
                              util::config::IndicesType lhs_indices,
-                             util::config::IndexType rhs_index)
+                             util::config::IndicesType rhs_indices)
         : relation_(std::move(relation)),
           typed_relation_(std::move(typed_relation)),
           lhs_indices_(std::move(lhs_indices)),
-          rhs_index_(rhs_index) {}
+          rhs_indices_(std::move(rhs_indices)) {}
 };
 
 }  // namespace algos::fd_verifier
