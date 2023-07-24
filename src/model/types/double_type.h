@@ -6,9 +6,7 @@ namespace model {
 
 class DoubleType final : public NumericType<Double> {
 public:
-    DoubleType() /*noexcept*/ : NumericType<Double>(TypeId::kDouble) {
-        this->cast_to_cpp.reset(static_cast<model::ICastToCppType *>(new CastToDoubleType()));
-    }
+    DoubleType() /*noexcept*/ : NumericType<Double>(TypeId::kDouble) {}
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const final {
         Double l_val = GetValue(l);
@@ -39,6 +37,11 @@ public:
             return nullptr;
         }
     }
+    virtual ICastToCppType & CastToBuitin(){
+        return this->caster_to_builtin_;
+    }
+    protected:
+    model::CastFromDoubleType caster_to_builtin_;
 };
 
 }  // namespace model

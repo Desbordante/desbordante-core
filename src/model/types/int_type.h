@@ -11,6 +11,11 @@ public:
     [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
         return std::make_unique<IntType>();
     }
+    virtual ICastToCppType & CastToBuitin(){
+        return this->caster_to_builtin_;
+    }
+    protected:
+    model::CastFromIntType caster_to_builtin_;
 };
 
 }  // namespace model

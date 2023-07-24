@@ -15,6 +15,8 @@ public:
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
+    virtual model::ICastToCppType & CastToBuitin() = 0;
+
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
     virtual std::byte* Sub(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -30,12 +32,13 @@ public:
     [[nodiscard]] virtual std::byte const* Min() const = 0;
     [[nodiscard]] virtual std::byte const* Max() const = 0;
 
-    std::unique_ptr<model::ICastToCppType> cast_to_cpp;
+    
 };
 
 template <typename T>
 class NumericType : public INumericType {
 protected:
+    model::EmptyCastToCpp caster_to_builtin_;
     static T const& GetValue(std::byte const* buf) {
         return INumericType::GetValue<T>(buf);
     }
@@ -44,6 +47,9 @@ protected:
     }
 
 public:
+    virtual ICastToCppType & CastToBuitin() override{
+        return this->caster_to_builtin_;
+    }
     using UnderlyingType = T;
 
     static constexpr T kMinValue = std::numeric_limits<T>::lowest();
