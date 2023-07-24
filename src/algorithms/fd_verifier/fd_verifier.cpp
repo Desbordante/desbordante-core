@@ -22,19 +22,18 @@ void FDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
-    auto check_rhs = [this](util::config::IndexType rhs_index) {
-        util::config::ValidateIndex(rhs_index, relation_->GetSchema()->GetNumColumns());
-    };
 
     RegisterOption(util::config::TableOpt(&input_table_));
     RegisterOption(util::config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(util::config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
-    RegisterOption(Option{&rhs_index_, kRhsIndex, kDRhsIndex}.SetValueCheck(check_rhs));
+    RegisterOption(util::config::RhsIndicesOpt(&rhs_indices_, get_schema_cols));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
     using namespace util::config::names;
-    MakeOptionsAvailable({util::config::LhsIndicesOpt.GetName(), kRhsIndex});
+
+    MakeOptionsAvailable(
+            {util::config::LhsIndicesOpt.GetName(), util::config::RhsIndicesOpt.GetName()});
 }
 
 void FDVerifier::LoadDataInternal() {
@@ -50,8 +49,8 @@ void FDVerifier::LoadDataInternal() {
 unsigned long long FDVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
-    stats_calculator_ =
-            std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_, rhs_index_);
+    stats_calculator_ = std::make_unique<StatsCalculator>(relation_, typed_relation_, lhs_indices_,
+                                                          rhs_indices_);
 
     VerifyFD();
     SortHighlightsByProportionDescending();
@@ -63,22 +62,28 @@ unsigned long long FDVerifier::ExecuteInternal() {
 }
 
 void FDVerifier::VerifyFD() const {
-    std::shared_ptr<util::PLI const> pli =
+    std::shared_ptr<util::PLI const> lhs_pli =
             relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
 
     for (size_t i = 1; i < lhs_indices_.size(); ++i) {
-        pli = pli->Intersect(relation_->GetColumnData(lhs_indices_[i]).GetPositionListIndex());
+        lhs_pli = lhs_pli->Intersect(
+                relation_->GetColumnData(lhs_indices_[i]).GetPositionListIndex());
     }
 
-    std::unique_ptr<util::PLI const> intersection_pli =
-            pli->Intersect(relation_->GetColumnData(rhs_index_).GetPositionListIndex());
+    std::shared_ptr<util::PLI const> rhs_pli =
+            relation_->GetColumnData(rhs_indices_[0]).GetPliOwnership();
 
-    if (pli->GetNumCluster() == intersection_pli->GetNumCluster()) {
+    for (size_t i = 1; i < rhs_indices_.size(); ++i) {
+        rhs_pli = rhs_pli->Intersect(
+                relation_->GetColumnData(rhs_indices_[i]).GetPositionListIndex());
+    }
+
+    std::unique_ptr<util::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
+    if (lhs_pli->GetNumCluster() == intersection_pli->GetNumCluster()) {
         return;
     }
 
-    auto& lhs_clusters = pli->GetIndex();
-    stats_calculator_->CalculateStatistics(std::move(lhs_clusters));
+    stats_calculator_->CalculateStatistics(lhs_pli.get(), rhs_pli.get());
 }
 
 void FDVerifier::SortHighlightsByProportionAscending() const {

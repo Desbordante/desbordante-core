@@ -20,7 +20,7 @@ private:
     util::config::InputTable input_table_;
 
     util::config::IndicesType lhs_indices_;
-    util::config::IndexType rhs_index_;
+    util::config::IndicesType rhs_indices_;
     util::config::EqNullsType is_null_equal_null_;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
