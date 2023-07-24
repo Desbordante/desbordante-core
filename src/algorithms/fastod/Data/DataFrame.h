@@ -18,7 +18,7 @@ private:
 public:
     explicit DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept;
 
-    SchemaValue const& GetValue(int tuple_index, int attribute_index) const noexcept;
+    SchemaValue GetValue(int tuple_index, int attribute_index) const noexcept;
     
     size_t GetColumnCount() const noexcept;
     size_t GetTupleCount() const noexcept;
