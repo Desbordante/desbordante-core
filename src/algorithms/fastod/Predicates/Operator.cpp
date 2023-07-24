@@ -1,8 +1,8 @@
 #include <string>
 
-#include "SchemaValue.h"
-#include "OperatorType.h"
 #include "Operator.h"
+#include "OperatorType.h"
+#include "../Data/SchemaValue.h"
 
 using namespace algos::fastod;
 
@@ -38,6 +38,8 @@ Operator Operator::Reverse() const noexcept {
         case OperatorType::GreaterOrEqual: return Operator(OperatorType::Less);
         case OperatorType::NotEqual: return Operator(OperatorType::Equal);
     }
+
+    return Operator(*this);
 }
 
 bool Operator::Oppose(Operator const& other) const noexcept {
@@ -77,9 +79,9 @@ bool Operator::Oppose(Operator const& other) const noexcept {
             if (otherType == OperatorType::Equal)
                 return true;
             break;
-            
-        default: return false;
     }
+
+    return false;
 }
 
 bool Operator::Imply(Operator const& other) const noexcept {
