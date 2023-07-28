@@ -2,9 +2,17 @@
 
 #include "numeric_type.h"
 
+//#include "int_type.h"
+
+#include "cast/cast_from_double.h"
 namespace model {
 
+
+
+
 class DoubleType final : public NumericType<Double> {
+private:
+
 public:
     DoubleType() /*noexcept*/ : NumericType<Double>(TypeId::kDouble) {}
 
@@ -37,11 +45,17 @@ public:
             return nullptr;
         }
     }
-    virtual ICastToCppType & CastToBuiltin(){
+    ICastToCppType & CastToBuiltin() override{
         return this->caster_to_builtin_;
+    }
+    ICastToNumericType& CastToNumeric()override{
+        return this->caster_to_numeric_;
     }
     protected:
     model::CastFromDoubleType caster_to_builtin_;
+    CastFromDoubleTypeToNumeric caster_to_numeric_;
+    
 };
+
 
 }  // namespace model

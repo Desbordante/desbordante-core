@@ -6,8 +6,11 @@
 
 #include "imetrizable_type.h"
 #include "type.h"
-#include "cast_numeric_to_builtin.h"
+
+#include "cast/cast_to_builtin_type.h"
+#include "cast/icast_to_numeric_type.h"
 namespace model {
+
 
 class INumericType : public IMetrizableType {
 public:
@@ -16,6 +19,7 @@ public:
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
     virtual model::ICastToCppType & CastToBuiltin() = 0;
+    virtual model::ICastToNumericType & CastToNumeric()=0;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -49,6 +53,10 @@ protected:
 public:
     virtual ICastToCppType & CastToBuiltin() override{
         return this->caster_to_builtin_;
+    }
+    virtual ICastToNumericType& CastToNumeric() override{
+        static_assert(true,"unable to cast template NumericType to its defenition");
+        throw std::logic_error("unable to cast template NumericType to its defenition");
     }
     using UnderlyingType = T;
 
@@ -175,5 +183,7 @@ std::byte* NumericType<T>::Abs(std::byte const* num, std::byte* res) const {
     GetValue(res) = std::abs(GetValue(num));
     return res;
 }
+
+
 
 }  // namespace model
