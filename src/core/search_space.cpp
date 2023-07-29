@@ -131,8 +131,8 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
         LOG(TRACE) << boost::format{"  Escaped: %1%"} % escaped_launch_pad_vertical.ToString();
         LOG(DEBUG) << boost::format{"  Proposed launch pad arity: %1% should be <= max_lhs: %2%"} %
                               escaped_launch_pad.vertical_.GetArity() %
-                              context_->GetConfiguration().max_lhs;
-        if (escaped_launch_pad.vertical_.GetArity() <= context_->GetConfiguration().max_lhs) {
+                              context_->GetParameters().max_lhs;
+        if (escaped_launch_pad.vertical_.GetArity() <= context_->GetParameters().max_lhs) {
             launch_pads_.insert(escaped_launch_pad);
             launch_pad_index_->Put(escaped_launch_pad.vertical_,
                                    std::make_unique<DependencyCandidate>(escaped_launch_pad));
@@ -146,7 +146,7 @@ void SearchSpace::AddLaunchPad(const DependencyCandidate& launch_pad) {
 }
 
 void SearchSpace::ReturnLaunchPad(DependencyCandidate const& launch_pad, bool is_defer) {
-    if (is_defer && context_->GetConfiguration().is_defer_failed_launch_pads) {
+    if (is_defer && context_->GetParameters().is_defer_failed_launch_pads) {
         deferred_launch_pads_.push_back(launch_pad);
         LOG(TRACE) << boost::format{"Deferred seed %1%"} % launch_pad.vertical_.ToString();
     } else {
@@ -172,7 +172,7 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
     while (true) {
         LOG(TRACE) << boost::format{"-> %1%"} % traversal_candidate.vertical_.ToString();
 
-        if (context_->GetConfiguration().is_check_estimates) {
+        if (context_->GetParameters().is_check_estimates) {
             CheckEstimate(strategy_.get(), traversal_candidate);
         }
 
@@ -191,7 +191,7 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
                                       traversal_candidate.error_;
                 error.reset();
             } else {
-                error = context_->GetConfiguration().is_estimate_only
+                error = context_->GetParameters().is_estimate_only
                                 ? traversal_candidate.error_.GetMean()
                                 : strategy_->CalculateError(traversal_candidate.vertical_);
                 // double errorDiff = *error - traversal_candidate.error_.GetMean();
@@ -213,7 +213,7 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
         if (traversal_candidate.vertical_.GetArity() >=
                     context_->GetColumnLayoutRelationData()->GetNumColumns() -
                             strategy_->GetNumIrrelevantColumns() ||
-            traversal_candidate.vertical_.GetArity() >= context_->GetConfiguration().max_lhs) {
+            traversal_candidate.vertical_.GetArity() >= context_->GetParameters().max_lhs) {
             break;
         }
 
@@ -431,7 +431,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
         }
 
         double error =
-                context_->GetConfiguration().is_estimate_only
+                context_->GetParameters().is_estimate_only
                         ? strategy_->CreateDependencyCandidate(alleged_max_non_dep).error_.GetMean()
                         : strategy_->CalculateError(alleged_max_non_dep);
         bool is_non_dep = error > strategy_->min_non_dependency_error_;
@@ -483,7 +483,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
         auto nested_search_space = std::make_unique<SearchSpace>(
                 -1, strategy_->CreateClone(), std::move(new_scope), std::move(global_visitees_),
                 context_->GetSchema(), launch_pads_.key_comp(), recursion_depth_ + 1,
-                sample_boost_ * context_->GetConfiguration().sample_booster);
+                sample_boost_ * context_->GetParameters().sample_booster);
         nested_search_space->SetContext(context_);
 
         std::unordered_set<Column> scope_columns;
@@ -619,7 +619,7 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
         alleged_min_deps->Put(min_dep_candidate.vertical_,
                               std::make_unique<VerticalInfo>(true, are_all_parents_known_non_deps,
                                                              candidate_error));
-        if (are_all_parents_known_non_deps && context_->GetConfiguration().is_check_estimates) {
+        if (are_all_parents_known_non_deps && context_->GetParameters().is_check_estimates) {
             RequireMinimalDependency(strategy, min_dep_candidate.vertical_);
         }
         trickling_down_from_ += std::chrono::duration_cast<std::chrono::nanoseconds>(
