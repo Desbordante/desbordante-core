@@ -6,9 +6,9 @@
 #include "agree_set_sample.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "configuration.h"
 #include "custom/custom_random.h"
 #include "dependency_consumer.h"
+#include "parameters.h"
 #include "partial_fd.h"
 #include "partial_key.h"
 
@@ -25,7 +25,7 @@ class VerticalMap;
 // Dependency Consumer?
 class ProfilingContext : public DependencyConsumer {
 private:
-    Configuration configuration_;
+    pyro::Parameters parameters_;
     std::unique_ptr<util::PLICache> pli_cache_;
     std::unique_ptr<util::VerticalMap<util::AgreeSetSample>> agree_set_samples_;  // unique_ptr?
     ColumnLayoutRelationData* relation_data_;
@@ -39,7 +39,7 @@ private:
 public:
     enum class ObjectToCache { kPli, kAs };
 
-    ProfilingContext(Configuration configuration, ColumnLayoutRelationData* relation_data,
+    ProfilingContext(pyro::Parameters parameters, ColumnLayoutRelationData* relation_data,
                      std::function<void(PartialKey const&)> const& ucc_consumer,
                      std::function<void(PartialFD const&)> const& fd_consumer,
                      CachingMethod const& caching_method,
@@ -58,8 +58,8 @@ public:
         return relation_data_->GetSchema();
     }
 
-    Configuration const& GetConfiguration() const {
-        return configuration_;
+    pyro::Parameters const& GetParameters() const {
+        return parameters_;
     }
     ColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
         return relation_data_;

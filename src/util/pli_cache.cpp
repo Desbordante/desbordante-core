@@ -139,7 +139,7 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
     //  поэтому приходится через variant разбирать. Проверить, насколько много платим за обёртку.
     // Intersect and cache
     std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> variant_intersection_pli;
-    if (operands.size() >= profiling_context->GetConfiguration().nary_intersection_size) {
+    if (operands.size() >= profiling_context->GetParameters().nary_intersection_size) {
         PositionListIndexRank base_pli_rank = operands[0];
         auto intersection_pli = base_pli_rank.pli_->ProbeAll(
                 vertical.Without(*base_pli_rank.vertical_), *relation_data_);
@@ -182,7 +182,7 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::C
     switch (caching_method_) {
         case CachingMethod::kCoin:
             if (profiling_context->NextDouble() <
-                profiling_context->GetConfiguration().caching_probability) {
+                profiling_context->GetParameters().caching_probability) {
                 index_->Put(vertical, std::move(pli));
                 return pli_pointer;
             } else {
