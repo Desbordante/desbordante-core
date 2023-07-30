@@ -22,6 +22,7 @@ public:
 
     bool Oppose(Operator const& other) const noexcept;
     bool Imply(Operator const& other) const noexcept;
+    bool Satisfy(SchemaValue const& first, SchemaValue const& second) const noexcept;
     bool Violate(SchemaValue const& first, SchemaValue const& second) const noexcept;
 
     bool IsLessOrGreater() const noexcept;

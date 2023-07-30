@@ -114,6 +114,10 @@ bool Operator::Imply(Operator const& other) const noexcept {
     return false;
 }
 
+bool Operator::Satisfy(SchemaValue const& first, SchemaValue const& second) const noexcept {
+    return !Violate(first, second);
+}
+
 bool Operator::Violate(SchemaValue const& first, SchemaValue const& second) const noexcept {
     switch (type_) {
         case OperatorType::Equal: return first != second;

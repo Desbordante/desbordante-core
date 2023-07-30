@@ -14,16 +14,16 @@ private:
 public:
     AttributeSet() noexcept;
     AttributeSet(int attribute) noexcept;
-    AttributeSet(std::vector<int> attributes) noexcept;
-    AttributeSet(std::set<int> set) noexcept;
+    AttributeSet(const std::vector<int>& attributes) noexcept;
+    AttributeSet(const std::set<int>& set) noexcept;
 
     bool ContainsAttribute(int attribute) const noexcept;
     AttributeSet AddAttribute(int attribute) const noexcept;
     AttributeSet DeleteAttribute(int attribute) const noexcept;
 
-    AttributeSet Intersect(AttributeSet other) const noexcept;
-    AttributeSet Union(AttributeSet other) const noexcept;
-    AttributeSet Difference(AttributeSet other) const noexcept;
+    AttributeSet Intersect(const AttributeSet& other) const noexcept;
+    AttributeSet Union(const AttributeSet& other) const noexcept;
+    AttributeSet Difference(const AttributeSet& other) const noexcept;
 
     bool IsEmpty() const noexcept;
     std::string ToString() const noexcept;
@@ -35,6 +35,9 @@ public:
     std::set<int>::iterator end() const noexcept;
 
     friend bool operator==(AttributeSet const& x, AttributeSet const& y);
+    friend bool operator<(const AttributeSet& x, const AttributeSet& y);
+
+    AttributeSet operator=(const AttributeSet& rhs);
 };
 
 } // namespace algos::fastod 

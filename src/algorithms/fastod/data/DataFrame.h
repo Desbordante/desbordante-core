@@ -16,6 +16,7 @@ private:
     std::vector<model::TypedColumnData> columns_data_;
 
 public:
+    DataFrame(const DataFrame&) = delete;
     explicit DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept;
 
     SchemaValue GetValue(int tuple_index, int attribute_index) const noexcept;
@@ -29,6 +30,7 @@ public:
                              char separator,
                              bool has_header,
                              util::config::EqNullsType is_null_equal_null);
+
 };
 
 } // namespace algos::fatod

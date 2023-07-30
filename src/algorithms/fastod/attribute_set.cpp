@@ -11,11 +11,11 @@ AttributeSet::AttributeSet() noexcept : set_(), value_(0) {}
 
 AttributeSet::AttributeSet(int attribute) noexcept : set_({attribute}), value_(1 << attribute) {}
 
-AttributeSet::AttributeSet(std::vector<int> attributes) noexcept :
+AttributeSet::AttributeSet(const std::vector<int>& attributes) noexcept :
     set_(attributes.cbegin(), attributes.cend()),
     value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, [&](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
 
-AttributeSet::AttributeSet(std::set<int> set) noexcept :
+AttributeSet::AttributeSet(const std::set<int>& set) noexcept :
     set_(set),
     value_(std::accumulate(set.cbegin(), set.cend(), 0, [&](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
 
@@ -45,14 +45,14 @@ AttributeSet AttributeSet::DeleteAttribute(int attribute) const noexcept {
     return AttributeSet(new_set);
 }
 
-AttributeSet AttributeSet::Intersect(AttributeSet other) const noexcept {
+AttributeSet AttributeSet::Intersect(const AttributeSet& other) const noexcept {
     std::vector<int> result;
     std::set_intersection(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
     return AttributeSet(result);
 }
 
-AttributeSet AttributeSet::Union(AttributeSet other) const noexcept {
+AttributeSet AttributeSet::Union(const AttributeSet& other) const noexcept {
     std::vector<int> result;
     std::set_difference(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
@@ -99,10 +99,18 @@ std::set<int>::iterator AttributeSet::end() const noexcept {
     return set_.end();
 }
 
+AttributeSet AttributeSet::operator=(const AttributeSet& rhs) {
+    return AttributeSet(rhs.set_);
+}
+
 namespace algos::fastod {
 
 bool operator==(AttributeSet const& x, AttributeSet const& y) {
     return x.set_ == y.set_;
+}
+
+bool operator<(const AttributeSet& x, const AttributeSet& y) {
+    return x.value_ < y.value_;
 }
 
 } // namespace algos::fastod

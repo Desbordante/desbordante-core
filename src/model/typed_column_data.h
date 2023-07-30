@@ -41,8 +41,8 @@ private:
     friend class TypedColumnDataFactory;
 
 public:
-    TypedColumnData(TypedColumnData const& other) = delete;
-    TypedColumnData& operator=(TypedColumnData const& other) = delete;
+//    TypedColumnData(TypedColumnData const& other) = delete;
+//    TypedColumnData& operator=(TypedColumnData const& other) = delete;
     TypedColumnData(TypedColumnData&& other) noexcept = default;
     TypedColumnData& operator=(TypedColumnData&& other) noexcept = default;
 
