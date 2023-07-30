@@ -6,16 +6,30 @@ namespace algos::fastod {
 
 class AttributePair {
 private:
-    std::pair<SingleAttributePredicate, int> const pair_;
+    const std::pair<SingleAttributePredicate, int> pair_;
 
 public:
-    AttributePair(SingleAttributePredicate left, int right) noexcept;
+    AttributePair(const SingleAttributePredicate& left, int right) noexcept;
 
-    SingleAttributePredicate GetLeft() const noexcept;
+    const SingleAttributePredicate& GetLeft() const noexcept;
     int GetRight() const noexcept;
 
     std::string ToString() const;
-    friend bool operator==(AttributePair const& x, AttributePair const& y);
+
+    friend bool operator==(const AttributePair& x, const AttributePair& y);
 };
 
 } // namespace algos::fastod 
+
+namespace std {
+
+template <>
+struct hash<algos::fastod::AttributePair> {
+    size_t operator()(const algos::fastod::AttributePair& pair) const {
+        auto left_hash = std::hash<int>()(pair.GetLeft().GetHashCode());
+        auto right_hash = std::hash<int>()(pair.GetRight());
+        return left_hash ^ right_hash;
+    }
+};
+
+} //namespace std;

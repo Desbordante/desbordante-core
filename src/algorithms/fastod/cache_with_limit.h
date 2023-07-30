@@ -15,9 +15,9 @@ private:
 public:
     CacheWithLimit(size_t max_size) noexcept;
     
-    bool Contains(K key) const noexcept;
-    V& Get(K key) const noexcept;
-    void Set(K key, V value);
+    bool Contains(const K& key) const noexcept;
+    const V& Get(const K& key) const noexcept;
+    void Set(const K& key, const V& value);
 };
 
 } // namespace algos::fastod;

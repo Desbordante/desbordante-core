@@ -551,7 +551,7 @@ const std::vector<model::TypedColumnData>& DataStats::GetData() const noexcept {
     return col_data_;
 }
 
-std::string DataStats::ToString() const {
+std::string DataStats::ToString() const{
     std::stringstream res;
     for (size_t i = 0; i < GetNumberOfColumns(); ++i) {
         res << "Column num = " << i << '\n';
