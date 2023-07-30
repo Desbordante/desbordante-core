@@ -55,3 +55,12 @@ SingleAttributePredicate SingleAttributePredicate::GetInstance(int attribute, Op
     
     return predicates[predicate_index];
 }
+
+namespace algos::fastod {
+
+bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y) {
+    return x.GetAttribute() == y.GetAttribute();
+}
+
+} // namespace algos::fastod
+
