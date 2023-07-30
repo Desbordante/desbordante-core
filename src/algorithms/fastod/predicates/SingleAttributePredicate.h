@@ -28,6 +28,8 @@ public:
                  int second_tuple_index) const noexcept;
 
     static SingleAttributePredicate GetInstance(int attribute, Operator const& op);
+
+    friend bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y);
 };
 
 } // namespace algos::fatod
