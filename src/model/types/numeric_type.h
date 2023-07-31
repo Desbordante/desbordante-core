@@ -42,7 +42,7 @@ public:
 template <typename T>
 class NumericType : public INumericType {
 protected:
-    model::EmptyCastToCpp caster_to_builtin_;
+    model::CastToCppType<T> caster_to_builtin_;
     static T const& GetValue(std::byte const* buf) {
         return INumericType::GetValue<T>(buf);
     }

@@ -13,16 +13,4 @@ class CastToCppType: public ICastToCppType{
         return static_cast<float> (*reinterpret_cast<T*>(buf));
     }
 };
-
-class EmptyCastToCpp:public ICastToCppType{
-    model::Double GetDouble(std::byte * buf) override{
-        throw std::logic_error("only unsafe cast implemented");
-    }
-    model::Int GetInt(std::byte * buf)override{
-        throw std::logic_error("only unsafe cast implemented");
-    }
-    float GetFloat(std::byte * buf)override{
-        throw std::logic_error("only unsafe cast implemented");
-    }
-};
 }//namespace model
