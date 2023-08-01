@@ -18,8 +18,8 @@
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
-#include "model/column_layout_relation_data.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/column_layout_typed_relation_data.h"
 #include "util/convex_hull.h"
 #include "util/qgram_vector.h"
 

@@ -3,6 +3,8 @@
 // https://github.com/cupertank
 //
 
+#include "position_list_index.h"
+
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -14,9 +16,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "column_layout_relation_data.h"
-#include "position_list_index.h"
-#include "vertical.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/vertical.h"
 
 namespace structures {
 

@@ -7,9 +7,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "relational_schema.h"
+#include "model/table/relational_schema.h"
+#include "model/table/vertical.h"
 #include "structures/position_list_index.h"
-#include "vertical.h"
 
 namespace structures {
 

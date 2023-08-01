@@ -12,7 +12,7 @@
 
 #include "config/ioption.h"
 #include "config/option.h"
-#include "model/idataset_stream.h"
+#include "model/table/idataset_stream.h"
 #include "parser/csv_parser.h"
 #include "util/progress.h"
 

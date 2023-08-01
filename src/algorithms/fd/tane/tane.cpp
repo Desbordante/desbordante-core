@@ -11,10 +11,10 @@
 #include "config/max_lhs/option.h"
 #include "lattice_level.h"
 #include "lattice_vertex.h"
-#include "model/column_combination.h"
-#include "model/column_data.h"
-#include "model/column_layout_relation_data.h"
-#include "model/relational_schema.h"
+#include "model/table/column_combination.h"
+#include "model/table/column_data.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/relational_schema.h"
 
 namespace algos {
 

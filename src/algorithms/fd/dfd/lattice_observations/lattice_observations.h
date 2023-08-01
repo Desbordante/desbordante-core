@@ -2,10 +2,10 @@
 
 #include <unordered_map>
 
-#include "vertical.h"
 #include "../src/custom/custom_hashes.h"
 #include "dfd/column_order/column_order.h"
 #include "dfd/node_category.h"
+#include "model/table/vertical.h"
 
 class LatticeObservations : public std::unordered_map<Vertical, NodeCategory> {
 public:

@@ -7,10 +7,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column_layout_relation_data.h"
 #include "confidence_interval.h"
 #include "custom/custom_random.h"
-#include "vertical.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/vertical.h"
 
 namespace structures {
 

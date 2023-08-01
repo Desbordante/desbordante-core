@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "idataset_stream.h"
+#include "model/table/idataset_stream.h"
 
 class CSVParser : public model::IDatasetStream {
 private:

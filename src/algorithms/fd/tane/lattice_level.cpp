@@ -1,9 +1,10 @@
+#include "lattice_level.h"
+
 #include <algorithm>
 
 #include <easylogging++.h>
 
-#include "column_combination.h"
-#include "lattice_level.h"
+#include "model/table/column_combination.h"
 
 namespace structures {
 

@@ -7,10 +7,10 @@
 
 #include "dependency_candidate.h"
 #include "dependency_strategy.h"
+#include "model/table/relational_schema.h"
+#include "model/table/vertical.h"
 #include "profiling_context.h"
-#include "relational_schema.h"
 #include "structures/vertical_map.h"
-#include "vertical.h"
 #include "vertical_info.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {

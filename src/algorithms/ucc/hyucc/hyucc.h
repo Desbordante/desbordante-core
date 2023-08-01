@@ -5,8 +5,8 @@
 #include "config/thread_number/option.h"
 #include "config/thread_number/type.h"
 #include "hycommon/types.h"
-#include "model/column_layout_relation_data.h"
-#include "model/idataset_stream.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/idataset_stream.h"
 #include "ucc/ucc_algorithm.h"
 
 namespace algos {

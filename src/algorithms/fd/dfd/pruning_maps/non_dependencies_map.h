@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vertical.h"
+#include "model/table/vertical.h"
 #include "pruning_map.h"
 
 class NonDependenciesMap : public PruningMap {

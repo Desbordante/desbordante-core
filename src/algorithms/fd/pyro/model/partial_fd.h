@@ -1,8 +1,9 @@
 #pragma once
 
 #include <boost/lexical_cast.hpp>
-#include "column.h"
-#include "vertical.h"
+
+#include "model/table/column.h"
+#include "model/table/vertical.h"
 
 class PartialFD {
 public:

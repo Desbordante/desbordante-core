@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vertical.h"
+#include "model/table/vertical.h"
 
 namespace model {
 

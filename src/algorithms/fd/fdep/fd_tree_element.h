@@ -10,7 +10,7 @@
 #include <string>
 
 #include "algorithms/fd/fd.h"
-#include "relational_schema.h"
+#include "model/table/relational_schema.h"
 
 class FDTreeElement {
 public:

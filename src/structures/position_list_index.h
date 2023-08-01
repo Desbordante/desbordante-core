@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "column.h"
+#include "model/table/column.h"
 
 class ColumnLayoutRelationData;
 

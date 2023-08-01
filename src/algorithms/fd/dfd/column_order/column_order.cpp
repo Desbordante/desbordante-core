@@ -2,9 +2,9 @@
 
 #include <set>
 
-#include "column_layout_relation_data.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/relational_schema.h"
 #include "ordered_partition.h"
-#include "relational_schema.h"
 
 ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     : order_(relation_data->GetSchema()->GetNumColumns()) {

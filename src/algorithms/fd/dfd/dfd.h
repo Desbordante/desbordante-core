@@ -6,7 +6,7 @@
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/functional/dfd/partition_storage/partition_storage.h"
 #include "config/thread_number/type.h"
-#include "model/vertical.h"
+#include "model/table/vertical.h"
 
 namespace algos {
 

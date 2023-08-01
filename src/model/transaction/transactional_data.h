@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "idataset_stream.h"
 #include "itemset.h"
+#include "model/table/idataset_stream.h"
 #include "transactional_input_format.h"
 
 namespace model {

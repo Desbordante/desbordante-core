@@ -13,7 +13,7 @@
 #include "config/error/type.h"
 #include "config/names.h"
 #include "datasets.h"
-#include "model/relational_schema.h"
+#include "model/table/relational_schema.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 

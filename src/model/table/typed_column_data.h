@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "model/abstract_column_data.h"
-#include "model/idataset_stream.h"
-#include "model/relation_data.h"
+#include "abstract_column_data.h"
+#include "idataset_stream.h"
 #include "model/types/types.h"
+#include "relation_data.h"
 
 namespace model {
 
