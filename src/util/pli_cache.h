@@ -2,12 +2,12 @@
 
 class ProfilingContext;
 
+#include <mutex>
+
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "profiling_context.h"
 #include "column_layout_relation_data.h"
-
-#include <mutex>
+#include "profiling_context.h"
 
 namespace util {
 
@@ -24,10 +24,10 @@ private:
             : vertical_(vertical), pli_(pli), added_arity_(initial_arity) {}
     };
 
-    //using CacheMap = VerticalMap<PositionListIndex>;
+    // using CacheMap = VerticalMap<PositionListIndex>;
     ColumnLayoutRelationData* relation_data_;
     std::unique_ptr<VerticalMap<PositionListIndex>> index_;
-    //usageCounter - for parallelism
+    // usageCounter - for parallelism
 
     int saved_intersections_ = 0;
 
@@ -36,7 +36,7 @@ private:
     CachingMethod caching_method_;
     CacheEvictionMethod eviction_method_;
     double caching_method_value_;
-    //long long maximumAvailableMemory_ = 0;
+    // long long maximumAvailableMemory_ = 0;
     double maximum_entropy_;
     double mean_entropy_;
     double min_entropy_;
@@ -45,8 +45,8 @@ private:
     double median_inverted_entropy_;
 
     std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> CachingProcess(
-        Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
-        ProfilingContext* profiling_context);
+            Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
+            ProfilingContext* profiling_context);
 
 public:
     PLICache(ColumnLayoutRelationData* relation_data, CachingMethod caching_method,
@@ -56,9 +56,11 @@ public:
 
     PositionListIndex* Get(Vertical const& vertical);
     std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> GetOrCreateFor(
-        Vertical const& vertical, ProfilingContext* profiling_context);
+            Vertical const& vertical, ProfilingContext* profiling_context);
 
-    void SetMaximumEntropy(double e) { maximum_entropy_ = e; }
+    void SetMaximumEntropy(double e) {
+        maximum_entropy_ = e;
+    }
 
     size_t Size() const;
 
@@ -66,5 +68,4 @@ public:
     virtual ~PLICache();
 };
 
-} // namespace util
-
+}  // namespace util
