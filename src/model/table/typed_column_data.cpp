@@ -1,6 +1,6 @@
-#include "model/column_layout_typed_relation_data.h"
-#include "model/typed_column_data.h"
+#include "typed_column_data.h"
 
+#include "column_layout_typed_relation_data.h"
 #include "create_type.h"
 
 namespace model {

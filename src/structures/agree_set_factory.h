@@ -9,9 +9,9 @@
 #include <boost/functional/hash.hpp>
 
 #include "algorithms/fd/fd_algorithm.h"
-#include "column_layout_relation_data.h"
 #include "custom/custom_hashes.h"
-#include "vertical.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/vertical.h"
 
 namespace structures {
 

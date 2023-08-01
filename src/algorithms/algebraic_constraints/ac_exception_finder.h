@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "ac_exception.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "model/table/column_layout_typed_relation_data.h"
 #include "ranges_collection.h"
 
 namespace algos {

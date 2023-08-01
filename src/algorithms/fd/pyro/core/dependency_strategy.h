@@ -1,8 +1,8 @@
 #pragma once
-#include "profiling_context.h"
 #include "dependency_candidate.h"
 #include "dependency_consumer.h"
-#include "vertical.h"
+#include "model/table/vertical.h"
+#include "profiling_context.h"
 
 class SearchSpace;
 
@@ -11,6 +11,7 @@ protected:
     DependencyStrategy(double max_error, double deviation)
         : min_non_dependency_error_(max_error - deviation),
           max_dependency_error_(max_error + deviation) {}
+
 public:
     // TODO: public --> protected fields
     double min_non_dependency_error_;

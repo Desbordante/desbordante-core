@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "column_data.h"
-#include "vertical.h"
-#include "column_layout_relation_data.h"
+#include "model/table/column_data.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/vertical.h"
 
 namespace structures {
 

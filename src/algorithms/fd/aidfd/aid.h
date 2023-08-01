@@ -8,9 +8,9 @@
 
 #include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/functional/aidfd/search_tree.h"
-#include "model/column.h"
-#include "model/relational_schema.h"
-#include "model/vertical.h"
+#include "model/table/column.h"
+#include "model/table/relational_schema.h"
+#include "model/table/vertical.h"
 
 namespace algos {
 

@@ -5,8 +5,8 @@
 
 #include "algorithms/functional/dfd/lattice_traversal/lattice_traversal.h"
 #include "config/thread_number/option.h"
-#include "model/column_layout_relation_data.h"
-#include "model/relational_schema.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/relational_schema.h"
 #include "structures/position_list_index.h"
 
 namespace algos {

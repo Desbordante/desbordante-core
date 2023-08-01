@@ -8,7 +8,7 @@
 #include "dfd/partition_storage/partition_storage.h"
 #include "dfd/pruning_maps/dependencies_map.h"
 #include "dfd/pruning_maps/non_dependencies_map.h"
-#include "vertical.h"
+#include "model/table/vertical.h"
 
 class LatticeTraversal {
 private:

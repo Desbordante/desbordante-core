@@ -3,7 +3,7 @@
 #include "algorithms/metric/highlight.h"
 #include "algorithms/metric/points.h"
 #include "config/indices/type.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 namespace algos::metric {
 

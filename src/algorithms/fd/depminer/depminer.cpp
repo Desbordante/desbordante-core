@@ -6,14 +6,14 @@
 
 #include <easylogging++.h>
 
-#include "model/column_combination.h"
-#include "model/relational_schema.h"
+#include "model/table/column_combination.h"
+#include "model/table/relational_schema.h"
 #include "structures/agree_set_factory.h"
 
 namespace algos {
 
-Depminer::Depminer() : PliBasedFDAlgorithm(
-        {"AgreeSets generation", "Finding CMAXSets", "Finding LHS"}) {}
+Depminer::Depminer()
+    : PliBasedFDAlgorithm({"AgreeSets generation", "Finding CMAXSets", "Finding LHS"}) {}
 
 using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::vector, std::list,
         std::dynamic_pointer_cast;

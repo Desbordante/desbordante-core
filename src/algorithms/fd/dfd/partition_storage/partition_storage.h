@@ -4,7 +4,7 @@
 
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "column_layout_relation_data.h"
+#include "model/table/column_layout_relation_data.h"
 #include "structures/vertical_map.h"
 
 class PartitionStorage {

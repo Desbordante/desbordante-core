@@ -15,7 +15,7 @@
 #include "algorithms/functional/pyro/pyro.h"
 #include "algorithms/functional/tane/tane.h"
 #include "datasets.h"
-#include "model/relational_schema.h"
+#include "model/table/relational_schema.h"
 #include "testing_utils.h"
 
 using std::string, std::vector;

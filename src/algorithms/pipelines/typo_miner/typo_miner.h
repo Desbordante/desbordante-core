@@ -6,8 +6,8 @@
 #include "config/equal_nulls/type.h"
 #include "config/names.h"
 #include "config/tabular_data/input_table_type.h"
-#include "model/column_layout_typed_relation_data.h"
-#include "model/idataset_stream.h"
+#include "model/table/column_layout_typed_relation_data.h"
+#include "model/table/idataset_stream.h"
 #include "parser/csv_parser.h"
 #include "types.h"
 

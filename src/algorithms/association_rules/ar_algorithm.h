@@ -11,7 +11,7 @@
 #include "ar.h"
 #include "ar_algorithm_enums.h"
 #include "config/tabular_data/input_table_type.h"
-#include "model/transactional_data.h"
+#include "model/transaction/transactional_data.h"
 
 namespace algos {
 

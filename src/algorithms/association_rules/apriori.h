@@ -8,7 +8,7 @@
 #include "algorithms/association_rules/candidate_hash_tree.h"
 #include "algorithms/association_rules/node.h"
 #include "ar_algorithm.h"
-#include "model/itemset.h"
+#include "model/transaction/itemset.h"
 
 namespace algos {
 
