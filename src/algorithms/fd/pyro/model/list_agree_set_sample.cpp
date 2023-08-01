@@ -2,7 +2,7 @@
 
 #include <easylogging++.h>
 
-namespace structures {
+namespace model {
 
 std::unique_ptr<ListAgreeSetSample> ListAgreeSetSample::CreateFocusedFor(
         ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
@@ -138,4 +138,4 @@ std::unique_ptr<std::vector<unsigned long long>> ListAgreeSetSample::GetNumAgree
             std::vector<unsigned long long>{count_agreements, count});
 }
 
-}  // namespace structures
+}  // namespace model

@@ -6,7 +6,7 @@
 
 #include "model/table/column_combination.h"
 
-namespace structures {
+namespace model {
 
 using std::move, std::min, std::shared_ptr, std::vector, std::sort, std::make_shared;
 
@@ -131,4 +131,4 @@ void LatticeLevel::ClearLevelsBelow(std::vector<std::unique_ptr<LatticeLevel>>& 
     }
 }
 
-}  // namespace structures
+}  // namespace model

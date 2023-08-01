@@ -13,7 +13,7 @@
 #include "model/table/vertical.h"
 #include "util/custom_hashes.h"
 
-namespace structures {
+namespace model {
 
 using AgreeSet = Vertical;
 
@@ -196,4 +196,4 @@ private:
     algos::FDAlgorithm* algo_;
 };
 
-}  // namespace structures
+}  // namespace model

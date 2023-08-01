@@ -7,11 +7,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "model/table/position_list_index.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
-#include "structures/position_list_index.h"
 
-namespace structures {
+namespace model {
 
 class LatticeVertex {
 private:
@@ -59,4 +59,4 @@ public:
     friend std::ostream& operator<<(std::ostream& os, LatticeVertex& lv);
 };
 
-}  // namespace structures
+}  // namespace model

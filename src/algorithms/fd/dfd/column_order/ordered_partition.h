@@ -1,6 +1,6 @@
 #pragma once
 
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 
 class OrderedPartition {
 private:
@@ -13,7 +13,7 @@ public:
     OrderedPartition& operator=(OrderedPartition const& other) = delete;
     OrderedPartition& operator=(OrderedPartition&& other) = delete;
 
-    OrderedPartition(structures::PositionListIndex const* const, unsigned int number_of_rows,
+    OrderedPartition(model::PositionListIndex const* const, unsigned int number_of_rows,
                      unsigned int column_index);
 
     bool operator<(OrderedPartition const& other) const;

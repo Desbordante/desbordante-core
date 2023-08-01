@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "algorithms/cfd/enums.h"
 #include "algorithms/create_algorithm.h"
-#include "algorithms/functional/cfd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/names_and_descriptions.h"

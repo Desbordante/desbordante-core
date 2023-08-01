@@ -8,7 +8,7 @@
 
 #include "agree_set_sample.h"
 
-namespace structures {
+namespace model {
 
 template <typename T>
 std::unique_ptr<T> AgreeSetSample::CreateFor(ColumnLayoutRelationData* relation_data,
@@ -163,4 +163,4 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
                                std::move(agree_set_counters));
 }
 
-}  // namespace structures
+}  // namespace model

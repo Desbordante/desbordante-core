@@ -4,12 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/ucc/hyucc/structures/ucc_tree.h"
+#include "algorithms/ucc/hyucc/model/ucc_tree.h"
 #include "algorithms/ucc/raw_ucc.h"
 #include "config/thread_number/type.h"
 #include "hycommon/primitive_validations.h"
 #include "hycommon/types.h"
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 
 namespace algos::hyucc {
 
@@ -23,7 +23,7 @@ private:
     unsigned current_level_number_ = 1;
     config::ThreadNumType threads_num_ = 1;
 
-    bool IsUnique(structures::PLI const& pivot_pli, model::RawUCC const& ucc,
+    bool IsUnique(model::PLI const& pivot_pli, model::RawUCC const& ucc,
                   hy::IdPairs& comparison_suggestions);
     UCCValidations GetValidations(LhsPair const& vertex_and_ucc);
     UCCValidations ValidateAndExtendSeq(std::vector<LhsPair> const& current_level);

@@ -4,12 +4,12 @@
 #include <queue>
 #include <unordered_set>
 
+#include "position_list_index.h"
 #include "pyro/core/dependency_candidate.h"
 #include "pyro/core/vertical_info.h"
-#include "pyro/structures/agree_set_sample.h"
-#include "structures/position_list_index.h"
+#include "pyro/model/agree_set_sample.h"
 
-namespace structures {
+namespace model {
 
 template <class Value>
 std::shared_ptr<Value> VerticalMap<Value>::SetTrie::Associate(Bitset const& key, size_t next_bit,
@@ -701,4 +701,4 @@ template class BlockingVerticalMap<VerticalInfo>;
 
 template class BlockingVerticalMap<Vertical>;
 
-}  // namespace structures
+}  // namespace model

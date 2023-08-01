@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/fd_verifier/fd_verifier.h"
+#include "algorithms/fd/fd_verifier/fd_verifier.h"
 #include "builtin.h"
 #include "config/indices/type.h"
 #include "datasets.h"

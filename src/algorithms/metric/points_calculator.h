@@ -25,24 +25,23 @@ private:
 
 public:
     IndexedPointsCalculationResult<IndexedOneDimensionalPoint> CalculateIndexedPoints(
-            structures::PLI::Cluster const& cluster) const;
+            model::PLI::Cluster const& cluster) const;
 
     IndexedPointsCalculationResult<IndexedVector> CalculateMultidimensionalIndexedPoints(
-            structures::PLI::Cluster const& cluster) const;
+            model::PLI::Cluster const& cluster) const;
 
     template <typename T>
     PointsCalculationResult<T> CalculateMultidimensionalPoints(
-            structures::PLI::Cluster const& cluster,
-            AssignmentFunction<T> const& assignment_func) const;
+            model::PLI::Cluster const& cluster, AssignmentFunction<T> const& assignment_func) const;
 
     PointsCalculationResult<util::Point> CalculateMultidimensionalPointsForCalipers(
-            structures::PLI::Cluster const& cluster) const;
+            model::PLI::Cluster const& cluster) const;
 
     PointsCalculationResult<std::vector<long double>> CalculateMultidimensionalPointsForApprox(
-            structures::PLI::Cluster const& cluster) const;
+            model::PLI::Cluster const& cluster) const;
 
     PointsCalculationResult<std::byte const*> CalculatePoints(
-            structures::PLI::Cluster const& cluster) const;
+            model::PLI::Cluster const& cluster) const;
 
     explicit PointsCalculator(bool dist_from_null_is_infinity,
                               std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation,

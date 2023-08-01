@@ -19,7 +19,7 @@
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
 
-namespace structures {
+namespace model {
 
 const int PositionListIndex::singleton_value_id_ = 0;
 unsigned long long PositionListIndex::micros_ = 0;
@@ -279,4 +279,4 @@ std::string PositionListIndex::ToString() const {
     return res;
 }
 
-}  // namespace structures
+}  // namespace model

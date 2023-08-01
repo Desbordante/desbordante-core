@@ -5,7 +5,7 @@
 
 #include "lattice_vertex.h"
 
-namespace structures {
+namespace model {
 
 class LatticeLevel {
 private:
@@ -30,4 +30,4 @@ public:
                                  unsigned int arity);
 };
 
-}  // namespace structures
+}  // namespace model
