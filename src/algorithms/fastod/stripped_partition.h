@@ -23,6 +23,7 @@ private:
     static CacheWithLimit<AttributeSet, StrippedPartition> cache_;
     
 public:
+    StrippedPartition();
     StrippedPartition(const DataFrame& data) noexcept;
     StrippedPartition(const StrippedPartition& origin) noexcept;
 

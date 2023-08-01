@@ -7,6 +7,9 @@
 
 using namespace algos::fastod;
 
+int CanonicalOD::split_check_count_ = 0;
+int CanonicalOD::swap_check_count_ = 0;
+
 CanonicalOD::CanonicalOD(const AttributeSet& context, const SingleAttributePredicate& left, int right) noexcept : context_(context), left_(left), right_(right) {}
 
 CanonicalOD::CanonicalOD(const AttributeSet& context, int right) noexcept : context_(context), left_({}), right_(right) {}

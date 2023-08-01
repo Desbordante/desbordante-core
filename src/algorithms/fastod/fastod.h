@@ -14,7 +14,7 @@
 
 namespace algos::fastod {
 
-class Fastod: public Algorithm {
+class Fastod/*: public Algorithm*/ {
 private:
     const long time_limit_;
     bool is_complete_ = true;
