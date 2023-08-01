@@ -1,4 +1,4 @@
-#include "algorithms/functional/fd_mine.h"
+#include "fd_mine.h"
 
 #include <queue>
 #include <vector>

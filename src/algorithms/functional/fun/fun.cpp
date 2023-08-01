@@ -1,4 +1,4 @@
-#include "algorithms/functional/fun.h"
+#include "fun.h"
 
 #include <easylogging++.h>
 
