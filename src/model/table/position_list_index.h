@@ -13,7 +13,7 @@
 
 class ColumnLayoutRelationData;
 
-namespace structures {
+namespace model {
 
 class PositionListIndex {
 public:
@@ -138,4 +138,4 @@ public:
 
 using PLI = PositionListIndex;
 
-}  // namespace structures
+}  // namespace model

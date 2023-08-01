@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 
 namespace algos::fd_verifier {
 
@@ -10,11 +10,11 @@ namespace algos::fd_verifier {
  * that cluster */
 class Highlight {
 private:
-    structures::PLI::Cluster cluster;          /* cluster that violate the FD */
+    model::PLI::Cluster cluster;               /* cluster that violate the FD */
     size_t num_distinct_rhs_values;            /* number of different RHS values within a cluster */
     double most_frequent_rhs_value_proportion; /* proportion of most frequent RHS value */
 public:
-    structures::PLI::Cluster const& GetCluster() const {
+    model::PLI::Cluster const& GetCluster() const {
         return cluster;
     }
 
@@ -26,7 +26,7 @@ public:
         return most_frequent_rhs_value_proportion;
     }
 
-    Highlight(structures::PLI::Cluster const& cluster, size_t num_distinct_rhs_values,
+    Highlight(model::PLI::Cluster const& cluster, size_t num_distinct_rhs_values,
               size_t num_most_frequent_rhs_value)
         : cluster(cluster),
           num_distinct_rhs_values(num_distinct_rhs_values),

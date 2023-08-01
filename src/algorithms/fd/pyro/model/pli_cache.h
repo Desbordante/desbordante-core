@@ -9,7 +9,7 @@ class ProfilingContext;
 #include "model/table/column_layout_relation_data.h"
 #include "pyro/core/profiling_context.h"
 
-namespace structures {
+namespace model {
 
 class PLICache {
 private:
@@ -68,4 +68,4 @@ public:
     virtual ~PLICache();
 };
 
-}  // namespace structures
+}  // namespace model

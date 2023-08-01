@@ -4,12 +4,12 @@
 
 #include <easylogging++.h>
 
-#include "pyro/structures/pli_cache.h"
+#include "pyro/model/pli_cache.h"
 #include "search_space.h"
 
 unsigned long long FdG1Strategy::nanos_ = 0;
 
-double FdG1Strategy::CalculateG1(structures::PositionListIndex* lhs_pli) const {
+double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
     unsigned long long num_violations = 0;
     std::unordered_map<int, int> value_counts;
     std::vector<int> const& probing_table = context_->GetColumnLayoutRelationData()
@@ -25,7 +25,7 @@ double FdG1Strategy::CalculateG1(structures::PositionListIndex* lhs_pli) const {
         value_counts.clear();
         for (int position : cluster) {
             probing_table_value_id = probing_table[position];
-            if (probing_table_value_id != structures::PositionListIndex::singleton_value_id_) {
+            if (probing_table_value_id != model::PositionListIndex::singleton_value_id_) {
                 value_counts[probing_table_value_id] += 1;
             }
         }
@@ -56,7 +56,7 @@ void FdG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
             CalculateError(*context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_);
     search_space->AddLaunchPad(DependencyCandidate(
             *context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_,
-            structures::ConfidenceInterval(zero_fd_error), true));
+            model::ConfidenceInterval(zero_fd_error), true));
 
     search_space->is_initialized_ = true;
 }
@@ -73,9 +73,9 @@ double FdG1Strategy::CalculateError(Vertical const& lhs) const {
     } else {
         auto lhs_pli = context_->GetPliCache()->GetOrCreateFor(lhs, context_);
         auto lhs_pli_pointer =
-                std::holds_alternative<structures::PositionListIndex*>(lhs_pli)
-                        ? std::get<structures::PositionListIndex*>(lhs_pli)
-                        : std::get<std::unique_ptr<structures::PositionListIndex>>(lhs_pli).get();
+                std::holds_alternative<model::PositionListIndex*>(lhs_pli)
+                        ? std::get<model::PositionListIndex*>(lhs_pli)
+                        : std::get<std::unique_ptr<model::PositionListIndex>>(lhs_pli).get();
         auto joint_pli = context_->GetPliCache()->Get(lhs.Union(static_cast<Vertical>(*rhs_)));
         error = joint_pli == nullptr
                         ? CalculateG1(lhs_pli_pointer)
@@ -85,25 +85,25 @@ double FdG1Strategy::CalculateError(Vertical const& lhs) const {
     return error;
 }
 
-structures::ConfidenceInterval FdG1Strategy::CalculateG1(
-        structures::ConfidenceInterval const& num_violations) const {
-    return structures::ConfidenceInterval(CalculateG1(num_violations.GetMin()),
-                                          CalculateG1(num_violations.GetMean()),
-                                          CalculateG1(num_violations.GetMax()));
+model::ConfidenceInterval FdG1Strategy::CalculateG1(
+        model::ConfidenceInterval const& num_violations) const {
+    return model::ConfidenceInterval(CalculateG1(num_violations.GetMin()),
+                                     CalculateG1(num_violations.GetMean()),
+                                     CalculateG1(num_violations.GetMax()));
 }
 
 DependencyCandidate FdG1Strategy::CreateDependencyCandidate(Vertical const& vertical) const {
     if (context_->IsAgreeSetSamplesEmpty()) {
-        return DependencyCandidate(vertical, structures::ConfidenceInterval(0, .5, 1), false);
+        return DependencyCandidate(vertical, model::ConfidenceInterval(0, .5, 1), false);
     }
 
     auto agree_set_sample = context_->GetAgreeSetSample(vertical);
-    structures::ConfidenceInterval num_violating_tuple_pairs =
+    model::ConfidenceInterval num_violating_tuple_pairs =
             agree_set_sample
                     ->EstimateMixed(vertical, static_cast<Vertical>(*rhs_),
                                     context_->GetParameters().estimate_confidence)
                     .Multiply(context_->GetColumnLayoutRelationData()->GetNumTuplePairs());
-    structures::ConfidenceInterval g1 = CalculateG1(num_violating_tuple_pairs);
+    model::ConfidenceInterval g1 = CalculateG1(num_violating_tuple_pairs);
     return DependencyCandidate(vertical, g1, false);
 }
 

@@ -5,7 +5,7 @@
 #include <vector>
 #include "agree_set_sample.h"
 
-namespace structures {
+namespace model {
 
 // TODO: Java long ~ C++ long long => consider replacing ints with longlongs
 class ListAgreeSetSample : public AgreeSetSample {
@@ -39,4 +39,4 @@ public:
             Vertical const& agreement, Vertical const& disagreement) const override;
 };
 
-}  // namespace structures
+}  // namespace model

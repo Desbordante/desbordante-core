@@ -1,6 +1,6 @@
 #include "lattice_vertex.h"
 
-namespace structures {
+namespace model {
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
 
@@ -75,4 +75,4 @@ PositionListIndex const* LatticeVertex::GetPositionListIndex() const {
     }
 }
 
-}  // namespace structures
+}  // namespace model

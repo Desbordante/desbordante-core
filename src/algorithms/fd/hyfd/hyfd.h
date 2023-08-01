@@ -8,7 +8,7 @@
 #include "algorithms/fd/hycommon/types.h"
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/fd/raw_fd.h"
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 
 namespace algos::hyfd {
 

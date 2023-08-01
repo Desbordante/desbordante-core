@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "algorithms/cfd/structures/cfd_types.h"
+#include "algorithms/cfd/model/cfd_types.h"
 #include "algorithms/cfd/util/tidlist_util.h"
 
 // see algorithms/cfd/LICENSE

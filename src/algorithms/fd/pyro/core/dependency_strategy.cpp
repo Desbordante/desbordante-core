@@ -1,6 +1,6 @@
 #include "dependency_strategy.h"
 
-#include "pyro/structures/pli_cache.h"
+#include "pyro/model/pli_cache.h"
 
 bool DependencyStrategy::ShouldResample(Vertical const& vertical, double boost_factor) const {
     if (context_->GetParameters().sample_size <= 0 || vertical.GetArity() < 1) return false;
@@ -10,7 +10,7 @@ bool DependencyStrategy::ShouldResample(Vertical const& vertical, double boost_f
     if (current_sample->IsExact()) return false;
 
     // Get an estimate of the number of equality pairs in the vertical
-    structures::PositionListIndex* pli = context_->GetPliCache()->Get(vertical);
+    model::PositionListIndex* pli = context_->GetPliCache()->Get(vertical);
     double nep = pli != nullptr
                          ? pli->GetNepAsLong()
                          : current_sample->EstimateAgreements(vertical) *

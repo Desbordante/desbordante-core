@@ -1,6 +1,6 @@
 #include "identifier_set.h"
 
-namespace structures {
+namespace model {
 
 IdentifierSet::IdentifierSet(ColumnLayoutRelationData const* const relation, int index)
     : relation_(relation), tuple_index_(index) {
@@ -25,4 +25,4 @@ std::string IdentifierSet::ToString() const {
     return str;
 }
 
-}  // namespace structures
+}  // namespace model

@@ -7,7 +7,7 @@
 
 #include "hycommon/efficiency_threshold.h"
 #include "hycommon/validator_helpers.h"
-#include "ucc/hyucc/structures/ucc_tree_vertex.h"
+#include "ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace {
 
@@ -50,13 +50,12 @@ namespace algos::hyucc {
 
 using model::RawUCC;
 
-bool Validator::IsUnique(structures::PLI const& pivot_pli, RawUCC const& ucc,
+bool Validator::IsUnique(model::PLI const& pivot_pli, RawUCC const& ucc,
                          hy::IdPairs& comparison_suggestions) {
     std::vector<hy::ClusterId> indices = util::BitsetToIndices<hy::ClusterId>(ucc);
-    for (structures::PLI::Cluster const& cluster : pivot_pli.GetIndex()) {
+    for (model::PLI::Cluster const& cluster : pivot_pli.GetIndex()) {
         auto cluster_to_record =
-                hy::MakeClusterIdentifierToTMap<structures::PLI::Cluster::value_type>(
-                        cluster.size());
+                hy::MakeClusterIdentifierToTMap<model::PLI::Cluster::value_type>(cluster.size());
         for (auto const record_id : cluster) {
             std::vector<hy::ClusterId> cluster_id =
                     hy::BuildClustersIdentifier((*compressed_records_)[record_id], indices);
@@ -91,7 +90,7 @@ Validator::UCCValidations Validator::GetValidations(LhsPair const& vertex_and_uc
         ucc.reset(ucc_attr);
         // It's guaranteed that the first cluster has the fewest records because of sorting
         // in the Sampler
-        structures::PLI const* pivot_pli = (*plis_)[ucc_attr];
+        model::PLI const* pivot_pli = (*plis_)[ucc_attr];
         is_unique = IsUnique(*pivot_pli, ucc, validations.comparison_suggestions());
         ucc.set(ucc_attr);
     }

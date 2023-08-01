@@ -4,7 +4,7 @@
 #include <vector>
 
 #include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/functional/fdep/fd_tree_element.h"
+#include "algorithms/fd/fdep/fd_tree_element.h"
 #include "model/table/relation_data.h"
 #include "model/table/relational_schema.h"
 

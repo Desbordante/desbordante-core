@@ -1,7 +1,7 @@
 #pragma once
 
+#include "algorithms/fd/depminer/cmax_set.h"
 #include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "algorithms/functional/depminer/cmax_set.h"
 
 namespace algos {
 

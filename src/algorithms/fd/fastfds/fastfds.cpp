@@ -12,7 +12,7 @@
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
-#include "structures/agree_set_factory.h"
+#include "model/table/agree_set_factory.h"
 #include "util/parallel_for.h"
 
 namespace algos {
@@ -276,14 +276,14 @@ vector<FastFDs::DiffSet> FastFDs::GetDiffSetsMod(Column const& col) const {
 }
 
 void FastFDs::GenDiffSets() {
-    structures::AgreeSetFactory::Configuration c;
+    model::AgreeSetFactory::Configuration c;
     c.threads_num = threads_num_;
     if (threads_num_ > 1) {
         // Not implemented properly, check the description of AgreeSetFactory::GenMcParallel()
         // c.mc_gen_method = MCGenMethod::kParallel;
     }
-    structures::AgreeSetFactory factory(relation_.get(), c, this);
-    structures::AgreeSetFactory::SetOfAgreeSets agree_sets = factory.GenAgreeSets();
+    model::AgreeSetFactory factory(relation_.get(), c, this);
+    model::AgreeSetFactory::SetOfAgreeSets agree_sets = factory.GenAgreeSets();
 
     LOG(DEBUG) << "Agree sets:";
     for (auto const& agree_set : agree_sets) {
@@ -294,7 +294,7 @@ void FastFDs::GenDiffSets() {
     diff_sets_.reserve(agree_sets.size());
     if (threads_num_ > 1) {
         std::mutex m;
-        auto const task = [&m, this](structures::AgreeSet const& as) {
+        auto const task = [&m, this](model::AgreeSet const& as) {
             DiffSet diff_set = as.Invert();
             std::lock_guard lock(m);
             diff_sets_.push_back(std::move(diff_set));
@@ -302,7 +302,7 @@ void FastFDs::GenDiffSets() {
 
         util::parallel_foreach(agree_sets.begin(), agree_sets.end(), threads_num_, task);
     } else {
-        for (structures::AgreeSet const& agree_set : agree_sets) {
+        for (model::AgreeSet const& agree_set : agree_sets) {
             diff_sets_.push_back(agree_set.Invert());
         }
     }

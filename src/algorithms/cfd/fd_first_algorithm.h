@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/cfd/structures/partition_tidlist.h"
+#include "algorithms/cfd/model/partition_tidlist.h"
 #include "algorithms/cfd/util/prefix_tree.h"
 #include "cfd_discovery.h"
 #include "enums.h"

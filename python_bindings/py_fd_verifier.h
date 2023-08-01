@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/functional/fd_verifier/fd_verifier.h"
+#include "algorithms/fd/fd_verifier/fd_verifier.h"
 #include "get_algorithm.h"
 #include "py_algorithm.h"
 

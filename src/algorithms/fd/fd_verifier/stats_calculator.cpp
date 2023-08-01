@@ -1,4 +1,4 @@
-#include "algorithms/functional/fd_verifier/stats_calculator.h"
+#include "algorithms/fd/fd_verifier/stats_calculator.h"
 
 #include <algorithm>
 #include <cassert>
@@ -10,8 +10,8 @@
 namespace {
 
 model::CompareResult CompareTypesInCol(model::TypedColumnData const& col,
-                                       structures::PLI::Cluster::value_type i1,
-                                       structures::PLI::Cluster::value_type i2) {
+                                       model::PLI::Cluster::value_type i1,
+                                       model::PLI::Cluster::value_type i2) {
     if (col.IsEmpty(i1)) {
         if (col.IsEmpty(i2)) {
             return model::CompareResult::kEqual;
@@ -58,15 +58,15 @@ void StatsCalculator::PrintStatistics() const {
     }
 }
 
-void StatsCalculator::CalculateStatistics(util::PLI const* lhs_pli, util::PLI const* rhs_pli) {
-    std::deque<structures::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
-    std::shared_ptr<util::PLI::Cluster const> pt_shared = rhs_pli->CalculateAndGetProbingTable();
-    util::PLI::Cluster const& pt = *pt_shared.get();
+void StatsCalculator::CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli) {
+    std::deque<model::PLI::Cluster> const& lhs_clusters = lhs_pli->GetIndex();
+    std::shared_ptr<model::PLI::Cluster const> pt_shared = rhs_pli->CalculateAndGetProbingTable();
+    model::PLI::Cluster const& pt = *pt_shared.get();
     size_t num_tuples_conflicting_on_rhs = 0.;
 
     for (auto& cluster : lhs_clusters) {
         std::unordered_map<ClusterIndex, unsigned> frequencies =
-                structures::PLI::CreateFrequencies(cluster, pt);
+                model::PLI::CreateFrequencies(cluster, pt);
         size_t num_distinct_rhs_values = CalculateNumDistinctRhsValues(frequencies, cluster.size());
         if (num_distinct_rhs_values == 1) {
             continue;

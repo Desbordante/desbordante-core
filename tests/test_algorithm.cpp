@@ -6,14 +6,14 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/functional/depminer/depminer.h"
-#include "algorithms/functional/dfd/dfd.h"
-#include "algorithms/functional/fastfds/fastfds.h"
-#include "algorithms/functional/fdep/fdep.h"
-#include "algorithms/functional/fun/fun.h"
-#include "algorithms/functional/hyfd/hyfd.h"
-#include "algorithms/functional/pyro/pyro.h"
-#include "algorithms/functional/tane/tane.h"
+#include "algorithms/fd/depminer/depminer.h"
+#include "algorithms/fd/dfd/dfd.h"
+#include "algorithms/fd/fastfds/fastfds.h"
+#include "algorithms/fd/fdep/fdep.h"
+#include "algorithms/fd/fun/fun.h"
+#include "algorithms/fd/hyfd/hyfd.h"
+#include "algorithms/fd/pyro/pyro.h"
+#include "algorithms/fd/tane/tane.h"
 #include "datasets.h"
 #include "model/table/relational_schema.h"
 #include "testing_utils.h"

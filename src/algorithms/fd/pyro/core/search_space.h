@@ -9,8 +9,8 @@
 #include "dependency_strategy.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
+#include "model/table/vertical_map.h"
 #include "profiling_context.h"
-#include "structures/vertical_map.h"
 #include "vertical_info.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
@@ -19,12 +19,12 @@ private:
             std::function<bool(DependencyCandidate const&, DependencyCandidate const&)>;
     ProfilingContext* context_;
     std::unique_ptr<DependencyStrategy> strategy_;
-    std::unique_ptr<structures::VerticalMap<VerticalInfo>> local_visitees_ = nullptr;
-    std::unique_ptr<structures::VerticalMap<VerticalInfo>> global_visitees_;
+    std::unique_ptr<model::VerticalMap<VerticalInfo>> local_visitees_ = nullptr;
+    std::unique_ptr<model::VerticalMap<VerticalInfo>> global_visitees_;
     std::set<DependencyCandidate, DependencyCandidateComp> launch_pads_;
-    std::unique_ptr<structures::VerticalMap<DependencyCandidate>> launch_pad_index_;
+    std::unique_ptr<model::VerticalMap<DependencyCandidate>> launch_pad_index_;
     std::list<DependencyCandidate> deferred_launch_pads_;
-    std::unique_ptr<structures::VerticalMap<Vertical>> scope_;
+    std::unique_ptr<model::VerticalMap<Vertical>> scope_;
     double sample_boost_;
     int recursion_depth_;
     bool is_ascend_randomly_ = false;
@@ -43,34 +43,33 @@ private:
     void TrickleDown(Vertical const& main_peak, double main_peak_error);
     std::optional<Vertical> TrickleDownFrom(DependencyCandidate min_dep_candidate,
                                             DependencyStrategy* strategy,
-                                            structures::VerticalMap<VerticalInfo>* alleged_min_deps,
+                                            model::VerticalMap<VerticalInfo>* alleged_min_deps,
                                             std::unordered_set<Vertical>& alleged_non_deps,
-                                            structures::VerticalMap<VerticalInfo>* global_visitees,
+                                            model::VerticalMap<VerticalInfo>* global_visitees,
                                             double boost_factor);
 
     // CAREFUL: resets globalVisitees_, therefore SearchSpace could become invalidated
-    std::unique_ptr<structures::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {
+    std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {
         return std::move(global_visitees_);
     }
     // CAREFUL: resets localVisitees_, therefore SearchSpace could become invalidated
-    std::unique_ptr<structures::VerticalMap<VerticalInfo>> MoveOutLocalVisitees() {
+    std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutLocalVisitees() {
         return std::move(local_visitees_);
     }
-    void MoveInLocalVisitees(
-            std::unique_ptr<structures::VerticalMap<VerticalInfo>> local_visitees) {
+    void MoveInLocalVisitees(std::unique_ptr<model::VerticalMap<VerticalInfo>> local_visitees) {
         local_visitees_ = std::move(local_visitees);
     }
 
     static void RequireMinimalDependency(DependencyStrategy* strategy,
                                          Vertical const& min_dependency);
-    static std::vector<Vertical> GetSubsetDeps(
-            Vertical const& vertical, structures::VerticalMap<VerticalInfo>* vertical_infos);
+    static std::vector<Vertical> GetSubsetDeps(Vertical const& vertical,
+                                               model::VerticalMap<VerticalInfo>* vertical_infos);
     static bool IsImpliedByMinDep(Vertical const& vertical,
-                                  structures::VerticalMap<VerticalInfo>* vertical_infos);
+                                  model::VerticalMap<VerticalInfo>* vertical_infos);
     static bool IsKnownNonDependency(Vertical const& vertical,
-                                     structures::VerticalMap<VerticalInfo>* vertical_infos);
+                                     model::VerticalMap<VerticalInfo>* vertical_infos);
     static std::string FormatArityHistogram() = delete;
-    static std::string FormatArityHistogram(structures::VerticalMap<int*>) = delete;
+    static std::string FormatArityHistogram(model::VerticalMap<int*>) = delete;
 
 public:
     unsigned long long nanos_smart_constructing_ = 0;
@@ -85,15 +84,15 @@ public:
     int id_;
 
     SearchSpace(int id, std::unique_ptr<DependencyStrategy> strategy,
-                std::unique_ptr<structures::VerticalMap<Vertical>> scope,
-                std::unique_ptr<structures::VerticalMap<VerticalInfo>> global_visitees,
+                std::unique_ptr<model::VerticalMap<Vertical>> scope,
+                std::unique_ptr<model::VerticalMap<VerticalInfo>> global_visitees,
                 RelationalSchema const* schema,
                 DependencyCandidateComp const& dependency_candidate_comparator, int recursion_depth,
                 double sample_boost)
         : strategy_(std::move(strategy)),
           global_visitees_(std::move(global_visitees)),
           launch_pads_(dependency_candidate_comparator),
-          launch_pad_index_(std::make_unique<structures::VerticalMap<DependencyCandidate>>(schema)),
+          launch_pad_index_(std::make_unique<model::VerticalMap<DependencyCandidate>>(schema)),
           scope_(std::move(scope)),
           sample_boost_(sample_boost),
           recursion_depth_(recursion_depth),
@@ -103,7 +102,7 @@ public:
                 RelationalSchema const* schema,
                 DependencyCandidateComp const& dependency_candidate_comparator)
         : SearchSpace(id, std::move(strategy), nullptr,
-                      std::make_unique<structures::VerticalMap<VerticalInfo>>(schema), schema,
+                      std::make_unique<model::VerticalMap<VerticalInfo>>(schema), schema,
                       dependency_candidate_comparator, 0, 1) {}
 
     void EnsureInitialized();

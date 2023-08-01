@@ -12,7 +12,7 @@
 #include "model/table/vertical.h"
 #include "util/custom_random.h"
 
-namespace structures {
+namespace model {
 
 // abstract base class for Agree Set Sample implementations (trie <- not used, list)
 class AgreeSetSample {
@@ -65,7 +65,7 @@ private:
     double ProbitFunction(double quantile) const;
 };
 
-}  // namespace structures
+}  // namespace model
 
 // include template implementation
 #include "agree_set_sample_impl.h"

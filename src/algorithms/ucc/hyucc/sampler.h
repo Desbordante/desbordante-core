@@ -3,7 +3,7 @@
 #include "config/thread_number/type.h"
 #include "hycommon/sampler.h"
 #include "hycommon/types.h"
-#include "ucc/hyucc/structures/non_ucc_list.h"
+#include "ucc/hyucc/model/non_ucc_list.h"
 
 namespace algos::hyucc {
 

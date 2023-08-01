@@ -1,6 +1,6 @@
 #include "ordered_partition.h"
 
-OrderedPartition::OrderedPartition(structures::PositionListIndex const* const partition,
+OrderedPartition::OrderedPartition(model::PositionListIndex const* const partition,
                                    unsigned int number_of_rows, unsigned int column_index)
     : column_index_(column_index) {
     this->distinctiveness_ =

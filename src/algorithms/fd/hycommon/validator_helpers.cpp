@@ -1,8 +1,8 @@
 #include "validator_helpers.h"
 
 #include "algorithms/fd/hycommon/util/pli_util.h"
-#include "algorithms/fd/hyfd/structures/fd_tree_vertex.h"
-#include "ucc/hyucc/structures/ucc_tree_vertex.h"
+#include "algorithms/fd/hyfd/model/fd_tree_vertex.h"
+#include "ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace algos::hy {
 

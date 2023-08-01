@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
-#include "algorithms/functional/fd_verifier/stats_calculator.h"
+#include "algorithms/fd/fd_verifier/stats_calculator.h"
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
@@ -28,7 +28,7 @@ private:
     std::unique_ptr<StatsCalculator> stats_calculator_;
 
     void VerifyFD() const;
-    std::shared_ptr<util::PLI const> CalculatePLI(util::config::IndicesType const& indices) const;
+    std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
     void RegisterOptions();
     void ResetState() final {
         if (stats_calculator_) {

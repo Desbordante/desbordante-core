@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/cfd/structures/cfd_types.h"
+#include "algorithms/cfd/model/cfd_types.h"
 
 // see algorithms/cfd/LICENSE
 

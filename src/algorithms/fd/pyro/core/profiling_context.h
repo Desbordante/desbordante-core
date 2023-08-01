@@ -7,12 +7,12 @@
 #include "caching_method.h"
 #include "dependency_consumer.h"
 #include "parameters.h"
+#include "pyro/model/agree_set_sample.h"
 #include "pyro/model/partial_fd.h"
 #include "pyro/model/partial_key.h"
-#include "pyro/structures/agree_set_sample.h"
 #include "util/custom_random.h"
 
-namespace structures {
+namespace model {
 
 // forward declaration
 class PLICache;
@@ -20,20 +20,20 @@ class PLICache;
 template <class Value>
 class VerticalMap;
 
-}  // namespace structures
+}  // namespace model
 
 // Dependency Consumer?
 class ProfilingContext : public DependencyConsumer {
 private:
     pyro::Parameters parameters_;
-    std::unique_ptr<structures::PLICache> pli_cache_;
-    std::unique_ptr<structures::VerticalMap<structures::AgreeSetSample>> agree_set_samples_;
+    std::unique_ptr<model::PLICache> pli_cache_;
+    std::unique_ptr<model::VerticalMap<model::AgreeSetSample>> agree_set_samples_;
     ColumnLayoutRelationData* relation_data_;
     std::mt19937 random_;
     CustomRandom custom_random_;
 
-    structures::AgreeSetSample const* CreateColumnFocusedSample(
-            Vertical const& focus, structures::PositionListIndex const* restriction_pli,
+    model::AgreeSetSample const* CreateColumnFocusedSample(
+            Vertical const& focus, model::PositionListIndex const* restriction_pli,
             double boost_factor);
 
 public:
@@ -46,14 +46,12 @@ public:
                      CacheEvictionMethod const& eviction_method, double caching_method_value);
 
     // Non-const as RandomGenerator state gets changed
-    structures::AgreeSetSample const* CreateFocusedSample(Vertical const& focus,
-                                                          double boost_factor);
-    std::shared_ptr<structures::AgreeSetSample const> GetAgreeSetSample(
-            Vertical const& focus) const;
-    structures::PLICache* GetPliCache() {
+    model::AgreeSetSample const* CreateFocusedSample(Vertical const& focus, double boost_factor);
+    std::shared_ptr<model::AgreeSetSample const> GetAgreeSetSample(Vertical const& focus) const;
+    model::PLICache* GetPliCache() {
         return pli_cache_.get();
-
-    }bool IsAgreeSetSamplesEmpty() const {
+    }
+    bool IsAgreeSetSamplesEmpty() const {
         return agree_set_samples_ == nullptr;
     }
     RelationalSchema const* GetSchema() const {
@@ -66,7 +64,7 @@ public:
     ColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
         return relation_data_;
     }
-    structures::PLICache const* GetPliCache() const {
+    model::PLICache const* GetPliCache() const {
         return pli_cache_.get();
     }
 

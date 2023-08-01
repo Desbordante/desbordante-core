@@ -99,15 +99,14 @@ unsigned long FUN::Count(Vertical const& l) const {
     std::vector<ColumnData> const& column_data = relation_->GetColumnData();
     size_t first_column_index = l.GetColumnIndices().find_first();
 
-    structures::PositionListIndex const* pli =
-            column_data.at(first_column_index).GetPositionListIndex();
+    model::PositionListIndex const* pli = column_data.at(first_column_index).GetPositionListIndex();
 
     if (l.GetColumnIndices().count() == 1) {
         return pli->GetNumCluster();
     }
 
     //  workaround to avoid auto-destruction of plis
-    std::unique_ptr<structures::PositionListIndex> holder;
+    std::unique_ptr<model::PositionListIndex> holder;
 
     for (size_t i = l.GetColumnIndices().find_next(first_column_index);
          i != boost::dynamic_bitset<>::npos; i = l.GetColumnIndices().find_next(i)) {

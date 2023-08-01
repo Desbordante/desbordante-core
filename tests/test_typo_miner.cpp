@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/pipelines/typo_miner/typo_miner.h"
+#include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
 #include "datasets.h"
 
@@ -49,7 +49,7 @@ struct FDsParam : TestingParam {
 };
 
 struct ClustersParam : TestingParam {
-    using ClustersVec = std::vector<structures::PLI::Cluster>;
+    using ClustersVec = std::vector<model::PLI::Cluster>;
     using FdToClustersMap = std::unordered_map<FdByIndices, ClustersVec, boost::hash<FdByIndices>>;
 
     FdToClustersMap expected;
@@ -61,8 +61,8 @@ struct ClustersParam : TestingParam {
 };
 
 struct LinesParam : TestingParam {
-    using TyposVec = std::vector<structures::PLI::Cluster::value_type>;
-    using ClusterAndTyposPair = std::pair<structures::PLI::Cluster, TyposVec>;
+    using TyposVec = std::vector<model::PLI::Cluster::value_type>;
+    using ClusterAndTyposPair = std::pair<model::PLI::Cluster, TyposVec>;
     using FdToTyposMap = std::unordered_map<FdByIndices, std::vector<ClusterAndTyposPair>,
                                             boost::hash<FdByIndices>>;
 
@@ -202,8 +202,8 @@ TEST_P(ClustersWithTyposMiningTest, FindClustersWithTypos) {
         for (FD const& fd : typo_miner->GetApproxFDs()) {
             FdByIndices actual_fd = FDtoFdByIndices(fd);
             ASSERT_TRUE(expected.count(actual_fd));
-            std::vector<structures::PLI::Cluster> const& expected_cluster = expected.at(actual_fd);
-            std::vector<structures::PLI::Cluster> const actual_cluster =
+            std::vector<model::PLI::Cluster> const& expected_cluster = expected.at(actual_fd);
+            std::vector<model::PLI::Cluster> const actual_cluster =
                     typo_miner->FindClustersWithTypos(fd);
             EXPECT_EQ(expected_cluster, actual_cluster)
                     << "TyposMiner with " << algo._to_string() << " as precise algorithm\n"
@@ -218,31 +218,30 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(
                 /* Expected clusters should be sorted with respect to TyposMiner::SortCluster
                    sorting. */
-                ClustersParam({{FdByIndices{1, 2}, {structures::PLI::Cluster{7, 9}}}},
-                              "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-                ClustersParam({{FdByIndices{0, 1}, {structures::PLI::Cluster{4, 0, 1, 5, 6}}},
-                               {FdByIndices{1, 2}, {structures::PLI::Cluster{7, 9}}}},
+                ClustersParam({{FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}}}, "SimpleTypos.csv",
+                              ',', true, true, -1, 0.05, 0),
+                ClustersParam({{FdByIndices{0, 1}, {model::PLI::Cluster{4, 0, 1, 5, 6}}},
+                               {FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}}},
                               "SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
-                ClustersParam({{FdByIndices{0, 1}, {structures::PLI::Cluster{4, 0, 1, 5, 6}}},
-                               {FdByIndices{1, 2}, {structures::PLI::Cluster{7, 9}}},
+                ClustersParam({{FdByIndices{0, 1}, {model::PLI::Cluster{4, 0, 1, 5, 6}}},
+                               {FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}},
                                {FdByIndices{0, 2},
-                                {structures::PLI::Cluster{4, 0, 1, 5, 6},
-                                 structures::PLI::Cluster{7, 9}}},
+                                {model::PLI::Cluster{4, 0, 1, 5, 6}, model::PLI::Cluster{7, 9}}},
                                {FdByIndices{0},
-                                {structures::PLI::Cluster{8, 2, 3, 7, 9, 0, 1, 4, 5, 6}}}},
+                                {model::PLI::Cluster{8, 2, 3, 7, 9, 0, 1, 4, 5, 6}}}},
                               "SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
 
 class SquashClusterTest : public ::testing::TestWithParam<TestingParam> {};
 
 static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
-                           structures::PLI::Cluster const& cluster,
+                           model::PLI::Cluster const& cluster,
                            std::vector<algos::TypoMiner::SquashedElement> const& squashed) {
     std::vector<int> const& probing_table =
         rel.GetColumnData(fd.GetRhs().GetIndex()).GetProbingTable();
     unsigned cluster_index = 0;
     for (auto const& squashed_element : squashed) {
         int const value = probing_table[squashed_element.tuple_index];
-        ASSERT_FALSE(value == structures::PLI::singleton_value_id_ && squashed_element.amount != 1);
+        ASSERT_FALSE(value == model::PLI::singleton_value_id_ && squashed_element.amount != 1);
         for (unsigned i = 0; i != squashed_element.amount; ++i, ++cluster_index) {
             /* Check that tuples in one squashed element have equal values in rhs */
             int const actual_value = probing_table[cluster[cluster_index]];
@@ -253,8 +252,7 @@ static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
         }
         /* Check that the next tuple (after the last in this squashed element) is not equal to
          * previous one and therefore is correctly not presented at this squashed element */
-        ASSERT_TRUE(cluster_index == cluster.size() ||
-                    value == structures::PLI::singleton_value_id_ ||
+        ASSERT_TRUE(cluster_index == cluster.size() || value == model::PLI::singleton_value_id_ ||
                     value != probing_table[cluster[cluster_index]]);
     }
 }
@@ -265,7 +263,7 @@ TEST_P(SquashClusterTest, SquashCluster) {
     typo_miner->Execute();
 
     for (FD const& fd : typo_miner->GetApproxFDs()) {
-        std::vector<structures::PLI::Cluster> const actual_clusters =
+        std::vector<model::PLI::Cluster> const actual_clusters =
                 typo_miner->FindClustersWithTypos(fd);
         for (auto const& cluster : actual_clusters) {
             std::vector<algos::TypoMiner::SquashedElement> squashed =
@@ -294,7 +292,7 @@ TEST_P(LinesWithTyposMiningTest, FindLinesWithTypos) {
                 schema->IndicesToBitset(fd_by_indices.cbegin(), std::prev(fd_by_indices.cend()));
         FD fd(schema->GetVertical(std::move(bitset)), *schema->GetColumn(fd_by_indices.back()));
         for (auto const& [cluster, typos] : clusters_with_typos) {
-            std::vector<structures::PLI::Cluster::value_type> const actual =
+            std::vector<model::PLI::Cluster::value_type> const actual =
                     typo_miner->FindLinesWithTypos(fd, cluster, p.radius, p.ratio);
             EXPECT_EQ(typos, actual);
         }
@@ -305,12 +303,12 @@ INSTANTIATE_TEST_SUITE_P(
         TypoMinerTestSuite, LinesWithTyposMiningTest,
         ::testing::Values(
                 LinesParam({{FdByIndices{1, 2},
-                             {std::pair(structures::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
+                             {std::pair(model::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
                            1, -1, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
                 LinesParam({{FdByIndices{0, 1},
-                             {std::pair(structures::PLI::Cluster{4, 0, 1, 5, 6}, std::vector{4})}},
+                             {std::pair(model::PLI::Cluster{4, 0, 1, 5, 6}, std::vector{4})}},
                             {FdByIndices{1, 2},
-                             {std::pair(structures::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
+                             {std::pair(model::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
                            1, -1, "SimpleTypos.csv", ',', true, true, -1, 0.1, 0)));
 
 }  // namespace tests

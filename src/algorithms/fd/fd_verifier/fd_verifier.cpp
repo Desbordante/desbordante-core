@@ -1,4 +1,4 @@
-#include "algorithms/functional/fd_verifier/fd_verifier.h"
+#include "algorithms/fd/fd_verifier/fd_verifier.h"
 
 #include <chrono>
 #include <memory>
@@ -26,14 +26,13 @@ void FDVerifier::RegisterOptions() {
     RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
-    RegisterOption(util::config::RhsIndicesOpt(&rhs_indices_, get_schema_cols));
+    RegisterOption(config::RhsIndicesOpt(&rhs_indices_, get_schema_cols));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable(
-            {config::LhsIndicesOpt.GetName(), util::config::RhsIndicesOpt.GetName()});
+    MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), config::RhsIndicesOpt.GetName()});
 }
 
 void FDVerifier::LoadDataInternal() {
@@ -62,10 +61,10 @@ unsigned long long FDVerifier::ExecuteInternal() {
 }
 
 void FDVerifier::VerifyFD() const {
-    std::shared_ptr<structures::PLI const> lhs_pli = CalculatePLI(lhs_indices_);
-    std::shared_ptr<util::PLI const> rhs_pli = CalculatePLI(rhs_indices_);
+    std::shared_ptr<model::PLI const> lhs_pli = CalculatePLI(lhs_indices_);
+    std::shared_ptr<model::PLI const> rhs_pli = CalculatePLI(rhs_indices_);
 
-    std::unique_ptr<structures::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
+    std::unique_ptr<model::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
     if (lhs_pli->GetNumCluster() == intersection_pli->GetNumCluster()) {
         return;
     }
@@ -73,9 +72,9 @@ void FDVerifier::VerifyFD() const {
     stats_calculator_->CalculateStatistics(lhs_pli.get(), rhs_pli.get());
 }
 
-std::shared_ptr<util::PLI const> FDVerifier::CalculatePLI(
-        util::config::IndicesType const& indices) const {
-    std::shared_ptr<util::PLI const> pli = relation_->GetColumnData(indices[0]).GetPliOwnership();
+std::shared_ptr<model::PLI const> FDVerifier::CalculatePLI(
+        config::IndicesType const& indices) const {
+    std::shared_ptr<model::PLI const> pli = relation_->GetColumnData(indices[0]).GetPliOwnership();
 
     for (size_t i = 1; i < indices.size(); ++i) {
         pli = pli->Intersect(relation_->GetColumnData(indices[i]).GetPositionListIndex());

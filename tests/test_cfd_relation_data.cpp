@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/functional/cfd/structures/cfd_relation_data.h"
+#include "algorithms/cfd/model/cfd_relation_data.h"
 #include "datasets.h"
 #include "parser/csv_parser.h"
 

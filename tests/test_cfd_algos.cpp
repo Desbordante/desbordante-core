@@ -6,8 +6,8 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/cfd/enums.h"
-#include "algorithms/functional/cfd/fd_first_algorithm.h"
+#include "algorithms/cfd/enums.h"
+#include "algorithms/cfd/fd_first_algorithm.h"
 #include "config/names.h"
 #include "datasets.h"
 

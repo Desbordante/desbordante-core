@@ -3,8 +3,8 @@
 #include <memory>
 #include <utility>
 
-#include "structures/vertical_map.h"
 #include "vertical.h"
+#include "vertical_map.h"
 
 RelationalSchema::RelationalSchema(std::string name, bool is_null_eq_null)
     : columns_(), name_(std::move(name)), is_null_eq_null_(is_null_eq_null), empty_vertical_() {
@@ -62,9 +62,9 @@ std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
     std::sort(verticals.begin(), verticals.end(), [](auto& vertical1, auto& vertical2) {
         return vertical1.GetArity() < vertical2.GetArity();
     });
-    structures::VerticalMap<Vertical> consolidated_verticals(this);
+    model::VerticalMap<Vertical> consolidated_verticals(this);
 
-    structures::VerticalMap<Vertical> hitting_set(this);
+    model::VerticalMap<Vertical> hitting_set(this);
     hitting_set.Put(*empty_vertical_, Vertical::EmptyVertical(this));
 
     for (auto& vertical : verticals) {

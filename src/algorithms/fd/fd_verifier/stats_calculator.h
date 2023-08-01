@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/functional/fd_verifier/highlight.h"
+#include "algorithms/fd/fd_verifier/highlight.h"
 #include "config/indices/type.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
@@ -14,7 +14,7 @@ namespace algos::fd_verifier {
 
 class StatsCalculator {
 private:
-    using ClusterIndex = structures::PLI::Cluster::value_type;
+    using ClusterIndex = model::PLI::Cluster::value_type;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -44,7 +44,7 @@ private:
 public:
     using HighlightCompareFunction = std::function<bool(Highlight const& h1, Highlight const& h2)>;
 
-    void CalculateStatistics(structures::PLI const* lhs_pli, structures::PLI const* rhs_pli);
+    void CalculateStatistics(model::PLI const* lhs_pli, model::PLI const* rhs_pli);
 
     void PrintStatistics() const;
 

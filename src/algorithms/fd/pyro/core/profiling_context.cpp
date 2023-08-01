@@ -4,9 +4,9 @@
 
 #include <easylogging++.h>
 
-#include "pyro/structures/list_agree_set_sample.h"
-#include "pyro/structures/pli_cache.h"
-#include "structures/vertical_map.h"
+#include "model/table/vertical_map.h"
+#include "pyro/model/list_agree_set_sample.h"
+#include "pyro/model/pli_cache.h"
 
 using std::shared_ptr;
 
@@ -30,8 +30,7 @@ ProfilingContext::ProfilingContext(pyro::Parameters parameters,
     if (parameters_.sample_size > 0) {
         auto schema = relation_data_->GetSchema();
         agree_set_samples_ =
-                std::make_unique<structures::BlockingVerticalMap<structures::AgreeSetSample>>(
-                        schema);
+                std::make_unique<model::BlockingVerticalMap<model::AgreeSetSample>>(schema);
         // TODO: сделать, чтобы при одном потоке agree_set_samples_ =
         // std::make_unique<VerticalMap<AgreeSetSample>>(schema);
         for (auto& column : schema->GetColumns()) {
@@ -43,7 +42,7 @@ ProfilingContext::ProfilingContext(pyro::Parameters parameters,
         agree_set_samples_ = nullptr;
     }
     double max_entropy = GetMaximumEntropy(relation_data_);
-    pli_cache_ = std::make_unique<structures::PLICache>(
+    pli_cache_ = std::make_unique<model::PLICache>(
             relation_data_, caching_method, eviction_method, caching_method_value,
             GetMinEntropy(relation_data_), GetMeanEntropy(relation_data_),
             GetMedianEntropy(relation_data_), SetMaximumEntropy(relation_data_, caching_method),
@@ -137,39 +136,36 @@ double ProfilingContext::SetMaximumEntropy(ColumnLayoutRelationData const* relat
     }
 }
 
-structures::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical const& focus,
-                                                                        double boost_factor) {
+model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical const& focus,
+                                                                   double boost_factor) {
     auto pli = pli_cache_->GetOrCreateFor(focus, this);
-    auto pli_pointer =
-            std::holds_alternative<structures::PositionListIndex*>(pli)
-                    ? std::get<structures::PositionListIndex*>(pli)
-                    : std::get<std::unique_ptr<structures::PositionListIndex>>(pli).get();
-    std::unique_ptr<structures::ListAgreeSetSample> sample =
-            structures::ListAgreeSetSample::CreateFocusedFor(
-                    relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
-                    custom_random_);
+    auto pli_pointer = std::holds_alternative<model::PositionListIndex*>(pli)
+                               ? std::get<model::PositionListIndex*>(pli)
+                               : std::get<std::unique_ptr<model::PositionListIndex>>(pli).get();
+    std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
+            relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
+            custom_random_);
     LOG(TRACE) << boost::format{"Creating sample focused on: %1%"} % focus.ToString();
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
 }
 
-structures::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
-        const Vertical& focus, structures::PositionListIndex const* restriction_pli,
+model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
+        const Vertical& focus, model::PositionListIndex const* restriction_pli,
         double boost_factor) {
-    std::unique_ptr<structures::ListAgreeSetSample> sample =
-            structures::ListAgreeSetSample::CreateFocusedFor(
-                    relation_data_, focus, restriction_pli,
-                    parameters_.sample_size * boost_factor, custom_random_);
+    std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
+            relation_data_, focus, restriction_pli, parameters_.sample_size * boost_factor,
+            custom_random_);
     LOG(TRACE) << boost::format{"Creating sample focused on: %1%"} % focus.ToString();
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
 }
 
-shared_ptr<structures::AgreeSetSample const> ProfilingContext::GetAgreeSetSample(
+shared_ptr<model::AgreeSetSample const> ProfilingContext::GetAgreeSetSample(
         Vertical const& focus) const {
-    shared_ptr<structures::AgreeSetSample const> sample = nullptr;
+    shared_ptr<model::AgreeSetSample const> sample = nullptr;
     for (auto& [key, next_sample] : agree_set_samples_->GetSubsetEntries(focus)) {
         if (sample == nullptr || next_sample->GetSamplingRatio() > sample->GetSamplingRatio()) {
             sample = next_sample;

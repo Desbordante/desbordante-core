@@ -140,17 +140,15 @@ unsigned long long Pyro::ExecuteInternal() {
 
     SetProgress(100);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
 
-    LOG(INFO) << boost::format{"FdG1 error calculation: %1% ms"} %
-                     (FdG1Strategy::nanos_ / 1000000);
+    LOG(INFO) << boost::format{"FdG1 error calculation: %1% ms"} % (FdG1Strategy::nanos_ / 1000000);
     LOG(INFO) << "Init time: " << init_time_millis << "ms";
     LOG(INFO) << "Time: " << elapsed_milliseconds.count() << " milliseconds";
     LOG(INFO) << "Error calculation count: " << total_error_calc_count;
     LOG(INFO) << "Total ascension time: " << total_ascension << "ms";
     LOG(INFO) << "Total trickle time: " << total_trickle << "ms";
-    LOG(INFO) << "Total intersection time: " << structures::PositionListIndex::micros_ / 1000
-              << "ms";
+    LOG(INFO) << "Total intersection time: " << model::PositionListIndex::micros_ / 1000 << "ms";
     LOG(INFO) << "HASH: " << PliBasedFDAlgorithm::Fletcher16();
     return elapsed_milliseconds.count();
 }

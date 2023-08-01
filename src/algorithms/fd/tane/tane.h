@@ -5,8 +5,8 @@
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "config/error/type.h"
 #include "config/max_lhs/type.h"
+#include "model/table/position_list_index.h"
 #include "model/table/relation_data.h"
-#include "structures/position_list_index.h"
 
 namespace algos {
 
@@ -31,10 +31,10 @@ public:
 
     static double CalculateZeroAryFdError(ColumnData const* rhs,
                                           ColumnLayoutRelationData const* relation_data);
-    static double CalculateFdError(structures::PositionListIndex const* lhs_pli,
-                                   structures::PositionListIndex const* joint_pli,
+    static double CalculateFdError(model::PositionListIndex const* lhs_pli,
+                                   model::PositionListIndex const* joint_pli,
                                    ColumnLayoutRelationData const* relation_data);
-    static double CalculateUccError(structures::PositionListIndex const* pli,
+    static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
 
     // static double round(double error) { return ((int)(error * 32768) + 1)/ 32768.0; }

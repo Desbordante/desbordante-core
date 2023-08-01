@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-#include "algorithms/functional/cfd/enums.h"
+#include "algorithms/cfd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/enum_to_available_values.h"
 
