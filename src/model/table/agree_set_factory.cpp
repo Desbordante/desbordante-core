@@ -18,7 +18,7 @@
 #include "identifier_set.h"
 #include "parallel_for.h"
 
-namespace structures {
+namespace model {
 
 using std::set, std::vector, std::unordered_set;
 
@@ -599,4 +599,4 @@ void AgreeSetFactory::CalculateSupersets(
     }
 }
 
-}  // namespace structures
+}  // namespace model

@@ -46,7 +46,7 @@ include_directories(
         "src"
         "src/algorithms"
         "src/algorithms/association_rules"
-        "src/algorithms/functional/"
+        "src/algorithms/fd/"
         "src/algorithms/fd/aidfd"
         "src/algorithms/fd/depminer"
         "src/algorithms/fd/dfd"

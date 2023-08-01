@@ -4,9 +4,9 @@
 #include <stack>
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "algorithms/functional/dfd/partition_storage/partition_storage.h"
 #include "config/thread_number/type.h"
 #include "model/table/vertical.h"
+#include "partition_storage/partition_storage.h"
 
 namespace algos {
 

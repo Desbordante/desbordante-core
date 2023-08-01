@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "algorithms/fd/hycommon/primitive_validations.h"
-#include "algorithms/fd/hyfd/structures/fd_tree.h"
+#include "algorithms/fd/hyfd/model/fd_tree.h"
 #include "algorithms/fd/raw_fd.h"
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 #include "types.h"
 
 namespace algos::hyfd {

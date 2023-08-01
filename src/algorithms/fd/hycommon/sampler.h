@@ -9,7 +9,7 @@
 #include "all_column_combinations.h"
 #include "config/thread_number/type.h"
 #include "efficiency_threshold.h"
-#include "structures/position_list_index.h"
+#include "model/table/position_list_index.h"
 #include "types.h"
 
 namespace boost::asio {
@@ -44,11 +44,10 @@ private:
     void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
                size_t second_record_id);
     template <typename F>
-    void RunWindowImpl(Efficiency& efficiency, structures::PositionListIndex const& pli,
-                       F store_match);
+    void RunWindowImpl(Efficiency& efficiency, model::PositionListIndex const& pli, F store_match);
     std::vector<boost::dynamic_bitset<>> RunWindowRet(Efficiency& efficiency,
-                                                      structures::PositionListIndex const& pli);
-    void RunWindow(Efficiency& efficiency, structures::PositionListIndex const& pli);
+                                                      model::PositionListIndex const& pli);
+    void RunWindow(Efficiency& efficiency, model::PositionListIndex const& pli);
 
 public:
     Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads = 1);

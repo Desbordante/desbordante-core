@@ -1,13 +1,13 @@
-#include "algorithms/functional/dfd/dfd.h"
+#include "dfd.h"
 
 #include <boost/asio.hpp>
 #include <easylogging++.h>
 
-#include "algorithms/functional/dfd/lattice_traversal/lattice_traversal.h"
 #include "config/thread_number/option.h"
+#include "lattice_traversal/lattice_traversal.h"
 #include "model/table/column_layout_relation_data.h"
+#include "model/table/position_list_index.h"
 #include "model/table/relational_schema.h"
-#include "structures/position_list_index.h"
 
 namespace algos {
 
@@ -37,7 +37,7 @@ unsigned long long DFD::ExecuteInternal() {
     //search for unique columns
     for (auto const& column : schema->GetColumns()) {
         ColumnData& column_data = relation_->GetColumnData(column->GetIndex());
-        structures::PositionListIndex const* const column_pli = column_data.GetPositionListIndex();
+        model::PositionListIndex const* const column_pli = column_data.GetPositionListIndex();
 
         if (column_pli->AllValuesAreUnique()) {
             Vertical const lhs = Vertical(*column);
@@ -53,7 +53,7 @@ unsigned long long DFD::ExecuteInternal() {
         boost::asio::post(
                 search_space_pool, [this, &rhs, schema, progress_step, &partition_storage]() {
             ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
-            structures::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
+            model::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
 
             /* if all the rows have the same value, then we register FD with empty LHS
              * if we have minimal FD like []->RHS, it is impossible to find smaller FD with this RHS,

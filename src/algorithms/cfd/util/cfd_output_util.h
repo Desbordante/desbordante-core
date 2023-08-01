@@ -5,8 +5,8 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "algorithms/cfd/structures/cfd_relation_data.h"
-#include "algorithms/cfd/structures/cfd_types.h"
+#include "algorithms/cfd/model/cfd_relation_data.h"
+#include "algorithms/cfd/model/cfd_types.h"
 
 // see algorithms/cfd/LICENSE
 

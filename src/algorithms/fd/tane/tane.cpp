@@ -43,14 +43,14 @@ double Tane::CalculateZeroAryFdError(ColumnData const* rhs,
                    static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-double Tane::CalculateFdError(structures::PositionListIndex const* lhs_pli,
-                              structures::PositionListIndex const* joint_pli,
+double Tane::CalculateFdError(model::PositionListIndex const* lhs_pli,
+                              model::PositionListIndex const* joint_pli,
                               ColumnLayoutRelationData const* relation_data) {
     return (double)(lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
            static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-double Tane::CalculateUccError(structures::PositionListIndex const* pli,
+double Tane::CalculateUccError(model::PositionListIndex const* pli,
                                ColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
@@ -95,21 +95,21 @@ unsigned long long Tane::ExecuteInternal() {
     double progress_step = 100.0 / (schema->GetNumColumns() + 1);
 
     // Initialize level 0
-    std::vector<std::unique_ptr<structures::LatticeLevel>> levels;
-    auto level0 = std::make_unique<structures::LatticeLevel>(0);
+    std::vector<std::unique_ptr<model::LatticeLevel>> levels;
+    auto level0 = std::make_unique<model::LatticeLevel>(0);
     // TODO: через указатели кажется надо переделать
-    level0->Add(std::make_unique<structures::LatticeVertex>(*(schema->empty_vertical_)));
-    structures::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
+    level0->Add(std::make_unique<model::LatticeVertex>(*(schema->empty_vertical_)));
+    model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
     AddProgress(progress_step);
 
     // Initialize level1
     dynamic_bitset<> zeroary_fd_rhs(schema->GetNumColumns());
-    auto level1 = std::make_unique<structures::LatticeLevel>(1);
+    auto level1 = std::make_unique<model::LatticeLevel>(1);
     for (auto& column : schema->GetColumns()) {
         // for each attribute set vertex
         ColumnData const& column_data = relation_->GetColumnData(column->GetIndex());
-        auto vertex = std::make_unique<structures::LatticeVertex>(static_cast<Vertical>(*column));
+        auto vertex = std::make_unique<model::LatticeVertex>(static_cast<Vertical>(*column));
 
         vertex->AddRhsCandidates(schema->GetColumns());
         vertex->GetParents().push_back(empty_vertex);
@@ -167,13 +167,13 @@ unsigned long long Tane::ExecuteInternal() {
                                  : max_lhs_ + 1;
     for (unsigned int arity = 2; arity <= max_arity; arity++) {
         // auto start_time = std::chrono::system_clock::now();
-        structures::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
-        structures::LatticeLevel::GenerateNextLevel(levels);
+        model::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
+        model::LatticeLevel::GenerateNextLevel(levels);
         // std::chrono::duration<double> elapsed_milliseconds =
         // std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
         // start_time); apriori_millis_ += elapsed_milliseconds.count();
 
-        structures::LatticeLevel* level = levels[arity].get();
+        model::LatticeLevel* level = levels[arity].get();
         LOG(TRACE) << "Checking " << level->GetVertices().size() << " " << arity
                    << "-ary lattice vertices.";
         if (level->GetVertices().empty()) {
@@ -234,7 +234,7 @@ unsigned long long Tane::ExecuteInternal() {
 
         //Prune
         //cout << "Pruning level: " << level->GetArity() << ". " << level->GetVertices().size() << " vertices_" << endl;
-        std::list<structures::LatticeVertex*> key_vertices;
+        std::list<model::LatticeVertex*> key_vertices;
         for (auto& [map_key, vertex] : level->GetVertices()) {
             Vertical columns = vertex->GetVertical();  // Originally it's a ColumnCombination
 
@@ -298,8 +298,8 @@ unsigned long long Tane::ExecuteInternal() {
     apriori_millis_ += elapsed_milliseconds.count();
 
     LOG(INFO) << "Time: " << apriori_millis_ << " milliseconds";
-    LOG(INFO) << "Intersection time: " << structures::PositionListIndex::micros_ / 1000 << "ms";
-    LOG(INFO) << "Total intersections: " << structures::PositionListIndex::intersection_count_
+    LOG(INFO) << "Intersection time: " << model::PositionListIndex::micros_ / 1000 << "ms";
+    LOG(INFO) << "Total intersections: " << model::PositionListIndex::intersection_count_
               << std::endl;
     LOG(INFO) << "Total FD count: " << count_of_fd_;
     LOG(INFO) << "Total UCC count: " << count_of_ucc_;

@@ -3,17 +3,17 @@
 #include <utility>
 
 #include "model/table/vertical.h"
-#include "pyro/structures/confidence_interval.h"
+#include "pyro/model/confidence_interval.h"
 
 class DependencyCandidate {
 private:
     bool is_exact_;
 
 public:
-    structures::ConfidenceInterval error_;
+    model::ConfidenceInterval error_;
     Vertical vertical_;
 
-    DependencyCandidate(Vertical vertical, structures::ConfidenceInterval error, bool is_exact)
+    DependencyCandidate(Vertical vertical, model::ConfidenceInterval error, bool is_exact)
         : is_exact_(is_exact), error_(error), vertical_(std::move(vertical)) {}
     bool operator<(DependencyCandidate const& other) const;
 

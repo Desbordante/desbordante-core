@@ -217,7 +217,7 @@ void MetricVerifier::VisualizeHighlights() const {
 }
 
 void MetricVerifier::VerifyMetricFD() {
-    std::shared_ptr<structures::PLI const> pli =
+    std::shared_ptr<model::PLI const> pli =
             relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
 
     for (size_t i = 1; i < lhs_indices_.size(); ++i) {
@@ -286,7 +286,7 @@ ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
                 [&type](std::byte const* l, std::byte const* r) { return type.Dist(l, r); });
     }
 
-    return [this, &type, verify_func](structures::PLI::Cluster const& cluster) {
+    return [this, &type, verify_func](model::PLI::Cluster const& cluster) {
         std::unordered_map<std::string, util::QGramVector> q_gram_map;
         return verify_func(GetCosineDistFunction(type, q_gram_map))(cluster);
     };
@@ -294,7 +294,7 @@ ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
 
 ClusterFunction MetricVerifier::GetClusterFunctionForSeveralDimensions() {
     if (algo_ == +MetricAlgo::calipers) {
-        return [this](structures::PLI::Cluster const& cluster) {
+        return [this](model::PLI::Cluster const& cluster) {
             auto result = points_calculator_->CalculateMultidimensionalPointsForCalipers(cluster);
             if (!CheckMFDFailIfHasNulls(result.has_nulls) &&
                 CalipersCompareNumericValues(result.points)) {
@@ -357,8 +357,7 @@ template <typename T>
 ClusterFunction MetricVerifier::CalculateClusterFunction(
         IndexedPointsFunction<T> points_func, CompareFunction<T> compare_func,
         HighlightFunction<T> highlight_func) const {
-    return [this, points_func, compare_func,
-            highlight_func](structures::PLI::Cluster const& cluster) {
+    return [this, points_func, compare_func, highlight_func](model::PLI::Cluster const& cluster) {
         auto result = points_func(cluster);
         if (!CheckMFDFailIfHasNulls(result.has_nulls) && compare_func(result.points)) {
             return true;
@@ -371,7 +370,7 @@ ClusterFunction MetricVerifier::CalculateClusterFunction(
 template <typename T>
 ClusterFunction MetricVerifier::CalculateApproxClusterFunction(
         PointsFunction<T> points_func, DistanceFunction<T> dist_func) const {
-    return [points_func, dist_func, this](structures::PLI::Cluster const& cluster) {
+    return [points_func, dist_func, this](model::PLI::Cluster const& cluster) {
         auto result = points_func(cluster);
         return !CheckMFDFailIfHasNulls(result.has_nulls) &&
                ApproxVerifyCluster(result.points, dist_func);

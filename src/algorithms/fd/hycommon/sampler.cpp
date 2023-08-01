@@ -74,7 +74,7 @@ public:
 namespace algos::hy {
 
 template <typename F>
-void Sampler::RunWindowImpl(Efficiency& efficiency, structures::PositionListIndex const& pli,
+void Sampler::RunWindowImpl(Efficiency& efficiency, model::PositionListIndex const& pli,
                             F store_match) {
     efficiency.IncrementWindow();
 
@@ -84,7 +84,7 @@ void Sampler::RunWindowImpl(Efficiency& efficiency, structures::PositionListInde
     unsigned comparisons = 0;
     unsigned const window = efficiency.GetWindow();
 
-    for (structures::PLI::Cluster const& cluster : pli.GetIndex()) {
+    for (model::PLI::Cluster const& cluster : pli.GetIndex()) {
         boost::dynamic_bitset<> equal_attrs(num_attributes);
         for (size_t i = 0; window < cluster.size() && i < cluster.size() - window; ++i) {
             int const pivot_id = cluster[i];
@@ -105,8 +105,8 @@ void Sampler::RunWindowImpl(Efficiency& efficiency, structures::PositionListInde
     efficiency.SetComparisons(comparisons);
 }
 
-std::vector<boost::dynamic_bitset<>> Sampler::RunWindowRet(
-        Efficiency& efficiency, structures::PositionListIndex const& pli) {
+std::vector<boost::dynamic_bitset<>> Sampler::RunWindowRet(Efficiency& efficiency,
+                                                           model::PositionListIndex const& pli) {
     std::vector<boost::dynamic_bitset<>> matched;
     auto store_match = [&matched](boost::dynamic_bitset<> const& equal_attrs) {
         matched.push_back(equal_attrs);
@@ -115,7 +115,7 @@ std::vector<boost::dynamic_bitset<>> Sampler::RunWindowRet(
     return matched;
 }
 
-void Sampler::RunWindow(Efficiency& efficiency, structures::PositionListIndex const& pli) {
+void Sampler::RunWindow(Efficiency& efficiency, model::PositionListIndex const& pli) {
     auto store_match = [this](boost::dynamic_bitset<> const& equal_attrs) {
         agree_sets_->Add(equal_attrs);
     };
@@ -136,12 +136,12 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
 void Sampler::SortClustersParallel() {
     ColumnSlider column_slider(plis_->size());
     std::vector<boost::unique_future<void>> sort_futures;
-    for (structures::PLI* pli : *plis_) {
+    for (model::PLI* pli : *plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
                                              column_slider.GetRightNeighbor());
         auto sort = [pli, cluster_comparator]() {
-            for (structures::PLI::Cluster& cluster : pli->GetIndex()) {
+            for (model::PLI::Cluster& cluster : pli->GetIndex()) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
         };
@@ -155,11 +155,11 @@ void Sampler::SortClustersParallel() {
 
 void Sampler::SortClustersSeq() {
     ColumnSlider column_slider(plis_->size());
-    for (structures::PLI* pli : *plis_) {
+    for (model::PLI* pli : *plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
                                              column_slider.GetRightNeighbor());
-        for (structures::PLI::Cluster& cluster : pli->GetIndex()) {
+        for (model::PLI::Cluster& cluster : pli->GetIndex()) {
             std::sort(cluster.begin(), cluster.end(), cluster_comparator);
         }
         column_slider.ToNextColumn();

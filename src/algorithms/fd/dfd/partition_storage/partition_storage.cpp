@@ -4,9 +4,9 @@
 #include <boost/optional.hpp>
 #include <easylogging++.h>
 
-#include "structures/vertical_map.h"
+#include "model/table/vertical_map.h"
 
-structures::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
+model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
@@ -14,7 +14,7 @@ PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data,
                                    CachingMethod caching_method,
                                    CacheEvictionMethod eviction_method)
     : relation_data_(relation_data),
-      index_(std::make_unique<structures::BlockingVerticalMap<structures::PositionListIndex>>(
+      index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex>>(
               relation_data->GetSchema())),
       caching_method_(caching_method),
       eviction_method_(eviction_method) {
@@ -27,13 +27,13 @@ PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data,
 PartitionStorage::~PartitionStorage() {}
 
 // obtains or calculates a PositionListIndex using cache
-std::variant<structures::PositionListIndex*, std::unique_ptr<structures::PositionListIndex>>
+std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
 PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     std::scoped_lock lock(getting_pli_mutex_);
     LOG(DEBUG) << boost::format{"PLI for %1% requested: "} % vertical.ToString();
 
     // is PLI already cached?
-    structures::PositionListIndex* pli = Get(vertical);
+    model::PositionListIndex* pli = Get(vertical);
     if (pli != nullptr) {
         pli->IncFreq();
         LOG(DEBUG) << boost::format{"Served from PLI cache."};
@@ -47,7 +47,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     ranks.reserve(subset_entries.size());
     for (auto& [sub_vertical, sub_pli_ptr] : subset_entries) {
         PositionListIndexRank pli_rank(
-                &sub_vertical, std::const_pointer_cast<structures::PositionListIndex>(sub_pli_ptr),
+                &sub_vertical, std::const_pointer_cast<model::PositionListIndex>(sub_pli_ptr),
                 sub_vertical.GetArity());
         ranks.push_back(pli_rank);
         if (!smallest_pli_rank || smallest_pli_rank->pli_->GetSize() > pli_rank.pli_->GetSize() ||
@@ -116,7 +116,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     }
 
     // Intersect and cache
-    std::variant<structures::PositionListIndex*, std::unique_ptr<structures::PositionListIndex>>
+    std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
             variant_intersection_pli;
     if (operands.size() >= 4) {
         PositionListIndexRank base_pli_rank = operands[0];
@@ -130,16 +130,15 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         for (size_t i = 1; i < operands.size(); i++) {
             current_vertical = current_vertical.Union(*operands[i].vertical_);
             variant_intersection_pli =
-                    std::holds_alternative<structures::PositionListIndex*>(variant_intersection_pli)
-                            ? std::get<structures::PositionListIndex*>(variant_intersection_pli)
+                    std::holds_alternative<model::PositionListIndex*>(variant_intersection_pli)
+                            ? std::get<model::PositionListIndex*>(variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get())
-                            : std::get<std::unique_ptr<structures::PositionListIndex>>(
+                            : std::get<std::unique_ptr<model::PositionListIndex>>(
                                       variant_intersection_pli)
                                       ->Intersect(operands[i].pli_.get());
             variant_intersection_pli = CachingProcess(
-                    current_vertical,
-                    std::move(std::get<std::unique_ptr<structures::PositionListIndex>>(
-                            variant_intersection_pli)));
+                    current_vertical, std::move(std::get<std::unique_ptr<model::PositionListIndex>>(
+                                              variant_intersection_pli)));
         }
     }
 
@@ -153,9 +152,9 @@ size_t PartitionStorage::Size() const {
     return index_->GetSize();
 }
 
-std::variant<structures::PositionListIndex*, std::unique_ptr<structures::PositionListIndex>>
+std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
 PartitionStorage::CachingProcess(Vertical const& vertical,
-                                 std::unique_ptr<structures::PositionListIndex> pli) {
+                                 std::unique_ptr<model::PositionListIndex> pli) {
     auto pli_pointer = pli.get();
     index_->Put(vertical, std::move(pli));
     return pli_pointer;

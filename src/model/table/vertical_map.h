@@ -1,7 +1,6 @@
 #pragma once
 #include <functional>
 #include <memory>
-#include <set>
 #include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
@@ -11,7 +10,7 @@
 
 #include "util/custom_hashes.h"
 
-namespace structures {
+namespace model {
 
 // difficulties with const methods
 
@@ -207,4 +206,4 @@ public:
     virtual ~BlockingVerticalMap() = default;
 };
 
-}  // namespace structures
+}  // namespace model

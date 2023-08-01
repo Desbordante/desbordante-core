@@ -2,7 +2,7 @@
 #include <boost/format.hpp>
 #include <string>
 
-namespace structures {
+namespace model {
 
 class ConfidenceInterval {
 private:
@@ -36,4 +36,4 @@ public:
     friend std::ostream& operator<<(std::ostream&, ConfidenceInterval const&);
 };
 
-}  // namespace structures
+}  // namespace model

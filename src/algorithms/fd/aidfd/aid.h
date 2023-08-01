@@ -6,8 +6,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "algorithms/fd/aidfd/search_tree.h"
 #include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/functional/aidfd/search_tree.h"
 #include "model/table/column.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"

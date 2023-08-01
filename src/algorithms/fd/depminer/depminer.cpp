@@ -1,4 +1,4 @@
-#include "algorithms/functional/depminer/depminer.h"
+#include "algorithms/fd/depminer/depminer.h"
 
 #include <chrono>
 #include <list>
@@ -6,9 +6,9 @@
 
 #include <easylogging++.h>
 
+#include "model/table/agree_set_factory.h"
 #include "model/table/column_combination.h"
 #include "model/table/relational_schema.h"
-#include "structures/agree_set_factory.h"
 
 namespace algos {
 
@@ -26,8 +26,8 @@ unsigned long long Depminer::ExecuteInternal() {
     progress_step_ = kTotalProgressPercent / schema_->GetNumColumns();
 
     // Agree sets
-    const structures::AgreeSetFactory agree_set_factory = structures::AgreeSetFactory(
-            relation_.get(), structures::AgreeSetFactory::Configuration(), this);
+    const model::AgreeSetFactory agree_set_factory =
+            model::AgreeSetFactory(relation_.get(), model::AgreeSetFactory::Configuration(), this);
     const auto agree_sets = agree_set_factory.GenAgreeSets();
     ToNextProgressPhase();
 
