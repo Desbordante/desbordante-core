@@ -54,6 +54,13 @@ AttributeSet AttributeSet::Intersect(const AttributeSet& other) const noexcept {
 
 AttributeSet AttributeSet::Union(const AttributeSet& other) const noexcept {
     std::vector<int> result;
+    std::set_union(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
+
+    return AttributeSet(result);
+}
+
+AttributeSet AttributeSet::Difference(const AttributeSet& other) const noexcept {
+    std::vector<int> result;
     std::set_difference(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
     return AttributeSet(result);

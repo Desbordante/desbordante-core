@@ -19,6 +19,8 @@ long StrippedPartition::validate_time_ = 0;
 long StrippedPartition::clone_time_ = 0;
 CacheWithLimit<AttributeSet, StrippedPartition> StrippedPartition::cache_(1e4);
 
+StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
+
 StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(data) {
     for (int i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);

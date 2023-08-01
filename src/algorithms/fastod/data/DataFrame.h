@@ -16,6 +16,7 @@ private:
     std::vector<model::TypedColumnData> columns_data_;
 
 public:
+    DataFrame() = default;
     DataFrame(const DataFrame&) = delete;
     explicit DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept;
 

@@ -2,6 +2,7 @@
 
 #include <map>
 #include <queue>
+#include <cstddef>
 
 namespace algos::fastod {
 
@@ -21,3 +22,5 @@ public:
 };
 
 } // namespace algos::fastod;
+
+#include "cache_with_limit.tpp"

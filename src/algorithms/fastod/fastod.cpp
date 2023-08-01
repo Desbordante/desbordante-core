@@ -9,13 +9,13 @@
 using namespace algos::fastod;
 
 Fastod::Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
-    Algorithm({"Mining ODs"}),
+    //Algorithm({"Mining ODs"}),
     data_(data),
     time_limit_(time_limit),
     error_rate_threshold_(error_rate_threshold) {}
 
 Fastod::Fastod(const DataFrame& data, long time_limit) noexcept :
-    Algorithm({"Mining ODs"}),
+    //Algorithm({"Mining ODs"}),
     data_(data),
     time_limit_(time_limit) {}
 
@@ -57,6 +57,18 @@ std::unordered_set<AttributePair>& Fastod::CSGet(const AttributeSet& key) noexce
     }
 
     return cs_[key];
+}
+
+void Fastod::PrintStatistics() const noexcept {
+    std::string last_od = result_.size() > 0
+        ? result_[result_.size() - 1].ToString()
+        : std::string("");
+    
+    std::cout << "Current time " << timer_.GetElapsedSeconds() << " sec, "
+              << "found od " << fd_count_ + ocd_count_ << " ones, where "
+              << "fd " << fd_count_ << " ones, "
+              << "ocd " << ocd_count_ << " ones, "
+              << "the last od is " << last_od << '\n';
 }
 
 bool Fastod::IsComplete() const noexcept {
@@ -279,7 +291,7 @@ void Fastod::CalculateNextLevel() noexcept {
         }
 
         for (int i = 0; i < single_attributes.size(); i++) {
-            for (int j = i + 1; i < single_attributes.size(); j++) {
+            for (int j = i + 1; j < single_attributes.size(); j++) {
                 bool create_context = true;
                 auto candidate = prefix.AddAttribute(single_attributes[i]).AddAttribute(single_attributes[j]);
 
