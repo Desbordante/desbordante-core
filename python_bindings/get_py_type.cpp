@@ -15,12 +15,16 @@ namespace py = pybind11;
 
 namespace {
 
-constexpr static PyTypeObject* const py_int = &PyLong_Type;
-constexpr static PyTypeObject* const py_bool = &PyBool_Type;
-constexpr static PyTypeObject* const py_float = &PyFloat_Type;
-constexpr static PyTypeObject* const py_str = &PyUnicode_Type;
-constexpr static PyTypeObject* const py_list = &PyList_Type;
-constexpr static PyTypeObject* const py_tuple = &PyTuple_Type;
+constexpr PyTypeObject* const py_int = &PyLong_Type;
+constexpr PyTypeObject* const py_bool = &PyBool_Type;
+constexpr PyTypeObject* const py_float = &PyFloat_Type;
+constexpr PyTypeObject* const py_str = &PyUnicode_Type;
+constexpr PyTypeObject* const py_list = &PyList_Type;
+constexpr PyTypeObject* const py_tuple = &PyTuple_Type;
+
+py::handle MakeType(py::type type) {
+    return type;
+}
 
 py::handle MakeType(PyTypeObject* py_type_ptr) {
     // Does the same as `&py_type_ptr->ob_base.ob_base`: Python API simulates
@@ -40,51 +44,35 @@ py::tuple MakeTypeTuple(TypePtrs... type_ptrs) {
 }
 
 template <typename CppType, PyTypeObject*... PyTypes>
-std::pair<std::type_index, std::function<py::frozenset()>> const SimplePyTypeInfoPair{
-        std::type_index{typeid(CppType)},
-        []() { return py::frozenset{py::make_tuple(MakeTypeTuple(PyTypes...))}; }};
-
-py::frozenset GetPyInputTableType() {
-    std::vector<py::tuple> types;
-    try {
-        PyObject* df_type = py::module::import("pandas").attr("DataFrame").ptr();
-        types = {MakeTypeTuple(df_type), MakeTypeTuple(py_tuple, df_type, py_str),
-                 MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
-    } catch (py::error_already_set& e) {
-        if (e.matches(PyExc_ImportError)) {
-            types = {MakeTypeTuple(py_tuple, py_str, py_str, py_bool)};
-        } else {
-            throw;
-        }
-    }
-    return {py::make_iterator(types.begin(), types.end())};
-}
+std::pair<std::type_index, std::function<py::tuple()>> const PyTypePair{
+        std::type_index{typeid(CppType)}, []() { return MakeTypeTuple(PyTypes...); }};
 
 }  // namespace
 
 namespace python_bindings {
 
-py::frozenset GetPyType(std::type_index type_index) {
-    // Type indexes are mapped to frozensets of Python type tuples. The first
-    // element of all the tuples is the type of the parameter itself. If that
-    // element is `list`, the following element denotes the type of its
-    // elements. If that parameter is `tuple` then the following parameters
-    // denote the types of their respective elements.
+py::tuple GetPyType(std::type_index type_index) {
+    // Type indexes are mapped to Python type tuples. The first element of all
+    // the tuples is the type of the parameter itself. If that element is
+    // `list`, the following element denotes the type of its elements. If that
+    // parameter is `tuple` then the following parameters denote the types of
+    // their respective elements.
     // The tuples are created at runtime from Python API's raw pointers (when
     // possible) as storing pybind11's objects themselves statically is
     // unpredictable and can lead to errors related to garbage collection.
-    static const std::unordered_map<std::type_index, std::function<py::frozenset()>> type_map{
-            SimplePyTypeInfoPair<bool, py_bool>,
-            SimplePyTypeInfoPair<ushort, py_int>,
-            SimplePyTypeInfoPair<int, py_int>,
-            SimplePyTypeInfoPair<unsigned int, py_int>,
-            SimplePyTypeInfoPair<double, py_float>,
-            SimplePyTypeInfoPair<long double, py_float>,
-            SimplePyTypeInfoPair<algos::metric::Metric, py_str>,
-            SimplePyTypeInfoPair<algos::metric::MetricAlgo, py_str>,
-            SimplePyTypeInfoPair<algos::InputFormat, py_str>,
-            SimplePyTypeInfoPair<std::vector<unsigned int>, py_list, py_int>,
-            {typeid(util::config::InputTable), GetPyInputTableType},
+    static const std::unordered_map<std::type_index, std::function<py::tuple()>> type_map{
+            PyTypePair<bool, py_bool>,
+            PyTypePair<ushort, py_int>,
+            PyTypePair<int, py_int>,
+            PyTypePair<unsigned int, py_int>,
+            PyTypePair<double, py_float>,
+            PyTypePair<long double, py_float>,
+            PyTypePair<algos::metric::Metric, py_str>,
+            PyTypePair<algos::metric::MetricAlgo, py_str>,
+            PyTypePair<algos::InputFormat, py_str>,
+            PyTypePair<std::vector<unsigned int>, py_list, py_int>,
+            {typeid(util::config::InputTable),
+             []() { return MakeTypeTuple(py::type::of<util::config::InputTable>()); }},
     };
     return type_map.at(type_index)();
 }
