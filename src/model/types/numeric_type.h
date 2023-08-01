@@ -3,10 +3,10 @@
 #include <cmath>
 #include <limits>
 #include <sstream>
-#include "imetrizable_type.h"
-#include "type.h"
 #include "cast/cast_to_builtin_type.h"
 #include "cast/icast_to_numeric_type.h"
+#include "imetrizable_type.h"
+#include "type.h"
 namespace model {
 
 
@@ -179,7 +179,4 @@ std::byte* NumericType<T>::Abs(std::byte const* num, std::byte* res) const {
     GetValue(res) = std::abs(GetValue(num));
     return res;
 }
-
-
-
 }  // namespace model

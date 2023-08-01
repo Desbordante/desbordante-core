@@ -14,4 +14,4 @@ public:
         return static_cast<float>(*reinterpret_cast<T*>(buf));
     }
 };
-} // namespace model
+}  // namespace model

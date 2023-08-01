@@ -11,4 +11,4 @@ public:
         return this->MakeValue<Int>(static_cast<Int>(*reinterpret_cast<const Int*>(data)));
     }
 };
-} // namespace model
+}  // namespace model

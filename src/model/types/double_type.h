@@ -45,6 +45,7 @@ public:
     ICastToNumericType& CastToNumeric() override {
         return this->caster_to_numeric_;
     }
+
 protected:
     model::CastFromDoubleType caster_to_builtin_;
     CastFromDoubleTypeToNumeric caster_to_numeric_; 
