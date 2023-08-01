@@ -7,8 +7,8 @@
 #include "algorithms/ucc/hyucc/model/ucc_tree.h"
 #include "algorithms/ucc/raw_ucc.h"
 #include "config/thread_number/type.h"
-#include "hycommon/primitive_validations.h"
-#include "hycommon/types.h"
+#include "fd/hycommon/primitive_validations.h"
+#include "fd/hycommon/types.h"
 #include "model/table/position_list_index.h"
 
 namespace algos::hyucc {

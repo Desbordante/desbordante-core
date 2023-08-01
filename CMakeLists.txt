@@ -45,17 +45,9 @@ message(${Boost_INCLUDE_DIRS})
 include_directories(
         "src"
         "src/algorithms"
-        "src/algorithms/association_rules"
-        "src/algorithms/fd/"
-        "src/algorithms/fd/aidfd"
-        "src/algorithms/fd/depminer"
-        "src/algorithms/fd/dfd"
-        "src/algorithms/statistics"
-        "src/caching"
         "src/model"
         "src/model/types"
         "src/parser"
-        "src/parser/json"
         "src/util"
         "src/config"
 )
