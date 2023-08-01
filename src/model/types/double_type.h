@@ -48,6 +48,6 @@ public:
 
 protected:
     model::CastFromDoubleType caster_to_builtin_;
-    CastFromDoubleTypeToNumeric caster_to_numeric_; 
+    CastFromDoubleTypeToNumeric caster_to_numeric_;
 };
 }  // namespace model

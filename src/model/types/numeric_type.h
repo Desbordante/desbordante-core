@@ -3,12 +3,12 @@
 #include <cmath>
 #include <limits>
 #include <sstream>
+
 #include "cast/cast_to_builtin_type.h"
 #include "cast/icast_to_numeric_type.h"
 #include "imetrizable_type.h"
 #include "type.h"
 namespace model {
-
 
 class INumericType : public IMetrizableType {
 public:
@@ -32,7 +32,7 @@ public:
     virtual std::byte* MakeValueOfInt(int value) const = 0;
 
     [[nodiscard]] virtual std::byte const* Min() const = 0;
-    [[nodiscard]] virtual std::byte const* Max() const = 0; 
+    [[nodiscard]] virtual std::byte const* Max() const = 0;
 };
 
 template <typename T>
