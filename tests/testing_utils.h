@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/fd_algorithm.h"
+#include "algorithms/fd/fd_algorithm.h"
 #include "config/error/type.h"
 #include "config/names.h"
 #include "datasets.h"

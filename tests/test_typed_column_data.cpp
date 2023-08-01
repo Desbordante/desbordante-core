@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/functional/fd_algorithm.h"
+#include "algorithms/fd/fd_algorithm.h"
 #include "column_layout_typed_relation_data.h"
 #include "csv_parser.h"
 #include "datasets.h"
