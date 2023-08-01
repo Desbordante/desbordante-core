@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/fd/hycommon/preprocessor.h"
+#include "fd/hycommon/preprocessor.h"
 
 namespace algos::hyucc {
 

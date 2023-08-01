@@ -4,7 +4,7 @@
 
 #include <easylogging++.h>
 
-#include "pyro/model/pli_cache.h"
+#include "../model/pli_cache.h"
 #include "search_space.h"
 
 unsigned long long FdG1Strategy::nanos_ = 0;

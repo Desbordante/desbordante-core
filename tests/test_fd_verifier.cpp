@@ -4,12 +4,12 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/fd_verifier/fd_verifier.h"
+#include "algo_factory.h"
 #include "builtin.h"
 #include "config/indices/type.h"
 #include "datasets.h"
-#include "fd_verifier/stats_calculator.h"
+#include "fd/fd_verifier/fd_verifier.h"
+#include "fd/fd_verifier/stats_calculator.h"
 
 namespace {
 using namespace algos::fd_verifier;
