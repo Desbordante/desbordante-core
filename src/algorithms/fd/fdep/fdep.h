@@ -5,8 +5,8 @@
 
 #include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/functional/fdep/fd_tree_element.h"
-#include "model/relation_data.h"
-#include "model/relational_schema.h"
+#include "model/table/relation_data.h"
+#include "model/table/relational_schema.h"
 
 namespace algos {
 

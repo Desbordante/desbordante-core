@@ -2,7 +2,7 @@
 
 #include <pybind11/pybind11.h>
 
-#include "model/idataset_stream.h"
+#include "model/table/idataset_stream.h"
 
 namespace python_bindings {
 

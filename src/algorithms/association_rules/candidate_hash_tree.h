@@ -1,6 +1,6 @@
 #pragma once
 
-#include "transactional_data.h"
+#include "model/transaction/transactional_data.h"
 #include "node.h"
 
 namespace algos {

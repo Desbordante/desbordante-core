@@ -4,10 +4,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "column_layout_relation_data.h"
 #include "datasets.h"
 #include "functional/pyro/structures/list_agree_set_sample.h"
 #include "levenshtein_distance.h"
+#include "model/table/column_layout_relation_data.h"
 #include "structures/agree_set_factory.h"
 #include "structures/identifier_set.h"
 

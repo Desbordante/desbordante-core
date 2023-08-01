@@ -6,9 +6,9 @@
 #include <boost/unordered_map.hpp>
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "model/column_combination.h"
-#include "model/column_layout_relation_data.h"
-#include "model/vertical.h"
+#include "model/table/column_combination.h"
+#include "model/table/column_layout_relation_data.h"
+#include "model/table/vertical.h"
 #include "structures/position_list_index.h"
 
 namespace algos {

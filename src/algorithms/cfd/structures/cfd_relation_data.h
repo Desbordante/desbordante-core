@@ -8,8 +8,8 @@
 
 #include "cfd_column_data.h"
 #include "cfd_types.h"
-#include "model/idataset_stream.h"
-#include "model/relation_data.h"
+#include "model/table/idataset_stream.h"
+#include "model/table/relation_data.h"
 
 // see algorithms/cfd/LICENSE
 

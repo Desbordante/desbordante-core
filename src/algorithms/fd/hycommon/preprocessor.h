@@ -4,7 +4,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "model/column_layout_relation_data.h"
+#include "model/table/column_layout_relation_data.h"
 #include "types.h"
 
 namespace algos::hy {
