@@ -4,7 +4,7 @@
 
 #include "config/thread_number/option.h"
 #include "config/thread_number/type.h"
-#include "hycommon/types.h"
+#include "fd/hycommon/types.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/idataset_stream.h"
 #include "ucc/ucc_algorithm.h"

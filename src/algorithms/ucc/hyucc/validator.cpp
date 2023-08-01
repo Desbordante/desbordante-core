@@ -5,8 +5,8 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 
-#include "hycommon/efficiency_threshold.h"
-#include "hycommon/validator_helpers.h"
+#include "fd/hycommon/efficiency_threshold.h"
+#include "fd/hycommon/validator_helpers.h"
 #include "ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace {
