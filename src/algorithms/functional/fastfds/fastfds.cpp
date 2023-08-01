@@ -1,4 +1,4 @@
-#include "algorithms/functional/fastfds.h"
+#include "fastfds.h"
 
 #include <algorithm>
 #include <mutex>

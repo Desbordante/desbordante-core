@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/typo_miner.h"
+#include "algorithms/functional/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
 #include "datasets.h"
 

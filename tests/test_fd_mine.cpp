@@ -7,7 +7,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/fd_mine.h"
+#include "algorithms/functional/fd_mine/fd_mine.h"
 #include "algorithms/functional/pyro/pyro.h"
 #include "algorithms/functional/tane/tane.h"
 #include "config/error/type.h"

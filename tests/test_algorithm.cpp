@@ -8,9 +8,9 @@
 
 #include "algorithms/functional/depminer/depminer.h"
 #include "algorithms/functional/dfd/dfd.h"
-#include "algorithms/functional/fastfds.h"
+#include "algorithms/functional/fastfds/fastfds.h"
 #include "algorithms/functional/fdep/fdep.h"
-#include "algorithms/functional/fun.h"
+#include "algorithms/functional/fun/fun.h"
 #include "algorithms/functional/hyfd/hyfd.h"
 #include "algorithms/functional/pyro/pyro.h"
 #include "algorithms/functional/tane/tane.h"

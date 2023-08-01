@@ -1,4 +1,4 @@
-#include "algorithms/functional/typo_miner.h"
+#include "typo_miner.h"
 
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
