@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "convex_hull.h"
+#include "util/convex_hull.h"
 
 namespace {
 
