@@ -6,15 +6,9 @@
 
 #include "cast/cast_from_double.h"
 namespace model {
-
-
-
-
 class DoubleType final : public NumericType<Double> {
-private:
-
 public:
-    DoubleType() /*noexcept*/ : NumericType<Double>(TypeId::kDouble) {}
+    DoubleType() noexcept : NumericType<Double>(TypeId::kDouble) {}
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const final {
         Double l_val = GetValue(l);
@@ -45,17 +39,14 @@ public:
             return nullptr;
         }
     }
-    ICastToCppType & CastToBuiltin() override{
+    ICastToCppType& CastToBuiltin() override {
         return this->caster_to_builtin_;
     }
-    ICastToNumericType& CastToNumeric()override{
+    ICastToNumericType& CastToNumeric() override {
         return this->caster_to_numeric_;
     }
-    protected:
+protected:
     model::CastFromDoubleType caster_to_builtin_;
-    CastFromDoubleTypeToNumeric caster_to_numeric_;
-    
+    CastFromDoubleTypeToNumeric caster_to_numeric_; 
 };
-
-
 }  // namespace model

@@ -1,7 +1,7 @@
 #pragma once
 #include "cast_to_builtin_type.h"
 namespace model {
-class CastFromIntType:public CastToCppType<Int> {};
+class CastFromIntType : public CastToCppType<Int> {};
 class CastFromIntTypeToNumeric : public ICastToNumericType {
 public:
     std::byte* CastToDoubleType(const std::byte* data) override {
@@ -11,4 +11,4 @@ public:
         return this->MakeValue<Int>(static_cast<Int>(*reinterpret_cast<const Int*>(data)));
     }
 };
-} //namespace model
+} // namespace model

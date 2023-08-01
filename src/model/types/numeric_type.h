@@ -3,10 +3,8 @@
 #include <cmath>
 #include <limits>
 #include <sstream>
-
 #include "imetrizable_type.h"
 #include "type.h"
-
 #include "cast/cast_to_builtin_type.h"
 #include "cast/icast_to_numeric_type.h"
 namespace model {
@@ -18,8 +16,8 @@ public:
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
-    virtual model::ICastToCppType & CastToBuiltin() = 0;
-    virtual model::ICastToNumericType & CastToNumeric()=0;
+    virtual model::ICastToCppType& CastToBuiltin() = 0;
+    virtual model::ICastToNumericType& CastToNumeric() = 0;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -34,9 +32,7 @@ public:
     virtual std::byte* MakeValueOfInt(int value) const = 0;
 
     [[nodiscard]] virtual std::byte const* Min() const = 0;
-    [[nodiscard]] virtual std::byte const* Max() const = 0;
-
-    
+    [[nodiscard]] virtual std::byte const* Max() const = 0; 
 };
 
 template <typename T>
@@ -51,11 +47,11 @@ protected:
     }
 
 public:
-    virtual ICastToCppType & CastToBuiltin() override{
+    virtual ICastToCppType& CastToBuiltin() override {
         return this->caster_to_builtin_;
     }
-    virtual ICastToNumericType& CastToNumeric() override{
-        static_assert(true,"unable to cast template NumericType to its defenition");
+    virtual ICastToNumericType& CastToNumeric() override {
+        static_assert(true, "unable to cast template NumericType to its defenition");
         throw std::logic_error("unable to cast template NumericType to its defenition");
     }
     using UnderlyingType = T;
