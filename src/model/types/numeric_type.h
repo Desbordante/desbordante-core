@@ -4,9 +4,10 @@
 #include <limits>
 #include <sstream>
 
+#include "cast/cast_to_builtin_type.h"
+#include "cast/icast_to_numeric_type.h"
 #include "imetrizable_type.h"
 #include "type.h"
-
 namespace model {
 
 class INumericType : public IMetrizableType {
@@ -14,6 +15,9 @@ public:
     using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*, std::byte*) const;
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
+
+    virtual model::ICastToCppType& CastToBuiltin() = 0;
+    virtual model::ICastToNumericType& CastToNumeric() = 0;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -34,6 +38,7 @@ public:
 template <typename T>
 class NumericType : public INumericType {
 protected:
+    model::CastToCppType<T> caster_to_builtin_;
     static T const& GetValue(std::byte const* buf) {
         return INumericType::GetValue<T>(buf);
     }
@@ -42,6 +47,13 @@ protected:
     }
 
 public:
+    virtual ICastToCppType& CastToBuiltin() override {
+        return this->caster_to_builtin_;
+    }
+    virtual ICastToNumericType& CastToNumeric() override {
+        static_assert(true, "unable to cast template NumericType to its defenition");
+        throw std::logic_error("unable to cast template NumericType to its defenition");
+    }
     using UnderlyingType = T;
 
     static constexpr T kMinValue = std::numeric_limits<T>::lowest();
@@ -167,5 +179,4 @@ std::byte* NumericType<T>::Abs(std::byte const* num, std::byte* res) const {
     GetValue(res) = std::abs(GetValue(num));
     return res;
 }
-
 }  // namespace model
