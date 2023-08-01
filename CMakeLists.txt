@@ -43,13 +43,13 @@ message(${Boost_INCLUDE_DIRS})
 
 # providing subdirectories for header inclusion
 include_directories(
-        "src"
-        "src/algorithms"
-        "src/model"
-        "src/model/types"
-        "src/parser"
-        "src/util"
-        "src/config"
+        "src/core"
+        "src/core/algorithms"
+        "src/core/model"
+        "src/core/model/types"
+        "src/core/parser"
+        "src/core/util"
+        "src/core/config"
 )
 
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")
@@ -68,10 +68,10 @@ option(build_static_lib "Build easyloggingpp as a static library" ON)
 add_subdirectory("lib/easyloggingpp")
 set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
 
-add_subdirectory("src")
+add_subdirectory("src/core")
 
 if (COMPILE_TESTS)
-    add_subdirectory("tests")
+    add_subdirectory("src/tests")
 endif()
 if (UNPACK_DATASETS)
     add_subdirectory("datasets")
@@ -79,5 +79,5 @@ endif()
 add_subdirectory("cfg")
 
 if (COMPILE_PYBIND)
-    add_subdirectory("python_bindings")
+    add_subdirectory("src/python_bindings")
 endif()
