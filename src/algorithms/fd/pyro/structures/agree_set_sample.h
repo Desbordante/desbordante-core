@@ -8,9 +8,9 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "confidence_interval.h"
-#include "custom/custom_random.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
+#include "util/custom_random.h"
 
 namespace structures {
 

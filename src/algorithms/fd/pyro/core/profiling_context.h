@@ -5,12 +5,12 @@
 
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "custom/custom_random.h"
 #include "dependency_consumer.h"
 #include "parameters.h"
 #include "pyro/model/partial_fd.h"
 #include "pyro/model/partial_key.h"
 #include "pyro/structures/agree_set_sample.h"
+#include "util/custom_random.h"
 
 namespace structures {
 
