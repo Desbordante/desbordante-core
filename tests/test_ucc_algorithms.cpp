@@ -7,9 +7,9 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/functional/model/ucc.h"
 #include "algorithms/functional/ucc/hyucc/hyucc.h"
 #include "algorithms/functional/ucc/ucc_algorithm.h"
+#include "algorithms/ucc/ucc.h"
 #include "config/thread_number/type.h"
 #include "datasets.h"
 

@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "algorithms/functional/fd_algorithm.h"
-#include "algorithms/functional/model/fd.h"
+#include "algorithms/fd/fd.h"
+#include "algorithms/fd/fd_algorithm.h"
 #include "get_algorithm.h"
 #include "py_algorithm.h"
 #include "py_fd.h"

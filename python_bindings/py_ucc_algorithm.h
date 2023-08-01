@@ -2,8 +2,8 @@
 
 #include <list>
 
-#include "algorithms/functional/model/ucc.h"
 #include "algorithms/functional/ucc/ucc_algorithm.h"
+#include "algorithms/ucc/ucc.h"
 #include "get_algorithm.h"
 #include "py_algorithm.h"
 #include "py_ucc.h"
