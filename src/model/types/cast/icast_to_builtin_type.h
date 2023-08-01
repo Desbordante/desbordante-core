@@ -11,7 +11,7 @@ public:
         switch (inp_type) {
             case model::TypeId::kDouble: {
                 static_assert(std::is_same<return_type, Double>::value,
-                               "can only convert model::DoubleType to Double");
+                              "can only convert model::DoubleType to Double");
                 return *reinterpret_cast<Double*>(buf); 
             } break;
             case model::TypeId::kInt: {
