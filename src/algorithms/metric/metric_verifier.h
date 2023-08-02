@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <filesystem>
 #include <functional>
@@ -48,6 +49,9 @@ private:
     DistanceFunction<std::byte const*> GetCosineDistFunction(
             model::StringType const& type,
             std::unordered_map<std::string, util::QGramVector>& q_gram_map) const;
+
+    bool IsGreaterThanParameter(long double value) const;
+    bool IsLessOrEqualThanParameter(long double value) const;
 
     bool CheckMFDFailIfHasNulls(bool has_nulls) const {
         return dist_from_null_is_infinity_ && has_nulls;
@@ -106,6 +110,7 @@ public:
     }
 
     std::vector<std::vector<Highlight>> const& GetHighlights() const {
+        assert(highlight_calculator_);
         return highlight_calculator_->GetHighlights();
     }
 
@@ -114,21 +119,27 @@ public:
     }
 
     void SortHighlightsByDistanceAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByDistanceAscending();
     }
     void SortHighlightsByDistanceDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByDistanceDescending();
     }
     void SortHighlightsByFurthestIndexAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByFurthestIndexAscending();
     }
     void SortHighlightsByFurthestIndexDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByFurthestIndexDescending();
     }
     void SortHighlightsByIndexAscending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByIndexAscending();
     }
     void SortHighlightsByIndexDescending() {
+        assert(highlight_calculator_);
         highlight_calculator_->SortHighlightsByIndexDescending();
     }
 

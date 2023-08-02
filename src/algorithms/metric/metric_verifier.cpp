@@ -142,7 +142,6 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     points_calculator_ = std::make_unique<PointsCalculator>(dist_from_null_is_infinity_,
                                                             typed_relation_, rhs_indices_);
     highlight_calculator_ = std::make_unique<HighlightCalculator>(typed_relation_, rhs_indices_);
-    assert(points_calculator_.get() != nullptr || highlight_calculator_.get() != nullptr);
 
     VerifyMetricFD();
 
@@ -201,7 +200,8 @@ void MetricVerifier::VisualizeHighlights() const {
             std::string value = GetStringValue(rhs_indices_, highlight.data_index);
             std::string begin_desc;
             if (!is_empty) {
-                begin_desc = std::string("[") + (highlight.max_distance <= parameter_ ? "✓" : "X") +
+                begin_desc = std::string("[") +
+                             (IsGreaterThanParameter(highlight.max_distance) ? "X" : "✓") +
                              "] | max dist: " + std::to_string(highlight.max_distance) + "\t| ";
             }
             std::string end_desc;
@@ -394,7 +394,7 @@ bool MetricVerifier::CompareNumericValues(
         } else if (type.Compare(points[i].point, min_value) == model::CompareResult::kLess) {
             min_value = points[i].point;
         }
-        if (type.Dist(max_value, min_value) > parameter_) {
+        if (IsGreaterThanParameter(type.Dist(max_value, min_value))) {
             return false;
         }
     }
@@ -409,7 +409,7 @@ bool MetricVerifier::ApproxVerifyCluster(std::vector<T> const& points,
     }
     return std::all_of(std::next(points.cbegin()), points.cend(),
                        [this, &points, &dist_func](auto const& p) {
-                           return dist_func(points[0], p) * 2 <= parameter_;
+                           return IsLessOrEqualThanParameter(dist_func(points[0], p) * 2);
                        });
 }
 
@@ -418,7 +418,7 @@ bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& poin
                                         DistanceFunction<T> const& dist_func) const {
     for (size_t i = 0; i + 1 < points.size(); ++i) {
         for (size_t j = i + 1; j < points.size(); ++j) {
-            if (dist_func(points[i].point, points[j].point) > parameter_) {
+            if (IsGreaterThanParameter(dist_func(points[i].point, points[j].point))) {
                 return false;
             }
         }
@@ -429,8 +429,18 @@ bool MetricVerifier::BruteVerifyCluster(std::vector<IndexedPoint<T>> const& poin
 bool MetricVerifier::CalipersCompareNumericValues(std::vector<util::Point>& points) const {
     auto pairs = util::GetAntipodalPairs(util::CalculateConvexHull(points));
     return std::all_of(pairs.cbegin(), pairs.cend(), [this](auto const& pair) {
-        return util::Point::EuclideanDistance(pair.first, pair.second) <= parameter_;
+        return IsLessOrEqualThanParameter(util::Point::EuclideanDistance(pair.first, pair.second));
     });
+}
+
+static constexpr long double epsilon = 1e-15;
+
+bool MetricVerifier::IsGreaterThanParameter(long double value) const {
+    return value > parameter_ + epsilon;
+}
+
+bool MetricVerifier::IsLessOrEqualThanParameter(long double value) const {
+    return !IsGreaterThanParameter(value);
 }
 
 }  // namespace algos::metric

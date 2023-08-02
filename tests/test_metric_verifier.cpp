@@ -168,7 +168,8 @@ INSTANTIATE_TEST_SUITE_P(
                 MetricVerifyingParams("euclidean", 4.5, {0}, {12, 11}, "TestMetric.csv",
                                       "calipers"),
                 MetricVerifyingParams("euclidean", 6.0091679956547, {0}, {13, 14, 15},
-                                      "TestMetric.csv")));
+                                      "TestMetric.csv"),
+                MetricVerifyingParams("cosine", 0, {0}, {0}, "WDC_astronomical.csv")));
 
 constexpr long double inf = std::numeric_limits<long double>::infinity();
 
