@@ -62,21 +62,8 @@ unsigned long long FDVerifier::ExecuteInternal() {
 }
 
 void FDVerifier::VerifyFD() const {
-    std::shared_ptr<util::PLI const> lhs_pli =
-            relation_->GetColumnData(lhs_indices_[0]).GetPliOwnership();
-
-    for (size_t i = 1; i < lhs_indices_.size(); ++i) {
-        lhs_pli = lhs_pli->Intersect(
-                relation_->GetColumnData(lhs_indices_[i]).GetPositionListIndex());
-    }
-
-    std::shared_ptr<util::PLI const> rhs_pli =
-            relation_->GetColumnData(rhs_indices_[0]).GetPliOwnership();
-
-    for (size_t i = 1; i < rhs_indices_.size(); ++i) {
-        rhs_pli = rhs_pli->Intersect(
-                relation_->GetColumnData(rhs_indices_[i]).GetPositionListIndex());
-    }
+    std::shared_ptr<util::PLI const> lhs_pli = CalculatePLI(lhs_indices_);
+    std::shared_ptr<util::PLI const> rhs_pli = CalculatePLI(rhs_indices_);
 
     std::unique_ptr<util::PLI const> intersection_pli = lhs_pli->Intersect(rhs_pli.get());
     if (lhs_pli->GetNumCluster() == intersection_pli->GetNumCluster()) {
@@ -84,6 +71,16 @@ void FDVerifier::VerifyFD() const {
     }
 
     stats_calculator_->CalculateStatistics(lhs_pli.get(), rhs_pli.get());
+}
+
+std::shared_ptr<util::PLI const> FDVerifier::CalculatePLI(
+        util::config::IndicesType const& indices) const {
+    std::shared_ptr<util::PLI const> pli = relation_->GetColumnData(indices[0]).GetPliOwnership();
+
+    for (size_t i = 1; i < indices.size(); ++i) {
+        pli = pli->Intersect(relation_->GetColumnData(indices[i]).GetPositionListIndex());
+    }
+    return pli;
 }
 
 void FDVerifier::SortHighlightsByProportionAscending() const {

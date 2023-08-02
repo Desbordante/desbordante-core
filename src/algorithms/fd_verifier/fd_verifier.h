@@ -28,6 +28,7 @@ private:
     std::unique_ptr<StatsCalculator> stats_calculator_;
 
     void VerifyFD() const;
+    std::shared_ptr<util::PLI const> CalculatePLI(util::config::IndicesType const& indices) const;
     void RegisterOptions();
     void ResetState() final {
         if (stats_calculator_) {
