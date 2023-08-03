@@ -1,0 +1,30 @@
+name: 'Download library'
+description: 'Download a library used by Desbordante'
+inputs:
+  directory:
+    description: 'Name of the directory where the library is saved'
+    required: true
+  download-command:
+    description: 'Command to download the library'
+    required: true
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/cache@v3
+      id: cache-library
+      with:
+        path: ${{github.workspace}}/lib/${{inputs.directory}}
+        key: ${{runner.os}}-${{inputs.directory}}
+    - run: |
+        cd lib
+        ${{inputs.download-command}}
+      shell: bash
+      if: steps.cache-library.outputs.cache-hit != 'true'
+    - run: |
+        if ! test -d lib/'${{inputs.directory}}'; then
+          echo 'Library directory name is not correct:' '${{inputs.directory}}'
+          ls lib
+          exit 1
+        fi
+        exit 0
+      shell: bash

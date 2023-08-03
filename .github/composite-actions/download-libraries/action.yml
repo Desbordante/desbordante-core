@@ -1,0 +1,74 @@
+name: 'Download libraries'
+description: 'Download files necessary for compilation and testing'
+inputs:
+  download-pybind:
+    type: boolean
+    description: 'Download pybind11'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+    - name: Install build tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install gcc-10 g++-10 cmake build-essential
+      shell: bash
+    - name: Cache Boost
+      uses: actions/cache@v3
+      id: cache-boost
+      with:
+        path: ${{github.workspace}}/lib/boost
+        key: ${{ runner.os }}-boost-78
+    - name: Install Boost
+      run: |
+        wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
+        tar xzvf boost_1_78_0.tar.gz
+        cd boost_1_78_0
+        ./bootstrap.sh --prefix=${{github.workspace}}/lib/boost
+        ./b2
+        sudo ./b2 install
+      shell: bash
+      if: steps.cache-boost.outputs.cache-hit != 'true'
+    - name: Make lib directory
+      run: |
+        mkdir -p lib
+      shell: bash
+    - name: Download googletest
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: googletest
+        download-command: git clone https://github.com/google/googletest/ --branch release-1.12.1
+    - name: Download easyloggingpp
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: easyloggingpp
+        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0
+    - name: Download better-enums
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: better-enums
+        download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3
+    - name: Download pybind11
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: pybind11
+        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.10
+      if: inputs.download-pybind != 'false'
+
+#    Uncomment this if we set up our own git lfs server
+#    - name: Install git-lfs
+#      run: |
+#         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+#         git lfs install
+#      shell: bash
+#    - name: Generate lfs file list
+#      run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+#      shell: bash
+#    - name: Restore lfs cache
+#      uses: actions/cache@v3
+#      id: lfs-cache
+#      with:
+#        path: .git/lfs
+#        key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
