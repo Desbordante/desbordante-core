@@ -13,103 +13,13 @@ jobs:
       matrix:
         BUILD_TYPE: [ Release, Debug ]
     steps:
-    - uses: actions/checkout@v2
-    - name: Install build tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install gcc-10 g++-10 cmake build-essential
-    - name: Cache Boost
-      uses: actions/cache@v3
-      id: cache-boost
+    - uses: actions/checkout@v3
+    - name: Download libraries
+      uses: ./.github/composite-actions/download-libraries
       with:
-        path: ${{github.workspace}}/lib/boost
-        key: ${{ runner.os }}-boost-78
-    - name: Cache googletest
-      uses: actions/cache@v3
-      id: cache-googletest
-      with:
-        path: ${{github.workspace}}/lib/googletest
-        key: ${{ runner.os }}-googletest
-    - name: Cache easyloggingpp
-      uses: actions/cache@v3
-      id: cache-easyloggingpp
-      with:
-        path: ${{github.workspace}}/lib/easyloggingpp
-        key: ${{ runner.os }}-easyloggingpp
-    - name: Cache better-enums
-      uses: actions/cache@v3
-      id: cache-better-enums
-      with:
-        path: ${{github.workspace}}/lib/better-enums
-        key: ${{ runner.os }}better-enums
-    - name: Cache pybind11
-      uses: actions/cache@v3
-      id: cache-pybind11
-      with:
-        path: ${{github.workspace}}/lib/pybind11
-        key: ${{ runner.os }}-pybind11
-#     Uncomment this if we set up our own git lfs server
-#
-#     - name: Install git-lfs
-#       run: |
-#         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-#         git lfs install
-#     - name: Generate lfs file list
-#       run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
-#     - name: Restore lfs cache
-#       uses: actions/cache@v3
-#       id: lfs-cache
-#       with:
-#         path: .git/lfs
-#         key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
-
-#     Also change this if we set up our own git lfs server
-    - name: Cache datasets
-      uses: actions/cache@v3
-      id: cache-datasets
-      with:
-        path: ${{github.workspace}}/datasets/datasets.zip
-        key: ${{ runner.os }}datasets
-    - name: Pull datasets
-      run: bash pull_datasets.sh
-      if: steps.cache-datasets.outputs.cache-hit != 'true'
-    - name: Install Boost
-      run: |
-        wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
-        tar xzvf boost_1_78_0.tar.gz
-        cd boost_1_78_0
-        ./bootstrap.sh --prefix=${{github.workspace}}/lib/boost
-        ./b2
-        sudo ./b2 install
-      if: steps.cache-boost.outputs.cache-hit != 'true'
-    - name: Download googletest
-      run: |
-        mkdir -p lib
-        sudo chown -R $USER lib
-        cd lib
-        git clone https://github.com/google/googletest/ --branch release-1.12.1
-      if: steps.cache-googletest.outputs.cache-hit != 'true'
-    - name: Download easyloggingpp
-      run: |
-        mkdir -p lib
-        sudo chown -R $USER lib
-        cd lib
-        git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0
-      if: steps.cache-easyloggingpp.outputs.cache-hit != 'true'
-    - name: Download better-enums
-      run: |
-        mkdir -p lib
-        sudo chown -R $USER lib
-        cd lib
-        git clone https://github.com/aantron/better-enums.git --branch 0.11.3
-      if: steps.cache-better-enums.outputs.cache-hit != 'true'
-    - name: Download pybind11
-      run: |
-        mkdir -p lib
-        sudo chown -R $USER lib
-        cd lib
-        git clone https://github.com/pybind/pybind11.git --branch v2.10
-      if: steps.cache-pybind11.outputs.cache-hit != 'true'
+        download-pybind: false
+    - name: Download datasets
+      uses: ./.github/composite-actions/download-datasets
     - name: Configure CMake
       run: >
         cmake -B ${{github.workspace}}/build

@@ -1,0 +1,15 @@
+name: 'Download datasets'
+description: 'Download datasets'
+runs:
+  using: 'composite'
+  steps:
+  - name: Cache datasets
+    uses: actions/cache@v3
+    id: cache-datasets
+    with:
+      path: ${{github.workspace}}/datasets/datasets.zip
+      key: ${{ runner.os }}datasets
+  - name: Pull datasets
+    run: ./pull_datasets.sh
+    shell: bash
+    if: steps.cache-datasets.outputs.cache-hit != 'true'
