@@ -44,6 +44,8 @@ jobs:
           -DBOOST_ROOT=${{github.workspace}}/lib/boost \
           -DCMAKE_BUILD_TYPE=Debug \
           -Dgtest_disable_pthreads=OFF \
+          -DCOMPILE_PYBIND=ON \
+          -DASAN=OFF \
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
           . -B ${{github.workspace}}/build
                     
