@@ -1,0 +1,14 @@
+Source;Address;Latitude;Longitude
+google;65 N St Apt#C6, SLC;40.770896;-111.864066
+geocoder;65 N St Apt#C6, SLC;40.770767;-111.863768
+google;50 Cen Camp Dr, SLC;40.758951;-111.845246
+geocoder;50 Cen Camp Dr, SLC;40.767599;-111.843995
+google;35 S 700 E Apt#3, SLC;40.76837;-111.87064
+geocoder;35 S 700 E Apt#3, SLC;40.76833;-111.870869
+langlot;University of Miami;25.717396;-80.278130
+latitude;University of Miami;25.721644;-80.279267
+gll;University of Miami;25.7216374;-80.2792843
+latitude;Museo del Prado;40.4083317;-3.688830578
+latlong;Museo del Prado;40.413780;-3.692127
+latitude;Capital Museum;39.905;116.336
+latlong;Capital Museum;39.905159;116.400894

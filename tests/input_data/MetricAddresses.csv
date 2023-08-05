@@ -1,0 +1,14 @@
+Source;SSN;Address
+data.com;124-14-5903;1403 3rd Avenue, Cleveland OH
+data.com;563-82-5145;1701 New York Av., Washington, D.C.
+snoop.com;563-82-5145;1701 New York Ave., Washington, D.C.
+snoop.com;124-14-5903;1403 Third Ave., Cleveland OH
+data.com;589-21-7183;8 Peachtree Street, Boca Raton, Florida
+snoop.com;589-21-7183;8 Peachtree St., Boca Raton, Florida
+example.com;589-21-7183;Peachtree Street 8, Boca Raton, Florida
+data.com;564-72-5296;904 North Marlborough Road, Huntington Beach, California
+snoop.com;564-72-5296;904 North Marlborough Rd., Huntington Beach, California
+example.com;564-72-5296;North Marlborough Road 904, Huntington Beach, California
+data.com;074-70-2162;9465 West Tunnel Drive, Ithaca, New York
+snoop.com;074-70-2162;9465 West Tunnel Dr., Ithaca, New York
+example.com;074-70-2162;9465 West Tunnel Dr., Ithaca, NY
