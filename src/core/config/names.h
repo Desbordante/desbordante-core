@@ -44,4 +44,9 @@ constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdTuplesNumber = "tuples_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
+constexpr auto kHllAccuracy = "hll_accuracy";
+constexpr auto kSampleSize = "sample_size";
+constexpr auto kFindNary = "find_nary";
+constexpr auto kIgnoreNullCols = "ignore_null_cols";
+constexpr auto kIgnoreConstantCols = "ignore_constant_cols";
 }  // namespace config::names
