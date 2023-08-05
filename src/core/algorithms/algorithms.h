@@ -34,3 +34,6 @@
 
 /* UCC verifier */
 #include "ucc/ucc_verifier/ucc_verifier.h"
+
+/* Inclusion dependency mining algorithms */
+#include "algorithms/ind/faida/faida.h"
