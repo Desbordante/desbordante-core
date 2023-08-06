@@ -2,8 +2,8 @@
 
 #include <optional>
 
-#include "data/DataFrame.h"
-#include "predicates/SingleAttributePredicate.h"
+#include "data/data_frame.h"
+#include "predicates/single_attribute_predicate.h"
 #include "attribute_set.h"
 
 namespace algos::fastod {

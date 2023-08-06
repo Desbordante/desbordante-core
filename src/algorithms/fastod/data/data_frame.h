@@ -7,7 +7,7 @@
 #include "util/config/equal_nulls/type.h"
 #include "model/column_layout_typed_relation_data.h"
 
-#include "SchemaValue.h"
+#include "schema_value.h"
 
 namespace algos::fastod {
 

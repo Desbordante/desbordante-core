@@ -2,10 +2,10 @@
 #include <string>
 #include <utility>
 
-#include "Operator.h"
-#include "DataFrame.h"
-#include "SchemaValue.h"
-#include "SingleAttributePredicate.h"
+#include "operator.h"
+#include "data_frame.h"
+#include "schema_value.h"
+#include "single_attribute_predicate.h"
 
 using namespace algos::fastod;
 

@@ -3,9 +3,9 @@
 #include <vector>
 #include <map>
 
-#include "data/DataFrame.h"
-#include "data/SchemaValue.h"
-#include "predicates/SingleAttributePredicate.h"
+#include "data/data_frame.h"
+#include "data/schema_value.h"
+#include "predicates/single_attribute_predicate.h"
 #include "cache_with_limit.h"
 #include "attribute_set.h"
 

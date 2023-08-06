@@ -3,8 +3,8 @@
 #include <vector>
 #include <string>
 
-#include "Operator.h"
-#include "DataFrame.h"
+#include "operator.h"
+#include "data_frame.h"
 
 namespace algos::fastod {
 

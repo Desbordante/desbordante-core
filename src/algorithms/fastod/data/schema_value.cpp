@@ -3,7 +3,7 @@
 
 #include "model/column_layout_typed_relation_data.h"
 
-#include "SchemaValue.h"
+#include "schema_value.h"
 
 using namespace algos::fastod;
 

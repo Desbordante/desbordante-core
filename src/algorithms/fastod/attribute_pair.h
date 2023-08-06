@@ -1,6 +1,6 @@
 # pragma once
 
-#include "predicates/SingleAttributePredicate.h"
+#include "predicates/single_attribute_predicate.h"
 
 namespace algos::fastod {
 

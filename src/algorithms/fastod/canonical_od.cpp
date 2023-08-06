@@ -1,8 +1,8 @@
 #include <sstream>
 
 #include "canonical_od.h"
-#include "predicates/OperatorType.h"
-#include "predicates/SingleAttributePredicate.h"
+#include "predicates/operator_type.h"
+#include "predicates/single_attribute_predicate.h"
 #include "stripped_partition.h"
 
 using namespace algos::fastod;

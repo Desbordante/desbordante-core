@@ -1,6 +1,6 @@
 #include <chrono>
 
-#include "Timer.h"
+#include "timer.h"
 
 using namespace algos::fastod;
 

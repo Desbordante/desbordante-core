@@ -5,12 +5,12 @@
 #include <map>
 #include <sstream>
 
-#include "data/SchemaValue.h"
+#include "data/schema_value.h"
 #include "value_pair.h"
-#include "predicates/Operator.h"
-#include "predicates/OperatorType.h"
+#include "predicates/operator.h"
+#include "predicates/operator_type.h"
 #include "stripped_partition.h"
-#include "timers/Timer.h"
+#include "timers/timer.h"
 
 using namespace algos::fastod;
 

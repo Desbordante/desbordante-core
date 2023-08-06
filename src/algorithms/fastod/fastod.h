@@ -9,8 +9,8 @@
 #include "attribute_pair.h"
 #include "attribute_set.h"
 #include "canonical_od.h"
-#include "data/DataFrame.h"
-#include "timers/Timer.h"
+#include "data/data_frame.h"
+#include "timers/timer.h"
 
 namespace algos::fastod {
 

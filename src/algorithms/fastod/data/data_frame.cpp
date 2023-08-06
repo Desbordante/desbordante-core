@@ -7,8 +7,8 @@
 #include "util/config/equal_nulls/type.h"
 #include "model/column_layout_typed_relation_data.h"
 
-#include "DataFrame.h"
-#include "SchemaValue.h"
+#include "data_frame.h"
+#include "schema_value.h"
 
 using namespace algos::fastod;
 

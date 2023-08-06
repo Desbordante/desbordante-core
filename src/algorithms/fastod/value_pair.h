@@ -1,7 +1,7 @@
 # pragma once
 
 #include <string>
-#include "data/SchemaValue.h"
+#include "data/schema_value.h"
 
 namespace algos::fastod {
 

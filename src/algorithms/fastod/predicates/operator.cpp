@@ -1,8 +1,8 @@
 #include <string>
 
-#include "Operator.h"
-#include "OperatorType.h"
-#include "SchemaValue.h"
+#include "operator.h"
+#include "operator_type.h"
+#include "schema_value.h"
 
 using namespace algos::fastod;
 

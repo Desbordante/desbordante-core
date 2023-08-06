@@ -3,8 +3,8 @@
 #include <map>
 
 #include "fastod.h"
-#include "predicates/OperatorType.h"
-#include "predicates/SingleAttributePredicate.h"
+#include "predicates/operator_type.h"
+#include "predicates/single_attribute_predicate.h"
 
 using namespace algos::fastod;
 

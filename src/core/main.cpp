@@ -9,7 +9,7 @@
 #include "util/enum_to_available_values.h"
 
 #include "algorithms/fastod/fastod.h"
-#include "algorithms/fastod/data/DataFrame.h"
+#include "algorithms/fastod/data/data_frame.h"
 #include <climits>
 #include <string>
 #include <filesystem>
