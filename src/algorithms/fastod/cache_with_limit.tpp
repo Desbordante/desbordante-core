@@ -1,7 +1,7 @@
 #include <stdexcept>
 
 template <typename K, typename V>
-algos::fastod::CacheWithLimit<K, V>::CacheWithLimit(size_t max_size) noexcept : max_size_(max_size) {};
+algos::fastod::CacheWithLimit<K, V>::CacheWithLimit(std::size_t max_size) noexcept : max_size_(max_size) {};
 
 template <typename K, typename V>
 bool algos::fastod::CacheWithLimit<K, V>::Contains(const K& key) const noexcept {

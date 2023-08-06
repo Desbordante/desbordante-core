@@ -11,10 +11,10 @@ class CacheWithLimit {
 private:
     std::map<K, V> entries_;
     std::queue<K> keys_in_order_;
-    const size_t max_size_;
+    const std::size_t max_size_;
 
 public:
-    CacheWithLimit(size_t max_size) noexcept;
+    CacheWithLimit(std::size_t max_size) noexcept;
     
     bool Contains(const K& key) const noexcept;
     const V& Get(const K& key) const noexcept;

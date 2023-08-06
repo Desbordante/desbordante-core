@@ -78,7 +78,7 @@ bool SchemaValue::IsNumeric() const noexcept {
     return IsInt() || IsDouble();
 }
 
-SchemaValue SchemaValue::FromTypedColumnData(model::TypedColumnData const& column, size_t index) noexcept {
+SchemaValue SchemaValue::FromTypedColumnData(model::TypedColumnData const& column, std::size_t index) noexcept {
     return SchemaValue(column.GetValueTypeId(index), column.GetValue(index));
 }
 

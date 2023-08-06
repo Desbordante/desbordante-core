@@ -19,11 +19,11 @@ SchemaValue DataFrame::GetValue(int tuple_index, int attribute_index) const noex
     return SchemaValue::FromTypedColumnData(columns_data_.at(attribute_index), tuple_index);
 }
 
-size_t DataFrame::GetColumnCount() const noexcept {
+std::size_t DataFrame::GetColumnCount() const noexcept {
     return columns_data_.size();
 }
 
-size_t DataFrame::GetTupleCount() const noexcept {
+std::size_t DataFrame::GetTupleCount() const noexcept {
     return columns_data_.size() > 0
         ? columns_data_.at(0).GetNumRows()
         : 0;

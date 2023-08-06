@@ -42,7 +42,7 @@ std::string DataframeReaderBase::GetColumnName(int index) const {
     return column_names_.at(index);
 }
 
-size_t DataframeReaderBase::GetNumberOfColumns() const {
+std::size_t DataframeReaderBase::GetNumberOfColumns() const {
     return column_names_.size();
 }
 

@@ -25,7 +25,7 @@ namespace std {
 
 template <>
 struct hash<algos::fastod::AttributePair> {
-    size_t operator()(const algos::fastod::AttributePair& pair) const {
+    std::size_t operator()(const algos::fastod::AttributePair& pair) const {
         auto left_hash = std::hash<int>()(pair.GetLeft().GetHashCode());
         auto right_hash = std::hash<int>()(pair.GetRight());
         return left_hash ^ right_hash;

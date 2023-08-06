@@ -22,8 +22,8 @@ public:
 
     SchemaValue GetValue(int tuple_index, int attribute_index) const noexcept;
     
-    size_t GetColumnCount() const noexcept;
-    size_t GetTupleCount() const noexcept;
+    std::size_t GetColumnCount() const noexcept;
+    std::size_t GetTupleCount() const noexcept;
 
     static DataFrame FromCsv(std::filesystem::path const& path);
 

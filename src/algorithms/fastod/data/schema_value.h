@@ -40,7 +40,7 @@ public:
     bool IsNull() const noexcept;
     bool IsNumeric() const noexcept;
 
-    static SchemaValue FromTypedColumnData(model::TypedColumnData const& column, size_t index) noexcept;
+    static SchemaValue FromTypedColumnData(model::TypedColumnData const& column, std::size_t index) noexcept;
 
     friend bool operator==(SchemaValue const& x, SchemaValue const& y);
     friend bool operator!=(SchemaValue const& x, SchemaValue const& y);
