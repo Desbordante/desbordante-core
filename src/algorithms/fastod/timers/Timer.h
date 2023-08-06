@@ -4,7 +4,7 @@
 
 namespace algos::fastod {
 
-typedef std::chrono::_V2::system_clock::time_point TimePoint;
+typedef std::chrono::_V2::high_resolution_clock::time_point TimePoint;
 
 class Timer {
 private:
@@ -13,7 +13,7 @@ private:
     TimePoint end_time_;
 
 public:
-    Timer(bool start = true) noexcept;
+    Timer(bool start = false) noexcept;
 
     void Start() noexcept;
     void Stop() noexcept;
