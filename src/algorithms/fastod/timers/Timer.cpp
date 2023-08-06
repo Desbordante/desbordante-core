@@ -9,11 +9,8 @@ Timer::Timer(bool start) noexcept {
         Start();
 }
 
-void Timer::Start() noexcept {
-    if (is_started_)
-        return;
-    
-    start_time_ = end_time_ = std::chrono::system_clock::now();
+void Timer::Start() noexcept {  
+    start_time_ = end_time_ = std::chrono::high_resolution_clock::now();
     is_started_ = true;
 }
 
@@ -21,7 +18,7 @@ void Timer::Stop() noexcept {
     if (!is_started_)
         return;
     
-    end_time_ = std::chrono::system_clock::now();
+    end_time_ = std::chrono::high_resolution_clock::now();
     is_started_ = false;
 }
 
@@ -30,9 +27,9 @@ bool Timer::IsStarted() const noexcept {
 }
 
 double Timer::GetElapsedSeconds() const {
-    std::chrono::duration<double> elapsed_seconds = is_started_
-        ? std::chrono::system_clock::now() - start_time_
+    std::chrono::nanoseconds elapsed_nanoseconds = is_started_
+        ? std::chrono::high_resolution_clock::now() - start_time_
         : end_time_ - start_time_;
     
-    return elapsed_seconds.count();
+    return std::chrono::duration<double>(elapsed_nanoseconds).count();
 }
