@@ -77,7 +77,7 @@ bool Fastod::IsComplete() const noexcept {
 
 void Fastod::Initialize() noexcept {
     timer_.Start();
-    
+
     AttributeSet empty_set;
     context_in_each_level_.push_back(std::set<AttributeSet>());
     context_in_each_level_[0].insert(empty_set);
@@ -216,7 +216,7 @@ void Fastod::ComputeODs() noexcept {
 
                 bool add_context = true;
 
-                for(auto attribute: context_delete_ab) {
+                for (auto attribute: context_delete_ab) {
                     auto cs = CSGet(context.DeleteAttribute(attribute));
 
                     if (cs.find(attribute_pair) == cs.end()) {

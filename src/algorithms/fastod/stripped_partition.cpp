@@ -61,8 +61,8 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
             subgroups[value].push_back(index);
         }
 
-        for(auto [_, new_group]: subgroups){
-            if(new_group.size() > 1){
+        for (auto [_, new_group]: subgroups){
+            if (new_group.size() > 1){
                 new_begins.push_back(fill_pointer);
 
                 for (auto i: new_group) {
