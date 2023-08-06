@@ -20,9 +20,9 @@ private:
     bool is_complete_ = true;
     int level_;
     double error_rate_threshold_ = -1;
-    int od_count_;
-    int fd_count_;
-    int ocd_count_;
+    int od_count_ = 0;
+    int fd_count_ = 0;
+    int ocd_count_ = 0;
 
     std::vector<CanonicalOD> result_;
     std::vector<std::set<AttributeSet>> context_in_each_level_;
