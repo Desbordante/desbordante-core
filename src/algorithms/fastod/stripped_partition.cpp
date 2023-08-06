@@ -10,7 +10,7 @@
 #include "operator.h"
 #include "operator_type.h"
 #include "stripped_partition.h"
-#include "timers/timer.h"
+#include "timer.h"
 
 using namespace algos::fastod;
 
@@ -21,7 +21,7 @@ CacheWithLimit<AttributeSet, StrippedPartition> StrippedPartition::cache_(1e4);
 
 StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
 
-StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(data) {
+StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(std::move(data)) {
     for (int i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);
     }
@@ -39,19 +39,20 @@ StrippedPartition::StrippedPartition(StrippedPartition const &origin) noexcept :
 }
 
 StrippedPartition StrippedPartition::Product(int attribute) noexcept {
-    Timer timer;
+    Timer timer = Timer(true);
+
     std::vector<int> new_indexes;
     std::vector<int> new_begins;
     int fill_pointer = 0;
 
     for (int begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        auto group_begin = begins_[begin_pointer];
-        auto group_end = begins_[begin_pointer + 1];
+        int group_begin = begins_[begin_pointer];
+        int group_end = begins_[begin_pointer + 1];
         // CHANGE: utilize column types
         std::map<SchemaValue, std::vector<int>> subgroups;
 
         for (int i = group_begin; i < group_end; i++) {
-            auto index = indexes_[i];
+            int index = indexes_[i];
             auto value = data_.GetValue(index, attribute);
 
             if (subgroups.find(value) == subgroups.end()) {
@@ -65,7 +66,7 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
             if (new_group.size() > 1){
                 new_begins.push_back(fill_pointer);
 
-                for (auto i: new_group) {
+                for (int i : new_group) {
                     new_indexes.push_back(i);
                     fill_pointer++;
                 }
@@ -84,15 +85,15 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
 
 
 bool StrippedPartition::Split(int right) noexcept {
-    Timer timer;
+    Timer timer = Timer(true);
 
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
-        auto group_begin = begins_[begin_pointer];
-        auto group_end = begins_[begin_pointer + 1];
+        int group_begin = begins_[begin_pointer];
+        int group_end = begins_[begin_pointer + 1];
         auto group_value = data_.GetValue(indexes_[group_begin], right);
 
         for (int i = group_begin + 1; i < group_end; i++) {
-            auto index = indexes_[i];
+            int index = indexes_[i];
             auto value = data_.GetValue(index, right);
 
             if (value != group_value) {
@@ -109,15 +110,15 @@ bool StrippedPartition::Split(int right) noexcept {
 }
 
 bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) noexcept {
-    Timer timer;
+    Timer timer = Timer(true);
 
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
-        auto group_begin = begins_[begin_pointer];
-        auto group_end = begins_[begin_pointer + 1];
+        int group_begin = begins_[begin_pointer];
+        int group_end = begins_[begin_pointer + 1];
         std::vector<ValuePair> values;
 
         for (int i = group_begin; i < group_end; i++) {
-            auto index = indexes_[i];
+            int index = indexes_[i];
 
             values.push_back(ValuePair(
                 data_.GetValue(index, left.GetAttribute()),
@@ -127,13 +128,13 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
 
         // CHANGE: utilize operators
         // SCOPE: from here until the end of this loop
-        std::sort(values.begin(), values.end(), [left](const ValuePair& a, const ValuePair& b) {
+        std::sort(values.begin(), values.end(), [&left](const ValuePair& a, const ValuePair& b) {
             return left.GetOperator().Satisfy(a.GetFirst(), b.GetFirst()) && a.GetFirst() != b.GetFirst();
         });
 
-        auto prev_group_max_index = 0;
-        auto current_group_max_index = 0;
-        auto is_first_group = true;
+        int prev_group_max_index = 0;
+        int current_group_max_index = 0;
+        bool is_first_group = true;
 
         for (int i = 0; i < values.size(); i++) {
             auto first = values[i].GetFirst();
@@ -164,8 +165,8 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
 
 std::string StrippedPartition::ToString() const noexcept {
     std::stringstream ss;
-
     std::string indexes_string;
+
     for (int i = 0; i < indexes_.size(); i++) {
         if (i != 0) {
             indexes_string += ", ";
@@ -175,6 +176,7 @@ std::string StrippedPartition::ToString() const noexcept {
     }
 
     std::string begins_string;
+
     for (int i = 0; i < begins_.size(); i++) {
         if (i != 0) {
             begins_string += ", ";
@@ -191,7 +193,7 @@ std::string StrippedPartition::ToString() const noexcept {
 }
 
 StrippedPartition StrippedPartition::DeepClone() const noexcept {
-    Timer timer;
+    Timer timer = Timer(true);
     StrippedPartition result(data_);
 
     result.indexes_ = indexes_;
@@ -209,8 +211,9 @@ StrippedPartition StrippedPartition::GetStrippedPartition(const AttributeSet& at
 
     std::optional<StrippedPartition> result;
 
-    for (auto attribute: attribute_set) {
-        auto one_less = attribute_set.DeleteAttribute(attribute);
+    for (int attribute : attribute_set) {
+        AttributeSet one_less = attribute_set.DeleteAttribute(attribute);
+        
         if (StrippedPartition::cache_.Contains(one_less)) {
             result = StrippedPartition::cache_.Get(one_less).DeepClone().Product(attribute);
         }
@@ -219,7 +222,7 @@ StrippedPartition StrippedPartition::GetStrippedPartition(const AttributeSet& at
     if (!result.has_value()) {
         result = StrippedPartition(data);
 
-        for (auto attribute: attribute_set) {
+        for (int attribute : attribute_set) {
             result.value().Product(attribute);
         }
     }
@@ -230,13 +233,13 @@ StrippedPartition StrippedPartition::GetStrippedPartition(const AttributeSet& at
 }
 
 long StrippedPartition::SplitRemoveCount(int right) noexcept {
-    Timer timer;
+    Timer timer = Timer(true);
     long result = 0;
 
     for (int begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        auto group_begin = begins_[begin_pointer];
-        auto group_end = begins_[begin_pointer + 1];
-        auto group_length = group_end - group_begin;
+        int group_begin = begins_[begin_pointer];
+        int group_end = begins_[begin_pointer + 1];
+        int group_length = group_end - group_begin;
         // CHANGE: key type according to column types
         std::map<SchemaValue, int> group_int_2_count;
 
@@ -250,9 +253,9 @@ long StrippedPartition::SplitRemoveCount(int right) noexcept {
             }
         }
 
-        auto max = INT32_MIN;
+        int max = INT32_MIN;
 
-        for (auto &[_, count]: group_int_2_count) {
+        for (auto const& [_, count] : group_int_2_count) {
             max = std::max(max, count);
         }
 
@@ -265,15 +268,15 @@ long StrippedPartition::SplitRemoveCount(int right) noexcept {
 }
 
 long StrippedPartition::SwapRemoveCount(const SingleAttributePredicate& left, int right) noexcept {
-    auto length = indexes_.size();
+    std::size_t length = indexes_.size();
     std::vector<int> violations_count(length);
     std::vector<bool> deleted(length);
     int result = 0;
 
 next_class:
     for (int begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        auto group_begin = begins_[begin_pointer];
-        auto group_end = begins_[begin_pointer + 1];
+        int group_begin = begins_[begin_pointer];
+        int group_end = begins_[begin_pointer + 1];
 
         for (int i = group_begin; i < group_end; i++) {
             // CHANGE: was FiltereDataFrameGet
