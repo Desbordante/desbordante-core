@@ -24,7 +24,7 @@ private:
     
 public:
     StrippedPartition();
-    StrippedPartition(const DataFrame& data) noexcept;
+    explicit StrippedPartition(const DataFrame& data) noexcept;
     StrippedPartition(const StrippedPartition& origin) noexcept;
 
     StrippedPartition Product(int attribute) noexcept;

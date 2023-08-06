@@ -13,9 +13,9 @@ private:
 
 public:
     AttributeSet() noexcept;
-    AttributeSet(int attribute) noexcept;
-    AttributeSet(const std::vector<int>& attributes) noexcept;
-    AttributeSet(const std::set<int>& set) noexcept;
+    explicit AttributeSet(int attribute) noexcept;
+    explicit AttributeSet(const std::vector<int>& attributes) noexcept;
+    explicit AttributeSet(const std::set<int>& set) noexcept;
 
     bool ContainsAttribute(int attribute) const noexcept;
     AttributeSet AddAttribute(int attribute) const noexcept;

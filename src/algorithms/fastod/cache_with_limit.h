@@ -14,7 +14,7 @@ private:
     const std::size_t max_size_;
 
 public:
-    CacheWithLimit(std::size_t max_size) noexcept;
+    explicit CacheWithLimit(std::size_t max_size) noexcept;
     
     bool Contains(const K& key) const noexcept;
     const V& Get(const K& key) const noexcept;

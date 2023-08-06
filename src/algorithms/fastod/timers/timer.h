@@ -13,7 +13,7 @@ private:
     TimePoint end_time_;
 
 public:
-    Timer(bool start = false) noexcept;
+    explicit Timer(bool start = false) noexcept;
 
     void Start() noexcept;
     void Stop() noexcept;
