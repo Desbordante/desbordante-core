@@ -1,12 +1,13 @@
 #include <stdexcept>
 #include <sstream>
+#include <utility>
 
 #include "attribute_pair.h"
 #include "single_attribute_predicate.h"
 
 using namespace algos::fastod;
 
-AttributePair::AttributePair(const SingleAttributePredicate& left, int right) noexcept : pair_(std::make_pair(left, right)) {
+AttributePair::AttributePair(const SingleAttributePredicate& left, int right) noexcept : pair_(std::move(std::make_pair(left, right))) {
     if (left.GetAttribute() == right) {
         throw std::invalid_argument("Two attributes cannot be the same");
     }

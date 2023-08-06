@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 #include <set>
 #include <map>
 
@@ -10,13 +11,13 @@ using namespace algos::fastod;
 
 Fastod::Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(data),
+    data_(std::move(data)),
     time_limit_(time_limit),
     error_rate_threshold_(error_rate_threshold) {}
 
 Fastod::Fastod(const DataFrame& data, long time_limit) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(data),
+    data_(std::move(data)),
     time_limit_(time_limit) {}
 
 bool Fastod::IsTimeUp() const noexcept {
@@ -79,6 +80,7 @@ void Fastod::Initialize() noexcept {
     timer_.Start();
 
     AttributeSet empty_set;
+
     context_in_each_level_.push_back(std::set<AttributeSet>());
     context_in_each_level_[0].insert(empty_set);
 
@@ -88,10 +90,10 @@ void Fastod::Initialize() noexcept {
     }
 
     level_ = 1;
-
     std::set<AttributeSet> level_1_candidates;
+
     for (int i = 0; i < data_.GetColumnCount(); i++) {
-        auto single_attribute = empty_set.AddAttribute(i);
+        AttributeSet single_attribute = empty_set.AddAttribute(i);
         level_1_candidates.insert(single_attribute);
     }
 
@@ -135,7 +137,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
     Initialize();
 
     while (!context_in_each_level_[level_].empty()) {
-        //std::cout << "Current level: " << level_ << std::endl;
+        //std::cout << "Current level: " << level_ << '\n';
         ComputeODs();
 
         if (IsTimeUp()) {
@@ -155,15 +157,15 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
     timer_.Stop();
 
     if (IsComplete()) {
-        std::cout << "FastOD finished successfully" << std::endl;
+        std::cout << "FastOD finished successfully" << '\n';
     } else {
-        std::cout << "FastOD finished with a time-out" << std::endl;
+        std::cout << "FastOD finished with a time-out" << '\n';
     }
 
-    std::cout << "Seconds elapsed: " << timer_.GetElapsedSeconds() << std::endl;
-    std::cout << "ODs found: " << fd_count_ + ocd_count_ << std::endl;
-    std::cout << "FDs found: " << fd_count_ << std::endl;
-    std::cout << "OCDs found: " << ocd_count_ << std::endl;
+    std::cout << "Seconds elapsed: " << timer_.GetElapsedSeconds() << '\n'
+              << "ODs found: " << fd_count_ + ocd_count_ << '\n'
+              << "FDs found: " << fd_count_ << '\n'
+              << "OCDs found: " << ocd_count_ << '\n';
 
     return result_;
 }
@@ -171,14 +173,15 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
 void Fastod::ComputeODs() noexcept {
     auto context_this_level = context_in_each_level_[level_];
 
-    for (auto context: context_this_level) {
+    for (AttributeSet const& context : context_this_level) {
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
         }
 
-        auto context_cc = schema_;
-        for (auto attribute: context) {
+        AttributeSet context_cc = schema_;
+
+        for (int attribute : context) {
             context_cc = context_cc.Intersect(CCGet(context.DeleteAttribute(attribute)));
         }
 
@@ -198,25 +201,25 @@ void Fastod::ComputeODs() noexcept {
                     CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::LessOrEqual)), j));
                 }
             }
-        } else  if (level_ > 2) {
+        } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidate_cs_pair_set;
 
-            for (auto attribute: context) {
+            for (int attribute : context) {
                 auto cs = CSGet(context.DeleteAttribute(attribute));
 
-                for (auto pair: cs) {
+                for (AttributePair const& pair : cs) {
                     candidate_cs_pair_set.insert(pair);
                 }
             }
 
-            for (auto attribute_pair: candidate_cs_pair_set) {
-                auto context_delete_ab = context
+            for (AttributePair const& attribute_pair : candidate_cs_pair_set) {
+                AttributeSet context_delete_ab = context
                     .DeleteAttribute(attribute_pair.GetLeft().GetAttribute())
                     .DeleteAttribute(attribute_pair.GetRight());
 
                 bool add_context = true;
 
-                for (auto attribute: context_delete_ab) {
+                for (int attribute : context_delete_ab) {
                     auto cs = CSGet(context.DeleteAttribute(attribute));
 
                     if (cs.find(attribute_pair) == cs.end()) {
@@ -232,14 +235,15 @@ void Fastod::ComputeODs() noexcept {
         }
     }
 
-    for (auto context: context_this_level) {
+    for (AttributeSet const& context : context_this_level) {
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
         }
 
-        auto context_intersect_cc_context = context.Intersect(CCGet(context));
-        for (auto attribute: context_intersect_cc_context) {
+        AttributeSet context_intersect_cc_context = context.Intersect(CCGet(context));
+        
+        for (int attribute : context_intersect_cc_context) {
             CanonicalOD od(context.DeleteAttribute(attribute), attribute);
 
             if (od.IsValid(data_, error_rate_threshold_)) {
@@ -247,7 +251,7 @@ void Fastod::ComputeODs() noexcept {
                 fd_count_++;
                 CCPut(context, CCGet(context).DeleteAttribute(attribute));
 
-                for (auto i: schema_.Difference(context)) {
+                for (int i : schema_.Difference(context)) {
                     CCPut(context, CCGet(context).DeleteAttribute(i));
                 }
 
@@ -257,9 +261,9 @@ void Fastod::ComputeODs() noexcept {
 
         std::vector<AttributePair> attribute_pairs_to_remove;
 
-        for (auto attribute_pair: CSGet(context)) {
-            auto a = attribute_pair.GetLeft().GetAttribute();
-            auto b = attribute_pair.GetRight();
+        for (AttributePair const& attribute_pair : CSGet(context)) {
+            int a = attribute_pair.GetLeft().GetAttribute();
+            int b = attribute_pair.GetRight();
 
             if (!CCGet(context.DeleteAttribute(b)).ContainsAttribute(a) ||
                 !CCGet(context.DeleteAttribute(a)).ContainsAttribute(b)
@@ -278,7 +282,7 @@ void Fastod::ComputeODs() noexcept {
             }
         }
 
-        for (auto attribute_pair: attribute_pairs_to_remove) {
+        for (AttributePair const& attribute_pair : attribute_pairs_to_remove) {
             CSGet(context).erase(attribute_pair);
         }
     }
@@ -288,14 +292,15 @@ void Fastod::PruneLevels() noexcept {
     if (level_ >= 2) {
         std::vector<AttributeSet> nodes_to_remove;
 
-        for (auto attribute_set: context_in_each_level_[level_]) {
+        for (AttributeSet const& attribute_set : context_in_each_level_[level_]) {
             if (CCGet(attribute_set).IsEmpty() && CSGet(attribute_set).empty()) {
                 nodes_to_remove.push_back(attribute_set);
             }
         }
 
         auto contexts = context_in_each_level_[level_];
-        for (auto attribute_set: nodes_to_remove) {
+        
+        for (AttributeSet const& attribute_set : nodes_to_remove) {
             contexts.erase(attribute_set);
         }
     }
@@ -304,11 +309,12 @@ void Fastod::PruneLevels() noexcept {
 void Fastod::CalculateNextLevel() noexcept {
     std::map<AttributeSet, std::vector<int>> prefix_blocks;
     std::set<AttributeSet> context_next_level;
+
     auto context_this_level = context_in_each_level_[level_];
 
-    for (auto attribute_set: context_this_level) {
-        for (auto attribute: attribute_set) {
-            auto prefix = attribute_set.DeleteAttribute(attribute);
+    for (AttributeSet const& attribute_set : context_this_level) {
+        for (int attribute : attribute_set) {
+            AttributeSet prefix = attribute_set.DeleteAttribute(attribute);
 
             if (prefix_blocks.find(prefix) == prefix_blocks.end()) {
                 prefix_blocks[prefix] = std::vector<int>();
@@ -318,7 +324,7 @@ void Fastod::CalculateNextLevel() noexcept {
         }
     }
 
-    for (auto &[prefix, single_attributes] : prefix_blocks) {
+    for (auto const& [prefix, single_attributes] : prefix_blocks) {
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
@@ -331,9 +337,9 @@ void Fastod::CalculateNextLevel() noexcept {
         for (int i = 0; i < single_attributes.size(); i++) {
             for (int j = i + 1; j < single_attributes.size(); j++) {
                 bool create_context = true;
-                auto candidate = prefix.AddAttribute(single_attributes[i]).AddAttribute(single_attributes[j]);
+                AttributeSet candidate = prefix.AddAttribute(single_attributes[i]).AddAttribute(single_attributes[j]);
 
-                for (auto attribute: candidate) {
+                for (int attribute : candidate) {
                     if (context_this_level.find(candidate.DeleteAttribute(attribute)) == context_this_level.end()) {
                         create_context = false;
                         break;

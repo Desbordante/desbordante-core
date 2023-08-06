@@ -13,11 +13,11 @@ AttributeSet::AttributeSet(int attribute) noexcept : set_({attribute}), value_(1
 
 AttributeSet::AttributeSet(const std::vector<int>& attributes) noexcept :
     set_(attributes.cbegin(), attributes.cend()),
-    value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, [&](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
+    value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, [](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
 
 AttributeSet::AttributeSet(const std::set<int>& set) noexcept :
     set_(set),
-    value_(std::accumulate(set.cbegin(), set.cend(), 0, [&](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
+    value_(std::accumulate(set.cbegin(), set.cend(), 0, [](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
 
 bool AttributeSet::ContainsAttribute(int attribute) const noexcept {
     return set_.find(attribute) != set_.end();
@@ -28,10 +28,10 @@ AttributeSet AttributeSet::AddAttribute(int attribute) const noexcept {
         return *this;
     }
 
-    auto new_set = set_;
+    std::set<int> new_set = set_;
     new_set.insert(attribute);
 
-    return AttributeSet(new_set);
+    return AttributeSet(std::move(new_set));
 }
 
 AttributeSet AttributeSet::DeleteAttribute(int attribute) const noexcept {
@@ -39,31 +39,31 @@ AttributeSet AttributeSet::DeleteAttribute(int attribute) const noexcept {
         return *this;
     }
 
-    auto new_set = set_;
+    std::set<int> new_set = set_;
     new_set.erase(attribute);
 
-    return AttributeSet(new_set);
+    return AttributeSet(std::move(new_set));
 }
 
 AttributeSet AttributeSet::Intersect(const AttributeSet& other) const noexcept {
     std::vector<int> result;
     std::set_intersection(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
-    return AttributeSet(result);
+    return AttributeSet(std::move(result));
 }
 
 AttributeSet AttributeSet::Union(const AttributeSet& other) const noexcept {
     std::vector<int> result;
     std::set_union(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
-    return AttributeSet(result);
+    return AttributeSet(std::move(result));
 }
 
 AttributeSet AttributeSet::Difference(const AttributeSet& other) const noexcept {
     std::vector<int> result;
     std::set_difference(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
 
-    return AttributeSet(result);
+    return AttributeSet(std::move(result));
 }
 
 bool AttributeSet::IsEmpty() const noexcept {
@@ -76,7 +76,8 @@ std::string AttributeSet::ToString() const noexcept {
    ss << "{";
 
    bool first = true;
-   for (auto attribute: set_) {
+
+   for (int attribute: set_) {
         if (first) {
             first = false;
         } else {

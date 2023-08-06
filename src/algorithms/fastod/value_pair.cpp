@@ -1,11 +1,12 @@
 #include <sstream>
+#include <utility>
 
 #include "schema_value.h"
 #include "value_pair.h"
 
 using namespace algos::fastod;
 
-ValuePair::ValuePair(SchemaValue first, SchemaValue second) noexcept : pair_(std::make_pair(first, second)) {}
+ValuePair::ValuePair(SchemaValue const& first, SchemaValue const& second) noexcept : pair_(std::move(std::make_pair(first, second))) {}
 
 SchemaValue ValuePair::GetFirst() const noexcept {
     return this->pair_.first;

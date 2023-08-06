@@ -10,17 +10,16 @@ using namespace algos::fastod;
 int CanonicalOD::split_check_count_ = 0;
 int CanonicalOD::swap_check_count_ = 0;
 
-CanonicalOD::CanonicalOD(const AttributeSet& context, const SingleAttributePredicate& left, int right) noexcept : context_(context), left_(left), right_(right) {}
+CanonicalOD::CanonicalOD(const AttributeSet& context, const SingleAttributePredicate& left, int right) noexcept : context_(std::move(context)), left_(std::move(left)), right_(right) {}
 
-CanonicalOD::CanonicalOD(const AttributeSet& context, int right) noexcept : context_(context), left_({}), right_(right) {}
+CanonicalOD::CanonicalOD(const AttributeSet& context, int right) noexcept : context_(std::move(context)), left_({}), right_(right) {}
 
 bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
-    auto sp = StrippedPartition::GetStrippedPartition(context_, data);
+    StrippedPartition sp = StrippedPartition::GetStrippedPartition(context_, data);
 
     if (error_rate_threshold == -1) {
         if (!left_.has_value()) {
             split_check_count_++;
-
             return !sp.Split(right_);
         }
 
@@ -37,7 +36,7 @@ bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) co
         violation_count = sp.SwapRemoveCount(left_.value(), right_);
     }
 
-    auto error_rate = (double) violation_count / data.GetTupleCount();
+    double error_rate = (double)violation_count / data.GetTupleCount();
 
     return error_rate < error_rate_threshold;
 }
@@ -61,7 +60,9 @@ std::string CanonicalOD::ToString() const noexcept {
 namespace algos::fastod {
 
 bool operator==(CanonicalOD const& x, CanonicalOD const& y) {
-    return x.context_ == y.context_ && x.left_ == y.left_ && x.right_ == y.right_;
+    return x.context_ == y.context_
+        && x.left_ == y.left_
+        && x.right_ == y.right_;
 }
 
 // TODO: Check whether x and y should be swapped
@@ -85,7 +86,7 @@ bool operator<(CanonicalOD const& x, CanonicalOD const& y) {
         return false;
     }
 
-    auto left_difference = x.left_.value().GetAttribute() - y.left_.value().GetAttribute();
+    const int left_difference = x.left_.value().GetAttribute() - y.left_.value().GetAttribute();
     if (left_difference != 0) {
         return left_difference < 0;
     }

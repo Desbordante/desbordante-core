@@ -12,7 +12,7 @@ private:
     std::pair<SchemaValue, SchemaValue> pair_;
     
 public:
-    ValuePair(SchemaValue data, SchemaValue index) noexcept;
+    ValuePair(SchemaValue const& data, SchemaValue const& index) noexcept;
 
     SchemaValue GetFirst() const noexcept;
     SchemaValue GetSecond() const noexcept;
