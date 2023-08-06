@@ -32,6 +32,8 @@ private:
 
     Timer timer_;
 
+    // void PrintState() const noexcept;
+
     bool IsTimeUp() const noexcept;
     
     void CCPut(const AttributeSet& key, const AttributeSet& attribute_set) noexcept;

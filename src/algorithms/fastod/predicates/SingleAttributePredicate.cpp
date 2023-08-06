@@ -59,7 +59,7 @@ SingleAttributePredicate SingleAttributePredicate::GetInstance(int attribute, Op
 namespace algos::fastod {
 
 bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y) {
-    return x.GetAttribute() == y.GetAttribute();
+    return x.GetAttribute() == y.GetAttribute() && x.GetOperator() == y.GetOperator();
 }
 
 } // namespace algos::fastod

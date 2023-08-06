@@ -39,7 +39,7 @@ public:
     long SplitRemoveCount(int right) noexcept;
     long SwapRemoveCount(const SingleAttributePredicate& left, int right) noexcept;
 
-    StrippedPartition operator=(const StrippedPartition& other);
+    StrippedPartition& operator=(const StrippedPartition& other);
 };
 
 } // namespace algos::fastod

@@ -149,6 +149,10 @@ std::vector<Operator> Operator::SupportedOperators() noexcept {
     };
 }
 
+bool Operator::operator()(SchemaValue const& first, SchemaValue const& second) {
+    return Satisfy(first, second);
+}
+
 namespace algos::fastod {
 
 bool operator==(Operator const& x, Operator const& y) {

@@ -96,6 +96,39 @@ void Fastod::Initialize() noexcept {
     context_in_each_level_.push_back(level_1_candidates);
 }
 
+// void Fastod::PrintState() const noexcept {
+//     std::cout << "-----------------------\n";
+//     std::cout << "CONTEXT IN EACH LEVEL:\n";
+//     for (auto context: context_in_each_level_) {
+//         for (auto value: context) {
+//             std::cout << value.ToString() << " ";
+//         }
+//         std::cout << "\n";
+//     }
+//
+//     std::cout << "-----------------------\n";
+//     std::cout << "CC:\n";
+//     for (auto [key, value]: cc_) {
+//         std::cout << key.ToString() << ": " << value.ToString() << "\n";
+//     }
+//
+//     std::cout << "-----------------------\n";
+//     std::cout << "CS:\n";
+//     for (auto [key, values]: cs_) {
+//         std::cout << key.ToString() << ": ";
+//         for (auto value: values) {
+//             std::cout << value.ToString() << " ";
+//         }
+//         std::cout << "\n";
+//     }
+//
+//     std::cout << "-----------------------\n";
+//     std::cout << "SCHEMA:\n";
+//     std::cout << schema_.ToString() << "\n";
+//
+//     std::cout << "=======================\n";
+// }
+
 std::vector<CanonicalOD> Fastod::Discover() noexcept {
     Initialize();
 
@@ -161,8 +194,6 @@ void Fastod::ComputeODs() noexcept {
                     CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::LessOrEqual)), j));
                 }
             }
-
-            return;
         } else  if (level_ > 2) {
             std::unordered_set<AttributePair> candidate_cs_pair_set;
 
@@ -183,6 +214,7 @@ void Fastod::ComputeODs() noexcept {
 
                 for(auto attribute: context_delete_ab) {
                     auto cs = CSGet(context.DeleteAttribute(attribute));
+
                     if (cs.find(attribute_pair) == cs.end()) {
                         add_context = false;
                         break;
@@ -220,12 +252,14 @@ void Fastod::ComputeODs() noexcept {
         }
 
         std::vector<AttributePair> attribute_pairs_to_remove;
+
         for (auto attribute_pair: CSGet(context)) {
             auto a = attribute_pair.GetLeft().GetAttribute();
             auto b = attribute_pair.GetRight();
 
-            if (!CCGet(context.DeleteAttribute(b)).ContainsAttribute(a)
-                || !CCGet(context.DeleteAttribute(a)).ContainsAttribute(b)) {
+            if (!CCGet(context.DeleteAttribute(b)).ContainsAttribute(a) ||
+                !CCGet(context.DeleteAttribute(a)).ContainsAttribute(b)
+            ) {
                 attribute_pairs_to_remove.push_back(attribute_pair);
             } else {
                 CanonicalOD od(context.DeleteAttribute(a).DeleteAttribute(b), attribute_pair.GetLeft(), b);

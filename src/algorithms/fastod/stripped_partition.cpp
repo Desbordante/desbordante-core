@@ -125,10 +125,12 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
             ));
         }
 
-        std::sort(values.begin(), values.end());
-
         // CHANGE: utilize operators
         // SCOPE: from here until the end of this loop
+        std::sort(values.begin(), values.end(), [left](const ValuePair& a, const ValuePair& b) {
+            return left.GetOperator().Satisfy(a.GetFirst(), b.GetFirst()) && a.GetFirst() != b.GetFirst();
+        });
+
         auto prev_group_max_index = 0;
         auto current_group_max_index = 0;
         auto is_first_group = true;
@@ -138,19 +140,17 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
             auto second = values[i].GetSecond();
 
             // values are sorted by "first"
-            if (i != 0 && values[i].GetFirst() > values[i - 1].GetFirst()) {
+            if (i != 0 && values[i - 1].GetFirst() != first) {
                 is_first_group = false;
                 prev_group_max_index = current_group_max_index;
                 current_group_max_index = i;
             }
 
-            if (values[current_group_max_index].GetSecond() < values[i].GetSecond()) {
+            if (values[current_group_max_index].GetSecond() <= second) {
                 current_group_max_index = i;
             }
 
-            if (!is_first_group && left.GetOperator().Violate(
-                values[prev_group_max_index].GetSecond(),
-                values[i].GetSecond())) {
+            if (!is_first_group && values[prev_group_max_index].GetSecond() > second) {
                 validate_time_ += timer.GetElapsedSeconds();
                 return true;
             }
@@ -171,7 +171,7 @@ std::string StrippedPartition::ToString() const noexcept {
             indexes_string += ", ";
         }
 
-        indexes_string += indexes_[i];
+        indexes_string += std::to_string(indexes_[i]);
     }
 
     std::string begins_string;
@@ -180,7 +180,7 @@ std::string StrippedPartition::ToString() const noexcept {
             begins_string += ", ";
         }
 
-        begins_string += begins_[i];
+        begins_string += std::to_string(begins_[i]);
     }
 
     ss << "StrippedPartition {indexes=" << indexes_string
@@ -210,9 +210,9 @@ StrippedPartition StrippedPartition::GetStrippedPartition(const AttributeSet& at
     std::optional<StrippedPartition> result;
 
     for (auto attribute: attribute_set) {
-        auto oneLess = attribute_set.DeleteAttribute(attribute);
-        if (StrippedPartition::cache_.Contains(oneLess)) {
-            result = StrippedPartition::cache_.Get(oneLess).DeepClone().Product(attribute);
+        auto one_less = attribute_set.DeleteAttribute(attribute);
+        if (StrippedPartition::cache_.Contains(one_less)) {
+            result = StrippedPartition::cache_.Get(one_less).DeepClone().Product(attribute);
         }
     }
 
@@ -339,8 +339,17 @@ next_class:
     return result;
 }
 
-StrippedPartition StrippedPartition::operator=(const StrippedPartition& other) {
-    return StrippedPartition(other);
-}
+StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
+    if (this == &other) {
+        return *this;
+    }
+    
+    indexes_ = other.indexes_;
+    begins_ = other.begins_;
+    merge_time_ = other.merge_time_;
+    validate_time_ = other.validate_time_;
+    clone_time_ = other.clone_time_;
 
+    return *this;
+}
 

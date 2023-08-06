@@ -8,8 +8,8 @@ namespace algos::fastod {
 
 class AttributeSet {
 private:
-    std::set<int> const set_;
-    unsigned long long const value_;
+    std::set<int> set_;
+    unsigned long long value_;
 
 public:
     AttributeSet() noexcept;
@@ -37,7 +37,7 @@ public:
     friend bool operator==(AttributeSet const& x, AttributeSet const& y);
     friend bool operator<(const AttributeSet& x, const AttributeSet& y);
 
-    AttributeSet operator=(const AttributeSet& rhs);
+    AttributeSet& operator=(const AttributeSet& other);
 };
 
 } // namespace algos::fastod 
