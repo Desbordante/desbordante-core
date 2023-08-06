@@ -1,9 +1,9 @@
-# pragma once
+#pragma once
 
 #include <optional>
 
-#include "data/data_frame.h"
-#include "predicates/single_attribute_predicate.h"
+#include "data_frame.h"
+#include "single_attribute_predicate.h"
 #include "attribute_set.h"
 
 namespace algos::fastod {

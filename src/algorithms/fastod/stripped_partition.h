@@ -1,11 +1,11 @@
-# pragma once
+#pragma once
 
 #include <vector>
 #include <map>
 
-#include "data/data_frame.h"
-#include "data/schema_value.h"
-#include "predicates/single_attribute_predicate.h"
+#include "data_frame.h"
+#include "schema_value.h"
+#include "single_attribute_predicate.h"
 #include "cache_with_limit.h"
 #include "attribute_set.h"
 

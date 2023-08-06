@@ -5,10 +5,10 @@
 #include <map>
 #include <sstream>
 
-#include "data/schema_value.h"
+#include "schema_value.h"
 #include "value_pair.h"
-#include "predicates/operator.h"
-#include "predicates/operator_type.h"
+#include "operator.h"
+#include "operator_type.h"
 #include "stripped_partition.h"
 #include "timers/timer.h"
 

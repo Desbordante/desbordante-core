@@ -2,7 +2,7 @@
 #include <sstream>
 
 #include "attribute_pair.h"
-#include "predicates/single_attribute_predicate.h"
+#include "single_attribute_predicate.h"
 
 using namespace algos::fastod;
 

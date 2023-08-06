@@ -1,7 +1,4 @@
-//#include "cache_with_limit.h"
 #include <stdexcept>
-
-//using namespace algos::fastod;
 
 template <typename K, typename V>
 algos::fastod::CacheWithLimit<K, V>::CacheWithLimit(size_t max_size) noexcept : max_size_(max_size) {};
@@ -31,4 +28,3 @@ void algos::fastod::CacheWithLimit<K, V>::Set(const K& key, const V& value) {
     keys_in_order_.push(key);
     entries_.emplace(key, value);
 }
-

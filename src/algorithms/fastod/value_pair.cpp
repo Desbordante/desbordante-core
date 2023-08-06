@@ -1,5 +1,6 @@
 #include <sstream>
-#include "data/schema_value.h"
+
+#include "schema_value.h"
 #include "value_pair.h"
 
 using namespace algos::fastod;

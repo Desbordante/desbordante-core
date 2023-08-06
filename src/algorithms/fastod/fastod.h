@@ -1,16 +1,16 @@
-# pragma once
+#pragma once
 
 #include <map>
 #include <set>
 #include <unordered_set>
 #include <vector>
 
-#include "../algorithm.h"
+#include "algorithm.h"
 #include "attribute_pair.h"
 #include "attribute_set.h"
 #include "canonical_od.h"
-#include "data/data_frame.h"
-#include "timers/timer.h"
+#include "data_frame.h"
+#include "timer.h"
 
 namespace algos::fastod {
 
