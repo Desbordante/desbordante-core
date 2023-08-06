@@ -7,7 +7,7 @@
 using namespace algos::fastod;
 
 AttributePair::AttributePair(const SingleAttributePredicate& left, int right) noexcept : pair_(std::make_pair(left, right)) {
-    if(left.GetAttribute() == right) {
+    if (left.GetAttribute() == right) {
         throw std::invalid_argument("Two attributes cannot be the same");
     }
 }
