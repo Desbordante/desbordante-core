@@ -31,6 +31,7 @@ public:
 
     friend bool operator==(Operator const& x, Operator const& y);
     friend bool operator!=(Operator const& x, Operator const& y);
+    bool operator()(SchemaValue const& first, SchemaValue const& second);
 };
 
 } // namespace algos::fatod

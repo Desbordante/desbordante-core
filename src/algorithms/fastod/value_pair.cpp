@@ -25,7 +25,7 @@ std::string ValuePair::ToString() const noexcept {
 namespace algos::fastod {
 
 bool operator<(const ValuePair& x, const ValuePair& y) {
-    return x.GetFirst() < y.GetSecond();
+    return x.GetFirst() < y.GetFirst();
 }
 
 } // namespace algos::fastod

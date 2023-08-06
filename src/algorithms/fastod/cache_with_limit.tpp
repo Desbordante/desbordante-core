@@ -29,6 +29,6 @@ void algos::fastod::CacheWithLimit<K, V>::Set(const K& key, const V& value) {
     }
 
     keys_in_order_.push(key);
-    entries_[key] = value;
+    entries_.emplace(key, value);
 }
 

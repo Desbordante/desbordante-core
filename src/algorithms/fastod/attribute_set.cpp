@@ -80,7 +80,7 @@ std::string AttributeSet::ToString() const noexcept {
         if (first) {
             first = false;
         } else {
-            ss << ", ";
+            ss << ",";
         }
 
         ss << attribute + 1;
@@ -102,12 +102,20 @@ unsigned long long AttributeSet::GetValue() const noexcept {
 std::set<int>::iterator AttributeSet::begin() const noexcept {
     return set_.begin();
 }
+
 std::set<int>::iterator AttributeSet::end() const noexcept {
     return set_.end();
 }
 
-AttributeSet AttributeSet::operator=(const AttributeSet& rhs) {
-    return AttributeSet(rhs.set_);
+AttributeSet& AttributeSet::operator=(const AttributeSet& other) {
+    if (this == &other) {
+        return *this;
+    }
+
+    set_ = other.set_;
+    value_ = other.value_;
+
+    return *this;
 }
 
 namespace algos::fastod {
