@@ -76,6 +76,8 @@ bool Fastod::IsComplete() const noexcept {
 }
 
 void Fastod::Initialize() noexcept {
+    timer_.Start();
+    
     AttributeSet empty_set;
     context_in_each_level_.push_back(std::set<AttributeSet>());
     context_in_each_level_[0].insert(empty_set);
@@ -133,7 +135,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
     Initialize();
 
     while (!context_in_each_level_[level_].empty()) {
-        std::cout << "Current level: " << level_ << std::endl;
+        //std::cout << "Current level: " << level_ << std::endl;
         ComputeODs();
 
         if (IsTimeUp()) {
@@ -149,6 +151,8 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
 
         level_++;
     }
+
+    timer_.Stop();
 
     if (IsComplete()) {
         std::cout << "FastOD finished successfully" << std::endl;
@@ -247,7 +251,7 @@ void Fastod::ComputeODs() noexcept {
                     CCPut(context, CCGet(context).DeleteAttribute(i));
                 }
 
-                PrintStatistics();
+                //PrintStatistics();
             }
         }
 
@@ -270,7 +274,7 @@ void Fastod::ComputeODs() noexcept {
                     attribute_pairs_to_remove.push_back(attribute_pair);
                 }
 
-                PrintStatistics();
+                //PrintStatistics();
             }
         }
 
