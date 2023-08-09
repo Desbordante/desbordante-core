@@ -5,7 +5,7 @@
 
 #include "algorithms/cfd/model/cfd_relation_data.h"
 #include "datasets.h"
-#include "parser/csv_parser.h"
+#include "parser/csv_parser/csv_parser.h"
 
 namespace tests {
 

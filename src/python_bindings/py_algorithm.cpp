@@ -11,7 +11,7 @@
 #include "create_dataframe_reader.h"
 #include "dataframe_reader.h"
 #include "get_py_type.h"
-#include "parser/csv_parser.h"
+#include "parser/csv_parser/csv_parser.h"
 #include "py_to_any.h"
 
 namespace python_bindings {
