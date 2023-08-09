@@ -11,7 +11,7 @@
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/tabular_data/input_table_type.h"
 #include "create_dataframe_reader.h"
-#include "csv_parser.h"
+#include "parser/csv_parser/csv_parser.h"
 #include "util/enum_to_available_values.h"
 
 namespace {

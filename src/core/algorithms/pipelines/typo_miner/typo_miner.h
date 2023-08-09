@@ -8,7 +8,7 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/table/idataset_stream.h"
-#include "parser/csv_parser.h"
+#include "parser/csv_parser/csv_parser.h"
 #include "types.h"
 
 namespace algos {
