@@ -10,8 +10,11 @@ using namespace algos::fastod;
 bool SchemaValue::is_empty_equal_empty_ = true;
 util::config::EqNullsType SchemaValue::is_null_equal_null_ = true;
 
-SchemaValue::SchemaValue(model::TypeId type_id, std::byte const* value) noexcept
-    : type_id_(type_id), value_(value) { }
+SchemaValue::SchemaValue() noexcept
+    : type_id_(model::TypeId::kUndefined), value_(nullptr) { }
+
+SchemaValue::SchemaValue(model::TypeId type_id, model::Type const* type, std::byte const* value) noexcept
+    : type_id_(type_id), type_(type), value_(value) { }
 
 model::TypeId SchemaValue::GetTypeId() const noexcept {
     return type_id_;
@@ -46,8 +49,13 @@ BigInt SchemaValue::AsBigInt() const {
     return BigInt(AsString());
 }
 
+// std::string SchemaValue::AsString() const {
+//     return model::StringType().ValueToString(value_);
+//     return *reinterpret_cast<char const*>(value_);
+// }
+
 std::string SchemaValue::AsString() const {
-    return model::StringType().ValueToString(value_);
+    return type_->ValueToString(value_);
 }
 
 bool SchemaValue::IsInt() const noexcept {
@@ -79,7 +87,7 @@ bool SchemaValue::IsNumeric() const noexcept {
 }
 
 SchemaValue SchemaValue::FromTypedColumnData(model::TypedColumnData const& column, std::size_t index) noexcept {
-    return SchemaValue(column.GetValueTypeId(index), column.GetValue(index));
+    return SchemaValue(column.GetValueTypeId(index), &column.GetType(), column.GetValue(index));
 }
 
 namespace algos::fastod {

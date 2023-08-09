@@ -14,13 +14,15 @@ using BigInt = model::details::Placeholder;
 class SchemaValue {
 private:
     model::TypeId type_id_;
+    model::Type const* type_;
     std::byte const* value_;
 
     static bool is_empty_equal_empty_;
     static util::config::EqNullsType is_null_equal_null_;
 
 public:
-    SchemaValue(model::TypeId type_id, std::byte const* value) noexcept;
+    SchemaValue() noexcept;
+    SchemaValue(model::TypeId type_id, model::Type const* type, std::byte const* value) noexcept;
 
     model::TypeId GetTypeId() const noexcept;
     std::byte const* GetValue() const noexcept;
