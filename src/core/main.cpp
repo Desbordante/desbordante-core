@@ -31,7 +31,7 @@ int main(int argc, char const* argv[]) {
 
     std::string algorithm;
     std::string const algo_desc = "algorithm to use for data profiling\n" +
-                                  util::EnumToAvailableValues<algos::AlgorithmType>() + " + [ac]";
+                                  util::EnumToAvailableValues<algos::AlgorithmType>();
     auto general_options = GeneralOptions();
 
     // clang-format off
