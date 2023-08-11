@@ -2,7 +2,8 @@
 
 function print_help() {
 cat << EOF
-Usage: ./build.sh [-h|--help] [-p|--pybind] [-t|--tests] [-u|--unpack] [-jN|--jobs=N]
+Usage: ./build.sh [-h|--help] [-p|--pybind] [-n|--no-test]
+                  [-u|--no-unpack] [-jN|--jobs=N] [-d|--debug]
 
   -h,         --help                  Display help
   -p,         --pybind                Compile python bindings
@@ -10,6 +11,7 @@ Usage: ./build.sh [-h|--help] [-p|--pybind] [-t|--tests] [-u|--unpack] [-jN|--jo
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --jobs[=N]              Allow N jobs at once (default [=1])
   -d,         --debug                 Set debug build type
+
 EOF
 }
 
