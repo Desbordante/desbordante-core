@@ -16,17 +16,17 @@ struct Dataset {
 class LightDatasets {
 public:
     static inline const std::array<Dataset, 11> datasets_ = {
-            {{"CIPublicHighway10k.csv", 21537, ',', true},
-             {"neighbors10k.csv", 62210, ',', true},
-             {"WDC_astronomical.csv", 49417, ',', true},
-             {"WDC_age.csv", 44913, ',', true},
-             {"WDC_appearances.csv", 34497, ',', true},
-             {"WDC_astrology.csv", 12109, ',', true},
-             {"WDC_game.csv", 32103, ',', true},
-             {"WDC_science.csv", 44913, ',', true},
-             {"WDC_symbols.csv", 2160, ',', true},
-             {"breast_cancer.csv", 58641, ',', true},
-             {"WDC_kepler.csv", 6284, ',', true}}};
+            {{"CIPublicHighway10k.csv", 33398, ',', true},
+             {"neighbors10k.csv", 43368, ',', true},
+             {"WDC_astronomical.csv", 22281, ',', true},
+             {"WDC_age.csv", 19620, ',', true},
+             {"WDC_appearances.csv", 25827, ',', true},
+             {"WDC_astrology.csv", 40815, ',', true},
+             {"WDC_game.csv", 6418, ',', true},
+             {"WDC_science.csv", 19620, ',', true},
+             {"WDC_symbols.csv", 28289, ',', true},
+             {"breast_cancer.csv", 15121, ',', true},
+             {"WDC_kepler.csv", 63730, ',', true}}};
 
     // DEPRECATED -- just use
     // for (auto dataset : LightDatasets::datasets) { ... }
@@ -50,12 +50,12 @@ public:
 class HeavyDatasets {
 public:
     static inline const std::array<Dataset, 6> datasets_ = {
-            {{"adult.csv", 20873, ';', false},
-             {"CIPublicHighway.csv", 32696, ',', true},
-             {"EpicMeds.csv", 19617, '|', true},
-             {"EpicVitals.csv", 24082, '|', true},
-             {"iowa1kk.csv", 55285, ',', true},
-             {"LegacyPayors.csv", 34874, '|', true}}};
+            {{"adult.csv", 23075, ';', false},
+             {"CIPublicHighway.csv", 13035, ',', true},
+             {"EpicMeds.csv", 50218, '|', true},
+             {"EpicVitals.csv", 2083, '|', true},
+             {"iowa1kk.csv", 28573, ',', true},
+             {"LegacyPayors.csv", 43612, '|', true}}};
 
     // DEPRECATED -- just use
     // for (auto dataset : HeavyDatasets::datasets) { ... }
