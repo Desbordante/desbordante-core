@@ -99,7 +99,7 @@ static std::string MakeJsonFromFds(std::vector<FdByIndices> const& fds) {
     std::string json_fds = "{\"fds\": [";
 
     for (FdByIndices const& fd : fds) {
-        json_fds += "{lhs: [";
+        json_fds += "{\"lhs\": [";
         auto last = std::prev(fd.end());
         for (auto it = fd.begin(); it != last; ++it) {
             json_fds += std::to_string(*it);
@@ -107,7 +107,7 @@ static std::string MakeJsonFromFds(std::vector<FdByIndices> const& fds) {
                 json_fds += ", ";
             }
         }
-        json_fds += "], rhs: ";
+        json_fds += "], \"rhs\": ";
         assert(!fd.empty());
         json_fds += std::to_string(fd.back());
         json_fds += "},";
