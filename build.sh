@@ -93,5 +93,4 @@ cd ..
 mkdir -p build
 cd build
 rm CMakeCache.txt
-cmake $PREFIX ..
-make $JOBS_OPTION
+cmake $PREFIX .. && make $JOBS_OPTION
