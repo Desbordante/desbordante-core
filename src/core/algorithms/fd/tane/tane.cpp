@@ -55,9 +55,8 @@ double Tane::CalculateUccError(model::PositionListIndex const* pli,
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-void Tane::RegisterFd(Vertical const& lhs, Column const* rhs,
-                      [[maybe_unused]] double error,
-                      [[maybe_unused]] RelationalSchema const* schema) {
+void Tane::RegisterAndCountFd(Vertical const& lhs, Column const* rhs, [[maybe_unused]] double error,
+                              [[maybe_unused]] RelationalSchema const* schema) {
     dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
     PliBasedFDAlgorithm::RegisterFd(lhs, *rhs);
     count_of_fd_++;
@@ -120,7 +119,7 @@ unsigned long long Tane::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data, relation_.get());
         if (fd_error <= max_fd_error_) {  //TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterFd(*schema->empty_vertical_, column.get(), fd_error, schema);
+            RegisterAndCountFd(*schema->empty_vertical_, column.get(), fd_error, schema);
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -148,7 +147,7 @@ unsigned long long Tane::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterFd(column, schema->GetColumn(rhs_index), 0, schema);
+                        RegisterAndCountFd(column, schema->GetColumn(rhs_index), 0, schema);
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
@@ -219,7 +218,7 @@ unsigned long long Tane::ExecuteInternal() {
                     Column const* rhs = schema->GetColumns()[a_index].get();
 
                     //TODO: register FD to a file or something
-                    RegisterFd(lhs, rhs, error, schema);
+                    RegisterAndCountFd(lhs, rhs, error, schema);
                     xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                     if (error == 0) {
                         xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
@@ -269,7 +268,8 @@ unsigned long long Tane::ExecuteInternal() {
                                 }
                                 //Found fd: vertex->rhs => register it
                                 if (is_rhs_candidate) {
-                                    RegisterFd(columns, schema->GetColumn(rhs_index), 0, schema);
+                                    RegisterAndCountFd(columns, schema->GetColumn(rhs_index), 0,
+                                                       schema);
                                 }
                             }
                         }
