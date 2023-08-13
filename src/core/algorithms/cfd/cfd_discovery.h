@@ -29,7 +29,7 @@ protected:
 
     unsigned columns_number_;
     unsigned tuples_number_;
-    CFDList cfd_list_;
+    ItemsetCFDList cfd_list_;
     std::shared_ptr<CFDRelationData> relation_;
 
 public:
@@ -38,9 +38,10 @@ public:
     explicit CFDDiscovery();
     void LoadDataInternal() final;
     int NrCfds() const;
+    ItemsetCFDList const& GetItemsetCfds() const;
     CFDList GetCfds() const;
     std::string GetRelationString(char delim = ' ') const;
     std::string GetRelationString(const SimpleTIdList& subset, char delim = ' ') const;
-    std::string GetCfdString(CFD const& cfd) const;
+    std::string GetCfdString(ItemsetCFD const& cfd) const;
 };
 }  // namespace algos::cfd

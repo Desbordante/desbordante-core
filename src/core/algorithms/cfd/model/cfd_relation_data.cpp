@@ -31,7 +31,7 @@ void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
             it = ptr->second;
         } else {
             items.emplace_back(string_row[i], i);
-            columns_values_dict[static_cast<int>(i)].push_back(unique_elems_number);
+            columns_values_dict[static_cast<AttributeIndex>(i)].push_back(unique_elems_number);
             item_dictionary[std::make_pair(i, string_row[i])] = unique_elems_number;
             it = unique_elems_number++;
         }
@@ -74,7 +74,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
     }
 
     std::vector<CFDColumnData> column_data;
-    for (int i = 0; static_cast<size_t>(i) < num_columns; ++i) {
+    for (AttributeIndex i = 0; static_cast<size_t>(i) < num_columns; ++i) {
         auto column = Column(schema.get(), parser.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
@@ -94,7 +94,7 @@ void CFDRelationData::AddNewItemsInPartialTable(ItemDictionary& item_dictionary,
                                                 std::vector<Transaction>& data_rows,
                                                 int& unique_elems_number, int size) {
     std::vector<int> int_row(size);
-    int j = 0;
+    AttributeIndex j = 0;
     int it;
     for (size_t i = 0; i < string_row.size(); i++) {
         if (!std::binary_search(columns_numbers_list.begin(), columns_numbers_list.end(), i)) {
@@ -150,7 +150,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
     }
 
     std::vector<CFDColumnData> column_data;
-    for (int i = 0; i < num_columns; ++i) {
+    for (AttributeIndex i = 0; i < num_columns; ++i) {
         auto column = Column(schema.get(), file_input.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
@@ -262,7 +262,7 @@ std::string CFDRelationData::GetStringFormat(char delim) const {
 std::string CFDRelationData::GetStringFormat(const SimpleTIdList& subset, char delim) const {
     std::string result;
     for (size_t ai = 0; ai < GetNumColumns(); ai++) {
-        const auto& attr = GetAttrName(static_cast<int>(ai));
+        const auto& attr = GetAttrName(static_cast<AttributeIndex>(ai));
         result += attr;
         if (ai < GetNumColumns() - 1) {
             result += delim;
@@ -293,7 +293,7 @@ const std::string& CFDRelationData::GetValue(int i) const {
 std::vector<int> CFDRelationData::GetAttrVector(const Itemset& items) const {
     std::vector<int> attrs;
     attrs.reserve(items.size());
-    for (int i : items) {
+    for (Item i : items) {
         if (i > 0) {
             attrs.push_back(GetAttrIndex(i));
         } else {
@@ -307,7 +307,7 @@ std::vector<int> CFDRelationData::GetAttrVector(const Itemset& items) const {
 std::vector<int> CFDRelationData::GetAttrVectorItems(const Itemset& items) const {
     std::vector<int> attrs;
     attrs.reserve(items.size());
-    for (int i : items) {
+    for (Item i : items) {
         if (i > 0) {
             attrs.push_back(-1 - GetAttrIndex(i));
         } else {

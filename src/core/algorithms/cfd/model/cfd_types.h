@@ -10,6 +10,8 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "raw_cfd.h"
+
 // see algorithms/cfd/LICENSE
 
 namespace algos::cfd {
@@ -30,8 +32,9 @@ using SimpleTIdList = std::vector<Item>;
 using PairHash = boost::hash<std::pair<int, std::string>>;
 
 // Representation of CFD of the form left items -> right item
-using CFD = std::pair<Itemset, int>;
-using CFDList = std::vector<CFD>;
+using ItemsetCFD = std::pair<Itemset, Item>;
+using ItemsetCFDList = std::vector<ItemsetCFD>;
+using CFDList = std::list<RawCFD>;
 
 // Aliases for frequently used types
 using PartitionList = std::vector<std::pair<Itemset, std::vector<unsigned>>>;
