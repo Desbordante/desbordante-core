@@ -76,7 +76,7 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
     auto algorithm = CreateAlgorithmInstance(8, 0.85, path, "dfs", 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
-    for (auto const& cfd : algorithm->GetCfds()) {
+    for (auto const& cfd : algorithm->GetItemsetCfds()) {
         actual_cfds.insert(algorithm->GetCfdString(cfd));
     }
     std::set<std::string> expected_cfds = {"(windy, temp, outlook) => humidity",
@@ -104,7 +104,7 @@ TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
     auto algorithm = CreateAlgorithmInstance(4, 0.9, path, "dfs", 4, 4, 50);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
-    for (auto const& cfd : algorithm->GetCfds()) {
+    for (auto const& cfd : algorithm->GetItemsetCfds()) {
         actual_cfds.insert(algorithm->GetCfdString(cfd));
     }
     std::set<std::string> expected_cfds = {"(edible=p) => cap-shape=x",

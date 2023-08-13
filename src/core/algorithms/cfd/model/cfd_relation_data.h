@@ -19,14 +19,14 @@ namespace algos::cfd {
 class CFDRelationData : public AbstractRelationData<CFDColumnData> {
 private:
     using ItemDictionary = boost::unordered_map<std::pair<int, std::string>, int, PairHash>;
-    using ColumnesValuesDict = std::unordered_map<int, std::vector<int>>;
+    using ColumnesValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
     // ItemInfo contains info about one elem in the table.
     struct ItemInfo {
         ItemInfo() = default;
-        ItemInfo(std::string val, int attr)
+        ItemInfo(std::string val, AttributeIndex attr)
             : value(std::move(val)), attribute(attr), frequency(0) {}
         std::string value;
-        int attribute;
+        AttributeIndex attribute;
         unsigned frequency;
     };
 
@@ -57,7 +57,7 @@ public:
     void Sort();
     void ToFront(const SimpleTIdList &);
     void SetRow(int row_index, const Transaction &row);
-    int GetAttrIndex(int item_index) const;
+    AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
     const std::string &GetValue(int i) const;
     const std::vector<int> &GetDomainOfItem(int) const;
