@@ -50,11 +50,37 @@ int CFDDiscovery::NrCfds() const {
     return (int)cfd_list_.size();
 }
 
-CFDList CFDDiscovery::GetCfds() const {
+ItemsetCFDList const& CFDDiscovery::GetItemsetCfds() const {
     return cfd_list_;
 }
 
-std::string CFDDiscovery::GetCfdString(CFD const& cfd) const {
+CFDList CFDDiscovery::GetCfds() const {
+    CFDList list;
+
+    auto to_cfd = [&rel = *relation_](ItemsetCFD const& dep) -> RawCFD {
+        auto& [lhs, rhs] = dep;
+
+        RawCFD::RawItems cfd_lhs;
+        for (uint i = 0; i < lhs.size(); i++) {
+            Item item = lhs[i];
+            AttributeIndex attr = (item == 0) ? static_cast<AttributeIndex>(i)
+                                              : Output::ItemToAttrIndex(item, rel);
+            std::optional<std::string> pattern_opt = Output::ItemToPatternOpt(item, rel);
+            cfd_lhs.push_back({.attribute = attr, .value = pattern_opt});
+        }
+
+        RawCFD::RawItem cfd_rhs = {.attribute = Output::ItemToAttrIndex(rhs, rel),
+                                   .value = Output::ItemToPatternOpt(rhs, rel)};
+        return RawCFD{cfd_lhs, cfd_rhs};
+    };
+
+    for (ItemsetCFD const& dep : GetItemsetCfds()) {
+        list.push_back(to_cfd(dep));
+    }
+    return list;
+}
+
+std::string CFDDiscovery::GetCfdString(ItemsetCFD const& cfd) const {
     return Output::CFDToString(cfd, relation_);
 }
 
