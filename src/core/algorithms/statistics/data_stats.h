@@ -21,13 +21,13 @@ class DataStats : public Algorithm {
 
     void ResetState() final;
 
-    // Returns number of elements in the column satisfying the predicate
-    template <class Pred>
-    size_t CountIf(Pred pred, size_t index) const;
+    // Returns number of elements satisfying the predicate
+    template <class Pred, class Data>
+    size_t CountIf(Pred pred, const Data& data) const;
 
     // Returns vector with indices satisfying the predicate
-    template <class Pred>
-    std::vector<size_t> GetIndices(Pred pred) const;
+    template <class Pred, class Data>
+    std::vector<size_t> FilterIndices(Pred pred, const Data& data) const;
 
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
