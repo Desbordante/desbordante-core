@@ -290,13 +290,25 @@ Statistic DataStats::GetQuantile(double part, size_t index, bool calc_all) {
     return Statistic(data[quantile], &col.GetType(), true);
 }
 
-template <class Pred>
-size_t DataStats::CountIf(Pred pred, size_t index) const {
-    const mo::TypedColumnData& col = col_data_[index];
-    const std::vector<const std::byte*>& data = col.GetData();
+template <class Pred, class Data>
+std::vector<size_t> DataStats::FilterIndices(Pred pred, const Data& data) const {
+    std::vector<size_t> res;
+    res.reserve(data.size());
+    for (size_t i = 0; i < data.size(); i++) {
+        if (pred(i)) res.push_back(i);
+    }
+
+    res.shrink_to_fit();
+
+    return res;
+}
+
+template <class Pred, class Data>
+size_t DataStats::CountIf(Pred pred, const Data& data) const {
     size_t count = 0;
-    for (size_t i = 0; i < data.size(); i++)
+    for (size_t i = 0; i < data.size(); i++) {
         if (pred(data[i])) count++;
+    }
 
     return count;
 }
@@ -308,12 +320,13 @@ Statistic DataStats::CountIfInBinaryRelationWithZero(size_t index, mo::CompareRe
     const auto& type = static_cast<const mo::INumericType&>(col.GetType());
     std::byte* zero = type.MakeValueOfInt(0);
     mo::IntType int_type;
+    const std::vector<const std::byte*>& data = col_data_[index].GetData();
 
-    auto pred = [&zero, &type, &res](std::byte const* el) {
+    auto pred = [&zero, &type, &res](const std::byte* el) {
         return el && type.Compare(el, zero) == res;
     };
 
-    size_t count = CountIf(pred, index);
+    size_t count = CountIf(pred, data);
     type.Free(zero);
 
     return Statistic(int_type.MakeValue(count), &int_type, false);
@@ -554,31 +567,18 @@ unsigned long long DataStats::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-template <typename Pred>
-std::vector<size_t> DataStats::GetIndices(Pred pred) const {
-    std::vector<size_t> res;
-    res.reserve(col_data_.size());
-    for (size_t i = 0; i < col_data_.size(); i++) {
-        if (pred(i)) res.push_back(i);
-    }
-
-    res.shrink_to_fit();
-
-    return res;
-}
-
 std::vector<size_t> DataStats::GetNullColumns() const {
     auto pred = [this, num_rows = col_data_[0].GetNumRows()](size_t index) {
         return col_data_[index].GetNumNulls() == num_rows;
     };
 
-    return GetIndices(pred);
+    return FilterIndices(pred, col_data_);
 }
 
 std::vector<size_t> DataStats::GetColumnsWithNull() const {
     auto pred = [this](size_t index) { return col_data_[index].GetNumNulls() != 0; };
 
-    return GetIndices(pred);
+    return FilterIndices(pred, col_data_);
 }
 
 std::vector<size_t> DataStats::GetColumnsWithUniqueValues() {
@@ -586,7 +586,7 @@ std::vector<size_t> DataStats::GetColumnsWithUniqueValues() {
         return Distinct(index) == num_rows;
     };
 
-    return GetIndices(pred);
+    return FilterIndices(pred, col_data_);
 }
 
 size_t DataStats::GetNumberOfColumns() const {
