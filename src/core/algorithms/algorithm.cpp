@@ -127,5 +127,13 @@ std::type_index Algorithm::GetTypeIndex(std::string_view option_name) const {
     return it->second->GetTypeIndex();
 }
 
+std::unordered_set<std::string_view> Algorithm::GetPossibleOptions() const {
+    std::unordered_set<std::string_view> possible_options;
+    for (const auto& [key, _] : possible_options_) {
+        possible_options.insert(key);
+    }
+    return possible_options;
+}
+
 }  // namespace algos
 
