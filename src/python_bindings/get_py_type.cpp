@@ -34,7 +34,7 @@ py::handle MakeType(PyTypeObject* py_type_ptr) {
     return reinterpret_cast<PyObject*>(py_type_ptr);
 }
 
-py::handle MakeType(PyObject* py_type_ptr) {
+[[maybe_unused]] py::handle MakeType(PyObject* py_type_ptr) {
     return py_type_ptr;
 }
 
