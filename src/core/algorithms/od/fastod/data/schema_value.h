@@ -4,8 +4,8 @@
 #include <cstddef>
 #include <functional>
 
-#include "util/config/equal_nulls/type.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "config/equal_nulls/type.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 namespace algos::fastod {
 
@@ -18,7 +18,7 @@ private:
     std::byte const* value_;
 
     static bool is_empty_equal_empty_;
-    static util::config::EqNullsType is_null_equal_null_;
+    static config::EqNullsType is_null_equal_null_;
 
 public:
     SchemaValue() noexcept;

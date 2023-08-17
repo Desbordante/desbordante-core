@@ -50,10 +50,10 @@ include_directories(
         "src/core/parser"
         "src/core/util"
         "src/core/config"
-        "src/core/algorithms/fastod"
-        "src/core/algorithms/fastod/data"
-        "src/core/algorithms/fastod/predicates"
-        "src/core/algorithms/fastod/timers"
+        "src/core/algorithms/od/fastod"
+        "src/core/algorithms/od/fastod/data"
+        "src/core/algorithms/od/fastod/predicates"
+        "src/core/algorithms/od/fastod/timers"
 )
 
 include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/")

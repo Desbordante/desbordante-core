@@ -3,9 +3,9 @@
 #include <utility>
 #include <filesystem>
 
-#include "parser/csv_parser.h"
-#include "util/config/equal_nulls/type.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "parser/csv_parser/csv_parser.h"
+#include "config/equal_nulls/type.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 #include "data_frame.h"
 #include "schema_value.h"
@@ -36,7 +36,7 @@ DataFrame DataFrame::FromCsv(std::filesystem::path const& path) {
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path,
                              char separator,
                              bool has_header,
-                             util::config::EqNullsType is_null_equal_null) {
+                             config::EqNullsType is_null_equal_null) {
     CSVParser parser = CSVParser(path, separator, has_header);
     std::vector<model::TypedColumnData> columns_data = model::CreateTypedColumnData(parser, is_null_equal_null);
 

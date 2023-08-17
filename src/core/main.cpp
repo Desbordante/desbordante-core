@@ -8,8 +8,8 @@
 #include "config/all_options.h"
 #include "util/enum_to_available_values.h"
 
-#include "algorithms/fastod/fastod.h"
-#include "algorithms/fastod/data/data_frame.h"
+#include "algorithms/od/fastod/fastod.h"
+#include "algorithms/od/fastod/data/data_frame.h"
 #include <climits>
 #include <string>
 #include <filesystem>

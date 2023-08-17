@@ -4,8 +4,8 @@
 #include <string>
 #include <filesystem>
 
-#include "util/config/equal_nulls/type.h"
-#include "model/column_layout_typed_relation_data.h"
+#include "config/equal_nulls/type.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 #include "schema_value.h"
 
@@ -30,7 +30,7 @@ public:
     static DataFrame FromCsv(std::filesystem::path const& path,
                              char separator,
                              bool has_header,
-                             util::config::EqNullsType is_null_equal_null);
+                             config::EqNullsType is_null_equal_null);
 
 };
 

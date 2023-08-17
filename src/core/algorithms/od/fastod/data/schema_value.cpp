@@ -1,14 +1,14 @@
 #include <string>
 #include <cstddef>
 
-#include "model/column_layout_typed_relation_data.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 #include "schema_value.h"
 
 using namespace algos::fastod;
 
 bool SchemaValue::is_empty_equal_empty_ = true;
-util::config::EqNullsType SchemaValue::is_null_equal_null_ = true;
+config::EqNullsType SchemaValue::is_null_equal_null_ = true;
 
 SchemaValue::SchemaValue() noexcept
     : type_id_(model::TypeId::kUndefined), value_(nullptr) { }
