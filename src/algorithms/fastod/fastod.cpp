@@ -11,14 +11,14 @@ using namespace algos::fastod;
 
 Fastod::Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(std::move(data)),
     time_limit_(time_limit),
-    error_rate_threshold_(error_rate_threshold) {}
+    error_rate_threshold_(error_rate_threshold),
+    data_(std::move(data)) {}
 
 Fastod::Fastod(const DataFrame& data, long time_limit) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(std::move(data)),
-    time_limit_(time_limit) {}
+    time_limit_(time_limit),
+    data_(std::move(data)) {}
 
 bool Fastod::IsTimeUp() const noexcept {
     return timer_.GetElapsedSeconds() >= time_limit_;
@@ -84,7 +84,7 @@ void Fastod::Initialize() noexcept {
     context_in_each_level_.push_back(std::set<AttributeSet>());
     context_in_each_level_[0].insert(empty_set);
 
-    for (int i = 0; i < data_.GetColumnCount(); i++) {
+    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
         schema_ = schema_.AddAttribute(i);
         CCPut(empty_set, i);
     }
@@ -92,7 +92,7 @@ void Fastod::Initialize() noexcept {
     level_ = 1;
     std::set<AttributeSet> level_1_candidates;
 
-    for (int i = 0; i < data_.GetColumnCount(); i++) {
+    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
         AttributeSet single_attribute = empty_set.AddAttribute(i);
         level_1_candidates.insert(single_attribute);
     }
@@ -179,7 +179,7 @@ void Fastod::ComputeODs() noexcept {
             return;
         }
 
-        AttributeSet context_cc = schema_;
+        auto context_cc = schema_;
 
         for (int attribute : context) {
             context_cc = context_cc.Intersect(CCGet(context.DeleteAttribute(attribute)));
@@ -188,13 +188,13 @@ void Fastod::ComputeODs() noexcept {
         CCPut(context, context_cc);
 
         if (level_ == 2) {
-            for (int i = 0; i < data_.GetColumnCount(); i++) {
-                for (int j = 0; j < data_.GetColumnCount(); j++) {
+            for (size_t i = 0; i < data_.GetColumnCount(); i++) {
+                for (size_t j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j) {
                         continue;
                     }
 
-                    std::vector<int> t = {i, j};
+                    std::vector<size_t> t = {i, j};
                     AttributeSet c(t);
 
                     CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::GreaterOrEqual)), j));
@@ -334,8 +334,8 @@ void Fastod::CalculateNextLevel() noexcept {
             continue;
         }
 
-        for (int i = 0; i < single_attributes.size(); i++) {
-            for (int j = i + 1; j < single_attributes.size(); j++) {
+        for (size_t i = 0; i < single_attributes.size(); i++) {
+            for (size_t j = i + 1; j < single_attributes.size(); j++) {
                 bool create_context = true;
                 AttributeSet candidate = prefix.AddAttribute(single_attributes[i]).AddAttribute(single_attributes[j]);
 

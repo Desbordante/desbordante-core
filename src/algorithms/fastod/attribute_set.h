@@ -8,18 +8,20 @@ namespace algos::fastod {
 
 class AttributeSet {
 private:
-    std::set<int> set_;
+    std::set<size_t> set_;
     unsigned long long value_;
 
 public:
     AttributeSet() noexcept;
-    explicit AttributeSet(int attribute) noexcept;
-    explicit AttributeSet(const std::vector<int>& attributes) noexcept;
-    explicit AttributeSet(const std::set<int>& set) noexcept;
+    explicit AttributeSet(size_t attribute) noexcept;
+    explicit AttributeSet(const std::vector<size_t>& attributes) noexcept;
+    explicit AttributeSet(const std::set<size_t>& set) noexcept;
+    AttributeSet(AttributeSet& other) noexcept = default;
+    AttributeSet(const AttributeSet& other) noexcept = default;
 
-    bool ContainsAttribute(int attribute) const noexcept;
-    AttributeSet AddAttribute(int attribute) const noexcept;
-    AttributeSet DeleteAttribute(int attribute) const noexcept;
+    bool ContainsAttribute(size_t attribute) const noexcept;
+    AttributeSet AddAttribute(size_t attribute) const noexcept;
+    AttributeSet DeleteAttribute(size_t attribute) const noexcept;
 
     AttributeSet Intersect(const AttributeSet& other) const noexcept;
     AttributeSet Union(const AttributeSet& other) const noexcept;
@@ -31,8 +33,8 @@ public:
     std::size_t GetAttributeCount() const noexcept;
     unsigned long long GetValue() const noexcept;
 
-    std::set<int>::iterator begin() const noexcept;
-    std::set<int>::iterator end() const noexcept;
+    std::set<size_t>::iterator begin() const noexcept;
+    std::set<size_t>::iterator end() const noexcept;
 
     friend bool operator==(AttributeSet const& x, AttributeSet const& y);
     friend bool operator<(const AttributeSet& x, const AttributeSet& y);

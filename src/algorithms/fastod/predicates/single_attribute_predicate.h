@@ -27,7 +27,7 @@ public:
                  int first_tuple_index,
                  int second_tuple_index) const noexcept;
 
-    static SingleAttributePredicate GetInstance(int attribute, Operator const& op);
+    static SingleAttributePredicate GetInstance(size_t attribute, Operator const& op);
 
     friend bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y);
 };

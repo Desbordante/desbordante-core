@@ -9,7 +9,7 @@ private:
     const std::pair<SingleAttributePredicate, int> pair_;
 
 public:
-    AttributePair(const SingleAttributePredicate& left, int right) noexcept;
+    AttributePair(const SingleAttributePredicate& left, int right);
 
     const SingleAttributePredicate& GetLeft() const noexcept;
     int GetRight() const noexcept;

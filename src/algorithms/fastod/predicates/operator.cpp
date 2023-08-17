@@ -109,6 +109,8 @@ bool Operator::Imply(Operator const& other) const noexcept {
                 return true;
             }
             break;
+        default:
+            return false;
     }
 
     return false;

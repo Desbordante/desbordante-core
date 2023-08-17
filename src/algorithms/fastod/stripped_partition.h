@@ -13,8 +13,8 @@ namespace algos::fastod {
 
 class StrippedPartition {
 private:
-    std::vector<int> indexes_;
-    std::vector<int> begins_;
+    std::vector<size_t> indexes_;
+    std::vector<size_t> begins_;
     const DataFrame& data_;
 
     static long merge_time_;
@@ -23,21 +23,20 @@ private:
     static CacheWithLimit<AttributeSet, StrippedPartition> cache_;
     
 public:
-    StrippedPartition();
     explicit StrippedPartition(const DataFrame& data) noexcept;
     StrippedPartition(const StrippedPartition& origin) noexcept;
 
-    StrippedPartition Product(int attribute) noexcept;
+    StrippedPartition Product(size_t attribute) noexcept;
 
-    bool Split(int right) noexcept;
-    bool Swap(const SingleAttributePredicate& left, int right) noexcept;
+    bool Split(size_t right) noexcept;
+    bool Swap(const SingleAttributePredicate& left, size_t right) noexcept;
 
     std::string ToString() const noexcept;
     StrippedPartition DeepClone() const noexcept;
     static StrippedPartition GetStrippedPartition(const AttributeSet& attribute_set, const DataFrame& data) noexcept;
 
-    long SplitRemoveCount(int right) noexcept;
-    long SwapRemoveCount(const SingleAttributePredicate& left, int right) noexcept;
+    long SplitRemoveCount(size_t right) noexcept;
+    long SwapRemoveCount(const SingleAttributePredicate& left, size_t right) noexcept;
 
     StrippedPartition& operator=(const StrippedPartition& other);
 };

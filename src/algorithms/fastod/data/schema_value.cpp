@@ -32,9 +32,8 @@ std::string SchemaValue::ToString() const {
         case model::TypeId::kBigInt: return AsBigInt();
         case model::TypeId::kEmpty: return model::EmptyType().ValueToString(value_);
         case model::TypeId::kNull: return model::NullType(true).ValueToString(value_);
+        default: return AsString();
     }
-
-    return std::string();
 }
 
 int SchemaValue::AsInt() const {
@@ -102,12 +101,10 @@ bool operator==(SchemaValue const& x, SchemaValue const& y) {
         case model::TypeId::kBigInt: return x.AsBigInt() == y.AsBigInt();
         case model::TypeId::kString: return x.AsString() == y.AsString();     
         case model::TypeId::kEmpty: return SchemaValue::is_empty_equal_empty_;
-
         case model::TypeId::kNull: return model::NullType(SchemaValue::is_null_equal_null_)
             .Compare(x.value_, y.value_) == model::CompareResult::kEqual;
+        default: return false;
     }
-
-    return false;
 }
 
 bool operator!=(SchemaValue const& x, SchemaValue const& y) {
@@ -124,12 +121,10 @@ bool operator<(SchemaValue const& x, SchemaValue const& y) {
         case model::TypeId::kBigInt: return x.AsBigInt() < y.AsBigInt();
         case model::TypeId::kString: return x.AsString() < y.AsString();     
         case model::TypeId::kEmpty: return false;
-
         case model::TypeId::kNull: return model::NullType(SchemaValue::is_null_equal_null_)
             .Compare(x.value_, y.value_) == model::CompareResult::kLess;
+        default: return false;
     }
-
-    return false;
 }
 
 bool operator<=(SchemaValue const& x, SchemaValue const& y) {
