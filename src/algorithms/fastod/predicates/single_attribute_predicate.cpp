@@ -39,7 +39,7 @@ bool SingleAttributePredicate::Violate(DataFrame const& data,
     return operator_.Violate(first_value, second_value);
 }
 
-SingleAttributePredicate SingleAttributePredicate::GetInstance(size_t attribute, Operator const& op) {
+SingleAttributePredicate SingleAttributePredicate::GetInstance(std::size_t attribute, Operator const& op) {
     while (attribute >= cache_.size()) {
         std::vector<SingleAttributePredicate> predicates;
 

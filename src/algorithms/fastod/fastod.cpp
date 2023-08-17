@@ -84,7 +84,7 @@ void Fastod::Initialize() noexcept {
     context_in_each_level_.push_back(std::set<AttributeSet>());
     context_in_each_level_[0].insert(empty_set);
 
-    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
+    for (std::size_t i = 0; i < data_.GetColumnCount(); i++) {
         schema_ = schema_.AddAttribute(i);
         CCPut(empty_set, i);
     }
@@ -92,7 +92,7 @@ void Fastod::Initialize() noexcept {
     level_ = 1;
     std::set<AttributeSet> level_1_candidates;
 
-    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
+    for (std::size_t i = 0; i < data_.GetColumnCount(); i++) {
         AttributeSet single_attribute = empty_set.AddAttribute(i);
         level_1_candidates.insert(single_attribute);
     }
@@ -188,13 +188,13 @@ void Fastod::ComputeODs() noexcept {
         CCPut(context, context_cc);
 
         if (level_ == 2) {
-            for (size_t i = 0; i < data_.GetColumnCount(); i++) {
-                for (size_t j = 0; j < data_.GetColumnCount(); j++) {
+            for (std::size_t i = 0; i < data_.GetColumnCount(); i++) {
+                for (std::size_t j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j) {
                         continue;
                     }
 
-                    std::vector<size_t> t = {i, j};
+                    std::vector<std::size_t> t = {i, j};
                     AttributeSet c(t);
 
                     CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::GreaterOrEqual)), j));
@@ -334,8 +334,8 @@ void Fastod::CalculateNextLevel() noexcept {
             continue;
         }
 
-        for (size_t i = 0; i < single_attributes.size(); i++) {
-            for (size_t j = i + 1; j < single_attributes.size(); j++) {
+        for (std::size_t i = 0; i < single_attributes.size(); i++) {
+            for (std::size_t j = i + 1; j < single_attributes.size(); j++) {
                 bool create_context = true;
                 AttributeSet candidate = prefix.AddAttribute(single_attributes[i]).AddAttribute(single_attributes[j]);
 
