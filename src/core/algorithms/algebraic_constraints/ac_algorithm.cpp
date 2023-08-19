@@ -43,8 +43,11 @@ void ACAlgorithm::RegisterOptions() {
                         "Invalid operation for algebraic constraints discovery");
         }
     };
-    auto check_double_parameter = [](double parameter) {
-        if (parameter <= 0 || parameter > 1) throw std::invalid_argument("Parameter out of range");
+    auto check_weight = [](double parameter) {
+        if (parameter <= 0 || parameter > 1) throw std::invalid_argument("weight out of range");
+    };
+    auto check_p_fuzz = [](double parameter) {
+        if (parameter <= 0 || parameter >= 1) throw std::invalid_argument("p_fuzz out of range");
     };
     auto check_fuzziness = [](double parameter) {
         if (parameter < 0 || parameter > 1) throw std::invalid_argument("Parameter out of range");
@@ -61,8 +64,8 @@ void ACAlgorithm::RegisterOptions() {
             check_and_set_binop));
     RegisterOption(Option{&fuzziness_, kFuzziness, kDFuzziness}.SetValueCheck(check_fuzziness));
     RegisterOption(Option{&p_fuzz_, kFuzzinessProbability, kDFuzzinessProbability}.SetValueCheck(
-            check_double_parameter));
-    RegisterOption(Option{&weight_, kWeight, kDWeight}.SetValueCheck(check_double_parameter));
+            check_p_fuzz));
+    RegisterOption(Option{&weight_, kWeight, kDWeight}.SetValueCheck(check_weight));
     RegisterOption(
             Option{&bumps_limit_, kBumpsLimit, kDBumpsLimit}.SetValueCheck(check_non_negative));
     RegisterOption(Option{&iterations_limit_, kIterationsLimit, kDIterationsLimit}.SetValueCheck(
@@ -90,18 +93,17 @@ void ACAlgorithm::ResetState() {
 size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     /* Calculation of formula 26.2.23 from <<Mathematical Tables>>
     by Abramowitz & Stegun. Constants are given */
-    double xp;
-    double t, t_2, t_3;
     constexpr double c0 = 2.515517;
     constexpr double c1 = 0.802853;
     constexpr double c2 = 0.010328;
     constexpr double d1 = 1.432788;
     constexpr double d2 = 0.189269;
     constexpr double d3 = 0.001308;
-    t = sqrt(log(1 / pow(1.0 - p_fuzz_, 2.0)));
-    t_2 = pow(t, 2.0);
-    t_3 = pow(t, 3.0);
-    xp = t - ((c0 + c1 * t + c2 * t_2) / (1 + d1 * t + d2 * t_2 + d3 * t_3));
+    assert(p_fuzz_ != 1);
+    double t = sqrt(log(1 / pow(1.0 - p_fuzz_, 2.0)));
+    double t_2 = pow(t, 2.0);
+    double t_3 = pow(t, 3.0);
+    double xp = t - ((c0 + c1 * t + c2 * t_2) / (1 + d1 * t + d2 * t_2 + d3 * t_3));
     /* Calculation of formula 26.4.17 from <<Mathematical Tables>> by Abramowitz & Stegun*/
     double freedom_degree = 2 * (k_bumps + 1);
     double tmp1 = 2 / (9 * freedom_degree);
