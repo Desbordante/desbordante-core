@@ -91,6 +91,10 @@ void ACAlgorithm::ResetState() {
 }
 
 size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
+    if (fuzziness_ == 0) {
+        return typed_relation_->GetNumRows();
+    }
+
     /* Calculation of formula 26.2.23 from <<Mathematical Tables>>
     by Abramowitz & Stegun. Constants are given */
     constexpr double c0 = 2.515517;
@@ -112,6 +116,7 @@ size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic Constraints
      * in Relational Data>> by Paul G. Brown & Peter J. Haas*/
     size_t sample_size = (Xp_2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
+
     return sample_size;
 }
 
