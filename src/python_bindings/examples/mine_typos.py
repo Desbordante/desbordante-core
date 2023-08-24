@@ -4,23 +4,41 @@ from itertools import groupby, islice
 
 from colorama import Style, Fore
 from jellyfish import levenshtein_distance
-import desbordante as desb
-import pandas as pd
+import desbordante
+import pandas
 
+# Value cluster filtering parameters.
 RADIUS = 3
 RATIO = 0.1
-ERROR = 0.005
-EXACT_ALGORITHM = 'FastFDs'
-EXACT_CONFIG = {}
-APPROXIMATE_ALGORITHM = 'Pyro'
-APPROXIMATE_CONFIG = {'error': ERROR}
+
+# Algorithm that finds exact FDs and its config.
+EXACT_ALGORITHM_TYPE = desbordante.HyFD
+EXACT_ALGO_CONFIG = {}
+
+# Algorithm that finds approximate FDs and its config.
+APPROXIMATE_ALGORITHM_TYPE = desbordante.Pyro
+ERROR = 0.005  # Highest error for almost holding FDs.
+APPROXIMATE_ALGO_CONFIG = {'error': ERROR}
+
+# Parameters for pandas.read_csv(...).
 DATASET_PATH = 'datasets/Workshop.csv'
 HEADER = 0
 SEPARATOR = ','
-FD_INDEX = 2
-assert 'error' not in EXACT_CONFIG or EXACT_CONFIG[
-    'error'] == 0.0, 'Error must be 0 for precise algorithm'
 
+# Index of the almost holding FD. Chosen in advance purely for
+# demonstration purposes. In a real usage scenario this should be a
+# choice for the user.
+FD_INDEX = 2
+
+assert APPROXIMATE_ALGO_CONFIG['error'] > 0.0, 'Typo mining relies on non-zero error'
+assert EXACT_ALGO_CONFIG.get('error', 0.0) == 0.0, 'Error must be 0 for precise algorithm'
+
+# Variables to simplify the configuration string construction below.
+EXACT_ALGORITHM = EXACT_ALGORITHM_TYPE.__name__
+APPROXIMATE_ALGORITHM = APPROXIMATE_ALGORITHM_TYPE.__name__
+
+# A message containing all variables used by this usage scenario, to be
+# displayed to the user.
 CONFIG_STRING = f"""Starting typo discovery scenario with parameters:
 {RADIUS=}
 {RATIO=}
@@ -32,13 +50,13 @@ CONFIG_STRING = f"""Starting typo discovery scenario with parameters:
 {SEPARATOR=}"""
 
 
-def setup_pandas_print():
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.width', None)
-    pd.set_option('display.max_colwidth', None)
+def configure_dataframe_print():
+    pandas.set_option('display.max_columns', None)
+    pandas.set_option('display.width', None)
+    pandas.set_option('display.max_colwidth', None)
 
 
-def get_squashed_sorted_clusters(dataset: pd.DataFrame, lhs_indices, rhs_index):
+def get_squashed_sorted_clusters(dataset: pandas.DataFrame, lhs_indices, rhs_index):
     def get_lhs(row_count_pair):
         row, _ = row_count_pair
         return row[:-1]
@@ -111,7 +129,7 @@ def filter_squashed_sorted_clusters(squashed_sorted_clusters):
     return filter_ratio(squashed_sorted_clusters)
 
 
-def fd_to_string(dataset: pd.DataFrame, fd: tuple[tuple[int], int]):
+def fd_to_string(dataset: pandas.DataFrame, fd: tuple[tuple[int], int]):
     def get_col_name(col_index):
         return str(dataset.columns[col_index])
 
@@ -119,8 +137,8 @@ def fd_to_string(dataset: pd.DataFrame, fd: tuple[tuple[int], int]):
     return f'( {" ".join(map(get_col_name, lhs_indices))} ) -> {get_col_name(rhs_index)}'
 
 
-def get_result_set(df, algo_name, algo_config):
-    algo = getattr(desb, algo_name)()
+def get_result_set(df, algo_type, algo_config):
+    algo = algo_type()
     algo.load_data(df, **algo_config)
     algo.execute(**algo_config)
     return {(tuple(fd.lhs_indices), fd.rhs_index) for fd in algo.get_fds()}
@@ -131,22 +149,24 @@ def make_display_df(squashed_sorted_clusters, original_df, lhs_indices, rhs_inde
     for lhs, value_info in squashed_sorted_clusters:
         for value, count in value_info:
             display_rows.append((count, *lhs, value))
-    return pd.DataFrame(display_rows, columns=['rows count']
-                        + [original_df.columns[col] for col in lhs_indices]
-                        + [original_df.columns[rhs_index]])
+    return pandas.DataFrame(display_rows, columns=['rows count']
+                            + [original_df.columns[col] for col in lhs_indices]
+                            + [original_df.columns[rhs_index]])
 
 
 def print_display_df(display_df):
     df_lines = display_df.to_string(index=False).splitlines()
     print(df_lines[0])
     print(Fore.GREEN + df_lines[1] + Style.RESET_ALL)
-    print(Fore.RED + '\n'.join(df_lines[2:]) + Style.RESET_ALL)
+    print(Fore.RED + '\n'.join(islice(df_lines, 2)) + Style.RESET_ALL)
     print()
 
 
 def get_typo_candidates_df(df, display_df):
     typo_candidate_rows = []
     typo_candidate_row_indices = []
+
+    assert all(col_name.replace('_', '').isalnum() for col_name in df.columns)
     for index, row in display_df.iterrows():
         # Brittle, but good enough for an example. Breaks when there are
         # unusual characters like a backslash in the column name.
@@ -154,24 +174,24 @@ def get_typo_candidates_df(df, display_df):
             f'`{name}` == {value!r}' for name, value in islice(row.items(), 1, None))).head(1)
         typo_candidate_rows.append(query_data.values[0])
         typo_candidate_row_indices.append(query_data.index.values[0])
-    return pd.DataFrame(typo_candidate_rows, columns=df.columns, index=typo_candidate_row_indices)
+    return pandas.DataFrame(typo_candidate_rows, columns=df.columns, index=typo_candidate_row_indices)
 
 
 def main():
-    setup_pandas_print()
+    configure_dataframe_print()
 
     print(CONFIG_STRING)
     print()
 
-    df = pd.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
+    df = pandas.read_csv(DATASET_PATH, sep=SEPARATOR, header=HEADER, na_filter=False, dtype='string')
     print('Dataset sample:')
     print(df)
     print()
 
     print('Searching for almost holding FDs...')
     print()
-    holding_fds = get_result_set(df, EXACT_ALGORITHM, EXACT_CONFIG)
-    close_fds = get_result_set(df, APPROXIMATE_ALGORITHM, APPROXIMATE_CONFIG)
+    holding_fds = get_result_set(df, EXACT_ALGORITHM_TYPE, EXACT_ALGO_CONFIG)
+    close_fds = get_result_set(df, APPROXIMATE_ALGORITHM_TYPE, APPROXIMATE_ALGO_CONFIG)
     almost_holding_fds = sorted(close_fds - holding_fds)
     print('Found! Almost holding FDs:')
     print('\n'.join(map(lambda fd: fd_to_string(df, fd), almost_holding_fds)))
