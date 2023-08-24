@@ -6,7 +6,7 @@ import pandas as pd
 ALGORITHM = 'Pyro'
 ERROR = 0.001
 CONFIG = {'error': ERROR, 'max_lhs': 1}
-DATASET_PATH = 'duplicates.csv'
+DATASET_PATH = 'datasets/duplicates.csv'
 HEADER = 0
 SEPARATOR = ','
 OUTPUT_FILE = 'output.csv'
