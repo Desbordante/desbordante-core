@@ -30,20 +30,23 @@ protected:
     }
 
     template <typename T>
-    void TestArithmetic(std::byte* twenty_one,std::byte* seven, model::INumericType const& type_ref_from, model::INumericType const& type_ref_to){
+    void TestArithmetic(std::byte* twenty_one, std::byte* seven,
+                        model::INumericType const& type_ref_from,
+                        model::INumericType const& type_ref_to) {
         std::unique_ptr<std::byte[]> result_ptr(int_type_ref.MakeValueOfInt(0));
         std::byte* result = result_ptr.get();
-        type_ref_from.CastTo(twenty_one,type_ref_to);
-        type_ref_from.CastTo(seven,type_ref_to);
-        type_ref_to.Add(twenty_one,seven,result);
-        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21+7);
-        type_ref_to.Sub(twenty_one,seven,result);
-        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21-7);
-        type_ref_to.Mul(twenty_one,seven,result);
-        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21*7);
-        type_ref_to.Div(twenty_one,seven,result);
-        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21/7);
+        type_ref_from.CastTo(twenty_one, type_ref_to);
+        type_ref_from.CastTo(seven, type_ref_to);
+        type_ref_to.Add(twenty_one, seven, result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result), 21 + 7);
+        type_ref_to.Sub(twenty_one, seven, result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result), 21 - 7);
+        type_ref_to.Mul(twenty_one, seven, result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result), 21 * 7);
+        type_ref_to.Div(twenty_one, seven, result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result), 21 / 7);
     }
+
 private:
     std::unique_ptr<std::byte[]> dbl_twenty_one_ptr;
     std::unique_ptr<std::byte[]> dbl_seven_ptr;
@@ -79,11 +82,11 @@ TEST_F(NumericCast, IntTypeCastTo) {
 }
 
 TEST_F(NumericCast, ArifmeticDoubleCastedToInt) {
-    TestArithmetic<model::Int>(dbl_twenty_one,dbl_seven,dbl_type_ref,int_type_ref);
+    TestArithmetic<model::Int>(dbl_twenty_one, dbl_seven, dbl_type_ref, int_type_ref);
 }
 
 TEST_F(NumericCast, ArifmeticIntCastedToDouble) {
-    TestArithmetic<model::Double>(int_twenty_one,int_seven,int_type_ref,dbl_type_ref);
+    TestArithmetic<model::Double>(int_twenty_one, int_seven, int_type_ref, dbl_type_ref);
 }
 
 TEST_F(NumericCast, CastDoubleToBuiltin) {
