@@ -29,7 +29,7 @@ protected:
         dbl_seven = dbl_seven_ptr.get();
     }
 
-    private:
+private:
     std::unique_ptr<std::byte[]> dbl_twenty_one_ptr;
     std::unique_ptr<std::byte[]> dbl_seven_ptr;
     std::unique_ptr<std::byte[]> int_twenty_one_ptr;
@@ -87,10 +87,14 @@ TEST_F(NumericCast, ArifmeticDoubleCastedToInt) {
 }
 
 TEST_F(NumericCast, ArifmeticIntCastedToDouble) {
-    std::unique_ptr<std::byte[]> sum_res_ptr(model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> sub_res_ptr(model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> div_res_ptr(model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> mult_res_ptr(model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
+    std::unique_ptr<std::byte[]> sum_res_ptr(
+            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
+    std::unique_ptr<std::byte[]> sub_res_ptr(
+            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
+    std::unique_ptr<std::byte[]> div_res_ptr(
+            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
+    std::unique_ptr<std::byte[]> mult_res_ptr(
+            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
     std::byte* sum_res = sum_res_ptr.get();
     std::byte* sub_res = sub_res_ptr.get();
     std::byte* div_res = div_res_ptr.get();
