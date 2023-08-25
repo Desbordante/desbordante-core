@@ -16,8 +16,8 @@ public:
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
-    void CastTo(std::byte* value, TypeId to_type) const;
-    void CastTo(std::byte* value, INumericType const& to) const;
+    virtual void CastTo(std::byte* value, TypeId to_type) const = 0;
+    virtual void CastTo(std::byte* value, INumericType const& to) const = 0;
 
     template <typename T>
     T GetValueAs(std::byte const* value) const;
@@ -52,56 +52,6 @@ T INumericType::GetValueAs(std::byte const* value) const {
         default: {
             assert(false);
             __builtin_unreachable();
-        }
-    }
-}
-
-inline void INumericType::CastTo(std::byte* value, INumericType const& to) const {
-    CastTo(value, to.GetTypeId());
-}
-
-inline void INumericType::CastTo(std::byte* value, TypeId to_type) const {
-    if (value == nullptr) {
-        assert(false);
-    }
-    switch (GetTypeId()) {
-        case TypeId::kDouble: {
-            switch (to_type) {
-                case TypeId::kInt: {
-                    model::Int data = INumericType::GetValueAs<model::Int>(value);
-                    INumericType::GetValue<model::Int>(value) = data;
-                    break;
-                }
-                case TypeId::kDouble: {
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
-            }
-            break;
-        }
-        case TypeId::kInt: {
-            switch (to_type) {
-                case TypeId::kDouble: {
-                    model::Double data = INumericType::GetValueAs<model::Double>(value);
-                    INumericType::GetValue<model::Double>(value) = data;
-                    break;
-                }
-                case TypeId::kInt: {
-                    break;
-                }
-                default: {
-                    assert(false);
-                    break;
-                }
-            }
-            break;
-        }
-        default: {
-            assert(false);
-            break;
         }
     }
 }
@@ -170,6 +120,8 @@ public:
         GetValue(buf) = literal;
         return buf;
     }
+    virtual void CastTo(std::byte* value, TypeId to_type) const override;
+    virtual void CastTo(std::byte* value, INumericType const& to) const override;
 };
 
 template <typename T>
@@ -241,6 +193,32 @@ template <typename T>
 std::byte* NumericType<T>::Abs(std::byte const* num, std::byte* res) const {
     GetValue(res) = std::abs(GetValue(num));
     return res;
+}
+
+template <typename T>
+void NumericType<T>::CastTo(std::byte* value, INumericType const& to_type) const{
+    CastTo(value,to_type.GetTypeId());
+}
+
+template <typename T>
+void NumericType<T>::CastTo(std::byte* value, TypeId to) const{
+    switch (to)
+    {
+        case TypeId::kDouble: {
+            model::Double data = GetValueAs<model::Double>(value);
+            INumericType::GetValue<model::Double>(value)=data;
+            break;
+        }
+        case TypeId::kInt: {
+            model::Int data = GetValueAs<model::Int>(value);
+            INumericType::GetValue<model::Int>(value)=data;
+            break;
+        }
+        default: {
+            assert(false);
+            break;
+        }
+    }
 }
 
 }  // namespace model
