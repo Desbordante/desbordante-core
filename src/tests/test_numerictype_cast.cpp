@@ -29,6 +29,21 @@ protected:
         dbl_seven = dbl_seven_ptr.get();
     }
 
+    template <typename T>
+    void TestArithmetic(std::byte* twenty_one,std::byte* seven, model::INumericType const& type_ref_from, model::INumericType const& type_ref_to){
+        std::unique_ptr<std::byte[]> result_ptr(int_type_ref.MakeValueOfInt(0));
+        std::byte* result = result_ptr.get();
+        type_ref_from.CastTo(twenty_one,type_ref_to);
+        type_ref_from.CastTo(seven,type_ref_to);
+        type_ref_to.Add(twenty_one,seven,result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21+7);
+        type_ref_to.Sub(twenty_one,seven,result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21-7);
+        type_ref_to.Mul(twenty_one,seven,result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21*7);
+        type_ref_to.Div(twenty_one,seven,result);
+        ASSERT_EQ(type_ref_to.GetValueAs<T>(result),21/7);
+    }
 private:
     std::unique_ptr<std::byte[]> dbl_twenty_one_ptr;
     std::unique_ptr<std::byte[]> dbl_seven_ptr;
@@ -64,53 +79,11 @@ TEST_F(NumericCast, IntTypeCastTo) {
 }
 
 TEST_F(NumericCast, ArifmeticDoubleCastedToInt) {
-    std::unique_ptr<std::byte[]> sum_res_ptr(int_type_ref.MakeValueOfInt(0));
-    std::unique_ptr<std::byte[]> sub_res_ptr(int_type_ref.MakeValueOfInt(0));
-    std::unique_ptr<std::byte[]> div_res_ptr(int_type_ref.MakeValueOfInt(0));
-    std::unique_ptr<std::byte[]> mult_res_ptr(int_type_ref.MakeValueOfInt(0));
-    std::byte* sum_res = sum_res_ptr.get();
-    std::byte* sub_res = sub_res_ptr.get();
-    std::byte* div_res = div_res_ptr.get();
-    std::byte* mult_res = mult_res_ptr.get();
-    std::byte* a = dbl_twenty_one;
-    std::byte* b = dbl_seven;
-    dbl_type_ref.CastTo(a, int_type_ref);
-    dbl_type_ref.CastTo(b, int_type_ref);
-    int_type_ref.Add(a, b, sum_res);
-    int_type_ref.Sub(a, b, sub_res);
-    int_type_ref.Mul(a, b, mult_res);
-    int_type_ref.Div(a, b, div_res);
-    ASSERT_EQ(int_type_ref.GetValueAs<model::Int>(sum_res), 21 + 7);
-    ASSERT_EQ(int_type_ref.GetValueAs<model::Int>(sub_res), 21 - 7);
-    ASSERT_EQ(int_type_ref.GetValueAs<model::Int>(div_res), 21 / 7);
-    ASSERT_EQ(int_type_ref.GetValueAs<model::Int>(mult_res), 21 * 7);
+    TestArithmetic<model::Int>(dbl_twenty_one,dbl_seven,dbl_type_ref,int_type_ref);
 }
 
 TEST_F(NumericCast, ArifmeticIntCastedToDouble) {
-    std::unique_ptr<std::byte[]> sum_res_ptr(
-            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> sub_res_ptr(
-            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> div_res_ptr(
-            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::unique_ptr<std::byte[]> mult_res_ptr(
-            model::DoubleType::MakeFrom(int_twenty_one, int_type_ref));
-    std::byte* sum_res = sum_res_ptr.get();
-    std::byte* sub_res = sub_res_ptr.get();
-    std::byte* div_res = div_res_ptr.get();
-    std::byte* mult_res = mult_res_ptr.get();
-    std::byte* a = int_twenty_one;
-    std::byte* b = int_seven;
-    int_type_ref.CastTo(a, dbl_type_ref);
-    int_type_ref.CastTo(b, dbl_type_ref);
-    dbl_type_ref.Add(a, b, sum_res);
-    dbl_type_ref.Sub(a, b, sub_res);
-    dbl_type_ref.Mul(a, b, mult_res);
-    dbl_type_ref.Div(a, b, div_res);
-    ASSERT_DOUBLE_EQ(dbl_type_ref.GetValueAs<model::Double>(sum_res), 21 + 7);
-    ASSERT_DOUBLE_EQ(dbl_type_ref.GetValueAs<model::Double>(sub_res), 21 - 7);
-    ASSERT_DOUBLE_EQ(dbl_type_ref.GetValueAs<model::Double>(div_res), 21.0 / 7.0);
-    ASSERT_DOUBLE_EQ(dbl_type_ref.GetValueAs<model::Double>(mult_res), 21 * 7);
+    TestArithmetic<model::Double>(int_twenty_one,int_seven,int_type_ref,dbl_type_ref);
 }
 
 TEST_F(NumericCast, CastDoubleToBuiltin) {
