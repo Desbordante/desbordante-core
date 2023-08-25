@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <limits>
 #include <sstream>
@@ -14,6 +15,12 @@ public:
     using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*, std::byte*) const;
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
+
+    void CastTo(std::byte* value, TypeId to_type) const;
+    void CastTo(std::byte* value, INumericType const& to) const;
+
+    template <typename T>
+    T GetValueAs(std::byte const* value) const;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -30,6 +37,74 @@ public:
     [[nodiscard]] virtual std::byte const* Min() const = 0;
     [[nodiscard]] virtual std::byte const* Max() const = 0;
 };
+
+template <typename T>
+T INumericType::GetValueAs(std::byte const* value) const {
+    switch (GetTypeId()) {
+        case TypeId::kDouble: {
+            model::Double data = INumericType::GetValue<Double>(value);
+            return static_cast<T>(data);
+        }
+        case TypeId::kInt: {
+            model::Int data = INumericType::GetValue<Int>(value);
+            return static_cast<T>(data);
+        }
+        default: {
+            assert(false);
+            __builtin_unreachable();
+        }
+    }
+}
+
+inline void INumericType::CastTo(std::byte* value, INumericType const& to) const {
+    CastTo(value, to.GetTypeId());
+}
+
+inline void INumericType::CastTo(std::byte* value, TypeId to_type) const {
+    if (value == nullptr) {
+        assert(false);
+    }
+    switch (GetTypeId()) {
+        case TypeId::kDouble: {
+            switch (to_type) {
+                case TypeId::kInt: {
+                    model::Int data = INumericType::GetValueAs<model::Int>(value);
+                    INumericType::GetValue<model::Int>(value) = data;
+                    break;
+                }
+                case TypeId::kDouble: {
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            break;
+        }
+        case TypeId::kInt: {
+            switch (to_type) {
+                case TypeId::kDouble: {
+                    model::Double data = INumericType::GetValueAs<model::Double>(value);
+                    INumericType::GetValue<model::Double>(value) = data;
+                    break;
+                }
+                case TypeId::kInt: {
+                    break;
+                }
+                default: {
+                    assert(false);
+                    break;
+                }
+            }
+            break;
+        }
+        default: {
+            assert(false);
+            break;
+        }
+    }
+}
 
 template <typename T>
 class NumericType : public INumericType {
