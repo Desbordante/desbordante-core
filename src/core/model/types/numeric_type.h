@@ -50,19 +50,19 @@ T INumericType::GetValueAs(std::byte const* value) const {
             return static_cast<T>(data);
         }
         default: {
-            assert(true);
-            return T();
+            assert(false);
+            __builtin_unreachable();
         }
     }
 }
 
 inline void INumericType::CastTo(std::byte* value, INumericType const& to) const {
-    this->CastTo(value, to.GetTypeId());
+    CastTo(value, to.GetTypeId());
 }
 
 inline void INumericType::CastTo(std::byte* value, TypeId to_type) const {
     if (value == nullptr) {
-        assert(true);
+        assert(false);
     }
     switch (GetTypeId()) {
         case TypeId::kDouble: {
@@ -76,7 +76,7 @@ inline void INumericType::CastTo(std::byte* value, TypeId to_type) const {
                     break;
                 }
                 default: {
-                    assert(true);
+                    assert(false);
                     break;
                 }
             }
@@ -93,14 +93,14 @@ inline void INumericType::CastTo(std::byte* value, TypeId to_type) const {
                     break;
                 }
                 default: {
-                    assert(true);
+                    assert(false);
                     break;
                 }
             }
             break;
         }
         default: {
-            assert(true);
+            assert(false);
             break;
         }
     }
