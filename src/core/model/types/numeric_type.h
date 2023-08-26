@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
 #include <limits>
 #include <sstream>
@@ -14,6 +15,14 @@ public:
     using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*, std::byte*) const;
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
+
+    virtual void CastTo(std::byte* value, TypeId to_type) const = 0;
+    void CastTo(std::byte* value, INumericType const& to) const {
+        CastTo(value, to.GetTypeId());
+    }
+
+    template <typename T>
+    T GetValueAs(std::byte const* value) const;
 
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -30,6 +39,24 @@ public:
     [[nodiscard]] virtual std::byte const* Min() const = 0;
     [[nodiscard]] virtual std::byte const* Max() const = 0;
 };
+
+template <typename T>
+T INumericType::GetValueAs(std::byte const* value) const {
+    switch (GetTypeId()) {
+        case TypeId::kDouble: {
+            model::Double data = INumericType::GetValue<Double>(value);
+            return static_cast<T>(data);
+        }
+        case TypeId::kInt: {
+            model::Int data = INumericType::GetValue<Int>(value);
+            return static_cast<T>(data);
+        }
+        default: {
+            assert(false);
+            __builtin_unreachable();
+        }
+    }
+}
 
 template <typename T>
 class NumericType : public INumericType {
@@ -95,7 +122,28 @@ public:
         GetValue(buf) = literal;
         return buf;
     }
+    void CastTo(std::byte* value, TypeId to_type) const override;
 };
+
+template <typename T>
+void NumericType<T>::CastTo(std::byte* value, TypeId to_type) const {
+    switch (to_type) {
+        case TypeId::kDouble: {
+            model::Double data = GetValueAs<model::Double>(value);
+            INumericType::GetValue<model::Double>(value) = data;
+            break;
+        }
+        case TypeId::kInt: {
+            model::Int data = GetValueAs<model::Int>(value);
+            INumericType::GetValue<model::Int>(value) = data;
+            break;
+        }
+        default: {
+            assert(false);
+            break;
+        }
+    }
+}
 
 template <typename T>
 CompareResult NumericType<T>::Compare(std::byte const* l, std::byte const* r) const {
