@@ -15,9 +15,11 @@ namespace details {
 BOOST_STRONG_TYPEDEF(std::string, Placeholder);
 } // namespace details
 using BigInt = details::Placeholder; /* Type of an integer that don't fit into Int */
-using Double = long double; /* Fixed-precision floating point value; also we need type for values
-                             * with arbitrary precision analogous to BigInt */
+using Double = double; /* Fixed-precision floating point value; also we need type for values
+                        * with arbitrary precision analogous to BigInt */
 using String = std::string;
+
+static_assert(sizeof(Int) == sizeof(Double));
 
 /* Dummy types */
 
