@@ -74,8 +74,7 @@ private:
                                            size_t lhs_i, size_t rhs_i);
     /* Returns vector with ranges boundaries. Ranges constructed by grouping results of binary
      * operation between values in ac_pairs. */
-    std::vector<std::byte const*> ConstructDisjunctiveRanges(ACPairs const& ac_pairs,
-                                                             double weight) const;
+    std::vector<std::byte const*> ConstructDisjunctiveRanges(ACPairs const& ac_pairs) const;
     /* Greedily combines ranges if there is more than bumps_limit_ */
     void RestrictRangesAmount(std::vector<std::byte const*>& ranges) const;
     void RegisterOptions();
@@ -89,7 +88,7 @@ public:
     }
     size_t CalculateSampleSize(size_t k_bumps) const;
     /* Returns ranges reconstucted with new weight for pair of columns */
-    RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight) const;
+    RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight);
     std::vector<RangesCollection> const& GetRangesCollections() const {
         return ranges_;
     }
