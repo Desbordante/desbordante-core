@@ -62,7 +62,7 @@ Statistic DataStats::GetSum(size_t index) const {
 
     const std::vector<const std::byte*>& data = col.GetData();
     const auto& type = static_cast<const mo::INumericType&>(col.GetType());
-    std::byte* sum(type.Allocate());
+    std::byte* sum(type.MakeValueOfInt(0));
     for (size_t i = 0; i < data.size(); ++i) {
         if (!col.IsNullOrEmpty(i)) type.Add(sum, data[i], sum);
     }
@@ -95,7 +95,7 @@ Statistic DataStats::CalculateCentralMoment(size_t index, int number, bool besse
     Statistic avg = GetAvg(index);
     std::byte* neg_avg = double_type.Allocate();
     double_type.Negate(avg.GetData(), neg_avg);
-    std::byte* sum_of_difs = double_type.Allocate();
+    std::byte* sum_of_difs = double_type.MakeValueOfInt(0);
     std::byte* dif = double_type.Allocate();
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
@@ -332,7 +332,7 @@ Statistic DataStats::GetSumOfSquares(size_t index) const {
 
     const auto& type = static_cast<const mo::INumericType&>(col.GetType());
     const std::vector<const std::byte*>& data = col.GetData();
-    std::byte* res = type.Allocate();
+    std::byte* res = type.MakeValueOfInt(0);
     std::byte* square = type.Allocate();
 
     for (size_t i = 0; i < data.size(); i++) {
