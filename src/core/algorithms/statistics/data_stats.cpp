@@ -490,6 +490,11 @@ Statistic DataStats::GetMedianAD(size_t index) const {
 }
 
 unsigned long long DataStats::ExecuteInternal() {
+    if (all_stats_.empty()) {
+        // Table has 0 columns, nothing to do
+        return 0;
+    }
+
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
