@@ -263,25 +263,34 @@ std::vector<std::byte const*> ACAlgorithm::ConstructDisjunctiveRanges(ACPairs co
         ranges = std::vector<std::byte const*>();
         return ranges;
     }
+
     ACPair const* l_border = ac_pairs.front().get();
     ACPair const* r_border = nullptr;
-    double delta = num_type_->Dist(ac_pairs.front()->GetRes(), ac_pairs.back()->GetRes()) *
-                   (weight / (1 - weight));
 
-    for (size_t i = 0; i < ac_pairs.size() - 1; ++i) {
-        if (num_type_->Dist(ac_pairs[i]->GetRes(), ac_pairs[i + 1]->GetRes()) <= delta) {
-            r_border = ac_pairs[i + 1].get();
-        } else {
-            ranges.emplace_back(l_border->GetRes());
-            ranges.emplace_back(ac_pairs[i]->GetRes());
-            l_border = ac_pairs[i + 1].get();
-            r_border = ac_pairs[i + 1].get();
+    if (weight < 1) {
+        double delta = num_type_->Dist(ac_pairs.front()->GetRes(), ac_pairs.back()->GetRes()) *
+                       (weight / (1 - weight));
+
+        for (size_t i = 0; i < ac_pairs.size() - 1; ++i) {
+            if (num_type_->Dist(ac_pairs[i]->GetRes(), ac_pairs[i + 1]->GetRes()) <= delta) {
+                r_border = ac_pairs[i + 1].get();
+            } else {
+                ranges.emplace_back(l_border->GetRes());
+                ranges.emplace_back(ac_pairs[i]->GetRes());
+                l_border = ac_pairs[i + 1].get();
+                r_border = ac_pairs[i + 1].get();
+            }
         }
+    } else {
+        assert(weight == 1);
+        r_border = ac_pairs.back().get();
     }
+
     if (r_border == ac_pairs.back().get()) {
         ranges.emplace_back(l_border->GetRes());
         ranges.emplace_back(r_border->GetRes());
     }
+
     return ranges;
 }
 
