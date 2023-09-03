@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <memory>
+#include <unordered_map>
 
 #include "big_int_type.h"
 #include "create_type.h"
@@ -24,9 +25,15 @@ class MixedType final : public Type {
 private:
     bool is_null_eq_null_;
 
-public:
+    [[nodiscard]] static size_t GetTypeIdSizeWithPadding(TypeId type_id) noexcept {
+        size_t alignment = GetAlignment(type_id);
+        assert(kTypeIdSize <= alignment);
+        return alignment;
+    }
+
     static constexpr size_t kTypeIdSize = sizeof(TypeId::_integral);
 
+public:
     explicit MixedType(bool is_null_eq_null) noexcept
         : Type(TypeId::kMixed), is_null_eq_null_(is_null_eq_null) {}
 
@@ -100,6 +107,19 @@ public:
         return CreateType(type_id, is_null_eq_null_);
     }
 
+    [[nodiscard]] static size_t GetAlignment(TypeId type_id) noexcept {
+        // Could possibly be implemented as a virtual method, however, it's much more incovinient
+        // since virtual method requires an object of type `Type` to be called which is not always
+        // available. Moreover, alignment of a type is used only when implementing MixedType
+        // or working with it, so GetAlignment as a general method for any type seems quite useless.
+        static std::unordered_map<TypeId, size_t> const type_to_alignment = {
+                {TypeId::kNull, alignof(Null)},     {TypeId::kEmpty, alignof(Empty)},
+                {TypeId::kInt, alignof(Int)},       {TypeId::kDouble, alignof(Double)},
+                {TypeId::kString, alignof(String)}, {TypeId::kBigInt, alignof(BigInt)}};
+        assert(type_to_alignment.find(type_id) != type_to_alignment.end());
+        return type_to_alignment.at(type_id);
+    }
+
     static void ValueFromStr(std::byte* dest, std::string s, Type const* type) {
         type->ValueFromStr(SetTypeId(dest, type->GetTypeId()), std::move(s));
     }
@@ -118,11 +138,11 @@ public:
     }
 
     [[nodiscard]] static std::byte* RetrieveValue(std::byte* value_with_type) noexcept {
-        return value_with_type + kTypeIdSize;
+        return value_with_type + GetTypeIdSizeWithPadding(RetrieveTypeId(value_with_type));
     }
 
     [[nodiscard]] static std::byte const* RetrieveValue(std::byte const* value_with_type) noexcept {
-        return value_with_type + kTypeIdSize;
+        return value_with_type + GetTypeIdSizeWithPadding(RetrieveTypeId(value_with_type));
     }
 
     static std::byte* SetTypeId(std::byte* dest, TypeId const type_id) noexcept {
@@ -131,7 +151,7 @@ public:
     }
 
     [[nodiscard]] static size_t GetMixedValueSize(Type const* type) noexcept {
-        return kTypeIdSize + type->GetSize();
+        return GetTypeIdSizeWithPadding(type->GetTypeId()) + type->GetSize();
     }
 };
 

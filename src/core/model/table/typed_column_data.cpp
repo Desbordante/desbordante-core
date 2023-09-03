@@ -3,6 +3,19 @@
 #include "column_layout_typed_relation_data.h"
 #include "create_type.h"
 
+namespace {
+
+size_t GetNextAlignedOffset(size_t cur_offset, size_t align) {
+    // alignment should be power of 2
+    assert(align != 0 && (align & (align - 1)) == 0);
+    if (size_t remainder = cur_offset % align; remainder != 0) {
+        cur_offset += align - remainder;
+    }
+    return cur_offset;
+}
+
+}  // namespace
+
 namespace model {
 
 TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap() const {
@@ -55,14 +68,16 @@ TypedColumnDataFactory::TypeIdToType TypedColumnDataFactory::MapTypeIdsToTypes(
     return type_id_to_type;
 }
 
-size_t TypedColumnDataFactory::CalculateMixedBufSize(MixedType const* mixed,
-                                                     TypeIdToType const& type_id_to_type,
-                                                     TypeMap const& type_map) const noexcept {
-    size_t result = 0;
-    for (auto const& [type_id, indices] : type_map) {
-        result += (mixed->GetMixedValueSize(type_id_to_type.at(type_id).get())) * indices.size();
+size_t TypedColumnDataFactory::CalculateMixedBufSize(
+        std::vector<TypeId> const& types_layout,
+        TypeIdToType const& type_id_to_type) const noexcept {
+    size_t buf_size = 0;
+    for (TypeId const type_id : types_layout) {
+        size_t align = MixedType::GetAlignment(type_id);
+        buf_size = GetNextAlignedOffset(buf_size, align);
+        buf_size += MixedType::GetMixedValueSize(type_id_to_type.at(type_id).get());
     }
-    return result;
+    return buf_size;
 }
 
 TypedColumnData TypedColumnDataFactory::CreateMixedFromTypeMap(std::unique_ptr<Type const> type,
@@ -79,23 +94,29 @@ TypedColumnData TypedColumnDataFactory::CreateMixedFromTypeMap(std::unique_ptr<T
     size_t const empties_num = empties.size();
 
     TypeIdToType type_id_to_type = MapTypeIdsToTypes(type_map);
-    size_t const buf_size = CalculateMixedBufSize(mixed_type, type_id_to_type, type_map);
-    std::unique_ptr<std::byte[]> buf(new std::byte[buf_size]);
     std::vector<TypeId> types_layout = GetTypesLayout(type_map);
+    size_t const buf_size = CalculateMixedBufSize(types_layout, type_id_to_type);
+    static_assert(kTypesMaxAlignment <= __STDCPP_DEFAULT_NEW_ALIGNMENT__,
+                  "Overaligned types lead to a missaligned accesses to values in the current "
+                  "implementation, which is UB");
+    std::unique_ptr<std::byte[]> buf(new std::byte[buf_size]);
     type_map.clear(); /* type_map is no longer needed, so saving space */
 
-    std::byte* next = buf.get();
+    size_t buf_index = 0;
     for (size_t i = 0; i != types_layout.size(); ++i) {
         TypeId const type_id = types_layout[i];
         Type const* concrete_type = type_id_to_type.at(type_id).get();
         size_t const value_size = mixed_type->GetMixedValueSize(concrete_type);
+
+        buf_index = GetNextAlignedOffset(buf_index, mixed_type->GetAlignment(type_id));
+        std::byte* next = buf.get() + buf_index;
 
         assert(next + value_size <= buf.get() + buf_size);
 
         mixed_type->ValueFromStr(next, std::move(unparsed_[i]), concrete_type);
 
         data.push_back(next);
-        next += value_size;
+        buf_index += value_size;
     }
 
     return TypedColumnData(column_, std::move(type), rows_num, nulls_num, empties_num,
