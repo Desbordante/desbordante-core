@@ -106,13 +106,15 @@ public:
 
     [[nodiscard]] static std::byte* AllocateMixed(Type const* type) {
         auto* buf = new std::byte[GetMixedValueSize(type)];
-        *reinterpret_cast<TypeId*>(buf) = type->GetTypeId();
+        RetrieveTypeId(buf) = type->GetTypeId();
         return buf;
     }
 
-    [[nodiscard]] static TypeId RetrieveTypeId(std::byte const* value) {
-        TypeId type_id = *reinterpret_cast<TypeId const*>(value);
-        return type_id;
+    [[nodiscard]] static TypeId const& RetrieveTypeId(std::byte const* value) noexcept {
+        return GetValue<TypeId>(value);
+    }
+    [[nodiscard]] static TypeId& RetrieveTypeId(std::byte* value) noexcept {
+        return GetValue<TypeId>(value);
     }
 
     [[nodiscard]] static std::byte* RetrieveValue(std::byte* value_with_type) noexcept {
@@ -124,8 +126,8 @@ public:
     }
 
     static std::byte* SetTypeId(std::byte* dest, TypeId const type_id) {
-        *reinterpret_cast<TypeId*>(dest) = type_id;
-        return dest + kTypeIdSize;
+        RetrieveTypeId(dest) = type_id;
+        return RetrieveValue(dest);
     }
 
     [[nodiscard]] static size_t GetMixedValueSize(Type const* type) noexcept {
