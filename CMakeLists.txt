@@ -59,7 +59,7 @@ else()
         # Set DEBUG build options specific for build with ASAN
         set(ASAN_OPTS "-fsanitize=address")
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
-            "-O0"
+            "-O1"
             "${ASAN_OPTS}")
         set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
     elseif (UBSAN)
