@@ -125,7 +125,7 @@ public:
         return value_with_type + kTypeIdSize;
     }
 
-    static std::byte* SetTypeId(std::byte* dest, TypeId const type_id) {
+    static std::byte* SetTypeId(std::byte* dest, TypeId const type_id) noexcept {
         RetrieveTypeId(dest) = type_id;
         return RetrieveValue(dest);
     }
