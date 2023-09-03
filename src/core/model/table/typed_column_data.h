@@ -173,8 +173,8 @@ private:
         {TypeId::kNull, std::regex(Null::kValue.data())},
         {TypeId::kEmpty, std::regex(R"(^$)")}};
 
-    size_t CalculateMixedBufSize(MixedType const* mixed, TypeIdToType const& tid_to_map,
-                                 TypeMap const& type_map) const noexcept;
+    size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
+                                 TypeIdToType const& type_id_to_type) const noexcept;
     std::vector<TypeId> GetTypesLayout(TypeMap const& tm) const;
     TypeIdToType MapTypeIdsToTypes(TypeMap const& tm) const;
     TypeMap CreateTypeMap() const;
