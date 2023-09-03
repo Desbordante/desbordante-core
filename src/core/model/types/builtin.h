@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <boost/serialization/strong_typedef.hpp>
 #include <enum.h>
 
@@ -88,6 +90,19 @@ template <> struct TypeConverter<Empty> {
 };
 
 enum class CompareResult { kLess = -1, kGreater = 1, kEqual = 0, kNotEqual = 2 };
+
+namespace detail {
+
+template <typename T>
+struct TupleMaxAlign {};
+template <typename... Ts>
+struct TupleMaxAlign<std::tuple<Ts...>> {
+    static constexpr size_t value = std::max({alignof(Ts)...});
+};
+
+}  // namespace detail
+
+inline constexpr size_t kTypesMaxAlignment = detail::TupleMaxAlign<AllValueTypes>::value;
 
 }  // namespace model
 
