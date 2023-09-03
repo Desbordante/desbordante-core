@@ -2,9 +2,9 @@
 
 function print_help() {
 cat << EOF
-Usage: ./build.sh [-h|--help] [-p|--pybind] [-n|--no-test]
-                  [-u|--no-unpack] [-jN|--jobs=N] [-d|--debug]
+Usage: ./build.sh [options]
 
+Possible options:
   -h,         --help                  Display help
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
