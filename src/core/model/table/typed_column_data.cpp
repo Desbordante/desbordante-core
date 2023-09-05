@@ -175,6 +175,8 @@ std::vector<TypedColumnData> CreateTypedColumnData(IDatasetStream& dataset_strea
     std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
             model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream,
                                                              is_null_equal_null, -1, -1);
+    auto t = new int();
+    (void)t;
     std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }
