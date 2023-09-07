@@ -10,6 +10,7 @@
 #include "algorithms/cfd/util/set_util.h"
 #include "algorithms/cfd/util/tidlist_util.h"
 #include "config/equal_nulls/option.h"
+#include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 
@@ -54,36 +55,38 @@ unsigned long long FDFirstAlgorithm::ExecuteInternal() {
 }
 
 void FDFirstAlgorithm::CheckForIncorrectInput() const {
+    // TODO: should be checked by Option
     if (min_supp_ < 1) {
-        throw std::invalid_argument("[ERROR] Illegal Support value: \"" +
-                                    std::to_string(min_supp_) + "\"" + " is less than 1");
+        throw config::ConfigurationError("[ERROR] Illegal Support value: \"" +
+                                         std::to_string(min_supp_) + "\"" + " is less than 1");
     }
 
     if (min_conf_ < 0 || min_conf_ > 1) {
-        throw std::invalid_argument("[ERROR] Illegal Confidence value: \"" +
-                                    std::to_string(min_conf_) + "\"" + " not in [0,1]");
+        throw config::ConfigurationError("[ERROR] Illegal Confidence value: \"" +
+                                         std::to_string(min_conf_) + "\"" + " not in [0,1]");
     }
 
     if (max_cfd_size_ < 2) {
-        throw std::invalid_argument("[ERROR] Illegal Max size value: \"" +
-                                    std::to_string(max_cfd_size_) + "\"" + " is less than 1");
+        throw config::ConfigurationError("[ERROR] Illegal Max size value: \"" +
+                                         std::to_string(max_cfd_size_) + "\"" + " is less than 1");
     }
 
     if (columns_number_ != 0 && tuples_number_ == 0) {
-        throw std::invalid_argument(
+        throw config::ConfigurationError(
                 "[ERROR] Illegal columns_number and tuples_number values: columns_number is " +
                 std::to_string(columns_number_) + " while tuples_number is 0");
     }
 
     if (tuples_number_ != 0 && columns_number_ == 0) {
-        throw std::invalid_argument(
+        throw config::ConfigurationError(
                 "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
                 std::to_string(tuples_number_) + " while columnes_number is 0");
     }
 
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {
-        throw std::invalid_argument("[ERROR] Illegal Support value : " + std::to_string(min_supp_) +
-                                    " is not in [1, " + std::to_string(tuples_number_) + "]");
+        throw config::ConfigurationError(
+                "[ERROR] Illegal Support value : " + std::to_string(min_supp_) + " is not in [1, " +
+                std::to_string(tuples_number_) + "]");
     }
 }
 
