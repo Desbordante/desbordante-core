@@ -6,6 +6,7 @@
 #include <boost/any.hpp>
 
 #include "algorithms/algo_factory.h"
+#include "config/exceptions.h"
 #include "config/names.h"
 #include "config/tabular_data/input_table_type.h"
 #include "create_dataframe_reader.h"
@@ -62,8 +63,8 @@ std::unordered_set<std::string_view> PyAlgorithmBase::GetPossibleOptions() const
 py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     auto type_index = algorithm_->GetTypeIndex(option_name);
     if (type_index == void_index)
-        throw std::invalid_argument{std::string{"Option named \""} + option_name.data() +
-                                    "\" doesn't exist!"};
+        throw config::ConfigurationError{std::string{"Option named \""} + option_name.data() +
+                                         "\" doesn't exist!"};
     return GetPyType(type_index);
 }
 
