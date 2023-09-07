@@ -1,5 +1,6 @@
 #include "create_dataframe_reader.h"
 
+#include "config/exceptions.h"
 #include "dataframe_reader.h"
 
 namespace python_bindings {
@@ -24,7 +25,8 @@ static bool AllColumnsAreStrings(py::handle dataframe) {
 }
 
 config::InputTable CreateDataFrameReader(py::handle dataframe, std::string name) {
-    if (!IsDataFrame(dataframe)) throw std::invalid_argument("Passed object is not a dataframe");
+    if (!IsDataFrame(dataframe))
+        throw config::ConfigurationError("Passed object is not a dataframe");
     if (AllColumnsAreStrings(dataframe)) {
         return std::make_shared<StringDataframeReader>(dataframe, std::move(name));
     } else {

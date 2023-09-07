@@ -9,6 +9,7 @@
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
+#include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
 #include "create_dataframe_reader.h"
 #include "parser/csv_parser/csv_parser.h"
@@ -24,7 +25,7 @@ T CastAndReplaceCastError(std::string_view option_name, py::handle value) {
     try {
         return py::cast<T>(value);
     } catch (py::cast_error& e) {
-        throw std::invalid_argument(
+        throw config::ConfigurationError(
                 std::string("Unable to cast Python object to C++ type for option \"") +
                 option_name.data() + '"');
     }
@@ -32,7 +33,7 @@ T CastAndReplaceCastError(std::string_view option_name, py::handle value) {
 
 config::InputTable CreateCsvParser(std::string_view option_name, py::tuple const& arguments) {
     if (py::len(arguments) != 3) {
-        throw std::invalid_argument("Cannot create a csv parser from passed tuple.");
+        throw config::ConfigurationError("Cannot create a CSV parser from passed tuple.");
     }
 
     return std::make_shared<CSVParser>(
@@ -58,7 +59,7 @@ std::pair<std::type_index, ConvFunc> const EnumConvPair{
             std::stringstream error_message;
             error_message << "Incorrect value for option \"" << option_name
                           << "\". Possible values: " << util::EnumToAvailableValues<EnumType>();
-            throw std::invalid_argument(error_message.str());
+            throw config::ConfigurationError(error_message.str());
         }};
 
 template <typename EnumType>
@@ -83,7 +84,7 @@ std::pair<std::type_index, ConvFunc> const CharEnumConvPair{
             error_message.seekp(-1, std::stringstream::cur);
             error_message << ']';
 
-            throw std::invalid_argument(error_message.str());
+            throw config::ConfigurationError(error_message.str());
         }};
 
 boost::any InputTableToAny(std::string_view option_name, py::handle obj) {
