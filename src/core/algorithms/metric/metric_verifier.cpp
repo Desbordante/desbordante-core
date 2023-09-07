@@ -11,6 +11,7 @@
 #include <easylogging++.h>
 
 #include "config/equal_nulls/option.h"
+#include "config/exceptions.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
@@ -30,53 +31,57 @@ void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
         if (type_id == +model::TypeId::kUndefined) {
-            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                        "\" type undefined.");
+            throw config::ConfigurationError("Column with index \"" + std::to_string(column_index) +
+                                             "\" type undefined.");
         }
         if (type_id == +model::TypeId::kMixed) {
-            throw std::invalid_argument("Column with index \"" + std::to_string(column_index)
-                                        + "\" contains values of different types.");
+            throw config::ConfigurationError("Column with index \"" + std::to_string(column_index) +
+                                             "\" contains values of different types.");
         }
 
         if (metric_ == +Metric::euclidean) {
             if (!column.IsNumeric()) {
-                throw std::invalid_argument("\"Euclidean\" metric is only available for numeric "
-                                            "columns.");
+                throw config::ConfigurationError(
+                        "\"Euclidean\" metric is only available for numeric "
+                        "columns.");
             }
             return;
         }
         if (type_id == +model::TypeId::kString) return;
-        throw std::invalid_argument("The chosen metric is available only for string columns.");
+        throw config::ConfigurationError("The chosen metric is available only for string columns.");
     }
     if (metric_ == +Metric::euclidean) {
         for (config::IndexType column_index : rhs_indices) {
             model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
             model::TypeId type_id = column.GetTypeId();
             if (type_id == +model::TypeId::kUndefined) {
-                throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                            "\" type undefined.");
+                throw config::ConfigurationError("Column with index \"" +
+                                                 std::to_string(column_index) +
+                                                 "\" type undefined.");
             }
             if (type_id == +model::TypeId::kMixed) {
-                throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                            "\" contains values of different types.");
+                throw config::ConfigurationError("Column with index \"" +
+                                                 std::to_string(column_index) +
+                                                 "\" contains values of different types.");
             }
 
             if (!column.IsNumeric()) {
-                throw std::invalid_argument("\"Euclidean\" metric is only available for numeric "
-                                            "columns, column with index "
-                                            + std::to_string(column_index) + " is not numeric");
+                throw config::ConfigurationError(
+                        "\"Euclidean\" metric is only available for numeric "
+                        "columns, column with index " +
+                        std::to_string(column_index) + " is not numeric");
             }
         }
         return;
     }
-    throw std::invalid_argument("Multidimensional RHS is not available for the chosen metric");
+    throw config::ConfigurationError("Multidimensional RHS is not available for the chosen metric");
 }
 
 void MetricVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     auto check_parameter = [](long double parameter) {
-        if (parameter < 0) throw std::invalid_argument("Parameter out of range");
+        if (parameter < 0) throw config::ConfigurationError("Parameter out of range");
     };
     auto get_schema_columns = [this]() { return relation_->GetSchema()->GetNumColumns(); };
     auto check_rhs = [this](config::IndicesType const& rhs_indices) { ValidateRhs(rhs_indices); };
@@ -91,13 +96,13 @@ void MetricVerifier::RegisterOptions() {
         assert(!(metric_ == +Metric::euclidean && rhs_indices_.size() == 1));
         if (metric_algo == +MetricAlgo::calipers) {
             if (!(metric_ == +Metric::euclidean && rhs_indices_.size() == 2))
-                throw std::invalid_argument(
+                throw config::ConfigurationError(
                         "\"calipers\" algorithm is only available for "
                         "2-dimensional RHS and \"euclidean\" metric.");
         }
     };
     auto q_check = [](unsigned int q) {
-        if (q <= 0) throw std::invalid_argument("Q-gram length should be greater than zero.");
+        if (q <= 0) throw config::ConfigurationError("Q-gram length should be greater than zero.");
     };
 
     RegisterOption(config::TableOpt(&input_table_));

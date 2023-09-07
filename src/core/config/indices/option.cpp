@@ -1,8 +1,8 @@
 #include "config/indices/option.h"
 
 #include <algorithm>
-#include <stdexcept>
 
+#include "config/exceptions.h"
 #include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
 
@@ -29,7 +29,7 @@ Option<config::IndicesType> IndicesOption::operator()(
             [get_col_count = std::move(get_col_count),
              value_check_func_ = std::move(value_check_func_)](config::IndicesType const& indices) {
                 if (indices.empty()) {
-                    throw std::invalid_argument("Indices cannot be empty");
+                    throw ConfigurationError("Indices cannot be empty");
                 }
                 static_assert(std::is_unsigned_v<config::IndexType>);
                 assert(std::is_sorted(indices.begin(), indices.end()));
