@@ -2,6 +2,7 @@
 
 #include <thread>
 
+#include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 
 namespace config {
@@ -11,10 +12,9 @@ extern const CommonOption<ThreadNumType> ThreadNumberOpt{
             if (value == 0) {
                 value = std::thread::hardware_concurrency();
                 if (value == 0) {
-                    throw std::runtime_error(
-                            "Unable to detect number of concurrent threads "
-                            "supported by your system. Please, specify it "
-                            "manually.");
+                    throw ConfigurationError(
+                            "Unable to detect number of concurrent threads supported by your "
+                            "system. Please, specify it manually.");
                 }
             }
         }};

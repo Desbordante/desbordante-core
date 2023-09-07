@@ -2,6 +2,7 @@
 
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
+#include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
@@ -27,7 +28,8 @@ void TypoMiner::RegisterOptions() {
 
     auto radius_check = [](double radius) {
         if (!(radius == -1 || radius >= 0)) {
-            throw std::invalid_argument("Radius should be greater or equal to zero or equal to -1");
+            throw config::ConfigurationError(
+                    "Radius should be greater or equal to zero or equal to -1");
         }
     };
     auto ratio_default = [this]() {
@@ -35,7 +37,7 @@ void TypoMiner::RegisterOptions() {
     };
     auto ratio_check = [](double ratio) {
         if (!(ratio >= 0 && ratio <= 1)) {
-            throw std::invalid_argument("Ratio should be between 0 and 1");
+            throw config::ConfigurationError("Ratio should be between 0 and 1");
         }
     };
 
@@ -57,11 +59,11 @@ void TypoMiner::ResetState() {
 bool TypoMiner::SetExternalOption(std::string_view option_name, boost::any const& value) {
     if (option_name == config::ErrorOpt.GetName()) {
         if (value.empty()) {
-            throw std::invalid_argument("Must specify error value when mining typos.");
+            throw config::ConfigurationError("Must specify error value when mining typos.");
         }
         auto error = boost::any_cast<config::ErrorType>(value);
         if (error == 0.0) {
-            throw std::invalid_argument("Typo mining with error 0 is meaningless");
+            throw config::ConfigurationError("Typo mining with error 0 is meaningless");
         }
         return TrySetOption(option_name, config::ErrorType{0.0}, value) != 0;
     }
@@ -74,11 +76,13 @@ int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& valu
     try {
         precise_algo_->SetOption(option_name, value_precise);
         ++successes;
-    } catch (std::invalid_argument&) {}
+    } catch (config::ConfigurationError&) {
+    }
     try {
         approx_algo_->SetOption(option_name, value_approx);
         ++successes;
-    } catch (std::invalid_argument&) {}
+    } catch (config::ConfigurationError&) {
+    }
     return successes;
 }
 

@@ -7,6 +7,7 @@
 
 #include <easylogging++.h>
 
+#include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
 #include "types/create_type.h"
@@ -39,24 +40,26 @@ void ACAlgorithm::RegisterOptions() {
                 binop_pointer_ = &model::INumericType::Div;
                 break;
             default:
-                throw std::invalid_argument(
+                throw config::ConfigurationError(
                         "Invalid operation for algebraic constraints discovery");
         }
     };
     auto check_weight = [](double parameter) {
-        if (parameter <= 0 || parameter > 1) throw std::invalid_argument("weight out of range");
+        if (parameter <= 0 || parameter > 1)
+            throw config::ConfigurationError("weight out of range");
     };
     auto check_p_fuzz = [](double parameter) {
-        if (parameter <= 0 || parameter >= 1) throw std::invalid_argument("p_fuzz out of range");
+        if (parameter <= 0 || parameter >= 1)
+            throw config::ConfigurationError("p_fuzz out of range");
     };
     auto check_fuzziness = [](double parameter) {
-        if (parameter < 0 || parameter > 1) throw std::invalid_argument("Parameter out of range");
+        if (parameter < 0 || parameter > 1) config::ConfigurationError("Parameter out of range");
     };
     auto check_non_negative = [](int parameter) {
-        if (parameter < 0) throw std::invalid_argument("Parameter out of range");
+        if (parameter < 0) throw config::ConfigurationError("Parameter out of range");
     };
     auto check_positive = [](int parameter) {
-        if (parameter <= 0) throw std::invalid_argument("Parameter out of range");
+        if (parameter <= 0) throw config::ConfigurationError("Parameter out of range");
     };
 
     RegisterOption(config::TableOpt(&input_table_));
