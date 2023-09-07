@@ -36,6 +36,7 @@
 
 #include "algorithms/algorithms.h"
 #include "algorithms/association_rules/ar.h"
+#include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
 #include "py_ac_algorithm.h"
 #include "py_ar_algorithm.h"
@@ -90,6 +91,9 @@ PYBIND11_MODULE(desbordante, module) {
     }
 
     module.doc() = "A data profiling library";
+
+    py::register_exception<config::ConfigurationError>(module, "ConfigurationError",
+                                                       PyExc_ValueError);
 
     py::class_<config::InputTable>(module, "Table");
 
