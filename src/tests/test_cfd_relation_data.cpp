@@ -22,7 +22,7 @@ TEST(TestCFDRelationData, TennisDataSet) {
     std::string_view tennis_path = "tennis.csv";
     CSVParser parser{ConstructPath(tennis_path), ',', true};
     std::shared_ptr<algos::cfd::CFDRelationData> relation_ =
-            algos::cfd::CFDRelationData::CreateFrom(parser, true, 0, 0, 1, 1);
+            algos::cfd::CFDRelationData::CreateFrom(parser, 0, 0, 1, 1);
 
     std::string tennis_string =
             "outlook temp humidity windy play\n"
@@ -54,7 +54,7 @@ TEST(TestCFDRelationData, TennisDataSet) {
 
     CSVParser new_parser{ConstructPath(tennis_path), ',', true};
     std::shared_ptr<algos::cfd::CFDRelationData> new_relation_ =
-            algos::cfd::CFDRelationData::CreateFrom(new_parser, true, 3, 4, 1, 1);
+            algos::cfd::CFDRelationData::CreateFrom(new_parser, 3, 4, 1, 1);
 
     tennis_string =
             "outlook temp humidity\n"

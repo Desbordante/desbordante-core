@@ -19,8 +19,7 @@ void FDep::LoadDataInternal() {
     }
     column_names_.resize(number_attributes_);
 
-    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName(),
-                                                 is_null_equal_null_);
+    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_attributes_; ++i) {
         column_names_[i] = input_table_->GetColumnName(static_cast<int>(i));

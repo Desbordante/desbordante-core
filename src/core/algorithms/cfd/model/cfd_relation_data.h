@@ -69,10 +69,8 @@ public:
     int GetItem(int, const std::string &) const;
 
     static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream &file_input,
-                                                       bool is_null_eq_null, double c_sample = 1,
-                                                       double r_sample = 1);
+                                                       double c_sample = 1, double r_sample = 1);
     static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream &file_input,
-                                                       bool is_null_eq_null,
                                                        unsigned columns_number,
                                                        unsigned tuples_number, double c_sample = 1,
                                                        double r_sample = 1);

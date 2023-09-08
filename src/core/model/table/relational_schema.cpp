@@ -6,8 +6,8 @@
 #include "vertical.h"
 #include "vertical_map.h"
 
-RelationalSchema::RelationalSchema(std::string name, bool is_null_eq_null)
-    : columns_(), name_(std::move(name)), is_null_eq_null_(is_null_eq_null), empty_vertical_() {
+RelationalSchema::RelationalSchema(std::string name)
+    : columns_(), name_(std::move(name)), empty_vertical_() {
     Init();
 }
 
@@ -51,8 +51,6 @@ void RelationalSchema::AppendColumn(Column column) {
 size_t RelationalSchema::GetNumColumns() const {
     return columns_.size();
 }
-
-bool RelationalSchema::IsNullEqualNull() const { return is_null_eq_null_; }
 
 // TODO: critical part - consider optimization
 // TODO: list -> vector as list doesn't have RAIterators therefore can't be sorted
