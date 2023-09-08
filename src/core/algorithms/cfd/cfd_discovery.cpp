@@ -24,8 +24,7 @@ CFDDiscovery::CFDDiscovery(std::vector<std::string_view> phase_names)
 CFDDiscovery::CFDDiscovery() : CFDDiscovery({kDefaultPhaseName}) {}
 
 void CFDDiscovery::LoadDataInternal() {
-    relation_ = CFDRelationData::CreateFrom(*input_table_, is_null_equal_null_, columns_number_,
-                                            tuples_number_);
+    relation_ = CFDRelationData::CreateFrom(*input_table_, columns_number_, tuples_number_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty .csv file: CFD mining is meaningless.");
