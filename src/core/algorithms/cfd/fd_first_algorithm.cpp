@@ -11,6 +11,7 @@
 #include "algorithms/cfd/util/tidlist_util.h"
 #include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
+#include "config/option_using.h"
 
 // see algorithms/cfd/LICENSE
 
@@ -18,23 +19,15 @@ namespace algos::cfd {
 
 FDFirstAlgorithm::FDFirstAlgorithm(std::vector<std::string_view> phase_names)
     : CFDDiscovery(std::move(phase_names)) {
-    using namespace config::names;
-
     RegisterOptions();
-    MakeOptionsAvailable({kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
-    using namespace config::names;
-
     RegisterOptions();
-    MakeOptionsAvailable({kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
-    using namespace config::names;
-    using namespace config::descriptions;
-    using config::Option;
+    DESBORDANTE_OPTION_USING;
 
     Substrategy default_val = Substrategy::dfs;
     RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
