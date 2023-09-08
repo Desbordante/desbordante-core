@@ -42,16 +42,15 @@ void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
 }
 
 std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& parser,
-                                                             bool is_null_eq_null,
                                                              unsigned columns_number,
                                                              unsigned tuples_number,
                                                              double c_sample, double r_sample) {
     if (columns_number == 0 || tuples_number == 0) {
-        return CFDRelationData::CreateFrom(parser, is_null_eq_null, c_sample, r_sample);
+        return CFDRelationData::CreateFrom(parser, c_sample, r_sample);
     }
 
     // Fields of CFDRelationData class
-    auto schema = std::make_unique<RelationalSchema>(parser.GetRelationName(), is_null_eq_null);
+    auto schema = std::make_unique<RelationalSchema>(parser.GetRelationName());
     std::vector<Transaction> data_rows;
     ItemDictionary item_dictionary;
     std::vector<ItemInfo> items;
@@ -119,10 +118,9 @@ void CFDRelationData::AddNewItemsInPartialTable(ItemDictionary& item_dictionary,
 }
 
 std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& file_input,
-                                                             bool is_null_eq_null, double c_sample,
-                                                             double r_sample) {
+                                                             double c_sample, double r_sample) {
     // Fields of CFDRelationData class
-    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName(), is_null_eq_null);
+    auto schema = std::make_unique<RelationalSchema>(file_input.GetRelationName());
     std::vector<Transaction> data_rows;
     ItemDictionary item_dictionary;
     std::vector<ItemInfo> items;

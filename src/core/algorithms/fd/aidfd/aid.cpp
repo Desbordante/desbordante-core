@@ -10,8 +10,7 @@ void Aid::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName(),
-                                                 is_null_equal_null_);
+    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_of_attributes_; ++i) {
         const std::string& column_name = input_table_->GetColumnName(static_cast<int>(i));
