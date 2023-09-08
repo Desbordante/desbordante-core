@@ -19,7 +19,6 @@ namespace algos::cfd {
 
 class CFDDiscovery : public Algorithm {
 private:
-    bool is_null_equal_null_;
     void RegisterOptions();
     void ResetState() final;
     virtual void ResetStateCFD() = 0;

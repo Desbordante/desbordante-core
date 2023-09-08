@@ -21,14 +21,14 @@ FDFirstAlgorithm::FDFirstAlgorithm(std::vector<std::string_view> phase_names)
     using namespace config::names;
 
     RegisterOptions();
-    MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
+    MakeOptionsAvailable({kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
     using namespace config::names;
 
     RegisterOptions();
-    MakeOptionsAvailable({kEqualNulls, kCfdTuplesNumber, kCfdColumnsNumber});
+    MakeOptionsAvailable({kCfdTuplesNumber, kCfdColumnsNumber});
 }
 
 void FDFirstAlgorithm::RegisterOptions() {
