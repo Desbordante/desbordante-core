@@ -17,11 +17,6 @@
 
 namespace algos::cfd {
 
-FDFirstAlgorithm::FDFirstAlgorithm(std::vector<std::string_view> phase_names)
-    : CFDDiscovery(std::move(phase_names)) {
-    RegisterOptions();
-}
-
 FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
     RegisterOptions();
 }

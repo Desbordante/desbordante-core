@@ -67,7 +67,6 @@ protected:
     unsigned long long ExecuteInternal() final;
 
 public:
-    explicit FDFirstAlgorithm(std::vector<std::string_view> phase_names);
-    explicit FDFirstAlgorithm();
+    FDFirstAlgorithm();
 };
 }  // namespace algos::cfd
