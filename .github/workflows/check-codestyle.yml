@@ -49,11 +49,15 @@ jobs:
           -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
           . -B ${{github.workspace}}/build
 
-    - uses: ZedThree/clang-tidy-review@v0.13.3
+    - uses: ZedThree/clang-tidy-review@v0.13.4
       id: review
       with:
         build_dir: build
         config_file: '.clang-tidy'
         split_workflow: true
 
-    - uses: ZedThree/clang-tidy-review/upload@v0.13.3
+    - uses: ZedThree/clang-tidy-review/upload@v0.13.4
+
+    - name: Fail on comments
+      if: steps.review.outputs.total_comments > 0
+      run: exit 1
