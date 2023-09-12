@@ -56,8 +56,9 @@ std::vector<std::string> StringDataframeReader::GetNextRow() {
 
 std::vector<std::string> ArbitraryDataframeReader::GetNextRow() {
     std::vector<std::string> strings{};
-    auto list = *df_iter_++.cast<py::list>();
-    for (py::handle el : list) {
+    auto tuple_row = py::reinterpret_borrow<py::object>(*df_iter_);
+    ++df_iter_;
+    for (py::handle el : tuple_row) {
         // When reading from .csv files, pandas treats some values as nulls,
         // and empty values are among those values, which may cause some
         // confusion here, since in Desbordante only the literal "NULL" string
