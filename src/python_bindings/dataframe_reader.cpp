@@ -15,7 +15,7 @@ namespace python_bindings {
 
 namespace py = pybind11;
 
-static std::vector<std::string> GetColumnNames(pybind11::handle dataframe) {
+static std::vector<std::string> GetColumnNames(py::handle dataframe) {
     std::vector<std::string> names;
     py::list name_lst = dataframe.attr("columns").attr("to_list")();
     for (py::handle element : name_lst) {
@@ -24,7 +24,7 @@ static std::vector<std::string> GetColumnNames(pybind11::handle dataframe) {
     return names;
 }
 
-DataframeReaderBase::DataframeReaderBase(pybind11::handle dataframe, std::string name)
+DataframeReaderBase::DataframeReaderBase(py::handle dataframe, std::string name)
     : dataframe_(py::reinterpret_borrow<py::object>(dataframe)),
       df_iter_(dataframe_.attr("itertuples")(false, py::none{})),
       name_(std::move(name)),
@@ -62,7 +62,7 @@ std::vector<std::string> ArbitraryDataframeReader::GetNextRow() {
         // and empty values are among those values, which may cause some
         // confusion here, since in Desbordante only the literal "NULL" string
         // is interpreted as the null value.
-        strings.emplace_back(is_null_(el) ? model::Null::kValue : pybind11::str(el));
+        strings.emplace_back(is_null_(el) ? model::Null::kValue : py::str(el));
     }
     return strings;
 }
