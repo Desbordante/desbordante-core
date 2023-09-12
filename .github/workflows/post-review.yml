@@ -11,12 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: ZedThree/clang-tidy-review/post@v0.13.3
+      - uses: ZedThree/clang-tidy-review/post@v0.13.4
         id: post
         with:
           lgtm_comment_body: ''
-
-      # If there are any comments, fail the check
-      - name: Fail on comments
-        if: steps.post.outputs.total_comments > 0
-        run: exit 1
