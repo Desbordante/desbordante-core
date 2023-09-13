@@ -18,9 +18,7 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     while (data_stream.HasNextRow()) {
         row = data_stream.GetNextRow();
 
-        if (row.empty() && num_columns == 1) {
-            row.emplace_back("");
-        } else if (row.size() != num_columns) {
+        if (row.size() != num_columns) {
             LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
                          << num_columns << ", got " << row.size() << ")";
             continue;
