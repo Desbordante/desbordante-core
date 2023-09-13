@@ -36,7 +36,7 @@ Column const* RelationalSchema::GetColumn(const std::string& col_name) const {
                                 "\' to any of the schema's column names");
 }
 
-Column const* RelationalSchema::GetColumn(int index) const {
+Column const* RelationalSchema::GetColumn(size_t index) const {
     return columns_.at(index).get();
 }
 
