@@ -129,6 +129,9 @@ std::vector<std::string> CSVParser::ParseLine(const unsigned long long line_inde
 
 std::vector<std::string> CSVParser::GetNextRow() {
     std::vector<std::string> result = ParseString(next_line_);
+    if (number_of_columns_ == 1 && result.empty()) {
+        result = {""};
+    }
 
     GetNextIfHas();
 
