@@ -18,7 +18,7 @@ public:
 
     void Reset() final;
     [[nodiscard]] std::string GetRelationName() const final;
-    [[nodiscard]] std::string GetColumnName(int index) const final;
+    [[nodiscard]] std::string GetColumnName(size_t index) const final;
     [[nodiscard]] size_t GetNumberOfColumns() const final;
     [[nodiscard]] bool HasNextRow() const final;
 };

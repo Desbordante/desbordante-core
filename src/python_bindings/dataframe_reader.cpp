@@ -38,7 +38,7 @@ std::string DataframeReaderBase::GetRelationName() const {
     return name_;
 }
 
-std::string DataframeReaderBase::GetColumnName(int index) const {
+std::string DataframeReaderBase::GetColumnName(size_t index) const {
     return column_names_.at(index);
 }
 
