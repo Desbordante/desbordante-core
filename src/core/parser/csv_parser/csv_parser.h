@@ -49,7 +49,9 @@ public:
         return separator_;
     }
     size_t GetNumberOfColumns() const override { return number_of_columns_; }
-    std::string GetColumnName(int index) const override { return column_names_[index]; }
+    std::string GetColumnName(size_t index) const override {
+        return column_names_[index];
+    }
     std::string GetRelationName() const override { return relation_name_; }
     void Reset() override;
 };

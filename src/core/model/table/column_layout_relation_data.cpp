@@ -25,7 +25,7 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     std::unordered_map<std::string, int> value_dictionary;
     int next_value_id = 1;
     const int null_value_id = kNullValueId;
-    const int num_columns = data_stream.GetNumberOfColumns();
+    const size_t num_columns = data_stream.GetNumberOfColumns();
     std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
     std::vector<std::string> row;
 
@@ -34,12 +34,12 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
-        } else if ((int)row.size() != num_columns) {
+        } else if (row.size() != num_columns) {
             LOG(WARNING) << "Skipping incomplete rows";
             continue;
         }
 
-        int index = 0;
+        size_t index = 0;
         for (std::string& field : row) {
             if (field.empty()) {
                 column_vectors[index].push_back(null_value_id);
@@ -61,7 +61,7 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     }
 
     std::vector<ColumnData> column_data;
-    for (int i = 0; i < num_columns; ++i) {
+    for (size_t i = 0; i < num_columns; ++i) {
         auto column = Column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         auto pli = model::PositionListIndex::CreateFor(column_vectors[i], is_null_eq_null);

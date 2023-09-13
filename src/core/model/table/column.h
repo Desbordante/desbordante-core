@@ -16,10 +16,8 @@ private:
     RelationalSchema const* schema_;
 
 public:
-    Column(RelationalSchema const* schema, std::string name, int index) :
-        name_(std::move(name)),
-        index_(index),
-        schema_(schema) {}
+    Column(RelationalSchema const* schema, std::string name, size_t index)
+        : name_(std::move(name)), index_(index), schema_(schema) {}
 
     size_t GetIndex() const { return index_; }
 

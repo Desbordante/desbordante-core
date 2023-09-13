@@ -7,7 +7,7 @@ namespace model {
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
         IDatasetStream& data_stream, bool is_null_eq_null) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
-    int num_columns = data_stream.GetNumberOfColumns();
+    const size_t num_columns = data_stream.GetNumberOfColumns();
 
     std::vector<std::vector<std::string>> columns(num_columns);
     std::vector<std::string> row;
@@ -20,12 +20,12 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
 
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
-        } else if ((int)row.size() != num_columns) {
+        } else if (row.size() != num_columns) {
             LOG(WARNING) << "Skipping incomplete rows";
             continue;
         }
 
-        int index = 0;
+        size_t index = 0;
         for (std::string& field : row) {
             columns[index].push_back(std::move(field));
             index++;
@@ -36,7 +36,7 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
     }
 
     std::vector<TypedColumnData> column_data;
-    for (int i = 0; i < num_columns; ++i) {
+    for (size_t i = 0; i < num_columns; ++i) {
         Column column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         TypedColumnData typed_column_data = model::TypedColumnDataFactory::CreateFrom(
