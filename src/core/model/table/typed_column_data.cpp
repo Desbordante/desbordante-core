@@ -173,8 +173,7 @@ TypedColumnData TypedColumnDataFactory::CreateFrom() {
 std::vector<TypedColumnData> CreateTypedColumnData(IDatasetStream& dataset_stream,
                                                    bool is_null_equal_null) {
     std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-            model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream,
-                                                             is_null_equal_null, -1, -1);
+            model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream, is_null_equal_null);
     std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }

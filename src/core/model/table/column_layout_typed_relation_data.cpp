@@ -5,16 +5,11 @@
 namespace model {
 
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
-        IDatasetStream& data_stream, bool is_null_eq_null, int max_cols, long max_rows) {
+        IDatasetStream& data_stream, bool is_null_eq_null) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     int num_columns = data_stream.GetNumberOfColumns();
 
-    if (max_cols > 0) {
-        num_columns = std::min(num_columns, max_cols);
-    }
-
     std::vector<std::vector<std::string>> columns(num_columns);
-    int row_num = 0;
     std::vector<std::string> row;
 
     /* Parsing is very similar to ColumnLayoutRelationData::CreateFrom().
@@ -30,21 +25,14 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
             continue;
         }
 
-        if (max_rows <= 0 || row_num < max_rows) {
-            int index = 0;
-            for (std::string& field : row) {
-                columns[index].push_back(std::move(field));
-                index++;
-                if (index >= num_columns) {
-                    break;
-                }
+        int index = 0;
+        for (std::string& field : row) {
+            columns[index].push_back(std::move(field));
+            index++;
+            if (index >= num_columns) {
+                break;
             }
-        } else {
-            LOG(WARNING) << "Processed " << row_num << " rows and " << max_rows - row_num
-                         << " rows remain unprocessed due to `max_rows` parameter.";
-            break;
         }
-        row_num++;
     }
 
     std::vector<TypedColumnData> column_data;
