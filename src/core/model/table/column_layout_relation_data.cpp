@@ -35,12 +35,13 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
         } else if (row.size() != num_columns) {
-            LOG(WARNING) << "Skipping incomplete rows";
+            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
+                         << num_columns << ", got " << row.size() << ")";
             continue;
         }
 
-        size_t index = 0;
-        for (std::string& field : row) {
+        for (size_t index = 0; index < row.size(); ++index) {
+            std::string const& field = row[index];
             if (field.empty()) {
                 column_vectors[index].push_back(null_value_id);
             } else {
@@ -55,8 +56,6 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
                 }
                 column_vectors[index].push_back(value_id);
             }
-            index++;
-            if (index >= num_columns) break;
         }
     }
 

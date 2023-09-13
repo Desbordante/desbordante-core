@@ -21,17 +21,14 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
         if (row.empty() && num_columns == 1) {
             row.emplace_back("");
         } else if (row.size() != num_columns) {
-            LOG(WARNING) << "Skipping incomplete rows";
+            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
+                         << num_columns << ", got " << row.size() << ")";
             continue;
         }
 
-        size_t index = 0;
-        for (std::string& field : row) {
+        for (size_t index = 0; index < row.size(); ++index) {
+            std::string& field = row[index];
             columns[index].push_back(std::move(field));
-            index++;
-            if (index >= num_columns) {
-                break;
-            }
         }
     }
 
