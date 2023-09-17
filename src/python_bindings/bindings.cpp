@@ -169,7 +169,66 @@ PYBIND11_MODULE(desbordante, module) {
             .def("get_num_rows_violating_ucc", &PyUCCVerifier::GetNumRowsViolatingUCC)
             .def("get_clusters_violating_ucc", &PyUCCVerifier::GetClustersViolatingUCC);
 
-    DEFINE_ALGORITHM(DataStats, Algorithm).def("get_result_string", &PyDataStats::GetResultString);
+    DEFINE_ALGORITHM(DataStats, Algorithm)
+            .def("get_all_statistics_as_string", &PyDataStats::GetAllStatisticsAsString)
+            .def("get_number_of_values", &PyDataStats::GetNumberOfValues,
+                 "Get number of values in the column.", py::arg("index"))
+            .def("get_number_of_columns", &PyDataStats::GetNumberOfColumns,
+                 "Get number of columns in the table.")
+            .def("get_null_columns", &PyDataStats::GetNullColumns,
+                 "Get indices of columns with only null values.")
+            .def("get_columns_with_null", &PyDataStats::GetColumnsWithNull,
+                 "Get indices of columns which contain null value.")
+            .def("get_columns_with_all_unique_values", &PyDataStats::GetColumnsWithUniqueValues,
+                 "Get indices of columns where all values are distinct.")
+            .def("get_number_of_distinct", &PyDataStats::Distinct,
+                 "Get number of unique values in the column.", py::arg("index"))
+            .def("is_categorical", &PyDataStats::IsCategorical,
+                 "Check if quantity is greater than number of unique values in the column.",
+                 py::arg("index"), py::arg("quantity"))
+            .def("show_sample", &PyDataStats::ShowSample, py::arg("start_row"), py::arg("end_row"),
+                 py::arg("start_col"), py::arg("end_col"), py::arg("str_len") = 10,
+                 py::arg("unsigned_len") = 5, py::arg("double_len") = 10,
+                 "Returns a table slice containing values from rows in the range [start_row, "
+                 "end_row] and columns in the range [start_col, end_col]. Data values are "
+                 "converted to strings.")
+            .def("get_average", &PyDataStats::GetAverage,
+                 "Returns average value in the column if it's numeric.", py::arg("index"))
+            .def("get_corrected_std", &PyDataStats::GetCorrectedSTD,
+                 "Returns corrected standard deviation of the column if it's numeric.",
+                 py::arg("index"))
+            .def("get_skewness", &PyDataStats::GetSkewness,
+                 "Returns skewness of the column if it's numeric.", py::arg("index"))
+            .def("get_kurtosis", &PyDataStats::GetKurtosis,
+                 "Returns kurtosis of the column if it's numeric.", py::arg("index"))
+            .def("get_min", &PyDataStats::GetMin, "Returns minimum value of the column.",
+                 py::arg("index"))
+            .def("get_max", &PyDataStats::GetMax, "Returns maximumin value of the column.",
+                 py::arg("index"))
+            .def("get_sum", &PyDataStats::GetSum,
+                 "Returns sum of the column's values if it's numeric.", py::arg("index"))
+            .def("get_quantile", &PyDataStats::GetQuantile,
+                 "Returns quantile of the column if its type is comparable.", py::arg("part"),
+                 py::arg("index"), py::arg("calc_all") = false)
+            .def("get_number_of_zeros", &PyDataStats::GetNumberOfZeros,
+                 "Returns number of zeros in the column if it's numeric.", py::arg("index"))
+            .def("get_number_of_negatives", &PyDataStats::GetNumberOfNegatives,
+                 "Returns number of negative numbers in the column if it's numeric.",
+                 py::arg("index"))
+            .def("get_sum_of_squares", &PyDataStats::GetSumOfSquares,
+                 "Returns sum of numbers' squares in the column if it's numeric.", py::arg("index"))
+            .def("get_geometric_mean", &PyDataStats::GetGeometricMean,
+                 "Returns geometric mean of numbers in the column if it's numeric.",
+                 py::arg("index"))
+            .def("get_mean_ad", &PyDataStats::GetMeanAD,
+                 "Returns mean absolute deviation of the column if it's numeric.", py::arg("index"))
+            .def("get_median", &PyDataStats::GetMedian,
+                 "Returns median of the column if it's numeric.", py::arg("index"))
+            .def("get_median_ad", &PyDataStats::GetMedianAD,
+                 "Returns meadian absolute deviation of the column if it's numeric.",
+                 py::arg("index"))
+            .def("get_num_nulls", &PyDataStats::GetNumNulls,
+                 "Returns number of nulls in the column.", py::arg("index"));
 
     DEFINE_ALGORITHM(MetricVerifier, Algorithm).def("mfd_holds", &PyMetricVerifier::MfdHolds);
 
