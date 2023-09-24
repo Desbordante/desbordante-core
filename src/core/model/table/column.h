@@ -10,16 +10,21 @@
 class Column {
     friend RelationalSchema;
 
+public:
+    using IndexType = size_t;
+
 private:
     std::string name_;
-    size_t index_;
+    IndexType index_;
     RelationalSchema const* schema_;
 
 public:
-    Column(RelationalSchema const* schema, std::string name, size_t index)
+    Column(RelationalSchema const* schema, std::string name, IndexType index)
         : name_(std::move(name)), index_(index), schema_(schema) {}
 
-    size_t GetIndex() const { return index_; }
+    IndexType GetIndex() const {
+        return index_;
+    }
 
     std::string GetName() const { return name_; }
     RelationalSchema const* GetSchema() const { return schema_; }
