@@ -90,6 +90,10 @@ public:
         return *this;
     }
 
+    OptValue GetOptValue() const override {
+        return OptValue{std::type_index(typeid(T)), boost::any(*value_ptr_)};
+    }
+
 private:
     T ConvertValue(boost::any const &value) const;
 
