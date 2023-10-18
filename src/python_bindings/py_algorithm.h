@@ -8,7 +8,9 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/algorithm.h"
+#include "config/names.h"
 #include "config/tabular_data/input_table_type.h"
+#include "opt_to_py.h"
 
 namespace python_bindings {
 
@@ -48,6 +50,18 @@ public:
     void LoadData();
 
     pybind11::int_ Execute(pybind11::kwargs const& kwargs);
+
+    std::unordered_map<std::string, pybind11::object> GetOpts() {
+        auto opt_value_info = algorithm_->GetOptValues();
+        std::unordered_map<std::string, pybind11::object> res;
+        for (auto const& [name, value_info] : opt_value_info) {
+            if (name == config::names::kTable) {
+                continue;
+            }
+            res[std::string(name)] = OptToPy(value_info.type, value_info.value);
+        }
+        return res;
+    }
 };
 
 template <typename AlgorithmType, typename Base>

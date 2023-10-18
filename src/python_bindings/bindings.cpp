@@ -166,7 +166,9 @@ PYBIND11_MODULE(desbordante, module) {
                  "Get description of an option")
             .def("get_option_type", &PyAlgorithmBase::GetOptionType, "option_name"_a,
                  "Get info about the option's type")
-            .def("execute", &PyAlgorithmBase::Execute, "Process data");
+            .def("execute", &PyAlgorithmBase::Execute, "Process data")
+            .def("get_opts", &PyAlgorithmBase::GetOpts,
+                 "Get option values represented as the closest Python type");
 
     DEFINE_ALGORITHM_BASE(ArAlgorithm).def("get_ars", &PyArAlgorithmBase::GetARs);
     DEFINE_ALGORITHM_BASE(FdAlgorithm).def("get_fds", &PyFdAlgorithmBase::GetFDs);

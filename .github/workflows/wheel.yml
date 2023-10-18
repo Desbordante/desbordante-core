@@ -84,6 +84,9 @@ jobs:
             ./b2 install -j4 --prefix=/usr/local
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
+            cp {project}/test_input_data/transactional_data/rules-kaggle-rows.csv {project}/src/python_bindings &&
+            cp {project}/test_input_data/TestLong.csv {project}/src/python_bindings &&
+            cp {project}/test_input_data/TestWide.csv {project}/src/python_bindings &&
             cd {project}/src/python_bindings &&
             python3 {project}/src/python_bindings/test_bindings.py
 
