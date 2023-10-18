@@ -108,6 +108,16 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetPossibleOptions() const;
     [[nodiscard]] std::string_view GetDescription(std::string_view option_name) const;
+
+    std::unordered_map<std::string_view, config::OptValue> GetOptValues() const {
+        std::unordered_map<std::string_view, config::OptValue> opt_values;
+        for (auto const& [name, option] : possible_options_) {
+            if (option->IsSet()) {
+                opt_values.try_emplace(name, option->GetOptValue());
+            }
+        }
+        return opt_values;
+    }
 };
 
 }  // namespace algos
