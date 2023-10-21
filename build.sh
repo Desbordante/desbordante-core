@@ -66,7 +66,7 @@ if [[ $PYBIND == true ]]; then
   if [[ ! -d "pybind11" ]] ; then
       git clone https://github.com/pybind/pybind11.git --branch v2.10 --depth 1
   fi
-  PREFIX="$PREFIX -D COMPILE_PYBIND=ON"
+  PREFIX="$PREFIX -D COMPILE_PYBIND=ON -D COPY_PYTHON_EXAMPLES=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
