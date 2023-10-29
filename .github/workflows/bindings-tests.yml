@@ -15,20 +15,12 @@ jobs:
         uses: ./.github/composite-actions/download-libraries
         with:
           download-pybind: true
-      - name: Configure CMake
-        run: >
-          cmake -B ${{github.workspace}}/build
-          -DCMAKE_C_COMPILER=gcc-10
-          -DCMAKE_CXX_COMPILER=g++-10
-          -DCMAKE_BUILD_TYPE=Release
-          -Dgtest_disable_pthreads=OFF
-          -DASAN=OFF
-          -DCOMPILE_BINDINGS=ON
-          -DCOMPILE_TESTS=OFF
-          -DUNPACK_DATASETS=OFF
-      - name: Build
-        run: cmake --build ${{github.workspace}}/build --config Release
-      - name: Test
-        working-directory: ${{github.workspace}}/build/src/python_bindings
+          download-googletest: false
+      - name: Build pip package and test it
+        working-directory: ${{github.workspace}}
         shell: bash
-        run: python test_bindings.py
+        run: |
+          cp test_input_data/WDC_satellites.csv src/python_bindings/
+          pip install .
+          cd src/python_bindings
+          python test_bindings.py
