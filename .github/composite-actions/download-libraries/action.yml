@@ -12,29 +12,19 @@ runs:
     - uses: actions/checkout@v3
     - name: Install build tools
       run: |
-        sudo apt-get update
-        sudo apt-get install gcc-10 g++-10 cmake build-essential
+        sudo apt-get update -y
+        sudo apt-get install gcc-10 g++-10 cmake build-essential -y
       shell: bash
-    - name: Cache Boost
-      uses: actions/cache@v3
-      id: cache-boost
-      with:
-        path: ${{github.workspace}}/lib/boost
-        key: ${{ runner.os }}-boost-78
+
     - name: Install Boost
-      run: |
-        wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
-        tar xzvf boost_1_78_0.tar.gz
-        cd boost_1_78_0
-        ./bootstrap.sh --prefix=${{github.workspace}}/lib/boost
-        ./b2
-        sudo ./b2 install
+      run: sudo apt-get install libboost-all-dev -y
       shell: bash
-      if: steps.cache-boost.outputs.cache-hit != 'true'
+
     - name: Make lib directory
       run: |
         mkdir -p lib
       shell: bash
+
     - name: Download googletest
       uses: ./.github/composite-actions/download-library
       with:
@@ -45,11 +35,13 @@ runs:
       with:
         directory: easyloggingpp
         download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0
+
     - name: Download better-enums
       uses: ./.github/composite-actions/download-library
       with:
         directory: better-enums
         download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3
+
     - name: Download pybind11
       uses: ./.github/composite-actions/download-library
       with:
