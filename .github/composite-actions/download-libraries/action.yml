@@ -4,7 +4,12 @@ inputs:
   download-pybind:
     type: boolean
     description: 'Download pybind11'
-    required: true
+    default: false
+
+  download-googletest:
+    type: boolean
+    description: 'Download googletest'
+    default: true
 
 runs:
   using: 'composite'
@@ -30,6 +35,8 @@ runs:
       with:
         directory: googletest
         download-command: git clone https://github.com/google/googletest/ --branch release-1.12.1
+      if: inputs.download-googletest != 'false'
+
     - name: Download easyloggingpp
       uses: ./.github/composite-actions/download-library
       with:
