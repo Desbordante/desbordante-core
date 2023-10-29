@@ -23,7 +23,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release
           -Dgtest_disable_pthreads=OFF
           -DASAN=OFF
-          -DCOMPILE_PYBIND=ON
+          -DCOMPILE_BINDINGS=ON
           -DCOMPILE_TESTS=OFF
           -DUNPACK_DATASETS=OFF
       - name: Build
