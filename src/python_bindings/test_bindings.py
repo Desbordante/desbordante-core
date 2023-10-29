@@ -1,10 +1,10 @@
 from inspect import getmembers, isclass
 
-import desbordante as desb
+import desbordante
 
-for algorithm_name, type_ in getmembers(desb, isclass):
-    if not (issubclass(type_, desb.FdAlgorithm)
-            and type_ is not desb.FdAlgorithm):
+for algorithm_name, type_ in getmembers(desbordante, isclass):
+    if not (issubclass(type_, desbordante.FdAlgorithm)
+            and type_ is not desbordante.FdAlgorithm):
         continue
     algorithm = type_()
     for option_name in algorithm.get_possible_options():
