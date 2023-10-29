@@ -88,7 +88,7 @@ public:
     Statistic GetMax(size_t index) const;
     // Returns sum of the column's values if it's numeric.
     Statistic GetSum(size_t index) const;
-    // Returns quantile of the column if it's type is comparable.
+    // Returns quantile of the column if its type is comparable.
     Statistic GetQuantile(double part, size_t index, bool calc_all = false);
     // Deletes null and empty values in the column.
     std::vector<const std::byte*> DeleteNullAndEmpties(size_t index) const;
