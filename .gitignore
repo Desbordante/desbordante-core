@@ -9,3 +9,5 @@ lib/
 .csv
 .idea/
 .vscode/
+**/myeasylog.log
+dist

@@ -61,6 +61,9 @@ fi
 if [[ ! -d "better-enums" ]] ; then
   git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
 fi
+if [[ ! -d "pybind" ]] ; then
+  git clone https://github.com/pybind/pybind11.git --branch v2.10 --depth 1
+fi
 
 if [[ $NO_TESTS == true ]]; then
   PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
@@ -75,10 +78,7 @@ if [[ $NO_UNPACK == true ]]; then
 fi
 
 if [[ $PYBIND == true ]]; then
-  if [[ ! -d "pybind11" ]] ; then
-      git clone https://github.com/pybind/pybind11.git --branch v2.10 --depth 1
-  fi
-  PREFIX="$PREFIX -D COMPILE_PYBIND=ON -D COPY_PYTHON_EXAMPLES=ON"
+  PREFIX="$PREFIX -D PYTHON=COMPILE -D COPY_PYTHON_EXAMPLES=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
