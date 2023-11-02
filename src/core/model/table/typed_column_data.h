@@ -167,11 +167,11 @@ private:
     bool is_null_equal_null_;
 
     inline static const std::unordered_map<TypeId, std::regex> type_id_to_regex_ = {
-        {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
-        {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
-        {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*$)")},
-        {TypeId::kNull, std::regex(Null::kValue.data())},
-        {TypeId::kEmpty, std::regex(R"(^$)")}};
+            {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
+            {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
+            {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*$)")},
+            {TypeId::kNull, std::regex(Null::kValue.data())},
+            {TypeId::kEmpty, std::regex(R"(^$)")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;
