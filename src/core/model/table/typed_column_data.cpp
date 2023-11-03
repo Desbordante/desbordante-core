@@ -24,6 +24,10 @@ TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap() const {
         bool matched = false;
         for (auto const& [type_id, regex] : type_id_to_regex_) {
             if (std::regex_match(val, regex)) {
+                if (type_id == +TypeId::kDate &&
+                    boost::gregorian::from_simple_string(val).is_not_a_date()) {
+                    break;
+                }
                 type_map[type_id].insert(row);
                 matched = true;
                 break;

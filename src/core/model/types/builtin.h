@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
 #include <enum.h>
 
@@ -20,6 +21,7 @@ using BigInt = details::Placeholder; /* Type of an integer that don't fit into I
 using Double = double; /* Fixed-precision floating point value; also we need type for values
                         * with arbitrary precision analogous to BigInt */
 using String = std::string;
+using Date = boost::gregorian::date; /* Date in the range from 1400-Jan-01 to 9999-Dec-31 */
 
 static_assert(sizeof(Int) == sizeof(Double));
 
@@ -40,6 +42,7 @@ using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
  * Maybe we need to use separate enums to describe column types and value types to
  * avoid confusion.
  */
+// clang-format off
 BETTER_ENUM(TypeId, char,
     kInt = 0,   /* Except for nulls and empties column contains only ints
                  * (fixed-precision integer value) */
@@ -49,11 +52,14 @@ BETTER_ENUM(TypeId, char,
                  * (arbitrary-precision integer value) */
     kString,    /* Except for nulls and empties column contains only strings
                  * (string value, sequence of characters) */
+    kDate,      /* Column contains only valid dates in the range 1400-Jan-01 to 9999-Dec-31
+                 * (class date from boost::gregorian)  */
     kNull,      /* Column contains only nulls ("NULL" value) */
     kEmpty,     /* Column contains only empties ("" value) */
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
 );
+// clang-format on
 
 template <typename T> struct TypeConverter {};
 template <> struct TypeConverter<Int> {
