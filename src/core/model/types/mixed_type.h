@@ -6,6 +6,7 @@
 
 #include "big_int_type.h"
 #include "create_type.h"
+#include "date_type.h"
 #include "double_type.h"
 #include "empty_type.h"
 #include "int_type.h"
@@ -62,6 +63,9 @@ public:
         TypeId const type_id = RetrieveTypeId(value);
         if (type_id == +TypeId::kString || type_id == +TypeId::kBigInt) {
             StringType::Destruct(RetrieveValue(value));
+        }
+        if (type_id == +TypeId::kDate) {
+            DateType::Destruct(RetrieveValue(value));
         }
         Type::Free(value);
     }

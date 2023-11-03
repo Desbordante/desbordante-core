@@ -53,9 +53,14 @@ public:
 
         MixedType const* mixed = GetIfMixed();
         for (size_t i = 0; i != data_.size(); ++i) {
-            if (GetValueTypeId(i) == +TypeId::kString || GetValueTypeId(i) == +TypeId::kBigInt) {
+            if (GetValueTypeId(i) == +TypeId::kString || GetValueTypeId(i) == +TypeId::kBigInt ||
+                GetValueTypeId(i) == +TypeId::kDate) {
                 std::byte const* value = (mixed) ? mixed->RetrieveValue(data_[i]) : data_[i];
-                StringType::Destruct(value);
+                if (GetValueTypeId(i) == +TypeId::kDate) {
+                    DateType::Destruct(value);
+                } else {
+                    StringType::Destruct(value);
+                }
             }
         }
     }
@@ -80,7 +85,7 @@ public:
         if(IsNull(index)) {
             NullType null_type(true);
             return null_type.ValueToString(GetValue(index));
-        } 
+        }
         if(IsEmpty(index)) {
             EmptyType empty_type;
             return empty_type.ValueToString(GetValue(index));
@@ -170,6 +175,8 @@ private:
             {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
             {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
             {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*$)")},
+            {TypeId::kDate,
+             std::regex(R"(^([0-9]{4})[-.\/]?(1[0-2]|0[1-9])[-.\/]?(3[0-1]|0[1-9]|[1-2][0-9])$)")},
             {TypeId::kNull, std::regex(Null::kValue.data())},
             {TypeId::kEmpty, std::regex(R"(^$)")}};
 

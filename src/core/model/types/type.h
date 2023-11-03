@@ -1,7 +1,7 @@
 #pragma once
 
-#include <sstream>
 #include <memory>
+#include <sstream>
 
 #include "builtin.h"
 
@@ -33,8 +33,12 @@ public:
                type_id_ == +TypeId::kDouble;
     }
 
+    [[nodiscard]] bool IsDate() const noexcept {
+        return type_id_ == +TypeId::kDate;
+    }
+
     [[nodiscard]] bool IsMetrizable() const noexcept {
-        return IsNumeric() || type_id_ == +TypeId::kString;
+        return IsNumeric() || type_id_ == +TypeId::kString || IsDate();
     }
 
     [[nodiscard]] std::string ToString() const {
