@@ -1,6 +1,8 @@
 #include "fd_algorithm.h"
 
+#include <map>
 #include <thread>
+#include <vector>
 
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
