@@ -2,6 +2,7 @@
 
 #include "big_int_type.h"
 #include "create_type.h"
+#include "date_type.h"
 #include "double_type.h"
 #include "empty_type.h"
 #include "int_type.h"
