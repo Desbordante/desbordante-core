@@ -263,5 +263,107 @@ INSTANTIATE_TEST_SUITE_P(TestStringSuite, TestString,
                                            TestStringParam("", "abc"),
                                            TestStringParam("abc", ""),
                                            TestStringParam("bb", "aa")));
+namespace {
+using DatePtr = std::unique_ptr<std::byte[], mo::DateTypeDeleter>;
 
+DatePtr DatePtrFromString(std::string const& s, std::unique_ptr<mo::DateType> const& date_type) {
+    return {date_type->MakeValue(boost::gregorian::from_simple_string(s)),
+            date_type->GetDeleater()};
+}
+}  // namespace
+
+TEST(TestDateSuite, Compare) {
+    std::unique_ptr<mo::DateType> date_type(
+            mo::CreateSpecificType<mo::DateType>(mo::TypeId::kDate, true));
+    auto test = [date_type = std::move(date_type)](
+                        std::string const& date1, std::string const& date2, mo::CompareResult res) {
+        DatePtr ptr1 = DatePtrFromString(date1, date_type);
+        DatePtr ptr2 = DatePtrFromString(date2, date_type);
+        EXPECT_EQ(date_type->Compare(ptr1.get(), ptr2.get()), res);
+    };
+    test("2004-07-28", "2004-07-28", mo::CompareResult::kEqual);
+    test("2005-01-20", "2004-07-28", mo::CompareResult::kGreater);
+    test("2023-09-01", "2024-10-25", mo::CompareResult::kLess);
+    test("2023-10-28", "2023-10-28", mo::CompareResult::kEqual);
+    test("2203-09-01", "2024-10-25", mo::CompareResult::kGreater);
+    test("1991-11-20", "2200-07-28", mo::CompareResult::kLess);
+}
+
+TEST(TestDateSuite, Dist) {
+    std::unique_ptr<mo::DateType> date_type(
+            mo::CreateSpecificType<mo::DateType>(mo::TypeId::kDate, true));
+    auto test = [date_type = std::move(date_type)](std::string const& date1,
+                                                   std::string const& date2, long res) {
+        DatePtr left_val = DatePtrFromString(date1, date_type);
+        DatePtr right_val = DatePtrFromString(date2, date_type);
+        EXPECT_EQ(static_cast<long>(date_type->Dist(left_val.get(), right_val.get())), res);
+    };
+    test("2004-07-28", "2004-07-28", 0);
+    test("2005-01-20", "2004-07-28", 176);
+    test("1991-11-20", "2200-07-28", 76221);
+    test("1941-06-22", "1945-05-09", 1417);
+    test("2023-10-28", "2297-08-12", 100000);
+}
+
+namespace {
+struct TestDateArithmeticsParam {
+    std::string const date1;
+    std::string const date2;
+    long const dist;
+    TestDateArithmeticsParam(std::string l, std::string r, long dist)
+        : date1(std::move(l)), date2(std::move(r)), dist(dist){};
+};
+
+using DateTypeBinop = std::byte* (mo::DateType::*)(std::byte const* date,
+                                                   mo::DateType::Delta const&) const;
+
+void TestBinop(std::string const& initial, std::string const& expected_date, long const dist,
+               DateTypeBinop Binop) {
+    std::unique_ptr<mo::DateType> date_type(
+            mo::CreateSpecificType<mo::DateType>(mo::TypeId::kDate, true));
+    mo::DateType::Delta delta(dist);
+
+    DatePtr initial_date = DatePtrFromString(initial, date_type);
+    DatePtr expected = DatePtrFromString(expected_date, date_type);
+    auto actual = DatePtr(std::invoke(Binop, date_type.get(), initial_date.get(), delta),
+                          date_type->GetDeleater());
+
+    EXPECT_EQ(date_type->Compare(expected.get(), actual.get()), mo::CompareResult::kEqual);
+}
+}  // namespace
+
+class TestDateArithmetics : public ::testing::TestWithParam<TestDateArithmeticsParam> {};
+
+TEST_P(TestDateArithmetics, SubtractDelta) {
+    auto const& [initial_date, expected, delta] = GetParam();
+    TestBinop(initial_date, expected, delta, &mo::DateType::SubDelta);
+}
+
+TEST_P(TestDateArithmetics, AddDelta) {
+    auto const& [expected, initial_date, delta] = GetParam();
+    TestBinop(initial_date, expected, delta, &mo::DateType::AddDelta);
+}
+
+TEST_P(TestDateArithmetics, SubDate) {
+    std::unique_ptr<mo::DateType> date_type(
+            mo::CreateSpecificType<mo::DateType>(mo::TypeId::kDate, true));
+    auto const& [l_val, r_val, delta] = GetParam();
+
+    DatePtr left_val = DatePtrFromString(l_val, date_type);
+    DatePtr right_val = DatePtrFromString(r_val, date_type);
+
+    EXPECT_EQ(date_type->SubDate(left_val.get(), right_val.get()).days(), delta);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        TestDateSuite, TestDateArithmetics,
+        ::testing::Values(TestDateArithmeticsParam("2004-07-28", "2004-07-28", 0),
+                          TestDateArithmeticsParam("2005-01-20", "2004-07-28", 176),
+                          TestDateArithmeticsParam("2004-07-28", "2005-01-20", -176),
+                          TestDateArithmeticsParam("2023-10-28", "2297-08-12", -100000),
+                          TestDateArithmeticsParam("2297-08-12", "2023-10-28", 100000),
+                          TestDateArithmeticsParam("2200-07-28", "1991-11-20", 76221),
+                          TestDateArithmeticsParam("1991-11-20", "2200-07-28", -76221),
+                          TestDateArithmeticsParam("1945-05-09", "1941-06-22", 1417),
+                          TestDateArithmeticsParam("1941-06-22", "1945-05-09", -1417)));
 }  // namespace tests

@@ -46,6 +46,7 @@ TEST_P(TestTypeParsing, DefaultTest) {
     }
 }
 
+// clang-format off
 INSTANTIATE_TEST_SUITE_P(
     TypeSystem, TestTypeParsing,
     ::testing::Values(
@@ -78,7 +79,10 @@ INSTANTIATE_TEST_SUITE_P(
                            TypeId::kInt, TypeId::kString, TypeId::kDouble,
                            TypeId::kBigInt, TypeId::kMixed, TypeId::kBigInt,
                            TypeId::kMixed, TypeId::kInt},
-                          "SimpleTypes.csv")));
+                          "SimpleTypes.csv"),
+        TypeParsingParams({TypeId::kString, TypeId::kDate, TypeId::kDate},
+                          "ACShippingDates.csv" )));
+// clang-format on
 
 TEST(TypeSystem, SumColumnDoubles) {
     CSVParser parser{ConstructPath("iris.csv"), ',', false};
