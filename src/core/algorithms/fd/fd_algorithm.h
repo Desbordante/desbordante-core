@@ -8,8 +8,8 @@
 
 #include "algorithms/algorithm.h"
 #include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
 #include "config/max_lhs/type.h"
+#include "config/tabular_data/input_table_type.h"
 #include "fd.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "util/primitive_collection.h"

@@ -38,7 +38,7 @@ void Tane::ResetStateFd() {
 double Tane::CalculateZeroAryFdError(ColumnData const* rhs,
                                      ColumnLayoutRelationData const* relation_data) {
     return 1 - rhs->GetPositionListIndex()->GetNepAsLong() /
-                   static_cast<double>(relation_data->GetNumTuplePairs());
+                       static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
 double Tane::CalculateFdError(model::PositionListIndex const* lhs_pli,
@@ -60,9 +60,8 @@ void Tane::RegisterAndCountFd(Vertical const& lhs, Column const* rhs, [[maybe_un
     count_of_fd_++;
 }
 
-void Tane::RegisterUcc([[maybe_unused]] Vertical const& key,
-                       [[maybe_unused]] double error,
-                       [[maybe_unused]] RelationalSchema const* schema)  {
+void Tane::RegisterUcc([[maybe_unused]] Vertical const& key, [[maybe_unused]] double error,
+                       [[maybe_unused]] RelationalSchema const* schema) {
     /*dynamic_bitset<> key_bitset = key.getColumnIndices();
     LOG(INFO) << "Discovered UCC: ";
     for (int i = key_bitset.find_first(); i != -1; i = key_bitset.find_next(i)) {
@@ -113,9 +112,9 @@ unsigned long long Tane::ExecuteInternal() {
         vertex->SetKeyCandidate(true);
         vertex->SetPositionListIndex(column_data.GetPositionListIndex());
 
-        //check FDs: 0->A
+        // check FDs: 0->A
         double fd_error = CalculateZeroAryFdError(&column_data, relation_.get());
-        if (fd_error <= max_fd_error_) {  //TODO: max_error
+        if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
             RegisterAndCountFd(*schema->empty_vertical_, column.get(), fd_error, schema);
 
@@ -131,11 +130,11 @@ unsigned long long Tane::ExecuteInternal() {
     for (auto& [key_map, vertex] : level1->GetVertices()) {
         Vertical column = vertex->GetVertical();
         vertex->GetRhsCandidates() &=
-            ~zeroary_fd_rhs;  //~ returns flipped copy <- removed already discovered zeroary FDs
+                ~zeroary_fd_rhs;  //~ returns flipped copy <- removed already discovered zeroary FDs
 
         // вот тут костыль, чтобы вытянуть индекс колонки из вершины, в которой только один индекс
         ColumnData const& column_data =
-            relation_->GetColumnData(column.GetColumnIndices().find_first());
+                relation_->GetColumnData(column.GetColumnIndices().find_first());
         double ucc_error = CalculateUccError(column_data.GetPositionListIndex(), relation_.get());
         if (ucc_error <= max_ucc_error_) {
             RegisterUcc(column, ucc_error, schema);
@@ -149,7 +148,7 @@ unsigned long long Tane::ExecuteInternal() {
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
-                //set vertex invalid if we seek for exact dependencies
+                // set vertex invalid if we seek for exact dependencies
                 if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
                     vertex->SetInvalid(true);
                 }
@@ -159,9 +158,8 @@ unsigned long long Tane::ExecuteInternal() {
     levels.push_back(std::move(level1));
     AddProgress(progress_step);
 
-    unsigned int max_arity = max_lhs_ == std::numeric_limits<unsigned int>::max()
-                                 ? max_lhs_
-                                 : max_lhs_ + 1;
+    unsigned int max_arity =
+            max_lhs_ == std::numeric_limits<unsigned int>::max() ? max_lhs_ : max_lhs_ + 1;
     for (unsigned int arity = 2; arity <= max_arity; arity++) {
         // auto start_time = std::chrono::system_clock::now();
         model::LatticeLevel::ClearLevelsBelow(levels, arity - 1);
@@ -183,7 +181,7 @@ unsigned long long Tane::ExecuteInternal() {
             }
 
             Vertical xa = xa_vertex->GetVertical();
-            //Calculate XA PLI
+            // Calculate XA PLI
             if (xa_vertex->GetPositionListIndex() == nullptr) {
                 auto parent_pli_1 = xa_vertex->GetParents()[0]->GetPositionListIndex();
                 auto parent_pli_2 = xa_vertex->GetParents()[1]->GetPositionListIndex();
@@ -196,8 +194,9 @@ unsigned long long Tane::ExecuteInternal() {
             for (const auto& x_vertex : xa_vertex->GetParents()) {
                 Vertical const& lhs = x_vertex->GetVertical();
 
-                // Find index of A in XA. If a is not a candidate, continue. TODO: possible to do it easier??
-                //like "a_index = xa_indices - x_indices;"
+                // Find index of A in XA. If a is not a candidate, continue. TODO: possible to do it
+                // easier??
+                // like "a_index = xa_indices - x_indices;"
                 int a_index = xa_indices.find_first();
                 dynamic_bitset<> x_indices = lhs.GetColumnIndices();
                 while (a_index >= 0 && x_indices[a_index]) {
@@ -208,14 +207,12 @@ unsigned long long Tane::ExecuteInternal() {
                 }
 
                 // Check X -> A
-                double error = CalculateFdError(
-                    x_vertex->GetPositionListIndex(),
-                    xa_vertex->GetPositionListIndex(),
-                    relation_.get());
+                double error = CalculateFdError(x_vertex->GetPositionListIndex(),
+                                                xa_vertex->GetPositionListIndex(), relation_.get());
                 if (error <= max_fd_error_) {
                     Column const* rhs = schema->GetColumns()[a_index].get();
 
-                    //TODO: register FD to a file or something
+                    // TODO: register FD to a file or something
                     RegisterAndCountFd(lhs, rhs, error, schema);
                     xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                     if (error == 0) {
@@ -229,17 +226,18 @@ unsigned long long Tane::ExecuteInternal() {
             break;
         }
 
-        //Prune
-        //cout << "Pruning level: " << level->GetArity() << ". " << level->GetVertices().size() << " vertices_" << endl;
+        // Prune
+        // cout << "Pruning level: " << level->GetArity() << ". " << level->GetVertices().size() <<
+        // " vertices_" << endl;
         std::list<model::LatticeVertex*> key_vertices;
         for (auto& [map_key, vertex] : level->GetVertices()) {
             Vertical columns = vertex->GetVertical();  // Originally it's a ColumnCombination
 
             if (vertex->GetIsKeyCandidate()) {
                 double ucc_error =
-                    CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
-                if (ucc_error <= max_ucc_error_) {       //If a key candidate is an approx UCC
-                    //TODO: do smth with UCC
+                        CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
+                if (ucc_error <= max_ucc_error_) {  // If a key candidate is an approx UCC
+                    // TODO: do smth with UCC
 
                     RegisterUcc(columns, ucc_error, schema);
                     vertex->SetKeyCandidate(false);
@@ -248,23 +246,25 @@ unsigned long long Tane::ExecuteInternal() {
                              rhs_index != boost::dynamic_bitset<>::npos;
                              rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                             Vertical rhs =
-                                static_cast<Vertical>(*schema->GetColumn((int)rhs_index));
+                                    static_cast<Vertical>(*schema->GetColumn((int)rhs_index));
                             if (!columns.Contains(rhs)) {
                                 bool is_rhs_candidate = true;
                                 for (const auto& column : columns.GetColumns()) {
                                     Vertical sibling =
-                                        columns.Without(static_cast<Vertical>(*column)).Union(rhs);
+                                            columns.Without(static_cast<Vertical>(*column))
+                                                    .Union(rhs);
                                     auto sibling_vertex =
-                                        level->GetLatticeVertex(sibling.GetColumnIndices());
+                                            level->GetLatticeVertex(sibling.GetColumnIndices());
                                     if (sibling_vertex == nullptr ||
                                         !sibling_vertex->GetConstRhsCandidates()
-                                             [rhs.GetColumnIndices().find_first()]) {
+                                                 [rhs.GetColumnIndices().find_first()]) {
                                         is_rhs_candidate = false;
                                         break;
                                     }
-                                    // for each outer rhs: if there is a sibling s.t. it doesn't have this rhs, there is no FD: vertex->rhs
+                                    // for each outer rhs: if there is a sibling s.t. it doesn't
+                                    // have this rhs, there is no FD: vertex->rhs
                                 }
-                                //Found fd: vertex->rhs => register it
+                                // Found fd: vertex->rhs => register it
                                 if (is_rhs_candidate) {
                                     RegisterAndCountFd(columns, schema->GetColumn(rhs_index), 0,
                                                        schema);
@@ -272,11 +272,11 @@ unsigned long long Tane::ExecuteInternal() {
                             }
                         }
                         key_vertices.push_back(vertex.get());
-                        //cout << "--------------------------" << endl << "KeyVert: " << *vertex;
+                        // cout << "--------------------------" << endl << "KeyVert: " << *vertex;
                     }
                 }
             }
-            //if we seek for exact FDs then SetInvalid
+            // if we seek for exact FDs then SetInvalid
             if (max_fd_error_ == 0 && max_ucc_error_ == 0) {
                 for (auto key_vertex : key_vertices) {
                     key_vertex->GetRhsCandidates() &= key_vertex->GetVertical().GetColumnIndices();
@@ -285,7 +285,7 @@ unsigned long long Tane::ExecuteInternal() {
             }
         }
 
-        //TODO: printProfilingData
+        // TODO: printProfilingData
         AddProgress(progress_step);
     }
 
