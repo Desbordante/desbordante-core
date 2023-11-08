@@ -4,8 +4,8 @@
 #include <thread>
 #include <vector>
 
-#include "config/equal_nulls/option.h"
 #include "config/max_lhs/option.h"
+#include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 
 namespace algos {
@@ -13,8 +13,7 @@ namespace algos {
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::TableOpt.GetName(),
-                          config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
 }
 
 void FDAlgorithm::RegisterOptions() {
@@ -72,7 +71,7 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     size_t const number_of_columns = fds_count_per_col.begin()->first->GetSchema()->GetNumColumns();
     [[maybe_unused]] RelationalSchema const* first_schema =
             fds_count_per_col.begin()->first->GetSchema();
-    for (auto const& [col, num] : fds_count_per_col) {
+    for (auto const& [col, num]: fds_count_per_col) {
         assert(col->GetSchema() == first_schema);
         if (num + 1 + cols_of_equal_values == number_of_columns) {
             keys.push_back(col);
