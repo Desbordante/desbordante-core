@@ -7,7 +7,6 @@
 #include <easylogging++.h>
 
 #include "config/error/option.h"
-#include "config/max_lhs/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
@@ -31,14 +30,13 @@ void Pyro::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::ErrorOpt(&parameters_.max_ucc_error));
-    RegisterOption(config::MaxLhsOpt(&parameters_.max_lhs));
     RegisterOption(config::ThreadNumberOpt(&parameters_.parallelism));
     RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(),
+    MakeOptionsAvailable({config::ErrorOpt.GetName(),
                           config::ThreadNumberOpt.GetName(), kSeed});
 }
 
