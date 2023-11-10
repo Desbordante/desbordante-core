@@ -19,19 +19,19 @@ protected:
     std::byte* double_max;
     std::byte* result;
 
-    static void add(std::byte* a, std::byte* b, std::byte* res) {
+    static void Add(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Add(a, b, res);
     }
-    static void sub(std::byte* a, std::byte* b, std::byte* res) {
+    static void Sub(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Sub(a, b, res);
     }
-    static void mul(std::byte* a, std::byte* b, std::byte* res) {
+    static void Mul(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Mul(a, b, res);
     }
-    static void div(std::byte* a, std::byte* b, std::byte* res) {
+    static void Div(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Div(a, b, res);
     }
@@ -115,23 +115,23 @@ TEST_F(DoubleCompare, ComprasionFromAcAlgorithm) {
 }
 
 TEST_F(DoubleCompare, AddNumbers) {
-    TestArithmetic(7.7, 8.8, 7.7 + 8.8, add);
-    TestArithmetic(777.777, 888.888, 777.777 + 888.888, add);
+    TestArithmetic(7.7, 8.8, 7.7 + 8.8, Add);
+    TestArithmetic(777.777, 888.888, 777.777 + 888.888, Add);
 }
 
 TEST_F(DoubleCompare, SubNumbers) {
-    TestArithmetic(7.7, 8.8, 7.7 - 8.8, sub);
-    TestArithmetic(777.777, 888.888, 777.777 - 888.888, sub);
+    TestArithmetic(7.7, 8.8, 7.7 - 8.8, Sub);
+    TestArithmetic(777.777, 888.888, 777.777 - 888.888, Sub);
 }
 
 TEST_F(DoubleCompare, MulNumbers) {
-    TestArithmetic(7.7, 8.8, 7.7 * 8.8, mul);
-    TestArithmetic(777.777, 888.888, 777.777 * 888.888, mul);
+    TestArithmetic(7.7, 8.8, 7.7 * 8.8, Mul);
+    TestArithmetic(777.777, 888.888, 777.777 * 888.888, Mul);
 }
 
 TEST_F(DoubleCompare, DivNumbers) {
-    TestArithmetic(7.7, 8.8, 7.7 / 8.8, div);
-    TestArithmetic(777.777, 888.888, 777.777 / 888.888, div);
+    TestArithmetic(7.7, 8.8, 7.7 / 8.8, Div);
+    TestArithmetic(777.777, 888.888, 777.777 / 888.888, Div);
 }
 
 TEST_F(DoubleCompare, TwoSmallNumbers) {
@@ -153,11 +153,11 @@ TEST_F(DoubleCompare, EpsilonMin) {
 }
 TEST_F(DoubleCompare, LowFractionalNumber) {
     std::unique_ptr<std::byte[]> ten_power_minus_2(double_type.MakeValue(1e-2));
-    std::unique_ptr<std::byte[]> ten_power_minus_2_plus_eps_div_ten(
+    std::unique_ptr<std::byte[]> ten_power_minus_2_plus_eps_Div_ten(
             double_type.MakeValue(1e-2 + 2.5e-17));
 
     ASSERT_EQ(double_type_ref.Compare(ten_power_minus_2.get(),
-                                      ten_power_minus_2_plus_eps_div_ten.get()),
+                                      ten_power_minus_2_plus_eps_Div_ten.get()),
               model::CompareResult::kLess);
 }
 TEST_F(DoubleCompare, BigFractionalNumber) {
