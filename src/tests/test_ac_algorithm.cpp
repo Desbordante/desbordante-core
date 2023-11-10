@@ -11,20 +11,16 @@
 #include "types.h"
 
 namespace {
-void AssertRanges(std::vector<std::string>& expected_ranges,
+void AssertRanges(std::vector<model::Double>& expected_ranges,
                   algos::RangesCollection const& byte_ranges) {
     ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
 
-    auto expected = std::unique_ptr<std::byte[]>(byte_ranges.col_pair.num_type->Allocate());
+    model::DoubleType double_type;
     for (size_t i = 0; i < expected_ranges.size(); ++i) {
-        // FIXME:
-        /* Для значения "7.4": сравнение через num_type->Compare() значений в виде std::byte
-         * (полученных с помощью num_type->ValueFromStr()) возвращает, что они не равны,
-         * однако при использовании на этих же значениях num_type->ValueToString()
-         * полученные строки оказываются равными */
-        byte_ranges.col_pair.num_type->ValueFromStr(expected.get(), expected_ranges[i]);
-        EXPECT_EQ(byte_ranges.col_pair.num_type->ValueToString(expected.get()),
-                  byte_ranges.col_pair.num_type->ValueToString(byte_ranges.ranges[i]));
+        auto expected = std::unique_ptr<std::byte[]>(double_type.MakeValue(expected_ranges[i]));
+        double_type.CastTo(expected.get(), byte_ranges.col_pair.num_type->GetTypeId());
+        EXPECT_EQ(byte_ranges.col_pair.num_type->Compare(expected.get(), byte_ranges.ranges[i]),
+                  model::CompareResult::kEqual);
     }
 }
 
@@ -88,7 +84,7 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(0, 2);
 
-    std::vector<std::string> expected_ranges = {"5.4", "7.4", "8.1", "8.5", "9.1", "14.6"};
+    std::vector<model::Double> expected_ranges = {5.4, 7.4, 8.1, 8.5, 9.1, 14.6};
 
     AssertRanges(expected_ranges, ranges_collection);
 }
@@ -99,7 +95,7 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(2, 3);
 
-    std::vector<std::string> expected_ranges = {"1.2", "2.3", "4.1", "9.2"};
+    std::vector<model::Double> expected_ranges = {1.2, 2.3, 4.1, 9.2};
 
     AssertRanges(expected_ranges, ranges_collection);
 }
@@ -117,7 +113,7 @@ TEST_F(ACAlgorithmTest, SubNonFuzzy) {
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(1, 3);
 
-    std::vector<std::string> expected_ranges = {"0.3", "2.0", "2.7", "4.0"};
+    std::vector<model::Double> expected_ranges = {0.3, 2.0, 2.7, 4.0};
 
     AssertRanges(expected_ranges, ranges_collection);
 }
@@ -127,7 +123,7 @@ TEST_F(ACAlgorithmTest, MulNonFuzzy) {
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(2, 3);
 
-    std::vector<std::string> expected_ranges = {"0.11", "0.96", "3.3", "15.87"};
+    std::vector<model::Double> expected_ranges = {0.11, 0.96, 3.3, 15.87};
 
     AssertRanges(expected_ranges, ranges_collection);
 }
@@ -138,8 +134,8 @@ TEST_F(ACAlgorithmTest, DivNonFuzzy) {
     auto& ranges_collection01 = a->GetRangesByColumns(0, 1);
     auto& ranges_collection10 = a->GetRangesByColumns(1, 0);
 
-    std::vector<std::string> expected_ranges01 = {"0", "1", "10", "10"};
-    std::vector<std::string> true_ranges10 = {"0", "0", "1", "1"};
+    std::vector<model::Double> expected_ranges01 = {0, 1, 10, 10};
+    std::vector<model::Double> true_ranges10 = {0, 0, 1, 1};
 
     AssertRanges(expected_ranges01, ranges_collection01);
     AssertRanges(true_ranges10, ranges_collection10);
@@ -147,8 +143,8 @@ TEST_F(ACAlgorithmTest, DivNonFuzzy) {
     auto& ranges_collection02 = a->GetRangesByColumns(0, 2);
     auto& ranges_collection20 = a->GetRangesByColumns(2, 0);
 
-    std::vector<std::string> expected_ranges02 = {"1", "1"};
-    std::vector<std::string> expected_ranges20 = {"0", "0", "1", "1"};
+    std::vector<model::Double> expected_ranges02 = {1, 1};
+    std::vector<model::Double> expected_ranges20 = {0, 0, 1, 1};
 
     AssertRanges(expected_ranges02, ranges_collection02);
     AssertRanges(expected_ranges20, ranges_collection20);
@@ -162,10 +158,9 @@ TEST_F(ACAlgorithmTest, FuzzyBumpsDetection) {
     auto& ranges_collection02 = a->GetRangesByColumns(0, 2);
     auto& ranges_collection12 = a->GetRangesByColumns(1, 2);
 
-    std::vector<std::string> expected_ranges01 = {"3", "3", "4", "4", "5", "5",
-                                                  "6", "6", "7", "7", "8", "8"};
-    std::vector<std::string> expected_ranges02 = {"2", "2", "8", "9", "12", "13"};
-    std::vector<std::string> expected_ranges12 = {"9", "9", "11", "11"};
+    std::vector<model::Double> expected_ranges01 = {3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8};
+    std::vector<model::Double> expected_ranges02 = {2, 2, 8, 9, 12, 13};
+    std::vector<model::Double> expected_ranges12 = {9, 9, 11, 11};
 
     AssertRanges(expected_ranges01, ranges_collection01);
     AssertRanges(expected_ranges02, ranges_collection02);
@@ -181,9 +176,9 @@ TEST_F(ACAlgorithmTest, NullAndEmptyIgnoring) {
     auto& ranges_collection02 = a->GetRangesByColumns(0, 2);
     auto& ranges_collection12 = a->GetRangesByColumns(0, 3);
 
-    std::vector<std::string> expected_ranges01 = {"3", "3"};
-    std::vector<std::string> expected_ranges02 = {"4", "4"};
-    std::vector<std::string> expected_ranges03 = {"2", "2"};
+    std::vector<model::Double> expected_ranges01 = {3, 3};
+    std::vector<model::Double> expected_ranges02 = {4, 4};
+    std::vector<model::Double> expected_ranges03 = {2, 2};
 
     AssertRanges(expected_ranges01, ranges_collection01);
     AssertRanges(expected_ranges02, ranges_collection02);
@@ -216,7 +211,7 @@ TEST_F(ACAlgorithmTest, RangesReconstruction) {
     auto a = CreateACAlgorithmInstance("iris.csv", ',', false, algos::Binop::Subtraction, 0.0);
     a->Execute();
     auto ranges_collection = a->ReconstructRangesByColumns(1, 3, 1);
-    std::vector<std::string> expected_ranges = {"0.3", "4.0"};
+    std::vector<model::Double> expected_ranges = {0.3, 4.0};
 
     AssertRanges(expected_ranges, ranges_collection);
 }
