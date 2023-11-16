@@ -56,6 +56,6 @@ jobs:
 
       - uses: ZedThree/clang-tidy-review/upload@v0.13.4
 
-    - name: Fail the check if clang-tidy reported issues
-      if: steps.review.outputs.total_comments > 0
-      run: exit 1
+      - name: Fail the check if clang-tidy reported issues
+        if: steps.review.outputs.total_comments > 0
+        run: exit 1
