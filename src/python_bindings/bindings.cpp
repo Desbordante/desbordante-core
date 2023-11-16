@@ -45,6 +45,7 @@
 #include "py_fd_verifier.h"
 #include "py_metric_verifier.h"
 #include "py_ucc_algorithm.h"
+#include "py_ucc_verifier.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -161,6 +162,12 @@ PYBIND11_MODULE(desbordante, module) {
             .def("get_num_error_clusters", &PyFDVerifier::GetNumErrorClusters)
             .def("get_num_error_rows", &PyFDVerifier::GetNumErrorRows)
             .def("get_highlights", &PyFDVerifier::GetHighlights);
+
+    DEFINE_ALGORITHM(UCCVerifier, Algorithm)
+            .def("ucc_holds", &PyUCCVerifier::UCCHolds)
+            .def("get_num_clusters_violating_ucc", &PyUCCVerifier::GetNumClustersViolatingUCC)
+            .def("get_num_rows_violating_ucc", &PyUCCVerifier::GetNumRowsViolatingUCC)
+            .def("get_clusters_violating_ucc", &PyUCCVerifier::GetClustersViolatingUCC);
 
     DEFINE_ALGORITHM(DataStats, Algorithm).def("get_result_string", &PyDataStats::GetResultString);
 
