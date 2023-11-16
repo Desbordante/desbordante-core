@@ -9,7 +9,7 @@ namespace algos {
 using AlgorithmTypes =
         std::tuple<Depminer, DFD, FastFDs, FDep, Fd_mine, Pyro, Tane, FUN, hyfd::HyFD, Aid, Apriori,
                    metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
-                   cfd::FDFirstAlgorithm, ACAlgorithm>;
+                   cfd::FDFirstAlgorithm, ACAlgorithm, UCCVerifier>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -50,7 +50,10 @@ BETTER_ENUM(AlgorithmType, char,
     fd_first_dfs,
 
 /* Algebraic constraints mining algorithm*/
-    ac
+    ac,
+
+/* UCC verifier algorithm */
+    ucc_verifier
 )
 // clang-format on
 

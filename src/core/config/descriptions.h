@@ -33,6 +33,7 @@ const auto kDMetric = _kDMetric.c_str();
 constexpr auto kDLhsIndices = "LHS column indices";
 constexpr auto kDRhsIndices = "RHS column indices";
 constexpr auto kDRhsIndex = "RHS column index";
+constexpr auto kDUCCIndices = "column indices for UCC verification";
 constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDDistFromNullIsInfinity = "specify whether distance from NULL value is infinity "
                                           "(if not, it is 0)";
