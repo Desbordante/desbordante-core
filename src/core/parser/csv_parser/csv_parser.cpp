@@ -111,6 +111,7 @@ std::string CSVParser::GetUnparsedLine(unsigned long long const line_index) {
 
 std::vector<std::string> CSVParser::ParseString(std::string const& s) const {
     std::vector<std::string> tokens;
+    tokens.reserve(number_of_columns_);
     boost::escaped_list_separator<char> list_sep(escape_symbol_, separator_, quote_);
     boost::tokenizer<boost::escaped_list_separator<char>> tokenizer(s, list_sep);
 
