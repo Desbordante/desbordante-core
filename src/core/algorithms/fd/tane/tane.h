@@ -4,6 +4,7 @@
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "config/error/type.h"
+#include "config/error_measure/type.h"
 #include "config/max_lhs/type.h"
 #include "model/table/position_list_index.h"
 #include "model/table/relation_data.h"
@@ -21,6 +22,7 @@ private:
 public:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;
+    config::ErrorMeasureType error_measure_;
     config::MaxLhsType max_lhs_;
 
     int count_of_fd_ = 0;
@@ -34,6 +36,11 @@ public:
     static double CalculateFdError(model::PositionListIndex const* lhs_pli,
                                    model::PositionListIndex const* joint_pli,
                                    ColumnLayoutRelationData const* relation_data);
+    static double CalculateZeroAryFdPerValueError(ColumnData const* rhs,
+                                          ColumnLayoutRelationData const*);
+    static double CalculateFdPerValueError(model::PositionListIndex const* lhs_pli,
+                                   model::PositionListIndex const* joint_pli,
+                                   ColumnLayoutRelationData const*);
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
 

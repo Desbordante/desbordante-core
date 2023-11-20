@@ -279,4 +279,37 @@ std::string PositionListIndex::ToString() const {
     return res;
 }
 
+double PositionListIndex::GetAverageProbability(const PositionListIndex & XA) const {
+    double sum = 0.0;
+    size_t cluster_rows_count = 0;
+    auto xa_index = XA.GetIndex();
+    auto xa_cluster_iterator =  xa_index.begin();
+
+    for(auto & x_cluster: index_){ 
+        auto x_row_iterator = x_cluster.begin();
+        std::size_t max = 1;
+        while (++x_row_iterator != x_cluster.end()){
+            if(xa_cluster_iterator != xa_index.end() && *x_row_iterator == xa_cluster_iterator->at(0)){
+                auto cluster_size = xa_cluster_iterator->size();
+                if(cluster_size > max) max = cluster_size;
+                xa_cluster_iterator++;
+            }
+        }
+        sum += static_cast<double>(max) / x_cluster.size();
+        cluster_rows_count += x_cluster.size();
+    }
+    unsigned int unique_rows = relation_size_ - static_cast<unsigned int>(cluster_rows_count); 
+    return (sum + unique_rows) / (index_.size() + unique_rows);
+}
+
+double PositionListIndex::GetAverageProbability() const {
+    size_t cluster_rows_count = 0;
+    int max = 1;
+    for (auto & x_cluster: index_){ 
+        int total = x_cluster.size(); 
+        if(total > max) max = total;
+        cluster_rows_count += x_cluster.size();
+    }
+    return static_cast<double>(max) / relation_size_;
+}
 }  // namespace model

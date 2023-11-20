@@ -59,6 +59,7 @@ boost::program_options::options_description AlgoOptions() {
     po::options_description fd_options("FD options");
     fd_options.add_options()
             (names::kError, po::value<double>(), desc::kDError)
+            (names::kErrorMeasure, po::value<std::string>(), desc::kDErrorMeasure)
             (names::kMaximumLhs, po::value<unsigned int>(), desc::kDMaximumLhs)
             (names::kSeed, po::value<int>(), desc::kDSeed)
             ;

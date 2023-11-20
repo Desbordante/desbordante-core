@@ -8,6 +8,7 @@
 #include <easylogging++.h>
 
 #include "config/error/option.h"
+#include "config/error_measure/option.h"
 #include "config/max_lhs/option.h"
 #include "lattice_level.h"
 #include "lattice_vertex.h"
@@ -24,11 +25,12 @@ Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 
 void Tane::RegisterOptions() {
     RegisterOption(config::ErrorOpt(&max_ucc_error_));
+    RegisterOption(config::ErrorMeasureOpt(&error_measure_));
     RegisterOption(config::MaxLhsOpt(&max_lhs_));
 }
 
 void Tane::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName()});
+    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(), config::ErrorMeasureOpt.GetName()});
 }
 
 void Tane::ResetStateFd() {
@@ -48,6 +50,17 @@ double Tane::CalculateFdError(model::PositionListIndex const* lhs_pli,
                               ColumnLayoutRelationData const* relation_data) {
     return (double)(lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
            static_cast<double>(relation_data->GetNumTuplePairs());
+}
+
+double Tane::CalculateZeroAryFdPerValueError(ColumnData const* rhs,
+                                          ColumnLayoutRelationData const* /*relation_data*/) {
+    return 1 - rhs->GetPositionListIndex()->GetAverageProbability();
+}
+
+double Tane::CalculateFdPerValueError(model::PositionListIndex const* lhs_pli,
+                              model::PositionListIndex const* joint_pli,
+                                          ColumnLayoutRelationData const* /*relation_data*/) {
+    return 1 - lhs_pli->GetAverageProbability(*joint_pli);
 }
 
 double Tane::CalculateUccError(model::PositionListIndex const* pli,
@@ -77,6 +90,8 @@ void Tane::RegisterUcc([[maybe_unused]] Vertical const& key,
 unsigned long long Tane::ExecuteInternal() {
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
+    auto calculate_fd_error = error_measure_ == "per_value" ? Tane::CalculateFdPerValueError : Tane::CalculateFdError; 
+    auto calculate_fd_zero_ary_error = error_measure_ == "per_value" ? Tane::CalculateZeroAryFdPerValueError : Tane::CalculateZeroAryFdError; 
 
     LOG(INFO) << schema->GetName() << " has " << relation_->GetNumColumns() << " columns, "
               << relation_->GetNumRows() << " rows, and a maximum NIP of " << std::setw(2)
@@ -116,7 +131,7 @@ unsigned long long Tane::ExecuteInternal() {
         vertex->SetPositionListIndex(column_data.GetPositionListIndex());
 
         //check FDs: 0->A
-        double fd_error = CalculateZeroAryFdError(&column_data, relation_.get());
+        double fd_error = calculate_fd_zero_ary_error(&column_data, relation_.get());
         if (fd_error <= max_fd_error_) {  //TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
             RegisterAndCountFd(*schema->empty_vertical_, column.get(), fd_error, schema);
@@ -210,7 +225,7 @@ unsigned long long Tane::ExecuteInternal() {
                 }
 
                 // Check X -> A
-                double error = CalculateFdError(
+                double error = calculate_fd_error(
                     x_vertex->GetPositionListIndex(),
                     xa_vertex->GetPositionListIndex(),
                     relation_.get());
