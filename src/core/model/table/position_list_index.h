@@ -128,8 +128,7 @@ public:
         freq_++;
     }
 
-
-    double GetAverageProbability(const PositionListIndex & XA) const;
+    double GetAverageProbability(const PositionListIndex& XA) const;
     double GetAverageProbability() const;
 
     std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;

@@ -55,7 +55,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
         null_cluster = index[ColumnLayoutRelationData::kNullValueId];
     }
     if (!is_null_eq_null) {
-        index.erase(ColumnLayoutRelationData::kNullValueId); // move?
+        index.erase(ColumnLayoutRelationData::kNullValueId);  // move?
     }
 
     double key_gap = 0.0;
@@ -107,7 +107,7 @@ std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
     return frequencies;
 }
 
-//unsigned long long PositionListIndex::CalculateNep(unsigned int numElements) {
+// unsigned long long PositionListIndex::CalculateNep(unsigned int numElements) {
 //
 //}
 
@@ -132,10 +132,8 @@ std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbin
     return std::make_shared<std::vector<int>>(probing_table);
 }
 
-
-
-// интересное место: true --> надо передать поле без копирования, false --> надо сконструировать и выдать наружу
-// кажется, самым лёгким способом будет навернуть shared_ptr
+// интересное место: true --> надо передать поле без копирования, false --> надо сконструировать и
+// выдать наружу кажется, самым лёгким способом будет навернуть shared_ptr
 /*std::shared_ptr<const std::vector<int>> PositionListIndex::getProbingTable(bool isCaching) {
     auto probingTable = GetProbingTable();
     if (isCaching) {
@@ -145,19 +143,20 @@ std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbin
     return probingTable;
 }*/
 
-//std::deque<std::vector<int>> const & PositionListIndex::getIndex() const {
+// std::deque<std::vector<int>> const & PositionListIndex::getIndex() const {
 //    return index;
 //}
 
-std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(PositionListIndex const* that) const {
+std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(
+        PositionListIndex const* that) const {
     assert(this->relation_size_ == that->relation_size_);
-    return this->size_ > that->size_ ?
-           that->Probe(this->CalculateAndGetProbingTable()) :
-           this->Probe(that->CalculateAndGetProbingTable());
+    return this->size_ > that->size_ ? that->Probe(this->CalculateAndGetProbingTable())
+                                     : this->Probe(that->CalculateAndGetProbingTable());
 }
 
-//TODO: null_cluster_ некорректен
-std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<const std::vector<int>> probing_table) const {
+// TODO: null_cluster_ некорректен
+std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
+        std::shared_ptr<const std::vector<int>> probing_table) const {
     assert(this->relation_size_ == probing_table->size());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;
@@ -172,14 +171,13 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<cons
             if (probing_table == nullptr) LOG(DEBUG) << "NULLPTR";
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
                 LOG(DEBUG) << "position: " + std::to_string(position) +
-                                 ", size: " + std::to_string(probing_table->size());
+                                      ", size: " + std::to_string(probing_table->size());
                 for (size_t i = 0; i < positions.size(); ++i) {
                     LOG(DEBUG) << "Position " + std::to_string(positions[i]);
                 }
             }
             int probing_table_value_id = (*probing_table)[position];
-            if (probing_table_value_id == singleton_value_id_)
-                continue;
+            if (probing_table_value_id == singleton_value_id_) continue;
             intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
@@ -205,9 +203,9 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<cons
                                                relation_size_);
 }
 
-//TODO: null_cluster_ не поддерживается
+// TODO: null_cluster_ не поддерживается
 std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
-    Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
+        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
     assert(this->relation_size_ == relation_data.GetNumRows());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;
@@ -279,35 +277,36 @@ std::string PositionListIndex::ToString() const {
     return res;
 }
 
-double PositionListIndex::GetAverageProbability(const PositionListIndex & XA) const {
+double PositionListIndex::GetAverageProbability(const PositionListIndex& XA) const {
     double sum = 0.0;
     size_t cluster_rows_count = 0;
     auto xa_index = XA.GetIndex();
-    auto xa_cluster_iterator =  xa_index.begin();
+    auto xa_cluster_iterator = xa_index.begin();
 
-    for(auto & x_cluster: index_){ 
+    for (auto& x_cluster : index_) {
         auto x_row_iterator = x_cluster.begin();
         std::size_t max = 1;
-        while (++x_row_iterator != x_cluster.end()){
-            if(xa_cluster_iterator != xa_index.end() && *x_row_iterator == xa_cluster_iterator->at(0)){
+        while (++x_row_iterator != x_cluster.end()) {
+            if (xa_cluster_iterator != xa_index.end() &&
+                *x_row_iterator == xa_cluster_iterator->at(0)) {
                 auto cluster_size = xa_cluster_iterator->size();
-                if(cluster_size > max) max = cluster_size;
+                if (cluster_size > max) max = cluster_size;
                 xa_cluster_iterator++;
             }
         }
         sum += static_cast<double>(max) / x_cluster.size();
         cluster_rows_count += x_cluster.size();
     }
-    unsigned int unique_rows = relation_size_ - static_cast<unsigned int>(cluster_rows_count); 
+    unsigned int unique_rows = relation_size_ - static_cast<unsigned int>(cluster_rows_count);
     return (sum + unique_rows) / (index_.size() + unique_rows);
 }
 
 double PositionListIndex::GetAverageProbability() const {
     size_t cluster_rows_count = 0;
     int max = 1;
-    for (auto & x_cluster: index_){ 
-        int total = x_cluster.size(); 
-        if(total > max) max = total;
+    for (auto& x_cluster : index_) {
+        int total = x_cluster.size();
+        if (total > max) max = total;
         cluster_rows_count += x_cluster.size();
     }
     return static_cast<double>(max) / relation_size_;

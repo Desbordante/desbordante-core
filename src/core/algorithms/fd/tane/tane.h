@@ -37,10 +37,10 @@ public:
                                    model::PositionListIndex const* joint_pli,
                                    ColumnLayoutRelationData const* relation_data);
     static double CalculateZeroAryFdPerValueError(ColumnData const* rhs,
-                                          ColumnLayoutRelationData const*);
+                                                  ColumnLayoutRelationData const*);
     static double CalculateFdPerValueError(model::PositionListIndex const* lhs_pli,
-                                   model::PositionListIndex const* joint_pli,
-                                   ColumnLayoutRelationData const*);
+                                           model::PositionListIndex const* joint_pli,
+                                           ColumnLayoutRelationData const*);
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
 
