@@ -51,4 +51,5 @@ constexpr auto kIgnoreNullCols = "ignore_null_cols";
 constexpr auto kIgnoreConstantCols = "ignore_constant_cols";
 constexpr auto kGraphData = "graph";
 constexpr auto kGfdData = "gfd";
+constexpr auto kMemLimitMB = "mem_limit";
 }  // namespace config::names
