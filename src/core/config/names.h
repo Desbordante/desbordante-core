@@ -2,7 +2,9 @@
 
 namespace config::names {
 constexpr auto kTable = "table";
+constexpr auto kTables = "tables";
 constexpr auto kCsvPath = "csv_path";
+constexpr auto kCsvPaths = "csv_paths";
 constexpr auto kSeparator = "separator";
 constexpr auto kHasHeader = "has_header";
 constexpr auto kEqualNulls = "is_null_equal_null";

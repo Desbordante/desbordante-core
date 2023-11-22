@@ -11,6 +11,7 @@
 #include "algorithms/create_algorithm.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
+#include "tabular_data/input_tables_type.h"
 
 namespace algos {
 
@@ -71,12 +72,28 @@ template <typename OptionMap>
 void LoadAlgorithm(Algorithm& algorithm, OptionMap&& options) {
     ConfigureFromFunction(algorithm, [&options](std::string_view option_name) {
         using namespace config::names;
+        namespace fs = std::filesystem;
         if (option_name == kTable && options.find(std::string{kTable}) == options.end()) {
             config::InputTable parser = std::make_shared<CSVParser>(
-                    details::ExtractOptionValue<std::filesystem::path>(options, kCsvPath),
+                    details::ExtractOptionValue<fs::path>(options, kCsvPath),
                     details::ExtractOptionValue<char>(options, kSeparator),
                     details::ExtractOptionValue<bool>(options, kHasHeader));
             return boost::any{parser};
+        } else if (option_name == kTables && options.find(std::string{kTables}) == options.end()) {
+            auto paths = details::ExtractOptionValue<std::vector<fs::path>>(options, kCsvPaths);
+            auto separator = details::ExtractOptionValue<char>(options, kSeparator);
+            auto has_header = details::ExtractOptionValue<bool>(options, kHasHeader);
+
+            if (paths.empty()) {
+                throw config::ConfigurationError("Expected collection of csv paths");
+            }
+
+            config::InputTables tables;
+            tables.reserve(paths.size());
+            for (auto const& path : paths) {
+                tables.push_back(std::make_shared<CSVParser>(path, separator, has_header));
+            }
+            return boost::any{tables};
         }
         return details::GetOrEmpty(options, option_name);
     });
