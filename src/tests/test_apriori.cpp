@@ -59,11 +59,11 @@ protected:
                                            const std::filesystem::path& path,
                                            unsigned int tidColumnIndex,
                                            unsigned int itemColumnIndex, char separator = ',',
-                                           bool hasHeader = true) {
+                                           bool has_header = true) {
         using namespace config::names;
         return {{kCsvPath, path},
                 {kSeparator, separator},
-                {kHasHeader, hasHeader},
+                {kHasHeader, has_header},
                 {kInputFormat, +algos::InputFormat::singular},
                 {kMinimumSupport, minsup},
                 {kMinimumConfidence, minconf},
@@ -73,11 +73,11 @@ protected:
 
     static algos::StdParamsMap GetParamMap(double minsup, double minconf,
                                            const std::filesystem::path& path, bool firstColumnTid,
-                                           char separator = ',', bool hasHeader = true) {
+                                           char separator = ',', bool has_header = true) {
         using namespace config::names;
         return {{kCsvPath, path},
                 {kSeparator, separator},
-                {kHasHeader, hasHeader},
+                {kHasHeader, has_header},
                 {kInputFormat, +algos::InputFormat::tabular},
                 {kMinimumSupport, minsup},
                 {kMinimumConfidence, minconf},
@@ -87,16 +87,16 @@ protected:
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
             double minsup, double minconf, const std::filesystem::path& path,
             unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
-            bool hasHeader = true) {
+            bool has_header = true) {
         return algos::CreateAndLoadAlgorithm<algos::Apriori>(GetParamMap(
-                minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, hasHeader));
+                minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, has_header));
     }
 
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
             double minsup, double minconf, const std::filesystem::path& path, bool firstColumnTid,
-            char separator = ',', bool hasHeader = true) {
+            char separator = ',', bool has_header = true) {
         return algos::CreateAndLoadAlgorithm<algos::Apriori>(
-                GetParamMap(minsup, minconf, path, firstColumnTid, separator, hasHeader));
+                GetParamMap(minsup, minconf, path, firstColumnTid, separator, has_header));
     }
 };
 

@@ -53,14 +53,14 @@ public:
     using ACExceptions = std::vector<algos::ACException>;
 
     static algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator,
-                                           bool hasHeader, algos::Binop bin_operation,
+                                           bool has_header, algos::Binop bin_operation,
                                            double fuzziness, double p_fuzz, double weight,
                                            size_t bumps_limit, size_t iterations_limit,
                                            double seed) {
         using namespace config::names;
         return {{kCsvPath, path},
                 {kSeparator, separator},
-                {kHasHeader, hasHeader},
+                {kHasHeader, has_header},
                 {kBinaryOperation, bin_operation},
                 {kFuzziness, fuzziness},
                 {kFuzzinessProbability, p_fuzz},
@@ -71,13 +71,13 @@ public:
     }
 
     static std::unique_ptr<algos::ACAlgorithm> CreateACAlgorithmInstance(
-            std::string_view path, char separator = ',', bool hasHeader = true,
+            std::string_view path, char separator = ',', bool has_header = true,
             algos::Binop bin_operation = algos::Binop::Addition, double fuzziness = 0.1,
             double p_fuzz = 0.9, double weight = 0.1, size_t bumps_limit = 0,
             size_t iterations_limit = 10, double seed = 0) {
         auto data = test_data_dir / path;
         return algos::CreateAndLoadAlgorithm<algos::ACAlgorithm>(
-                GetParamMap(data, separator, hasHeader, bin_operation, fuzziness, p_fuzz, weight,
+                GetParamMap(data, separator, has_header, bin_operation, fuzziness, p_fuzz, weight,
                             bumps_limit, iterations_limit, seed));
     }
 };

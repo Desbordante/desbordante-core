@@ -32,13 +32,13 @@ protected:
     static std::unique_ptr<algos::cfd::FDFirstAlgorithm> CreateAlgorithmInstance(
             unsigned minsup, double minconf, const std::filesystem::path& path,
             char const* substrategy, unsigned int max_lhs, unsigned columns_number = 0,
-            unsigned tuples_number = 0, char separator = ',', bool hasHeader = true) {
+            unsigned tuples_number = 0, char separator = ',', bool has_header = true) {
         using namespace config::names;
 
         algos::StdParamsMap params{
                 {kCsvPath, path},
                 {kSeparator, separator},
-                {kHasHeader, hasHeader},
+                {kHasHeader, has_header},
                 {kCfdMinimumSupport, minsup},
                 {kCfdMinimumConfidence, minconf},
                 {kCfdMaximumLhs, max_lhs},
