@@ -107,7 +107,7 @@ TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
     try {
         for (auto const& dataset : LightDatasets::datasets_) {
             auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.header_presence);
+                                                                  dataset.has_header);
             algorithm->Execute();
             std::cout << dataset.name << std::endl;
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
@@ -124,7 +124,7 @@ TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
     try {
         for (auto const& dataset : HeavyDatasets::datasets_) {
             auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.header_presence);
+                                                                  dataset.has_header);
             algorithm->Execute();
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
                     << "The new algorithm and Pyro yield different results at " << dataset.name;
