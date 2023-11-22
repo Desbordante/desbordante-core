@@ -21,7 +21,7 @@ namespace fs = std::filesystem;
 
 TEST(pliChecker, first) {
     deque<vector<int>> ans = {
-        {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
+            {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
     };
 
     auto path = test_data_dir / "Test1.csv";
@@ -31,8 +31,7 @@ TEST(pliChecker, first) {
         auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, true);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }
@@ -41,10 +40,10 @@ TEST(pliChecker, first) {
 
 TEST(pliChecker, second) {
     deque<vector<int>> ans = {
-        {0, 2, 8, 11},
-        {1, 5, 9},
-        {4, 14},
-        {6, 7, 18},
+            {0, 2, 8, 11},
+            {1, 5, 9},
+            {4, 14},
+            {6, 7, 18},
     };
     deque<vector<int>> index;
     try {
@@ -53,8 +52,7 @@ TEST(pliChecker, second) {
         auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, false);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }
@@ -75,8 +73,7 @@ TEST(pliIntersectChecker, first) {
         auto pli2 = test2->GetColumnData(0).GetPositionListIndex();
 
         intersection = pli1->Intersect(pli2);
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }
@@ -89,20 +86,17 @@ TEST(testingBitsetToLonglong, first) {
 
     auto res_vector = *model::ListAgreeSetSample::BitSetToLongLongVector(simple_bitset);
     ASSERT_EQ(res_vector.size(), 1);
-    for (auto long_long_repr : res_vector)
-        ASSERT_EQ(encoded_num, long_long_repr);
+    for (auto long_long_repr : res_vector) ASSERT_EQ(encoded_num, long_long_repr);
 }
 
 TEST(IdentifierSetTest, Computation) {
     std::set<std::string> id_sets;
-    std::set<std::string> id_sets_ans = {
-        "[(A, 0), (B, 1), (C, 1), (D, 1), (E, 1), (F, 1)]",
-        "[(A, 1), (B, 1), (C, 1), (D, 2), (E, 0), (F, 1)]",
-        "[(A, 1), (B, 1), (C, 2), (D, 1), (E, 1), (F, 0)]",
-        "[(A, 1), (B, 2), (C, 2), (D, 1), (E, 1), (F, 1)]",
-        "[(A, 1), (B, 2), (C, 1), (D, 2), (E, 1), (F, 1)]",
-        "[(A, 1), (B, 2), (C, 2), (D, 2), (E, 1), (F, 1)]"
-    };
+    std::set<std::string> id_sets_ans = {"[(A, 0), (B, 1), (C, 1), (D, 1), (E, 1), (F, 1)]",
+                                         "[(A, 1), (B, 1), (C, 1), (D, 2), (E, 0), (F, 1)]",
+                                         "[(A, 1), (B, 1), (C, 2), (D, 1), (E, 1), (F, 0)]",
+                                         "[(A, 1), (B, 2), (C, 2), (D, 1), (E, 1), (F, 1)]",
+                                         "[(A, 1), (B, 2), (C, 1), (D, 2), (E, 1), (F, 1)]",
+                                         "[(A, 1), (B, 2), (C, 2), (D, 2), (E, 1), (F, 1)]"};
 
     try {
         auto path = test_data_dir / "BernoulliRelation.csv";
@@ -112,8 +106,7 @@ TEST(IdentifierSetTest, Computation) {
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
             id_sets.insert(model::IdentifierSet(relation.get(), i).ToString());
         }
-    }
-    catch (std::runtime_error const& e) {
+    } catch (std::runtime_error const& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }
@@ -121,24 +114,11 @@ TEST(IdentifierSetTest, Computation) {
 }
 
 TEST(IdentifierSetTest, Intersection) {
-    std::set<std::string> intersection_actual; // id set intersection result
+    std::set<std::string> intersection_actual;  // id set intersection result
     std::set<std::string> intersection_ans = {
-        "[A D F]",
-        "[A B]",
-        "[D E F]",
-        "[A E]",
-        "[C E F]",
-        "[E F]",
-        "[B C F]",
-        "[A B E F]",
-        "[A C D E]",
-        "[B D E]",
-        "[A B C E F]",
-        "[A F]",
-        "[A B D E F]",
-        "[A C D F]",
-        "[A C E]"
-    };
+            "[A D F]",     "[A B]",   "[D E F]",     "[A E]",     "[C E F]",
+            "[E F]",       "[B C F]", "[A B E F]",   "[A C D E]", "[B D E]",
+            "[A B C E F]", "[A F]",   "[A B D E F]", "[A C D F]", "[A C E]"};
 
     try {
         auto path = test_data_dir / "BernoulliRelation.csv";
@@ -156,8 +136,7 @@ TEST(IdentifierSetTest, Intersection) {
                 intersection_actual.insert(p->Intersect(*q).ToString());
             }
         }
-    }
-    catch (std::runtime_error const& e) {
+    } catch (std::runtime_error const& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }
@@ -165,25 +144,11 @@ TEST(IdentifierSetTest, Intersection) {
 }
 
 void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
-    std::set<std::string> agree_sets_actual; // id set intersection result
-    std::set<std::string> agree_sets_ans = {
-        "[A D F]",
-        "[A B]",
-        "[D E F]",
-        "[A E]",
-        "[C E F]",
-        "[E F]",
-        "[B C F]",
-        "[A B E F]",
-        "[]",
-        "[A C D E]",
-        "[B D E]",
-        "[A B C E F]",
-        "[A F]",
-        "[A B D E F]",
-        "[A C D F]",
-        "[A C E]"
-    };
+    std::set<std::string> agree_sets_actual;  // id set intersection result
+    std::set<std::string> agree_sets_ans = {"[A D F]", "[A B]",       "[D E F]",   "[A E]",
+                                            "[C E F]", "[E F]",       "[B C F]",   "[A B E F]",
+                                            "[]",      "[A C D E]",   "[B D E]",   "[A B C E F]",
+                                            "[A F]",   "[A B D E F]", "[A C D F]", "[A C E]"};
 
     try {
         auto path = test_data_dir / "BernoulliRelation.csv";
@@ -193,8 +158,7 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
         for (model::AgreeSet const& agree_set : factory.GenAgreeSets()) {
             agree_sets_actual.insert(agree_set.ToString());
         }
-    }
-    catch (std::runtime_error const& e) {
+    } catch (std::runtime_error const& e) {
         cout << "Exception raised in test: " << e.what() << endl;
         FAIL();
     }

@@ -68,7 +68,8 @@ class TestMetricVerifying : public ::testing::TestWithParam<MetricVerifyingParam
 
 class TestHighlights : public ::testing::TestWithParam<HighlightTestParams> {};
 
-static std::unique_ptr<algos::metric::MetricVerifier> CreateMetricVerifier(algos::StdParamsMap const& map) {
+static std::unique_ptr<algos::metric::MetricVerifier> CreateMetricVerifier(
+        algos::StdParamsMap const& map) {
     auto mp = algos::StdParamsMap(map);
     return algos::CreateAndLoadAlgorithm<algos::metric::MetricVerifier>(mp);
 }

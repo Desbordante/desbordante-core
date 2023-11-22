@@ -43,7 +43,7 @@ using FdByIndices = std::vector<unsigned>;
 struct FDsParam : TestingParam {
     std::vector<FdByIndices> expected;
 
-    template<typename... Params>
+    template <typename... Params>
     explicit FDsParam(std::vector<FdByIndices> expected, Params&&... params)
         : TestingParam(std::forward<Params>(params)...), expected(std::move(expected)) {}
 };
@@ -57,7 +57,6 @@ struct ClustersParam : TestingParam {
     template <typename... Params>
     explicit ClustersParam(FdToClustersMap expected, Params&&... params)
         : TestingParam(std::forward<Params>(params)...), expected(std::move(expected)) {}
-
 };
 
 struct LinesParam : TestingParam {
@@ -121,7 +120,7 @@ static std::string MakeJsonFromFds(std::vector<FdByIndices> const& fds) {
     return json_fds;
 }
 
-template<typename F>
+template <typename F>
 static void TestForEachAlgo(F&& test) {
     for (algos::AlgorithmType const algorithm_type :
          algos::GetAllDerived<algos::PliBasedFDAlgorithm>()) {
@@ -177,13 +176,13 @@ TEST_P(ApproxFdsMiningTest, ConsistentRepeatedExecution) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypoMinerTestSuite, ApproxFdsMiningTest,
-    ::testing::Values(
-        /* Expected fds should be sorted by lhs */
-        FDsParam({{1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-        FDsParam({{0, 1}, {0, 2}, {1, 2}, {0}}, "SimpleTypos.csv", ',', true, true, -1, 0.81, 0),
-        FDsParam({{0, 1}, {1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.1, 0)));
-
+        TypoMinerTestSuite, ApproxFdsMiningTest,
+        ::testing::Values(
+                /* Expected fds should be sorted by lhs */
+                FDsParam({{1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
+                FDsParam({{0, 1}, {0, 2}, {1, 2}, {0}}, "SimpleTypos.csv", ',', true, true, -1,
+                         0.81, 0),
+                FDsParam({{0, 1}, {1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.1, 0)));
 
 class ClustersWithTyposMiningTest : public ::testing::TestWithParam<ClustersParam> {};
 
@@ -237,7 +236,7 @@ static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
                            model::PLI::Cluster const& cluster,
                            std::vector<algos::TypoMiner::SquashedElement> const& squashed) {
     std::vector<int> const& probing_table =
-        rel.GetColumnData(fd.GetRhs().GetIndex()).GetProbingTable();
+            rel.GetColumnData(fd.GetRhs().GetIndex()).GetProbingTable();
     unsigned cluster_index = 0;
     for (auto const& squashed_element : squashed) {
         int const value = probing_table[squashed_element.tuple_index];
@@ -267,17 +266,17 @@ TEST_P(SquashClusterTest, SquashCluster) {
                 typo_miner->FindClustersWithTypos(fd);
         for (auto const& cluster : actual_clusters) {
             std::vector<algos::TypoMiner::SquashedElement> squashed =
-                typo_miner->SquashCluster(fd, cluster);
+                    typo_miner->SquashCluster(fd, cluster);
             VerifySquashed(rel, fd, cluster, squashed);
         }
     }
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    TypoMinerTestSuite, SquashClusterTest,
-    ::testing::Values(TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-                      TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
-                      TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
+        TypoMinerTestSuite, SquashClusterTest,
+        ::testing::Values(TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
+                          TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
+                          TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
 
 class LinesWithTyposMiningTest : public ::testing::TestWithParam<LinesParam> {};
 

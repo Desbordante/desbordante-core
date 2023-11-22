@@ -13,8 +13,8 @@ namespace tests {
 namespace fs = std::filesystem;
 namespace mo = model;
 
-using mo::TypeId;
 using algos::FDAlgorithm;
+using mo::TypeId;
 
 struct TypeParsingParams {
     std::vector<mo::TypeId> expected;

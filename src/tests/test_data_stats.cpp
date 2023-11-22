@@ -203,7 +203,7 @@ TEST(TestDataStats, TestDistinct) {
     algos::DataStats &stats = *stats_ptr;
     auto distinct = stats.Distinct(3);
     EXPECT_EQ(5, distinct);
-    EXPECT_EQ(6, stats.Distinct(5)); // mixed column
+    EXPECT_EQ(6, stats.Distinct(5));  // mixed column
 }
 
 TEST(TestDataStats, TestDistinctStringColumn) {
@@ -246,9 +246,9 @@ TEST(TestDataStats, TestShowSample) {
     auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
-    for(const auto& row : sample) {
+    for (const auto &row : sample) {
         std::stringstream result;
-        for(const auto& str : row) {
+        for (const auto &str : row) {
             result << str << " \t";
         }
         LOG(INFO) << result.str();
@@ -297,7 +297,7 @@ TEST(TestDataStats, CorrectExecutionEmpty) {
     EXPECT_EQ(stats.GetAllStats().size(), 0);
 }
 
-//To measure performace of mining statistics in multiple threads.
+// To measure performace of mining statistics in multiple threads.
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
