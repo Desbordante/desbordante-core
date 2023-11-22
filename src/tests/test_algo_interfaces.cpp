@@ -30,7 +30,7 @@ struct KeysTestParams {
 
 class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 
-template<typename AlgoInterface>
+template <typename AlgoInterface>
 static inline void GetKeysTestImpl(KeysTestParams const& p) {
     namespace onam = config::names;
     auto path = test_data_dir / p.dataset;
@@ -41,7 +41,7 @@ static inline void GetKeysTestImpl(KeysTestParams const& p) {
                             {onam::kSeed, decltype(pyro::Parameters::seed){0}},
                             {onam::kError, config::ErrorType{0.0}}};
     auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
-    auto &pyro = *pyro_ptr;
+    auto& pyro = *pyro_ptr;
 
     pyro.Execute();
 

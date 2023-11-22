@@ -42,13 +42,11 @@ std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(std::string const& p
     return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(path, separator, has_header));
 }
 
-class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {
-};
+class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {};
 
 std::vector<unsigned int> FD_MineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first();
-         index != boost::dynamic_bitset<>::npos;
+    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
         res.push_back(index);
     }
@@ -56,11 +54,11 @@ std::vector<unsigned int> FD_MineBitsetToIndexVector(boost::dynamic_bitset<> con
 }
 
 testing::AssertionResult FD_Mine_CheckFDListEquality(
-    std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
-    std::list<FD> const& expected) {
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
+        std::list<FD> const& expected) {
     for (auto& fd : expected) {
         std::vector<unsigned int> lhs_indices =
-            FD_MineBitsetToIndexVector(fd.GetLhs().GetColumnIndices());
+                FD_MineBitsetToIndexVector(fd.GetLhs().GetColumnIndices());
         std::sort(lhs_indices.begin(), lhs_indices.end());
 
         if (auto it = actual.find(std::make_pair(lhs_indices, fd.GetRhs().GetIndex()));
@@ -196,11 +194,10 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
 
             EXPECT_EQ(results_pyro, algorithm_results)
-                << "The new algorithm and Pyro yield different results at "
-                << LightDatasets::DatasetName(i);
+                    << "The new algorithm and Pyro yield different results at "
+                    << LightDatasets::DatasetName(i);
         }
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;
         FAIL();
     }
