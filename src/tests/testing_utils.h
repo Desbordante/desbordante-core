@@ -12,14 +12,15 @@
 
 template <typename T>
 class AlgorithmTest : public ::testing::Test {
-    config::InputTable MakeCsvParser(std::string const& path, char separator, bool has_header) {
+    static config::InputTable MakeCsvParser(std::string const& path, char separator,
+                                            bool has_header) {
         return std::make_shared<CSVParser>(path, separator, has_header);
     }
 
 protected:
-    std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(std::string const& path,
-                                                            char separator = ',',
-                                                            bool has_header = true) {
+    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(std::string const& path,
+                                                                   char separator = ',',
+                                                                   bool has_header = true) {
         using config::InputTable, algos::ConfigureFromMap, algos::StdParamsMap;
         std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
         auto parser = MakeCsvParser(path, separator, has_header);
@@ -27,8 +28,8 @@ protected:
         return algorithm;
     }
 
-    algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator = ',',
-                                    bool has_header = true) {
+    static algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator = ',',
+                                           bool has_header = true) {
         using namespace config::names;
         return {
                 {kTable, MakeCsvParser(path, separator, has_header)},
@@ -37,9 +38,9 @@ protected:
         };
     }
 
-    std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(const std::string& filename,
-                                                                char separator = ',',
-                                                                bool has_header = true) {
+    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(const std::string& filename,
+                                                                       char separator = ',',
+                                                                       bool has_header = true) {
         return algos::CreateAndLoadAlgorithm<T>(
                 GetParamMap(test_data_dir / filename, separator, has_header));
     }
