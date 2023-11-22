@@ -10,7 +10,7 @@ struct Dataset {
     std::string name;
     size_t hash;
     char separator;
-    bool header_presence;
+    bool has_header;
 };
 
 class LightDatasets {
@@ -40,7 +40,7 @@ public:
         return datasets_[i].separator;
     }
     static bool HasHeader(size_t i) {
-        return datasets_[i].header_presence;
+        return datasets_[i].has_header;
     }
     static unsigned int Hash(size_t i) {
         return datasets_[i].hash;
@@ -69,7 +69,7 @@ public:
         return datasets_[i].separator;
     }
     static bool HasHeader(size_t i) {
-        return datasets_[i].header_presence;
+        return datasets_[i].has_header;
     }
     static unsigned int Hash(size_t i) {
         return datasets_[i].hash;
