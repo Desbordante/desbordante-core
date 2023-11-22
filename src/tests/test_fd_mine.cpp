@@ -152,19 +152,18 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     namespace onam = config::names;
 
     try {
-        for (size_t i = 0; i < LightDatasets::DatasetQuantity(); i++) {
-            std::cout << LightDatasets::DatasetName(i) << std::endl;
+        for (Dataset const& dataset : LightDatasets::datasets_) {
             // TODO: change this hotfix
-            if (LightDatasets::DatasetName(i) == "breast_cancer.csv") {
+            if (dataset.name == "breast_cancer.csv") {
                 continue;
             }
-            auto algorithm = CreateFD_MineAlgorithmInstance(
-                    test_data_dir / LightDatasets::DatasetName(i), LightDatasets::Separator(i),
-                    LightDatasets::HasHeader(i));
+            auto path = test_data_dir / dataset.name;
+            auto algorithm =
+                    CreateFD_MineAlgorithmInstance(path, dataset.separator, dataset.has_header);
 
-            StdParamsMap params_map{{onam::kCsvPath, test_data_dir / LightDatasets::DatasetName(i)},
-                                    {onam::kSeparator, LightDatasets::Separator(i)},
-                                    {onam::kHasHeader, LightDatasets::HasHeader(i)},
+            StdParamsMap params_map{{onam::kCsvPath, path},
+                                    {onam::kSeparator, dataset.separator},
+                                    {onam::kHasHeader, dataset.has_header},
                                     {onam::kSeed, decltype(pyro::Parameters::seed){0}},
                                     {onam::kError, config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
@@ -189,13 +188,11 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             }
 
             MinimizeFDs(fds);
-            // std::string algorithm_results = algorithm->GetJsonFDs();
             std::string algorithm_results = GetJsonFDs(fds);
             std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
 
             EXPECT_EQ(results_pyro, algorithm_results)
-                    << "The new algorithm and Pyro yield different results at "
-                    << LightDatasets::DatasetName(i);
+                    << "The new algorithm and Pyro yield different results at " << dataset.name;
         }
     } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;
