@@ -88,4 +88,5 @@ constexpr auto kDIgnoreConstantCols =
         "increase performance but impacts the result. [true|false]";
 constexpr auto kDGraphData = "Path to dot-file with graph";
 constexpr auto kDGfdData = "Path to file with GFD";
+constexpr auto kDMemLimitMB = "memory limit im MBs";
 }  // namespace config::descriptions
