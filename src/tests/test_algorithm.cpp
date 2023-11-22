@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
  * 1. extends FDAlgorithm
  * 2. stores the results in FDAlgorithm::fd_collection_
  * 3. has a constructor with signature: myAlgorithm(fs::path const& path, char separator, bool
- * hasHeader)
+ * has_header)
  *
  * To test your algorithm, just:
  * 1. include the header
