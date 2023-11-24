@@ -2,6 +2,8 @@
 #include <utility>
 #include <vector>
 
+#include "model/table/column_index.h"
+
 namespace model {
 
 class PositionListIndex;
@@ -11,7 +13,7 @@ class PositionListIndex;
 namespace algos::hy {
 
 // Row (or column) position in the table
-using TablePos = unsigned int;
+using TablePos = model::ColumnIndex;
 using ClusterId = unsigned int;
 
 // Represents a relation as a list of position list indexes. i-th PLI is a PLI built on i-th column
