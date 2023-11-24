@@ -1,17 +1,18 @@
 #pragma once
 
 #include <string>
-
-#include <boost/dynamic_bitset.hpp>
 #include <utility>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "column_index.h"
 #include "relational_schema.h"
 
 class Column {
     friend RelationalSchema;
 
 public:
-    using IndexType = size_t;
+    using IndexType = model::ColumnIndex;
 
 private:
     std::string name_;

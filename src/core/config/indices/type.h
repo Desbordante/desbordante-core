@@ -2,7 +2,9 @@
 
 #include <vector>
 
+#include "model/table/column_index.h"
+
 namespace config {
-using IndexType = unsigned int;
+using IndexType = model::ColumnIndex;
 using IndicesType = std::vector<IndexType>;
 }  // namespace config
