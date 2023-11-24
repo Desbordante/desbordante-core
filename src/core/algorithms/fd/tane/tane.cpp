@@ -11,12 +11,13 @@
 #include "config/max_lhs/option.h"
 #include "lattice_level.h"
 #include "lattice_vertex.h"
-#include "model/table/column_combination.h"
 #include "model/table/column_data.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/relational_schema.h"
 
 namespace algos {
+
+using boost::dynamic_bitset;
 
 Tane::Tane() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();

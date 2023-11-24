@@ -8,6 +8,8 @@
 
 namespace algos {
 
+using boost::dynamic_bitset;
+
 Fd_mine::Fd_mine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
 void Fd_mine::ResetStateFd() {
