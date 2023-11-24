@@ -113,8 +113,8 @@ void FastFDs::FindCovers(Column const& attribute, vector<DiffSet> const& diff_se
                          vector<DiffSet> const& cur_diff_sets, Vertical const& path,
                          set<Column, OrderingComparator> const& ordering) {
     if (path.GetArity() > max_lhs_) {
-            return;
-        }
+        return;
+    }
 
     if (ordering.size() == 0 && !cur_diff_sets.empty()) {
         return; // no FDs here
