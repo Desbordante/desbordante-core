@@ -4,8 +4,6 @@
 
 #include <easylogging++.h>
 
-#include "model/table/column_combination.h"
-
 namespace model {
 
 using std::move, std::min, std::shared_ptr, std::vector, std::sort, std::make_shared;
@@ -63,9 +61,10 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
 
             Vertical child_columns = vertex1->GetVertical().Union(vertex2->GetVertical());
             std::unique_ptr<LatticeVertex> child_vertex =
-                std::make_unique<LatticeVertex>(child_columns);
+                    std::make_unique<LatticeVertex>(child_columns);
 
-            dynamic_bitset<> parent_indices(vertex1->GetVertical().GetSchema()->GetNumColumns());
+            boost::dynamic_bitset<> parent_indices(
+                    vertex1->GetVertical().GetSchema()->GetNumColumns());
             parent_indices |= vertex1->GetVertical().GetColumnIndices();
             parent_indices |= vertex2->GetVertical().GetColumnIndices();
 
@@ -79,7 +78,7 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
                  i++, skip_index = parent_indices.find_next(skip_index)) {
                 parent_indices[skip_index] = false;
                 LatticeVertex const* parent_vertex =
-                    current_level->GetLatticeVertex(parent_indices);
+                        current_level->GetLatticeVertex(parent_indices);
 
                 if (parent_vertex == nullptr) {
                     goto continueMidOuter;
