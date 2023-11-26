@@ -29,6 +29,8 @@ public:
     }
 
     std::string ToString() const;
+
+    virtual ~ColumnCombination() = default;
 };
 
 }  // namespace model
