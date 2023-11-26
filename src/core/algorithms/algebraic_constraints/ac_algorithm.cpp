@@ -53,7 +53,8 @@ void ACAlgorithm::RegisterOptions() {
             throw config::ConfigurationError("p_fuzz out of range");
     };
     auto check_fuzziness = [](double parameter) {
-        if (parameter < 0 || parameter > 1) config::ConfigurationError("Parameter out of range");
+        if (parameter < 0 || parameter > 1)
+            throw config::ConfigurationError("Parameter out of range");
     };
     auto check_non_negative = [](int parameter) {
         if (parameter < 0) throw config::ConfigurationError("Parameter out of range");
