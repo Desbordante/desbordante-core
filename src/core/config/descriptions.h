@@ -9,7 +9,9 @@
 
 namespace config::descriptions {
 constexpr auto kDTable = "table processed by the algorithm";
+constexpr auto kDTables = "table collection processed by the algorithm";
 constexpr auto kDCsvPath = "path to the CSV table";
+constexpr auto kDCsvPaths = "path to the collection of CSV tables";
 constexpr auto kDSeparator = "CSV separator";
 constexpr auto kDHasHeader = "CSV header presence flag [true|false]";
 constexpr auto kDEqualNulls = "specify whether two NULLs should be considered equal";

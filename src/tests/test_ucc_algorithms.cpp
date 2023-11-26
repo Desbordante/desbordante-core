@@ -123,8 +123,8 @@ template <typename T>
 void PerformConsistentHashTestOn(std::vector<Dataset> const& datasets) {
     for (Dataset const& dataset : datasets) {
         try {
-            auto ucc_algo = T::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                       dataset.header_presence);
+            auto ucc_algo =
+                    T::CreateAlgorithmInstance(dataset.name, dataset.separator, dataset.has_header);
             ucc_algo->Execute();
 
             std::list<model::UCC> const& actual_list = ucc_algo->UCCList();

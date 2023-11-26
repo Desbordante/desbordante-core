@@ -193,9 +193,8 @@ TYPED_TEST(TestNumeric, Dist) {
     using Type = typename TypeParam::UnderlyingType;
     auto test = [this](Type l, Type r) {
         this->SetActualAndLiteral(l, r);
-        EXPECT_DOUBLE_EQ(std::abs(l - r),
-                         this->type_->Dist(this->actual_ptr_, this->literal_ptr_))
-            << this->GetErrorStr(l, r);
+        EXPECT_DOUBLE_EQ(std::abs(l - r), this->type_->Dist(this->actual_ptr_, this->literal_ptr_))
+                << this->GetErrorStr(l, r);
     };
 
     test(0, 100);
@@ -223,8 +222,7 @@ struct TestStringParam {
     std::string const l;
     std::string const r;
 
-    TestStringParam(std::string l, std::string r) noexcept
-        : l(std::move(l)), r(std::move(r)) {}
+    TestStringParam(std::string l, std::string r) noexcept : l(std::move(l)), r(std::move(r)) {}
 };
 
 class TestString : public ::testing::TestWithParam<TestStringParam> {};
@@ -258,10 +256,8 @@ TEST_P(TestString, Default) {
 INSTANTIATE_TEST_SUITE_P(TestStringSuite, TestString,
                          ::testing::Values(TestStringParam("123", "123"),
                                            TestStringParam("aa", "bbbb"),
-                                           TestStringParam("a", "abcde"),
-                                           TestStringParam("", ""),
-                                           TestStringParam("", "abc"),
-                                           TestStringParam("abc", ""),
+                                           TestStringParam("a", "abcde"), TestStringParam("", ""),
+                                           TestStringParam("", "abc"), TestStringParam("abc", ""),
                                            TestStringParam("bb", "aa")));
 namespace {
 using DatePtr = std::unique_ptr<std::byte[], mo::DateTypeDeleter>;

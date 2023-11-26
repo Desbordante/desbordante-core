@@ -1,22 +1,32 @@
-//
-// Created by Ilya Vologin
-// https://github.com/cupertank
-//
-
-
 #pragma once
 
-#include "vertical.h"
+#include <string>
+#include <vector>
 
-#include <boost/dynamic_bitset.hpp>
+#include "column_index.h"
 
-using boost::dynamic_bitset, std::string;
+namespace model {
 
-//useless class - think about deprecation
-/*class ColumnCombination : public Vertical {
+// Represents an index for a table within a set of tables
+// As an example, this type is used in inclusion dependencies
+using TableIndex = unsigned int;
+
+class ColumnCombination {
+protected:
+    TableIndex table_index_;
+    std::vector<ColumnIndex> column_indices_;
 
 public:
-    ColumnCombination(dynamic_bitset<> column_indices_, shared_ptr<RelationalSchema> schema);
-    explicit ColumnCombination(Vertical&& vertical) : Vertical(vertical) {}     //or const&??
-    string ToString() override ;
-};*/
+    ColumnCombination(TableIndex table_index, std::vector<ColumnIndex> col_indices)
+        : table_index_(table_index), column_indices_(std::move(col_indices)) {}
+
+    TableIndex GetTableIndex() const {
+        return table_index_;
+    }
+    std::vector<ColumnIndex> const& GetColumnIndices() const {
+        return column_indices_;
+    }
+    std::string ToString() const;
+};
+
+}  // namespace model

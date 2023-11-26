@@ -7,7 +7,6 @@
 #include <easylogging++.h>
 
 #include "model/table/agree_set_factory.h"
-#include "model/table/column_combination.h"
 #include "model/table/relational_schema.h"
 
 namespace algos {

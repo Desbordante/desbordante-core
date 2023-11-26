@@ -28,7 +28,7 @@ namespace fs = std::filesystem;
  * 1. extends FDAlgorithm
  * 2. stores the results in FDAlgorithm::fd_collection_
  * 3. has a constructor with signature: myAlgorithm(fs::path const& path, char separator, bool
- * hasHeader)
+ * has_header)
  *
  * To test your algorithm, just:
  * 1. include the header
@@ -37,8 +37,7 @@ namespace fs = std::filesystem;
 
 std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first();
-         index != boost::dynamic_bitset<>::npos;
+    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
         res.push_back(index);
     }
@@ -46,8 +45,8 @@ std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bit
 }
 
 testing::AssertionResult CheckFdListEquality(
-    std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
-    std::list<FD> const& expected) {
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
+        std::list<FD> const& expected) {
     for (auto& fd : expected) {
         std::vector<unsigned int> lhs_indices = BitsetToIndexVector(fd.GetLhs().GetColumnIndices());
         std::sort(lhs_indices.begin(), lhs_indices.end());
@@ -97,7 +96,7 @@ TYPED_TEST_P(AlgorithmTest, WorksOnLongDataset) {
 
 TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{
-        {{0}, 2}, {{0}, 4}, {{2}, 0}, {{2}, 4}, {{4}, 0}, {{4}, 2}, {{}, 1}, {{}, 3}};
+            {{0}, 2}, {{0}, 4}, {{2}, 0}, {{2}, 4}, {{4}, 0}, {{4}, 2}, {{}, 1}, {{}, 3}};
 
     auto algorithm = TestFixture::CreateAlgorithmInstance("TestWide.csv", ',', true);
     algorithm->Execute();
@@ -108,14 +107,13 @@ TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
     try {
         for (auto const& dataset : LightDatasets::datasets_) {
             auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.header_presence);
+                                                                  dataset.has_header);
             algorithm->Execute();
             std::cout << dataset.name << std::endl;
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
-                << "FD collection hash changed for " << dataset.name;
+                    << "FD collection hash changed for " << dataset.name;
         }
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;
         FAIL();
     }
@@ -126,13 +124,12 @@ TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
     try {
         for (auto const& dataset : HeavyDatasets::datasets_) {
             auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.header_presence);
+                                                                  dataset.has_header);
             algorithm->Execute();
             EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
-                << "The new algorithm and Pyro yield different results at " << dataset.name;
+                    << "The new algorithm and Pyro yield different results at " << dataset.name;
         }
-    }
-    catch (std::runtime_error& e) {
+    } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;
         FAIL();
     }
