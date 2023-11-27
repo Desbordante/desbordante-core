@@ -1,16 +1,36 @@
 #pragma once
 
 #include <filesystem>
-#include <string>
+#include <string_view>
 #include <vector>
 
-static const auto test_data_dir = std::filesystem::current_path() / "input_data";
+#include "config/tabular_data/input_table_type.h"
+#include "parser/csv_parser/csv_parser.h"
+
+namespace tests {
+
+static auto const test_data_dir = std::filesystem::current_path() / "input_data";
 
 struct Dataset {
     std::string name;
     size_t hash;
     char separator;
     bool has_header;
+};
+
+/// csv table configuration info to create an input table
+struct TableConfig {
+    std::string_view name;
+    char separator;
+    bool has_header;
+
+    std::filesystem::path GetPath() const {
+        return test_data_dir / name;
+    }
+
+    config::InputTable MakeInputTable() const {
+        return std::make_shared<CSVParser>(GetPath(), separator, has_header);
+    }
 };
 
 class LightDatasets {
