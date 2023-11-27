@@ -16,12 +16,14 @@
 #include "algorithms/fd/tane/tane.h"
 #include "datasets.h"
 #include "model/table/relational_schema.h"
-#include "testing_utils.h"
+#include "test_fd_util.h"
 
 using std::string, std::vector;
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace fs = std::filesystem;
+
+namespace tests {
 
 /* This is a test suite for algorithm verification. It should be possible to run these tests for any
  * algorithm that:
@@ -76,12 +78,12 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<
 TYPED_TEST_SUITE_P(AlgorithmTest);
 
 TYPED_TEST_P(AlgorithmTest, ThrowsOnEmpty) {
-    auto algorithm = TestFixture::CreateAndConfToLoad(test_data_dir / "TestEmpty.csv", ',', true);
+    auto algorithm = TestFixture::CreateAndConfToLoad(kTestEmpty);
     ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
 }
 
 TYPED_TEST_P(AlgorithmTest, ReturnsEmptyOnSingleNonKey) {
-    auto algorithm = TestFixture::CreateAlgorithmInstance("TestSingleColumn.csv", ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestSingleColumn);
     algorithm->Execute();
     ASSERT_TRUE(algorithm->FdList().empty());
 }
@@ -89,7 +91,7 @@ TYPED_TEST_P(AlgorithmTest, ReturnsEmptyOnSingleNonKey) {
 TYPED_TEST_P(AlgorithmTest, WorksOnLongDataset) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
 
-    auto algorithm = TestFixture::CreateAlgorithmInstance("TestLong.csv", ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestLong);
     algorithm->Execute();
     ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
@@ -98,51 +100,25 @@ TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{
             {{0}, 2}, {{0}, 4}, {{2}, 0}, {{2}, 4}, {{4}, 0}, {{4}, 2}, {{}, 1}, {{}, 3}};
 
-    auto algorithm = TestFixture::CreateAlgorithmInstance("TestWide.csv", ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kTestWide);
     algorithm->Execute();
     ASSERT_TRUE(CheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
 
 TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
-    try {
-        for (auto const& dataset : LightDatasets::datasets_) {
-            auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.has_header);
-            algorithm->Execute();
-            std::cout << dataset.name << std::endl;
-            EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
-                    << "FD collection hash changed for " << dataset.name;
-        }
-    } catch (std::runtime_error& e) {
-        std::cout << "Exception raised in test: " << e.what() << std::endl;
-        FAIL();
-    }
-    SUCCEED();
+    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
 }
 
 TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
-    try {
-        for (auto const& dataset : HeavyDatasets::datasets_) {
-            auto algorithm = TestFixture::CreateAlgorithmInstance(dataset.name, dataset.separator,
-                                                                  dataset.has_header);
-            algorithm->Execute();
-            EXPECT_EQ(algorithm->Fletcher16(), dataset.hash)
-                    << "The new algorithm and Pyro yield different results at " << dataset.name;
-        }
-    } catch (std::runtime_error& e) {
-        std::cout << "Exception raised in test: " << e.what() << std::endl;
-        FAIL();
-    }
-    SUCCEED();
+    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
 }
 
 TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
-    auto const path = test_data_dir / "WDC_astronomical.csv";
-    auto algorithm = TestFixture::CreateAlgorithmInstance(path, ',', true);
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kWDC_astronomical);
     algorithm->Execute();
     auto first_res = FDsToSet(algorithm->FdList());
     for (int i = 0; i < 3; ++i) {
-        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(path, ',', true));
+        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWDC_astronomical));
         algorithm->Execute();
         ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
     }
@@ -155,3 +131,5 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
 using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
                                     algos::Depminer, algos::FDep, algos::FUN, algos::hyfd::HyFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
+
+}  // namespace tests
