@@ -7,6 +7,7 @@ name = "desbordante"
 version = "1.0.0"
 description = "Python bindings for Desbordante, a science-intensive high-performance data profiler"
 requires-python = ">=3.7"
+readme = "README_PYPI.md"
 license = { text = "AGPL-3.0-only" }
 
 [tool.scikit-build.cmake.define]
