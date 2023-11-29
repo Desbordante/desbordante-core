@@ -9,7 +9,8 @@ namespace config {
 
 // This class is meant for creating options that are collections of indices.
 struct IndicesOption {
-    IndicesOption(std::string_view name, std::string_view description);
+    IndicesOption(std::string_view name, std::string_view description,
+                  typename Option<config::IndicesType>::DefaultFunc calculate_default = nullptr);
 
     [[nodiscard]] std::string_view GetName() const;
 
