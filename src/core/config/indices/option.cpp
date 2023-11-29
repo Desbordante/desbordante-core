@@ -13,8 +13,9 @@ static void NormalizeIndices(config::IndicesType& indices) {
     indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
 }
 
-IndicesOption::IndicesOption(std::string_view name, std::string_view description)
-    : common_option_(name, description, {}, NormalizeIndices) {}
+IndicesOption::IndicesOption(std::string_view name, std::string_view description,
+                             typename Option<config::IndicesType>::DefaultFunc calculate_default)
+    : common_option_(name, description, std::move(calculate_default), NormalizeIndices, nullptr) {}
 
 std::string_view IndicesOption::GetName() const {
     return common_option_.GetName();
