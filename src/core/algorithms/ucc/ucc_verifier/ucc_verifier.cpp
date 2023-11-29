@@ -1,6 +1,7 @@
 #include "ucc_verifier.h"
 
 #include <chrono>
+#include <numeric>
 #include <stdexcept>
 
 #include "config/equal_nulls/option.h"
@@ -19,10 +20,15 @@ UCCVerifier::UCCVerifier() : Algorithm({}) {
 void UCCVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
+    auto calculate_default = [get_schema_cols]() {
+        config::IndicesType indices(get_schema_cols());
+        std::iota(indices.begin(), indices.end(), 0);
+        return indices;
+    };
     RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(
-            config::IndicesOption{kUCCIndices, kDUCCIndices}(&column_indices_, get_schema_cols));
+    RegisterOption(config::IndicesOption{kUCCIndices, kDUCCIndices, std::move(calculate_default)}(
+            &column_indices_, std::move(get_schema_cols)));
 }
 
 void UCCVerifier::MakeExecuteOptsAvailable() {
