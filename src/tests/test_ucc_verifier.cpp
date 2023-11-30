@@ -22,14 +22,19 @@ public:
                             std::vector<model::PLI::Cluster> clusters_violating_ucc,
                             std::string_view dataset, char const separator = ',',
                             bool const has_header = true)
-        : params_map_({{onam::kUCCIndices, std::move(column_indices)},
-                       {onam::kCsvPath, test_data_dir / dataset},
+        : params_map_({{onam::kCsvPath, test_data_dir / dataset},
                        {onam::kSeparator, separator},
                        {onam::kHasHeader, has_header},
                        {onam::kEqualNulls, true}}),
           num_clusters_violating_ucc_(num_clusters_violating_ucc),
           num_rows_violating_ucc_(num_rows_violating_ucc),
-          clusters_violating_ucc_(std::move(clusters_violating_ucc)) {}
+          clusters_violating_ucc_(std::move(clusters_violating_ucc)) {
+        // if column_indices is empty then it is not inserted into params_map_ (and this option is
+        // not passed to the algorithm), in this case default implementation will be used
+        if (!column_indices.empty()) {
+            params_map_.insert({onam::kUCCIndices, std::move(column_indices)});
+        }
+    }
 
     algos::StdParamsMap GetParamsMap() const {
         return params_map_;
@@ -91,18 +96,20 @@ TEST_P(TestUCCVerifierSimple, DefaultTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         UCCVerifierSimpleTestSuite, TestUCCVerifierSimple,
-        ::testing::Values(UCCVerifierSimpleParams({0}, 1, 12,
-                                                  {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
-                                                  "TestFD.csv"),
-                          UCCVerifierSimpleParams({0, 1}, 4, 12,
-                                                  {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}},
-                                                  "TestFD.csv"),
-                          UCCVerifierSimpleParams({0, 1, 2}, 4, 8,
-                                                  {{0, 1}, {3, 4}, {6, 7}, {9, 10}}, "TestFD.csv"),
-                          UCCVerifierSimpleParams({0, 1, 2, 3, 4, 5}, 3, 6,
-                                                  {{3, 4}, {6, 7}, {9, 10}}, "TestFD.csv"),
-                          UCCVerifierSimpleParams({0}, 0, 0, {}, "TestWide.csv"),
-                          UCCVerifierSimpleParams({0, 1, 2, 3, 4}, 0, 0, {}, "TestWide.csv")));
+        ::testing::Values(
+                UCCVerifierSimpleParams({0}, 1, 12, {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
+                                        "TestFD.csv"),
+                UCCVerifierSimpleParams({0, 1}, 4, 12,
+                                        {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}},
+                                        "TestFD.csv"),
+                UCCVerifierSimpleParams({0, 1, 2}, 4, 8, {{0, 1}, {3, 4}, {6, 7}, {9, 10}},
+                                        "TestFD.csv"),
+                UCCVerifierSimpleParams({0, 1, 2, 3, 4, 5}, 3, 6, {{3, 4}, {6, 7}, {9, 10}},
+                                        "TestFD.csv"),
+                UCCVerifierSimpleParams({0}, 0, 0, {}, "TestWide.csv"),
+                UCCVerifierSimpleParams({0, 1, 2, 3, 4}, 0, 0, {}, "TestWide.csv"),
+                UCCVerifierSimpleParams({}, 3, 6, {{3, 4}, {6, 7}, {9, 10}}, "TestFD.csv"),
+                UCCVerifierSimpleParams({}, 0, 0, {}, "TestWide.csv")));
 
 TEST_P(TestUCCVerifierWithHyUCC, TestWithHyUCC) {
     UCCVerifierWithHyUCCParams const& p(GetParam());
