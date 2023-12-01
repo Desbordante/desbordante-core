@@ -75,9 +75,12 @@ public:
         throw std::logic_error("Mixed type does not have a fixed size");
     }
 
-    [[nodiscard]]std::byte* Clone(std::byte const* value)const override{
+    [[nodiscard]] std::byte* Clone(std::byte const* value) const final {
         std::unique_ptr<Type> type = RetrieveType(value);
-        return type->Clone(value);
+        size_t size = GetMixedValueSize(type.get());
+        auto* new_value = new std::byte[size];
+        type->Clone(value,new_value,size);
+        return new_value;
     }
 
     /* Note: first kTypeIdSize bytes of dest should contain type_id to cast to */
