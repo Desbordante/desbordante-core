@@ -1,0 +1,143 @@
+name: Wheel
+on:
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  release:
+    types:
+      - published
+jobs:
+  generate-wheels-matrix:
+    # https://iscinumpy.dev/post/cibuildwheel-2-10-0/
+    name: Generate wheels matrix
+    runs-on: ubuntu-latest
+    outputs:
+      include: ${{ steps.set-matrix.outputs.include }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install cibuildwheel
+        run: pipx install cibuildwheel==2.16.2
+      - id: set-matrix
+        run: |
+          MATRIX=$(
+            {
+              cibuildwheel --print-build-identifiers --platform linux \
+              | jq -nRc '{"only": inputs, "os": "ubuntu-latest"}'
+            } | jq -sc
+          )
+          echo "include=$MATRIX" >> $GITHUB_OUTPUT
+    env:
+      CIBW_ARCHS_LINUX: x86_64
+      # Builds wheels for PyPy & CPython on manylinux
+      CIBW_BUILD: "*manylinux*"
+      # musllinux crashes during Boost 1.78.0 compilation
+      # May be related to https://bugs.gentoo.org/829147
+      # Perhaps that bumping Boost version in workflow can solve the issue
+      CIBW_SKIP: "*musllinux*"
+      CIBW_TEST_REQUIRES: pytest
+      CIBW_BUILD_VERBOSITY: 1
+      CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+
+  build-wheels:
+    name: Build ${{ matrix.only }}
+    needs: generate-wheels-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.generate-wheels-matrix.outputs.include) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download libraries
+        uses: ./.github/composite-actions/download-libraries
+        with:
+          download-pybind: true
+          download-googletest: false
+
+      - name: Cache unpacked Boost
+        uses: actions/cache@v3
+        id: cache-unpacked-boost
+        with:
+          path: ${{github.workspace}}/lib/boost_1_78_0
+          key: ${{ runner.os }}-boost-for-wheels-78
+
+      - name: Download & unpack Boost
+        run: |
+          cd ${{github.workspace}}/lib
+          wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
+          tar xzf boost_1_78_0.tar.gz
+        shell: bash
+        if: steps.cache-unpacked-boost.outputs.cache-hit != 'true'
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        with:
+          only: ${{ matrix.only }}
+        env:
+          CIBW_BEFORE_ALL: >
+            cd lib/boost_1_78_0 && 
+            ./bootstrap.sh --prefix=/usr/local &&
+            ./b2 install -j4 --prefix=/usr/local
+          CIBW_TEST_COMMAND: >
+            cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
+            cd {project}/src/python_bindings &&
+            python3 {project}/src/python_bindings/test_bindings.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-${{ matrix.only }}
+          if-no-files-found: ignore
+          path: ./wheelhouse/*.whl
+
+  merge-artifacts:
+    name: Merge artifacts
+    runs-on: ubuntu-latest
+    needs: build-wheels
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download all artifacts from previous step
+        uses: actions/download-artifact@v3
+        with:
+          path: wheel-artifacts
+
+      - name: Delete old artifacts
+        uses: geekyeggo/delete-artifact@v2
+        with:
+          name: artifact-*
+          failOnError: false
+
+      - run: mkdir -p wheelhouse
+      - name: Flattening nested directories
+        run: find wheel-artifacts -mindepth 2 -type f -exec mv -i '{}' wheelhouse ';'
+
+      - name: Upload a single artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: wheelhouse/*.whl
+
+  publish-wheels:
+    needs: merge-artifacts
+    name: Publish wheels
+    # Related:
+    # https://learn.scientific-python.org/development/guides/gha-wheels/
+    # https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/
+    environment: pypi
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Download wheels
+        uses: actions/download-artifact@v3
+        with:
+          name: wheels
+          path: dist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
