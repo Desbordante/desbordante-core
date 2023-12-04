@@ -9,7 +9,7 @@ add_executable(${BINARY} ${test_sources})
 add_test(NAME ${BINARY} COMMAND ${BINARY})
 
 # linking with gtest and implemented classes
-target_link_libraries(${BINARY} PRIVATE ${CMAKE_PROJECT_NAME}_lib gtest gmock)
+target_link_libraries(${BINARY} PRIVATE ${CMAKE_PROJECT_NAME} gtest gmock)
 
 # copying sample csv's for testing
 add_custom_target(copy-files ALL
