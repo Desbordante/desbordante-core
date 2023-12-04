@@ -39,4 +39,5 @@
 #include "algorithms/ind/faida/faida.h"
 
 /* Graph functional dependency mining algorithms */
+#include "algorithms/gfd/egfd_validation.h"
 #include "algorithms/gfd/gfd_validation.h"
