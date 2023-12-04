@@ -86,4 +86,6 @@ constexpr auto kDIgnoreNullCols =
 constexpr auto kDIgnoreConstantCols =
         "Ignore INDs which contain columns filled with only one value. May "
         "increase performance but impacts the result. [true|false]";
+constexpr auto kDGraphData = "Path to dot-file with graph";
+constexpr auto kDGfdData = "Path to file with GFD";
 }  // namespace config::descriptions

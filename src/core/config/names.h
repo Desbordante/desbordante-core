@@ -49,4 +49,6 @@ constexpr auto kSampleSize = "sample_size";
 constexpr auto kFindNary = "find_nary";
 constexpr auto kIgnoreNullCols = "ignore_null_cols";
 constexpr auto kIgnoreConstantCols = "ignore_constant_cols";
+constexpr auto kGraphData = "graph";
+constexpr auto kGfdData = "gfd";
 }  // namespace config::names
