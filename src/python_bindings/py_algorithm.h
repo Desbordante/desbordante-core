@@ -30,6 +30,7 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetPossibleOptions() const;
 
+    [[nodiscard]] std::string_view GetDescription(std::string_view option_name) const;
     [[nodiscard]] pybind11::tuple GetOptionType(std::string_view option_name) const;
 
     // For pandas dataframes
