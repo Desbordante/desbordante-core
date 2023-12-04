@@ -37,3 +37,6 @@
 
 /* Inclusion dependency mining algorithms */
 #include "algorithms/ind/faida/faida.h"
+
+/* Graph functional dependency mining algorithms */
+#include "algorithms/gfd/gfd_validation.h"
