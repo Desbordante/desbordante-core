@@ -137,5 +137,14 @@ std::unordered_set<std::string_view> Algorithm::GetPossibleOptions() const {
     return possible_options;
 }
 
+std::string_view Algorithm::GetDescription(std::string_view option_name) const {
+    auto it = possible_options_.find(option_name);
+    if (it == possible_options_.end()) {
+        return "";
+    } else {
+        return it->second->GetDescription();
+    }
+}
+
 }  // namespace algos
 

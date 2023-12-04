@@ -104,6 +104,7 @@ public:
     std::type_index GetTypeIndex(std::string_view option_name) const;
 
     [[nodiscard]] std::unordered_set<std::string_view> GetPossibleOptions() const;
+    [[nodiscard]] std::string_view GetDescription(std::string_view option_name) const;
 };
 
 }  // namespace algos
