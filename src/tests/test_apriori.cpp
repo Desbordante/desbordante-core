@@ -5,7 +5,7 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/association_rules/apriori.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace fs = std::filesystem;
 

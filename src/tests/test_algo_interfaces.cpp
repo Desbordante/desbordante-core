@@ -9,7 +9,7 @@
 #include "algorithms/fd/pyro/pyro.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 

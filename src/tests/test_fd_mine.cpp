@@ -12,8 +12,8 @@
 #include "algorithms/fd/tane/tane.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "datasets.h"
 #include "model/table/relational_schema.h"
+#include "table_config.h"
 #include "test_fd_util.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
