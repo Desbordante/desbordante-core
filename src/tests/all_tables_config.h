@@ -1,6 +1,6 @@
 #pragma once
 
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 extern TableConfig const kWDC_astronomical;

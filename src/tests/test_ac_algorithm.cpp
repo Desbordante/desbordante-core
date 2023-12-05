@@ -7,7 +7,7 @@
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/algo_factory.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 #include "types.h"
 
 namespace {

@@ -3,7 +3,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 namespace mo = model;

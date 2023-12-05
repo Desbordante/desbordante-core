@@ -12,7 +12,7 @@
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "all_tables_config.h"
 #include "config/thread_number/type.h"
-#include "datasets.h"
+#include "table_config.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();

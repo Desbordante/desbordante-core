@@ -9,7 +9,7 @@
 #include "all_tables_config.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 template <typename T>

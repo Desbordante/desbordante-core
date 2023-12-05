@@ -11,7 +11,7 @@
 #include "algorithms/metric/enums.h"
 #include "algorithms/metric/metric_verifier.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 namespace onam = config::names;

@@ -14,8 +14,8 @@
 #include "algorithms/fd/hyfd/hyfd.h"
 #include "algorithms/fd/pyro/pyro.h"
 #include "algorithms/fd/tane/tane.h"
-#include "datasets.h"
 #include "model/table/relational_schema.h"
+#include "table_config.h"
 #include "test_fd_util.h"
 
 using std::string, std::vector;

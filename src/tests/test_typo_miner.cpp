@@ -7,7 +7,7 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 namespace onam = config::names;
