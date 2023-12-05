@@ -49,7 +49,7 @@ public:
         return name_;
     }
 
-    [[nodiscard]] std::string_view GetDescription() const {
+    [[nodiscard]] std::string_view GetDescription() const override {
         return description_;
     }
 
