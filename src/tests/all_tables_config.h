@@ -42,4 +42,5 @@ extern TableConfig const kIndTestPlanets;
 extern TableConfig const kIndTest3aryInds;
 extern TableConfig const kIndTestTableFirst;
 extern TableConfig const kIndTestTableSecond;
+extern TableConfig const kIndTestNulls;
 }  // namespace tests

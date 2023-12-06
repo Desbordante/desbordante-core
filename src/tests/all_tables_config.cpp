@@ -40,4 +40,5 @@ extern TableConfig const kIndTestPlanets{"ind_data/Planets.csv", ',', false};
 extern TableConfig const kIndTest3aryInds{"ind_data/Test-3ary-inds.csv", ',', false};
 extern TableConfig const kIndTestTableFirst{"ind_data/two_tables/first.csv", ',', false};
 extern TableConfig const kIndTestTableSecond{"ind_data/two_tables/second.csv", ',', false};
+extern TableConfig const kIndTestNulls{"INDTestNulls.csv", ',', true};
 }  // namespace tests
