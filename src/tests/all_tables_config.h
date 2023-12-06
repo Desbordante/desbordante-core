@@ -35,4 +35,5 @@ extern TableConfig const kLegacyPayors;
 extern TableConfig const kTestEmpty;
 extern TableConfig const kTestSingleColumn;
 extern TableConfig const kTestLong;
+extern TableConfig const kTestFD;
 }  // namespace tests
