@@ -33,4 +33,5 @@ extern TableConfig const kLegacyPayors{"LegacyPayors.csv", '|', true};
 extern TableConfig const kTestEmpty{"TestEmpty.csv", ',', true};
 extern TableConfig const kTestSingleColumn{"TestSingleColumn.csv", ',', true};
 extern TableConfig const kTestLong{"TestLong.csv", ',', true};
+extern TableConfig const kTestFD{"TestFD.csv", ',', true};
 }  // namespace tests
