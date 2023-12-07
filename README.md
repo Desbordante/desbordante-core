@@ -205,43 +205,64 @@ Prior to cloning the repository and attempting to build the project, ensure that
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
 
-### Building the project (first option: with tests)
-Firstly, navigate to a desired directory.
-Then, clone the repository, cd into the project directory and launch the build script:
-```
-git clone https://github.com/Mstrutov/Desbordante/
-cd Desbordante
-./pull_datasets.sh
-./build.sh
-```
+### Building the project
+#### Building the Python module using pip (this is what you probably want if you are not a developer)
+**NOTE**: this step is mandatory for setting up the Command Line Interface for Desbordante.
 
-### Building the project (second option: without tests)
-
-Firstly, navigate to a desired directory.
-Then, clone the repository, cd into the project directory and launch the build script:
-```
-git clone https://github.com/Mstrutov/Desbordante/
-cd Desbordante
-./build.sh --no-tests --no-unpack
-```
-
-### Launching the binaries
-The script generates the following file structure in `/path/to/Desbordante/build/target`:
+Firstly, navigate to a directory of choice.
+Then, clone the repository, change the current directory to the project directory and run the following commands:
 ```bash
+./build.sh
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install .
+```
+
+Now it is possible to `import desbordante` as a module from within the created virtual environment. The CLI for Desbordante can be run using the following commands:
+```sh
+pip install -r cli/requirements.txt
+python3 cli/cli.py --help
+```
+
+#### Building tests & the Python module manually
+In order to build tests, pull the test datasets using the following command:
+```sh
+./pull_datasets.sh
+```
+then build the tests themselves:
+```sh
+./build.sh -j$(nproc)
+```
+
+The Python module can be built by providing the `--pybind` switch:
+```sh
+./build.sh --pybind -j$(nproc)
+```
+
+See `./build.sh --help` for more available options.
+
+The `./build.sh` script generates the following file structure in `/path/to/Desbordante/build/target`:
+```
 ├───input_data
 │   └───some-sample-csv\'s.csv
 ├───Desbordante_test
-├───Desbordante_run
+├───desbordante.cpython-*.so
 ```
-The `input_data` directory contains several .csv files that may be used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
-```
+
+The `input_data` directory contains several .csv files that are used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
+```sh
 cd build/target
 ./Desbordante_test
 ```
-The tool itself may be run like the following:
+
+`desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
+```sh
+cd build/target
+python3
+>>> import desbordante
 ```
-./Desbordante_run --algo=tane --data=<path_to_dataset>
-```
+
+We use [easyloggingpp](https://github.com/abumq/easyloggingpp) in order to log (mostly debug) information in the core library. Python bindings search for a configuration file in the working directory, so to configure logging, create `logging.conf` in the directory from which desbordante will be imported. In particular, when running the CLI with `python3 ./relative/path/to/cli.py`, `logging.conf` should be located in `.`.
 
 ## Cite
 If you use this software for research, please cite one of our papers:
@@ -253,7 +274,4 @@ If you use this software for research, please cite one of our papers:
 # Contacts and Q&A
 
 If you have any questions regarding the tool usage you can ask it in our [google group](https://groups.google.com/g/desbordante). To contact dev team email George Chernishev, Maxim Strutovsky or Nikita Bobrov.
-
-
-
 

@@ -176,8 +176,10 @@ Install all dependencies listed in [README.md](https://github.com/Mstrutov/Desbo
 Then, in the Desbordante directory (the same one that contains this file), execute:
 
 ```bash
-$ ./build.sh
-$ pip install .
+./build.sh
+python3 -m venv venv
+source venv/bin/activate
+python3 -m pip install .
 ```
 
 ## Cite
