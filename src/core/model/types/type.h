@@ -85,8 +85,7 @@ public:
         std::memcpy(new_value, value, size);
         return new_value;
     }
-
-    virtual void Clone(std::byte const* value,std::byte* new_value,size_t const size) const {
+    virtual void Clone(std::byte const* value, std::byte* new_value, size_t const size) const {
         std::memcpy(new_value, value, size);
     }
 
