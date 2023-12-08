@@ -11,6 +11,7 @@
 #include "algorithms/ucc/ucc.h"
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "all_tables_config.h"
+#include "config/names.h"
 #include "config/thread_number/type.h"
 #include "table_config.h"
 

@@ -3,6 +3,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
+#include "config/names.h"
 #include "table_config.h"
 
 namespace tests {

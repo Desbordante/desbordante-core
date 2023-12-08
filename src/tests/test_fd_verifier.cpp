@@ -7,6 +7,7 @@
 #include "algo_factory.h"
 #include "builtin.h"
 #include "config/indices/type.h"
+#include "config/names.h"
 #include "fd/fd_verifier/fd_verifier.h"
 #include "fd/fd_verifier/stats_calculator.h"
 #include "table_config.h"
