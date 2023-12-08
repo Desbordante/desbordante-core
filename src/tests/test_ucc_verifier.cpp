@@ -4,6 +4,7 @@
 #include "algorithms/ucc/ucc_verifier/ucc_verifier.h"
 #include "all_tables_config.h"
 #include "config/indices/type.h"
+#include "config/names.h"
 
 namespace tests {
 namespace onam = config::names;
