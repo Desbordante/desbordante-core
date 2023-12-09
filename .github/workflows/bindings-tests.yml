@@ -24,3 +24,11 @@ jobs:
           pip install .
           cd src/python_bindings
           python test_bindings.py
+          cd ${{github.workspace}}
+      - name: Test data stats
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: |
+          cp test_input_data/TestDataStats.csv src/python_bindings
+          cd src/python_bindings
+          python test_pybind_data_stats.py
