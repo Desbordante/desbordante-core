@@ -28,7 +28,8 @@ Try the web version at https://desbordante.unidata-platform.ru/
 1. Functional dependencies, both exact and approximate (discovery and validation)
 2. Metric functional dependencies (validation)
 3. Fuzzy algebraic constraints (discovery)
-4. Association rules (discovery)
+4. Unique column combinations (validation)
+5. Association rules (discovery)
 
 This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the
 algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
