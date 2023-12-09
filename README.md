@@ -11,6 +11,7 @@ Desbordante is a high-performance data profiler that is capable of discovering a
 * Conditional functional dependencies (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
+* Unique column combinations (validation)
 * Association rules (discovery)
 
 The discovered patterns can have many uses:
