@@ -17,7 +17,7 @@ def print_results(ucc_verifier):
 
 # Loading input data
 algo = desbordante.UCCVerifier()
-algo.load_data('datasets/actors_and_actress.csv', ',', True)
+algo.load_data('examples/datasets/actors_and_actress.csv', ',', True)
 
 # Checking whether (First Name) UCC holds
 algo.execute(ucc_indices=[1])

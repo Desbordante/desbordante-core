@@ -1,6 +1,6 @@
 import desbordante
 
-TABLE = 'datasets/inventory_afd.csv'
+TABLE = 'examples/datasets/inventory_afd.csv'
 ERROR = 0.1
 
 algo = desbordante.Pyro()

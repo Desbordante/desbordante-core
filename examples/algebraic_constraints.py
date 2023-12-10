@@ -2,7 +2,7 @@ import desbordante
 import pandas
 import operator
 
-TABLE = 'datasets/cargo_march.csv'
+TABLE = 'examples/datasets/cargo_march.csv'
 HEADER = 0
 SEPARATOR = ','
 P_FUZZ = 0.85

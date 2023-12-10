@@ -1,7 +1,7 @@
 import desbordante as db
 
 # Parameters for data_stats.load_data(...)
-DATASET_PATH = "datasets/Workshop.csv"
+DATASET_PATH = "examples/datasets/Workshop.csv"
 SEPARATOR = ','
 HAS_HEADER = True
 

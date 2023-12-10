@@ -21,7 +21,7 @@ ERROR = 0.005  # Highest error for almost holding FDs.
 APPROXIMATE_ALGO_CONFIG = {'error': ERROR}
 
 # Parameters for pandas.read_csv(...).
-DATASET_PATH = 'datasets/Workshop.csv'
+DATASET_PATH = 'examples/datasets/Workshop.csv'
 HEADER = 0
 SEPARATOR = ','
 

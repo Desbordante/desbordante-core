@@ -9,7 +9,7 @@ ERROR = 0.001
 CONFIG = {'error': ERROR, 'max_lhs': 1}
 
 # Parameters for pandas.read_csv(...).
-DATASET_PATH = 'datasets/duplicates.csv'
+DATASET_PATH = 'examples/datasets/duplicates.csv'
 HEADER = 0
 SEPARATOR = ','
 
