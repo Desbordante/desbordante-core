@@ -11,7 +11,7 @@ Desbordante is a high-performance data profiler that is capable of discovering a
 * Conditional functional dependencies (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
-* Unique column combinations (validation)
+* Unique column combinations (discovery and validation)
 * Association rules (discovery)
 
 The discovered patterns can have many uses:
@@ -84,12 +84,10 @@ Simple usage examples:
 ```python
 import desbordante
 
-TABLE = '../examples/datasets/university_fd.csv'
+TABLE = 'examples/datasets/university_fd.csv'
 
 algo = desbordante.HyFD()
-algo.set_option('table', (TABLE, ',', True))
-algo.set_option('is_null_equal_null')
-algo.load_data()
+algo.load_data(TABLE, ',', True)
 algo.execute()
 result = algo.get_fds()
 print('FDs:')
@@ -111,22 +109,16 @@ FDs:
 ```python
 import desbordante
 
-TABLE = '../examples/datasets/inventory_afd.csv'
+TABLE = 'examples/datasets/inventory_afd.csv'
 ERROR = 0.1
 
 algo = desbordante.Pyro()
-algo.set_option('table', (TABLE, ',', True))
-algo.set_option('is_null_equal_null')
-algo.load_data()
-algo.set_option('error', ERROR)
-algo.set_option('threads')
-algo.set_option('max_lhs')
-algo.set_option('seed')
-algo.execute()
+algo.load_data(TABLE, ',', True)
+algo.execute(error=ERROR)
 result = algo.get_fds()
 print('AFDs:')
 for fd in result:
-	print(fd)
+    print(fd)
 ```
 ```text
 AFDs:
@@ -140,22 +132,16 @@ AFDs:
 ```python
 import desbordante
 
-TABLE = '../examples/datasets/theatres_mfd.csv'
+TABLE = 'examples/datasets/theatres_mfd.csv'
 METRIC = 'euclidean'
 LHS_INDICES = [0]
 RHS_INDICES = [2]
 PARAMETER = 5
 
 algo = desbordante.MetricVerifier()
-algo.set_option('table', (TABLE, ',', True))
-algo.set_option('is_null_equal_null')
-algo.load_data()
-algo.set_option('lhs_indices', LHS_INDICES)
-algo.set_option('metric', METRIC)
-algo.set_option('parameter', PARAMETER)
-algo.set_option('dist_from_null_is_infinity')
-algo.set_option('rhs_indices', RHS_INDICES)
-algo.execute()
+algo.load_data(TABLE, ',', True)
+algo.execute(lhs_indices=LHS_INDICES, metric=METRIC,
+	     parameter=PARAMETER, rhs_indices=RHS_INDICES)
 if algo.mfd_holds():
     print('MFD holds')
 else:
