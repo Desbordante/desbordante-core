@@ -1,7 +1,7 @@
 import desbordante
 import pandas as pd
 pyro = desbordante.Pyro()
-df = pd.read_csv('datasets/iris.csv', sep=',', header=0)
+df = pd.read_csv('examples/datasets/iris.csv', sep=',', header=0)
 pyro.load_data(df)
 pyro.execute(error=0.0)
 pyro.get_fds()
