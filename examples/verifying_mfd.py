@@ -1,6 +1,6 @@
 import desbordante
 
-TABLE = 'datasets/theatres_mfd.csv'
+TABLE = 'examples/datasets/theatres_mfd.csv'
 METRIC = 'euclidean'
 LHS_INDICES = [0]
 RHS_INDICES = [2]

@@ -1,6 +1,6 @@
 import desbordante
 
-TABLE = 'datasets/university_fd.csv'
+TABLE = 'examples/datasets/university_fd.csv'
 
 algo = desbordante.HyFD()
 algo.load_data(TABLE, ',', True)
