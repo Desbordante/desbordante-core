@@ -250,6 +250,25 @@ python3
 
 We use [easyloggingpp](https://github.com/abumq/easyloggingpp) in order to log (mostly debug) information in the core library. Python bindings search for a configuration file in the working directory, so to configure logging, create `logging.conf` in the directory from which desbordante will be imported. In particular, when running the CLI with `python3 ./relative/path/to/cli.py`, `logging.conf` should be located in `.`.
 
+#### Troubleshooting Git LFS
+If, when cloning the repo with git lfs installed, `git clone` produces the following (or similar) error:
+```
+Cloning into 'Desbordante'...
+remote: Enumerating objects: 13440, done.
+remote: Counting objects: 100% (13439/13439), done.
+remote: Compressing objects: 100% (3784/3784), done.
+remote: Total 13440 (delta 9537), reused 13265 (delta 9472), pack-reused 1
+Receiving objects: 100% (13440/13440), 125.78 MiB | 8.12 MiB/s, done.
+Resolving deltas: 100% (9537/9537), done.
+Updating files: 100% (478/478), done.
+Downloading datasets/datasets.zip (102 MB)
+Error downloading object: datasets/datasets.zip (2085458): Smudge error: Error downloading datasets/datasets.zip (2085458e26e55ea68d79bcd2b8e5808de731de6dfcda4407b06b30bce484f97b): batch response: This repository is over its data quota. Account responsible for LFS bandwidth should purchase more data packs to restore access.
+```
+delete the already cloned version, set `GIT_LFS_SKIP_SMUDGE=1` environment variable and clone the repo again:
+```sh
+GIT_LFS_SKIP_SMUDGE=1 git clone git@github.com:Mstrutov/Desbordante.git
+```
+
 ## Cite
 If you use this software for research, please cite one of our papers:
 1) George Chernishev, et al. Solving Data Quality Problems with Desbordante: a Demo. CoRR abs/2307.14935 (2023).
