@@ -7,6 +7,7 @@ add_custom_command(TARGET copy-python-examples
             copy ${CMAKE_SOURCE_DIR}/examples/dedupe.py
                  ${CMAKE_SOURCE_DIR}/examples/mine_typos.py
                  ${CMAKE_SOURCE_DIR}/examples/anomaly_detection.py
+                 ${CMAKE_SOURCE_DIR}/examples/algebraic_constraints.py
                  ${CMAKE_BINARY_DIR}/examples
         COMMAND ${CMAKE_COMMAND} -E
             copy ${CMAKE_SOURCE_DIR}/examples/datasets/duplicates.csv
@@ -14,5 +15,6 @@ add_custom_command(TARGET copy-python-examples
                  ${CMAKE_SOURCE_DIR}/examples/datasets/cargo_data_1.csv
                  ${CMAKE_SOURCE_DIR}/examples/datasets/cargo_data_2.csv
                  ${CMAKE_SOURCE_DIR}/examples/datasets/cargo_data_3.csv
+                 ${CMAKE_SOURCE_DIR}/examples/datasets/cargo_march.csv
                  ${CMAKE_BINARY_DIR}/examples/datasets
 )
