@@ -49,10 +49,10 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-#define DEFINE_ALGORITHM(type, base)                                                        \
-    auto var##type = py::class_<Py##type, Py##base##Base>(module, #type).def(py::init<>()); \
-    var##type.doc() = MakeDocString<Py##type>();                                            \
-    var##type
+#define DEFINE_ALGORITHM(type, base)                                      \
+    auto var##type = py::class_<Py##type, Py##base##Base>(module, #type); \
+    var##type.doc() = MakeDocString<Py##type>();                          \
+    var##type.def(py::init<>())
 #define DEFINE_ALGORITHM_BASE(base) py::class_<Py##base##Base, PyAlgorithmBase>(module, #base)
 #define DEFINE_FD_ALGORITHM(type) DEFINE_ALGORITHM(type, FdAlgorithm)
 #define DEFINE_AR_ALGORITHM(type) DEFINE_ALGORITHM(type, ArAlgorithm)
@@ -61,7 +61,7 @@ INITIALIZE_EASYLOGGINGPP
 namespace {
 template <typename AlgoType>
 std::string MakeDocString() {
-    AlgoType algo = AlgoType();
+    auto algo = AlgoType();
     std::stringstream docstring;
     docstring << "Options:\n";
     for (std::string_view option_name : algo.GetPossibleOptions()) {
