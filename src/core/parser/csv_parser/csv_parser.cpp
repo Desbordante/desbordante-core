@@ -97,7 +97,12 @@ void CSVParser::GetLine(unsigned long long const line_index) {
 
 void CSVParser::GetNextIfHas() {
     has_next_ = !source_.eof();
+
     if (has_next_) {
+        if (source_.peek() == std::ifstream::traits_type::eof()) {  // Check for the last newline
+            has_next_ = false;
+            return;
+        }
         GetNext();
     }
 }
