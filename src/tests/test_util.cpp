@@ -11,6 +11,7 @@
 #include "model/table/agree_set_factory.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/identifier_set.h"
+#include "separator_validator.h"
 
 namespace tests {
 
@@ -229,5 +230,36 @@ INSTANTIATE_TEST_SUITE_P(TestLevenshteinSuite, TestLevenshtein,
                                            TestLevenshteinParam("book", "", 4),
                                            TestLevenshteinParam("", "book", 4),
                                            TestLevenshteinParam("randomstring", "juststring", 6)));
+
+struct TestSeparatorValidationParam {
+    CSVConfig csv_config;
+    char test_separator;
+    std::optional<char> expected_separator;
+};
+
+class TestSeparatorValidation : public ::testing::TestWithParam<TestSeparatorValidationParam> {};
+
+TEST_P(TestSeparatorValidation, Default) {
+    TestSeparatorValidationParam const& p = GetParam();
+    std::optional<char> actual = util::ValidateSeparator(p.csv_config.path, p.test_separator).first;
+    EXPECT_EQ(actual, p.expected_separator);
+}
+
+INSTANTIATE_TEST_SUITE_P(TestSeparatorValidationSuite, TestSeparatorValidation,
+                         ::testing::Values(TestSeparatorValidationParam(kTest1, ',', ','),
+                                           TestSeparatorValidationParam(kTest1, ';', ';'),
+                                           TestSeparatorValidationParam(kTest1, '1', std::nullopt),
+                                           TestSeparatorValidationParam(kTestFD, ',', ','),
+                                           TestSeparatorValidationParam(kTestFD, ';', ','),
+                                           TestSeparatorValidationParam(kAdult, ';', ';'),
+                                           TestSeparatorValidationParam(kAdult, ',', ';'),
+                                           TestSeparatorValidationParam(kAbalone, ',', ','),
+                                           TestSeparatorValidationParam(kAbalone, '.', ','),
+                                           TestSeparatorValidationParam(kTestParse, ',', ','),
+                                           TestSeparatorValidationParam(kTestSeparator, ',', ','),
+                                           TestSeparatorValidationParam(kTestSeparator, ';', ','),
+                                           TestSeparatorValidationParam(kTestSeparator1, ',', ','),
+                                           TestSeparatorValidationParam(kTestSeparator1, ';',
+                                                                        ';')));
 
 }  // namespace tests
