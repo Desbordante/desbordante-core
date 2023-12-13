@@ -329,7 +329,7 @@ def check_mismatch(algo: str | None, task: str | None) -> None:
 
 
 def check_error_option_presence(task: str | None, error: str | None) -> None:
-    if task in (Task.afd, Task.afd_verification) and error is None:
+    if task == Task.afd and error is None:
         click.echo(f"ERROR: Missing option '{ERROR}'.")
         sys.exit(1)
     if task in (Task.fd, Task.fd_verification) and error is not None:
