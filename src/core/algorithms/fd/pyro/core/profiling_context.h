@@ -84,7 +84,7 @@ public:
         return custom_random_.NextDouble();
     }
 
-    ~ProfilingContext();
+    ~ProfilingContext() override;
 
     static double GetMaximumEntropy(ColumnLayoutRelationData const* cd1);
     static double GetMinEntropy(ColumnLayoutRelationData const* cd1);
