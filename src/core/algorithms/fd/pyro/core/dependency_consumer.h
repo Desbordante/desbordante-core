@@ -36,4 +36,6 @@ public:
     std::string UCCsToString() const;
 
     virtual std::string GetJsonFDs();
+
+    virtual ~DependencyConsumer() = default;
 };
