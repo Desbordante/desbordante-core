@@ -79,13 +79,11 @@ public:
         throw std::logic_error("Mixed type does not have a fixed size");
     }
 
-    //It's correct, but not optimal, need to be rewrited later with other virtual
-    //Clone(std::byte const* value, std::byte const* new_value)
-    [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
+    [[nodiscard]] std::byte* Clone(std::byte const* value) const final {
         std::unique_ptr<Type> type = RetrieveType(value);
         size_t size = GetMixedValueSize(type.get());
         auto* new_value = new std::byte[size];
-        ValueFromStr(new_value, ValueToString(value), type.get());
+        type->Clone(value, new_value, size);
         return new_value;
     }
 
