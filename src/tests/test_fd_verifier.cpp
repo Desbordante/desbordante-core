@@ -7,9 +7,10 @@
 #include "algo_factory.h"
 #include "builtin.h"
 #include "config/indices/type.h"
-#include "datasets.h"
+#include "config/names.h"
 #include "fd/fd_verifier/fd_verifier.h"
 #include "fd/fd_verifier/stats_calculator.h"
+#include "table_config.h"
 
 namespace {
 using namespace algos::fd_verifier;

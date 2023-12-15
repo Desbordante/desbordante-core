@@ -68,6 +68,10 @@ py::tuple PyAlgorithmBase::GetOptionType(std::string_view option_name) const {
     return GetPyType(type_index);
 }
 
+std::string_view PyAlgorithmBase::GetDescription(std::string_view option_name) const {
+    return algorithm_->GetDescription(option_name);
+}
+
 void PyAlgorithmBase::LoadProvidedData(pybind11::kwargs const& kwargs, InputTable table) {
     algorithm_->UnsetOption(kTable);
     Configure(kwargs, std::move(table));

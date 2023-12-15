@@ -9,7 +9,7 @@
 #include "algorithms/cfd/enums.h"
 #include "algorithms/cfd/fd_first_algorithm.h"
 #include "config/names.h"
-#include "datasets.h"
+#include "table_config.h"
 
 namespace tests {
 namespace fs = std::filesystem;

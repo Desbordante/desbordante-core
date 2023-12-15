@@ -6,7 +6,7 @@ from os.path import join
 # Parameters for pandas.read_csv(...).
 HEADER = 0
 SEPARATOR = ','
-DATASET_FOLDER_PATH = 'datasets'
+DATASET_FOLDER_PATH = 'examples/datasets'
 DATASET1_PATH = join(DATASET_FOLDER_PATH, "cargo_data_1.csv")
 DATASET2_PATH = join(DATASET_FOLDER_PATH, "cargo_data_2.csv")
 DATASET3_PATH = join(DATASET_FOLDER_PATH, "cargo_data_3.csv")

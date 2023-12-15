@@ -5,9 +5,25 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "desbordante"
 version = "1.0.0"
-description = "Python bindings for Desbordante, a science-intensive high-performance data profiler"
+description = "Science-intensive high-performance data profiler"
 requires-python = ">=3.7"
+readme = "README_PYPI.md"
 license = { text = "AGPL-3.0-only" }
+
+classifiers = [
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/Mstrutov/Desbordante", issues = "https://github.com/Mstrutov/Desbordante/issues" }
 
 [tool.scikit-build.cmake.define]
 PYTHON = "INSTALL"

@@ -12,8 +12,9 @@
 #include "algorithms/fd/tane/tane.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "datasets.h"
 #include "model/table/relational_schema.h"
+#include "table_config.h"
+#include "test_fd_util.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 
@@ -23,26 +24,21 @@ using std::string, std::vector;
 
 namespace onam = config::names;
 
-StdParamsMap FD_MineGetParamMap(const std::filesystem::path& path, char separator = ',',
-                                bool has_header = true) {
-    InputTable parser = std::make_unique<CSVParser>(path, separator, has_header);
-    return {{config::names::kTable, parser}};
+StdParamsMap FD_MineGetParamMap(tests::TableConfig const& info) {
+    return {{config::names::kTable, info.MakeInputTable()}};
 }
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(std::string const& path, char separator = ',',
-                                               bool has_header = true) {
+std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(tests::TableConfig const& info) {
     std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
-    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(path, separator, has_header));
+    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(info));
     return algorithm;
 }
 
-std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(std::string const& path,
-                                                            char separator = ',',
-                                                            bool has_header = true) {
-    return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(path, separator, has_header));
+std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(tests::TableConfig const& info) {
+    return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(info));
 }
 
-class AlgorithmTest : public LightDatasets, public HeavyDatasets, public ::testing::Test {};
+using FDMineAlgorithmTest = tests::AlgorithmTest<Fd_mine>;
 
 std::vector<unsigned int> FD_MineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
@@ -85,24 +81,20 @@ std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
-    auto path = test_data_dir / "TestEmpty.csv";
-    auto algorithm = ConfToLoadFD_Mine(test_data_dir / "TestEmpty.csv", ',', true);
+    auto algorithm = ConfToLoadFD_Mine(tests::kTestEmpty);
     ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
-    auto path = test_data_dir / "TestSingleColumn.csv";
-    auto algorithm = CreateFD_MineAlgorithmInstance(path, ',', true);
+    auto algorithm = CreateFD_MineAlgorithmInstance(tests::kTestSingleColumn);
     algorithm->Execute();
     ASSERT_TRUE(algorithm->FdList().empty());
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
-    auto path = test_data_dir / "TestLong.csv";
-
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
 
-    auto algorithm = CreateFD_MineAlgorithmInstance(path, ',', true);
+    auto algorithm = CreateFD_MineAlgorithmInstance(tests::kTestLong);
     algorithm->Execute();
     ASSERT_TRUE(FD_Mine_CheckFDListEquality(true_fd_collection, algorithm->FdList()));
 }
@@ -148,22 +140,20 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
     }
 }
 
-TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
+TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     namespace onam = config::names;
 
     try {
-        for (Dataset const& dataset : LightDatasets::datasets_) {
+        for (auto const& [config, hash] : FDMineAlgorithmTest::light_datasets_) {
             // TODO: change this hotfix
-            if (dataset.name == "breast_cancer.csv") {
+            if (config.name == tests::kbreast_cancer.name) {
                 continue;
             }
-            auto path = test_data_dir / dataset.name;
-            auto algorithm =
-                    CreateFD_MineAlgorithmInstance(path, dataset.separator, dataset.has_header);
+            auto algorithm = CreateFD_MineAlgorithmInstance(config);
 
-            StdParamsMap params_map{{onam::kCsvPath, path},
-                                    {onam::kSeparator, dataset.separator},
-                                    {onam::kHasHeader, dataset.has_header},
+            StdParamsMap params_map{{onam::kCsvPath, config.GetPath()},
+                                    {onam::kSeparator, config.separator},
+                                    {onam::kHasHeader, config.has_header},
                                     {onam::kSeed, decltype(pyro::Parameters::seed){0}},
                                     {onam::kError, config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
@@ -192,7 +182,7 @@ TEST_F(AlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
 
             EXPECT_EQ(results_pyro, algorithm_results)
-                    << "The new algorithm and Pyro yield different results at " << dataset.name;
+                    << "The new algorithm and Pyro yield different results at " << config.name;
         }
     } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;

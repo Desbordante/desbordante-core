@@ -10,8 +10,10 @@
 #include "algorithms/ucc/hyucc/hyucc.h"
 #include "algorithms/ucc/ucc.h"
 #include "algorithms/ucc/ucc_algorithm.h"
+#include "all_tables_config.h"
+#include "config/names.h"
 #include "config/thread_number/type.h"
-#include "datasets.h"
+#include "table_config.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();
@@ -21,80 +23,6 @@ std::ostream& operator<<(std::ostream& os, Vertical const& v) {
 namespace tests {
 
 namespace {
-
-// TODO(polyntsov): think how we should organize test code, maybe implement some classes with
-// basic functionality common for all primitive mining algorithms. Without it every test class
-// for specific algorithm is similar to any other (compare this class to AlgorithmTest and
-// ARAlgorithmTest for example).
-template <typename AlgorithmUnderTest>
-class UCCAlgorithmTest : public ::testing::Test {
-    static config::ThreadNumType threads_;
-
-protected:
-    static void SetThreadsParam(config::ThreadNumType threads) noexcept {
-        assert(threads > 0);
-        threads_ = threads;
-    }
-
-public:
-    static algos::StdParamsMap GetParamMap(std::filesystem::path const& path, char separator = ',',
-                                           bool has_header = true) {
-        using namespace config::names;
-        return {{kCsvPath, path},
-                {kSeparator, separator},
-                {kHasHeader, has_header},
-                {kThreads, threads_}};
-    }
-
-    static std::unique_ptr<algos::UCCAlgorithm> CreateAlgorithmInstance(std::string const& filename,
-                                                                        char separator = ',',
-                                                                        bool has_header = true) {
-        return algos::CreateAndLoadAlgorithm<AlgorithmUnderTest>(
-                GetParamMap(test_data_dir / filename, separator, has_header));
-    }
-
-    static inline const std::vector<Dataset> light_datasets_ = {
-        {"WDC_astronomical.csv", 2089541732445U, ',', true},
-        {"WDC_symbols.csv", 1, ',', true},
-        {"WDC_science.csv", 2658842082150U, ',', true},
-        {"WDC_satellites.csv", 5208443370856032U, ',', true},
-        {"WDC_appearances.csv", 82369238361U, ',', true},
-        {"WDC_astrology.csv", 79554241843163108U, ',', true},
-        {"WDC_game.csv", 2555214540772530U, ',', true},
-        {"WDC_kepler.csv", 82426217315737U, ',', true},
-        {"WDC_planetz.csv", 2555214540772530U, ',', true},
-        {"WDC_age.csv", 2658842082150U, ',', true},
-        {"TestWide.csv", 2555250373874U, ',', true},
-        {"abalone.csv", 16581571148699134255U, ',', true},
-        {"iris.csv", 1, ',', false},
-        {"adult.csv", 1, ';', false},
-        {"breast_cancer.csv", 16854900230774656828U, ',', true},
-        // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
-        // able to process these move them to heavy_datasets_
-        {"neighbors10k.csv", 170971924188219U, ',', true},
-#if 0
-        {"neighbors50k.csv", 1, ',', true},
-#endif
-        {"neighbors100k.csv", 170971924188219U, ',', true},
-        {"CIPublicHighway10k.csv", 82369238361U, ',', true},
-        {"CIPublicHighway700.csv", 82369238361U, ',', true},
-    };
-
-    static inline const std::vector<Dataset> heavy_datasets_ = {
-        {"EpicVitals.csv", 1, '|', true},
-        {"EpicMeds.csv", 59037771758954037U, '|', true},
-        {"iowa1kk.csv", 2654435863U, ',', true},
-#if 0
-        {"fd-reduced-30.csv", 275990379954778425U, ',', true},
-        {"flight_1k.csv", 2512091017708538662U, ';', true},
-        {"plista_1k.csv", 1, ';', false},
-        {"letter.csv", 1, ',', false},
-#endif
-    };
-};
-
-template <typename AlgorithmUnderTest>
-config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
 
 // Implement custom hash functions since implementation of `std::hash` or `boost::hash` may change
 // depending on the library version/architecture/os/whatever leading to tests failing.
@@ -119,28 +47,96 @@ std::size_t Hash(std::vector<std::vector<unsigned>> const& vec) {
     return hash;
 }
 
-template <typename T>
-void PerformConsistentHashTestOn(std::vector<Dataset> const& datasets) {
-    for (Dataset const& dataset : datasets) {
-        try {
-            auto ucc_algo =
-                    T::CreateAlgorithmInstance(dataset.name, dataset.separator, dataset.has_header);
-            ucc_algo->Execute();
+// TODO(polyntsov): think how we should organize test code, maybe implement some classes with
+// basic functionality common for all primitive mining algorithms. Without it every test class
+// for specific algorithm is similar to any other (compare this class to AlgorithmTest and
+// ARAlgorithmTest for example).
+template <typename AlgorithmUnderTest>
+class UCCAlgorithmTest : public ::testing::Test {
+    static config::ThreadNumType threads_;
 
-            std::list<model::UCC> const& actual_list = ucc_algo->UCCList();
-            std::vector<std::vector<unsigned>> actual;
-            actual.reserve(actual_list.size());
-            std::transform(actual_list.begin(), actual_list.end(), std::back_inserter(actual),
-                           [](Vertical const& v) { return v.GetColumnIndicesAsVector(); });
-            std::sort(actual.begin(), actual.end());
-            EXPECT_EQ(Hash(actual), dataset.hash) << "Wrong hash on dataset " << dataset.name;
-        } catch (std::exception const& e) {
-            std::cout << "An exception with message: " << e.what() << "\n\tis thrown on dataset "
-                      << dataset.name << '\n';
-            FAIL();
+protected:
+    static void SetThreadsParam(config::ThreadNumType threads) noexcept {
+        assert(threads > 0);
+        threads_ = threads;
+    }
+    void PerformConsistentHashTestOn(std::vector<TableConfigHash> const& datasets) {
+        for (auto const& [config, hash] : datasets) {
+            try {
+                auto ucc_algo = CreateAlgorithmInstance(config);
+                ucc_algo->Execute();
+
+                std::list<model::UCC> const& actual_list = ucc_algo->UCCList();
+                std::vector<std::vector<unsigned>> actual;
+                actual.reserve(actual_list.size());
+                std::transform(actual_list.begin(), actual_list.end(), std::back_inserter(actual),
+                               [](Vertical const& v) { return v.GetColumnIndicesAsVector(); });
+                std::sort(actual.begin(), actual.end());
+                EXPECT_EQ(Hash(actual), hash) << "Wrong hash on dataset " << config.name;
+            } catch (std::exception const& e) {
+                std::cout << "An exception with message: " << e.what()
+                          << "\n\tis thrown on dataset " << config.name << '\n';
+                FAIL();
+            }
         }
     }
-}
+
+public:
+    static algos::StdParamsMap GetParamMap(tests::TableConfig const& config) {
+        using namespace config::names;
+        return {{kCsvPath, config.GetPath()},
+                {kSeparator, config.separator},
+                {kHasHeader, config.has_header},
+                {kThreads, threads_}};
+    }
+
+    static std::unique_ptr<algos::UCCAlgorithm> CreateAlgorithmInstance(
+            tests::TableConfig const& info) {
+        return algos::CreateAndLoadAlgorithm<AlgorithmUnderTest>(GetParamMap(info));
+    }
+
+    inline static std::vector<TableConfigHash> const light_datasets_ = {
+        {kWDC_astronomical, 2089541732445U},
+        {kWDC_symbols, 1},
+        {kWDC_science, 2658842082150U},
+        {kWDC_satellites, 5208443370856032U},
+        {kWDC_appearances, 82369238361U},
+        {kWDC_astrology, 79554241843163108U},
+        {kWDC_game, 2555214540772530U},
+        {kWDC_kepler, 82426217315737U},
+        {kWDC_planetz, 2555214540772530U},
+        {kWDC_age, 2658842082150U},
+        {kTestWide, 2555250373874U},
+        {kabalone, 16581571148699134255U},
+        {kiris, 1},
+        {kadult, 1},
+        {kbreast_cancer, 16854900230774656828U},
+        // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
+        // able to process these move them to heavy_datasets_
+        {kneighbors10k, 170971924188219U},
+#if 0
+        {kneighbors50k, 1},
+#endif
+        {kneighbors100k, 170971924188219U},
+        {kCIPublicHighway10k, 82369238361U},
+        {kCIPublicHighway700, 82369238361U},
+    };
+
+    inline static std::vector<TableConfigHash> const heavy_datasets_ = {
+        {kEpicVitals, 1},
+        {kEpicMeds, 59037771758954037U},
+        {kiowa1kk, 2654435863U},
+#if 0
+        {kfd_reduced_30, 275990379954778425U},
+        {kflight_1k, 2512091017708538662U},
+        {kplista_1k, 1},
+        {kletter, 1},
+#endif
+    };
+};
+
+template <typename AlgorithmUnderTest>
+config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
 
 }  // namespace
 
@@ -148,22 +144,22 @@ TYPED_TEST_SUITE_P(UCCAlgorithmTest);
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets) {
     TestFixture::SetThreadsParam(1);
-    PerformConsistentHashTestOn<TestFixture>(TestFixture::light_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasets) {
     TestFixture::SetThreadsParam(1);
-    PerformConsistentHashTestOn<TestFixture>(TestFixture::heavy_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasetsParallel) {
     TestFixture::SetThreadsParam(4);
-    PerformConsistentHashTestOn<TestFixture>(TestFixture::light_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasetsParallel) {
     TestFixture::SetThreadsParam(4);
-    PerformConsistentHashTestOn<TestFixture>(TestFixture::heavy_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,
