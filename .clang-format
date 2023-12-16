@@ -12,3 +12,6 @@ IncludeCategories:
     Priority: 1
   - Regex: '.+'
     Priority: 3
+QualifierAlignment: Custom
+QualifierOrder: ['inline', 'static', 'type', 'const', 'volatile' ]
+SeparateDefinitionBlocks: Always
