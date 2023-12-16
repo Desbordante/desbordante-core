@@ -94,7 +94,7 @@ boost::any InputTableToAny(std::string_view option_name, py::handle obj) {
     return python_bindings::CreateDataFrameReader(obj);
 }
 
-const std::unordered_map<std::type_index, ConvFunc> converters{
+std::unordered_map<std::type_index, ConvFunc> const converters{
         NormalConvPair<bool>,
         NormalConvPair<double>,
         NormalConvPair<unsigned int>,

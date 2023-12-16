@@ -48,7 +48,7 @@ class ACAlgorithmTest : public ::testing::Test {
 public:
     using ACExceptions = std::vector<algos::ACException>;
 
-    static algos::StdParamsMap GetParamMap(const std::filesystem::path& path, char separator,
+    static algos::StdParamsMap GetParamMap(std::filesystem::path const& path, char separator,
                                            bool has_header, algos::Binop bin_operation,
                                            double fuzziness, double p_fuzz, double weight,
                                            size_t bumps_limit, size_t iterations_limit,

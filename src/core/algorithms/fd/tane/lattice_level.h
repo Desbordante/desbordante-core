@@ -14,6 +14,7 @@ private:
 
 public:
     explicit LatticeLevel(unsigned int m_arity) : arity_(m_arity) {}
+
     unsigned int GetArity() const {
         return arity_;
     }
@@ -21,7 +22,8 @@ public:
     std::map<boost::dynamic_bitset<>, std::unique_ptr<LatticeVertex>>& GetVertices() {
         return vertices_;
     }
-    LatticeVertex const* GetLatticeVertex(const boost::dynamic_bitset<>& column_indices) const;
+
+    LatticeVertex const* GetLatticeVertex(boost::dynamic_bitset<> const& column_indices) const;
     void Add(std::unique_ptr<LatticeVertex> vertex);
 
     // using vectors instead of lists because of .get()

@@ -2,17 +2,17 @@
 
 namespace algos::cfd {
 
-const int PartitionTIdList::SEP = -1;
+int const PartitionTIdList::SEP = -1;
 
-bool PartitionTIdList::operator==(const PartitionTIdList& b) const {
+bool PartitionTIdList::operator==(PartitionTIdList const& b) const {
     return sets_number == b.sets_number && tids == b.tids;
 }
 
-bool PartitionTIdList::operator!=(const PartitionTIdList& b) const {
+bool PartitionTIdList::operator!=(PartitionTIdList const& b) const {
     return sets_number != b.sets_number || tids != b.tids;
 }
 
-bool PartitionTIdList::operator<(const PartitionTIdList& b) const {
+bool PartitionTIdList::operator<(PartitionTIdList const& b) const {
     return sets_number < b.sets_number || (sets_number == b.sets_number && tids < b.tids);
 }
 
@@ -25,7 +25,7 @@ SimpleTIdList PartitionTIdList::Convert() const {
     return res;
 }
 
-PartitionTIdList PartitionTIdList::Intersection(const PartitionTIdList& rhs) const {
+PartitionTIdList PartitionTIdList::Intersection(PartitionTIdList const& rhs) const {
     std::unordered_map<int, int> eqIndices;
     eqIndices.reserve(this->tids.size() + 1 - this->sets_number);
     std::vector<std::vector<int> > eqClasses(this->sets_number);
@@ -55,7 +55,7 @@ PartitionTIdList PartitionTIdList::Intersection(const PartitionTIdList& rhs) con
                 }
             }
         } else {
-            const int jt = rhs.tids[ix];
+            int const jt = rhs.tids[ix];
             if (eqIndices[jt]) {
                 eqClasses[eqIndices[jt] - 1].push_back(jt);
             }
@@ -67,7 +67,7 @@ PartitionTIdList PartitionTIdList::Intersection(const PartitionTIdList& rhs) con
     return res;
 }
 
-int PartitionTIdList::PartitionError(const PartitionTIdList& xa) const {
+int PartitionTIdList::PartitionError(PartitionTIdList const& xa) const {
     int e = 0;
 
     std::map<int, int> bigt;

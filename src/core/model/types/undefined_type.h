@@ -7,7 +7,7 @@ namespace model {
 
 class UndefinedType final : public EmptyType, public NullType {
 private:
-    [[noreturn]] static inline void ThrowUnsupportedOperation() {
+    [[noreturn]] inline static void ThrowUnsupportedOperation() {
         throw std::logic_error("Meaningless operation. Use EmptyType or NullType methods directly");
     }
 

@@ -18,11 +18,12 @@ public:
     AbstractColumnData(AbstractColumnData&& other) noexcept = default;
     AbstractColumnData& operator=(AbstractColumnData&& other) noexcept = default;
 
-    Column const* GetColumn() const { return column_; }
+    Column const* GetColumn() const {
+        return column_;
+    }
 
     virtual std::string ToString() const = 0;
     virtual ~AbstractColumnData() = default;
 };
 
-} // namespace model
-
+}  // namespace model

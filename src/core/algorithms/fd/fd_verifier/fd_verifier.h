@@ -30,6 +30,7 @@ private:
     void VerifyFD() const;
     std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
     void RegisterOptions();
+
     void ResetState() final {
         if (stats_calculator_) {
             stats_calculator_->ResetState();

@@ -1,9 +1,9 @@
 #include "non_dependencies_map.h"
 
-NonDependenciesMap::NonDependenciesMap(RelationalSchema const* schema)
-    : PruningMap(schema) {}
+NonDependenciesMap::NonDependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 
-std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(std::unordered_set<Vertical> const& supersets) const {
+std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(
+        std::unordered_set<Vertical> const& supersets) const {
     std::unordered_set<Vertical> pruned_supersets;
     for (auto const& node : supersets) {
         if (CanBePruned(node)) {
@@ -13,7 +13,7 @@ std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(std::unorder
     return pruned_supersets;
 }
 
-bool NonDependenciesMap::CanBePruned(const Vertical& node) const {
+bool NonDependenciesMap::CanBePruned(Vertical const& node) const {
     for (auto const& map_row : *this) {
         Vertical const& key = map_row.first;
         if (node.Contains(key)) {
@@ -36,7 +36,7 @@ void NonDependenciesMap::AddNewNonDependency(Vertical const& node_to_add) {
             bool has_superset_entry = false;
 
             for (auto iter = non_deps_for_key.begin(); iter != non_deps_for_key.end();) {
-                //if verticals are the same, then contains == true
+                // if verticals are the same, then contains == true
                 Vertical const& non_dep = *iter;
                 if (non_dep.Contains(node_to_add)) {
                     has_superset_entry = true;

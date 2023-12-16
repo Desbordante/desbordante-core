@@ -4,5 +4,5 @@
 
 namespace config {
 using names::kEqualNulls, descriptions::kDEqualNulls;
-extern const CommonOption<EqNullsType> EqualNullsOpt{kEqualNulls, kDEqualNulls, true};
+extern CommonOption<EqNullsType> const EqualNullsOpt{kEqualNulls, kDEqualNulls, true};
 }  // namespace config

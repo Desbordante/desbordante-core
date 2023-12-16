@@ -21,7 +21,7 @@
 
 namespace model {
 
-const int PositionListIndex::singleton_value_id_ = 0;
+int const PositionListIndex::singleton_value_id_ = 0;
 unsigned long long PositionListIndex::micros_ = 0;
 int PositionListIndex::intersection_count_ = 0;
 
@@ -55,7 +55,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::CreateFor(std::vector<int>
         null_cluster = index[ColumnLayoutRelationData::kNullValueId];
     }
     if (!is_null_eq_null) {
-        index.erase(ColumnLayoutRelationData::kNullValueId); // move?
+        index.erase(ColumnLayoutRelationData::kNullValueId);  // move?
     }
 
     double key_gap = 0.0;
@@ -107,16 +107,16 @@ std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
     return frequencies;
 }
 
-//unsigned long long PositionListIndex::CalculateNep(unsigned int numElements) {
+// unsigned long long PositionListIndex::CalculateNep(unsigned int numElements) {
 //
-//}
+// }
 
 void PositionListIndex::SortClusters(std::deque<std::vector<int>>& clusters) {
     sort(clusters.begin(), clusters.end(),
          [](std::vector<int> const& a, std::vector<int> const& b) { return a[0] < b[0]; });
 }
 
-std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbingTable() const {
+std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbingTable() const {
     if (probing_table_cache_ != nullptr) return probing_table_cache_;
 
     std::vector<int> probing_table = std::vector<int>(original_relation_size_);
@@ -132,10 +132,8 @@ std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbin
     return std::make_shared<std::vector<int>>(probing_table);
 }
 
-
-
-// интересное место: true --> надо передать поле без копирования, false --> надо сконструировать и выдать наружу
-// кажется, самым лёгким способом будет навернуть shared_ptr
+// интересное место: true --> надо передать поле без копирования, false --> надо сконструировать и
+// выдать наружу кажется, самым лёгким способом будет навернуть shared_ptr
 /*std::shared_ptr<const std::vector<int>> PositionListIndex::getProbingTable(bool isCaching) {
     auto probingTable = GetProbingTable();
     if (isCaching) {
@@ -145,19 +143,20 @@ std::shared_ptr<const std::vector<int>> PositionListIndex::CalculateAndGetProbin
     return probingTable;
 }*/
 
-//std::deque<std::vector<int>> const & PositionListIndex::getIndex() const {
-//    return index;
-//}
+// std::deque<std::vector<int>> const & PositionListIndex::getIndex() const {
+//     return index;
+// }
 
-std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(PositionListIndex const* that) const {
+std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(
+        PositionListIndex const* that) const {
     assert(this->relation_size_ == that->relation_size_);
-    return this->size_ > that->size_ ?
-           that->Probe(this->CalculateAndGetProbingTable()) :
-           this->Probe(that->CalculateAndGetProbingTable());
+    return this->size_ > that->size_ ? that->Probe(this->CalculateAndGetProbingTable())
+                                     : this->Probe(that->CalculateAndGetProbingTable());
 }
 
-//TODO: null_cluster_ некорректен
-std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<const std::vector<int>> probing_table) const {
+// TODO: null_cluster_ некорректен
+std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
+        std::shared_ptr<std::vector<int> const> probing_table) const {
     assert(this->relation_size_ == probing_table->size());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;
@@ -172,14 +171,13 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<cons
             if (probing_table == nullptr) LOG(DEBUG) << "NULLPTR";
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
                 LOG(DEBUG) << "position: " + std::to_string(position) +
-                                 ", size: " + std::to_string(probing_table->size());
+                                      ", size: " + std::to_string(probing_table->size());
                 for (size_t i = 0; i < positions.size(); ++i) {
                     LOG(DEBUG) << "Position " + std::to_string(positions[i]);
                 }
             }
             int probing_table_value_id = (*probing_table)[position];
-            if (probing_table_value_id == singleton_value_id_)
-                continue;
+            if (probing_table_value_id == singleton_value_id_) continue;
             intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
@@ -205,9 +203,9 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(std::shared_ptr<cons
                                                relation_size_);
 }
 
-//TODO: null_cluster_ не поддерживается
+// TODO: null_cluster_ не поддерживается
 std::unique_ptr<PositionListIndex> PositionListIndex::ProbeAll(
-    Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
+        Vertical const& probing_columns, ColumnLayoutRelationData& relation_data) {
     assert(this->relation_size_ == relation_data.GetNumRows());
     std::deque<std::vector<int>> new_index;
     unsigned int new_size = 0;

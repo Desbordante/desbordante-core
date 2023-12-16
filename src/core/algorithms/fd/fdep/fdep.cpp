@@ -4,9 +4,9 @@
 
 #include "model/table/column_layout_relation_data.h"
 
-//#ifndef PRINT_FDS
-//#define PRINT_FDS
-//#endif
+// #ifndef PRINT_FDS
+// #define PRINT_FDS
+// #endif
 
 namespace algos {
 
@@ -59,7 +59,7 @@ unsigned long long FDep::ExecuteInternal() {
     pos_cover_tree_->FillFdCollection(*this->schema_, FdList());
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
 
 #ifdef PRINT_FDS
     pos_cover_tree_->printDep("recent_call_result.txt", this->column_names_);
@@ -71,8 +71,7 @@ unsigned long long FDep::ExecuteInternal() {
 void FDep::BuildNegativeCover() {
     this->neg_cover_tree_ = std::make_unique<FDTreeElement>(this->number_attributes_);
     for (auto i = this->tuples_.begin(); i != this->tuples_.end(); ++i) {
-        for (auto j = i + 1; j != this->tuples_.end(); ++j)
-            AddViolatedFDs(*i, *j);
+        for (auto j = i + 1; j != this->tuples_.end(); ++j) AddViolatedFDs(*i, *j);
     }
 
     this->neg_cover_tree_->FilterSpecializations();

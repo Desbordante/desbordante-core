@@ -20,6 +20,7 @@ public:
           count_(0),
           quasiclosure_(*candidate.GetSchema()->empty_vertical_),
           closure_(*candidate.GetSchema()->empty_vertical_) {}
+
     explicit FunQuadruple(Column const& candidate) : FunQuadruple(Vertical(candidate)) {}
 
     Vertical const& GetCandidate() const {

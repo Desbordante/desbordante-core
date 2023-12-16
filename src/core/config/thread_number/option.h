@@ -6,5 +6,5 @@
 #include "config/thread_number/type.h"
 
 namespace config {
-extern const CommonOption<ThreadNumType> ThreadNumberOpt;
+extern CommonOption<ThreadNumType> const ThreadNumberOpt;
 }  // namespace config

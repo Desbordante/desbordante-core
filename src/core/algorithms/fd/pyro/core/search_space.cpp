@@ -140,7 +140,7 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
     }
 }
 
-void SearchSpace::AddLaunchPad(const DependencyCandidate& launch_pad) {
+void SearchSpace::AddLaunchPad(DependencyCandidate const& launch_pad) {
     launch_pads_.insert(launch_pad);
     launch_pad_index_->Put(launch_pad.vertical_, std::make_unique<DependencyCandidate>(launch_pad));
 }

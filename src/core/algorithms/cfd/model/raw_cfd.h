@@ -14,6 +14,7 @@ public:
         AttributeIndex attribute;         /* attribute column index */
         std::optional<std::string> value; /* pattern value is optional */
     };
+
     using RawItems = std::vector<RawItem>;
 
 private:
@@ -28,6 +29,7 @@ public:
     RawItems const& GetLhs() const {
         return lhs_;
     }
+
     RawItem const& GetRhs() const {
         return rhs_;
     }

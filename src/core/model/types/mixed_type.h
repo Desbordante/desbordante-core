@@ -79,8 +79,8 @@ public:
         throw std::logic_error("Mixed type does not have a fixed size");
     }
 
-    //It's correct, but not optimal, need to be rewrited later with other virtual
-    //Clone(std::byte const* value, std::byte const* new_value)
+    // It's correct, but not optimal, need to be rewrited later with other virtual
+    // Clone(std::byte const* value, std::byte const* new_value)
     [[nodiscard]] std::byte* Clone(std::byte const* value) const override {
         std::unique_ptr<Type> type = RetrieveType(value);
         size_t size = GetMixedValueSize(type.get());
@@ -137,6 +137,7 @@ public:
     [[nodiscard]] static TypeId const& RetrieveTypeId(std::byte const* value) noexcept {
         return GetValue<TypeId>(value);
     }
+
     [[nodiscard]] static TypeId& RetrieveTypeId(std::byte* value) noexcept {
         return GetValue<TypeId>(value);
     }

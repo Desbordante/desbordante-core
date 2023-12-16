@@ -31,8 +31,8 @@ std::vector<VertexAndAgreeSet> CollectCurrentChildren(
         std::vector<VertexAndAgreeSet> const& cur_level_vertices, size_t num_attributes);
 
 template <typename VertexAndAgreeSet, typename InstanceValidations>
-void LogLevel(const std::vector<VertexAndAgreeSet>& cur_level_vertices,
-              const InstanceValidations& result, size_t candidates, size_t current_level_number,
+void LogLevel(std::vector<VertexAndAgreeSet> const& cur_level_vertices,
+              InstanceValidations const& result, size_t candidates, size_t current_level_number,
               std::string_view primitive) {
     int const num_invalid_instances = result.invalid_instances().size();
     int const num_valid_instances = result.count_validations() - num_invalid_instances;

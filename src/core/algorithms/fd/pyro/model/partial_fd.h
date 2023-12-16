@@ -18,11 +18,17 @@ public:
     std::string ToIndicesString() const {
         return lhs_.ToIndicesString() + " - " + rhs_.ToIndicesString();
     }
+
     std::string ToString() const {
         return lhs_.ToString() + "~>" + rhs_.ToString() + boost::lexical_cast<std::string>(error_) +
                boost::lexical_cast<std::string>(score_);
     }
 
-    double GetError() const { return error_; }
-    int GetArity() const { return lhs_.GetColumns().size(); }
+    double GetError() const {
+        return error_;
+    }
+
+    int GetArity() const {
+        return lhs_.GetColumns().size();
+    }
 };

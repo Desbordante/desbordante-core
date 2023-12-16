@@ -14,7 +14,8 @@ namespace algos {
 
 class Apriori : public ARAlgorithm {
 private:
-    // TODO(alexandrsmirn): попробовать убрать из полей, и создавать просто в методе GenerateAllRules
+    // TODO(alexandrsmirn): попробовать убрать из полей, и создавать просто в методе
+    // GenerateAllRules
     std::unique_ptr<CandidateHashTree> candidate_hash_tree_;
 
     Node root_;
@@ -44,4 +45,4 @@ public:
     std::list<std::set<std::string>> GetFrequentList() const override;
 };
 
-} // namespace algos
+}  // namespace algos

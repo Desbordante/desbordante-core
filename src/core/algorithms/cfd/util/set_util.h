@@ -20,12 +20,12 @@ std::vector<int> Range(int, int, int = 1);
 std::vector<int> Iota(unsigned);
 
 template <typename T>
-bool IsSubsetOf(const T& sub, const T& super) {
+bool IsSubsetOf(T const& sub, T const& super) {
     return std::includes(super.begin(), super.end(), sub.begin(), sub.end());
 }
 
 template <typename T>
-T ConstructSubset(const T& items, const typename T::value_type leave_out) {
+T ConstructSubset(T const& items, typename T::value_type const leave_out) {
     if (items.size() == 1) return T();
     T sub;
     sub.reserve(items.size() - 1);
@@ -38,7 +38,7 @@ T ConstructSubset(const T& items, const typename T::value_type leave_out) {
 }
 
 template <typename T>
-void InsertSorted(const T& in, const typename T::value_type item, T& out) {
+void InsertSorted(T const& in, typename T::value_type const item, T& out) {
     auto it = in.begin();
     while (it != in.end() && *it < item) {
         it++;
@@ -54,7 +54,7 @@ void InsertSorted(const T& in, const typename T::value_type item, T& out) {
 }
 
 template <typename T>
-T ConstructIntersection(const T& lhs, const T& rhs) {
+T ConstructIntersection(T const& lhs, T const& rhs) {
     T isect(std::min(lhs.size(), rhs.size()));
     auto it = std::set_intersection(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), isect.begin());
     isect.resize(static_cast<int>(it - isect.begin()));
@@ -62,7 +62,7 @@ T ConstructIntersection(const T& lhs, const T& rhs) {
 }
 
 template <typename T>
-T SetDiff(const T& lhs, const T& rhs) {
+T SetDiff(T const& lhs, T const& rhs) {
     T res;
     std::set_difference(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                         std::inserter(res, res.begin()));
@@ -70,7 +70,7 @@ T SetDiff(const T& lhs, const T& rhs) {
 }
 
 template <typename T>
-T* Join(const T* lhs, const T* rhs) {
+T* Join(T const* lhs, T const* rhs) {
     T* uni = new T(lhs->size() + rhs->size());
     auto it = std::set_union(lhs->begin(), lhs->end(), rhs->begin(), rhs->end(), uni->begin());
     uni->resize(static_cast<int>(it - uni->begin()));
@@ -78,7 +78,7 @@ T* Join(const T* lhs, const T* rhs) {
 }
 
 template <typename T>
-T Join(const T& lhs, const T& rhs) {
+T Join(T const& lhs, T const& rhs) {
     T uni(lhs.size() + rhs.size());
     auto it = std::set_union(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), uni.begin());
     uni.resize(static_cast<int>(it - uni.begin()));
@@ -86,7 +86,7 @@ T Join(const T& lhs, const T& rhs) {
 }
 
 template <typename T>
-T Join(const T& lhs, const typename T::value_type& rhs) {
+T Join(T const& lhs, typename T::value_type const& rhs) {
     T res;
     res.reserve(lhs.size() + 1);
     InsertSorted(lhs, rhs, res);
@@ -94,7 +94,7 @@ T Join(const T& lhs, const typename T::value_type& rhs) {
 }
 
 template <typename T>
-T* Join(const T* lhs, const typename T::value_type& rhs_item) {
+T* Join(T const* lhs, typename T::value_type const& rhs_item) {
     T* res = new T();
     res->reserve(lhs->size() + 1);
     InsertSorted(*lhs, rhs_item, *res);
@@ -102,22 +102,22 @@ T* Join(const T* lhs, const typename T::value_type& rhs_item) {
 }
 
 template <typename T>
-T Remove(const T& lhs, const typename T::value_type& rhs_item) {
+T Remove(T const& lhs, typename T::value_type const& rhs_item) {
     T res;
     res.reserve(lhs.size() - 1);
-    const auto& lower = std::lower_bound(lhs.begin(), lhs.end(), rhs_item);
+    auto const& lower = std::lower_bound(lhs.begin(), lhs.end(), rhs_item);
     res.insert(res.begin(), lhs.begin(), lower);
     res.insert(res.begin() + (lower - lhs.begin()), lower + 1, lhs.end());
     return res;
 }
 
 template <typename T>
-bool Contains(const T& collection, const typename T::value_type& item) {
+bool Contains(T const& collection, typename T::value_type const& item) {
     return std::find(collection.begin(), collection.end(), item) != collection.end();
 }
 
 template <typename T, typename S>
-T ConstructProjection(const T& collection, const S& indices) {
+T ConstructProjection(T const& collection, S const& indices) {
     T res;
     for (int i : indices) {
         res.push_back(collection[i]);
@@ -126,7 +126,7 @@ T ConstructProjection(const T& collection, const S& indices) {
 }
 
 template <typename T>
-std::vector<T> Split(const T& collection, const typename T::value_type& spl) {
+std::vector<T> Split(T const& collection, typename T::value_type const& spl) {
     std::vector<T> res(1);
     for (int i : collection) {
         if (i == spl) {
@@ -140,7 +140,7 @@ std::vector<T> Split(const T& collection, const typename T::value_type& spl) {
 }
 
 template <typename T>
-T GetMaxElem(const std::vector<std::pair<T, int>>& collection) {
+T GetMaxElem(std::vector<std::pair<T, int>> const& collection) {
     auto comparatorLess = [](std::pair<T, int> a, std::pair<T, int> b) {
         if (a.second < b.second) {
             return true;

@@ -1,15 +1,15 @@
 
 #include "dependency_consumer.h"
 
-PartialFD DependencyConsumer::RegisterFd(Vertical const& lhs, Column const& rhs,
-                                         double error, double score) const {
+PartialFD DependencyConsumer::RegisterFd(Vertical const& lhs, Column const& rhs, double error,
+                                         double score) const {
     PartialFD partial_fd(lhs, rhs, error, score);
     fd_consumer_(partial_fd);
     return partial_fd;
 }
 
-PartialKey DependencyConsumer::RegisterUcc(Vertical const& key_vertical,
-                                           double error, double score) const {
+PartialKey DependencyConsumer::RegisterUcc(Vertical const& key_vertical, double error,
+                                           double score) const {
     PartialKey partial_key(key_vertical, error, score);
     ucc_consumer_(partial_key);
     return partial_key;
@@ -61,4 +61,3 @@ std::string DependencyConsumer::GetJsonFDs() {
     result += "]}";
     return result;
 }
-

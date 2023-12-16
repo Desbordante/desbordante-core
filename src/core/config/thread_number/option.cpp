@@ -7,7 +7,7 @@
 
 namespace config {
 using names::kThreads, descriptions::kDThreads;
-extern const CommonOption<ThreadNumType> ThreadNumberOpt{
+extern CommonOption<ThreadNumType> const ThreadNumberOpt{
         kThreads, kDThreads, 0, [](auto &value) {
             if (value == 0) {
                 value = std::thread::hardware_concurrency();

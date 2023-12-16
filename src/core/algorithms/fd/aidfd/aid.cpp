@@ -13,12 +13,12 @@ void Aid::LoadDataInternal() {
     schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_of_attributes_; ++i) {
-        const std::string& column_name = input_table_->GetColumnName(static_cast<int>(i));
+        std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
         schema_->AppendColumn(column_name);
     }
 
     while (input_table_->HasNextRow()) {
-        const std::vector<std::string>& next_line = input_table_->GetNextRow();
+        std::vector<std::string> const& next_line = input_table_->GetNextRow();
         if (next_line.empty()) {
             break;
         }
@@ -50,7 +50,7 @@ unsigned long long Aid::ExecuteInternal() {
     InvertNegativeCover();
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
 
     return elapsed_milliseconds.count();
 }
@@ -121,11 +121,11 @@ void Aid::CreateNegativeCover() {
 void Aid::HandleTuple(size_t tuple_num, size_t iteration_num) {
     for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
         size_t value = tuples_[tuple_num][attr_num];
-        const Cluster& cluster = clusters_[attr_num].at(value);
+        Cluster const& cluster = clusters_[attr_num].at(value);
         size_t index_in_cluster = indices_in_clusters_[attr_num][tuple_num];
         if (iteration_num <= index_in_cluster) {
             size_t another_index_in_cluster =
-                GenerateSecondClusterIndex(index_in_cluster, iteration_num);
+                    GenerateSecondClusterIndex(index_in_cluster, iteration_num);
             size_t another_tuple_num = cluster[another_index_in_cluster];
             auto tuples_agree_set = BuildAgreeSet(tuple_num, another_tuple_num);
             neg_cover_.insert(tuples_agree_set);
@@ -156,14 +156,14 @@ void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
     }
 }
 
-void Aid::HandleInvalidFd(const boost::dynamic_bitset<>& neg_cover_el, SearchTree& pos_cover_tree,
+void Aid::HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTree& pos_cover_tree,
                           size_t rhs) {
     std::vector<boost::dynamic_bitset<>> subsets;
-    pos_cover_tree.ForEachSubset(neg_cover_el, [&subsets](const boost::dynamic_bitset<>& subset) {
+    pos_cover_tree.ForEachSubset(neg_cover_el, [&subsets](boost::dynamic_bitset<> const& subset) {
         subsets.push_back(subset);
     });
 
-    for (const auto& subset : subsets) {
+    for (auto const& subset : subsets) {
         pos_cover_tree.Remove(subset);
     }
 
@@ -190,7 +190,7 @@ void Aid::InvertNegativeCover() {
 
     std::vector<boost::dynamic_bitset<>> neg_cover_vector;
     neg_cover_vector.insert(neg_cover_vector.end(), neg_cover_.begin(), neg_cover_.end());
-    auto comp_by_card = [](const boost::dynamic_bitset<>& lhs, const boost::dynamic_bitset<>& rhs) {
+    auto comp_by_card = [](boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
         return lhs.count() > rhs.count();
     };
     std::sort(neg_cover_vector.begin(), neg_cover_vector.end(), comp_by_card);
@@ -214,7 +214,7 @@ void Aid::InvertNegativeCover() {
 
         attributes[rhs] = false;
         SearchTree pos_cover_tree(attributes);
-        for (const auto& neg_cover_el : neg_cover_vector) {
+        for (auto const& neg_cover_el : neg_cover_vector) {
             if (!neg_cover_el[rhs]) {
                 HandleInvalidFd(neg_cover_el, pos_cover_tree, rhs);
             }
@@ -223,9 +223,9 @@ void Aid::InvertNegativeCover() {
         size_t real_rhs = attr_indices[rhs];
         std::vector<boost::dynamic_bitset<>> pos_cover_vector;
         pos_cover_tree.ForEach(
-            [&pos_cover_vector, &attr_indices](const boost::dynamic_bitset<>& pos_cover_el) {
-                pos_cover_vector.push_back(ChangeAttributesOrder(pos_cover_el, attr_indices));
-            });
+                [&pos_cover_vector, &attr_indices](boost::dynamic_bitset<> const& pos_cover_el) {
+                    pos_cover_vector.push_back(ChangeAttributesOrder(pos_cover_el, attr_indices));
+                });
 
         RegisterFDs(real_rhs, pos_cover_vector);
         attributes[rhs] = true;
@@ -233,9 +233,9 @@ void Aid::InvertNegativeCover() {
 }
 
 void Aid::RegisterFDs(size_t rhs_attribute,
-                      const std::vector<boost::dynamic_bitset<>>& list_of_lhs_attributes) {
+                      std::vector<boost::dynamic_bitset<>> const& list_of_lhs_attributes) {
     Column rhs = *schema_->GetColumn(rhs_attribute);
-    for (const auto& lhs_attributes : list_of_lhs_attributes) {
+    for (auto const& lhs_attributes : list_of_lhs_attributes) {
         Vertical lhs = schema_->GetVertical(lhs_attributes);
         RegisterFd(lhs, rhs);
     }
@@ -245,8 +245,8 @@ size_t Aid::GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration
     return (iteration_num * prime_) % index_in_cluster;
 }
 
-boost::dynamic_bitset<> Aid::ChangeAttributesOrder(const boost::dynamic_bitset<>& initial_bitset,
-                                                   const std::vector<size_t>& new_order) {
+boost::dynamic_bitset<> Aid::ChangeAttributesOrder(boost::dynamic_bitset<> const& initial_bitset,
+                                                   std::vector<size_t> const& new_order) {
     size_t bitset_size = initial_bitset.size();
     boost::dynamic_bitset<> modified_bitset(bitset_size);
     for (size_t bit = 0; bit < bitset_size; ++bit) {
@@ -259,9 +259,9 @@ boost::dynamic_bitset<> Aid::ChangeAttributesOrder(const boost::dynamic_bitset<>
 }
 
 std::vector<size_t> Aid::GetAttributesSortedByFrequency(
-    const std::vector<boost::dynamic_bitset<>>& neg_cover_vector) const {
+        std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const {
     std::vector<unsigned int> frequency(number_of_attributes_, 0);
-    for (const auto& bitset : neg_cover_vector) {
+    for (auto const& bitset : neg_cover_vector) {
         for (size_t attr_num = 0; attr_num < number_of_attributes_; ++attr_num) {
             frequency[attr_num] += bitset[attr_num];
         }

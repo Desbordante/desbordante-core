@@ -20,7 +20,7 @@ size_t CFDRelationData::GetNumRows() const {
 void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
                                              ColumnesValuesDict& columns_values_dict,
                                              std::vector<ItemInfo>& items,
-                                             const std::vector<std::string>& string_row,
+                                             std::vector<std::string> const& string_row,
                                              std::vector<int>& int_row,
                                              std::vector<Transaction>& data_rows,
                                              int& unique_elems_number, unsigned num_columns) {
@@ -88,8 +88,8 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
 void CFDRelationData::AddNewItemsInPartialTable(ItemDictionary& item_dictionary,
                                                 ColumnesValuesDict& columns_values_dict,
                                                 std::vector<ItemInfo>& items,
-                                                const std::vector<std::string>& string_row,
-                                                const std::vector<int>& columns_numbers_list,
+                                                std::vector<std::string> const& string_row,
+                                                std::vector<int> const& columns_numbers_list,
                                                 std::vector<Transaction>& data_rows,
                                                 int& unique_elems_number, int size) {
     std::vector<int> int_row(size);
@@ -171,11 +171,11 @@ unsigned CFDRelationData::GetItemsNumber() const {
     return items_.size();
 }
 
-const Transaction& CFDRelationData::GetRow(unsigned row) const {
+Transaction const& CFDRelationData::GetRow(unsigned row) const {
     return data_rows_.at(row);
 }
 
-void CFDRelationData::SetRow(int row_index, const Transaction& row) {
+void CFDRelationData::SetRow(int row_index, Transaction const& row) {
     for (size_t i = 0; i < row.size(); i++) {
         if (data_rows_[row_index][i] != row[i]) {
             items_[data_rows_[row_index][i] - 1].frequency--;
@@ -185,11 +185,11 @@ void CFDRelationData::SetRow(int row_index, const Transaction& row) {
     data_rows_[row_index] = row;
 }
 
-const std::vector<int>& CFDRelationData::GetDomainOfItem(int item) const {
+std::vector<int> const& CFDRelationData::GetDomainOfItem(int item) const {
     return column_data_.at(items_[item - 1].attribute).GetValues();
 }
 
-const std::vector<int>& CFDRelationData::GetDomain(unsigned attr) const {
+std::vector<int> const& CFDRelationData::GetDomain(unsigned attr) const {
     return column_data_.at(attr).GetValues();
 }
 
@@ -197,9 +197,9 @@ std::string CFDRelationData::GetAttrName(int index) const {
     return GetSchema()->GetColumn(index)->GetName();
 }
 
-int CFDRelationData::GetAttr(const std::string& s) const {
+int CFDRelationData::GetAttr(std::string const& s) const {
     for (int i = 0; static_cast<size_t>(i) < GetNumColumns(); i++) {
-        const std::string ai = GetAttrName(i);
+        std::string const ai = GetAttrName(i);
         if (ai == s) {
             return i;
         }
@@ -207,18 +207,18 @@ int CFDRelationData::GetAttr(const std::string& s) const {
     return -1;
 }
 
-int CFDRelationData::GetItem(int attr, const std::string& str_value) const {
+int CFDRelationData::GetItem(int attr, std::string const& str_value) const {
     return item_dictionary_.at(std::make_pair(attr, str_value));
 }
 
 void CFDRelationData::Sort() {
     std::sort(data_rows_.begin(), data_rows_.end(),
-              [](const std::vector<int>& a, const std::vector<int>& b) {
+              [](std::vector<int> const& a, std::vector<int> const& b) {
                   return std::lexicographical_compare(a.begin(), b.begin(), a.end(), b.end());
               });
 }
 
-void CFDRelationData::ToFront(const SimpleTIdList& tids) {
+void CFDRelationData::ToFront(SimpleTIdList const& tids) {
     for (size_t i = 0; i < tids.size(); i++) {
         std::swap(data_rows_[i], data_rows_[tids[i]]);
     }
@@ -235,7 +235,7 @@ int CFDRelationData::GetAttrIndex(int item_index) const {
 std::string CFDRelationData::GetStringFormat(char delim) const {
     std::string file;
     for (size_t ai = 0; ai < GetNumColumns(); ai++) {
-        const std::string attr = GetAttrName(static_cast<int>(ai));
+        std::string const attr = GetAttrName(static_cast<int>(ai));
         file += attr;
         if (ai < GetNumColumns() - 1) {
             file += delim;
@@ -243,9 +243,9 @@ std::string CFDRelationData::GetStringFormat(char delim) const {
             file += '\n';
         }
     }
-    for (const auto& row : data_rows_) {
+    for (auto const& row : data_rows_) {
         for (size_t ri = 0; ri < row.size(); ri++) {
-            const auto& item = row[ri];
+            auto const& item = row[ri];
             file += items_[item - 1].value;
             if (ri < row.size() - 1) {
                 file += delim;
@@ -257,10 +257,10 @@ std::string CFDRelationData::GetStringFormat(char delim) const {
     return file;
 }
 
-std::string CFDRelationData::GetStringFormat(const SimpleTIdList& subset, char delim) const {
+std::string CFDRelationData::GetStringFormat(SimpleTIdList const& subset, char delim) const {
     std::string result;
     for (size_t ai = 0; ai < GetNumColumns(); ai++) {
-        const auto& attr = GetAttrName(static_cast<AttributeIndex>(ai));
+        auto const& attr = GetAttrName(static_cast<AttributeIndex>(ai));
         result += attr;
         if (ai < GetNumColumns() - 1) {
             result += delim;
@@ -271,7 +271,7 @@ std::string CFDRelationData::GetStringFormat(const SimpleTIdList& subset, char d
     for (int i : subset) {
         auto& row = data_rows_[i];
         for (size_t ri = 0; ri < row.size(); ri++) {
-            const auto& item = row[ri];
+            auto const& item = row[ri];
             result += items_[item - 1].value;
             if (ri < row.size() - 1) {
                 result += delim;
@@ -283,12 +283,12 @@ std::string CFDRelationData::GetStringFormat(const SimpleTIdList& subset, char d
     return result;
 }
 
-const std::string& CFDRelationData::GetValue(int i) const {
+std::string const& CFDRelationData::GetValue(int i) const {
     return items_[i - 1].value;
 }
 
 // Receives elements from table and returns its attributes sorted vector
-std::vector<int> CFDRelationData::GetAttrVector(const Itemset& items) const {
+std::vector<int> CFDRelationData::GetAttrVector(Itemset const& items) const {
     std::vector<int> attrs;
     attrs.reserve(items.size());
     for (Item i : items) {
@@ -302,7 +302,7 @@ std::vector<int> CFDRelationData::GetAttrVector(const Itemset& items) const {
     return attrs;
 }
 
-std::vector<int> CFDRelationData::GetAttrVectorItems(const Itemset& items) const {
+std::vector<int> CFDRelationData::GetAttrVectorItems(Itemset const& items) const {
     std::vector<int> attrs;
     attrs.reserve(items.size());
     for (Item i : items) {

@@ -29,13 +29,21 @@ public:
     TransactionalData(TransactionalData&& other) = default;
     TransactionalData& operator=(TransactionalData&& other) = default;
 
-    std::vector<std::string> const& GetItemUniverse() const noexcept { return item_universe_; }
+    std::vector<std::string> const& GetItemUniverse() const noexcept {
+        return item_universe_;
+    }
+
     std::unordered_map<size_t, Itemset> const& GetTransactions() const noexcept {
         return transactions_;
     }
 
-    size_t GetUniverseSize() const noexcept { return item_universe_.size(); }
-    size_t GetNumTransactions() const noexcept { return transactions_.size(); }
+    size_t GetUniverseSize() const noexcept {
+        return item_universe_.size();
+    }
+
+    size_t GetNumTransactions() const noexcept {
+        return transactions_.size();
+    }
 
     static std::unique_ptr<TransactionalData> CreateFromSingular(IDatasetStream& data_stream,
                                                                  size_t tid_col_index = 0,

@@ -34,7 +34,7 @@ algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
         algos::hy::ClusterId cluster_id = 0;
         std::vector<algos::hy::ClusterId> current(pli->getRelationSize(),
                                                   algos::hy::PLIUtil::kSingletonClusterId);
-        for (const auto& cluster : pli->GetIndex()) {
+        for (auto const& cluster : pli->GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
             }
@@ -72,7 +72,7 @@ std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationDa
 
     auto og_mapping = SortAndGetMapping(plis);
 
-    const auto inverted_plis = BuildInvertedPlis(plis);
+    auto const inverted_plis = BuildInvertedPlis(plis);
 
     auto pli_records = BuildRecordRepresentation(inverted_plis);
 

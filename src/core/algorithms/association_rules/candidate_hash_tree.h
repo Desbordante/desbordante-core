@@ -23,8 +23,8 @@ private:
 
         LeafRow(LeafRow&& other) = default;
         LeafRow& operator=(LeafRow&& other) = delete;
-        LeafRow(NodeIterator node, Node* parent)
-            : candidate_node(node), parent(parent) {}
+
+        LeafRow(NodeIterator node, Node* parent) : candidate_node(node), parent(parent) {}
 
         LeafRow(LeafRow const& other) = delete;
     };
@@ -36,13 +36,16 @@ private:
         std::list<LeafRow> candidates;
 
         HashTreeNode() = delete;
-        explicit HashTreeNode(unsigned level_number)
-            : level_number(level_number) {}
+
+        explicit HashTreeNode(unsigned level_number) : level_number(level_number) {}
     };
 
     HashTreeNode root_;
     unsigned HashFunction(LeafRow const& node_row, unsigned level_num) const;
-    unsigned ItemHash(unsigned item_id) const noexcept { return item_id % branching_degree_; }
+
+    unsigned ItemHash(unsigned item_id) const noexcept {
+        return item_id % branching_degree_;
+    }
 
     void AppendRow(LeafRow row, HashTreeNode& subtree_root);
     void AddLevel(HashTreeNode& leaf_node);
@@ -66,9 +69,13 @@ public:
     }
 
     void AddCandidate(NodeIterator candidate, Node* parent);
-    unsigned Size() const noexcept { return total_row_count_; };
+
+    unsigned Size() const noexcept {
+        return total_row_count_;
+    };
+
     void PerformCounting();
     void PruneNodes(double minsup);
 };
 
-} // namespace algos
+}  // namespace algos

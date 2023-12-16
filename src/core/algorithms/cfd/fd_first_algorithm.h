@@ -32,34 +32,34 @@ private:
     void CheckForIncorrectInput() const;
 
     void FdsFirstDFS();
-    void FdsFirstDFS(const Itemset &, const std::vector<MinerNode<PartitionTIdList>> &,
+    void FdsFirstDFS(Itemset const &, std::vector<MinerNode<PartitionTIdList>> const &,
                      Substrategy = Substrategy::dfs);
-    void MinePatternsBFS(const Itemset &lhs, int rhs, const PartitionTIdList &all_tids);
-    void MinePatternsDFS(const Itemset &lhs, int rhs, const PartitionTIdList &all_tids);
-    void MinePatternsDFS(const Itemset &, std::vector<MinerNode<SimpleTIdList>> &, const Itemset &,
+    void MinePatternsBFS(Itemset const &lhs, int rhs, PartitionTIdList const &all_tids);
+    void MinePatternsDFS(Itemset const &lhs, int rhs, PartitionTIdList const &all_tids);
+    void MinePatternsDFS(Itemset const &, std::vector<MinerNode<SimpleTIdList>> &, Itemset const &,
                          int, RhsesPair2DList &, PartitionList &, std::vector<unsigned> &);
     std::vector<MinerNode<PartitionTIdList>> GetPartitionSingletons();
 
-    bool Precedes(const Itemset &a, const Itemset &b);
-    bool IsConstRule(const PartitionTIdList &items, int rhs_a);
+    bool Precedes(Itemset const &a, Itemset const &b);
+    bool IsConstRule(PartitionTIdList const &items, int rhs_a);
 
-    void MineFD(const MinerNode<PartitionTIdList> &inode, const Itemset &lhs, int rhs);
-    std::pair<std::vector<const PartitionTIdList *>, std::vector<MinerNode<PartitionTIdList>>>
-    ExpandMiningFd(const MinerNode<PartitionTIdList> &inode, int ix, const Itemset &iset,
-                   const std::vector<MinerNode<PartitionTIdList>> &items) const;
+    void MineFD(MinerNode<PartitionTIdList> const &inode, Itemset const &lhs, int rhs);
+    std::pair<std::vector<PartitionTIdList const *>, std::vector<MinerNode<PartitionTIdList>>>
+    ExpandMiningFd(MinerNode<PartitionTIdList> const &inode, int ix, Itemset const &iset,
+                   std::vector<MinerNode<PartitionTIdList>> const &items) const;
 
     void FillMinePatternsVars(PartitionList &, RhsesPair2DList &, RuleIxs &, std::vector<int> &,
-                              const Itemset &, int, const PartitionTIdList &) const;
+                              Itemset const &, int, PartitionTIdList const &) const;
 
-    void AddCFDToCFDList(const std::vector<int> &sub, int out,
-                         const MinerNode<SimpleTIdList> &inode, const PartitionList &partitions);
+    void AddCFDToCFDList(std::vector<int> const &sub, int out,
+                         MinerNode<SimpleTIdList> const &inode, PartitionList const &partitions);
 
-    void AnalyzeCFDFromPIdList(const std::pair<int, SimpleTIdList> &, const PartitionList &,
-                               const std::vector<unsigned> &,
-                               std::vector<MinerNode<SimpleTIdList>> &, const Itemset &);
+    void AnalyzeCFDFromPIdList(std::pair<int, SimpleTIdList> const &, PartitionList const &,
+                               std::vector<unsigned> const &,
+                               std::vector<MinerNode<SimpleTIdList>> &, Itemset const &);
 
-    bool FillFreeMapAndItemsets(const PartitionList &partitions, const Itemset &lhs,
-                                const Itemset &new_set, const SimpleTIdList &ij_tids, unsigned);
+    bool FillFreeMapAndItemsets(PartitionList const &partitions, Itemset const &lhs,
+                                Itemset const &new_set, SimpleTIdList const &ij_tids, unsigned);
 
 protected:
     void RegisterOptions();

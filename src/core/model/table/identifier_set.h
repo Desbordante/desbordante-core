@@ -30,6 +30,7 @@ public:
 
     // Returns an intersection (agree_set(tuple, other.tuple)) of two IndetifierSets
     Vertical Intersect(IdentifierSet const& other) const;
+
 private:
     struct IdentifierSetValue {
         Column const* attribute;
@@ -50,8 +51,7 @@ inline Vertical IdentifierSet::Intersect(IdentifierSet const& other) const {
         if (p->attribute->GetIndex() < q->attribute->GetIndex()) {
             ++p;
         } else {
-            if (q->attribute->GetIndex() == p->attribute->GetIndex() &&
-                p->cluster_index != 0 &&
+            if (q->attribute->GetIndex() == p->attribute->GetIndex() && p->cluster_index != 0 &&
                 p->cluster_index == q->cluster_index) {
                 intersection.set(p->attribute->GetIndex());
                 ++p;

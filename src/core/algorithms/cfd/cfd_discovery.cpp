@@ -86,7 +86,7 @@ std::string CFDDiscovery::GetRelationString(char delim) const {
     return relation_->GetStringFormat(delim);
 }
 
-std::string CFDDiscovery::GetRelationString(const SimpleTIdList& subset, char delim) const {
+std::string CFDDiscovery::GetRelationString(SimpleTIdList const& subset, char delim) const {
     return relation_->GetStringFormat(subset, delim);
 }
 }  // namespace algos::cfd

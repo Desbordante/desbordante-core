@@ -7,5 +7,5 @@
 #include "config/tabular_data/input_table_type.h"
 
 namespace config {
-extern const CommonOption<InputTable> TableOpt;
+extern CommonOption<InputTable> const TableOpt;
 }  // namespace config

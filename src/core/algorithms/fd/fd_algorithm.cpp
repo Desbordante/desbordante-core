@@ -69,7 +69,7 @@ std::vector<Column const*> FDAlgorithm::GetKeys() const {
     size_t const number_of_columns = fds_count_per_col.begin()->first->GetSchema()->GetNumColumns();
     [[maybe_unused]] RelationalSchema const* first_schema =
             fds_count_per_col.begin()->first->GetSchema();
-    for (auto const& [col, num]: fds_count_per_col) {
+    for (auto const& [col, num] : fds_count_per_col) {
         assert(col->GetSchema() == first_schema);
         if (num + 1 + cols_of_equal_values == number_of_columns) {
             keys.push_back(col);

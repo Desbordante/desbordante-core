@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
-#include <thread>
 #include <cassert>
 #include <system_error>
+#include <thread>
+#include <vector>
 
 #include <easylogging++.h>
 
@@ -14,16 +14,15 @@ namespace util {
  * NOTE: actual number of threads to be used is minimum of the
  *       std::distance(begin, end) and threads_num_max.
  */
-template<typename It, typename UnaryFunction>
-inline void parallel_foreach(It begin, It end, unsigned const threads_num_max,
-                             UnaryFunction f) {
+template <typename It, typename UnaryFunction>
+inline void parallel_foreach(It begin, It end, unsigned const threads_num_max, UnaryFunction f) {
     assert(threads_num_max != 0);
     auto const length = std::distance(begin, end);
     if (length == 0) {
         return;
     }
     auto const threads_num_actual =
-        static_cast<unsigned>(std::min(length, static_cast<decltype(length)>(threads_num_max)));
+            static_cast<unsigned>(std::min(length, static_cast<decltype(length)>(threads_num_max)));
     auto const items_per_thread = std::distance(begin, end) / threads_num_actual;
     std::vector<std::thread> threads;
     threads.reserve(threads_num_actual);
@@ -59,5 +58,4 @@ inline void parallel_foreach(It begin, It end, unsigned const threads_num_max,
     }
 }
 
-} // namespace util
-
+}  // namespace util

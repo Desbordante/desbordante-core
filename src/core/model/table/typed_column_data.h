@@ -23,10 +23,9 @@ private:
     std::unordered_set<size_t> nulls_;
     std::unordered_set<size_t> empties_;
 
-    TypedColumnData(Column const* column, std::unique_ptr<Type const> type,
-                    size_t const rows_num, size_t nulls_num, size_t empties_num,
-                    std::unique_ptr<std::byte[]> buffer, std::vector<std::byte const*> data,
-                    std::unordered_set<size_t> nulls,
+    TypedColumnData(Column const* column, std::unique_ptr<Type const> type, size_t const rows_num,
+                    size_t nulls_num, size_t empties_num, std::unique_ptr<std::byte[]> buffer,
+                    std::vector<std::byte const*> data, std::unordered_set<size_t> nulls,
                     std::unordered_set<size_t> empties) noexcept
         : AbstractColumnData(column),
           type_(std::move(type)),
@@ -82,11 +81,11 @@ public:
     }
 
     std::string GetDataAsString(size_t index) const {
-        if(IsNull(index)) {
+        if (IsNull(index)) {
             NullType null_type(true);
             return null_type.ValueToString(GetValue(index));
         }
-        if(IsEmpty(index)) {
+        if (IsEmpty(index)) {
             EmptyType empty_type;
             return empty_type.ValueToString(GetValue(index));
         }
@@ -171,7 +170,7 @@ private:
     std::vector<std::string> unparsed_;
     bool is_null_equal_null_;
 
-    inline static const std::unordered_map<TypeId, std::regex> type_id_to_regex_ = {
+    inline static std::unordered_map<TypeId, std::regex> const type_id_to_regex_ = {
             {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
             {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
             {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*$)")},

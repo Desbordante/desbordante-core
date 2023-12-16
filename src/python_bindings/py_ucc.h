@@ -12,6 +12,7 @@ private:
 
 public:
     explicit PyUCC(model::RawUCC const& raw_ucc);
+
     explicit PyUCC(model::UCC const& ucc) : PyUCC(ucc.GetColumnIndices()) {}
 
     [[nodiscard]] std::string ToString() const;

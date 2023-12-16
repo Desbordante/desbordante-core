@@ -13,7 +13,7 @@ void Apriori::GenerateCandidates(std::vector<Node>& children) {
     auto const last_child_iter = std::prev(children.end());
     for (auto child_iter = children.begin(); child_iter != last_child_iter; ++child_iter) {
         for (auto child_right_sibling_iter = std::next(child_iter);
-                  child_right_sibling_iter != children.end(); ++child_right_sibling_iter) {
+             child_right_sibling_iter != children.end(); ++child_right_sibling_iter) {
             std::vector<unsigned> items = child_iter->items;
             items.push_back(child_right_sibling_iter->items.back());
 
@@ -94,7 +94,8 @@ bool Apriori::CanBePruned(std::vector<unsigned> const& itemset) {
 
             if (node->items.back() == next_item_id) {
                 // we found an item, so we go a level deeper
-                // TODO(alexandrsmirn): вот тут кажется можно очистить стек, и заполнить новым, а не дополнять старое
+                // TODO(alexandrsmirn): вот тут кажется можно очистить стек, и заполнить новым, а не
+                // дополнять старое
                 ++item_index;
                 if (item_index == itemset.size()) {
                     // if we reached the final level
@@ -133,9 +134,8 @@ unsigned long long Apriori::FindFrequent() {
         auto const branching_degree = level_num_;
         auto const min_treshold = candidates_count / branching_degree + 1;
 
-        candidate_hash_tree_ = std::make_unique<CandidateHashTree>(transactional_data_.get(),
-                                                                   candidates_,
-                                                                   branching_degree, min_treshold);
+        candidate_hash_tree_ = std::make_unique<CandidateHashTree>(
+                transactional_data_.get(), candidates_, branching_degree, min_treshold);
         candidate_hash_tree_->PerformCounting();
         candidate_hash_tree_->PruneNodes(minsup_);
         AppendToTree();
@@ -144,7 +144,7 @@ unsigned long long Apriori::FindFrequent() {
     }
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
     long long millis = elapsed_milliseconds.count();
 
     return millis;
@@ -169,7 +169,7 @@ unsigned long long Apriori::GenerateAllRules() {
     }
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
     long long millis = elapsed_milliseconds.count();
 
     LOG(INFO) << "> Count of frequent itemsets: " << frequent_count;
@@ -229,4 +229,4 @@ void Apriori::AppendToTree() {
     }
 }
 
-} //namespace algos
+}  // namespace algos
