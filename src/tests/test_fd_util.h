@@ -29,7 +29,7 @@ protected:
         return {
                 {kTable, config.MakeInputTable()},
                 {kError, config::ErrorType{0.0}},
-                {kSeed, decltype(pyro::Parameters::seed){0}},
+                {kSeed, decltype(algos::pyro::Parameters::seed){0}},
         };
     }
 

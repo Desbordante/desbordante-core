@@ -7,26 +7,23 @@
 #include <easylogging++.h>
 
 #include "algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
-#include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"
 #include "config/error/option.h"
 #include "config/max_lhs/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
-#include "core/fd_g1_strategy.h"
-#include "core/key_g1_strategy.h"
 
 namespace algos {
 
 std::mutex searchSpacesMutex;
 
-Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}), parameters_(true, false) {
     RegisterOptions();
-    ucc_consumer_ = [this](auto const& key) { this->DiscoverUcc(key); };
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
         this->FDAlgorithm::RegisterFd(fd.lhs_, fd.rhs_);
     };
+    ucc_consumer_ = nullptr;
 }
 
 void Pyro::RegisterOptions() {
@@ -67,29 +64,16 @@ unsigned long long Pyro::ExecuteInternal() {
     }
 
     int next_id = 0;
-    if (parameters_.is_find_keys) {
+    for (auto& rhs : schema->GetColumns()) {
         std::unique_ptr<DependencyStrategy> strategy;
         if (parameters_.ucc_error_measure == "g1prime") {
-            strategy = std::make_unique<KeyG1Strategy>(parameters_.max_ucc_error,
-                                                       parameters_.error_dev);
+            strategy = std::make_unique<FdG1Strategy>(rhs.get(), parameters_.max_ucc_error,
+                                                      parameters_.error_dev);
         } else {
             throw std::runtime_error("Unknown key error measure.");
         }
         search_spaces_.push_back(std::make_unique<SearchSpace>(next_id++, std::move(strategy),
                                                                schema, launch_pad_order));
-    }
-    if (parameters_.is_find_fds) {
-        for (auto& rhs : schema->GetColumns()) {
-            std::unique_ptr<DependencyStrategy> strategy;
-            if (parameters_.ucc_error_measure == "g1prime") {
-                strategy = std::make_unique<FdG1Strategy>(rhs.get(), parameters_.max_ucc_error,
-                                                          parameters_.error_dev);
-            } else {
-                throw std::runtime_error("Unknown key error measure.");
-            }
-            search_spaces_.push_back(std::make_unique<SearchSpace>(next_id++, std::move(strategy),
-                                                                   schema, launch_pad_order));
-        }
     }
     unsigned long long init_time_millis = std::chrono::duration_cast<std::chrono::milliseconds>(
                                                   std::chrono::system_clock::now() - start_time)
@@ -104,9 +88,7 @@ unsigned long long Pyro::ExecuteInternal() {
     auto const work_on_search_space =
             [this, &progress_step](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
                                    ProfilingContext* profiling_context, int id) {
-                unsigned long long millis = 0;
                 while (true) {
-                    auto thread_start_time = std::chrono::system_clock::now();
                     std::unique_ptr<SearchSpace> polled_space;
                     {
                         std::scoped_lock<std::mutex> lock(searchSpacesMutex);
@@ -121,18 +103,11 @@ unsigned long long Pyro::ExecuteInternal() {
                     polled_space->EnsureInitialized();
                     polled_space->Discover();
                     AddProgress(progress_step);
-
-                    millis += std::chrono::duration_cast<std::chrono::milliseconds>(
-                                      std::chrono::system_clock::now() - thread_start_time)
-                                      .count();
                 }
-                LOG(DEBUG) << "Thread" << id << " stopped working, ELAPSED TIME: " << millis
-                           << " ms.";
             };
 
     std::vector<std::thread> threads;
     for (int i = 0; i < parameters_.parallelism; i++) {
-        // std::thread();
         threads.emplace_back(work_on_search_space, std::ref(search_spaces_),
                              profiling_context.get(), i);
     }

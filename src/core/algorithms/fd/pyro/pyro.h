@@ -9,6 +9,7 @@
 
 namespace algos {
 
+/* Class for mining FD with pyro algorithm */
 class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
 private:
     std::list<std::unique_ptr<SearchSpace>> search_spaces_;

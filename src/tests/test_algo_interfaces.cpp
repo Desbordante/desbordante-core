@@ -39,7 +39,7 @@ inline static void GetKeysTestImpl(KeysTestParams const& p) {
     StdParamsMap params_map{{onam::kCsvPath, path},
                             {onam::kSeparator, p.sep},
                             {onam::kHasHeader, p.has_header},
-                            {onam::kSeed, decltype(pyro::Parameters::seed){0}},
+                            {onam::kSeed, decltype(algos::pyro::Parameters::seed){0}},
                             {onam::kError, config::ErrorType{0.0}}};
     auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
     auto& pyro = *pyro_ptr;

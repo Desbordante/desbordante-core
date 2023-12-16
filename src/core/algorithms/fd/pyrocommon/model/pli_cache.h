@@ -4,9 +4,9 @@ class ProfilingContext;
 
 #include <mutex>
 
+#include "../core/profiling_context.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
-#include "../core/profiling_context.h"
 #include "model/table/column_layout_relation_data.h"
 
 namespace model {
