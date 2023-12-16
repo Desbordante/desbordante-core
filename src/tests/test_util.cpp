@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "fd/pyro/model/list_agree_set_sample.h"
+#include "fd/pyrocommon/model/list_agree_set_sample.h"
 #include "levenshtein_distance.h"
 #include "model/table/agree_set_factory.h"
 #include "model/table/column_layout_relation_data.h"
