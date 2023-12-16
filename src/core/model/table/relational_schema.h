@@ -31,14 +31,21 @@ public:
 
     RelationalSchema(std::string name);
     void Init();
-    std::string GetName() const { return name_; }
-    std::vector<std::unique_ptr<Column>> const& GetColumns() const { return columns_; };
-    Column const* GetColumn(const std::string& col_name) const;
+
+    std::string GetName() const {
+        return name_;
+    }
+
+    std::vector<std::unique_ptr<Column>> const& GetColumns() const {
+        return columns_;
+    };
+
+    Column const* GetColumn(std::string const& col_name) const;
     Column const* GetColumn(size_t index) const;
     size_t GetNumColumns() const;
     Vertical GetVertical(boost::dynamic_bitset<> indices) const;
 
-    void AppendColumn(const std::string& col_name);
+    void AppendColumn(std::string const& col_name);
     void AppendColumn(Column column);
 
     template <typename Container>
@@ -47,8 +54,8 @@ public:
     boost::dynamic_bitset<> IndicesToBitset(ForwardIt begin, ForwardIt end) const;
 
     std::unordered_set<Vertical> CalculateHittingSet(
-        std::vector<Vertical> verticals,
-        boost::optional<std::function<bool(Vertical const&)>> pruning_function) const;
+            std::vector<Vertical> verticals,
+            boost::optional<std::function<bool(Vertical const&)>> pruning_function) const;
 
     ~RelationalSchema();
 
@@ -58,6 +65,7 @@ public:
 inline bool operator==(RelationalSchema const& l, RelationalSchema const& r) {
     return (l.name_ == r.name_ && l.columns_.size() == r.columns_.size());
 }
+
 inline bool operator!=(RelationalSchema const& l, RelationalSchema const& r) {
     return !(l == r);
 }

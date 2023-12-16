@@ -41,6 +41,7 @@ public:
     [[nodiscard]] std::pair<size_t, size_t> GetColumnIndices() const {
         return column_indices_;
     }
+
     [[nodiscard]] Ranges const& GetRanges() const {
         return ranges_;
     }

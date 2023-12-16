@@ -7,23 +7,23 @@
 namespace algos {
 class Statistic {
     bool has_value_ = false;
-    const std::byte* data_ = nullptr;
+    std::byte const *data_ = nullptr;
     std::unique_ptr<model::Type> type_ = nullptr;
 
 public:
     Statistic() noexcept = default;
-    Statistic(const std::byte*, const model::Type*, bool clone_data);
-    Statistic(const Statistic&);
-    Statistic(Statistic&&);
+    Statistic(std::byte const *, model::Type const *, bool clone_data);
+    Statistic(Statistic const &);
+    Statistic(Statistic &&);
     ~Statistic();
 
-    Statistic& operator=(const Statistic&);
-    Statistic& operator=(Statistic&&);
+    Statistic &operator=(Statistic const &);
+    Statistic &operator=(Statistic &&);
 
     bool HasValue() const noexcept;
-    const std::byte* GetData() const;
-    const model::Type* GetType() const;
-    const std::byte* ReleaseData();
+    std::byte const *GetData() const;
+    model::Type const *GetType() const;
+    std::byte const *ReleaseData();
     std::string ToString() const;
 };
 

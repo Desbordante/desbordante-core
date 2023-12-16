@@ -38,6 +38,7 @@ namespace algos::hyfd {
 class HyFD : public PliBasedFDAlgorithm {
 private:
     void ResetStateFd() final {}
+
     unsigned long long ExecuteInternal() override;
 
     void RegisterFDs(std::vector<RawFD>&& fds, std::vector<algos::hy::ClusterId> const& og_mapping);

@@ -32,7 +32,7 @@ std::string Output::ItemToPattern(Item item, CFDRelationData const& db) {
     return pattern_opt.has_value() ? "=" + pattern_opt.value() : "";
 }
 
-std::string Output::ItemsetToString(const Itemset& items,
+std::string Output::ItemsetToString(Itemset const& items,
                                     std::shared_ptr<CFDRelationData const> const& db) {
     std::string answer;
     answer += '(';
@@ -49,16 +49,16 @@ std::string Output::ItemsetToString(const Itemset& items,
     return answer;
 }
 
-std::string Output::CFDListToString(const ItemsetCFDList& cs,
+std::string Output::CFDListToString(ItemsetCFDList const& cs,
                                     std::shared_ptr<CFDRelationData const> const& db) {
     std::string answer;
-    for (const auto& [lhs, rhs] : cs) {
+    for (auto const& [lhs, rhs] : cs) {
         answer += CFDToString(lhs, rhs, db);
     }
     return answer;
 }
 
-std::string Output::CFDToString(const Itemset& lhs, Item rhs,
+std::string Output::CFDToString(Itemset const& lhs, Item rhs,
                                 std::shared_ptr<CFDRelationData const> const& db) {
     std::stringstream ss;
     ss << ItemsetToString(lhs, db) << " => " << ItemToAttrName(rhs, *db) << ItemToPattern(rhs, *db);

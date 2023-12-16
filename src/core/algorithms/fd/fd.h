@@ -21,6 +21,7 @@ public:
     Vertical const& GetLhs() const {
         return lhs_;
     }
+
     Column const& GetRhs() const {
         return rhs_;
     }

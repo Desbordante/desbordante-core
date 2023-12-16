@@ -12,11 +12,13 @@ namespace model {
 
 class INumericType : public IMetrizableType {
 public:
-    using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*, std::byte*) const;
+    using NumericBinop = std::byte* (INumericType::*)(std::byte const*, std::byte const*,
+                                                      std::byte*) const;
 
     explicit INumericType(TypeId id) noexcept : IMetrizableType(id) {}
 
     virtual void CastTo(std::byte* value, TypeId to_type) const = 0;
+
     void CastTo(std::byte* value, INumericType const& to) const {
         CastTo(value, to.GetTypeId());
     }
@@ -64,6 +66,7 @@ protected:
     static T const& GetValue(std::byte const* buf) {
         return INumericType::GetValue<T>(buf);
     }
+
     static T& GetValue(std::byte* buf) {
         return INumericType::GetValue<T>(buf);
     }
@@ -122,6 +125,7 @@ public:
         GetValue(buf) = literal;
         return buf;
     }
+
     void CastTo(std::byte* value, TypeId to_type) const override;
 };
 
@@ -168,6 +172,7 @@ std::byte* NumericType<T>::Negate(std::byte const* value, std::byte* res) const 
     GetValue(res) = -GetValue(value);
     return res;
 }
+
 template <typename T>
 std::byte* NumericType<T>::Add(std::byte const* l, std::byte const* r, std::byte* res) const {
     GetValue(res) = GetValue(l) + GetValue(r);

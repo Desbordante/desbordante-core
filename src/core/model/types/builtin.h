@@ -14,9 +14,11 @@ namespace model {
 /* 'Real' types */
 
 using Int = int64_t; /* Type of any integer value that fits into int64 */
+
 namespace details {
 BOOST_STRONG_TYPEDEF(std::string, Placeholder);
-} // namespace details
+}  // namespace details
+
 using BigInt = details::Placeholder; /* Type of an integer that don't fit into Int */
 using Double = double; /* Fixed-precision floating point value; also we need type for values
                         * with arbitrary precision analogous to BigInt */
@@ -32,7 +34,9 @@ static_assert(sizeof(Int) == sizeof(Double));
 struct Null {
     constexpr static std::string_view kValue = "NULL";
 };
+
 class Empty {}; /* Empty value */
+
 class Mixed {}; /* Dummy type only to describe columns with more than one type */
 
 /* All types that ColumnData can contain */
@@ -59,26 +63,36 @@ BETTER_ENUM(TypeId, char,
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
 );
+
 // clang-format on
 
-template <typename T> struct TypeConverter {};
-template <> struct TypeConverter<Int> {
+template <typename T>
+struct TypeConverter {};
+
+template <>
+struct TypeConverter<Int> {
     inline static constexpr auto convert = [](std::string const& v) {
         return static_cast<Int>(std::stoll(v));
     };
 };
-template <> struct TypeConverter<Double> {
+
+template <>
+struct TypeConverter<Double> {
     inline static constexpr auto convert = [](std::string const& v) { return std::stold(v); };
 };
-template <> struct TypeConverter<BigInt> {
+
+template <>
+struct TypeConverter<BigInt> {
     inline static constexpr auto convert = [](std::string& v) { return BigInt(std::move(v)); };
 };
-template <> struct TypeConverter<String> {
-    inline static constexpr auto convert = [](std::string& v) {
-        return std::move(v);
-    };
+
+template <>
+struct TypeConverter<String> {
+    inline static constexpr auto convert = [](std::string& v) { return std::move(v); };
 };
-template <> struct TypeConverter<Null> {
+
+template <>
+struct TypeConverter<Null> {
     inline static constexpr auto convert = [](std::string const& v) {
         if (v != Null::kValue) {
             throw std::invalid_argument("Cannot convert v to Null value");
@@ -86,7 +100,9 @@ template <> struct TypeConverter<Null> {
         return Null();
     };
 };
-template <> struct TypeConverter<Empty> {
+
+template <>
+struct TypeConverter<Empty> {
     inline static constexpr auto convert = [](std::string const& v) {
         if (!v.empty()) {
             throw std::invalid_argument("Cannot convert v to Empty value");
@@ -101,6 +117,7 @@ namespace detail {
 
 template <typename T>
 struct TupleMaxAlign {};
+
 template <typename... Ts>
 struct TupleMaxAlign<std::tuple<Ts...>> {
     static constexpr size_t value = std::max({alignof(Ts)...});

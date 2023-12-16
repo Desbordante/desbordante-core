@@ -30,7 +30,7 @@ static void CheckCfdSetsEquality(std::set<std::string> const& actual,
 class CFDAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::cfd::FDFirstAlgorithm> CreateAlgorithmInstance(
-            unsigned minsup, double minconf, const std::filesystem::path& path,
+            unsigned minsup, double minconf, std::filesystem::path const& path,
             char const* substrategy, unsigned int max_lhs, unsigned columns_number = 0,
             unsigned tuples_number = 0, char separator = ',', bool has_header = true) {
         using namespace config::names;

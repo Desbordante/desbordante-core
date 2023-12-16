@@ -28,8 +28,13 @@ public:
     ConfidenceInterval EstimateMixed(Vertical const& agreement, Vertical const& disagreement,
                                      double confidence) const;
 
-    double GetSamplingRatio() const { return sample_size_ / static_cast<double>(population_size_); }
-    bool IsExact() const { return population_size_ == sample_size_; }
+    double GetSamplingRatio() const {
+        return sample_size_ / static_cast<double>(population_size_);
+    }
+
+    bool IsExact() const {
+        return population_size_ == sample_size_;
+    }
 
     virtual ~AgreeSetSample() = default;
 
@@ -41,23 +46,26 @@ protected:
     AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
                    unsigned int sample_size, unsigned long long population_size);
 
-    template<typename T>
+    template <typename T>
     static std::unique_ptr<T> CreateFor(ColumnLayoutRelationData* relation_data, int sample_size);
 
-    template<typename T>
+    template <typename T>
     static std::unique_ptr<T> CreateFocusedFor(ColumnLayoutRelationData const* relation,
                                                Vertical const& restriction_vertical,
                                                PositionListIndex const* restriction_pli,
                                                unsigned int sample_size, CustomRandom& random);
+
 private:
     static double std_dev_smoothing_;
 
     double RatioToRelationRatio(double ratio) const {
         return ratio * population_size_ / relation_data_->GetNumTuplePairs();
     }
+
     double ObservationsToRelationRatio(double num_observations) const {
         return RatioToRelationRatio(num_observations / sample_size_);
     }
+
     static double CalculateNonNegativeFraction(double a, double b);
 
     ConfidenceInterval EstimateGivenNumHits(unsigned long long num_hits, double confidence) const;

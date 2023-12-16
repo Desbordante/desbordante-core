@@ -72,7 +72,7 @@ public:
         return result;
     }
 
-    std::byte* Concat(std::byte *l, std::byte* r) const {
+    std::byte* Concat(std::byte* l, std::byte* r) const {
         std::byte* result = MakeValue();
         return Concat(l, r, result);
     }

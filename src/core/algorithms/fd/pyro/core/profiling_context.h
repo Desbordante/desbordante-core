@@ -48,12 +48,15 @@ public:
     // Non-const as RandomGenerator state gets changed
     model::AgreeSetSample const* CreateFocusedSample(Vertical const& focus, double boost_factor);
     std::shared_ptr<model::AgreeSetSample const> GetAgreeSetSample(Vertical const& focus) const;
+
     model::PLICache* GetPliCache() {
         return pli_cache_.get();
     }
+
     bool IsAgreeSetSamplesEmpty() const {
         return agree_set_samples_ == nullptr;
     }
+
     RelationalSchema const* GetSchema() const {
         return relation_data_->GetSchema();
     }
@@ -61,9 +64,11 @@ public:
     pyro::Parameters const& GetParameters() const {
         return parameters_;
     }
+
     ColumnLayoutRelationData const* GetColumnLayoutRelationData() const {
         return relation_data_;
     }
+
     model::PLICache const* GetPliCache() const {
         return pli_cache_.get();
     }
@@ -74,6 +79,7 @@ public:
     int NextInt(int upper_bound) {
         return custom_random_.NextInt(upper_bound);
     }
+
     double NextDouble() {
         return custom_random_.NextDouble();
     }

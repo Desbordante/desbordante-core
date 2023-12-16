@@ -6,6 +6,7 @@ class OrderedPartition {
 private:
     double distinctiveness_;
     unsigned int column_index_;
+
 public:
     OrderedPartition() = delete;
     OrderedPartition(OrderedPartition const& other) = delete;
@@ -17,5 +18,8 @@ public:
                      unsigned int column_index);
 
     bool operator<(OrderedPartition const& other) const;
-    unsigned int GetColumnIndex() const { return this->column_index_; }
+
+    unsigned int GetColumnIndex() const {
+        return this->column_index_;
+    }
 };

@@ -34,7 +34,7 @@ void Algorithm::ExcludeOptions(std::string_view parent_option) noexcept {
     auto it = opt_parents_.find(parent_option);
     if (it == opt_parents_.end()) return;
 
-    for (auto const &option_name: it->second) {
+    for (auto const& option_name : it->second) {
         auto possible_opt_it = possible_options_.find(option_name);
         assert(possible_opt_it != possible_options_.end());
         available_options_.erase(possible_opt_it->first);
@@ -45,15 +45,15 @@ void Algorithm::ExcludeOptions(std::string_view parent_option) noexcept {
 
 void Algorithm::UnsetOption(std::string_view option_name) noexcept {
     auto it = possible_options_.find(option_name);
-    if (it == possible_options_.end()
-        || available_options_.find(it->first) == available_options_.end())
+    if (it == possible_options_.end() ||
+        available_options_.find(it->first) == available_options_.end())
         return;
     it->second->Unset();
     ExcludeOptions(it->first);
 }
 
 void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option_names) {
-    for (std::string_view name: option_names) {
+    for (std::string_view name : option_names) {
         auto it = possible_options_.find(name);
         assert(it != possible_options_.end());
         available_options_.insert(it->first);
@@ -61,8 +61,8 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
 }
 
 void Algorithm::LoadData() {
-    if (!GetNeededOptions().empty()) throw std::logic_error(
-                "All options need to be set before starting processing.");
+    if (!GetNeededOptions().empty())
+        throw std::logic_error("All options need to be set before starting processing.");
     LoadDataInternal();
     ExecutePrepare();
 }
@@ -131,7 +131,7 @@ std::type_index Algorithm::GetTypeIndex(std::string_view option_name) const {
 
 std::unordered_set<std::string_view> Algorithm::GetPossibleOptions() const {
     std::unordered_set<std::string_view> possible_options;
-    for (const auto& [key, _] : possible_options_) {
+    for (auto const& [key, _] : possible_options_) {
         possible_options.insert(key);
     }
     return possible_options;
@@ -147,4 +147,3 @@ std::string_view Algorithm::GetDescription(std::string_view option_name) const {
 }
 
 }  // namespace algos
-

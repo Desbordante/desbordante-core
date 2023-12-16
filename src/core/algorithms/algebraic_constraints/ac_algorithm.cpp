@@ -240,6 +240,7 @@ ACPairsCollection const& ACAlgorithm::GetACPairsByColumns(size_t lhs_i, size_t r
     }
     return *res;
 }
+
 void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) const {
     for (size_t i = 0; i < ranges_.size(); ++i) {
         LOG(DEBUG) << "lhs: " << data.at(ranges_[i].col_pair.col_i.first).ToString() << std::endl;

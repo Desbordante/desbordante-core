@@ -6,8 +6,8 @@
 
 namespace algos::cfd {
 
-unsigned PartitionUtil::GetPartitionSupport(const SimpleTIdList& pids,
-                                            const std::vector<unsigned>& psupps) {
+unsigned PartitionUtil::GetPartitionSupport(SimpleTIdList const& pids,
+                                            std::vector<unsigned> const& psupps) {
     unsigned res = 0;
     for (int p : pids) {
         res += psupps[p];
@@ -15,8 +15,8 @@ unsigned PartitionUtil::GetPartitionSupport(const SimpleTIdList& pids,
     return res;
 }
 
-unsigned PartitionUtil::GetPartitionError(const SimpleTIdList& pids,
-                                          const PartitionList& partitions) {
+unsigned PartitionUtil::GetPartitionError(SimpleTIdList const& pids,
+                                          PartitionList const& partitions) {
     unsigned res = 0;
     for (int p : pids) {
         unsigned max =
@@ -28,7 +28,7 @@ unsigned PartitionUtil::GetPartitionError(const SimpleTIdList& pids,
     return res;
 }
 
-bool PartitionUtil::IsConstRulePartition(const SimpleTIdList& items, const RhsesPair2DList& rhses) {
+bool PartitionUtil::IsConstRulePartition(SimpleTIdList const& items, RhsesPair2DList const& rhses) {
     int rhs_value;
     bool first = true;
     for (int pi : items) {

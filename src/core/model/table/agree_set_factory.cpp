@@ -2,13 +2,13 @@
 
 #include <atomic>
 #include <condition_variable>
-#include <thread>
 #include <shared_mutex>
+#include <thread>
 #include <unordered_set>
 
 #include <boost/asio/post.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <boost/asio/thread_pool.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 #define BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY
 #include <boost/thread.hpp>
@@ -54,9 +54,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
     agree_sets.insert(*relation_->GetSchema()->empty_vertical_);
 
     auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "TIME TO GENERATE AGREE SETS WITH METHOD "
-              << method_str << ": "
+            std::chrono::system_clock::now() - start_time);
+    LOG(INFO) << "TIME TO GENERATE AGREE SETS WITH METHOD " << method_str << ": "
               << elapsed_mills_to_gen_agree_sets.count();
 
     return agree_sets;
@@ -82,7 +81,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     }
 
     auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
     LOG(INFO) << "TIME TO IDENTIFIER SETS GENERATION: " << elapsed_mills_to_gen_id_sets.count();
 
     LOG(DEBUG) << "Identifier sets:";
@@ -95,9 +94,9 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
     if (!identifier_sets.empty()) {
         size_t const size = identifier_sets.size();
         size_t const pairs_num = (size_t)(size * (size - 1) / 2);
-        double const percent_per_idset = (pairs_num == 0)
-                ? algos::FDAlgorithm::kTotalProgressPercent
-                : algos::FDAlgorithm::kTotalProgressPercent / pairs_num;
+        double const percent_per_idset =
+                (pairs_num == 0) ? algos::FDAlgorithm::kTotalProgressPercent
+                                 : algos::FDAlgorithm::kTotalProgressPercent / pairs_num;
         auto back_it = std::prev(identifier_sets.end());
         for (auto p = identifier_sets.begin(); p != back_it; ++p) {
             for (auto q = std::next(p); q != identifier_sets.end(); ++q) {
@@ -124,7 +123,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
     }
 
     auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
     LOG(INFO) << "TIME TO IDENTIFIER SETS GENERATION: " << elapsed_mills_to_gen_id_sets.count();
 
     LOG(DEBUG) << "Identifier sets:";
@@ -135,9 +134,9 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
     // compute agree sets using identifier sets
     // metanome approach (using map of identifier sets)
     double const percent_per_cluster =
-        max_representation.empty()
-        ? algos::FDAlgorithm::kTotalProgressPercent
-        : algos::FDAlgorithm::kTotalProgressPercent / max_representation.size();
+            max_representation.empty()
+                    ? algos::FDAlgorithm::kTotalProgressPercent
+                    : algos::FDAlgorithm::kTotalProgressPercent / max_representation.size();
 
     if (config_.threads_num > 1) {
         /* Not as fast and simple as it can be, need to use concurrent unordered_set.
@@ -158,8 +157,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
          *       threads_agree_sets.size() always will be not equal to actual_threads_num leading
          *       to the infinite wait on cv.
          */
-        ushort const actual_threads_num = std::min(max_representation.size(),
-                                                   (size_t)config_.threads_num);
+        ushort const actual_threads_num =
+                std::min(max_representation.size(), (size_t)config_.threads_num);
         auto task = [&identifier_sets, &agree_sets, percent_per_cluster, actual_threads_num,
                      &map_init_mutex, this, &threads_agree_sets, &map_init_cv,
                      &map_initialized](SetOfVectors::value_type const& cluster) {
@@ -181,9 +180,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
                 for (auto q = std::next(p); q != cluster.end(); ++q) {
                     IdentifierSet const& id_set1 = identifier_sets.at(*p);
                     IdentifierSet const& id_set2 = identifier_sets.at(*q);
-                    threads_agree_sets[thread_id].insert(
-                        id_set1.Intersect(id_set2)
-                    );
+                    threads_agree_sets[thread_id].insert(id_set1.Intersect(id_set2));
                 }
             }
             AddProgress(percent_per_cluster);
@@ -250,8 +247,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingGetAgreeSets() const 
     return agree_sets;
 }
 
-AgreeSet AgreeSetFactory::GetAgreeSet(int const tuple1_index,
-                                      int const tuple2_index) const {
+AgreeSet AgreeSetFactory::GetAgreeSet(int const tuple1_index, int const tuple2_index) const {
     std::vector<int> const tuple1 = relation_->GetTuple(tuple1_index);
     std::vector<int> const tuple2 = relation_->GetTuple(tuple2_index);
     boost::dynamic_bitset<> agree_set_indices(relation_->GetNumColumns());
@@ -271,34 +267,32 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
     auto start_time = std::chrono::system_clock::now();
 
     switch (config_.mc_gen_method) {
-    case MCGenMethod::kUsingCalculateSupersets: {
-        method_str = "`kUsingCalculateSupersets`";
-        max_representation = GenMcUsingCalculateSupersets();
-        break;
-    }
-    case MCGenMethod::kUsingHandleEqvClass: {
-        method_str = "`kUsingHandleEqvClass`";
-        max_representation = GenMcUsingHandleEqvClass();
-        break;
-    }
-    case MCGenMethod::kUsingHandlePartition: {
-        method_str = "`kUsingHandlePartition`";
-        max_representation = GenMcUsingHandlePartition();
-        break;
-    }
-    case MCGenMethod::kParallel: {
-        method_str = "`kParallel`";
-        max_representation = GenMcParallel();
-        break;
-    }
+        case MCGenMethod::kUsingCalculateSupersets: {
+            method_str = "`kUsingCalculateSupersets`";
+            max_representation = GenMcUsingCalculateSupersets();
+            break;
+        }
+        case MCGenMethod::kUsingHandleEqvClass: {
+            method_str = "`kUsingHandleEqvClass`";
+            max_representation = GenMcUsingHandleEqvClass();
+            break;
+        }
+        case MCGenMethod::kUsingHandlePartition: {
+            method_str = "`kUsingHandlePartition`";
+            max_representation = GenMcUsingHandlePartition();
+            break;
+        }
+        case MCGenMethod::kParallel: {
+            method_str = "`kParallel`";
+            max_representation = GenMcParallel();
+            break;
+        }
     }
 
     auto elapsed_mills_to_gen_max_representation =
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time
-        );
-    LOG(INFO) << "TIME TO GENERATE MAX REPRESENTATION WITH METHOD "
-              << method_str << ": "
+            std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
+                                                                  start_time);
+    LOG(INFO) << "TIME TO GENERATE MAX REPRESENTATION WITH METHOD " << method_str << ": "
               << elapsed_mills_to_gen_max_representation.count();
 
     return max_representation;
@@ -308,11 +302,9 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingCalculateSupersets() co
     vector<ColumnData> const& columns_data = relation_->GetColumnData();
     SetOfVectors max_representation;
 
-    auto not_empty_pli =
-        std::find_if(columns_data.begin(), columns_data.end(),
-                     [](ColumnData const& c) {
-                         return c.GetPositionListIndex()->GetSize() != 0;
-                     });
+    auto not_empty_pli = std::find_if(
+            columns_data.begin(), columns_data.end(),
+            [](ColumnData const& c) { return c.GetPositionListIndex()->GetSize() != 0; });
 
     if (not_empty_pli == columns_data.end()) {
         return max_representation;
@@ -338,8 +330,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandleEqvClass() const 
         if (lhs.size() != rhs.size()) {
             return lhs.size() < rhs.size();
         }
-        return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                            rhs.begin(), rhs.end());
+        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     };
     auto sorted_eqv_classes = GenSortedEqvClasses(less);
 
@@ -353,8 +344,8 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandleEqvClass() const 
     SetOfVectors min_set;
 
     auto const first_not_min =
-        std::find_if_not(sorted_eqv_classes.begin(), sorted_eqv_classes.end(),
-                         [min_size](auto const& p) { return p.size() == min_size; });
+            std::find_if_not(sorted_eqv_classes.begin(), sorted_eqv_classes.end(),
+                             [min_size](auto const& p) { return p.size() == min_size; });
 
     min_set.insert(sorted_eqv_classes.begin(), first_not_min);
     max_sets.emplace(min_size, std::move(min_set));
@@ -377,8 +368,8 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandleEqvClass() const 
     return max_representation;
 }
 
-set<vector<int>, AgreeSetFactory::VectorComp>
-AgreeSetFactory::GenSortedEqvClasses(VectorComp comp) const {
+set<vector<int>, AgreeSetFactory::VectorComp> AgreeSetFactory::GenSortedEqvClasses(
+        VectorComp comp) const {
     vector<ColumnData> const& columns_data = relation_->GetColumnData();
     // set of all equivalence classes of all paritions
     set<vector<int>, VectorComp> sorted_eqv_classes(comp);
@@ -398,8 +389,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandlePartition() const
         if (lhs.size() != rhs.size()) {
             return lhs.size() > rhs.size();
         }
-        return std::lexicographical_compare(lhs.begin(), lhs.end(),
-                                            rhs.begin(), rhs.end(),
+        return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                                             std::greater<int>());
     };
     auto sorted_eqv_classes = GenSortedEqvClasses(greater);
@@ -414,8 +404,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandlePartition() const
     std::unordered_map<int, unordered_set<size_t>> index;
 
     size_t eqv_class_index = 0;
-    for (auto it = sorted_eqv_classes.begin();
-         it != sorted_eqv_classes.end();
+    for (auto it = sorted_eqv_classes.begin(); it != sorted_eqv_classes.end();
          ++it, ++eqv_class_index) {
         // handlePartition method in Metanome
         if (!IsSubset(*it, index)) {
@@ -543,8 +532,7 @@ void AgreeSetFactory::HandleEqvClass(vector<int>& eqv_class,
         /* Need to check if an element with copy.size() key exists before accessing it
          * to avoid new SetOfVectors() creation if it doesn't.
          */
-        if (max_sets.count(size) != 0 &&
-            max_sets[size].find(copy) != max_sets[size].end()) {
+        if (max_sets.count(size) != 0 && max_sets[size].find(copy) != max_sets[size].end()) {
             max_sets[size].erase(copy);
         } else {
             if (size > 2) {
@@ -553,13 +541,12 @@ void AgreeSetFactory::HandleEqvClass(vector<int>& eqv_class,
         }
     }
 
-    if (first_step)
-        max_sets[eqv_class.size()].insert(std::move(eqv_class));
+    if (first_step) max_sets[eqv_class.size()].insert(std::move(eqv_class));
 }
 
 void AgreeSetFactory::CalculateSupersets(
-    std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>& max_representation,
-    std::deque<vector<int>> const& partition) const {
+        std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>& max_representation,
+        std::deque<vector<int>> const& partition) const {
     SetOfVectors to_add_to_mc;
     auto hash = [beg = max_representation.begin()](SetOfVectors::const_iterator it) {
         return std::distance<SetOfVectors::const_iterator>(beg, it);
@@ -569,8 +556,7 @@ void AgreeSetFactory::CalculateSupersets(
 
     for (auto it = max_representation.begin(); it != max_representation.end(); ++it) {
         for (auto p = partition.begin();
-             to_exclude_from_partition.size() != partition.size() && p != partition.end();
-             ++p) {
+             to_exclude_from_partition.size() != partition.size() && p != partition.end(); ++p) {
             if (to_exclude_from_partition.find(p) != to_exclude_from_partition.end()) {
                 continue;
             }

@@ -11,7 +11,7 @@ private:
 #ifdef SAFE_VERTICAL_HASHING
             BitsetHashingMethod::kTrimAndConvertToUlong;
 #else
-        BitsetHashingMethod::kTryConvertToUlong;
+            BitsetHashingMethod::kTryConvertToUlong;
 #endif
 
     template <auto bitsetHashingMethod = kDefaultHashingMethod>
@@ -23,13 +23,13 @@ private:
 
 template <>
 inline size_t CustomHashing::BitsetHash<CustomHashing::BitsetHashingMethod::kTryConvertToUlong>(
-    boost::dynamic_bitset<> const& bitset) {
+        boost::dynamic_bitset<> const& bitset) {
     return bitset.to_ulong();
 }
 
 template <>
 inline size_t CustomHashing::BitsetHash<CustomHashing::BitsetHashingMethod::kTrimAndConvertToUlong>(
-    boost::dynamic_bitset<> const& bitset) {
+        boost::dynamic_bitset<> const& bitset) {
     boost::dynamic_bitset<> copy_bitset = bitset;
     copy_bitset.resize(std::numeric_limits<unsigned long>::digits);
     return copy_bitset.to_ulong();
@@ -77,5 +77,4 @@ struct hash<std::pair<std::shared_ptr<Vertical>, T>> {
         return std::hash<Vertical>()(*k.first);
     }
 };
-}
-
+}  // namespace std

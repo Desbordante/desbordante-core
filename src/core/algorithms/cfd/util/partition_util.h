@@ -8,9 +8,9 @@ namespace algos::cfd {
 
 class PartitionUtil {
 public:
-    static bool IsConstRulePartition(const SimpleTIdList& items, const RhsesPair2DList& rhses);
-    static unsigned GetPartitionSupport(const SimpleTIdList& pids,
-                                        const std::vector<unsigned>& partitions);
-    static unsigned GetPartitionError(const SimpleTIdList& pids, const PartitionList& partitions);
+    static bool IsConstRulePartition(SimpleTIdList const& items, RhsesPair2DList const& rhses);
+    static unsigned GetPartitionSupport(SimpleTIdList const& pids,
+                                        std::vector<unsigned> const& partitions);
+    static unsigned GetPartitionError(SimpleTIdList const& pids, PartitionList const& partitions);
 };
 }  // namespace algos::cfd

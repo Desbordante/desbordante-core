@@ -8,5 +8,3 @@ enum class NodeCategory {
     kMaximalNonDependency,
     kCandidateMaximalNonDependency
 };
-
-

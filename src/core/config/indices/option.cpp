@@ -42,7 +42,7 @@ Option<config::IndicesType> IndicesOption::operator()(
 
 using config::names::kLhsIndices, config::descriptions::kDLhsIndices;
 using config::names::kRhsIndices, config::descriptions::kDRhsIndices;
-extern const IndicesOption LhsIndicesOpt{kLhsIndices, kDLhsIndices};
-extern const IndicesOption RhsIndicesOpt{kRhsIndices, kDRhsIndices};
+extern IndicesOption const LhsIndicesOpt{kLhsIndices, kDLhsIndices};
+extern IndicesOption const RhsIndicesOpt{kRhsIndices, kDRhsIndices};
 
 }  // namespace config

@@ -37,6 +37,7 @@ public:
     std::pair<uint8_t, double> GetProgress() const noexcept;
     // Finishes current phase and moves to the next one
     void ToNextProgressPhase() noexcept;
+
     std::vector<std::string_view> const& GetPhaseNames() const noexcept {
         return phase_names_;
     }

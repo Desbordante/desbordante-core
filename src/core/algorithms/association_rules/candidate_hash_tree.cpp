@@ -18,7 +18,7 @@ void CandidateHashTree::AppendRow(LeafRow row, HashTreeNode& subtree_root) {
          * level number equals to the cardinality of a candidates), min_threshold is ignored
          * and a new candidates are just appended without trying to further grow the tree.*/
         if (subtree_root.candidates.size() > min_threshold_ &&
-             subtree_root.level_number <= max_level_number) {
+            subtree_root.level_number <= max_level_number) {
             AddLevel(subtree_root);
         }
     }
@@ -72,7 +72,9 @@ void CandidateHashTree::FindAndVisitLeaves(HashTreeNode& subtree_root,
 
 void CandidateHashTree::VisitLeaf(HashTreeNode& leaf,
                                   std::vector<unsigned> const& transaction_items, int tid) {
-    if (leaf.last_visited_transaction_id == tid) { return; }
+    if (leaf.last_visited_transaction_id == tid) {
+        return;
+    }
 
     leaf.last_visited_transaction_id = tid;
 
@@ -130,4 +132,4 @@ void CandidateHashTree::AddCandidates() {
     }
 }
 
-} // namespace algos
+}  // namespace algos

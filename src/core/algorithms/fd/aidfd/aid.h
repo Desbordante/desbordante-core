@@ -26,9 +26,9 @@ private:
 
     std::unordered_set<boost::dynamic_bitset<>> neg_cover_{};
 
-    constexpr static const double growth_threshold_ = 0.01;
-    constexpr static const size_t window_size_ = 10;
-    constexpr static const size_t prime_ = 10619863;
+    constexpr static double const growth_threshold_ = 0.01;
+    constexpr static size_t const window_size_ = 10;
+    constexpr static size_t const prime_ = 10619863;
 
     std::vector<double> prev_ratios_;
     double sum_{};
@@ -48,18 +48,18 @@ private:
     void InvertNegativeCover();
 
     void HandleTuple(size_t tuple_num, size_t index);
-    void HandleInvalidFd(const boost::dynamic_bitset<>& neg_cover_el, SearchTree& pos_cover_tree,
+    void HandleInvalidFd(boost::dynamic_bitset<> const& neg_cover_el, SearchTree& pos_cover_tree,
                          size_t rhs);
     size_t GenerateSecondClusterIndex(size_t index_in_cluster, size_t iteration_num) const;
     bool IsNegativeCoverGrowthSmall(size_t iteration_num, double curr_ratio);
 
     void HandleConstantColumns(boost::dynamic_bitset<>& attributes);
-    void RegisterFDs(size_t rhs, const std::vector<boost::dynamic_bitset<>>& list_of_lhs);
+    void RegisterFDs(size_t rhs, std::vector<boost::dynamic_bitset<>> const& list_of_lhs);
 
     static boost::dynamic_bitset<> ChangeAttributesOrder(
-        const boost::dynamic_bitset<>& initial_bitset, const std::vector<size_t>& new_order);
+            boost::dynamic_bitset<> const& initial_bitset, std::vector<size_t> const& new_order);
     std::vector<size_t> GetAttributesSortedByFrequency(
-        const std::vector<boost::dynamic_bitset<>>& neg_cover_vector) const;
+            std::vector<boost::dynamic_bitset<>> const& neg_cover_vector) const;
 
     boost::dynamic_bitset<> BuildAgreeSet(size_t t1, size_t t2);
 

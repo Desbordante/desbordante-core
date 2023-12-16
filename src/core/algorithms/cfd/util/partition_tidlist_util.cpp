@@ -6,7 +6,7 @@ namespace algos::cfd {
 
 // Computes intersection
 std::vector<PartitionTIdList> PartitionTIdListUtil::ConstructIntersection(
-        PartitionTIdList const& lhs, const std::vector<const PartitionTIdList*>& rhses) {
+        PartitionTIdList const& lhs, std::vector<PartitionTIdList const*> const& rhses) {
     std::unordered_map<int, int> eqIndices(TIdUtil::Support(lhs.tids));
     std::vector<std::vector<int> > eqClasses(lhs.sets_number);
     // Construct a lookup from tid to equivalence class
@@ -22,7 +22,7 @@ std::vector<PartitionTIdList> PartitionTIdListUtil::ConstructIntersection(
         }
     }
     std::vector<PartitionTIdList> res;
-    for (const PartitionTIdList* rhs : rhses) {
+    for (PartitionTIdList const* rhs : rhses) {
         PartitionTIdList p_tid_list = PartitionTIdList();
         p_tid_list.sets_number = 0;
         p_tid_list.tids.reserve(lhs.tids.size());

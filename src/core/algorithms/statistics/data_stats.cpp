@@ -33,17 +33,16 @@ void DataStats::ResetState() {
 }
 
 Statistic DataStats::GetMin(size_t index, mo::CompareResult order) const {
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
 
-    const mo::Type& type = col.GetType();
-    const std::vector<const std::byte*>& data = col.GetData();
-    const std::byte* result = nullptr;
+    mo::Type const& type = col.GetType();
+    std::vector<std::byte const*> const& data = col.GetData();
+    std::byte const* result = nullptr;
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
         if (result != nullptr) {
-            if (type.Compare(data[i], result) == order) 
-                result = data[i];
+            if (type.Compare(data[i], result) == order) result = data[i];
         } else {
             result = data[i];
         }
@@ -57,11 +56,11 @@ Statistic DataStats::GetMax(size_t index) const {
 
 Statistic DataStats::GetSum(size_t index) const {
     if (all_stats_[index].sum.HasValue()) return all_stats_[index].sum;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    const std::vector<const std::byte*>& data = col.GetData();
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    std::vector<std::byte const*> const& data = col.GetData();
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
     std::byte* sum(type.MakeValueOfInt(0));
     for (size_t i = 0; i < data.size(); ++i) {
         if (!col.IsNullOrEmpty(i)) type.Add(sum, data[i], sum);
@@ -71,14 +70,14 @@ Statistic DataStats::GetSum(size_t index) const {
 
 Statistic DataStats::GetAvg(size_t index) const {
     if (all_stats_[index].avg.HasValue()) return all_stats_[index].avg;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     mo::DoubleType double_type;
 
     Statistic sum_stat = GetSum(index);
     std::byte* double_sum = mo::DoubleType::MakeFrom(sum_stat.GetData(), col.GetType());
     std::byte* avg = double_type.Allocate();
-    const std::byte* count_of_nums = double_type.MakeValue(this->NumberOfValues(index));
+    std::byte const* count_of_nums = double_type.MakeValue(this->NumberOfValues(index));
     double_type.Div(double_sum, count_of_nums, avg);
 
     double_type.Free(double_sum);
@@ -86,10 +85,11 @@ Statistic DataStats::GetAvg(size_t index) const {
     return Statistic(avg, &double_type, false);
 }
 
-Statistic DataStats::CalculateCentralMoment(size_t index, int number, bool bessel_correction) const {
-    const mo::TypedColumnData& col = col_data_[index];
+Statistic DataStats::CalculateCentralMoment(size_t index, int number,
+                                            bool bessel_correction) const {
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
-    const std::vector<const std::byte*>& data = col.GetData();
+    std::vector<std::byte const*> const& data = col.GetData();
     mo::DoubleType double_type;
 
     Statistic avg = GetAvg(index);
@@ -145,14 +145,14 @@ Statistic DataStats::GetStandardizedCentralMomentOfDist(size_t index, int number
 
 Statistic DataStats::GetSkewness(size_t index) const {
     if (all_stats_[index].skewness.HasValue()) return all_stats_[index].skewness;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     return GetStandardizedCentralMomentOfDist(index, 3);
 }
 
 Statistic DataStats::GetKurtosis(size_t index) const {
     if (all_stats_[index].kurtosis.HasValue()) return all_stats_[index].kurtosis;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
     Statistic result = GetStandardizedCentralMomentOfDist(index, 4);
     mo::DoubleType double_type;
@@ -164,26 +164,25 @@ Statistic DataStats::GetKurtosis(size_t index) const {
 }
 
 size_t DataStats::NumberOfValues(size_t index) const {
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     return col.GetNumRows() - col.GetNumNulls() - col.GetNumEmpties();
 };
 
-static size_t inline CountDistinctInSortedData(const std::vector<const std::byte*>& data,
-                                               const mo::Type& type) {
+inline static size_t CountDistinctInSortedData(std::vector<std::byte const*> const& data,
+                                               mo::Type const& type) {
     size_t distinct = data.size() == 0 ? 0 : 1;
     for (size_t i = 0; i + 1 < data.size(); ++i) {
-        if (type.Compare(data[i], data[i + 1]) != model::CompareResult::kEqual) 
-            ++distinct;
+        if (type.Compare(data[i], data[i + 1]) != model::CompareResult::kEqual) ++distinct;
     }
     return distinct;
 }
 
 size_t DataStats::MixedDistinct(size_t index) const {
-    const mo::TypedColumnData& col = col_data_[index];
-    const std::vector<const std::byte*>& data = col.GetData();
+    mo::TypedColumnData const& col = col_data_[index];
+    std::vector<std::byte const*> const& data = col.GetData();
     mo::MixedType mixed_type(is_null_equal_null_);
 
-    std::vector<std::vector<const std::byte*>> values_by_type_id(mo::TypeId::_size());
+    std::vector<std::vector<std::byte const*>> values_by_type_id(mo::TypeId::_size());
 
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
@@ -191,7 +190,7 @@ size_t DataStats::MixedDistinct(size_t index) const {
     }
 
     size_t result = 0;
-    for (std::vector<const std::byte*>& type_values : values_by_type_id) {
+    for (std::vector<std::byte const*>& type_values : values_by_type_id) {
         std::sort(type_values.begin(), type_values.end(), mixed_type.GetComparator());
         result += CountDistinctInSortedData(type_values, mixed_type);
     }
@@ -200,14 +199,14 @@ size_t DataStats::MixedDistinct(size_t index) const {
 
 size_t DataStats::Distinct(size_t index) {
     if (all_stats_[index].distinct != 0) return all_stats_[index].distinct;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() == +mo::TypeId::kMixed) {
         all_stats_[index].distinct = MixedDistinct(index);
         return all_stats_[index].distinct;
     }
-    const auto& type = col.GetType();
+    auto const& type = col.GetType();
 
-    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
     std::sort(data.begin(), data.end(), type.GetComparator());
     return all_stats_[index].distinct = CountDistinctInSortedData(data, type);
 }
@@ -216,7 +215,7 @@ std::vector<std::vector<std::string>> DataStats::ShowSample(size_t start_row, si
                                                             size_t start_col, size_t end_col,
                                                             size_t str_len, size_t unsigned_len,
                                                             size_t double_len) const {
-    auto cut_str = [](const std::string& str, size_t len) {
+    auto cut_str = [](std::string const& str, size_t len) {
         return str.substr(0, std::min(len, str.length()));
     };
 
@@ -235,8 +234,8 @@ std::vector<std::vector<std::string>> DataStats::ShowSample(size_t start_row, si
                                               std::vector<std::string>(end_col - start_col + 1));
 
     for (size_t j = start_col - 1; j < end_col; ++j) {
-        const mo::TypedColumnData& col = col_data_[j];
-        const auto& type = col.GetType();
+        mo::TypedColumnData const& col = col_data_[j];
+        auto const& type = col.GetType();
         mo::NullType null_type(is_null_equal_null_);
         mo::EmptyType empty_type;
         for (size_t i = start_row - 1; i < end_row; ++i) {
@@ -250,14 +249,14 @@ bool DataStats::IsCategorical(size_t index, size_t quantity) {
     return this->Distinct(index) <= quantity;
 }
 
-std::vector<const std::byte*> DataStats::DeleteNullAndEmpties(size_t index) const {
-    const mo::TypedColumnData& col = col_data_[index];
+std::vector<std::byte const*> DataStats::DeleteNullAndEmpties(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
     if (type_id == +mo::TypeId::kNull || type_id == +mo::TypeId::kEmpty ||
         type_id == +mo::TypeId::kUndefined)
         return {};
-    const std::vector<const std::byte*>& data = col.GetData();
-    std::vector<const std::byte*> res;
+    std::vector<std::byte const*> const& data = col.GetData();
+    std::vector<std::byte const*> res;
     res.reserve(data.size());
     for (size_t i = 0; i < data.size(); ++i) {
         if (!col.IsNullOrEmpty(i)) res.push_back(data[i]);
@@ -266,10 +265,10 @@ std::vector<const std::byte*> DataStats::DeleteNullAndEmpties(size_t index) cons
 }
 
 Statistic DataStats::GetQuantile(double part, size_t index, bool calc_all) {
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
-    const mo::Type& type = col.GetType();
-    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    mo::Type const& type = col.GetType();
+    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
     int quantile = data.size() * part;
 
     if (calc_all && !all_stats_[index].quantile25.HasValue()) {
@@ -291,7 +290,7 @@ Statistic DataStats::GetQuantile(double part, size_t index, bool calc_all) {
 }
 
 template <class Pred, class Data>
-std::vector<size_t> DataStats::FilterIndices(Pred pred, const Data& data) const {
+std::vector<size_t> DataStats::FilterIndices(Pred pred, Data const& data) const {
     std::vector<size_t> res;
     res.reserve(data.size());
     for (size_t i = 0; i < data.size(); i++) {
@@ -304,7 +303,7 @@ std::vector<size_t> DataStats::FilterIndices(Pred pred, const Data& data) const 
 }
 
 template <class Pred, class Data>
-size_t DataStats::CountIf(Pred pred, const Data& data) const {
+size_t DataStats::CountIf(Pred pred, Data const& data) const {
     size_t count = 0;
     for (size_t i = 0; i < data.size(); i++) {
         if (pred(data[i])) count++;
@@ -314,15 +313,15 @@ size_t DataStats::CountIf(Pred pred, const Data& data) const {
 }
 
 Statistic DataStats::CountIfInBinaryRelationWithZero(size_t index, mo::CompareResult res) const {
-    const mo::TypedColumnData& col = GetData()[index];
+    mo::TypedColumnData const& col = GetData()[index];
     if (!col.IsNumeric()) return {};
 
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
     std::byte* zero = type.MakeValueOfInt(0);
     mo::IntType int_type;
-    const std::vector<const std::byte*>& data = col_data_[index].GetData();
+    std::vector<std::byte const*> const& data = col_data_[index].GetData();
 
-    auto pred = [&zero, &type, &res](const std::byte* el) {
+    auto pred = [&zero, &type, &res](std::byte const* el) {
         return el && type.Compare(el, zero) == res;
     };
 
@@ -344,11 +343,11 @@ Statistic DataStats::GetNumberOfNegatives(size_t index) const {
 
 Statistic DataStats::GetSumOfSquares(size_t index) const {
     if (all_stats_[index].sum_of_squares.HasValue()) return all_stats_[index].sum_of_squares;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
-    const std::vector<const std::byte*>& data = col.GetData();
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
+    std::vector<std::byte const*> const& data = col.GetData();
     std::byte* res = type.MakeValueOfInt(0);
     std::byte* square = type.Allocate();
 
@@ -365,11 +364,11 @@ Statistic DataStats::GetSumOfSquares(size_t index) const {
 
 Statistic DataStats::GetGeometricMean(size_t index) const {
     if (all_stats_[index].geometric_mean.HasValue()) return all_stats_[index].geometric_mean;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
-    const std::vector<const std::byte*> data = col.GetData();
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
+    std::vector<std::byte const*> const data = col.GetData();
     mo::DoubleType double_type;
     std::byte* res = type.MakeValueOfInt(1);
     std::byte* zero = type.MakeValueOfInt(0);
@@ -395,18 +394,18 @@ Statistic DataStats::GetGeometricMean(size_t index) const {
 
 Statistic DataStats::GetMeanAD(size_t index) const {
     if (all_stats_[index].mean_ad.HasValue()) return all_stats_[index].mean_ad;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
     // Convert each summand to DoubleType
-    const auto& col_type = static_cast<const mo::INumericType&>(col.GetType());
-    const std::vector<const std::byte*> data = col.GetData();
+    auto const& col_type = static_cast<mo::INumericType const&>(col.GetType());
+    std::vector<std::byte const*> const data = col.GetData();
     mo::DoubleType double_type;
     std::byte* difference = double_type.MakeValue(0);  // data[i] - comparable
     std::byte* temp = double_type.Allocate();          // For converting data[i] to double
     std::byte* res = double_type.MakeValue(0);
     Statistic avg_stat = GetAvg(index);
-    const std::byte* comparable = mo::DoubleType::MakeFrom(avg_stat.GetData(), *avg_stat.GetType());
+    std::byte const* comparable = mo::DoubleType::MakeFrom(avg_stat.GetData(), *avg_stat.GetType());
 
     // Calculating the sum of |data[i] - comparable|
     for (size_t i = 0; i < data.size(); i++) {
@@ -430,9 +429,9 @@ Statistic DataStats::GetMeanAD(size_t index) const {
     return Statistic(res, &double_type, false);
 }
 
-std::byte* DataStats::MedianOfNumericVector(const std::vector<const std::byte*>& data,
-                                            const mo::INumericType& type) {
-    std::vector<const std::byte*> data_copy = data;
+std::byte* DataStats::MedianOfNumericVector(std::vector<std::byte const*> const& data,
+                                            mo::INumericType const& type) {
+    std::vector<std::byte const*> data_copy = data;
 
     size_t size = data_copy.size();
     if (data_copy.empty()) return nullptr;
@@ -465,11 +464,11 @@ std::byte* DataStats::MedianOfNumericVector(const std::vector<const std::byte*>&
 
 Statistic DataStats::GetMedian(size_t index) const {
     if (all_stats_[index].median.HasValue()) return all_stats_[index].median;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
-    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
+    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
     mo::DoubleType double_type;
     std::byte* median = MedianOfNumericVector(data, type);
 
@@ -480,19 +479,19 @@ Statistic DataStats::GetMedianAD(size_t index) const {
     if (all_stats_[index].median_ad.HasValue()) {
         return all_stats_[index].median_ad;
     }
-    const mo::TypedColumnData& col = col_data_[index];
-    const auto& type = static_cast<const mo::INumericType&>(col.GetType());
+    mo::TypedColumnData const& col = col_data_[index];
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
     if (!col.IsNumeric()) return {};
 
-    std::vector<const std::byte*> data = DeleteNullAndEmpties(index);
+    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
     std::byte* median = MedianOfNumericVector(data, type);
     mo::DoubleType double_type;
     std::byte* temp;
 
-    std::vector<const std::byte*> res;
+    std::vector<std::byte const*> res;
     res.reserve(data.size());
 
-    for (const std::byte* x : data) {
+    for (std::byte const* x : data) {
         temp = mo::DoubleType::MakeFrom(x, col.GetType());
         double_type.Sub(temp, median, temp);
         double_type.Abs(temp, temp);
@@ -508,7 +507,7 @@ Statistic DataStats::GetMedianAD(size_t index) const {
 
 Statistic DataStats::GetNumNulls(size_t index) const {
     if (all_stats_[index].num_nulls.HasValue()) return all_stats_[index].num_nulls;
-    const mo::TypedColumnData& col = col_data_[index];
+    mo::TypedColumnData const& col = col_data_[index];
     size_t count = col.GetNumNulls();
     mo::IntType int_type;
 
@@ -557,8 +556,7 @@ unsigned long long DataStats::ExecuteInternal() {
             boost::asio::post(pool, [i, task]() { return task(i); });
         pool.join();
     } else {
-        for (size_t i = 0; i < all_stats_.size(); ++i) 
-            task(i);
+        for (size_t i = 0; i < all_stats_.size(); ++i) task(i);
     }
 
     SetProgress(kTotalProgressPercent);
@@ -593,15 +591,15 @@ size_t DataStats::GetNumberOfColumns() const {
     return col_data_.size();
 }
 
-const ColumnStats& DataStats::GetAllStats(size_t index) const {
+ColumnStats const& DataStats::GetAllStats(size_t index) const {
     return all_stats_[index];
 }
 
-const std::vector<ColumnStats>& DataStats::GetAllStats() const {
+std::vector<ColumnStats> const& DataStats::GetAllStats() const {
     return all_stats_;
 }
 
-const std::vector<model::TypedColumnData>& DataStats::GetData() const noexcept {
+std::vector<model::TypedColumnData> const& DataStats::GetData() const noexcept {
     return col_data_;
 }
 

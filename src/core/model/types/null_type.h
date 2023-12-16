@@ -18,8 +18,8 @@ public:
         return is_null_eq_null_;
     }
 
-    [[nodiscard]]
-    std::string ValueToString([[maybe_unused]] std::byte const* value) const override {
+    [[nodiscard]] std::string ValueToString(
+            [[maybe_unused]] std::byte const* value) const override {
         return Null::kValue.data();
     }
 

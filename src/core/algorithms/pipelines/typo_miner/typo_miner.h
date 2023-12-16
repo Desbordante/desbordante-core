@@ -23,9 +23,9 @@ private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     /* Config members */
-    double radius_;      /* Maximal distance between two values to consider one of them a typo */
-    double ratio_;       /* Maximal fraction of deviations per cluster to flag the cluster as
-                          * containing typos */
+    double radius_; /* Maximal distance between two values to consider one of them a typo */
+    double ratio_;  /* Maximal fraction of deviations per cluster to flag the cluster as
+                     * containing typos */
     config::EqNullsType is_null_equal_null_;
 
     void ResetState() final;
@@ -40,10 +40,12 @@ private:
                                                model::PLI::Cluster const& cluster) const;
     unsigned GetMostFrequentValueIndex(Column const& cluster_col,
                                        model::PLI::Cluster const& cluster) const;
+
     bool ValuesAreClose(std::byte const* l, std::byte const* r, model::Type const& type) const {
         assert(type.IsMetrizable());
         return static_cast<model::IMetrizableType const&>(type).Dist(l, r) < radius_;
     }
+
     explicit TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
                        std::unique_ptr<FDAlgorithm> approx_algo);
     void RegisterOptions();
@@ -106,24 +108,30 @@ public:
     std::vector<FD> const& GetApproxFDs() const noexcept {
         return approx_fds_;
     }
+
     double GetRadius() const noexcept {
         return radius_;
     }
+
     double GetRatio() const noexcept {
         return ratio_;
     }
+
     double SetRadius(double radius) {
         SetOption(config::names::kRadius, radius);
         return radius_;
     }
+
     double SetRatio(double ratio) {
         SetOption(config::names::kRatio, ratio);
         return ratio_;
     }
+
     ColumnLayoutRelationData const& GetRelationData() const noexcept {
         assert(relation_ != nullptr);
         return *relation_;
     }
+
     std::string GetApproxFDsAsJson() const {
         return FDAlgorithm::FDsToJson(approx_fds_);
     }

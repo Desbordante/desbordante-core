@@ -14,7 +14,9 @@ public:
     PartialKey(Vertical vertical, double error, double score)
         : error_(error), vertical_(std::move(vertical)), score_(score) {}
 
-    std::string ToIndicesString() const { return vertical_.ToIndicesString(); }
+    std::string ToIndicesString() const {
+        return vertical_.ToIndicesString();
+    }
 
     std::string ToString() const {
         return vertical_.ToString() + "~>" + boost::lexical_cast<std::string>(error_) +

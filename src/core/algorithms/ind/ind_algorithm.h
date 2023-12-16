@@ -37,6 +37,7 @@ protected:
                              std::shared_ptr<model::ColumnCombination> rhs) {
         ind_collection_.Register(std::move(lhs), std::move(rhs));
     }
+
     virtual void RegisterIND(IND ind) {
         ind_collection_.Register(std::move(ind));
     }

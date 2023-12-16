@@ -15,7 +15,7 @@ void PruningMap::Rebalance() {
             Vertical const& key = iter->first;
             auto const& related_verticals = iter->second;
 
-            //RebalanceGroup() invalidates this iterator, because it erases the key element
+            // RebalanceGroup() invalidates this iterator, because it erases the key element
             ++iter;
             if (related_verticals.size() > 1000) {
                 RebalanceGroup(key);

@@ -8,15 +8,15 @@ namespace model {
 
 class EmptyType : public virtual Type {
 private:
-    [[noreturn]] static inline void ThrowUnsupportedOperation() {
+    [[noreturn]] inline static void ThrowUnsupportedOperation() {
         throw std::logic_error("Meaningless operation");
     }
 
 public:
     EmptyType() noexcept : Type(TypeId::kEmpty) {}
 
-    [[nodiscard]]
-    std::string ValueToString([[maybe_unused]] std::byte const* value) const override {
+    [[nodiscard]] std::string ValueToString(
+            [[maybe_unused]] std::byte const* value) const override {
         return "";
     }
 

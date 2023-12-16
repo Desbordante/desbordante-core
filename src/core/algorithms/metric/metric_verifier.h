@@ -52,6 +52,7 @@ private:
     bool CheckMFDFailIfHasNulls(bool has_nulls) const {
         return dist_from_null_is_infinity_ && has_nulls;
     }
+
     bool CompareNumericValues(std::vector<IndexedOneDimensionalPoint> const& points) const;
 
     template <typename T>
@@ -115,18 +116,23 @@ public:
     void SortHighlightsByDistanceAscending() {
         highlight_calculator_->SortHighlightsByDistanceAscending();
     }
+
     void SortHighlightsByDistanceDescending() {
         highlight_calculator_->SortHighlightsByDistanceDescending();
     }
+
     void SortHighlightsByFurthestIndexAscending() {
         highlight_calculator_->SortHighlightsByFurthestIndexAscending();
     }
+
     void SortHighlightsByFurthestIndexDescending() {
         highlight_calculator_->SortHighlightsByFurthestIndexDescending();
     }
+
     void SortHighlightsByIndexAscending() {
         highlight_calculator_->SortHighlightsByIndexAscending();
     }
+
     void SortHighlightsByIndexDescending() {
         highlight_calculator_->SortHighlightsByIndexDescending();
     }

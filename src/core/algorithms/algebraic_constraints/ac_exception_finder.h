@@ -25,9 +25,11 @@ private:
 
 public:
     void CollectExceptions(ACAlgorithm const* ac_alg);
+
     void ResetState() {
         exceptions_.clear();
     }
+
     std::vector<ACException> const& GetACExceptions() const {
         return exceptions_;
     }
