@@ -10,10 +10,10 @@ jobs:
       - name: Pull clang-format
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang-format-12
+          sudo apt-get install -y clang-format-14
       - name: Check formatting
         run: |
-          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-12 -p 1)
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-14 -p 1)
 
           if [ "$formatterOutput" != "" ]
           then
