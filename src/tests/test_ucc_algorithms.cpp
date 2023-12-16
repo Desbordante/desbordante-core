@@ -85,6 +85,10 @@ protected:
 public:
     static algos::StdParamsMap GetParamMap(tests::TableConfig const& config) {
         using namespace config::names;
+        // Here we return StdParamsMap with option kThreads but some algorithms does not need this
+        // option (PyroUCC for example). This does not generate errors, because when creating the
+        // algorithm with function CreateAndLoadAlgorithm only the options necessary for the
+        // algorithm will be used
         return {{kCsvPath, config.GetPath()},
                 {kSeparator, config.separator},
                 {kHasHeader, config.has_header},
@@ -167,7 +171,7 @@ REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,
                             ConsistentHashOnHeavyDatasets, ConsistentHashOnLightDatasetsParallel,
                             ConsistentHashOnHeavyDatasetsParallel);
 
-using Algorithms = ::testing::Types<algos::HyUCC>;
+using Algorithms = ::testing::Types<algos::HyUCC, algos::PyroUCC>;
 INSTANTIATE_TYPED_TEST_SUITE_P(UCCAlgorithmTest, UCCAlgorithmTest, Algorithms);
 
 }  // namespace tests
