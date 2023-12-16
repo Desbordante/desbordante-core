@@ -39,7 +39,7 @@ CSVParser::CSVParser(std::filesystem::path const& path, char separator, bool has
         PeekNext();
     }
 
-    std::vector<std::string> next_parsed = GetNextRow();
+    std::vector<std::string> next_parsed = CSVParser::GetNextRow();
     number_of_columns_ = next_parsed.size();
     column_names_ = std::move(next_parsed);
 
