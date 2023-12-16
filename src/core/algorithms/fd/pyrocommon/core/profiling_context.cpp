@@ -10,7 +10,7 @@
 
 using std::shared_ptr;
 
-ProfilingContext::ProfilingContext(pyro::Parameters parameters,
+ProfilingContext::ProfilingContext(algos::pyro::Parameters parameters,
                                    ColumnLayoutRelationData* relation_data,
                                    std::function<void(PartialKey const&)> const& ucc_consumer,
                                    std::function<void(PartialFD const&)> const& fd_consumer,

@@ -25,7 +25,7 @@ class VerticalMap;
 // Dependency Consumer?
 class ProfilingContext : public DependencyConsumer {
 private:
-    pyro::Parameters parameters_;
+    algos::pyro::Parameters parameters_;
     std::unique_ptr<model::PLICache> pli_cache_;
     std::unique_ptr<model::VerticalMap<model::AgreeSetSample>> agree_set_samples_;
     ColumnLayoutRelationData* relation_data_;
@@ -39,7 +39,7 @@ private:
 public:
     enum class ObjectToCache { kPli, kAs };
 
-    ProfilingContext(pyro::Parameters parameters, ColumnLayoutRelationData* relation_data,
+    ProfilingContext(algos::pyro::Parameters parameters, ColumnLayoutRelationData* relation_data,
                      std::function<void(PartialKey const&)> const& ucc_consumer,
                      std::function<void(PartialFD const&)> const& fd_consumer,
                      CachingMethod const& caching_method,
@@ -61,7 +61,7 @@ public:
         return relation_data_->GetSchema();
     }
 
-    pyro::Parameters const& GetParameters() const {
+    algos::pyro::Parameters const& GetParameters() const {
         return parameters_;
     }
 
