@@ -4,9 +4,9 @@
 #include <queue>
 #include <unordered_set>
 
-#include "fd/pyro/core/dependency_candidate.h"
-#include "fd/pyro/core/vertical_info.h"
-#include "fd/pyro/model/agree_set_sample.h"
+#include "fd/pyrocommon/core/dependency_candidate.h"
+#include "fd/pyrocommon/core/vertical_info.h"
+#include "fd/pyrocommon/model/agree_set_sample.h"
 #include "position_list_index.h"
 
 namespace model {
