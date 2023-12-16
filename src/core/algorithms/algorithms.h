@@ -24,6 +24,7 @@
 
 /* Unique Column Combination mining algorithms */
 #include "algorithms/ucc/hyucc/hyucc.h"
+#include "algorithms/ucc/pyroucc/pyroucc.h"
 
 /* CFD mining algorithms */
 #include "algorithms/cfd/fd_first_algorithm.h"
