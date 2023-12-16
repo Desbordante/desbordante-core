@@ -56,7 +56,7 @@ static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
 class ARAlgorithmTest : public ::testing::Test {
 protected:
     static algos::StdParamsMap GetParamMap(double minsup, double minconf,
-                                           const std::filesystem::path& path,
+                                           std::filesystem::path const& path,
                                            unsigned int tidColumnIndex,
                                            unsigned int itemColumnIndex, char separator = ',',
                                            bool has_header = true) {
@@ -72,7 +72,7 @@ protected:
     }
 
     static algos::StdParamsMap GetParamMap(double minsup, double minconf,
-                                           const std::filesystem::path& path, bool firstColumnTid,
+                                           std::filesystem::path const& path, bool firstColumnTid,
                                            char separator = ',', bool has_header = true) {
         using namespace config::names;
         return {{kCsvPath, path},
@@ -85,7 +85,7 @@ protected:
     }
 
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, const std::filesystem::path& path,
+            double minsup, double minconf, std::filesystem::path const& path,
             unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
             bool has_header = true) {
         return algos::CreateAndLoadAlgorithm<algos::Apriori>(GetParamMap(
@@ -93,7 +93,7 @@ protected:
     }
 
     static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, const std::filesystem::path& path, bool firstColumnTid,
+            double minsup, double minconf, std::filesystem::path const& path, bool firstColumnTid,
             char separator = ',', bool has_header = true) {
         return algos::CreateAndLoadAlgorithm<algos::Apriori>(
                 GetParamMap(minsup, minconf, path, firstColumnTid, separator, has_header));

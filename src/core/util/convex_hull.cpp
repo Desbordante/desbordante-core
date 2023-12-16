@@ -52,12 +52,13 @@ std::vector<std::pair<Point, Point>> GetAntipodalPairs(std::vector<Point> const&
 }
 
 std::vector<Point> CalculateConvexHull(std::vector<Point>& points) {
-    std::sort(points.begin(), points.end(), [](Point& p1, Point& p2) {
-        return (p1.x < p2.x || (p1.x == p2.x && p1.y < p2.y));
-    });
-    points.erase(std::unique(points.begin(), points.end(), [](Point const& p1, Point const& p2) {
-        return p1.x == p2.x && p1.y == p2.y;
-    }), points.end());
+    std::sort(points.begin(), points.end(),
+              [](Point& p1, Point& p2) { return (p1.x < p2.x || (p1.x == p2.x && p1.y < p2.y)); });
+    points.erase(std::unique(points.begin(), points.end(),
+                             [](Point const& p1, Point const& p2) {
+                                 return p1.x == p2.x && p1.y == p2.y;
+                             }),
+                 points.end());
 
     int n = (int)points.size();
     if (n < 3) return points;

@@ -47,6 +47,7 @@ protected:
     virtual void RegisterFd(Vertical lhs, Column rhs) {
         fd_collection_.Register(std::move(lhs), std::move(rhs));
     }
+
     virtual void RegisterFd(FD fd_to_register) {
         fd_collection_.Register(std::move(fd_to_register));
     }
@@ -60,6 +61,7 @@ public:
     std::list<FD> const& FdList() const noexcept {
         return fd_collection_.AsList();
     }
+
     std::list<FD>& FdList() noexcept {
         return fd_collection_.AsList();
     }

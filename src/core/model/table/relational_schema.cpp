@@ -15,8 +15,8 @@ void RelationalSchema::Init() {
     empty_vertical_ = Vertical::EmptyVertical(this);
 }
 
-//TODO: В оригинале тут что-то непонятное + приходится пересоздавать empty_vertical_ -- тут
-//должен быть unique_ptr, тк создаём в остальных случаях новую вершину и выдаём наружу с овнершипом
+// TODO: В оригинале тут что-то непонятное + приходится пересоздавать empty_vertical_ -- тут
+// должен быть unique_ptr, тк создаём в остальных случаях новую вершину и выдаём наружу с овнершипом
 Vertical RelationalSchema::GetVertical(boost::dynamic_bitset<> indices) const {
     if (indices.empty()) return *Vertical::EmptyVertical(this);
 
@@ -26,10 +26,10 @@ Vertical RelationalSchema::GetVertical(boost::dynamic_bitset<> indices) const {
     return Vertical(this, std::move(indices));
 }
 
-Column const* RelationalSchema::GetColumn(const std::string& col_name) const {
+Column const* RelationalSchema::GetColumn(std::string const& col_name) const {
     auto found_entry_iterator =
-        std::find_if(columns_.begin(), columns_.end(),
-                     [&col_name](auto& column) { return column->name_ == col_name; });
+            std::find_if(columns_.begin(), columns_.end(),
+                         [&col_name](auto& column) { return column->name_ == col_name; });
     if (found_entry_iterator != columns_.end()) return found_entry_iterator->get();
 
     throw std::invalid_argument("Couldn't match column name \'" + col_name +
@@ -40,7 +40,7 @@ Column const* RelationalSchema::GetColumn(size_t index) const {
     return columns_.at(index).get();
 }
 
-void RelationalSchema::AppendColumn(const std::string& col_name) {
+void RelationalSchema::AppendColumn(std::string const& col_name) {
     columns_.push_back(std::make_unique<Column>(this, col_name, columns_.size()));
 }
 
@@ -55,8 +55,8 @@ size_t RelationalSchema::GetNumColumns() const {
 // TODO: critical part - consider optimization
 // TODO: list -> vector as list doesn't have RAIterators therefore can't be sorted
 std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
-    std::vector<Vertical> verticals,
-    boost::optional<std::function<bool(Vertical const&)>> pruning_function) const {
+        std::vector<Vertical> verticals,
+        boost::optional<std::function<bool(Vertical const&)>> pruning_function) const {
     std::sort(verticals.begin(), verticals.end(), [](auto& vertical1, auto& vertical2) {
         return vertical1.GetArity() < vertical2.GetArity();
     });
@@ -86,10 +86,10 @@ std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
             for (size_t corrective_column_index = vertical.GetColumnIndices().find_first();
                  corrective_column_index != boost::dynamic_bitset<>::npos;
                  corrective_column_index =
-                     vertical.GetColumnIndices().find_next(corrective_column_index)) {
+                         vertical.GetColumnIndices().find_next(corrective_column_index)) {
                 auto corrective_column = *GetColumn(corrective_column_index);
                 auto corrected_member =
-                    invalid_member.Union(static_cast<Vertical>(corrective_column));
+                        invalid_member.Union(static_cast<Vertical>(corrective_column));
 
                 if (hitting_set.GetAnySubsetEntry(corrected_member).second == nullptr) {
                     if (pruning_function) {

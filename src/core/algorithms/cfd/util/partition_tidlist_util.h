@@ -7,6 +7,6 @@ namespace algos::cfd {
 class PartitionTIdListUtil {
 public:
     static std::vector<PartitionTIdList> ConstructIntersection(
-            PartitionTIdList const& lhs, const std::vector<const PartitionTIdList*>& rhses);
+            PartitionTIdList const& lhs, std::vector<PartitionTIdList const*> const& rhses);
 };
 }  // namespace algos::cfd

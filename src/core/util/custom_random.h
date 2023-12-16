@@ -10,7 +10,7 @@ private:
     long long multiplier_ = 0x5DEECE66DLL;
     long long mask_ = (1LL << 48) - 1;
 
-    const double kDoubleUnit = 1.0 / (1LL << 53);
+    double const kDoubleUnit = 1.0 / (1LL << 53);
 
     long long Abs(long long number) {
         if (number < 0) {
@@ -19,9 +19,10 @@ private:
             return number;
         }
     }
+
 public:
     explicit CustomRandom(long long seed = 12345) : seed_(InitialScramble(seed)) {
-        //std::cout << "Initializing with seed = " << seed << '\n';
+        // std::cout << "Initializing with seed = " << seed << '\n';
     }
 
     static long long InitialScramble(long long seed) {

@@ -84,30 +84,30 @@ enum class MCGenMethod {
                                *  After all equivalence classes have been processed, map stores the
                                *  maximum representation.
                                */
-    kUsingHandlePartition,     /*< Sorts all equivalence classes from all partitions in descending
-                                *  order using std::set. Definition of comparison for equivalence
-                                *  classes is same as for kUsingHandleEqvClass. Iterates over
-                                *  sorted_eqv_classes and maintains index as std::map<int, set<int>>.
-                                *  A more detailed description of index is in the implementation.
-                                *  'handlePartition':
-                                *  For current eqv_class checks if it has superset in the index using
-                                *  IsSubset(), if not, adds it to the index and to
-                                *  max_representation.
-                                */
-    kUsingCalculateSupersets,  /*< Fills max_representation with equivalence classes from first not
-                                *  empty partition. Then iterates over the remaining partitions
-                                *  and edits max_representation on the fly using CalculateSupersets:
-                                *  1. Iterates over sets from max_representation.
-                                *  2. If current set is a subset of equivalence class from the
-                                *     current partition, then deletes (after max_representation
-                                *     has been fully processed) it from the max_representation.
-                                *     And adds (also delayed) appropriate equivalence class to
-                                *     max_representation.
-                                */
-    kParallel                  /*< Algorithm is the same as in kUsingHandlePartition method.
-                                *  Uses thread pool of config_.threads_num threads to perform
-                                *  'handlePartition' part on equivalence classes of the same size.
-                                */
+    kUsingHandlePartition,    /*< Sorts all equivalence classes from all partitions in descending
+                               *  order using std::set. Definition of comparison for equivalence
+                               *  classes is same as for kUsingHandleEqvClass. Iterates over
+                               *  sorted_eqv_classes and maintains index as std::map<int, set<int>>.
+                               *  A more detailed description of index is in the implementation.
+                               *  'handlePartition':
+                               *  For current eqv_class checks if it has superset in the index using
+                               *  IsSubset(), if not, adds it to the index and to
+                               *  max_representation.
+                               */
+    kUsingCalculateSupersets, /*< Fills max_representation with equivalence classes from first not
+                               *  empty partition. Then iterates over the remaining partitions
+                               *  and edits max_representation on the fly using CalculateSupersets:
+                               *  1. Iterates over sets from max_representation.
+                               *  2. If current set is a subset of equivalence class from the
+                               *     current partition, then deletes (after max_representation
+                               *     has been fully processed) it from the max_representation.
+                               *     And adds (also delayed) appropriate equivalence class to
+                               *     max_representation.
+                               */
+    kParallel                 /*< Algorithm is the same as in kUsingHandlePartition method.
+                               *  Uses thread pool of config_.threads_num threads to perform
+                               *  'handlePartition' part on equivalence classes of the same size.
+                               */
 };
 
 class AgreeSetFactory {
@@ -121,20 +121,19 @@ public:
          * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
          */
         Configuration() noexcept {}
-        explicit Configuration(AgreeSetsGenMethod as_gen_m,
-                               MCGenMethod mc_gen_m,
+
+        explicit Configuration(AgreeSetsGenMethod as_gen_m, MCGenMethod mc_gen_m,
                                ushort threads_num) noexcept
             : as_gen_method(as_gen_m), mc_gen_method(mc_gen_m), threads_num(threads_num) {}
-        explicit Configuration(AgreeSetsGenMethod as_gen_m) noexcept
-            : as_gen_method(as_gen_m) {}
-        explicit Configuration(MCGenMethod mc_gen_m) noexcept
-            : mc_gen_method(mc_gen_m) {}
-        explicit Configuration(ushort threads_num) noexcept
-            : threads_num(threads_num) {}
+
+        explicit Configuration(AgreeSetsGenMethod as_gen_m) noexcept : as_gen_method(as_gen_m) {}
+
+        explicit Configuration(MCGenMethod mc_gen_m) noexcept : mc_gen_method(mc_gen_m) {}
+
+        explicit Configuration(ushort threads_num) noexcept : threads_num(threads_num) {}
     };
 
-    using SetOfVectors = std::unordered_set<std::vector<int>,
-                                            boost::hash<std::vector<int>>>;
+    using SetOfVectors = std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>;
     using SetOfAgreeSets = std::unordered_set<AgreeSet>;
 
     explicit AgreeSetFactory(ColumnLayoutRelationData const* const rel,
@@ -142,8 +141,13 @@ public:
                              algos::FDAlgorithm* algo = nullptr)
         : relation_(rel), config_(c), algo_(algo) {}
 
-    ColumnLayoutRelationData const* GetRelation() const { return relation_; }
-    void SetConfiguration(Configuration const& c) { config_ = c; }
+    ColumnLayoutRelationData const* GetRelation() const {
+        return relation_;
+    }
+
+    void SetConfiguration(Configuration const& c) {
+        config_ = c;
+    }
 
     // Computes all agree sets of `relation_` using specified method
     SetOfAgreeSets GenAgreeSets() const;
@@ -151,6 +155,7 @@ public:
     SetOfVectors GenPliMaxRepresentation() const;
 
     AgreeSet GetAgreeSet(int const tuple1_index, int const tuple2_index) const;
+
 private:
     /* Implementations of generation agree sets algorithms */
     SetOfAgreeSets GenAsUsingVectorOfIdSets() const;
@@ -165,22 +170,23 @@ private:
     SetOfVectors GenMcParallel() const;
 
     void CalculateSupersets(
-        std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>& max_representation,
-        std::deque<std::vector<int>> const& partition) const;
+            std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>& max_representation,
+            std::deque<std::vector<int>> const& partition) const;
     /* From Metanome: `handleList`.
      * Extremely slow for anything big eqv_class,
      * I think it is not usable at all
      */
     void HandleEqvClass(
-        std::vector<int>& eqv_class,
-        std::unordered_map<
-            size_t, std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>>& max_sets,
-        bool const first_step) const;
+            std::vector<int>& eqv_class,
+            std::unordered_map<size_t,
+                               std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>>&
+                    max_sets,
+            bool const first_step) const;
     /* From Metanome.
      * Checks if index 'contains' eqvivalence class which is superset of eqv_class.
      */
     bool IsSubset(std::vector<int> const& eqv_class,
-                  const std::unordered_map<int, std::unordered_set<size_t>>& index) const;
+                  std::unordered_map<int, std::unordered_set<size_t>> const& index) const;
     using VectorComp = std::function<bool(std::vector<int> const&, std::vector<int> const&)>;
     std::set<std::vector<int>, VectorComp> GenSortedEqvClasses(VectorComp comp) const;
 

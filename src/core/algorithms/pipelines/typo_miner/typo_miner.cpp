@@ -86,7 +86,8 @@ int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& valu
     return successes;
 }
 
-void TypoMiner::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
+void TypoMiner::AddSpecificNeededOptions(
+        std::unordered_set<std::string_view>& previous_options) const {
     auto precise_options = precise_algo_->GetNeededOptions();
     auto approx_options = approx_algo_->GetNeededOptions();
     previous_options.insert(precise_options.begin(), precise_options.end());
@@ -126,7 +127,7 @@ unsigned long long TypoMiner::ExecuteInternal() {
                         precise_fds.end(), std::back_inserter(approx_fds_), FDLess);
 
     auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
 
     return elapsed_milliseconds.count();
 }
@@ -246,7 +247,7 @@ void TypoMiner::RestoreLineOrder(model::PLI::Cluster& cluster) const {
 
 void TypoMiner::RestoreLineOrder(std::vector<TypoMiner::SquashedElement>& squashed_cluster) const {
     std::sort(squashed_cluster.begin(), squashed_cluster.end(),
-              [](const TypoMiner::SquashedElement& lhs, const TypoMiner::SquashedElement& rhs) {
+              [](TypoMiner::SquashedElement const& lhs, TypoMiner::SquashedElement const& rhs) {
                   return lhs.tuple_index < rhs.tuple_index;
               });
 }
@@ -305,7 +306,7 @@ std::vector<model::PLI::Cluster::value_type> TypoMiner::FindLinesWithTypos(
 }
 
 std::vector<TypoMiner::ClusterTyposPair> TypoMiner::FindClustersAndLinesWithTypos(
-        const FD& typos_fd, const bool sort_clusters) const {
+        const FD& typos_fd, bool const sort_clusters) const {
     std::vector<ClusterTyposPair> result;
     std::vector<model::PLI::Cluster> clusters = FindClustersWithTypos(typos_fd, sort_clusters);
 
@@ -334,8 +335,8 @@ unsigned TypoMiner::GetMostFrequentValueIndex(Column const& cluster_col,
     for (int const tuple_index : cluster) {
         int const probing_table_value = probing_table[tuple_index];
         unsigned const frequency = (ColumnData::IsValueSingleton(probing_table_value))
-                                   ? 1
-                                   : frequencies.at(probing_table_value);
+                                           ? 1
+                                           : frequencies.at(probing_table_value);
         if (frequency > largest_frequency) {
             largest_frequency = frequency;
             most_frequent_index = tuple_index;

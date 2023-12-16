@@ -3,7 +3,7 @@
 namespace algos {
 
 PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
-        : FDAlgorithm(std::move(phase_names)) {}
+    : FDAlgorithm(std::move(phase_names)) {}
 
 void PliBasedFDAlgorithm::LoadDataInternal() {
     relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <functional>
-#include <unordered_map>
 #include <random>
+#include <unordered_map>
 
 #include <easylogging++.h>
 
@@ -61,7 +61,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
     boost::dynamic_bitset<> free_column_indices(relation->GetNumColumns());
     free_column_indices.set();
     free_column_indices &= ~restriction_vertical.GetColumnIndices();
-    std::vector<std::reference_wrapper<const ColumnData>> relevant_column_data;
+    std::vector<std::reference_wrapper<ColumnData const>> relevant_column_data;
     for (size_t column_index = free_column_indices.find_first();
          column_index != boost::dynamic_bitset<>::npos;
          column_index = free_column_indices.find_next(column_index)) {
@@ -143,7 +143,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
             }
         }
     }
-    //std::cout << "-----------------\n";
+    // std::cout << "-----------------\n";
     /*string agreeSetCountersStr = "{";
     for (auto& [key, value] : agree_set_counters) {
         agreeSetCountersStr += '\"';

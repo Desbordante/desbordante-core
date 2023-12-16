@@ -11,9 +11,11 @@ public:
     struct ColumnValueIndex {
         size_t column;
         size_t value_index;
+
         bool operator==(ColumnValueIndex const& o) const {
             return column == o.column && value_index == o.value_index;
         }
+
         bool operator!=(ColumnValueIndex const& o) const {
             return !(o == *this);
         }
@@ -37,15 +39,19 @@ public:
     ColumnValueIndex GetLhsColumnValueIndex() const {
         return lhs;
     }
+
     ColumnValueIndex GetRhsColumnValueIndex() const {
         return rhs;
     }
+
     std::byte const* GetLhsValue() const {
         return lhs_val;
     }
+
     std::byte const* GetRhsValue() const {
         return rhs_val;
     }
+
     std::byte const* GetRes() const {
         return res.get();
     }

@@ -20,11 +20,14 @@ class CFDRelationData : public AbstractRelationData<CFDColumnData> {
 private:
     using ItemDictionary = boost::unordered_map<std::pair<int, std::string>, int, PairHash>;
     using ColumnesValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
+
     // ItemInfo contains info about one elem in the table.
     struct ItemInfo {
         ItemInfo() = default;
+
         ItemInfo(std::string val, AttributeIndex attr)
             : value(std::move(val)), attribute(attr), frequency(0) {}
+
         std::string value;
         AttributeIndex attribute;
         unsigned frequency;
@@ -37,13 +40,13 @@ private:
     std::vector<ItemInfo> items_;
 
     static void AddNewItemsInFullTable(ItemDictionary &, ColumnesValuesDict &,
-                                       std::vector<ItemInfo> &, const std::vector<std::string> &,
+                                       std::vector<ItemInfo> &, std::vector<std::string> const &,
                                        std::vector<int> &, std::vector<Transaction> &, int &,
                                        unsigned);
 
     static void AddNewItemsInPartialTable(ItemDictionary &, ColumnesValuesDict &,
-                                          std::vector<ItemInfo> &, const std::vector<std::string> &,
-                                          const std::vector<int> &, std::vector<Transaction> &,
+                                          std::vector<ItemInfo> &, std::vector<std::string> const &,
+                                          std::vector<int> const &, std::vector<Transaction> &,
                                           int &, int);
 
 public:
@@ -51,22 +54,22 @@ public:
     unsigned GetAttrsNumber() const;
     unsigned GetItemsNumber() const;
     size_t GetNumRows() const override;
-    const Transaction &GetRow(unsigned) const;
+    Transaction const &GetRow(unsigned) const;
     std::string GetStringFormat(char delim = ' ') const;
-    std::string GetStringFormat(const SimpleTIdList &subset, char delim = ' ') const;
+    std::string GetStringFormat(SimpleTIdList const &subset, char delim = ' ') const;
     void Sort();
-    void ToFront(const SimpleTIdList &);
-    void SetRow(int row_index, const Transaction &row);
+    void ToFront(SimpleTIdList const &);
+    void SetRow(int row_index, Transaction const &row);
     AttributeIndex GetAttrIndex(int item_index) const;
     unsigned Frequency(int i) const;
-    const std::string &GetValue(int i) const;
-    const std::vector<int> &GetDomainOfItem(int) const;
-    const std::vector<int> &GetDomain(unsigned attr) const;
-    std::vector<int> GetAttrVector(const Itemset &) const;
-    std::vector<int> GetAttrVectorItems(const Itemset &) const;
+    std::string const &GetValue(int i) const;
+    std::vector<int> const &GetDomainOfItem(int) const;
+    std::vector<int> const &GetDomain(unsigned attr) const;
+    std::vector<int> GetAttrVector(Itemset const &) const;
+    std::vector<int> GetAttrVectorItems(Itemset const &) const;
     std::string GetAttrName(int index) const;
-    int GetAttr(const std::string &) const;
-    int GetItem(int, const std::string &) const;
+    int GetAttr(std::string const &) const;
+    int GetItem(int, std::string const &) const;
 
     static std::unique_ptr<CFDRelationData> CreateFrom(model::IDatasetStream &file_input,
                                                        double c_sample = 1, double r_sample = 1);

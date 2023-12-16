@@ -18,41 +18,41 @@ using boost::dynamic_bitset, std::make_shared, std::shared_ptr, std::setw, std::
         std::dynamic_pointer_cast;
 
 unsigned long long Depminer::ExecuteInternal() {
-    const auto start_time = std::chrono::system_clock::now();
+    auto const start_time = std::chrono::system_clock::now();
 
     schema_ = relation_->GetSchema();
 
     progress_step_ = kTotalProgressPercent / schema_->GetNumColumns();
 
     // Agree sets
-    const model::AgreeSetFactory agree_set_factory =
+    model::AgreeSetFactory const agree_set_factory =
             model::AgreeSetFactory(relation_.get(), model::AgreeSetFactory::Configuration(), this);
-    const auto agree_sets = agree_set_factory.GenAgreeSets();
+    auto const agree_sets = agree_set_factory.GenAgreeSets();
     ToNextProgressPhase();
 
     // maximal sets
-    const std::vector<CMAXSet> c_max_cets = GenerateCmaxSets(agree_sets);
+    std::vector<CMAXSet> const c_max_cets = GenerateCmaxSets(agree_sets);
     ToNextProgressPhase();
 
     // LHS
-    const auto lhs_time = std::chrono::system_clock::now();
+    auto const lhs_time = std::chrono::system_clock::now();
     // 1
     for (auto const& column : schema_->GetColumns()) {
         LhsForColumn(column, c_max_cets);
         AddProgress(progress_step_);
     }
 
-    const auto lhs_elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - lhs_time);
+    auto const lhs_elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - lhs_time);
     LOG(INFO) << "> LHS FIND TIME: " << lhs_elapsed_milliseconds.count();
     LOG(INFO) << "> FD COUNT: " << this->fd_collection_.Size();
-    const auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
 }
 
 std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> const& agree_sets) {
-    const auto start_time = std::chrono::system_clock::now();
+    auto const start_time = std::chrono::system_clock::now();
 
     std::vector<CMAXSet> c_max_cets;
 
@@ -101,8 +101,8 @@ std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> con
         AddProgress(progress_step_);
     }
 
-    const auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
     LOG(INFO) << "> CMAX GENERATION TIME: " << elapsed_milliseconds.count();
     LOG(INFO) << "> CMAX SETS COUNT: " << c_max_cets.size();
 
@@ -115,7 +115,7 @@ void Depminer::LhsForColumn(std::unique_ptr<Column> const& column,
     // 3
     CMAXSet correct = GenFirstLevel(c_max_cets, *column, level);
 
-    const auto pli = relation_->GetColumnData(column->GetIndex()).GetPositionListIndex();
+    auto const pli = relation_->GetColumnData(column->GetIndex()).GetPositionListIndex();
     bool column_contains_only_equal_values = pli->IsConstant();
     if (column_contains_only_equal_values) {
         RegisterFd(Vertical(), *column);
@@ -160,8 +160,7 @@ CMAXSet Depminer::GenFirstLevel(std::vector<CMAXSet> const& c_max_cets, Column c
         correct_set = set;
         for (auto const& combination : correct_set.GetCombinations()) {
             for (auto const& column : combination.GetColumns()) {
-                if (level.count(Vertical(*column)) == 0)
-                    level.insert(Vertical(*column));
+                if (level.count(Vertical(*column)) == 0) level.insert(Vertical(*column));
             }
         }
         break;
@@ -169,8 +168,9 @@ CMAXSet Depminer::GenFirstLevel(std::vector<CMAXSet> const& c_max_cets, Column c
     return correct_set;
 }
 
-//Apriori-gen function
-std::unordered_set<Vertical> Depminer::GenNextLevel(std::unordered_set<Vertical> const& prev_level) {
+// Apriori-gen function
+std::unordered_set<Vertical> Depminer::GenNextLevel(
+        std::unordered_set<Vertical> const& prev_level) {
     std::unordered_set<Vertical> candidates;
     for (auto const& p : prev_level) {
         for (auto const& q : prev_level) {

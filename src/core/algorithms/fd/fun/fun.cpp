@@ -194,7 +194,7 @@ unsigned long long FUN::ExecuteInternal() {
 
     SetProgress(kTotalProgressPercent);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
 
     LOG(INFO) << "Total FD count: " << total_fds;
     LOG(INFO) << "HASH: " << Fletcher16();

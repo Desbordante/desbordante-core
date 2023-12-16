@@ -15,7 +15,7 @@ namespace algos {
 
 class Fd_mine : public PliBasedFDAlgorithm {
 private:
-    const RelationalSchema* schema_;
+    RelationalSchema const* schema_;
 
     std::set<boost::dynamic_bitset<>> candidate_set_;
     boost::unordered_map<boost::dynamic_bitset<>, std::unordered_set<boost::dynamic_bitset<>>>

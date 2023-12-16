@@ -12,8 +12,8 @@ using std::shared_ptr;
 
 ProfilingContext::ProfilingContext(pyro::Parameters parameters,
                                    ColumnLayoutRelationData* relation_data,
-                                   std::function<void(const PartialKey&)> const& ucc_consumer,
-                                   std::function<void(const PartialFD&)> const& fd_consumer,
+                                   std::function<void(PartialKey const&)> const& ucc_consumer,
+                                   std::function<void(PartialFD const&)> const& fd_consumer,
                                    CachingMethod const& caching_method,
                                    CacheEvictionMethod const& eviction_method,
                                    double caching_method_value)
@@ -152,7 +152,7 @@ model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical cons
 }
 
 model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
-        const Vertical& focus, model::PositionListIndex const* restriction_pli,
+        Vertical const& focus, model::PositionListIndex const* restriction_pli,
         double boost_factor) {
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, restriction_pli, parameters_.sample_size * boost_factor,

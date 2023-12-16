@@ -24,8 +24,8 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     std::unordered_map<std::string, int> value_dictionary;
     int next_value_id = 1;
-    const int null_value_id = kNullValueId;
-    const size_t num_columns = data_stream.GetNumberOfColumns();
+    int const null_value_id = kNullValueId;
+    size_t const num_columns = data_stream.GetNumberOfColumns();
     std::vector<std::vector<int>> column_vectors = std::vector<std::vector<int>>(num_columns);
     std::vector<std::string> row;
 

@@ -86,27 +86,36 @@ public:
     void InvokeBinop(std::byte const* l, std::byte const* r, std::byte* res) const {
         std::invoke(binop_pointer_, num_type_, l, r, res);
     }
+
     size_t CalculateSampleSize(size_t k_bumps) const;
     /* Returns ranges reconstucted with new weight for pair of columns */
     RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight);
+
     std::vector<RangesCollection> const& GetRangesCollections() const {
         return ranges_;
     }
+
     std::vector<ACException> const& GetACExceptions() const {
         return ac_exception_finder_->GetACExceptions();
     }
+
     RangesCollection const& GetRangesByColumns(size_t lhs_i, size_t rhs_i) const;
     ACPairsCollection const& GetACPairsByColumns(size_t lhs_i, size_t rhs_i) const;
+
     std::vector<model::TypedColumnData> const& GetTypedData() const {
         return typed_relation_->GetColumnData();
     }
+
     Binop GetBinOperation() const {
         return bin_operation_;
     }
+
     void PrintRanges(std::vector<model::TypedColumnData> const& data) const;
+
     void CollectACExceptions() const {
         ac_exception_finder_->CollectExceptions(this);
     }
+
     unsigned long long ExecuteInternal() override;
 
     ACAlgorithm();

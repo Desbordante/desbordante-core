@@ -20,6 +20,7 @@ private:
     RelationalSchema const* schema_ = nullptr;
 
     void ResetStateFd() final {}
+
     unsigned long long ExecuteInternal() final;
 
 public:

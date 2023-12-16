@@ -60,7 +60,7 @@ py::tuple GetPyType(std::type_index type_index) {
     // The tuples are created at runtime from Python API's raw pointers (when
     // possible) as storing pybind11's objects themselves statically is
     // unpredictable and can lead to errors related to garbage collection.
-    static const std::unordered_map<std::type_index, std::function<py::tuple()>> type_map{
+    static std::unordered_map<std::type_index, std::function<py::tuple()>> const type_map{
             PyTypePair<bool, py_bool>,
             PyTypePair<ushort, py_int>,
             PyTypePair<int, py_int>,

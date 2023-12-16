@@ -115,8 +115,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::hyfd::LhsPair>& next_
     for (auto const& [lhs, rhs] : invalid_fds) {
         for (size_t attr = 0; attr < num_attributes; ++attr) {
             if (lhs.test(attr) || rhs == attr || fds_tree.FindFdOrGeneral(lhs, attr) ||
-                (fds_tree.GetRoot().HasChildren() &&
-                 fds_tree.GetRoot().ContainsChildAt(attr) &&
+                (fds_tree.GetRoot().HasChildren() && fds_tree.GetRoot().ContainsChildAt(attr) &&
                  fds_tree.GetRoot().GetChild(attr)->IsFd(rhs))) {
                 continue;
             }
@@ -182,7 +181,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
 
     for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
          attr = rhs.find_next(attr)) {
-        for (const auto& cluster : (*plis_)[lhs_attr]->GetIndex()) {
+        for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
                 std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {

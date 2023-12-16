@@ -20,7 +20,7 @@ namespace python_bindings {
 using config::InputTable;
 using config::names::kTable;
 
-static const auto void_index = std::type_index{typeid(void)};
+static auto const void_index = std::type_index{typeid(void)};
 
 namespace py = pybind11;
 

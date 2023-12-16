@@ -22,18 +22,19 @@ public:
     static std::optional<std::string> ItemToPatternOpt(Item item, CFDRelationData const& db);
     static std::string ItemToPattern(Item item, CFDRelationData const& db);
 
-    static std::string ItemsetToString(const Itemset& items,
+    static std::string ItemsetToString(Itemset const& items,
                                        std::shared_ptr<CFDRelationData const> const& db);
 
-    static std::string CFDListToString(const ItemsetCFDList& cs,
+    static std::string CFDListToString(ItemsetCFDList const& cs,
                                        std::shared_ptr<CFDRelationData const> const& db);
-    static std::string CFDToString(const ItemsetCFD& c,
+
+    static std::string CFDToString(ItemsetCFD const& c,
                                    std::shared_ptr<CFDRelationData const> const& db) {
-        const auto& [lhs, rhs] = c;
+        auto const& [lhs, rhs] = c;
         return CFDToString(lhs, rhs, db);
     }
 
-    static std::string CFDToString(const Itemset& lhs, Item rhs,
+    static std::string CFDToString(Itemset const& lhs, Item rhs,
                                    std::shared_ptr<CFDRelationData const> const& db);
 };
 }  // namespace algos::cfd

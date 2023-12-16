@@ -23,9 +23,11 @@ public:
     TableIndex GetTableIndex() const {
         return table_index_;
     }
+
     std::vector<ColumnIndex> const& GetColumnIndices() const {
         return column_indices_;
     }
+
     std::string ToString() const;
 };
 

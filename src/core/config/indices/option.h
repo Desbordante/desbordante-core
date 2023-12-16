@@ -24,7 +24,7 @@ private:
     CommonOption<config::IndicesType> const common_option_;
 };
 
-extern const IndicesOption LhsIndicesOpt;
-extern const IndicesOption RhsIndicesOpt;
+extern IndicesOption const LhsIndicesOpt;
+extern IndicesOption const RhsIndicesOpt;
 
 }  // namespace config

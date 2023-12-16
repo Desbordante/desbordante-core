@@ -3,6 +3,7 @@
 #include <map>
 #include <utility>
 #include <vector>
+
 #include "agree_set_sample.h"
 
 namespace model {
@@ -22,11 +23,12 @@ private:
 
 public:
     static std::unique_ptr<std::vector<unsigned long long>> BitSetToLongLongVector(
-        boost::dynamic_bitset<> const& bitset);
+            boost::dynamic_bitset<> const& bitset);
 
     static std::unique_ptr<ListAgreeSetSample> CreateFocusedFor(
-        ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
-        PositionListIndex const* restriction_p_li, unsigned int sample_size, CustomRandom& random);
+            ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,
+            PositionListIndex const* restriction_p_li, unsigned int sample_size,
+            CustomRandom& random);
 
     ListAgreeSetSample(ColumnLayoutRelationData const* relation, Vertical const& focus,
                        unsigned int sample_size, unsigned long long population_size,

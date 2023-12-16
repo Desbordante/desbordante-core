@@ -31,6 +31,7 @@ private:
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailable() override;
     unsigned long long ExecuteInternal() override;
+
     void ResetState() override {
         clusters_violating_ucc_.clear();
         num_rows_violating_ucc_ = 0;

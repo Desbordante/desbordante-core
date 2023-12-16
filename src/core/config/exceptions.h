@@ -10,7 +10,7 @@ class ConfigurationError : public std::exception {
 public:
     explicit ConfigurationError(std::string message) noexcept : message_(std::move(message)) {}
 
-    const char* what() const noexcept override {
+    char const* what() const noexcept override {
         return message_.data();
     }
 };

@@ -23,18 +23,18 @@ class DataStats : public Algorithm {
 
     // Returns number of elements satisfying the predicate
     template <class Pred, class Data>
-    size_t CountIf(Pred pred, const Data& data) const;
+    size_t CountIf(Pred pred, Data const& data) const;
 
     // Returns vector with indices satisfying the predicate
     template <class Pred, class Data>
-    std::vector<size_t> FilterIndices(Pred pred, const Data& data) const;
+    std::vector<size_t> FilterIndices(Pred pred, Data const& data) const;
 
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
 
     // Returns median value for numeric vector
-    static std::byte* MedianOfNumericVector(const std::vector<const std::byte*>& data,
-                                            const model::INumericType& type);
+    static std::byte* MedianOfNumericVector(std::vector<std::byte const*> const& data,
+                                            model::INumericType const& type);
 
 protected:
     config::InputTable input_table_;
@@ -46,7 +46,7 @@ protected:
 public:
     DataStats();
 
-    const std::vector<model::TypedColumnData>& GetData() const noexcept;
+    std::vector<model::TypedColumnData> const& GetData() const noexcept;
 
     // Returns number of non-NULL and nonempty values in the column.
     size_t NumberOfValues(size_t index) const;
@@ -91,7 +91,7 @@ public:
     // Returns quantile of the column if its type is comparable.
     Statistic GetQuantile(double part, size_t index, bool calc_all = false);
     // Deletes null and empty values in the column.
-    std::vector<const std::byte*> DeleteNullAndEmpties(size_t index) const;
+    std::vector<std::byte const*> DeleteNullAndEmpties(size_t index) const;
     // Returns number of zeros in the column if it's numeric.
     Statistic GetNumberOfZeros(size_t index) const;
     // Returns number of negative numbers in the column if it's numeric.
@@ -109,8 +109,8 @@ public:
     // Returns number of nulls in the column.
     Statistic GetNumNulls(size_t index) const;
 
-    const ColumnStats& GetAllStats(size_t index) const;
-    const std::vector<ColumnStats>& GetAllStats() const;
+    ColumnStats const& GetAllStats(size_t index) const;
+    std::vector<ColumnStats> const& GetAllStats() const;
     std::string ToString() const;
 };
 

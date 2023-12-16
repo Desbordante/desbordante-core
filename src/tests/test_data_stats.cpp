@@ -12,7 +12,7 @@ namespace mo = model;
 // to run tests:
 // ./Desbordante_test --gtest_filter="*TestDataStats*"
 
-static const std::string test_file_name = "TestDataStats.csv";
+static std::string const test_file_name = "TestDataStats.csv";
 
 static algos::StdParamsMap GetParamMap(std::string_view dataset, char const separator = ',',
                                        bool const has_header = true,
@@ -143,7 +143,7 @@ TEST(TestDataStats, TestNumberOfNegatives) {
 }
 
 TEST(TestDataStats, TestGetNumberOfZeros) {
-    auto test = [](const std::string &file_name, size_t index, bool has_header = true) {
+    auto test = [](std::string const &file_name, size_t index, bool has_header = true) {
         std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(file_name, ',', has_header);
         algos::DataStats &stats = *stats_ptr;
         algos::Statistic num_zeros_stat = stats.GetNumberOfZeros(index);
@@ -247,9 +247,9 @@ TEST(TestDataStats, TestShowSample) {
     auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
     algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
-    for (const auto &row : sample) {
+    for (auto const &row : sample) {
         std::stringstream result;
-        for (const auto &str : row) {
+        for (auto const &str : row) {
             result << str << " \t";
         }
         LOG(INFO) << result.str();

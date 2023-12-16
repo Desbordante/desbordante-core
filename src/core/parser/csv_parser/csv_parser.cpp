@@ -15,9 +15,9 @@ inline std::string& CSVParser::rtrim(std::string& s) {
     return s;
 }
 
-CSVParser::CSVParser(const std::filesystem::path& path) : CSVParser(path, ',', true) {}
+CSVParser::CSVParser(std::filesystem::path const& path) : CSVParser(path, ',', true) {}
 
-CSVParser::CSVParser(const std::filesystem::path& path, char separator, bool has_header)
+CSVParser::CSVParser(std::filesystem::path const& path, char separator, bool has_header)
     : source_(path),
       separator_(separator),
       has_header_(has_header),
@@ -26,7 +26,7 @@ CSVParser::CSVParser(const std::filesystem::path& path, char separator, bool has
       number_of_columns_(),
       column_names_(),
       relation_name_(path.filename().string()) {
-    //Wrong path
+    // Wrong path
     if (!source_) {
         throw std::runtime_error("Error: couldn't find file " + path.string());
     }
@@ -79,7 +79,7 @@ void CSVParser::Reset() {
     }
 }
 
-void CSVParser::GetLine(const unsigned long long line_index) {
+void CSVParser::GetLine(unsigned long long const line_index) {
     Reset();
 
     /* Index is less than the line number by one. Skip line_index lines */
@@ -99,7 +99,7 @@ void CSVParser::GetNextIfHas() {
     }
 }
 
-std::string CSVParser::GetUnparsedLine(const unsigned long long line_index) {
+std::string CSVParser::GetUnparsedLine(unsigned long long const line_index) {
     GetLine(line_index);
     std::string line = next_line_;
 
@@ -109,7 +109,7 @@ std::string CSVParser::GetUnparsedLine(const unsigned long long line_index) {
     return line;
 }
 
-std::vector<std::string> CSVParser::ParseString(const std::string& s) const {
+std::vector<std::string> CSVParser::ParseString(std::string const& s) const {
     std::vector<std::string> tokens;
     boost::escaped_list_separator<char> list_sep(escape_symbol_, separator_, quote_);
     boost::tokenizer<boost::escaped_list_separator<char>> tokenizer(s, list_sep);
@@ -121,7 +121,7 @@ std::vector<std::string> CSVParser::ParseString(const std::string& s) const {
     return tokens;
 }
 
-std::vector<std::string> CSVParser::ParseLine(const unsigned long long line_index) {
+std::vector<std::string> CSVParser::ParseLine(unsigned long long const line_index) {
     std::string unparsed_line = GetUnparsedLine(line_index);
     std::vector<std::string> parsed = ParseString(unparsed_line);
     return parsed;
@@ -137,4 +137,3 @@ std::vector<std::string> CSVParser::GetNextRow() {
 
     return result;
 }
-

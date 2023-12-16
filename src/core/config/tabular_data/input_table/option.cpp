@@ -4,5 +4,5 @@
 
 namespace config {
 using names::kTable, descriptions::kDTable;
-extern const CommonOption<InputTable> TableOpt{kTable, kDTable};
+extern CommonOption<InputTable> const TableOpt{kTable, kDTable};
 }  // namespace config

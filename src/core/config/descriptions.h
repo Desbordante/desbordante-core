@@ -29,24 +29,28 @@ constexpr auto kDItemColumnIndex = "index of the column where an item name is st
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
 const std::string _kDMetric =
         "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
-const auto kDMetric = _kDMetric.c_str();
+auto const kDMetric = _kDMetric.c_str();
 constexpr auto kDLhsIndices = "LHS column indices";
 constexpr auto kDRhsIndices = "RHS column indices";
 constexpr auto kDRhsIndex = "RHS column index";
 constexpr auto kDUCCIndices = "column indices for UCC verification";
 constexpr auto kDParameter = "metric FD parameter";
-constexpr auto kDDistFromNullIsInfinity = "specify whether distance from NULL value is infinity "
-                                          "(if not, it is 0)";
+constexpr auto kDDistFromNullIsInfinity =
+        "specify whether distance from NULL value is infinity "
+        "(if not, it is 0)";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 const std::string _kDMetricAlgorithm =
         "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
-const auto kDMetricAlgorithm = _kDMetricAlgorithm.c_str();
-constexpr auto kDRadius = "maximum difference between a value and the most common value in a "
-                          "cluster";
-constexpr auto kDRatio = "ratio between the number of deviating values in a cluster and the "
-                         "cluster's size";
-constexpr auto kDPreciseAlgorithm = "Algorithm that gives exact FDs for typo miner to compare "
-                                    "against approximate FDs";
+auto const kDMetricAlgorithm = _kDMetricAlgorithm.c_str();
+constexpr auto kDRadius =
+        "maximum difference between a value and the most common value in a "
+        "cluster";
+constexpr auto kDRatio =
+        "ratio between the number of deviating values in a cluster and the "
+        "cluster's size";
+constexpr auto kDPreciseAlgorithm =
+        "Algorithm that gives exact FDs for typo miner to compare "
+        "against approximate FDs";
 constexpr auto kDApproximateAlgorithm = "Algorithm which gets approximate FDs for typo miner";
 constexpr auto kDCfdColumnsNumber =
         "Number of columns in the part of the dataset if you "
@@ -61,7 +65,7 @@ constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
 const std::string _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
                                       util::EnumToAvailableValues<algos::cfd::Substrategy>();
-const auto kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
+auto const kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
 constexpr auto kDBinaryOperation = "one of available operations: /, *, +, -";
 constexpr auto kDFuzziness = "fraction of exceptional records, lies in (0, 1]";
 constexpr auto kDFuzzinessProbability =

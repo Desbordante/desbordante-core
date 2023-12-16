@@ -1,9 +1,9 @@
 #include "dependencies_map.h"
 
-DependenciesMap::DependenciesMap(RelationalSchema const* schema)
-    : PruningMap(schema) {}
+DependenciesMap::DependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 
-std::unordered_set<Vertical> DependenciesMap::GetPrunedSubsets(std::unordered_set<Vertical> const& subsets) const {
+std::unordered_set<Vertical> DependenciesMap::GetPrunedSubsets(
+        std::unordered_set<Vertical> const& subsets) const {
     std::unordered_set<Vertical> pruned_subsets;
     for (auto const& node : subsets) {
         if (CanBePruned(node)) {
@@ -22,7 +22,7 @@ void DependenciesMap::AddNewDependency(Vertical const& node_to_add) {
             bool has_subset_entry = false;
 
             for (auto iter = deps_for_key.begin(); iter != deps_for_key.end();) {
-                //if verticals are the same, then contains == true
+                // if verticals are the same, then contains == true
                 Vertical const& dep = *iter;
                 if (node_to_add.Contains(dep)) {
                     has_subset_entry = true;

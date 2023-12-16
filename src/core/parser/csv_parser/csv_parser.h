@@ -3,7 +3,6 @@
 // https://github.com/cupertank
 //
 
-
 #pragma once
 
 #include <filesystem>
@@ -27,31 +26,41 @@ private:
     std::string relation_name_;
     void GetNext();
     void PeekNext();
-    void GetLine(const unsigned long long line_index);
-    std::vector<std::string> ParseString(const std::string& s) const;
+    void GetLine(unsigned long long const line_index);
+    std::vector<std::string> ParseString(std::string const& s) const;
     void GetNextIfHas();
     void SkipLine();
 
-    static inline std::string& rtrim(std::string& s);
+    inline static std::string& rtrim(std::string& s);
 
 public:
     CSVParser() = default;
-    explicit CSVParser(const std::filesystem::path& path);
-    CSVParser(const std::filesystem::path& path, char separator, bool has_header);
+    explicit CSVParser(std::filesystem::path const& path);
+    CSVParser(std::filesystem::path const& path, char separator, bool has_header);
 
     std::vector<std::string> GetNextRow() override;
-    std::string GetUnparsedLine(const unsigned long long line_index);
-    std::vector<std::string> ParseLine(const unsigned long long line_index);
+    std::string GetUnparsedLine(unsigned long long const line_index);
+    std::vector<std::string> ParseLine(unsigned long long const line_index);
+
     bool HasNextRow() const override {
         return has_next_;
     }
+
     char GetSeparator() const {
         return separator_;
     }
-    size_t GetNumberOfColumns() const override { return number_of_columns_; }
+
+    size_t GetNumberOfColumns() const override {
+        return number_of_columns_;
+    }
+
     std::string GetColumnName(size_t index) const override {
         return column_names_[index];
     }
-    std::string GetRelationName() const override { return relation_name_; }
+
+    std::string GetRelationName() const override {
+        return relation_name_;
+    }
+
     void Reset() override;
 };

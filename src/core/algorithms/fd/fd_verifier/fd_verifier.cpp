@@ -86,30 +86,37 @@ void FDVerifier::SortHighlightsByProportionAscending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsByProportionAscending());
 }
+
 void FDVerifier::SortHighlightsByProportionDescending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsByProportionDescending());
 }
+
 void FDVerifier::SortHighlightsByNumAscending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsByNumAscending());
 }
+
 void FDVerifier::SortHighlightsByNumDescending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsByNumDescending());
 }
+
 void FDVerifier::SortHighlightsBySizeAscending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsBySizeAscending());
 }
+
 void FDVerifier::SortHighlightsBySizeDescending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(StatsCalculator::CompareHighlightsBySizeDescending());
 }
+
 void FDVerifier::SortHighlightsByLhsAscending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(stats_calculator_->CompareHighlightsByLhsAscending());
 }
+
 void FDVerifier::SortHighlightsByLhsDescending() const {
     assert(stats_calculator_);
     stats_calculator_->SortHighlights(stats_calculator_->CompareHighlightsByLhsDescending());

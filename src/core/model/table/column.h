@@ -27,17 +27,25 @@ public:
         return index_;
     }
 
-    std::string GetName() const { return name_; }
-    RelationalSchema const* GetSchema() const { return schema_; }
+    std::string GetName() const {
+        return name_;
+    }
+
+    RelationalSchema const* GetSchema() const {
+        return schema_;
+    }
 
     std::string ToIndicesString() const {
         return std::to_string(index_);
     }
+
     std::string ToString() const {
         return "[" + name_ + "]";
     }
 
-    explicit operator std::string() const { return ToString(); }
+    explicit operator std::string() const {
+        return ToString();
+    }
 
     explicit operator Vertical() const;
 

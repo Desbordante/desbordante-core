@@ -13,7 +13,7 @@
 namespace algos::cfd {
 
 template <typename T>
-size_t HashCollection(const T& xs) {
+size_t HashCollection(T const& xs) {
     size_t res = boost::hash_range(xs.begin(), xs.end());
     return res;
 }
@@ -22,8 +22,8 @@ template <typename Key, typename Value>
 class PrefixTree {
 public:
     PrefixTree();
-    void Insert(const Key&, const Value&);
-    Value* Find(const Key&) const;
+    void Insert(Key const&, Value const&);
+    Value* Find(Key const&) const;
 
 private:
     struct PrefixNode {
@@ -46,7 +46,7 @@ PrefixTree<Key, Value>::PrefixTree() {
 }
 
 template <typename Key, typename Value>
-void PrefixTree<Key, Value>::Insert(const Key& k, const Value& v) {
+void PrefixTree<Key, Value>::Insert(Key const& k, Value const& v) {
     typename Key::const_iterator it = k.begin();
     PrefixNode* insertion_point = &root_;
     while (it != k.end()) {
@@ -65,8 +65,8 @@ void PrefixTree<Key, Value>::Insert(const Key& k, const Value& v) {
 }
 
 template <typename Key, typename Value>
-Value* PrefixTree<Key, Value>::Find(const Key& k) const {
-    const auto& elem = jumps_.find(HashCollection(k));
+Value* PrefixTree<Key, Value>::Find(Key const& k) const {
+    auto const& elem = jumps_.find(HashCollection(k));
     if (elem == jumps_.end()) return nullptr;
 
     for (PrefixNode* prefix_node : elem->second) {

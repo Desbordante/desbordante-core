@@ -21,9 +21,11 @@ public:
     ColumnCombination const& GetLhs() const {
         return *lhs_;
     }
+
     ColumnCombination const& GetRhs() const {
         return *rhs_;
     }
+
     std::string ToString() const;
 };
 

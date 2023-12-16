@@ -4,7 +4,7 @@
 
 namespace algos {
 
-Statistic::Statistic(const std::byte* data, const model::Type* type, bool clone_data) {
+Statistic::Statistic(std::byte const* data, model::Type const* type, bool clone_data) {
     if (type != nullptr && data != nullptr) {
         has_value_ = true;
         this->type_ = type->CloneType();
@@ -15,7 +15,7 @@ Statistic::Statistic(const std::byte* data, const model::Type* type, bool clone_
     }
 }
 
-Statistic::Statistic(const Statistic& other)
+Statistic::Statistic(Statistic const& other)
     : Statistic::Statistic(other.data_, other.type_.get(), true) {}
 
 Statistic::Statistic(Statistic&& other)
@@ -23,7 +23,7 @@ Statistic::Statistic(Statistic&& other)
     other.has_value_ = false;
 }
 
-Statistic& Statistic::operator=(const Statistic& other) {
+Statistic& Statistic::operator=(Statistic const& other) {
     if (this != &other) {
         if (has_value_) {
             type_->Free(data_);
@@ -63,19 +63,18 @@ bool Statistic::HasValue() const noexcept {
     return has_value_;
 }
 
-const std::byte* Statistic::GetData() const {
+std::byte const* Statistic::GetData() const {
     return data_;
 }
 
-const std::byte* Statistic::ReleaseData() {
-    const std::byte* res = data_;
+std::byte const* Statistic::ReleaseData() {
+    std::byte const* res = data_;
     data_ = nullptr;
     has_value_ = false;
     return res;
 }
 
-
-const model::Type* Statistic::GetType() const {
+model::Type const* Statistic::GetType() const {
     return type_.get();
 }
 
@@ -89,10 +88,9 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     res.emplace("type", type);
     res.emplace("count", std::to_string(count));
     res.emplace("distinct", std::to_string(distinct));
-    if (distinct != 0)
-        res.emplace("isCategorical", std::to_string(is_categorical));
+    if (distinct != 0) res.emplace("isCategorical", std::to_string(is_categorical));
 
-    auto try_add_stat = [&res](const Statistic& stat, const std::string& statName) {
+    auto try_add_stat = [&res](Statistic const& stat, std::string const& statName) {
         if (stat.HasValue()) res.emplace(statName, stat.ToString());
     };
 
@@ -120,7 +118,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
 
 std::string ColumnStats::ToString() const {
     std::stringstream res;
-    for (const auto& [statName, value] : ToKeyValueMap()) {
+    for (auto const& [statName, value] : ToKeyValueMap()) {
         res << statName << " = " << value << '\n';
     }
     return res.str();

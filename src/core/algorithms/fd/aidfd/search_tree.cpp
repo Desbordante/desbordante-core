@@ -1,7 +1,7 @@
 #include "search_tree.h"
 
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset sets_union,
-                       SearchTree::Bitset sets_inter, const std::shared_ptr<Node>& parent,
+                       SearchTree::Bitset sets_inter, std::shared_ptr<Node> const& parent,
                        std::shared_ptr<Node> left, std::shared_ptr<Node> right)
     : bit_(bit),
       set_(std::move(set)),
@@ -12,7 +12,7 @@ SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset se
       parent_(parent) {}
 
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset sets_union, SearchTree::Bitset sets_inter,
-                       const std::shared_ptr<Node>& parent, std::shared_ptr<Node> left,
+                       std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left,
                        std::shared_ptr<Node> right)
     : bit_(bit),
       union_(std::move(sets_union)),
@@ -21,7 +21,7 @@ SearchTree::Node::Node(size_t bit, SearchTree::Bitset sets_union, SearchTree::Bi
       right_(std::move(right)),
       parent_(parent) {}
 
-SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, const std::shared_ptr<Node>& parent)
+SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, std::shared_ptr<Node> const& parent)
     : bit_(bit), set_(std::move(set)), parent_(parent) {}
 
 bool SearchTree::Node::IsLeaf() const {
@@ -29,21 +29,21 @@ bool SearchTree::Node::IsLeaf() const {
     return !left_ && !right_;
 }
 
-const SearchTree::Bitset& SearchTree::Node::GetUnion() const {
+SearchTree::Bitset const& SearchTree::Node::GetUnion() const {
     return IsLeaf() ? set_ : union_;
 }
 
-const SearchTree::Bitset& SearchTree::Node::GetInter() const {
+SearchTree::Bitset const& SearchTree::Node::GetInter() const {
     return IsLeaf() ? set_ : inter_;
 }
 
 SearchTree::SearchTree(size_t number_of_attributes) : number_of_attributes_(number_of_attributes) {}
 
-SearchTree::SearchTree(const Bitset& set) : number_of_attributes_(set.size()) {
+SearchTree::SearchTree(Bitset const& set) : number_of_attributes_(set.size()) {
     CreateSingleElementSets(set);
 }
 
-void SearchTree::CreateSingleElementSets(const Bitset& set) {
+void SearchTree::CreateSingleElementSets(Bitset const& set) {
     for (size_t bit = set.find_first(); bit != Bitset::npos; bit = set.find_next(bit)) {
         Bitset bitset_to_add(number_of_attributes_);
         bitset_to_add.set(bit);
@@ -51,7 +51,7 @@ void SearchTree::CreateSingleElementSets(const Bitset& set) {
     }
 }
 
-bool SearchTree::Add(const Bitset& set) {
+bool SearchTree::Add(Bitset const& set) {
     assert(!set.empty());
     assert(set.size() == number_of_attributes_);
 
@@ -88,7 +88,7 @@ bool SearchTree::Add(const Bitset& set) {
     return true;
 }
 
-bool SearchTree::Remove(const Bitset& set) {
+bool SearchTree::Remove(Bitset const& set) {
     assert(!set.empty());
     if (!root_) {
         return false;
@@ -104,8 +104,8 @@ bool SearchTree::Remove(const Bitset& set) {
     return true;
 }
 
-void SearchTree::CollectSubsets(const Bitset& set, const std::shared_ptr<Node>& current_node,
-                                const BitsetConsumer& collect, bool& go_further) const {
+void SearchTree::CollectSubsets(Bitset const& set, std::shared_ptr<Node> const& current_node,
+                                BitsetConsumer const& collect, bool& go_further) const {
     if (current_node->IsLeaf()) {
         auto node_set = current_node->set_;
         if (node_set.is_subset_of(set)) {
@@ -122,9 +122,9 @@ void SearchTree::CollectSubsets(const Bitset& set, const std::shared_ptr<Node>& 
     }
 }
 
-bool SearchTree::ContainsAnySubsetOf(const Bitset& set) const {
+bool SearchTree::ContainsAnySubsetOf(Bitset const& set) const {
     bool go_further = true;
-    auto contains_func = [&go_further](const Bitset&) { go_further = false; };
+    auto contains_func = [&go_further](Bitset const&) { go_further = false; };
 
     if (root_) {
         CollectSubsets(set, root_, contains_func, go_further);
@@ -133,8 +133,8 @@ bool SearchTree::ContainsAnySubsetOf(const Bitset& set) const {
     return !go_further;
 }
 
-void SearchTree::ForEach(const std::shared_ptr<Node>& current_node,
-                         const BitsetConsumer& collect) const {
+void SearchTree::ForEach(std::shared_ptr<Node> const& current_node,
+                         BitsetConsumer const& collect) const {
     if (current_node->IsLeaf()) {
         collect(current_node->set_);
         return;
@@ -144,31 +144,31 @@ void SearchTree::ForEach(const std::shared_ptr<Node>& current_node,
     ForEach(current_node->right_, collect);
 }
 
-void SearchTree::ForEach(const BitsetConsumer& collect) const {
+void SearchTree::ForEach(BitsetConsumer const& collect) const {
     if (root_) {
         ForEach(root_, collect);
     }
 }
 
-void SearchTree::ForEachSubset(const SearchTree::Bitset& set, const BitsetConsumer& collect) const {
+void SearchTree::ForEachSubset(SearchTree::Bitset const& set, BitsetConsumer const& collect) const {
     if (root_) {
         bool go_further = true;
         CollectSubsets(set, root_, collect, go_further);
     }
 }
 
-void SearchTree::UpdateInterAndUnion(const std::shared_ptr<Node>& node) {
+void SearchTree::UpdateInterAndUnion(std::shared_ptr<Node> const& node) {
     auto node_copy = node;
     while (node_copy) {
-        const auto& left = node_copy->left_;
-        const auto& right = node_copy->right_;
+        auto const& left = node_copy->left_;
+        auto const& right = node_copy->right_;
         node_copy->union_ = left->GetUnion() | right->GetUnion();
         node_copy->inter_ = left->GetInter() & right->GetInter();
         node_copy = node_copy->parent_.lock();
     }
 }
 
-std::shared_ptr<SearchTree::Node> SearchTree::FindNode(const Bitset& set) {
+std::shared_ptr<SearchTree::Node> SearchTree::FindNode(Bitset const& set) {
     auto current_node = root_;
     for (size_t set_bit = set.find_first(), node_bit = current_node->bit_; !current_node->IsLeaf();
          node_bit = current_node->bit_) {
@@ -191,7 +191,7 @@ std::shared_ptr<SearchTree::Node> SearchTree::FindNode(const Bitset& set) {
     return current_node;
 }
 
-void SearchTree::CutLeaf(const std::shared_ptr<Node>& node_to_remove) {
+void SearchTree::CutLeaf(std::shared_ptr<Node> const& node_to_remove) {
     if (node_to_remove == root_) {
         root_ = nullptr;
         return;
@@ -199,7 +199,7 @@ void SearchTree::CutLeaf(const std::shared_ptr<Node>& node_to_remove) {
 
     auto parent_node = node_to_remove->parent_.lock();
     auto another_child_node =
-        (parent_node->right_ == node_to_remove) ? parent_node->left_ : parent_node->right_;
+            (parent_node->right_ == node_to_remove) ? parent_node->left_ : parent_node->right_;
 
     parent_node->left_ = another_child_node->left_;
     parent_node->right_ = another_child_node->right_;
@@ -215,8 +215,8 @@ void SearchTree::CutLeaf(const std::shared_ptr<Node>& node_to_remove) {
     UpdateInterAndUnion(parent_node->parent_.lock());
 }
 
-std::pair<size_t, size_t> SearchTree::FindNodeAndSetBits(const Bitset& node_set,
-                                                         const Bitset& set) {
+std::pair<size_t, size_t> SearchTree::FindNodeAndSetBits(Bitset const& node_set,
+                                                         Bitset const& set) {
     size_t node_bit = node_set.find_first();
     size_t set_bit = set.find_first();
     for (; node_bit == set_bit;
@@ -229,9 +229,9 @@ std::pair<size_t, size_t> SearchTree::FindNodeAndSetBits(const Bitset& node_set,
     return std::make_pair(node_bit, set_bit);
 }
 
-void SearchTree::InsertLeafIntoEnd(const std::shared_ptr<Node>& current_node, const Bitset& set,
-                         size_t node_bit, size_t set_bit) {
-    const Bitset& node_set = current_node->set_;
+void SearchTree::InsertLeafIntoEnd(std::shared_ptr<Node> const& current_node, Bitset const& set,
+                                   size_t node_bit, size_t set_bit) {
+    Bitset const& node_set = current_node->set_;
     auto new_left = std::make_shared<Node>(node_bit, node_set, current_node);
     auto new_right = std::make_shared<Node>(set_bit, set, current_node);
 
@@ -250,11 +250,11 @@ void SearchTree::InsertLeafIntoEnd(const std::shared_ptr<Node>& current_node, co
     UpdateInterAndUnion(current_node);
 }
 
-void SearchTree::InsertLeafIntoMiddle(const std::shared_ptr<Node>& current_node,
-                            const SearchTree::Bitset& set, size_t set_bit) {
-    auto new_left = std::make_shared<Node>(
-        current_node->bit_, current_node->set_,current_node->union_, current_node->inter_,
-        current_node, current_node->left_, current_node->right_);
+void SearchTree::InsertLeafIntoMiddle(std::shared_ptr<Node> const& current_node,
+                                      SearchTree::Bitset const& set, size_t set_bit) {
+    auto new_left = std::make_shared<Node>(current_node->bit_, current_node->set_,
+                                           current_node->union_, current_node->inter_, current_node,
+                                           current_node->left_, current_node->right_);
     auto new_right = std::make_shared<Node>(set.find_next(set_bit), set, current_node);
     auto replacing_node = new_left;
     if (!set[set_bit]) {

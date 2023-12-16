@@ -3,7 +3,6 @@
 // https://github.com/cupertank
 //
 
-
 #pragma once
 
 #include <memory>
@@ -16,14 +15,13 @@
 
 class Vertical {
 private:
-    //Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
+    // Vertical(shared_ptr<RelationalSchema>& relSchema, int indices);
 
-    //TODO: unique_ptr<column_indices_> if this is big
+    // TODO: unique_ptr<column_indices_> if this is big
     boost::dynamic_bitset<> column_indices_;
     RelationalSchema const* schema_;
 
 public:
-
     static std::unique_ptr<Vertical> EmptyVertical(RelationalSchema const* rel_schema);
 
     Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices);
@@ -32,7 +30,7 @@ public:
     explicit Vertical(Column const& col);
 
     Vertical(Vertical const& other) = default;
-    Vertical& operator=(const Vertical& rhs) = default;
+    Vertical& operator=(Vertical const& rhs) = default;
     Vertical(Vertical&& other) = default;
     Vertical& operator=(Vertical&& rhs) = default;
 
@@ -45,17 +43,30 @@ public:
      * suitable for this case, check out operator< for Columns.
      */
     bool operator<(Vertical const& rhs) const;
+
     bool operator==(Vertical const& other) const {
         return column_indices_ == other.column_indices_;
     }
+
     bool operator!=(Vertical const& other) const {
         return column_indices_ != other.column_indices_;
     }
-    bool operator>(Vertical const& rhs) const { return !(*this < rhs && *this == rhs); }
 
-    boost::dynamic_bitset<> GetColumnIndices() const { return column_indices_; }
-    boost::dynamic_bitset<> const& GetColumnIndicesRef() const { return column_indices_; }
-    RelationalSchema const* GetSchema() const { return schema_; }
+    bool operator>(Vertical const& rhs) const {
+        return !(*this < rhs && *this == rhs);
+    }
+
+    boost::dynamic_bitset<> GetColumnIndices() const {
+        return column_indices_;
+    }
+
+    boost::dynamic_bitset<> const& GetColumnIndicesRef() const {
+        return column_indices_;
+    }
+
+    RelationalSchema const* GetSchema() const {
+        return schema_;
+    }
 
     bool Contains(Vertical const& that) const;
     bool Contains(Column const& that) const;
@@ -68,7 +79,10 @@ public:
     Vertical Invert() const;
     Vertical Invert(Vertical const& scope) const;
 
-    unsigned int GetArity() const { return column_indices_.count(); }
+    unsigned int GetArity() const {
+        return column_indices_.count();
+    }
+
     std::vector<Column const*> GetColumns() const;
     std::vector<unsigned> GetColumnIndicesAsVector() const;
     std::vector<Vertical> GetParents() const;
@@ -76,6 +90,7 @@ public:
     std::string ToString() const;
     std::string ToIndicesString() const;
 
-    explicit operator std::string() const { return ToString(); }
-
+    explicit operator std::string() const {
+        return ToString();
+    }
 };

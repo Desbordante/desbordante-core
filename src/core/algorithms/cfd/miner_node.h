@@ -13,23 +13,23 @@ template <typename T>
 struct MinerNode {
     MinerNode() : item(-1), node_supp(-1) {}
 
-    explicit MinerNode(const Item& item) : item(item), node_supp(0) {}
+    explicit MinerNode(Item const& item) : item(item), node_supp(0) {}
 
-    MinerNode(const Item& item, const T& tids) : item(item), tids(tids), node_supp(0) {
+    MinerNode(Item const& item, T const& tids) : item(item), tids(tids), node_supp(0) {
         node_supp = Supp();
     }
 
-    MinerNode(const Item& item, const T& tids, unsigned supp)
+    MinerNode(Item const& item, T const& tids, unsigned supp)
         : item(item), tids(tids), node_supp(supp), prefix() {}
 
-    MinerNode(const Item& item, const T& tids, unsigned supp, Itemset prefix)
+    MinerNode(Item const& item, T const& tids, unsigned supp, Itemset prefix)
         : item(item), tids(tids), node_supp(supp), prefix(std::move(prefix)) {}
 
-    bool operator<(const MinerNode<T>& rhs) const {
+    bool operator<(MinerNode<T> const& rhs) const {
         return tids < rhs.tids;
     }
 
-    bool operator==(const MinerNode<T>& rhs) const {
+    bool operator==(MinerNode<T> const& rhs) const {
         return item == rhs.item && prefix == rhs.prefix && tids == rhs.tids;
     }
 

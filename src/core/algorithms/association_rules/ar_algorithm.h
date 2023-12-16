@@ -34,14 +34,13 @@ private:
         /* Temporary fix. Now we allocate generated AR twice -- in ar_collection_
          * and also in a rule node by copying it.
          * */
-        explicit RuleNode(model::ArIDs const& rule)
-            : rule(rule) {}
+        explicit RuleNode(model::ArIDs const& rule) : rule(rule) {}
     };
 
     RuleNode root_;
 
-    bool GenerateRuleLevel(std::vector<unsigned> const& frequent_itemset,
-                           double support, unsigned level_number);
+    bool GenerateRuleLevel(std::vector<unsigned> const& frequent_itemset, double support,
+                           unsigned level_number);
     bool MergeRules(std::vector<unsigned> const& frequent_itemset, double support, RuleNode* node);
     static void UpdatePath(std::stack<RuleNode*>& path, std::list<RuleNode>& vertices);
     void RegisterOptions();
@@ -65,12 +64,16 @@ protected:
 public:
     explicit ARAlgorithm(std::vector<std::string_view> phase_names);
 
-    std::list<model::ArIDs> const& GetArIDsList() const noexcept { return ar_collection_; };
+    std::list<model::ArIDs> const& GetArIDsList() const noexcept {
+        return ar_collection_;
+    };
+
     std::vector<std::string> const& GetItemNamesVector() const noexcept {
         return transactional_data_->GetItemUniverse();
     }
 
-    virtual std::list<std::set<std::string>> GetFrequentList() const = 0;  // for debugging and testing
+    virtual std::list<std::set<std::string>> GetFrequentList()
+            const = 0;  // for debugging and testing
     std::list<model::ARStrings> GetArStringsList() const;
 
     virtual ~ARAlgorithm() = default;

@@ -18,9 +18,12 @@ private:
 
     void LoadDataInternal() override;
     unsigned long long ExecuteInternal() override;
+
     void ResetUCCAlgorithmState() override {}
+
     void RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
-                      const std::vector<hy::ClusterId>& og_mapping);
+                      std::vector<hy::ClusterId> const& og_mapping);
+
     void MakeExecuteOptsAvailable() final {
         MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
     }

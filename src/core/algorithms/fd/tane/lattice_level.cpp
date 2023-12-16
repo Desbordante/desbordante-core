@@ -13,7 +13,7 @@ void LatticeLevel::Add(std::unique_ptr<LatticeVertex> vertex) {
 }
 
 LatticeVertex const* LatticeLevel::GetLatticeVertex(
-        const boost::dynamic_bitset<>& column_indices) const {
+        boost::dynamic_bitset<> const& column_indices) const {
     auto it = vertices_.find(column_indices);
     if (it != vertices_.end()) {
         return it->second.get();
@@ -30,7 +30,7 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
     LatticeLevel* current_level = levels[arity].get();
 
     std::vector<LatticeVertex*> current_level_vertices;
-    for (const auto& [map_key, vertex] : current_level->GetVertices()) {
+    for (auto const& [map_key, vertex] : current_level->GetVertices()) {
         current_level_vertices.push_back(vertex.get());
     }
 
@@ -105,9 +105,9 @@ void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>&
 
             next_level->Add(std::move(child_vertex));
 
-            continueMidOuter:
+        continueMidOuter:
             continue;
-            }
+        }
     }
 
     levels.push_back(std::move(next_level));

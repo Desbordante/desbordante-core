@@ -4,5 +4,5 @@
 #include "config/max_lhs/type.h"
 
 namespace config {
-extern const CommonOption<MaxLhsType> MaxLhsOpt;
+extern CommonOption<MaxLhsType> const MaxLhsOpt;
 }  // namespace config

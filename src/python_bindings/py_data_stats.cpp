@@ -8,9 +8,9 @@ namespace py = pybind11;
 namespace mo = model;
 
 namespace {
-py::object GetValue(const algos::Statistic& stat) {
-    const std::byte* data = stat.GetData();
-    const mo::Type* type = stat.GetType();
+py::object GetValue(algos::Statistic const& stat) {
+    std::byte const* data = stat.GetData();
+    mo::Type const* type = stat.GetType();
 
     if (data == nullptr) return py::none();
 

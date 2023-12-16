@@ -43,9 +43,11 @@ protected:
     void AddProgress(double val) noexcept {
         progress_.AddProgress(val);
     }
+
     void SetProgress(double val) noexcept {
         progress_.SetProgress(val);
     }
+
     void ToNextProgressPhase() noexcept {
         progress_.ToNextProgressPhase();
     }
@@ -97,6 +99,7 @@ public:
     std::pair<uint8_t, double> GetProgress() const noexcept {
         return progress_.GetProgress();
     }
+
     std::vector<std::string_view> const& GetPhaseNames() const noexcept {
         return progress_.GetPhaseNames();
     }

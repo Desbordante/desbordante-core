@@ -13,6 +13,7 @@ private:
 
 public:
     explicit Type(TypeId const type_id) noexcept : type_id_(type_id) {}
+
     virtual ~Type() = default;
 
     /* Operations on the type itself */
@@ -20,6 +21,7 @@ public:
     friend inline bool operator==(Type const& l, Type const& r) {
         return l.type_id_ == r.type_id_;
     }
+
     friend inline bool operator!=(Type const& l, Type const& r) {
         return !(l == r);
     }
@@ -52,6 +54,7 @@ public:
 
     public:
         explicit Hasher(Type const* type) noexcept : type_(type) {}
+
         size_t operator()(std::byte const* key) const {
             return type_->Hash(key);
         }
@@ -62,6 +65,7 @@ public:
 
     public:
         explicit Comparator(Type const* type) noexcept : type_(type) {}
+
         size_t operator()(std::byte const* a, std::byte const* b) const {
             return (type_->Compare(a, b) == CompareResult::kLess);
         }
@@ -93,6 +97,7 @@ public:
     virtual void Free(std::byte const* val) const noexcept {
         delete[] val;
     }
+
     [[nodiscard]] virtual std::string ValueToString(std::byte const* value) const = 0;
     [[nodiscard]] virtual std::unique_ptr<Type> CloneType() const = 0;
     [[nodiscard]] virtual CompareResult Compare(std::byte const* l, std::byte const* r) const = 0;
@@ -111,12 +116,13 @@ public:
     [[nodiscard]] static T const& GetValue(std::byte const* buf) {
         return *reinterpret_cast<T const*>(buf);
     }
+
     template <typename T>
     [[nodiscard]] static T& GetValue(std::byte* buf) {
         return *reinterpret_cast<T*>(buf);
     }
 
-    static bool IsOrdered(const TypeId& type_id) {
+    static bool IsOrdered(TypeId const& type_id) {
         return !(type_id == +TypeId::kEmpty || type_id == +TypeId::kNull ||
                  type_id == +TypeId::kUndefined || type_id == +TypeId::kMixed);
     }

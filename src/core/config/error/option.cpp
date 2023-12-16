@@ -5,7 +5,7 @@
 
 namespace config {
 using names::kError, descriptions::kDError;
-extern const CommonOption<ErrorType> ErrorOpt{
+extern CommonOption<ErrorType> const ErrorOpt{
         kError, kDError, 0.0, {}, [](ErrorType error) {
             if (!(error >= 0 && error <= 1)) {
                 throw ConfigurationError("ERROR: error should be between 0 and 1.");

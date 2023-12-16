@@ -20,7 +20,7 @@ ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     }
 }
 
-std::vector<int> ColumnOrder::GetOrderHighDistinctCount(const Vertical& columns) const {
+std::vector<int> ColumnOrder::GetOrderHighDistinctCount(Vertical const& columns) const {
     std::vector<int> order_for_columns(columns.GetArity());
 
     int current_order_index = 0;
@@ -33,7 +33,7 @@ std::vector<int> ColumnOrder::GetOrderHighDistinctCount(const Vertical& columns)
     return order_for_columns;
 }
 
-std::vector<int> ColumnOrder::GetOrderLowDistinctCount(const Vertical& columns) const {
+std::vector<int> ColumnOrder::GetOrderLowDistinctCount(Vertical const& columns) const {
     std::vector<int> order_for_columns(columns.GetArity());
 
     assert(!order_.empty());

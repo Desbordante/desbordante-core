@@ -8,16 +8,16 @@ NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node)
         return new_category;
     }
 
-    auto column_indices = node.GetColumnIndicesRef(); //copy indices
+    auto column_indices = node.GetColumnIndicesRef();  // copy indices
     bool has_unchecked_subset = false;
 
     for (size_t index = column_indices.find_first(); index < column_indices.size();
          index = column_indices.find_next(index)) {
-        column_indices[index] = false; //remove one column
+        column_indices[index] = false;  // remove one column
         auto const subset_node_iter = this->find(Vertical(node.GetSchema(), column_indices));
 
         if (subset_node_iter == this->end()) {
-            //if we found unchecked subset of this node
+            // if we found unchecked subset of this node
             has_unchecked_subset = true;
         } else {
             NodeCategory const& subset_vertical_category = subset_node_iter->second;
@@ -30,7 +30,7 @@ NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node)
             }
         }
 
-        column_indices[index] = true; //restore removed column
+        column_indices[index] = true;  // restore removed column
     }
     new_category = has_unchecked_subset ? NodeCategory::kCandidateMinimalDependency
                                         : NodeCategory::kMinimalDependency;
@@ -52,7 +52,7 @@ NodeCategory LatticeObservations::UpdateNonDependencyCategory(Vertical const& no
         auto const superset_node_iter = this->find(node.Union(*node.GetSchema()->GetColumn(index)));
 
         if (superset_node_iter == this->end()) {
-            //if we found unchecked superset of this node
+            // if we found unchecked superset of this node
             has_unchecked_superset = true;
         } else {
             NodeCategory const& superset_vertical_category = superset_node_iter->second;
@@ -82,7 +82,7 @@ bool LatticeObservations::IsCandidate(Vertical const& node) const {
 }
 
 std::unordered_set<Vertical> LatticeObservations::GetUncheckedSubsets(
-    Vertical const& node, ColumnOrder const& column_order) const {
+        Vertical const& node, ColumnOrder const& column_order) const {
     auto indices = node.GetColumnIndices();
     std::unordered_set<Vertical> unchecked_subsets;
 
@@ -99,7 +99,7 @@ std::unordered_set<Vertical> LatticeObservations::GetUncheckedSubsets(
 }
 
 std::unordered_set<Vertical> LatticeObservations::GetUncheckedSupersets(
-    Vertical const& node, unsigned int rhs_index, ColumnOrder const& column_order) const {
+        Vertical const& node, unsigned int rhs_index, ColumnOrder const& column_order) const {
     auto flipped_indices = node.GetColumnIndices().flip();
     std::unordered_set<Vertical> unchecked_supersets;
 

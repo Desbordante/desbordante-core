@@ -4,7 +4,7 @@ OrderedPartition::OrderedPartition(model::PositionListIndex const* const partiti
                                    unsigned int number_of_rows, unsigned int column_index)
     : column_index_(column_index) {
     this->distinctiveness_ =
-        (double)(number_of_rows - partition->GetNumNonSingletonCluster()) / number_of_rows;
+            (double)(number_of_rows - partition->GetNumNonSingletonCluster()) / number_of_rows;
 }
 
 bool OrderedPartition::operator<(OrderedPartition const& other) const {

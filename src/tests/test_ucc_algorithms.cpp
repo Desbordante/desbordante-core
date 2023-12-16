@@ -60,6 +60,7 @@ protected:
         assert(threads > 0);
         threads_ = threads;
     }
+
     void PerformConsistentHashTestOn(std::vector<TableConfigHash> const& datasets) {
         for (auto const& [config, hash] : datasets) {
             try {

@@ -52,10 +52,12 @@ private:
     std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {
         return std::move(global_visitees_);
     }
+
     // CAREFUL: resets localVisitees_, therefore SearchSpace could become invalidated
     std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutLocalVisitees() {
         return std::move(local_visitees_);
     }
+
     void MoveInLocalVisitees(std::unique_ptr<model::VerticalMap<VerticalInfo>> local_visitees) {
         local_visitees_ = std::move(local_visitees);
     }
@@ -108,11 +110,19 @@ public:
     void EnsureInitialized();
     void Discover();
     void AddLaunchPad(DependencyCandidate const& launch_pad);
+
     void SetContext(ProfilingContext* context) {
         context_ = context;
         strategy_->context_ = context;
     }
-    ProfilingContext* GetContext() { return context_; }
-    unsigned int GetErrorCalcCount() { return strategy_->calc_count_; }
+
+    ProfilingContext* GetContext() {
+        return context_;
+    }
+
+    unsigned int GetErrorCalcCount() {
+        return strategy_->calc_count_;
+    }
+
     void PrintStats() const;
 };

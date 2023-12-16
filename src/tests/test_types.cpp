@@ -63,6 +63,7 @@ protected:
     static std::string GetErrorStr(K l, Y r) {
         return "Failed with l=" + std::to_string(l) + " and r=" + std::to_string(r);
     }
+
     static void ExpectEq(UnderlyingType expected, std::byte const* v, std::string error = "") {
         UnderlyingType actual = mo::Type::GetValue<decltype(expected)>(v);
         if constexpr (std::is_floating_point_v<UnderlyingType>) {
@@ -259,6 +260,7 @@ INSTANTIATE_TEST_SUITE_P(TestStringSuite, TestString,
                                            TestStringParam("a", "abcde"), TestStringParam("", ""),
                                            TestStringParam("", "abc"), TestStringParam("abc", ""),
                                            TestStringParam("bb", "aa")));
+
 namespace {
 using DatePtr = std::unique_ptr<std::byte[], mo::DateTypeDeleter>;
 

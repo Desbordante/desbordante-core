@@ -8,4 +8,4 @@ void Itemset::Sort() {
     std::sort(indices_.begin(), indices_.end());
 }
 
-} // namespace model
+}  // namespace model

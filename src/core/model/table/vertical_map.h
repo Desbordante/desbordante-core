@@ -20,20 +20,23 @@ template <class Value>
 class VerticalMap {
 protected:
     using Bitset = boost::dynamic_bitset<>;
+
     // typename std::shared_ptr<Value> shared_ptr<Value>;
 
-    // Each node corresponds to a bit in a bitset. Each node also has a vector of the possible consequent set bits.
+    // Each node corresponds to a bit in a bitset. Each node also has a vector of the possible
+    // consequent set bits.
     class SetTrie {
     private:
         size_t offset_;
         size_t dimension_;
-        std::vector<std::unique_ptr<SetTrie>> subtries_; //unique_ptr?
+        std::vector<std::unique_ptr<SetTrie>> subtries_;  // unique_ptr?
         std::shared_ptr<Value> value_;
 
         bool IsEmpty() const;
 
     public:
         explicit SetTrie(size_t dimension) : SetTrie(0, dimension) {}
+
         SetTrie(size_t offset, size_t dimension) : offset_(offset), dimension_(dimension) {}
 
         // Sets given key to a given value
@@ -63,26 +66,27 @@ protected:
 
         // Calls collector on every trie that is a subset of the given subset_key
         bool CollectSubsetKeys(
-            Bitset const& key, size_t next_bit, Bitset& subset_key,
-            std::function<bool(Bitset const&, std::shared_ptr<Value const>)> const& collector)
-            const;
+                Bitset const& key, size_t next_bit, Bitset& subset_key,
+                std::function<bool(Bitset const&, std::shared_ptr<Value const>)> const& collector)
+                const;
 
         // Calls collector on every trie that is a superset of the given subsetKey
         bool CollectSupersetKeys(
-            Bitset const& key, size_t next_bit, Bitset& superset_key,
-            std::function<bool(Bitset const&, std::shared_ptr<Value const>)> const& collector)
-            const;
+                Bitset const& key, size_t next_bit, Bitset& superset_key,
+                std::function<bool(Bitset const&, std::shared_ptr<Value const>)> const& collector)
+                const;
 
-        // Calls collector on every trie that is a superset of the given subsetKey with no bits from the blacklist
+        // Calls collector on every trie that is a superset of the given subsetKey with no bits from
+        // the blacklist
         bool CollectRestrictedSupersetKeys(
-            Bitset const& key, Bitset const& blacklist, size_t next_bit, Bitset& superset_key,
-            std::function<void(Bitset const&, std::shared_ptr<Value const>)> const& collector)
-            const;
+                Bitset const& key, Bitset const& blacklist, size_t next_bit, Bitset& superset_key,
+                std::function<void(Bitset const&, std::shared_ptr<Value const>)> const& collector)
+                const;
 
         // Calls collector on every entry
         void TraverseEntries(
-            Bitset& subset_key,
-            std::function<void(Bitset const&, std::shared_ptr<Value const>)> collector) const;
+                Bitset& subset_key,
+                std::function<void(Bitset const&, std::shared_ptr<Value const>)> collector) const;
     };
 
     RelationalSchema const* relation_;
@@ -92,19 +96,30 @@ protected:
     SetTrie set_trie_;
 
     unsigned int RemoveFromUsageCounter(std::unordered_map<Vertical, unsigned int>& usage_counter,
-                                        const Vertical& key);
+                                        Vertical const& key);
 
 public:
     using Entry = std::pair<Vertical, std::shared_ptr<Value const>>;
-    explicit VerticalMap(RelationalSchema const* relation) :
-        relation_(relation), set_trie_(relation->GetNumColumns()) {}
-    virtual size_t GetSize() const { return size_; }
-    virtual bool IsEmpty() const { return size_ == 0; }
+
+    explicit VerticalMap(RelationalSchema const* relation)
+        : relation_(relation), set_trie_(relation->GetNumColumns()) {}
+
+    virtual size_t GetSize() const {
+        return size_;
+    }
+
+    virtual bool IsEmpty() const {
+        return size_ == 0;
+    }
 
     // basic get-check-insert-remove operations
     virtual std::shared_ptr<Value const> Get(Vertical const& key) const;
     virtual std::shared_ptr<Value const> Get(Bitset const& key) const;
-    virtual bool ContainsKey(Vertical const& key) const { return Get(key) != nullptr; }
+
+    virtual bool ContainsKey(Vertical const& key) const {
+        return Get(key) != nullptr;
+    }
+
     virtual std::shared_ptr<Value> Put(Vertical const& key, std::shared_ptr<Value> value);
     virtual std::shared_ptr<Value> Remove(Vertical const& key);
     virtual std::shared_ptr<Value> Remove(Bitset const& key);
@@ -122,13 +137,14 @@ public:
     virtual std::vector<Entry> GetSubsetEntries(Vertical const& vertical) const;
     virtual Entry GetAnySubsetEntry(Vertical const& vertical) const;
     virtual Entry GetAnySubsetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<Value const>)> const& condition) const;
+            Vertical const& vertical,
+            std::function<bool(Vertical const*, std::shared_ptr<Value const>)> const& condition)
+            const;
     virtual std::vector<Entry> GetSupersetEntries(Vertical const& vertical) const;
     virtual Entry GetAnySupersetEntry(Vertical const& vertical) const;
     virtual Entry GetAnySupersetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<Value const>)> condition) const;
+            Vertical const& vertical,
+            std::function<bool(Vertical const*, std::shared_ptr<Value const>)> condition) const;
     virtual std::vector<Entry> GetRestrictedSupersetEntries(Vertical const& vertical,
                                                             Vertical const& exclusion) const;
     virtual bool RemoveSupersetEntries(Vertical const& key);
@@ -142,8 +158,13 @@ public:
     virtual void Shrink(std::unordered_map<Vertical, unsigned int>& usage_counter,
                         std::function<bool(Entry)> const& can_remove);
 
-    virtual long long GetShrinkInvocations() { return shrink_invocations_; }
-    virtual long long GetTimeSpentOnShrinking() { return time_spent_on_shrinking_; }
+    virtual long long GetShrinkInvocations() {
+        return shrink_invocations_;
+    }
+
+    virtual long long GetTimeSpentOnShrinking() {
+        return time_spent_on_shrinking_;
+    }
 
     virtual ~VerticalMap() = default;
 };
@@ -162,6 +183,7 @@ public:
     using typename VerticalMap<V>::Bitset;
 
     explicit BlockingVerticalMap(RelationalSchema const* relation) : VerticalMap<V>(relation) {}
+
     virtual size_t GetSize() const override;
     virtual bool IsEmpty() const override;
 
@@ -182,16 +204,16 @@ public:
     virtual std::vector<Entry> GetSubsetEntries(Vertical const& vertical) const override;
     virtual Entry GetAnySubsetEntry(Vertical const& vertical) const override;
     virtual Entry GetAnySubsetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<V const>)> const& condition)
-        const override;
+            Vertical const& vertical,
+            std::function<bool(Vertical const*, std::shared_ptr<V const>)> const& condition)
+            const override;
     virtual std::vector<Entry> GetSupersetEntries(Vertical const& vertical) const override;
     virtual Entry GetAnySupersetEntry(Vertical const& vertical) const override;
-    virtual Entry GetAnySupersetEntry(
-        Vertical const& vertical,
-        std::function<bool(Vertical const*, std::shared_ptr<V const>)> condition) const override;
+    virtual Entry GetAnySupersetEntry(Vertical const& vertical,
+                                      std::function<bool(Vertical const*, std::shared_ptr<V const>)>
+                                              condition) const override;
     virtual std::vector<Entry> GetRestrictedSupersetEntries(
-        Vertical const& vertical, Vertical const& exclusion) const override;
+            Vertical const& vertical, Vertical const& exclusion) const override;
     virtual bool RemoveSupersetEntries(Vertical const& key) override;
     virtual bool RemoveSubsetEntries(Vertical const& key) override;
 

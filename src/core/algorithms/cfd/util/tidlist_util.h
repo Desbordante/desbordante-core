@@ -9,9 +9,9 @@ namespace algos::cfd {
 
 class TIdUtil {
 public:
-    static int Support(const PartitionTIdList& tids);
-    static unsigned Hash(const PartitionTIdList& tids);
-    static int Support(const SimpleTIdList& tids);
-    static unsigned Hash(const SimpleTIdList& tids);
+    static int Support(PartitionTIdList const& tids);
+    static unsigned Hash(PartitionTIdList const& tids);
+    static int Support(SimpleTIdList const& tids);
+    static unsigned Hash(SimpleTIdList const& tids);
 };
 }  // namespace algos::cfd

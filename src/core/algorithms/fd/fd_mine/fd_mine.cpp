@@ -56,7 +56,7 @@ unsigned long long Fd_mine::ExecuteInternal() {
     Display();
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time);
+            std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
 }
 
@@ -73,9 +73,9 @@ void Fd_mine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
 
             if (xi.count() == 1) {
                 auto candidate_x_pli =
-                    relation_->GetColumnData(xi.find_first()).GetPositionListIndex();
+                        relation_->GetColumnData(xi.find_first()).GetPositionListIndex();
                 auto candidate_y_pli =
-                    relation_->GetColumnData(column_index).GetPositionListIndex();
+                        relation_->GetColumnData(column_index).GetPositionListIndex();
 
                 plis_[candidate_xy] = candidate_x_pli->Intersect(candidate_y_pli);
 
@@ -88,7 +88,7 @@ void Fd_mine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
 
             if (!plis_.count(candidate_xy)) {
                 auto candidate_y_pli =
-                    relation_->GetColumnData(candidate_y.find_first()).GetPositionListIndex();
+                        relation_->GetColumnData(candidate_y.find_first()).GetPositionListIndex();
                 plis_[candidate_xy] = plis_[xi]->Intersect(candidate_y_pli);
             }
 
@@ -107,8 +107,8 @@ void Fd_mine::ObtainFDandKey(dynamic_bitset<> const& xi) {
 }
 
 void Fd_mine::ObtainEqSet() {
-    for (auto const& candidate: candidate_set_) {
-        for (auto &[lhs, closure] : fd_set_) {
+    for (auto const& candidate : candidate_set_) {
+        for (auto& [lhs, closure] : fd_set_) {
             auto common_atrs = candidate & lhs;
             if ((candidate - common_atrs).is_subset_of(closure) &&
                 (lhs - common_atrs).is_subset_of(closure_[candidate])) {
@@ -182,13 +182,13 @@ void Fd_mine::GenerateNextLevelCandidates() {
                     !(candidate_i).is_subset_of(fd_set_[candidate_j])) {
                     if (candidate_i.count() == 1) {
                         auto candidate_i_pli = relation_->GetColumnData(candidate_i.find_first())
-                                                   .GetPositionListIndex();
+                                                       .GetPositionListIndex();
                         auto candidate_j_pli = relation_->GetColumnData(candidate_j.find_first())
-                                                   .GetPositionListIndex();
+                                                       .GetPositionListIndex();
                         plis_[candidate_ij] = candidate_i_pli->Intersect(candidate_j_pli);
                     } else {
                         plis_[candidate_ij] =
-                            plis_[candidate_i]->Intersect(plis_[candidate_j].get());
+                                plis_[candidate_i]->Intersect(plis_[candidate_j].get());
                     }
 
                     auto closure_ij = closure_[candidate_i] | closure_[candidate_j];
@@ -210,16 +210,16 @@ void Fd_mine::Reconstruct() {
     dynamic_bitset<> generated_lhs(relation_indices_.size());
     dynamic_bitset<> generated_lhs_tmp(relation_indices_.size());
 
-    for (const auto &[lhs, rhs] : fd_set_) {
+    for (auto const& [lhs, rhs] : fd_set_) {
         std::unordered_map<dynamic_bitset<>, bool> observed;
 
         observed[lhs] = true;
         auto rhs_copy = rhs;
         queue.push(lhs);
 
-        for (const auto &[eq, eqset] : eq_set_) {
+        for (auto const& [eq, eqset] : eq_set_) {
             if (eq.is_subset_of(rhs_copy)) {
-                for (const auto& eq_rhs : eqset) {
+                for (auto const& eq_rhs : eqset) {
                     rhs_copy |= eq_rhs;
                 }
             }
@@ -230,16 +230,16 @@ void Fd_mine::Reconstruct() {
             dynamic_bitset<> current_lhs = queue.front();
             queue.pop();
             size_t rhs_count = rhs_copy.count();
-            for (const auto &[eq, eqset] : eq_set_) {
+            for (auto const& [eq, eqset] : eq_set_) {
                 if (!rhs_will_not_change && eq.is_subset_of(rhs_copy)) {
-                    for (const auto& eq_rhs : eqset) {
+                    for (auto const& eq_rhs : eqset) {
                         rhs_copy |= eq_rhs;
                     }
                 }
 
                 if (eq.is_subset_of(current_lhs)) {
                     generated_lhs_tmp = current_lhs - eq;
-                    for (const auto& new_eq : eqset) {
+                    for (auto const& new_eq : eqset) {
                         generated_lhs = generated_lhs_tmp;
                         generated_lhs |= new_eq;
 
@@ -255,7 +255,7 @@ void Fd_mine::Reconstruct() {
             }
         }
 
-        for (auto &[lhs, rbool] : observed) {
+        for (auto& [lhs, rbool] : observed) {
             if (final_fd_set_.count(lhs)) {
                 final_fd_set_[lhs] |= rhs_copy;
             } else {
@@ -274,8 +274,8 @@ void Fd_mine::Display() {
                 continue;
             }
             Vertical lhs_vertical(schema_, lhs);
-            LOG(DEBUG) << "Discovered FD: " << lhs_vertical.ToString()
-                       << " -> " << schema_->GetColumn(j)->GetName();
+            LOG(DEBUG) << "Discovered FD: " << lhs_vertical.ToString() << " -> "
+                       << schema_->GetColumn(j)->GetName();
             RegisterFd(std::move(lhs_vertical), *schema_->GetColumn(j));
             fd_counter++;
         }

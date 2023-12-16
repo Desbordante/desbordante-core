@@ -1,7 +1,3 @@
 #pragma once
 
-enum class CacheEvictionMethod {
-    kDefault,
-    kMedainUsage,
-    kHottoRemain
-};
+enum class CacheEvictionMethod { kDefault, kMedainUsage, kHottoRemain };

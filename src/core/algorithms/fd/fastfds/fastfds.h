@@ -44,8 +44,8 @@ private:
      * according to `diff_sets`
      */
     std::set<Column, OrderingComparator> GetNextOrdering(
-        std::vector<DiffSet> const& diff_sets, Column const& attribute,
-        std::set<Column, OrderingComparator> const& cur_ordering) const;
+            std::vector<DiffSet> const& diff_sets, Column const& attribute,
+            std::set<Column, OrderingComparator> const& cur_ordering) const;
     void FindCovers(Column const& attribute, std::vector<DiffSet> const& diff_sets_mod,
                     std::vector<DiffSet> const& cur_diff_sets, Vertical const& path,
                     std::set<Column, OrderingComparator> const& ordering);

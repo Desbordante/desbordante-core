@@ -90,8 +90,8 @@ unsigned long long Pyro::ExecuteInternal() {
         }
     }
     unsigned long long init_time_millis = std::chrono::duration_cast<std::chrono::milliseconds>(
-                                              std::chrono::system_clock::now() - start_time)
-                                              .count();
+                                                  std::chrono::system_clock::now() - start_time)
+                                                  .count();
 
     start_time = std::chrono::system_clock::now();
     unsigned int total_error_calc_count = 0;
@@ -99,37 +99,38 @@ unsigned long long Pyro::ExecuteInternal() {
     unsigned long long total_trickle = 0;
     double progress_step = 100.0 / search_spaces_.size();
 
-    const auto work_on_search_space = [this, &progress_step](
-        std::list<std::unique_ptr<SearchSpace>>& search_spaces,
-        ProfilingContext* profiling_context, int id) {
-        unsigned long long millis = 0;
-        while (true) {
-            auto thread_start_time = std::chrono::system_clock::now();
-            std::unique_ptr<SearchSpace> polled_space;
-            {
-                std::scoped_lock<std::mutex> lock(searchSpacesMutex);
-                if (search_spaces.empty()) {
-                    break;
-                }
-                polled_space = std::move(search_spaces.front());
-                search_spaces.pop_front();
-            }
-            LOG(TRACE) << "Thread" << id << " got SearchSpace";
-            polled_space->SetContext(profiling_context);
-            polled_space->EnsureInitialized();
-            polled_space->Discover();
-            AddProgress(progress_step);
+    auto const work_on_search_space =
+            [this, &progress_step](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
+                                   ProfilingContext* profiling_context, int id) {
+                unsigned long long millis = 0;
+                while (true) {
+                    auto thread_start_time = std::chrono::system_clock::now();
+                    std::unique_ptr<SearchSpace> polled_space;
+                    {
+                        std::scoped_lock<std::mutex> lock(searchSpacesMutex);
+                        if (search_spaces.empty()) {
+                            break;
+                        }
+                        polled_space = std::move(search_spaces.front());
+                        search_spaces.pop_front();
+                    }
+                    LOG(TRACE) << "Thread" << id << " got SearchSpace";
+                    polled_space->SetContext(profiling_context);
+                    polled_space->EnsureInitialized();
+                    polled_space->Discover();
+                    AddProgress(progress_step);
 
-            millis += std::chrono::duration_cast<std::chrono::milliseconds>(
-                          std::chrono::system_clock::now() - thread_start_time)
-                          .count();
-        }
-        //cout << "Thread" << id << " stopped working, ELAPSED TIME: " << millis << "ms.\n";
-    };
+                    millis += std::chrono::duration_cast<std::chrono::milliseconds>(
+                                      std::chrono::system_clock::now() - thread_start_time)
+                                      .count();
+                }
+                // cout << "Thread" << id << " stopped working, ELAPSED TIME: " << millis <<
+                // "ms.\n";
+            };
 
     std::vector<std::thread> threads;
     for (int i = 0; i < parameters_.parallelism; i++) {
-        //std::thread();
+        // std::thread();
         threads.emplace_back(work_on_search_space, std::ref(search_spaces_),
                              profiling_context.get(), i);
     }

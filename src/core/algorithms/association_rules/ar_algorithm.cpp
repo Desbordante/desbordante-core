@@ -82,14 +82,13 @@ void ARAlgorithm::GenerateRulesFrom(std::vector<unsigned> const& frequent_itemse
     for (auto item_id : frequent_itemset) {
         std::vector<unsigned> rhs{item_id};
         std::vector<unsigned> lhs;
-        std::set_difference(frequent_itemset.begin(), frequent_itemset.end(),
-                            rhs.begin(), rhs.end(),
-                            std::back_inserter(lhs));
+        std::set_difference(frequent_itemset.begin(), frequent_itemset.end(), rhs.begin(),
+                            rhs.end(), std::back_inserter(lhs));
         auto const lhs_support = GetSupport(lhs);
         auto const confidence = support / lhs_support;
         if (confidence >= minconf_) {
-            auto const& new_ar = ar_collection_.emplace_back(std::move(lhs), std::move(rhs),
-                                                             confidence);
+            auto const& new_ar =
+                    ar_collection_.emplace_back(std::move(lhs), std::move(rhs), confidence);
             root_.children.emplace_back(new_ar);
         }
     }
@@ -132,7 +131,7 @@ bool ARAlgorithm::MergeRules(std::vector<unsigned> const& frequent_itemset, doub
     auto const last_child_iter = std::prev(children.end());
     for (auto child_iter = children.begin(); child_iter != last_child_iter; ++child_iter) {
         for (auto child_right_sibling_iter = std::next(child_iter);
-                  child_right_sibling_iter != children.end(); ++child_right_sibling_iter) {
+             child_right_sibling_iter != children.end(); ++child_right_sibling_iter) {
             std::vector<unsigned> rhs = child_iter->rule.right;
             rhs.push_back(child_right_sibling_iter->rule.right.back());
             if (rhs.size() == frequent_itemset.size()) {
@@ -141,15 +140,14 @@ bool ARAlgorithm::MergeRules(std::vector<unsigned> const& frequent_itemset, doub
             }
 
             std::vector<unsigned> lhs;
-            std::set_difference(frequent_itemset.begin(), frequent_itemset.end(),
-                                rhs.begin(), rhs.end(),
-                                std::back_inserter(lhs));
+            std::set_difference(frequent_itemset.begin(), frequent_itemset.end(), rhs.begin(),
+                                rhs.end(), std::back_inserter(lhs));
 
             auto const lhs_support = GetSupport(lhs);
             auto const confidence = support / lhs_support;
             if (confidence >= minconf_) {
-                auto const& new_ar = ar_collection_.emplace_back(std::move(lhs), std::move(rhs),
-                                                                 confidence);
+                auto const& new_ar =
+                        ar_collection_.emplace_back(std::move(lhs), std::move(rhs), confidence);
                 child_iter->children.emplace_back(new_ar);
                 is_rule_produced = true;
             }
@@ -166,4 +164,4 @@ std::list<model::ARStrings> ARAlgorithm::GetArStringsList() const {
     return ar_strings;
 }
 
-} // namespace algos
+}  // namespace algos

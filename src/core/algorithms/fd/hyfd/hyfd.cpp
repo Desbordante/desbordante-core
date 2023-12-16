@@ -62,8 +62,8 @@ unsigned long long HyFD::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-void HyFD::RegisterFDs(std::vector<RawFD>&& fds, const std::vector<hy::ClusterId>& og_mapping) {
-    const auto* const schema = GetRelation().GetSchema();
+void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> const& og_mapping) {
+    auto const* const schema = GetRelation().GetSchema();
     for (auto&& [lhs, rhs] : fds) {
         boost::dynamic_bitset<> mapped_lhs =
                 hy::RestoreAgreeSet(lhs, og_mapping, schema->GetNumColumns());

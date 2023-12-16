@@ -39,8 +39,7 @@ bool LatticeVertex::operator>(LatticeVertex const& that) const {
     int result;
     while (true) {
         result = this_index - that_index;
-        if (result)
-            return (result > 0);
+        if (result) return (result > 0);
         this_index = this_indices.find_next(this_index);
         that_index = that_indices.find_next(that_index);
     }
@@ -55,8 +54,7 @@ std::ostream& operator<<(std::ostream& os, LatticeVertex& lv) {
     os << "Vertex: " << lv.vertical_.ToString() << endl;
 
     string rhs;
-    for (size_t index = lv.rhs_candidates_.find_first();
-         index != dynamic_bitset<>::npos;
+    for (size_t index = lv.rhs_candidates_.find_first(); index != dynamic_bitset<>::npos;
          index = lv.rhs_candidates_.find_next(index)) {
         rhs += std::to_string(index) + " ";
     }

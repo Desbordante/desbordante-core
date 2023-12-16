@@ -1,23 +1,24 @@
 #include "column.h"
+
 #include "vertical.h"
 
 using namespace std;
 
-bool Column::operator<(const Column& rhs) const {
+bool Column::operator<(Column const& rhs) const {
     // use assert here to check if Columns belong to the same schema?
     return index_ > rhs.index_ && *schema_ == *rhs.schema_;
 }
 
-bool Column::operator>(const Column& rhs) const {
+bool Column::operator>(Column const& rhs) const {
     return index_ < rhs.index_ && *schema_ == *rhs.schema_;
 }
 
-bool Column::operator==(const Column& rhs) const {
+bool Column::operator==(Column const& rhs) const {
     if (this == &rhs) return true;
     return index_ == rhs.index_ && *schema_ == *rhs.schema_;
 }
 
-bool Column::operator!=(const Column& rhs) const {
+bool Column::operator!=(Column const& rhs) const {
     return !(*this == rhs);
 }
 

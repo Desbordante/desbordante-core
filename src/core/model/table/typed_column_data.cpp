@@ -64,7 +64,7 @@ std::vector<TypeId> TypedColumnDataFactory::GetTypesLayout(TypeMap const& tm) co
 }
 
 TypedColumnDataFactory::TypeIdToType TypedColumnDataFactory::MapTypeIdsToTypes(
-    TypeMap const& tm) const {
+        TypeMap const& tm) const {
     std::unordered_map<TypeId, std::unique_ptr<Type>> type_id_to_type;
     for (auto const& [type_id, indices] : tm) {
         type_id_to_type.emplace(type_id, CreateType(type_id, is_null_equal_null_));

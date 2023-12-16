@@ -21,6 +21,7 @@ struct TypeParsingParams {
     std::string_view dataset;
     char const sep;
     bool const has_header;
+
     TypeParsingParams(std::vector<mo::TypeId> expected, std::string_view dataset,
                       char const sep = ',', bool const has_header = true) noexcept
         : expected(std::move(expected)), dataset(dataset), sep(sep), has_header(has_header) {}
@@ -82,6 +83,7 @@ INSTANTIATE_TEST_SUITE_P(
                           "SimpleTypes.csv"),
         TypeParsingParams({TypeId::kString, TypeId::kDate, TypeId::kDate},
                           "ACShippingDates.csv" )));
+
 // clang-format on
 
 TEST(TypeSystem, SumColumnDoubles) {

@@ -13,6 +13,7 @@ struct ArIDs {
     double confidence = -1;
 
     ArIDs() = default;
+
     ArIDs(std::vector<unsigned> left, std::vector<unsigned> right, double confidence)
         : left(std::move(left)), right(std::move(right)), confidence(confidence) {}
 
@@ -28,6 +29,7 @@ struct ARStrings {
     double confidence = -1;
 
     ARStrings() = default;
+
     ARStrings(std::list<std::string> left, std::list<std::string> right, double confidence)
         : left(std::move(left)), right(std::move(right)), confidence(confidence) {}
 
@@ -69,4 +71,4 @@ struct ARStrings {
     }
 };
 
-} // namespace model
+}  // namespace model

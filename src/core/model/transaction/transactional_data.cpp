@@ -7,9 +7,7 @@
 namespace model {
 
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
-        IDatasetStream& data_stream,
-        size_t tid_col_index,
-        size_t item_col_index) {
+        IDatasetStream& data_stream, size_t tid_col_index, size_t item_col_index) {
     std::vector<std::string> item_universe;
     std::unordered_map<std::string, size_t> item_universe_set;
     std::unordered_map<size_t, Itemset> transactions;
@@ -45,8 +43,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
         items.Sort();
     }
 
-    return std::unique_ptr<TransactionalData>(new TransactionalData(std::move(item_universe),
-                                                                    std::move(transactions)));
+    return std::unique_ptr<TransactionalData>(
+            new TransactionalData(std::move(item_universe), std::move(transactions)));
 }
 
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDatasetStream& data_stream,
@@ -77,8 +75,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
             }
             size_t item_id = latest_item_id;
 
-            auto const [item_iter, was_inserted] = item_universe_set.try_emplace(item_name,
-                                                                                 item_id);
+            auto const [item_iter, was_inserted] =
+                    item_universe_set.try_emplace(item_name, item_id);
             if (was_inserted) {
                 // TODO(alexandrsmirn) попробовать избежать этого добавления.
                 item_universe.push_back(std::move(item_name));
@@ -97,8 +95,8 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
         }
     }
 
-    return std::unique_ptr<TransactionalData>(new TransactionalData(std::move(item_universe),
-                                                                    std::move(transactions)));
+    return std::unique_ptr<TransactionalData>(
+            new TransactionalData(std::move(item_universe), std::move(transactions)));
 }
 
 }  // namespace model

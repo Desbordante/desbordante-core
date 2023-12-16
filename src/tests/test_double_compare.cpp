@@ -23,14 +23,17 @@ protected:
         model::DoubleType double_type;
         double_type.Add(a, b, res);
     }
+
     static void Sub(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Sub(a, b, res);
     }
+
     static void Mul(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Mul(a, b, res);
     }
+
     static void Div(std::byte* a, std::byte* b, std::byte* res) {
         model::DoubleType double_type;
         double_type.Div(a, b, res);
@@ -44,6 +47,7 @@ protected:
         double_min = double_min_ptr.get();
         double_max = double_max_ptr.get();
     }
+
     template <typename Fnc>
     void TestArithmetic(model::Double left, model::Double right, model::Double expected,
                         Fnc operation) {
@@ -151,6 +155,7 @@ TEST_F(DoubleCompare, EpsilonMin) {
     ASSERT_EQ(double_type_ref.Compare(epsilon.get(), minimum.get()),
               model::CompareResult::kGreater);
 }
+
 TEST_F(DoubleCompare, LowFractionalNumber) {
     std::unique_ptr<std::byte[]> ten_power_minus_2(double_type.MakeValue(1e-2));
     std::unique_ptr<std::byte[]> ten_power_minus_2_plus_eps_Div_ten(
@@ -160,6 +165,7 @@ TEST_F(DoubleCompare, LowFractionalNumber) {
                                       ten_power_minus_2_plus_eps_Div_ten.get()),
               model::CompareResult::kLess);
 }
+
 TEST_F(DoubleCompare, BigFractionalNumber) {
     std::unique_ptr<std::byte[]> thirty_thousands(double_type.MakeValue(30000.0));
     std::unique_ptr<std::byte[]> thirty_thousands_next(

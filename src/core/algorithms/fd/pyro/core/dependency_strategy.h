@@ -37,9 +37,12 @@ public:
     virtual std::unique_ptr<DependencyStrategy> CreateClone() = 0;
 
     bool ShouldResample(Vertical const& vertical, double boost_factor) const;
+
     bool IsIrrelevantColumn(Column const& column) const {
         return this->IsIrrelevantColumn(column.GetIndex());
     }
 
-    static double Round(double error) { return std::ceil(error * 32768) / 32768; }
+    static double Round(double error) {
+        return std::ceil(error * 32768) / 32768;
+    }
 };

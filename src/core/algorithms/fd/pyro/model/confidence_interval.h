@@ -1,6 +1,7 @@
 #pragma once
-#include <boost/format.hpp>
 #include <string>
+
+#include <boost/format.hpp>
 
 namespace model {
 
@@ -16,19 +17,31 @@ public:
 
     explicit ConfidenceInterval(double value) : ConfidenceInterval(value, value, value) {}
 
-    double GetMin() const { return min_; }
-    double GetMax() const { return max_; }
-    double GetMean() const { return mean_; }
+    double GetMin() const {
+        return min_;
+    }
 
-    //TODO: assert min_ == max_
-    double Get() const { return mean_; }
+    double GetMax() const {
+        return max_;
+    }
+
+    double GetMean() const {
+        return mean_;
+    }
+
+    // TODO: assert min_ == max_
+    double Get() const {
+        return mean_;
+    }
 
     ConfidenceInterval Multiply(double scalar) {
         return ConfidenceInterval(min_ * scalar, mean_ * scalar, max_ * scalar);
     }
+
     bool IsPoint() const {
         return min_ == max_;
     }
+
     explicit operator std::string() const {
         return (boost::format("error=(%f, %f, %f)") % min_ % mean_ % max_).str();
     }
