@@ -150,8 +150,12 @@ std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbin
 std::unique_ptr<PositionListIndex> PositionListIndex::Intersect(
         PositionListIndex const* that) const {
     assert(this->relation_size_ == that->relation_size_);
-    return this->size_ > that->size_ ? that->Probe(this->CalculateAndGetProbingTable())
-                                     : this->Probe(that->CalculateAndGetProbingTable());
+
+    if (this->size_ > that->size_) {
+        return that->Probe(this->CalculateAndGetProbingTable());
+    } else {
+        return this->Probe(that->CalculateAndGetProbingTable());
+    }
 }
 
 // TODO: null_cluster_ некорректен

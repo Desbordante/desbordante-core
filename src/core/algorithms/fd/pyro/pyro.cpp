@@ -124,8 +124,8 @@ unsigned long long Pyro::ExecuteInternal() {
                                       std::chrono::system_clock::now() - thread_start_time)
                                       .count();
                 }
-                // cout << "Thread" << id << " stopped working, ELAPSED TIME: " << millis <<
-                // "ms.\n";
+                LOG(DEBUG) << "Thread" << id << " stopped working, ELAPSED TIME: " << millis
+                           << " ms.";
             };
 
     std::vector<std::thread> threads;
