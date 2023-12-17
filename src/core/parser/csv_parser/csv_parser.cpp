@@ -80,6 +80,9 @@ void CSVParser::Reset() {
     if (has_header_) {
         SkipLine();
     }
+
+    // For correctness of GetNextRow() after this method
+    GetNextIfHas();
 }
 
 void CSVParser::GetLine(unsigned long long const line_index) {
