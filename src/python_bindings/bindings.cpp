@@ -89,6 +89,7 @@ using PyDepminer = PyFDAlgorithm<algos::Depminer>;
 using PyAid = PyFDAlgorithm<algos::Aid>;
 // UCC mining algorithms
 using PyHyUCC = PyUCCAlgorithm<algos::HyUCC>;
+using PyPyroUCC = PyUCCAlgorithm<algos::PyroUCC>;
 
 using FDHighlight = algos::fd_verifier::Highlight;
 using algos::ACException;
@@ -265,6 +266,7 @@ PYBIND11_MODULE(desbordante, module) {
     DEFINE_FD_ALGORITHM(Tane);
 
     DEFINE_UCC_ALGORITHM(HyUCC);
+    DEFINE_UCC_ALGORITHM(PyroUCC);
 }
 
 #undef DEFINE_FD_ALGORITHM
