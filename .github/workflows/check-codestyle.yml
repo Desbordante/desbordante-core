@@ -47,7 +47,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             . -B ${{github.workspace}}/build
 
-      - uses: ZedThree/clang-tidy-review@v0.13.4
+      - uses: ZedThree/clang-tidy-review@v0.14.0
         id: review
         with:
           apt_packages: libboost-dev
@@ -55,7 +55,7 @@ jobs:
           config_file: '.clang-tidy'
           split_workflow: true
 
-      - uses: ZedThree/clang-tidy-review/upload@v0.13.4
+      - uses: ZedThree/clang-tidy-review/upload@v0.14.0
 
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
