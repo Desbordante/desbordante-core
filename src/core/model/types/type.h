@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <sstream>
 
@@ -12,8 +13,9 @@ private:
     TypeId type_id_;
 
 public:
-    explicit Type(TypeId const type_id) noexcept : type_id_(type_id) {}
+    using Destructor = std::function<void(std::byte*)>;
 
+    explicit Type(TypeId const type_id) noexcept : type_id_(type_id) {}
     virtual ~Type() = default;
 
     /* Operations on the type itself */
@@ -126,6 +128,8 @@ public:
         return !(type_id == +TypeId::kEmpty || type_id == +TypeId::kNull ||
                  type_id == +TypeId::kUndefined || type_id == +TypeId::kMixed);
     }
+
+    virtual void Destruct(std::byte const* data) {}
 };
 
 }  // namespace model

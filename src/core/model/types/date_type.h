@@ -110,7 +110,7 @@ public:
         return std::abs(d.days());
     }
 
-    static void Destruct(std::byte const* value) {
+    void Destruct(std::byte const* value) override {
         GetValue<Date>(value).~Date();
     }
 

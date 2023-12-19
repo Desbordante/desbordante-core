@@ -86,7 +86,7 @@ public:
         return util::LevenshteinDistance(GetValue<String>(l), GetValue<String>(r));
     }
 
-    static void Destruct(std::byte const* v) {
+    void Destruct(std::byte const* v) override {
         reinterpret_cast<String const*>(v)->~String();
     }
 };
