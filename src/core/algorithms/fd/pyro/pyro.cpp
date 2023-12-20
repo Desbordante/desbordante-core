@@ -17,7 +17,7 @@ namespace algos {
 
 std::mutex searchSpacesMutex;
 
-Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}), parameters_(true, false) {
+Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);

@@ -14,7 +14,7 @@
 
 namespace algos {
 
-PyroUCC::PyroUCC() : UCCAlgorithm({kDefaultPhaseName}), parameters_(false, true) {
+PyroUCC::PyroUCC() : UCCAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
     fd_consumer_ = nullptr;
     ucc_consumer_ = [this](auto const& ucc) {

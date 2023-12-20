@@ -10,10 +10,6 @@
 namespace algos::pyro {
 
 struct Parameters {
-    bool is_find_fds = true;
-    bool is_find_keys = true;
-    config::EqNullsType is_null_equal_null = true;
-
     std::string ucc_error_measure = "g1prime";
 
     // Error settings
@@ -44,9 +40,6 @@ struct Parameters {
     bool is_check_estimates = false;
     bool is_initial_pause = false;
     std::string fd_score_measure = "none";
-
-    Parameters(bool is_find_fds, bool is_find_keys)
-        : is_find_fds(is_find_fds), is_find_keys(is_find_keys) {}
 };
 
 }  // namespace algos::pyro
