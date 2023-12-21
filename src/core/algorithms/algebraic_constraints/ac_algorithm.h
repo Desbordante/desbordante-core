@@ -16,6 +16,7 @@
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
 #include "ranges_collection.h"
+#include "type_wrapper.h"
 #include "typed_column_pair.h"
 
 namespace algos {
@@ -57,8 +58,9 @@ private:
     double seed_;
     std::vector<ACPairsCollection> ac_pairs_;
     std::vector<RangesCollection> ranges_;
-    model::INumericType::NumericBinop binop_pointer_ = nullptr;
-    std::unique_ptr<model::INumericType> num_type_;
+    model::INumericType::NumericBinop num_binop_pointer_ = nullptr;
+    model::DateType::DateBinop date_binop_pointer_ = nullptr;
+    TypeWrapper type_wrapper_;
 
     /* Returns vector with ranges boundaries constructed for columns with lhs_i and rhs_i indices.
      * Value pairs (by which ranges constructed) fall into sample selection with chosen probability.
@@ -84,7 +86,11 @@ private:
 
 public:
     void InvokeBinop(std::byte const* l, std::byte const* r, std::byte* res) const {
-        std::invoke(binop_pointer_, num_type_, l, r, res);
+        if (type_wrapper_.IsNumeric()) {
+            std::invoke(num_binop_pointer_, type_wrapper_.num_type, l, r, res);
+        } else {
+            std::invoke(date_binop_pointer_, type_wrapper_.date_type, l, r, res);
+        }
     }
 
     size_t CalculateSampleSize(size_t k_bumps) const;
@@ -110,7 +116,7 @@ public:
         return bin_operation_;
     }
 
-    void PrintRanges(std::vector<model::TypedColumnData> const& data) const;
+    void PrintRanges(std::vector<model::TypedColumnData> const& data);
 
     void CollectACExceptions() const {
         ac_exception_finder_->CollectExceptions(this);

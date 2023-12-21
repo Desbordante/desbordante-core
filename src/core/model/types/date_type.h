@@ -14,6 +14,8 @@ namespace model {
 class DateType : public IMetrizableType {
 public:
     using Delta = boost::gregorian::date_duration;
+    using DateBinop = std::byte* (DateType::*)(std::byte const*, std::byte const*,
+                                               std::byte*) const;
 
     DateType() noexcept : IMetrizableType(TypeId::kDate) {}
 

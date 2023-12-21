@@ -2,21 +2,25 @@
 
 #include "ac_algorithm.h"
 #include "bin_operation_enum.h"
+#include "type_wrapper.h"
 
 namespace algos::algebraic_constraints {
 
 bool ACExceptionFinder::ValueBelongsToRanges(RangesCollection const& ranges_collection,
                                              std::byte const* val) {
-    model::INumericType* num_type = ranges_collection.col_pair.num_type.get();
     for (size_t i = 0; i < ranges_collection.ranges.size() - 1; i += 2) {
         std::byte const* l_border = ranges_collection.ranges[i];
         std::byte const* r_border = ranges_collection.ranges[i + 1];
-        if (num_type->Compare(l_border, val) == model::CompareResult::kEqual ||
-            num_type->Compare(val, r_border) == model::CompareResult::kEqual) {
+        if (ranges_collection.col_pair.type_wrapper.NumericCompare(l_border, val) ==
+                    model::CompareResult::kEqual ||
+            ranges_collection.col_pair.type_wrapper.NumericCompare(val, r_border) ==
+                    model::CompareResult::kEqual) {
             return true;
         }
-        if (num_type->Compare(l_border, val) == model::CompareResult::kLess &&
-            num_type->Compare(val, r_border) == model::CompareResult::kLess) {
+        if (ranges_collection.col_pair.type_wrapper.NumericCompare(l_border, val) ==
+                    model::CompareResult::kLess &&
+            ranges_collection.col_pair.type_wrapper.NumericCompare(val, r_border) ==
+                    model::CompareResult::kLess) {
             return true;
         }
     }
@@ -39,18 +43,19 @@ void ACExceptionFinder::CollectColumnPairExceptions(std::vector<model::TypedColu
     size_t rhs_i = ranges_collection.col_pair.col_i.second;
     std::vector<std::byte const*> const& lhs = data.at(lhs_i).GetData();
     std::vector<std::byte const*> const& rhs = data.at(rhs_i).GetData();
-    std::unique_ptr<model::INumericType> num_type =
-            model::CreateSpecificType<model::INumericType>(data.at(lhs_i).GetTypeId(), true);
+    TypeWrapper type_wrapper(data.at(lhs_i).GetTypeId());
     for (size_t i = 0; i < lhs.size(); ++i) {
         std::byte const* l = lhs.at(i);
         std::byte const* r = rhs.at(i);
         if (data[lhs_i].IsNullOrEmpty(i) || data[rhs_i].IsNullOrEmpty(i)) {
             continue;
         }
-        auto res = std::unique_ptr<std::byte[]>(num_type->Allocate());
-        num_type->ValueFromStr(res.get(), "0");
+        std::unique_ptr<std::byte[]> res =
+                std::unique_ptr<std::byte[]>(type_wrapper.NumericAllocate());
+        type_wrapper.NumericFromStr(res.get(), "0");
+
         if (ac_alg_->GetBinOperation() == +Binop::Division &&
-            num_type->Compare(r, res.get()) == model::CompareResult::kEqual) {
+            type_wrapper.NumericCompare(r, res.get()) == model::CompareResult::kEqual) {
             continue;
         }
         ac_alg_->InvokeBinop(l, r, res.get());
