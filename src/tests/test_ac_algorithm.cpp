@@ -16,10 +16,20 @@ void AssertRanges(std::vector<model::Double>& expected_ranges,
     ASSERT_EQ(expected_ranges.size(), byte_ranges.ranges.size());
 
     model::DoubleType double_type;
+    model::IntType int_type;
     for (size_t i = 0; i < expected_ranges.size(); ++i) {
-        auto expected = std::unique_ptr<std::byte[]>(double_type.MakeValue(expected_ranges[i]));
-        double_type.CastTo(expected.get(), byte_ranges.col_pair.num_type->GetTypeId());
-        EXPECT_EQ(byte_ranges.col_pair.num_type->Compare(expected.get(), byte_ranges.ranges[i]),
+        std::unique_ptr<std::byte[]>
+                expected;  // =
+                           // std::unique_ptr<std::byte[]>(double_type.MakeValue(expected_ranges[i]));
+        if (byte_ranges.col_pair.type_wrapper.IsNumeric()) {
+            expected = std::unique_ptr<std::byte[]>(double_type.MakeValue(expected_ranges[i]));
+            double_type.CastTo(expected.get(), byte_ranges.col_pair.type_wrapper.GetNumericId());
+        } else {
+            expected = std::unique_ptr<std::byte[]>(int_type.MakeValue((expected_ranges[i])));
+            int_type.CastTo(expected.get(), byte_ranges.col_pair.type_wrapper.GetNumericId());
+        }
+        EXPECT_EQ(byte_ranges.col_pair.type_wrapper.NumericCompare(expected.get(),
+                                                                   byte_ranges.ranges[i]),
                   model::CompareResult::kEqual);
     }
 }
@@ -214,5 +224,27 @@ TEST_F(ACAlgorithmTest, RangesReconstruction) {
     std::vector<model::Double> expected_ranges = {0.3, 4.0};
 
     AssertRanges(expected_ranges, ranges_collection);
+}
+
+TEST_F(ACAlgorithmTest, DatesIntegrationTest) {
+    auto a = CreateACAlgorithmInstance("ACShippingDates.csv", ',', true, algos::Binop::Subtraction,
+                                       0.2, 0.85, 0.1, 0, 4);
+    a->Execute();
+    a->CollectACExceptions();
+    auto& ranges_collection = a->GetRangesByColumns(1, 2);
+    std::vector<model::Double> expected_ranges = {-213, -5, 0, 0};
+
+    algos::ACException e0(3, {{1, 2}});
+    algos::ACException e1(10, {{1, 2}});
+    algos::ACException e2(22, {{1, 2}});
+    algos::ACException e3(26, {{1, 2}});
+    algos::ACException e4(61, {{1, 2}});
+    algos::ACException e5(71, {{1, 2}});
+    algos::ACException e6(75, {{1, 2}});
+    algos::ACException e7(79, {{1, 2}});
+    algos::ACException e8(87, {{1, 2}});
+    ACAlgorithmTest::ACExceptions expected = {e0, e1, e2, e3, e4, e5, e6, e7, e8};
+    AssertRanges(expected_ranges, ranges_collection);
+    AssertACExceptions(expected, a->GetACExceptions());
 }
 }  // namespace tests
