@@ -61,4 +61,5 @@ extern CSVConfig const kSimpleTypos;
 extern CSVConfig const kTest1;
 extern CSVConfig const kProbeTest1;
 extern CSVConfig const kProbeTest2;
+extern CSVConfig const kTestParse;
 }  // namespace tests
