@@ -29,7 +29,7 @@ void SampledInvertedIndex::FinalizeInsertion(
         }
     }
 
-    for (auto const& [record, _, hash] : inverted_index_) {
+    for (auto const& [hash, record] : inverted_index_) {
         emhash2::HashSet<int> const& cc_indices = record.first;
 
         for (int dep_cc_index : cc_indices) {

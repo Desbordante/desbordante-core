@@ -2,7 +2,6 @@
 
 #include <atomic_bitvector.hpp>
 #include <hash_set2.hpp>
-#include <hash_table7.hpp>
 #include <hash_table8.hpp>
 #include <mutex>
 #include <unordered_map>
@@ -19,7 +18,7 @@ private:
     using LockPrimitive = std::mutex;
 
     // Maps combined hash to the column combination IDs
-    emhash7::HashMap<size_t, std::pair<emhash2::HashSet<int>, std::unique_ptr<LockPrimitive>>>
+    emhash8::HashMap<size_t, std::pair<emhash2::HashSet<int>, std::unique_ptr<LockPrimitive>>>
             inverted_index_;
 
     emhash2::HashSet<SimpleIND> discovered_inds_;
