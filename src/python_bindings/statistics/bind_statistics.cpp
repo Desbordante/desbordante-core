@@ -81,12 +81,9 @@ void BindStatistics(pybind11::module_& main_module) {
                  "column.",
                  py::arg("index"), py::arg("quantity"))
             .def("show_sample", &DataStats::ShowSample, py::arg("start_row"), py::arg("end_row"),
-                 py::arg("start_col"), py::arg("end_col"), py::arg("str_len") = 10,
-                 py::arg("unsigned_len") = 5, py::arg("double_len") = 10,
-                 "Returns a table slice containing values from rows in the range "
-                 "[start_row, "
-                 "end_row] and columns in the range [start_col, end_col]. Data "
-                 "values are "
+                 py::arg("start_col"), py::arg("end_col"),
+                 "Returns a table slice containing values from rows in the range [start_row, "
+                 "end_row] and columns in the range [start_col, end_col]. Data values are "
                  "converted to strings.")
             .def("get_average", &DataStats::GetAvg,
                  "Returns average value in the column if it's numeric.", py::arg("index"))
