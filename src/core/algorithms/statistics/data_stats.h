@@ -69,9 +69,7 @@ public:
     // Returns table slice from start_row to end_row and from start_col to end_col.
     // Data values converted to string type.
     std::vector<std::vector<std::string>> ShowSample(size_t start_row, size_t end_row,
-                                                     size_t start_col, size_t end_col,
-                                                     size_t str_len = 10, size_t unsigned_len = 5,
-                                                     size_t double_len = 10) const;
+                                                     size_t start_col, size_t end_col) const;
     // Returns avarage value in the column if it's numeric.
     Statistic GetAvg(size_t index) const;
     // Returns corrected standard deviation of the column if it's numeric.

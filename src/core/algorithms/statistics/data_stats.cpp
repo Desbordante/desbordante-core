@@ -212,36 +212,16 @@ size_t DataStats::Distinct(size_t index) {
 }
 
 std::vector<std::vector<std::string>> DataStats::ShowSample(size_t start_row, size_t end_row,
-                                                            size_t start_col, size_t end_col,
-                                                            size_t str_len, size_t unsigned_len,
-                                                            size_t double_len) const {
-    auto cut_str = [](std::string const& str, size_t len) {
-        return str.substr(0, std::min(len, str.length()));
-    };
-
-    auto get_max_len = [str_len, double_len, unsigned_len](mo::TypeId type_id) {
-        switch (type_id) {
-            case mo::TypeId::kDouble:
-                return double_len;
-            case mo::TypeId::kInt:
-                return unsigned_len;
-            default:
-                return str_len;
-        }
-    };
-
+                                                            size_t start_col,
+                                                            size_t end_col) const {
     std::vector<std::vector<std::string>> res(end_row - start_row + 1,
                                               std::vector<std::string>(end_col - start_col + 1));
 
     for (size_t j = start_col - 1; j < end_col; ++j) {
         mo::TypedColumnData const& col = col_data_[j];
-        auto const& type = col.GetType();
-        mo::NullType null_type(is_null_equal_null_);
-        mo::EmptyType empty_type;
-        for (size_t i = start_row - 1; i < end_row; ++i) {
-            res[i][j] = cut_str(col.GetDataAsString(i), get_max_len(type.GetTypeId()));
-        }
+        for (size_t i = start_row - 1; i < end_row; ++i) res[i][j] = col.GetDataAsString(i);
     }
+
     return res;
 }
 
