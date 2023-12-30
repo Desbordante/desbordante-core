@@ -114,8 +114,7 @@ TEST(TestDataStats, TestGetVocab) {
 
 TEST(TestDataStats, TestGetNumberOfNulls) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
-    algos::Statistic num_nulls_stat = stats_ptr->GetNumNulls(0);
-    size_t num_nulls = mo::Type::GetValue<mo::Int>(num_nulls_stat.GetData());
+    size_t num_nulls = stats_ptr->GetNumNulls(0);
     EXPECT_EQ(num_nulls, 5);
 }
 

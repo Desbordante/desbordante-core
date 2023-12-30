@@ -111,7 +111,6 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(mean_ad, "mean_ad");
     try_add_stat(median, "median");
     try_add_stat(median_ad, "median_ad");
-    try_add_stat(num_nulls, "num_nulls");
     try_add_stat(vocab, "vocab");
     try_add_stat(num_non_letter_chars, "num_non_letter_chars");
     try_add_stat(num_digit_chars, "num_digit_chars");
