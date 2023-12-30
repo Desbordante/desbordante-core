@@ -370,23 +370,25 @@ Statistic DataStats::GetGeometricMean(size_t index) const {
     auto const& type = static_cast<mo::INumericType const&>(col.GetType());
     std::vector<std::byte const*> const data = col.GetData();
     mo::DoubleType double_type;
-    std::byte* res = type.MakeValueOfInt(1);
+    std::byte* res = double_type.MakeValueOfInt(1);
+    std::byte* temp = double_type.Allocate();
     std::byte* zero = type.MakeValueOfInt(0);
+    long double num_values_reciprocal = 1.0L / static_cast<long double>(NumberOfValues(index));
 
     for (size_t i = 0; i < data.size(); i++) {
         if (col.IsNullOrEmpty(i)) continue;
         if (type.Compare(data[i], zero) == mo::CompareResult::kLess) {
+            double_type.Free(temp);
+            double_type.Free(res);
             type.Free(zero);
-            type.Free(res);
             return {};
         }
-        type.Mul(res, data[i], res);
+        mo::DoubleType::MakeFrom(data[i], type, temp);
+        double_type.Power(temp, num_values_reciprocal, temp);
+        double_type.Mul(res, temp, res);
     }
 
-    auto temp = res;
-    res = mo::DoubleType::MakeFrom(temp, type);
-    double_type.Power(res, 1 / (long double)NumberOfValues(index), res);
-    type.Free(temp);
+    double_type.Free(temp);
     type.Free(zero);
 
     return Statistic(res, &double_type, false);
