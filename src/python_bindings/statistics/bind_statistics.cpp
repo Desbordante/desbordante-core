@@ -131,6 +131,20 @@ void BindStatistics(pybind11::module_& main_module) {
                  "numeric.",
                  py::arg("index"))
             .def("get_num_nulls", &DataStats::GetNumNulls, "Returns number of nulls in the column.",
-                 py::arg("index"));
+                 py::arg("index"))
+            .def("get_vocab", &DataStats::GetVocab,
+                 "Returns all the symbols of the columns as a sorted string.", py::arg("index"))
+            .def("get_number_of_non_letter_chars", &DataStats::GetNumberOfNonLetterChars,
+                 "Returns number of non-letter chars in a string column.", py::arg("index"))
+            .def("get_number_of_digit_chars", &DataStats::GetNumberOfDigitChars,
+                 "Returns number of digit chars in a string column.", py::arg("index"))
+            .def("get_number_of_lowercase_chars", &DataStats::GetNumberOfLowercaseChars,
+                 "Returns number of lowercase chars in a string column.", py::arg("index"))
+            .def("get_number_of_uppercase_chars", &DataStats::GetNumberOfUppercaseChars,
+                 "Returns number of uppercase chars in a string column.", py::arg("index"))
+            .def("get_number_of_chars", &DataStats::GetNumberOfChars,
+                 "Returns total number of characters in a string column.", py::arg("index"))
+            .def("get_avg_number_of_chars", &DataStats::GetAvgNumberOfChars,
+                 "Returns average number of chars in a string column.", py::arg("index"));
 }
 }  // namespace python_bindings

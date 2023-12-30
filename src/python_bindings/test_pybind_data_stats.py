@@ -33,6 +33,12 @@ class TestDataStats(unittest.TestCase):
         self.assertIsNone(self.data_stats.get_mean_ad(0))
         self.assertIsNone(self.data_stats.get_median(0))
         self.assertIsNone(self.data_stats.get_median_ad(0))
+        self.assertIsNone(self.data_stats.get_number_of_non_letter_chars(0))
+        self.assertIsNone(self.data_stats.get_number_of_digit_chars(0))
+        self.assertIsNone(self.data_stats.get_number_of_lowercase_chars(0))
+        self.assertIsNone(self.data_stats.get_number_of_uppercase_chars(0))
+        self.assertIsNone(self.data_stats.get_number_of_chars(0))
+        self.assertIsNone(self.data_stats.get_avg_number_of_chars(0))
 
     def test_get_number_of_values(self) -> None:
         res = self.data_stats.get_number_of_values(0)
@@ -151,6 +157,41 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_num_nulls(0)
         expected = 5
         self.assertEqual(expected, res)
+
+    def test_get_vocab(self) -> None:
+        res = self.data_stats.get_vocab(1)
+        expected = "abd"
+        self.assertEqual(expected, res)
+
+    def test_get_number_of_non_letter_chars(self) -> None:
+        res = self.data_stats.get_number_of_non_letter_chars(10)
+        expected = 8
+        self.assertEqual(expected, res)
+
+    def test_get_number_of_digit_chars(self) -> None:
+        res = self.data_stats.get_number_of_digit_chars(10)
+        expected = 6
+        self.assertEqual(expected, res)
+
+    def test_get_number_of_lowercase_chars(self) -> None:
+        res = self.data_stats.get_number_of_lowercase_chars(10)
+        expected = 33
+        self.assertEqual(expected, res)
+
+    def test_get_number_of_uppercase_chars(self) -> None:
+        res = self.data_stats.get_number_of_uppercase_chars(10)
+        expected = 6
+        self.assertEqual(expected, res)
+
+    def test_get_number_of_chars(self) -> None:
+        res = self.data_stats.get_number_of_chars(10)
+        expected = 47
+        self.assertEqual(expected, res)
+
+    def test_get_avg_number_of_chars(self) -> None:
+        res = self.data_stats.get_avg_number_of_chars(10)
+        expected = 5.875
+        self.assertAlmostEqual(expected, res)
 
 if __name__ == "__main__":
     unittest.main()
