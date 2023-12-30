@@ -507,15 +507,6 @@ Statistic DataStats::GetMedianAD(size_t index) const {
     return Statistic(median_ad, &double_type, false);
 }
 
-Statistic DataStats::GetNumNulls(size_t index) const {
-    if (all_stats_[index].num_nulls.HasValue()) return all_stats_[index].num_nulls;
-    mo::TypedColumnData const& col = col_data_[index];
-    size_t count = col.GetNumNulls();
-    mo::IntType int_type;
-
-    return Statistic(int_type.MakeValue(count), &int_type, false);
-}
-
 Statistic DataStats::GetVocab(size_t index) const {
     if (all_stats_[index].vocab.HasValue()) return all_stats_[index].vocab;
     mo::TypedColumnData const& col = col_data_[index];
@@ -661,7 +652,6 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].mean_ad = GetMeanAD(index);
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
-            all_stats_[index].num_nulls = GetNumNulls(index);
             all_stats_[index].vocab = GetVocab(index);
             all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
             all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
@@ -690,6 +680,11 @@ unsigned long long DataStats::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
+}
+
+size_t DataStats::GetNumNulls(size_t index) const {
+    mo::TypedColumnData const& col = col_data_[index];
+    return col.GetNumNulls();
 }
 
 std::vector<size_t> DataStats::GetNullColumns() const {
