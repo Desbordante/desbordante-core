@@ -177,6 +177,17 @@ While the Python interface makes building interactive applications possible, Des
 
 You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to a large demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/vs9h/Desbordante).
 
+## Installation
+Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI).
+
+To install Desbordante type:
+
+```sh
+$ pip install desbordante
+```
+
+However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
+
 ## Build instructions
 
 ## Ubuntu
