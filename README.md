@@ -178,7 +178,9 @@ While the Python interface makes building interactive applications possible, Des
 You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to a large demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/vs9h/Desbordante).
 
 ## Installation
-Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI).
+Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
+
+* Python >=3.7 
 
 To install Desbordante type:
 
