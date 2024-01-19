@@ -13,6 +13,10 @@ struct Highlight {
         : data_index(data_index),
           furthest_data_index(furthest_data_index),
           max_distance(max_distance) {}
+
+    std::tuple<ClusterIndex, ClusterIndex, long double> ToTuple() const {
+        return {data_index, furthest_data_index, max_distance};
+    }
 };
 
 }  // namespace algos::metric
