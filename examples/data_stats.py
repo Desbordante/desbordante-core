@@ -7,8 +7,8 @@ HAS_HEADER = True
 
 
 def main() -> None:
-    data_stats = db.DataStats()
-    data_stats.load_data(DATASET_PATH, SEPARATOR, HAS_HEADER)
+    data_stats = db.statistics.algorithms.Default()
+    data_stats.load_data(table=(DATASET_PATH, SEPARATOR, HAS_HEADER))
     data_stats.execute()
 
     # Some of column and table methods
