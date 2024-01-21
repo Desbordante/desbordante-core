@@ -4,7 +4,7 @@ import desbordante
 import pandas
 
 # Algorithm that finds approximate FDs and its config
-ALGORITHM_TYPE = desbordante.Pyro
+ALGORITHM_TYPE = desbordante.afd.algorithms.Default
 ERROR = 0.001
 CONFIG = {'error': ERROR, 'max_lhs': 1}
 
@@ -34,7 +34,7 @@ CONFIG_STRING = f"""Deduplication parameters:
 
 def get_1lhs_fds(df, algo_type, algo_config):
     algo = algo_type()
-    algo.load_data(df, **algo_config)
+    algo.load_data(table=df, **algo_config)
     algo.execute(**algo_config)
     return sorted((lhs_indices[0], fd.rhs_index) for fd in algo.get_fds()
                   if len(lhs_indices := fd.lhs_indices) == 1)
