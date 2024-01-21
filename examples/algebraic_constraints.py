@@ -20,12 +20,12 @@ OPERATIONS = {
 }
 operation, operation_name = OPERATIONS[BIN_OPERATION]
 
-algo = desbordante.ACAlgorithm()
+algo = desbordante.ac.algorithms.Default()
 
 df = pandas.read_csv(TABLE, sep=SEPARATOR, header=HEADER)
 df_without_id = df[['Delivery date', 'Dispatch date']]
 
-algo.load_data(df=df_without_id)
+algo.load_data(table=df_without_id)
 
 algo.execute(p_fuzz=P_FUZZ, fuzziness=FUZZINESS, bumps_limit=BUMPS_LIMIT, weight=WEIGHT,
              bin_operation=BIN_OPERATION, ac_seed=AC_SEED, iterations_limit=ITERATIONS_LIMIT)

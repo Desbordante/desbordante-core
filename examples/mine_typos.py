@@ -12,11 +12,11 @@ RADIUS = 3
 RATIO = 0.1
 
 # Algorithm that finds exact FDs and its config.
-EXACT_ALGORITHM_TYPE = desbordante.HyFD
+EXACT_ALGORITHM_TYPE = desbordante.fd.algorithms.Default
 EXACT_ALGO_CONFIG = {}
 
 # Algorithm that finds approximate FDs and its config.
-APPROXIMATE_ALGORITHM_TYPE = desbordante.Pyro
+APPROXIMATE_ALGORITHM_TYPE = desbordante.afd.algorithms.Default
 ERROR = 0.005  # Highest error for almost holding FDs.
 APPROXIMATE_ALGO_CONFIG = {'error': ERROR}
 
@@ -129,19 +129,11 @@ def filter_squashed_sorted_clusters(squashed_sorted_clusters):
     return filter_ratio(squashed_sorted_clusters)
 
 
-def fd_to_string(dataset: pandas.DataFrame, fd: tuple[tuple[int], int]):
-    def get_col_name(col_index):
-        return str(dataset.columns[col_index])
-
-    lhs_indices, rhs_index = fd
-    return f'( {" ".join(map(get_col_name, lhs_indices))} ) -> {get_col_name(rhs_index)}'
-
-
 def get_result_set(df, algo_type, algo_config):
     algo = algo_type()
-    algo.load_data(df, **algo_config)
+    algo.load_data(table=df, **algo_config)
     algo.execute(**algo_config)
-    return {(tuple(fd.lhs_indices), fd.rhs_index) for fd in algo.get_fds()}
+    return set(algo.get_fds())
 
 
 def make_display_df(squashed_sorted_clusters, original_df, lhs_indices, rhs_index):
@@ -158,7 +150,7 @@ def print_display_df(display_df):
     df_lines = display_df.to_string(index=False).splitlines()
     print(df_lines[0])
     print(Fore.GREEN + df_lines[1] + Style.RESET_ALL)
-    print(Fore.RED + '\n'.join(islice(df_lines, 2)) + Style.RESET_ALL)
+    print(Fore.RED + '\n'.join(islice(df_lines, 2, None)) + Style.RESET_ALL)
     print()
 
 
@@ -192,13 +184,13 @@ def main():
     print()
     holding_fds = get_result_set(df, EXACT_ALGORITHM_TYPE, EXACT_ALGO_CONFIG)
     close_fds = get_result_set(df, APPROXIMATE_ALGORITHM_TYPE, APPROXIMATE_ALGO_CONFIG)
-    almost_holding_fds = sorted(close_fds - holding_fds)
+    almost_holding_fds = sorted(close_fds - holding_fds, key=lambda fd: fd.to_index_tuple())
     print('Found! Almost holding FDs:')
-    print('\n'.join(map(lambda fd: fd_to_string(df, fd), almost_holding_fds)))
+    print('\n'.join(map(str, almost_holding_fds)))
     print()
 
     print(f'Selecting FD with index {FD_INDEX}:')
-    lhs_indices, rhs_index = almost_holding_fds[FD_INDEX]
+    lhs_indices, rhs_index = almost_holding_fds[FD_INDEX].to_index_tuple()
     squashed_sorted_clusters = filter_squashed_sorted_clusters(
         get_squashed_sorted_clusters(df, lhs_indices, rhs_index))
 
