@@ -37,12 +37,13 @@ python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
 ```
 
 ```text
-( 1 3 ) -> 0
-( 1 3 ) -> 2
-( 0 ) -> 2
-( 0 3 ) -> 1
-( 2 ) -> 0
-( 2 3 ) -> 1
+[Course Classroom] -> Professor
+[Classroom Semester] -> Professor
+[Classroom Semester] -> Course
+[Professor] -> Course
+[Professor Semester] -> Classroom
+[Course Semester] -> Classroom
+[Course Semester] -> Professor
 ```
 
 2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default AFD discovery algorithm (Pyro) is used.
@@ -52,9 +53,9 @@ python3 cli.py --task=afd --table=../examples/datasets/inventory_afd.csv , True 
 ```
 
 ```text
-( 0 ) -> 1
-( 0 ) -> 2
-( 1 ) -> 2
+[Id] -> ProductName
+[Id] -> Price
+[ProductName] -> Price
 ```
 
 3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
@@ -86,8 +87,8 @@ import desbordante
 
 TABLE = 'examples/datasets/university_fd.csv'
 
-algo = desbordante.HyFD()
-algo.load_data(TABLE, ',', True)
+algo = desbordante.fd.algorithms.Default()
+algo.load_data(table=(TABLE, ',', True))
 algo.execute()
 result = algo.get_fds()
 print('FDs:')
@@ -96,12 +97,13 @@ for fd in result:
 ```
 ```text
 FDs:
-( 1 3 ) -> 0
-( 1 3 ) -> 2
-( 0 ) -> 2
-( 0 3 ) -> 1
-( 2 ) -> 0
-( 2 3 ) -> 1
+[Course Classroom] -> Professor
+[Classroom Semester] -> Professor
+[Classroom Semester] -> Course
+[Professor] -> Course
+[Professor Semester] -> Classroom
+[Course Semester] -> Classroom
+[Course Semester] -> Professor
 ```
 
 2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the AFD discovery algorithm Pyro is used.
@@ -112,8 +114,8 @@ import desbordante
 TABLE = 'examples/datasets/inventory_afd.csv'
 ERROR = 0.1
 
-algo = desbordante.Pyro()
-algo.load_data(TABLE, ',', True)
+algo = desbordante.afd.algorithms.Default()
+algo.load_data(table=(TABLE, ',', True))
 algo.execute(error=ERROR)
 result = algo.get_fds()
 print('AFDs:')
@@ -122,9 +124,9 @@ for fd in result:
 ```
 ```text
 AFDs:
-( 0 ) -> 1
-( 0 ) -> 2
-( 1 ) -> 2
+[Id] -> Price
+[Id] -> ProductName
+[ProductName] -> Price
 ```
 
 3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
@@ -138,10 +140,10 @@ LHS_INDICES = [0]
 RHS_INDICES = [2]
 PARAMETER = 5
 
-algo = desbordante.MetricVerifier()
-algo.load_data(TABLE, ',', True)
+algo = desbordante.mfd_verification.algorithms.Default()
+algo.load_data(table=(TABLE, ',', True))
 algo.execute(lhs_indices=LHS_INDICES, metric=METRIC,
-	     parameter=PARAMETER, rhs_indices=RHS_INDICES)
+             parameter=PARAMETER, rhs_indices=RHS_INDICES)
 if algo.mfd_holds():
     print('MFD holds')
 else:
@@ -150,25 +152,25 @@ else:
 ```text
 MFD holds
 ```
-4) Discover approximate functional dependencies with various error thresholds. Here, we showcase the preferred approach to configuring algorithm options. Furthermore, we are using a pandas DataFrame to load data from a CSV file.
+4) Discover approximate functional dependencies with various error thresholds. Here, we are using a pandas DataFrame to load data from a CSV file.
 ```python-repl
 >>> import desbordante
 >>> import pandas as pd
->>> pyro = desbordante.Pyro()
->>> df = pd.read_csv('iris.csv', sep=',', header=0)
->>> pyro.load_data(df)
+>>> pyro = desbordante.afd.algorithms.Pyro()  # same as desbordante.afd.algorithms.Default()
+>>> df = pd.read_csv('iris.csv', sep=',', header=None)
+>>> pyro.load_data(table=df)
 >>> pyro.execute(error=0.0)
->>> pyro.get_fds()
-[( 0 1 2 ) -> 4, ( 0 2 3 ) -> 4, ( 0 1 3 ) -> 4, ( 1 2 3 ) -> 4]
+>>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
+[[0 1 2] -> 4, [0 2 3] -> 4, [0 1 3] -> 4, [1 2 3] -> 4]
 >>> pyro.execute(error=0.1)
->>> pyro.get_fds()
-[( 2 ) -> 0, ( 2 ) -> 1, ( 0 ) -> 2, ( 2 ) -> 4, ( 2 ) -> 3, ( 3 ) -> 2, ( 3 ) -> 0, ( 0 ) -> 1, ( 0 ) -> 3, ( 1 ) -> 0, ( 1 ) -> 2, ( 3 ) -> 4, ( 3 ) -> 1, ( 1 ) -> 3, ( 0 ) -> 4, ( 1 ) -> 4]
+>>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
+[[2] -> 0, [2] -> 3, [2] -> 1, [0] -> 2, [3] -> 0, [0] -> 3, [0] -> 1, [1] -> 3, [1] -> 0, [3] -> 2, [3] -> 1, [1] -> 2, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4]
 >>> pyro.execute(error=0.2)
->>> pyro.get_fds()
-[( 2 ) -> 1, ( 2 ) -> 0, ( 2 ) -> 4, ( 0 ) -> 2, ( 2 ) -> 3, ( 0 ) -> 1, ( 3 ) -> 4, ( 3 ) -> 2, ( 3 ) -> 1, ( 3 ) -> 0, ( 1 ) -> 2, ( 0 ) -> 3, ( 0 ) -> 4, ( 1 ) -> 0, ( 1 ) -> 4, ( 1 ) -> 3]
+>>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
+[[2] -> 0, [0] -> 2, [3] -> 2, [1] -> 2, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4, [3] -> 0, [1] -> 0, [2] -> 3, [2] -> 1, [0] -> 3, [0] -> 1, [1] -> 3, [3] -> 1]
 >>> pyro.execute(error=0.3)
->>> pyro.get_fds()
-[( 2 ) -> 1, ( 0 ) -> 2, ( 2 ) -> 0, ( 3 ) -> 0, ( 2 ) -> 3, ( 1 ) -> 0, ( 2 ) -> 4, ( 3 ) -> 2, ( 0 ) -> 1, ( 1 ) -> 2, ( 3 ) -> 1, ( 3 ) -> 4, ( 0 ) -> 3, ( 4 ) -> 2, ( 4 ) -> 1, ( 0 ) -> 4, ( 1 ) -> 3, ( 1 ) -> 4, ( 4 ) -> 3]
+>>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
+[[2] -> 1, [0] -> 2, [2] -> 0, [2] -> 3, [0] -> 1, [3] -> 2, [3] -> 1, [1] -> 2, [3] -> 0, [0] -> 3, [4] -> 1, [1] -> 0, [1] -> 3, [4] -> 2, [4] -> 3, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4]
 ```
 
 ## Web interface
