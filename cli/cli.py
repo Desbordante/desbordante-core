@@ -284,19 +284,19 @@ TASK_INFO = {
 }
 
 ALGOS = {
-    Algorithm.pyro: desbordante.Pyro,
-    Algorithm.tane: desbordante.Tane,
-    Algorithm.hyfd: desbordante.HyFD,
-    Algorithm.fd_mine: desbordante.FdMine,
-    Algorithm.dfd: desbordante.DFD,
-    Algorithm.dep_miner: desbordante.Depminer,
-    Algorithm.fdep: desbordante.FDep,
-    Algorithm.fun: desbordante.FUN,
-    Algorithm.fastfds: desbordante.FastFDs,
-    Algorithm.aid: desbordante.Aid,
-    Algorithm.naive_fd_verifier: desbordante.FDVerifier,
-    Algorithm.naive_afd_verifier: desbordante.FDVerifier,
-    Algorithm.icde09_mfd_verifier: desbordante.MetricVerifier
+    Algorithm.pyro: desbordante.fd.algorithms.Pyro,
+    Algorithm.tane: desbordante.fd.algorithms.Tane,
+    Algorithm.hyfd: desbordante.fd.algorithms.HyFD,
+    Algorithm.fd_mine: desbordante.fd.algorithms.FdMine,
+    Algorithm.dfd: desbordante.fd.algorithms.DFD,
+    Algorithm.dep_miner: desbordante.fd.algorithms.Depminer,
+    Algorithm.fdep: desbordante.fd.algorithms.FDep,
+    Algorithm.fun: desbordante.fd.algorithms.FUN,
+    Algorithm.fastfds: desbordante.fd.algorithms.FastFDs,
+    Algorithm.aid: desbordante.fd.algorithms.Aid,
+    Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
+    Algorithm.naive_afd_verifier: desbordante.afd_verification.algorithms.FDVerifier,
+    Algorithm.icde09_mfd_verifier: desbordante.mfd_verification.algorithms.MetricVerifier
 }
 
 
@@ -484,7 +484,7 @@ def algos_options() -> Callable:
             if opt_main_type == list:
                 click.option(arg, multiple=True,
                              type=opt_additional_types[0])(func)
-            elif opt_main_type == desbordante.Table:
+            elif opt_main_type == desbordante.data_types.Table:
                 click.option(arg, type=(str, str, bool),
                              required=True)(func)
             else:
