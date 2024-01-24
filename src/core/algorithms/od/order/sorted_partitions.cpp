@@ -56,7 +56,7 @@ void SortedPartition::Intersect(SortedPartition const& other) {
         if (EquivalenceClass const& eq_class = sorted_partition_[i]; eq_class.size() == 1) {
             res.sorted_partition_.push_back(eq_class);
         } else {
-            for (EquivalenceClass const& eq_class : hash_product[i]) {
+            for (EquivalenceClass& eq_class : hash_product[i]) {
                 if (!eq_class.empty()) {
                     res.sorted_partition_.push_back(std::move(eq_class));
                 }
