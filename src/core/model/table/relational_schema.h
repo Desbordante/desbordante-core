@@ -14,6 +14,7 @@
 #include <boost/optional.hpp>
 
 #include "model/table/column.h"
+#include "model/table/idataset_stream.h"
 #include "model/table/vertical.h"
 #include "util/bitset_utils.h"
 
@@ -25,14 +26,14 @@ private:
 public:
     std::unique_ptr<Vertical> empty_vertical_;
 
-    RelationalSchema(std::string name);
+    RelationalSchema(std::string name, std::vector<std::string> column_names);
 
     RelationalSchema(RelationalSchema const& other) = delete;
     RelationalSchema& operator=(RelationalSchema const& rhs) = delete;
     RelationalSchema(RelationalSchema&& other) noexcept = default;
     RelationalSchema& operator=(RelationalSchema&& rhs) noexcept = default;
 
-    void Init();
+    static std::unique_ptr<RelationalSchema> CreateFrom(model::IDatasetStream& table);
 
     std::string GetName() const {
         return name_;
@@ -46,9 +47,6 @@ public:
     Column const& GetColumn(size_t index) const;
     size_t GetNumColumns() const;
     Vertical GetVertical(boost::dynamic_bitset<> indices) const;
-
-    void AppendColumn(std::string const& col_name);
-    void AppendColumn(Column column);
 
     template <typename Container>
     boost::dynamic_bitset<> IndicesToBitset(Container const& indices) const;
