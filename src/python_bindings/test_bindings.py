@@ -30,9 +30,7 @@ def check_metric_verifier_failure(dataset, options) -> bool:
 
 
 ALGO_CORRECT_OPTIONS_INFO = [
-    (desb.fd.algorithms.Aid, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
     (desb.fd.algorithms.Depminer, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.fd.algorithms.FDep, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
     (desb.fd.algorithms.FUN, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
     (desb.fd.algorithms.FdMine, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
     (desb.fd.algorithms.HyFD, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
