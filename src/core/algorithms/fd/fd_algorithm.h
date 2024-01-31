@@ -7,9 +7,7 @@
 #include <boost/any.hpp>
 
 #include "algorithms/algorithm.h"
-#include "config/equal_nulls/type.h"
 #include "config/max_lhs/type.h"
-#include "config/tabular_data/input_table_type.h"
 #include "fd.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "util/primitive_collection.h"
@@ -35,7 +33,6 @@ private:
     virtual void ResetStateFd() = 0;
 
 protected:
-    config::InputTable input_table_;
     config::MaxLhsType max_lhs_;
 
     /* Collection of all discovered FDs
@@ -43,7 +40,6 @@ protected:
      * accessing this field directly, use RegisterFd methods instead
      */
     util::PrimitiveCollection<FD> fd_collection_;
-    config::EqNullsType is_null_equal_null_;
 
     /* Registers new FD.
      * Should be overrided if custom behavior is needed
