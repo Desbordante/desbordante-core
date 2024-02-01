@@ -25,7 +25,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    PFDTane();
+    PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
 
