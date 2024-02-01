@@ -78,7 +78,8 @@ void PFDTane::MakeExecuteOptsAvailableFDInternal() {
 
 void PFDTane::ResetStateFd() {}
 
-PFDTane::PFDTane() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+PFDTane::PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager)
+    : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {
     RegisterOptions();
 }
 

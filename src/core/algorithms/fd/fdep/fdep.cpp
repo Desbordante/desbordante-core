@@ -14,11 +14,11 @@ namespace algos {
 
 FDep::FDep() : FDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void FDep::RegisterOptions() {
-    RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(config::kTableOpt(&input_table_));
 }
 
 void FDep::LoadDataInternal() {
