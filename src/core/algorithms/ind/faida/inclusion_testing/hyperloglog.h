@@ -29,13 +29,12 @@
 #pragma once
 
 #include <algorithm>
+#include <bit>
 #include <cassert>
 #include <cmath>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-
-#include "immintrin.h"
 
 #define HLL_HASH_SEED 313
 
@@ -116,12 +115,12 @@ public:
 
     int zcf(size_t hash, int prec) {
         size_t mask = ~(((1 << prec) - 1) << (64 - prec));
-        return _lzcnt_u64(hash & mask) - (uint8_t)prec;
+        return std::countl_zero(hash & mask) - (uint8_t)prec;
     }
 
     void add_hash(size_t value_hash) {
         int index = (int)(value_hash >> (8 * sizeof(size_t) - b_));
-        int rank = _lzcnt_u64((value_hash << b_) | ((1 << (b_ - 1)) + 1)) + 1;
+        int rank = std::countl_zero((value_hash << b_) | ((1 << (b_ - 1)) + 1)) + 1;
 
         // (alexandrsmirn) Another way to calculate rank.
         // This value should be identical with the current calculaton method, and may be useful in
