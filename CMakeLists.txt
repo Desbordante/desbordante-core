@@ -4,6 +4,7 @@ project(Desbordante)
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
+option(BUILD_NATIVE "Build for host machine" ON)
 set(SANITIZER "" CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB")
 
 set(PYTHON OFF CACHE STRING "Compile Python bindings")
@@ -40,7 +41,10 @@ if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  "${CMAKE_BINARY_DIR}/target")
 else()
     # -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-    set(BUILD_OPTS "-DELPP_THREAD_SAFE;-march=native")
+    set(BUILD_OPTS "-DELPP_THREAD_SAFE")
+    if (BUILD_NATIVE)
+        string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
+    endif()
 
     # RELEASE build options
     string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}"
