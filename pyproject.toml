@@ -29,6 +29,7 @@ urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "ht
 PYTHON = "INSTALL"
 UNPACK_DATASETS = "OFF"
 COMPILE_TESTS = "OFF"
+BUILD_NATIVE = "OFF"
 ASAN = "OFF"
 CMAKE_BUILD_TYPE = "Release"
 
