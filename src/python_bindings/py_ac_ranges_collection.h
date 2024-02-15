@@ -26,8 +26,9 @@ private:
         for (size_t i = 0; i < r_coll.ranges.size(); i += 2) {
             // TODO: change this once a proper conversion mechanism from `model::INumericType` is
             // implemented
-            std::string l_endpoint = r_coll.col_pair.num_type->ValueToString(r_coll.ranges[i]);
-            std::string r_endpoint = r_coll.col_pair.num_type->ValueToString(r_coll.ranges[i + 1]);
+            std::string l_endpoint = r_coll.col_pair.type_wrapper.NumericToString(r_coll.ranges[i]);
+            std::string r_endpoint =
+                    r_coll.col_pair.type_wrapper.NumericToString(r_coll.ranges[i + 1]);
             res.emplace_back(pybind11::float_(pybind11::str(l_endpoint)),
                              pybind11::float_(pybind11::str(r_endpoint)));
         }

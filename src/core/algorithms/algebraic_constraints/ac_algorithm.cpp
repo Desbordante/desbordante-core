@@ -28,16 +28,20 @@ void ACAlgorithm::RegisterOptions() {
     auto check_and_set_binop = [this](Binop bin_operation) {
         switch (bin_operation) {
             case +Binop::Addition:
-                binop_pointer_ = &model::INumericType::Add;
+                num_binop_pointer_ = &model::INumericType::Add;
+                // date_binop_pointer remains nullptr because dates do not support addition
                 break;
             case +Binop::Subtraction:
-                binop_pointer_ = &model::INumericType::Sub;
+                num_binop_pointer_ = &model::INumericType::Sub;
+                date_binop_pointer_ = &model::DateType::SubDate;
                 break;
             case +Binop::Multiplication:
-                binop_pointer_ = &model::INumericType::Mul;
+                num_binop_pointer_ = &model::INumericType::Mul;
+                // date_binop_pointer remains nullptr because dates do not support multiplication
                 break;
             case +Binop::Division:
-                binop_pointer_ = &model::INumericType::Div;
+                num_binop_pointer_ = &model::INumericType::Div;
+                // date_binop_pointer remains nullptr because dates do not support division
                 break;
             default:
                 throw config::ConfigurationError(
@@ -147,9 +151,8 @@ std::vector<std::byte const*> ACAlgorithm::Sampling(std::vector<model::TypedColu
         ++i;
     }
     RestrictRangesAmount(ranges);
-    ac_pairs_.emplace_back(ACPairsCollection(
-            model::CreateSpecificType<model::INumericType>(data.at(lhs_i).GetTypeId(), true),
-            std::move(ac_pairs), lhs_i, rhs_i));
+    ac_pairs_.emplace_back(
+            ACPairsCollection(data.at(lhs_i).GetTypeId(), std::move(ac_pairs), lhs_i, rhs_i));
     return ranges;
 }
 
@@ -160,7 +163,6 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
     std::vector<std::byte const*> const& rhs = data.at(rhs_i).GetData();
     ac_pairs.clear();
     std::mt19937 gen(seed_);
-
     std::bernoulli_distribution d(probability);
     for (size_t i = 0; i < lhs.size(); ++i) {
         if (d(gen)) {
@@ -169,10 +171,12 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
             if (data[lhs_i].IsNullOrEmpty(i) || data[rhs_i].IsNullOrEmpty(i)) {
                 continue;
             }
-            auto res = std::unique_ptr<std::byte[]>(num_type_->Allocate());
-            num_type_->ValueFromStr(res.get(), "0");
+            std::unique_ptr<std::byte[]> res =
+                    std::unique_ptr<std::byte[]>(type_wrapper_.NumericAllocate());
+            type_wrapper_.NumericFromStr(res.get(), "0");
+
             if (bin_operation_ == +Binop::Division &&
-                num_type_->Compare(r, res.get()) == model::CompareResult::kEqual) {
+                type_wrapper_.NumericCompare(r, res.get()) == model::CompareResult::kEqual) {
                 continue;
             }
             InvokeBinop(l, r, res.get());
@@ -186,7 +190,7 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
     std::sort(ac_pairs.begin(), ac_pairs.end(),
               [this](std::unique_ptr<ACPair> const& a, std::unique_ptr<ACPair> const& b) {
                   return model::CompareResult::kLess ==
-                         this->num_type_->Compare(a->GetRes(), b->GetRes());
+                         this->type_wrapper_.NumericCompare(a->GetRes(), b->GetRes());
               });
 
     return ConstructDisjunctiveRanges(ac_pairs);
@@ -207,7 +211,7 @@ void ACAlgorithm::RestrictRangesAmount(std::vector<std::byte const*>& ranges) co
         double min_dist = -1;
         size_t min_index = 1;
         for (size_t i = min_index; i < bumps * 2 - 1; i += 2) {
-            double dist = num_type_->Dist(ranges.at(i), ranges.at(i + 1));
+            double dist = type_wrapper_.Dist(ranges.at(i), ranges.at(i + 1));
             if (min_dist == -1 || dist < min_dist) {
                 min_dist = dist;
                 min_index = i;
@@ -241,7 +245,7 @@ ACPairsCollection const& ACAlgorithm::GetACPairsByColumns(size_t lhs_i, size_t r
     return *res;
 }
 
-void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) const {
+void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) {
     for (size_t i = 0; i < ranges_.size(); ++i) {
         LOG(DEBUG) << "lhs: " << data.at(ranges_[i].col_pair.col_i.first).ToString() << std::endl;
         LOG(DEBUG) << "rhs: " << data.at(ranges_[i].col_pair.col_i.second).ToString() << std::endl;
@@ -249,10 +253,13 @@ void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) c
             LOG(DEBUG) << "No intervals were found." << std::endl;
             continue;
         }
+
         for (size_t k = 0; k < ranges_[i].ranges.size() - 1; k += 2) {
-            auto* num_type = ranges_[i].col_pair.num_type.get();
-            LOG(DEBUG) << "[" << num_type->ValueToString(ranges_[i].ranges[k]) << ", "
-                       << num_type->ValueToString(ranges_[i].ranges[k + 1]) << "]";
+            LOG(DEBUG) << "["
+                       << ranges_[i].col_pair.type_wrapper.NumericToString(ranges_[i].ranges[k])
+                       << ", "
+                       << ranges_[i].col_pair.type_wrapper.NumericToString(ranges_[i].ranges[k + 1])
+                       << "]";
             if (k != ranges_[i].ranges.size() - 2) {
                 LOG(DEBUG) << ", ";
             }
@@ -273,11 +280,11 @@ std::vector<std::byte const*> ACAlgorithm::ConstructDisjunctiveRanges(
     ACPair const* r_border = nullptr;
 
     if (weight_ < 1) {
-        double delta = num_type_->Dist(ac_pairs.front()->GetRes(), ac_pairs.back()->GetRes()) *
+        double delta = type_wrapper_.Dist(ac_pairs.front()->GetRes(), ac_pairs.back()->GetRes()) *
                        (weight_ / (1 - weight_));
 
         for (size_t i = 0; i < ac_pairs.size() - 1; ++i) {
-            if (num_type_->Dist(ac_pairs[i]->GetRes(), ac_pairs[i + 1]->GetRes()) <= delta) {
+            if (type_wrapper_.Dist(ac_pairs[i]->GetRes(), ac_pairs[i + 1]->GetRes()) <= delta) {
                 r_border = ac_pairs[i + 1].get();
             } else {
                 ranges.emplace_back(l_border->GetRes());
@@ -305,9 +312,8 @@ RangesCollection ACAlgorithm::ReconstructRangesByColumns(size_t lhs_i, size_t rh
     ACPairsCollection const& constraints_collection = GetACPairsByColumns(lhs_i, rhs_i);
     ACPairs const& ac_pairs = constraints_collection.ac_pairs;
     std::vector<std::byte const*> ranges = ConstructDisjunctiveRanges(ac_pairs);
-    model::TypeId type_id = constraints_collection.col_pair.num_type->GetTypeId();
-    return RangesCollection{model::CreateSpecificType<model::INumericType>(type_id, true),
-                            std::move(ranges), lhs_i, rhs_i};
+    model::TypeId type_id = constraints_collection.col_pair.type_wrapper.GetTypeId();
+    return RangesCollection{type_id, std::move(ranges), lhs_i, rhs_i};
 }
 
 unsigned long long ACAlgorithm::ExecuteInternal() {
@@ -318,23 +324,23 @@ unsigned long long ACAlgorithm::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     for (size_t col_i = 0; col_i < data.size() - 1; ++col_i) {
-        if (!data.at(col_i).GetType().IsNumeric()) continue;
-        num_type_ =
-                model::CreateSpecificType<model::INumericType>(data.at(col_i).GetTypeId(), true);
+        if (!(data.at(col_i).GetType().IsNumeric() || data.at(col_i).GetType().IsDate())) continue;
+        type_wrapper_.Set(data.at(col_i).GetTypeId());
         for (size_t col_k = col_i + 1; col_k < data.size(); ++col_k) {
             if (data.at(col_i).GetTypeId() == data.at(col_k).GetTypeId()) {
-                ranges_.emplace_back(
-                        RangesCollection{model::CreateSpecificType<model::INumericType>(
-                                                 data.at(col_i).GetTypeId(), true),
-                                         Sampling(data, col_i, col_k), col_i, col_k});
+                if (data.at(col_i).GetTypeId() == +model::TypeId::kDate &&
+                    bin_operation_ != +Binop::Subtraction) {
+                    continue;
+                }
+
+                ranges_.emplace_back(data.at(col_i).GetTypeId(), Sampling(data, col_i, col_k),
+                                     col_i, col_k);
                 /* Because of asymmetry and division by 0, we need to rediscover ranges.
                  * We don't need to do that for minus: (column1 - column2) lies in *some ranges*
                  * there we can express one column through another without possible problems */
                 if (bin_operation_ == +Binop::Division) {
-                    ranges_.emplace_back(
-                            RangesCollection{model::CreateSpecificType<model::INumericType>(
-                                                     data.at(col_i).GetTypeId(), true),
-                                             Sampling(data, col_k, col_i), col_k, col_i});
+                    ranges_.emplace_back(data.at(col_i).GetTypeId(), Sampling(data, col_k, col_i),
+                                         col_k, col_i);
                 }
             }
         }
