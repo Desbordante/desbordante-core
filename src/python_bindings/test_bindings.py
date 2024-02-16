@@ -4,7 +4,6 @@ from itertools import chain
 
 import desbordante as desb
 
-
 OptionContainer = namedtuple("OptionContainer", ['path', 'load_options', 'execute_options'])
 FailureCaseContainer = namedtuple("FailureCaseContainer", ['path', 'options'])
 
@@ -24,49 +23,49 @@ def get_apriori_load_container(load_options):
 
 
 def check_metric_verifier_failure(dataset, options) -> bool:
-    alg = desb.MetricVerifier()
-    alg.load_data(dataset, ",", True)
+    alg = desb.mfd_verification.algorithms.MetricVerifier()
+    alg.load_data(table=(dataset, ",", True))
     for opt_name in options:
         alg.set_option(opt_name, options[opt_name])
-    
+
 
 ALGO_CORRECT_OPTIONS_INFO = [
-    (desb.Aid, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.Depminer, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.FDep, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.FUN, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.FdMine, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.HyFD, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
-    (desb.Pyro, [
+    (desb.fd.algorithms.Aid, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.Depminer, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.FDep, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.FUN, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.FdMine, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.fd.algorithms.HyFD, [ONLY_NULL_EQUAL_NULL_OPTION_CONTAINER]),
+    (desb.afd.algorithms.Pyro, [
         get_common_option_container(
             {"seed": 1, "max_lhs": 12, "threads": 5, "error": 0.015}
         ),
     ]),
-    (desb.DFD, [
+    (desb.fd.algorithms.DFD, [
         get_common_option_container(
             {
                 "threads": 15,
             }
         ),
     ]),
-    (desb.FastFDs, [
+    (desb.fd.algorithms.FastFDs, [
         get_common_option_container({"max_lhs": 12, "threads": 15}),
     ]),
-    (desb.Tane, [
+    (desb.afd.algorithms.Tane, [
         get_common_option_container({"max_lhs": 12, "error": 0.015}),
     ]),
-    (desb.DataStats, [
+    (desb.statistics.algorithms.DataStats, [
         get_common_option_container({"threads": 15}),
     ]),
-    (desb.HyUCC, [
+    (desb.ucc.algorithms.HyUCC, [
         get_common_option_container({"threads": 15}),
     ]),
-    (desb.FDVerifier, [
+    (desb.fd_verification.algorithms.FDVerifier, [
         get_common_option_container(
             {"lhs_indices": [1, 2, 3], "rhs_indices": [1, 2, 3]}
         ),
     ]),
-    (desb.Apriori, [
+    (desb.ar.algorithms.Apriori, [
         get_apriori_load_container({"input_format": "tabular", "has_tid": True}),
         get_apriori_load_container({"input_format": "tabular", "has_tid": False}),
         get_apriori_load_container(
@@ -82,7 +81,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
             {"minconf": 0.00312, "minsup": 0.2321},
         ),
     ]),
-    (desb.MetricVerifier, [
+    (desb.mfd_verification.algorithms.MetricVerifier, [
         OptionContainer(
             "TestLong.csv",
             {},
@@ -172,7 +171,7 @@ class TestPythonBindings(unittest.TestCase):
         self, algo, path, separator, has_header, options: dict
     ):
         testing_algo = algo()
-        testing_algo.load_data(path, separator, has_header, **options.load_options)
+        testing_algo.load_data(table=(path, separator, has_header), **options.load_options)
         for name, value in options.execute_options.items():
             testing_algo.set_option(name, value)
 
