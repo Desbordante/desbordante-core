@@ -9,8 +9,8 @@ HAS_HEADER = True
 class TestDataStats(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.data_stats = db.DataStats()
-        cls.data_stats.load_data(DATASET_PATH, SEPARATOR, HAS_HEADER)
+        cls.data_stats = db.statistics.algorithms.DataStats()
+        cls.data_stats.load_data(table=(DATASET_PATH, SEPARATOR, HAS_HEADER))
         cls.data_stats.execute()
 
         return super().setUpClass()
