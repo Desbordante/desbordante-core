@@ -146,4 +146,11 @@ constexpr auto kDMaxAmountOfCategories =
 constexpr auto kDFixedSample =
         "Indicates that instead of random generated sample CORDS uses sample consisting of n first "
         "rows of the given table. Intended for tests only.";
+constexpr auto kDLeftTable = "first table processed by the algorithm";
+constexpr auto kDRightTable = "second table processed by the algorithm";
+constexpr auto kDPruneNonDisjoint =
+        "don't search for dependencies where the LHS decision boundary at the same index as the "
+        "RHS decision boundary limits the number of records matched";
+constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
+constexpr auto kDColumnMatches = "column matches to examine";
 }  // namespace config::descriptions

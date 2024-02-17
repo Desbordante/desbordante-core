@@ -73,4 +73,9 @@ constexpr auto kMaxFalsePositiveProbability = "max_false_positive_probability";
 constexpr auto kDelta = "delta";
 constexpr auto kMaxAmountOfCategories = "max_amount_of_categories";
 constexpr auto kFixedSample = "fixed_sample";
+constexpr auto kLeftTable = "left_table";
+constexpr auto kRightTable = "right_table";
+constexpr auto kPruneNonDisjoint = "prune_nondisjoint";
+constexpr auto kMinSupport = "min_support";
+constexpr auto kColumnMatches = "column_matches";
 }  // namespace config::names

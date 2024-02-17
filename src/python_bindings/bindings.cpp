@@ -14,6 +14,7 @@
 #include "fd/bind_fd_verification.h"
 #include "gfd/bind_gfd_verification.h"
 #include "ind/bind_ind.h"
+#include "md/bind_md.h"
 #include "mfd/bind_mfd_verification.h"
 #include "nd/bind_nd.h"
 #include "nd/bind_nd_verification.h"
@@ -38,10 +39,26 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
         el::Loggers::reconfigureAllLoggers(conf);
     }
 
-    for (auto bind_func :
-         {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd, BindNd,
-          BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd,
-          BindGfdVerification, BindSplit, BindDynamicFdVerification, BindNdVerification, BindSFD}) {
+    for (auto bind_func : {BindMainClasses,
+                           BindDataTypes,
+                           BindFd,
+                           BindCfd,
+                           BindAr,
+                           BindUcc,
+                           BindAc,
+                           BindOd,
+                           BindNd,
+                           BindFdVerification,
+                           BindMfdVerification,
+                           BindUccVerification,
+                           BindStatistics,
+                           BindInd,
+                           BindGfdVerification,
+                           BindSplit,
+                           BindDynamicFdVerification,
+                           BindNdVerification,
+                           BindSFD,
+                           BindMd}) {
         bind_func(module);
     }
 }
