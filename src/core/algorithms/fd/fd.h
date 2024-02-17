@@ -29,4 +29,16 @@ public:
     [[nodiscard]] RawFD ToRawFD() const {
         return {lhs_.GetColumnIndices(), rhs_.GetIndex()};
     }
+
+    std::vector<model::ColumnIndex> GetLhsIndices() const;
+
+    model::ColumnIndex GetRhsIndex() const noexcept {
+        return rhs_.GetIndex();
+    }
+
+    std::tuple<std::vector<std::string>, std::string> ToNameTuple() const;
+
+    std::string ToShortString() const;
+
+    std::string ToLongString() const;
 };
