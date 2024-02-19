@@ -52,6 +52,14 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfDigitChars(0).HasValue());
 }
 
+TEST(TestDataStats, TestGetNumberOfDigitChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic non_letter_chars_stat = stats.GetNumberOfDigitChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(non_letter_chars_stat.GetData());
+    EXPECT_EQ(count, 6);
+}
+
 TEST(TestDataStats, TestGetNumberOfNonLetterChars) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
