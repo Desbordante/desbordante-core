@@ -544,6 +544,14 @@ Statistic DataStats::GetNumberOfNonLetterChars(size_t index) const {
     return CountIfInColumn(pred, index);
 }
 
+Statistic DataStats::GetNumberOfDigitChars(size_t index) const {
+    if (all_stats_[index].num_digit_chars.HasValue()) return all_stats_[index].num_digit_chars;
+
+    auto pred = [](unsigned char symbol) { return std::isdigit(symbol); };
+
+    return CountIfInColumn(pred, index);
+}
+
 template <class Pred>
 Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
