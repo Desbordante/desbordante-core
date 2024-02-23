@@ -179,7 +179,7 @@ While the Python interface makes building interactive applications possible, Des
 
 You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to a large demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/vs9h/Desbordante).
 
-## Installation
+## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
 
 * Python >=3.7 
@@ -191,6 +191,17 @@ $ pip install desbordante
 ```
 
 However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
+
+## CLI installation
+
+**NOTE**: Only Python 3.11+ is supported for CLI
+
+Сlone the repository, change the current directory to the project directory and run the following commands:
+
+```sh
+pip install -r cli/requirements.txt
+python3 cli/cli.py --help
+```
 
 ## Build instructions
 
@@ -207,11 +218,10 @@ To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
 
 ### Building the project
-#### Building the Python module using pip (this is what you probably want if you are not a developer)
-**NOTE**: this step is mandatory for setting up the Command Line Interface for Desbordante.
+#### Building the Python module using pip
 
-Firstly, navigate to a directory of choice.
-Then, clone the repository, change the current directory to the project directory and run the following commands:
+Clone the repository, change the current directory to the project directory and run the following commands:
+
 ```bash
 ./build.sh
 python3 -m venv venv
@@ -219,11 +229,7 @@ source venv/bin/activate
 python3 -m pip install .
 ```
 
-Now it is possible to `import desbordante` as a module from within the created virtual environment. The CLI for Desbordante can be run using the following commands:
-```sh
-pip install -r cli/requirements.txt
-python3 cli/cli.py --help
-```
+Now it is possible to `import desbordante` as a module from within the created virtual environment. 
 
 #### Building tests & the Python module manually
 In order to build tests, pull the test datasets using the following command:
