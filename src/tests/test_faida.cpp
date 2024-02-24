@@ -7,45 +7,34 @@
 #include "all_tables_config.h"
 #include "config/names.h"
 #include "table_config.h"
+#include "test_ind_util.h"
 
 namespace fs = std::filesystem;
 
 namespace tests {
 
-using IndCCTest = std::pair<model::TableIndex, std::vector<model::ColumnIndex>>;
-using IndsTest = std::set<std::pair<IndCCTest, IndCCTest>>;
-using OrderedDatasetsTest = std::vector<std::string>;
+using INDTestSet = std::set<INDTest>;
 
-void CheckINDsListsEquality(std::list<model::IND> const& actual, IndsTest const& expected) {
+void CheckINDsListsEquality(std::list<model::IND> const& actual, INDTestSet const& expected) {
     ASSERT_EQ(actual.size(), expected.size())
             << "count of generated dependencies does not match: expected " << expected.size()
             << ", got " << actual.size();
 
-    auto to_test_cc = [](model::ColumnCombination const& cc) -> IndCCTest {
-        return std::make_pair(cc.GetTableIndex(), cc.GetColumnIndices());
-    };
-
     for (auto const& dep : actual) {
-        if (expected.find(std::make_pair(to_test_cc(dep.GetLhs()), to_test_cc(dep.GetRhs()))) ==
-            expected.end()) {
+        if (expected.find(ToINDTest(dep)) == expected.end()) {
             FAIL() << "generated dep '" << dep.ToString() << "' is not present in expected";
         }
     }
     SUCCEED();
 }
 
-void CheckResultContainsINDs(std::list<model::IND> const& actual, IndsTest expected_subset) {
+void CheckResultContainsINDs(std::list<model::IND> const& actual, INDTestSet expected_subset) {
     ASSERT_NE(actual.size(), expected_subset.size())
             << "count of generated dependencies must not not be equal to the subset size: got "
             << actual.size();
 
-    auto to_test_cc = [](model::ColumnCombination const& cc) -> IndCCTest {
-        return std::make_pair(cc.GetTableIndex(), cc.GetColumnIndices());
-    };
-
     for (auto const& dep : actual) {
-        auto iter = expected_subset.find(
-                std::make_pair(to_test_cc(dep.GetLhs()), to_test_cc(dep.GetRhs())));
+        auto iter = expected_subset.find(ToINDTest(dep));
 
         if (iter != expected_subset.end()) {
             expected_subset.erase(iter);
@@ -61,10 +50,9 @@ void CheckResultContainsINDs(std::list<model::IND> const& actual, IndsTest expec
 // class.
 class FaidaINDAlgorithmTest : public ::testing::Test {
 protected:
-    static algos::StdParamsMap GetParamMap(std::vector<fs::path> const& paths, char separator = ',',
-                                           bool has_header = true, int sample_size = 500,
-                                           double hll_accuracy = 0.001, bool find_nary = true,
-                                           unsigned short num_threads = 4) {
+    static algos::StdParamsMap GetParamMap(std::vector<fs::path> const& paths, char separator,
+                                           bool has_header, int sample_size, double hll_accuracy,
+                                           bool find_nary, unsigned short num_threads) {
         using namespace config::names;
         return {{kCsvPaths, paths},     {kSeparator, separator},    {kHasHeader, has_header},
                 {kFindNary, find_nary}, {kSampleSize, sample_size}, {kHllAccuracy, hll_accuracy},
@@ -79,7 +67,8 @@ protected:
 };
 
 TEST_F(FaidaINDAlgorithmTest, TestWide2) {
-    IndsTest expected_inds{{{0, {2}}, {0, {0}}}, {{0, {3}}, {0, {1}}}, {{0, {2, 3}}, {0, {0, 1}}}};
+    INDTestSet expected_inds{
+            {{0, {2}}, {0, {0}}}, {{0, {3}}, {0, {1}}}, {{0, {2, 3}}, {0, {0, 1}}}};
 
     TableConfig const& table = kIndTestWide2;
 
@@ -96,8 +85,6 @@ TEST_F(FaidaINDAlgorithmTest, TestWide2) {
 }
 
 TEST_F(FaidaINDAlgorithmTest, TestEmpty) {
-    IndsTest expected_inds{};
-
     TableConfig const& table = kIndTestEmpty;
 
     int sample_size = 500;
@@ -125,10 +112,10 @@ TEST_F(FaidaINDAlgorithmTest, TestEmptyInput) {
 }
 
 TEST_F(FaidaINDAlgorithmTest, TestPlanets) {
-    IndsTest expected_inds{{{0, {0}}, {0, {1}}},       {{0, {1}}, {0, {0}}},
-                           {{0, {2}}, {0, {3}}},       {{0, {3}}, {0, {2}}},
-                           {{0, {1, 3}}, {0, {0, 2}}}, {{0, {0, 2}}, {0, {1, 3}}},
-                           {{0, {0, 3}}, {0, {1, 2}}}, {{0, {1, 2}}, {0, {0, 3}}}};
+    INDTestSet expected_inds{{{0, {0}}, {0, {1}}},       {{0, {1}}, {0, {0}}},
+                             {{0, {2}}, {0, {3}}},       {{0, {3}}, {0, {2}}},
+                             {{0, {1, 3}}, {0, {0, 2}}}, {{0, {0, 2}}, {0, {1, 3}}},
+                             {{0, {0, 3}}, {0, {1, 2}}}, {{0, {1, 2}}, {0, {0, 3}}}};
 
     TableConfig const& table = kIndTestPlanets;
 
@@ -145,15 +132,15 @@ TEST_F(FaidaINDAlgorithmTest, TestPlanets) {
 }
 
 TEST_F(FaidaINDAlgorithmTest, Test3ary) {
-    IndsTest expected_inds{{{0, {3}}, {0, {0}}},
-                           {{0, {4}}, {0, {1}}},
-                           {{0, {5}}, {0, {2}}},
-                           {{0, {2}}, {0, {5}}},
-                           {{0, {3, 4}}, {0, {0, 1}}},
-                           {{0, {4, 5}}, {0, {1, 2}}},
-                           {{0, {3, 5}}, {0, {0, 2}}},
-                           {{0, {3, 4, 5}}, {0, {0, 1, 2}}},
-                           {{0, {3, 4, 5}}, {0, {0, 1, 2}}}};
+    INDTestSet expected_inds{{{0, {3}}, {0, {0}}},
+                             {{0, {4}}, {0, {1}}},
+                             {{0, {5}}, {0, {2}}},
+                             {{0, {2}}, {0, {5}}},
+                             {{0, {3, 4}}, {0, {0, 1}}},
+                             {{0, {4, 5}}, {0, {1, 2}}},
+                             {{0, {3, 5}}, {0, {0, 2}}},
+                             {{0, {3, 4, 5}}, {0, {0, 1, 2}}},
+                             {{0, {3, 4, 5}}, {0, {0, 1, 2}}}};
 
     TableConfig const& table = kIndTest3aryInds;
 
@@ -170,8 +157,8 @@ TEST_F(FaidaINDAlgorithmTest, Test3ary) {
 }
 
 TEST_F(FaidaINDAlgorithmTest, TestTwoTables) {
-    IndsTest expected_inds_subset{{{0, {0, 1, 2, 3}}, {1, {0, 1, 3, 4}}},
-                                  {{1, {0, 1, 3, 4}}, {0, {0, 1, 2, 3}}}};
+    INDTestSet expected_inds_subset{{{0, {0, 1, 2, 3}}, {1, {0, 1, 3, 4}}},
+                                    {{1, {0, 1, 3, 4}}, {0, {0, 1, 2, 3}}}};
     size_t constexpr expected_result_size = 47;
 
     TableConfig const& table1 = kIndTestTableFirst;
