@@ -3,6 +3,8 @@
 namespace config::names {
 constexpr auto kTable = "table";
 constexpr auto kTables = "tables";
+constexpr auto kCsvConfig = "csv_config";
+constexpr auto kCsvConfigs = "csv_configs";
 constexpr auto kCsvPath = "csv_path";
 constexpr auto kCsvPaths = "csv_paths";
 constexpr auto kSeparator = "separator";
