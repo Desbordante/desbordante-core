@@ -5,10 +5,10 @@
 
 namespace tests {
 
-std::string TableNamesToString(std::vector<TableConfig> const& configs) {
+std::string TableNamesToString(CSVConfigs const& csv_configs) {
     std::stringstream ss;
-    for (auto const& config : configs) {
-        ss << config.GetPath() << " ";
+    for (auto const& csv_config : csv_configs) {
+        ss << csv_config.path.filename() << " ";
     }
     return ss.str();
 }

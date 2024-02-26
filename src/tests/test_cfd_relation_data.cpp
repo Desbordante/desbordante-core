@@ -1,28 +1,20 @@
-#include <filesystem>
 #include <memory>
 
 #include <gtest/gtest.h>
 
 #include "algorithms/cfd/model/cfd_relation_data.h"
-#include "parser/csv_parser/csv_parser.h"
-#include "table_config.h"
+#include "all_csv_configs.h"
+#include "csv_config_util.h"
 
 namespace tests {
 
-namespace fs = std::filesystem;
-namespace mo = model;
-
 class TestCFDRelationData : public ::testing::Test {};
 
-static fs::path ConstructPath(std::string_view dataset) {
-    return test_data_dir / "cfd_data" / dataset;
-}
-
 TEST(TestCFDRelationData, TennisDataSet) {
-    std::string_view tennis_path = "tennis.csv";
-    CSVParser parser{ConstructPath(tennis_path), ',', true};
+    auto input_table = MakeInputTable(ktennis);
+    ;
     std::shared_ptr<algos::cfd::CFDRelationData> relation_ =
-            algos::cfd::CFDRelationData::CreateFrom(parser, 0, 0, 1, 1);
+            algos::cfd::CFDRelationData::CreateFrom(*input_table, 0, 0, 1, 1);
 
     std::string tennis_string =
             "outlook temp humidity windy play\n"
@@ -52,9 +44,9 @@ TEST(TestCFDRelationData, TennisDataSet) {
     ASSERT_EQ(relation_->GetStringFormat(), tennis_string);
     ASSERT_EQ(relation_->GetStringFormat(my_tidlist), tennis_partial_string);
 
-    CSVParser new_parser{ConstructPath(tennis_path), ',', true};
+    auto new_input_table = MakeInputTable(ktennis);
     std::shared_ptr<algos::cfd::CFDRelationData> new_relation_ =
-            algos::cfd::CFDRelationData::CreateFrom(new_parser, 3, 4, 1, 1);
+            algos::cfd::CFDRelationData::CreateFrom(*new_input_table, 3, 4, 1, 1);
 
     tennis_string =
             "outlook temp humidity\n"

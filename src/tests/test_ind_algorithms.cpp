@@ -1,10 +1,11 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "all_tables_config.h"
+#include "all_csv_configs.h"
 #include "config/equal_nulls/type.h"
 #include "config/names.h"
 #include "config/thread_number/type.h"
+#include "csv_config_util.h"
 #include "test_hash_util.h"
 #include "test_ind_util.h"
 
@@ -26,35 +27,32 @@ protected:
         is_null_equal_null_ = is_null_equal_null;
     }
 
-    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(
-            config::InputTables const& input_tables) {
+    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(CSVConfigs const& csv_configs) {
         using namespace config::names;
-        return algos::CreateAndLoadAlgorithm<Algorithm>(algos::StdParamsMap{
-                {kTables, input_tables}, {kThreads, threads_}, {kEqualNulls, is_null_equal_null_}});
+        return algos::CreateAndLoadAlgorithm<Algorithm>(
+                algos::StdParamsMap{{kCsvConfigs, csv_configs},
+                                    {kThreads, threads_},
+                                    {kEqualNulls, is_null_equal_null_}});
     }
 
-    static void PerformConsistentHashTestOn(std::vector<TablesConfigHash> const& configs_hashes) {
-        for (auto const& [configs, hash] : configs_hashes) {
+    static void PerformConsistentHashTestOn(std::vector<CSVConfigsHash> const& configs_hashes) {
+        for (auto const& [csv_configs, hash] : configs_hashes) {
             try {
-                config::InputTables input_tables;
-                input_tables.reserve(configs.size());
-                for (TableConfig const& config : configs) {
-                    input_tables.push_back(config.MakeInputTable());
-                }
-                auto ind_algo = CreateAlgorithmInstance(input_tables);
+                auto ind_algo = CreateAlgorithmInstance(csv_configs);
                 ind_algo->Execute();
                 EXPECT_EQ(HashVec(ToSortedINDTestVec(ind_algo->INDList()), HashPair), hash)
-                        << "Wrong hash on datasets " << TableNamesToString(configs);
+                        << "Wrong hash on datasets " << TableNamesToString(csv_configs);
             } catch (std::exception const& e) {
                 std::cerr << "An exception with message: " << e.what()
-                          << "\n\tis thrown on datasets " << TableNamesToString(configs) << '\n';
+                          << "\n\tis thrown on datasets " << TableNamesToString(csv_configs)
+                          << '\n';
                 FAIL();
             }
         }
     }
 
     /* hashes for light tables */
-    inline static std::vector<TablesConfigHash> const light_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const light_configs_hashes_ = {
             {{kIndTestNulls}, 170947241093786881U},
             {{kWDC_astronomical}, 1U},
             {{kWDC_symbols}, 1U},
@@ -77,13 +75,13 @@ protected:
             {{kCIPublicHighway700}, 195810426634326U}};
 
     /* hashes for tests with `is_null_equal_null` flag (light tables) */
-    inline static std::vector<TablesConfigHash> const null_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const null_configs_hashes_ = {
             {{kIndTestNulls}, 6131570082162402642U},
             {{kCIPublicHighway10k}, 3501995834407208U},
             {{kCIPublicHighway700}, 6532935312084701U}};
 
     /* hashes for heavy tables */
-    inline static std::vector<TablesConfigHash> const heavy_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const heavy_configs_hashes_ = {
             {{kEpicVitals}, 8662177202540121819U},
             {{kEpicMeds}, 5352642523966732252U},
             {{kiowa1kk}, 232519218595U}};
