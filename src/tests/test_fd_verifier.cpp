@@ -1,16 +1,16 @@
 #include <algorithm>
-#include <filesystem>
 #include <memory>
 
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"
+#include "all_csv_configs.h"
 #include "builtin.h"
 #include "config/indices/type.h"
 #include "config/names.h"
+#include "csv_config_util.h"
 #include "fd/fd_verifier/fd_verifier.h"
 #include "fd/fd_verifier/stats_calculator.h"
-#include "table_config.h"
 
 namespace {
 using namespace algos::fd_verifier;
@@ -58,13 +58,10 @@ struct FDVerifyingParams {
 
     FDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
                       size_t const num_error_clusters = 0, size_t const num_error_rows = 0,
-                      long double const error = 0., char const* dataset = "TestFD.csv",
-                      char const separator = ',', bool const has_header = true)
-        : params({{onam::kLhsIndices, std::move(lhs_indices)},
+                      long double const error = 0., CSVConfig const& csv_config = kTestFD)
+        : params({{onam::kCsvConfig, csv_config},
+                  {onam::kLhsIndices, std::move(lhs_indices)},
                   {onam::kRhsIndices, std::move(rhs_indices)},
-                  {onam::kCsvPath, test_data_dir / dataset},
-                  {onam::kSeparator, separator},
-                  {onam::kHasHeader, has_header},
                   {onam::kEqualNulls, true}}),
           error(error),
           num_error_clusters(num_error_clusters),

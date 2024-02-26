@@ -1,7 +1,5 @@
 #include <algorithm>
-#include <filesystem>
 #include <iostream>
-#include <map>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -12,30 +10,29 @@
 #include "algorithms/fd/tane/tane.h"
 #include "config/error/type.h"
 #include "config/names.h"
+#include "csv_config_util.h"
 #include "model/table/relational_schema.h"
-#include "table_config.h"
 #include "test_fd_util.h"
 
+namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap, config::InputTable;
-
-using std::string, std::vector;
+using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap;
 
 namespace onam = config::names;
 
-StdParamsMap FD_MineGetParamMap(tests::TableConfig const& info) {
-    return {{config::names::kTable, info.MakeInputTable()}};
+StdParamsMap FD_MineGetParamMap(CSVConfig const& csv_config) {
+    return {{config::names::kTable, MakeInputTable(csv_config)}};
 }
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(tests::TableConfig const& info) {
+std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(CSVConfig const& csv_config) {
     std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
-    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(info));
+    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(csv_config));
     return algorithm;
 }
 
-std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(tests::TableConfig const& info) {
-    return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(info));
+std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(CSVConfig const& csv_config) {
+    return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(csv_config));
 }
 
 using FDMineAlgorithmTest = tests::AlgorithmTest<Fd_mine>;
@@ -141,21 +138,19 @@ void MinimizeFDs(std::list<FD>& fd_collection) {
 }
 
 TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
-    namespace onam = config::names;
+    using namespace config::names;
 
     try {
         for (auto const& [config, hash] : FDMineAlgorithmTest::light_datasets_) {
             // TODO: change this hotfix
-            if (config.name == tests::kbreast_cancer.name) {
+            if (config.path == tests::kbreast_cancer.path) {
                 continue;
             }
             auto algorithm = CreateFD_MineAlgorithmInstance(config);
 
-            StdParamsMap params_map{{onam::kCsvPath, config.GetPath()},
-                                    {onam::kSeparator, config.separator},
-                                    {onam::kHasHeader, config.has_header},
-                                    {onam::kSeed, decltype(algos::pyro::Parameters::seed){0}},
-                                    {onam::kError, config::ErrorType{0.0}}};
+            StdParamsMap params_map{{kCsvConfig, config},
+                                    {kSeed, decltype(algos::pyro::Parameters::seed){0}},
+                                    {kError, config::ErrorType{0.0}}};
             auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
             auto& pyro = *pyro_ptr;
 
@@ -182,7 +177,8 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
             std::string results_pyro = pyro.FDAlgorithm::GetJsonFDs();
 
             EXPECT_EQ(results_pyro, algorithm_results)
-                    << "The new algorithm and Pyro yield different results at " << config.name;
+                    << "The new algorithm and Pyro yield different results at "
+                    << config.path.filename();
         }
     } catch (std::runtime_error& e) {
         std::cout << "Exception raised in test: " << e.what() << std::endl;
@@ -190,3 +186,5 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     }
     SUCCEED();
 }
+
+}  // namespace tests

@@ -4,7 +4,7 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/gfd/gfd_validation.h"
 #include "config/names.h"
-#include "table_config.h"
+#include "csv_config_util.h"
 
 using namespace algos;
 using algos::StdParamsMap;

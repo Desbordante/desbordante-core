@@ -2,7 +2,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/ucc/ucc_verifier/ucc_verifier.h"
-#include "all_tables_config.h"
+#include "all_csv_configs.h"
 #include "config/indices/type.h"
 #include "config/names.h"
 
@@ -19,15 +19,11 @@ private:
     std::vector<model::PLI::Cluster> clusters_violating_ucc_;
 
 public:
-    UCCVerifierSimpleParams(config::IndicesType column_indices,
+    UCCVerifierSimpleParams(CSVConfig const& csv_config, config::IndicesType column_indices,
                             size_t const num_clusters_violating_ucc,
                             size_t const num_rows_violating_ucc,
-                            std::vector<model::PLI::Cluster> clusters_violating_ucc,
-                            TableConfig const& input_table_config)
-        : params_map_({{onam::kCsvPath, input_table_config.GetPath()},
-                       {onam::kSeparator, input_table_config.separator},
-                       {onam::kHasHeader, input_table_config.has_header},
-                       {onam::kEqualNulls, true}}),
+                            std::vector<model::PLI::Cluster> clusters_violating_ucc)
+        : params_map_({{onam::kCsvConfig, csv_config}, {onam::kEqualNulls, true}}),
           num_clusters_violating_ucc_(num_clusters_violating_ucc),
           num_rows_violating_ucc_(num_rows_violating_ucc),
           clusters_violating_ucc_(std::move(clusters_violating_ucc)) {
@@ -74,20 +70,18 @@ TEST_P(TestUCCVerifierSimple, DefaultTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         UCCVerifierSimpleTestSuite, TestUCCVerifierSimple,
-        ::testing::Values(UCCVerifierSimpleParams({0}, 1, 12,
-                                                  {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}},
-                                                  kTestFD),
-                          UCCVerifierSimpleParams({0, 1}, 4, 12,
-                                                  {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}},
-                                                  kTestFD),
-                          UCCVerifierSimpleParams({0, 1, 2}, 4, 8,
-                                                  {{0, 1}, {3, 4}, {6, 7}, {9, 10}}, kTestFD),
-                          UCCVerifierSimpleParams({0, 1, 2, 3, 4, 5}, 3, 6,
-                                                  {{3, 4}, {6, 7}, {9, 10}}, kTestFD),
-                          UCCVerifierSimpleParams({0}, 0, 0, {}, kTestWide),
-                          UCCVerifierSimpleParams({0, 1, 2, 3, 4}, 0, 0, {}, kTestWide),
-                          UCCVerifierSimpleParams({}, 3, 6, {{3, 4}, {6, 7}, {9, 10}}, kTestFD),
-                          UCCVerifierSimpleParams({}, 0, 0, {}, kTestWide)));
+        ::testing::Values(UCCVerifierSimpleParams(kTestFD, {0}, 1, 12,
+                                                  {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}}),
+                          UCCVerifierSimpleParams(kTestFD, {0, 1}, 4, 12,
+                                                  {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}}),
+                          UCCVerifierSimpleParams(kTestFD, {0, 1, 2}, 4, 8,
+                                                  {{0, 1}, {3, 4}, {6, 7}, {9, 10}}),
+                          UCCVerifierSimpleParams(kTestFD, {0, 1, 2, 3, 4, 5}, 3, 6,
+                                                  {{3, 4}, {6, 7}, {9, 10}}),
+                          UCCVerifierSimpleParams(kTestWide, {0}, 0, 0, {}),
+                          UCCVerifierSimpleParams(kTestWide, {0, 1, 2, 3, 4}, 0, 0, {}),
+                          UCCVerifierSimpleParams(kTestFD, {}, 3, 6, {{3, 4}, {6, 7}, {9, 10}}),
+                          UCCVerifierSimpleParams(kTestWide, {}, 0, 0, {})));
 
 namespace {
 
@@ -97,15 +91,10 @@ private:
     algos::StdParamsMap hyucc_params_map_;
 
 public:
-    explicit UCCVerifierWithHyUCCParams(TableConfig const& input_table_config)
-        : ucc_verifier_params_map_({{onam::kCsvPath, input_table_config.GetPath()},
-                                    {onam::kSeparator, input_table_config.separator},
-                                    {onam::kHasHeader, input_table_config.has_header},
-                                    {onam::kEqualNulls, true}}),
+    explicit UCCVerifierWithHyUCCParams(CSVConfig const& csv_config)
+        : ucc_verifier_params_map_({{onam::kCsvConfig, csv_config}, {onam::kEqualNulls, true}}),
           hyucc_params_map_({{onam::kThreads, static_cast<config::ThreadNumType>(1)},
-                             {onam::kCsvPath, input_table_config.GetPath()},
-                             {onam::kSeparator, input_table_config.separator},
-                             {onam::kHasHeader, input_table_config.has_header},
+                             {onam::kCsvConfig, csv_config},
                              {onam::kEqualNulls, true}}) {}
 
     algos::StdParamsMap const& GetUCCVerifierParamsMap() const {

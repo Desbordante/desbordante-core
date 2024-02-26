@@ -6,28 +6,21 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
-#include "table_config.h"
+#include "csv_config_util.h"
 
 namespace tests {
 namespace onam = config::names;
 
-static config::InputTable MakeCsvParser(std::string const& dataset_filename, char const separator,
-                                        bool const has_header) {
-    return std::make_shared<CSVParser>(test_data_dir / dataset_filename, separator, has_header);
-}
-
 struct TestingParam {
     algos::StdParamsMap params;
 
-    TestingParam(std::string const& dataset_filename, char const separator, bool const has_header,
-                 bool const is_null_equal_null, unsigned const max_lhs, double const error,
-                 ushort const threads)
+    TestingParam(CSVConfig const& csv_config, bool const is_null_equal_null, unsigned const max_lhs,
+                 double const error, ushort const threads)
         // This dictionary is only created once, so if we put the relation itself here, it
         // won't be reset between different algorithms.
-        : params({{onam::kCsvPath, test_data_dir / dataset_filename},
-                  {onam::kSeparator, separator},
-                  {onam::kHasHeader, has_header},
+        : params({{onam::kCsvConfig, csv_config},
                   {onam::kEqualNulls, is_null_equal_null},
                   {onam::kMaximumLhs, max_lhs},
                   {onam::kError, error},
@@ -78,12 +71,10 @@ struct LinesParam : TestingParam {
 };
 
 static std::unique_ptr<algos::TypoMiner> ConfToLoadTypoMiner(
-        algos::AlgorithmType const algorithm_type, std::string const& dataset_path,
-        char const separator, bool const has_header) {
+        algos::AlgorithmType const algorithm_type, CSVConfig const& csv_config) {
     auto typo_miner = std::make_unique<algos::TypoMiner>(algorithm_type);
-    algos::ConfigureFromMap(
-            *typo_miner, algos::StdParamsMap{{onam::kTable,
-                                              MakeCsvParser(dataset_path, separator, has_header)}});
+    algos::ConfigureFromMap(*typo_miner,
+                            algos::StdParamsMap{{onam::kTable, MakeInputTable(csv_config)}});
     return typo_miner;
 }
 
@@ -135,7 +126,7 @@ static void TestForEachAlgo(F&& test) {
 
 TEST(SimpleTypoMinerTest, ThrowsOnEmpty) {
     auto const test = [](algos::AlgorithmType const algo) {
-        auto typo_miner = ConfToLoadTypoMiner(algo, test_data_dir / "TestEmpty.csv", ',', true);
+        auto typo_miner = ConfToLoadTypoMiner(algo, kTestEmpty);
         ASSERT_THROW(typo_miner->LoadData(), std::runtime_error);
     };
     TestForEachAlgo(test);
@@ -175,14 +166,13 @@ TEST_P(ApproxFdsMiningTest, ConsistentRepeatedExecution) {
     TestForEachAlgo(test);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        TypoMinerTestSuite, ApproxFdsMiningTest,
-        ::testing::Values(
-                /* Expected fds should be sorted by lhs */
-                FDsParam({{1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-                FDsParam({{0, 1}, {0, 2}, {1, 2}, {0}}, "SimpleTypos.csv", ',', true, true, -1,
-                         0.81, 0),
-                FDsParam({{0, 1}, {1, 2}}, "SimpleTypos.csv", ',', true, true, -1, 0.1, 0)));
+INSTANTIATE_TEST_SUITE_P(TypoMinerTestSuite, ApproxFdsMiningTest,
+                         ::testing::Values(
+                                 /* Expected fds should be sorted by lhs */
+                                 FDsParam({{1, 2}}, kSimpleTypos, true, -1, 0.05, 0),
+                                 FDsParam({{0, 1}, {0, 2}, {1, 2}, {0}}, kSimpleTypos, true, -1,
+                                          0.81, 0),
+                                 FDsParam({{0, 1}, {1, 2}}, kSimpleTypos, true, -1, 0.1, 0)));
 
 class ClustersWithTyposMiningTest : public ::testing::TestWithParam<ClustersParam> {};
 
@@ -217,18 +207,18 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(
                 /* Expected clusters should be sorted with respect to TyposMiner::SortCluster
                    sorting. */
-                ClustersParam({{FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}}}, "SimpleTypos.csv",
-                              ',', true, true, -1, 0.05, 0),
+                ClustersParam({{FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}}}, kSimpleTypos,
+                              true, -1, 0.05, 0),
                 ClustersParam({{FdByIndices{0, 1}, {model::PLI::Cluster{4, 0, 1, 5, 6}}},
                                {FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}}},
-                              "SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
+                              kSimpleTypos, true, -1, 0.1, 0),
                 ClustersParam({{FdByIndices{0, 1}, {model::PLI::Cluster{4, 0, 1, 5, 6}}},
                                {FdByIndices{1, 2}, {model::PLI::Cluster{7, 9}}},
                                {FdByIndices{0, 2},
                                 {model::PLI::Cluster{4, 0, 1, 5, 6}, model::PLI::Cluster{7, 9}}},
                                {FdByIndices{0},
                                 {model::PLI::Cluster{8, 2, 3, 7, 9, 0, 1, 4, 5, 6}}}},
-                              "SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
+                              kSimpleTypos, true, -1, 0.81, 0)));
 
 class SquashClusterTest : public ::testing::TestWithParam<TestingParam> {};
 
@@ -272,11 +262,10 @@ TEST_P(SquashClusterTest, SquashCluster) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        TypoMinerTestSuite, SquashClusterTest,
-        ::testing::Values(TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
-                          TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.1, 0),
-                          TestingParam("SimpleTypos.csv", ',', true, true, -1, 0.81, 0)));
+INSTANTIATE_TEST_SUITE_P(TypoMinerTestSuite, SquashClusterTest,
+                         ::testing::Values(TestingParam(kSimpleTypos, true, -1, 0.05, 0),
+                                           TestingParam(kSimpleTypos, true, -1, 0.1, 0),
+                                           TestingParam(kSimpleTypos, true, -1, 0.81, 0)));
 
 class LinesWithTyposMiningTest : public ::testing::TestWithParam<LinesParam> {};
 
@@ -303,11 +292,11 @@ INSTANTIATE_TEST_SUITE_P(
         ::testing::Values(
                 LinesParam({{FdByIndices{1, 2},
                              {std::pair(model::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
-                           1, -1, "SimpleTypos.csv", ',', true, true, -1, 0.05, 0),
+                           1, -1, kSimpleTypos, true, -1, 0.05, 0),
                 LinesParam({{FdByIndices{0, 1},
                              {std::pair(model::PLI::Cluster{4, 0, 1, 5, 6}, std::vector{4})}},
                             {FdByIndices{1, 2},
                              {std::pair(model::PLI::Cluster{7, 9}, std::vector{7, 9})}}},
-                           1, -1, "SimpleTypos.csv", ',', true, true, -1, 0.1, 0)));
+                           1, -1, kSimpleTypos, true, -1, 0.1, 0)));
 
 }  // namespace tests

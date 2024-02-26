@@ -1,45 +1,43 @@
 #pragma once
 
-#include <filesystem>
-
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd/fd_algorithm.h"
-#include "all_tables_config.h"
+#include "all_csv_configs.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "table_config.h"
+#include "csv_config_util.h"
 
 namespace tests {
 template <typename T>
 class AlgorithmTest : public ::testing::Test {
 protected:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(
-            tests::TableConfig const& config) {
-        using config::InputTable, algos::ConfigureFromMap, algos::StdParamsMap;
+    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+        using namespace config::names;
+        using algos::ConfigureFromMap, algos::StdParamsMap;
+
         std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
-        ConfigureFromMap(*algorithm,
-                         StdParamsMap{{config::names::kTable, config.MakeInputTable()}});
+        ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
         return algorithm;
     }
 
-    static algos::StdParamsMap GetParamMap(tests::TableConfig const& config) {
+    static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config) {
         using namespace config::names;
         return {
-                {kTable, config.MakeInputTable()},
+                {kCsvConfig, csv_config},
                 {kError, config::ErrorType{0.0}},
                 {kSeed, decltype(algos::pyro::Parameters::seed){0}},
         };
     }
 
-    static void PerformConsistentHashTestOn(std::vector<TableConfigHash> const& datasets) {
+    static void PerformConsistentHashTestOn(std::vector<CSVConfigHash> const& config_hashes) {
         try {
-            for (auto const& [config, hash] : datasets) {
-                auto algorithm = CreateAlgorithmInstance(config);
+            for (auto const& [csv_config, hash] : config_hashes) {
+                auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
                 EXPECT_EQ(algorithm->Fletcher16(), hash)
-                        << "FD collection hash changed for " << config.name;
+                        << "FD collection hash changed for " << csv_config.path.filename();
             }
         } catch (std::runtime_error& e) {
             std::cout << "Exception raised in test: " << e.what() << std::endl;
@@ -49,12 +47,11 @@ protected:
     }
 
 public:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(
-            tests::TableConfig const& config) {
+    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(CSVConfig const& config) {
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config));
     }
 
-    inline static std::vector<tests::TableConfigHash> const light_datasets_ = {
+    inline static std::vector<CSVConfigHash> const light_datasets_ = {
             {{tests::kCIPublicHighway10k, 33398},
              {tests::kneighbors10k, 43368},
              {tests::kWDC_astronomical, 22281},
@@ -67,7 +64,7 @@ public:
              {tests::kbreast_cancer, 15121},
              {tests::kWDC_kepler, 63730}}};
 
-    inline static std::vector<tests::TableConfigHash> const heavy_datasets_ = {
+    inline static std::vector<CSVConfigHash> const heavy_datasets_ = {
             {{tests::kadult, 23075},
              {tests::kCIPublicHighway, 13035},
              {tests::kEpicMeds, 50218},

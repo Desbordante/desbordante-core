@@ -1,16 +1,14 @@
-#include <filesystem>
 #include <memory>
 
 #include <gtest/gtest.h>
 
 #include "algorithms/fd/fd_algorithm.h"
+#include "all_csv_configs.h"
+#include "csv_config_util.h"
 #include "model/table/column_layout_typed_relation_data.h"
-#include "parser/csv_parser/csv_parser.h"
-#include "table_config.h"
 
 namespace tests {
 
-namespace fs = std::filesystem;
 namespace mo = model;
 
 using algos::FDAlgorithm;
@@ -18,31 +16,21 @@ using mo::TypeId;
 
 struct TypeParsingParams {
     std::vector<mo::TypeId> expected;
-    std::string_view dataset;
-    char const sep;
-    bool const has_header;
-
-    TypeParsingParams(std::vector<mo::TypeId> expected, std::string_view dataset,
-                      char const sep = ',', bool const has_header = true) noexcept
-        : expected(std::move(expected)), dataset(dataset), sep(sep), has_header(has_header) {}
+    CSVConfig const& csv_config;
 };
 
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};
 
-static fs::path ConstructPath(std::string_view dataset) {
-    return test_data_dir / dataset;
-}
-
 TEST_P(TestTypeParsing, DefaultTest) {
-    TypeParsingParams const& p = GetParam();
-    CSVParser parser{ConstructPath(p.dataset), p.sep, p.has_header};
-    std::vector<mo::TypedColumnData> column_data{mo::CreateTypedColumnData(parser, true)};
+    auto const& [expected, csv_config] = GetParam();
+    auto input_table = MakeInputTable(csv_config);
+    std::vector<mo::TypedColumnData> column_data{mo::CreateTypedColumnData(*input_table, true)};
 
-    ASSERT_EQ(column_data.size(), p.expected.size());
+    ASSERT_EQ(column_data.size(), expected.size());
 
     size_t i = 0;
     for (mo::TypedColumnData const& col_data : column_data) {
-        EXPECT_EQ(col_data.GetTypeId(), p.expected[i]) << "Column index: " << i;
+        EXPECT_EQ(col_data.GetTypeId(), expected[i]) << "Column index: " << i;
         ++i;
     }
 }
@@ -52,43 +40,43 @@ INSTANTIATE_TEST_SUITE_P(
     TypeSystem, TestTypeParsing,
     ::testing::Values(
         TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed},
-                          "WDC_appearances.csv"),
+                          kWDC_appearances),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kString},
-                          "WDC_age.csv"),
+                          kWDC_age),
         TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed,
                            TypeId::kMixed},
-                          "WDC_kepler.csv"),
+                          kWDC_kepler),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kMixed,
                            TypeId::kMixed, TypeId::kMixed, TypeId::kString,
                            TypeId::kString, TypeId::kString},
-                          "WDC_satellites.csv"),
+                          kWDC_satellites),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kInt,
                            TypeId::kInt, TypeId::kInt, TypeId::kInt,
                            TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined,
                            TypeId::kUndefined, TypeId::kUndefined, TypeId::kInt,
                            TypeId::kInt, TypeId::kInt, TypeId::kInt,
                            TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined},
-                          "CIPublicHighway700.csv"),
+                          kCIPublicHighway700),
         TypeParsingParams({TypeId::kInt, TypeId::kInt, TypeId::kMixed,
                            TypeId::kInt, TypeId::kInt, TypeId::kInt,
                            TypeId::kInt},
-                          "neighbors10k.csv"),
+                          kneighbors10k),
         TypeParsingParams({TypeId::kDouble, TypeId::kDouble, TypeId::kDouble,
                            TypeId::kDouble, TypeId::kString},
-                          "iris.csv", ',', false),
-        TypeParsingParams({TypeId::kUndefined,TypeId::kUndefined,TypeId::kUndefined,
+                          kiris),
+        TypeParsingParams({TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
                            TypeId::kInt, TypeId::kString, TypeId::kDouble,
                            TypeId::kBigInt, TypeId::kMixed, TypeId::kBigInt,
                            TypeId::kMixed, TypeId::kInt},
-                          "SimpleTypes.csv"),
+                          kSimpleTypes),
         TypeParsingParams({TypeId::kString, TypeId::kDate, TypeId::kDate},
-                          "ACShippingDates.csv" )));
+                          kACShippingDates)));
 
 // clang-format on
 
 TEST(TypeSystem, SumColumnDoubles) {
-    CSVParser parser{ConstructPath("iris.csv"), ',', false};
-    std::vector<mo::TypedColumnData> col_data{mo::CreateTypedColumnData(parser, true)};
+    auto input_table = MakeInputTable(kiris);
+    std::vector<mo::TypedColumnData> col_data{mo::CreateTypedColumnData(*input_table, true)};
     ASSERT_EQ(col_data.size(), 5);
     mo::TypedColumnData const& col = col_data.front();
     ASSERT_EQ(col.GetTypeId(), static_cast<TypeId>(TypeId::kDouble));

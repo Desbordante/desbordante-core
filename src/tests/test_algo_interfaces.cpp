@@ -1,4 +1,3 @@
-#include <filesystem>
 #include <iostream>
 #include <vector>
 
@@ -7,40 +6,28 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd/pyro/pyro.h"
+#include "all_csv_configs.h"
 #include "config/error/type.h"
 #include "config/names.h"
-#include "table_config.h"
 
 namespace tests {
 
-using algos::FDAlgorithm, algos::PliBasedFDAlgorithm, algos::StdParamsMap;
-using ::testing::ContainerEq;
-
-namespace fs = std::filesystem;
-
 struct KeysTestParams {
     std::vector<unsigned int> const expected;
-    std::string_view const dataset;
-    char const sep;
-    bool const has_header;
-
-    KeysTestParams(std::vector<unsigned int> expected, std::string_view const dataset,
-                   char const sep = ',', bool const has_header = true) noexcept
-        : expected(std::move(expected)), dataset(dataset), sep(sep), has_header(has_header) {}
+    CSVConfig const& csv_config;
 };
 
 class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};
 
 template <typename AlgoInterface>
 inline static void GetKeysTestImpl(KeysTestParams const& p) {
-    namespace onam = config::names;
-    auto path = test_data_dir / p.dataset;
+    using namespace config::names;
+    using ::testing::ContainerEq;
+
     std::vector<unsigned int> actual;
-    StdParamsMap params_map{{onam::kCsvPath, path},
-                            {onam::kSeparator, p.sep},
-                            {onam::kHasHeader, p.has_header},
-                            {onam::kSeed, decltype(algos::pyro::Parameters::seed){0}},
-                            {onam::kError, config::ErrorType{0.0}}};
+    algos::StdParamsMap params_map{{kCsvConfig, p.csv_config},
+                                   {kSeed, decltype(algos::pyro::Parameters::seed){0}},
+                                   {kError, config::ErrorType{0.0}}};
     auto pyro_ptr = algos::CreateAndLoadAlgorithm<algos::Pyro>(params_map);
     auto& pyro = *pyro_ptr;
 
@@ -62,19 +49,19 @@ inline static void GetKeysTestImpl(KeysTestParams const& p) {
 }
 
 TEST_P(KeysTest, FDAlgorithmTest) {
-    GetKeysTestImpl<FDAlgorithm>(GetParam());
+    GetKeysTestImpl<algos::FDAlgorithm>(GetParam());
 }
 
 TEST_P(KeysTest, PliBasedAlgorithmTest) {
-    GetKeysTestImpl<PliBasedFDAlgorithm>(GetParam());
+    GetKeysTestImpl<algos::PliBasedFDAlgorithm>(GetParam());
 }
 
 INSTANTIATE_TEST_SUITE_P(, KeysTest,
-                         ::testing::Values(KeysTestParams({0, 1, 2}, "WDC_age.csv"),
-                                           KeysTestParams({0, 1, 2, 3, 4}, "WDC_game.csv"),
-                                           KeysTestParams({0, 2}, "WDC_appearances.csv"),
-                                           KeysTestParams({3, 4, 5}, "WDC_astronomical.csv"),
-                                           KeysTestParams({0, 2}, "CIPublicHighway700.csv"),
-                                           KeysTestParams({}, "abalone.csv", ',', false),
-                                           KeysTestParams({}, "adult.csv", ';', false)));
+                         ::testing::Values(KeysTestParams({0, 1, 2}, kWDC_age),
+                                           KeysTestParams({0, 1, 2, 3, 4}, kWDC_game),
+                                           KeysTestParams({0, 2}, kWDC_appearances),
+                                           KeysTestParams({3, 4, 5}, kWDC_astronomical),
+                                           KeysTestParams({0, 2}, kCIPublicHighway700),
+                                           KeysTestParams({}, kabalone),
+                                           KeysTestParams({}, kadult)));
 }  // namespace tests
