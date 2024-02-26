@@ -77,7 +77,7 @@ void CSVParser::Reset() {
     next_line_.clear();
     has_next_ = true;
 
-    /* Skip header */
+    // Skip header
     if (has_header_) {
         SkipLine();
     }
@@ -89,7 +89,7 @@ void CSVParser::Reset() {
 void CSVParser::GetLine(unsigned long long const line_index) {
     Reset();
 
-    /* Index is less than the line number by one. Skip line_index lines */
+    // Index is less than the line number by one. Skip line_index lines
     for (unsigned long long i = 0; i < line_index; ++i) {
         SkipLine();
     }
@@ -115,7 +115,7 @@ std::string CSVParser::GetUnparsedLine(unsigned long long const line_index) {
     GetLine(line_index);
     std::string line = next_line_;
 
-    /* For correctness of GetNextRow() after this method */
+    // For correctness of GetNextRow() after this method
     GetNextIfHas();
 
     return line;
