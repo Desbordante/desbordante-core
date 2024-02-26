@@ -1,18 +1,15 @@
 
 // see input_data/cfd_data/LICENSE
 
-#include <filesystem>
-
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/cfd/enums.h"
 #include "algorithms/cfd/fd_first_algorithm.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
-#include "table_config.h"
 
 namespace tests {
-namespace fs = std::filesystem;
 
 static void CheckCfdSetsEquality(std::set<std::string> const& actual,
                                  std::set<std::string> const& expected) {
@@ -30,15 +27,12 @@ static void CheckCfdSetsEquality(std::set<std::string> const& actual,
 class CFDAlgorithmTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::cfd::FDFirstAlgorithm> CreateAlgorithmInstance(
-            unsigned minsup, double minconf, std::filesystem::path const& path,
-            char const* substrategy, unsigned int max_lhs, unsigned columns_number = 0,
-            unsigned tuples_number = 0, char separator = ',', bool has_header = true) {
+            CSVConfig const& csv_config, unsigned minsup, double minconf, char const* substrategy,
+            unsigned int max_lhs, unsigned columns_number = 0, unsigned tuples_number = 0) {
         using namespace config::names;
 
         algos::StdParamsMap params{
-                {kCsvPath, path},
-                {kSeparator, separator},
-                {kHasHeader, has_header},
+                {kCsvConfig, csv_config},
                 {kCfdMinimumSupport, minsup},
                 {kCfdMinimumConfidence, minconf},
                 {kCfdMaximumLhs, max_lhs},
@@ -50,8 +44,7 @@ protected:
 };
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
-    auto const path = test_data_dir / "cfd_data" / "tennis.csv";
-    auto algorithm = CreateAlgorithmInstance(2, 0.85, path, "dfs", 3, 4, 5);
+    auto algorithm = CreateAlgorithmInstance(ktennis, 2, 0.85, "dfs", 3, 4, 5);
     algorithm->Execute();
     std::string expected_data =
             "outlook temp humidity windy\nsunny hot high false\nsunny hot high true\n";
@@ -60,8 +53,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
 }
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
-    auto const path = test_data_dir / "cfd_data" / "tennis.csv";
-    auto algorithm = CreateAlgorithmInstance(8, 0.85, path, "dfs", 3);
+    auto algorithm = CreateAlgorithmInstance(ktennis, 8, 0.85, "dfs", 3);
     algorithm->Execute();
     std::vector<int> tids = {0, 2, 4, 6};
     std::string expected_data =
@@ -72,8 +64,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
 }
 
 TEST_F(CFDAlgorithmTest, FullTennisDataset) {
-    auto const path = test_data_dir / "cfd_data" / "tennis.csv";
-    auto algorithm = CreateAlgorithmInstance(8, 0.85, path, "dfs", 3);
+    auto algorithm = CreateAlgorithmInstance(ktennis, 8, 0.85, "dfs", 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetItemsetCfds()) {
@@ -94,14 +85,13 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
                                            "(windy, humidity, outlook) => play"};
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
-    algorithm = CreateAlgorithmInstance(8, 0.85, path, "bfs", 3);
+    algorithm = CreateAlgorithmInstance(ktennis, 8, 0.85, "bfs", 3);
     algorithm->Execute();
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
 
 TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
-    auto const path = test_data_dir / "cfd_data" / "mushroom.csv";
-    auto algorithm = CreateAlgorithmInstance(4, 0.9, path, "dfs", 4, 4, 50);
+    auto algorithm = CreateAlgorithmInstance(kmushroom, 4, 0.9, "dfs", 4, 4, 50);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetItemsetCfds()) {

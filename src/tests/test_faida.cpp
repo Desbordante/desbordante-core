@@ -1,12 +1,9 @@
-#include <filesystem>
-
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/ind/faida/faida.h"
-#include "all_tables_config.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
-#include "table_config.h"
 #include "test_ind_util.h"
 
 namespace fs = std::filesystem;
@@ -50,12 +47,14 @@ void CheckResultContainsINDs(std::list<model::IND> const& actual, INDTestSet exp
 // class.
 class FaidaINDAlgorithmTest : public ::testing::Test {
 protected:
-    static algos::StdParamsMap GetParamMap(std::vector<fs::path> const& paths, char separator,
-                                           bool has_header, int sample_size, double hll_accuracy,
-                                           bool find_nary, unsigned short num_threads) {
+    static algos::StdParamsMap GetParamMap(CSVConfigs const& csv_configs, int sample_size,
+                                           double hll_accuracy, bool find_nary,
+                                           unsigned short num_threads) {
         using namespace config::names;
-        return {{kCsvPaths, paths},     {kSeparator, separator},    {kHasHeader, has_header},
-                {kFindNary, find_nary}, {kSampleSize, sample_size}, {kHllAccuracy, hll_accuracy},
+        return {{kCsvConfigs, csv_configs},
+                {kFindNary, find_nary},
+                {kSampleSize, sample_size},
+                {kHllAccuracy, hll_accuracy},
                 {kThreads, num_threads}};
     }
 
@@ -70,45 +69,37 @@ TEST_F(FaidaINDAlgorithmTest, TestWide2) {
     INDTestSet expected_inds{
             {{0, {2}}, {0, {0}}}, {{0, {3}}, {0, {1}}}, {{0, {2, 3}}, {0, {0, 1}}}};
 
-    TableConfig const& table = kIndTestWide2;
-
     int sample_size = 500;
     double hll_accuracy = 0.001;
     bool find_nary = true;
     unsigned short num_threads = 4;
 
-    auto algorithm =
-            CreateFaidaInstance(std::vector{table.GetPath()}, table.separator, table.has_header,
-                                sample_size, hll_accuracy, find_nary, num_threads);
+    auto algorithm = CreateFaidaInstance(CSVConfigs{kIndTestWide2}, sample_size, hll_accuracy,
+                                         find_nary, num_threads);
     algorithm->Execute();
     CheckINDsListsEquality(algorithm->INDList(), expected_inds);
 }
 
 TEST_F(FaidaINDAlgorithmTest, TestEmpty) {
-    TableConfig const& table = kIndTestEmpty;
+    int sample_size = 500;
+    double hll_accuracy = 0.001;
+    bool find_nary = true;
+    unsigned short num_threads = 4;
 
+    ASSERT_THROW(CreateFaidaInstance(CSVConfigs{kIndTestEmpty}, sample_size, hll_accuracy,
+                                     find_nary, num_threads),
+                 std::runtime_error);
+}
+
+TEST_F(FaidaINDAlgorithmTest, TestEmptyInput) {
     int sample_size = 500;
     double hll_accuracy = 0.001;
     bool find_nary = true;
     unsigned short num_threads = 4;
 
     ASSERT_THROW(
-            CreateFaidaInstance(std::vector{table.GetPath()}, table.separator, table.has_header,
-                                sample_size, hll_accuracy, find_nary, num_threads),
-            std::runtime_error);
-}
-
-TEST_F(FaidaINDAlgorithmTest, TestEmptyInput) {
-    char separator = ',';
-    bool has_header = false;
-    int sample_size = 500;
-    double hll_accuracy = 0.001;
-    bool find_nary = true;
-    unsigned short num_threads = 4;
-
-    ASSERT_THROW(CreateFaidaInstance(std::vector<fs::path>{}, separator, has_header, sample_size,
-                                     hll_accuracy, find_nary, num_threads),
-                 config::ConfigurationError);
+            CreateFaidaInstance(CSVConfigs{}, sample_size, hll_accuracy, find_nary, num_threads),
+            config::ConfigurationError);
 }
 
 TEST_F(FaidaINDAlgorithmTest, TestPlanets) {
@@ -117,16 +108,13 @@ TEST_F(FaidaINDAlgorithmTest, TestPlanets) {
                              {{0, {1, 3}}, {0, {0, 2}}}, {{0, {0, 2}}, {0, {1, 3}}},
                              {{0, {0, 3}}, {0, {1, 2}}}, {{0, {1, 2}}, {0, {0, 3}}}};
 
-    TableConfig const& table = kIndTestPlanets;
-
     int sample_size = 500;
     double hll_accuracy = 0.001;
     bool find_nary = true;
     unsigned short num_threads = 4;
 
-    auto algorithm =
-            CreateFaidaInstance(std::vector{table.GetPath()}, table.separator, table.has_header,
-                                sample_size, hll_accuracy, find_nary, num_threads);
+    auto algorithm = CreateFaidaInstance(CSVConfigs{kIndTestPlanets}, sample_size, hll_accuracy,
+                                         find_nary, num_threads);
     algorithm->Execute();
     CheckINDsListsEquality(algorithm->INDList(), expected_inds);
 }
@@ -142,16 +130,13 @@ TEST_F(FaidaINDAlgorithmTest, Test3ary) {
                              {{0, {3, 4, 5}}, {0, {0, 1, 2}}},
                              {{0, {3, 4, 5}}, {0, {0, 1, 2}}}};
 
-    TableConfig const& table = kIndTest3aryInds;
-
     int sample_size = 500;
     double hll_accuracy = 0.001;
     bool find_nary = true;
     unsigned short num_threads = 4;
 
-    auto algorithm =
-            CreateFaidaInstance(std::vector{table.GetPath()}, table.separator, table.has_header,
-                                sample_size, hll_accuracy, find_nary, num_threads);
+    auto algorithm = CreateFaidaInstance(CSVConfigs{kIndTest3aryInds}, sample_size, hll_accuracy,
+                                         find_nary, num_threads);
     algorithm->Execute();
     CheckINDsListsEquality(algorithm->INDList(), expected_inds);
 }
@@ -161,17 +146,12 @@ TEST_F(FaidaINDAlgorithmTest, TestTwoTables) {
                                     {{1, {0, 1, 3, 4}}, {0, {0, 1, 2, 3}}}};
     size_t constexpr expected_result_size = 47;
 
-    TableConfig const& table1 = kIndTestTableFirst;
-    TableConfig const& table2 = kIndTestTableSecond;
-
     int sample_size = 500;
     double hll_accuracy = 0.001;
     bool find_nary = true;
     unsigned short num_threads = 4;
 
-    std::vector file_paths{table1.GetPath(), table2.GetPath()};
-
-    auto algorithm = CreateFaidaInstance(file_paths, table1.separator, table1.has_header,
+    auto algorithm = CreateFaidaInstance(CSVConfigs{kIndTestTableFirst, kIndTestTableSecond},
                                          sample_size, hll_accuracy, find_nary, num_threads);
     algorithm->Execute();
     auto result = algorithm->INDList();

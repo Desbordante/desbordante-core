@@ -4,12 +4,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "all_csv_configs.h"
+#include "csv_config_util.h"
 #include "fd/pyrocommon/model/list_agree_set_sample.h"
 #include "levenshtein_distance.h"
 #include "model/table/agree_set_factory.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/identifier_set.h"
-#include "table_config.h"
 
 namespace tests {
 
@@ -23,12 +24,10 @@ TEST(pliChecker, first) {
     deque<vector<int>> ans = {
             {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
     };
-
-    auto path = test_data_dir / "Test1.csv";
     deque<vector<int>> index;
     try {
-        auto csv_parser = std::make_unique<CSVParser>(path);
-        auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, true);
+        auto input_table = MakeInputTable(kTest1);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
     } catch (std::runtime_error& e) {
@@ -47,9 +46,8 @@ TEST(pliChecker, second) {
     };
     deque<vector<int>> index;
     try {
-        auto path = test_data_dir / "Test1.csv";
-        auto csv_parser = std::make_unique<CSVParser>(path);
-        auto test = ColumnLayoutRelationData::CreateFrom(*csv_parser, false);
+        auto input_table = MakeInputTable(kTest1);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, false);
         auto column_data = test->GetColumnData(0);
         index = column_data.GetPositionListIndex()->GetIndex();
     } catch (std::runtime_error& e) {
@@ -64,11 +62,11 @@ TEST(pliIntersectChecker, first) {
     std::shared_ptr<model::PositionListIndex> intersection;
 
     try {
-        auto csv_parser_1 = std::make_unique<CSVParser>(test_data_dir / "ProbeTest1.csv");
-        auto csv_parser_2 = std::make_unique<CSVParser>(test_data_dir / "ProbeTest2.csv");
+        auto input_table_1 = MakeInputTable(kProbeTest1);
+        auto input_table_2 = MakeInputTable(kProbeTest2);
 
-        auto test1 = ColumnLayoutRelationData::CreateFrom(*csv_parser_1, false);
-        auto test2 = ColumnLayoutRelationData::CreateFrom(*csv_parser_2, false);
+        auto test1 = ColumnLayoutRelationData::CreateFrom(*input_table_1, false);
+        auto test2 = ColumnLayoutRelationData::CreateFrom(*input_table_2, false);
         auto pli1 = test1->GetColumnData(0).GetPositionListIndex();
         auto pli2 = test2->GetColumnData(0).GetPositionListIndex();
 
@@ -99,9 +97,8 @@ TEST(IdentifierSetTest, Computation) {
                                          "[(A, 1), (B, 2), (C, 2), (D, 2), (E, 1), (F, 1)]"};
 
     try {
-        auto path = test_data_dir / "BernoulliRelation.csv";
-        auto parser = std::make_unique<CSVParser>(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
+        auto input_table = MakeInputTable(kBernoulliRelation);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
             id_sets.insert(model::IdentifierSet(relation.get(), i).ToString());
@@ -121,9 +118,8 @@ TEST(IdentifierSetTest, Intersection) {
             "[A B C E F]", "[A F]",   "[A B D E F]", "[A C D F]", "[A C E]"};
 
     try {
-        auto path = test_data_dir / "BernoulliRelation.csv";
-        auto parser = std::make_unique<CSVParser>(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
+        auto input_table = MakeInputTable(kBernoulliRelation);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
         std::vector<model::IdentifierSet> id_sets;
 
         for (unsigned i = 0; i < relation->GetNumRows(); ++i) {
@@ -151,9 +147,8 @@ void TestAgreeSetFactory(AgreeSetFactory::Configuration c) {
                                             "[A F]",   "[A B D E F]", "[A C D F]", "[A C E]"};
 
     try {
-        auto path = test_data_dir / "BernoulliRelation.csv";
-        auto parser = std::make_unique<CSVParser>(path);
-        auto relation = ColumnLayoutRelationData::CreateFrom(*parser, false);
+        auto input_table = MakeInputTable(kBernoulliRelation);
+        auto relation = ColumnLayoutRelationData::CreateFrom(*input_table, false);
         AgreeSetFactory factory(relation.get(), c);
         for (model::AgreeSet const& agree_set : factory.GenAgreeSets()) {
             agree_sets_actual.insert(agree_set.ToString());

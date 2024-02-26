@@ -1,13 +1,9 @@
-#include <filesystem>
-
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/association_rules/apriori.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
-#include "table_config.h"
-
-namespace fs = std::filesystem;
 
 namespace tests {
 
@@ -55,54 +51,34 @@ static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
 
 class ARAlgorithmTest : public ::testing::Test {
 protected:
-    static algos::StdParamsMap GetParamMap(double minsup, double minconf,
-                                           std::filesystem::path const& path,
-                                           unsigned int tidColumnIndex,
-                                           unsigned int itemColumnIndex, char separator = ',',
-                                           bool has_header = true) {
+    static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config, double minsup,
+                                           double minconf, unsigned int tidColumnIndex,
+                                           unsigned int itemColumnIndex) {
         using namespace config::names;
-        return {{kCsvPath, path},
-                {kSeparator, separator},
-                {kHasHeader, has_header},
-                {kInputFormat, +algos::InputFormat::singular},
-                {kMinimumSupport, minsup},
-                {kMinimumConfidence, minconf},
-                {kTIdColumnIndex, tidColumnIndex},
-                {kItemColumnIndex, itemColumnIndex}};
+        return {{kCsvConfig, csv_config},          {kInputFormat, +algos::InputFormat::singular},
+                {kMinimumSupport, minsup},         {kMinimumConfidence, minconf},
+                {kTIdColumnIndex, tidColumnIndex}, {kItemColumnIndex, itemColumnIndex}};
     }
 
-    static algos::StdParamsMap GetParamMap(double minsup, double minconf,
-                                           std::filesystem::path const& path, bool firstColumnTid,
-                                           char separator = ',', bool has_header = true) {
+    static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config, double minsup,
+                                           double minconf, bool firstColumnTid) {
         using namespace config::names;
-        return {{kCsvPath, path},
-                {kSeparator, separator},
-                {kHasHeader, has_header},
+        return {{kCsvConfig, csv_config},
                 {kInputFormat, +algos::InputFormat::tabular},
                 {kMinimumSupport, minsup},
                 {kMinimumConfidence, minconf},
                 {kFirstColumnTId, firstColumnTid}};
     }
 
-    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, std::filesystem::path const& path,
-            unsigned int tidColumnIndex, unsigned int itemColumnIndex, char separator = ',',
-            bool has_header = true) {
-        return algos::CreateAndLoadAlgorithm<algos::Apriori>(GetParamMap(
-                minsup, minconf, path, tidColumnIndex, itemColumnIndex, separator, has_header));
-    }
-
-    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(
-            double minsup, double minconf, std::filesystem::path const& path, bool firstColumnTid,
-            char separator = ',', bool has_header = true) {
+    template <typename... Args>
+    static std::unique_ptr<algos::ARAlgorithm> CreateAlgorithmInstance(Args&&... args) {
         return algos::CreateAndLoadAlgorithm<algos::Apriori>(
-                GetParamMap(minsup, minconf, path, firstColumnTid, separator, has_header));
+                GetParamMap(std::forward<Args>(args)...));
     }
 };
 
 TEST_F(ARAlgorithmTest, BookDataset) {
-    auto const path = test_data_dir / "transactional_data" / "rules-book.csv";
-    auto algorithm = CreateAlgorithmInstance(0.3, 0.5, path, 0, 1, ',', false);
+    auto algorithm = CreateAlgorithmInstance(krules_book, 0.3, 0.5, 0, 1);
     algorithm->Execute();
     auto const actual_frequent = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected_frequent = {{"Bread"},
@@ -133,8 +109,7 @@ TEST_F(ARAlgorithmTest, BookDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
-    auto const path = test_data_dir / "transactional_data" / "rules-presentation-extended.csv";
-    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
+    auto algorithm = CreateAlgorithmInstance(krules_presentation_extended, 0.6, 0, 0, 1);
     algorithm->Execute();
     auto const actual = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected = {{"Bread"},
@@ -153,8 +128,7 @@ TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationDataset) {
-    auto const path = test_data_dir / "transactional_data" / "rules-presentation.csv";
-    auto algorithm = CreateAlgorithmInstance(0.6, 0, path, 0, 1, ',', false);
+    auto algorithm = CreateAlgorithmInstance(krules_presentation, 0.6, 0, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -174,8 +148,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 }
 
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
-    auto const path = test_data_dir / "transactional_data" / "rules-synthetic-2.csv";
-    auto algorithm = CreateAlgorithmInstance(0.13, 1.00001, path, 0, 1, ',', false);
+    auto algorithm = CreateAlgorithmInstance(krules_synthetic_2, 0.13, 1.00001, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -208,8 +181,7 @@ TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
 }
 
 TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
-    auto const path = test_data_dir / "transactional_data" / "rules-kaggle-rows.csv";
-    auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
+    auto algorithm = CreateAlgorithmInstance(krules_kaggle_rows, 0.1, 0.5, true);
     algorithm->Execute();
 
     auto const actual_frequent = algorithm->GetFrequentList();
@@ -336,12 +308,11 @@ TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
 }
 
 TEST_F(ARAlgorithmTest, RepeatedExecutionConsistentResult) {
-    auto const path = test_data_dir / "transactional_data" / "rules-kaggle-rows.csv";
-    auto algorithm = CreateAlgorithmInstance(0.1, 0.5, path, true, ',', true);
+    auto algorithm = CreateAlgorithmInstance(krules_kaggle_rows, 0.1, 0.5, true);
     algorithm->Execute();
     auto first_result = ToSet(algorithm->GetArStringsList());
     for (int i = 0; i < 5; ++i) {
-        algos::ConfigureFromMap(*algorithm, GetParamMap(0.1, 0.5, path, true, ',', true));
+        algos::ConfigureFromMap(*algorithm, GetParamMap(krules_kaggle_rows, 0.1, 0.5, true));
         algorithm->Execute();
         CheckAssociationRulesListsEquality(algorithm->GetArStringsList(), first_result);
     }

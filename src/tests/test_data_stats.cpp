@@ -3,8 +3,8 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
-#include "table_config.h"
 
 namespace tests {
 namespace mo = model;
@@ -12,33 +12,24 @@ namespace mo = model;
 // to run tests:
 // ./Desbordante_test --gtest_filter="*TestDataStats*"
 
-static std::string const test_file_name = "TestDataStats.csv";
-
-static algos::StdParamsMap GetParamMap(std::string_view dataset, char const separator = ',',
-                                       bool const has_header = true,
+static algos::StdParamsMap GetParamMap(CSVConfig const &csv_config,
                                        bool const is_null_equal_null = true,
                                        ushort thread_num = 1) {
     using namespace config::names;
-    return {{kCsvPath, test_data_dir / dataset},
-            {kHasHeader, has_header},
-            {kSeparator, separator},
-            {kEqualNulls, is_null_equal_null},
-            {kThreads, thread_num}};
+    return {{kCsvConfig, csv_config}, {kEqualNulls, is_null_equal_null}, {kThreads, thread_num}};
 }
 
-static std::unique_ptr<algos::DataStats> MakeStatAlgorithm(std::string_view dataset,
-                                                           char const separator = ',',
-                                                           bool const has_header = true,
+static std::unique_ptr<algos::DataStats> MakeStatAlgorithm(CSVConfig const &csv_config,
                                                            bool const is_null_equal_null = true,
                                                            ushort thread_num = 1) {
     return algos::CreateAndLoadAlgorithm<algos::DataStats>(
-            GetParamMap(dataset, separator, has_header, is_null_equal_null, thread_num));
+            GetParamMap(csv_config, is_null_equal_null, thread_num));
 }
 
 class TestDataStats : public ::testing::TestCase {};
 
 TEST(TestDataStats, TestNullEmpties) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_FALSE(stats.GetMin(0).HasValue());
     EXPECT_FALSE(stats.GetMax(0).HasValue());
@@ -60,35 +51,35 @@ TEST(TestDataStats, TestNullEmpties) {
 }
 
 TEST(TestDataStats, TestGetNumberOfNulls) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::Statistic num_nulls_stat = stats_ptr->GetNumNulls(0);
     size_t num_nulls = mo::Type::GetValue<mo::Int>(num_nulls_stat.GetData());
     EXPECT_EQ(num_nulls, 5);
 }
 
 TEST(TestDataStats, TestGetColumnsWithUniqueValues) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
     std::vector<size_t> actual_cols = std::vector<size_t>{8, 9};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
 TEST(TestDataStats, TestGetNullColumns) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm("SimpleTypes.csv");
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kSimpleTypes);
     std::vector<size_t> expected_cols = stats_ptr->GetNullColumns();
     std::vector<size_t> actual_cols = std::vector<size_t>{1};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
 TEST(TestDataStats, TestGetColumnsWithNull) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm("TestMetric.csv", ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestMetric);
     std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithNull();
     std::vector<size_t> actual_cols = std::vector<size_t>{6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
 TEST(TestDataStats, TestMedianAD) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic median_ad_stat = stats.GetMedianAD(8);
     mo::Double median_ad = mo::Type::GetValue<mo::Double>(median_ad_stat.GetData());
@@ -96,7 +87,7 @@ TEST(TestDataStats, TestMedianAD) {
 }
 
 TEST(TestDataStats, TestGetMedian) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     auto test = [&stats = *stats_ptr](size_t index) {
         algos::Statistic median_stat = stats.GetMedian(index);
         mo::Double median = mo::Type::GetValue<mo::Double>(median_stat.GetData());
@@ -107,7 +98,7 @@ TEST(TestDataStats, TestGetMedian) {
 }
 
 TEST(TestDataStats, TestMeanAD) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic mean_ad_stat = stats.GetMeanAD(7);
     mo::Double mean_ad = mo::Type::GetValue<mo::Double>(mean_ad_stat.GetData());
@@ -116,7 +107,7 @@ TEST(TestDataStats, TestMeanAD) {
 
 TEST(TestDataStats, TestGeometricMean) {
     auto test = [](int index) {
-        std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+        std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
         algos::DataStats &stats = *stats_ptr;
         algos::Statistic geometric_mean_stat = stats.GetGeometricMean(index);
         mo::Double geometric_mean = mo::Type::GetValue<mo::Double>(geometric_mean_stat.GetData());
@@ -127,7 +118,7 @@ TEST(TestDataStats, TestGeometricMean) {
 }
 
 TEST(TestDataStats, TestSumOfSquares) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic sum_stat = stats.GetSumOfSquares(7);
     mo::Double sum = mo::Type::GetValue<mo::Double>(sum_stat.GetData());
@@ -135,7 +126,7 @@ TEST(TestDataStats, TestSumOfSquares) {
 }
 
 TEST(TestDataStats, TestNumberOfNegatives) {
-    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     algos::Statistic num_negatives_stat = stats.GetNumberOfNegatives(8);
     mo::Int num_negatives = mo::Type::GetValue<mo::Int>(num_negatives_stat.GetData());
@@ -143,19 +134,19 @@ TEST(TestDataStats, TestNumberOfNegatives) {
 }
 
 TEST(TestDataStats, TestGetNumberOfZeros) {
-    auto test = [](std::string const &file_name, size_t index, bool has_header = true) {
-        std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(file_name, ',', has_header);
+    auto test = [](CSVConfig const &csv_config, size_t index) {
+        std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(csv_config);
         algos::DataStats &stats = *stats_ptr;
         algos::Statistic num_zeros_stat = stats.GetNumberOfZeros(index);
         mo::Int num_zeros = mo::Type::GetValue<mo::Int>(num_zeros_stat.GetData());
         return num_zeros;
     };
-    EXPECT_EQ(5, test("BernoulliRelation.csv", 0));  // Int zeros
-    EXPECT_EQ(3, test(test_file_name, 7, false));    // Double zeros
+    EXPECT_EQ(5, test(kBernoulliRelation, 0));  // Int zeros
+    EXPECT_EQ(3, test(kTestDataStats, 7));      // Double zeros
 }
 
 TEST(TestDataStats, TestMinString) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(1);
     auto min = mo::Type::GetValue<mo::String>(min_stat.GetData());
@@ -163,7 +154,7 @@ TEST(TestDataStats, TestMinString) {
 }
 
 TEST(TestDataStats, TestMaxString) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(1);
     auto max = mo::Type::GetValue<mo::String>(max_stat.GetData());
@@ -171,7 +162,7 @@ TEST(TestDataStats, TestMaxString) {
 }
 
 TEST(TestDataStats, TestMinDouble) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto min_stat = stats.GetMin(2);
     auto min = mo::Type::GetValue<mo::Double>(min_stat.GetData());
@@ -179,7 +170,7 @@ TEST(TestDataStats, TestMinDouble) {
 }
 
 TEST(TestDataStats, TestMaxDouble) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto max_stat = stats.GetMax(2);
     auto max = mo::Type::GetValue<mo::Double>(max_stat.GetData());
@@ -187,20 +178,20 @@ TEST(TestDataStats, TestMaxDouble) {
 }
 
 TEST(TestDataStats, TestSumDouble) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto sum_stat = stats.GetSum(2);
     EXPECT_DOUBLE_EQ(212.61, mo::Type::GetValue<mo::Double>(sum_stat.GetData()));
 }
 
 TEST(TestDataStats, NumberOfValues) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(0, stats.NumberOfValues(0));
 }
 
 TEST(TestDataStats, TestDistinct) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto distinct = stats.Distinct(3);
     EXPECT_EQ(5, distinct);
@@ -208,19 +199,19 @@ TEST(TestDataStats, TestDistinct) {
 }
 
 TEST(TestDataStats, TestDistinctStringColumn) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_EQ(7, stats.Distinct(6));
 }
 
 TEST(TestDataStats, TestIsCategorial) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     EXPECT_TRUE(stats.IsCategorical(3, 5));
 }
 
 TEST(TestDataStats, TestGetQuantiles) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
 
     auto quantile_0_25 = stats.GetQuantile(0.25, 4);
@@ -236,7 +227,7 @@ TEST(TestDataStats, TestGetQuantiles) {
 }
 
 TEST(TestDataStats, TestGetAvg) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     auto avg_stat = stats.GetAvg(2);
     auto s = mo::Type::GetValue<mo::Double>(avg_stat.GetData());
@@ -244,7 +235,7 @@ TEST(TestDataStats, TestGetAvg) {
 }
 
 TEST(TestDataStats, TestShowSample) {
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     std::vector<std::vector<std::string>> sample = stats.ShowSample(1, 8, 1, 5);
     for (auto const &row : sample) {
@@ -258,14 +249,14 @@ TEST(TestDataStats, TestShowSample) {
 
 TEST(TestDataStats, TestShowAllStats) {
     // Mixed type statistics will be calculated here.
-    auto stats_ptr = MakeStatAlgorithm(test_file_name, ',', false);
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
     LOG(INFO) << stats.ToString();
 }
 
 TEST(TestDataStats, TestGetSTD) {
-    auto stats_ptr = MakeStatAlgorithm("BernoulliRelation.csv");
+    auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     algos::DataStats &stats = *stats_ptr;
     auto STD_stat = stats.GetCorrectedSTD(1);
     auto s = mo::Type::GetValue<mo::Double>(STD_stat.GetData());
@@ -274,7 +265,7 @@ TEST(TestDataStats, TestGetSTD) {
 }
 
 TEST(TestDataStats, TestGetSkewness) {
-    auto stats_ptr = MakeStatAlgorithm("BernoulliRelation.csv");
+    auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     algos::DataStats &stats = *stats_ptr;
     auto skewness_stat = stats.GetSkewness(1);
     auto s = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
@@ -283,7 +274,7 @@ TEST(TestDataStats, TestGetSkewness) {
 }
 
 TEST(TestDataStats, TestGetKurtosis) {
-    auto stats_ptr = MakeStatAlgorithm("BernoulliRelation.csv");
+    auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     algos::DataStats &stats = *stats_ptr;
     auto kurtosis_stat = stats.GetKurtosis(1);
     auto k = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
@@ -292,7 +283,7 @@ TEST(TestDataStats, TestGetKurtosis) {
 }
 
 TEST(TestDataStats, CorrectExecutionEmpty) {
-    auto stats_ptr = MakeStatAlgorithm("TestEmpty.csv");
+    auto stats_ptr = MakeStatAlgorithm(kTestEmpty);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
     EXPECT_EQ(stats.GetAllStats().size(), 0);
@@ -304,7 +295,7 @@ TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
         LOG(INFO) << "thread num = " << thread_num;
         auto start_time = std::chrono::system_clock::now();
-        algos::CsvStats stats(MakeConfig("EpicMeds.csv", '|', true, true, thread_num));
+        algos::CsvStats stats(MakeConfig(kEpicMeds, true, thread_num));
         auto elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time
@@ -318,12 +309,11 @@ TEST(TestCsvStats, TestDiffThreadNum) {
 #endif
 
 TEST(TestDataStats, MultipleExecutionConsistentResults) {
-    auto dataset_filename = "BernoulliRelation.csv";
-    auto stats_ptr = MakeStatAlgorithm(dataset_filename);
+    auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     stats_ptr->Execute();
     std::string first_res = stats_ptr->ToString();
     for (int i = 0; i < 5; ++i) {
-        algos::ConfigureFromMap(*stats_ptr, GetParamMap(dataset_filename));
+        algos::ConfigureFromMap(*stats_ptr, GetParamMap(kBernoulliRelation));
         stats_ptr->Execute();
         ASSERT_EQ(first_res, stats_ptr->ToString()) << "fail on run " << i;
     }
