@@ -50,6 +50,9 @@ CSVParser::CSVParser(std::filesystem::path const& path, char separator, bool has
     }
 }
 
+CSVParser::CSVParser(CSVConfig const& csv_config)
+    : CSVParser(csv_config.path, csv_config.separator, csv_config.has_header) {}
+
 void CSVParser::GetNext() {
     next_line_ = "";
     std::getline(source_, next_line_);

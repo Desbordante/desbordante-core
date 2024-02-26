@@ -12,6 +12,12 @@
 
 #include "model/table/idataset_stream.h"
 
+struct CSVConfig {
+    std::filesystem::path path;
+    char separator;
+    bool has_header;
+};
+
 class CSVParser : public model::IDatasetStream {
 private:
     std::ifstream source_;
@@ -37,6 +43,7 @@ public:
     CSVParser() = default;
     explicit CSVParser(std::filesystem::path const& path);
     CSVParser(std::filesystem::path const& path, char separator, bool has_header);
+    explicit CSVParser(CSVConfig const& csv_config);
 
     std::vector<std::string> GetNextRow() override;
     std::string GetUnparsedLine(unsigned long long const line_index);
