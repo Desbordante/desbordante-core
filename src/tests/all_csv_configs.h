@@ -98,4 +98,5 @@ extern CSVConfig const kTestDynamicFDUpdateBad1;
 extern CSVConfig const kTestDynamicFDUpdateBad2;
 extern CSVConfig const kTestDynamicFDUpdateBad3;
 extern CSVConfig const kTestDynamicFDUpdateBad4;
+extern CSVConfig const kTmpDC;
 }  // namespace tests

@@ -118,4 +118,5 @@ CSVConfig const kTestDynamicFDUpdateBad3 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad3.csv", ',', true);
 CSVConfig const kTestDynamicFDUpdateBad4 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
+CSVConfig const kTmpDC = CreateCsvConfig("tmp_dc.csv", ',', true);
 }  // namespace tests
