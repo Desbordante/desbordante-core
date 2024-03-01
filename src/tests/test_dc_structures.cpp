@@ -3,11 +3,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "all_csv_configs.h"
+#include "csv_parser/csv_parser.h"
+#include "dc/column_operand.h"
 #include "dc/operator.h"
-#include "types.h"
+#include "dc/predicate.h"
+#include "table/column_layout_typed_relation_data.h"
 
 namespace tests {
 
+namespace fs = std::filesystem;
 namespace mo = model;
 
 class TestOperatorInt : public ::testing::Test {
@@ -205,6 +210,28 @@ TEST(TestOperatorString, Compare) {
     test("sfsdf", "sfsdf", false, neq);
     test("abc", "cba", false, eq);
     test("abc", "cba", true, neq);
+}
+
+TEST(Predicate, PredicateCreatesCorrectly) {
+    CSVParser parser{kTmpDC};
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
+            mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
+    Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
+
+    mo::PredicatePtr s_a_less_t_b =
+            mo::GetPredicate(mo::Operator(mo::OperatorType::kLess), mo::ColumnOperand(first, true),
+                             mo::ColumnOperand(second, false));
+
+    EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 0, 1));
+    EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 1, 0));
+
+    mo::PredicatePtr s_a_neq_t_a =
+            GetPredicate(mo::Operator(mo::OperatorType::kUnequal), mo::ColumnOperand(first, true),
+                         mo::ColumnOperand(first, false));
+
+    EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 0, 1));
+    EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 1, 0));
 }
 
 }  // namespace tests
