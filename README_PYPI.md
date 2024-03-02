@@ -18,6 +18,7 @@ Try the web version at https://desbordante.unidata-platform.ru/
 - [Usage Example](#usage-example)
 - [Installation](#installation)
 - [Installation from sources](#installation-from-sources)
+- [Troubleshooting](#troubleshooting)
 - [Cite](#cite)
 - [Contacts and Q&A](#contacts-and-qa)
 
@@ -166,6 +167,14 @@ python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install .
 ```
+
+## Troubleshooting
+### No type hints in IDE
+If type hints don't work for you in Visual Studio Code, for example, then install stubs using the command:
+```sh
+pip install desbordate-stubs
+```
+**HOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
 
 ## Cite
 
