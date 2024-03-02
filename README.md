@@ -27,7 +27,7 @@ Desbordante can be used via three interfaces:
 
 A brief introduction into the tool and its use cases is presented [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Also, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers).
 
-# Console
+## Console
 
 Usage examples:
 1) Discover all exact functional dependencies in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default FD discovery algorithm (HyFD) is used.
@@ -205,7 +205,7 @@ python3 cli/cli.py --help
 
 ## Build instructions
 
-## Ubuntu
+### Ubuntu
 The following instructions were tested on Ubuntu 20.04+ LTS.
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
@@ -271,7 +271,9 @@ python3
 
 We use [easyloggingpp](https://github.com/abumq/easyloggingpp) in order to log (mostly debug) information in the core library. Python bindings search for a configuration file in the working directory, so to configure logging, create `logging.conf` in the directory from which desbordante will be imported. In particular, when running the CLI with `python3 ./relative/path/to/cli.py`, `logging.conf` should be located in `.`.
 
-#### Troubleshooting Git LFS
+## Troubleshooting
+
+### Git LFS
 If, when cloning the repo with git lfs installed, `git clone` produces the following (or similar) error:
 ```
 Cloning into 'Desbordante'...
@@ -290,6 +292,13 @@ delete the already cloned version, set `GIT_LFS_SKIP_SMUDGE=1` environment varia
 GIT_LFS_SKIP_SMUDGE=1 git clone git@github.com:Mstrutov/Desbordante.git
 ```
 
+### No type hints in IDE
+If type hints don't work for you in Visual Studio Code, for example, then install stubs using the command:
+```sh
+pip install desbordate-stubs
+```
+**HOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
+
 ## Cite
 If you use this software for research, please cite one of our papers:
 1) George Chernishev, et al. Solving Data Quality Problems with Desbordante: a Demo. CoRR abs/2307.14935 (2023).
@@ -300,4 +309,3 @@ If you use this software for research, please cite one of our papers:
 # Contacts and Q&A
 
 If you have any questions regarding the tool usage you can ask it in our [google group](https://groups.google.com/g/desbordante). To contact dev team email George Chernishev, Maxim Strutovsky or Nikita Bobrov.
-
