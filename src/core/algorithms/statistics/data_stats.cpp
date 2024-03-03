@@ -1,5 +1,7 @@
 #include "algorithms/statistics/data_stats.h"
 
+#include <set>
+
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
