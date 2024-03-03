@@ -2,9 +2,31 @@ name: Wheel
 on:
   pull_request:
     types: [ opened, synchronize, reopened ]
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
   push:
     branches:
       - main
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
   workflow_dispatch:
   release:
     types:
