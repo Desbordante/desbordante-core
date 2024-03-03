@@ -297,7 +297,7 @@ If type hints don't work for you in Visual Studio Code, for example, then instal
 ```sh
 pip install desbordate-stubs
 ```
-**HOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
+**NOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
 
 ## Cite
 If you use this software for research, please cite one of our papers:
