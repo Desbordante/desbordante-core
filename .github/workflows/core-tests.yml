@@ -2,9 +2,29 @@ name: CMake
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - pyproject.toml
   push:
     branches:
       - main
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - pyproject.toml
   workflow_dispatch:
 jobs:
   run_tests:
