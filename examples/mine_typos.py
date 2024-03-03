@@ -1,6 +1,8 @@
 """Typo mining example using Desbordante algorithms."""
 
+from functools import reduce
 from itertools import groupby, islice
+import operator
 
 from colorama import Style, Fore
 from jellyfish import levenshtein_distance
@@ -155,17 +157,18 @@ def print_display_df(display_df):
 
 
 def get_typo_candidates_df(df, display_df):
+    def get_mask(attr_info):
+        col_name, value = attr_info
+        return df[col_name] == value
+
     typo_candidate_rows = []
     typo_candidate_row_indices = []
 
-    assert all(col_name.replace('_', '').isalnum() for col_name in df.columns)
     for index, row in display_df.iterrows():
-        # Brittle, but good enough for an example. Breaks when there are
-        # unusual characters like a backslash in the column name.
-        query_data = df.query('and'.join(
-            f'`{name}` == {value!r}' for name, value in islice(row.items(), 1, None))).head(1)
-        typo_candidate_rows.append(query_data.values[0])
-        typo_candidate_row_indices.append(query_data.index.values[0])
+        mask = reduce(operator.and_, map(get_mask, islice(row.items(), 1, None)))
+        found_rows = df[mask]
+        typo_candidate_rows.append(found_rows.values[0])
+        typo_candidate_row_indices.append(found_rows.index.values[0])
     return pandas.DataFrame(typo_candidate_rows, columns=df.columns, index=typo_candidate_row_indices)
 
 
