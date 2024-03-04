@@ -11,6 +11,7 @@
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
+#include "config/tabular_data/input_tables_type.h"
 #include "parser/csv_parser/csv_parser.h"
 #include "py_util/create_dataframe_reader.h"
 #include "util/enum_to_available_values.h"
@@ -94,6 +95,19 @@ boost::any InputTableToAny(std::string_view option_name, py::handle obj) {
     return python_bindings::CreateDataFrameReader(obj);
 }
 
+boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
+    std::vector<py::handle> tables = 
+        CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
+    std::vector<config::InputTable> parsers;
+    for (auto const& table : tables)
+    {
+        if (py::isinstance<py::tuple>(table))
+            parsers.push_back(CreateCsvParser(option_name, py::cast<py::tuple>(table)));
+        else parsers.push_back(python_bindings::CreateDataFrameReader(table));
+    }
+    return parsers;
+}
+
 std::unordered_map<std::type_index, ConvFunc> const converters{
         NormalConvPair<bool>,
         NormalConvPair<double>,
@@ -108,6 +122,7 @@ std::unordered_map<std::type_index, ConvFunc> const converters{
         EnumConvPair<algos::InputFormat>,
         CharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
+        {typeid(config::InputTables), InputTablesToAny},
 };
 
 }  // namespace
