@@ -13,6 +13,7 @@
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
+#include "ind/bind_ind.h"
 
 INITIALIZE_EASYLOGGINGPP
 
@@ -31,7 +32,7 @@ PYBIND11_MODULE(desbordante, module) {
 
     for (auto bind_func :
          {BindMainClasses, BindDataTypes, BindFd, BindAr, BindUcc, BindAc, BindFdVerification,
-          BindMfdVerification, BindUccVerification, BindStatistics}) {
+          BindMfdVerification, BindUccVerification, BindStatistics, BindInd}) {
         bind_func(module);
     }
 }

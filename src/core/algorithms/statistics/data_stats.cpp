@@ -4,6 +4,8 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
+#include <set>
+
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
