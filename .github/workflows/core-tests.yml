@@ -7,7 +7,6 @@ on:
       - README.md
       - README_PYPI.md
       - cli/**
-      - examples/**
       - images/**
       - .gitignore
       - COPYING
@@ -20,7 +19,6 @@ on:
       - README.md
       - README_PYPI.md
       - cli/**
-      - examples/**
       - images/**
       - .gitignore
       - COPYING
