@@ -39,4 +39,6 @@ void IndexProvider<T>::Sort() {
     for (size_t i = 0; i < objects_.size(); ++i) indexes_[objects_[i]] = i;
 }
 
+template class IndexProvider<PredicatePtr>;
+
 }  // namespace model

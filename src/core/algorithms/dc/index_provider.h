@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "dc/base_provider.h"
+#include "dc/predicate.h"
 
 namespace model {
 
@@ -43,5 +44,7 @@ public:
 
     void Sort();
 };
+
+using PredicateIndexProvider = IndexProvider<PredicatePtr>;
 
 }  // namespace model
