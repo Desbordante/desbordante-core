@@ -10,17 +10,22 @@
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/indexes/similarity_index.h"
 #include "algorithms/md/hymd/indexes/similarity_matrix.h"
-#include "algorithms/md/hymd/lattice/full_lattice.h"
 #include "algorithms/md/hymd/lattice/validation_info.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "algorithms/md/hymd/recommendation.h"
 #include "algorithms/md/hymd/similarity_vector.h"
 #include "model/index.h"
+#include "util/worker_thread_pool.h"
 
 namespace algos::hymd {
 
 class SimilarityData {
+public:
+    using ColMatchesInfo = std::vector<
+            std::tuple<std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure>,
+                       model::Index, model::Index>>;
+
 private:
     indexes::RecordsInfo const* const records_info_;
     bool const single_table_;
@@ -42,12 +47,9 @@ public:
           single_table_(records_info_->OneTableGiven()),
           column_matches_info_(std::move(column_matches_info)) {}
 
-    static SimilarityData CreateFrom(
-            indexes::RecordsInfo* records_info,
-            std::vector<std::tuple<
-                    std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure>,
-                    model::Index, model::Index>>
-                    column_matches_info);
+    static SimilarityData CreateFrom(indexes::RecordsInfo* records_info,
+                                     ColMatchesInfo column_matches_info,
+                                     util::WorkerThreadPool& pool);
 
     [[nodiscard]] std::size_t GetColumnMatchNumber() const noexcept {
         return column_matches_info_.size();

@@ -6,11 +6,8 @@
 #include "model/index.h"
 
 namespace algos::hymd {
-struct InvalidatedRhs {
+struct MdElement {
     model::Index index;
-    model::md::DecisionBoundary old_bound;
-    model::md::DecisionBoundary new_bound;
+    model::md::DecisionBoundary decision_boundary;
 };
-
-using InvalidatedRhss = std::vector<InvalidatedRhs>;
 }  // namespace algos::hymd

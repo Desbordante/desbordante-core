@@ -8,6 +8,7 @@
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/table_identifiers.h"
+#include "algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "algorithms/md/hymd/utility/java_hash.h"
 #include "model/index.h"
 #include "util/bitset_utils.h"
@@ -20,6 +21,7 @@ using indexes::CompressedRecords;
 using indexes::PliCluster;
 using indexes::RecSet;
 using indexes::SimilarityMatrix;
+using utility::InvalidatedRhss;
 using RecommendationVector = std::vector<Recommendation>;
 using IndexVector = std::vector<Index>;
 using AllRecomVecs = std::vector<RecommendationVector>;
@@ -66,8 +68,7 @@ namespace algos::hymd {
 
 struct WorkingInfo {
     RecommendationVector& recommendations;
-    DecisionBoundary const old_bound;
-    Index const index;
+    MdElement const old_rhs;
     DecisionBoundary current_bound;
     std::size_t const col_match_values;
     DecisionBoundary interestingness_boundary;
@@ -84,14 +85,13 @@ struct WorkingInfo {
         return current_bound == kLowestBound && EnoughRecommendations();
     }
 
-    WorkingInfo(DecisionBoundary old_bound, Index col_match_index,
-                RecommendationVector& recommendations, std::size_t col_match_values,
-                CompressedRecords const& right_records, SimilarityMatrix const& similarity_matrix,
-                Index const left_index, Index const right_index)
+    WorkingInfo(MdElement old_rhs, RecommendationVector& recommendations,
+                std::size_t col_match_values, CompressedRecords const& right_records,
+                SimilarityMatrix const& similarity_matrix, Index const left_index,
+                Index const right_index)
         : recommendations(recommendations),
-          old_bound(old_bound),
-          index(col_match_index),
-          current_bound(old_bound),
+          old_rhs(old_rhs),
+          current_bound(old_rhs.decision_boundary),
           col_match_values(col_match_values),
           right_records(right_records),
           similarity_matrix(similarity_matrix),
@@ -144,12 +144,7 @@ class Validator::SetPairProcessor {
     Result MakeAllInvalidatedAndSupportedResult(std::vector<WorkingInfo> const& working,
                                                 AllRecomVecs&& recommendations) {
         for (WorkingInfo const& working_info : working) {
-            Index const index = working_info.index;
-            DecisionBoundary const old_bound = working_info.old_bound;
-            DecisionBoundary const new_bound = working_info.current_bound;
-            assert(old_bound != kLowestBound);
-            assert(new_bound == kLowestBound);
-            invalidated_.emplace_back(index, old_bound, kLowestBound);
+            invalidated_.PushBack(working_info.old_rhs, kLowestBound);
         }
         return {std::move(recommendations), std::move(invalidated_), false};
     }
@@ -157,11 +152,10 @@ class Validator::SetPairProcessor {
     Result MakeOutOfClustersResult(std::vector<WorkingInfo> const& working,
                                    AllRecomVecs&& recommendations, std::size_t support) {
         for (WorkingInfo const& working_info : working) {
-            Index const index = working_info.index;
-            DecisionBoundary const old_bound = working_info.old_bound;
             DecisionBoundary const new_bound = working_info.current_bound;
-            if (new_bound == old_bound) continue;
-            invalidated_.emplace_back(index, old_bound, new_bound);
+            MdElement old_rhs = working_info.old_rhs;
+            if (new_bound == old_rhs.decision_boundary) continue;
+            invalidated_.PushBack(old_rhs, new_bound);
         }
         return {std::move(recommendations), std::move(invalidated_), !Supported(support)};
     }
@@ -215,16 +209,18 @@ Validator::SetPairProcessor<PairProvider>::MakeWorkingAndRecs(
     for (Index index : indices) {
         RecommendationVector& last_recs = recommendations.emplace_back();
         auto const& [sim_info, left_index, right_index] = column_matches_info_[index];
-        working.emplace_back(rhs_bounds_[index], index, last_recs,
-                             validator_->GetLeftValueNum(index), right_records_,
+        MdElement rhs{index, rhs_bounds_[index]};
+        working.emplace_back(rhs, last_recs, validator_->GetLeftValueNum(index), right_records_,
                              sim_info.similarity_matrix, left_index, right_index);
     }
 
     auto for_each_working = [&](auto f) { std::for_each(working.begin(), working.end(), f); };
-    for_each_working([&](WorkingInfo const& w) { rhs_bounds_[w.index] = kLowestBound; });
+    for_each_working([&](WorkingInfo const& w) { rhs_bounds_[w.old_rhs.index] = kLowestBound; });
     std::vector<DecisionBoundary> const gen_max_rhs =
             validator_->lattice_->GetRhsInterestingnessBounds(lhs_bounds_, indices);
-    for_each_working([&](WorkingInfo const& w) { rhs_bounds_[w.index] = w.old_bound; });
+    for_each_working([&](WorkingInfo const& w) {
+        rhs_bounds_[w.old_rhs.index] = w.old_rhs.decision_boundary;
+    });
 
     auto it = working.begin();
     auto set_advance = [&it](DecisionBoundary bound) { it++->interestingness_boundary = bound; };
@@ -267,7 +263,7 @@ auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatchNoCheck(
             }
 
             preprocessing::Similarity const pair_similarity = it_right->second;
-            if (pair_similarity < working_info.old_bound) add_recommendations();
+            if (pair_similarity < working_info.old_rhs.decision_boundary) add_recommendations();
             if (pair_similarity < current_rhs_bound) current_rhs_bound = pair_similarity;
             if (current_rhs_bound <= working_info.interestingness_boundary) goto rhs_not_valid;
         }
@@ -482,13 +478,13 @@ public:
 };
 
 Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
-    DecisionBoundaryVector const& lhs_bounds = info.node_info->lhs_bounds;
-    DecisionBoundaryVector& rhs_bounds = *info.node_info->rhs_bounds;
+    DecisionBoundaryVector const& lhs_bounds = info.messenger->GetLhs();
+    DecisionBoundaryVector& rhs_bounds = info.messenger->GetRhs();
     // After a call to this method, info.rhs_indices must not be used
     boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
     IndexVector non_zero_indices = GetNonZeroIndices(lhs_bounds);
     std::size_t const cardinality = non_zero_indices.size();
-    InvalidatedRhss invalidated = GetAllocatedVector<InvalidatedRhs>(indices_bitset.count());
+    InvalidatedRhss invalidated;
     if (cardinality == 0) [[unlikely]] {
         util::ForEachIndex(indices_bitset, [&](auto index) {
             DecisionBoundary const old_bound = rhs_bounds[index];
@@ -496,7 +492,7 @@ Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
                     (*column_matches_info_)[index].similarity_info.lowest_similarity;
             if (old_bound == new_bound) [[unlikely]]
                 return;
-            invalidated.emplace_back(index, old_bound, new_bound);
+            invalidated.PushBack({index, old_bound}, new_bound);
         });
         return {{}, std::move(invalidated), !Supported(GetTotalPairsNum())};
     }
@@ -505,7 +501,7 @@ Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
         Index const non_zero_index = non_zero_indices.front();
         // Never happens when disjointedness pruning is on.
         if (indices_bitset.test_set(non_zero_index, false)) {
-            invalidated.emplace_back(non_zero_index, rhs_bounds[non_zero_index], kLowestBound);
+            invalidated.PushBack({non_zero_index, rhs_bounds[non_zero_index]}, kLowestBound);
         }
         SetPairProcessor<OneCardPairProvider> processor(this, invalidated, rhs_bounds, lhs_bounds,
                                                         non_zero_indices);
