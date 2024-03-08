@@ -130,4 +130,5 @@ CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
 CSVConfig const kAnimalsBeverages = CreateCsvConfig("animals_beverages.csv", ',', true);
 CSVConfig const kTestDC = CreateCsvConfig("TestDC.csv", ',', true);
 CSVConfig const kTestDC1 = CreateCsvConfig("TestDC1.csv", ',', true);
+CSVConfig const kTmpDC = CreateCsvConfig("tmp_dc.csv", ',', true);
 }  // namespace tests
