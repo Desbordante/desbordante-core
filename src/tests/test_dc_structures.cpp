@@ -10,6 +10,8 @@
 #include "dc/predicate.h"
 #include "dc/predicate_builder.h"
 #include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
+#include "test_dc_structures_correct_results.h"
 
 namespace tests {
 
@@ -218,9 +220,9 @@ TEST(Predicate, PredicateCreatesCorrectly) {
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
             mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
+    // Hack for the required singleton classes to be created (for the sake of test simplicity)
+    mo::PredicateBuilder builder(true);
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
-    // FIXME: temprorary to make test work
-    model::PredicateBuilder pbuilder;
 
     mo::PredicatePtr s_a_less_t_b =
             mo::GetPredicate(mo::Operator(mo::OperatorType::kLess), mo::ColumnOperand(first, true),
@@ -235,6 +237,71 @@ TEST(Predicate, PredicateCreatesCorrectly) {
 
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 0, 1));
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 1, 0));
+}
+
+TEST(FastADC, DifferentColumnPredicateSpace) {
+    CSVParser parser{kTestDC};
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
+            mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
+    mo::PredicateBuilder builder(true);
+
+    auto check_preds = [](auto const& actual, auto const& expected, std::string const& name) {
+        ASSERT_EQ(actual.size(), expected.size())
+                << "The number of " << name << " does not match the expected count.";
+
+        for (size_t i = 0; i < actual.size(); ++i) {
+            EXPECT_EQ(actual[i]->ToString(), expected[i])
+                    << name << " at index " << i << " does not match the expected value.";
+        }
+    };
+
+    builder.BuildPredicateSpace(col_data);
+
+    check_preds(builder.GetPredicates(), different_column_predicates_expected, "all predicates");
+    check_preds(builder.GetNumSingleColumnPredicates(), num_single_column_predicate_group_expected,
+                "numeric single column predicates");
+    check_preds(builder.GetNumCrossColumnPredicates(), num_cross_column_predicate_group_expected,
+                "numeric cross column predicates");
+    check_preds(builder.GetStrSingleColumnPredicates(), str_single_column_predicate_group_expected,
+                "string single column predicates");
+    check_preds(builder.GetStrCrossColumnPredicates(), str_cross_column_predicate_group_expected,
+                "string cross column predicates");
+}
+
+TEST(FastADC, InverseAndMutexMaps) {
+    CSVParser parser{kTestDC};
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
+            model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
+    model::PredicateBuilder builder(true);
+
+    builder.BuildPredicateSpace(col_data);
+
+    auto const& predicates = builder.GetPredicates();
+    auto const& inverse_map = builder.GetInverseMap();
+    for (size_t i = 0; i < predicates.size(); ++i) {
+        auto const& predicate = predicates[i];
+        auto inverse_idx = inverse_map[i];
+        auto const& inverse_predicate = predicates[inverse_idx];
+
+        EXPECT_EQ(predicate->GetOperator().GetInverse(), inverse_predicate->GetOperator())
+                << "Predicate at index " << i
+                << " does not have the correct inverse operator at index " << inverse_idx;
+    }
+
+    auto const& mutex_map = builder.GetMutexMap();
+    for (size_t i = 0; i < predicates.size(); ++i) {
+        auto const& predicate = predicates[i];
+        auto const& mutex_bits = mutex_map[i];
+
+        for (size_t bit = mutex_bits.find_first(); bit != boost::dynamic_bitset<>::npos;
+             bit = mutex_bits.find_next(bit)) {
+            EXPECT_TRUE(predicate->HasSameOperandsAs(*predicates[bit]))
+                    << "Predicate at index " << i << " is not mutex with predicate at index "
+                    << bit;
+        }
+    }
 }
 
 }  // namespace tests
