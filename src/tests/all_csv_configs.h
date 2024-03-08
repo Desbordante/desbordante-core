@@ -109,4 +109,5 @@ extern CSVConfig const kLineItem;
 extern CSVConfig const kAnimalsBeverages;
 extern CSVConfig const kTestDC;
 extern CSVConfig const kTestDC1;
+extern CSVConfig const kTmpDC;
 }  // namespace tests
