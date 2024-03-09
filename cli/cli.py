@@ -5,6 +5,7 @@ from collections import namedtuple
 from enum import StrEnum, auto
 from time import process_time
 from typing import Any, Callable
+from os import scandir
 
 import click
 import desbordante
@@ -15,6 +16,7 @@ class Task(StrEnum):
     afd = auto()
     od = auto()
     pfd = auto()
+    ind = auto()
     fd_verification = auto()
     afd_verification = auto()
     mfd_verification = auto()
@@ -34,6 +36,8 @@ class Algorithm(StrEnum):
     aid = auto()
     fastod = auto()
     order = auto()
+    spider = auto()
+    faida = auto()
     naive_fd_verifier = auto()
     naive_afd_verifier = auto()
     icde09_mfd_verifier = auto()
@@ -47,6 +51,9 @@ FILENAME = 'filename'
 VERBOSE = 'verbose'
 ERROR = 'error'
 ERROR_MEASURE = 'error_measure'
+TABLES = 'tables'
+TABLES_LIST = 'tables_list'
+TABLES_DIRECTORY = 'tables_directory'
 
 PRIMARY_HELP = '''The Desbordante data profiler is designed to help users
 discover or verify various types of patterns in data. These patterns are
@@ -102,9 +109,10 @@ Currently, the console version of Desbordante supports:
 2) Discovery of approximate functional dependencies
 3) Discovery of probabilistic functional dependencies
 4) Discovery of exact order dependencies (set-based and list-based axiomatization)
-5) Verification of exact functional dependencies
-6) Verification of approximate functional dependencies
-7) Verification of metric dependencies
+5) Discovery of inclusion dependencies
+6) Verification of exact functional dependencies
+7) Verification of approximate functional dependencies
+8) Verification of metric dependencies
 
 If you need other types, you should look into the C++ code, the Python
 bindings or the Web version.
@@ -117,7 +125,9 @@ bindings or the Web version.
     specify the algorithm to run, e.g., PYRO
 
 --table=TABLE
-    specify the input file to be processed by the algorithm
+    specify the input file to be processed by the algorithm.
+    Algorithms for some tasks (currently, only IND) accept multiple
+    input files; see --task=TASK for more information
 
 --is_null_equal_null=BOOLEAN
     specify whether two NULLs should be considered equal
@@ -164,6 +174,28 @@ dependencies. Probabilitistic functional dependencies are defined in the
 data integration systems” paper by Daisy Zhe Wang et al.
 Algorithms: PFDTANE
 Default: PFDTANE
+'''
+IND_HELP = '''Discover inclusion dependecies. For more information about
+inclusion dependecies, refer to the "Inclusion Dependency Discovery: An
+Experimental Evaluation of Thirteen Algorithms" by Falco Dürsch et al.
+Algorithms for this task accept multiple input files. You can use one of the
+following options:
+
+--tables=TABLE
+    specify input files to be processed by the algorithm.
+    For multiple values, specify multiple times
+    (e.g., --tables=TABLE_1 --tables=TABLE_2)
+
+--tables_list=FILENAME
+    specify file with list of input files (one on a line).
+    You can type --tables_list=- to use stdin
+
+--tables_directory=FILENAME, STRING, BOOLEAN
+    specify directory with input files.
+    separator and has_header are applied to all tables
+
+Algorithms: SPIDER, FAIDA
+Default: SPIDER
 '''
 FD_VERIFICATION_HELP = '''Verify whether a given exact functional dependency
 holds on the specified dataset. For more information about the primitive and
@@ -244,6 +276,16 @@ it is significantly faster (10x-100x). For more information, refer to the
 “Approximate Discovery of Functional Dependencies for Large Datasets” paper
 by T.Bleifus et al.
 '''
+SPIDER_HELP = '''A disk-backed unary inclusion dependency mining algorithm.
+For more information, refer to "Efficiently detecting inclusion dependencies"
+by J. Bauckmann et al.
+'''
+FAIDA_HELP = '''Both unary and n-ary inclusion dependency mining algorithm.
+Unlike all other algorithms, it is approximate, i.e. it can
+miss some dependencies or produce non-valid ones. In exchange,
+it is significantly faster. For more information, refer to "Fast approximate
+discovery of inclusion dependencies" by S. Kruse et al.
+'''
 FASTOD_HELP = '''A modern algorithm for discovery of canonical order 
 dependencies. For more information, refer to the “Effective and complete 
 discovery of order dependencies via set-based axiomatization” paper by 
@@ -285,6 +327,7 @@ TASK_HELP_PAGES = {
     Task.afd: AFD_HELP,
     Task.od: OD_HELP,
     Task.pfd: PFD_HELP,
+    Task.ind: IND_HELP,
     Task.fd_verification: FD_VERIFICATION_HELP,
     Task.afd_verification: AFD_VERIFICATION_HELP,
     Task.mfd_verification: MFD_VERIFICATION_HELP
@@ -304,6 +347,8 @@ ALGO_HELP_PAGES = {
     Algorithm.aid: AID_HELP,
     Algorithm.fastod: FASTOD_HELP,
     Algorithm.order: ORDER_HELP,
+    Algorithm.spider: SPIDER_HELP,
+    Algorithm.faida: FAIDA_HELP,
     Algorithm.naive_fd_verifier: NAIVE_FD_VERIFIER_HELP,
     Algorithm.naive_afd_verifier: NAIVE_AFD_VERIFIER_HELP,
     Algorithm.icde09_mfd_verifier: ICDE09_MFD_VERIFIER_HELP
@@ -322,6 +367,8 @@ TASK_INFO = {
     Task.od: TaskInfo([Algorithm.fastod, Algorithm.order],
                       Algorithm.fastod),
     Task.pfd: TaskInfo([Algorithm.pfdtane], Algorithm.pfdtane),
+    Task.ind: TaskInfo([Algorithm.spider, Algorithm.faida],
+                       Algorithm.spider),
     Task.fd_verification: TaskInfo([Algorithm.naive_fd_verifier],
                                    Algorithm.naive_fd_verifier),
     Task.afd_verification: TaskInfo([Algorithm.naive_afd_verifier],
@@ -344,6 +391,8 @@ ALGOS = {
     Algorithm.aid: desbordante.fd.algorithms.Aid,
     Algorithm.fastod: desbordante.od.algorithms.Fastod,
     Algorithm.order: desbordante.od.algorithms.Order,
+    Algorithm.spider: desbordante.ind.algorithms.Spider,
+    Algorithm.faida: desbordante.ind.algorithms.Faida,
     Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
     Algorithm.naive_afd_verifier: desbordante.afd_verification.algorithms.FDVerifier,
     Algorithm.icde09_mfd_verifier: desbordante.mfd_verification.algorithms.MetricVerifier
@@ -390,6 +439,35 @@ def check_error_option_presence(task: str | None, error: str | None) -> None:
 def check_error_measure_option_presence(task: str | None, error_measure: str | None) -> None:
     if task == Task.pfd and error_measure is None:
         click.echo(f"ERROR: Missing option '{ERROR_MEASURE}'.")
+        sys.exit(1)
+
+
+def parse_tables_list_file(file: click.File) \
+        -> list[tuple[str, str, bool]]:
+    try:
+        result = []
+        for line_num, line in enumerate(file.readlines(), start=1):
+            table_tuple = line.rsplit(maxsplit=2)
+            if len(table_tuple) != 3:
+                click.echo(
+                    f'ERROR: Invalid format of table description on line {line_num}: {line}')
+                sys.exit(1)
+            filename, separator, has_header_str = table_tuple
+            result.append((filename, separator, bool(has_header_str)))
+        return result
+    except OSError as exc:
+        click.echo(exc)
+        sys.exit(1)
+
+
+def parse_tables_directory(tp: tuple[click.Path, str, bool]) \
+        -> list[tuple[str, str, bool]]:
+    dir_name, separator, has_header = tp
+    try:
+        entries = scandir(dir_name)
+        return [(dir_entry.path, separator, has_header) for dir_entry in entries]
+    except OSError as exc:
+        click.echo(exc)
         sys.exit(1)
 
 
@@ -441,6 +519,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_asc_ods() + algo.get_desc_ods() + algo.get_simple_ods()
             case Algorithm.order:
                 result = algo.get_list_ods()
+            case algo_name if algo_name in TASK_INFO[Task.ind].algos:
+                result = algo.get_inds()
             case _:
                 assert False, 'No matching get_result function.'
         return result
@@ -478,7 +558,10 @@ def print_result(result: Any, filename: str | None) -> None:
 
 
 def print_unused_opts(used_opts: set, provided_opts: set) -> None:
-    unused_opts = provided_opts - (used_opts | {TASK, ALGO, VERBOSE, FILENAME})
+    unused_opts = provided_opts - (used_opts | {TASK, ALGO, VERBOSE, FILENAME} |
+                                   ({TABLES_LIST, TABLES_DIRECTORY}
+                                    if TABLES in used_opts
+                                    else set()))
     if unused_opts:
         click.echo(f'Unused options: {unused_opts}')
 
@@ -496,7 +579,7 @@ def print_algo_help_page(algo_name: str) -> None:
     algo = ALGOS[Algorithm(algo_name)]()
     help_info = ''
     for opt in algo.get_possible_options():
-        if opt not in ('table', 'is_null_equal_null'):
+        if opt not in ('table', TABLES, 'is_null_equal_null'):
             help_info += get_option_help_info(opt, algo)
     click.echo(f'{ALGO_HELP_PAGES[Algorithm(algo_name)]}{help_info}')
 
@@ -534,6 +617,18 @@ def get_option_type_info() -> dict[str, Any]:
     return option_type_info
 
 
+def process_tables_options(opts: dict[str, Any], algo_name: str) -> dict[str, Any]:
+    result = opts.copy()
+
+    for option_name, parse_func in ((TABLES_LIST, parse_tables_list_file),
+            (TABLES_DIRECTORY, parse_tables_directory)):
+        value = result.pop(option_name)
+        if not is_omitted(value):
+            result[TABLES] = list(result[TABLES]) + parse_func(value)
+    
+    return result
+
+
 def algos_options() -> Callable:
     option_type_info = get_option_type_info()
 
@@ -542,11 +637,14 @@ def algos_options() -> Callable:
                 in option_type_info.items():
             arg = f'--{opt_name}'
             if opt_main_type == list:
-                click.option(arg, multiple=True,
+                if opt_additional_types[0] == desbordante.data_types.Table:
+                    click.option(arg, type=(str, str, bool),
+                                 multiple=True)(func)
+                else:
+                    click.option(arg, multiple=True,
                              type=opt_additional_types[0])(func)
             elif opt_main_type == desbordante.data_types.Table:
-                click.option(arg, type=(str, str, bool),
-                             required=True)(func)
+                click.option(arg, type=(str, str, bool))(func)
             else:
                 click.option(arg, type=opt_main_type)(func)
         return func
@@ -568,6 +666,9 @@ def algos_options() -> Callable:
               callback=get_algorithm, is_eager=True)
 @click.option(f'--{FILENAME}', type=str)
 @click.option(f'--{VERBOSE}', is_flag=True)
+@click.option(f'--{TABLES_LIST}', type=click.File('r'))
+@click.option(f'--{TABLES_DIRECTORY}', type=(click.Path(exists=True, file_okay=False,
+               dir_okay=True, resolve_path=True, allow_dash=False), str, bool))
 @algos_options()
 def desbordante_cli(**kwargs: Any) -> None:
     """Takes in options from console as a dictionary, sets these options
@@ -585,10 +686,12 @@ def desbordante_cli(**kwargs: Any) -> None:
     check_error_option_presence(curr_task, error_opt)
     check_error_measure_option_presence(curr_task, error_measure_opt)
 
+    opts = process_tables_options(kwargs, curr_algo_name)
+
     start_point = process_time()
-    used_opts = set_algo_options(curr_algo, kwargs)
+    used_opts = set_algo_options(curr_algo, opts)
     curr_algo.load_data()
-    used_opts |= set_algo_options(curr_algo, kwargs)
+    used_opts |= set_algo_options(curr_algo, opts)
     provided_options = get_provided_options(kwargs)
     print_unused_opts(used_opts, set(provided_options.keys()))
     result = get_algo_result(curr_algo, curr_algo_name)

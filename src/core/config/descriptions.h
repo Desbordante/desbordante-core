@@ -86,8 +86,12 @@ constexpr auto kDBumpsLimit = "max considered intervals amount. Pass 0 to remove
 constexpr auto kDTimeLimitSeconds = "max running time of the algorithm. Pass 0 to remove limit";
 constexpr auto kDIterationsLimit = "limit for iterations of sampling";
 constexpr auto kDACSeed = "seed, needed for choosing a data sample";
-constexpr auto kDHllAccuracy = "HyperLogLog approximation accuracy";
-constexpr auto kDSampleSize = "Size of a table sample";
+constexpr auto kDHllAccuracy =
+        "HyperLogLog approximation accuracy. Must be positive\n"
+        "Closer to 0 - higher accuracy, more memory needed and slower the algorithm.\n";
+constexpr auto kDSampleSize =
+        "Size of a table sample. Greater value - more correct answers, but higher memory "
+        "consumption.\n Applies to all tables";
 constexpr auto kDFindNary = "Detect n-ary inclusion dependencies [true|false]";
 constexpr auto kDIgnoreNullCols =
         "Ignore INDs which contain columns filled only with NULLs. May increase "
