@@ -1,3 +1,4 @@
+[![Downloads](https://static.pepy.tech/badge/desbordante)](https://pepy.tech/project/desbordante)
 
 <p>
    <img src="https://github.com/Mstrutov/Desbordante/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
@@ -259,7 +260,7 @@ The `./build.sh` script generates the following file structure in `/path/to/Desb
 The `input_data` directory contains several .csv files that are used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
 ```sh
 cd build/target
-./Desbordante_test
+./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
 ```
 
 `desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
