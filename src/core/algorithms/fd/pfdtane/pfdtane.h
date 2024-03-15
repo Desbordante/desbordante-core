@@ -15,12 +15,11 @@ class PFDTane : public PliBasedFDAlgorithm {
 private:
     config::ErrorType max_fd_error_;
     config::ErrorType max_ucc_error_;
-    config::MaxLhsType max_lhs_;
     ErrorMeasure error_measure_ = +ErrorMeasure::per_tuple;
 
     void ResetStateFd() final;
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
+    void MakeExecuteOptsAvailableFDInternal() final;
     void Prune(model::LatticeLevel* level);
     void ComputeDependencies(model::LatticeLevel* level);
     unsigned long long ExecuteInternal() final;
