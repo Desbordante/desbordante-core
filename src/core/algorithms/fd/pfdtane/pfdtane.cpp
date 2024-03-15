@@ -70,12 +70,10 @@ config::ErrorType PFDTane::CalculateFdError(model::PositionListIndex const* x_pl
 void PFDTane::RegisterOptions() {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
     RegisterOption(config::kErrorMeasureOpt(&error_measure_));
-    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
 }
 
-void PFDTane::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kErrorMeasureOpt.GetName(),
-                          config::kMaxLhsOpt.GetName()});
+void PFDTane::MakeExecuteOptsAvailableFDInternal() {
+    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kErrorMeasureOpt.GetName()});
 }
 
 void PFDTane::ResetStateFd() {}
