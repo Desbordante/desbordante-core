@@ -30,15 +30,13 @@ void Pyro::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::kErrorOpt(&parameters_.max_ucc_error));
-    RegisterOption(config::kMaxLhsOpt(&parameters_.max_lhs));
     RegisterOption(config::kThreadNumberOpt(&parameters_.parallelism));
     RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
-void Pyro::MakeExecuteOptsAvailable() {
+void Pyro::MakeExecuteOptsAvailableFDInternal() {
     using namespace config::names;
-    MakeOptionsAvailable({config::kMaxLhsOpt.GetName(), config::kErrorOpt.GetName(),
-                          config::kThreadNumberOpt.GetName(), kSeed});
+    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kThreadNumberOpt.GetName(), kSeed});
 }
 
 void Pyro::ResetStateFd() {
