@@ -6,6 +6,7 @@
 namespace model {
 
 class PredicateBuilder;
+class PliShardBuilder;
 
 template <typename Derived>
 class BaseProvider {
@@ -18,6 +19,7 @@ protected:
     // which will create/clear singletons and call PredicateBuilder, PliShardBuiler,
     // SomeOtherBuilder in order..
     friend PredicateBuilder;
+    friend PliShardBuilder;
 
     static void CreateInstance() {
         if (instance_) {
