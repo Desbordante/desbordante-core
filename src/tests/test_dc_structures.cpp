@@ -7,6 +7,8 @@
 #include "csv_parser/csv_parser.h"
 #include "dc/column_operand.h"
 #include "dc/operator.h"
+#include "dc/utils.h"
+#include "dc/pli_shard.h"
 #include "dc/predicate.h"
 #include "dc/predicate_builder.h"
 #include "table/column_layout_typed_relation_data.h"
@@ -300,6 +302,55 @@ TEST(FastADC, InverseAndMutexMaps) {
             EXPECT_TRUE(predicate->HasSameOperandsAs(*predicates[bit]))
                     << "Predicate at index " << i << " is not mutex with predicate at index "
                     << bit;
+        }
+    }
+}
+
+template <typename T>
+void AssertClusterValues(model::TypedColumnData const& column, std::vector<size_t> const& cluster) {
+    ASSERT_FALSE(cluster.empty()) << "Cluster is unexpectedly empty.";
+
+    auto expected = model::GetValue<T>(column, cluster.front());
+    for (auto row_index : cluster) {
+        auto actual = model::GetValue<T>(column, row_index);
+        ASSERT_EQ(expected, actual) << "Mismatch in cluster for key at row " << row_index;
+    }
+}
+
+TEST(FastADC, PliShards) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+    model::PliShardBuilder builder;
+
+    builder.BuildPliShards(col_data);
+    auto& pli_shards = builder.GetPliShards();
+
+    for (auto const& shard : pli_shards) {
+        for (size_t i = 0; i < shard.plis.size(); ++i) {
+            auto const& pli = shard.plis[i];
+            auto const& keys = pli.GetKeys();
+            auto const& clusters = pli.GetClusters();
+            auto const& column = col_data[i];
+
+            for (auto key : keys) {
+                auto const& cluster = clusters[pli.GetClusterIdByKey(key)];
+                if (cluster.size() <= 1) continue;
+
+                switch (column.GetTypeId()) {
+                    case mo::TypeId::kInt:
+                        AssertClusterValues<int64_t>(column, cluster);
+                        break;
+                    case mo::TypeId::kDouble:
+                        AssertClusterValues<double>(column, cluster);
+                        break;
+                    case mo::TypeId::kString:
+                        AssertClusterValues<std::string>(column, cluster);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }
