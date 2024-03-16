@@ -7,12 +7,15 @@
 #include <vector>
 
 #include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/hymd/column_match_info.h"
 #include "algorithms/md/hymd/decision_boundary_vector.h"
-#include "algorithms/md/hymd/lattice/lattice_child_array.h"
+#include "algorithms/md/hymd/lattice/md.h"
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
+#include "algorithms/md/hymd/lattice/md_node.h"
+#include "algorithms/md/hymd/lattice/node_base.h"
 #include "algorithms/md/hymd/lattice/single_level_func.h"
+#include "algorithms/md/hymd/lattice/support_node.h"
 #include "algorithms/md/hymd/md_element.h"
+#include "algorithms/md/hymd/md_lhs.h"
 #include "algorithms/md/hymd/rhss.h"
 #include "algorithms/md/hymd/similarity_vector.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
@@ -22,71 +25,63 @@ namespace algos::hymd::lattice {
 
 class MdLattice {
 private:
-    struct MdNode {
-        LatticeChildArray<MdNode> children;
-        DecisionBoundaryVector rhs_bounds;
+    class GeneralizationHelper;
 
-        MdNode(std::size_t attributes_num, std::size_t children_number)
-            : children(children_number), rhs_bounds(attributes_num) {}
+    using MdBoundMap = MdNode::BoundMap;
+    using MdOptionalChild = MdNode::OptionalChild;
+    using MdNodeChildren = MdNode::Children;
 
-        explicit MdNode(DecisionBoundaryVector rhs)
-            : children(rhs.size()), rhs_bounds(std::move(rhs)) {}
-    };
-
-    struct SupportNode {
-        LatticeChildArray<SupportNode> children;
-        bool is_unsupported = false;
-
-        SupportNode(std::size_t children_number) : children(children_number) {}
-    };
-
-    class GeneralizationChecker;
-
-    using MdBoundMap = BoundaryMap<MdNode>;
-    using MdOptionalChild = std::optional<MdBoundMap>;
-    using MdNodeChildren = LatticeChildArray<MdNode>;
-
-    using SupportNodeChildren = LatticeChildArray<SupportNode>;
+    using SupportBoundMap = SupportNode::BoundMap;
+    using SupportOptionalChild = SupportNode::OptionalChild;
+    using SupportNodeChildren = SupportNode::Children;
 
 public:
     class MdRefiner {
         MdLattice* lattice_;
         SimilarityVector const* sim_;
-        DecisionBoundaryVector lhs_;
-        DecisionBoundaryVector* rhs_;
+        MdLatticeNodeInfo node_info_;
         utility::InvalidatedRhss invalidated_;
 
     public:
-        MdRefiner(MdLattice* lattice, SimilarityVector const* sim, DecisionBoundaryVector lhs,
-                  DecisionBoundaryVector* rhs, utility::InvalidatedRhss invalidated)
+        MdRefiner(MdLattice* lattice, SimilarityVector const* sim, MdLatticeNodeInfo node_info,
+                  utility::InvalidatedRhss invalidated)
             : lattice_(lattice),
               sim_(sim),
-              lhs_(std::move(lhs)),
-              rhs_(rhs),
+              node_info_(std::move(node_info)),
               invalidated_(std::move(invalidated)) {}
+
+        MdLhs const& GetLhs() const {
+            return node_info_.lhs;
+        }
+
+        void ZeroRhs() {
+            node_info_.ZeroRhs();
+        }
 
         void Refine();
     };
 
     class MdVerificationMessenger {
         MdLattice* lattice_;
-        DecisionBoundaryVector lhs_;
-        DecisionBoundaryVector* rhs_;
+        MdLatticeNodeInfo node_info_;
 
     public:
-        MdVerificationMessenger(MdLattice* lattice, DecisionBoundaryVector lhs,
-                                DecisionBoundaryVector* rhs)
-            : lattice_(lattice), lhs_(std::move(lhs)), rhs_(rhs) {}
+        MdVerificationMessenger(MdLattice* lattice, MdLatticeNodeInfo node_info)
+            : lattice_(lattice), node_info_(std::move(node_info)) {}
 
-        DecisionBoundaryVector const& GetLhs() const {
-            return lhs_;
+        MdLhs const& GetLhs() const {
+            return node_info_.lhs;
         }
 
         DecisionBoundaryVector& GetRhs() {
-            return *rhs_;
+            return *node_info_.rhs_bounds;
         }
 
         void MarkUnsupported();
+
+        void ZeroRhs() {
+            node_info_.ZeroRhs();
+        }
 
         void LowerAndSpecialize(utility::InvalidatedRhss const& invalidated);
     };
@@ -99,65 +94,57 @@ private:
     // Is there a way to define a level in such a way that one cannot use each decision boundary
     // independently to determine an MD's level but the lattice traversal algorithms still works?
     SingleLevelFunc const get_single_level_;
-    std::vector<ColumnMatchInfo> const* const column_matches_info_;
+    std::vector<std::vector<model::md::DecisionBoundary>> const* const lhs_bounds_;
     bool const prune_nondisjoint_;
 
-    bool HasLhsGeneralization(MdNode const& node, DecisionBoundaryVector const& lhs_bounds,
-                              MdElement rhs, model::Index node_index,
-                              model::Index start_index) const;
+    [[nodiscard]] bool HasGeneralization(Md const& md) const;
 
     void GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>& collected,
-                  DecisionBoundaryVector& cur_node_lhs_bounds, model::Index cur_node_index,
-                  std::size_t level_left);
-
-    [[nodiscard]] bool HasGeneralization(MdNode const& node,
-                                         DecisionBoundaryVector const& lhs_bounds, MdElement rhs,
-                                         model::Index cur_node_index) const;
+                  MdLhs& cur_node_lhs, model::Index cur_node_index, std::size_t level_left);
 
     void RaiseInterestingnessBounds(
-            MdNode const& cur_node, DecisionBoundaryVector const& lhs_bounds,
+            MdNode const& cur_node, MdLhs const& lhs,
             std::vector<model::md::DecisionBoundary>& cur_interestingness_bounds,
             model::Index cur_node_index, std::vector<model::Index> const& indices) const;
 
     void TryAddRefiner(std::vector<MdRefiner>& found, DecisionBoundaryVector& rhs,
-                       SimilarityVector const& similarity_vector,
-                       DecisionBoundaryVector const& cur_node_lhs_bounds);
+                       SimilarityVector const& similarity_vector, MdLhs const& cur_node_lhs);
     void CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
-                                    DecisionBoundaryVector& cur_node_lhs_bounds,
-                                    SimilarityVector const& similarity_vector,
+                                    MdLhs& cur_node_lhs, SimilarityVector const& similarity_vector,
                                     model::Index cur_node_index);
 
-    void GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected,
-                DecisionBoundaryVector& cur_node_lhs_bounds, model::Index this_node_index);
+    bool IsUnsupported(MdLhs const& lhs) const;
 
-    void AddNewMinimal(MdNode& cur_node, DecisionBoundaryVector const& lhs_bounds, MdElement rhs,
-                       model::Index cur_node_index);
+    bool IsUnsupported(LhsSpecialization const& lhs_specialization) const;
 
-    void UpdateMaxLevel(DecisionBoundaryVector const& lhs_bounds);
+    void UpdateMaxLevel(LhsSpecialization const& lhs_specialization);
+    void AddNewMinimal(MdNode& cur_node, MdSpecialization const& md, model::Index cur_node_index);
+    MdNode* TryGetNextNode(MdSpecialization const& md, GeneralizationHelper& helper,
+                           model::Index cur_node_index, model::Index const next_node_index,
+                           model::md::DecisionBoundary const next_lhs_bound);
+    void AddIfMinimal(MdSpecialization const& md);
 
-    MdNode* ReturnNextNode(DecisionBoundaryVector const& lhs_bounds, GeneralizationChecker& checker,
-                           model::Index cur_node_index, model::Index next_node_index);
+    static auto SetUnsupAction() noexcept {
+        return [](SupportNode* node) { node->is_unsupported = true; };
+    }
 
-    bool IsUnsupported(SupportNode const& cur_node, DecisionBoundaryVector const& lhs_bounds,
-                       model::Index cur_node_index) const;
-    void MarkNewLhs(SupportNode& cur_node, DecisionBoundaryVector const& lhs_bounds,
-                    model::Index cur_node_index);
+    // Generalization check, specialization (add if minimal)
+    void MarkNewLhs(SupportNode& cur_node, MdLhs const& lhs, model::Index cur_node_index);
+    void MarkUnsupported(MdLhs const& lhs);
 
     [[nodiscard]] std::optional<model::md::DecisionBoundary> SpecializeOneLhs(
             model::Index col_match_index, model::md::DecisionBoundary lhs_bound) const;
+    void Specialize(MdLhs const& lhs, SimilarityVector const& specialize_past, Rhss const& rhss);
+    void Specialize(MdLhs const& lhs, Rhss const& rhss);
 
-    void AddIfMinimal(DecisionBoundaryVector const& lhs_bounds, MdElement rhs);
-    bool IsUnsupported(DecisionBoundaryVector const& lhs_bounds) const;
-
-    [[nodiscard]] bool HasGeneralization(DecisionBoundaryVector const& lhs_bounds,
-                                         MdElement rhs) const;
-
-    void MarkUnsupported(DecisionBoundaryVector const& lhs_bounds);
-
-    void Specialize(DecisionBoundaryVector& lhs_bounds,
-                    DecisionBoundaryVector const& specialize_past, Rhss const& rhss);
+    void GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected, MdLhs& cur_node_lhs,
+                model::Index this_node_index);
 
 public:
+    explicit MdLattice(std::size_t column_matches_size, SingleLevelFunc single_level_func,
+                       std::vector<std::vector<model::md::DecisionBoundary>> const& lhs_bounds,
+                       bool prune_nondisjoint);
+
     std::size_t GetColMatchNumber() const noexcept {
         return column_matches_size_;
     }
@@ -166,16 +153,11 @@ public:
         return max_level_;
     }
 
-    std::vector<MdVerificationMessenger> GetLevel(std::size_t level);
     std::vector<model::md::DecisionBoundary> GetRhsInterestingnessBounds(
-            DecisionBoundaryVector const& lhs_bounds,
-            std::vector<model::Index> const& indices) const;
+            MdLhs const& lhs, std::vector<model::Index> const& indices) const;
+    std::vector<MdVerificationMessenger> GetLevel(std::size_t level);
     std::vector<MdRefiner> CollectRefinersForViolated(SimilarityVector const& similarity_vector);
     std::vector<MdLatticeNodeInfo> GetAll();
-
-    explicit MdLattice(std::size_t column_matches_size, SingleLevelFunc single_level_func,
-                       std::vector<ColumnMatchInfo> const& column_matches_info,
-                       bool prune_nondisjoint);
 };
 
 }  // namespace algos::hymd::lattice
