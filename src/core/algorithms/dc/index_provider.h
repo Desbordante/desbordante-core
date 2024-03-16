@@ -47,4 +47,11 @@ public:
 
 using PredicateIndexProvider = IndexProvider<PredicatePtr>;
 
+// FIXME: I don't like it... looks really wrong.
+// I guess something like in FastOD should be done to hash all columns of the table.
+// But it gets the job done, so it's fine by now
+using IntIndexProvider = IndexProvider<int64_t>;
+using DoubleIndexProvider = IndexProvider<double>;
+using StringIndexProvider = IndexProvider<std::string>;
+
 }  // namespace model
