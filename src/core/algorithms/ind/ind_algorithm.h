@@ -6,6 +6,7 @@
 
 #include "algorithms/algorithm.h"
 #include "ind.h"
+#include "model/table/relational_schema.h"
 #include "tabular_data/input_tables_type.h"
 #include "util/primitive_collection.h"
 
@@ -17,6 +18,11 @@ public:
 
 private:
     util::PrimitiveCollection<IND> ind_collection_;
+    std::shared_ptr<std::vector<RelationalSchema>> schemas_;
+
+    void LoadDataInternal() final;
+
+    virtual void LoadINDAlgorithmDataInternal() = 0;
 
     void ResetState() final {
         ind_collection_.Clear();
@@ -34,7 +40,7 @@ protected:
 
     virtual void RegisterIND(std::shared_ptr<model::ColumnCombination> lhs,
                              std::shared_ptr<model::ColumnCombination> rhs) {
-        ind_collection_.Register(std::move(lhs), std::move(rhs));
+        ind_collection_.Register(std::move(lhs), std::move(rhs), schemas_);
     }
 
     virtual void RegisterIND(IND ind) {

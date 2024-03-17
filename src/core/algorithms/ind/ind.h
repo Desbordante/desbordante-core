@@ -4,6 +4,8 @@
 #include <string>
 
 #include "model/table/column_combination.h"
+#include "model/table/relational_schema.h"
+#include "model/table/vertical.h"
 
 namespace model {
 
@@ -13,10 +15,12 @@ class IND {
 private:
     std::shared_ptr<ColumnCombination> lhs_;
     std::shared_ptr<ColumnCombination> rhs_;
+    std::shared_ptr<std::vector<RelationalSchema>> schemas_;
 
 public:
-    IND(std::shared_ptr<ColumnCombination> lhs, std::shared_ptr<ColumnCombination> rhs)
-        : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
+    IND(std::shared_ptr<ColumnCombination> lhs, std::shared_ptr<ColumnCombination> rhs,
+        std::shared_ptr<std::vector<RelationalSchema>> schemas)
+        : lhs_(std::move(lhs)), rhs_(std::move(rhs)), schemas_(std::move(schemas)) {}
 
     ColumnCombination const& GetLhs() const {
         return *lhs_;
@@ -26,7 +30,9 @@ public:
         return *rhs_;
     }
 
-    std::string ToString() const;
+    std::string ToShortString() const;
+
+    std::string ToLongString() const;
 };
 
 }  // namespace model

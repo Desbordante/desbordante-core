@@ -16,7 +16,9 @@ void BindInd(py::module_& main_module) {
 
     auto ind_module = main_module.def_submodule("ind");
     py::class_<IND>(ind_module, "IND")
-            .def("__str__", &IND::ToString)
+            .def("__str__", &IND::ToLongString)
+            .def("to_short_string", &IND::ToShortString)
+            .def("to_long_string", &IND::ToLongString)
             .def("get_lhs", &IND::GetLhs)
             .def("get_rhs", &IND::GetRhs);
 
