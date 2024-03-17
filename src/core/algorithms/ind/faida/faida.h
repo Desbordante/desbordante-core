@@ -30,7 +30,7 @@ private:
     std::unique_ptr<faida::IInclusionTester> inclusion_tester_;
     std::unique_ptr<faida::Preprocessor> data_;
 
-    void LoadDataInternal() final;
+    void LoadINDAlgorithmDataInternal() final;
     void MakeExecuteOptsAvailable() final;
     unsigned long long ExecuteInternal() final;
     void ResetINDAlgorithmState() override;

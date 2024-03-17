@@ -44,7 +44,7 @@ void Spider::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::kErrorOpt.GetName()});
 }
 
-void Spider::LoadDataInternal() {
+void Spider::LoadINDAlgorithmDataInternal() {
     auto const create_domains = [&] {
         domains_ = model::ColumnDomain::CreateFrom(input_tables_, mem_limit_mb_, threads_num_);
     };

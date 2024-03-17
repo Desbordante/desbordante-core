@@ -19,7 +19,7 @@ void CheckINDsListsEquality(std::list<model::IND> const& actual, INDTestSet cons
 
     for (auto const& dep : actual) {
         if (expected.find(ToINDTest(dep)) == expected.end()) {
-            FAIL() << "generated dep '" << dep.ToString() << "' is not present in expected";
+            FAIL() << "generated dep '" << dep.ToShortString() << "' is not present in expected";
         }
     }
     SUCCEED();
