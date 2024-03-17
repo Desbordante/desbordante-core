@@ -30,7 +30,7 @@ void Faida::MakeExecuteOptsAvailable() {
                           config::kThreadNumberOpt.GetName()});
 }
 
-void Faida::LoadDataInternal() {
+void Faida::LoadINDAlgorithmDataInternal() {
     auto start_time = std::chrono::system_clock::now();
 
     data_ = faida::Preprocessor::CreateHashedStores("Faida", input_tables_, sample_size_);

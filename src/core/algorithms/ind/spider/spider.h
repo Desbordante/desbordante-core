@@ -44,7 +44,7 @@ private:
     StageTimings timings_;                     /*< timings info */
 
     void MakeLoadOptsAvailable();
-    void LoadDataInternal() final;
+    void LoadINDAlgorithmDataInternal() final;
     void MakeExecuteOptsAvailable() final;
 
     using INDAlgorithm::RegisterIND;
