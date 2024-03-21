@@ -149,8 +149,8 @@ struct CheckCallback {
 private:
     graph_t const& query;
     graph_t const& graph;
-    const std::vector<Literal> premises;
-    const std::vector<Literal> conclusion;
+    std::vector<Literal> const premises;
+    std::vector<Literal> const conclusion;
     bool& res;
 
 public:
@@ -161,7 +161,7 @@ public:
 
     template <typename CorrespondenceMap1To2, typename CorrespondenceMap2To1>
     bool operator()(CorrespondenceMap1To2 f, CorrespondenceMap2To1) const {
-        auto satisfied = [this, &f](const std::vector<Literal> literals) {
+        auto satisfied = [this, &f](std::vector<Literal> const literals) {
             for (const Literal& l : literals) {
                 auto fst_token = l.first;
                 auto snd_token = l.second;

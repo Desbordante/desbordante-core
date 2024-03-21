@@ -7,7 +7,7 @@ namespace model {
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
         IDatasetStream& data_stream, bool is_null_eq_null) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
-    const size_t num_columns = data_stream.GetNumberOfColumns();
+    size_t const num_columns = data_stream.GetNumberOfColumns();
 
     std::vector<std::vector<std::string>> columns(num_columns);
     std::vector<std::string> row;
