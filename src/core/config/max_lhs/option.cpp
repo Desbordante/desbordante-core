@@ -6,6 +6,6 @@
 
 namespace config {
 using names::kMaximumLhs, descriptions::kDMaximumLhs;
-extern CommonOption<MaxLhsType> const MaxLhsOpt{kMaximumLhs, kDMaximumLhs,
-                                                std::numeric_limits<MaxLhsType>::max()};
+extern CommonOption<MaxLhsType> const kMaxLhsOpt{kMaximumLhs, kDMaximumLhs,
+                                                 std::numeric_limits<MaxLhsType>::max()};
 }  // namespace config

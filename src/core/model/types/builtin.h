@@ -71,29 +71,29 @@ struct TypeConverter {};
 
 template <>
 struct TypeConverter<Int> {
-    inline static constexpr auto convert = [](std::string const& v) {
+    inline static constexpr auto kConvert = [](std::string const& v) {
         return static_cast<Int>(std::stoll(v));
     };
 };
 
 template <>
 struct TypeConverter<Double> {
-    inline static constexpr auto convert = [](std::string const& v) { return std::stold(v); };
+    inline static constexpr auto kConvert = [](std::string const& v) { return std::stold(v); };
 };
 
 template <>
 struct TypeConverter<BigInt> {
-    inline static constexpr auto convert = [](std::string& v) { return BigInt(std::move(v)); };
+    inline static constexpr auto kConvert = [](std::string& v) { return BigInt(std::move(v)); };
 };
 
 template <>
 struct TypeConverter<String> {
-    inline static constexpr auto convert = [](std::string& v) { return std::move(v); };
+    inline static constexpr auto kConvert = [](std::string& v) { return std::move(v); };
 };
 
 template <>
 struct TypeConverter<Null> {
-    inline static constexpr auto convert = [](std::string const& v) {
+    inline static constexpr auto kConvert = [](std::string const& v) {
         if (v != Null::kValue) {
             throw std::invalid_argument("Cannot convert v to Null value");
         }
@@ -103,7 +103,7 @@ struct TypeConverter<Null> {
 
 template <>
 struct TypeConverter<Empty> {
-    inline static constexpr auto convert = [](std::string const& v) {
+    inline static constexpr auto kConvert = [](std::string const& v) {
         if (!v.empty()) {
             throw std::invalid_argument("Cannot convert v to Empty value");
         }
@@ -120,12 +120,12 @@ struct TupleMaxAlign {};
 
 template <typename... Ts>
 struct TupleMaxAlign<std::tuple<Ts...>> {
-    static constexpr size_t value = std::max({alignof(Ts)...});
+    static constexpr size_t kValue = std::max({alignof(Ts)...});
 };
 
 }  // namespace detail
 
-inline constexpr size_t kTypesMaxAlignment = detail::TupleMaxAlign<AllValueTypes>::value;
+inline constexpr size_t kTypesMaxAlignment = detail::TupleMaxAlign<AllValueTypes>::kValue;
 
 }  // namespace model
 

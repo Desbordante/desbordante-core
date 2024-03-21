@@ -23,37 +23,37 @@ public:
 
 private:
     /* Index of the left operand and its value */
-    ColumnValueIndex lhs;
-    std::byte const* lhs_val;
+    ColumnValueIndex lhs_;
+    std::byte const* lhs_val_;
     /* Index of the right operand and its value */
-    ColumnValueIndex rhs;
-    std::byte const* rhs_val;
+    ColumnValueIndex rhs_;
+    std::byte const* rhs_val_;
     /* The result of a binary arithmetic operation */
-    std::unique_ptr<std::byte[]> res;
+    std::unique_ptr<std::byte[]> res_;
 
 public:
     ACPair(ColumnValueIndex l, ColumnValueIndex r, std::byte const* la, std::byte const* ra,
            std::unique_ptr<std::byte[]> res)
-        : lhs(l), lhs_val(la), rhs(r), rhs_val(ra), res(std::move(res)) {}
+        : lhs_(l), lhs_val_(la), rhs_(r), rhs_val_(ra), res_(std::move(res)) {}
 
     ColumnValueIndex GetLhsColumnValueIndex() const {
-        return lhs;
+        return lhs_;
     }
 
     ColumnValueIndex GetRhsColumnValueIndex() const {
-        return rhs;
+        return rhs_;
     }
 
     std::byte const* GetLhsValue() const {
-        return lhs_val;
+        return lhs_val_;
     }
 
     std::byte const* GetRhsValue() const {
-        return rhs_val;
+        return rhs_val_;
     }
 
     std::byte const* GetRes() const {
-        return res.get();
+        return res_.get();
     }
 };
 

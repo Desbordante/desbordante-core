@@ -51,25 +51,25 @@ public:
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config));
     }
 
-    inline static std::vector<CSVConfigHash> const light_datasets_ = {
+    inline static std::vector<CSVConfigHash> const kLightDatasets = {
             {{tests::kCIPublicHighway10k, 33398},
-             {tests::kneighbors10k, 43368},
-             {tests::kWDC_astronomical, 22281},
-             {tests::kWDC_age, 19620},
-             {tests::kWDC_appearances, 25827},
-             {tests::kWDC_astrology, 40815},
-             {tests::kWDC_game, 6418},
-             {tests::kWDC_science, 19620},
-             {tests::kWDC_symbols, 28289},
-             {tests::kbreast_cancer, 15121},
-             {tests::kWDC_kepler, 63730}}};
+             {tests::kNeighbors10k, 43368},
+             {tests::kWdcAstronomical, 22281},
+             {tests::kWdcAge, 19620},
+             {tests::kWdcAppearances, 25827},
+             {tests::kWdcAstrology, 40815},
+             {tests::kWdcGame, 6418},
+             {tests::kWdcScience, 19620},
+             {tests::kWdcSymbols, 28289},
+             {tests::kBreastCancer, 15121},
+             {tests::kWdcKepler, 63730}}};
 
-    inline static std::vector<CSVConfigHash> const heavy_datasets_ = {
-            {{tests::kadult, 23075},
+    inline static std::vector<CSVConfigHash> const kHeavyDatasets = {
+            {{tests::kAdult, 23075},
              {tests::kCIPublicHighway, 13035},
              {tests::kEpicMeds, 50218},
              {tests::kEpicVitals, 2083},
-             {tests::kiowa1kk, 28573},
+             {tests::kIowa1kk, 28573},
              {tests::kLegacyPayors, 43612}}};
 };
 }  // namespace tests

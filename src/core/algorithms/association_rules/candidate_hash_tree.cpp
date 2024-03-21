@@ -29,7 +29,7 @@ void CandidateHashTree::AddLevel(HashTreeNode& leaf_node) {
 
     // by this we make leaf node interior
     leaf_node.children.reserve(branching_degree_);
-    for (unsigned siblingNum = 0; siblingNum < branching_degree_; ++siblingNum) {
+    for (unsigned sibling_num = 0; sibling_num < branching_degree_; ++sibling_num) {
         // generate new leaf nodes
         leaf_node.children.emplace_back(next_level_number);
     }

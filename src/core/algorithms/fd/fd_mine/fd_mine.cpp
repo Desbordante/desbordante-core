@@ -10,9 +10,9 @@ namespace algos {
 
 using boost::dynamic_bitset;
 
-Fd_mine::Fd_mine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
+FdMine::FdMine() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
-void Fd_mine::ResetStateFd() {
+void FdMine::ResetStateFd() {
     candidate_set_.clear();
     eq_set_.clear();
     fd_set_.clear();
@@ -22,7 +22,7 @@ void Fd_mine::ResetStateFd() {
     plis_.clear();
 }
 
-unsigned long long Fd_mine::ExecuteInternal() {
+unsigned long long FdMine::ExecuteInternal() {
     // 1
     schema_ = relation_->GetSchema();
     auto start_time = std::chrono::system_clock::now();
@@ -60,7 +60,7 @@ unsigned long long Fd_mine::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-void Fd_mine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
+void FdMine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
     if (!closure_.count(xi)) {
         closure_[xi] = dynamic_bitset<>(xi.size());
     }
@@ -99,14 +99,14 @@ void Fd_mine::ComputeNonTrivialClosure(dynamic_bitset<> const& xi) {
     }
 }
 
-void Fd_mine::ObtainFDandKey(dynamic_bitset<> const& xi) {
+void FdMine::ObtainFDandKey(dynamic_bitset<> const& xi) {
     fd_set_[xi] = closure_[xi];
     if (relation_indices_ == (xi | closure_[xi])) {
         key_set_.insert(xi);
     }
 }
 
-void Fd_mine::ObtainEqSet() {
+void FdMine::ObtainEqSet() {
     for (auto const& candidate : candidate_set_) {
         for (auto& [lhs, closure] : fd_set_) {
             auto common_atrs = candidate & lhs;
@@ -121,7 +121,7 @@ void Fd_mine::ObtainEqSet() {
     }
 }
 
-void Fd_mine::PruneCandidates() {
+void FdMine::PruneCandidates() {
     auto it = candidate_set_.begin();
     while (it != candidate_set_.end()) {
         bool found = false;
@@ -145,7 +145,7 @@ void Fd_mine::PruneCandidates() {
     }
 }
 
-void Fd_mine::GenerateNextLevelCandidates() {
+void FdMine::GenerateNextLevelCandidates() {
     std::vector<dynamic_bitset<>> candidates(candidate_set_.begin(), candidate_set_.end());
 
     dynamic_bitset<> candidate_i;
@@ -205,7 +205,7 @@ void Fd_mine::GenerateNextLevelCandidates() {
     }
 }
 
-void Fd_mine::Reconstruct() {
+void FdMine::Reconstruct() {
     std::queue<dynamic_bitset<>> queue;
     dynamic_bitset<> generated_lhs(relation_indices_.size());
     dynamic_bitset<> generated_lhs_tmp(relation_indices_.size());
@@ -265,7 +265,7 @@ void Fd_mine::Reconstruct() {
     }
 }
 
-void Fd_mine::Display() {
+void FdMine::Display() {
     unsigned int fd_counter = 0;
 
     for (auto const& [lhs, rhs] : final_fd_set_) {

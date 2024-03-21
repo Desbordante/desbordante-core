@@ -21,7 +21,7 @@ void AbstractColumnStore::LoadData(std::string const& dataset_name, TableIndex t
     }
     schema_->Init();
     column_properties_ =
-            std::vector<ColumnProperty>(input_data.GetNumberOfColumns(), ColumnProperty::ORDINARY);
+            std::vector<ColumnProperty>(input_data.GetNumberOfColumns(), ColumnProperty::kOrdinary);
 
     std::filesystem::path dir = PrepareDir(dataset_name, table_idx);
 
@@ -52,7 +52,7 @@ void AbstractColumnStore::WriteSample(std::vector<std::vector<std::string>> cons
     for (std::vector<std::string> const& row : rows) {
         ColumnIndex col_idx = 0;
         for (std::string const& value : row) {
-            size_t const value_hash = hash(value);
+            size_t const value_hash = Hash(value);
             row_hashes[col_idx++] = value_hash;
         }
         sample_stream.write(reinterpret_cast<char*>(row_hashes.data()),

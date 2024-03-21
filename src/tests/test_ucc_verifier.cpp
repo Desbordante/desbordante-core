@@ -149,7 +149,7 @@ TEST_P(TestUCCVerifierWithHyUCC, TestWithHyUCC) {
 }
 
 INSTANTIATE_TEST_SUITE_P(UCCVerifierWithHyUCCTestSuite, TestUCCVerifierWithHyUCC,
-                         ::testing::Values(UCCVerifierWithHyUCCParams(kabalone),
-                                           UCCVerifierWithHyUCCParams(kbreast_cancer),
+                         ::testing::Values(UCCVerifierWithHyUCCParams(kAbalone),
+                                           UCCVerifierWithHyUCCParams(kBreastCancer),
                                            UCCVerifierWithHyUCCParams(kCIPublicHighway10k)));
 }  // namespace tests

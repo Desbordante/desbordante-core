@@ -57,11 +57,11 @@ TEST_P(KeysTest, PliBasedAlgorithmTest) {
 }
 
 INSTANTIATE_TEST_SUITE_P(, KeysTest,
-                         ::testing::Values(KeysTestParams({0, 1, 2}, kWDC_age),
-                                           KeysTestParams({0, 1, 2, 3, 4}, kWDC_game),
-                                           KeysTestParams({0, 2}, kWDC_appearances),
-                                           KeysTestParams({3, 4, 5}, kWDC_astronomical),
+                         ::testing::Values(KeysTestParams({0, 1, 2}, kWdcAge),
+                                           KeysTestParams({0, 1, 2, 3, 4}, kWdcGame),
+                                           KeysTestParams({0, 2}, kWdcAppearances),
+                                           KeysTestParams({3, 4, 5}, kWdcAstronomical),
                                            KeysTestParams({0, 2}, kCIPublicHighway700),
-                                           KeysTestParams({}, kabalone),
-                                           KeysTestParams({}, kadult)));
+                                           KeysTestParams({}, kAbalone),
+                                           KeysTestParams({}, kAdult)));
 }  // namespace tests

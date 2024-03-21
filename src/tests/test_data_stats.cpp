@@ -319,8 +319,8 @@ TEST(TestDataStats, TestShowAllStats) {
 TEST(TestDataStats, TestGetSTD) {
     auto stats_ptr = MakeStatAlgorithm(kBernoulliRelation);
     algos::DataStats &stats = *stats_ptr;
-    auto STD_stat = stats.GetCorrectedSTD(1);
-    auto s = mo::Type::GetValue<mo::Double>(STD_stat.GetData());
+    auto std_stat = stats.GetCorrectedSTD(1);
+    auto s = mo::Type::GetValue<mo::Double>(std_stat.GetData());
     mo::Double expected = 0.547722557505166113456969782801;
     EXPECT_DOUBLE_EQ(s, expected);
 }

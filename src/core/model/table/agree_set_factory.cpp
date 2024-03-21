@@ -144,16 +144,16 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
          * for each thread, and as a consequence it is necessary to ensure the thread safety
          * of threads_agree_sets initialization or to manually parallelize for loop over the
          * max_representation. Leads to the bulky code with synchronization primitives or to
-         * the copying of util::parallel_foreach code.
+         * the copying of util::ParallelForeach code.
          */
         std::map<std::thread::id, std::unordered_set<AgreeSet>> threads_agree_sets;
         std::condition_variable map_init_cv;
         bool map_initialized = false;
         std::mutex map_init_mutex;
-        /* Need to know the exact number of threads used by util::parallel_foreach to identify
+        /* Need to know the exact number of threads used by util::ParallelForeach to identify
          * when threads_agree_sets is initialized (when its size equals to the number
          * of used threads).
-         * NOTE: if parallel_foreach fails to create exactly actual_threads_num threads when
+         * NOTE: if ParallelForeach fails to create exactly actual_threads_num threads when
          *       threads_agree_sets.size() always will be not equal to actual_threads_num leading
          *       to the infinite wait on cv.
          */
@@ -186,8 +186,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
             AddProgress(percent_per_cluster);
         };
 
-        util::parallel_foreach(max_representation.begin(), max_representation.end(),
-                               config_.threads_num, task);
+        util::ParallelForeach(max_representation.begin(), max_representation.end(),
+                              config_.threads_num, task);
 
         for (auto& [thread_id, thread_as] : threads_agree_sets) {
             agree_sets.insert(std::make_move_iterator(thread_as.begin()),

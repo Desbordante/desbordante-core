@@ -227,8 +227,8 @@ private:
                     partition.Insert(std::string{it.GetValue()});
                 } while (it.TryMoveToNext());
             };
-            util::parallel_foreach(raw_domains_.begin(), raw_domains_.end(), threads_num_,
-                                   store_column);
+            util::ParallelForeach(raw_domains_.begin(), raw_domains_.end(), threads_num_,
+                                  store_column);
             block_count--;
         }
         return block_stream.HasNextBlock();

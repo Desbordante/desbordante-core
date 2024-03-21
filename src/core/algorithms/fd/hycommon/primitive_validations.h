@@ -27,35 +27,35 @@ public:
         count_validations_ += other.count_validations_;
     }
 
-    std::vector<RawPrimitive> const& invalid_instances() const noexcept {
+    std::vector<RawPrimitive> const& InvalidInstances() const noexcept {
         return invalid_instances_;
     }
 
-    std::vector<RawPrimitive>& invalid_instances() noexcept {
+    std::vector<RawPrimitive>& InvalidInstances() noexcept {
         return invalid_instances_;
     }
 
-    IdPairs const& comparison_suggestions() const noexcept {
+    IdPairs const& ComparisonSuggestions() const noexcept {
         return comparison_suggestions_;
     }
 
-    IdPairs& comparison_suggestions() noexcept {
+    IdPairs& ComparisonSuggestions() noexcept {
         return comparison_suggestions_;
     }
 
-    unsigned count_validations() const noexcept {
+    unsigned CountValidations() const noexcept {
         return count_validations_;
     }
 
-    void set_count_validations(unsigned count_validations) noexcept {
+    void SetCountValidations(unsigned count_validations) noexcept {
         count_validations_ = count_validations;
     }
 
-    unsigned count_intersections() const noexcept {
+    unsigned CountIntersections() const noexcept {
         return count_intersections_;
     }
 
-    void set_count_intersections(unsigned count_intersections) noexcept {
+    void SetCountIntersections(unsigned count_intersections) noexcept {
         count_intersections_ = count_intersections;
     }
 };

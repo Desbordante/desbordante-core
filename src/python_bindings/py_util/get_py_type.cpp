@@ -17,12 +17,12 @@ namespace py = pybind11;
 
 namespace {
 
-constexpr PyTypeObject* const py_int = &PyLong_Type;
-constexpr PyTypeObject* const py_bool = &PyBool_Type;
-constexpr PyTypeObject* const py_float = &PyFloat_Type;
-constexpr PyTypeObject* const py_str = &PyUnicode_Type;
-constexpr PyTypeObject* const py_list = &PyList_Type;
-constexpr PyTypeObject* const py_tuple = &PyTuple_Type;
+constexpr PyTypeObject* const kPyInt = &PyLong_Type;
+constexpr PyTypeObject* const kPyBool = &PyBool_Type;
+constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
+constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
+constexpr PyTypeObject* const kPyList = &PyList_Type;
+constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -63,20 +63,20 @@ py::tuple GetPyType(std::type_index type_index) {
     // possible) as storing pybind11's objects themselves statically is
     // unpredictable and can lead to errors related to garbage collection.
     static std::unordered_map<std::type_index, std::function<py::tuple()>> const type_map{
-            PyTypePair<bool, py_bool>,
-            PyTypePair<ushort, py_int>,
-            PyTypePair<int, py_int>,
-            PyTypePair<unsigned int, py_int>,
-            PyTypePair<double, py_float>,
-            PyTypePair<long double, py_float>,
-            PyTypePair<algos::metric::Metric, py_str>,
-            PyTypePair<algos::metric::MetricAlgo, py_str>,
-            PyTypePair<algos::InputFormat, py_str>,
-            PyTypePair<std::vector<unsigned int>, py_list, py_int>,
+            PyTypePair<bool, kPyBool>,
+            PyTypePair<ushort, kPyInt>,
+            PyTypePair<int, kPyInt>,
+            PyTypePair<unsigned int, kPyInt>,
+            PyTypePair<double, kPyFloat>,
+            PyTypePair<long double, kPyFloat>,
+            PyTypePair<algos::metric::Metric, kPyStr>,
+            PyTypePair<algos::metric::MetricAlgo, kPyStr>,
+            PyTypePair<algos::InputFormat, kPyStr>,
+            PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
             {typeid(config::InputTables),
-             []() { return MakeTypeTuple(py_list, py::type::of<config::InputTable>()); }},
+             []() { return MakeTypeTuple(kPyList, py::type::of<config::InputTable>()); }},
     };
     return type_map.at(type_index)();
 }

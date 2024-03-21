@@ -40,16 +40,16 @@ INSTANTIATE_TEST_SUITE_P(
     TypeSystem, TestTypeParsing,
     ::testing::Values(
         TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed},
-                          kWDC_appearances),
+                          kWdcAppearances),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kString},
-                          kWDC_age),
+                          kWdcAge),
         TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed,
                            TypeId::kMixed},
-                          kWDC_kepler),
+                          kWdcKepler),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kMixed,
                            TypeId::kMixed, TypeId::kMixed, TypeId::kString,
                            TypeId::kString, TypeId::kString},
-                          kWDC_satellites),
+                          kWdcSatellites),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kInt,
                            TypeId::kInt, TypeId::kInt, TypeId::kInt,
                            TypeId::kInt, TypeId::kUndefined, TypeId::kUndefined,
@@ -60,10 +60,10 @@ INSTANTIATE_TEST_SUITE_P(
         TypeParsingParams({TypeId::kInt, TypeId::kInt, TypeId::kMixed,
                            TypeId::kInt, TypeId::kInt, TypeId::kInt,
                            TypeId::kInt},
-                          kneighbors10k),
+                          kNeighbors10k),
         TypeParsingParams({TypeId::kDouble, TypeId::kDouble, TypeId::kDouble,
                            TypeId::kDouble, TypeId::kString},
-                          kiris),
+                          kIris),
         TypeParsingParams({TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
                            TypeId::kInt, TypeId::kString, TypeId::kDouble,
                            TypeId::kBigInt, TypeId::kMixed, TypeId::kBigInt,
@@ -75,7 +75,7 @@ INSTANTIATE_TEST_SUITE_P(
 // clang-format on
 
 TEST(TypeSystem, SumColumnDoubles) {
-    auto input_table = MakeInputTable(kiris);
+    auto input_table = MakeInputTable(kIris);
     std::vector<mo::TypedColumnData> col_data{mo::CreateTypedColumnData(*input_table, true)};
     ASSERT_EQ(col_data.size(), 5);
     mo::TypedColumnData const& col = col_data.front();

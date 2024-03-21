@@ -34,19 +34,19 @@ template <typename VertexAndAgreeSet, typename InstanceValidations>
 void LogLevel(std::vector<VertexAndAgreeSet> const& cur_level_vertices,
               InstanceValidations const& result, size_t candidates, size_t current_level_number,
               std::string_view primitive) {
-    int const num_invalid_instances = result.invalid_instances().size();
-    int const num_valid_instances = result.count_validations() - num_invalid_instances;
+    int const num_invalid_instances = result.InvalidInstances().size();
+    int const num_valid_instances = result.CountValidations() - num_invalid_instances;
 
     LOG(INFO) << "LEVEL " << current_level_number << "(" << cur_level_vertices.size()
-              << "): " << result.count_intersections() << " intersections; "
-              << result.count_validations() << " validations; " << num_invalid_instances
+              << "): " << result.CountIntersections() << " intersections; "
+              << result.CountValidations() << " validations; " << num_invalid_instances
               << " invalid; " << candidates << " new candidates; --> " << num_valid_instances << " "
               << primitive << "s";
 }
 
 template <typename T>
 auto MakeClusterIdentifierToTMap(size_t bucket_size) {
-    auto const kHasher = [](std::vector<ClusterId> const& v) noexcept {
+    auto const hasher = [](std::vector<ClusterId> const& v) noexcept {
         size_t hash = 1;
         for (auto it = v.rbegin(); it != v.rend(); ++it) {
             hash = 31 * hash + *it;
@@ -55,11 +55,11 @@ auto MakeClusterIdentifierToTMap(size_t bucket_size) {
     };
 
 #if UNORDERED_FLAT_MAP_AVAILABLE
-    using UnorderedMap = boost::unordered_flat_map<std::vector<ClusterId>, T, decltype(kHasher)>;
+    using UnorderedMap = boost::unordered_flat_map<std::vector<ClusterId>, T, decltype(hasher)>;
 #else
-    using UnorderedMap = std::unordered_map<std::vector<ClusterId>, T, decltype(kHasher)>;
+    using UnorderedMap = std::unordered_map<std::vector<ClusterId>, T, decltype(hasher)>;
 #endif
-    return UnorderedMap(bucket_size, kHasher);
+    return UnorderedMap(bucket_size, hasher);
 }
 
 #undef UNORDERED_FLAT_MAP_AVAILABLE

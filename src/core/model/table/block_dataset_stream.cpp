@@ -34,7 +34,7 @@ BlockData BlockDatasetStream::GetNextBlock() {
     BlockData block{static_cast<ColumnIndex>(stream_->GetNumberOfColumns())};
     size_t block_size = 0;
     do {
-        if (!block.isEmpty() && block_size + GetRowSize(cur_row_) > capacity_) {
+        if (!block.IsEmpty() && block_size + GetRowSize(cur_row_) > capacity_) {
             break;
         }
         block.InsertRow(cur_row_);

@@ -52,39 +52,39 @@ protected:
     }
 
     /* hashes for light tables */
-    inline static std::vector<CSVConfigsHash> const light_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const kLightConfigsHashes = {
             {{kIndTestNulls}, 170947241093786881U},
-            {{kWDC_astronomical}, 1U},
-            {{kWDC_symbols}, 1U},
-            {{kWDC_science}, 1U},
-            {{kWDC_satellites}, 1U},
-            {{kWDC_appearances}, 1U},
-            {{kWDC_astrology}, 13455143437649811744U},
-            {{kWDC_game}, 447511263452U},
-            {{kWDC_kepler}, 1U},
-            {{kWDC_planetz}, 1U},
-            {{kWDC_age}, 1U},
+            {{kWdcAstronomical}, 1U},
+            {{kWdcSymbols}, 1U},
+            {{kWdcScience}, 1U},
+            {{kWdcSatellites}, 1U},
+            {{kWdcAppearances}, 1U},
+            {{kWdcAstrology}, 13455143437649811744U},
+            {{kWdcGame}, 447511263452U},
+            {{kWdcKepler}, 1U},
+            {{kWdcPlanetz}, 1U},
+            {{kWdcAge}, 1U},
             {{kTestWide}, 7112674290840U},
-            {{kabalone}, 11213732566U},
-            {{kiris}, 1U},
-            {{kadult}, 118907247627U},
-            {{kbreast_cancer}, 1U},
-            {{kneighbors10k}, 139579476277123U},
-            {{kneighbors100k}, 139579476277123U},
+            {{kAbalone}, 11213732566U},
+            {{kIris}, 1U},
+            {{kAdult}, 118907247627U},
+            {{kBreastCancer}, 1U},
+            {{kNeighbors10k}, 139579476277123U},
+            {{kNeighbors100k}, 139579476277123U},
             {{kCIPublicHighway10k}, 195810426634326U},
             {{kCIPublicHighway700}, 195810426634326U}};
 
     /* hashes for tests with `is_null_equal_null` flag (light tables) */
-    inline static std::vector<CSVConfigsHash> const null_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const kNullConfigsHashes = {
             {{kIndTestNulls}, 6131570082162402642U},
             {{kCIPublicHighway10k}, 3501995834407208U},
             {{kCIPublicHighway700}, 6532935312084701U}};
 
     /* hashes for heavy tables */
-    inline static std::vector<CSVConfigsHash> const heavy_configs_hashes_ = {
+    inline static std::vector<CSVConfigsHash> const kHeavyConfigsHashes = {
             {{kEpicVitals}, 8662177202540121819U},
             {{kEpicMeds}, 5352642523966732252U},
-            {{kiowa1kk}, 232519218595U}};
+            {{kIowa1kk}, 232519218595U}};
 };
 
 template <typename Algorithm>
@@ -100,31 +100,31 @@ TYPED_TEST_SUITE_P(INDAlgorithmTest);
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnLightTables) {
     TestFixture::SetThreadsParam(1);
     TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::light_configs_hashes_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnHeavyTables) {
     TestFixture::SetThreadsParam(1);
     TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_configs_hashes_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnNullTables) {
     TestFixture::SetThreadsParam(1);
     TestFixture::SetEqualNulls(true);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::null_configs_hashes_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kNullConfigsHashes);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnLightTablesParallel) {
     TestFixture::SetThreadsParam(4);
     TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::light_configs_hashes_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnHeavyTablesParallel) {
     TestFixture::SetThreadsParam(4);
     TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_configs_hashes_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(INDAlgorithmTest, ConsistentHashOnLightTables,

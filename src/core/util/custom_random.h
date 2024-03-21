@@ -1,6 +1,6 @@
-#include <stdexcept>
-
 #pragma once
+
+#include <stdexcept>
 
 // ~ Java.Random
 class CustomRandom {
@@ -10,7 +10,7 @@ private:
     long long multiplier_ = 0x5DEECE66DLL;
     long long mask_ = (1LL << 48) - 1;
 
-    double const kDoubleUnit = 1.0 / (1LL << 53);
+    static constexpr double kDoubleUnit = 1.0 / (1LL << 53);
 
     long long Abs(long long number) {
         if (number < 0) {

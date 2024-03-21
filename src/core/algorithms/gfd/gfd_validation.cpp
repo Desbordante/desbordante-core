@@ -145,19 +145,23 @@ void CalculateMessages(graph_t const& graph, std::vector<Request> const& request
     }
 }
 
-struct CheckCallback {
+class CheckCallback {
 private:
-    graph_t const& query;
-    graph_t const& graph;
-    std::vector<Literal> const premises;
-    std::vector<Literal> const conclusion;
-    bool& res;
+    graph_t const& query_;
+    graph_t const& graph_;
+    std::vector<Literal> const premises_;
+    std::vector<Literal> const conclusion_;
+    bool& res_;
 
 public:
     CheckCallback(graph_t const& query_, graph_t const& graph_,
                   std::vector<Literal> const& premises_, std::vector<Literal> const& conclusion_,
                   bool& res_)
-        : query(query_), graph(graph_), premises(premises_), conclusion(conclusion_), res(res_) {}
+        : query_(query_),
+          graph_(graph_),
+          premises_(premises_),
+          conclusion_(conclusion_),
+          res_(res_) {}
 
     template <typename CorrespondenceMap1To2, typename CorrespondenceMap2To1>
     bool operator()(CorrespondenceMap1To2 f, CorrespondenceMap2To1) const {
@@ -171,9 +175,9 @@ public:
                     fst = fst_token.second;
                 } else {
                     vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query);
+                    vertex_t u = boost::vertex(fst_token.first, query_);
                     v = get(f, u);
-                    auto attrs = graph[v].attributes;
+                    auto attrs = graph_[v].attributes;
                     if (attrs.find(fst_token.second) == attrs.end()) {
                         return false;
                     }
@@ -183,9 +187,9 @@ public:
                     snd = snd_token.second;
                 } else {
                     vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query);
+                    vertex_t u = boost::vertex(fst_token.first, query_);
                     v = get(f, u);
-                    auto attrs = graph[v].attributes;
+                    auto attrs = graph_[v].attributes;
                     if (attrs.find(snd_token.second) == attrs.end()) {
                         return false;
                     }
@@ -198,11 +202,11 @@ public:
             return true;
         };
 
-        if (!satisfied(premises)) {
+        if (!satisfied(premises_)) {
             return true;
         }
-        if (!satisfied(conclusion)) {
-            res = false;
+        if (!satisfied(conclusion_)) {
+            res_ = false;
             return false;
         }
         return true;
@@ -269,8 +273,8 @@ void CalculateUnsatisfied(graph_t const& graph, std::vector<Message> const& mess
 namespace algos {
 
 GfdValidation::GfdValidation() : GfdHandler() {
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
-    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
+    MakeOptionsAvailable({config::kThreadNumberOpt.GetName()});
 };
 
 std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,

@@ -9,7 +9,7 @@
 namespace tests {
 
 /// path to the directory with test data
-static auto const test_data_dir = std::filesystem::current_path() / "input_data";
+static auto const kTestDataDir = std::filesystem::current_path() / "input_data";
 
 /// vector of csv configs
 using CSVConfigs = std::vector<CSVConfig>;

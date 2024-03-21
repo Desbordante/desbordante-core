@@ -18,7 +18,7 @@ struct PartitionTIdList {
 
     SimpleTIdList tids;
     unsigned sets_number;
-    static int const SEP;  // = -1;
+    static int const kSep;  // = -1;
     bool operator==(PartitionTIdList const &) const;
     bool operator!=(PartitionTIdList const &) const;
     bool operator<(PartitionTIdList const &) const;

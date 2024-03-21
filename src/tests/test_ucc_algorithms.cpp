@@ -76,42 +76,42 @@ public:
         return algos::CreateAndLoadAlgorithm<AlgorithmUnderTest>(GetParamMap(csv_config));
     }
 
-    inline static std::vector<CSVConfigHash> const light_datasets_ = {
-        {kWDC_astronomical, 2089541732445U},
-        {kWDC_symbols, 1},
-        {kWDC_science, 2658842082150U},
-        {kWDC_satellites, 5208443370856032U},
-        {kWDC_appearances, 82369238361U},
-        {kWDC_astrology, 79554241843163108U},
-        {kWDC_game, 2555214540772530U},
-        {kWDC_kepler, 82426217315737U},
-        {kWDC_planetz, 2555214540772530U},
-        {kWDC_age, 2658842082150U},
+    inline static std::vector<CSVConfigHash> const kLightDatasets = {
+        {kWdcAstronomical, 2089541732445U},
+        {kWdcSymbols, 1},
+        {kWdcScience, 2658842082150U},
+        {kWdcSatellites, 5208443370856032U},
+        {kWdcAppearances, 82369238361U},
+        {kWdcAstrology, 79554241843163108U},
+        {kWdcGame, 2555214540772530U},
+        {kWdcKepler, 82426217315737U},
+        {kWdcPlanetz, 2555214540772530U},
+        {kWdcAge, 2658842082150U},
         {kTestWide, 2555250373874U},
-        {kabalone, 16581571148699134255U},
-        {kiris, 1},
-        {kadult, 1},
-        {kbreast_cancer, 16854900230774656828U},
+        {kAbalone, 16581571148699134255U},
+        {kIris, 1},
+        {kAdult, 1},
+        {kBreastCancer, 16854900230774656828U},
         // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
-        // able to process these move them to heavy_datasets_
-        {kneighbors10k, 170971924188219U},
+        // able to process these move them to kHeavyDatasets
+        {kNeighbors10k, 170971924188219U},
 #if 0
-        {kneighbors50k, 1},
+        {kNeighbors50k, 1},
 #endif
-        {kneighbors100k, 170971924188219U},
+        {kNeighbors100k, 170971924188219U},
         {kCIPublicHighway10k, 82369238361U},
         {kCIPublicHighway700, 82369238361U},
     };
 
-    inline static std::vector<CSVConfigHash> const heavy_datasets_ = {
+    inline static std::vector<CSVConfigHash> const kHeavyDatasets = {
         {kEpicVitals, 1},
         {kEpicMeds, 59037771758954037U},
-        {kiowa1kk, 2654435863U},
+        {kIowa1kk, 2654435863U},
 #if 0
-        {kfd_reduced_30, 275990379954778425U},
-        {kflight_1k, 2512091017708538662U},
-        {kplista_1k, 1},
-        {kletter, 1},
+        {kFdReduced30, 275990379954778425U},
+        {kFlight1k, 2512091017708538662U},
+        {kPlista1k, 1},
+        {kLetter, 1},
 #endif
     };
 };
@@ -125,22 +125,22 @@ TYPED_TEST_SUITE_P(UCCAlgorithmTest);
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets) {
     TestFixture::SetThreadsParam(1);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasets) {
     TestFixture::SetThreadsParam(1);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasetsParallel) {
     TestFixture::SetThreadsParam(4);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasetsParallel) {
     TestFixture::SetThreadsParam(4);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,

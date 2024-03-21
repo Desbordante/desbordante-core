@@ -163,7 +163,7 @@ bool CandVerify(graph_t const& graph, vertex_t const& v, graph_t const& query, v
 
 void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t const& query,
                     std::map<std::string, std::set<vertex_t>> const& label_classes) {
-    auto cmpComplexity = [&graph, &query, &label_classes](vertex_t const& a, vertex_t const& b) {
+    auto cmp_complexity = [&graph, &query, &label_classes](vertex_t const& a, vertex_t const& b) {
         std::size_t a_degree = boost::degree(a, query);
         int an = 0;
         for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
@@ -181,15 +181,15 @@ void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t 
         }
         return an / a_degree < bn / b_degree;
     };
-    std::sort(order.begin(), order.end(), cmpComplexity);
+    std::sort(order.begin(), order.end(), cmp_complexity);
 }
 
 void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
                             graph_t const& query,
                             std::map<std::string, std::set<vertex_t>> const& label_classes) {
     int top = std::min(int(order.size()), 3);
-    auto cmpAccurateComplexity = [&graph, &query, &label_classes](vertex_t const& a,
-                                                                  vertex_t const& b) {
+    auto cmp_accurate_complexity = [&graph, &query, &label_classes](vertex_t const& a,
+                                                                    vertex_t const& b) {
         int a_degree = boost::degree(a, query);
         int an = 0;
         for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
@@ -207,7 +207,7 @@ void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
         }
         return an / a_degree < bn / b_degree;
     };
-    std::sort(order.begin(), std::next(order.begin(), top), cmpAccurateComplexity);
+    std::sort(order.begin(), std::next(order.begin(), top), cmp_accurate_complexity);
 }
 
 int GetRoot(graph_t const& graph, graph_t const& query, std::set<vertex_t> const& core) {
@@ -508,12 +508,12 @@ void FinalRefinement(vertex_t const& u, CPI& cpi, graph_t const& query,
         typename boost::graph_traits<graph_t>::adjacency_iterator q_adj_it, q_adj_end;
         boost::tie(q_adj_it, q_adj_end) = boost::adjacent_vertices(u, query);
         for (; q_adj_it != q_adj_end; ++q_adj_it) {
-            vertex_t u_ = *q_adj_it;
-            if ((parent.find(u_) != parent.end()) && (parent.at(u_) == u)) {
-                std::pair<vertex_t, vertex_t> cpi_edge(u, u_);
-                for (vertex_t const& v_ : cpi.at(cpi_edge).at(v)) {
-                    if (candidates.at(u_).find(v_) == candidates.at(u_).end()) {
-                        cpi.at(cpi_edge).at(v).erase(v_);
+            vertex_t u2 = *q_adj_it;
+            if ((parent.find(u2) != parent.end()) && (parent.at(u2) == u)) {
+                std::pair<vertex_t, vertex_t> cpi_edge(u, u2);
+                for (vertex_t const& v2 : cpi.at(cpi_edge).at(v)) {
+                    if (candidates.at(u2).find(v2) == candidates.at(u2).end()) {
+                        cpi.at(cpi_edge).at(v).erase(v2);
                     }
                 }
             }
@@ -778,7 +778,7 @@ void CompleteSeq(CPI& cpi, std::vector<std::set<vertex_t>> const& forest,
     for (auto& tree : forest) {
         std::vector<std::vector<vertex_t>> tree_paths = GetPaths(tree, parent);
 
-        std::vector<vertex_t> tree_NTs = {};
+        std::vector<vertex_t> tree_nts = {};
         for (auto& path : tree_paths) {
             int nt = 0;
             for (auto& desc : nte) {
@@ -789,9 +789,9 @@ void CompleteSeq(CPI& cpi, std::vector<std::set<vertex_t>> const& forest,
                     nt++;
                 }
             }
-            tree_NTs.push_back(nt);
+            tree_nts.push_back(nt);
         }
-        std::vector<vertex_t> tree_seq = MatchingOrder(cpi, tree_paths, tree_NTs);
+        std::vector<vertex_t> tree_seq = MatchingOrder(cpi, tree_paths, tree_nts);
 
         seq.insert(seq.end(), ++tree_seq.begin(), tree_seq.end());
     }
@@ -928,9 +928,9 @@ bool Check(CPI& cpi, graph_t const& graph, Gfd const& gfd, std::set<vertex_t> co
     graph_t query = gfd.GetPattern();
     std::vector<std::vector<vertex_t>> paths = GetPaths(core, parent);
 
-    std::vector<vertex_t> NTs = {};
-    FullNTs(paths, nte, query, NTs);
-    std::vector<vertex_t> seq = MatchingOrder(cpi, paths, NTs);
+    std::vector<vertex_t> nts = {};
+    FullNTs(paths, nte, query, nts);
+    std::vector<vertex_t> seq = MatchingOrder(cpi, paths, nts);
 
     CompleteSeq(cpi, forest, parent, query, nte, seq);
 

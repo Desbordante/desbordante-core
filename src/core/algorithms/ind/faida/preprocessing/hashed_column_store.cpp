@@ -49,7 +49,7 @@ void HashedColumnStore::WriteColumnsAndSample(model::IDatasetStream& data_stream
         bool row_has_unseen_value = false;
         for (ColumnIndex col_idx = 0; col_idx < schema_->GetNumColumns(); col_idx++) {
             std::string const& value = row.at(col_idx);
-            size_t value_hash = this->hash(value);
+            size_t value_hash = this->Hash(value);
 
             buf[col_idx][row_counter % bufsize] = value_hash;
             if (row_counter % bufsize == bufsize - 1) {
@@ -105,9 +105,9 @@ void HashedColumnStore::WriteColumnsAndSample(model::IDatasetStream& data_stream
         if (constant_col_hashes[col_idx].has_value()) {
             size_t const col_hash = constant_col_hashes[col_idx].value();
             if (col_hash == null_hash_) {
-                column_properties_[col_idx] = ColumnProperty::NULL_CONSTANT;
+                column_properties_[col_idx] = ColumnProperty::kNullConstant;
             } else {
-                column_properties_[col_idx] = ColumnProperty::CONSTANT;
+                column_properties_[col_idx] = ColumnProperty::kConstant;
             }
         }
     }

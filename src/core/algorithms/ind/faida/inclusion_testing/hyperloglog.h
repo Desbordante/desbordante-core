@@ -25,6 +25,7 @@
  */
 
 // clang-format off
+// NOLINTBEGIN(readability-identifier-naming)
 
 #pragma once
 
@@ -261,4 +262,5 @@ protected:
 
 }  // namespace hll
 
+// NOLINTEND(readability-identifier-naming)
 // clang-format on

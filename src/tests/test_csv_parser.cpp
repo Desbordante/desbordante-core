@@ -39,7 +39,7 @@ TEST(TestCSVParser, TestGetNextRow) {
     CheckGetNextRow(kTestSingleColumn, {{"1"}, {"2"}, {"3"}, {"3"}});
     CheckGetNextRow(kTestWide, {{"1", "3", "3", "4", "5"}, {"2", "3", "4", "4", "6"}});
     CheckGetNextRow(kTestEmpty, {});
-    CheckGetNextRow(kabalone,
+    CheckGetNextRow(kAbalone,
                     {{"M", "0.455", "0.365", "0.095", "0.514", "0.2245", "0.101", "0.15", "15"}});
     CheckGetNextRow(kTestParse, {{"", "\\\\\\\"", "b\"b\\\\ b"},
                                  {"\"", "\\\\", "b\\"},
@@ -64,7 +64,7 @@ static void CheckHasNextRow(CSVConfig const& table, std::size_t num_rows) {
 
 TEST(TestCSVParser, TestHasNextRow) {
     CheckHasNextRow(kACShippingDates, 6);
-    CheckHasNextRow(kadult, 32561);
+    CheckHasNextRow(kAdult, 32561);
     CheckHasNextRow(kTestEmpty, 1);
     CheckHasNextRow(kTest1, 20);
 }
@@ -93,7 +93,7 @@ static void CheckReset(CSVConfig const& table, std::size_t num_rows) {
 
 TEST(TestCSVParser, TestReset) {
     CheckReset(kACShippingDates, 6);
-    CheckReset(kadult, 32561);
+    CheckReset(kAdult, 32561);
     CheckReset(kTestEmpty, 1);
     CheckReset(kTest1, 20);
 }

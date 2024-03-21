@@ -32,11 +32,11 @@ public:
         return this->left_->StartsWith(*other.left_) && this->right_->StartsWith(*other.right_);
     }
 
-    std::shared_ptr<SimpleCC> const& left() const {
+    std::shared_ptr<SimpleCC> const& Left() const {
         return left_;
     }
 
-    std::shared_ptr<SimpleCC> const& right() const {
+    std::shared_ptr<SimpleCC> const& Right() const {
         return right_;
     }
 
@@ -51,8 +51,8 @@ template <>
 struct std::hash<algos::faida::SimpleIND> {
     size_t operator()(algos::faida::SimpleIND const& ind) const {
         size_t seed = 0;
-        seed ^= reinterpret_cast<size_t>(ind.left().get());
-        seed = std::rotl(seed, 11) ^ reinterpret_cast<size_t>(ind.right().get());
+        seed ^= reinterpret_cast<size_t>(ind.Left().get());
+        seed = std::rotl(seed, 11) ^ reinterpret_cast<size_t>(ind.Right().get());
         return seed;
     }
 };
@@ -61,8 +61,8 @@ template <>
 struct std::hash<algos::faida::SimpleIND const*> {
     size_t operator()(algos::faida::SimpleIND const* ind) const {
         size_t seed = 0;
-        seed ^= std::hash<algos::faida::SimpleCC>{}(*(ind->left()));
-        seed = std::rotl(seed, 11) ^ std::hash<algos::faida::SimpleCC>{}(*(ind->right()));
+        seed ^= std::hash<algos::faida::SimpleCC>{}(*(ind->Left()));
+        seed = std::rotl(seed, 11) ^ std::hash<algos::faida::SimpleCC>{}(*(ind->Right()));
         return seed;
     }
 };

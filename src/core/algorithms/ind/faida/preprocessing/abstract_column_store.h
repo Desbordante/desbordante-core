@@ -25,7 +25,7 @@ private:
     unsigned sample_size_ = 0;
 
 protected:
-    enum class ColumnProperty : char { ORDINARY, CONSTANT, NULL_CONSTANT };
+    enum class ColumnProperty : char { kOrdinary, kConstant, kNullConstant };
 
     std::unique_ptr<RelationalSchema> schema_;
     int const sample_goal_;
@@ -48,7 +48,7 @@ protected:
 
     HashedTableSample ReadSample() const;
 
-    size_t hash(std::string const& str) const {
+    size_t Hash(std::string const& str) const {
         size_t curr_hash = hashing::CalcMurmurHash(str);
 
         if (curr_hash == null_hash_ && !str.empty()) {
@@ -63,11 +63,11 @@ public:
     AbstractColumnStore(AbstractColumnStore&& other) = default;
 
     bool IsConstantCol(ColumnIndex col_idx) const {
-        return column_properties_[col_idx] == AbstractColumnStore::ColumnProperty::CONSTANT;
+        return column_properties_[col_idx] == AbstractColumnStore::ColumnProperty::kConstant;
     }
 
     bool IsNullCol(ColumnIndex col_idx) const {
-        return column_properties_[col_idx] == AbstractColumnStore::ColumnProperty::NULL_CONSTANT;
+        return column_properties_[col_idx] == AbstractColumnStore::ColumnProperty::kNullConstant;
     }
 
     RelationalSchema const* GetSchema() const {

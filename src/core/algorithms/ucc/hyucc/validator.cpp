@@ -78,8 +78,8 @@ bool Validator::IsUnique(model::PLI const& pivot_pli, RawUCC const& ucc,
 Validator::UCCValidations Validator::GetValidations(LhsPair const& vertex_and_ucc) {
     auto [vertex, ucc] = vertex_and_ucc;
     UCCValidations validations;
-    validations.set_count_validations(1);
-    validations.set_count_intersections(1);
+    validations.SetCountValidations(1);
+    validations.SetCountIntersections(1);
 
     size_t ucc_attr = ucc.find_first();
     bool is_unique;
@@ -91,13 +91,13 @@ Validator::UCCValidations Validator::GetValidations(LhsPair const& vertex_and_uc
         // It's guaranteed that the first cluster has the fewest records because of sorting
         // in the Sampler
         model::PLI const* pivot_pli = (*plis_)[ucc_attr];
-        is_unique = IsUnique(*pivot_pli, ucc, validations.comparison_suggestions());
+        is_unique = IsUnique(*pivot_pli, ucc, validations.ComparisonSuggestions());
         ucc.set(ucc_attr);
     }
 
     if (!is_unique) {
         vertex->SetIsUCC(false);
-        validations.invalid_instances().push_back(std::move(ucc));
+        validations.InvalidInstances().push_back(std::move(ucc));
     }
 
     return validations;
@@ -166,17 +166,17 @@ hy::IdPairs Validator::ValidateAndExtendCandidates() {
     while (!current_level.empty()) {
         UCCValidations result = ValidateAndExtend(current_level);
         comparison_suggestions.insert(comparison_suggestions.end(),
-                                      result.comparison_suggestions().begin(),
-                                      result.comparison_suggestions().end());
+                                      result.ComparisonSuggestions().begin(),
+                                      result.ComparisonSuggestions().end());
         std::vector<LhsPair> next_level = hy::CollectCurrentChildren(current_level, num_attributes);
 
         size_t candidates = AddExtendedCandidatesFromInvalid(
-                next_level, *tree_, result.invalid_instances(), num_attributes);
+                next_level, *tree_, result.InvalidInstances(), num_attributes);
 
         LogLevel(current_level, result, candidates, current_level_number_, "UCC");
 
-        size_t const num_invalid_uccs = result.invalid_instances().size();
-        size_t const num_valid_uccs = result.count_validations() - num_invalid_uccs;
+        size_t const num_invalid_uccs = result.InvalidInstances().size();
+        size_t const num_valid_uccs = result.CountValidations() - num_invalid_uccs;
         current_level = std::move(next_level);
         current_level_number_++;
 

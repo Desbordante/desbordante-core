@@ -71,7 +71,7 @@ public:
 };
 
 TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Addition, 0.0, 0.9, 0.05);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Addition, 0.0, 0.9, 0.05);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(0, 2);
 
@@ -81,7 +81,7 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection1) {
 }
 
 TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Addition, 0.0, 0.9, 0.05);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Addition, 0.0, 0.9, 0.05);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(2, 3);
 
@@ -91,14 +91,14 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
 }
 
 TEST_F(ACAlgorithmTest, SampleSizeCalculation) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Addition, 0.1, 0.8, 0.05);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Addition, 0.1, 0.8, 0.05);
     ASSERT_EQ(28, a->CalculateSampleSize(1));
     ASSERT_EQ(168, a->CalculateSampleSize(13));
     ASSERT_EQ(331, a->CalculateSampleSize(28));
 }
 
 TEST_F(ACAlgorithmTest, SubNonFuzzy) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Subtraction, 0.0);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Subtraction, 0.0);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(1, 3);
 
@@ -108,7 +108,7 @@ TEST_F(ACAlgorithmTest, SubNonFuzzy) {
 }
 
 TEST_F(ACAlgorithmTest, MulNonFuzzy) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Multiplication, 0.0);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Multiplication, 0.0);
     a->Execute();
     auto& ranges_collection = a->GetRangesByColumns(2, 3);
 
@@ -195,7 +195,7 @@ TEST_F(ACAlgorithmTest, CollectingACExceptions) {
 }
 
 TEST_F(ACAlgorithmTest, RangesReconstruction) {
-    auto a = CreateACAlgorithmInstance(kiris, algos::Binop::Subtraction, 0.0);
+    auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Subtraction, 0.0);
     a->Execute();
     auto ranges_collection = a->ReconstructRangesByColumns(1, 3, 1);
     std::vector<model::Double> expected_ranges = {0.3, 4.0};

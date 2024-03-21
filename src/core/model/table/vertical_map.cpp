@@ -499,19 +499,16 @@ std::shared_ptr<Value> VerticalMap<Value>::Put(Vertical const& key, std::shared_
 template <class Value>
 std::shared_ptr<Value const> VerticalMap<Value>::Get(Vertical const& key) const {
     return set_trie_.Get(key.GetColumnIndices(), 0);
-    ;
 }
 
 template <class Value>
 std::shared_ptr<Value> VerticalMap<Value>::Get(Vertical const& key) {
     return std::const_pointer_cast<Value>(set_trie_.Get(key.GetColumnIndices(), 0));
-    ;
 }
 
 template <class Value>
 std::shared_ptr<Value const> VerticalMap<Value>::Get(Bitset const& key) const {
     return set_trie_.Get(key, 0);
-    ;
 }
 
 // explicitly instantiate to solve template implementation linking issues

@@ -37,11 +37,11 @@ struct ARStrings {
         : confidence(id_format_rule.confidence) {
         std::vector<std::string> const& item_names_map = transactional_data->GetItemUniverse();
 
-        for (auto itemID : id_format_rule.left) {
-            this->left.push_back(item_names_map[itemID]);
+        for (auto item_id : id_format_rule.left) {
+            this->left.push_back(item_names_map[item_id]);
         }
-        for (auto itemID : id_format_rule.right) {
-            this->right.push_back(item_names_map[itemID]);
+        for (auto item_id : id_format_rule.right) {
+            this->right.push_back(item_names_map[item_id]);
         }
     }
 

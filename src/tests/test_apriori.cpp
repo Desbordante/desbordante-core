@@ -78,7 +78,7 @@ protected:
 };
 
 TEST_F(ARAlgorithmTest, BookDataset) {
-    auto algorithm = CreateAlgorithmInstance(krules_book, 0.3, 0.5, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesBook, 0.3, 0.5, 0, 1);
     algorithm->Execute();
     auto const actual_frequent = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected_frequent = {{"Bread"},
@@ -109,7 +109,7 @@ TEST_F(ARAlgorithmTest, BookDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
-    auto algorithm = CreateAlgorithmInstance(krules_presentation_extended, 0.6, 0, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesPresentationExtended, 0.6, 0, 0, 1);
     algorithm->Execute();
     auto const actual = algorithm->GetFrequentList();
     std::set<std::set<std::string>> const expected = {{"Bread"},
@@ -128,7 +128,7 @@ TEST_F(ARAlgorithmTest, PresentationExtendedDataset) {
 }
 
 TEST_F(ARAlgorithmTest, PresentationDataset) {
-    auto algorithm = CreateAlgorithmInstance(krules_presentation, 0.6, 0, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesPresentation, 0.6, 0, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -148,7 +148,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 }
 
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
-    auto algorithm = CreateAlgorithmInstance(krules_synthetic_2, 0.13, 1.00001, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesSynthetic2, 0.13, 1.00001, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
@@ -181,7 +181,7 @@ TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
 }
 
 TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
-    auto algorithm = CreateAlgorithmInstance(krules_kaggle_rows, 0.1, 0.5, true);
+    auto algorithm = CreateAlgorithmInstance(kRulesKaggleRows, 0.1, 0.5, true);
     algorithm->Execute();
 
     auto const actual_frequent = algorithm->GetFrequentList();
@@ -308,11 +308,11 @@ TEST_F(ARAlgorithmTest, KaggleDatasetWithTIDandHeader) {
 }
 
 TEST_F(ARAlgorithmTest, RepeatedExecutionConsistentResult) {
-    auto algorithm = CreateAlgorithmInstance(krules_kaggle_rows, 0.1, 0.5, true);
+    auto algorithm = CreateAlgorithmInstance(kRulesKaggleRows, 0.1, 0.5, true);
     algorithm->Execute();
     auto first_result = ToSet(algorithm->GetArStringsList());
     for (int i = 0; i < 5; ++i) {
-        algos::ConfigureFromMap(*algorithm, GetParamMap(krules_kaggle_rows, 0.1, 0.5, true));
+        algos::ConfigureFromMap(*algorithm, GetParamMap(kRulesKaggleRows, 0.1, 0.5, true));
         algorithm->Execute();
         CheckAssociationRulesListsEquality(algorithm->GetArStringsList(), first_result);
     }

@@ -6,15 +6,15 @@ namespace model {
 
 class InputFormat {
 public:
-    virtual size_t tid_column_index() const noexcept {
+    virtual size_t TidColumnIndex() const noexcept {
         return 0;
     };
 
-    virtual size_t item_column_index() const noexcept {
+    virtual size_t ItemColumnIndex() const noexcept {
         return 0;
     };
 
-    virtual bool tid_presence() const noexcept = 0;
+    virtual bool TidPresence() const noexcept = 0;
 
     virtual ~InputFormat() = default;
 };
@@ -28,15 +28,15 @@ public:
     explicit Singular(size_t tid_column_index, size_t item_column_index)
         : tid_column_index_(tid_column_index), item_column_index_(item_column_index) {}
 
-    size_t tid_column_index() const noexcept override {
+    size_t TidColumnIndex() const noexcept override {
         return tid_column_index_;
     }
 
-    size_t item_column_index() const noexcept override {
+    size_t ItemColumnIndex() const noexcept override {
         return item_column_index_;
     }
 
-    bool tid_presence() const noexcept override {
+    bool TidPresence() const noexcept override {
         return true;
     }
 };
@@ -48,7 +48,7 @@ private:
 public:
     explicit Tabular(bool has_tid) : has_tid_(has_tid) {}
 
-    bool tid_presence() const noexcept override {
+    bool TidPresence() const noexcept override {
         return has_tid_;
     }
 };

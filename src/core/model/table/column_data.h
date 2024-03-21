@@ -30,7 +30,7 @@ public:
     }
 
     bool IsSingleton(int tuple_index) const noexcept {
-        return GetProbingTableValue(tuple_index) == model::PLI::singleton_value_id_;
+        return GetProbingTableValue(tuple_index) == model::PLI::kSingletonValueId;
     }
 
     model::PositionListIndex const* GetPositionListIndex() const {
@@ -54,6 +54,6 @@ public:
     }
 
     static bool IsValueSingleton(int value) noexcept {
-        return value == model::PLI::singleton_value_id_;
+        return value == model::PLI::kSingletonValueId;
     }
 };

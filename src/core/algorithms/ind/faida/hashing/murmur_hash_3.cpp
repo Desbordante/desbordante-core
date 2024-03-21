@@ -8,6 +8,7 @@
 // non-native version will be less than optimal.
 
 // clang-format off
+// NOLINTBEGIN(readability-identifier-naming)
 
 #include "murmur_hash_3.h"
 
@@ -356,4 +357,5 @@ void MurmurHash3_x64_128 ( const void * key, const int len,
 
 //-----------------------------------------------------------------------------
 
+// NOLINTEND(readability-identifier-naming)
 // clang-format on

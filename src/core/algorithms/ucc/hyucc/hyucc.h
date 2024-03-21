@@ -25,12 +25,12 @@ private:
                       std::vector<hy::ClusterId> const& og_mapping);
 
     void MakeExecuteOptsAvailable() final {
-        MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
+        MakeOptionsAvailable({config::kThreadNumberOpt.GetName()});
     }
 
 public:
     HyUCC() : UCCAlgorithm({}) {
-        RegisterOption(config::ThreadNumberOpt(&threads_num_));
+        RegisterOption(config::kThreadNumberOpt(&threads_num_));
     }
 };
 

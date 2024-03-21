@@ -44,7 +44,7 @@ private:
 public:
     static int intersection_count_;
     static unsigned long long micros_;
-    static int const singleton_value_id_;
+    static int const kSingletonValueId;
 
     PositionListIndex(std::deque<Cluster> index, Cluster null_cluster, unsigned int size,
                       double entropy, unsigned long long nep, unsigned int relation_size,
@@ -109,7 +109,7 @@ public:
         return size_;
     }
 
-    unsigned int getRelationSize() const {
+    unsigned int GetRelationSize() const {
         return relation_size_;
     }
 

@@ -25,7 +25,7 @@ double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
         value_counts.clear();
         for (int position : cluster) {
             probing_table_value_id = probing_table[position];
-            if (probing_table_value_id != model::PositionListIndex::singleton_value_id_) {
+            if (probing_table_value_id != model::PositionListIndex::kSingletonValueId) {
                 value_counts[probing_table_value_id] += 1;
             }
         }

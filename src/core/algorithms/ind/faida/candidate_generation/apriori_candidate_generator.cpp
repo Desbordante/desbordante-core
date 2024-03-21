@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-namespace algos::faida::AprioriCandidateGenerator {
+namespace algos::faida::apriori_candidate_generator {
 
 std::shared_ptr<SimpleCC> CombineCCs(SimpleCC const& first, SimpleCC const& second,
                                      std::unordered_set<std::shared_ptr<SimpleCC>>& ccs_on_level) {
@@ -19,9 +19,9 @@ bool CreateCandidate(SimpleIND const& first, SimpleIND const& second,
                      std::unordered_set<SimpleIND const*> const& last_result_set,
                      std::vector<SimpleIND>& candidates) {
     std::shared_ptr<SimpleCC> new_left =
-            CombineCCs(*(first.left()), *(second.left()), ccs_on_level);
+            CombineCCs(*(first.Left()), *(second.Left()), ccs_on_level);
     std::shared_ptr<SimpleCC> new_right =
-            CombineCCs(*(first.right()), *(second.right()), ccs_on_level);
+            CombineCCs(*(first.Right()), *(second.Right()), ccs_on_level);
 
     int const size = new_left->GetColumnIndices().size();
 
@@ -86,8 +86,8 @@ std::vector<SimpleIND> CreateCombinedCandidates(std::vector<SimpleIND> const& in
                 break;
             }
 
-            if (first_ind.left()->GetLastColumn() == second_ind.left()->GetLastColumn() ||
-                first_ind.right()->GetLastColumn() == second_ind.right()->GetLastColumn()) {
+            if (first_ind.Left()->GetLastColumn() == second_ind.Left()->GetLastColumn() ||
+                first_ind.Right()->GetLastColumn() == second_ind.Right()->GetLastColumn()) {
                 continue;
             }
 
@@ -98,4 +98,4 @@ std::vector<SimpleIND> CreateCombinedCandidates(std::vector<SimpleIND> const& in
     return candidates;
 }
 
-}  // namespace algos::faida::AprioriCandidateGenerator
+}  // namespace algos::faida::apriori_candidate_generator

@@ -16,7 +16,7 @@ namespace algos {
 
 ACAlgorithm::ACAlgorithm() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
     ac_exception_finder_ = std::make_unique<algebraic_constraints::ACExceptionFinder>();
 }
 
@@ -63,7 +63,7 @@ void ACAlgorithm::RegisterOptions() {
         if (parameter <= 0) throw config::ConfigurationError("Parameter out of range");
     };
 
-    RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&bin_operation_, kBinaryOperation, kDBinaryOperation}.SetValueCheck(
             check_and_set_binop));
     RegisterOption(Option{&fuzziness_, kFuzziness, kDFuzziness}.SetValueCheck(check_fuzziness));
@@ -116,10 +116,10 @@ size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
     double freedom_degree = 2 * (k_bumps + 1);
     double tmp1 = 2 / (9 * freedom_degree);
     double tmp2 = (1 - tmp1 + xp * sqrt(tmp1));
-    double Xp_2 = freedom_degree * pow(tmp2, 3.0);
+    double xp2 = freedom_degree * pow(tmp2, 3.0);
     /* Formula (7) from <<BHUNT: Automatic Discovery of Fuzzy Algebraic Constraints
      * in Relational Data>> by Paul G. Brown & Peter J. Haas*/
-    size_t sample_size = (Xp_2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
+    size_t sample_size = (xp2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
 
     return sample_size;
 }
@@ -133,12 +133,11 @@ std::vector<std::byte const*> ACAlgorithm::Sampling(std::vector<model::TypedColu
     size_t sample_size = CalculateSampleSize(k_bumps);
     size_t new_k_bumps = 1;
     size_t n_rows = data.at(lhs_i).GetData().size();
-    double probability = sample_size / static_cast<double>(n_rows);
     while (i < iterations_limit_ &&
            (ranges.empty() || sample_size < CalculateSampleSize(new_k_bumps))) {
         k_bumps = new_k_bumps;
         sample_size = CalculateSampleSize(k_bumps);
-        probability = sample_size / static_cast<double>(n_rows);
+        double probability = sample_size / static_cast<double>(n_rows);
         ranges = SamplingIteration(data, lhs_i, rhs_i, probability, ac_pairs);
         new_k_bumps = ranges.size() / 2;
         if (new_k_bumps == 0) {

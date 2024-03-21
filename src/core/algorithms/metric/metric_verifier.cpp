@@ -21,7 +21,7 @@ namespace algos::metric {
 
 MetricVerifier::MetricVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
@@ -105,25 +105,25 @@ void MetricVerifier::RegisterOptions() {
         if (q <= 0) throw config::ConfigurationError("Q-gram length should be greater than zero.");
     };
 
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_columns));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_columns));
     RegisterOption(Option{&algo_, kMetricAlgorithm, kDMetricAlgorithm}.SetValueCheck(algo_check));
     RegisterOption(Option{&dist_from_null_is_infinity_, kDistFromNullIsInfinity,
                           kDDistFromNullIsInfinity, false});
     RegisterOption(Option{&parameter_, kParameter, kDParameter}.SetValueCheck(check_parameter));
     RegisterOption(Option{&q_, kQGramLength, kDQGramLength, 2u}.SetValueCheck(q_check));
-    RegisterOption(config::RhsIndicesOpt(&rhs_indices_, get_schema_columns, check_rhs)
+    RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_columns, check_rhs)
                            .SetConditionalOpts({{need_algo_and_q, {kMetricAlgorithm, kQGramLength}},
                                                 {need_algo_only, {kMetricAlgorithm}}}));
     RegisterOption(Option{&metric_, kMetric, kDMetric}.SetConditionalOpts(
-            {{{}, {config::RhsIndicesOpt.GetName()}}}));
+            {{{}, {config::kRhsIndicesOpt.GetName()}}}));
 }
 
 void MetricVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable(
-            {kDistFromNullIsInfinity, kParameter, kMetric, config::LhsIndicesOpt.GetName()});
+            {kDistFromNullIsInfinity, kParameter, kMetric, config::kLhsIndicesOpt.GetName()});
 }
 
 void MetricVerifier::LoadDataInternal() {

@@ -5,6 +5,6 @@
 
 namespace config {
 
-extern CommonOption<ErrorType> const ErrorOpt;
+extern CommonOption<ErrorType> const kErrorOpt;
 
 }  // namespace config

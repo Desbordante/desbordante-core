@@ -15,7 +15,7 @@ namespace util {
  *       std::distance(begin, end) and threads_num_max.
  */
 template <typename It, typename UnaryFunction>
-inline void parallel_foreach(It begin, It end, unsigned const threads_num_max, UnaryFunction f) {
+inline void ParallelForeach(It begin, It end, unsigned const threads_num_max, UnaryFunction f) {
     assert(threads_num_max != 0);
     auto const length = std::distance(begin, end);
     if (length == 0) {
@@ -41,7 +41,7 @@ inline void parallel_foreach(It begin, It end, unsigned const threads_num_max, U
             threads.emplace_back(task, prev, p);
         } catch (std::system_error const& e) {
             /* Could not create a new thread */
-            LOG(WARNING) << "Created " << threads.size() << " threads in parallel_foreach. "
+            LOG(WARNING) << "Created " << threads.size() << " threads in ParallelForeach. "
                          << "Could not create new thread: " << e.what();
             /* Fall through to the serial case for the remaining elements */
             p = prev;

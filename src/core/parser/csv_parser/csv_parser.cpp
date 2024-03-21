@@ -11,7 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 
-inline std::string& CSVParser::rtrim(std::string& s) {
+inline std::string& CSVParser::Rtrim(std::string& s) {
     boost::trim_right(s);
     return s;
 }
@@ -57,7 +57,7 @@ CSVParser::CSVParser(CSVConfig const& csv_config)
 void CSVParser::GetNext() {
     next_line_ = "";
     std::getline(source_, next_line_);
-    rtrim(next_line_);
+    Rtrim(next_line_);
 }
 
 void CSVParser::PeekNext() {
@@ -96,7 +96,7 @@ void CSVParser::GetLine(unsigned long long const line_index) {
 
     std::getline(source_, next_line_);
 
-    rtrim(next_line_);
+    Rtrim(next_line_);
 }
 
 void CSVParser::GetNextIfHas() {

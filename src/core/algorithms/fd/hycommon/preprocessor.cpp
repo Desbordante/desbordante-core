@@ -13,10 +13,10 @@ std::vector<algos::hy::ClusterId> SortAndGetMapping(algos::hy::PLIs& plis) {
     std::transform(plis.begin(), plis.end(), std::back_inserter(plis_sort_ids),
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
-    auto const kClusterQuantityDescending = [](auto const& pli1, auto const& pli2) {
+    auto const cluster_quantity_descending = [](auto const& pli1, auto const& pli2) {
         return pli1.first->GetNumCluster() > pli2.first->GetNumCluster();
     };
-    std::sort(plis_sort_ids.begin(), plis_sort_ids.end(), kClusterQuantityDescending);
+    std::sort(plis_sort_ids.begin(), plis_sort_ids.end(), cluster_quantity_descending);
 
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), plis.begin(),
                    [](auto& pli_ext) { return std::move(pli_ext.first); });
@@ -32,7 +32,7 @@ algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
 
     for (auto const& pli : plis) {
         algos::hy::ClusterId cluster_id = 0;
-        std::vector<algos::hy::ClusterId> current(pli->getRelationSize(),
+        std::vector<algos::hy::ClusterId> current(pli->GetRelationSize(),
                                                   algos::hy::PLIUtil::kSingletonClusterId);
         for (auto const& cluster : pli->GetIndex()) {
             for (int value : cluster) {

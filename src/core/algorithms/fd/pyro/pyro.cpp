@@ -15,7 +15,7 @@
 
 namespace algos {
 
-std::mutex searchSpacesMutex;
+std::mutex search_spaces_mutex;
 
 Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
@@ -29,16 +29,16 @@ Pyro::Pyro() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
 void Pyro::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::ErrorOpt(&parameters_.max_ucc_error));
-    RegisterOption(config::MaxLhsOpt(&parameters_.max_lhs));
-    RegisterOption(config::ThreadNumberOpt(&parameters_.parallelism));
+    RegisterOption(config::kErrorOpt(&parameters_.max_ucc_error));
+    RegisterOption(config::kMaxLhsOpt(&parameters_.max_lhs));
+    RegisterOption(config::kThreadNumberOpt(&parameters_.parallelism));
     RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
 void Pyro::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(),
-                          config::ThreadNumberOpt.GetName(), kSeed});
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName(), config::kErrorOpt.GetName(),
+                          config::kThreadNumberOpt.GetName(), kSeed});
 }
 
 void Pyro::ResetStateFd() {
@@ -91,7 +91,7 @@ unsigned long long Pyro::ExecuteInternal() {
                 while (true) {
                     std::unique_ptr<SearchSpace> polled_space;
                     {
-                        std::scoped_lock<std::mutex> lock(searchSpacesMutex);
+                        std::scoped_lock<std::mutex> lock(search_spaces_mutex);
                         if (search_spaces.empty()) {
                             break;
                         }
