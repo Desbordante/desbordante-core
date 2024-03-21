@@ -15,7 +15,7 @@ namespace algos::fd_verifier {
 
 FDVerifier::FDVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void FDVerifier::RegisterOptions() {
@@ -23,16 +23,16 @@ void FDVerifier::RegisterOptions() {
 
     auto get_schema_cols = [this]() { return relation_->GetSchema()->GetNumColumns(); };
 
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::LhsIndicesOpt(&lhs_indices_, get_schema_cols));
-    RegisterOption(config::RhsIndicesOpt(&rhs_indices_, get_schema_cols));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
+    RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
 }
 
 void FDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({config::LhsIndicesOpt.GetName(), config::RhsIndicesOpt.GetName()});
+    MakeOptionsAvailable({config::kLhsIndicesOpt.GetName(), config::kRhsIndicesOpt.GetName()});
 }
 
 void FDVerifier::LoadDataInternal() {

@@ -32,7 +32,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFor(ColumnLayoutRelationData* relation_
         boost::dynamic_bitset<> agree_set(relation_data->GetNumColumns());
         for (auto& column_data : relation_data->GetColumnData()) {
             int value1 = column_data.GetProbingTableValue(tuple_index_1);
-            if (value1 != PositionListIndex::singleton_value_id_ &&
+            if (value1 != PositionListIndex::kSingletonValueId &&
                 value1 == column_data.GetProbingTableValue(tuple_index_2)) {
                 agree_set[column_data.GetColumn()->GetIndex()] = true;
             }
@@ -82,7 +82,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
                     boost::dynamic_bitset<> agree_set(agree_set_prototype);
                     for (auto& column_data : relevant_column_data) {
                         int value1 = column_data.get().GetProbingTableValue(tuple_index_1);
-                        if (value1 != PositionListIndex::singleton_value_id_ &&
+                        if (value1 != PositionListIndex::kSingletonValueId &&
                             value1 == column_data.get().GetProbingTableValue(tuple_index_2)) {
                             agree_set.set(column_data.get().GetColumn()->GetIndex());
                         }
@@ -129,7 +129,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
             boost::dynamic_bitset<> agree_set(agree_set_prototype);
             for (auto& column_data : relevant_column_data) {
                 int value1 = column_data.get().GetProbingTableValue(tuple_index_1);
-                if (value1 != PositionListIndex::singleton_value_id_ &&
+                if (value1 != PositionListIndex::kSingletonValueId &&
                     value1 == column_data.get().GetProbingTableValue(tuple_index_2)) {
                     agree_set.set(column_data.get().GetColumn()->GetIndex());
                 }

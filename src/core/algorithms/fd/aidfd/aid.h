@@ -26,9 +26,9 @@ private:
 
     std::unordered_set<boost::dynamic_bitset<>> neg_cover_{};
 
-    constexpr static double const growth_threshold_ = 0.01;
-    constexpr static size_t const window_size_ = 10;
-    constexpr static size_t const prime_ = 10619863;
+    constexpr static double const kGrowthThreshold = 0.01;
+    constexpr static size_t const kWindowSize = 10;
+    constexpr static size_t const kPrime = 10619863;
 
     std::vector<double> prev_ratios_;
     double sum_{};

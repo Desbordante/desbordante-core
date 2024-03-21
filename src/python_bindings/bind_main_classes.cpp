@@ -17,14 +17,14 @@
 namespace {
 namespace py = pybind11;
 using algos::Algorithm;
-auto const void_index = std::type_index{typeid(void)};
+auto const kVoidIndex = std::type_index{typeid(void)};
 
 void ConfigureAlgo(Algorithm& algorithm, py::kwargs const& kwargs) {
     using python_bindings::PyToAny;
     algos::ConfigureFromFunction(
             algorithm, [&kwargs, &algorithm](std::string_view option_name) -> boost::any {
                 std::type_index type_index = algorithm.GetTypeIndex(option_name);
-                assert(type_index != void_index);
+                assert(type_index != kVoidIndex);
                 return kwargs.contains(option_name)
                                ? PyToAny(option_name, type_index, kwargs[option_name.data()])
                                : boost::any{};
@@ -65,7 +65,7 @@ void BindMainClasses(py::module_& main_module) {
                     "get_option_type",
                     [](Algorithm const& algo, std::string_view option_name) {
                         auto type_index = algo.GetTypeIndex(option_name);
-                        if (type_index == void_index)
+                        if (type_index == kVoidIndex)
                             throw config::ConfigurationError{std::string{"Option named \""} +
                                                              option_name.data() +
                                                              "\" doesn't exist!"};

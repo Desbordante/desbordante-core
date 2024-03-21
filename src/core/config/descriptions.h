@@ -8,6 +8,16 @@
 #include "util/enum_to_available_values.h"
 
 namespace config::descriptions {
+
+namespace details {
+std::string const kDMetricString =
+        "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
+std::string const kDMetricAlgorithmString =
+        "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
+std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to use\n" +
+                                           util::EnumToAvailableValues<algos::cfd::Substrategy>();
+}  // namespace details
+
 constexpr auto kDTable = "table processed by the algorithm";
 constexpr auto kDTables = "table collection processed by the algorithm";
 constexpr auto kDCsvPath = "path to the CSV table";
@@ -27,9 +37,7 @@ constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[sing
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
-std::string const _kDMetric =
-        "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
-auto const kDMetric = _kDMetric.c_str();
+auto const kDMetric = details::kDMetricString.c_str();
 constexpr auto kDLhsIndices = "LHS column indices";
 constexpr auto kDRhsIndices = "RHS column indices";
 constexpr auto kDRhsIndex = "RHS column index";
@@ -39,9 +47,7 @@ constexpr auto kDDistFromNullIsInfinity =
         "specify whether distance from NULL value is infinity "
         "(if not, it is 0)";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
-std::string const _kDMetricAlgorithm =
-        "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
-auto const kDMetricAlgorithm = _kDMetricAlgorithm.c_str();
+auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
 constexpr auto kDRadius =
         "maximum difference between a value and the most common value in a "
         "cluster";
@@ -63,9 +69,7 @@ constexpr auto kDCfdMinimumSupport =
         "between 1 and number of tuples in dataset)";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
-std::string const _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
-                                      util::EnumToAvailableValues<algos::cfd::Substrategy>();
-auto const kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
+auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 constexpr auto kDBinaryOperation = "one of available operations: /, *, +, -";
 constexpr auto kDFuzziness = "fraction of exceptional records, lies in (0, 1]";
 constexpr auto kDFuzzinessProbability =

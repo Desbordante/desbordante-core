@@ -17,27 +17,27 @@
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;
 
-using algos::FDAlgorithm, algos::Fd_mine, algos::StdParamsMap;
+using algos::FDAlgorithm, algos::FdMine, algos::StdParamsMap;
 
 namespace onam = config::names;
 
-StdParamsMap FD_MineGetParamMap(CSVConfig const& csv_config) {
+StdParamsMap FdMineGetParamMap(CSVConfig const& csv_config) {
     return {{config::names::kTable, MakeInputTable(csv_config)}};
 }
 
-std::unique_ptr<FDAlgorithm> ConfToLoadFD_Mine(CSVConfig const& csv_config) {
-    std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<Fd_mine>();
-    algos::ConfigureFromMap(*algorithm, FD_MineGetParamMap(csv_config));
+std::unique_ptr<FDAlgorithm> ConfToLoadFdMine(CSVConfig const& csv_config) {
+    std::unique_ptr<FDAlgorithm> algorithm = std::make_unique<FdMine>();
+    algos::ConfigureFromMap(*algorithm, FdMineGetParamMap(csv_config));
     return algorithm;
 }
 
-std::unique_ptr<FDAlgorithm> CreateFD_MineAlgorithmInstance(CSVConfig const& csv_config) {
-    return algos::CreateAndLoadAlgorithm<Fd_mine>(FD_MineGetParamMap(csv_config));
+std::unique_ptr<FDAlgorithm> CreateFdMineAlgorithmInstance(CSVConfig const& csv_config) {
+    return algos::CreateAndLoadAlgorithm<FdMine>(FdMineGetParamMap(csv_config));
 }
 
-using FDMineAlgorithmTest = tests::AlgorithmTest<Fd_mine>;
+using FDMineAlgorithmTest = tests::AlgorithmTest<FdMine>;
 
-std::vector<unsigned int> FD_MineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
+std::vector<unsigned int> FdMineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
     for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
@@ -46,12 +46,12 @@ std::vector<unsigned int> FD_MineBitsetToIndexVector(boost::dynamic_bitset<> con
     return res;
 }
 
-testing::AssertionResult FD_Mine_CheckFDListEquality(
+testing::AssertionResult FdMineCheckFdListEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
     for (auto& fd : expected) {
         std::vector<unsigned int> lhs_indices =
-                FD_MineBitsetToIndexVector(fd.GetLhs().GetColumnIndices());
+                FdMineBitsetToIndexVector(fd.GetLhs().GetColumnIndices());
         std::sort(lhs_indices.begin(), lhs_indices.end());
 
         if (auto it = actual.find(std::make_pair(lhs_indices, fd.GetRhs().GetIndex()));
@@ -67,23 +67,23 @@ testing::AssertionResult FD_Mine_CheckFDListEquality(
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
-std::set<std::pair<std::vector<unsigned int>, unsigned int>> FD_MineFDsToSet(
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FdMineFDsToSet(
         std::list<FD> const& fds) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
     for (auto const& fd : fds) {
         auto const& raw_fd = fd.ToRawFD();
-        set.emplace(FD_MineBitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
+        set.emplace(FdMineBitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
     }
     return set;
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ThrowsOnEmpty) {
-    auto algorithm = ConfToLoadFD_Mine(tests::kTestEmpty);
+    auto algorithm = ConfToLoadFdMine(tests::kTestEmpty);
     ASSERT_THROW(algorithm->LoadData(), std::runtime_error);
 }
 
 TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
-    auto algorithm = CreateFD_MineAlgorithmInstance(tests::kTestSingleColumn);
+    auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestSingleColumn);
     algorithm->Execute();
     ASSERT_TRUE(algorithm->FdList().empty());
 }
@@ -91,9 +91,9 @@ TEST(AlgorithmSyntheticTest, FD_Mine_ReturnsEmptyOnSingleNonKey) {
 TEST(AlgorithmSyntheticTest, FD_Mine_WorksOnLongDataset) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> true_fd_collection{{{2}, 1}};
 
-    auto algorithm = CreateFD_MineAlgorithmInstance(tests::kTestLong);
+    auto algorithm = CreateFdMineAlgorithmInstance(tests::kTestLong);
     algorithm->Execute();
-    ASSERT_TRUE(FD_Mine_CheckFDListEquality(true_fd_collection, algorithm->FdList()));
+    ASSERT_TRUE(FdMineCheckFdListEquality(true_fd_collection, algorithm->FdList()));
 }
 
 std::string GetJsonFDs(std::list<FD>& fd_collection) {
@@ -141,12 +141,12 @@ TEST_F(FDMineAlgorithmTest, FD_Mine_ReturnsSameAsPyro) {
     using namespace config::names;
 
     try {
-        for (auto const& [config, hash] : FDMineAlgorithmTest::light_datasets_) {
+        for (auto const& [config, hash] : FDMineAlgorithmTest::kLightDatasets) {
             // TODO: change this hotfix
-            if (config.path == tests::kbreast_cancer.path) {
+            if (config.path == tests::kBreastCancer.path) {
                 continue;
             }
-            auto algorithm = CreateFD_MineAlgorithmInstance(config);
+            auto algorithm = CreateFdMineAlgorithmInstance(config);
 
             StdParamsMap params_map{{kCsvConfig, config},
                                     {kSeed, decltype(algos::pyro::Parameters::seed){0}},

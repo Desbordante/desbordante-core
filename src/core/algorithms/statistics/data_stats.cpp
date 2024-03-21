@@ -17,17 +17,17 @@ namespace mo = model;
 
 DataStats::DataStats() : Algorithm({"Calculating statistics"}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void DataStats::RegisterOptions() {
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
 void DataStats::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::ThreadNumberOpt.GetName()});
+    MakeOptionsAvailable({config::kThreadNumberOpt.GetName()});
 }
 
 void DataStats::ResetState() {
@@ -551,7 +551,6 @@ Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
     if (col.GetTypeId() != +mo::TypeId::kString) return {};
 
     size_t count = 0;
-    std::string string_data;
     mo::IntType int_type;
 
     for (size_t i = 0; i < col.GetNumRows(); i++) {

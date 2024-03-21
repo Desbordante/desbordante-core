@@ -102,19 +102,19 @@ TYPED_TEST_P(AlgorithmTest, WorksOnWideDataset) {
 }
 
 TYPED_TEST_P(AlgorithmTest, LightDatasetsConsistentHash) {
-    TestFixture::PerformConsistentHashTestOn(TestFixture::light_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
 }
 
 TYPED_TEST_P(AlgorithmTest, HeavyDatasetsConsistentHash) {
-    TestFixture::PerformConsistentHashTestOn(TestFixture::heavy_datasets_);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
 }
 
 TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
-    auto algorithm = TestFixture::CreateAlgorithmInstance(kWDC_astronomical);
+    auto algorithm = TestFixture::CreateAlgorithmInstance(kWdcAstronomical);
     algorithm->Execute();
     auto first_res = FDsToSet(algorithm->FdList());
     for (int i = 0; i < 3; ++i) {
-        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWDC_astronomical));
+        algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWdcAstronomical));
         algorithm->Execute();
         ASSERT_TRUE(CheckFdListEquality(first_res, algorithm->FdList()));
     }

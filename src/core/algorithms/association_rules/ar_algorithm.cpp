@@ -24,7 +24,7 @@ void ARAlgorithm::RegisterOptions() {
     auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
     auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
 
-    RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
     RegisterOption(Option{&item_column_index_, kItemColumnIndex, kDItemColumnIndex, 1u});
     RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});

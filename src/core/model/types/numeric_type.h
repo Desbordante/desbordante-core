@@ -164,7 +164,7 @@ CompareResult NumericType<T>::Compare(std::byte const* l, std::byte const* r) co
 
 template <typename T>
 void NumericType<T>::ValueFromStr(std::byte* buf, std::string s) const {
-    GetValue(buf) = TypeConverter<T>::convert(s);
+    GetValue(buf) = TypeConverter<T>::kConvert(s);
 }
 
 template <typename T>

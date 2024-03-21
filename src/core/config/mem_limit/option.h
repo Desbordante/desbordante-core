@@ -4,5 +4,5 @@
 #include "config/mem_limit/type.h"
 
 namespace config {
-extern CommonOption<MemLimitMBType> const MemLimitMBOpt;
+extern CommonOption<MemLimitMBType> const kMemLimitMbOpt;
 }  // namespace config

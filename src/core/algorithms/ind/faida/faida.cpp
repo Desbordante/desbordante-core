@@ -19,7 +19,7 @@ Faida::Faida() : INDAlgorithm({}) {
     RegisterOption(Option{&detect_nary_, kFindNary, kDFindNary, true});
     RegisterOption(Option{&ignore_null_cols_, kIgnoreNullCols, kDIgnoreNullCols, false});
     RegisterOption(Option{&ignore_const_cols_, kIgnoreConstantCols, kDIgnoreConstantCols, false});
-    RegisterOption(config::ThreadNumberOpt(&number_of_threads_));
+    RegisterOption(config::kThreadNumberOpt(&number_of_threads_));
 
     MakeOptionsAvailable({kSampleSize});
 }
@@ -27,7 +27,7 @@ Faida::Faida() : INDAlgorithm({}) {
 void Faida::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({kFindNary, kHllAccuracy, kIgnoreNullCols, kIgnoreConstantCols,
-                          config::ThreadNumberOpt.GetName()});
+                          config::kThreadNumberOpt.GetName()});
 }
 
 void Faida::LoadDataInternal() {
@@ -51,7 +51,7 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::CreateUnaryCCs(
         faida::Preprocessor const& data) const {
     std::vector<std::shared_ptr<SimpleCC>> combinations;
 
-    int const kIndex = 0;
+    constexpr int const index = 0;
     for (TableIndex table_idx = 0; table_idx < data.GetStores().size(); table_idx++) {
         AbstractColumnStore const& store = *data.GetStores()[table_idx];
         size_t const num_columns = store.GetSchema()->GetNumColumns();
@@ -66,7 +66,7 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::CreateUnaryCCs(
                 continue;
             }
             combinations.emplace_back(
-                    std::make_shared<SimpleCC>(table_idx, std::vector{col_idx}, kIndex));
+                    std::make_shared<SimpleCC>(table_idx, std::vector{col_idx}, index));
         }
     }
 
@@ -93,8 +93,8 @@ std::vector<std::shared_ptr<faida::SimpleCC>> Faida::ExtractCCs(
         std::vector<SimpleIND> const& candidates) const {
     std::unordered_set<std::shared_ptr<SimpleCC>> combinations;
     for (SimpleIND const& ind_candidate : candidates) {
-        combinations.insert(ind_candidate.left());
-        combinations.insert(ind_candidate.right());
+        combinations.insert(ind_candidate.Left());
+        combinations.insert(ind_candidate.Right());
     }
     return {combinations.begin(), combinations.end()};
 }
@@ -120,7 +120,7 @@ unsigned long long Faida::ExecuteInternal() {
     if (detect_nary_) {
         while (!last_result.empty()) {
             level_num++;
-            candidates = faida::AprioriCandidateGenerator::CreateCombinedCandidates(last_result);
+            candidates = faida::apriori_candidate_generator::CreateCombinedCandidates(last_result);
             if (candidates.empty()) {
                 LOG(DEBUG) << "\nNo candidates on level " << level_num;
                 break;
@@ -197,7 +197,7 @@ std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const
     std::vector<SimpleIND> result;
 
     for (SimpleIND const& candidate_ind : candidates) {
-        if (inclusion_tester_->IsIncludedIn(candidate_ind.left(), candidate_ind.right())) {
+        if (inclusion_tester_->IsIncludedIn(candidate_ind.Left(), candidate_ind.Right())) {
             result.emplace_back(candidate_ind);
         }
     }
@@ -212,7 +212,7 @@ std::vector<faida::SimpleIND> Faida::TestCandidates(std::vector<SimpleIND> const
 
 void Faida::RegisterInds(std::vector<SimpleIND> const& inds) {
     for (SimpleIND const& ind : inds) {
-        RegisterIND(ind.left(), ind.right());
+        RegisterIND(ind.Left(), ind.Right());
     }
 }
 

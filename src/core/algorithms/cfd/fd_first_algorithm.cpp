@@ -121,7 +121,7 @@ bool FDFirstAlgorithm::IsConstRule(PartitionTIdList const& items, int rhs_a) {
     int rhs_value;
     bool first = true;
     for (size_t pos_index = 0; pos_index <= items.tids.size(); pos_index++) {
-        if (pos_index != items.tids.size() && items.tids[pos_index] != PartitionTIdList::SEP) {
+        if (pos_index != items.tids.size() && items.tids[pos_index] != PartitionTIdList::kSep) {
             continue;
         }
 
@@ -285,7 +285,7 @@ void FDFirstAlgorithm::FillMinePatternsVars(PartitionList& partitions, RhsesPair
     auto const lhs_attrs = relation_->GetAttrVector(lhs);
     unsigned count = 0;
     for (size_t pi = 0; pi <= all_tids.tids.size(); pi++) {
-        if (pi != all_tids.tids.size() && all_tids.tids[pi] != PartitionTIdList::SEP) {
+        if (pi != all_tids.tids.size() && all_tids.tids[pi] != PartitionTIdList::kSep) {
             count++;
             continue;
         }
@@ -561,7 +561,7 @@ FDFirstAlgorithm::PIdListMiners FDFirstAlgorithm::GetPartitionSingletons() {
             auto& ts = new_node.tids.tids;
             ts.insert(ts.end(), partitions[a][i].begin(), partitions[a][i].end());
             if (i != dom.size() - 1) {
-                ts.push_back(PartitionTIdList::SEP);
+                ts.push_back(PartitionTIdList::kSep);
             }
         }
 

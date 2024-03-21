@@ -24,12 +24,12 @@ FastFDs::FastFDs() : PliBasedFDAlgorithm({"Agree sets generation", "Finding mini
 }
 
 void FastFDs::RegisterOptions() {
-    RegisterOption(config::MaxLhsOpt(&max_lhs_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
+    RegisterOption(config::kMaxLhsOpt(&max_lhs_));
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
 void FastFDs::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ThreadNumberOpt.GetName()});
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName(), config::kThreadNumberOpt.GetName()});
 }
 
 void FastFDs::ResetStateFd() {
@@ -290,7 +290,7 @@ void FastFDs::GenDiffSets() {
             diff_sets_.push_back(std::move(diff_set));
         };
 
-        util::parallel_foreach(agree_sets.begin(), agree_sets.end(), threads_num_, task);
+        util::ParallelForeach(agree_sets.begin(), agree_sets.end(), threads_num_, task);
     } else {
         for (model::AgreeSet const& agree_set : agree_sets) {
             diff_sets_.push_back(agree_set.Invert());

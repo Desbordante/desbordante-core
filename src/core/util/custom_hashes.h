@@ -14,7 +14,7 @@ private:
             BitsetHashingMethod::kTryConvertToUlong;
 #endif
 
-    template <auto bitsetHashingMethod = kDefaultHashingMethod>
+    template <auto BitsetHashingMethod = kDefaultHashingMethod>
     static size_t BitsetHash(boost::dynamic_bitset<> const& bitset);
 
     friend std::hash<Vertical>;

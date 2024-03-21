@@ -37,7 +37,7 @@ private:
     void GetNextIfHas();
     void SkipLine();
 
-    inline static std::string& rtrim(std::string& s);
+    inline static std::string& Rtrim(std::string& s);
 
 public:
     CSVParser() = default;

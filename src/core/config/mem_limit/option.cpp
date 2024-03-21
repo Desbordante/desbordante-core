@@ -4,7 +4,7 @@
 
 namespace config {
 using names::kMemLimitMB, descriptions::kDMemLimitMB;
-extern CommonOption<MemLimitMBType> const MemLimitMBOpt{
+extern CommonOption<MemLimitMBType> const kMemLimitMbOpt{
         kMemLimitMB, kDMemLimitMB, 2 * 1024u, [](auto &value) {
             constexpr MemLimitMBType min_limit_mb = 16u;
             if (value < min_limit_mb) {

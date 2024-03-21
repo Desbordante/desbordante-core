@@ -111,11 +111,11 @@ void Balancer::DeleteFirstSmall() {
             small_processors.push_back(processor);
         }
     }
-    auto cGreater = [this](std::vector<int> const& a, std::vector<int> const& b) {
+    auto c_greater = [this](std::vector<int> const& a, std::vector<int> const& b) {
         return std::get<2>(quality_.at(a.at(0))) > std::get<2>(quality_.at(b.at(0)));
     };
-    sort(small_processors.begin(), small_processors.end(), cGreater);
-    sort(large_processors.begin(), large_processors.end(), cGreater);
+    sort(small_processors.begin(), small_processors.end(), c_greater);
+    sort(large_processors.begin(), large_processors.end(), c_greater);
     result_.clear();
     result_.insert(result_.end(), small_processors.begin(), small_processors.end());
     result_.insert(result_.end(), large_processors.begin(), large_processors.end());

@@ -141,16 +141,16 @@ std::vector<T> Split(T const& collection, typename T::value_type const& spl) {
 
 template <typename T>
 T GetMaxElem(std::vector<std::pair<T, int>> const& collection) {
-    auto comparatorLess = [](std::pair<T, int> a, std::pair<T, int> b) {
+    auto comparator_less = [](std::pair<T, int> a, std::pair<T, int> b) {
         if (a.second < b.second) {
             return true;
         }
         return false;
     };
 
-    auto result = std::max_element(collection.begin(), collection.end(), comparatorLess);
-    size_t maxElementIndex = std::distance(collection.begin(), result);
-    return collection[maxElementIndex].first;
+    auto result = std::max_element(collection.begin(), collection.end(), comparator_less);
+    size_t max_element_index = std::distance(collection.begin(), result);
+    return collection[max_element_index].first;
 }
 
 template <typename T>

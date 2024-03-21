@@ -13,7 +13,7 @@
 
 namespace algos {
 
-class Fd_mine : public PliBasedFDAlgorithm {
+class FdMine : public PliBasedFDAlgorithm {
 private:
     RelationalSchema const* schema_;
 
@@ -40,7 +40,7 @@ private:
     unsigned long long ExecuteInternal() override;
 
 public:
-    Fd_mine();
+    FdMine();
 };
 
 }  // namespace algos
