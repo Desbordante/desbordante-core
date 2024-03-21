@@ -11,3 +11,4 @@ lib/
 .vscode/
 **/myeasylog.log
 dist
+venv
