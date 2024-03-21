@@ -12,9 +12,9 @@ void Inductor::UpdateFdTree(NonFDList&& non_fds) {
             auto rhs_bits = lhs_bits;
             rhs_bits.flip();
 
-            for (size_t rhsId = rhs_bits.find_first(); rhsId != boost::dynamic_bitset<>::npos;
-                 rhsId = rhs_bits.find_next(rhsId)) {
-                SpecializeTreeForNonFd(lhs_bits, rhsId);
+            for (size_t rhs_id = rhs_bits.find_first(); rhs_id != boost::dynamic_bitset<>::npos;
+                 rhs_id = rhs_bits.find_next(rhs_id)) {
+                SpecializeTreeForNonFd(lhs_bits, rhs_id);
             }
         }
     }

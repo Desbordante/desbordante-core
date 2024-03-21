@@ -23,26 +23,26 @@ std::string_view IndicesOption::GetName() const {
 
 Option<config::IndicesType> IndicesOption::operator()(
         config::IndicesType* value_ptr, std::function<config::IndexType()> get_col_count,
-        typename Option<config::IndicesType>::ValueCheckFunc value_check_func_) const {
+        typename Option<config::IndicesType>::ValueCheckFunc value_check_func) const {
     assert(get_col_count);
     Option<config::IndicesType> option = common_option_(value_ptr);
     option.SetValueCheck(
             [get_col_count = std::move(get_col_count),
-             value_check_func_ = std::move(value_check_func_)](config::IndicesType const& indices) {
+             value_check_func = std::move(value_check_func)](config::IndicesType const& indices) {
                 if (indices.empty()) {
                     throw ConfigurationError("Indices cannot be empty");
                 }
                 static_assert(std::is_unsigned_v<config::IndexType>);
                 assert(std::is_sorted(indices.begin(), indices.end()));
                 config::ValidateIndex(indices.back(), get_col_count());
-                if (value_check_func_) value_check_func_(indices);
+                if (value_check_func) value_check_func(indices);
             });
     return option;
 }
 
 using config::names::kLhsIndices, config::descriptions::kDLhsIndices;
 using config::names::kRhsIndices, config::descriptions::kDRhsIndices;
-extern IndicesOption const LhsIndicesOpt{kLhsIndices, kDLhsIndices};
-extern IndicesOption const RhsIndicesOpt{kRhsIndices, kDRhsIndices};
+extern IndicesOption const kLhsIndicesOpt{kLhsIndices, kDLhsIndices};
+extern IndicesOption const kRhsIndicesOpt{kRhsIndices, kDRhsIndices};
 
 }  // namespace config

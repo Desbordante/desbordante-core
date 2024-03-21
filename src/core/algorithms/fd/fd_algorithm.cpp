@@ -12,12 +12,12 @@ namespace algos {
 FDAlgorithm::FDAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void FDAlgorithm::RegisterOptions() {
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
 }
 
 void FDAlgorithm::ResetState() {

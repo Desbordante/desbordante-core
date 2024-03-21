@@ -21,7 +21,7 @@
 
 namespace model {
 
-int const PositionListIndex::singleton_value_id_ = 0;
+int const PositionListIndex::kSingletonValueId = 0;
 unsigned long long PositionListIndex::micros_ = 0;
 int PositionListIndex::intersection_count_ = 0;
 
@@ -99,7 +99,7 @@ std::unordered_map<int, unsigned> PositionListIndex::CreateFrequencies(
     for (int const tuple_index : cluster) {
         int const probing_table_value = probing_table[tuple_index];
 
-        if (probing_table_value != singleton_value_id_) {
+        if (probing_table_value != kSingletonValueId) {
             frequencies[probing_table_value]++;
         }
     }
@@ -120,10 +120,10 @@ std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbin
     if (probing_table_cache_ != nullptr) return probing_table_cache_;
 
     std::vector<int> probing_table = std::vector<int>(original_relation_size_);
-    int next_cluster_id = singleton_value_id_ + 1;
+    int next_cluster_id = kSingletonValueId + 1;
     for (auto& cluster : index_) {
         int value_id = next_cluster_id++;
-        assert(value_id != singleton_value_id_);
+        assert(value_id != kSingletonValueId);
         for (int position : cluster) {
             probing_table[position] = value_id;
         }
@@ -181,7 +181,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
                 }
             }
             int probing_table_value_id = (*probing_table)[position];
-            if (probing_table_value_id == singleton_value_id_) continue;
+            if (probing_table_value_id == kSingletonValueId) continue;
             intersection_count_++;
             partial_index[probing_table_value_id].push_back(position);
         }
@@ -259,7 +259,7 @@ bool PositionListIndex::TakeProbe(int position, ColumnLayoutRelationData& relati
     for (unsigned long index = probing_indices.find_first(); index < probing_indices.size();
          index = probing_indices.find_next(index)) {
         int value = relation_data.GetColumnData(index).GetProbingTableValue(position);
-        if (value == PositionListIndex::singleton_value_id_) return false;
+        if (value == PositionListIndex::kSingletonValueId) return false;
         probe.push_back(value);
     }
     return true;

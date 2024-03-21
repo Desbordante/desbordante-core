@@ -27,7 +27,7 @@ template <typename T>
 std::pair<std::type_index, ConvFunction> enum_conv_pair{
         std::type_index(typeid(T)),
         [](boost::any value) { return py::cast(boost::any_cast<T>(value)._to_string()); }};
-std::unordered_map<std::type_index, ConvFunction> const converters{
+std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<int>,
         normal_conv_pair<double>,
         normal_conv_pair<long double>,
@@ -44,6 +44,6 @@ std::unordered_map<std::type_index, ConvFunction> const converters{
 
 namespace python_bindings {
 py::object OptToPy(std::type_index type, boost::any val) {
-    return converters.at(type)(val);
+    return kConverters.at(type)(val);
 }
 }  // namespace python_bindings

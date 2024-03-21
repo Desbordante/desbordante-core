@@ -166,7 +166,7 @@ INSTANTIATE_TEST_SUITE_P(
                 MetricVerifyingParams(kTestMetric, Metric::euclidean, 6.0091679956547, {0},
                                       {13, 14, 15})));
 
-constexpr long double inf = std::numeric_limits<long double>::infinity();
+constexpr long double kInf = std::numeric_limits<long double>::infinity();
 
 INSTANTIATE_TEST_SUITE_P(
         HighlightTestSuite, TestHighlights,
@@ -181,7 +181,7 @@ INSTANTIATE_TEST_SUITE_P(
                                     Metric::euclidean, {0}, {2}),
                 HighlightTestParams(kTestMetric, {{3.9, 3.9, 2.07, 0, 0}}, Metric::euclidean, {16},
                                     {13}),
-                HighlightTestParams(kTestMetric, {{inf, 3.9, 3.9, 2.07, 0}}, Metric::euclidean,
+                HighlightTestParams(kTestMetric, {{kInf, 3.9, 3.9, 2.07, 0}}, Metric::euclidean,
                                     {16}, {13}, MetricAlgo::brute, true),
                 HighlightTestParams(kTestMetric, {{2, 2, 2, 2, 2, 1}, {2, 2, 2, 2, 2, 2}},
                                     Metric::levenshtein, {0}, {5}),
@@ -193,21 +193,21 @@ INSTANTIATE_TEST_SUITE_P(
                 HighlightTestParams(kTestMetric, {{0.5, 0.5, 0.410744}}, Metric::cosine, {1}, {7}),
                 HighlightTestParams(kTestMetric,
                                     {{0.661938, 0.661938, 0.53709, 0.525658, 0.428571, 0.316237},
-                                     {inf, inf, inf, 0, 0, 0}},
+                                     {kInf, kInf, kInf, 0, 0, 0}},
                                     Metric::cosine, {0}, {8}, MetricAlgo::brute, true, 3),
                 HighlightTestParams(kTestMetric, {{0.525658, 0.525658, 0.483602}}, Metric::cosine,
                                     {1}, {8}, MetricAlgo::brute, true, 3),
                 HighlightTestParams(kTestMetric, {{4.574986, 4.574986, 2.540827, 0, 0}},
                                     Metric::euclidean, {16}, {13, 14, 15}),
-                HighlightTestParams(kTestMetric, {{inf, 4.574986, 4.574986, 2.540827, 0}},
+                HighlightTestParams(kTestMetric, {{kInf, 4.574986, 4.574986, 2.540827, 0}},
                                     Metric::euclidean, {16}, {13, 14, 15}, MetricAlgo::brute, true),
                 HighlightTestParams(kTestMetric, {{4.543006, 4.54301, 2.41814, 0, 0}},
                                     Metric::euclidean, {16}, {13, 14}),
-                HighlightTestParams(kTestMetric, {{inf, 4.543006, 4.54301, 2.41814, 0}},
+                HighlightTestParams(kTestMetric, {{kInf, 4.543006, 4.54301, 2.41814, 0}},
                                     Metric::euclidean, {16}, {13, 14}, MetricAlgo::brute, true),
                 HighlightTestParams(kTestMetric, {{4.543006, 4.54301, 2.41814, 0, 0}},
                                     Metric::euclidean, {16}, {13, 14}, MetricAlgo::calipers),
-                HighlightTestParams(kTestMetric, {{inf, 4.543006, 4.54301, 2.41814, 0}},
+                HighlightTestParams(kTestMetric, {{kInf, 4.543006, 4.54301, 2.41814, 0}},
                                     Metric::euclidean, {16}, {13, 14}, MetricAlgo::calipers, true),
                 HighlightTestParams(kTestMetric,
                                     {{3.08137, 3.08137, 2.43892, 2.15623, 2.15421, 1.86557}},

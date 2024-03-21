@@ -13,7 +13,7 @@ namespace tests {
 
 namespace {
 
-auto current_path = test_data_dir / "graph_data";
+auto current_path = kTestDataDir / "graph_data";
 
 template <typename T>
 class GfdValidationTest : public ::testing::Test {
@@ -21,9 +21,9 @@ protected:
     std::unique_ptr<algos::GfdHandler> CreateGfdValidationInstance(
             std::filesystem::path const& graph_path,
             std::vector<std::filesystem::path> const& gfd_paths) {
-        StdParamsMap optionMap = {{config::names::kGraphData, graph_path},
-                                  {config::names::kGfdData, gfd_paths}};
-        return algos::CreateAndLoadAlgorithm<T>(optionMap);
+        StdParamsMap option_map = {{config::names::kGraphData, graph_path},
+                                   {config::names::kGfdData, gfd_paths}};
+        return algos::CreateAndLoadAlgorithm<T>(option_map);
     }
 };
 
@@ -36,8 +36,8 @@ TYPED_TEST_P(GfdValidationTest, TestTrivially) {
     auto algorithm = TestFixture::CreateGfdValidationInstance(graph_path, gfd_paths);
     int expected_size = 1;
     algorithm->Execute();
-    std::vector<Gfd> GfdList = algorithm->GfdList();
-    ASSERT_EQ(expected_size, GfdList.size());
+    std::vector<Gfd> gfd_list = algorithm->GfdList();
+    ASSERT_EQ(expected_size, gfd_list.size());
 }
 
 TYPED_TEST_P(GfdValidationTest, TestExistingMatches) {
@@ -47,8 +47,8 @@ TYPED_TEST_P(GfdValidationTest, TestExistingMatches) {
     auto algorithm = TestFixture::CreateGfdValidationInstance(graph_path, gfd_paths);
     int expected_size = 0;
     algorithm->Execute();
-    std::vector<Gfd> GfdList = algorithm->GfdList();
-    ASSERT_EQ(expected_size, GfdList.size());
+    std::vector<Gfd> gfd_list = algorithm->GfdList();
+    ASSERT_EQ(expected_size, gfd_list.size());
 }
 
 REGISTER_TYPED_TEST_SUITE_P(GfdValidationTest, TestTrivially, TestExistingMatches);

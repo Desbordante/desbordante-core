@@ -230,7 +230,7 @@ static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
     unsigned cluster_index = 0;
     for (auto const& squashed_element : squashed) {
         int const value = probing_table[squashed_element.tuple_index];
-        ASSERT_FALSE(value == model::PLI::singleton_value_id_ && squashed_element.amount != 1);
+        ASSERT_FALSE(value == model::PLI::kSingletonValueId && squashed_element.amount != 1);
         for (unsigned i = 0; i != squashed_element.amount; ++i, ++cluster_index) {
             /* Check that tuples in one squashed element have equal values in rhs */
             int const actual_value = probing_table[cluster[cluster_index]];
@@ -241,7 +241,7 @@ static void VerifySquashed(ColumnLayoutRelationData const& rel, FD const& fd,
         }
         /* Check that the next tuple (after the last in this squashed element) is not equal to
          * previous one and therefore is correctly not presented at this squashed element */
-        ASSERT_TRUE(cluster_index == cluster.size() || value == model::PLI::singleton_value_id_ ||
+        ASSERT_TRUE(cluster_index == cluster.size() || value == model::PLI::kSingletonValueId ||
                     value != probing_table[cluster[cluster_index]]);
     }
 }

@@ -9,29 +9,29 @@
 
 namespace {
 
-struct CheckCallback {
+class CheckCallback {
 private:
-    graph_t const& query;
-    graph_t const& graph;
-    std::vector<Literal> const premises;
-    std::vector<Literal> const conclusion;
-    bool& res;
-    int& amount;
+    graph_t const& query_;
+    graph_t const& graph_;
+    std::vector<Literal> const premises_;
+    std::vector<Literal> const conclusion_;
+    bool& res_;
+    int& amount_;
 
 public:
     CheckCallback(graph_t const& query_, graph_t const& graph_,
                   std::vector<Literal> const& premises_, std::vector<Literal> const& conclusion_,
                   bool& res_, int& amount_)
-        : query(query_),
-          graph(graph_),
-          premises(premises_),
-          conclusion(conclusion_),
-          res(res_),
-          amount(amount_) {}
+        : query_(query_),
+          graph_(graph_),
+          premises_(premises_),
+          conclusion_(conclusion_),
+          res_(res_),
+          amount_(amount_) {}
 
     template <typename CorrespondenceMap1To2, typename CorrespondenceMap2To1>
     bool operator()(CorrespondenceMap1To2 f, CorrespondenceMap2To1) const {
-        amount++;
+        amount_++;
         auto satisfied = [this, &f](std::vector<Literal> const& literals) {
             for (const Literal& l : literals) {
                 auto fst_token = l.first;
@@ -42,9 +42,9 @@ public:
                     fst = fst_token.second;
                 } else {
                     vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query);
+                    vertex_t u = boost::vertex(fst_token.first, query_);
                     v = get(f, u);
-                    auto attrs = graph[v].attributes;
+                    auto attrs = graph_[v].attributes;
                     if (attrs.find(fst_token.second) == attrs.end()) {
                         return false;
                     }
@@ -54,9 +54,9 @@ public:
                     snd = snd_token.second;
                 } else {
                     vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query);
+                    vertex_t u = boost::vertex(fst_token.first, query_);
                     v = get(f, u);
-                    auto attrs = graph[v].attributes;
+                    auto attrs = graph_[v].attributes;
                     if (attrs.find(snd_token.second) == attrs.end()) {
                         return false;
                     }
@@ -69,11 +69,11 @@ public:
             return true;
         };
 
-        if (!satisfied(premises)) {
+        if (!satisfied(premises_)) {
             return true;
         }
-        if (!satisfied(conclusion)) {
-            res = false;
+        if (!satisfied(conclusion_)) {
+            res_ = false;
             return false;
         }
         return true;

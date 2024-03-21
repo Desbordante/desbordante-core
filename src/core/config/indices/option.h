@@ -18,13 +18,13 @@ struct IndicesOption {
     // sometimes check other things as well.
     [[nodiscard]] Option<config::IndicesType> operator()(
             config::IndicesType* value_ptr, std::function<config::IndexType()> get_col_count,
-            typename Option<config::IndicesType>::ValueCheckFunc value_check_func_ = nullptr) const;
+            typename Option<config::IndicesType>::ValueCheckFunc value_check_func = nullptr) const;
 
 private:
     CommonOption<config::IndicesType> const common_option_;
 };
 
-extern IndicesOption const LhsIndicesOpt;
-extern IndicesOption const RhsIndicesOpt;
+extern IndicesOption const kLhsIndicesOpt;
+extern IndicesOption const kRhsIndicesOpt;
 
 }  // namespace config

@@ -14,7 +14,7 @@ namespace algos {
 
 UCCVerifier::UCCVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void UCCVerifier::RegisterOptions() {
@@ -25,8 +25,8 @@ void UCCVerifier::RegisterOptions() {
         std::iota(indices.begin(), indices.end(), 0);
         return indices;
     };
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::IndicesOption{kUCCIndices, kDUCCIndices, std::move(calculate_default)}(
             &column_indices_, std::move(get_schema_cols)));
 }

@@ -97,7 +97,7 @@ public:
     }
 
     /// check if block empty
-    bool isEmpty() const {
+    bool IsEmpty() const {
         /* if some column empty, then all block columns are empty */
         return columns_.front().IsEmpty();
     }

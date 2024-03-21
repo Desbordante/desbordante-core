@@ -4,5 +4,5 @@
 #include "config/tabular_data/input_tables_type.h"
 
 namespace config {
-extern CommonOption<InputTables> const TablesOpt;
+extern CommonOption<InputTables> const kTablesOpt;
 }  // namespace config

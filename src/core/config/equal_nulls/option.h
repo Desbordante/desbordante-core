@@ -4,5 +4,5 @@
 #include "config/equal_nulls/type.h"
 
 namespace config {
-extern CommonOption<EqNullsType> const EqualNullsOpt;
+extern CommonOption<EqNullsType> const kEqualNullsOpt;
 }  // namespace config

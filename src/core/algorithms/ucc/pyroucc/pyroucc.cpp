@@ -26,14 +26,14 @@ PyroUCC::PyroUCC() : UCCAlgorithm({kDefaultPhaseName}) {
 void PyroUCC::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::ErrorOpt(&parameters_.max_ucc_error));
-    RegisterOption(config::MaxLhsOpt(&parameters_.max_lhs));
+    RegisterOption(config::kErrorOpt(&parameters_.max_ucc_error));
+    RegisterOption(config::kMaxLhsOpt(&parameters_.max_lhs));
     RegisterOption(Option{&parameters_.seed, kSeed, kDSeed, 0});
 }
 
 void PyroUCC::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({config::MaxLhsOpt.GetName(), config::ErrorOpt.GetName(), kSeed});
+    MakeOptionsAvailable({config::kMaxLhsOpt.GetName(), config::kErrorOpt.GetName(), kSeed});
 }
 
 void PyroUCC::LoadDataInternal() {

@@ -39,7 +39,7 @@ void CFDDiscovery::ResetState() {
 void CFDDiscovery::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&columns_number_, kCfdColumnsNumber, kDCfdColumnsNumber, 0u});
     RegisterOption(Option{&tuples_number_, kCfdTuplesNumber, kDCfdTuplesNumber, 0u});
 }

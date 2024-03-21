@@ -20,7 +20,7 @@ TypoMiner::TypoMiner(std::unique_ptr<FDAlgorithm> precise_algo,
           precise_algo_(std::move(precise_algo)),
           approx_algo_(std::move(approx_algo)) {
     RegisterOptions();
-    MakeOptionsAvailable({config::TableOpt.GetName(), config::EqualNullsOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void TypoMiner::RegisterOptions() {
@@ -41,8 +41,8 @@ void TypoMiner::RegisterOptions() {
         }
     };
 
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(Option{&radius_, kRadius, kDRadius, -1.0}.SetValueCheck(radius_check));
     RegisterOption(Option{&ratio_, kRatio, kDRatio, {ratio_default}}.SetValueCheck(ratio_check));
 }
@@ -57,7 +57,7 @@ void TypoMiner::ResetState() {
 }
 
 bool TypoMiner::SetExternalOption(std::string_view option_name, boost::any const& value) {
-    if (option_name == config::ErrorOpt.GetName()) {
+    if (option_name == config::kErrorOpt.GetName()) {
         if (value.empty()) {
             throw config::ConfigurationError("Must specify error value when mining typos.");
         }
@@ -223,7 +223,7 @@ std::vector<TypoMiner::SquashedElement> TypoMiner::SquashCluster(
     squashed.push_back({.tuple_index = *prev, .amount = 1});
 
     for (auto it = std::next(cluster.cbegin()); it != cluster.cend(); ++it) {
-        if (probing_table[*it] != model::PLI::singleton_value_id_ &&
+        if (probing_table[*it] != model::PLI::kSingletonValueId &&
             probing_table[*it] == probing_table[*prev]) {
             squashed.back().amount++;
         } else {

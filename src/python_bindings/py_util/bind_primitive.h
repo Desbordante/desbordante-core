@@ -28,11 +28,12 @@ auto RegisterAlgorithm(pybind11::module_ module, auto&& name) {
     // py::multiple_inheritance only needed for Pyro. May incur an unnecessary performance cost for
     // other classes, but whatever pybind11 manages is probably not a performance-critical part, so
     // it should be fine.
-    auto cls_ = py::class_<AlgorithmType, BaseType>(module, std::move(name),
-                                                    py::multiple_inheritance());
-    cls_.doc() = MakeDocString<AlgorithmType>();
-    cls_.def(py::init<>());
-    return cls_;
+    auto cls = py::class_<AlgorithmType, BaseType>(module, std::move(name),
+                                                   py::multiple_inheritance());
+
+    cls.doc() = MakeDocString<AlgorithmType>();
+    cls.def(py::init<>());
+    return cls;
 }
 
 template <typename T>
@@ -66,9 +67,9 @@ auto BindPrimitive(pybind11::module_& module, auto result_method, char const* ba
             .def(base_result_method_name, result_method, result_rv_policy);
     auto algos_module = module.def_submodule("algorithms");
     auto arr_iter = algo_names.begin();
-    auto default_ = detail::RegisterAlgorithm<Default, Base>(algos_module, *arr_iter++);
+    auto default_module = detail::RegisterAlgorithm<Default, Base>(algos_module, *arr_iter++);
     (detail::RegisterAlgorithm<Others, Base>(algos_module, *arr_iter++), ...);
-    algos_module.attr("Default") = default_;
+    algos_module.attr("Default") = default_module;
     return algos_module;
 }
 
@@ -78,9 +79,10 @@ auto BindPrimitiveNoBase(pybind11::module_& module, char const* algo_name) {
     using algos::Algorithm;
 
     auto algos_module = module.def_submodule("algorithms");
-    auto default_ = detail::RegisterAlgorithm<AlgorithmType, Algorithm>(algos_module, algo_name);
-    algos_module.attr("Default") = default_;
-    return default_;
+    auto default_module =
+            detail::RegisterAlgorithm<AlgorithmType, Algorithm>(algos_module, algo_name);
+    algos_module.attr("Default") = default_module;
+    return default_module;
 }
 
 }  // namespace python_bindings

@@ -67,7 +67,7 @@ void CombinedInclusionTester::InsertRows(IRowIterator::Block const& hashed_cols,
             hlls_by_table_[curr_table_idx_];
     unsigned int const chunk_size = block_size;
 
-    util::parallel_foreach(
+    util::ParallelForeach(
             hll_by_cc.begin(), hll_by_cc.end(), num_threads_,
             [this, &hashed_cols, chunk_size](auto& elem) {
                 std::shared_ptr<SimpleCC>& cc = elem.first;

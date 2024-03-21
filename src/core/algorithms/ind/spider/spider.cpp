@@ -28,20 +28,20 @@ using AttributeIndex = spider::AttributeIndex;
 Spider::Spider() : INDAlgorithm({}) {
     DESBORDANTE_OPTION_USING;
 
-    RegisterOption(config::EqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::ThreadNumberOpt(&threads_num_));
-    RegisterOption(config::MemLimitMBOpt(&mem_limit_mb_));
-    RegisterOption(config::ErrorOpt(&max_ind_error_));
+    RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
+    RegisterOption(config::kMemLimitMbOpt(&mem_limit_mb_));
+    RegisterOption(config::kErrorOpt(&max_ind_error_));
     MakeLoadOptsAvailable();
 }
 
 void Spider::MakeLoadOptsAvailable() {
-    MakeOptionsAvailable({config::EqualNullsOpt.GetName(), config::ThreadNumberOpt.GetName(),
-                          config::MemLimitMBOpt.GetName()});
+    MakeOptionsAvailable({config::kEqualNullsOpt.GetName(), config::kThreadNumberOpt.GetName(),
+                          config::kMemLimitMbOpt.GetName()});
 }
 
 void Spider::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::ErrorOpt.GetName()});
+    MakeOptionsAvailable({config::kErrorOpt.GetName()});
 }
 
 void Spider::LoadDataInternal() {
