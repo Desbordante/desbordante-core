@@ -197,7 +197,7 @@ FDFirstAlgorithm::ExpandMiningFd(MinerNode<PartitionTIdList> const& inode, int i
         if (std::binary_search(node_attrs.begin(), node_attrs.end(),
                                relation_->GetAttrIndex(jnode.item)))
             continue;
-        const Itemset newset = Join(iset, jnode.item);
+        Itemset const newset = Join(iset, jnode.item);
         auto c = ConstructIntersection(inode.candidates, jnode.candidates);
         for (int zz : newset) {
             auto const zsub = ConstructSubset(newset, zz);
@@ -224,10 +224,10 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
                                    Substrategy ss) {
     for (int ix = static_cast<int>(items.size()) - 1; ix >= 0; ix--) {
         MinerNode<PartitionTIdList> const& inode = items[ix];
-        const Itemset iset = Join(prefix, inode.item);
+        Itemset const iset = Join(prefix, inode.item);
         auto const insect = ConstructIntersection(iset, inode.candidates);
         for (int out : insect) {
-            const Itemset sub = ConstructSubset(iset, out);
+            Itemset const sub = ConstructSubset(iset, out);
             MineFD(inode, sub, out);
 
             if (ss == +Substrategy::dfs) {
@@ -291,7 +291,7 @@ void FDFirstAlgorithm::FillMinePatternsVars(PartitionList& partitions, RhsesPair
         }
 
         Transaction const& trans = relation_->GetRow(all_tids.tids[pi - 1]);
-        const std::vector<int> lhs_constants = ConstructProjection(trans, lhs_attrs);
+        std::vector<int> const lhs_constants = ConstructProjection(trans, lhs_attrs);
         auto const rule_i = rule_ixs.find(lhs_constants);
         if (rule_i == rule_ixs.end()) {
             rhses.push_back(trans[-1 - rhs]);
@@ -347,7 +347,7 @@ void FDFirstAlgorithm::AnalyzeCFDFromPIdList(std::pair<int, SimpleTIdList> const
     if (p_supp < min_supp_) {
         return;
     }
-    const Itemset ns = Join(Itemset{item.first},
+    Itemset const ns = Join(Itemset{item.first},
                             ConstructSubset(lhs, -1 - relation_->GetAttrIndex(item.first)));
     std::set<Itemset> nr_parts;
     for (int pid : item.second) {
@@ -381,7 +381,7 @@ bool FDFirstAlgorithm::FillFreeMapAndItemsets(PartitionList const& partitions, I
 
     bool gen = true;
     auto const nas = relation_->GetAttrVectorItems(new_set);
-    const Itemset ns = Join(new_set, SetDiff(lhs, nas));
+    Itemset const ns = Join(new_set, SetDiff(lhs, nas));
     std::set<Itemset> nr_parts;
     for (int pid : ij_tids) {
         nr_parts.insert(partitions[pid].first);
@@ -498,7 +498,7 @@ void FDFirstAlgorithm::MinePatternsDFS(Itemset const& prefix, TIdListMiners& ite
         if (inode.tids.empty() && items[ix].tids.empty()) {
             LOG(INFO) << ix;
         }
-        const Itemset iset = Join(prefix, inode.item);
+        Itemset const iset = Join(prefix, inode.item);
         auto const node_attrs = relation_->GetAttrVectorItems(iset);
         int out = (iset.size() == lhs.size()) ? GetMaxElem(rhses_pair[inode.tids[0]]) : rhs;
         auto const sub = Join(iset, SetDiff(lhs, node_attrs));
@@ -512,7 +512,7 @@ void FDFirstAlgorithm::MinePatternsDFS(Itemset const& prefix, TIdListMiners& ite
             if (std::binary_search(node_attrs.begin(), node_attrs.end(),
                                    -1 - relation_->GetAttrIndex(jnode.item)))
                 continue;
-            const Itemset new_set = Join(iset, jnode.item);
+            Itemset const new_set = Join(iset, jnode.item);
             SimpleTIdList ij_tids = ConstructIntersection(inode.tids, jnode.tids);
             unsigned ij_supp = PartitionUtil::GetPartitionSupport(ij_tids, psupps);
 

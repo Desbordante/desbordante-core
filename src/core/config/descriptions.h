@@ -27,7 +27,7 @@ constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[sing
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
-const std::string _kDMetric =
+std::string const _kDMetric =
         "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
 auto const kDMetric = _kDMetric.c_str();
 constexpr auto kDLhsIndices = "LHS column indices";
@@ -39,7 +39,7 @@ constexpr auto kDDistFromNullIsInfinity =
         "specify whether distance from NULL value is infinity "
         "(if not, it is 0)";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
-const std::string _kDMetricAlgorithm =
+std::string const _kDMetricAlgorithm =
         "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
 auto const kDMetricAlgorithm = _kDMetricAlgorithm.c_str();
 constexpr auto kDRadius =
@@ -63,7 +63,7 @@ constexpr auto kDCfdMinimumSupport =
         "between 1 and number of tuples in dataset)";
 constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0 and 1)";
 constexpr auto kDCfdMaximumLhs = "cfd max considered LHS size";
-const std::string _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
+std::string const _kDCfdSubstrategy = "CFD lattice traversal strategy to use\n" +
                                       util::EnumToAvailableValues<algos::cfd::Substrategy>();
 auto const kDCfdSubstrategy = _kDCfdSubstrategy.c_str();
 constexpr auto kDBinaryOperation = "one of available operations: /, *, +, -";
