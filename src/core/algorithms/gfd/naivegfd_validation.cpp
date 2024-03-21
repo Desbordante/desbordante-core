@@ -13,8 +13,8 @@ struct CheckCallback {
 private:
     graph_t const& query;
     graph_t const& graph;
-    const std::vector<Literal> premises;
-    const std::vector<Literal> conclusion;
+    std::vector<Literal> const premises;
+    std::vector<Literal> const conclusion;
     bool& res;
     int& amount;
 

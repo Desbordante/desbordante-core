@@ -11,6 +11,7 @@ struct OptValue {
     std::type_index type;
     boost::any value;
 };
+
 class IOption {
 public:
     virtual std::vector<std::string_view> Set(boost::any const& value) = 0;
