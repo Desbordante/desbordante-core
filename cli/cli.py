@@ -22,6 +22,7 @@ class Task(StrEnum):
     mfd_verification = auto()
     ucc_verification = auto()
     aucc_verification = auto()
+    gfd_verification = auto()
 
 
 class Algorithm(StrEnum):
@@ -45,6 +46,9 @@ class Algorithm(StrEnum):
     icde09_mfd_verifier = auto()
     naive_ucc_verifier = auto()
     naive_aucc_verifier = auto()
+    naive_gfd_verifier = auto()
+    gfd_verifier = auto()
+    egfd_verifier = auto()
 
 
 HELP = 'help'
@@ -242,6 +246,9 @@ S. Kruse and F. Naumann
 Algorithms: NAIVE_AUCC_VERIFIER
 Default: NAIVE_AUCC_VERIFIER
 '''
+GFD_VERIFICATION_HELP = '''
+Algorithms: NAIVE_GFD_VERIFIER, GFD_VERIFIER, EGFD_VERIFIER
+'''
 PYRO_HELP = '''A modern algorithm for discovery of approximate functional
 dependencies. Approximate functional dependencies are defined in the
 “Efficient Discovery of Approximate Dependencies” paper by S.Kruse and
@@ -335,6 +342,10 @@ ICDE09_MFD_VERIFIER_HELP = '''A family of metric functional dependency
 verification algorithms. For more information about the primitive and the
 algorithms, refer to “Metric Functional Dependencies” by N. Koudas et al.
 '''
+GFD_VERIFIER_HELP = '''Algorithm for verifying whether a given
+graph functional dependency holds. For more information about the primitive
+refer to “Functional Dependencies for Graphs” by Wenfei Fan et al.
+'''
 
 NAIVE_UCC_VERIFIER_HELP = '''A straightforward partition-based algorithm for
 verifying whether a given unique column combination holds.
@@ -367,7 +378,8 @@ TASK_HELP_PAGES = {
     Task.afd_verification: AFD_VERIFICATION_HELP,
     Task.mfd_verification: MFD_VERIFICATION_HELP,
     Task.ucc_verification: UCC_VERIFICATION_HELP,
-    Task.aucc_verification: AUCC_VERIFICATION_HELP
+    Task.aucc_verification: AUCC_VERIFICATION_HELP,
+    Task.gfd_verification: GFD_VERIFICATION_HELP,
 }
 
 ALGO_HELP_PAGES = {
@@ -390,7 +402,10 @@ ALGO_HELP_PAGES = {
     Algorithm.naive_afd_verifier: NAIVE_AFD_VERIFIER_HELP,
     Algorithm.icde09_mfd_verifier: ICDE09_MFD_VERIFIER_HELP,
     Algorithm.naive_ucc_verifier: NAIVE_UCC_VERIFIER_HELP,
-    Algorithm.naive_aucc_verifier: NAIVE_AUCC_VERIFIER_HELP
+    Algorithm.naive_aucc_verifier: NAIVE_AUCC_VERIFIER_HELP,
+    Algorithm.naive_gfd_verifier: GFD_VERIFIER_HELP,
+    Algorithm.gfd_verifier: GFD_VERIFIER_HELP,
+    Algorithm.egfd_verifier: GFD_VERIFIER_HELP,
 }
 
 TaskInfo = namedtuple('TaskInfo', ['algos', 'default'])
@@ -417,7 +432,9 @@ TASK_INFO = {
     Task.ucc_verification: TaskInfo([Algorithm.naive_ucc_verifier],
                                     Algorithm.naive_ucc_verifier),
     Task.aucc_verification: TaskInfo([Algorithm.naive_aucc_verifier],
-                                     Algorithm.naive_aucc_verifier)
+                                     Algorithm.naive_aucc_verifier),
+    Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier, Algorithm.egfd_verifier],
+                                    Algorithm.naive_gfd_verifier),
 }
 
 ALGOS = {
@@ -440,7 +457,10 @@ ALGOS = {
     Algorithm.naive_afd_verifier: desbordante.afd_verification.algorithms.FDVerifier,
     Algorithm.icde09_mfd_verifier: desbordante.mfd_verification.algorithms.MetricVerifier,
     Algorithm.naive_ucc_verifier: desbordante.ucc_verification.algorithms.UccVerifier,
-    Algorithm.naive_aucc_verifier: desbordante.aucc_verification.algorithms.UccVerifier
+    Algorithm.naive_aucc_verifier: desbordante.aucc_verification.algorithms.UccVerifier,
+    Algorithm.naive_gfd_verifier: desbordante.gfd_verification.algorithms.NaiveGfdValid,
+    Algorithm.gfd_verifier: desbordante.gfd_verification.algorithms.GfdValid,
+    Algorithm.egfd_verifier: desbordante.gfd_verification.algorithms.EGfdValid,
 }
 
 
@@ -576,6 +596,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_list_ods()
             case algo_name if algo_name in TASK_INFO[Task.ind].algos:
                 result = algo.get_inds()
+            case algo_name if algo_name in TASK_INFO[Task.gfd_verification].algos:
+                result = algo.get_gfds()
             case _:
                 assert False, 'No matching get_result function.'
         return result
