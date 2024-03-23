@@ -8,6 +8,7 @@
 #include <boost/graph/exterior_property.hpp>
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <easylogging++.h>
 
 #include "balancer.h"
 #include "config/equal_nulls/option.h"
@@ -54,7 +55,7 @@ unsigned long long GfdHandler::ExecuteInternal() {
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    std::cout << "Satisfied GFDs: " << result_.size() << "/" << gfds_.size() << std::endl;
+    LOG(DEBUG) << "Satisfied GFDs: " << result_.size() << "/" << gfds_.size();
     return elapsed_milliseconds.count();
 }
 

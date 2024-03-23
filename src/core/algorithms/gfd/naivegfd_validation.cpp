@@ -4,6 +4,7 @@
 #include <set>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <easylogging++.h>
 
 #include "gfd.h"
 
@@ -60,7 +61,7 @@ public:
                     if (attrs.find(snd_token.second) == attrs.end()) {
                         return false;
                     }
-                    fst = attrs.at(snd_token.second);
+                    snd = attrs.at(snd_token.second);
                 }
                 if (fst != snd) {
                     return false;
@@ -108,7 +109,7 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
     bool found = boost::vf2_subgraph_iso(
             pattern, graph, callback, get(boost::vertex_index, pattern),
             get(boost::vertex_index, graph), vertex_order_by_mult(pattern), ecompare, vcompare);
-    std::cout << "Checked embeddings: " << amount << std::endl;
+    LOG(DEBUG) << "Checked embeddings: " << amount;
     if (!found) {
         return true;
     }

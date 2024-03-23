@@ -42,4 +42,6 @@ public:
     void SetConclusion(std::vector<Literal>& conclusion) {
         conclusion_ = conclusion;
     }
+
+    std::string ToString();
 };
