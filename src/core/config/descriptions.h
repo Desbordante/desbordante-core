@@ -4,6 +4,7 @@
 #include <string>
 
 #include "algorithms/cfd/enums.h"
+#include "algorithms/fd/pfdtane/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/enum_to_available_values.h"
 
@@ -16,6 +17,8 @@ std::string const kDMetricAlgorithmString =
         "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
 std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to use\n" +
                                            util::EnumToAvailableValues<algos::cfd::Substrategy>();
+std::string const kDErrorMeasureString =
+        "PFD error measure to use\n" + util::EnumToAvailableValues<algos::ErrorMeasure>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -29,6 +32,7 @@ constexpr auto kDThreads =
         "number of threads to use. If 0, then as many threads are used as the "
         "hardware can handle concurrently.";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
+auto const kDErrorMeasure = details::kDErrorMeasureString.c_str();
 constexpr auto kDMaximumLhs = "max considered LHS size";
 constexpr auto kDSeed = "RNG seed";
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
