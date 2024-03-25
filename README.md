@@ -1,14 +1,17 @@
 [![Downloads](https://static.pepy.tech/badge/desbordante)](https://pepy.tech/project/desbordante)
+[![Downloads](https://static.pepy.tech/badge/desbordante/month)](https://pepy.tech/project/desbordante)
 
 <p>
    <img src="https://github.com/Mstrutov/Desbordante/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
 </p>
 
-
 # General
 
 Desbordante is a high-performance data profiler that is capable of discovering and validating many different patterns in data using various algorithms. The currently supported data patterns are:
-* Functional dependencies, both exact and approximate (discovery and validation)
+* Functional dependency variants:
+    - Exact functional dependencies (discovery and validation)
+    - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
+    - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
 * Conditional functional dependencies (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
