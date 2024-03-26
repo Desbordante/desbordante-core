@@ -32,13 +32,8 @@ AttributeList MaxPrefix(AttributeList const& attribute_list) {
 
 bool InUnorderedMap(OrderDependencies const& map, AttributeList const& lhs,
                     AttributeList const& rhs) {
-    if (map.find(lhs) == map.end()) {
-        return false;
-    }
-    if (map.at(lhs).find(rhs) == map.at(lhs).end()) {
-        return false;
-    }
-    return true;
+    auto it = map.find(lhs);
+    return it != map.end() && it->second.find(rhs) != it->second.end();
 }
 
 bool AreDisjoint(AttributeList const& a, AttributeList const& b) {
