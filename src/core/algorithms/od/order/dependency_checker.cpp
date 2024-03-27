@@ -3,13 +3,15 @@
 #include <algorithm>
 #include <unordered_set>
 
+#include "model/table/tuple_index.h"
+
 namespace algos::order {
 
 namespace {
 bool SubsetSetDifference(std::unordered_set<unsigned long> const& a,
                          std::unordered_set<unsigned long>& b) {
     auto const not_found = b.end();
-    for (unsigned long element : a) {
+    for (model::TupleIndex element : a) {
         if (b.find(element) == not_found) {
             return false;
         } else {
