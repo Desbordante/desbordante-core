@@ -33,6 +33,7 @@ class Algorithm(StrEnum):
     fastfds = auto()
     aid = auto()
     fastod = auto()
+    order = auto()
     naive_fd_verifier = auto()
     naive_afd_verifier = auto()
     icde09_mfd_verifier = auto()
@@ -100,7 +101,7 @@ Currently, the console version of Desbordante supports:
 1) Discovery of exact functional dependencies
 2) Discovery of approximate functional dependencies
 3) Discovery of probabilistic functional dependencies
-4) Discovery of exact order dependencies (set-based axiomatization)
+4) Discovery of exact order dependencies (set-based and list-based axiomatization)
 5) Verification of exact functional dependencies
 6) Verification of approximate functional dependencies
 7) Verification of metric dependencies
@@ -154,7 +155,7 @@ primitive and algorithms, refer to the “Effective and complete discovery
 of order dependencies via set-based axiomatization” paper by J. Szlichta 
 et al.
 
-Algorithms: FASTOD
+Algorithms: FASTOD, ORDER
 Default: FASTOD
 '''
 PFD_HELP = '''Discover minimal non-trivial probabilistic functional
@@ -248,6 +249,12 @@ dependencies. For more information, refer to the “Effective and complete
 discovery of order dependencies via set-based axiomatization” paper by 
 J. Szlichta et al.
 '''
+
+ORDER_HELP = '''Algorithm Order efficiently discovers all n-ary lexicographical 
+order dependencies under the operator “<”. For more information, refer to the
+“Efficient order dependency detection” paper by Philipp Langer and Felix Naumann
+'''
+
 NAIVE_FD_VERIFIER_HELP = '''A straightforward partition-based algorithm for
 verifying whether a given exact functional dependency holds on the specified
 dataset. For more information, refer to Lemma 2.2 from “TANE: An Efficient
@@ -296,6 +303,7 @@ ALGO_HELP_PAGES = {
     Algorithm.fastfds: FASTFDS_HELP,
     Algorithm.aid: AID_HELP,
     Algorithm.fastod: FASTOD_HELP,
+    Algorithm.order: ORDER_HELP,
     Algorithm.naive_fd_verifier: NAIVE_FD_VERIFIER_HELP,
     Algorithm.naive_afd_verifier: NAIVE_AFD_VERIFIER_HELP,
     Algorithm.icde09_mfd_verifier: ICDE09_MFD_VERIFIER_HELP
@@ -311,7 +319,7 @@ TASK_INFO = {
                       Algorithm.hyfd),
     Task.afd: TaskInfo([Algorithm.pyro, Algorithm.tane],
                        Algorithm.pyro),
-    Task.od: TaskInfo([Algorithm.fastod],
+    Task.od: TaskInfo([Algorithm.fastod, Algorithm.order],
                       Algorithm.fastod),
     Task.pfd: TaskInfo([Algorithm.pfdtane], Algorithm.pfdtane),
     Task.fd_verification: TaskInfo([Algorithm.naive_fd_verifier],
@@ -335,6 +343,7 @@ ALGOS = {
     Algorithm.fastfds: desbordante.fd.algorithms.FastFDs,
     Algorithm.aid: desbordante.fd.algorithms.Aid,
     Algorithm.fastod: desbordante.od.algorithms.Fastod,
+    Algorithm.order: desbordante.od.algorithms.Order,
     Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
     Algorithm.naive_afd_verifier: desbordante.afd_verification.algorithms.FDVerifier,
     Algorithm.icde09_mfd_verifier: desbordante.mfd_verification.algorithms.MetricVerifier
@@ -430,6 +439,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_fds()
             case Algorithm.fastod:
                 result = algo.get_asc_ods() + algo.get_desc_ods() + algo.get_simple_ods()
+            case Algorithm.order:
+                result = algo.get_list_ods()
             case _:
                 assert False, 'No matching get_result function.'
         return result
