@@ -18,8 +18,8 @@ void PrintOD(AttributeList const& lhs, AttributeList const& rhs) {
     }
 }
 
-std::vector<AttributeList> GetPrefixes(Node const& node) {
-    std::vector<AttributeList> res;
+Prefixes GetPrefixes(Node const& node) {
+    Prefixes res;
     res.reserve(node.size() - 1);
     for (size_t i = 1; i < node.size(); ++i) {
         res.emplace_back(node.begin(), node.begin() + i);
