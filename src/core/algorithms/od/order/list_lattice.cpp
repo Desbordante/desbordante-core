@@ -35,7 +35,7 @@ void ListLattice::Prune(CandidateSets& candidate_sets) {
     }
     for (auto node_it = lattice_level_.begin(); node_it != lattice_level_.end();) {
         bool all_candidates_empty = false;
-        std::vector<AttributeList> prefixes = GetPrefixes(*node_it);
+        Prefixes prefixes = GetPrefixes(*node_it);
         for (AttributeList const& lhs : prefixes) {
             if (!candidate_sets[lhs].empty()) {
                 all_candidates_empty = false;

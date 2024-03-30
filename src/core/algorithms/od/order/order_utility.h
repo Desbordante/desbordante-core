@@ -13,6 +13,7 @@
 namespace algos::order {
 using Node = std::vector<model::ColumnIndex>;
 using AttributeList = std::vector<model::ColumnIndex>;
+using Prefixes = std::vector<AttributeList>;
 using CandidatePairs = std::vector<std::pair<AttributeList, AttributeList>>;
 using ListHash = boost::hash<AttributeList>;
 using CandidateSets =
@@ -26,7 +27,7 @@ struct IndexedByteData {
 };
 
 void PrintOD(AttributeList const& lhs, AttributeList const& rhs);
-std::vector<AttributeList> GetPrefixes(Node const& node);
+Prefixes GetPrefixes(Node const& node);
 AttributeList MaxPrefix(AttributeList const& attribute_list);
 bool InUnorderedMap(OrderDependencies const& map, AttributeList const& lhs,
                     AttributeList const& rhs);
