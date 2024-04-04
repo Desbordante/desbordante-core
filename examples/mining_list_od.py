@@ -37,6 +37,7 @@ if __name__ == '__main__':
     print()
     print_data_frame(df)
     print()
+    print("Resulting dependencies for this table are:")
     print_named_ods(ods, df)
     print()
     print("Depenency [weight] -> [shipping cost] means that ordering table by weight")
@@ -47,4 +48,14 @@ if __name__ == '__main__':
     print_data_frame(df_sorted)
     print()
     print("We can see that shipping cost is sorted too. And dependency seems reasonable:")
-    print("the more the package weighs, the more expensive it will be to send it.")
+    print("the more the package weights, the more expensive it will be to send it.")
+    print()
+    
+    print("Order dependencies are called lexicographical, because ordering for multiple")
+    print("columns is lexicographical. For example [shipping cost] -> [weight, days] implies")
+    print("that ordering by shipping cost will also lexicographically order [weight, days]:")
+    print()
+    df_sorted = df.sort_values("shipping cost")
+    print_data_frame(df_sorted)
+    print()
+
