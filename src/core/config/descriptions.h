@@ -102,4 +102,5 @@ constexpr auto kDIgnoreConstantCols =
 constexpr auto kDGraphData = "Path to dot-file with graph";
 constexpr auto kDGfdData = "Path to file with GFD";
 constexpr auto kDMemLimitMB = "memory limit im MBs";
+constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
 }  // namespace config::descriptions
