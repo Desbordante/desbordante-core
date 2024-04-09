@@ -13,6 +13,7 @@ import desbordante
 
 class Task(StrEnum):
     fd = auto()
+    cfd = auto()
     afd = auto()
     od = auto()
     pfd = auto()
@@ -37,6 +38,7 @@ class Algorithm(StrEnum):
     fun = auto()
     fastfds = auto()
     aid = auto()
+    fd_first = auto()
     fastod = auto()
     order = auto()
     spider = auto()
@@ -160,6 +162,14 @@ algorithms” paper by T. Papenbrock et al.
 
 Algorithms: PYRO, TANE, HYFD, FD_MINE, DFD, DEP_MINER, FDEP, FUN, FASTFDS, AID
 Default: HYFD
+'''
+CFD_HELP = '''Discover approximate conditional functional dependencies. For
+more information about the primitive and the algorithm, refer to the “Revisiting
+Conditional Functional Dependency Discovery: Splitting the “C” from the “FD””
+paper by J. Rammelaere and F. Geerts.
+
+Algorithms: FD_FIRST
+Default: FD_FIRST
 '''
 AFD_HELP = '''Discover minimal non-trivial approximate functional
 dependencies. Approximate functional dependencies are defined in the
@@ -325,6 +335,12 @@ order dependencies under the operator “<”. For more information, refer to th
 “Efficient order dependency detection” paper by Philipp Langer and Felix Naumann
 '''
 
+FD_FIRST_HELP = '''FD-First algorithm belongs to the family of algorithms
+for discovering approximate conditional functional dependencies. For more
+information, refer to the “Revisiting Conditional Functional Dependency
+Discovery: Splitting the “C” from the “FD”” paper by J. Rammelaere 
+and F. Geerts.
+'''
 NAIVE_FD_VERIFIER_HELP = '''A straightforward partition-based algorithm for
 verifying whether a given exact functional dependency holds on the specified
 dataset. For more information, refer to Lemma 2.2 from “TANE: An Efficient
@@ -370,6 +386,7 @@ OPTION_TYPES = {
 
 TASK_HELP_PAGES = {
     Task.fd: FD_HELP,
+    Task.cfd: CFD_HELP,
     Task.afd: AFD_HELP,
     Task.od: OD_HELP,
     Task.pfd: PFD_HELP,
@@ -398,6 +415,7 @@ ALGO_HELP_PAGES = {
     Algorithm.order: ORDER_HELP,
     Algorithm.spider: SPIDER_HELP,
     Algorithm.faida: FAIDA_HELP,
+    Algorithm.fd_first: FD_FIRST_HELP,
     Algorithm.naive_fd_verifier: NAIVE_FD_VERIFIER_HELP,
     Algorithm.naive_afd_verifier: NAIVE_AFD_VERIFIER_HELP,
     Algorithm.icde09_mfd_verifier: ICDE09_MFD_VERIFIER_HELP,
@@ -416,6 +434,8 @@ TASK_INFO = {
                        Algorithm.fdep, Algorithm.fun, Algorithm.fastfds,
                        Algorithm.aid, Algorithm.pfdtane],
                       Algorithm.hyfd),
+    Task.cfd: TaskInfo([Algorithm.fd_first],
+                       Algorithm.fd_first),
     Task.afd: TaskInfo([Algorithm.pyro, Algorithm.tane],
                        Algorithm.pyro),
     Task.od: TaskInfo([Algorithm.fastod, Algorithm.order],
@@ -453,6 +473,7 @@ ALGOS = {
     Algorithm.order: desbordante.od.algorithms.Order,
     Algorithm.spider: desbordante.ind.algorithms.Spider,
     Algorithm.faida: desbordante.ind.algorithms.Faida,
+    Algorithm.fd_first: desbordante.cfd.algorithms.FDFirst,
     Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
     Algorithm.naive_afd_verifier: desbordante.afd_verification.algorithms.FDVerifier,
     Algorithm.icde09_mfd_verifier: desbordante.mfd_verification.algorithms.MetricVerifier,
@@ -598,6 +619,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_inds()
             case algo_name if algo_name in TASK_INFO[Task.gfd_verification].algos:
                 result = algo.get_gfds()
+            case Algorithm.fd_first:
+                result = algo.get_cfds()
             case _:
                 assert False, 'No matching get_result function.'
         return result
