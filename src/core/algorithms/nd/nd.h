@@ -3,6 +3,8 @@
 #include "model/table/column.h"
 #include "model/table/vertical.h"
 
+namespace model {
+
 using WeightType = unsigned;
 
 class ND {
@@ -12,30 +14,32 @@ private:
     WeightType weight_;
 
 public:
-    ND(Vertical const& lhs, Vertical const& rhs, WeightType weight)
-        : lhs_(lhs), rhs_(rhs), weight_(weight) {}
+    ND(Vertical lhs, Vertical rhs, WeightType weight)
+        : lhs_(std::move(lhs)), rhs_(std::move(rhs)), weight_(weight) {}
 
-    Vertical const& GetLhs() const {
+    [[nodiscard]] Vertical const& GetLhs() const {
         return lhs_;
     }
 
-    Vertical const& GetRhs() const {
+    [[nodiscard]] Vertical const& GetRhs() const {
         return rhs_;
     }
 
-    WeightType GetWeight() const {
+    [[nodiscard]] WeightType GetWeight() const {
         return weight_;
     }
 
-    std::vector<model::ColumnIndex> GetLhsIndices() const {
+    [[nodiscard]] std::vector<ColumnIndex> GetLhsIndices() const {
         return lhs_.GetColumnIndicesAsVector();
     }
 
-    std::vector<model::ColumnIndex> GetRhsIndices() const {
+    [[nodiscard]] std::vector<ColumnIndex> GetRhsIndices() const {
         return rhs_.GetColumnIndicesAsVector();
     }
 
-    std::string ToShortString() const;
+    [[nodiscard]] std::string ToShortString() const;
 
-    std::string ToLongString() const;
+    [[nodiscard]] std::string ToLongString() const;
 };
+
+}  // namespace model
