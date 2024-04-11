@@ -13,11 +13,12 @@ struct NDVerifyingParams {
     algos::StdParamsMap params;
 
     NDVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
-                      model::WeightType weight = -1, CSVConfig const& csv_config = kTestND)
+                      model::WeightType weight = -1, CSVConfig const& csv_config = kTestND,
+                      bool null_eq_null = true)
         : params({{onam::kCsvConfig, csv_config},
                   {onam::kLhsIndices, std::move(lhs_indices)},
                   {onam::kRhsIndices, std::move(rhs_indices)},
-                  {onam::kEqualNulls, true},
+                  {onam::kEqualNulls, null_eq_null},
                   {onam::kWeight, weight}}) {}
 };
 
@@ -31,19 +32,6 @@ TEST_P(TestNDVerifying, DefaultTest) {
     EXPECT_EQ(verifier->NDHolds(), true);
 }
 
-/* Valid NDs:
-    0 ->(4) 1
-    0 ->(6) 2
-    0 ->(4) 3
-    0 ->(5) 4
-    0 ->(9) 5
-
-    0, 1 ->(3) 3, 5
-
-    ...
-
-*/
-
 // clang-format off
 INSTANTIATE_TEST_SUITE_P(
         NDVerifierTestSuite, TestNDVerifying,
@@ -55,6 +43,27 @@ INSTANTIATE_TEST_SUITE_P(
             NDVerifyingParams({0}, {5}, 9),
             NDVerifyingParams({0, 1}, {3, 5}, 3)
             ));
+
+INSTANTIATE_TEST_CASE_P(
+        NDVerifierHeavyDatasets, TestNDVerifying,
+        ::testing::Values(
+            NDVerifyingParams({5}, {6}, 1000000, kIowa1kk),  // I just want to see execution time. Real weight doesn't matter (but it shouldn't be very big)
+            NDVerifyingParams({16, 17, 18}, {20, 23}, 1000000, kIowa1kk)  // Also, I want to see how execution time depends on number of columns
+        ));
+
+INSTANTIATE_TEST_CASE_P(
+    NDVerifierTestNullEqualNull, TestNDVerifying,
+    ::testing::Values(  // 6-th column contains 2 values and 7 empty cells
+        NDVerifyingParams({0}, {6}, 3, kTestND, true),
+        NDVerifyingParams({0}, {6}, 7, kTestND, false)
+    ));
+
+INSTANTIATE_TEST_SUITE_P(  // Here we don't need actual weight. We compare execution time with statistics
+    NDVerifierComparisonWithStatsHeavyDatasets, TestNDVerifying,
+    ::testing::Values(
+        NDVerifyingParams({0}, {1}, -1, kEpicMeds),
+        NDVerifyingParams({0}, {1}, -1, kEpicVitals)
+    ));
 // clang-format on
 
 }  // namespace tests

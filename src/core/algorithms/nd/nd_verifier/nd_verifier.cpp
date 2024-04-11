@@ -103,6 +103,7 @@ NDVerifier::EncodeMultipleValues(config::IndicesType const& col_idxs) const {
     for (size_t row_idx{0}; row_idx < typed_relation_->GetNumRows(); ++row_idx) {
         std::stringstream ss;
         ss << '(';
+        bool is_null = false;
         for (auto col_idx_pt{col_idxs.begin()}; col_idx_pt != col_idxs.end(); ++col_idx_pt) {
             auto const& col_data = typed_relation_->GetColumnData(*col_idx_pt);
             auto const& byte_data = col_data.GetData();
@@ -113,8 +114,9 @@ NDVerifier::EncodeMultipleValues(config::IndicesType const& col_idxs) const {
             }
 
             auto const* bytes_ptr = byte_data[row_idx];
-            if (bytes_ptr == nullptr) {  // FIXME: this omits null_eq_null
+            if (bytes_ptr == nullptr) {
                 LOG(INFO) << "WARNING: Cell (" << *col_idx_pt << ", " << row_idx << ") is empty";
+                is_null = true;
             } else {
                 ss << type.ValueToString(bytes_ptr);
             }
@@ -123,15 +125,20 @@ NDVerifier::EncodeMultipleValues(config::IndicesType const& col_idxs) const {
 
         auto string_data = ss.str();
         size_t index{values->size()};
-        for (size_t i{0}; i < values->size(); ++i) {
-            if (values->at(i) == string_data) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index == values->size()) {  // wasn't in codes
+        if (is_null && !is_null_equal_null_) {
+            // If not null_eq_null, every value with null will be unique
             values->push_back(string_data);
+        } else {
+            for (size_t i{0}; i < values->size(); ++i) {
+                if (values->at(i) == string_data) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == values->size()) {  // wasn't in codes
+                values->push_back(string_data);
+            }
         }
         row->push_back(index);
     }
@@ -140,6 +147,7 @@ NDVerifier::EncodeMultipleValues(config::IndicesType const& col_idxs) const {
 
 std::pair<std::shared_ptr<std::vector<std::string>>, std::shared_ptr<std::vector<size_t>>>
 NDVerifier::EncodeSingleValues(config::IndexType col_idx) const {
+    LOG(INFO) << "Encoding single values...";
     auto values = std::make_shared<std::vector<std::string>>();
     auto row = std::make_shared<std::vector<size_t>>();
 
@@ -149,25 +157,33 @@ NDVerifier::EncodeSingleValues(config::IndexType col_idx) const {
 
     for (auto const* bytes_ptr : byte_data) {
         std::string string_data;
-        if (bytes_ptr == nullptr) {  // FIXME: this omits null_eq_null
+        bool is_null = false;
+        if (bytes_ptr == nullptr) {
             LOG(INFO) << "WARNING: Empty cell in column " << col_idx;
+            is_null = true;
         } else {
             string_data = type.ValueToString(bytes_ptr);
         }
 
         size_t index{values->size()};
-        for (size_t i{0}; i < values->size(); ++i) {
-            if (values->at(i) == string_data) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index == values->size()) {  // wasn`t in values
+        if (is_null && !is_null_equal_null_) {
+            // If not null_eq_null, every value with null will be unique
             values->push_back(string_data);
+        } else {
+            for (size_t i{0}; i < values->size(); ++i) {
+                if (values->at(i) == string_data) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index == values->size()) {  // wasn`t in values
+                values->push_back(string_data);
+            }
         }
         row->push_back(index);
     }
+    LOG(INFO) << "\t\tDone";
     return std::make_pair(std::move(values), std::move(row));
 }
 
@@ -181,12 +197,15 @@ NDVerifier::EncodeValues(config::IndicesType const& col_idxs) const {
 
 void NDVerifier::VerifyND() {
     auto local_start_time = std::chrono::system_clock::now();
+    LOG(INFO) << "VerifyND started";
     auto [lhs_values, encoded_lhs] = EncodeValues(lhs_indices_);
+    LOG(INFO) << "Lhs encoded";
     auto [rhs_values, encoded_rhs] = EncodeValues(rhs_indices_);
+    LOG(INFO) << "Rhs encoded";
 
     LOG(WARNING) << "Values encoding encoding took "
-                 << std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now() - local_start_time);
+                 << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now() - local_start_time).count());
 
     local_start_time = std::chrono::system_clock::now();
     auto value_deps = std::make_shared<std::unordered_map<size_t, std::unordered_set<size_t>>>();
@@ -202,8 +221,8 @@ void NDVerifier::VerifyND() {
         }
     }
     LOG(WARNING) << "Value deps calculation took "
-                 << std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now() - local_start_time);
+                 << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                            std::chrono::system_clock::now() - local_start_time).count());
 
     stats_calculator_ = util::StatsCalculator<std::string>(
             std::move(value_deps), std::move(lhs_values), std::move(rhs_values),
