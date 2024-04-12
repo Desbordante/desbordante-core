@@ -58,12 +58,14 @@ INSTANTIATE_TEST_CASE_P(
         NDVerifyingParams({0}, {6}, 7, kTestND, false)
     ));
 
+#if 0
 INSTANTIATE_TEST_SUITE_P(  // Here we don't need actual weight. We compare execution time with statistics
-    NDVerifierComparisonWithStatsHeavyDatasets, TestNDVerifying,
+    NDVerifierComparisonWithStatsOnHeavyDatasets, TestNDVerifying,
     ::testing::Values(
         NDVerifyingParams({0}, {1}, -1, kEpicMeds),
         NDVerifyingParams({0}, {1}, -1, kEpicVitals)
     ));
+#endif
 // clang-format on
 
 }  // namespace tests

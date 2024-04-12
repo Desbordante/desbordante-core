@@ -1,7 +1,7 @@
 #include "algorithms/nd/nd_verifier/nd_verifier.h"
 
-#include <algorithm>
 #include <chrono>
+#include <numeric>
 #include <set>
 #include <sstream>
 
@@ -42,8 +42,6 @@ void NDVerifier::LoadDataInternal() {
     if (typed_relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: ND verifying is meaningless.");
     }
-    typed_relation_ =
-            model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 }
 
 void NDVerifier::MakeExecuteOptsAvailable() {
@@ -73,7 +71,6 @@ unsigned long long NDVerifier::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    // TODO(senichenkov): here should be INFO:
     LOG(WARNING) << "NDVerifier::ExecuteInternal finished in "
                  << std::to_string(elapsed_milliseconds.count())
                  << "ms";  // We use std::to_string, because compiler on github doesn`t
@@ -87,12 +84,12 @@ unsigned long long NDVerifier::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-bool NDVerifier::NDHolds() {
+bool NDVerifier::NDHolds() const {
     return stats_calculator_.GetRealWeight() <= weight_;
 }
 
 void NDVerifier::ResetState() {
-    stats_calculator_ = util::StatsCalculator<std::string>{};
+    stats_calculator_ = util::StatsCalculator{};
 }
 
 std::pair<std::shared_ptr<std::vector<std::string>>, std::shared_ptr<std::vector<size_t>>>
@@ -147,7 +144,6 @@ NDVerifier::EncodeMultipleValues(config::IndicesType const& col_idxs) const {
 
 std::pair<std::shared_ptr<std::vector<std::string>>, std::shared_ptr<std::vector<size_t>>>
 NDVerifier::EncodeSingleValues(config::IndexType col_idx) const {
-    LOG(INFO) << "Encoding single values...";
     auto values = std::make_shared<std::vector<std::string>>();
     auto row = std::make_shared<std::vector<size_t>>();
 
@@ -183,7 +179,6 @@ NDVerifier::EncodeSingleValues(config::IndexType col_idx) const {
         }
         row->push_back(index);
     }
-    LOG(INFO) << "\t\tDone";
     return std::make_pair(std::move(values), std::move(row));
 }
 
@@ -197,15 +192,14 @@ NDVerifier::EncodeValues(config::IndicesType const& col_idxs) const {
 
 void NDVerifier::VerifyND() {
     auto local_start_time = std::chrono::system_clock::now();
-    LOG(INFO) << "VerifyND started";
     auto [lhs_values, encoded_lhs] = EncodeValues(lhs_indices_);
-    LOG(INFO) << "Lhs encoded";
     auto [rhs_values, encoded_rhs] = EncodeValues(rhs_indices_);
-    LOG(INFO) << "Rhs encoded";
 
-    LOG(WARNING) << "Values encoding encoding took "
+    LOG(WARNING) << "Values encoding took "
                  << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now() - local_start_time).count());
+                                           std::chrono::system_clock::now() - local_start_time)
+                                           .count())
+                 << "ms";
 
     local_start_time = std::chrono::system_clock::now();
     auto value_deps = std::make_shared<std::unordered_map<size_t, std::unordered_set<size_t>>>();
@@ -222,11 +216,13 @@ void NDVerifier::VerifyND() {
     }
     LOG(WARNING) << "Value deps calculation took "
                  << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::system_clock::now() - local_start_time).count());
+                                           std::chrono::system_clock::now() - local_start_time)
+                                           .count())
+                 << "ms";
 
-    stats_calculator_ = util::StatsCalculator<std::string>(
-            std::move(value_deps), std::move(lhs_values), std::move(rhs_values),
-            std::move(encoded_lhs), std::move(encoded_rhs));
+    stats_calculator_ = util::StatsCalculator(std::move(value_deps), std::move(lhs_values),
+                                              std::move(rhs_values), std::move(encoded_lhs),
+                                              std::move(encoded_rhs));
 }
 
 }  // namespace algos::nd_verifier

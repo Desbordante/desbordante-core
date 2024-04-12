@@ -16,6 +16,8 @@
 
 namespace algos::nd_verifier {
 
+using namespace algos::nd_verifier::util;
+
 /// @brief Algorithm for verifying if ND holds with given weight
 class NDVerifier : public Algorithm {
 private:
@@ -30,7 +32,7 @@ private:
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    util::StatsCalculator<std::string> stats_calculator_;
+    util::StatsCalculator stats_calculator_;
 
     void RegisterOptions();
     void ResetState() override;
@@ -54,7 +56,7 @@ protected:
 
 public:
     NDVerifier();
-    [[nodiscard]] bool NDHolds();
+    [[nodiscard]] bool NDHolds() const;
 
     [[nodiscard]] auto const& GetHighlights() const {
         return stats_calculator_.GetHighlights();
@@ -68,11 +70,11 @@ public:
         return stats_calculator_.GetRealWeight();
     }
 
-    [[nodiscard]] auto const& GetLhsFrequencies() const {
+    [[nodiscard]] auto GetLhsFrequencies() const {
         return stats_calculator_.GetLhsFrequencies();
     }
 
-    [[nodiscard]] auto const& GetRhsFrequencies() const {
+    [[nodiscard]] auto GetRhsFrequencies() const {
         return stats_calculator_.GetRhsFrequencies();
     }
 };
