@@ -121,9 +121,40 @@ TYPED_TEST_P(AlgorithmTest, ConsistentRepeatedExecution) {
     }
 }
 
+namespace {
+void MaxLhsTestFun(CSVConfig config, std::list<FD> const& fds_list, config::MaxLhsType max_lhs) {
+    using namespace config::names;
+    algos::StdParamsMap verify_params = {
+            {kCsvConfig, config},
+            {kError, config::ErrorType{0.0}},
+            {kMaximumLhs, max_lhs},
+    };
+    auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
+    verify_algo->Execute();
+    auto verify_list = FDsToSet(verify_algo->FdList());
+    ASSERT_TRUE(CheckFdListEquality(verify_list, fds_list));
+    for (auto& fd : fds_list) {
+        ASSERT_TRUE(fd.GetLhs().GetArity() <= max_lhs);
+    }
+}
+}  // namespace
+
+TYPED_TEST_P(AlgorithmTest, MaxLHSOptionWork) {
+    config::MaxLhsType max_lhs = 2;
+
+    auto algo = TestFixture::CreateAlgorithmInstance(kTestFD, max_lhs);
+    algo->Execute();
+    MaxLhsTestFun(kTestFD, algo->FdList(), max_lhs);
+
+    auto algo_large = TestFixture::CreateAlgorithmInstance(kCIPublicHighway700, max_lhs);
+    algo_large->Execute();
+    MaxLhsTestFun(kCIPublicHighway700, algo_large->FdList(), max_lhs);
+}
+
 REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNonKey,
                             WorksOnLongDataset, WorksOnWideDataset, LightDatasetsConsistentHash,
-                            HeavyDatasetsConsistentHash, ConsistentRepeatedExecution);
+                            HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
+                            MaxLHSOptionWork);
 
 using Algorithms =
         ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,

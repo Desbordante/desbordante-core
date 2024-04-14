@@ -8,6 +8,7 @@
 #include <boost/graph/exterior_property.hpp>
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <easylogging++.h>
 
 #include "balancer.h"
 #include "config/equal_nulls/option.h"
@@ -187,13 +188,13 @@ public:
                     snd = snd_token.second;
                 } else {
                     vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query_);
+                    vertex_t u = boost::vertex(snd_token.first, query_);
                     v = get(f, u);
                     auto attrs = graph_[v].attributes;
                     if (attrs.find(snd_token.second) == attrs.end()) {
                         return false;
                     }
-                    fst = attrs.at(snd_token.second);
+                    snd = attrs.at(snd_token.second);
                 }
                 if (fst != snd) {
                     return false;
@@ -354,7 +355,7 @@ std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
         unsatisfied.push_back(empty);
     }
 
-    std::cout << "Messages constructed. Matching..." << std::endl;
+    LOG(DEBUG) << "Messages constructed. Matching...";
     // calculate unsatisfied forall processor (vf2)
     threads.clear();
     for (int i = 0; i < threads_num_; ++i) {
