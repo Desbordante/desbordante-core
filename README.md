@@ -7,11 +7,18 @@
 
 # General
 
-Desbordante is a high-performance data profiler that is capable of discovering and validating many different patterns in data using various algorithms. The currently supported data patterns are:
+Desbordante is a high-performance data profiler that is capable of discovering and validating many different patterns in data using various algorithms. 
+
+The **Discovery** task is designed to identify all instances of a specified pattern *type* of a given dataset.
+
+The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values).
+
+The currently supported data patterns are:
 * Functional dependency variants:
     - Exact functional dependencies (discovery and validation)
     - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
     - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
+* Graph functional dependencies (validation)
 * Conditional functional dependencies (discovery)
 * Inclusion dependencies (discovery)
 * Order dependencies:
@@ -19,7 +26,9 @@ Desbordante is a high-performance data profiler that is capable of discovering a
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
-* Unique column combinations, both exact and approximate (discovery and validation)
+* Unique column combinations:
+   - Exact unique column combination (discovery and validation)
+   - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
 * Association rules (discovery)
 
 The discovered patterns can have many uses:
@@ -33,12 +42,12 @@ Desbordante can be used via three interfaces:
 * **Python bindings.** Desbordante functionality can be accessed from within Python programs by employing the Desbordante Python library. This interface offers everything that is currently provided by the console version and allows advanced use, such as building interactive applications and designing scenarios for solving a particular real-life task. Relational data processing algorithms accept pandas DataFrames as input, allowing the user to conveniently preprocess the data before mining patterns.
 * **Web application.** There is a web application that provides discovery and validation tasks with a rich interactive interface where results can be conveniently visualized. However, currently it supports a limited number of patterns and should be considered more as an interactive demo.
 
-A brief introduction into the tool and its use cases is presented [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Also, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers).
+A brief introduction to the tool and its use cases can be found [here](https://medium.com/@chernishev/exploratory-data-analysis-with-desbordante-4b97299cce07) (in English) and [here](https://habr.com/ru/company/unidata/blog/667636/) (in Russian). Next, a list of various articles and guides can be found [here](https://desbordante.unidata-platform.ru/papers). Finally, an extensive list of tutorial examples that cover each supported pattern is available [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
 
 ## Console
 
 Usage examples:
-1) Discover all exact functional dependencies in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default FD discovery algorithm (HyFD) is used.
+1) Discover all exact functional dependencies in a table stored in a comma-separated file with a header row. In this example the default FD discovery algorithm (HyFD) is used.
 
 ```sh
 python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
@@ -85,10 +94,10 @@ Desbordante features can be accessed from within Python programs by employing th
 2) [Data deduplication](https://colab.research.google.com/drive/1hgF8idXi1-U4ZOR0fAmdbfbhltgEJecR?usp=sharing)
 3) [Anomaly detection](https://colab.research.google.com/drive/1hgF8idXi1-U4ZOR0fAmdbfbhltgEJecR?usp=sharing)
 
-[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them, and all of these python scripts are [here](https://github.com/Mstrutov/Desbordante/tree/main/examples). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3). 
+[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3). 
 
 Simple usage examples:
-1) Discover all exact functional dependencies in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the FD discovery algorithm HyFD is used.
+1) Discover all exact functional dependencies in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default FD discovery algorithm (HyFD) is used.
 
 ```python
 import desbordante
@@ -185,7 +194,48 @@ MFD holds
 
 While the Python interface makes building interactive applications possible, Desbordante also offers a web interface which is aimed specifically for interactive tasks. Such tasks typically involve multiple steps and require substantial user input on each of them. Interactive tasks usually originate from Python scenarios, i.e. we select the most interesting ones and implement them in the web version. Currently, only the typo detection scenario is implemented. The web interface is also useful for pattern discovery and validation tasks: a user may specify parameters, browse results, employ advanced visualizations and filters, all in a convenient way.
 
-You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to a large demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/vs9h/Desbordante).
+You can try the deployed web version [here](https://desbordante.unidata-platform.ru/). You have to register in order to process your own datasets. Keep in mind that due to high demand various time and memory limits are enforced: processing is aborted if they are exceeded. The source code of the web interface is kept in a separate [repo](https://github.com/Desbordante/desbordante-server-node).
+
+## I still don't understand how to use Desbordante and patterns :(
+
+No worries! Desbordante offers a novel type of data profiling, which may require that you first familiarize yourself with its concepts and usage. The most challenging part of Desbordante are the primitives: their definitions and applications in practice. To help you get started, here’s a step-by-step guide:
+
+1) First of all, explore the guides on our [website](https://desbordante.unidata-platform.ru/papers). Since our team currently does not include technical writers, it's possible that some guides may be missing.
+2) To compensate for the lack of guides, we provide several examples for each supported pattern. These examples illustrate both the pattern itself and how to use it in Python. You can check them out [here](https://github.com/Desbordante/desbordante-core/tree/main/examples).
+3) Each of our patterns was introduced in a research paper. These papers typically provide a formal definition of the pattern, examples of use, and its application scope. We recommend at least skimming through them. Don't be discouraged by the complexity of the papers! To effectively use the patterns, you only need to read the more accessible parts, such as the introduction and the example sections.
+4) Finally, do not hesitate to ask questions in the mailing list (link below) or create an issue.
+
+### Papers about patterns
+
+Here is a list of papers about patterns, organized in the recommended reading order in each item:
+
+* Functional dependency variants:
+    - Exact functional dependencies
+       - [Thorsten Papenbrock et al. 2015. Functional dependency discovery: an experimental evaluation of seven algorithms. Proc. VLDB Endow. 8, 10 (June 2015), 1082–1093.](http://www.vldb.org/pvldb/vol8/p1082-papenbrock.pdf)
+       - [Thorsten Papenbrock and Felix Naumann. 2016. A Hybrid Approach to Functional Dependency Discovery. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 821–833.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2016_papenbrock_a.pdf)
+    - Approximate functional dependencies, with g<sub>1</sub> metric
+       - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
+    - Probabilistic functional dependencies, with PerTuple and PerValue metrics
+       - [Daisy Zhe Wang et al. Functional Dependency Generation and Applications in Pay-As-You-Go Data Integration Systems. WebDB 2009](http://webdb09.cse.buffalo.edu/papers/Paper18/webdb09.pdf)
+       - [Daisy Zhe Wang et al. Discovering Functional Dependencies in Pay-As-You-Go Data Integration Systems. Tech Rep. UCB/EECS-2009-119.](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2009/EECS-2009-119.pdf)
+* Graph functional dependencies
+    - [Wenfei Fan, Yinghui Wu, and Jingbo Xu. 2016. Functional Dependencies for Graphs. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 1843–1857.](https://dl.acm.org/doi/pdf/10.1145/2882903.2915232)
+* Conditional functional dependencies
+    - [Rammelaere, J., Geerts, F. (2019). Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”. Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2018. ](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_33)
+* Inclusion dependencies (discovery)
+    - [Falco Dürsch et al. 2019. Inclusion Dependency Discovery: An Experimental Evaluation of Thirteen Algorithms. In Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM '19). Association for Computing Machinery, New York, NY, USA, 219–228.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2019_duersch_inclusion.pdf)
+    - [Sebastian Kruse, et al: Fast Approximate Discovery of Inclusion Dependencies. BTW 2017: 207-226](http://btw2017.informatik.uni-stuttgart.de/slidesandpapers/F4-10-47/paper_web.pdf)
+* Order dependencies:
+   - [Jaroslaw Szlichta et al. 2017. Effective and complete discovery of order dependencies via set-based axiomatization. Proc. VLDB Endow. 10, 7 (March 2017), 721–732.](http://www.vldb.org/pvldb/vol10/p721-szlichta.pdf)
+   - [Langer, P., Naumann, F. Efficient order dependency detection. The VLDB Journal 25, 223–241 (2016)](https://link.springer.com/article/10.1007/s00778-015-0412-3)
+* Metric functional dependencies
+   - [N. Koudas et al. "Metric Functional Dependencies," 2009 IEEE 25th International Conference on Data Engineering, Shanghai, China, 2009, pp. 1275-1278.](https://ieeexplore.ieee.org/document/4812519)
+* Fuzzy algebraic constraints
+   - [Paul G. Brown and Peter J. Hass. 2003. BHUNT: automatic discovery of Fuzzy algebraic constraints in relational data. In Proceedings of the 29th international conference on Very large data bases - Volume 29 (VLDB '03), Vol. 29. VLDB Endowment, 668–679.](https://www.vldb.org/conf/2003/papers/S20P03.pdf)
+* Unique column combinations:
+   - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
+* Association rules
+   - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
 
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
