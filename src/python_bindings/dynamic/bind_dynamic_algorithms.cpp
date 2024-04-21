@@ -55,7 +55,7 @@ void BindDynamicAlgorithms(py::module_& main_module) {
                 return algo;
         }))
         .def("process",
-            [](DynamicAlgorithm& algo, py::kwargs const& kwargs) {
+            [](DynamicAlgorithmDemo& algo, py::kwargs const& kwargs) {
                 for (std::string_view option_name : algo.GetOperationsOptions()) {
                     SetOptionByName(algo, option_name, kwargs);
                 }

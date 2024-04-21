@@ -36,8 +36,9 @@ std::vector<std::string_view> algos::DynamicAlgorithm::GetOperationsOptions() {
 void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements, std::string_view option_name) {
     auto opt_values = GetOptValues();
     bool is_delete_statements = (&statements == &delete_statements_);
-    if (opt_values.find(option_name) != opt_values.end()) {
-        InputTable data_stream = boost::any_cast<InputTable>(opt_values.at(option_name).value);
+    auto it = opt_values.find(option_name);
+    if (it != opt_values.end()) {
+        InputTable data_stream = boost::any_cast<InputTable>(it->second.value);
         if (data_stream->GetNumberOfColumns() != table_cols_cnt_) {
             throw config::ConfigurationError("Invalid data received: the number of columns in the \
                 modification statements is different from the table.");
@@ -74,8 +75,9 @@ void algos::DynamicAlgorithm::LoadDataInternal() {
     static_algo_executed_ = false;
     auto opt_values = GetOptValues();
     RowsContainer statements{};
-    if (opt_values.find(kTable) != opt_values.end()) {
-        table_cols_cnt_ = boost::any_cast<InputTable>(opt_values.at(kTable).value)->GetNumberOfColumns();
+    auto it = opt_values.find(kTable);
+    if (it != opt_values.end()) {
+        table_cols_cnt_ = boost::any_cast<InputTable>(it->second.value)->GetNumberOfColumns();
     }
 }
 
@@ -86,8 +88,9 @@ void algos::DynamicAlgorithm::ResetState() {
     table_cols_cnt_ = 0;
     static_algo_executed_ = false;
     auto opt_values = GetOptValues();
-    if (opt_values.find(kTable) != opt_values.end()) {
-        boost::any_cast<InputTable>(opt_values.at(kTable).value)->Reset();
+    auto it = opt_values.find(kTable);
+    if (it != opt_values.end()) {
+        boost::any_cast<InputTable>(it->second.value)->Reset();
     }
 }
 
