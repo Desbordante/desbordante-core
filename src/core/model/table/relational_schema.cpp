@@ -32,7 +32,6 @@ std::unique_ptr<RelationalSchema> RelationalSchema::CreateFrom(model::IDatasetSt
     return std::make_unique<RelationalSchema>(table.GetRelationName(), std::move(column_names));
 }
 
-// TODO: В оригинале тут что-то непонятное
 Vertical RelationalSchema::GetVertical(boost::dynamic_bitset<> indices) const {
     return Vertical(this, std::move(indices));
 }
