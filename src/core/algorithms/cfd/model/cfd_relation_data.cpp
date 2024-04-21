@@ -23,7 +23,7 @@ void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
                                              std::vector<std::string> const& string_row,
                                              std::vector<int>& int_row,
                                              std::vector<Transaction>& data_rows,
-                                             int& unique_elems_number, unsigned num_columns) {
+                                             int& unique_elems_number, size_t num_columns) {
     int it;
     for (size_t i = 0; i < num_columns; i++) {
         auto ptr = item_dictionary.find(std::make_pair(i, string_row[i]));
@@ -49,7 +49,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         return CFDRelationData::CreateFrom(parser, c_sample, r_sample);
     }
 
-    unsigned const num_columns = std::min(parser.GetNumberOfColumns(), columns_number);
+    size_t const num_columns = std::min(parser.GetNumberOfColumns(), columns_number);
     std::vector<std::string> column_names;
     column_names.reserve(num_columns);
     for (AttributeIndex i = 0; static_cast<size_t>(i) < num_columns; ++i) {

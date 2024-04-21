@@ -42,7 +42,7 @@ private:
     static void AddNewItemsInFullTable(ItemDictionary &, ColumnesValuesDict &,
                                        std::vector<ItemInfo> &, std::vector<std::string> const &,
                                        std::vector<int> &, std::vector<Transaction> &, int &,
-                                       unsigned);
+                                       size_t);
 
     static void AddNewItemsInPartialTable(ItemDictionary &, ColumnesValuesDict &,
                                           std::vector<ItemInfo> &, std::vector<std::string> const &,
