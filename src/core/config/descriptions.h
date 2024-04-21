@@ -102,4 +102,8 @@ constexpr auto kDIgnoreConstantCols =
 constexpr auto kDGraphData = "Path to dot-file with graph";
 constexpr auto kDGfdData = "Path to file with GFD";
 constexpr auto kDMemLimitMB = "memory limit im MBs";
+constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";
+constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
+constexpr auto kDUpdateOldStatements = "Rows that need to be replaced in the table using the update operation";
+constexpr auto kDUpdateNewStatements = "Rows that need to be used to replace old data in the table using the update operation";
 }  // namespace config::descriptions

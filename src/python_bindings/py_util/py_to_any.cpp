@@ -17,6 +17,8 @@
 #include "parser/csv_parser/csv_parser.h"
 #include "py_util/create_dataframe_reader.h"
 #include "util/enum_to_available_values.h"
+#include "model/table/table_row.h"
+#include "util/dynamic_collection.h"
 
 namespace {
 
