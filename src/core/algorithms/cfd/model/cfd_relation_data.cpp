@@ -42,9 +42,9 @@ void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
 }
 
 std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStream& parser,
-                                                             unsigned columns_number,
-                                                             unsigned tuples_number,
-                                                             double c_sample, double r_sample) {
+                                                             size_t columns_number,
+                                                             size_t tuples_number, double c_sample,
+                                                             double r_sample) {
     if (columns_number == 0 || tuples_number == 0) {
         return CFDRelationData::CreateFrom(parser, c_sample, r_sample);
     }
