@@ -1,4 +1,4 @@
-#include "config/tabular_data/table_modification_operations/insert/option.h"
+#include "config/tabular_data/crud_operations/insert/option.h"
 
 #include "config/names_and_descriptions.h"
 

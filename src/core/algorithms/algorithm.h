@@ -35,7 +35,6 @@ private:
     virtual void ResetState() = 0;
 
     void ExcludeOptions(std::string_view parent_option) noexcept;
-    void ClearOptions() noexcept;
     virtual void LoadDataInternal() = 0;
     virtual unsigned long long ExecuteInternal() = 0;
 
@@ -68,6 +67,7 @@ protected:
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
 
+    void ClearOptions() noexcept;
     // Overload this to add options after your algorithm has processed the data
     // given through LoadData
     virtual void MakeExecuteOptsAvailable();

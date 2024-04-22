@@ -1,5 +1,5 @@
-// This option is meant for the common case where an algorithm accepts only one
-// table.
+// This option is meant for the dynamic case where an algorithm processes crud
+// operations over table many times.
 
 #pragma once
 

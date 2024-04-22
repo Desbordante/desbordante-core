@@ -11,14 +11,9 @@ algos::DynamicAlgorithmDemo::DynamicAlgorithmDemo(std::vector<std::string_view> 
 unsigned long long algos::DynamicAlgorithmDemo::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
     
-    auto opt_values = GetOptValues();
-    auto it = opt_values.find(kTable);
-    if (it != opt_values.end()) {
-        InputTable data_stream = boost::any_cast<InputTable>(it->second.value);
-        while (data_stream->HasNextRow()) {
-            TableRow row(TableRow(data_stream->GetNextRow()));
-            result_collection_.Add(row.toString());
-        }
+    while (input_table_->HasNextRow()) {
+        TableRow row{input_table_->GetNextRow()};
+        result_collection_.Add(row.toString());
     }
     sleep(1);
 

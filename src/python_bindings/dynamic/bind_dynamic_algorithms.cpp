@@ -7,6 +7,7 @@
 #include "algorithms/dynamic/dynamic_algorithm.h"
 #include "algorithms/dynamic/demo/demo_algo.h"
 #include "config/names.h"
+#include "config/tabular_data/crud_operations/operations.h"
 #include "py_util/bind_primitive.h"
 #include "py_util/py_to_any.h"
 
@@ -49,14 +50,12 @@ void BindDynamicAlgorithms(py::module_& main_module) {
         .def(py::init([](py::kwargs const& kwargs) {
                 auto algo = std::make_unique<DynamicAlgorithmDemo>();
                 ConfigureAlgo(*algo, kwargs);
-                algo->LoadData();
-                ConfigureAlgo(*algo, kwargs);
-                algo->Execute();
+                algo->Initialize();
                 return algo;
         }))
         .def("process",
             [](DynamicAlgorithmDemo& algo, py::kwargs const& kwargs) {
-                for (std::string_view option_name : algo.GetOperationsOptions()) {
+                for (const std::string_view& option_name : CRUD_OPTIONS) {
                     SetOptionByName(algo, option_name, kwargs);
                 }
                 algo.ProcessBatch();

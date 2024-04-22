@@ -1,22 +1,114 @@
 #include "dynamic_algorithm.h"
 #include "config/tabular_data/input_table_type.h"
-#include "config/names.h"
+#include "config/names_and_descriptions.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
+#include "config/tabular_data/crud_operations/operations.h"
 
 #include <easylogging++.h>
 
+
+namespace {
 using config::InputTable;
-using config::names::kTable;
+
+std::unordered_map<std::string, size_t> GetIndexes(const InputTable& table) {
+    std::unordered_map<std::string, size_t> index;
+    for (int i = 0; i < table->GetNumberOfColumns(); ++i) {
+        index[table->GetColumnName(i)] = i;
+    }
+    return std::move(index);
+}
+
+std::vector<size_t> GetTransposition(const InputTable& table, const InputTable& stream) {
+    static std::unordered_map<std::string, size_t> index = GetIndexes(table);
+    std::vector<size_t> result;
+    for (int i = 0; i < stream->GetNumberOfColumns(); ++i) {
+        result.emplace_back(index[stream->GetColumnName(i)]);
+    }
+    return std::move(result);
+}
+} // namespace
+
+void algos::DynamicAlgorithm::RegisterOptions() {
+    DESBORDANTE_OPTION_USING;
+
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kInsertStatementsOpt(&insert_statements_stream_));
+    RegisterOption(config::kDeleteStatementsOpt(&delete_statements_stream_));
+    RegisterOption(config::kUpdateOldStatementsOpt(&update_old_statements_stream_));
+    RegisterOption(config::kUpdateNewStatementsOpt(&update_new_statements_stream_));
+}
+
+algos::DynamicAlgorithm::DynamicAlgorithm(std::vector<std::string_view> phase_names)
+    : Algorithm(phase_names) {
+    RegisterOptions();
+    MakeOptionsAvailable({config::names::kTable});
+}
+
+void algos::DynamicAlgorithm::LoadDataInternal() {
+    if (input_table_->GetNumberOfColumns() == 0) {
+        throw std::runtime_error("Unable to work on an empty dataset.");
+    }
+}
+
+void algos::DynamicAlgorithm::ResetState() {
+    insert_statements_.Clear();
+    delete_statements_.Clear();
+    table_validation_rows_.Clear();
+    while (input_table_->HasNextRow()) {
+        table_validation_rows_.Add(input_table_->GetNextRow());
+    }
+    input_table_->Reset();
+}
+
+void algos::DynamicAlgorithm::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable(CRUD_OPTIONS);
+}
+
+void algos::DynamicAlgorithm::Initialize() {
+    LoadData();
+    Execute();
+}
+
+void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements, 
+                                                 InputTable &data_stream) {
+    if (data_stream->GetNumberOfColumns() != input_table_->GetNumberOfColumns()) {
+        throw config::ConfigurationError("Invalid data received: the number of columns in the \
+            modification statements is different from the table.");
+    }
+    bool is_delete_statement = (&statements == &delete_statements_);
+    while (data_stream->HasNextRow()) {
+        TableRow row{data_stream->GetNextRow()};
+        if (row.getData().size() != input_table_->GetNumberOfColumns()) {
+            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
+                            << input_table_->GetNumberOfColumns() << ", got " 
+                            << row.getData().size() << ")";
+            continue;
+        }
+        if (is_delete_statement) {
+            if (!table_validation_rows_.Contains(row)) {
+                throw config::ConfigurationError("Invalid data received: the row from the delete \
+                    statement does not exist in the table. Bad statement: " + row.toString());
+            } else {
+                table_validation_rows_.Erase(row);
+            }
+        } else {
+            table_validation_rows_.Add(row);
+        }
+        statements.Add(row);
+    }
+}
 
 void algos::DynamicAlgorithm::ConfigureOperations() {
-    // process insert statements
-    ExtractAndValidate(insert_statements_, config::names::kInsertStatements);
-    // process delete statements
-    ExtractAndValidate(delete_statements_, config::names::kDeleteStatements);
-    // process update statements
-    size_t inserts_cnt = insert_statements_.Size();
-    size_t deletes_cnt = delete_statements_.Size();
-    ExtractAndValidate(delete_statements_, config::names::kUpdateOldStatements);
-    ExtractAndValidate(insert_statements_, config::names::kUpdateNewStatements);
+    // configure insert statements
+    ExtractAndValidate(insert_statements_, insert_statements_stream_);
+    // configure delete statements
+    ExtractAndValidate(delete_statements_, delete_statements_stream_);
+    // configure update statements
+    const size_t inserts_cnt = insert_statements_.Size();
+    const size_t deletes_cnt = delete_statements_.Size();
+    ExtractAndValidate(delete_statements_, update_old_statements_stream_);
+    ExtractAndValidate(insert_statements_, update_new_statements_stream_);
     if (insert_statements_.Size() - inserts_cnt != delete_statements_.Size() - deletes_cnt) {
         throw config::ConfigurationError("Invalid data received: number of rows to update: "
             + std::to_string(insert_statements_.Size() - inserts_cnt)
@@ -25,81 +117,20 @@ void algos::DynamicAlgorithm::ConfigureOperations() {
     }
 }
 
-std::vector<std::string_view> algos::DynamicAlgorithm::GetOperationsOptions() {
-    static std::vector<std::string_view> options{config::names::kInsertStatements, 
-                                                 config::names::kDeleteStatements,
-                                                 config::names::kUpdateOldStatements,
-                                                 config::names::kUpdateNewStatements};
-    return options;
+bool algos::DynamicAlgorithm::CheckRecievedBatch() {
+    return insert_statements_stream_->HasNextRow() ||
+           delete_statements_stream_->HasNextRow() ||
+           update_old_statements_stream_->HasNextRow() ||
+           update_new_statements_stream_->HasNextRow();
 }
-
-void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements, std::string_view option_name) {
-    auto opt_values = GetOptValues();
-    bool is_delete_statements = (&statements == &delete_statements_);
-    auto it = opt_values.find(option_name);
-    if (it != opt_values.end()) {
-        InputTable data_stream = boost::any_cast<InputTable>(it->second.value);
-        if (data_stream->GetNumberOfColumns() != table_cols_cnt_) {
-            throw config::ConfigurationError("Invalid data received: the number of columns in the \
-                modification statements is different from the table.");
-        }
-        while (data_stream->HasNextRow()) {
-            TableRow row(TableRow(data_stream->GetNextRow()));
-            if (row.getData().size() != table_cols_cnt_) {
-                LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                             << table_cols_cnt_ << ", got " << row.getData().size() << ")";
-                continue;
-            }
-            if (!table_validation_rows_.Contains(row)) {
-                throw config::ConfigurationError("Invalid data received: the row from the delete \
-                    statement does not exist in the table. Bad statement: " + row.toString());
-            } else {
-                table_validation_rows_.Erase(row);
-                statements.Add(row);
-            }
-        }
-    }
-    UnsetOption(option_name);
-}
-
-algos::DynamicAlgorithm::DynamicAlgorithm(std::vector<std::string_view> phase_names)
-    : Algorithm(phase_names) {}
 
 unsigned long long algos::DynamicAlgorithm::ProcessBatch() {
-    ConfigureOperations();
-    unsigned long long time_ms = ProcessBatchInternal();
-    return time_ms;
-}
-
-void algos::DynamicAlgorithm::LoadDataInternal() {
-    static_algo_executed_ = false;
-    auto opt_values = GetOptValues();
-    RowsContainer statements{};
-    auto it = opt_values.find(kTable);
-    if (it != opt_values.end()) {
-        table_cols_cnt_ = boost::any_cast<InputTable>(it->second.value)->GetNumberOfColumns();
+    if (CheckRecievedBatch()) {
+        ConfigureOperations();
+        unsigned long long time_ms = ProcessBatchInternal();
+        ClearOptions();
+        MakeExecuteOptsAvailable();
+        return time_ms;
     }
-}
-
-void algos::DynamicAlgorithm::ResetState() {
-    insert_statements_.Clear();
-    delete_statements_.Clear();
-    table_validation_rows_.Clear();
-    table_cols_cnt_ = 0;
-    static_algo_executed_ = false;
-    auto opt_values = GetOptValues();
-    auto it = opt_values.find(kTable);
-    if (it != opt_values.end()) {
-        boost::any_cast<InputTable>(it->second.value)->Reset();
-    }
-}
-
-unsigned long long algos::DynamicAlgorithm::ExecuteInternal() {
     return 0;
 }
-
-unsigned long long algos::DynamicAlgorithm::ProcessBatchInternal() {
-    return 0;
-}
-
-void algos::DynamicAlgorithm::UpdateResult() {}
