@@ -30,8 +30,6 @@ std::vector<size_t> GetTransposition(const InputTable& table, const InputTable& 
 } // namespace
 
 void algos::DynamicAlgorithm::RegisterOptions() {
-    DESBORDANTE_OPTION_USING;
-
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kInsertStatementsOpt(&insert_statements_stream_));
     RegisterOption(config::kDeleteStatementsOpt(&delete_statements_stream_));
@@ -49,6 +47,7 @@ void algos::DynamicAlgorithm::LoadDataInternal() {
     if (input_table_->GetNumberOfColumns() == 0) {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
+    is_initialized_ = false;
 }
 
 void algos::DynamicAlgorithm::ResetState() {
@@ -62,12 +61,16 @@ void algos::DynamicAlgorithm::ResetState() {
 }
 
 void algos::DynamicAlgorithm::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable(CRUD_OPTIONS);
+    if (is_initialized_) {
+        MakeOptionsAvailable(CRUD_OPTIONS);
+    }
 }
 
 void algos::DynamicAlgorithm::Initialize() {
     LoadData();
     Execute();
+    is_initialized_ = true;
+    MakeExecuteOptsAvailable();
 }
 
 void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements, 

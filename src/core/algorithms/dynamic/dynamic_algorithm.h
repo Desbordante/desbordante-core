@@ -57,6 +57,7 @@ private:
     // fills after execute method with table init data after static algo execution 
     // and insert_statements_ after processing every batch
     RowsContainer table_validation_rows_ {};
+    bool is_initialized_ = false;
 };
 
 }  // namespace algos

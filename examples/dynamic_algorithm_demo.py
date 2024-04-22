@@ -4,7 +4,6 @@ import pandas
 TABLE = 'examples/datasets/ind_datasets/teaches.csv'
 
 algo = desbordante.dynamic.algorithms.Default(table=(TABLE, ',', True))
-algo.__init__(table=(TABLE, ',', True))
 
 result = algo.get_result()
 print('First result:')

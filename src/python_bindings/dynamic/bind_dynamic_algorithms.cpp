@@ -32,12 +32,12 @@ void ConfigureAlgo(DynamicAlgorithm& algorithm, py::kwargs const& kwargs) {
 void SetOptionByName(DynamicAlgorithm& algorithm, 
                      std::string_view option_name, 
                      py::kwargs const& kwargs) {
-    std::type_index type_index = algorithm.GetTypeIndex(option_name);
-    assert(type_index != kVoidIndex);
-    boost::any option_value = kwargs.contains(option_name)
-                              ? PyToAny(option_name, type_index, kwargs[option_name.data()])
-                              : boost::any{};
-    algorithm.SetOption(option_name, option_value);
+    if (kwargs.contains(option_name)) {
+        std::type_index type_index = algorithm.GetTypeIndex(option_name);
+        assert(type_index != kVoidIndex);
+        boost::any option_value = PyToAny(option_name, type_index, kwargs[option_name.data()]);
+        algorithm.SetOption(option_name, option_value);
+    }
 }
 }  // namespace
 
