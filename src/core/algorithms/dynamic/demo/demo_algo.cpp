@@ -24,14 +24,12 @@ unsigned long long algos::DynamicAlgorithmDemo::ExecuteInternal() {
 
 unsigned long long algos::DynamicAlgorithmDemo::ProcessBatchInternal() {
     auto start_time = std::chrono::system_clock::now();
-
     for (TableRow row : insert_statements_.AsUnorderedMultiset()) {
         added_to_result_.Add(row.toString());
     }
     for (TableRow row : delete_statements_.AsUnorderedMultiset()) {
         erased_from_result_.Add(row.toString());
     }
-    
     sleep(1);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);

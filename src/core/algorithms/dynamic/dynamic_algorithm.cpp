@@ -75,6 +75,9 @@ void algos::DynamicAlgorithm::Initialize() {
 
 void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements, 
                                                  InputTable &data_stream) {
+    if (!data_stream) {
+        return;
+    }
     if (data_stream->GetNumberOfColumns() != input_table_->GetNumberOfColumns()) {
         throw config::ConfigurationError("Invalid data received: the number of columns in the \
             modification statements is different from the table.");
@@ -96,7 +99,7 @@ void algos::DynamicAlgorithm::ExtractAndValidate(RowsContainer &statements,
                 table_validation_rows_.Erase(row);
             }
         } else {
-            table_validation_rows_.Add(row);
+            table_validation_rows_.Add(TableRow(row));
         }
         statements.Add(row);
     }
@@ -131,6 +134,7 @@ unsigned long long algos::DynamicAlgorithm::ProcessBatch() {
     if (CheckRecievedBatch()) {
         ConfigureOperations();
         unsigned long long time_ms = ProcessBatchInternal();
+        UpdateResult();
         ClearOptions();
         MakeExecuteOptsAvailable();
         return time_ms;

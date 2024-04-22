@@ -26,9 +26,10 @@ public:
             }
             return hash;
         }()) {}
-
     
-    TableRow() : hash_(0) {};
+    TableRow(const TableRow& other) : data_(other.getData()), hash_(other.getHash()) {}
+
+    TableRow() : data_({}), hash_(0) {};
 
     const std::vector<std::string>& getData() const {
         return data_;

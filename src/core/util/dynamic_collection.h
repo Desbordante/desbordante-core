@@ -11,7 +11,7 @@ namespace util {
 template <typename T>
 class DynamicCollection {
 private:
-    std::unordered_multiset<T> collection_;
+    std::unordered_multiset<T> collection_{};
     std::mutex mutable mutex_;
 
 public:
