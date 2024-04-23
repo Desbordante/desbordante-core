@@ -30,6 +30,14 @@ public:
         return *rhs_;
     }
 
+    bool StartsWith(IND const& other) const noexcept {
+        return GetLhs().StartsWith(other.GetLhs()) && GetRhs().StartsWith(other.GetRhs());
+    }
+
+    ArityIndex GetArity() const noexcept {
+        return lhs_->GetArity();
+    }
+
     std::string ToShortString() const;
 
     std::string ToLongString() const;
