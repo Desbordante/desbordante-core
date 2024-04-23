@@ -34,6 +34,7 @@ constexpr auto kDThreads =
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 auto const kDErrorMeasure = details::kDErrorMeasureString.c_str();
 constexpr auto kDMaximumLhs = "max considered LHS size";
+constexpr auto kDMaximumArity = "max considered arity";
 constexpr auto kDSeed = "RNG seed";
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
 constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)";
@@ -92,7 +93,6 @@ constexpr auto kDHllAccuracy =
 constexpr auto kDSampleSize =
         "Size of a table sample. Greater value - more correct answers, but higher memory "
         "consumption.\n Applies to all tables";
-constexpr auto kDFindNary = "Detect n-ary inclusion dependencies [true|false]";
 constexpr auto kDIgnoreNullCols =
         "Ignore INDs which contain columns filled only with NULLs. May increase "
         "performance but impacts the result. [true|false]";
