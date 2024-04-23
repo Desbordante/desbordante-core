@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "column_index.h"
+#include "table/idataset_stream.h"
 
 namespace model {
 
@@ -89,7 +90,7 @@ public:
     explicit BlockData(ColumnIndex cols_count) : columns_(cols_count) {}
 
     /// insert row from data stream
-    void InsertRow(std::vector<std::string> const& row);
+    void InsertRow(IDatasetStream::Row const& row);
 
     /// get column data
     ColumnData const& GetColumn(ColumnIndex id) const noexcept {
