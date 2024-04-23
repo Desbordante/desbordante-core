@@ -1,43 +1,38 @@
 /** \file
  * \brief Block data stream
  *
- * implementation of the BlockDatasetStream class, which represents
- * a dataset stream with block-base access
+ * implementation of the BlockDatasetStream class, which
+ * represents a dataset stream with block-base access
  */
 #pragma once
 
-#include <memory>
+#include <cassert>
+#include <numeric>
 #include <string>
-#include <vector>
+
+#include <easylogging++.h>
 
 #include "block_data.h"
-#include "idataset_stream.h"
+#include "dataset_stream_wrapper.h"
 
 namespace model {
 
 /// block-based data stream
+template <class DatasetStream>
 class BlockDatasetStream {
 public:
-    using Row = std::vector<std::string>;
-    using RowVec = std::vector<Row>;
+    using Row = DatasetStream::Row;
 
 private:
-    std::shared_ptr<IDatasetStream> stream_; /* data stream */
-    size_t capacity_;                        /* block size limit */
-    Row cur_row_;                            /* next row to be added to the output block */
+    DatasetStreamWrapper<DatasetStream> stream_;
+    size_t capacity_; /* block size limit */
 
-    /* get the count of chars in a row */
-    static size_t GetRowSize(Row const& row);
-
-    ///
-    /// \brief try to store next row
-    ///
-    /// \note skip row from data stream when row
-    ///       has incorrect number of values.
-    ///
-    /// @return return false means end of data stream
-    ///
-    bool TryStoreNextRow();
+    /* get count of chars in a row */
+    static size_t GetRowSize(Row const& row) {
+        return std::accumulate(
+                row.begin(), row.end(), 0UL,
+                [](size_t acc, std::string const& value) { return acc + value.size(); });
+    }
 
 public:
     ///
@@ -46,18 +41,27 @@ public:
     /// \param stream    shared pointer to the dataset stream.
     /// \param capacity  block size limit in bytes
     ///
-    BlockDatasetStream(std::shared_ptr<IDatasetStream> const& stream, size_t capacity)
-        : stream_(stream), capacity_(capacity) {
-        TryStoreNextRow();
-    }
+    template <typename Stream>
+    BlockDatasetStream(Stream&& stream, size_t capacity)
+        : stream_(std::forward<Stream>(stream)), capacity_(capacity) {}
 
     /// check if there is a next block available in the dataset stream
-    bool HasNextBlock() const {
-        return !cur_row_.empty();
+    [[nodiscard]] bool HasNextBlock() const {
+        return stream_.HasNextRow();
     }
 
     /// get the next block of data from the dataset stream
-    BlockData GetNextBlock();
+    BlockData GetNextBlock() {
+        assert(HasNextBlock());
+        BlockData block{static_cast<ColumnIndex>(stream_.GetNumberOfColumns())};
+        size_t block_size = 0;
+        do {
+            Row row = stream_.GetNextRow();
+            block_size += GetRowSize(row);
+            block.InsertRow(std::move(row));
+        } while ((block_size < capacity_) && stream_.HasNextRow());
+        return block;
+    }
 };
 
 }  // namespace model

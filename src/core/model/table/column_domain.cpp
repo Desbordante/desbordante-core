@@ -14,6 +14,7 @@
 
 #include "config/thread_number/type.h"
 #include "model/table/block_dataset_stream.h"
+#include "model/table/dataset_stream_fixed.h"
 #include "util/parallel_for.h"
 
 namespace model {
@@ -217,7 +218,7 @@ private:
     }
 
     /* process next `block_count` blocks */
-    bool ProcessNext(BlockDatasetStream& block_stream, size_t block_count) {
+    bool ProcessNext(BlockDatasetStream<DatasetStreamFixed<>>& block_stream, size_t block_count) {
         while (block_count != 0 && block_stream.HasNextBlock()) {
             BlockData const block = block_stream.GetNextBlock();
             auto store_column = [&block](DomainRawData& raw_domain) {
@@ -265,10 +266,14 @@ public:
     void ProcessDatasetStream(TableIndex table_id,
                               std::shared_ptr<model::IDatasetStream> const& stream) {
         auto const col_count = static_cast<ColumnIndex>(stream->GetNumberOfColumns());
+        if (!stream->HasNextRow()) {
+            throw std::runtime_error("Got an empty file: IND mining is meaningless.");
+        }
+
         RawDomainsInit(table_id, col_count);
         processed_block_count_ = 0;
         size_t block_count = 0;
-        BlockDatasetStream block_stream{stream, block_capacity_};
+        BlockDatasetStream<DatasetStreamFixed<>> block_stream{stream, block_capacity_};
         do {
             processed_block_count_ += block_count;
             block_count = GetNumberOfBlocks();
