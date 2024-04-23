@@ -43,6 +43,11 @@ protected:
         ind_collection_.Register(std::move(lhs), std::move(rhs), schemas_);
     }
 
+    void RegisterIND(model::ColumnCombination lhs, model::ColumnCombination rhs) {
+        RegisterIND(std::make_shared<model::ColumnCombination>(std::move(lhs)),
+                    std::make_shared<model::ColumnCombination>(std::move(rhs)));
+    }
+
     virtual void RegisterIND(IND ind) {
         ind_collection_.Register(std::move(ind));
     }
