@@ -14,6 +14,7 @@ import desbordante
 class Task(StrEnum):
     fd = auto()
     cfd = auto()
+    ar = auto()
     afd = auto()
     od = auto()
     pfd = auto()
@@ -43,6 +44,7 @@ class Algorithm(StrEnum):
     order = auto()
     spider = auto()
     faida = auto()
+    apriori = auto()
     naive_fd_verifier = auto()
     naive_afd_verifier = auto()
     icde09_mfd_verifier = auto()
@@ -64,6 +66,7 @@ ERROR_MEASURE = 'error_measure'
 TABLES = 'tables'
 TABLES_LIST = 'tables_list'
 TABLES_DIRECTORY = 'tables_directory'
+INPUT_FORMAT = 'input_format'
 
 PRIMARY_HELP = '''The Desbordante data profiler is designed to help users
 discover or verify various types of patterns in data. These patterns are
@@ -118,13 +121,14 @@ Currently, the console version of Desbordante supports:
 1) Discovery of exact functional dependencies
 2) Discovery of approximate functional dependencies
 3) Discovery of probabilistic functional dependencies
-4) Discovery of exact order dependencies (set-based and list-based axiomatization)
-5) Discovery of inclusion dependencies
-6) Verification of exact functional dependencies
-7) Verification of approximate functional dependencies
-8) Verification of metric dependencies
-9) Verification of exact unique column combinations
-10) Verification of approximate unique column combinations
+4) Discovery of association rules
+5) Discovery of exact order dependencies (set-based and list-based axiomatization)
+6) Discovery of inclusion dependencies
+7) Verification of exact functional dependencies
+8) Verification of approximate functional dependencies
+9) Verification of metric dependencies
+10) Verification of exact unique column combinations
+11) Verification of approximate unique column combinations
 If you need other types, you should look into the C++ code, the Python
 bindings or the Web version.
 
@@ -215,6 +219,12 @@ following options:
 
 Algorithms: SPIDER, FAIDA
 Default: SPIDER
+'''
+AR_HELP = '''Discover association rules. For more information, refer to
+"Frequent Pattern Mining" book by Charu C. Aggarwal and Jiawei Han.
+
+Algorithms: Apriori
+Default: Apriori
 '''
 FD_VERIFICATION_HELP = '''Verify whether a given exact functional dependency
 holds on the specified dataset. For more information about the primitive and
@@ -329,12 +339,10 @@ dependencies. For more information, refer to the “Effective and complete
 discovery of order dependencies via set-based axiomatization” paper by 
 J. Szlichta et al.
 '''
-
 ORDER_HELP = '''Algorithm Order efficiently discovers all n-ary lexicographical 
 order dependencies under the operator “<”. For more information, refer to the
-“Efficient order dependency detection” paper by Philipp Langer and Felix Naumann
+“Efficient order dependency detection” paper by Philipp Langer and Felix Naumann.
 '''
-
 FD_FIRST_HELP = '''FD-First algorithm belongs to the family of algorithms
 for discovering approximate conditional functional dependencies. For more
 information, refer to the “Revisiting Conditional Functional Dependency
@@ -362,20 +370,24 @@ GFD_VERIFIER_HELP = '''Algorithm for verifying whether a given
 graph functional dependency holds. For more information about the primitive
 refer to “Functional Dependencies for Graphs” by Wenfei Fan et al.
 '''
-
 NAIVE_UCC_VERIFIER_HELP = '''A straightforward partition-based algorithm for
 verifying whether a given unique column combination holds.
 For more information on partitions refer to Section 2 of “TANE : An 
 Efficient Algorithm for Discovering Functional and Approximate Dependencies”
 by Y.Huntala et al. For more information on UCC, refer to "Efficient Discovery
-of Approximate Dependencies" by S. Kruse and F. Naumann '''
-
+of Approximate Dependencies" by S. Kruse and F. Naumann.
+'''
 NAIVE_AUCC_VERIFIER_HELP = '''A straightforward partition-based algorithm for
 verifying whether a given approximate unique column combination holds.
 For more information on partitions refer to Section 2 of “TANE : An 
 Efficient Algorithm for Discovering Functional and Approximate Dependencies”
 by Y.Huntala et al. For more information on AUCC, refer to "Efficient Discovery
-of Approximate Dependencies" by S. Kruse and F. Naumann'''
+of Approximate Dependencies" by S. Kruse and F. Naumann.
+'''
+APRIORI_HELP = '''An algorithm for frequent item set mining and association 
+rule discovery. For more information, refer to the "Fast Algorithms for 
+Mining Association Rules" paper by Agrawal and Srikant from 1994.
+'''
 
 OPTION_TYPES = {
     str: 'STRING',
@@ -391,6 +403,7 @@ TASK_HELP_PAGES = {
     Task.od: OD_HELP,
     Task.pfd: PFD_HELP,
     Task.ind: IND_HELP,
+    Task.ar: AR_HELP,
     Task.fd_verification: FD_VERIFICATION_HELP,
     Task.afd_verification: AFD_VERIFICATION_HELP,
     Task.mfd_verification: MFD_VERIFICATION_HELP,
@@ -424,6 +437,7 @@ ALGO_HELP_PAGES = {
     Algorithm.naive_gfd_verifier: GFD_VERIFIER_HELP,
     Algorithm.gfd_verifier: GFD_VERIFIER_HELP,
     Algorithm.egfd_verifier: GFD_VERIFIER_HELP,
+    Algorithm.apriori: APRIORI_HELP
 }
 
 TaskInfo = namedtuple('TaskInfo', ['algos', 'default'])
@@ -443,6 +457,8 @@ TASK_INFO = {
     Task.pfd: TaskInfo([Algorithm.pfdtane], Algorithm.pfdtane),
     Task.ind: TaskInfo([Algorithm.spider, Algorithm.faida],
                        Algorithm.spider),
+    Task.ar: TaskInfo([Algorithm.apriori],
+                      Algorithm.apriori),
     Task.fd_verification: TaskInfo([Algorithm.naive_fd_verifier],
                                    Algorithm.naive_fd_verifier),
     Task.afd_verification: TaskInfo([Algorithm.naive_afd_verifier],
@@ -482,6 +498,7 @@ ALGOS = {
     Algorithm.naive_gfd_verifier: desbordante.gfd_verification.algorithms.NaiveGfdValid,
     Algorithm.gfd_verifier: desbordante.gfd_verification.algorithms.GfdValid,
     Algorithm.egfd_verifier: desbordante.gfd_verification.algorithms.EGfdValid,
+    Algorithm.apriori: desbordante.ar.algorithms.Apriori
 }
 
 
@@ -621,6 +638,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_gfds()
             case Algorithm.fd_first:
                 result = algo.get_cfds()
+            case Algorithm.apriori:
+                result = algo.get_ars()
             case _:
                 assert False, 'No matching get_result function.'
         return result
