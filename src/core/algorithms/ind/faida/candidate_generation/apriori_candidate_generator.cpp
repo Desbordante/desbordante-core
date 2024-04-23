@@ -25,12 +25,8 @@ bool CreateCandidate(SimpleIND const& first, SimpleIND const& second,
 
     int const size = new_left->GetColumnIndices().size();
 
-    if (new_left->GetTableIndex() == new_right->GetTableIndex()) {
-        for (ColumnIndex i : new_left->GetColumnIndices()) {
-            for (ColumnIndex j : new_right->GetColumnIndices()) {
-                if (i == j) return false;
-            }
-        }
+    if (SimpleCC::HaveIndicesIntersection(*new_left, *new_right)) {
+        return false;
     }
 
     int const num_checks = size - 2;
