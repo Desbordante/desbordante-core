@@ -6,11 +6,9 @@
 #include "spider.h"
 
 #include <functional>
-#include <memory>
 #include <queue>
 #include <string>
 #include <type_traits>
-#include <utility>
 
 #include "attribute.h"
 #include "config/equal_nulls/option.h"
@@ -102,11 +100,6 @@ std::vector<Attribute> GetProcessedAttributes(std::vector<model::ColumnDomain> c
     return attrs;
 }
 };  // namespace
-
-void Spider::RegisterIND(model::ColumnCombination lhs, model::ColumnCombination rhs) {
-    RegisterIND(std::make_shared<model::ColumnCombination>(std::move(lhs)),
-                std::make_shared<model::ColumnCombination>(std::move(rhs)));
-}
 
 void Spider::MineINDs() {
     using spider::INDAttribute;
