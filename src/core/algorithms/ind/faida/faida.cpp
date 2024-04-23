@@ -7,6 +7,7 @@
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "max_arity/option.h"
 #include "model/table/column.h"
 
 namespace algos {
@@ -16,7 +17,7 @@ Faida::Faida() : INDAlgorithm({}) {
 
     RegisterOption(Option{&sample_size_, kSampleSize, kDSampleSize, 500});
     RegisterOption(Option{&hll_accuracy_, kHllAccuracy, kDHllAccuracy, 0.001});
-    RegisterOption(Option{&detect_nary_, kFindNary, kDFindNary, true});
+    RegisterOption(config::kMaxArityOpt(&max_arity_));
     RegisterOption(Option{&ignore_null_cols_, kIgnoreNullCols, kDIgnoreNullCols, false});
     RegisterOption(Option{&ignore_const_cols_, kIgnoreConstantCols, kDIgnoreConstantCols, false});
     RegisterOption(config::kThreadNumberOpt(&number_of_threads_));
@@ -26,8 +27,8 @@ Faida::Faida() : INDAlgorithm({}) {
 
 void Faida::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kFindNary, kHllAccuracy, kIgnoreNullCols, kIgnoreConstantCols,
-                          config::kThreadNumberOpt.GetName()});
+    MakeOptionsAvailable({config::kMaxArityOpt.GetName(), kHllAccuracy, kIgnoreNullCols,
+                          kIgnoreConstantCols, config::kThreadNumberOpt.GetName()});
 }
 
 void Faida::LoadINDAlgorithmDataInternal() {
@@ -117,27 +118,24 @@ unsigned long long Faida::ExecuteInternal() {
     LOG(DEBUG) << "Found " << last_result.size() << " INDs on level " << level_num;
     RegisterInds(last_result);
 
-    if (detect_nary_) {
-        while (!last_result.empty()) {
-            level_num++;
-            candidates = faida::apriori_candidate_generator::CreateCombinedCandidates(last_result);
-            if (candidates.empty()) {
-                LOG(DEBUG) << "\nNo candidates on level " << level_num;
-                break;
-            }
-            LOG(DEBUG) << "\nCreated " << candidates.size() << " candidates";
-
-            /* All unique combinations on this level */
-            combinations = ExtractCCs(candidates);
-            LOG(DEBUG) << "Extracted " << combinations.size() << " CCs";
-
-            active_columns = inclusion_tester_->SetCCs(combinations);
-            InsertRows(active_columns, *data_);
-
-            last_result = TestCandidates(candidates);
-            RegisterInds(last_result);
-            LOG(DEBUG) << "Found " << last_result.size() << " INDs on level " << level_num;
+    while (!last_result.empty() && ++level_num != max_arity_) {
+        candidates = faida::apriori_candidate_generator::CreateCombinedCandidates(last_result);
+        if (candidates.empty()) {
+            LOG(DEBUG) << "\nNo candidates on level " << level_num;
+            break;
         }
+        LOG(DEBUG) << "\nCreated " << candidates.size() << " candidates";
+
+        /* All unique combinations on this level */
+        combinations = ExtractCCs(candidates);
+        LOG(DEBUG) << "Extracted " << combinations.size() << " CCs";
+
+        active_columns = inclusion_tester_->SetCCs(combinations);
+        InsertRows(active_columns, *data_);
+
+        last_result = TestCandidates(candidates);
+        RegisterInds(last_result);
+        LOG(DEBUG) << "Found " << last_result.size() << " INDs on level " << level_num;
     }
 
     auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
