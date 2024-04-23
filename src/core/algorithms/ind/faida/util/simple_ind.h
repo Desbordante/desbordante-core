@@ -40,8 +40,8 @@ public:
         return right_;
     }
 
-    size_t GetArity() const {
-        return left_->GetColumnIndices().size();
+    model::ArityIndex GetArity() const {
+        return left_->GetArity();
     }
 };
 
