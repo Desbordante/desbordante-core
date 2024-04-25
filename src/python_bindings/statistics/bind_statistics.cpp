@@ -1,9 +1,16 @@
 #include "statistics/bind_statistics.h"
 
+#include <cassert>
+#include <cstddef>
+
+#include <Python.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "algorithms/statistics/data_stats.h"
+#include "algorithms/statistics/statistic.h"
+#include "model/types/builtin.h"
+#include "model/types/type.h"
 #include "py_util/bind_primitive.h"
 
 namespace {

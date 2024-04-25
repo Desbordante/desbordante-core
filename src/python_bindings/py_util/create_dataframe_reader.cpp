@@ -1,5 +1,8 @@
 #include "py_util/create_dataframe_reader.h"
 
+#include <Python.h>
+#include <pybind11/pybind11.h>
+
 #include "config/exceptions.h"
 #include "py_util/dataframe_reader.h"
 

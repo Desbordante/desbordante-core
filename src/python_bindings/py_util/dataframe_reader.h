@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <vector>
+
 #include <pybind11/pybind11.h>
 
 #include "model/table/idataset_stream.h"

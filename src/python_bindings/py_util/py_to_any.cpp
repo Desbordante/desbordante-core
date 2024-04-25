@@ -1,7 +1,12 @@
 #include "py_util/py_to_any.h"
 
 #include <functional>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <unordered_map>
+#include <vector>
 
 #include <boost/any.hpp>
 #include <easylogging++.h>

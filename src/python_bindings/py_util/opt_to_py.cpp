@@ -1,9 +1,13 @@
 #include "py_util/opt_to_py.h"
 
 #include <functional>
+#include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 
+#include <boost/any.hpp>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "algorithms/metric/enums.h"

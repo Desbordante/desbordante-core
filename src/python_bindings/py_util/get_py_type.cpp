@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <Python.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/cfd/enums.h"
