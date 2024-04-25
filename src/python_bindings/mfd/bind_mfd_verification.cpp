@@ -1,4 +1,4 @@
-#include "bind_mfd_verification.h"
+#include "mfd/bind_mfd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
