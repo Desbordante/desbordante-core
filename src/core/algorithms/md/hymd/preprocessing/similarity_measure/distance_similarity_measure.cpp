@@ -9,23 +9,6 @@
 
 #include "algorithms/md/hymd/preprocessing/similarity_measure/distance_similarity_measure.h"
 #include "config/exceptions.h"
-#include "model/types/date_type.h"
-
-double NumberDifference(const std::byte* left, const std::byte* right) {
-    auto left_val = model::Type::GetValue<model::Double>(left);  
-    auto right_val = model::Type::GetValue<model::Double>(right);
-
-    return std::abs(static_cast<double>(left_val - right_val));
-}
-
-double DateDifference(const std::byte* left, const std::byte* right) {
-    auto left_date = model::Type::GetValue<model::Date>(left);
-    auto right_date = model::Type::GetValue<model::Date>(right);
-
-    model::DateType date_type;
-    return static_cast<double>(abs(date_type.SubDate(left, right).days()));
-}
-
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
@@ -34,7 +17,7 @@ using SimInfo = std::map<Similarity, indexes::RecSet>;
 indexes::ColumnMatchSimilarityInfo DistanceSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
-        std::vector<indexes::PliCluster> const* clusters_right, model::md::DecisionBoundary min_sim, bool is_null_equal_null) const {
+        std::vector<indexes::PliCluster> const& clusters_right) const {
     std::vector<model::md::DecisionBoundary> decision_bounds;
     indexes::SimilarityMatrix similarity_matrix;
     indexes::SimilarityIndex similarity_index;
@@ -44,13 +27,13 @@ indexes::ColumnMatchSimilarityInfo DistanceSimilarityMeasure::MakeIndexes(
     for (ValueIdentifier value_id_left = 0; value_id_left < data_left_size; ++value_id_left) {
         std::vector<std::pair<Similarity, RecordIdentifier>> sim_rec_id_vec;
         std::byte const* left_value = data_info_left->GetAt(value_id_left);
-        Similarity max_distance = 0;
-        std::vector<double> distances(data_info_right->GetElementNumber());
-
+        double max_distance = 0;
+        std::vector<double> distances;
+        distances.reserve(data_info_right->GetElementNumber());
         for (ValueIdentifier right_index = 0; right_index < data_right_size; ++right_index) {
                 std::byte const* right_value = data_info_right->GetAt(right_index);
-                Similarity distance = compute_similarity_(left_value, right_value);
-                distances[right_index] = distance;
+                Similarity distance = compute_distance_(left_value, right_value);
+                distances.push_back(distance);
                 max_distance = std::max(max_distance, distance);
         }
         auto get_similarity = [max_distance, &distances](ValueIdentifier value_id_right) {
@@ -62,14 +45,13 @@ indexes::ColumnMatchSimilarityInfo DistanceSimilarityMeasure::MakeIndexes(
              ++value_id_right) {
             Similarity similarity = get_similarity(value_id_right);
             if (similarity < min_sim) {
-                // Metanome keeps the actual value for some reason.
-                lowest = 0.0 /*similarity???*/;
+                lowest = 0.0;
                 continue;
             }
             if (lowest > similarity) lowest = similarity;
             decision_bounds.push_back(similarity);
             similarity_matrix[value_id_left][value_id_right] = similarity;
-            for (RecordIdentifier record_id : clusters_right->operator[](value_id_right)) {
+            for (RecordIdentifier record_id : clusters_right.operator[](value_id_right)) {
                 sim_rec_id_vec.emplace_back(similarity, record_id);
             }
         }
