@@ -11,6 +11,7 @@
 #include "dc/pli_shard.h"
 #include "dc/predicate.h"
 #include "dc/predicate_builder.h"
+#include "dc/single_clue_set_builder.h"
 #include "table/column_layout_typed_relation_data.h"
 #include "table/typed_column_data.h"
 #include "test_dc_structures_correct_results.h"
@@ -352,6 +353,36 @@ TEST(FastADC, PliShards) {
                 }
             }
         }
+    }
+}
+
+TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+    model::PredicateBuilder pbuilder(true);
+
+    pbuilder.BuildPredicateSpace(col_data);
+
+    // won't be used, just to build some ClueSetBuilder to check generic static fields
+    auto dummy_pli_shard = model::PliShard({}, 0, 1);
+    model::SingleClueSetBuilder builder(pbuilder, dummy_pli_shard);
+
+    ASSERT_EQ(builder.GetNumberOfBitsInClue(), 18);
+    auto packs = builder.GetPredicatePacks();
+    auto correction_map = builder.GetCorrectionMap();
+
+    for (size_t i = 0; i < packs.size(); ++i) {
+        EXPECT_EQ(packs[i].left_idx, expected_column_indices[i].first);
+        EXPECT_EQ(packs[i].right_idx, expected_column_indices[i].second);
+        EXPECT_EQ(packs[i].eq_mask, VectorToBitset(expected_eq_masks[i]));
+        if (!expected_gt_masks[i].empty()) {
+            EXPECT_EQ(packs[i].gt_mask, VectorToBitset(expected_gt_masks[i]));
+        }
+    }
+
+    for (size_t i = 0; i < correction_map.size(); ++i) {
+        EXPECT_EQ(correction_map[i], VectorToBitset(expected_correction_map[i]));
     }
 }
 
