@@ -19,7 +19,13 @@ def main() -> None:
         "Min": data_stats.get_min,
         "Max": data_stats.get_max,
         "Distinct": data_stats.get_number_of_distinct,
-        "Corrected std": data_stats.get_corrected_std
+        "Corrected std": data_stats.get_corrected_std,
+        "Min chars in a row": data_stats.get_min_number_of_chars,
+        "Max chars in a row": data_stats.get_max_number_of_chars,
+        "Min words in a row": data_stats.get_min_number_of_words,
+        "Max words in a row": data_stats.get_max_number_of_words,
+        "Char vocabulary": data_stats.get_vocab,
+        "Word vocabulary": data_stats.get_words
     }
 
     table_methods = {
