@@ -39,6 +39,13 @@ class TestDataStats(unittest.TestCase):
         self.assertIsNone(self.data_stats.get_number_of_uppercase_chars(0))
         self.assertIsNone(self.data_stats.get_number_of_chars(0))
         self.assertIsNone(self.data_stats.get_avg_number_of_chars(0))
+        self.assertIsNone(self.data_stats.get_min_number_of_chars(0))
+        self.assertIsNone(self.data_stats.get_max_number_of_chars(0))
+        self.assertIsNone(self.data_stats.get_min_number_of_words(0))
+        self.assertIsNone(self.data_stats.get_max_number_of_words(0))
+        self.assertIsNone(self.data_stats.get_number_of_words(0))
+        self.assertIsNone(self.data_stats.get_number_of_entirely_uppercase_words(0))
+        self.assertIsNone(self.data_stats.get_number_of_entirely_lowercase_words(0))
 
     def test_get_number_of_values(self) -> None:
         res = self.data_stats.get_number_of_values(0)
@@ -47,7 +54,7 @@ class TestDataStats(unittest.TestCase):
 
     def test_get_number_of_columns(self) -> None:
         res = self.data_stats.get_number_of_columns()
-        expected = 11
+        expected = 12
         self.assertEqual(expected, res)
 
     def test_get_null_columns(self) -> None:
@@ -62,7 +69,7 @@ class TestDataStats(unittest.TestCase):
 
     def test_get_columns_with_all_unique_values(self) -> None:
         res = self.data_stats.get_columns_with_all_unique_values()
-        expected = [8, 9, 10]
+        expected = [8, 9, 10, 11]
         self.assertEqual(expected, res)
 
     def test_get_number_of_distinct(self) -> None:
@@ -191,7 +198,57 @@ class TestDataStats(unittest.TestCase):
     def test_get_avg_number_of_chars(self) -> None:
         res = self.data_stats.get_avg_number_of_chars(10)
         expected = 5.875
-        self.assertAlmostEqual(expected, res)
+        self.assertEqual(expected, res)
+
+    def test_get_min_chars(self) -> None:
+        res = self.data_stats.get_min_number_of_chars(10)
+        expected = 3
+        self.assertEqual(expected, res)
+
+    def test_get_max_chars(self) -> None:
+        res = self.data_stats.get_max_number_of_chars(10)
+        expected = 13
+        self.assertEqual(expected, res)
+
+    def test_get_min_words(self) -> None:
+        res = self.data_stats.get_min_number_of_words(11)
+        expected = 1
+        self.assertEqual(expected, res)
+
+    def test_get_max_words(self) -> None:
+        res = self.data_stats.get_max_number_of_words(11)
+        expected = 9
+        self.assertEqual(expected, res)
+
+    def test_entirely_uppercase_words(self) -> None:
+        res = self.data_stats.get_number_of_entirely_uppercase_words(11)
+        expected = 2
+        self.assertEqual(expected, res)
+
+    def test_entirely_lowercase_words(self) -> None:
+        res = self.data_stats.get_number_of_entirely_lowercase_words(11)
+        expected = 16
+        self.assertEqual(expected, res)
+
+    def test_word_count(self) -> None:
+        res = self.data_stats.get_number_of_words(11)
+        expected = 21
+        self.assertEqual(expected, res)
+
+    def test_top_k_chars(self) -> None:
+        res = self.data_stats.get_top_k_chars(10, 2)
+        expected = ['d', 'a']
+        self.assertEqual(expected, res)
+
+    def test_top_k_words(self) -> None:
+        res = self.data_stats.get_top_k_words(11, 1)
+        expected = ["this"]
+        self.assertEqual(expected, res)
+
+    def test_word_vocab(self) -> None:
+        res = self.data_stats.get_words(6)
+        expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
+        self.assertEqual(expected, res)
 
 if __name__ == "__main__":
     unittest.main()
