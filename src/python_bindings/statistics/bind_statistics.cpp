@@ -142,6 +142,30 @@ void BindStatistics(pybind11::module_& main_module) {
             .def("get_number_of_chars", &DataStats::GetNumberOfChars,
                  "Returns total number of characters in a string column.", py::arg("index"))
             .def("get_avg_number_of_chars", &DataStats::GetAvgNumberOfChars,
-                 "Returns average number of chars in a string column.", py::arg("index"));
+                 "Returns average number of chars in a string column.", py::arg("index"))
+            .def("get_words", &DataStats::GetWords,
+                 "Returns all distinct words of the column as a set of strings.", py::arg("index"))
+            .def("get_top_k_chars", &DataStats::GetTopKChars,
+                 "Returns top k most frequent chars in a string column as a vector of chars.",
+                 py::arg("index"), py::arg("k"))
+            .def("get_top_k_words", &DataStats::GetTopKWords,
+                 "Returns top k most frequent words in a string column as a vector of strings.",
+                 py::arg("index"), py::arg("k"))
+            .def("get_min_number_of_chars", &DataStats::GetMinNumberOfChars,
+                 "Returns the minimal amount of chars in a column.", py::arg("index"))
+            .def("get_max_number_of_chars", &DataStats::GetMaxNumberOfChars,
+                 "Returns the maximal amount of chars in a column.", py::arg("index"))
+            .def("get_min_number_of_words", &DataStats::GetMinNumberOfWords,
+                 "Returns the minimal amount of words in a column.", py::arg("index"))
+            .def("get_max_number_of_words", &DataStats::GetMaxNumberOfWords,
+                 "Returns the maximal amount of words in a column.", py::arg("index"))
+            .def("get_number_of_words", &DataStats::GetNumberOfWords,
+                 "Returns the total amount of words in a column", py::arg("index"))
+            .def("get_number_of_entirely_lowercase_words",
+                 &DataStats::GetNumberOfEntirelyLowercaseWords,
+                 "Returns the amount of entirely lowercase words in a column.", py::arg("index"))
+            .def("get_number_of_entirely_uppercase_words",
+                 &DataStats::GetNumberOfEntirelyUppercaseWords,
+                 "Returns the amount of entirely uppercase words in a column.", py::arg("index"));
 }
 }  // namespace python_bindings
