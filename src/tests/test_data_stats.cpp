@@ -54,6 +54,94 @@ TEST(TestDataStats, TestNullEmpties) {
     EXPECT_FALSE(stats.GetNumberOfUppercaseChars(0).HasValue());
     EXPECT_FALSE(stats.GetNumberOfChars(0).HasValue());
     EXPECT_FALSE(stats.GetAvgNumberOfChars(0).HasValue());
+    EXPECT_FALSE(stats.GetMinNumberOfChars(0).HasValue());
+    EXPECT_FALSE(stats.GetMaxNumberOfChars(0).HasValue());
+    EXPECT_FALSE(stats.GetMinNumberOfWords(0).HasValue());
+    EXPECT_FALSE(stats.GetMaxNumberOfWords(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfWords(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfEntirelyUppercaseWords(0).HasValue());
+    EXPECT_FALSE(stats.GetNumberOfEntirelyLowercaseWords(0).HasValue());
+}
+
+TEST(TestDataStats, TestGetWords) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    std::set<std::string> words_stat = stats.GetWords(6);
+    std::set<std::string> actual_words =
+            std::set<std::string>{"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"};
+    EXPECT_EQ(words_stat, actual_words);
+}
+
+TEST(TestDataStats, TestGetTopKWords) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    std::vector<std::string> top_k_words_stat = stats.GetTopKWords(11, 1);
+    std::vector<std::string> actual_top_k_words = std::vector<std::string>{"this"};
+    EXPECT_EQ(top_k_words_stat, actual_top_k_words);
+}
+
+TEST(TestDataStats, TestGetTopKChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    std::vector<char> top_k_chars_stat = stats.GetTopKChars(10, 2);
+    std::vector<char> actual_top_k_chars = std::vector<char>{'d', 'a'};
+    EXPECT_EQ(top_k_chars_stat, actual_top_k_chars);
+}
+
+TEST(TestDataStats, TestGetWordCount) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic word_count_stat = stats.GetNumberOfWords(11);
+    size_t count = mo::Type::GetValue<mo::Int>(word_count_stat.GetData());
+    EXPECT_EQ(count, 21);
+}
+
+TEST(TestDataStats, TestGetEntirelyUppercaseCount) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic entirely_uppercase_count_stat = stats.GetNumberOfEntirelyUppercaseWords(11);
+    size_t count = mo::Type::GetValue<mo::Int>(entirely_uppercase_count_stat.GetData());
+    EXPECT_EQ(count, 2);
+}
+
+TEST(TestDataStats, TestGetEntirelyLowercaseCount) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic entirely_lowercase_count_stat = stats.GetNumberOfEntirelyLowercaseWords(11);
+    size_t count = mo::Type::GetValue<mo::Int>(entirely_lowercase_count_stat.GetData());
+    EXPECT_EQ(count, 16);
+}
+
+TEST(TestDataStats, TestGetMaxWords) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic max_words_stat = stats.GetMaxNumberOfWords(11);
+    size_t count = mo::Type::GetValue<mo::Int>(max_words_stat.GetData());
+    EXPECT_EQ(count, 9);
+}
+
+TEST(TestDataStats, TestGetMinWords) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic min_words_stat = stats.GetMinNumberOfWords(11);
+    size_t count = mo::Type::GetValue<mo::Int>(min_words_stat.GetData());
+    EXPECT_EQ(count, 1);
+}
+
+TEST(TestDataStats, TestGetMaxChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic max_chars_stat = stats.GetMaxNumberOfChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(max_chars_stat.GetData());
+    EXPECT_EQ(count, 13);
+}
+
+TEST(TestDataStats, TestGetMinChars) {
+    std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    algos::Statistic min_chars_stat = stats.GetMinNumberOfChars(10);
+    size_t count = mo::Type::GetValue<mo::Int>(min_chars_stat.GetData());
+    EXPECT_EQ(count, 3);
 }
 
 TEST(TestDataStats, TestGetAvgNumberOfChars) {
@@ -121,7 +209,7 @@ TEST(TestDataStats, TestGetNumberOfNulls) {
 TEST(TestDataStats, TestGetColumnsWithUniqueValues) {
     std::unique_ptr<algos::DataStats> stats_ptr = MakeStatAlgorithm(kTestDataStats);
     std::vector<size_t> expected_cols = stats_ptr->GetColumnsWithUniqueValues();
-    std::vector<size_t> actual_cols = std::vector<size_t>{8, 9, 10};
+    std::vector<size_t> actual_cols = std::vector<size_t>{8, 9, 10, 11};
     EXPECT_EQ(expected_cols, actual_cols);
 }
 
