@@ -35,7 +35,8 @@ struct ColumnStats {
     Statistic avg, STD, skewness, kurtosis, min, max, sum, quantile25, quantile50, quantile75,
             num_zeros, num_negatives, sum_of_squares, geometric_mean, mean_ad, median, median_ad,
             vocab, num_non_letter_chars, num_digit_chars, num_lowercase_chars, num_uppercase_chars,
-            num_chars, num_avg_chars;
+            num_chars, num_avg_chars, min_num_chars, max_num_chars, min_num_words, max_num_words,
+            num_words, num_entirely_uppercase, num_entirely_lowercase;
 
     std::string ToString() const;
     std::unordered_map<std::string, std::string> ToKeyValueMap() const;

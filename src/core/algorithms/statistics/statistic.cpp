@@ -118,6 +118,13 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_uppercase_chars, "num_uppercase_chars");
     try_add_stat(num_chars, "num_chars");
     try_add_stat(num_avg_chars, "avg_chars");
+    try_add_stat(min_num_words, "min_num_chars");
+    try_add_stat(max_num_words, "max_num_chars");
+    try_add_stat(min_num_words, "min_num_words");
+    try_add_stat(max_num_words, "max_num_words");
+    try_add_stat(num_words, "num_words");
+    try_add_stat(num_entirely_uppercase, "num_entirely_uppercase");
+    try_add_stat(num_entirely_lowercase, "num_entirely_lowercase");
 
     return res;
 }
