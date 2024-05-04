@@ -25,6 +25,10 @@ public:
         return rhs_;
     }
 
+    [[nodiscard]] std::vector<std::string> GetLhsNames() const;
+
+    [[nodiscard]] std::vector<std::string> GetRhsNames() const;
+
     [[nodiscard]] WeightType GetWeight() const {
         return weight_;
     }
@@ -40,6 +44,12 @@ public:
     [[nodiscard]] std::string ToShortString() const;
 
     [[nodiscard]] std::string ToLongString() const;
+
+    [[nodiscard]] std::tuple<std::vector<std::string>, std::vector<std::string>, WeightType>
+    ToNameTuple() const;
+
+    bool operator==(ND const& other) const = default;
+    bool operator!=(ND const& other) const = default;
 };
 
 }  // namespace model
