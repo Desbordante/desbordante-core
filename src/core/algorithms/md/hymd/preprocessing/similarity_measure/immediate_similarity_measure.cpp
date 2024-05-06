@@ -1,5 +1,3 @@
-#include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
-
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -10,6 +8,7 @@
 #include <vector>
 
 #include "config/exceptions.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
@@ -39,7 +38,8 @@ indexes::ColumnMatchSimilarityInfo ImmediateSimilarityMeasure::MakeIndexes(
              ++value_id_right) {
             Similarity similarity = compute_similarity_(data_info_left->GetAt(value_id_left),
                                                         data_info_right->GetAt(value_id_right));
-            if (similarity == 0.0) {
+            if (similarity == kLowestBound) {
+                lowest = kLowestBound;
                 continue;
             }
             if (lowest > similarity) lowest = similarity;

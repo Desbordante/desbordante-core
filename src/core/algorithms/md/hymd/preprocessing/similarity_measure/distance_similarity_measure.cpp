@@ -1,11 +1,11 @@
-#include <iostream>
-#include <vector>
-#include <functional>
 #include <algorithm>
-#include <unordered_set>
-#include <sstream>
 #include <cstddef>
+#include <functional>
+#include <iostream>
 #include <numeric>
+#include <sstream>
+#include <unordered_set>
+#include <vector>
 
 #include "algorithms/md/hymd/preprocessing/similarity_measure/distance_similarity_measure.h"
 #include "config/exceptions.h"
@@ -31,20 +31,21 @@ indexes::ColumnMatchSimilarityInfo DistanceSimilarityMeasure::MakeIndexes(
         std::vector<double> distances;
         distances.reserve(data_info_right->GetElementNumber());
         for (ValueIdentifier right_index = 0; right_index < data_right_size; ++right_index) {
-                std::byte const* right_value = data_info_right->GetAt(right_index);
-                Similarity distance = compute_distance_(left_value, right_value);
-                distances.push_back(distance);
-                max_distance = std::max(max_distance, distance);
+            std::byte const* right_value = data_info_right->GetAt(right_index);
+            Similarity distance = compute_distance_(left_value, right_value);
+            distances.push_back(distance);
+            max_distance = std::max(max_distance, distance);
         }
         auto get_similarity = [max_distance, &distances](ValueIdentifier value_id_right) {
             if (max_distance == 0) return 1.0;
             Similarity distance = distances[value_id_right];
-            return static_cast<Similarity>(max_distance - distance) / static_cast<Similarity>(max_distance);
-            };
+            return static_cast<Similarity>(max_distance - distance) /
+                   static_cast<Similarity>(max_distance);
+        };
         for (ValueIdentifier value_id_right = 0; value_id_right < data_right_size;
              ++value_id_right) {
             Similarity similarity = get_similarity(value_id_right);
-            if (similarity < min_sim) {
+            if (similarity < min_sim_) {
                 lowest = 0.0;
                 continue;
             }
@@ -86,5 +87,3 @@ indexes::ColumnMatchSimilarityInfo DistanceSimilarityMeasure::MakeIndexes(
 }
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
-
-
