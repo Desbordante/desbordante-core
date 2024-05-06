@@ -13,14 +13,14 @@ class DateSimilarityMeasure : public DistanceSimilarityMeasure {
 public:
     DateSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : DistanceSimilarityMeasure(
-              std::make_unique<model::DateType>(),
-              [](std::byte const* l, std::byte const* r) {
-                  const auto& left = model::Type::GetValue<model::Date>(l);
-                  const auto& right = model::Type::GetValue<model::Date>(r);
-                  size_t dist = DateDifference(left, right);
-                  return dist;
-              },
-              min_sim) {}
+                  std::make_unique<model::DateType>(),
+                  [](std::byte const* l, std::byte const* r) {
+                      const auto& left = model::Type::GetValue<model::Date>(l);
+                      const auto& right = model::Type::GetValue<model::Date>(r);
+                      size_t dist = DateDifference(left, right);
+                      return dist;
+                  },
+                  min_sim) {}
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
