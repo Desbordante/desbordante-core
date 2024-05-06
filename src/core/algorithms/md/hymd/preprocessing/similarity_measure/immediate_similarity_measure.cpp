@@ -1,17 +1,17 @@
-#include <iostream>
-#include <vector>
-#include <functional>
-#include <algorithm>
-#include <unordered_set>
-#include <sstream>
-#include <cstddef>
-#include <numeric>
-
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <iostream>
+#include <numeric>
+#include <sstream>
+#include <unordered_set>
+#include <vector>
+
 #include "config/exceptions.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
-constexpr model::md::DecisionBoundary kLowestBound = 0.0;
 
 Similarity GetSimilarity(DataInfo const& data_info_left, DataInfo const& data_info_right,
                          SimilarityFunction const& compute_similarity,
@@ -37,8 +37,8 @@ indexes::ColumnMatchSimilarityInfo ImmediateSimilarityMeasure::MakeIndexes(
         std::vector<std::pair<Similarity, RecordIdentifier>> sim_rec_id_vec;
         for (ValueIdentifier value_id_right = 0; value_id_right < data_right_size;
              ++value_id_right) {
-            Similarity similarity = compute_similarity_(data_info_left->GetAt(value_id_left), 
-                                                            data_info_right->GetAt(value_id_right));
+            Similarity similarity = compute_similarity_(data_info_left->GetAt(value_id_left),
+                                                        data_info_right->GetAt(value_id_right));
             if (similarity == 0.0) {
                 continue;
             }
