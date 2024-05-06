@@ -1,3 +1,3 @@
 #include <string>
 
-double longest_common_subsequence(std::string const& word1, std::string const& word2);
+double LongestCommonSubsequence(std::string const& word1, std::string const& word2);

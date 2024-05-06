@@ -2,7 +2,7 @@
 
 #include <vector>
 
-double longest_common_subsequence(std::string const& word1, std::string const& word2) {
+double LongestCommonSubsequence(std::string const& word1, std::string const& word2) {
     size_t m = word1.size();
     size_t n = word2.size();
 
