@@ -30,8 +30,7 @@ void BindAr(py::module_& main_module) {
             .def_readonly("confidence", &ArIDs::confidence);
 
     py::class_<ARAlgorithm, Algorithm>(ar_module, "ArAlgorithm")
-            .def("get_ars", &ARAlgorithm::GetArStringsList,
-                 py::return_value_policy::reference_internal)
+            .def("get_ars", &ARAlgorithm::GetArStringsList, py::return_value_policy::move)
             .def("get_itemnames", &ARAlgorithm::GetItemNamesVector)
             .def("get_ar_ids", &ARAlgorithm::GetArIDsList);
 
