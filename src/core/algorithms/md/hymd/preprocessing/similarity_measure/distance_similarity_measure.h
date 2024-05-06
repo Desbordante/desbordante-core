@@ -11,7 +11,7 @@ using DistanceFunction =
 class DistanceSimilarityMeasure : public SimilarityMeasure {
 private:
     DistanceFunction const compute_distance_;
-    model::md::DecisionBoundary min_sim;
+    model::md::DecisionBoundary min_sim_;
 
     [[nodiscard]] indexes::ColumnMatchSimilarityInfo MakeIndexes(
             std::shared_ptr<DataInfo const> data_info_left,
@@ -21,7 +21,7 @@ public:
     DistanceSimilarityMeasure(std::unique_ptr<model::Type> arg_type,
                                DistanceFunction compute_distance, model::md::DecisionBoundary min_sim)
         : SimilarityMeasure(std::move(arg_type),std::make_unique<model::DoubleType>()), 
-                                        compute_distance_(std::move(compute_distance)), min_sim(min_sim) {};
+                                        compute_distance_(std::move(compute_distance)), min_sim_(min_sim) {};
 };
 
 } 

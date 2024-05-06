@@ -7,8 +7,6 @@ double NumberDifference(model::Double left, model::Double right) {
 
 namespace algos::hymd::preprocessing::similarity_measure {
 class NumberSimilarityMeasure : public DistanceSimilarityMeasure {
-private:
-    model::md::DecisionBoundary min_sim;
 public:
     NumberSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : DistanceSimilarityMeasure(std::make_unique<model::DoubleType>(),
