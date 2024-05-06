@@ -4,10 +4,8 @@
 #include <vector>
 #include <algorithm>
 
-unsigned LevenshteinDistance(std::byte const* l_ptr, std::byte const* r_ptr) noexcept {
-    std::string_view l(reinterpret_cast<char const*>(l_ptr));
-    std::string_view r(reinterpret_cast<char const*>(r_ptr));
-
+unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
+    
     if (r.size() > l.size()) {
         std::swap(l, r);
     }
