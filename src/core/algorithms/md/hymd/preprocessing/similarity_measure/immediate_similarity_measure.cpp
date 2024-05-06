@@ -1,3 +1,5 @@
+#include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
+
 #include <algorithm>
 #include <cstddef>
 #include <functional>
@@ -8,7 +10,6 @@
 #include <vector>
 
 #include "config/exceptions.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 

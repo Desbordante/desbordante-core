@@ -1,11 +1,10 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_distance.h"
 
+#include <algorithm>
 #include <numeric>
 #include <vector>
-#include <algorithm>
 
 unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
-    
     if (r.size() > l.size()) {
         std::swap(l, r);
     }
