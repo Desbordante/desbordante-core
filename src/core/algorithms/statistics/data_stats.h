@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/statistics/statistic.h"
 #include "config/equal_nulls/type.h"
