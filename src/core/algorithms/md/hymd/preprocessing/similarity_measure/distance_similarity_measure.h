@@ -1,3 +1,4 @@
+#include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "model/types/double_type.h"
 
@@ -9,10 +10,11 @@ private:
     DistanceFunction const compute_distance_;
     model::md::DecisionBoundary min_sim_;
 
-    [[nodiscard]] indexes::ColumnMatchSimilarityInfo MakeIndexes(
+    [[nodiscard]] indexes::SimilarityMeasureOutput MakeIndexes(
             std::shared_ptr<DataInfo const> data_info_left,
             std::shared_ptr<DataInfo const> data_info_right,
-            std::vector<indexes::PliCluster> const& clusters_right) const final;
+            std::vector<indexes::PliCluster> const& clusters_right,
+            util::WorkerThreadPool& thread_pool) const final;
 
 public:
     DistanceSimilarityMeasure(std::unique_ptr<model::Type> arg_type,

@@ -23,10 +23,10 @@ Similarity GetSimilarity(DataInfo const& data_info_left, DataInfo const& data_in
 
 using SimInfo = std::map<Similarity, indexes::RecSet>;
 
-indexes::ColumnMatchSimilarityInfo ImmediateSimilarityMeasure::MakeIndexes(
+indexes::SimilarityMeasureOutput ImmediateSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
-        std::vector<indexes::PliCluster> const& clusters_right) const {
+        std::vector<indexes::PliCluster> const& clusters_right, util::WorkerThreadPool&) const {
     std::vector<model::md::DecisionBoundary> decision_bounds;
     indexes::SimilarityMatrix similarity_matrix;
     indexes::SimilarityIndex similarity_index;
@@ -76,8 +76,8 @@ indexes::ColumnMatchSimilarityInfo ImmediateSimilarityMeasure::MakeIndexes(
     std::sort(decision_bounds.begin(), decision_bounds.end());
     decision_bounds.erase(std::unique(decision_bounds.begin(), decision_bounds.end()),
                           decision_bounds.end());
-    return {std::move(decision_bounds), lowest, std::move(similarity_matrix),
-            std::move(similarity_index)};
+    return {std::move(decision_bounds),
+            {lowest, std::move(similarity_matrix), std::move(similarity_index)}};
 }
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
