@@ -1,25 +1,36 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_metric.h"
 
 #include <algorithm>
-#include <iterator>
-#include <sstream>
+#include <vector>
 
-#include "algorithms/md/hymd/preprocessing/similarity_measure/jacaard_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
 
 double MongeElkan(std::string const& word1, std::string const& word2) {
     double cummax = 0.0;
-    std::istringstream iss1(word1), iss2(word2);
-    std::string token1, token2;
+    std::vector<std::string> words1;
+    std::vector<std::string> words2;
 
-    while (std::getline(iss1, token1, ' ')) {
+    size_t start = 0, end = 0;
+    while ((end = word1.find(" ", start)) != std::string::npos) {
+        words1.push_back(word1.substr(start, end - start));
+        start = end + 1;
+    }
+    words1.push_back(word1.substr(start));
+
+    start = 0, end = 0;
+    while ((end = word2.find(" ", start)) != std::string::npos) {
+        words2.push_back(word2.substr(start, end - start));
+        start = end + 1;
+    }
+    words2.push_back(word2.substr(start));
+
+    for (auto const& w1 : words1) {
         double maxscore = 0.0;
-        iss2.clear();
-        iss2.seekg(0);
-
-        while (std::getline(iss2, token2, ' ')) {
-            maxscore = std::max(maxscore, JacaardMetric(token1.c_str(), token2.c_str()));
+        for (auto const& w2 : words2) {
+            maxscore = std::max(maxscore, JaccardIndex(w1, w2));
         }
         cummax += maxscore;
     }
-    return cummax / std::count(word1.begin(), word1.end(), ' ') + 1;
+
+    return cummax / words1.size();
 }

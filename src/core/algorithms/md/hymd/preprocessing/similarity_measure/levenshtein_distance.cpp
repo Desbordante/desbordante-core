@@ -5,16 +5,10 @@
 #include <vector>
 
 unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
-    if (r.size() > l.size()) {
-        std::swap(l, r);
-    }
-
-    std::size_t l_size = l.size();
     std::size_t r_size = r.size();
-
-    std::vector<unsigned> v0, v1;
-    v0.reserve(r_size + 1);
-    v1.reserve(r_size + 1);
+    std::size_t l_size = l.size();
+    std::vector<unsigned> v0(r_size + 1);
+    std::vector<unsigned> v1(r_size + 1);
 
     std::iota(v0.begin(), v0.end(), 0);
 
