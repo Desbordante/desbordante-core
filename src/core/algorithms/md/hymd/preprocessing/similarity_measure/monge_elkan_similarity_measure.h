@@ -1,11 +1,31 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_metric.h"
+#include "algorithms/md/hymd/similarity_measure_creator.h"
+#include "config/exceptions.h"
 #include "model/types/string_type.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
 class MongeElkanSimilarityMeasure : public ImmediateSimilarityMeasure {
+    static constexpr auto kName = "monge_elkan_similarity";
+
 public:
+    class Creator final : public SimilarityMeasureCreator {
+        model::md::DecisionBoundary const min_sim_;
+
+    public:
+        Creator(model::md::DecisionBoundary min_sim)
+            : SimilarityMeasureCreator(kName), min_sim_(min_sim) {
+            if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
+                throw config::ConfigurationError("Minimum similarity out of range");
+            }
+        }
+
+        std::unique_ptr<SimilarityMeasure> MakeMeasure() const final {
+            return std::make_unique<MongeElkanSimilarityMeasure>(min_sim_);
+        }
+    };
+
     MongeElkanSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : ImmediateSimilarityMeasure(
                   std::make_unique<model::StringType>(),

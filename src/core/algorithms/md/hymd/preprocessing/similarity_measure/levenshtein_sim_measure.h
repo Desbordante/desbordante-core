@@ -1,11 +1,28 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_distance.h"
 #include "model/types/string_type.h"
+#include "algorithms/md/hymd/similarity_measure_creator.h"
+#include "config/exceptions.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
 class LevenshteinSimilarityMeasure : public ImmediateSimilarityMeasure {
+    static constexpr auto kName = "levenshtein_similarity";
 public:
+    class Creator final : public SimilarityMeasureCreator {
+        model::md::DecisionBoundary const min_sim_;
+    public:
+        Creator(model::md::DecisionBoundary min_sim) 
+            : SimilarityMeasureCreator(kName), min_sim_(min_sim) {
+            if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
+                throw config::ConfigurationError("Minimum similarity out of range");
+            }
+        }
+
+        std::unique_ptr<SimilarityMeasure> MakeMeasure() const final {
+            return std::make_unique<LevenshteinSimilarityMeasure>(min_sim_);
+        }
+    };
     LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : ImmediateSimilarityMeasure(
                   std::make_unique<model::StringType>(),
