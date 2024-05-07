@@ -3,7 +3,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include "algorithms/md/hymd/preprocessing/similarity_measure/date_dif_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/lcs_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "algorithms/md/md.h"
 #include "algorithms/md/mining_algorithms.h"
@@ -36,6 +41,29 @@ void BindMd(py::module_& main_module) {
                                                                        "LevenshteinSimilarity")
             .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
                  "bound_number_limit"_a = 0);
+    py::class_<MongeElkanSimilarityMeasure::Creator, SimilarityMeasureCreator,
+               std::shared_ptr<MongeElkanSimilarityMeasure::Creator>>(measures_module,
+                                                                      "MongeElkanSimilarity")
+            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+
+    py::class_<JaccardSimilarityMeasure::Creator, SimilarityMeasureCreator,
+               std::shared_ptr<JaccardSimilarityMeasure::Creator>>(measures_module,
+                                                                   "JaccardSimilarity")
+            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+
+    py::class_<DateSimilarityMeasure::Creator, SimilarityMeasureCreator,
+               std::shared_ptr<DateSimilarityMeasure::Creator>>(measures_module, "DateSimilarity")
+            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+
+    py::class_<NumberSimilarityMeasure::Creator, SimilarityMeasureCreator,
+               std::shared_ptr<NumberSimilarityMeasure::Creator>>(measures_module,
+                                                                  "NumberSimilarity")
+            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+
+    py::class_<LcsSimilarityMeasure::Creator, SimilarityMeasureCreator,
+               std::shared_ptr<LcsSimilarityMeasure::Creator>>(measures_module, "LcsSimilarity")
+            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }
 }  // namespace python_bindings
