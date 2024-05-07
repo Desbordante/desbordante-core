@@ -1,13 +1,13 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/jacaard_metric.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_metric.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "config/exceptions.h"
 #include "model/types/string_type.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-class MongeElkanSimilarityMeasure : public ImmediateSimilarityMeasure {
-    static constexpr auto kName = "jacaard_similarity";
+class JaccardSimilarityMeasure : public ImmediateSimilarityMeasure {
+    static constexpr auto kName = "jaccard_similarity";
 
 public:
     class Creator final : public SimilarityMeasureCreator {
@@ -22,17 +22,17 @@ public:
         }
 
         std::unique_ptr<SimilarityMeasure> MakeMeasure() const final {
-            return std::make_unique<MongeElkanSimilarityMeasure>(min_sim_);
+            return std::make_unique<JaccardSimilarityMeasure>(min_sim_);
         }
     };
 
-    MongeElkanSimilarityMeasure(model::md::DecisionBoundary min_sim)
+    JaccardSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : ImmediateSimilarityMeasure(
                   std::make_unique<model::StringType>(),
                   [min_sim](std::byte const* l, std::byte const* r) {
                       std::string const& left = model::Type::GetValue<model::String>(l);
                       std::string const& right = model::Type::GetValue<model::String>(r);
-                      Similarity sim = JacaardMetric(left, right);
+                      Similarity sim = JaccardIndex(left, right);
                       if (sim < min_sim) return kLowestBound;
                       return sim;
                   }) {}

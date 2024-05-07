@@ -1,12 +1,8 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/distance_similarity_measure.h"
 
-#include <algorithm>
 #include <cstddef>
-#include <functional>
 #include <unordered_set>
 #include <vector>
-
-#include "config/exceptions.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
