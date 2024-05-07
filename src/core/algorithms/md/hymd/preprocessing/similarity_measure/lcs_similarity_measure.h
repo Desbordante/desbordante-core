@@ -1,18 +1,20 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/lcs.h"
-#include "model/types/string_type.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "config/exceptions.h"
+#include "model/types/string_type.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
 class LcsSimilarityMeasure : public ImmediateSimilarityMeasure {
     static constexpr auto kName = "lcs_similarity";
+
 public:
     class Creator final : public SimilarityMeasureCreator {
         model::md::DecisionBoundary const min_sim_;
+
     public:
-        Creator(model::md::DecisionBoundary min_sim) 
+        Creator(model::md::DecisionBoundary min_sim)
             : SimilarityMeasureCreator(kName), min_sim_(min_sim) {
             if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
                 throw config::ConfigurationError("Minimum similarity out of range");
@@ -23,6 +25,7 @@ public:
             return std::make_unique<LcsSimilarityMeasure>(min_sim_);
         }
     };
+
     LcsSimilarityMeasure(model::md::DecisionBoundary min_sim)
         : ImmediateSimilarityMeasure(
                   std::make_unique<model::StringType>(),

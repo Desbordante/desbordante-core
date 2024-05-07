@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "model/types/double_type.h"
