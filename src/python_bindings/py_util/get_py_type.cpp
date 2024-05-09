@@ -9,6 +9,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/cfd/enums.h"
+#include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/error_measure/type.h"
@@ -81,6 +82,11 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::InputFormat, kPyStr>,
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
+            {typeid(algos::hymd::HyMD::ColMatchesVector),
+             []() {
+                 return MakeTypeTuple(kPyList, kPyTuple, kPyStr, kPyStr,
+                                      py::type::of<algos::hymd::SimilarityMeasureCreator>());
+             }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
             {typeid(config::InputTables),
