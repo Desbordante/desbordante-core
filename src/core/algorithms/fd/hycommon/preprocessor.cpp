@@ -5,11 +5,11 @@
 
 #include "algorithms/fd/hycommon/util/pli_util.h"
 
-namespace {
+namespace algos::hy::util {
 
-std::vector<algos::hy::ClusterId> SortAndGetMapping(algos::hy::PLIs& plis) {
-    algos::hy::ClusterId id = 0;
-    std::vector<std::pair<algos::hy::PLIs::value_type, algos::hy::ClusterId>> plis_sort_ids;
+std::vector<ClusterId> SortAndGetMapping(PLIs& plis) {
+    ClusterId id = 0;
+    std::vector<std::pair<PLIs::value_type, ClusterId>> plis_sort_ids;
     std::transform(plis.begin(), plis.end(), std::back_inserter(plis_sort_ids),
                    [&id](auto& pli) { return std::make_pair(std::move(pli), id++); });
 
@@ -21,19 +21,18 @@ std::vector<algos::hy::ClusterId> SortAndGetMapping(algos::hy::PLIs& plis) {
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), plis.begin(),
                    [](auto& pli_ext) { return std::move(pli_ext.first); });
 
-    std::vector<algos::hy::ClusterId> og_mapping(plis_sort_ids.size());
+    std::vector<ClusterId> og_mapping(plis_sort_ids.size());
     std::transform(plis_sort_ids.begin(), plis_sort_ids.end(), og_mapping.begin(),
                    [](auto const& pli_ext) { return pli_ext.second; });
     return og_mapping;
 }
 
-algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
-    algos::hy::Columns inverted_plis;
+Columns BuildInvertedPlis(PLIs const& plis) {
+    Columns inverted_plis;
 
     for (auto const& pli : plis) {
-        algos::hy::ClusterId cluster_id = 0;
-        std::vector<algos::hy::ClusterId> current(pli->GetRelationSize(),
-                                                  algos::hy::PLIUtil::kSingletonClusterId);
+        ClusterId cluster_id = 0;
+        std::vector<ClusterId> current(pli->GetRelationSize(), PLIUtil::kSingletonClusterId);
         for (auto const& cluster : pli->GetIndex()) {
             for (int value : cluster) {
                 current[value] = cluster_id;
@@ -45,11 +44,11 @@ algos::hy::Columns BuildInvertedPlis(algos::hy::PLIs const& plis) {
     return inverted_plis;
 }
 
-algos::hy::Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
+Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_plis) {
     size_t const num_columns = inverted_plis.size();
     size_t const num_rows = num_columns == 0 ? 0 : inverted_plis.begin()->size();
 
-    algos::hy::Rows pli_records(num_rows, algos::hy::Row(num_columns));
+    Rows pli_records(num_rows, Row(num_columns));
 
     for (size_t i = 0; i < num_rows; ++i) {
         for (size_t j = 0; j < num_columns; ++j) {
@@ -60,15 +59,21 @@ algos::hy::Rows BuildRecordRepresentation(algos::hy::Columns const& inverted_pli
     return pli_records;
 }
 
-}  // namespace
-
-namespace algos::hy {
-
-std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation) {
+PLIs BuildPLIs(ColumnLayoutRelationData* relation) {
     PLIs plis;
     std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
                    std::back_inserter(plis),
                    [](auto& column_data) { return column_data.GetPositionListIndex(); });
+    return plis;
+}
+
+}  // namespace algos::hy::util
+
+namespace algos::hy {
+using namespace util;
+
+std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationData* relation) {
+    PLIs plis = BuildPLIs(relation);
 
     auto og_mapping = SortAndGetMapping(plis);
 
