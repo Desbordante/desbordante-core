@@ -14,6 +14,7 @@
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/error_measure/type.h"
+#include "config/custom_random/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
 #include "model/table/column_combination.h"
@@ -77,6 +78,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<size_t, kPyInt>,
             PyTypePair<long double, kPyFloat>,
             PyTypePair<std::size_t, kPyInt>,
+            PyTypePair<config::CustomRandomFlagType, kPyTuple>,
             PyTypePair<algos::metric::Metric, kPyStr>,
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::PfdErrorMeasureType, kPyStr>,
