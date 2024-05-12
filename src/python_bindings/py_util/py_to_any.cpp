@@ -13,8 +13,8 @@
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
-#include "config/error_measure/type.h"
 #include "config/custom_random/type.h"
+#include "config/error_measure/type.h"
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
@@ -118,7 +118,8 @@ boost::any CustomRandomFlagToAny(std::string_view option_name, py::handle obj) {
     }
     auto tup = py::cast<py::tuple>(obj);
     if (py::len(tup) != 2) {
-        throw config::ConfigurationError("Tuple for converting into std::pair must get 2 fields.");
+        throw config::ConfigurationError(
+                "Tuple for converting into std::pair must contain 2 fields.");
     }
     bool flag = CastAndReplaceCastError<bool>(option_name, tup[0]);
     int seed = CastAndReplaceCastError<int>(option_name, tup[1]);
