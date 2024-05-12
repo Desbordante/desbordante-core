@@ -42,7 +42,7 @@ constexpr auto kDThreads =
         "number of threads to use. If 0, then as many threads are used as the "
         "hardware can handle concurrently.";
 constexpr auto kDCustomRandom =
-        "for same answers in tests of approximate algs in different platforms.\n"
+        "for the same answers in tests of approximate algorithms on different platforms:\n"
         "first field is flag is enable, second seed of custom random";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 auto const kDPfdErrorMeasure = details::kDPfdErrorMeasureString.c_str();

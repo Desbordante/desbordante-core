@@ -6,24 +6,18 @@
 #include "algorithms/fd/eulerfd/eulerfd.h"
 #include "all_csv_configs.h"
 #include "test_fd_util.h"
+#include "util/bitset_utils.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 
 namespace tests {
-static std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
-    std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
-        res.push_back(index);
-    }
-    return res;
-}
 
 static testing::AssertionResult CheckFdListEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
     for (auto& fd : expected) {
-        std::vector<unsigned int> lhs_indices = BitsetToIndexVector(fd.GetLhs().GetColumnIndices());
+        std::vector<unsigned int> lhs_indices =
+                util::BitsetToIndices<unsigned int>(fd.GetLhs().GetColumnIndices());
         std::sort(lhs_indices.begin(), lhs_indices.end());
 
         if (auto it = actual.find(std::make_pair(lhs_indices, fd.GetRhs().GetIndex()));
@@ -39,11 +33,12 @@ static testing::AssertionResult CheckFdListEquality(
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
-static std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<FD> const& fds) {
+static std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        std::list<FD> const& fds) {
     std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
     for (auto const& fd : fds) {
         auto const& raw_fd = fd.ToRawFD();
-        set.emplace(BitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
+        set.emplace(util::BitsetToIndices<unsigned int>(raw_fd.lhs_), raw_fd.rhs_);
     }
     return set;
 }
@@ -79,12 +74,12 @@ TYPED_TEST_P(ApproximateFDTest, WorksOnWideDataset) {
 
 TYPED_TEST_P(ApproximateFDTest, LightDatasetsConsistentHash) {
     TestFixture::PerformConsistentHashTestOn(
-        ApproximateDatasets<typename TestFixture::AlgorithmType>::light_datasets_);
+            ApproximateDatasets<typename TestFixture::AlgorithmType>::kLightDatasets);
 }
 
 TYPED_TEST_P(ApproximateFDTest, HeavyDatasetsConsistentHash) {
     TestFixture::PerformConsistentHashTestOn(
-        ApproximateDatasets<typename TestFixture::AlgorithmType>::heavy_datasets_);
+            ApproximateDatasets<typename TestFixture::AlgorithmType>::kHeavyDatasets);
 }
 
 TYPED_TEST_P(ApproximateFDTest, ConsistentRepeatedExecution) {
@@ -104,4 +99,4 @@ REGISTER_TYPED_TEST_SUITE_P(ApproximateFDTest, ThrowsOnEmpty, ReturnsEmptyOnSing
 
 using Algorithms = ::testing::Types<algos::EulerFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(ApproximateFDTest, ApproximateFDTest, Algorithms);
-} // namespace tests
+}  // namespace tests

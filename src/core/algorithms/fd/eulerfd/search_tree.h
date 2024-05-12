@@ -16,9 +16,9 @@ private:
     struct Node {
         size_t bit_{};
 
-        Bitset set_;
-        Bitset union_;
-        Bitset inter_;
+        Bitset set_;    // Set of attributes which corresponds this node
+        Bitset union_;  // Union of children of this node
+        Bitset inter_;  // Intersection of children of this node
 
         std::shared_ptr<Node> left_{};
         std::shared_ptr<Node> right_{};
@@ -29,14 +29,14 @@ private:
         [[nodiscard]] Bitset const& GetUnion() const;
         [[nodiscard]] Bitset const& GetInter() const;
 
-        // for inner nodes
+        // For inner nodes
         Node(size_t bit, Bitset sets_union, Bitset sets_inter, std::shared_ptr<Node> const& parent,
              std::shared_ptr<Node> left = nullptr, std::shared_ptr<Node> right = nullptr);
 
-        // for leaves
+        // For leaves
         Node(size_t bit, Bitset set, std::shared_ptr<Node> const& parent);
 
-        // for both types of nodes
+        // For both types of nodes
         Node(size_t bit, Bitset set, Bitset sets_union, Bitset sets_inter,
              std::shared_ptr<Node> const& parent, std::shared_ptr<Node> left = nullptr,
              std::shared_ptr<Node> right = nullptr);
@@ -50,21 +50,23 @@ private:
 
     void CollectSubsets(Bitset const& set, std::shared_ptr<Node> const& current_node,
                         BitsetConsumer const& collect, bool& go_further) const;
-    bool SupersetsTraverse(const Bitset &set,
-        const std::shared_ptr<Node> &current_node) const;
+    [[nodiscard]] bool SupersetsTraverse(Bitset const& set,
+                                         std::shared_ptr<Node> const& current_node) const;
 
     void ForEach(std::shared_ptr<Node> const& current_node, BitsetConsumer const& collect) const;
 
-    std::shared_ptr<Node> FindNode(Bitset const& set);
+    [[nodiscard]] std::shared_ptr<Node> FindNode(Bitset const& set);
     void CutLeaf(std::shared_ptr<Node> const& node_to_remove);
-    void InsertLeafIntoEnd(std::shared_ptr<Node> const& current_node, Bitset const& set,
-                           size_t node_bit, size_t set_bit);
-    void InsertLeafIntoMiddle(std::shared_ptr<Node> const& current_node, Bitset const& set,
-                              size_t set_bit);
+
+    static void InsertLeafIntoEnd(std::shared_ptr<Node> const& current_node, Bitset const& set,
+                                  size_t node_bit, size_t set_bit);
+    static void InsertLeafIntoMiddle(std::shared_ptr<Node> const& current_node, Bitset const& set,
+                                     size_t set_bit);
 
     static void UpdateInterAndUnion(std::shared_ptr<Node> const& node);
 
-    static std::pair<size_t, size_t> FindNodeAndSetBits(Bitset const& node_set, Bitset const& set);
+    [[nodiscard]] static std::pair<size_t, size_t> FindNodeAndSetBits(Bitset const& node_set,
+                                                                      Bitset const& set);
 
 public:
     explicit SearchTreeEulerFD(size_t number_of_attributes);
@@ -83,4 +85,4 @@ public:
     [[nodiscard]] bool ContainsAnySupersetOf(Bitset const& set) const;
 };
 
-} // namespace algos
+}  // namespace algos

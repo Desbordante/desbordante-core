@@ -54,13 +54,13 @@ void BindFd(py::module_& main_module) {
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
     static constexpr auto kPFDTaneName = "PFDTane";
-    auto fd_algos_module =
-            BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep, FdMine, FUN, Pyro, Tane,
-                          PFDTane>(fd_module, py::overload_cast<>(&FDAlgorithm::FdList, py::const_),
-                                   "FdAlgorithm", "get_fds",
-                                   {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine",
-                                    "FUN", kPyroName, kTaneName, kPFDTaneName},
-                                   pybind11::return_value_policy::copy);
+    auto fd_algos_module = BindPrimitive<hyfd::HyFD, Aid, EulerFD, Depminer, DFD, FastFDs, FDep,
+                                         FdMine, FUN, Pyro, Tane, PFDTane>(
+            fd_module, py::overload_cast<>(&FDAlgorithm::FdList, py::const_), "FdAlgorithm",
+            "get_fds",
+            {"HyFD", "Aid", "EulerFD", "Depminer", "DFD", "FastFDs", "FDep", "FdMine", "FUN",
+             kPyroName, kTaneName, kPFDTaneName},
+            pybind11::return_value_policy::copy);
 
     auto define_submodule = [&fd_algos_module, &main_module](char const* name,
                                                              std::vector<char const*> algorithms) {
