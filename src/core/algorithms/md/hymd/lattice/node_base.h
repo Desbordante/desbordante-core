@@ -68,15 +68,12 @@ protected:
 };
 
 template <typename NodeType>
-void AddUnchecked(NodeType* cur_node_ptr, MdLhs const& lhs, model::Index cur_node_index,
+void AddUnchecked(NodeType* cur_node_ptr, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter,
                   auto final_node_action) {
     assert(cur_node_ptr->IsEmpty());
-    for (MdElement element = lhs.FindNextNonZero(cur_node_index); lhs.IsNotEnd(element);
-         element = lhs.FindNextNonZero(cur_node_index)) {
-        auto const& [next_node_index, next_bound] = element;
-        std::size_t const child_array_index = next_node_index - cur_node_index;
+    for (auto lhs_end = lhs.end(); cur_lhs_iter != lhs_end; ++cur_lhs_iter) {
+        auto const& [child_array_index, next_bound] = *cur_lhs_iter;
         cur_node_ptr = cur_node_ptr->AddOneUnchecked(child_array_index, next_bound);
-        cur_node_index = next_node_index + 1;
     }
     final_node_action(cur_node_ptr);
 }
@@ -84,25 +81,22 @@ void AddUnchecked(NodeType* cur_node_ptr, MdLhs const& lhs, model::Index cur_nod
 template <typename NodeType>
 void CheckedAdd(NodeType* cur_node_ptr, MdLhs const& lhs, auto const& info, auto unchecked_add,
                 auto final_node_action) {
-    model::Index cur_node_index = 0;
-    for (MdElement element = lhs.FindNextNonZero(cur_node_index); lhs.IsNotEnd(element);
-         element = lhs.FindNextNonZero(cur_node_index)) {
-        auto const& [next_node_index, next_bound] = element;
-        model::Index const child_array_index = next_node_index - cur_node_index;
-        cur_node_index = next_node_index + 1;
+    for (auto lhs_iter = lhs.begin(), lhs_end = lhs.end(); lhs_iter != lhs_end;) {
+        auto const& [child_array_index, next_bound] = *lhs_iter;
+        ++lhs_iter;
         std::size_t const next_child_array_size =
                 cur_node_ptr->GetChildArraySize(child_array_index);
         auto [boundary_map, is_first_arr] = cur_node_ptr->TryEmplaceChild(child_array_index);
         if (is_first_arr) {
             NodeType& new_node =
                     boundary_map.try_emplace(next_bound, next_child_array_size).first->second;
-            unchecked_add(new_node, info, cur_node_index);
+            unchecked_add(new_node, info, lhs_iter);
             return;
         }
         auto [it_map, is_first_map] = boundary_map.try_emplace(next_bound, next_child_array_size);
         NodeType& next_node = it_map->second;
         if (is_first_map) {
-            unchecked_add(next_node, info, cur_node_index);
+            unchecked_add(next_node, info, lhs_iter);
             return;
         }
         cur_node_ptr = &next_node;

@@ -4,8 +4,8 @@
 #include <functional>
 #include <vector>
 
-#include "algorithms/md/hymd/decision_boundary_vector.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
+#include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/table_identifiers.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
@@ -28,16 +28,6 @@ using AllRecomVecs = std::vector<RecommendationVector>;
 using RecIdVec = std::vector<RecordIdentifier>;
 using RecPtr = CompressedRecord const*;
 using RecordCluster = std::vector<RecPtr>;
-
-IndexVector GetNonZeroIndices(MdLhs const& lhs) {
-    IndexVector indices;
-    DecisionBoundaryVector const& lhs_bounds = lhs.GetValues();
-    std::size_t const col_match_number = lhs_bounds.size();
-    for (Index i = 0; i != col_match_number; ++i) {
-        if (lhs_bounds[i] != kLowestBound) indices.push_back(i);
-    }
-    return indices;
-}
 
 template <typename ElementType>
 std::vector<ElementType> GetAllocatedVector(std::size_t size) {
@@ -118,7 +108,7 @@ class Validator::SetPairProcessor {
     CompressedRecords const& left_records_ = validator_->GetLeftCompressor().GetRecords();
     CompressedRecords const& right_records_ = validator_->GetRightCompressor().GetRecords();
     InvalidatedRhss& invalidated_;
-    DecisionBoundaryVector& rhs_bounds_;
+    lattice::Rhs& lattice_rhs_;
     MdLhs const& lhs_;
     PairProvider pair_provider_;
 
@@ -163,13 +153,12 @@ class Validator::SetPairProcessor {
 
 public:
     SetPairProcessor(Validator const* validator, InvalidatedRhss& invalidated,
-                     DecisionBoundaryVector& rhs_bounds, MdLhs const& lhs,
-                     IndexVector const& non_zero_indices)
+                     lattice::Rhs& rhs, MdLhs const& lhs)
         : validator_(validator),
           invalidated_(invalidated),
-          rhs_bounds_(rhs_bounds),
+          lattice_rhs_(rhs),
           lhs_(lhs),
-          pair_provider_(validator, non_zero_indices, lhs) {}
+          pair_provider_(validator, lhs) {}
 
     Result ProcessPairs(boost::dynamic_bitset<> const& indices_bitset) {
         auto [working, recommendations] = MakeWorkingAndRecs(indices_bitset);
@@ -203,17 +192,17 @@ Validator::SetPairProcessor<PairProvider>::MakeWorkingAndRecs(
     for (Index index : indices) {
         RecommendationVector& last_recs = recommendations.emplace_back();
         auto const& [sim_info, left_index, right_index] = column_matches_info_[index];
-        MdElement rhs{index, rhs_bounds_[index]};
+        MdElement rhs{index, lattice_rhs_[index]};
         working.emplace_back(rhs, last_recs, validator_->GetLeftValueNum(index), right_records_,
                              sim_info.similarity_matrix, left_index, right_index);
     }
 
     auto for_each_working = [&](auto f) { std::for_each(working.begin(), working.end(), f); };
-    for_each_working([&](WorkingInfo const& w) { rhs_bounds_[w.old_rhs.index] = kLowestBound; });
+    for_each_working([&](WorkingInfo const& w) { lattice_rhs_[w.old_rhs.index] = kLowestBound; });
     std::vector<DecisionBoundary> const gen_max_rhs =
             validator_->lattice_->GetRhsInterestingnessBounds(lhs_, indices);
     for_each_working([&](WorkingInfo const& w) {
-        rhs_bounds_[w.old_rhs.index] = w.old_rhs.decision_boundary;
+        lattice_rhs_[w.old_rhs.index] = w.old_rhs.decision_boundary;
     });
 
     auto it = working.begin();
@@ -300,11 +289,10 @@ class Validator::OneCardPairProvider {
     RecSet const* similar_records_ptr_{};
 
 public:
-    OneCardPairProvider(Validator const* validator, IndexVector const& non_zero_indices,
-                        MdLhs const& lhs)
+    OneCardPairProvider(Validator const* validator, MdLhs const& lhs)
         : validator_(validator),
-          non_zero_index_(non_zero_indices.front()),
-          decision_boundary_(lhs[non_zero_index_]) {}
+          non_zero_index_(lhs.begin()->child_array_index),
+          decision_boundary_(lhs.begin()->decision_boundary) {}
 
     bool TryGetNextPair() {
         for (++value_id_; value_id_ != clusters_size_; ++value_id_) {
@@ -325,44 +313,50 @@ public:
 };
 
 class Validator::MultiCardPairProvider {
+    using MatchingInfo = std::vector<std::tuple<Index, Index, DecisionBoundary>>;
+
     struct InitInfo {
         Validator const* validator;
-        std::vector<std::pair<Index, Index>> col_match_val_idx_vec;
+        MatchingInfo matching_info;
         IndexVector non_first_indices;
-        MdLhs const& lhs;
         Index first_pli_index;
         std::size_t plis_involved = 1;
 
-        InitInfo(Validator const* validator, IndexVector const& non_zero_indices, MdLhs const& lhs)
-            : validator(validator), lhs(lhs) {
-            std::size_t const cardinality = non_zero_indices.size();
-            col_match_val_idx_vec.reserve(cardinality);
+        InitInfo(Validator const* validator, MdLhs const& lhs) : validator(validator) {
+            using AbsoluteLhsElements = std::vector<MdElement>;
+            std::size_t const cardinality = lhs.Cardinality();
+            matching_info.reserve(cardinality);
 
             std::size_t const left_pli_number = validator->GetLeftCompressor().GetPliNumber();
             non_first_indices.reserve(std::min(cardinality, left_pli_number));
-            std::vector<IndexVector> pli_map(left_pli_number);
-            for (Index col_match_index : non_zero_indices) {
-                pli_map[validator->GetLeftPliIndex(col_match_index)].push_back(col_match_index);
+            std::vector<AbsoluteLhsElements> pli_map(left_pli_number);
+            Index col_match_index = 0;
+            for (auto const& [child_array_index, bound] : lhs) {
+                col_match_index += child_array_index;
+                pli_map[validator->GetLeftPliIndex(col_match_index)].emplace_back(col_match_index,
+                                                                                  bound);
+                ++col_match_index;
             }
 
             Index pli_idx = 0;
             while (pli_map[pli_idx].empty()) ++pli_idx;
 
             Index value_ids_index = 0;
-            auto fill_for_value_ids_idx = [this, &value_ids_index](IndexVector const& indices) {
-                for (Index const col_match_idx : indices) {
-                    col_match_val_idx_vec.emplace_back(col_match_idx, value_ids_index);
+            auto fill_for_value_ids_idx = [this,
+                                           &value_ids_index](AbsoluteLhsElements const& elements) {
+                for (auto const& [col_match_idx, bound] : elements) {
+                    matching_info.emplace_back(col_match_idx, value_ids_index, bound);
                 }
                 ++value_ids_index;
             };
             first_pli_index = pli_idx;
             fill_for_value_ids_idx(pli_map[pli_idx]);
             for (++pli_idx; pli_idx != left_pli_number; ++pli_idx) {
-                IndexVector const& col_match_idxs = pli_map[pli_idx];
-                if (col_match_idxs.empty()) continue;
+                AbsoluteLhsElements const& pli_col_matches = pli_map[pli_idx];
+                if (pli_col_matches.empty()) continue;
                 ++plis_involved;
                 non_first_indices.push_back(pli_idx);
-                fill_for_value_ids_idx(col_match_idxs);
+                fill_for_value_ids_idx(pli_col_matches);
             }
         }
     };
@@ -382,8 +376,7 @@ class Validator::MultiCardPairProvider {
     std::vector<PliCluster> const& first_pli_;
     std::size_t first_pli_size_ = first_pli_.size();
     CompressedRecords const& left_records_ = validator_->GetLeftCompressor().GetRecords();
-    std::vector<std::pair<Index, Index>> const col_match_val_idx_vec_;
-    MdLhs const& lhs_;
+    MatchingInfo const matching_info_;
     RecIdVec similar_records_;
     RecordCluster const* cluster_ptr_;
 
@@ -392,10 +385,9 @@ class Validator::MultiCardPairProvider {
           non_first_indices_(std::move(init_info.non_first_indices)),
           first_pli_(
                   validator_->GetLeftCompressor().GetPli(init_info.first_pli_index).GetClusters()),
-          col_match_val_idx_vec_(std::move(init_info.col_match_val_idx_vec)),
-          lhs_(init_info.lhs) {
+          matching_info_(std::move(init_info.matching_info)) {
         value_ids_.reserve(init_info.plis_involved);
-        rec_sets_.reserve(col_match_val_idx_vec_.size());
+        rec_sets_.reserve(matching_info_.size());
     }
 
     bool TryGetNextGroup() {
@@ -418,9 +410,8 @@ class Validator::MultiCardPairProvider {
     }
 
 public:
-    MultiCardPairProvider(Validator const* validator, IndexVector const& non_zero_indices,
-                          MdLhs const& lhs)
-        : MultiCardPairProvider(InitInfo{validator, non_zero_indices, lhs}) {}
+    MultiCardPairProvider(Validator const* validator, MdLhs const& lhs)
+        : MultiCardPairProvider(InitInfo{validator, lhs}) {}
 
     bool TryGetNextPair() {
         similar_records_.clear();
@@ -429,9 +420,9 @@ public:
                 auto const& [val_ids, cluster] = *cur_group_iter_;
                 rec_sets_.clear();
                 ++cur_group_iter_;
-                for (auto const& [column_match_index, value_ids_index] : col_match_val_idx_vec_) {
+                for (auto const& [column_match_index, value_ids_index, bound] : matching_info_) {
                     RecSet const* similar_records_ptr = validator_->GetSimilarRecords(
-                            val_ids[value_ids_index], lhs_[column_match_index], column_match_index);
+                            val_ids[value_ids_index], bound, column_match_index);
                     if (similar_records_ptr == nullptr) goto no_similar_records;
                     rec_sets_.push_back(similar_records_ptr);
                 }
@@ -471,15 +462,14 @@ public:
 
 Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
     MdLhs const& lhs = info.messenger->GetLhs();
-    DecisionBoundaryVector& rhs_bounds = info.messenger->GetRhs();
+    lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
     // After a call to this method, info.rhs_indices must not be used
     boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
-    IndexVector non_zero_indices = GetNonZeroIndices(lhs);
-    std::size_t const cardinality = non_zero_indices.size();
+    std::size_t const cardinality = lhs.Cardinality();
     InvalidatedRhss invalidated;
     if (cardinality == 0) [[unlikely]] {
         util::ForEachIndex(indices_bitset, [&](auto index) {
-            DecisionBoundary const old_bound = rhs_bounds[index];
+            DecisionBoundary const old_bound = lattice_rhs[index];
             DecisionBoundary const new_bound =
                     (*column_matches_info_)[index].similarity_info.lowest_similarity;
             if (old_bound == new_bound) [[unlikely]]
@@ -490,18 +480,16 @@ Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
     }
 
     if (cardinality == 1) {
-        Index const non_zero_index = non_zero_indices.front();
+        Index const non_zero_index = lhs.begin()->child_array_index;
         // Never happens when disjointedness pruning is on.
         if (indices_bitset.test_set(non_zero_index, false)) {
-            invalidated.PushBack({non_zero_index, rhs_bounds[non_zero_index]}, kLowestBound);
+            invalidated.PushBack({non_zero_index, lattice_rhs[non_zero_index]}, kLowestBound);
         }
-        SetPairProcessor<OneCardPairProvider> processor(this, invalidated, rhs_bounds, lhs,
-                                                        non_zero_indices);
+        SetPairProcessor<OneCardPairProvider> processor(this, invalidated, lattice_rhs, lhs);
         return processor.ProcessPairs(indices_bitset);
     }
 
-    SetPairProcessor<MultiCardPairProvider> processor(this, invalidated, rhs_bounds, lhs,
-                                                      non_zero_indices);
+    SetPairProcessor<MultiCardPairProvider> processor(this, invalidated, lattice_rhs, lhs);
     return processor.ProcessPairs(indices_bitset);
 }
 

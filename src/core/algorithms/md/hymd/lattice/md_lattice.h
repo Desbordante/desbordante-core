@@ -7,17 +7,17 @@
 #include <vector>
 
 #include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/hymd/decision_boundary_vector.h"
 #include "algorithms/md/hymd/lattice/md.h"
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "algorithms/md/hymd/lattice/md_node.h"
 #include "algorithms/md/hymd/lattice/node_base.h"
+#include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lattice/single_level_func.h"
 #include "algorithms/md/hymd/lattice/support_node.h"
 #include "algorithms/md/hymd/md_element.h"
 #include "algorithms/md/hymd/md_lhs.h"
+#include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/rhss.h"
-#include "algorithms/md/hymd/similarity_vector.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "model/index.h"
 
@@ -38,15 +38,15 @@ private:
 public:
     class MdRefiner {
         MdLattice* lattice_;
-        SimilarityVector const* sim_;
+        PairComparisonResult const* pair_similarities_;
         MdLatticeNodeInfo node_info_;
         utility::InvalidatedRhss invalidated_;
 
     public:
-        MdRefiner(MdLattice* lattice, SimilarityVector const* sim, MdLatticeNodeInfo node_info,
-                  utility::InvalidatedRhss invalidated)
+        MdRefiner(MdLattice* lattice, PairComparisonResult const* pair_similarities,
+                  MdLatticeNodeInfo node_info, utility::InvalidatedRhss invalidated)
             : lattice_(lattice),
-              sim_(sim),
+              pair_similarities_(pair_similarities),
               node_info_(std::move(node_info)),
               invalidated_(std::move(invalidated)) {}
 
@@ -73,8 +73,8 @@ public:
             return node_info_.lhs;
         }
 
-        DecisionBoundaryVector& GetRhs() {
-            return *node_info_.rhs_bounds;
+        Rhs& GetRhs() {
+            return *node_info_.rhs;
         }
 
         void MarkUnsupported();
@@ -105,36 +105,55 @@ private:
     void RaiseInterestingnessBounds(
             MdNode const& cur_node, MdLhs const& lhs,
             std::vector<model::md::DecisionBoundary>& cur_interestingness_bounds,
-            model::Index cur_node_index, std::vector<model::Index> const& indices) const;
+            MdLhs::iterator cur_lhs_iter, std::vector<model::Index> const& indices) const;
 
-    void TryAddRefiner(std::vector<MdRefiner>& found, DecisionBoundaryVector& rhs,
-                       SimilarityVector const& similarity_vector, MdLhs const& cur_node_lhs);
+    void TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
+                       PairComparisonResult const& pair_comparison_result, MdLhs const& cur_node_lhs);
     void CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
-                                    MdLhs& cur_node_lhs, SimilarityVector const& similarity_vector,
+                                    MdLhs& cur_node_lhs,
+                                    PairComparisonResult const& pair_comparison_result,
                                     model::Index cur_node_index);
 
     bool IsUnsupported(MdLhs const& lhs) const;
 
-    bool IsUnsupported(LhsSpecialization const& lhs_specialization) const;
+    bool IsUnsupportedReplace(LhsSpecialization const& lhs_specialization) const;
+    bool IsUnsupportedNonReplace(LhsSpecialization const& lhs_specialization) const;
 
-    void UpdateMaxLevel(LhsSpecialization const& lhs_specialization);
-    void AddNewMinimal(MdNode& cur_node, MdSpecialization const& md, model::Index cur_node_index);
-    MdNode* TryGetNextNode(MdSpecialization const& md, GeneralizationHelper& helper,
-                           model::Index cur_node_index, model::Index const next_node_index,
-                           model::md::DecisionBoundary const next_lhs_bound);
-    void AddIfMinimal(MdSpecialization const& md);
+    void UpdateMaxLevel(LhsSpecialization const& lhs_specialization, auto handle_tail);
+    void AddNewMinimal(MdNode& cur_node, MdSpecialization const& md, MdLhs::iterator cur_node_iter,
+                       auto handle_level_update_tail);
+    MdNode* TryGetNextNode(GeneralizationHelper& helper, model::Index child_array_index,
+                           auto new_minimal_action,
+                           model::md::DecisionBoundary const next_lhs_bound, MdLhs::iterator iter,
+                           std::size_t gen_check_offset = 0);
+
+    MdNode* TryGetNextNodeBoundMap(MdBoundMap& boundary_mapping, GeneralizationHelper& helper,
+                                   model::Index child_array_index, auto new_minimal_action,
+                                   model::md::DecisionBoundary const next_lhs_bound,
+                                   MdLhs::iterator iter, auto get_b_map_iter,
+                                   std::size_t gen_check_offset = 0);
+
+    void AddIfMinimal(MdSpecialization const& md, auto handle_tail, auto gen_checker_method);
+    void AddIfMinimalAppend(MdSpecialization const& md);
+    void WalkToTail(MdSpecialization const& md, GeneralizationHelper& helper,
+                    MdLhs::iterator next_lhs_iter, auto handle_level_update_tail);
+    void AddIfMinimalReplace(MdSpecialization const& md);
+    void AddIfMinimalInsert(MdSpecialization const& md);
 
     static auto SetUnsupAction() noexcept {
         return [](SupportNode* node) { node->is_unsupported = true; };
     }
 
     // Generalization check, specialization (add if minimal)
-    void MarkNewLhs(SupportNode& cur_node, MdLhs const& lhs, model::Index cur_node_index);
+    void MarkNewLhs(SupportNode& cur_node, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter);
     void MarkUnsupported(MdLhs const& lhs);
 
     [[nodiscard]] std::optional<model::md::DecisionBoundary> SpecializeOneLhs(
             model::Index col_match_index, model::md::DecisionBoundary lhs_bound) const;
-    void Specialize(MdLhs const& lhs, SimilarityVector const& specialize_past, Rhss const& rhss);
+    void Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_higher_lhs_bound,
+                    auto get_higher_other_bound);
+    void Specialize(MdLhs const& lhs, PairComparisonResult const& pair_comparison_result,
+                    Rhss const& rhss);
     void Specialize(MdLhs const& lhs, Rhss const& rhss);
 
     void GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected, MdLhs& cur_node_lhs,
@@ -156,7 +175,8 @@ public:
     std::vector<model::md::DecisionBoundary> GetRhsInterestingnessBounds(
             MdLhs const& lhs, std::vector<model::Index> const& indices) const;
     std::vector<MdVerificationMessenger> GetLevel(std::size_t level);
-    std::vector<MdRefiner> CollectRefinersForViolated(SimilarityVector const& similarity_vector);
+    std::vector<MdRefiner> CollectRefinersForViolated(
+            PairComparisonResult const& pair_comparison_result);
     std::vector<MdLatticeNodeInfo> GetAll();
 };
 
