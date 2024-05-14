@@ -1,18 +1,24 @@
 #pragma once
 
-#include "algorithms/md/hymd/md_element.h"
 #include "algorithms/md/hymd/md_lhs.h"
 
 namespace algos::hymd::lattice {
-struct LhsSpecialization {
-    MdLhs const& old_lhs;
-    MdElement specialized;
+struct SpecializationData {
+    MdLhs::iterator const spec_before;
+    LhsNode const new_child;
+};
 
-    MdLhs const& ToUnspecialized() const {
+struct LhsSpecialization {
+    using Unspecialized = MdLhs const&;
+
+    MdLhs const& old_lhs;
+    SpecializationData const specialization_data;
+
+    Unspecialized ToUnspecialized() const noexcept {
         return old_lhs;
     }
 
-    LhsSpecialization const& GetLhsSpecialization() const {
+    LhsSpecialization const& GetLhsSpecialization() const noexcept {
         return *this;
     }
 };
