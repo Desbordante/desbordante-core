@@ -10,14 +10,15 @@ double MongeElkan(std::string const& word1, std::string const& word2) {
     std::vector<std::string> words1;
     std::vector<std::string> words2;
 
-    size_t start = 0, end = 0;
+    size_t start = 0;
+    size_t end = 0;
     while ((end = word1.find(" ", start)) != std::string::npos) {
         words1.push_back(word1.substr(start, end - start));
         start = end + 1;
     }
     words1.push_back(word1.substr(start));
 
-    start = 0, end = 0;
+    start = 0;
     while ((end = word2.find(" ", start)) != std::string::npos) {
         words2.push_back(word2.substr(start, end - start));
         start = end + 1;
