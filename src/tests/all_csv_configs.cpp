@@ -91,4 +91,12 @@ CSVConfig const kProbeTest1 = CreateCsvConfig("ProbeTest1.csv", ',', true);
 CSVConfig const kProbeTest2 = CreateCsvConfig("ProbeTest2.csv", ',', true);
 CSVConfig const kTestParse = CreateCsvConfig("TestParse.csv", ',', false);
 CSVConfig const kODnorm6 = CreateCsvConfig("OD_norm6.csv", ',', true);
+CSVConfig const kTestDD = CreateCsvConfig("TestDD.csv", ',', true);
+CSVConfig const kTestDD1 = CreateCsvConfig("TestDD1.csv", ',', true);
+CSVConfig const kTestDD2 = CreateCsvConfig("TestDD2.csv", ',', true);
+CSVConfig const kTestDD3 = CreateCsvConfig("TestDD3.csv", ',', true);
+CSVConfig const kTestDif = CreateCsvConfig("dif_tables/TestDif.csv", ',', true);
+CSVConfig const kTestDif1 = CreateCsvConfig("dif_tables/TestDif1.csv", ',', true);
+CSVConfig const kTestDif2 = CreateCsvConfig("dif_tables/TestDif2.csv", ',', true);
+CSVConfig const kTestDif3 = CreateCsvConfig("dif_tables/TestDif3.csv", ',', true);
 }  // namespace tests

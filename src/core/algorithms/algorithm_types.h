@@ -9,8 +9,9 @@ namespace algos {
 using AlgorithmTypes =
         std::tuple<Depminer, DFD, FastFDs, FDep, FdMine, Pyro, Tane, PFDTane, FUN, hyfd::HyFD, Aid,
                    Apriori, metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
-                   PyroUCC, cfd::FDFirstAlgorithm, ACAlgorithm, UCCVerifier, Faida, Spider, Fastod,
-                   GfdValidation, EGfdValidation, NaiveGfdValidation, order::Order>;
+                   PyroUCC, cfd::FDFirstAlgorithm, ACAlgorithm, UCCVerifier, Faida, Spider, Mind,
+                   Fastod, GfdValidation, EGfdValidation, NaiveGfdValidation, order::Order,
+                   dd::Split>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -61,6 +62,7 @@ BETTER_ENUM(AlgorithmType, char,
 /* Inclusion dependency mining algorithms */
     faida,
     spider,
+    mind,
 
 /* Order dependency mining algorithms */
     fastod,
@@ -71,7 +73,10 @@ BETTER_ENUM(AlgorithmType, char,
     naivegfdvalid,
 
 /* Order dependency mining algorithms */
-    order
+    order,
+
+/* Differential dependencies mining algorithm */
+    split
 )
 // clang-format on
 

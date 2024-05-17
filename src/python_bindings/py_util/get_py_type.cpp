@@ -8,6 +8,7 @@
 #include <Python.h>
 #include <pybind11/stl/filesystem.h>
 
+#include "algorithms/cfd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/error_measure/type.h"
@@ -75,6 +76,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::ErrorMeasureType, kPyStr>,
             PyTypePair<algos::InputFormat, kPyStr>,
+            PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},

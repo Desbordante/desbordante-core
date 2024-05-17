@@ -8,6 +8,7 @@
 #include "bind_main_classes.h"
 #include "cfd/bind_cfd.h"
 #include "data/bind_data_types.h"
+#include "dd/bind_split.h"
 #include "dynamic/bind_dynamic_algorithms.h"
 #include "fd/bind_fd.h"
 #include "fd/bind_fd_verification.h"
@@ -36,7 +37,8 @@ PYBIND11_MODULE(desbordante, module) {
 
     for (auto bind_func : {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc,
                            BindOd, BindFdVerification, BindMfdVerification, BindUccVerification,
-                           BindStatistics, BindInd, BindGfdVerification, BindDynamicAlgorithms}) {
+                           BindStatistics, BindInd, BindGfdVerification, BindDynamicAlgorithms, 
+                           BindSplit}) {
         bind_func(module);
     }
 }

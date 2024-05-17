@@ -3,42 +3,45 @@
 #include "algorithms/algo_factory.h"
 #include "all_csv_configs.h"
 #include "config/equal_nulls/type.h"
+#include "config/max_arity/type.h"
 #include "config/names.h"
 #include "config/thread_number/type.h"
 #include "csv_config_util.h"
+#include "max_arity/type.h"
 #include "test_hash_util.h"
 #include "test_ind_util.h"
 
 namespace tests {
 namespace {
 
+struct INDTestConfig {
+    config::ThreadNumType threads;
+    config::EqNullsType is_null_equal_null;
+    config::MaxArityType max_arity;
+};
+
 template <typename Algorithm>
 class INDAlgorithmTest : public ::testing::Test {
-    static config::ThreadNumType threads_;
-    static config::EqNullsType is_null_equal_null_;
+public:
+    using Config = INDTestConfig;
 
 protected:
-    static void SetThreadsParam(config::ThreadNumType threads) noexcept {
-        assert(threads > 0);
-        threads_ = threads;
-    }
-
-    static void SetEqualNulls(config::EqNullsType is_null_equal_null) noexcept {
-        is_null_equal_null_ = is_null_equal_null;
-    }
-
-    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(CSVConfigs const& csv_configs) {
+    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(CSVConfigs const& csv_configs,
+                                                              Config const& test_config) {
         using namespace config::names;
-        return algos::CreateAndLoadAlgorithm<Algorithm>(
-                algos::StdParamsMap{{kCsvConfigs, csv_configs},
-                                    {kThreads, threads_},
-                                    {kEqualNulls, is_null_equal_null_}});
+        return algos::CreateAndLoadAlgorithm<Algorithm>(algos::StdParamsMap{
+                {kCsvConfigs, csv_configs},
+                {kThreads, test_config.threads},
+                {kEqualNulls, test_config.is_null_equal_null},
+                {kMaximumArity, test_config.max_arity},
+        });
     }
 
-    static void PerformConsistentHashTestOn(std::vector<CSVConfigsHash> const& configs_hashes) {
+    static void PerformConsistentHashTestOn(std::vector<CSVConfigsHash> const& configs_hashes,
+                                            Config const& test_config) {
         for (auto const& [csv_configs, hash] : configs_hashes) {
             try {
-                auto ind_algo = CreateAlgorithmInstance(csv_configs);
+                auto ind_algo = CreateAlgorithmInstance(csv_configs, test_config);
                 ind_algo->Execute();
                 EXPECT_EQ(HashVec(ToSortedINDTestVec(ind_algo->INDList()), HashPair), hash)
                         << "Wrong hash on datasets " << TableNamesToString(csv_configs);
@@ -48,6 +51,15 @@ protected:
                           << '\n';
                 FAIL();
             }
+        }
+    }
+
+    static void PerformEqualityTestOn(
+            std::vector<INDEqualityTestConfig> const& equality_test_configs,
+            Config const& test_config) {
+        for (auto const& [csv_configs, expected_inds] : equality_test_configs) {
+            CheckINDsListsEqualityTest(CreateAlgorithmInstance(csv_configs, test_config),
+                                       expected_inds);
         }
     }
 
@@ -87,44 +99,51 @@ protected:
             {{kIowa1kk}, 232519218595U}};
 };
 
-template <typename Algorithm>
-config::ThreadNumType INDAlgorithmTest<Algorithm>::threads_ = 1;
+static INDTestConfig const kUnaryTestConfigNotEqualNull{
+        .threads = 1,
+        .is_null_equal_null = false,
+        .max_arity = 1,
+};
 
-template <typename Algorithm>
-config::EqNullsType INDAlgorithmTest<Algorithm>::is_null_equal_null_ = false;
+static INDTestConfig const kUnaryTestConfigEqualNull{
+        .threads = 1,
+        .is_null_equal_null = true,
+        .max_arity = 1,
+};
+
+static INDTestConfig const kUnaryTestConfigNotEqualNullParallel{
+        .threads = 4,
+        .is_null_equal_null = false,
+        .max_arity = 1,
+};
 
 }  // namespace
 
 TYPED_TEST_SUITE_P(INDAlgorithmTest);
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnLightTables) {
-    TestFixture::SetThreadsParam(1);
-    TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes,
+                                             kUnaryTestConfigNotEqualNull);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnHeavyTables) {
-    TestFixture::SetThreadsParam(1);
-    TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes,
+                                             kUnaryTestConfigNotEqualNull);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnNullTables) {
-    TestFixture::SetThreadsParam(1);
-    TestFixture::SetEqualNulls(true);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kNullConfigsHashes);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kNullConfigsHashes,
+                                             kUnaryTestConfigEqualNull);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnLightTablesParallel) {
-    TestFixture::SetThreadsParam(4);
-    TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightConfigsHashes,
+                                             kUnaryTestConfigNotEqualNullParallel);
 }
 
 TYPED_TEST_P(INDAlgorithmTest, ConsistentHashOnHeavyTablesParallel) {
-    TestFixture::SetThreadsParam(4);
-    TestFixture::SetEqualNulls(false);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes);
+    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyConfigsHashes,
+                                             kUnaryTestConfigNotEqualNullParallel);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(INDAlgorithmTest, ConsistentHashOnLightTables,
@@ -132,8 +151,64 @@ REGISTER_TYPED_TEST_SUITE_P(INDAlgorithmTest, ConsistentHashOnLightTables,
                             ConsistentHashOnLightTablesParallel,
                             ConsistentHashOnHeavyTablesParallel);
 
-using Algorithms = ::testing::Types<algos::Spider>;
+/* We don't add Mind here, because Mind uses Spider to mine unary dependencies. */
+using UnaryTestAlgorithms = ::testing::Types<algos::Spider>;
 
-INSTANTIATE_TYPED_TEST_SUITE_P(INDAlgorithmTest, INDAlgorithmTest, Algorithms);
+INSTANTIATE_TYPED_TEST_SUITE_P(INDAlgorithmTest, INDAlgorithmTest, UnaryTestAlgorithms);
+
+namespace {
+
+template <typename Algorithm>
+class GeneralINDAlgorithmTest : public ::testing::Test {
+protected:
+    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(CSVConfigs const& csv_configs) {
+        using namespace config::names;
+        return algos::CreateAndLoadAlgorithm<Algorithm>(algos::StdParamsMap{
+                {kCsvConfigs, csv_configs},
+        });
+    }
+};
+
+}  // namespace
+
+/* General tests for all IND algorithms */
+using GeneralTestAlgorithms = ::testing::Types<algos::Spider, algos::Mind, algos::Faida>;
+
+TYPED_TEST_SUITE(GeneralINDAlgorithmTest, GeneralTestAlgorithms);
+
+TYPED_TEST(GeneralINDAlgorithmTest, TestEmptyTable) {
+    ASSERT_THROW(TestFixture::CreateAlgorithmInstance({kIndTestEmpty}), std::runtime_error);
+}
+
+TYPED_TEST(GeneralINDAlgorithmTest, TestEmptyTablesCollection) {
+    ASSERT_THROW(TestFixture::CreateAlgorithmInstance({}), config::ConfigurationError);
+}
+
+namespace {
+
+template <typename Algorithm>
+class NaryINDAlgorithmTest : public ::testing::Test {
+protected:
+    static std::unique_ptr<Algorithm> CreateAlgorithmInstance(CSVConfigs const& csv_configs) {
+        using namespace config::names;
+        return algos::CreateAndLoadAlgorithm<Algorithm>(algos::StdParamsMap{
+                {kCsvConfigs, csv_configs},
+        });
+    }
+};
+
+}  // namespace
+
+/* We don't add Faida, since Faida is an approximate algorithm. */
+using NaryTestAlgorithms = ::testing::Types<algos::Mind>;
+
+TYPED_TEST_SUITE(NaryINDAlgorithmTest, NaryTestAlgorithms);
+
+TYPED_TEST(NaryINDAlgorithmTest, EqualityTest) {
+    for (auto& [csv_configs, expected_inds] : kINDEqualityTestConfigs) {
+        CheckINDsListsEqualityTest(TestFixture::CreateAlgorithmInstance(csv_configs),
+                                   expected_inds);
+    }
+}
 
 }  // namespace tests
