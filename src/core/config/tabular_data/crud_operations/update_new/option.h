@@ -1,6 +1,3 @@
-// This option is meant for the dynamic case where an algorithm processes crud
-// operations over table many times.
-
 #pragma once
 
 #include "config/common_option.h"

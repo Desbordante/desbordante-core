@@ -128,6 +128,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(config::InputTables), InputTablesToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
+        kNormalConvPair<std::vector<size_t>>,
 };
 
 }  // namespace

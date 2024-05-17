@@ -50,7 +50,7 @@ void BindDynamicAlgorithms(py::module_& main_module) {
         .def(py::init([](py::kwargs const& kwargs) {
                 auto algo = std::make_unique<DynamicAlgorithmDemo>();
                 ConfigureAlgo(*algo, kwargs);
-                algo->Initialize();
+                algo->LoadData();
                 return algo;
         }))
         .def("process",
@@ -58,7 +58,7 @@ void BindDynamicAlgorithms(py::module_& main_module) {
                 for (const std::string_view& option_name : CRUD_OPTIONS) {
                     SetOptionByName(algo, option_name, kwargs);
                 }
-                algo.ProcessBatch();
+                algo.Execute();
             },
             "Process algorithm with given batch of changes")
         .def("get_result", &DynamicAlgorithmDemo::GetResult, 

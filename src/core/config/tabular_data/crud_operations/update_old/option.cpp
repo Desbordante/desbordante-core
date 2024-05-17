@@ -4,6 +4,6 @@
 
 namespace config {
 using names::kUpdateOldStatements, descriptions::kDUpdateOldStatements;
-extern CommonOption<InputTable> const kUpdateOldStatementsOpt = {
+extern CommonOption<std::vector<size_t>> const kUpdateOldStatementsOpt = {
         kUpdateOldStatements, kDUpdateOldStatements, std::nullopt, nullptr, nullptr};
 }  // namespace config

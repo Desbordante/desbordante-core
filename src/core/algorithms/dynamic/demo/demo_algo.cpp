@@ -8,54 +8,39 @@ using config::InputTable;
 algos::DynamicAlgorithmDemo::DynamicAlgorithmDemo(std::vector<std::string_view> phase_names)
     : DynamicAlgorithm(phase_names) {}
 
-unsigned long long algos::DynamicAlgorithmDemo::ExecuteInternal() {
+unsigned long long algos::DynamicAlgorithmDemo::ProcessBatch() {
     auto start_time = std::chrono::system_clock::now();
-    
+    added_to_result_.Clear();
+    erased_from_result_.Clear();
+    for (size_t rowId : delete_statements_) {
+        erased_from_result_.Add(result_collection_.Erase({rowId}));
+    }
+    for (TableRow row : insert_statements_.AsUnorderedMultiset()) {
+        table_rows_ids_.emplace(row.getId());
+        result_collection_.Add(row);
+        added_to_result_.Add(row);
+    }
+    sleep(1);
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+    return elapsed_milliseconds.count();
+}
+
+void algos::DynamicAlgorithmDemo::LoadDataInternal() {
+    DynamicAlgorithm::LoadDataInternal();
     while (input_table_->HasNextRow()) {
         TableRow row{input_table_->GetNextRow()};
-        result_collection_.Add(row.toString());
+        table_rows_ids_.emplace(row.getId());
+        result_collection_.Add(row);
     }
     sleep(1);
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
-}
-
-unsigned long long algos::DynamicAlgorithmDemo::ProcessBatchInternal() {
-    auto start_time = std::chrono::system_clock::now();
-    for (TableRow row : insert_statements_.AsUnorderedMultiset()) {
-        added_to_result_.Add(row.toString());
-    }
-    for (TableRow row : delete_statements_.AsUnorderedMultiset()) {
-        erased_from_result_.Add(row.toString());
-    }
-    sleep(1);
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
-}
-
-void algos::DynamicAlgorithmDemo::UpdateResult() {
-    for (std::string elem : added_to_result_.AsUnorderedMultiset()) {
-        result_collection_.Add(elem);
-    }
-    for (std::string elem : erased_from_result_.AsUnorderedMultiset()) {
-        result_collection_.Erase(elem);
-    }
 }
 
 std::vector<std::string> algos::DynamicAlgorithmDemo::GetResult() {
-    return result_collection_.AsVector();
+    return result_collection_.AsStringVector();
 }
 
-std::pair<std::vector<std::string>, std::vector<std::string>> algos::DynamicAlgorithmDemo::GetResultDiff() {
-    return std::make_pair(added_to_result_.AsVector(), erased_from_result_.AsVector());
-}
-
-void algos::DynamicAlgorithmDemo::ResetState() {
-    DynamicAlgorithm::ResetState();
-    result_collection_.Clear();
-    added_to_result_.Clear();
-    erased_from_result_.Clear();
+std::pair<std::vector<std::string>, std::vector<std::string>> 
+    algos::DynamicAlgorithmDemo::GetResultDiff() {
+    return std::make_pair(added_to_result_.AsStringVector(), erased_from_result_.AsStringVector());
 }

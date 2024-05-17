@@ -14,41 +14,55 @@ public:
 
 private:
     std::vector<std::string> data_;
-    const size_t hash_;
+    size_t id_;
+
+    static int createId() {
+        static int id = 1;
+        return id++;
+    }
 
 public:
     TableRow(std::vector<std::string>&& data) : 
         data_(std::move(data)), 
-        hash_([&data]() -> size_t {
-            size_t hash = 0;
-            for (std::string element : data) {
-                hash += std::hash<std::string>{}(element);
-            }
-            return hash;
-        }()) {}
-    
-    TableRow(const TableRow& other) : data_(other.getData()), hash_(other.getHash()) {}
+        id_(createId()) {}
+    TableRow(size_t id) : data_({}), id_(id) {}
+    TableRow() : data_({}), id_(0) {};
 
-    TableRow() : data_({}), hash_(0) {};
+    TableRow(const TableRow& other) : data_(other.data_), id_(other.id_) {}
+    TableRow(TableRow&& other) : data_(std::move(other.data_)), id_(other.id_) {}
+    TableRow& operator=(const TableRow& other) {
+        if (this != &other) {
+            data_ = other.data_;
+            id_ = other.id_;
+        }
+        return *this;
+    }
+    TableRow& operator=(TableRow&& other) {
+        if (this != &other) {
+            data_ = std::move(other.data_);
+            id_ = other.id_;
+        }
+        return *this;
+    }
 
     const std::vector<std::string>& getData() const {
         return data_;
     }
 
     std::string toString() const {
-        return "(" + boost::algorithm::join(data_, ",") + ")";
+        return "(id: " + std::to_string(id_) + ", data: " + boost::algorithm::join(data_, ",") + ")";
     }
 
     explicit operator std::string() const {
         return toString();
     }
 
-    size_t getHash() const {
-        return hash_;
+    size_t getId() const {
+        return id_;
     }
 
     bool operator==(const TableRow &rhs) const {
-        return hash_ == rhs.getHash();
+        return id_ == rhs.getId();
     }
 };
 
@@ -57,6 +71,6 @@ struct std::hash<TableRow>
 {
     std::size_t operator()(const TableRow& s) const noexcept
     {
-        return s.getHash();
+        return s.getId();
     }
 };

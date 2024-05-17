@@ -6,8 +6,7 @@
 
 namespace util {
 
-/* Represents version of PrimitiveCollection with thread-safe deletions for dynamic algorithms
- */
+// Represents version of PrimitiveCollection with thread-safe deletions for dynamic algorithms
 template <typename T>
 class DynamicCollection {
 private:
@@ -15,7 +14,7 @@ private:
     std::mutex mutable mutex_;
 
 public:
-    void Add(T& primitive) {
+    void Add(T&& primitive) {
         std::scoped_lock lock(mutex_);
         collection_.insert(std::move(primitive));
     }
@@ -37,15 +36,27 @@ public:
         return it != collection_.end();
     }
 
+    T Erase(const T& primitive) {
+        std::scoped_lock lock(mutex_);
+        auto it = collection_.find(primitive);
+        T res;
+        if (it != collection_.end()) {
+            res = *it;
+            collection_.erase(it);
+            return res;
+        }
+        return res;
+    }
+
     size_t Size() const noexcept {
         std::scoped_lock lock(mutex_);
         return collection_.size();
     }
 
-    std::vector<T> AsVector() const noexcept {
-        std::vector<T> result_;
+    std::vector<std::string> AsStringVector() const noexcept {
+        std::vector<std::string> result_;
         for (const T &item : collection_) {
-            result_.emplace_back(item);
+            result_.emplace_back(std::string(item));
         }
         return result_;
     }
@@ -56,14 +67,6 @@ public:
 
     std::unordered_multiset<T>& AsUnorderedMultiset() noexcept {
         return collection_;
-    }
-    
-    void Erase(const T& primitive) {
-        std::scoped_lock lock(mutex_);
-        auto it = collection_.find(primitive);
-        if (it != collection_.end()) {
-            collection_.erase(it);
-        }
     }
 };
 

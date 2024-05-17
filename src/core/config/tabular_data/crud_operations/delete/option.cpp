@@ -4,6 +4,6 @@
 
 namespace config {
 using names::kDeleteStatements, descriptions::kDDeleteStatements;
-extern CommonOption<InputTable> const kDeleteStatementsOpt = {
+extern CommonOption<std::vector<size_t>> const kDeleteStatementsOpt = {
         kDeleteStatements, kDDeleteStatements, std::nullopt, nullptr, nullptr};
 }  // namespace config

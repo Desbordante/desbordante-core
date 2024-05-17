@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "config/exceptions.h"
+#include "algorithm.h"
 
 namespace algos {
 
@@ -146,4 +147,7 @@ std::string_view Algorithm::GetDescription(std::string_view option_name) const {
     }
 }
 
+bool Algorithm::IsOptionSet(std::string_view option_name) const {
+    return possible_options_.at(option_name)->IsSet();
+}
 }  // namespace algos
