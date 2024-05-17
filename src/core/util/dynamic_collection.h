@@ -1,12 +1,12 @@
 #pragma once
 
-#include <unordered_set>
 #include <mutex>
-#include "primitive_collection.h"
+#include <unordered_set>
+#include <vector>
 
 namespace util {
 
-// Represents version of PrimitiveCollection with thread-safe deletions for dynamic algorithms
+// Represents version Collection with thread-safe deletions for dynamic algorithms
 template <typename T>
 class DynamicCollection {
 private:
@@ -54,8 +54,8 @@ public:
     }
 
     std::vector<std::string> AsStringVector() const noexcept {
-        std::vector<std::string> result_;
-        for (const T &item : collection_) {
+        std::vector<std::string> result_{};
+        for (const T& item : collection_) {
             result_.emplace_back(std::string(item));
         }
         return result_;

@@ -4,6 +4,6 @@
 
 namespace config {
 using names::kInsertStatements, descriptions::kDInsertStatements;
-extern CommonOption<InputTable> const kInsertStatementsOpt = {
-        kInsertStatements, kDInsertStatements, std::nullopt, nullptr, nullptr};
+extern CommonOption<InputTable> const kInsertStatementsOpt = {kInsertStatements, kDInsertStatements,
+                                                              std::nullopt, nullptr, nullptr};
 }  // namespace config

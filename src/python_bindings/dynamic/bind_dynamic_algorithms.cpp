@@ -4,8 +4,8 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/dynamic/dynamic_algorithm.h"
 #include "algorithms/dynamic/demo/demo_algo.h"
+#include "algorithms/dynamic/dynamic_algorithm.h"
 #include "config/names.h"
 #include "config/tabular_data/crud_operations/operations.h"
 #include "py_util/bind_primitive.h"
@@ -55,7 +55,7 @@ void BindDynamicAlgorithms(py::module_& main_module) {
         }))
         .def("process",
             [](DynamicAlgorithmDemo& algo, py::kwargs const& kwargs) {
-                for (const std::string_view& option_name : CRUD_OPTIONS) {
+                for (const std::string_view& option_name : kCrudOptions) {
                     SetOptionByName(algo, option_name, kwargs);
                 }
                 algo.Execute();

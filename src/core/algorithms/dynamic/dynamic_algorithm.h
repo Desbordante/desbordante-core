@@ -42,7 +42,7 @@ protected:
     // update operations stream (new values)
     InputTable update_new_batch_;
     // stores current table rows ids (after last Execute() method call)
-    std::unordered_set<size_t> table_rows_ids_ {};
+    std::unordered_set<size_t> table_rows_ids_{};
 
 private:
     void AddSpecificNeededOptions(
