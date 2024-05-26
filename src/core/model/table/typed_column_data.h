@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <regex>
 #include <string>
 #include <vector>
@@ -170,20 +171,28 @@ private:
     std::vector<std::string> unparsed_;
     bool is_null_equal_null_;
 
+    inline static std::vector<TypeId> const kAllCandidateTypes = {
+            +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
+    inline static std::regex const kNullRegex = std::regex(Null::kValue.data());
+    inline static std::regex const kEmptyRegex = std::regex(R"(^$)");
     inline static std::unordered_map<TypeId, std::regex> const kTypeIdToRegex = {
-            {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
-            {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
             {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*((E|e)(\+|-)\d*)?$)")},
+            {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
+            {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
             {TypeId::kDate,
-             std::regex(R"(^([0-9]{4})[-.\/]?(1[0-2]|0[1-9])[-.\/]?(3[0-1]|0[1-9]|[1-2][0-9])$)")},
-            {TypeId::kNull, std::regex(Null::kValue.data())},
-            {TypeId::kEmpty, std::regex(R"(^$)")}};
+             std::regex(R"(^([0-9]{4})[-.\/]?(1[0-2]|0[1-9])[-.\/]?(3[0-1]|0[1-9]|[1-2][0-9])$)")}};
+    inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
+            {+TypeId::kInt, std::bitset<5>("01110")},
+            {+TypeId::kBigInt, std::bitset<5>("01100")},
+            {+TypeId::kDouble, std::bitset<5>("01000")},
+            {+TypeId::kString, std::bitset<5>("10000")}};
 
     size_t CalculateMixedBufSize(std::vector<TypeId> const& types_layout,
                                  TypeIdToType const& type_id_to_type) const noexcept;
     std::vector<TypeId> GetTypesLayout(TypeMap const& tm) const;
     TypeIdToType MapTypeIdsToTypes(TypeMap const& tm) const;
-    TypeMap CreateTypeMap() const;
+    TypeId DeduceColumnType() const;
+    TypeMap CreateTypeMap(TypeId const type_id) const;
     TypedColumnData CreateMixedFromTypeMap(std::unique_ptr<Type const> type, TypeMap type_map);
     TypedColumnData CreateConcreteFromTypeMap(std::unique_ptr<Type const> type, TypeMap type_map);
     TypedColumnData CreateFromTypeMap(std::unique_ptr<Type const> type, TypeMap type_map);

@@ -1,5 +1,8 @@
 #include "typed_column_data.h"
 
+#include <bitset>
+#include <cstddef>
+
 #include "column_layout_typed_relation_data.h"
 #include "create_type.h"
 
@@ -18,27 +21,93 @@ size_t GetNextAlignedOffset(size_t cur_offset, size_t align) {
 
 namespace model {
 
-TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap() const {
-    TypeMap type_map;
-    auto const match = [&type_map](std::string const& val, size_t const row) {
-        bool matched = false;
-        for (auto const& [type_id, regex] : kTypeIdToRegex) {
-            if (std::regex_match(val, regex)) {
-                if (type_id == +TypeId::kDate &&
-                    boost::gregorian::from_simple_string(val).is_not_a_date()) {
-                    break;
+TypeId TypedColumnDataFactory::DeduceColumnType() const {
+    bool is_undefined = true;
+    std::bitset<5> candidate_types_bitset("11111");
+    TypeId first_type_id = +TypeId::kUndefined;
+    for (std::size_t i = 0; i != unparsed_.size(); ++i) {
+        if (!std::regex_match(unparsed_[i], kNullRegex) &&
+            !std::regex_match(unparsed_[i], kEmptyRegex)) {
+            is_undefined = false;
+            if (first_type_id != +TypeId::kUndefined) {
+                if (std::regex_match(unparsed_[i], kTypeIdToRegex.at(first_type_id))) {
+                    continue;
                 }
-                type_map[type_id].insert(row);
-                matched = true;
-                break;
+            }
+
+            std::bitset<5> new_candidate_types_bitset("00000");
+            bool matched = false;
+            for (auto const& [type_id, regex] : kTypeIdToRegex) {
+                if (type_id != first_type_id && std::regex_match(unparsed_[i], regex)) {
+                    if (type_id == +TypeId::kDate &&
+                        boost::gregorian::from_simple_string(unparsed_[i]).is_not_a_date()) {
+                        continue;
+                    }
+                    if (first_type_id == +TypeId::kUndefined && !matched) {
+                        first_type_id = type_id;
+                    }
+                    matched = true;
+                    if (type_id != +TypeId::kDate) {
+                        new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
+                        break;
+                    } else {
+                        new_candidate_types_bitset[0] = 1;
+                    }
+                }
+            }
+            if (!matched) {
+                new_candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
+            }
+
+            candidate_types_bitset &= new_candidate_types_bitset;
+            if (candidate_types_bitset.none()) {
+                return +TypeId::kMixed;
             }
         }
-        if (!matched) {
-            type_map[TypeId::kString].insert(row);
+    }
+
+    if (is_undefined) {
+        return +TypeId::kUndefined;
+    }
+
+    for (std::size_t i = 0; i < 5; i++) {
+        if (candidate_types_bitset[i]) {
+            return kAllCandidateTypes[i];
+        }
+    }
+
+    return +TypeId::kMixed;
+}
+
+TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap(TypeId const type_id) const {
+    TypeMap type_map;
+    auto const match = [&type_map, type_id](std::string const& val, size_t const row) {
+        if (std::regex_match(val, kNullRegex)) {
+            type_map[+TypeId::kNull].insert(row);
+        } else if (std::regex_match(val, kEmptyRegex)) {
+            type_map[+TypeId::kEmpty].insert(row);
+        } else if (type_id != +TypeId::kMixed) {
+            type_map[type_id].insert(row);
+        } else {
+            bool matched = false;
+            for (auto const& [type_id, regex] : kTypeIdToRegex) {
+                if (std::regex_match(val, regex)) {
+                    if (type_id == +TypeId::kDate &&
+                        boost::gregorian::from_simple_string(val).is_not_a_date()) {
+                        break;
+                    }
+                    type_map[type_id].insert(row);
+                    matched = true;
+                    break;
+                }
+            }
+            if (!matched) {
+                type_map[TypeId::kString].insert(row);
+            }
         }
     };
 
-    for (size_t i = 0; i != unparsed_.size(); ++i) {
+    for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         match(unparsed_[i], i);
     }
 
@@ -176,21 +245,8 @@ TypedColumnData TypedColumnDataFactory::CreateFromTypeMap(std::unique_ptr<Type c
 }
 
 TypedColumnData TypedColumnDataFactory::CreateFrom() {
-    TypeMap type_map = CreateTypeMap();
-
-    decltype(type_map)::node_type null_node = type_map.extract(TypeId::kNull);
-    decltype(type_map)::node_type empty_node = type_map.extract(TypeId::kEmpty);
-
-    TypeId type_id = TypeId::kMixed;
-
-    if (type_map.empty()) {
-        type_id = TypeId::kUndefined;
-    } else if (type_map.size() == 1) {
-        type_id = type_map.begin()->first;
-    }
-
-    type_map.insert(std::move(null_node));
-    type_map.insert(std::move(empty_node));
+    TypeId const type_id = DeduceColumnType();
+    TypeMap type_map = CreateTypeMap(type_id);
 
     return CreateFromTypeMap(CreateType(type_id, is_null_equal_null_), std::move(type_map));
 }
