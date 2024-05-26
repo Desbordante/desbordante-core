@@ -39,12 +39,12 @@ TEST_P(TestTypeParsing, DefaultTest) {
 INSTANTIATE_TEST_SUITE_P(
     TypeSystem, TestTypeParsing,
     ::testing::Values(
-        TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed},
+        TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kDouble},
                           kWdcAppearances),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kString},
                           kWdcAge),
-        TypeParsingParams({TypeId::kString, TypeId::kMixed, TypeId::kMixed,
-                           TypeId::kMixed},
+        TypeParsingParams({TypeId::kString, TypeId::kDouble, TypeId::kDouble,
+                           TypeId::kDouble},
                           kWdcKepler),
         TypeParsingParams({TypeId::kString, TypeId::kString, TypeId::kMixed,
                            TypeId::kMixed, TypeId::kMixed, TypeId::kString,
@@ -66,11 +66,11 @@ INSTANTIATE_TEST_SUITE_P(
                           kIris),
         TypeParsingParams({TypeId::kUndefined, TypeId::kUndefined, TypeId::kUndefined,
                            TypeId::kInt, TypeId::kString, TypeId::kDouble,
-                           TypeId::kBigInt, TypeId::kMixed, TypeId::kBigInt,
+                           TypeId::kBigInt, TypeId::kDouble, TypeId::kBigInt,
                            TypeId::kMixed, TypeId::kInt},
                           kSimpleTypes),
-        TypeParsingParams({TypeId::kString, TypeId::kDate, TypeId::kDate},
-                          kACShippingDates)));
+        TypeParsingParams({TypeId::kMixed, TypeId::kDate, TypeId::kDate},
+                          kACShippingDates));
 
 // clang-format on
 
