@@ -99,4 +99,5 @@ CSVConfig const kTestDif = CreateCsvConfig("dif_tables/TestDif.csv", ',', true);
 CSVConfig const kTestDif1 = CreateCsvConfig("dif_tables/TestDif1.csv", ',', true);
 CSVConfig const kTestDif2 = CreateCsvConfig("dif_tables/TestDif2.csv", ',', true);
 CSVConfig const kTestDif3 = CreateCsvConfig("dif_tables/TestDif3.csv", ',', true);
+CSVConfig const kSimpleTypes1 = CreateCsvConfig("SimpleTypes1.csv", ',', true);
 }  // namespace tests
