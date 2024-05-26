@@ -26,33 +26,34 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
     std::bitset<5> candidate_types_bitset("11111");
     TypeId first_type_id = +TypeId::kUndefined;
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
-        if (!std::regex_match(unparsed_[i], kNullRegex) &&
-            !std::regex_match(unparsed_[i], kEmptyRegex)) {
+        if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
             if (first_type_id != +TypeId::kUndefined) {
-                if (std::regex_match(unparsed_[i], kTypeIdToRegex.at(first_type_id))) {
+                auto& type_check = kTypeIdToChecker.at(first_type_id);
+                if (type_check(unparsed_[i])) {
+                    // undelimited and delimited dates have different bitsets
+                    if (first_type_id == +TypeId::kDate) {
+                        candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
+                    }
                     continue;
                 }
             }
 
             std::bitset<5> new_candidate_types_bitset("00000");
             bool matched = false;
-            for (auto const& [type_id, regex] : kTypeIdToRegex) {
-                if (type_id != first_type_id && std::regex_match(unparsed_[i], regex)) {
-                    if (type_id == +TypeId::kDate &&
-                        boost::gregorian::from_simple_string(unparsed_[i]).is_not_a_date()) {
-                        continue;
-                    }
+            for (auto const& [type_id, type_check] : kTypeIdToChecker) {
+                if (type_id != first_type_id && type_check(unparsed_[i])) {
                     if (first_type_id == +TypeId::kUndefined && !matched) {
                         first_type_id = type_id;
                     }
                     matched = true;
-                    if (type_id != +TypeId::kDate) {
-                        new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
-                        break;
-                    } else {
-                        new_candidate_types_bitset[0] = 1;
+                    new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
+                    // possible value types are known at the first match except for dates
+                    // (undelimited dates could be ints or doubles and delimited couldn't)
+                    if (type_id == +TypeId::kDate && kUndelimitedDateCheck(unparsed_[i])) {
+                        new_candidate_types_bitset |= kTypeIdToBitset.at(+TypeId::kInt);
                     }
+                    break;
                 }
             }
             if (!matched) {
@@ -82,20 +83,16 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
 TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap(TypeId const type_id) const {
     TypeMap type_map;
     auto const match = [&type_map, type_id](std::string const& val, size_t const row) {
-        if (std::regex_match(val, kNullRegex)) {
+        if (kNullCheck(val)) {
             type_map[+TypeId::kNull].insert(row);
-        } else if (std::regex_match(val, kEmptyRegex)) {
+        } else if (kEmptyCheck(val)) {
             type_map[+TypeId::kEmpty].insert(row);
         } else if (type_id != +TypeId::kMixed) {
             type_map[type_id].insert(row);
         } else {
             bool matched = false;
-            for (auto const& [type_id, regex] : kTypeIdToRegex) {
-                if (std::regex_match(val, regex)) {
-                    if (type_id == +TypeId::kDate &&
-                        boost::gregorian::from_simple_string(val).is_not_a_date()) {
-                        break;
-                    }
+            for (auto const& [type_id, type_check] : kTypeIdToChecker) {
+                if (type_check(val)) {
                     type_map[type_id].insert(row);
                     matched = true;
                     break;
