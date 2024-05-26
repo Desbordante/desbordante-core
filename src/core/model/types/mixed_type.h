@@ -126,7 +126,8 @@ public:
         static std::unordered_map<TypeId, size_t> const type_to_alignment = {
                 {TypeId::kNull, alignof(Null)},     {TypeId::kEmpty, alignof(Empty)},
                 {TypeId::kInt, alignof(Int)},       {TypeId::kDouble, alignof(Double)},
-                {TypeId::kString, alignof(String)}, {TypeId::kBigInt, alignof(BigInt)}};
+                {TypeId::kString, alignof(String)}, {TypeId::kBigInt, alignof(BigInt)},
+                {TypeId::kDate, alignof(Date)}};
         assert(type_to_alignment.find(type_id) != type_to_alignment.end());
         return type_to_alignment.at(type_id);
     }

@@ -31,7 +31,11 @@ public:
     }
 
     void ValueFromStr(std::byte* dest, std::string s) const override {
-        new (dest) Date(boost::gregorian::from_simple_string(s));
+        try {
+            new (dest) Date(boost::gregorian::from_simple_string(s));
+        } catch (...) {
+            new (dest) Date(boost::gregorian::from_undelimited_string(s));
+        }
     }
 
     [[nodiscard]] std::unique_ptr<Type> CloneType() const override {
