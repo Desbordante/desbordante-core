@@ -70,7 +70,10 @@ INSTANTIATE_TEST_SUITE_P(
                            TypeId::kMixed, TypeId::kInt},
                           kSimpleTypes),
         TypeParsingParams({TypeId::kMixed, TypeId::kDate, TypeId::kDate},
-                          kACShippingDates));
+                          kACShippingDates),
+        TypeParsingParams({TypeId::kInt, TypeId::kString, TypeId::kDouble,
+                           TypeId::kMixed, TypeId::kInt, TypeId::kDate,TypeId::kMixed},
+                          kSimpleTypes1)));
 
 // clang-format on
 
