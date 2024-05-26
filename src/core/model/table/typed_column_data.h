@@ -173,15 +173,66 @@ private:
 
     inline static std::vector<TypeId> const kAllCandidateTypes = {
             +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
-    inline static std::regex const kNullRegex = std::regex(Null::kValue.data());
-    inline static std::regex const kEmptyRegex = std::regex(R"(^$)");
     inline static std::unordered_map<TypeId, std::regex> const kTypeIdToRegex = {
-            {TypeId::kDouble, std::regex(R"(^(\+|-)?\d+\.\d*((E|e)(\+|-)\d*)?$)")},
-            {TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
-            {TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
-            {TypeId::kDate,
-             std::regex(R"(^([0-9]{4})[-.\/]?(1[0-2]|0[1-9])[-.\/]?(3[0-1]|0[1-9]|[1-2][0-9])$)")}};
+            {+TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
+            {+TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
+            {+TypeId::kNull, std::regex(Null::kValue.data())},
+            {+TypeId::kEmpty, std::regex(R"(^$)")}};
+    inline static auto const kNullCheck = [](std::string const& val) {
+        return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kNull));
+    };
+    inline static auto const kEmptyCheck = [](std::string const& val) {
+        return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kEmpty));
+    };
+    inline static std::function<bool(std::string const&)> const kUndelimitedDateCheck =
+            [](std::string const& val) {
+                bool is_undelimited_date = false;
+                try {
+                    boost::gregorian::from_undelimited_string(val);
+                    is_undelimited_date = true;
+                } catch (...) {
+                }
+                return is_undelimited_date;
+            };
+    inline static std::function<bool(std::string const&)> const kDelimitedDateCheck =
+            [](std::string const& val) {
+                bool is_simple_date = false;
+                try {
+                    boost::gregorian::from_simple_string(val);
+                    is_simple_date = true;
+                } catch (...) {
+                }
+                return is_simple_date;
+            };
+    inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
+            kTypeIdToChecker = {{TypeId::kDouble,
+                                 [](std::string const& val) {
+                                     bool is_double = false;
+                                     try {
+                                         std::size_t pos = 0;
+                                         std::stod(val, &pos);
+                                         if (pos == val.size()) {
+                                             is_double = true;
+                                         }
+                                     } catch (...) {
+                                     }
+                                     return is_double;
+                                 }},
+                                {TypeId::kBigInt,
+                                 [](std::string const& val) {
+                                     return std::regex_match(val,
+                                                             kTypeIdToRegex.at(+TypeId::kBigInt));
+                                 }},
+                                {TypeId::kInt,
+                                 [](std::string const& val) {
+                                     return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
+                                 }},
+                                {TypeId::kDate, [](std::string const& val) {
+                                     return kDelimitedDateCheck(val) || kUndelimitedDateCheck(val);
+                                 }}};
+    // each 1 represents a possible type from kAllCandidateTypes
     inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
+            {+TypeId::kDate, std::bitset<5>("00001")},  // bitset for delimited dates
             {+TypeId::kInt, std::bitset<5>("01110")},
             {+TypeId::kBigInt, std::bitset<5>("01100")},
             {+TypeId::kDouble, std::bitset<5>("01000")},
