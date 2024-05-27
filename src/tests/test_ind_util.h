@@ -1,9 +1,9 @@
 #pragma once
 #include <list>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
-#include <set>
 
 #include "algorithms/ind/ind.h"
 #include "algorithms/ind/ind_algorithm.h"
