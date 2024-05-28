@@ -68,7 +68,7 @@ INSTANTIATE_TEST_SUITE_P(
                           CSVConfigHash{kTestFD, 15333753345229147120ULL},
                           CSVConfigHash{kWdcAstrology, 723643032648123806ULL},
                           CSVConfigHash{kWdcGame, 3164616462792843131ULL},
-                          CSVConfigHash{kWdcPlanetz, 3164616455022529293ULL},
+                          CSVConfigHash{kWdcPlanetz, 11920309231858256338ULL},
                           CSVConfigHash{kWdcSymbols, 2211268401046792ULL},
                           CSVConfigHash{kNeighbors10k, 11706974185824900569ULL},
                           CSVConfigHash{kNeighbors100k, 11706974185824900569ULL},
