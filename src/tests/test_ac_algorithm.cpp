@@ -177,7 +177,7 @@ TEST_F(ACAlgorithmTest, ColumnTypesPairing) {
     auto a = CreateACAlgorithmInstance(kSimpleTypes, algos::Binop::Addition, 0.0);
     a->Execute();
     auto& ranges = a->GetRangesCollections();
-    EXPECT_EQ(ranges.size(), 1);
+    EXPECT_EQ(ranges.size(), 2);
 }
 
 TEST_F(ACAlgorithmTest, CollectingACExceptions) {
