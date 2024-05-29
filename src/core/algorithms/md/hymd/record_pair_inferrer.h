@@ -11,8 +11,25 @@
 namespace algos::hymd {
 
 class RecordPairInferrer {
+public:
+    struct PairStatistics;
+
+    struct PhaseSwitchHeuristicParameters {
+        static constexpr std::size_t kPairsRequiredForPhaseSwitch = 5;
+
+        // Represents the ratio in 5.3.1 of the "Efficient Discovery of Matching Dependencies"
+        // article, except instead of refined MDs, removed MDs are used in the numerator.
+        double final_lattice_coefficient;
+        static constexpr double kStaleCoefficient = 1 / 21.;
+        static constexpr double kFinalLatticeGrowth = 1 / 2.;
+    };
+
 private:
-    struct Statistics;
+    enum class InferenceStatus {
+        KeepGoing,
+        LatticeIsAlmostFinal,
+        PairsAreStale,
+    };
 
     SimilarityData* const similarity_data_;
     lattice::MdLattice* const lattice_;
@@ -25,12 +42,13 @@ private:
 
     RecordIdentifier next_left_record_ = 0;
 
-    // std::size_t efficiency_reciprocal_ = 100;
+    PhaseSwitchHeuristicParameters heuristic_parameters{1 / 100.};
 
     bool const avoid_same_comparison_processing_ = true;
 
-    void ProcessSimVec(PairComparisonResult const& pair_comparison_result);
-    bool ShouldStopInferring(Statistics const& statistics) const noexcept;
+    PairStatistics ProcessPairComparison(PairComparisonResult const& pair_comparison_result);
+    template <typename StatisticsType>
+    InferenceStatus Evaluate(StatisticsType const& statistics) const noexcept;
 
 public:
     RecordPairInferrer(SimilarityData* similarity_data, lattice::MdLattice* lattice,
