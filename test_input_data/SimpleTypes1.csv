@@ -1,6 +1,6 @@
 Int,String,Double,JustMixed,IntAndDate,Date,MixedWithDate
-12341,asdb,3.142,123,3123,2002-04-05,20020405
-12312341,justs0mestring,3.,123.,2,2020-02-29,2020-02-29
+12341,asdb,3.142,123,20020405,2002-04-05,20020405
+12312341,justs0mestring,3.,123.,20200229,2020-02-29,2020-02-29
 0,"some string within quotes",-3.142,3.,,2007/12/31,123
 -1,"some string"" with quote",-2312.,1111,NULL,"2012.12.12",1
 -10101,something,8321937193.0,NULL,NULL,20150228,2
