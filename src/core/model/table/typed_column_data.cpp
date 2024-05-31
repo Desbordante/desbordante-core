@@ -32,7 +32,7 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
                 auto& type_check = kTypeIdToChecker.at(first_type_id);
                 if (type_check(unparsed_[i])) {
                     // undelimited and delimited dates have different bitsets
-                    if (first_type_id == +TypeId::kDate) {
+                    if (first_type_id == +TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
                         candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
                     }
                     continue;
