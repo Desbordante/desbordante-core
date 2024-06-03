@@ -46,46 +46,7 @@ A brief introduction to the tool and its use cases can be found [here](https://m
 
 ## Console
 
-Usage examples:
-1) Discover all exact functional dependencies in a table stored in a comma-separated file with a header row. In this example the default FD discovery algorithm (HyFD) is used.
-
-```sh
-python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
-```
-
-```text
-[Course Classroom] -> Professor
-[Classroom Semester] -> Professor
-[Classroom Semester] -> Course
-[Professor] -> Course
-[Professor Semester] -> Classroom
-[Course Semester] -> Classroom
-[Course Semester] -> Professor
-```
-
-2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default AFD discovery algorithm (Pyro) is used.
-
-```sh
-python3 cli.py --task=afd --table=../examples/datasets/inventory_afd.csv , True --error=0.1
-```
-
-```text
-[Id] -> ProductName
-[Id] -> Price
-[ProductName] -> Price
-```
-
-3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
-
-```sh
-python3 cli.py --task=mfd_verification --table=../examples/datasets/theatres_mfd.csv , True --lhs_indices=0 --rhs_indices=2 --metric=euclidean --parameter=5
-```
-
-```text
-True
-```
-
-For more information consult documentation and help files.
+For information about the console interface check the [repository](https://github.com/Desbordante/desbordante-cli).
 
 ## Python bindings
 
@@ -249,17 +210,6 @@ $ pip install desbordante
 ```
 
 However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
-
-## CLI installation
-
-**NOTE**: Only Python 3.11+ is supported for CLI
-
-Сlone the repository, change the current directory to the project directory and run the following commands:
-
-```sh
-pip install -r cli/requirements.txt
-python3 cli/cli.py --help
-```
 
 ## Build instructions
 
