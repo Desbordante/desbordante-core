@@ -29,9 +29,15 @@ PYBIND11_MODULE(desbordante, module) {
     if (std::filesystem::exists("logging.conf")) {
         el::Loggers::configureFromGlobal("logging.conf");
     } else {
+        using std::filesystem::is_empty, std::filesystem::remove;
         el::Configurations conf;
         conf.set(el::Level::Global, el::ConfigurationType::Enabled, "false");
         el::Loggers::reconfigureAllLoggers(conf);
+        try {
+            static constexpr auto kElppDefaultFile = "myeasylog.log";
+            if (is_empty(kElppDefaultFile)) remove(kElppDefaultFile);
+        } catch (std::filesystem::filesystem_error&) {
+        }
     }
 
     for (auto bind_func : {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc,
