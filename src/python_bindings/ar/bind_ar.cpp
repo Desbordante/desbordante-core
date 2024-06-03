@@ -34,12 +34,6 @@ void BindAr(py::module_& main_module) {
             .def("get_itemnames", &ARAlgorithm::GetItemNamesVector)
             .def("get_ar_ids", &ARAlgorithm::GetArIDsList);
 
-    auto algos_module = ar_module.def_submodule("algorithms");
-    auto default_algorithm =
-            detail::RegisterAlgorithm<Apriori, ARAlgorithm>(algos_module, "Apriori");
-    algos_module.attr("Default") = default_algorithm;
-
-    // Perhaps in the future there will be a need for:
-    // default_algorithm.def("get_frequent_list", &Apriori::GetFrequentList);
+    BindAlgos<ARAlgorithm, Apriori>(ar_module, {"Apriori"});
 }
 }  // namespace python_bindings

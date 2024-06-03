@@ -54,16 +54,12 @@ void BindOd(py::module_& main_module) {
             .def_readonly("lhs", &ListOD::lhs)
             .def_readonly("rhs", &ListOD::rhs);
 
-    static constexpr auto kFastodName = "Fastod";
-    static constexpr auto kOrderName = "Order";
-
-    auto fastod_algos_module =
-            BindPrimitiveNoBase<algos::Fastod>(od_module, "Fastod")
-                    .def("get_asc_ods", &algos::Fastod::GetAscendingDependencies)
-                    .def("get_desc_ods", &algos::Fastod::GetDescendingDependencies)
-                    .def("get_simple_ods", &algos::Fastod::GetSimpleDependencies);
-    auto order_algos_module =
-            BindPrimitiveNoBase<Order>(od_module, "Order").def("get_list_ods", [](Order& algo) {
+    auto [fastod, od_algos_module] = BindNoBaseAndSetDefault<algos::Fastod>(od_module, "Fastod");
+    fastod.def("get_asc_ods", &algos::Fastod::GetAscendingDependencies)
+            .def("get_desc_ods", &algos::Fastod::GetDescendingDependencies)
+            .def("get_simple_ods", &algos::Fastod::GetSimpleDependencies);
+    detail::RegisterAlgorithm<Order, algos::Algorithm>(od_algos_module, "Order")
+            .def("get_list_ods", [](Order& algo) {
                 OrderDependencies const& map_res = algo.GetValidODs();
                 std::vector<ListOD> res;
                 for (auto const& [lhs, rhs_list] : map_res) {
@@ -73,8 +69,6 @@ void BindOd(py::module_& main_module) {
                 }
                 return res;
             });
-
-    main_module.attr("od_module") = od_module;
 }
 
 }  // namespace python_bindings

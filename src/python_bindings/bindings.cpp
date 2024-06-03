@@ -40,9 +40,10 @@ PYBIND11_MODULE(desbordante, module) {
         }
     }
 
-    for (auto bind_func : {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc,
-                           BindOd, BindFdVerification, BindMfdVerification, BindUccVerification,
-                           BindStatistics, BindInd, BindGfdVerification, BindSplit}) {
+    for (auto bind_func :
+         {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd,
+          BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd,
+          BindGfdVerification, BindSplit}) {
         bind_func(module);
     }
 }

@@ -22,8 +22,13 @@ void BindUcc(py::module_& main_module) {
     py::class_<UCC>(ucc_module, "UCC")
             .def("__str__", &UCC::ToIndicesString)
             .def_property_readonly("indices", &UCC::GetColumnIndicesAsVector);
-    BindPrimitive<HyUCC, PyroUCC>(ucc_module,
-                                  py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_),
-                                  "UccAlgorithm", "get_uccs", {"HyUCC", "PyroUCC"});
+    BindPrimitive<HyUCC, PyroUCC>(
+            ucc_module, py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_), "UccAlgorithm",
+            "get_uccs", {"HyUCC", "PyroUCC"},
+            // TODO: make UCCs independent of the algorithm.
+            // NOTE: a new run of the algorithm will break the previous run's UCCs with this RV
+            // policy. On the contrary, the algorithm's object will not be garbage collected (thus
+            // breaking all UCCs obtained from it) until all UCCs are.
+            py::return_value_policy::reference_internal);
 }
 }  // namespace python_bindings

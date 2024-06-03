@@ -474,8 +474,8 @@ TASK_INFO = {
 }
 
 ALGOS = {
-    Algorithm.pyro: desbordante.fd.algorithms.Pyro,
-    Algorithm.tane: desbordante.fd.algorithms.Tane,
+    Algorithm.pyro: desbordante.afd.algorithms.Pyro,
+    Algorithm.tane: desbordante.afd.algorithms.Tane,
     Algorithm.pfdtane: desbordante.pfd.algorithms.PFDTane,
     Algorithm.hyfd: desbordante.fd.algorithms.HyFD,
     Algorithm.fd_mine: desbordante.fd.algorithms.FdMine,
@@ -487,7 +487,7 @@ ALGOS = {
     Algorithm.aid: desbordante.fd.algorithms.Aid,
     Algorithm.fastod: desbordante.od.algorithms.Fastod,
     Algorithm.order: desbordante.od.algorithms.Order,
-    Algorithm.spider: desbordante.ind.algorithms.Spider,
+    Algorithm.spider: desbordante.aind.algorithms.Spider,
     Algorithm.faida: desbordante.ind.algorithms.Faida,
     Algorithm.fd_first: desbordante.cfd.algorithms.FDFirst,
     Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
