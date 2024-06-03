@@ -1,4 +1,4 @@
-#include "bind_fd_verification.h"
+#include "fd/bind_fd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -8,9 +8,7 @@
 #include "algorithms/fd/verification_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindFdVerification(pybind11::module_& main_module) {
@@ -30,6 +28,8 @@ void BindFdVerification(pybind11::module_& main_module) {
             .def("get_num_error_rows", &FDVerifier::GetNumErrorRows)
             .def("get_highlights", &FDVerifier::GetHighlights);
 
+    // Create AFD verification module alias. We currently consider FD verification and AFD
+    // verification to be the same.
     main_module.attr("afd_verification") = fd_verification_module;
 }
 }  // namespace python_bindings

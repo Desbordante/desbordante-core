@@ -1,4 +1,8 @@
-#include "bind_fd.h"
+#include "fd/bind_fd.h"
+
+#include <cstddef>
+#include <initializer_list>
+#include <vector>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -10,9 +14,9 @@
 #include "py_util/bind_primitive.h"
 #include "util/bitset_utils.h"
 
-namespace {
 namespace py = pybind11;
 
+namespace {
 template <typename ElementType>
 py::tuple VectorToTuple(std::vector<ElementType> vec) {
     std::size_t const size = vec.size();

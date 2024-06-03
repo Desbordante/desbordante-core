@@ -2,7 +2,11 @@
 
 #include <array>
 #include <cstddef>
+#include <sstream>
+#include <string>
+#include <string_view>
 #include <type_traits>
+#include <utility>
 
 #include <pybind11/pybind11.h>
 

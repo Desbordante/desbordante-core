@@ -1,4 +1,4 @@
-#include "bind_ar.h"
+#include "ar/bind_ar.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -7,9 +7,7 @@
 #include "algorithms/association_rules/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindAr(py::module_& main_module) {

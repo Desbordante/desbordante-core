@@ -1,9 +1,13 @@
-#include "opt_to_py.h"
+#include "py_util/opt_to_py.h"
 
 #include <functional>
+#include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 
+#include <boost/any.hpp>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "algorithms/metric/enums.h"
@@ -14,8 +18,9 @@
 #include "config/max_lhs/type.h"
 #include "config/thread_number/type.h"
 
-namespace {
 namespace py = pybind11;
+
+namespace {
 using ConvFunction = std::function<py::object(boost::any)>;
 
 template <typename T>

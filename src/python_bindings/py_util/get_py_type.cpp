@@ -1,4 +1,4 @@
-#include "get_py_type.h"
+#include "py_util/get_py_type.h"
 
 #include <functional>
 #include <typeinfo>
@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <Python.h>
+#include <pybind11/pybind11.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/cfd/enums.h"

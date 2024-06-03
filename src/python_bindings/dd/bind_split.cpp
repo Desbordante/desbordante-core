@@ -1,4 +1,4 @@
-#include "bind_split.h"
+#include "dd/bind_split.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -7,9 +7,7 @@
 #include "algorithms/dd/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindSplit(py::module_& main_module) {

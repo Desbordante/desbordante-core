@@ -1,4 +1,4 @@
-#include "bind_ucc.h"
+#include "ucc/bind_ucc.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -9,10 +9,8 @@
 #include "py_util/bind_primitive.h"
 #include "util/bitset_utils.h"
 
-namespace {
 namespace py = pybind11;
 using model::UCC;
-}  // namespace
 
 namespace python_bindings {
 void BindUcc(py::module_& main_module) {

@@ -6,9 +6,7 @@
 #include "algorithms/gfd/verification_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindGfdVerification(pybind11::module_& main_module) {

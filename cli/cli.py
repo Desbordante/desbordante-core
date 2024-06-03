@@ -469,7 +469,8 @@ TASK_INFO = {
                                     Algorithm.naive_ucc_verifier),
     Task.aucc_verification: TaskInfo([Algorithm.naive_aucc_verifier],
                                      Algorithm.naive_aucc_verifier),
-    Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier, Algorithm.egfd_verifier],
+    Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier,
+                                     Algorithm.egfd_verifier],
                                     Algorithm.naive_gfd_verifier),
 }
 
