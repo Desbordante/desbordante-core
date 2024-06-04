@@ -756,13 +756,13 @@ def algos_options() -> Callable:
                 in option_type_info.items():
             arg = f'--{opt_name}'
             if opt_main_type == list:
-                if opt_additional_types[0] == desbordante.data_types.Table:
+                if opt_additional_types[0] == desbordante.data.Table:
                     click.option(arg, type=(str, str, bool),
                                  multiple=True)(func)
                 else:
                     click.option(arg, multiple=True,
                              type=opt_additional_types[0])(func)
-            elif opt_main_type == desbordante.data_types.Table:
+            elif opt_main_type == desbordante.data.Table:
                 click.option(arg, type=(str, str, bool))(func)
             else:
                 click.option(arg, type=opt_main_type)(func)

@@ -7,7 +7,7 @@
 #include "ar/bind_ar.h"
 #include "bind_main_classes.h"
 #include "cfd/bind_cfd.h"
-#include "data/bind_data_types.h"
+#include "data/bind_data.h"
 #include "dd/bind_split.h"
 #include "fd/bind_fd.h"
 #include "fd/bind_fd_verification.h"
@@ -41,7 +41,7 @@ PYBIND11_MODULE(desbordante, module) {
     }
 
     for (auto bind_func :
-         {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd,
+         {BindMainClasses, BindDataModule, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd,
           BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd,
           BindGfdVerification, BindSplit}) {
         bind_func(module);

@@ -3,5 +3,5 @@
 #include <pybind11/pybind11.h>
 
 namespace python_bindings {
-void BindDataTypes(pybind11::module_& main_module);
+void BindDataModule(pybind11::module_& main_module);
 }  // namespace python_bindings
