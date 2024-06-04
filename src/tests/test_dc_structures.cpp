@@ -8,6 +8,7 @@
 #include "dc/column_operand.h"
 #include "dc/operator.h"
 #include "dc/predicate.h"
+#include "dc/predicate_builder.h"
 #include "table/column_layout_typed_relation_data.h"
 
 namespace tests {
@@ -218,6 +219,8 @@ TEST(Predicate, PredicateCreatesCorrectly) {
             mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
+    // FIXME: temprorary to make test work
+    model::PredicateBuilder pbuilder;
 
     mo::PredicatePtr s_a_less_t_b =
             mo::GetPredicate(mo::Operator(mo::OperatorType::kLess), mo::ColumnOperand(first, true),
