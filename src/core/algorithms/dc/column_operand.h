@@ -1,7 +1,10 @@
 #pragma once
 
+#include <exception>
+
 #include <boost/functional/hash.hpp>
 
+#include "../table/column_layout_relation_data.h"
 #include "table/column.h"
 
 namespace model {
@@ -32,6 +35,23 @@ private:
 
 public:
     ColumnOperand(Column const* column, bool tuple) : column_(column), tuple_(tuple) {}
+
+    ColumnOperand() = default;
+
+    // For conversion from "t.ColumnPosition" or "t.ColumnName"
+    ColumnOperand(std::string str_op, RelationalSchema const& schema) {
+        if (str_op[0] != 't' and str_op[0] != 's') throw std::logic_error("Unknown tuple name");
+
+        tuple_ = str_op[0] == 't';
+        std::string name(str_op.begin() + 2, str_op.end());
+        std::vector<std::unique_ptr<Column>> const& cols = schema.GetColumns();
+        for (std::unique_ptr<Column> const& col : cols) {
+            if (name == col->GetName()) {
+                column_ = col.get();
+                break;
+            }
+        }
+    }
 
     bool operator==(ColumnOperand const& rhs) const {
         return column_ == rhs.column_ && tuple_ == rhs.tuple_;
