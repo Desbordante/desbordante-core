@@ -1,4 +1,4 @@
-#include "bind_data_types.h"
+#include "data/bind_data.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -6,19 +6,14 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_combination.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
-void BindDataTypes(py::module_& main_module) {
-    auto data_module = main_module.def_submodule("data_types");
-    data_module.doc() = R"doc(
-        Contains the types of data supported by Desbordante.
-
-        Currently only used as tags for Algorithm.get_option_type
-    )doc";
-    py::class_<config::InputTable>(data_module, "Table");
+void BindDataModule(py::module_& main_module) {
+    auto data_module = main_module.def_submodule("data");
+    data_module.doc() = "Contains everything related to data itself.";
+    auto table_tag = py::class_<config::InputTable>(data_module, "Table");
+    table_tag.doc() = "Tag type for tabular data.";
 
     using namespace model;
     py::class_<ColumnCombination>(data_module, "ColumnCombination")

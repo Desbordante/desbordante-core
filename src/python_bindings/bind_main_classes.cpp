@@ -14,8 +14,9 @@
 #include "py_util/opt_to_py.h"
 #include "py_util/py_to_any.h"
 
-namespace {
 namespace py = pybind11;
+
+namespace {
 using algos::Algorithm;
 auto const kVoidIndex = std::type_index{typeid(void)};
 

@@ -1,4 +1,4 @@
-#include "bind_ucc_verification.h"
+#include "ucc/bind_ucc_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -6,9 +6,7 @@
 #include "algorithms/ucc/verification_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindUccVerification(pybind11::module_& main_module) {
@@ -22,6 +20,8 @@ void BindUccVerification(pybind11::module_& main_module) {
             .def("get_num_rows_violating_ucc", &UCCVerifier::GetNumRowsViolatingUCC)
             .def("get_clusters_violating_ucc", &UCCVerifier::GetClustersViolatingUCC)
             .def("get_error", &UCCVerifier::GetError);
+    // Create AUCC verification module alias. We currently consider UCC verification and AUCC
+    // verification to be the same.
     main_module.attr("aucc_verification") = ucc_verification_module;
 }
 }  // namespace python_bindings

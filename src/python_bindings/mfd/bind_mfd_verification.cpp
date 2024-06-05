@@ -1,4 +1,4 @@
-#include "bind_mfd_verification.h"
+#include "mfd/bind_mfd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -7,9 +7,7 @@
 #include "algorithms/metric/verification_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindMfdVerification(py::module_& main_module) {

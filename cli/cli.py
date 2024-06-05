@@ -469,13 +469,14 @@ TASK_INFO = {
                                     Algorithm.naive_ucc_verifier),
     Task.aucc_verification: TaskInfo([Algorithm.naive_aucc_verifier],
                                      Algorithm.naive_aucc_verifier),
-    Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier, Algorithm.egfd_verifier],
+    Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier,
+                                     Algorithm.egfd_verifier],
                                     Algorithm.naive_gfd_verifier),
 }
 
 ALGOS = {
-    Algorithm.pyro: desbordante.fd.algorithms.Pyro,
-    Algorithm.tane: desbordante.fd.algorithms.Tane,
+    Algorithm.pyro: desbordante.afd.algorithms.Pyro,
+    Algorithm.tane: desbordante.afd.algorithms.Tane,
     Algorithm.pfdtane: desbordante.pfd.algorithms.PFDTane,
     Algorithm.hyfd: desbordante.fd.algorithms.HyFD,
     Algorithm.fd_mine: desbordante.fd.algorithms.FdMine,
@@ -487,7 +488,7 @@ ALGOS = {
     Algorithm.aid: desbordante.fd.algorithms.Aid,
     Algorithm.fastod: desbordante.od.algorithms.Fastod,
     Algorithm.order: desbordante.od.algorithms.Order,
-    Algorithm.spider: desbordante.ind.algorithms.Spider,
+    Algorithm.spider: desbordante.aind.algorithms.Spider,
     Algorithm.faida: desbordante.ind.algorithms.Faida,
     Algorithm.fd_first: desbordante.cfd.algorithms.FDFirst,
     Algorithm.naive_fd_verifier: desbordante.fd_verification.algorithms.FDVerifier,
@@ -756,13 +757,13 @@ def algos_options() -> Callable:
                 in option_type_info.items():
             arg = f'--{opt_name}'
             if opt_main_type == list:
-                if opt_additional_types[0] == desbordante.data_types.Table:
+                if opt_additional_types[0] == desbordante.data.Table:
                     click.option(arg, type=(str, str, bool),
                                  multiple=True)(func)
                 else:
                     click.option(arg, multiple=True,
                              type=opt_additional_types[0])(func)
-            elif opt_main_type == desbordante.data_types.Table:
+            elif opt_main_type == desbordante.data.Table:
                 click.option(arg, type=(str, str, bool))(func)
             else:
                 click.option(arg, type=opt_main_type)(func)

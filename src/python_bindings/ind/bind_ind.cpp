@@ -15,29 +15,21 @@ void BindInd(py::module_& main_module) {
     using namespace model;
     using namespace algos;
 
+    static constexpr auto kIndName = "IND";
+
     auto ind_module = main_module.def_submodule("ind");
-    py::class_<IND>(ind_module, "IND")
-            .def("__str__", &IND::ToLongString)
-            .def("to_short_string", &IND::ToShortString)
-            .def("to_long_string", &IND::ToLongString)
-            .def("get_lhs", &IND::GetLhs)
-            .def("get_rhs", &IND::GetRhs);
+    auto ind = py::class_<IND>(ind_module, kIndName)
+                       .def("__str__", &IND::ToLongString)
+                       .def("to_short_string", &IND::ToShortString)
+                       .def("to_long_string", &IND::ToLongString)
+                       .def("get_lhs", &IND::GetLhs)
+                       .def("get_rhs", &IND::GetRhs);
 
-    static constexpr auto kSpiderName = "Spider";
-    static constexpr auto kMindName = "Mind";
+    BindPrimitive<Faida>(ind_module, &INDAlgorithm::INDList, "IndAlgorithm", "get_inds", {"Faida"});
 
-    auto ind_algos_module =
-            BindPrimitive<Spider, Faida, Mind>(ind_module, &INDAlgorithm::INDList, "IndAlgorithm",
-                                               "get_inds", {kSpiderName, "Faida", kMindName});
-    auto define_submodule = [&ind_algos_module, &main_module](char const* name,
-                                                              std::vector<char const*> algorithms) {
-        auto algos_module = main_module.def_submodule(name).def_submodule("algorithms");
-        for (auto algo_name : algorithms) {
-            algos_module.attr(algo_name) = ind_algos_module.attr(algo_name);
-        }
-        algos_module.attr("Default") = algos_module.attr(algorithms.front());
-    };
-
-    define_submodule("aind", {kSpiderName, kMindName});
+    auto aind_module = main_module.def_submodule("aind");
+    // Currently there is no AIND primitive, using IND instead.
+    aind_module.attr(kIndName) = ind;
+    BindAlgos<INDAlgorithm, Spider, Mind>(aind_module, {"Spider", "Mind"});
 }
 }  // namespace python_bindings

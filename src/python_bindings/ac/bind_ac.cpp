@@ -1,4 +1,9 @@
-#include "bind_ac.h"
+#include "ac/bind_ac.h"
+
+#include <cstddef>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -7,9 +12,7 @@
 #include "algorithms/algebraic_constraints/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindAc(py::module_& main_module) {
@@ -27,7 +30,7 @@ void BindAc(py::module_& main_module) {
                 std::vector<std::pair<pybind11::float_, pybind11::float_>> res;
                 res.reserve(ranges.ranges.size() / 2);
                 assert(ranges.ranges.size() % 2 == 0);
-                for (size_t i = 0; i < ranges.ranges.size(); i += 2) {
+                for (std::size_t i = 0; i < ranges.ranges.size(); i += 2) {
                     // TODO: change this once a proper conversion mechanism from
                     // `model::INumericType` is implemented
                     std::string l_endpoint =
@@ -42,12 +45,9 @@ void BindAc(py::module_& main_module) {
     BindPrimitiveNoBase<ACAlgorithm>(ac_module, "AcAlgorithm")
             .def("get_ac_ranges", &ACAlgorithm::GetRangesCollections,
                  py::return_value_policy::reference_internal)
-            .def(
-                    "get_ac_exceptions",
-                    [](ACAlgorithm& algo) {
-                        algo.CollectACExceptions();
-                        return algo.GetACExceptions();
-                    },
-                    py::return_value_policy::reference_internal);
+            .def("get_ac_exceptions", [](ACAlgorithm& algo) {
+                algo.CollectACExceptions();
+                return algo.GetACExceptions();
+            });
 }
 }  // namespace python_bindings
