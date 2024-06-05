@@ -22,6 +22,8 @@ private:
     static std::unordered_map<OperatorType, std::string> const kShortStringMap;
 
 public:
+    static std::unordered_map<std::string, OperatorType> const kStringToOperatorMap;
+
     Operator(OperatorType type) : op_(type) {}
 
     bool operator==(Operator const& rhs) const {
@@ -77,6 +79,8 @@ public:
     InitializeTransitivesMap();
 
     static std::unordered_map<OperatorType, std::string> const InitializeShortStringMap();
+
+    static std::unordered_map<std::string, OperatorType> const InitializeStringToOperatorMap();
 };
 
 // NOLINTBEGIN(readability-identifier-naming)

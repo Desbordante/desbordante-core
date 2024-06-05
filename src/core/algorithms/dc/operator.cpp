@@ -74,6 +74,12 @@ std::unordered_map<OperatorType, std::string> const Operator::InitializeShortStr
             {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
 }
 
+std::unordered_map<std::string, OperatorType> const Operator::InitializeStringToOperatorMap() {
+    return {{"==", OperatorType::kEqual},        {"!=", OperatorType::kUnequal},
+            {">", OperatorType::kGreater},       {"<", OperatorType::kLess},
+            {">=", OperatorType::kGreaterEqual}, {"<=", OperatorType::kLessEqual}};
+}
+
 std::unordered_map<OperatorType, OperatorType> const Operator::kInverseMap =
         Operator::InitializeInverseMap();
 std::unordered_map<OperatorType, OperatorType> const Operator::kSymmetricMap =
@@ -84,6 +90,8 @@ std::unordered_map<OperatorType, std::vector<OperatorType>> const Operator::kTra
         Operator::InitializeTransitivesMap();
 std::unordered_map<OperatorType, std::string> const Operator::kShortStringMap =
         Operator::InitializeShortStringMap();
+std::unordered_map<std::string, OperatorType> const Operator::kStringToOperatorMap =
+        Operator::InitializeStringToOperatorMap();
 
 size_t hash_value(model::Operator const& k) noexcept {
     return std::hash<model::Operator>()(k);
