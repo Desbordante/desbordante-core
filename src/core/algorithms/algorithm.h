@@ -108,6 +108,7 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetPossibleOptions() const;
     [[nodiscard]] std::string_view GetDescription(std::string_view option_name) const;
+    [[nodiscard]] bool IsOptionSet(std::string_view option_name) const;
 
     std::unordered_map<std::string_view, config::OptValue> GetOptValues() const {
         std::unordered_map<std::string_view, config::OptValue> opt_values;
