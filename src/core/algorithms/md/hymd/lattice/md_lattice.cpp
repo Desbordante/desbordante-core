@@ -28,13 +28,14 @@ namespace algos::hymd::lattice {
 // TODO: remove recursion
 MdLattice::MdLattice(std::size_t column_matches_size, SingleLevelFunc single_level_func,
                      std::vector<std::vector<model::md::DecisionBoundary>> const& lhs_bounds,
-                     bool prune_nondisjoint)
+                     bool prune_nondisjoint, std::size_t max_cardinality)
     : column_matches_size_(column_matches_size),
       md_root_(Rhs(column_matches_size_, 1.0)),
       support_root_(column_matches_size_),
       get_single_level_(std::move(single_level_func)),
       lhs_bounds_(&lhs_bounds),
-      prune_nondisjoint_(prune_nondisjoint) {}
+      prune_nondisjoint_(prune_nondisjoint),
+      max_cardinality_(max_cardinality) {}
 
 std::optional<DecisionBoundary> MdLattice::SpecializeOneLhs(Index col_match_index,
                                                             DecisionBoundary lhs_bound) const {
@@ -45,12 +46,14 @@ std::optional<DecisionBoundary> MdLattice::SpecializeOneLhs(Index col_match_inde
     return *upper;
 }
 
-void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_higher_lhs_bound,
-                           auto get_higher_other_bound) {
-    Index lhs_spec_index = 0;
+void MdLattice::SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::iterator lhs_iter,
+                                  model::Index spec_child_index,
+                                  model::md::DecisionBoundary spec_past,
+                                  model::Index lhs_spec_index, auto add_method,
+                                  auto support_check_method) {
     auto rhs_begin = rhss.begin(), rhs_end = rhss.end();
-    auto lhs_iter = lhs.begin(), lhs_end = lhs.end();
-    auto add_all_rhs = [&](LhsSpecialization const& lhs_spec, auto method) {
+    auto add_all_rhs = [rhs_begin, rhs_end, &lhs_spec_index, this](
+                               LhsSpecialization const& lhs_spec, auto method) {
         for (auto rhs_it = rhs_begin; rhs_it != rhs_end; ++rhs_it) {
             if (rhs_it->index == lhs_spec_index) {
                 if (!prune_nondisjoint_) {
@@ -67,29 +70,46 @@ void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_higher_l
             (this->*method)({lhs_spec, *rhs_it});
         }
     };
-    auto specialize_element = [&](Index spec_child_index, DecisionBoundary spec_past,
-                                  auto add_method, auto support_check_method) {
-        std::optional<DecisionBoundary> const specialized_lhs_bound =
-                SpecializeOneLhs(lhs_spec_index, spec_past);
-        if (!specialized_lhs_bound.has_value()) return;
-        LhsSpecialization lhs_spec{lhs, {lhs_iter, {spec_child_index, *specialized_lhs_bound}}};
-        if ((this->*support_check_method)(lhs_spec)) return;
-        add_all_rhs(lhs_spec, add_method);
-    };
+    std::optional<DecisionBoundary> const specialized_lhs_bound =
+            SpecializeOneLhs(lhs_spec_index, spec_past);
+    if (!specialized_lhs_bound.has_value()) return;
+    LhsSpecialization lhs_spec{lhs, {lhs_iter, {spec_child_index, *specialized_lhs_bound}}};
+    if ((this->*support_check_method)(lhs_spec)) return;
+    add_all_rhs(lhs_spec, add_method);
+}
+
+void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_higher_lhs_bound,
+                           auto get_higher_other_bound) {
+    Index lhs_spec_index = 0;
+    auto lhs_iter = lhs.begin(), lhs_end = lhs.end();
+    if (lhs.Cardinality() == max_cardinality_) {
+        for (; lhs_iter != lhs_end; ++lhs_iter) {
+            auto const& [child_array_index, bound] = *lhs_iter;
+            lhs_spec_index += child_array_index;
+            SpecializeElement(lhs, rhss, lhs_iter, child_array_index,
+                              get_higher_lhs_bound(lhs_spec_index, bound), lhs_spec_index,
+                              &MdLattice::AddIfMinimalReplace, &MdLattice::IsUnsupportedReplace);
+            ++lhs_spec_index;
+        }
+        return;
+    }
     for (; lhs_iter != lhs_end; ++lhs_iter, ++lhs_spec_index) {
         auto const& [child_array_index, bound] = *lhs_iter;
         for (Index spec_child_index = 0; spec_child_index != child_array_index;
              ++spec_child_index, ++lhs_spec_index) {
-            specialize_element(spec_child_index, get_higher_other_bound(lhs_spec_index),
-                               &MdLattice::AddIfMinimalInsert, &MdLattice::IsUnsupportedNonReplace);
+            SpecializeElement(lhs, rhss, lhs_iter, spec_child_index,
+                              get_higher_other_bound(lhs_spec_index), lhs_spec_index,
+                              &MdLattice::AddIfMinimalInsert, &MdLattice::IsUnsupportedNonReplace);
         }
-        specialize_element(child_array_index, get_higher_lhs_bound(lhs_spec_index, bound),
-                           &MdLattice::AddIfMinimalReplace, &MdLattice::IsUnsupportedReplace);
+        SpecializeElement(lhs, rhss, lhs_iter, child_array_index,
+                          get_higher_lhs_bound(lhs_spec_index, bound), lhs_spec_index,
+                          &MdLattice::AddIfMinimalReplace, &MdLattice::IsUnsupportedReplace);
     }
     for (Index spec_child_index = 0; lhs_spec_index != column_matches_size_;
          ++lhs_spec_index, ++spec_child_index) {
-        specialize_element(spec_child_index, get_higher_other_bound(lhs_spec_index),
-                           &MdLattice::AddIfMinimalAppend, &MdLattice::IsUnsupportedNonReplace);
+        SpecializeElement(lhs, rhss, lhs_iter, spec_child_index,
+                          get_higher_other_bound(lhs_spec_index), lhs_spec_index,
+                          &MdLattice::AddIfMinimalAppend, &MdLattice::IsUnsupportedNonReplace);
     };
 }
 
@@ -557,8 +577,7 @@ void MdLattice::GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>&
                          std::size_t const level_left) {
     Rhs& rhs = cur_node.rhs;
     if (level_left == 0) {
-        if (NotEmpty(rhs))
-            collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &rhs});
+        if (NotEmpty(rhs)) collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &rhs});
         return;
     }
     auto collect = [&](MdBoundMap& bound_map, model::Index child_array_index) {
