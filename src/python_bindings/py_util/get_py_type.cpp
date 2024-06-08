@@ -75,6 +75,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<double, kPyFloat>,
             PyTypePair<size_t, kPyInt>,
             PyTypePair<long double, kPyFloat>,
+            PyTypePair<std::size_t, kPyInt>,
             PyTypePair<algos::metric::Metric, kPyStr>,
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::PfdErrorMeasureType, kPyStr>,

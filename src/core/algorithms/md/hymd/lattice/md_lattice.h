@@ -100,6 +100,7 @@ private:
     SingleLevelFunc const get_single_level_;
     std::vector<std::vector<model::md::DecisionBoundary>> const* const lhs_bounds_;
     bool const prune_nondisjoint_;
+    std::size_t const max_cardinality_;
 
     [[nodiscard]] bool HasGeneralization(Md const& md) const;
 
@@ -112,7 +113,8 @@ private:
             MdLhs::iterator cur_lhs_iter, std::vector<model::Index> const& indices) const;
 
     void TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
-                       PairComparisonResult const& pair_comparison_result, MdLhs const& cur_node_lhs);
+                       PairComparisonResult const& pair_comparison_result,
+                       MdLhs const& cur_node_lhs);
     void CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
                                     MdLhs& cur_node_lhs,
                                     PairComparisonResult const& pair_comparison_result,
@@ -154,6 +156,9 @@ private:
 
     [[nodiscard]] std::optional<model::md::DecisionBoundary> SpecializeOneLhs(
             model::Index col_match_index, model::md::DecisionBoundary lhs_bound) const;
+    void SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::iterator lhs_iter,
+                           model::Index spec_child_index, model::md::DecisionBoundary spec_past,
+                           model::Index lhs_spec_index, auto add_method, auto support_check_method);
     void Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_higher_lhs_bound,
                     auto get_higher_other_bound);
     void Specialize(MdLhs const& lhs, PairComparisonResult const& pair_comparison_result,
@@ -166,7 +171,7 @@ private:
 public:
     explicit MdLattice(std::size_t column_matches_size, SingleLevelFunc single_level_func,
                        std::vector<std::vector<model::md::DecisionBoundary>> const& lhs_bounds,
-                       bool prune_nondisjoint);
+                       bool prune_nondisjoint, std::size_t max_cardinality);
 
     std::size_t GetColMatchNumber() const noexcept {
         return column_matches_size_;
