@@ -15,16 +15,17 @@ std::string DC::DCToString() {
 }
 
 std::vector<unsigned> DC::GetColumnIndicesWithOperator(Operator op) {
-    std::vector<unsigned> res;
+    std::set<unsigned> res;
     for (Predicate pred : predicates_) {
         if (pred.GetOperator() == op) {
             auto leftInd = pred.GetLeftOperand().GetColumn()->GetIndex();
             auto rightInd = pred.GetRightOperand().GetColumn()->GetIndex();
-            res.insert(res.end(), {leftInd, rightInd});
+            res.insert(rightInd);
+            res.insert(leftInd);
         }
     }
-
-    return res;
+    
+    return std::vector(res.begin(), res.end());
 }
 
 }  // namespace model

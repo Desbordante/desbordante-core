@@ -21,11 +21,13 @@ private:
     bool VerifyDC();
     void ConvertToInequality();
     model::DC ParseDCString(std::string dc_string);
-    bool CheckOneOrZeroInequality();
+    bool CheckOneInequality();
+    bool CheckAllEquality();
 
     // Verify DC in case if it contains only one heterogeneous or homogeneous inequality
     // (>, >=, <=, <) predicate and others predicates are only homogeneous equality ones.
     bool VerifyOneInequality();
+    bool VerifyAllEquality();
     std::vector<std::byte const*> GetTuple(std::vector<unsigned> const& indices, size_t row);
     std::vector<unsigned> ByteVecToUnsignedVec(const std::vector<std::byte const*> vec,
                                                std::vector<unsigned> const& indices);

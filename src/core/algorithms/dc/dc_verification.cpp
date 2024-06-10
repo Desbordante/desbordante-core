@@ -50,9 +50,11 @@ unsigned long long int DCVerification::ExecuteInternal() {
     // ConvertToInequality();
 
     dc_ = ParseDCString(dc_string_);
-    if (CheckOneOrZeroInequality())
+    if (CheckAllEquality()) {
+        result_ = VerifyAllEquality();
+    } else if (CheckOneInequality()) {
         result_ = VerifyOneInequality();
-    else {
+    } else {
         result_ = VerifyDC();
     }
 
@@ -71,7 +73,19 @@ bool DCVerification::VerifyDC() {
     return true;
 }
 
-bool DCVerification::CheckOneOrZeroInequality() {
+bool DCVerification::CheckAllEquality() {
+    std::vector<mo::Predicate> predicates = dc_.GetPredicates();
+
+    for (mo::Predicate const& pred : predicates) {
+        mo::Operator op = pred.GetOperator();
+        mo::ColumnOperand l = pred.GetLeftOperand(), r = pred.GetRightOperand();
+        if (op != mo::OperatorType::kEqual or l.GetColumn() != r.GetColumn()) return false;
+    }
+
+    return true;
+}
+
+bool DCVerification::CheckOneInequality() {
     std::vector<mo::Predicate> predicates = dc_.GetPredicates();
     size_t count_eq = 0, count_ineq = 0;
 
@@ -85,23 +99,34 @@ bool DCVerification::CheckOneOrZeroInequality() {
             count_ineq++;
     }
 
-    return count_eq + count_ineq == predicates.size() && count_ineq <= 1;
+    return count_eq + count_ineq == predicates.size() && count_ineq == 1;
+}
+
+bool DCVerification::VerifyAllEquality() {
+    std::vector<unsigned> const indices =
+            dc_.GetColumnIndicesWithOperator(mo::OperatorType::kEqual);
+
+    std::unordered_set<unsigned> res;
+    for (size_t i = 0; i < data_.size(); i++) {
+        std::vector<std::byte const*> tuple = GetTuple(indices, i);
+        std::vector<unsigned> hash_tuple = ByteVecToUnsignedVec(tuple, indices);
+        unsigned key = boost::hash_value(hash_tuple);
+        if (res.find(key) != res.end()) return false;
+        res.insert(key);
+    }
+
+    return true;
 }
 
 bool DCVerification::VerifyOneInequality() {
-    const std::vector<unsigned> indices =
+    std::vector<unsigned> const indices =
             dc_.GetColumnIndicesWithOperator(mo::OperatorType::kEqual);
     std::vector<mo::Predicate> predicates = dc_.GetPredicates();
     mo::PredicatePtr ineq_pred = nullptr;
-    for (const mo::Predicate& pred : predicates) {
+    for (mo::Predicate const& pred : predicates) {
         auto pred_type = pred.GetOperator().GetType();
         if (pred_type != mo::OperatorType::kEqual and pred_type != mo::OperatorType::kUnequal)
             ineq_pred = &pred;
-    }
-
-    for (auto ind : indices) {
-        mo::TypeId typeId = data_[ind].GetTypeId();
-        if (!mo::Type::IsOrdered(typeId)) return false;
     }
 
     mo::ColumnOperand operandA = ineq_pred->GetLeftOperand();
@@ -139,16 +164,18 @@ bool DCVerification::VerifyOneInequality() {
             minB[key] = maxB[key] = nullptr;
         } else if (minA[key] != nullptr) {
             if (ineq_pred == nullptr)
-                if ((op.GetType() == mo::OperatorType::kLess or
-                     op.GetType() == mo::OperatorType::kLessEqual) and
-                    (op.Eval(minA[key], tuple[indB], *res_type) or
-                     op.Eval(tuple[indA], maxB[key], *res_type)))
-                    return false;
+                return false;
 
-            if ((op.GetType() == mo::OperatorType::kGreater or
-                 op.GetType() == mo::OperatorType::kGreaterEqual) and
-                (op.Eval(maxA[key], tuple[indB], *res_type) or
-                 op.Eval(tuple[indA], minB[key], *res_type)))
+            else if ((op.GetType() == mo::OperatorType::kLess or
+                      op.GetType() == mo::OperatorType::kLessEqual) and
+                     (op.Eval(minA[key], tuple[indB], *res_type) or
+                      op.Eval(tuple[indA], maxB[key], *res_type)))
+                return false;
+
+            else if ((op.GetType() == mo::OperatorType::kGreater or
+                      op.GetType() == mo::OperatorType::kGreaterEqual) and
+                     (op.Eval(maxA[key], tuple[indB], *res_type) or
+                      op.Eval(tuple[indA], minB[key], *res_type)))
                 return false;
             minA[key] = std::min(minA[key], tuple[indA], typeA.GetComparator());
             minB[key] = std::min(minB[key], tuple[indB], typeB.GetComparator());
@@ -164,7 +191,7 @@ bool DCVerification::VerifyOneInequality() {
     return true;
 }
 
-std::vector<unsigned> DCVerification::ByteVecToUnsignedVec(const std::vector<std::byte const*> vec,
+std::vector<unsigned> DCVerification::ByteVecToUnsignedVec(std::vector<std::byte const*> const vec,
                                                            std::vector<unsigned> const& indices) {
     std::vector<unsigned> res(vec.size());
     for (auto ind : indices) {
