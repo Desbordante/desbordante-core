@@ -30,6 +30,10 @@ public:
         return op_ == rhs.op_;
     }
 
+    bool operator!=(Operator const& rhs) const {
+        return op_ != rhs.op_;
+    }
+
     bool Eval(std::byte const* v1, std::byte const* v2, Type const& type) const;
 
     // 'a op b' <=> !'a op.inverse b'
