@@ -95,7 +95,8 @@ bool DCVerification::CheckOneInequality() {
 
         if (op == mo::OperatorType::kEqual and l.GetColumn() == r.GetColumn())
             count_eq++;
-        else if (op != mo::OperatorType::kEqual and op != mo::OperatorType::kUnequal)
+        else if (op != mo::OperatorType::kEqual and op != mo::OperatorType::kUnequal and
+                 l.GetColumn() != r.GetColumn())
             count_ineq++;
     }
 
@@ -107,8 +108,8 @@ bool DCVerification::VerifyAllEquality() {
             dc_.GetColumnIndicesWithOperator(mo::OperatorType::kEqual);
 
     std::unordered_set<unsigned> res;
-    for (size_t i = 0; i < data_.size(); i++) {
-        std::vector<std::byte const*> tuple = GetTuple(indices, i);
+    for (size_t i = 0; i < data_[0].GetNumRows(); i++) {
+        std::vector<std::byte const*> tuple = GetTuple(i);
         std::vector<unsigned> hash_tuple = ByteVecToUnsignedVec(tuple, indices);
         unsigned key = boost::hash_value(hash_tuple);
         if (res.find(key) != res.end()) return false;
@@ -119,8 +120,6 @@ bool DCVerification::VerifyAllEquality() {
 }
 
 bool DCVerification::VerifyOneInequality() {
-    std::vector<unsigned> const indices =
-            dc_.GetColumnIndicesWithOperator(mo::OperatorType::kEqual);
     std::vector<mo::Predicate> predicates = dc_.GetPredicates();
     mo::PredicatePtr ineq_pred = nullptr;
     for (mo::Predicate const& pred : predicates) {
@@ -151,10 +150,13 @@ bool DCVerification::VerifyOneInequality() {
     } else
         return false;
 
+    std::vector<unsigned> const indices =
+            dc_.GetColumnIndicesWithOperator(mo::OperatorType::kEqual);
     std::unordered_map<unsigned, std::byte const*> minA, minB, maxA, maxB;
 
-    for (size_t i = 0; i < data_.size(); i++) {
-        std::vector<std::byte const*> tuple = GetTuple(indices, i);
+    for (size_t i = 0; i < data_[0].GetNumRows(); i++) {
+        std::vector<std::byte const*> tuple = GetTuple(i);
+        ;
         std::vector<unsigned> hash_tuple = ByteVecToUnsignedVec(tuple, indices);
         unsigned key = boost::hash_value(hash_tuple);
 
@@ -162,21 +164,25 @@ bool DCVerification::VerifyOneInequality() {
         if (minA.find(key) == minA.end()) {
             minA[key] = maxA[key] = nullptr;
             minB[key] = maxB[key] = nullptr;
-        } else if (minA[key] != nullptr) {
-            if (ineq_pred == nullptr)
-                return false;
+        }
 
-            else if ((op.GetType() == mo::OperatorType::kLess or
-                      op.GetType() == mo::OperatorType::kLessEqual) and
-                     (op.Eval(minA[key], tuple[indB], *res_type) or
-                      op.Eval(tuple[indA], maxB[key], *res_type)))
+        if (minA[key] != nullptr) {
+            if ((op.GetType() == mo::OperatorType::kLess or
+                 op.GetType() == mo::OperatorType::kLessEqual) and
+                (op.Eval(minA[key], tuple[indB], *res_type) or
+                 op.Eval(tuple[indA], maxB[key], *res_type))) {
+                LOG(INFO) << "DC Verification fails at row number " << i + 2;
                 return false;
+            }
 
             else if ((op.GetType() == mo::OperatorType::kGreater or
                       op.GetType() == mo::OperatorType::kGreaterEqual) and
                      (op.Eval(maxA[key], tuple[indB], *res_type) or
-                      op.Eval(tuple[indA], minB[key], *res_type)))
+                      op.Eval(tuple[indA], minB[key], *res_type))) {
+                LOG(INFO) << "DC Verification fails at row number " << i + 2;
                 return false;
+            }
+
             minA[key] = std::min(minA[key], tuple[indA], typeA.GetComparator());
             minB[key] = std::min(minB[key], tuple[indB], typeB.GetComparator());
             maxA[key] = std::max(maxA[key], tuple[indA], typeA.GetComparator());
@@ -193,7 +199,8 @@ bool DCVerification::VerifyOneInequality() {
 
 std::vector<unsigned> DCVerification::ByteVecToUnsignedVec(std::vector<std::byte const*> const vec,
                                                            std::vector<unsigned> const& indices) {
-    std::vector<unsigned> res(vec.size());
+    std::vector<unsigned> res;
+    res.reserve(vec.size());
     for (auto ind : indices) {
         mo::Type const& type = data_[ind].GetType();
         mo::Type::Hasher hasher = type.GetHasher();
@@ -201,6 +208,17 @@ std::vector<unsigned> DCVerification::ByteVecToUnsignedVec(std::vector<std::byte
     }
 
     return res;
+
+    // for (size_t i = 0; i < vec.size(); i++) {
+    //     if (i < 2) {
+    //         auto res = mo::Type::GetValue<mo::Int>(vec[indices[i] - 1]);
+    //         LOG(INFO) << "index:" << indices[i] << "value: " << res;
+    //     } else {
+    //         auto res = mo::Type::GetValue<mo::String>(vec[indices[i] - 1]);
+    //         LOG(INFO) << "index:" << indices[i] << "value: " << res;
+    //     }
+    // }
+    // return {};
 }
 
 mo::DC DCVerification::ParseDCString(std::string dc_string) {
@@ -213,7 +231,6 @@ mo::DC DCVerification::ParseDCString(std::string dc_string) {
     for (auto& token : tokens) {
         std::replace_if(token.begin(), token.end(), boost::is_any_of("!()"), ' ');
         boost::trim(token);
-        LOG(INFO) << token;
         std::vector<std::string> predicate_parts;
         boost::split(predicate_parts, token, boost::is_any_of(" "));
         predicates.push_back(
@@ -225,12 +242,12 @@ mo::DC DCVerification::ParseDCString(std::string dc_string) {
     return {predicates};
 }
 
-std::vector<std::byte const*> DCVerification::GetTuple(std::vector<unsigned> const& indices,
-                                                       size_t row) {
+std::vector<std::byte const*> DCVerification::GetTuple(size_t row) {
     std::vector<std::byte const*> res;
-    for (auto ind : indices) {
-        res.push_back(data_[ind].GetValue(row));
+    for (auto const& col : data_) {
+        res.push_back(col.GetValue(row));
     }
+
     return res;
 }
 

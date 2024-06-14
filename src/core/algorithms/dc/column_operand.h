@@ -48,9 +48,10 @@ public:
         for (std::unique_ptr<Column> const& col : cols) {
             if (name == col->GetName()) {
                 column_ = col.get();
-                break;
+                return;
             }
         }
+        throw std::logic_error("Unknown column name");
     }
 
     bool operator==(ColumnOperand const& rhs) const {
