@@ -20,6 +20,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [verifying_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_aucc.py) — a scenario showing how to verify an approximate unique column combination.
 + [verifying_fd_afd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_fd_afd.py) — a scenario showing how to verify exact and approximate functional dependencies.
 + [verifying_gfd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_gfd) — a scenario showing how to verify a graph functional dependency.
++ [verifying_nd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_nd) — a scenario showing how to verify numerical dependencies.
 + [verifying_mfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_mfd.py) — a scenario showing how to verify metric functional dependencies.
 + [verifying_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_ucc.py) — a scenario showing how to verify a unique column combination.
 
