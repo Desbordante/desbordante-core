@@ -100,4 +100,22 @@ CSVConfig const kTestDif1 = CreateCsvConfig("dif_tables/TestDif1.csv", ',', true
 CSVConfig const kTestDif2 = CreateCsvConfig("dif_tables/TestDif2.csv", ',', true);
 CSVConfig const kTestDif3 = CreateCsvConfig("dif_tables/TestDif3.csv", ',', true);
 CSVConfig const kSimpleTypes1 = CreateCsvConfig("SimpleTypes1.csv", ',', true);
+CSVConfig const kTestDynamicFDInit = CreateCsvConfig("dynamic_fd/TestDynamicInit.csv", ',', true);
+CSVConfig const kTestDynamicFDEmpty = CreateCsvConfig("dynamic_fd/TestDynamicEmpty.csv", ',', true);
+CSVConfig const kTestDynamicFDInsert =
+        CreateCsvConfig("dynamic_fd/TestDynamicInsert.csv", ',', true);
+CSVConfig const kTestDynamicFDInsertBad1 =
+        CreateCsvConfig("dynamic_fd/TestDynamicInsertBad1.csv", ',', true);
+CSVConfig const kTestDynamicFDInsertBad2 =
+        CreateCsvConfig("dynamic_fd/TestDynamicInsertBad2.csv", ',', true);
+CSVConfig const kTestDynamicFDUpdate =
+        CreateCsvConfig("dynamic_fd/TestDynamicUpdate.csv", ',', true);
+CSVConfig const kTestDynamicFDUpdateBad1 =
+        CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad1.csv", ',', true);
+CSVConfig const kTestDynamicFDUpdateBad2 =
+        CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad2.csv", ',', true);
+CSVConfig const kTestDynamicFDUpdateBad3 =
+        CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad3.csv", ',', true);
+CSVConfig const kTestDynamicFDUpdateBad4 =
+        CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
 }  // namespace tests

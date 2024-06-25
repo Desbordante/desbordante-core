@@ -88,4 +88,14 @@ extern CSVConfig const kTestDif1;
 extern CSVConfig const kTestDif2;
 extern CSVConfig const kTestDif3;
 extern CSVConfig const kSimpleTypes1;
+extern CSVConfig const kTestDynamicFDInit;
+extern CSVConfig const kTestDynamicFDEmpty;
+extern CSVConfig const kTestDynamicFDInsert;
+extern CSVConfig const kTestDynamicFDInsertBad1;
+extern CSVConfig const kTestDynamicFDInsertBad2;
+extern CSVConfig const kTestDynamicFDUpdate;
+extern CSVConfig const kTestDynamicFDUpdateBad1;
+extern CSVConfig const kTestDynamicFDUpdateBad2;
+extern CSVConfig const kTestDynamicFDUpdateBad3;
+extern CSVConfig const kTestDynamicFDUpdateBad4;
 }  // namespace tests

@@ -26,6 +26,7 @@ constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
 constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
+constexpr PyTypeObject* const kPySet = &PySet_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -84,6 +85,7 @@ py::tuple GetPyType(std::type_index type_index) {
              []() { return MakeTypeTuple(kPyList, py::type::of<config::InputTable>()); }},
             PyTypePair<std::filesystem::path, kPyStr>,
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
+            PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
     };
     return type_map.at(type_index)();
 }
