@@ -105,4 +105,7 @@ constexpr auto kDMemLimitMB = "memory limit im MBs";
 constexpr auto kDDifferenceTable = "CSV table containing difference limits for each column";
 constexpr auto kDNumRows = "Use only first N rows of the table";
 constexpr auto kDNUmColumns = "Use only first N columns of the table";
+constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";
+constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
+constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
 }  // namespace config::descriptions
