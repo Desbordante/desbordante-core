@@ -9,6 +9,7 @@
 #include "cfd/bind_cfd.h"
 #include "data/bind_data_types.h"
 #include "dd/bind_split.h"
+#include "dynamic/bind_dynamic_fd_verification.h"
 #include "fd/bind_fd.h"
 #include "fd/bind_fd_verification.h"
 #include "gfd/bind_gfd_verification.h"
@@ -34,9 +35,10 @@ PYBIND11_MODULE(desbordante, module) {
         el::Loggers::reconfigureAllLoggers(conf);
     }
 
-    for (auto bind_func : {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc,
-                           BindOd, BindFdVerification, BindMfdVerification, BindUccVerification,
-                           BindStatistics, BindInd, BindGfdVerification, BindSplit}) {
+    for (auto bind_func :
+         {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd,
+          BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd,
+          BindGfdVerification, BindSplit, BindDynamicFdVerification}) {
         bind_func(module);
     }
 }
