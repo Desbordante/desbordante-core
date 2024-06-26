@@ -13,8 +13,8 @@
 ## Table of Contents
 
 - [Main Features](#main-features)
-- [Usage Examples](#usage-examples)
 - [Installation](#installation)
+- [Usage Examples](#usage-examples)
 - [Contacts and Q&A](#contacts-and-qa)
 
 # Main Features
@@ -45,13 +45,30 @@ The currently supported data patterns are:
 
 For more information about the supported patterns check the main [repo](https://github.com/Desbordante/desbordante-core).
 
-## Usage examples
+## Installation
 
-Usage examples:
+**Requrements**:
+* Python 3.11+
+* pipx
+* [`desbordante` package](https://pypi.org/project/desbordante/) requirements
+
+### PyPI
+Run the following command:
+```sh
+pipx install desbordante-cli
+```
+### Git
+```sh
+pipx install git+https://github.com/desbordante/desbordante-cli
+```
+
+## Usage examples
+Example datasets can be found at main [repo](https://github.com/Desbordante/desbordante-core)
+
 1) Discover all exact functional dependencies in a table stored in a comma-separated file with a header row. In this example the default FD discovery algorithm (HyFD) is used.
 
 ```sh
-python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
+desbordante --task=fd --table=../examples/datasets/university_fd.csv , True
 ```
 
 ```text
@@ -67,7 +84,7 @@ python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
 2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default AFD discovery algorithm (Pyro) is used.
 
 ```sh
-python3 cli.py --task=afd --table=../examples/datasets/inventory_afd.csv , True --error=0.1
+desbordante --task=afd --table=../examples/datasets/inventory_afd.csv , True --error=0.1
 ```
 
 ```text
@@ -79,7 +96,7 @@ python3 cli.py --task=afd --table=../examples/datasets/inventory_afd.csv , True 
 3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
 
 ```sh
-python3 cli.py --task=mfd_verification --table=../examples/datasets/theatres_mfd.csv , True --lhs_indices=0 --rhs_indices=2 --metric=euclidean --parameter=5
+desbordante --task=mfd_verification --table=../examples/datasets/theatres_mfd.csv , True --lhs_indices=0 --rhs_indices=2 --metric=euclidean --parameter=5
 ```
 
 ```text
@@ -87,20 +104,10 @@ True
 ```
 
 For more information check the --help option:
-
 ```sh
 desbordante --help
 ```
 
-## Installation
+# Contacts and Q&A
 
-The source code is currently hosted on GitHub at https://github.com/Desbordante/desbordante-console. In order for this to run, first you have to have install the latest version of the main Desbordante [package](https://pypi.org/project/desbordante/).
-
-**NOTE**: Only Python 3.11+ is supported for CLI
-
-Run the following commands:
-
-```sh
-pip install -r cli/requirements.txt
-python3 cli/cli.py --help
-```
+If you have any questions regarding the tool you can create an [issue](https://github.com/Desbordante/desbordante-cli/issues) at GitHub.
