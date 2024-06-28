@@ -25,6 +25,7 @@ class Task(StrEnum):
     ucc_verification = auto()
     aucc_verification = auto()
     gfd_verification = auto()
+    nd_verification = auto()
 
 
 class Algorithm(StrEnum):
@@ -53,6 +54,7 @@ class Algorithm(StrEnum):
     naive_gfd_verifier = auto()
     gfd_verifier = auto()
     egfd_verifier = auto()
+    nd_verifier = auto()
 
 
 HELP = 'help'
@@ -129,6 +131,7 @@ Currently, the console version of Desbordante supports:
 9) Verification of metric dependencies
 10) Verification of exact unique column combinations
 11) Verification of approximate unique column combinations
+12) Verification of numerical dependencies
 If you need other types, you should look into the C++ code, the Python
 bindings or the Web version.
 
@@ -269,6 +272,11 @@ Default: NAIVE_AUCC_VERIFIER
 GFD_VERIFICATION_HELP = '''
 Algorithms: NAIVE_GFD_VERIFIER, GFD_VERIFIER, EGFD_VERIFIER
 '''
+# TODO: ND_VERIFICATION_HELP
+ND_VERIFICATION_HELP = '''
+Algorithms: ND_VERIFIER
+Default: ND_VERIFIER
+'''
 PYRO_HELP = '''A modern algorithm for discovery of approximate functional
 dependencies. Approximate functional dependencies are defined in the
 “Efficient Discovery of Approximate Dependencies” paper by S.Kruse and
@@ -388,6 +396,9 @@ APRIORI_HELP = '''An algorithm for frequent item set mining and association
 rule discovery. For more information, refer to the "Fast Algorithms for 
 Mining Association Rules" paper by Agrawal and Srikant from 1994.
 '''
+# TODO: ND_VERIFIER_HELP
+ND_VERIFIER_HELP = '''
+'''
 
 OPTION_TYPES = {
     str: 'STRING',
@@ -410,6 +421,7 @@ TASK_HELP_PAGES = {
     Task.ucc_verification: UCC_VERIFICATION_HELP,
     Task.aucc_verification: AUCC_VERIFICATION_HELP,
     Task.gfd_verification: GFD_VERIFICATION_HELP,
+    Task.nd_verification: ND_VERIFICATION_HELP,
 }
 
 ALGO_HELP_PAGES = {
@@ -437,7 +449,8 @@ ALGO_HELP_PAGES = {
     Algorithm.naive_gfd_verifier: GFD_VERIFIER_HELP,
     Algorithm.gfd_verifier: GFD_VERIFIER_HELP,
     Algorithm.egfd_verifier: GFD_VERIFIER_HELP,
-    Algorithm.apriori: APRIORI_HELP
+    Algorithm.apriori: APRIORI_HELP,
+    Algorithm.nd_verifier: ND_VERIFIER_HELP,
 }
 
 TaskInfo = namedtuple('TaskInfo', ['algos', 'default'])
@@ -471,6 +484,7 @@ TASK_INFO = {
                                      Algorithm.naive_aucc_verifier),
     Task.gfd_verification: TaskInfo([Algorithm.naive_gfd_verifier, Algorithm.gfd_verifier, Algorithm.egfd_verifier],
                                     Algorithm.naive_gfd_verifier),
+    Task.nd_verification: TaskInfo([Algorithm.nd_verifier], Algorithm.nd_verifier),
 }
 
 ALGOS = {
@@ -498,7 +512,8 @@ ALGOS = {
     Algorithm.naive_gfd_verifier: desbordante.gfd_verification.algorithms.NaiveGfdValid,
     Algorithm.gfd_verifier: desbordante.gfd_verification.algorithms.GfdValid,
     Algorithm.egfd_verifier: desbordante.gfd_verification.algorithms.EGfdValid,
-    Algorithm.apriori: desbordante.ar.algorithms.Apriori
+    Algorithm.apriori: desbordante.ar.algorithms.Apriori,
+    Algorithm.nd_verifier: desbordante.nd_verification.algorithms.NDVerifier,
 }
 
 
@@ -640,6 +655,8 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_cfds()
             case Algorithm.apriori:
                 result = algo.get_ars()
+            case Algorithm.nd_verifier:
+                result = algo.nd_holds
             case _:
                 assert False, 'No matching get_result function.'
         return result
