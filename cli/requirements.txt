@@ -1,2 +1,2 @@
 click==8.1.6
-desbordante==2.0.0
+desbordante==2.1.0
