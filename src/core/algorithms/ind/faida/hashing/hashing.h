@@ -2,7 +2,6 @@
 
 #include <string>
 
-#include "immintrin.h"
 #include "murmur_hash_3.h"
 
 namespace algos::faida::hashing {
