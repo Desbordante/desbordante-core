@@ -1,5 +1,8 @@
 #include "combined_inclusion_tester.h"
 
+#ifdef __AVX2__
+#include "immintrin.h"
+#endif
 #include "algorithms/ind/faida/hashing/hashing.h"
 #include "util/parallel_for.h"
 
