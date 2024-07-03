@@ -28,10 +28,7 @@ void MinPickerLattice::ExcludeGeneralizationRhs(Node const& cur_node,
     }
     auto const& [child_array_index, next_lhs_bound] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    OptionalChild const& optional_child = cur_node.children[child_array_index];
-    if (!optional_child.has_value()) return;
-    Node::BoundMap const& bound_map = *optional_child;
-    for (auto const& [bound, node] : bound_map) {
+    for (auto const& [bound, node] : cur_node.children[child_array_index]) {
         if (bound > next_lhs_bound) break;
         ExcludeGeneralizationRhs(node, messenger, cur_lhs_iter, considered_indices);
         if (considered_indices.none()) return;
@@ -56,9 +53,8 @@ void MinPickerLattice::RemoveSpecializations(Node& cur_node,
     }
     auto const& [child_array_index, next_node_bound] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    OptionalChild& optional_child = cur_node.children[child_array_index];
-    if (!optional_child.has_value()) return;
-    Node::BoundMap& bound_map = *optional_child;
+    BoundMap& bound_map = cur_node.children[child_array_index];
+    if (bound_map.empty()) return;
     auto mapping_end = bound_map.end();
     for (auto it_map = bound_map.lower_bound(next_node_bound); it_map != mapping_end; ++it_map) {
         auto& node = it_map->second;

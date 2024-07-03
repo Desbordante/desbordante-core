@@ -362,8 +362,8 @@ MdNode* MdLattice::TryGetNextNode(GeneralizationHelper& helper, Index const chil
                                   auto new_minimal_action, DecisionBoundary const next_lhs_bound,
                                   MdLhs::iterator iter, std::size_t gen_check_offset) {
     MdNode& cur_node = helper.CurNode();
-    auto [boundary_mapping, is_first_arr] = cur_node.TryEmplaceChild(child_array_index);
-    if (is_first_arr) [[unlikely]] {
+    MdBoundMap& boundary_mapping = cur_node.children[child_array_index];
+    if (boundary_mapping.empty()) [[unlikely]] {
         MdNode& new_node = boundary_mapping
                                    .try_emplace(next_lhs_bound, column_matches_size_,
                                                 cur_node.GetChildArraySize(child_array_index))
@@ -390,8 +390,8 @@ void MdLattice::AddIfMinimal(MdSpecialization const& md, auto handle_tail,
         if ((gen_checker.*gen_checker_method)(helper.CurNode(), next_lhs_iter,
                                               child_array_index + 1))
             return;
-        assert(helper.Children()[child_array_index].has_value());
-        MdBoundMap& bound_map = *helper.Children()[child_array_index];
+        assert(!helper.Children()[child_array_index].empty());
+        MdBoundMap& bound_map = helper.Children()[child_array_index];
         assert(bound_map.find(next_lhs_bound) != bound_map.end());
         auto it = bound_map.begin();
         for (; it->first != next_lhs_bound; ++it) {
@@ -452,11 +452,11 @@ void MdLattice::AddIfMinimalReplace(MdSpecialization const& md) {
         add_until_end();
     };
     auto handle_tail = [&](GeneralizationHelper& helper) {
-        assert(helper.Children()[child_array_index].has_value());
+        assert(!helper.Children()[child_array_index].empty());
         auto get_higher = [&](MdBoundMap& b_map) { return b_map.upper_bound(old_bound); };
         ++spec_iter;
         auto add_normal = [&](MdNode& node) { AddNewMinimal(node, md, spec_iter, skip_one); };
-        if (helper.SetAndCheck(TryGetNextNodeBoundMap(*helper.Children()[child_array_index], helper,
+        if (helper.SetAndCheck(TryGetNextNodeBoundMap(helper.Children()[child_array_index], helper,
                                                       spec_child_array_index, add_normal,
                                                       spec_bound, spec_iter, get_higher)))
             return;
@@ -523,9 +523,7 @@ void MdLattice::RaiseInterestingnessBounds(
         auto const& [offset, generalization_bound_limit] = *cur_lhs_iter;
         ++cur_lhs_iter;
         child_array_index += offset;
-        MdOptionalChild const& optional_child = cur_node.children[child_array_index];
-        if (!optional_child.has_value()) continue;
-        for (auto const& [generalization_bound, node] : *optional_child) {
+        for (auto const& [generalization_bound, node] : cur_node.children[child_array_index]) {
             if (generalization_bound > generalization_bound_limit) break;
             RaiseInterestingnessBounds(node, lhs, cur_interestingness_bounds, cur_lhs_iter,
                                        indices);
