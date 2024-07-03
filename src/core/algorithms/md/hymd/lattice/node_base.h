@@ -14,8 +14,7 @@ template <typename NodeType>
 class NodeBase {
 public:
     using BoundMap = std::map<model::md::DecisionBoundary, NodeType>;
-    using OptionalChild = std::optional<BoundMap>;
-    using Children = std::vector<OptionalChild>;
+    using Children = std::vector<BoundMap>;
 
     Children children;
 
@@ -38,22 +37,13 @@ public:
         model::Index index = 0;
         for (std::size_t const array_size = self.children.size(); index != array_size; ++index) {
             auto& b_map = self.children[index];
-            if (b_map.has_value()) action(*b_map, index);
+            if (!b_map.empty()) action(b_map, index);
         };
     }
 
-    template <typename... Args>
-    std::pair<BoundMap&, bool> TryEmplaceChild(model::Index index, Args&&... args) {
-        OptionalChild& optional_child = children[index];
-        if (optional_child.has_value()) {
-            return {*optional_child, false};
-        }
-        return {optional_child.emplace(std::forward<Args>(args)...), true};
-    }
-
     bool IsEmpty() const noexcept {
-        return std::none_of(children.begin(), children.end(),
-                            std::mem_fn(&OptionalChild::has_value));
+        return std::all_of(children.begin(), children.end(),
+                            std::mem_fn(&BoundMap::empty));
     }
 
 protected:
@@ -61,7 +51,6 @@ protected:
     NodeType* AddOneUncheckedBase(model::Index child_array_index, model::md::DecisionBoundary bound,
                                   Args... args) {
         return &children[child_array_index]
-                        .emplace()
                         .try_emplace(bound, args..., GetChildArraySize(child_array_index))
                         .first->second;
     }
@@ -86,8 +75,8 @@ void CheckedAdd(NodeType* cur_node_ptr, MdLhs const& lhs, auto const& info, auto
         ++lhs_iter;
         std::size_t const next_child_array_size =
                 cur_node_ptr->GetChildArraySize(child_array_index);
-        auto [boundary_map, is_first_arr] = cur_node_ptr->TryEmplaceChild(child_array_index);
-        if (is_first_arr) {
+        auto& boundary_map = cur_node_ptr->children[child_array_index];
+        if (boundary_map.empty()) {
             NodeType& new_node =
                     boundary_map.try_emplace(next_bound, next_child_array_size).first->second;
             unchecked_add(new_node, info, lhs_iter);
