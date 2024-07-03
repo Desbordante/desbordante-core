@@ -59,7 +59,7 @@ CFDList CFDDiscovery::GetCfds() const {
         auto& [lhs, rhs] = dep;
 
         RawCFD::RawItems cfd_lhs;
-        for (uint i = 0; i < lhs.size(); i++) {
+        for (unsigned int i = 0; i < lhs.size(); i++) {
             Item item = lhs[i];
             AttributeIndex attr = (item == 0) ? static_cast<AttributeIndex>(i)
                                               : Output::ItemToAttrIndex(item, rel);

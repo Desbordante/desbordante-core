@@ -68,7 +68,7 @@ py::tuple GetPyType(std::type_index type_index) {
     // unpredictable and can lead to errors related to garbage collection.
     static std::unordered_map<std::type_index, std::function<py::tuple()>> const type_map{
             PyTypePair<bool, kPyBool>,
-            PyTypePair<ushort, kPyInt>,
+            PyTypePair<unsigned short, kPyInt>,
             PyTypePair<int, kPyInt>,
             PyTypePair<unsigned int, kPyInt>,
             PyTypePair<double, kPyFloat>,

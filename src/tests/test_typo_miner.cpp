@@ -17,7 +17,7 @@ struct TestingParam {
     algos::StdParamsMap params;
 
     TestingParam(CSVConfig const& csv_config, bool const is_null_equal_null, unsigned const max_lhs,
-                 double const error, ushort const threads)
+                 double const error, unsigned short const threads)
         // This dictionary is only created once, so if we put the relation itself here, it
         // won't be reset between different algorithms.
         : params({{onam::kCsvConfig, csv_config},

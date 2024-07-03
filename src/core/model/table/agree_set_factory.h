@@ -115,7 +115,7 @@ public:
     struct Configuration {
         AgreeSetsGenMethod as_gen_method = AgreeSetsGenMethod::kUsingMapOfIDSets;
         MCGenMethod mc_gen_method = MCGenMethod::kUsingCalculateSupersets;
-        ushort threads_num = 1;
+        unsigned short threads_num = 1;
 
         /* Not using default keyword because of gcc bug:
          * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88165
@@ -123,14 +123,14 @@ public:
         Configuration() noexcept {}
 
         explicit Configuration(AgreeSetsGenMethod as_gen_m, MCGenMethod mc_gen_m,
-                               ushort threads_num) noexcept
+                               unsigned short threads_num) noexcept
             : as_gen_method(as_gen_m), mc_gen_method(mc_gen_m), threads_num(threads_num) {}
 
         explicit Configuration(AgreeSetsGenMethod as_gen_m) noexcept : as_gen_method(as_gen_m) {}
 
         explicit Configuration(MCGenMethod mc_gen_m) noexcept : mc_gen_method(mc_gen_m) {}
 
-        explicit Configuration(ushort threads_num) noexcept : threads_num(threads_num) {}
+        explicit Configuration(unsigned short threads_num) noexcept : threads_num(threads_num) {}
     };
 
     using SetOfVectors = std::unordered_set<std::vector<int>, boost::hash<std::vector<int>>>;

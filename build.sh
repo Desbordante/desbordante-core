@@ -91,7 +91,7 @@ if [[ $DEBUG_MODE != true ]]; then
   PREFIX="$PREFIX -D CMAKE_BUILD_TYPE=Release"
 fi
 
-if [[ -v SANITIZER ]]; then
+if [[ -n $SANITIZER ]]; then
   PREFIX="$PREFIX -D SANITIZER=${SANITIZER}"
 fi
 

@@ -14,14 +14,14 @@ namespace mo = model;
 
 static algos::StdParamsMap GetParamMap(CSVConfig const &csv_config,
                                        bool const is_null_equal_null = true,
-                                       ushort thread_num = 1) {
+                                       unsigned short thread_num = 1) {
     using namespace config::names;
     return {{kCsvConfig, csv_config}, {kEqualNulls, is_null_equal_null}, {kThreads, thread_num}};
 }
 
 static std::unique_ptr<algos::DataStats> MakeStatAlgorithm(CSVConfig const &csv_config,
                                                            bool const is_null_equal_null = true,
-                                                           ushort thread_num = 1) {
+                                                           unsigned short thread_num = 1) {
     return algos::CreateAndLoadAlgorithm<algos::DataStats>(
             GetParamMap(csv_config, is_null_equal_null, thread_num));
 }
