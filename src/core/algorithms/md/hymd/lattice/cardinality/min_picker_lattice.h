@@ -25,7 +25,6 @@ private:
     };
 
     using BoundMap = Node::BoundMap;
-    using OptionalChild = Node::OptionalChild;
     using NodeChildren = Node::Children;
 
     Node root_;

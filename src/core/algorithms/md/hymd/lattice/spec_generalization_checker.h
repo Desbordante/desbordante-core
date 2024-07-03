@@ -8,7 +8,6 @@ template <typename NodeType>
 class SpecGeneralizationChecker {
     using Specialization = NodeType::Specialization;
     using BoundMap = NodeType::BoundMap;
-    using OptionalChild = NodeType::OptionalChild;
 
     Specialization const& specialization_;
     TotalGeneralizationChecker<NodeType> total_checker_{specialization_.ToUnspecialized()};
@@ -22,9 +21,7 @@ class SpecGeneralizationChecker {
                          MdLhs::iterator fol_iter, model::md::DecisionBoundary bound_limit,
                          model::Index next_child_array_index, auto gen_method,
                          auto get_b_map_iter) const {
-        OptionalChild const& optional_child = node.children[child_array_index];
-        if (!optional_child.has_value()) return false;
-        BoundMap const& b_map = *optional_child;
+        BoundMap const& b_map = node.children[child_array_index];
         for (auto spec_iter = get_b_map_iter(b_map), end_iter = b_map.end(); spec_iter != end_iter;
              ++spec_iter) {
             auto const& [generalization_bound, node] = *spec_iter;
