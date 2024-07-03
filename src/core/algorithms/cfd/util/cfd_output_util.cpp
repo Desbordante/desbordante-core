@@ -37,7 +37,7 @@ std::string Output::ItemsetToString(Itemset const& items,
     std::string answer;
     answer += '(';
     std::vector<std::string> parts;
-    for (uint i = 0; i < items.size(); i++) {
+    for (unsigned int i = 0; i < items.size(); i++) {
         Item item = items[i];
         std::string attr_name =
                 (item == 0) ? db->GetAttrName(static_cast<int>(i)) : ItemToAttrName(item, *db);
