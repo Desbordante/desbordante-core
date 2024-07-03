@@ -115,7 +115,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<unsigned int>,
         kNormalConvPair<long double>,
         kNormalConvPair<std::vector<unsigned int>>,
-        kNormalConvPair<ushort>,
+        kNormalConvPair<unsigned short>,
         kNormalConvPair<int>,
         kNormalConvPair<size_t>,
         kEnumConvPair<algos::metric::Metric>,
