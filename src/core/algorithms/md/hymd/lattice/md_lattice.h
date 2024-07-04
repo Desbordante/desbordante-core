@@ -28,6 +28,7 @@ private:
     class GeneralizationHelper;
 
     using MdBoundMap = MdNode::BoundMap;
+    using MdOptionalChild = MdNode::OptionalChild;
     using MdNodeChildren = MdNode::Children;
 
     using SupportBoundMap = SupportNode::BoundMap;

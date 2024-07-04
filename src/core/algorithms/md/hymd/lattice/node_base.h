@@ -8,13 +8,22 @@
 
 #include "algorithms/md/hymd/md_lhs.h"
 #include "model/index.h"
+#include "util/excl_optional.h"
 
 namespace algos::hymd::lattice {
+
 template <typename NodeType>
 class NodeBase {
+private:
+    template <typename T>
+    inline static bool NotEmpty(T const& bm) {
+        return !bm.empty();
+    }
+
 public:
     using BoundMap = std::map<model::md::DecisionBoundary, NodeType>;
-    using Children = std::vector<BoundMap>;
+    using OptionalChild = util::ExclOptional<BoundMap, NotEmpty<BoundMap>>;
+    using Children = std::vector<OptionalChild>;
 
     Children children;
 
@@ -36,14 +45,14 @@ public:
     static void ForEachNonEmpty(Self& self, auto action) {
         model::Index index = 0;
         for (std::size_t const array_size = self.children.size(); index != array_size; ++index) {
-            auto& b_map = self.children[index];
-            if (!b_map.empty()) action(b_map, index);
+            auto& optional_child = self.children[index];
+            if (optional_child.HasValue()) action(*optional_child, index);
         };
     }
 
     bool IsEmpty() const noexcept {
-        return std::all_of(children.begin(), children.end(),
-                            std::mem_fn(&BoundMap::empty));
+        return std::none_of(children.begin(), children.end(),
+                            std::mem_fn(&OptionalChild::HasValue));
     }
 
 protected:
@@ -51,7 +60,7 @@ protected:
     NodeType* AddOneUncheckedBase(model::Index child_array_index, model::md::DecisionBoundary bound,
                                   Args... args) {
         return &children[child_array_index]
-                        .try_emplace(bound, args..., GetChildArraySize(child_array_index))
+                        ->try_emplace(bound, args..., GetChildArraySize(child_array_index))
                         .first->second;
     }
 };
@@ -76,13 +85,13 @@ void CheckedAdd(NodeType* cur_node_ptr, MdLhs const& lhs, auto const& info, auto
         std::size_t const next_child_array_size =
                 cur_node_ptr->GetChildArraySize(child_array_index);
         auto& boundary_map = cur_node_ptr->children[child_array_index];
-        if (boundary_map.empty()) {
+        if (!boundary_map.HasValue()) {
             NodeType& new_node =
-                    boundary_map.try_emplace(next_bound, next_child_array_size).first->second;
+                    boundary_map->try_emplace(next_bound, next_child_array_size).first->second;
             unchecked_add(new_node, info, lhs_iter);
             return;
         }
-        auto [it_map, is_first_map] = boundary_map.try_emplace(next_bound, next_child_array_size);
+        auto [it_map, is_first_map] = boundary_map->try_emplace(next_bound, next_child_array_size);
         NodeType& next_node = it_map->second;
         if (is_first_map) {
             unchecked_add(next_node, info, lhs_iter);
