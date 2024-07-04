@@ -22,7 +22,7 @@ public:
             auto const& [index_delta, generalization_bound_limit] = *next_iter;
             child_array_index += index_delta;
             ++next_iter;
-            for (auto const& [generalization_bound, node] : node.children[child_array_index]) {
+            for (auto const& [generalization_bound, node] : *node.children[child_array_index]) {
                 if (generalization_bound > generalization_bound_limit) break;
                 if (HasGeneralization(node, next_iter)) return true;
             }

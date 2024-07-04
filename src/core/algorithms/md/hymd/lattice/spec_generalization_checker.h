@@ -21,7 +21,7 @@ class SpecGeneralizationChecker {
                          MdLhs::iterator fol_iter, model::md::DecisionBoundary bound_limit,
                          model::Index next_child_array_index, auto gen_method,
                          auto get_b_map_iter) const {
-        BoundMap const& b_map = node.children[child_array_index];
+        BoundMap const& b_map = *node.children[child_array_index];
         for (auto spec_iter = get_b_map_iter(b_map), end_iter = b_map.end(); spec_iter != end_iter;
              ++spec_iter) {
             auto const& [generalization_bound, node] = *spec_iter;
