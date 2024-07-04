@@ -153,8 +153,6 @@ private:
     void MarkNewLhs(SupportNode& cur_node, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter);
     void MarkUnsupported(MdLhs const& lhs);
 
-    [[nodiscard]] std::optional<model::md::DecisionBoundary> SpecializeOneLhs(
-            model::Index col_match_index, model::md::DecisionBoundary lhs_bound) const;
     void SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::iterator lhs_iter,
                            model::Index spec_child_index, model::md::DecisionBoundary spec_past,
                            model::Index lhs_spec_index, auto add_method, auto support_check_method);

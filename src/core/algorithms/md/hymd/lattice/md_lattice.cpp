@@ -37,15 +37,6 @@ MdLattice::MdLattice(std::size_t column_matches_size, SingleLevelFunc single_lev
       prune_nondisjoint_(prune_nondisjoint),
       max_cardinality_(max_cardinality) {}
 
-std::optional<DecisionBoundary> MdLattice::SpecializeOneLhs(Index col_match_index,
-                                                            DecisionBoundary lhs_bound) const {
-    std::vector<DecisionBoundary> const& decision_bounds = (*lhs_bounds_)[col_match_index];
-    auto end_bounds = decision_bounds.end();
-    auto upper = std::upper_bound(decision_bounds.begin(), end_bounds, lhs_bound);
-    if (upper == end_bounds) return std::nullopt;
-    return *upper;
-}
-
 void MdLattice::SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::iterator lhs_iter,
                                   model::Index spec_child_index,
                                   model::md::DecisionBoundary spec_past,
@@ -70,10 +61,11 @@ void MdLattice::SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::ite
             (this->*method)({lhs_spec, *rhs_it});
         }
     };
-    std::optional<DecisionBoundary> const specialized_lhs_bound =
-            SpecializeOneLhs(lhs_spec_index, spec_past);
-    if (!specialized_lhs_bound.has_value()) return;
-    LhsSpecialization lhs_spec{lhs, {lhs_iter, {spec_child_index, *specialized_lhs_bound}}};
+    std::vector<DecisionBoundary> const& decision_bounds = (*lhs_bounds_)[lhs_spec_index];
+    auto end_bounds = decision_bounds.end();
+    auto upper = std::upper_bound(decision_bounds.begin(), end_bounds, spec_past);
+    if (upper == end_bounds) return;
+    LhsSpecialization lhs_spec{lhs, {lhs_iter, {spec_child_index, *upper}}};
     if ((this->*support_check_method)(lhs_spec)) return;
     add_all_rhs(lhs_spec, add_method);
 }
