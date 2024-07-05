@@ -31,7 +31,7 @@ The **Discovery** task is designed to identify all instances of a specified patt
 
 The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values).
 
-For some patterns Desbordante supports a **dynamic** task variant. It allows users to "subscribe" task result (an individual pattern or their set) for modification operations of a dataset (e.g., inserts). The idea is to track changes in the dataset in order to update result on-the-fly rather than processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
+For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
 The currently supported data patterns are:
 * Functional dependency variants:
