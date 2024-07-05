@@ -219,17 +219,64 @@ However, as Desbordante core uses C++, additional requirements on the machine ar
 
 ## Build instructions
 
-### Ubuntu
-The following instructions were tested on Ubuntu 20.04+ LTS.
+### Ubuntu and MacOS
+The following instructions were tested on Ubuntu 20.04+ LTS and MacOS 14.0+ (Apple Silicon).
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
-- GNU g++ compiler, version 10+
+- GNU GCC, version 10+
 - CMake, version 3.13+
-- Boost library, version 1.74.0+
+- Boost library built with GCC, version 1.74.0+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
+
+#### Ubuntu dependencies installation
+
+Run the following commands:
+```sh 
+sudo apt install gcc g++ cmake libboost-all-dev git-lfs
+export CC=gcc
+export CXX=g++
+```
+The last 2 lines set gcc as CMake compiler in your terminal session.
+You can also add them to the end of `~/.profile` to set this by default in all sessions.
+
+#### MacOS dependencies installation
+
+To install GCC and CMake on MacOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+installed, run the following commands:
+```sh
+brew install gcc cmake 
+```
+After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
+homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
+`~/.bash_profile` (for Bash) and add to the end of the file the output of `brew shellenv`.
+After that, restart the terminal and check the version of CMake again, now it should be displayed.
+
+Then, check the installed version of GCC:`brew info gcc`. You must see something like `==> gcc: stable X.Y.Z ...`. 
+Check that `gcc-X` and `g++-X` commands work, where X is the version from this output 
+(this designation continues to be used further).
+
+After you need to install Boost library. Please, don't use Homebrew for this, as it may not work correctly.
+Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/).
+After downloading, unpack the archive to the `/usr/local` directory or another directory of your
+choice.
+
+Go to unpacked boost directory in the terminal and run the following commands:
+```sh
+./bootstrap.sh 
+echo "using gcc : : g++-X ;" > user-config.jam
+./b2 --user-config=user-config.jam
+export BOOST_ROOT=$(pwd)
+``` 
+You can also add last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
+
+Before building project you must set GCC as default compiler by changing the following environment variables:
+```sh
+export CC=gcc-X
+export CXX=g++-X
+```
 
 ### Building the project
 #### Building the Python module using pip
