@@ -31,11 +31,14 @@ The **Discovery** task is designed to identify all instances of a specified patt
 
 The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values).
 
+For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
+
 The currently supported data patterns are:
 * Functional dependency variants:
     - Exact functional dependencies (discovery and validation)
     - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
     - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
+    - Dynamic validation of exact and approximate functional dependencies
 * Graph functional dependencies (validation)
 * Conditional functional dependencies (discovery)
 * Inclusion dependencies (discovery)
@@ -44,6 +47,7 @@ The currently supported data patterns are:
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
+* Differential Dependencies (discovery)
 * Unique column combinations:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
@@ -195,7 +199,9 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [N. Koudas et al. "Metric Functional Dependencies," 2009 IEEE 25th International Conference on Data Engineering, Shanghai, China, 2009, pp. 1275-1278.](https://ieeexplore.ieee.org/document/4812519)
 * Fuzzy algebraic constraints
    - [Paul G. Brown and Peter J. Hass. 2003. BHUNT: automatic discovery of Fuzzy algebraic constraints in relational data. In Proceedings of the 29th international conference on Very large data bases - Volume 29 (VLDB '03), Vol. 29. VLDB Endowment, 668–679.](https://www.vldb.org/conf/2003/papers/S20P03.pdf)
-* Unique column combinations:
+* Differential dependencies
+   - [Shaoxu Song and Lei Chen. 2011. Differential dependencies: Reasoning and discovery. ACM Trans. Database Syst. 36, 3, Article 16 (August 2011), 41 pages.](https://sxsong.github.io/doc/11tods.pdf)
+* Unique column combinations
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
