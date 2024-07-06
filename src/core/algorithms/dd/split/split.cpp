@@ -603,15 +603,16 @@ std::list<DD> Split::InstanceExclusionReduce(
         return dds;
     }
 
-    std::vector<std::pair<std::size_t, std::size_t>> other_remaining_tuple_pairs;
-
     cnt++;
+    bool dd_holds = true;
     for (auto pair : tuple_pairs) {
-        if (CheckDF(last_df, pair) && !CheckDF(rhs, pair))
-            other_remaining_tuple_pairs.push_back(pair);
+        if (CheckDF(last_df, pair) && !CheckDF(rhs, pair)) {
+            dd_holds = false;
+            break;
+        }
     }
 
-    if (other_remaining_tuple_pairs.size()) {
+    if (!dd_holds) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
     }
