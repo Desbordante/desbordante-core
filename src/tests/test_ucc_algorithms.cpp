@@ -147,7 +147,7 @@ REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,
                             ConsistentHashOnHeavyDatasets, ConsistentHashOnLightDatasetsParallel,
                             ConsistentHashOnHeavyDatasetsParallel);
 
-using Algorithms = ::testing::Types<algos::HyUCC, algos::PyroUCC>;
+using Algorithms = ::testing::Types<algos::HyUCC, algos::PyroUCC, algos::HPIValid>;
 INSTANTIATE_TYPED_TEST_SUITE_P(UCCAlgorithmTest, UCCAlgorithmTest, Algorithms);
 
 }  // namespace tests
