@@ -353,7 +353,6 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     std::size_t dif_num_rows = difference_typed_relation_->GetNumRows();
 
     model::TypedColumnData const& dif_column = difference_typed_relation_->GetColumnData(index);
-    model::Type const& type = dif_column.GetType();
 
     auto pair_compare = [](model::DFConstraint const& first_pair,
                            model::DFConstraint const& second_pair) {
@@ -372,20 +371,7 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
         if (type_id == +model::TypeId::kString) {
-            std::string df_str;
-            if (dif_column.IsMixed()) {
-                model::MixedType const* mixed_type = dif_column.GetIfMixed();
-                std::byte const* df_string = dif_column.GetValue(row_index);
-                std::unique_ptr<model::Type> t = mixed_type->RetrieveType(df_string);
-                std::byte const* df_string_value = mixed_type->RetrieveValue(df_string);
-                model::StringType const* str_type = static_cast<model::StringType const*>(t.get());
-                df_str = str_type->ValueToString(df_string_value);
-            } else {
-                model::StringType const& str_type = static_cast<model::StringType const&>(type);
-                std::byte const* df_string = dif_column.GetValue(row_index);
-                df_str = str_type.ValueToString(df_string);
-            }
-
+            std::string df_str = dif_column.GetDataAsString(row_index);
             std::smatch matches;
             if (std::regex_match(df_str, matches, df_regex)) {
                 double const lower_limit = model::TypeConverter<double>::kConvert(matches[1].str());
