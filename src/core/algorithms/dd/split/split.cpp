@@ -428,7 +428,7 @@ std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
             }
             if (IsFeasible(intersect)) {
                 merged_search_space.push_back(intersect);
-            } else {
+            } else if (!has_dif_table_) {
                 break;
             }
         }
