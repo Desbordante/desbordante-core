@@ -58,7 +58,7 @@ private:
     void InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
                         std::size_t second_index, double& min_dif, double& max_dif);
     bool CheckDF(DF const& dep, std::pair<std::size_t, std::size_t> tuple_pair);
-    bool VerifyDD(DD const& dep);
+    bool VerifyDD(DF const& lhs, DF const& rhs);
     void CalculateAllDistances();
     bool IsFeasible(DF const& d);
     std::vector<DF> SearchSpace(std::vector<model::ColumnIndex>& indices);

@@ -277,10 +277,10 @@ inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_
     return true;
 }
 
-bool Split::VerifyDD(DD const& dep) {
+bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
     for (std::size_t i = 0; i < num_rows_; i++) {
         for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(dep.lhs, {i, j}) && !CheckDF(dep.rhs, {i, j})) return false;
+            if (CheckDF(lhs, {i, j}) && !CheckDF(rhs, {i, j})) return false;
         }
     }
     return true;
@@ -552,7 +552,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     DF const last_df = *search.rbegin();
 
     cnt++;
-    if (!VerifyDD({last_df, rhs})) {
+    if (!VerifyDD(last_df, rhs)) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return NegativePruningReduce(rhs, remainder, cnt);
     }
@@ -560,7 +560,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (!dds.size()) dds.push_back({last_df, rhs});
+    if (!dds.size()) dds.emplace_back(last_df, rhs);
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -578,8 +578,8 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     DF const last_df = *search.rbegin();
 
     cnt++;
-    if (VerifyDD({first_df, rhs})) {
-        dds.push_back({first_df, rhs});
+    if (VerifyDD(first_df, rhs)) {
+        dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = HybridPruningReduce(rhs, remainder, cnt);
         dds.splice(dds.end(), remaining_dds);
@@ -587,7 +587,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     }
 
     cnt++;
-    if (!VerifyDD({last_df, rhs})) {
+    if (!VerifyDD(last_df, rhs)) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return HybridPruningReduce(rhs, remainder, cnt);
     }
@@ -619,7 +619,7 @@ std::list<DD> Split::InstanceExclusionReduce(
     }
 
     if (!remaining_tuple_pairs.size()) {
-        dds.push_back({first_df, rhs});
+        dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
         dds.splice(dds.end(), remaining_dds);
