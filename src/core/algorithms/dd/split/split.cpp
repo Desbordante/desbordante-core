@@ -226,6 +226,10 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
     model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
     model::TypeId type_id = column.GetTypeId();
 
+    if (type_ids_[column_index] == +model::TypeId::kUndefined) {
+        type_ids_[column_index] = type_id;
+    }
+
     if (type_id == +model::TypeId::kUndefined) {
         throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                     "\" type undefined.");
@@ -254,8 +258,20 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
 inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         double const dif = distances_[column_index][tuple_pair.first][tuple_pair.second];
-        if (dif < dif_func[column_index].lower_bound || dif > dif_func[column_index].upper_bound) {
-            return false;
+
+        if (type_ids_[column_index] == +model::TypeId::kDouble) {
+            // this is faster than direct model::Less and model::Greater calls
+            if ((dif < dif_func[column_index].lower_bound &&
+                 !model::IsEqual(dif, dif_func[column_index].lower_bound)) ||
+                (dif > dif_func[column_index].upper_bound &&
+                 !model::IsEqual(dif, dif_func[column_index].upper_bound))) {
+                return false;
+            }
+        } else {
+            if (dif < dif_func[column_index].lower_bound ||
+                dif > dif_func[column_index].upper_bound) {
+                return false;
+            }
         }
     }
     return true;
@@ -290,6 +306,7 @@ void Split::CalculateAllDistances() {
             num_columns_,
             std::vector<std::vector<double>>(num_rows_, std::vector<double>(num_rows_, 0)));
     min_max_dif_ = std::vector<model::DFConstraint>(num_columns_, {0, 0});
+    type_ids_ = std::vector<model::TypeId>(num_columns_, model::TypeId::kUndefined);
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         std::shared_ptr<model::PLI const> pli =
@@ -342,7 +359,8 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     if (!has_dif_table_) {
         // differential functions should be put in this exact order for further reducing
         for (int i = num_dfs_per_column_ - 1; i >= 0; i--) {
-            if (i >= min_max_dif_[index].lower_bound && i < min_max_dif_[index].upper_bound) {
+            if (model::GreaterOrEqual(i, min_max_dif_[index].lower_bound) &&
+                model::Less(i, min_max_dif_[index].upper_bound)) {
                 d[index] = {min_max_dif_[index].lower_bound, (double)i};
                 dfs.push_back(d);
             }
@@ -359,7 +377,7 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
         double const first_pair_length = first_pair.upper_bound - first_pair.lower_bound;
         double const second_pair_length = second_pair.upper_bound - second_pair.lower_bound;
         return (first_pair_length > second_pair_length) ||
-               (first_pair_length == second_pair_length &&
+               (model::IsEqual(first_pair_length, second_pair_length) &&
                 (first_pair.lower_bound > second_pair.lower_bound));
     };
 
@@ -377,8 +395,9 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
                 double const lower_limit = model::TypeConverter<double>::kConvert(matches[1].str());
                 double const upper_limit = model::TypeConverter<double>::kConvert(matches[3].str());
 
-                if (upper_limit >= min_max_dif_[index].lower_bound &&
-                    lower_limit <= min_max_dif_[index].upper_bound && lower_limit <= upper_limit) {
+                if (model::GreaterOrEqual(upper_limit, min_max_dif_[index].lower_bound) &&
+                    model::LessOrEqual(lower_limit, min_max_dif_[index].upper_bound) &&
+                    model::LessOrEqual(lower_limit, upper_limit)) {
                     model::DFConstraint intersect = {
                             std::max(lower_limit, min_max_dif_[index].lower_bound),
                             std::min(upper_limit, min_max_dif_[index].upper_bound)};
@@ -424,8 +443,10 @@ std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
 
 bool Split::Subsume(DF const& df1, DF const& df2) {
     for (model::ColumnIndex i = 0; i < num_columns_; i++) {
-        if (df2[i].lower_bound < df1[i].lower_bound || df2[i].upper_bound > df1[i].upper_bound)
+        if (model::Less(df2[i].lower_bound, df1[i].lower_bound) ||
+            model::Greater(df2[i].upper_bound, df1[i].upper_bound)) {
             return false;
+        }
     }
     return true;
 }

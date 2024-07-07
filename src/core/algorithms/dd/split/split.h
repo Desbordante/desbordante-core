@@ -14,6 +14,7 @@
 #include "model/table/column_index.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "model/types/builtin.h"
 
 namespace algos::dd {
 
@@ -28,6 +29,8 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
+
+    std::vector<model::TypeId> type_ids_;
 
     bool has_dif_table_;
 
