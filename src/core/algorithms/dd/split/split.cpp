@@ -1,5 +1,6 @@
 #include "algorithms/dd/split/split.h"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -7,6 +8,7 @@
 #include <limits>
 #include <list>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
