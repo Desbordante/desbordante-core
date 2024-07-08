@@ -6,11 +6,11 @@
 #include <deque>
 #include <limits>
 #include <list>
-#include <regex>
 #include <set>
 #include <utility>
 #include <vector>
 
+#include <boost/regex.hpp>
 #include <easylogging++.h>
 
 #include "config/names_and_descriptions.h"
@@ -375,23 +375,32 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
 
     // accepts a string in the following format: [a;b], where a and b are double type values
-    std::regex df_regex(R"(\[(\d{1,19}(\.\d*)?)\;(\d{1,19}(\.\d*)?)\]$)");
+    boost::regex df_regex(R"(\[(.*)\;(.*)\]$)");
+    boost::regex double_regex(
+            R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
+            R"(^[+-]?(?i)(inf|nan)(?-i)$|)"
+            R"(^[+-]?0[xX](((\d|[a-f]|[A-F]))+(\.(\d|[a-f]|[A-F])*)?|\.(\d|[a-f]|[A-F])+)([pP][+-]?\d+)?$)");
 
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
         if (type_id == +model::TypeId::kString) {
             std::string df_str = dif_column.GetDataAsString(row_index);
-            std::smatch matches;
-            if (std::regex_match(df_str, matches, df_regex)) {
-                double const lower_limit = model::TypeConverter<double>::kConvert(matches[1].str());
-                double const upper_limit = model::TypeConverter<double>::kConvert(matches[3].str());
+            boost::smatch matches;
+            if (boost::regex_match(df_str, matches, df_regex)) {
+                if (boost::regex_match(matches[1].str(), double_regex) &&
+                    boost::regex_match(matches[2].str(), double_regex)) {
+                    double const lower_limit =
+                            model::TypeConverter<double>::kConvert(matches[1].str());
+                    double const upper_limit =
+                            model::TypeConverter<double>::kConvert(matches[2].str());
 
-                model::DFConstraint parsed_limits{lower_limit, upper_limit};
+                    model::DFConstraint parsed_limits{lower_limit, upper_limit};
 
-                if (parsed_limits.IsValid()) {
-                    auto intersect = parsed_limits.IntersectWith(min_max_dif_[index]);
-                    if (intersect && *intersect != min_max_dif_[index]) {
-                        limits.insert(*intersect);
+                    if (parsed_limits.IsValid()) {
+                        auto intersect = parsed_limits.IntersectWith(min_max_dif_[index]);
+                        if (intersect && *intersect != min_max_dif_[index]) {
+                            limits.insert(*intersect);
+                        }
                     }
                 }
             }
