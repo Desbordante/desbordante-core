@@ -2,8 +2,6 @@
 
 #include <cassert>
 
-#include "algorithms/md/hymd/lowest_bound.h"
-
 namespace {
 using namespace algos::hymd;
 using model::Index;
@@ -26,10 +24,10 @@ void MinPickerLattice::ExcludeGeneralizationRhs(Node const& cur_node,
         considered_indices -= cur_node_indices;
         return;
     }
-    auto const& [child_array_index, next_lhs_bound] = *cur_lhs_iter;
+    auto const& [child_array_index, lhs_ccv_id] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    for (auto const& [bound, node] : *cur_node.children[child_array_index]) {
-        if (bound > next_lhs_bound) break;
+    for (auto const& [ccv_id, node] : *cur_node.children[child_array_index]) {
+        if (ccv_id > lhs_ccv_id) break;
         ExcludeGeneralizationRhs(node, messenger, cur_lhs_iter, considered_indices);
         if (considered_indices.none()) return;
     }
@@ -51,11 +49,11 @@ void MinPickerLattice::RemoveSpecializations(Node& cur_node,
         }
         return;
     }
-    auto const& [child_array_index, next_node_bound] = *cur_lhs_iter;
+    auto const& [child_array_index, next_ccv_id] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    BoundMap& bound_map = *cur_node.children[child_array_index];
-    auto mapping_end = bound_map.end();
-    for (auto it_map = bound_map.lower_bound(next_node_bound); it_map != mapping_end; ++it_map) {
+    CCVIdChildMap& child_map = *cur_node.children[child_array_index];
+    auto mapping_end = child_map.end();
+    for (auto it_map = child_map.lower_bound(next_ccv_id); it_map != mapping_end; ++it_map) {
         auto& node = it_map->second;
         RemoveSpecializations(node, messenger, cur_lhs_iter, picked_indices);
     }
@@ -66,8 +64,8 @@ void MinPickerLattice::GetAll(Node& cur_node, std::vector<ValidationInfo>& colle
     if (task_info != nullptr) {
         collected.push_back(std::move(*task_info));
     }
-    auto collect = [&](BoundMap& bound_map, model::Index) {
-        for (auto& [boundary, node] : bound_map) {
+    auto collect = [&](CCVIdChildMap& child_map, model::Index) {
+        for (auto& [_, node] : child_map) {
             GetAll(node, collected);
         }
     };

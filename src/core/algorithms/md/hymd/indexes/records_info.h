@@ -21,6 +21,10 @@ public:
         return *right_compressor_;
     }
 
+    [[nodiscard]] std::size_t GetTotalPairsNum() const noexcept {
+        return GetLeftCompressor().GetNumberOfRecords() * GetRightCompressor().GetNumberOfRecords();
+    }
+
     RecordsInfo(std::shared_ptr<DictionaryCompressor> left_compressor,
                 std::shared_ptr<DictionaryCompressor> right_compressor) noexcept
         : left_compressor_(std::move(left_compressor)),
