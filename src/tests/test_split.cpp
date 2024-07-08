@@ -164,4 +164,14 @@ TEST_F(SplitAlgorithmTest, Test5) {
     CompareDDStringLists(expected_results, actual_results);
 }
 
+TEST_F(SplitAlgorithmTest, TestDoubleCompare) {
+    auto algo = CreateSplitAlgorithmInstance(kTestDD5, kTestDif5);
+    algo->Execute();
+
+    auto actual_results = algo->GetDDStringList();
+    std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
+            expected_results = {{{{"Col3", 5.1, 5.1}}, {{"Col2", 4, 4}}}};
+    CompareDDStringLists(expected_results, actual_results);
+}
+
 }  // namespace tests
