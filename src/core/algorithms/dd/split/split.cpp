@@ -384,7 +384,19 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
 
     // accepts a string in the following format: [a;b], where a and b are double type values
-    std::regex df_regex(R"(\[(\d{1,19}(\.\d*)?)\;(\d{1,19}(\.\d*)?)\]$)");
+    std::regex df_regex(R"(\[(.*)\;(.*)\]$)");
+    auto double_check = [](std::string const& val) {
+        bool is_double = false;
+        try {
+            std::size_t pos = 0;
+            std::stod(val, &pos);
+            if (pos == val.size()) {
+                is_double = true;
+            }
+        } catch (...) {
+        }
+        return is_double;
+    };
 
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
@@ -392,17 +404,21 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
             std::string df_str = dif_column.GetDataAsString(row_index);
             std::smatch matches;
             if (std::regex_match(df_str, matches, df_regex)) {
-                double const lower_limit = model::TypeConverter<double>::kConvert(matches[1].str());
-                double const upper_limit = model::TypeConverter<double>::kConvert(matches[3].str());
+                if (double_check(matches[1].str()) && double_check(matches[2].str())) {
+                    double const lower_limit =
+                            model::TypeConverter<double>::kConvert(matches[1].str());
+                    double const upper_limit =
+                            model::TypeConverter<double>::kConvert(matches[2].str());
 
-                if (model::GreaterOrEqual(upper_limit, min_max_dif_[index].lower_bound) &&
-                    model::LessOrEqual(lower_limit, min_max_dif_[index].upper_bound) &&
-                    model::LessOrEqual(lower_limit, upper_limit)) {
-                    model::DFConstraint intersect = {
-                            std::max(lower_limit, min_max_dif_[index].lower_bound),
-                            std::min(upper_limit, min_max_dif_[index].upper_bound)};
-                    if (intersect != min_max_dif_[index]) {
-                        limits.insert(intersect);
+                    if (model::GreaterOrEqual(upper_limit, min_max_dif_[index].lower_bound) &&
+                        model::LessOrEqual(lower_limit, min_max_dif_[index].upper_bound) &&
+                        model::LessOrEqual(lower_limit, upper_limit)) {
+                        model::DFConstraint intersect = {
+                                std::max(lower_limit, min_max_dif_[index].lower_bound),
+                                std::min(upper_limit, min_max_dif_[index].upper_bound)};
+                        if (intersect != min_max_dif_[index]) {
+                            limits.insert(intersect);
+                        }
                     }
                 }
             }
