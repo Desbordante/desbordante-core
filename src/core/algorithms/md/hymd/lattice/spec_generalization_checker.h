@@ -7,7 +7,7 @@ namespace algos::hymd::lattice {
 template <typename NodeType>
 class SpecGeneralizationChecker {
     using Specialization = NodeType::Specialization;
-    using BoundMap = NodeType::BoundMap;
+    using CCVIdChildMap = NodeType::OrderedCCVIdChildMap;
 
     Specialization const& specialization_;
     TotalGeneralizationChecker<NodeType> total_checker_{specialization_.ToUnspecialized()};
@@ -18,21 +18,21 @@ class SpecGeneralizationChecker {
     }
 
     bool HasChildGenSpec(NodeType const& node, model::Index child_array_index,
-                         MdLhs::iterator fol_iter, model::md::DecisionBoundary bound_limit,
+                         MdLhs::iterator fol_iter, ColumnClassifierValueId ccv_id_limit,
                          model::Index next_child_array_index, auto gen_method,
-                         auto get_b_map_iter) const {
-        BoundMap const& b_map = *node.children[child_array_index];
-        for (auto spec_iter = get_b_map_iter(b_map), end_iter = b_map.end(); spec_iter != end_iter;
-             ++spec_iter) {
-            auto const& [generalization_bound, node] = *spec_iter;
-            if (generalization_bound > bound_limit) break;
+                         auto get_child_map_iter) const {
+        CCVIdChildMap const& child_map = *node.children[child_array_index];
+        for (auto spec_iter = get_child_map_iter(child_map), end_iter = child_map.end();
+             spec_iter != end_iter; ++spec_iter) {
+            auto const& [generalization_ccv_id, node] = *spec_iter;
+            if (generalization_ccv_id > ccv_id_limit) break;
             if ((this->*gen_method)(node, fol_iter, next_child_array_index)) return true;
         }
         return false;
     }
 
     static auto GetFirstAction() noexcept {
-        return [](BoundMap const& b_map) { return b_map.begin(); };
+        return [](CCVIdChildMap const& child_map) { return child_map.begin(); };
     }
 
     bool HasGeneralizationInChildren(NodeType const& node, MdLhs::iterator next_node_iter,
@@ -41,37 +41,39 @@ class SpecGeneralizationChecker {
         LhsSpecialization const& lhs_specialization = specialization_.GetLhsSpecialization();
         MdLhs::iterator spec_iter = lhs_specialization.specialization_data.spec_before;
         while (next_node_iter != spec_iter) {
-            auto const& [delta, next_bound] = *next_node_iter;
+            auto const& [delta, next_ccv_id] = *next_node_iter;
             ++next_node_iter;
             child_array_index += delta;
-            if (HasChildGenSpec(node, child_array_index, next_node_iter, next_bound, 0, spec_method,
-                                GetFirstAction()))
+            if (HasChildGenSpec(node, child_array_index, next_node_iter, next_ccv_id, 0,
+                                spec_method, GetFirstAction()))
                 return true;
             ++child_array_index;
         }
-        auto const& [spec_delta, spec_bound] = lhs_specialization.specialization_data.new_child;
+        auto const& [spec_delta, spec_ccv_id] = lhs_specialization.specialization_data.new_child;
         child_array_index += spec_delta;
-        return (this->*final_method)(node, child_array_index, spec_iter, spec_bound, spec_delta);
+        return (this->*final_method)(node, child_array_index, spec_iter, spec_ccv_id, spec_delta);
     }
 
     bool ReplaceFinalCheck(NodeType const& node, model::Index child_array_index,
-                           MdLhs::iterator spec_iter, model::md::DecisionBoundary spec_bound,
+                           MdLhs::iterator spec_iter, ColumnClassifierValueId ccv_id,
                            std::size_t spec_delta) const {
         assert(spec_iter != specialization_.GetLhsSpecialization().old_lhs.end() &&
                spec_iter->child_array_index == spec_delta);
-        model::md::DecisionBoundary const old_bound = spec_iter->decision_boundary;
-        auto get_higher = [&](BoundMap const& b_map) { return b_map.upper_bound(old_bound); };
+        ColumnClassifierValueId const old_ccv_id = spec_iter->ccv_id;
+        auto get_higher = [&](CCVIdChildMap const& child_map) {
+            return child_map.upper_bound(old_ccv_id);
+        };
         ++spec_iter;
-        return HasChildGenSpec(node, child_array_index, spec_iter, spec_bound, 0,
+        return HasChildGenSpec(node, child_array_index, spec_iter, ccv_id, 0,
                                &SpecGeneralizationChecker::HasGeneralizationTotal, get_higher);
     }
 
     bool NonReplaceFinalCheck(NodeType const& node, model::Index child_array_index,
-                              MdLhs::iterator spec_iter, model::md::DecisionBoundary spec_bound,
+                              MdLhs::iterator spec_iter, ColumnClassifierValueId ccv_id,
                               std::size_t spec_delta) const {
         assert(spec_iter == specialization_.GetLhsSpecialization().old_lhs.end() ||
                spec_iter->child_array_index > spec_delta);
-        return HasChildGenSpec(node, child_array_index, spec_iter, spec_bound, -(spec_delta + 1),
+        return HasChildGenSpec(node, child_array_index, spec_iter, ccv_id, -(spec_delta + 1),
                                &SpecGeneralizationChecker::HasGeneralizationTotal,
                                GetFirstAction());
     }

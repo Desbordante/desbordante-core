@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/records_info.h"
+#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"

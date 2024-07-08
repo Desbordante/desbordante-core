@@ -5,12 +5,6 @@
 
 #include <boost/circular_buffer.hpp>
 
-#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/utility/set_for_scope.h"
-#include "model/index.h"
-
 namespace algos::hymd {
 
 constexpr std::size_t kSmallestWindowSize = 1000;
@@ -110,8 +104,8 @@ auto RecordPairInferrer::Evaluate(StatisticsType const& statistics) const noexce
             statistics.mds_removed;
     if (lattice_is_almost_final) return InferenceStatus::LatticeIsAlmostFinal;
 
-    // New phase switch heuristic: if there are too many pairs that share similarity classifier
-    // boundaries with already processed pairs, switch phase.
+    // New phase switch heuristic: if there are too many pairs that share column classifier values
+    // with already processed pairs, switch phase.
     bool const pairs_are_stale =
             statistics.pairs_inspected * PhaseSwitchHeuristicParameters::kStaleCoefficient >=
             statistics.pairs_processed;

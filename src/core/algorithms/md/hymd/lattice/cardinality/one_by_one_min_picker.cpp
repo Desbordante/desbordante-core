@@ -20,16 +20,16 @@ bool OneByOnePicker::IsGeneralization(MdLhs::iterator gen_it, MdLhs::iterator sp
     using model::Index;
     auto inc_until_eq = [](MdLhs::iterator const gen_it, MdLhs::iterator& spec_it,
                            MdLhs::iterator const spec_end) {
-        auto const [gen_index, gen_bound] = *gen_it;
+        auto const [gen_index, gen_ccv_id] = *gen_it;
         Index cur_spec_index = 0;
         do {
-            auto const& [spec_child_index, spec_bound] = *spec_it;
+            auto const& [spec_child_index, spec_ccv_id] = *spec_it;
             cur_spec_index += spec_child_index;
             // Incomparable, spec has no classifier for the considered gen's column match.
             if (cur_spec_index > gen_index) return true;
             if (cur_spec_index == gen_index) {
                 // Incomparable, spec's classifier matches more record pairs.
-                if (gen_bound > spec_bound) return true;
+                if (gen_ccv_id > spec_ccv_id) return true;
                 return false;
             }
             ++cur_spec_index;
@@ -56,8 +56,8 @@ auto OneByOnePicker::CompareLhss(MdLhs const& cur, MdLhs const& prev) -> Compari
         if (prev_it == prev_end) {  // prev has no more LHS elements, prev generalizes cur.
             return ComparisonResult::Specialization;
         }
-        auto const& [cur_child_index, cur_bound] = *cur_it;
-        auto const& [prev_child_index, prev_bound] = *prev_it;
+        auto const& [cur_child_index, cur_ccv_id] = *cur_it;
+        auto const& [prev_child_index, prev_ccv_id] = *prev_it;
         if (cur_child_index > prev_child_index) {  // prev cannot be a generalization of cur.
             if (IsGeneralization(cur_it, prev_it, cur_end, prev_end))
                 return ComparisonResult::Generalization;
@@ -66,11 +66,11 @@ auto OneByOnePicker::CompareLhss(MdLhs const& cur, MdLhs const& prev) -> Compari
             if (IsGeneralization(prev_it, cur_it, prev_end, cur_end))
                 return ComparisonResult::Specialization;
             return ComparisonResult::Incomparable;
-        } else if (cur_bound < prev_bound) {  // prev cannot be a generalization of cur.
+        } else if (cur_ccv_id < prev_ccv_id) {  // prev cannot be a generalization of cur.
             if (IsGeneralizationIncr(cur_it, prev_it, cur_end, prev_end))
                 return ComparisonResult::Generalization;
             return ComparisonResult::Incomparable;
-        } else if (prev_bound < cur_bound) {  // cur cannot be a generalization of prev.
+        } else if (prev_ccv_id < cur_ccv_id) {  // cur cannot be a generalization of prev.
             if (IsGeneralizationIncr(prev_it, cur_it, prev_end, cur_end))
                 return ComparisonResult::Specialization;
             return ComparisonResult::Incomparable;

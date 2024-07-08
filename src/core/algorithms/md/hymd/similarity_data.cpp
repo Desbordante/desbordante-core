@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/lowest_bound.h"
+#include "algorithms/md/hymd/lowest_cc_value_id.h"
 
 namespace algos::hymd {
 
@@ -14,8 +14,8 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
     std::size_t const col_match_number = column_matches_info_initial.size();
     std::vector<ColumnMatchInfo> column_matches_info;
     column_matches_info.reserve(col_match_number);
-    std::vector<std::vector<model::md::DecisionBoundary>> column_matches_lhs_bounds;
-    column_matches_lhs_bounds.reserve(col_match_number);
+    std::vector<std::vector<model::Index>> column_matches_lhs_ids;
+    column_matches_lhs_ids.reserve(col_match_number);
     auto const& left_records = records_info->GetLeftCompressor();
     auto const& right_records = records_info->GetRightCompressor();
     for (auto const& [measure, left_col_index, right_col_index] : column_matches_info_initial) {
@@ -30,14 +30,14 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
         } else {
             data_info_right = preprocessing::DataInfo::MakeFrom(right_pli, measure->GetArgType());
         }
-        // TODO: sort column matches on the number of LHS bounds.
-        auto [lhs_bounds, indexes] =
+        // TODO: sort column matches on the number of LHS CCV IDs.
+        auto [lhs_ccv_ids, indexes] =
                 measure->MakeIndexes(std::move(data_info_left), std::move(data_info_right),
                                      right_pli.GetClusters(), pool);
         column_matches_info.emplace_back(std::move(indexes), left_col_index, right_col_index);
-        column_matches_lhs_bounds.push_back(std::move(lhs_bounds));
+        column_matches_lhs_ids.push_back(std::move(lhs_ccv_ids));
     }
-    return {records_info, std::move(column_matches_info), std::move(column_matches_lhs_bounds)};
+    return {records_info, std::move(column_matches_info), std::move(column_matches_lhs_ids)};
 }
 
 std::unordered_set<PairComparisonResult> SimilarityData::CompareAllWith(
@@ -56,7 +56,7 @@ std::unordered_set<PairComparisonResult> SimilarityData::CompareAllWith(
             indexes::SimilarityMatrixRow const& sim_matrix_row =
                     sim_info.similarity_matrix[left_record[left_col_index]];
             auto it = sim_matrix_row.find(record[right_col_index]);
-            pair_sims.push_back(it == sim_matrix_row.end() ? kLowestBound : it->second);
+            pair_sims.push_back(it == sim_matrix_row.end() ? kLowestCCValueId : it->second);
         }
         comparisons.insert(pair_sims);
         pair_sims.clear();
@@ -72,18 +72,24 @@ PairComparisonResult SimilarityData::CompareRecords(CompressedRecord const& left
         indexes::SimilarityMatrixRow const& row =
                 sim_info.similarity_matrix[left_record[left_col_index]];
         auto sim_it = row.find(right_record[right_col_index]);
-        comparison_result.push_back(sim_it == row.end() ? kLowestBound : sim_it->second);
+        comparison_result.push_back(sim_it == row.end() ? kLowestCCValueId : sim_it->second);
     }
     return comparison_result;
 }
 
-std::optional<model::md::DecisionBoundary> SimilarityData::GetPreviousDecisionBound(
-        model::md::DecisionBoundary const lhs_bound, model::Index const column_match_index) const {
-    std::vector<model::md::DecisionBoundary> const& bounds =
-            column_matches_lhs_bounds_[column_match_index];
-    auto it = std::lower_bound(bounds.begin(), bounds.end(), lhs_bound);
-    if (it == bounds.begin()) return std::nullopt;
-    return *--it;
+model::md::DecisionBoundary SimilarityData::GetLhsDecisionBoundary(
+        model::Index column_match_index,
+        ColumnClassifierValueId classifier_value_id) const noexcept {
+    return column_matches_sim_info_[column_match_index]
+            .similarity_info
+            .classifier_values[column_matches_lhs_ids_[column_match_index][classifier_value_id]];
+}
+
+model::md::DecisionBoundary SimilarityData::GetDecisionBoundary(
+        model::Index column_match_index,
+        ColumnClassifierValueId classifier_value_id) const noexcept {
+    return column_matches_sim_info_[column_match_index]
+            .similarity_info.classifier_values[classifier_value_id];
 }
 
 }  // namespace algos::hymd

@@ -17,14 +17,14 @@ private:
     struct Node : NodeBase<Node> {
         ValidationInfo* task_info = nullptr;
 
-        Node* AddOneUnchecked(model::Index child_array_index, model::md::DecisionBoundary bound) {
-            return AddOneUncheckedBase(child_array_index, bound);
+        Node* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id) {
+            return AddOneUncheckedBase(child_array_index, ccv_id);
         }
 
         Node(std::size_t children_number) : NodeBase<Node>(children_number) {}
     };
 
-    using BoundMap = Node::BoundMap;
+    using CCVIdChildMap = Node::OrderedCCVIdChildMap;
     using NodeChildren = Node::Children;
 
     Node root_;
@@ -33,6 +33,7 @@ private:
     static auto SetInfoAction(ValidationInfo* info) {
         return [info](Node* node) { node->task_info = info; };
     }
+
     void AddNewLhs(Node& cur_node, ValidationInfo* validation_info, MdLhs::iterator cur_lhs_iter);
     void ExcludeGeneralizationRhs(Node const& cur_node,
                                   MdLattice::MdVerificationMessenger const& messenger,
