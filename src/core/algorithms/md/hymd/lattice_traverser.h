@@ -12,7 +12,6 @@ namespace algos::hymd {
 
 class LatticeTraverser {
 private:
-    lattice::MdLattice* const lattice_;
     Recommendations recommendations_;
 
     std::unique_ptr<lattice::LevelGetter> const level_getter_;
@@ -21,13 +20,9 @@ private:
     util::WorkerThreadPool* pool_;
 
 public:
-    LatticeTraverser(lattice::MdLattice* lattice,
-                     std::unique_ptr<lattice::LevelGetter> level_getter, Validator validator,
+    LatticeTraverser(std::unique_ptr<lattice::LevelGetter> level_getter, Validator validator,
                      util::WorkerThreadPool* pool) noexcept
-        : lattice_(lattice),
-          level_getter_(std::move(level_getter)),
-          validator_(validator),
-          pool_(pool) {}
+        : level_getter_(std::move(level_getter)), validator_(validator), pool_(pool) {}
 
     bool TraverseLattice(bool traverse_all);
 

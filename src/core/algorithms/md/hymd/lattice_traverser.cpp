@@ -1,7 +1,5 @@
 #include "algorithms/md/hymd/lattice_traverser.h"
 
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/utility/set_for_scope.h"
 #include "model/index.h"
 
 namespace algos::hymd {

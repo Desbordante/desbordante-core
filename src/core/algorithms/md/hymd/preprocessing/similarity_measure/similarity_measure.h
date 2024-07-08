@@ -16,12 +16,7 @@ namespace algos::hymd::preprocessing::similarity_measure {
 class SimilarityMeasure {
 private:
     std::unique_ptr<model::Type> const arg_type_;
-    // Let R be a total order such that
-    // \forall a in D \forall b in D (a R b -> sim_R(a) subseteq sim_R(b))
-    // where sim is this similarity measure, R is defined on D x D
-    // sim_R(c) := { (value1, value2) | sim(value1, value2) R c }
-    // then we can use HyMD with minimal changes (enumerating the natural decision boundaries).
-    // For the original algorithm D = [0.0, 1.0], R = >
+    // Doesn't have to be a double, just any type with total order.
     std::unique_ptr<model::INumericType> const ret_type_;
 
 public:

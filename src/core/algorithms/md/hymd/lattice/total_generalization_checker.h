@@ -8,7 +8,6 @@ namespace algos::hymd::lattice {
 template <typename NodeType>
 class TotalGeneralizationChecker {
     using Unspecialized = NodeType::Specialization::Unspecialized;
-    using BoundMap = NodeType::BoundMap;
     Unspecialized unspecialized_;
 
 public:
@@ -19,11 +18,11 @@ public:
                                      model::Index child_array_index = 0) const {
         MdLhs const& lhs = NodeType::GetLhs(unspecialized_);
         for (MdLhs::iterator end_iter = lhs.end(); next_iter != end_iter; ++child_array_index) {
-            auto const& [index_delta, generalization_bound_limit] = *next_iter;
+            auto const& [index_delta, lhs_ccv_id] = *next_iter;
             child_array_index += index_delta;
             ++next_iter;
-            for (auto const& [generalization_bound, node] : *node.children[child_array_index]) {
-                if (generalization_bound > generalization_bound_limit) break;
+            for (auto const& [child_ccv_id, node] : *node.children[child_array_index]) {
+                if (child_ccv_id > lhs_ccv_id) break;
                 if (HasGeneralization(node, next_iter)) return true;
             }
         }

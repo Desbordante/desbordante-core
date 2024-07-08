@@ -1,7 +1,7 @@
 #include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 
 #include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lowest_bound.h"
+#include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "util/erase_if_replace.h"
 
 namespace algos::hymd::lattice::cardinality {
@@ -16,7 +16,7 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
         boost::dynamic_bitset<> indices(column_match_number);
         lattice::Rhs const& rhs = messenger.GetRhs();
         for (model::Index i = 0; i < column_match_number; ++i) {
-            if (rhs[i] != kLowestBound) {
+            if (rhs[i] != kLowestCCValueId) {
                 indices.set(i);
             }
         }

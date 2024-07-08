@@ -4,7 +4,6 @@
 #include <unordered_set>
 #include <vector>
 
-#include "algorithms/md/decision_boundary.h"
 #include "algorithms/md/hymd/column_match_info.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
@@ -55,12 +54,12 @@ private:
         return GetLeftCompressor().GetPli(GetLeftPliIndex(col_match_index)).GetClusters().size();
     }
 
-    std::size_t GetTotalPairsNum() const {
-        return GetLeftCompressor().GetNumberOfRecords() * GetRightCompressor().GetNumberOfRecords();
+    std::size_t GetTotalPairsNum() const noexcept {
+        return records_info_->GetTotalPairsNum();
     }
 
     [[nodiscard]] indexes::RecSet const* GetSimilarRecords(ValueIdentifier value_id,
-                                                           model::md::DecisionBoundary lhs_bound,
+                                                           model::Index lhs_ccv_id,
                                                            model::Index column_match_index) const;
 
 public:
