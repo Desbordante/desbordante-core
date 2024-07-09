@@ -124,7 +124,7 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::Probe(
 
     std::unordered_map<int, std::pair<ClusterValue, Cluster>> partial_clusters;
 
-    for (auto& [value, cluster] : clusters_) {
+    for (auto const& [value, cluster] : clusters_) {
         for (int position : cluster) {
             int probing_table_value_id = (*probing_table)[position];
             auto partial_cluster = partial_clusters.find(probing_table_value_id);
