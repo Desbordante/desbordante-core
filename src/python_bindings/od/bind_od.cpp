@@ -54,9 +54,6 @@ void BindOd(py::module_& main_module) {
             .def_readonly("lhs", &ListOD::lhs)
             .def_readonly("rhs", &ListOD::rhs);
 
-    static constexpr auto kFastodName = "Fastod";
-    static constexpr auto kOrderName = "Order";
-
     auto fastod_algos_module =
             BindPrimitiveNoBase<algos::Fastod>(od_module, "Fastod")
                     .def("get_asc_ods", &algos::Fastod::GetAscendingDependencies)
