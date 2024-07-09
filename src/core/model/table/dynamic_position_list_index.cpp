@@ -132,7 +132,7 @@ std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::Probe(
                 auto& [key, positions] = partial_cluster->second;
                 positions.emplace_back(position);
             } else {
-                ClusterValue key = std::move(value);
+                ClusterValue key = value;
                 auto& cluster_value = cluster_values[probing_table_value_id];
                 key.insert(key.end(), cluster_value.begin(), cluster_value.end());
                 partial_clusters[probing_table_value_id] = {std::move(key), {position}};
