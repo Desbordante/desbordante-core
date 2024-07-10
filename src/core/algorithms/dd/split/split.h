@@ -51,6 +51,7 @@ private:
 
     void ResetState() final {
         dd_collection_.clear();
+        tuple_pairs_.clear();
     }
 
     double CalculateDistance(model::ColumnIndex column_index,
