@@ -16,34 +16,6 @@
 #include "algorithms/md/hymd/table_identifiers.h"
 
 namespace algos::hymd::preprocessing {
-inline std::vector<ColumnClassifierValueId> CreateLhsIds(std::size_t cv_number,
-                                                         std::size_t const size_limit) {
-    std::vector<ColumnClassifierValueId> lhs_ids;
-    if (size_limit == 0 || cv_number <= size_limit) {
-        lhs_ids.reserve(cv_number);
-        auto iota = std::views::iota(0ul, cv_number);
-        lhs_ids.assign(iota.begin(), iota.end());
-    } else {
-        lhs_ids.reserve(size_limit + 1);
-        lhs_ids.push_back(kLowestCCValueId);
-        --cv_number;
-        std::size_t const add_index = cv_number / size_limit;
-        std::size_t const add_rem = cv_number % size_limit;
-        std::size_t rem = add_rem;
-        std::size_t index = add_index;
-        while (index <= cv_number) {
-            lhs_ids.push_back(index);
-            index += add_index;
-            rem += add_rem;
-            if (rem >= size_limit) {
-                ++index;
-                rem -= size_limit;
-            }
-        }
-    }
-    return lhs_ids;
-}
-
 inline void SortAllRows(EnumeratedValidTableResults& tr_res) {
     auto pair_comparer = [](ValueResult<ColumnClassifierValueId> const& p1,
                             ValueResult<ColumnClassifierValueId> const& p2) {
@@ -134,11 +106,10 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
 template <typename ResultType>
 indexes::SimilarityMeasureOutput BuildIndexes(
         EnumeratedValidTableResults enumerated, std::vector<ResultType> classifier_values,
-        std::size_t size_limit, std::vector<indexes::PliCluster> const& clusters_right) {
+        std::vector<indexes::PliCluster> const& clusters_right, auto create_lhs_ids) {
     SortAllRows(enumerated);
 
-    std::vector<ColumnClassifierValueId> lhs_ids =
-            CreateLhsIds(classifier_values.size(), size_limit);
+    std::vector<ColumnClassifierValueId> lhs_ids = create_lhs_ids(classifier_values);
 
     indexes::SimilarityMatrix value_matrix = CreateValueMatrix(enumerated);
 

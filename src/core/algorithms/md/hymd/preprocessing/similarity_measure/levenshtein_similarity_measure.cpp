@@ -7,6 +7,7 @@
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
+#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 #include "algorithms/md/hymd/preprocessing/encode_results.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
@@ -198,8 +199,11 @@ indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
             EncodeResults(std::move(worker.task_data), additional_results);
     if (data_info_left == data_info_right) SymmetricClosure(enumerated_results, clusters_right);
 
-    return BuildIndexes(std::move(enumerated_results), std::move(similarities), size_limit_,
-                        clusters_right);
+    auto pick_index_uniform = [this](auto const& bounds) {
+        return ccv_id_pickers::IndexUniform(bounds.size(), size_limit_);
+    };
+    return BuildIndexes(std::move(enumerated_results), std::move(similarities), clusters_right,
+                        pick_index_uniform);
 }
 
 LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim,
