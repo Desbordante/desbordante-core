@@ -14,14 +14,14 @@ class bcolors:
 GRAPH_NAME = 'channels_graph'
 GFD_NAME = 'entertainment_viewer_gfd'
 
-GRAPHS_DATASETS_FOLDER_PATH = 'examples/verifying_gfd/datasets/graphs'
-GFDS_DATASETS_FOLDER_PATH = 'examples/verifying_gfd/datasets/gfds'
+GRAPHS_DATASETS_FOLDER_PATH = 'examples/datasets/verifying_gfd/graphs'
+GFDS_DATASETS_FOLDER_PATH = 'examples/datasets/verifying_gfd/gfds'
 
 GRAPH = Path(f'{GRAPHS_DATASETS_FOLDER_PATH}/{GRAPH_NAME}.dot')
 GFD = Path(f'{GFDS_DATASETS_FOLDER_PATH}/{GFD_NAME}.dot')
 
-GRAPH_IMAGE = Path(f'examples/verifying_gfd/figures/graphs/{GRAPH_NAME}.png')
-GFD_IMAGE = Path(f'examples/verifying_gfd/figures/gfds/{GFD_NAME}.png')
+GRAPH_IMAGE = Path(f'examples/basic/verifying_gfd/figures/graphs/{GRAPH_NAME}.png')
+GFD_IMAGE = Path(f'examples/basic/verifying_gfd/figures/gfds/{GFD_NAME}.png')
 
 GRAPH_INFO = ('Figure provides an example of a graph dependency and graph. '
               'The vertices of the graph have labels of C (Channel) or U '

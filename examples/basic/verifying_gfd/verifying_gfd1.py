@@ -15,15 +15,15 @@ GRAPH_NAME = 'blogs_graph'
 MODIFIED_GRAPH_NAME = 'incorrect_author_blogs_graph'
 GFD_NAME = 'correct_author_gfd'
 
-GRAPHS_DATASETS_FOLDER_PATH = 'examples/verifying_gfd/datasets/graphs'
-GFDS_DATASETS_FOLDER_PATH = 'examples/verifying_gfd/datasets/gfds'
+GRAPHS_DATASETS_FOLDER_PATH = 'examples/datasets/verifying_gfd/graphs'
+GFDS_DATASETS_FOLDER_PATH = 'examples/datasets/verifying_gfd/gfds'
 
 GRAPH = Path(f'{GRAPHS_DATASETS_FOLDER_PATH}/{GRAPH_NAME}.dot')
 MODIFIED_GRAPH = Path(f'{GRAPHS_DATASETS_FOLDER_PATH}/{MODIFIED_GRAPH_NAME}.dot')
 GFD = Path(f'{GFDS_DATASETS_FOLDER_PATH}/{GFD_NAME}.dot')
 
-GRAPHS_FIGURES_FOLDER_PATH = 'examples/verifying_gfd/figures/graphs'
-GFDS_FIGURES_FOLDER_PATH = 'examples/verifying_gfd/figures/gfds'
+GRAPHS_FIGURES_FOLDER_PATH = 'examples/basic/verifying_gfd/figures/graphs'
+GFDS_FIGURES_FOLDER_PATH = 'examples/basic/verifying_gfd/figures/gfds'
 
 GRAPH_IMAGE = Path(f'{GRAPHS_FIGURES_FOLDER_PATH}/{GRAPH_NAME}.png')
 MODIFIED_GRAPH_IMAGE = Path(f'{GRAPHS_FIGURES_FOLDER_PATH}/{MODIFIED_GRAPH_NAME}.png')
