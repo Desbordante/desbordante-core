@@ -333,21 +333,8 @@ public:
     MdNodeChildren& Children() noexcept {
         return node_->children;
     }
-
-    ColumnClassifierValueId IncomingCCVId() const noexcept {
-        return rhs_.ccv_id;
-    }
-
-    Index IncomingIndex() const noexcept {
-        return rhs_.index;
-    }
-
     void SetCCVIdOnCurrent() noexcept {
         *cur_node_rhs_ptr_ = rhs_.ccv_id;
-    }
-
-    MdElement GetIncomingRhs() const noexcept {
-        return rhs_;
     }
 
     MdGenChecker const& GetTotalChecker() const noexcept {
