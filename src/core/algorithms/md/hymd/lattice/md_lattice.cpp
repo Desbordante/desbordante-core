@@ -66,36 +66,34 @@ void MdLattice::SpecializeElement(MdLhs const& lhs, Rhss const& rhss, MdLhs::ite
                                   model::Index spec_child_index, ColumnClassifierValueId spec_past,
                                   model::Index lhs_spec_index, auto add_method,
                                   auto support_check_method) {
-    auto rhs_begin = rhss.begin(), rhs_end = rhss.end();
-    auto add_all_rhs = [rhs_begin, rhs_end, &lhs_spec_index, this](
-                               LhsSpecialization const& lhs_spec, auto method) {
-        for (auto rhs_it = rhs_begin; rhs_it != rhs_end; ++rhs_it) {
-            if (rhs_it->index == lhs_spec_index) {
-                if (!prune_nondisjoint_) {
-                    ColumnClassifierValueId const ccv_id_triviality_bound =
-                            (*lhs_ccv_ids_)[lhs_spec_index]
-                                           [lhs_spec.specialization_data.new_child.ccv_id];
-                    if (rhs_it->ccv_id > ccv_id_triviality_bound)
-                        (this->*method)({lhs_spec, *rhs_it});
-                }
-                for (++rhs_it; rhs_it != rhs_end; ++rhs_it) {
-                    (this->*method)({lhs_spec, *rhs_it});
-                }
-                return;
-            }
-            (this->*method)({lhs_spec, *rhs_it});
-        }
-    };
     std::vector<ColumnClassifierValueId> const& lhs_ccv_ids = (*lhs_ccv_ids_)[lhs_spec_index];
     // TODO: remove those before starting.
-    if (lhs_ccv_ids.size() == 1) return;
+    // if (lhs_ccv_ids.size() == 1) return;
+    // TODO: enforce this with a special class (basically a vector that guarantees this condition).
     assert(!lhs_ccv_ids.empty());
     ++spec_past;
     if (spec_past == lhs_ccv_ids.size()) return;
     assert(spec_past < lhs_ccv_ids.size());
     LhsSpecialization lhs_spec{lhs, {lhs_iter, {spec_child_index, spec_past}}};
-    if ((this->*support_check_method)(lhs_spec)) return;
-    add_all_rhs(lhs_spec, add_method);
+    bool const is_unsupported = (this->*support_check_method)(lhs_spec);
+    if (is_unsupported) return;
+    auto const rhs_end = rhss.end();
+    for (auto rhs_it = rhss.begin(); rhs_it != rhs_end; ++rhs_it) {
+        if (rhs_it->index == lhs_spec_index) {
+            if (!prune_nondisjoint_) {
+                ColumnClassifierValueId const ccv_id_triviality_bound =
+                        (*lhs_ccv_ids_)[lhs_spec_index]
+                                       [lhs_spec.specialization_data.new_child.ccv_id];
+                if (rhs_it->ccv_id > ccv_id_triviality_bound)
+                    (this->*add_method)({lhs_spec, *rhs_it});
+            }
+            for (++rhs_it; rhs_it != rhs_end; ++rhs_it) {
+                (this->*add_method)({lhs_spec, *rhs_it});
+            }
+            return;
+        }
+        (this->*add_method)({lhs_spec, *rhs_it});
+    }
 }
 
 void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_lhs_ccv_id,
