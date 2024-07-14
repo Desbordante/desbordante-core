@@ -4,23 +4,23 @@
 #include "algorithms/md/hymd/lattice/total_generalization_checker.h"
 
 namespace algos::hymd::lattice {
-template <typename NodeType>
+template <typename NodeType, typename Specialization = NodeType::Specialization>
 class SpecGeneralizationChecker {
-    using Specialization = NodeType::Specialization;
     using CCVIdChildMap = NodeType::OrderedCCVIdChildMap;
 
-    Specialization const& specialization_;
-    TotalGeneralizationChecker<NodeType> total_checker_{specialization_.ToUnspecialized()};
+    Specialization& specialization_;
+    TotalGeneralizationChecker<NodeType, typename Specialization::Unspecialized> total_checker_{
+            specialization_.ToUnspecialized()};
 
     bool HasGeneralizationTotal(NodeType const& node, MdLhs::iterator iter,
-                                model::Index child_array_index) const {
+                                model::Index child_array_index) {
         return total_checker_.HasGeneralization(node, iter, child_array_index);
     }
 
     bool HasChildGenSpec(NodeType const& node, model::Index child_array_index,
                          MdLhs::iterator fol_iter, ColumnClassifierValueId ccv_id_limit,
                          model::Index next_child_array_index, auto gen_method,
-                         auto get_child_map_iter) const {
+                         auto get_child_map_iter) {
         CCVIdChildMap const& child_map = *node.children[child_array_index];
         for (auto spec_iter = get_child_map_iter(child_map), end_iter = child_map.end();
              spec_iter != end_iter; ++spec_iter) {
@@ -37,7 +37,7 @@ class SpecGeneralizationChecker {
 
     bool HasGeneralizationInChildren(NodeType const& node, MdLhs::iterator next_node_iter,
                                      model::Index child_array_index, auto spec_method,
-                                     auto final_method) const {
+                                     auto final_method) {
         LhsSpecialization const& lhs_specialization = specialization_.GetLhsSpecialization();
         MdLhs::iterator spec_iter = lhs_specialization.specialization_data.spec_before;
         while (next_node_iter != spec_iter) {
@@ -56,7 +56,7 @@ class SpecGeneralizationChecker {
 
     bool ReplaceFinalCheck(NodeType const& node, model::Index child_array_index,
                            MdLhs::iterator spec_iter, ColumnClassifierValueId ccv_id,
-                           std::size_t spec_delta) const {
+                           std::size_t spec_delta) {
         assert(spec_iter != specialization_.GetLhsSpecialization().old_lhs.end() &&
                spec_iter->child_array_index == spec_delta);
         ColumnClassifierValueId const old_ccv_id = spec_iter->ccv_id;
@@ -70,7 +70,7 @@ class SpecGeneralizationChecker {
 
     bool NonReplaceFinalCheck(NodeType const& node, model::Index child_array_index,
                               MdLhs::iterator spec_iter, ColumnClassifierValueId ccv_id,
-                              std::size_t spec_delta) const {
+                              std::size_t spec_delta) {
         assert(spec_iter == specialization_.GetLhsSpecialization().old_lhs.end() ||
                spec_iter->child_array_index > spec_delta);
         return HasChildGenSpec(node, child_array_index, spec_iter, ccv_id, -(spec_delta + 1),
@@ -79,11 +79,11 @@ class SpecGeneralizationChecker {
     }
 
 public:
-    SpecGeneralizationChecker(Specialization const& specialization)
+    SpecGeneralizationChecker(Specialization& specialization)
         : specialization_(specialization) {}
 
     bool HasGeneralizationInChildrenReplace(NodeType const& node, MdLhs::iterator next_node_iter,
-                                            model::Index child_array_index = 0) const {
+                                            model::Index child_array_index = 0) {
         return HasGeneralizationInChildren(
                 node, next_node_iter, child_array_index,
                 &SpecGeneralizationChecker::HasGeneralizationInChildrenReplace,
@@ -91,32 +91,32 @@ public:
     }
 
     bool HasGeneralizationInChildrenNonReplace(NodeType const& node, MdLhs::iterator next_node_iter,
-                                               model::Index child_array_index = 0) const {
+                                               model::Index child_array_index = 0) {
         return HasGeneralizationInChildren(
                 node, next_node_iter, child_array_index,
                 &SpecGeneralizationChecker::HasGeneralizationInChildrenNonReplace,
                 &SpecGeneralizationChecker::NonReplaceFinalCheck);
     }
 
-    bool HasGeneralizationReplace(NodeType const& node, MdLhs::iterator iter) const {
+    bool HasGeneralizationReplace(NodeType const& node, MdLhs::iterator iter) {
         return HasGeneralizationInChildrenReplace(node, iter);
     }
 
-    bool HasGeneralizationNonReplace(NodeType const& node, MdLhs::iterator iter) const {
+    bool HasGeneralizationNonReplace(NodeType const& node, MdLhs::iterator iter) {
         return HasGeneralizationInChildrenNonReplace(node, iter);
     }
 
-    bool HasGeneralizationReplace(NodeType const& node) const {
+    bool HasGeneralizationReplace(NodeType const& node) {
         return HasGeneralizationReplace(node,
                                         specialization_.GetLhsSpecialization().old_lhs.begin());
     }
 
-    bool HasGeneralizationNonReplace(NodeType const& node) const {
+    bool HasGeneralizationNonReplace(NodeType const& node) {
         return HasGeneralizationNonReplace(node,
                                            specialization_.GetLhsSpecialization().old_lhs.begin());
     }
 
-    auto const& GetTotalChecker() const noexcept {
+    auto& GetTotalChecker() noexcept {
         return total_checker_;
     }
 };
