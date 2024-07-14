@@ -68,24 +68,26 @@ MdLattice::MdLattice(SingleLevelFunc single_level_func,
     enabled_rhs_indices_.resize(column_matches_size_, true);
 }
 
-void MdLattice::Specialize(MdLhs const& lhs, PairComparisonResult const& pair_comparison_result,
-                           Rhss const& rhss) {
+inline void MdLattice::Specialize(MdLhs const& lhs,
+                                  PairComparisonResult const& pair_comparison_result,
+                                  Rhss const& rhss) {
     auto get_pair_lhs_ccv_id = [&](Index index, ...) {
         return rhs_to_lhs_ccv_id_map_[index][pair_comparison_result[index]];
     };
     Specialize(lhs, rhss, get_pair_lhs_ccv_id, get_pair_lhs_ccv_id);
 }
 
-void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss) {
+inline void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss) {
     auto get_lowest = [](...) { return kLowestCCValueId; };
     auto get_lhs_ccv_id = [](Index, ColumnClassifierValueId ccv_id) { return ccv_id; };
     Specialize(lhs, rhss, get_lhs_ccv_id, get_lowest);
 }
 
-void MdLattice::SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::iterator lhs_iter,
-                                  model::Index spec_child_index, ColumnClassifierValueId spec_past,
-                                  model::Index lhs_spec_index, auto support_check_method,
-                                  auto add_rhs) {
+inline void MdLattice::SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::iterator lhs_iter,
+                                         model::Index spec_child_index,
+                                         ColumnClassifierValueId spec_past,
+                                         model::Index lhs_spec_index, auto support_check_method,
+                                         auto add_rhs) {
     std::vector<ColumnClassifierValueId> const& lhs_ccv_ids = (*lhs_ccv_ids_)[lhs_spec_index];
     // TODO: remove those before starting.
     // if (lhs_ccv_ids.size() == 1) return;
@@ -100,21 +102,21 @@ void MdLattice::SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::iterator l
     add_rhs(rhs, lhs_spec, lhs_spec_index);
 }
 
-void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_lhs_ccv_id,
-                           auto get_nonlhs_ccv_id) {
-    if (rhss.empty()) {
-        assert(false);
-        __builtin_unreachable();
-    }
-    if (rhss.size() == 1) {
-        SpecializeSingle(lhs, get_lhs_ccv_id, get_nonlhs_ccv_id, rhss.front());
-    } else {
-        SpecializeMulti(lhs, get_lhs_ccv_id, get_nonlhs_ccv_id, rhss);
+inline void MdLattice::Specialize(MdLhs const& lhs, Rhss const& rhss, auto get_lhs_ccv_id,
+                                  auto get_nonlhs_ccv_id) {
+    switch (rhss.size()) {
+        case 0:
+            break;
+        case 1:
+            SpecializeSingle(lhs, get_lhs_ccv_id, get_nonlhs_ccv_id, rhss.front());
+            break;
+        default:
+            SpecializeMulti(lhs, get_lhs_ccv_id, get_nonlhs_ccv_id, rhss);
     }
 }
 
-void MdLattice::SpecializeSingle(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
-                                 MdElement rhs) {
+inline void MdLattice::SpecializeSingle(MdLhs const& lhs, auto get_lhs_ccv_id,
+                                        auto get_nonlhs_ccv_id, MdElement rhs) {
     auto add_rhs_single = [&](auto add_method) {
         return [this, add_method](MdElement rhs, LhsSpecialization lhs_spec,
                                   model::Index lhs_spec_index) {
@@ -132,8 +134,8 @@ void MdLattice::SpecializeSingle(MdLhs const& lhs, auto get_lhs_ccv_id, auto get
     DoSpecialize<MdSpecialization>(lhs, get_lhs_ccv_id, get_nonlhs_ccv_id, rhs, add_rhs_single);
 }
 
-void MdLattice::SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
-                                Rhss const& rhss) {
+inline void MdLattice::SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id,
+                                       auto get_nonlhs_ccv_id, Rhss const& rhss) {
     auto enabled_rhss = utility::ExclusionList<MdElement>::Create(rhss, enabled_rhs_indices_);
     std::size_t const rhss_size = enabled_rhss.Size();
     auto add_rhs_multi = [&](auto add_method) {
@@ -163,8 +165,8 @@ void MdLattice::SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_
 }
 
 template <typename MdInfoType>
-void MdLattice::DoSpecialize(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
-                             auto& rhs, auto add_rhs) {
+inline void MdLattice::DoSpecialize(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
+                                    auto& rhs, auto add_rhs) {
     Index lhs_spec_index = 0;
     auto lhs_iter = lhs.begin(), lhs_end = lhs.end();
     if (lhs.Cardinality() == max_cardinality_) {
@@ -202,8 +204,8 @@ void MdLattice::DoSpecialize(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_non
 }
 
 template <typename MdInfoType>
-void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md, MdLhs::iterator cur_node_iter,
-                              auto handle_level_update_tail) {
+inline void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md,
+                                     MdLhs::iterator cur_node_iter, auto handle_level_update_tail) {
     assert(!NotEmpty(cur_node.rhs));
     assert(cur_node_iter >= md.lhs_specialization.specialization_data.spec_before);
     auto set_rhs = [&](MdNode* node) { node->SetRhs(md.GetRhs()); };
@@ -211,7 +213,7 @@ void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md, MdLhs::ite
     UpdateMaxLevel(md.lhs_specialization, handle_level_update_tail);
 }
 
-void MdLattice::UpdateMaxLevel(LhsSpecialization const& lhs, auto handle_tail) {
+inline void MdLattice::UpdateMaxLevel(LhsSpecialization const& lhs, auto handle_tail) {
     std::size_t level = 0;
     auto const& [spec_child_array_index, spec_ccv_id] = lhs.specialization_data.new_child;
     MdLhs const& old_lhs = lhs.old_lhs;
@@ -308,11 +310,12 @@ public:
 };
 
 template <typename HelperType>
-MdNode* MdLattice::TryGetNextNodeChildMap(MdCCVIdChildMap& child_map, HelperType& helper,
-                                          model::Index child_array_index, auto new_minimal_action,
-                                          ColumnClassifierValueId const next_lhs_ccv_id,
-                                          MdLhs::iterator iter, auto get_child_map_iter,
-                                          std::size_t gen_check_offset) {
+inline MdNode* MdLattice::TryGetNextNodeChildMap(MdCCVIdChildMap& child_map, HelperType& helper,
+                                                 model::Index child_array_index,
+                                                 auto new_minimal_action,
+                                                 ColumnClassifierValueId const next_lhs_ccv_id,
+                                                 MdLhs::iterator iter, auto get_child_map_iter,
+                                                 std::size_t gen_check_offset) {
     MdNode& cur_node = helper.CurNode();
     auto it = get_child_map_iter(child_map);
     auto& total_checker = helper.GetTotalChecker();
@@ -335,10 +338,10 @@ MdNode* MdLattice::TryGetNextNodeChildMap(MdCCVIdChildMap& child_map, HelperType
 
 // NOTE: writing this in AddIfMinimal with gotos may be faster.
 template <typename HelperType>
-MdNode* MdLattice::TryGetNextNode(HelperType& helper, Index const child_array_index,
-                                  auto new_minimal_action,
-                                  ColumnClassifierValueId const next_lhs_ccv_id,
-                                  MdLhs::iterator iter, std::size_t gen_check_offset) {
+inline MdNode* MdLattice::TryGetNextNode(HelperType& helper, Index const child_array_index,
+                                         auto new_minimal_action,
+                                         ColumnClassifierValueId const next_lhs_ccv_id,
+                                         MdLhs::iterator iter, std::size_t gen_check_offset) {
     MdNode& cur_node = helper.CurNode();
     MdOptionalMap& optional_map = cur_node.children[child_array_index];
     if (!optional_map.HasValue()) [[unlikely]] {
@@ -355,7 +358,7 @@ MdNode* MdLattice::TryGetNextNode(HelperType& helper, Index const child_array_in
 }
 
 template <typename MdInfoType>
-void MdLattice::AddIfMinimal(MdInfoType md, auto handle_tail, auto gen_checker_method) {
+inline void MdLattice::AddIfMinimal(MdInfoType md, auto handle_tail, auto gen_checker_method) {
     MdSpecGenChecker<MdInfoType> gen_checker{md};
     auto& total_checker = gen_checker.GetTotalChecker();
     auto helper = GeneralizationHelper<typename MdInfoType::Unspecialized>(md_root_, total_checker);
@@ -381,8 +384,8 @@ void MdLattice::AddIfMinimal(MdInfoType md, auto handle_tail, auto gen_checker_m
 }
 
 template <typename MdInfoType, typename HelperType>
-void MdLattice::WalkToTail(MdInfoType md, HelperType& helper, MdLhs::iterator next_lhs_iter,
-                           auto handle_level_update_tail) {
+inline void MdLattice::WalkToTail(MdInfoType md, HelperType& helper, MdLhs::iterator next_lhs_iter,
+                                  auto handle_level_update_tail) {
     auto& total_checker = helper.GetTotalChecker();
     MdLhs::iterator lhs_end = md.lhs_specialization.old_lhs.end();
     while (next_lhs_iter != lhs_end) {
@@ -403,7 +406,7 @@ void MdLattice::WalkToTail(MdInfoType md, HelperType& helper, MdLhs::iterator ne
 }
 
 template <typename MdInfoType>
-void MdLattice::AddIfMinimalAppend(MdInfoType md) {
+inline void MdLattice::AddIfMinimalAppend(MdInfoType md) {
     MdLhs::iterator spec_iter = md.lhs_specialization.specialization_data.spec_before;
     assert(spec_iter == md.lhs_specialization.old_lhs.end());
     auto const& [spec_child_array_index, spec_ccv_id] =
@@ -421,7 +424,7 @@ void MdLattice::AddIfMinimalAppend(MdInfoType md) {
 }
 
 template <typename MdInfoType>
-void MdLattice::AddIfMinimalReplace(MdInfoType md) {
+inline void MdLattice::AddIfMinimalReplace(MdInfoType md) {
     MdLhs::iterator spec_iter = md.lhs_specialization.specialization_data.spec_before;
     assert(spec_iter != md.lhs_specialization.old_lhs.end());
     auto const& [spec_child_array_index, spec_ccv_id] =
@@ -451,7 +454,7 @@ void MdLattice::AddIfMinimalReplace(MdInfoType md) {
 }
 
 template <typename MdInfoType>
-void MdLattice::AddIfMinimalInsert(MdInfoType md) {
+inline void MdLattice::AddIfMinimalInsert(MdInfoType md) {
     MdLhs::iterator spec_iter = md.lhs_specialization.specialization_data.spec_before;
     assert(spec_iter != md.lhs_specialization.old_lhs.end());
     auto const& [spec_child_array_index, spec_ccv_id] =
