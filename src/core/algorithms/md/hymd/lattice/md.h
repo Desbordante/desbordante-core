@@ -5,6 +5,8 @@
 
 namespace algos::hymd::lattice {
 struct Md {
+    using FasterType = void;
+
     MdLhs const& lhs;
     MdElement rhs;
 };
