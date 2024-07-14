@@ -22,6 +22,7 @@ class MdLhs {
     Nodes values_;
 
 public:
+    using FasterType = void;
     using iterator = Nodes::const_iterator;
 
     MdLhs(std::size_t column_match_number) {
