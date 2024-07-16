@@ -14,6 +14,7 @@
 #include "model/index.h"
 #include "util/bitset_utils.h"
 #include "util/py_tuple_hash.h"
+#include "util/reserve_more.h"
 
 namespace {
 using model::Index;
@@ -23,9 +24,7 @@ using indexes::PliCluster;
 using indexes::RecSet;
 using indexes::SimilarityMatrix;
 using utility::InvalidatedRhss;
-using RecommendationVector = std::vector<Recommendation>;
 using IndexVector = std::vector<Index>;
-using AllRecomVecs = std::vector<RecommendationVector>;
 using RecIdVec = std::vector<RecordIdentifier>;
 using RecPtr = CompressedRecord const*;
 using RecordCluster = std::vector<RecPtr>;
@@ -39,42 +38,6 @@ std::vector<ElementType> GetAllocatedVector(std::size_t size) {
 }  // namespace
 
 namespace algos::hymd {
-
-struct WorkingInfo {
-    RecommendationVector& recommendations;
-    MdElement const old_rhs;
-    ColumnClassifierValueId current_id;
-    std::size_t const col_match_values;
-    ColumnClassifierValueId interestingness_id;
-    CompressedRecords const& right_records;
-    SimilarityMatrix const& similarity_matrix;
-    Index const left_index;
-    Index const right_index;
-
-    bool EnoughRecommendations() const {
-        return true;
-        // <=> return recommendations.size() >= 1 /* was 20 */;
-        // I believe this check is no longer needed, as we are only giving "useful" recommendations,
-        // which means those that are very likely to actually remove the need to validate MDs.
-    }
-
-    bool ShouldStop() const {
-        return current_id == kLowestCCValueId && EnoughRecommendations();
-    }
-
-    WorkingInfo(MdElement old_rhs, RecommendationVector& recommendations,
-                std::size_t col_match_values, CompressedRecords const& right_records,
-                SimilarityMatrix const& similarity_matrix, Index const left_index,
-                Index const right_index)
-        : recommendations(recommendations),
-          old_rhs(old_rhs),
-          current_id(old_rhs.ccv_id),
-          col_match_values(col_match_values),
-          right_records(right_records),
-          similarity_matrix(similarity_matrix),
-          left_index(left_index),
-          right_index(right_index) {}
-};
 
 RecSet const* Validator::GetSimilarRecords(ValueIdentifier value_id, model::Index lhs_ccv_id,
                                            Index column_match_index) const {
@@ -93,8 +56,8 @@ class Validator::SetPairProcessor {
     std::vector<ColumnMatchInfo> const& column_matches_info_ = *validator_->column_matches_info_;
     CompressedRecords const& left_records_ = validator_->GetLeftCompressor().GetRecords();
     CompressedRecords const& right_records_ = validator_->GetRightCompressor().GetRecords();
-    InvalidatedRhss& invalidated_;
-    lattice::Rhs& lattice_rhs_;
+    Result& result_;
+    std::vector<WorkingInfo>& working_;
     MdLhs const& lhs_;
     PairProvider pair_provider_;
 
@@ -111,91 +74,59 @@ class Validator::SetPairProcessor {
                                       RecordCluster const& matched_records,
                                       Collection const& similar_records) const;
 
-    std::pair<std::vector<WorkingInfo>, AllRecomVecs> MakeWorkingAndRecs(
-            boost::dynamic_bitset<> const& indices_bitset);
-
     bool Supported(std::size_t support) {
         return validator_->Supported(support);
     }
 
-    Result MakeAllInvalidatedAndSupportedResult(std::vector<WorkingInfo> const& working,
-                                                AllRecomVecs&& recommendations) {
-        for (WorkingInfo const& working_info : working) {
-            invalidated_.PushBack(working_info.old_rhs, kLowestCCValueId);
+    void MakeAllInvalidatedAndSupportedResult() {
+        result_.is_unsupported = false;
+        for (WorkingInfo const& working_info : working_) {
+            result_.invalidated.PushBack(working_info.old_rhs, kLowestCCValueId);
         }
-        return {std::move(recommendations), std::move(invalidated_), false};
     }
 
-    Result MakeOutOfClustersResult(std::vector<WorkingInfo> const& working,
-                                   AllRecomVecs&& recommendations, std::size_t support) {
-        for (WorkingInfo const& working_info : working) {
-            ColumnClassifierValueId const new_id = working_info.current_id;
-            MdElement old_rhs = working_info.old_rhs;
-            if (new_id == old_rhs.ccv_id) continue;
-            invalidated_.PushBack(old_rhs, new_id);
+    void MakeOutOfClustersResult(std::size_t support) {
+        if (!Supported(support)) {
+            result_.is_unsupported = true;
+            return;
         }
-        return {std::move(recommendations), std::move(invalidated_), !Supported(support)};
+        result_.is_unsupported = false;
+        for (WorkingInfo const& working_info : working_) {
+            ColumnClassifierValueId const new_ccv_id = working_info.current_ccv_id;
+            MdElement old_rhs = working_info.old_rhs;
+            if (new_ccv_id == old_rhs.ccv_id) continue;
+            result_.invalidated.PushBack(old_rhs, new_ccv_id);
+        }
     }
 
 public:
-    SetPairProcessor(Validator const* validator, InvalidatedRhss& invalidated, lattice::Rhs& rhs,
+    SetPairProcessor(Validator const* validator, Result& result, std::vector<WorkingInfo>& working,
                      MdLhs const& lhs)
         : validator_(validator),
-          invalidated_(invalidated),
-          lattice_rhs_(rhs),
+          result_(result),
+          working_(working),
           lhs_(lhs),
           pair_provider_(validator, lhs) {}
 
-    Result ProcessPairs(boost::dynamic_bitset<> const& indices_bitset) {
-        auto [working, recommendations] = MakeWorkingAndRecs(indices_bitset);
+    void ProcessPairs() {
         std::size_t support = 0;
         while (pair_provider_.TryGetNextPair()) {
             auto const& cluster = pair_provider_.GetCluster();
             auto const& similar = pair_provider_.GetSimilarRecords();
             support += cluster.size() * similar.size();
             bool all_invalid = true;
-            for (WorkingInfo& working_info : working) {
+            for (WorkingInfo& working_info : working_) {
                 Status const status = LowerForColumnMatch(working_info, cluster, similar);
                 if (status == Status::kCheckedAll) all_invalid = false;
             }
-            if (all_invalid && Supported(support))
-                return MakeAllInvalidatedAndSupportedResult(working, std::move(recommendations));
+            if (all_invalid && Supported(support)) {
+                MakeAllInvalidatedAndSupportedResult();
+                return;
+            }
         }
-        return MakeOutOfClustersResult(working, std::move(recommendations), support);
+        MakeOutOfClustersResult(support);
     }
 };
-
-template <typename PairProvider>
-std::pair<std::vector<WorkingInfo>, AllRecomVecs>
-Validator::SetPairProcessor<PairProvider>::MakeWorkingAndRecs(
-        boost::dynamic_bitset<> const& indices_bitset) {
-    std::pair<std::vector<WorkingInfo>, AllRecomVecs> working_and_recs;
-    auto& [working, recommendations] = working_and_recs;
-    std::size_t const working_size = indices_bitset.count();
-    working.reserve(working_size);
-    recommendations.reserve(working_size);
-    IndexVector indices = util::BitsetToIndices<Index>(indices_bitset);
-    for (Index index : indices) {
-        RecommendationVector& last_recs = recommendations.emplace_back();
-        auto const& [sim_info, left_index, right_index] = column_matches_info_[index];
-        MdElement rhs{index, lattice_rhs_[index]};
-        working.emplace_back(rhs, last_recs, validator_->GetLeftValueNum(index), right_records_,
-                             sim_info.similarity_matrix, left_index, right_index);
-    }
-
-    auto for_each_working = [&](auto f) { std::for_each(working.begin(), working.end(), f); };
-    for_each_working(
-            [&](WorkingInfo const& w) { lattice_rhs_[w.old_rhs.index] = kLowestCCValueId; });
-    std::vector<ColumnClassifierValueId> const gen_max_rhs =
-            validator_->lattice_->GetInterestingnessCCVIds(lhs_, indices);
-    for_each_working(
-            [&](WorkingInfo const& w) { lattice_rhs_[w.old_rhs.index] = w.old_rhs.ccv_id; });
-
-    auto it = working.begin();
-    auto set_advance = [&it](ColumnClassifierValueId ccv_id) { it++->interestingness_id = ccv_id; };
-    std::for_each(gen_max_rhs.begin(), gen_max_rhs.end(), set_advance);
-    return working_and_recs;
-}
 
 template <typename PairProvider>
 template <typename Collection>
@@ -210,14 +141,14 @@ auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatchNoCheck(
     for (RecPtr left_record_ptr : matched_records) {
         grouped[(*left_record_ptr)[working_info.left_index]].push_back(left_record_ptr);
     }
-    ColumnClassifierValueId& current_rhs_id = working_info.current_id;
-    SimilarityMatrix const& similarity_matrix = working_info.similarity_matrix;
+    ColumnClassifierValueId& current_rhs_id = working_info.current_ccv_id;
+    SimilarityMatrix const& similarity_matrix = *working_info.similarity_matrix;
     for (auto const& [left_value_id, records_left] : grouped) {
         for (RecordIdentifier record_id_right : similar_records) {
-            CompressedRecord const& right_record = working_info.right_records[record_id_right];
+            CompressedRecord const& right_record = (*working_info.right_records)[record_id_right];
             auto add_recommendations = [&records_left, &right_record, &working_info]() {
                 for (RecPtr left_record_ptr : records_left) {
-                    working_info.recommendations.emplace_back(left_record_ptr, &right_record);
+                    working_info.recommendations->emplace_back(left_record_ptr, &right_record);
                 }
             };
             auto const& row = similarity_matrix[left_value_id];
@@ -450,36 +381,99 @@ public:
     }
 };
 
-Validator::Result Validator::Validate(lattice::ValidationInfo& info) const {
+void Validator::Validate(lattice::ValidationInfo& info, Result& result,
+                         std::vector<WorkingInfo>& working) const {
     MdLhs const& lhs = info.messenger->GetLhs();
-    lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
-    // After a call to this method, info.rhs_indices must not be used
-    boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
-    std::size_t const cardinality = lhs.Cardinality();
-    InvalidatedRhss invalidated;
-    if (cardinality == 0) [[unlikely]] {
-        util::ForEachIndex(indices_bitset, [&](auto index) {
-            ColumnClassifierValueId old_cc_value_id = lattice_rhs[index];
-            if (old_cc_value_id == kLowestCCValueId) [[likely]]
-                return;
-            invalidated.PushBack({index, old_cc_value_id}, kLowestCCValueId);
-        });
-        return {{}, std::move(invalidated), !Supported(GetTotalPairsNum())};
+    switch (lhs.Cardinality()) {
+        [[unlikely]] case 0:
+            break;
+        case 1: {
+            SetPairProcessor<OneCardPairProvider> processor(this, result, working, lhs);
+            processor.ProcessPairs();
+        } break;
+        default: {
+            SetPairProcessor<MultiCardPairProvider> processor(this, result, working, lhs);
+            processor.ProcessPairs();
+        } break;
     }
+}
 
-    if (cardinality == 1) {
-        Index const non_zero_index = lhs.begin()->child_array_index;
-        // Never happens when disjointedness pruning is on.
-        if (indices_bitset.test_set(non_zero_index, false)) {
-            assert(lattice_rhs[non_zero_index] != kLowestCCValueId);
-            invalidated.PushBack({non_zero_index, lattice_rhs[non_zero_index]}, kLowestCCValueId);
+void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
+                                   std::vector<WorkingInfo>& working,
+                                   AllRecomVecs& recommendations) {
+    MdLhs const& lhs = info.messenger->GetLhs();
+    boost::dynamic_bitset<> const& indices_bitset = info.rhs_indices;
+    IndexVector indices = util::BitsetToIndices<Index>(indices_bitset);
+    std::size_t const working_size = indices.size();
+    working.reserve(working_size);
+    recommendations.reserve(working_size);
+    std::vector<ColumnClassifierValueId> const removed_ccv_ids =
+            lattice_->RemoveExisting(lhs, indices);
+    std::vector<ColumnClassifierValueId> const interestingness_ccv_ids =
+            lattice_->GetInterestingnessCCVIds(lhs, indices);
+    lattice_->AddRemoved(lhs, indices, removed_ccv_ids);
+
+    auto old_iter = removed_ccv_ids.begin();
+    auto intrestingness_iter = interestingness_ccv_ids.begin();
+    indexes::CompressedRecords const& right_records = GetRightCompressor().GetRecords();
+    for (Index index : indices) {
+        RecommendationVector& last_recs = recommendations.emplace_back();
+        auto const& [sim_info, left_index, right_index] = (*column_matches_info_)[index];
+        MdElement rhs{index, *old_iter++};
+        working.emplace_back(rhs, last_recs, GetLeftValueNum(index), *intrestingness_iter++,
+                             right_records, sim_info.similarity_matrix, left_index, right_index);
+    }
+}
+
+inline void Validator::Initialize(std::vector<lattice::ValidationInfo>& validation_info) {
+    std::size_t const validations_size = validation_info.size();
+    results_.clear();
+    current_working_.clear();
+    util::ReserveMore(results_, validations_size);
+    util::ReserveMore(current_working_, validations_size);
+    for (lattice::ValidationInfo& info : validation_info) {
+        MdLhs const& lhs = info.messenger->GetLhs();
+        std::size_t const cardinality = lhs.Cardinality();
+        Result& result = results_.emplace_back();
+        boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
+        std::vector<WorkingInfo>& working = current_working_.emplace_back();
+        lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
+        switch (cardinality) {
+            [[unlikely]] case 0: {
+                util::ForEachIndex(indices_bitset, [&](auto index) {
+                    ColumnClassifierValueId old_cc_value_id = lattice_rhs[index];
+                    if (old_cc_value_id == kLowestCCValueId) [[likely]]
+                        return;
+                    result.invalidated.PushBack({index, old_cc_value_id}, kLowestCCValueId);
+                });
+                result.is_unsupported = !Supported(GetTotalPairsNum());
+            } break;
+            case 1: {
+                Index const non_zero_index = lhs.begin()->child_array_index;
+                // Never happens when disjointedness pruning is on.
+                if (indices_bitset.test_set(non_zero_index, false)) {
+                    assert(lattice_rhs[non_zero_index] != kLowestCCValueId);
+                    result.invalidated.PushBack({non_zero_index, lattice_rhs[non_zero_index]},
+                                                kLowestCCValueId);
+                }
+                MakeWorkingAndRecs(info, working, result.recommendations);
+            } break;
+            default: {
+                MakeWorkingAndRecs(info, working, result.recommendations);
+            } break;
         }
-        SetPairProcessor<OneCardPairProvider> processor(this, invalidated, lattice_rhs, lhs);
-        return processor.ProcessPairs(indices_bitset);
     }
+}
 
-    SetPairProcessor<MultiCardPairProvider> processor(this, invalidated, lattice_rhs, lhs);
-    return processor.ProcessPairs(indices_bitset);
+auto Validator::ValidateAll(std::vector<lattice::ValidationInfo>& validation_info)
+        -> std::vector<Result> const& {
+    Initialize(validation_info);
+    auto validate_at_index = [&](Index i) {
+        Validate(validation_info[i], results_[i], current_working_[i]);
+    };
+    pool_->ExecIndex(validate_at_index, validation_info.size());
+    pool_->WorkUntilComplete();
+    return results_;
 }
 
 }  // namespace algos::hymd

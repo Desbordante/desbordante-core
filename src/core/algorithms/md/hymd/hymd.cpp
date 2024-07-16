@@ -159,7 +159,8 @@ unsigned long long HyMD::ExecuteInternal() {
                                similarity_data.CreateMaxRhs()};
     LatticeTraverser lattice_traverser{
             std::make_unique<lattice::cardinality::MinPickingLevelGetter>(&lattice),
-            {records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_, &lattice},
+            {&pool, records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_,
+             &lattice},
             &pool};
     RecordPairInferrer record_pair_inferrer{&similarity_data, &lattice, &pool};
 

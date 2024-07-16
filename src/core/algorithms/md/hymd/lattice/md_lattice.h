@@ -184,13 +184,21 @@ private:
     void SpecializeSingle(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
                           MdElement rhs);
     void SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id, auto get_nonlhs_ccv_id,
-                          Rhss const& rhss);
+                         Rhss const& rhss);
     void Specialize(MdLhs const& lhs, PairComparisonResult const& pair_comparison_result,
                     Rhss const& rhss);
     void Specialize(MdLhs const& lhs, Rhss const& rhss);
 
     void GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected, MdLhs& cur_node_lhs,
                 model::Index this_node_index);
+
+    Rhs& GetRhs(MdLhs const& lhs) {
+        MdNode* node = &md_root_;
+        for (auto const& [index, ccv_id] : lhs) {
+            node = &node->children[index]->find(ccv_id)->second;
+        }
+        return node->rhs;
+    }
 
 public:
     explicit MdLattice(SingleLevelFunc single_level_func,
@@ -207,6 +215,10 @@ public:
 
     std::vector<ColumnClassifierValueId> GetInterestingnessCCVIds(
             MdLhs const& lhs, std::vector<model::Index> const& indices) const;
+    std::vector<ColumnClassifierValueId> RemoveExisting(MdLhs const& lhs,
+                                                        std::vector<model::Index> const& indices);
+    void AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& indices,
+                    std::vector<ColumnClassifierValueId> const& ccv_ids);
     std::vector<MdVerificationMessenger> GetLevel(std::size_t level);
     std::vector<MdRefiner> CollectRefinersForViolated(
             PairComparisonResult const& pair_comparison_result);
