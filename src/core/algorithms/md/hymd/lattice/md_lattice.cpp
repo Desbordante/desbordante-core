@@ -648,6 +648,29 @@ void MdLattice::RaiseInterestingnessCCVIds(
     }
 }
 
+std::vector<ColumnClassifierValueId> MdLattice::RemoveExisting(
+        MdLhs const& lhs, std::vector<model::Index> const& indices) {
+    Rhs& node_rhs = GetRhs(lhs);
+    std::vector<ColumnClassifierValueId> ccv_ids;
+    ccv_ids.reserve(indices.size());
+    for (model::Index index : indices) {
+        ColumnClassifierValueId& rhs_ccv_id = node_rhs[index];
+        ccv_ids.push_back(rhs_ccv_id);
+        rhs_ccv_id = kLowestCCValueId;
+    }
+    return ccv_ids;
+}
+
+void MdLattice::AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& indices,
+                           std::vector<ColumnClassifierValueId> const& ccv_ids) {
+    Rhs& node_rhs = GetRhs(lhs);
+    assert(indices.size() == ccv_ids.size());
+    auto ccv_id_iter = ccv_ids.begin();
+    for (Index index : indices) {
+        node_rhs[index] = *ccv_id_iter++;
+    }
+}
+
 std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
         MdLhs const& lhs, std::vector<Index> const& indices) const {
     std::vector<ColumnClassifierValueId> interestingness_ccv_ids;
