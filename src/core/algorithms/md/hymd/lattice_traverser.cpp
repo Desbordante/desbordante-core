@@ -12,20 +12,18 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
             continue;
         }
 
-        std::size_t const validations_size = validations.size();
-        std::vector<Validator::Result> results(validations_size);
-        auto validate_at_index = [&](Index i) { results[i] = validator_.Validate(validations[i]); };
-        pool_->ExecIndex(validate_at_index, validations_size);
-        pool_->WorkUntilComplete();
+        std::vector<Validator::Result> const& results = validator_.ValidateAll(validations);
         auto viol_func = [this, &results]() {
-            for (Validator::Result& result : results) {
+            for (Validator::Result const& result : results) {
+                /*if (result.is_unsupported) continue; ???*/
                 for (std::vector<Recommendation> const& rhs_violations : result.recommendations) {
                     recommendations_.insert(rhs_violations.begin(), rhs_violations.end());
                 };
             }
         };
         pool_->ExecSingle(viol_func);
-        for (Index i = 0; i < validations_size; ++i) {
+        std::size_t const validations_size = validations.size();
+        for (Index i = 0; i != validations_size; ++i) {
             Validator::Result const& result = results[i];
             lattice::MdLattice::MdVerificationMessenger& messenger = *validations[i].messenger;
             if (result.is_unsupported) {

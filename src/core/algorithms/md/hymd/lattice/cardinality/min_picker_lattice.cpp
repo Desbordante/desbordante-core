@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "util/reserve_more.h"
+
 namespace {
 using namespace algos::hymd;
 using model::Index;
@@ -80,10 +82,7 @@ void MinPickerLattice::Add(ValidationInfo* validation_info) {
 
 void MinPickerLattice::NewBatch(std::size_t max_elements) {
     info_.clear();
-    std::size_t const vec_capacity = info_.capacity();
-    if (max_elements > vec_capacity) {
-        info_.reserve(std::max(vec_capacity * 2, max_elements));
-    }
+    util::ReserveMore(info_, max_elements);
     root_ = {root_.children.size()};
 }
 
