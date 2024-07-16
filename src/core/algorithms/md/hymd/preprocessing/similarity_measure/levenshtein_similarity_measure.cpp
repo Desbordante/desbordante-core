@@ -207,19 +207,15 @@ indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
 }
 
 LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim,
-                                                           bool is_null_equal_null,
                                                            std::size_t size_limit)
     : SimilarityMeasure(std::make_unique<model::StringType>(),
                         std::make_unique<model::DoubleType>()),
-      is_null_equal_null_(is_null_equal_null),
       min_sim_(min_sim),
       size_limit_(size_limit) {}
 
-LevenshteinSimilarityMeasure::Creator::Creator(model::md::DecisionBoundary min_sim,
-                                               bool is_null_equal_null, std::size_t size_limit)
+LevenshteinSimilarityMeasure::Creator::Creator(model::md::DecisionBoundary min_sim, std::size_t size_limit)
     : SimilarityMeasureCreator(kName),
       min_sim_(min_sim),
-      is_null_equal_null_(is_null_equal_null),
       size_limit_(size_limit) {
     if (!(0.0 <= min_sim_ && min_sim_ <= 1.0))
         throw config::ConfigurationError("Minimum similarity out of range");
