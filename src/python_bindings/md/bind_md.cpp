@@ -34,8 +34,7 @@ void BindMd(py::module_& main_module) {
     py::class_<LevenshteinSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<LevenshteinSimilarityMeasure::Creator>>(measures_module,
                                                                        "LevenshteinSimilarity")
-            .def(py::init<model::md::DecisionBoundary, bool, std::size_t>(),
-                 "minimum_similarity"_a = 0.7, "is_null_equal_null"_a = true,
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
                  "bound_number_limit"_a = 0);
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }
