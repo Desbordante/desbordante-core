@@ -13,6 +13,7 @@
 #include "algorithms/md/hymd/utility/size_t_vector_hash.h"
 #include "model/index.h"
 #include "util/bitset_utils.h"
+#include "util/erase_if_replace.h"
 #include "util/py_tuple_hash.h"
 #include "util/reserve_more.h"
 
@@ -99,6 +100,23 @@ class Validator::SetPairProcessor {
         }
     }
 
+    void MakeAllInvalidatedResult(std::size_t support) {
+        if (Supported(support)) {
+            MakeAllInvalidatedAndSupportedResult();
+            return;
+        }
+        while (pair_provider_.TryGetNextPair()) {
+            auto const& cluster = pair_provider_.GetCluster();
+            auto const& similar = pair_provider_.GetSimilarRecords();
+            support += cluster.size() * similar.size();
+            if (Supported(support)) {
+                MakeAllInvalidatedAndSupportedResult();
+                return;
+            }
+        }
+        result_.is_unsupported = true;
+    }
+
 public:
     SetPairProcessor(Validator const* validator, Result& result, std::vector<WorkingInfo>& working,
                      MdLhs const& lhs)
@@ -114,13 +132,13 @@ public:
             auto const& cluster = pair_provider_.GetCluster();
             auto const& similar = pair_provider_.GetSimilarRecords();
             support += cluster.size() * similar.size();
-            bool all_invalid = true;
-            for (WorkingInfo& working_info : working_) {
-                Status const status = LowerForColumnMatch(working_info, cluster, similar);
-                if (status == Status::kCheckedAll) all_invalid = false;
-            }
-            if (all_invalid && Supported(support)) {
-                MakeAllInvalidatedAndSupportedResult();
+            util::EraseIfReplace(working_, [&](WorkingInfo& info) {
+                Status const status = LowerForColumnMatch(info, cluster, similar);
+                return status == Status::kInvalidated;
+            });
+            bool all_invalid = working_.empty();
+            if (all_invalid) {
+                MakeAllInvalidatedResult(support);
                 return;
             }
         }
@@ -179,7 +197,7 @@ template <typename PairProvider>
 auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatch(
         WorkingInfo& working_info, RecordCluster const& matched_records,
         RecIdVec const& similar_records) const -> Status {
-    if (working_info.ShouldStop()) return Status::kInvalidated;
+    assert(!working_info.ShouldStop());
     return LowerForColumnMatchNoCheck(working_info, matched_records, similar_records);
 }
 
@@ -187,7 +205,7 @@ template <typename PairProvider>
 auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatch(
         WorkingInfo& working_info, PliCluster const& cluster,
         RecSet const& similar_records) const -> Status {
-    if (working_info.ShouldStop()) return Status::kInvalidated;
+    assert(!working_info.ShouldStop());
 
     assert(!similar_records.empty());
     RecordCluster cluster_records = GetAllocatedVector<RecPtr>(cluster.size());
@@ -402,8 +420,7 @@ void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
                                    std::vector<WorkingInfo>& working,
                                    AllRecomVecs& recommendations) {
     MdLhs const& lhs = info.messenger->GetLhs();
-    boost::dynamic_bitset<> const& indices_bitset = info.rhs_indices;
-    IndexVector indices = util::BitsetToIndices<Index>(indices_bitset);
+    IndexVector indices = util::BitsetToIndices<Index>(info.rhs_indices);
     std::size_t const working_size = indices.size();
     working.reserve(working_size);
     recommendations.reserve(working_size);
@@ -433,12 +450,11 @@ inline void Validator::Initialize(std::vector<lattice::ValidationInfo>& validati
     util::ReserveMore(current_working_, validations_size);
     for (lattice::ValidationInfo& info : validation_info) {
         MdLhs const& lhs = info.messenger->GetLhs();
-        std::size_t const cardinality = lhs.Cardinality();
         Result& result = results_.emplace_back();
         boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
         std::vector<WorkingInfo>& working = current_working_.emplace_back();
         lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
-        switch (cardinality) {
+        switch (lhs.Cardinality()) {
             [[unlikely]] case 0: {
                 util::ForEachIndex(indices_bitset, [&](auto index) {
                     ColumnClassifierValueId old_cc_value_id = lattice_rhs[index];
