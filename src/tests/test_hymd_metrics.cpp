@@ -26,7 +26,7 @@ TEST_P(SimilarityMetricTest, ComputesCorrectSimilarity) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-        LCSTests, SimilarityMetricTest,
+        Default, SimilarityMetricTest,
         ::testing::Values(
                 // lcs
                 SimilarityTestParams{LongestCommonSubsequence, "", "", 0.0},
