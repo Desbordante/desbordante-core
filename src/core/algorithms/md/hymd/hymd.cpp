@@ -61,8 +61,7 @@ void HyMD::RegisterOptions() {
                 column_matches_option.emplace_back(
                         column_name, column_name,
                         std::make_shared<preprocessing::similarity_measure::
-                                                 LevenshteinSimilarityMeasure::Creator>(0.7, true,
-                                                                                        0));
+                                                 LevenshteinSimilarityMeasure::Creator>(0.7, 0));
             }
         } else {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
@@ -75,8 +74,8 @@ void HyMD::RegisterOptions() {
                     column_matches_option.emplace_back(
                             column_name_left, column_name_right,
                             std::make_shared<preprocessing::similarity_measure::
-                                                     LevenshteinSimilarityMeasure::Creator>(
-                                    0.7, true, 0));
+                                                     LevenshteinSimilarityMeasure::Creator>(0.7,
+                                                                                            0));
                 }
             }
         }
