@@ -8,8 +8,7 @@
 namespace algos::hymd {
 
 SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_info,
-                                          ColMatchesInfo const column_matches_info_initial,
-                                          util::WorkerThreadPool& pool) {
+                                          ColMatchesInfo const column_matches_info_initial) {
     bool const one_table_given = records_info->OneTableGiven();
     std::size_t const col_match_number = column_matches_info_initial.size();
     std::vector<ColumnMatchInfo> column_matches_info;
@@ -31,9 +30,8 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
             data_info_right = preprocessing::DataInfo::MakeFrom(right_pli, measure->GetArgType());
         }
         // TODO: sort column matches on the number of LHS CCV IDs.
-        auto [lhs_ccv_ids, indexes] =
-                measure->MakeIndexes(std::move(data_info_left), std::move(data_info_right),
-                                     right_pli.GetClusters(), pool);
+        auto [lhs_ccv_ids, indexes] = measure->MakeIndexes(
+                std::move(data_info_left), std::move(data_info_right), right_pli.GetClusters());
         column_matches_info.emplace_back(std::move(indexes), left_col_index, right_col_index);
         column_matches_lhs_ids.push_back(std::move(lhs_ccv_ids));
     }

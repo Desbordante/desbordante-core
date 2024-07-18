@@ -38,8 +38,6 @@ private:
     std::unordered_set<PairComparisonResult> comparisons_to_process_;
     std::unordered_set<PairComparisonResult> processed_comparisons_;
 
-    util::WorkerThreadPool* pool_;
-
     RecordIdentifier next_left_record_ = 0;
 
     PhaseSwitchHeuristicParameters heuristic_parameters{1 / 100.};
@@ -51,9 +49,8 @@ private:
     InferenceStatus Evaluate(StatisticsType const& statistics) const noexcept;
 
 public:
-    RecordPairInferrer(SimilarityData* similarity_data, lattice::MdLattice* lattice,
-                       util::WorkerThreadPool* pool) noexcept
-        : similarity_data_(similarity_data), lattice_(lattice), pool_(pool) {}
+    RecordPairInferrer(SimilarityData* similarity_data, lattice::MdLattice* lattice) noexcept
+        : similarity_data_(similarity_data), lattice_(lattice) {}
 
     bool InferFromRecordPairs(Recommendations recommendations);
 };

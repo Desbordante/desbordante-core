@@ -87,54 +87,48 @@ std::size_t GetLargestStringSize(DataInfo const& data_info_left) {
     return max_size;
 }
 
-struct ValueProcessingWorker {
-    std::shared_ptr<DataInfo const> const& data_info_left;
-    std::shared_ptr<DataInfo const> const& data_info_right;
-    std::vector<indexes::PliCluster> const& clusters_right;
-    Similarity const min_sim;
-    ValidTableResults<Similarity>& task_data;
-    std::size_t const data_left_size = data_info_left->GetElementNumber();
-    std::size_t const data_right_size = data_info_right->GetElementNumber();
-    std::size_t const largest_string_size = GetLargestStringSize(*data_info_left);
-    std::atomic<bool> dissimilar_found = false;
-    std::atomic<model::Index> current_index = 0;
+template <typename IndexType>
+class ValueProcessingWorker {
+    std::shared_ptr<DataInfo const> const& data_info_left_;
+    std::shared_ptr<DataInfo const> const& data_info_right_;
+    std::vector<indexes::PliCluster> const& clusters_right_;
+    Similarity const min_sim_;
+    ValidTableResults<Similarity>& task_data_;
+    std::size_t const data_left_size_ = data_info_left_->GetElementNumber();
+    std::size_t const data_right_size_ = data_info_right_->GetElementNumber();
+    std::size_t const largest_string_size_ = GetLargestStringSize(*data_info_left_);
+    std::atomic<bool> dissimilar_found_ = false;
+    IndexType current_index_ = 0;
 
     void AddValue(RowInfo<Similarity>& row_info, ValueIdentifier value_id, Similarity sim) {
         auto& [sim_value_id_vec, valid_records_number] = row_info;
         sim_value_id_vec.emplace_back(sim, value_id);
-        valid_records_number += clusters_right[value_id].size();
+        valid_records_number += clusters_right_[value_id].size();
     }
 
     void Start(auto method) {
+        std::size_t const buf_len = largest_string_size_ + 1;
         auto buf = /* TODO: replace with std::make_unique_for_overwrite when GCC in CI is
                       upgraded */
-                utility::MakeUniqueForOverwrite<unsigned[]>((largest_string_size + 1) * 2);
+                utility::MakeUniqueForOverwrite<unsigned[]>(buf_len * 2);
         ValueIdentifier left_value_id;
         auto buf1 = buf.get();
-        auto buf2 = buf1 + largest_string_size + 1;
+        auto buf2 = buf1 + buf_len;
         bool found_dissimilar = false;
-        while ((left_value_id = current_index++) < data_left_size) {
+        while ((left_value_id = current_index_++) < data_left_size_) {
             bool found_dissimilar_here = (this->*method)(left_value_id, buf1, buf2);
             if (found_dissimilar_here) found_dissimilar = true;
         }
-        current_index = data_left_size;
-        if (found_dissimilar) dissimilar_found.store(true, std::memory_order::release);
-    }
-
-    void StartFull() {
-        Start(&ValueProcessingWorker::ProcessFull);
+        current_index_ = data_left_size_;
+        if (found_dissimilar) dissimilar_found_.store(true, std::memory_order::release);
     }
 
     bool ProcessFull(ValueIdentifier const left_value_id, unsigned* buf1, unsigned* buf2) {
-        return CalcAndAdd(left_value_id, buf1, buf2, task_data[left_value_id], 0);
-    }
-
-    void StartSame() {
-        Start(&ValueProcessingWorker::ProcessSame);
+        return CalcAndAdd(left_value_id, buf1, buf2, task_data_[left_value_id], 0);
     }
 
     bool ProcessSame(ValueIdentifier const left_value_id, unsigned* buf1, unsigned* buf2) {
-        RowInfo<Similarity>& row_info = task_data[left_value_id];
+        RowInfo<Similarity>& row_info = task_data_[left_value_id];
         AddValue(row_info, left_value_id, 1.0);
         return CalcAndAdd(left_value_id, buf1, buf2, row_info, left_value_id + 1);
     }
@@ -143,23 +137,23 @@ struct ValueProcessingWorker {
                     RowInfo<Similarity>& row_info, ValueIdentifier start_from) {
         // Ignore nulls and empty for now.
         auto const& left_string =
-                model::Type::GetValue<std::string>(data_info_left->GetAt(left_value_id));
+                model::Type::GetValue<std::string>(data_info_left_->GetAt(left_value_id));
         std::size_t const left_size = left_string.size();
         bool dissimilar_found_here = false;
-        for (ValueIdentifier value_id_right = start_from; value_id_right != data_right_size;
+        for (ValueIdentifier value_id_right = start_from; value_id_right != data_right_size_;
              ++value_id_right) {
             auto const& right_string =
-                    model::Type::GetValue<std::string>(data_info_right->GetAt(value_id_right));
+                    model::Type::GetValue<std::string>(data_info_right_->GetAt(value_id_right));
             std::size_t const max_dist = std::max(left_size, right_string.size());
             // Left has to be second since that's what the function uses to determine the buffer
             // size it needs
             Similarity similarity = 1.0;
             if (max_dist != 0) {
-                unsigned lim = max_dist * (1 - min_sim);
+                unsigned lim = max_dist * (1 - min_sim_);
                 unsigned dist = LevenshteinDistance(&right_string, &left_string, buf1, buf2, lim);
                 similarity = (max_dist - dist) / static_cast<Similarity>(max_dist);
                 // Don't store 0.0 no matter the value of min_sim.
-                if (similarity < min_sim) similarity = kLowestBound;
+                if (similarity < min_sim_) similarity = kLowestBound;
             }
             if (similarity == kLowestBound) {
                 dissimilar_found_here = true;
@@ -170,10 +164,49 @@ struct ValueProcessingWorker {
         return dissimilar_found_here;
     }
 
+public:
+    ValueProcessingWorker(std::shared_ptr<DataInfo const> const& data_info_left,
+                          std::shared_ptr<DataInfo const> const& data_info_right,
+                          std::vector<indexes::PliCluster> const& clusters_right,
+                          Similarity const min_sim, ValidTableResults<Similarity>& task_data)
+        : data_info_left_(data_info_left),
+          data_info_right_(data_info_right),
+          clusters_right_(clusters_right),
+          min_sim_(min_sim),
+          task_data_(task_data) {}
+
+    void StartFull() {
+        Start(&ValueProcessingWorker::ProcessFull);
+    }
+
+    void StartSame() {
+        Start(&ValueProcessingWorker::ProcessSame);
+    }
+
     bool DissimilarFound() const noexcept {
-        return dissimilar_found.load(std::memory_order::acquire);
+        return dissimilar_found_.load(std::memory_order::acquire);
     }
 };
+
+template <typename IndexType>
+auto GetResults(std::shared_ptr<DataInfo const> const& data_info_left,
+                std::shared_ptr<DataInfo const> const& data_info_right,
+                std::vector<indexes::PliCluster> const& clusters_right,
+                preprocessing::Similarity min_sim, auto start_same, auto start_full, auto finish) {
+    ValidTableResults<Similarity> task_data{data_info_left->GetElementNumber()};
+    ValueProcessingWorker<IndexType> worker{data_info_left, data_info_right, clusters_right,
+                                            min_sim, task_data};
+    if (data_info_left == data_info_right) {
+        start_same(worker);
+    } else {
+        start_full(worker);
+    }
+    finish();
+
+    auto additional_bounds = {1.0, kLowestBound};
+    std::span additional_results(additional_bounds.begin(), worker.DissimilarFound() ? 2 : 1);
+    return EncodeResults(std::move(task_data), additional_results);
+}
 }  // namespace
 
 namespace algos::hymd::preprocessing::similarity_measure {
@@ -181,22 +214,21 @@ namespace algos::hymd::preprocessing::similarity_measure {
 indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
-        std::vector<indexes::PliCluster> const& clusters_right,
-        util::WorkerThreadPool& thread_pool) const {
-    ValidTableResults<Similarity> task_data{data_info_left->GetElementNumber()};
-    ValueProcessingWorker worker{data_info_left, data_info_right, clusters_right, min_sim_,
-                                 task_data};
-    if (data_info_left == data_info_right) {
-        thread_pool.SetWork([&worker]() { worker.StartSame(); });
+        std::vector<indexes::PliCluster> const& clusters_right) const {
+    std::pair<std::vector<preprocessing::Similarity>, EnumeratedValidTableResults> results;
+    if (pool_ == nullptr) {
+        results = GetResults<model::Index>(
+                data_info_left, data_info_right, clusters_right, min_sim_,
+                [](auto& worker) { worker.StartSame(); }, [](auto& worker) { worker.StartFull(); },
+                []() {});
     } else {
-        thread_pool.SetWork([&worker]() { worker.StartFull(); });
+        results = GetResults<std::atomic<model::Index>>(
+                data_info_left, data_info_right, clusters_right, min_sim_,
+                [this](auto& worker) { pool_->SetWork([&worker]() { worker.StartSame(); }); },
+                [this](auto& worker) { pool_->SetWork([&worker]() { worker.StartFull(); }); },
+                [this]() { pool_->WorkUntilComplete(); });
     }
-    thread_pool.WorkUntilComplete();
-
-    auto additional_bounds = {1.0, kLowestBound};
-    std::span additional_results(additional_bounds.begin(), worker.DissimilarFound() ? 2 : 1);
-    auto [similarities, enumerated_results] =
-            EncodeResults(std::move(worker.task_data), additional_results);
+    auto& [similarities, enumerated_results] = results;
     if (data_info_left == data_info_right) SymmetricClosure(enumerated_results, clusters_right);
 
     auto pick_index_uniform = [this](auto const& bounds) {
@@ -207,16 +239,17 @@ indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
 }
 
 LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim,
-                                                           std::size_t size_limit)
+                                                           std::size_t size_limit,
+                                                           util::WorkerThreadPool* thread_pool)
     : SimilarityMeasure(std::make_unique<model::StringType>(),
                         std::make_unique<model::DoubleType>()),
       min_sim_(min_sim),
-      size_limit_(size_limit) {}
+      size_limit_(size_limit),
+      pool_(thread_pool) {}
 
-LevenshteinSimilarityMeasure::Creator::Creator(model::md::DecisionBoundary min_sim, std::size_t size_limit)
-    : SimilarityMeasureCreator(kName),
-      min_sim_(min_sim),
-      size_limit_(size_limit) {
+LevenshteinSimilarityMeasure::Creator::Creator(model::md::DecisionBoundary min_sim,
+                                               std::size_t size_limit)
+    : SimilarityMeasureCreator(kName), min_sim_(min_sim), size_limit_(size_limit) {
     if (!(0.0 <= min_sim_ && min_sim_ <= 1.0))
         throw config::ConfigurationError("Minimum similarity out of range");
 }
