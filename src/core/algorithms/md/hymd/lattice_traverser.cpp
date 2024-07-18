@@ -21,7 +21,11 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
                 };
             }
         };
-        pool_->ExecSingle(viol_func);
+        if (pool_ == nullptr) {
+            viol_func();
+        } else {
+            pool_->ExecSingle(viol_func);
+        }
         std::size_t const validations_size = validations.size();
         for (Index i = 0; i != validations_size; ++i) {
             Validator::Result const& result = results[i];
@@ -32,7 +36,7 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
                 messenger.LowerAndSpecialize(result.invalidated);
             }
         }
-        pool_->WorkUntilComplete();
+        if (pool_ != nullptr) pool_->WorkUntilComplete();
         if (!traverse_all) return false;
     }
     return true;

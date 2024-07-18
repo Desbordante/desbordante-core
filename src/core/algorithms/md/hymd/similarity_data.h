@@ -50,8 +50,7 @@ public:
           column_matches_lhs_ids_(std::move(column_matches_lhs_ids)) {}
 
     static SimilarityData CreateFrom(indexes::RecordsInfo* records_info,
-                                     ColMatchesInfo column_matches_info,
-                                     util::WorkerThreadPool& pool);
+                                     ColMatchesInfo column_matches_info);
 
     [[nodiscard]] std::size_t GetColumnMatchNumber() const noexcept {
         return column_matches_sim_info_.size();

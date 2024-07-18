@@ -487,8 +487,15 @@ auto Validator::ValidateAll(std::vector<lattice::ValidationInfo>& validation_inf
     auto validate_at_index = [&](Index i) {
         Validate(validation_info[i], results_[i], current_working_[i]);
     };
-    pool_->ExecIndex(validate_at_index, validation_info.size());
-    pool_->WorkUntilComplete();
+    std::size_t const validation_info_size = validation_info.size();
+    if (pool_ == nullptr) {
+        for (model::Index i = 0; i != validation_info_size; ++i) {
+            validate_at_index(i);
+        }
+    } else {
+        pool_->ExecIndex(validate_at_index, validation_info_size);
+        pool_->WorkUntilComplete();
+    }
     return results_;
 }
 
