@@ -15,6 +15,7 @@
 #include "algorithms/md/hymd/utility/md_less.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
+#include "config/thread_number/option.h"
 #include "model/index.h"
 #include "model/table/column.h"
 #include "util/worker_thread_pool.h"
@@ -31,7 +32,8 @@ HyMD::HyMD() : MdAlgorithm({}) {
 
 void HyMD::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kMinSupport, kPruneNonDisjoint, kColumnMatches, kMaxCardinality});
+    MakeOptionsAvailable(
+            {kMinSupport, kPruneNonDisjoint, kColumnMatches, kMaxCardinality, kThreads});
 }
 
 void HyMD::RegisterOptions() {
@@ -111,6 +113,7 @@ void HyMD::RegisterOptions() {
                            .SetValueCheck(column_matches_check));
     RegisterOption(Option{&max_cardinality_, kMaxCardinality, kDMaxCardinality,
                           std::numeric_limits<std::size_t>::max()});
+    RegisterOption(config::kThreadNumberOpt(&threads_));
 }
 
 void HyMD::ResetStateMd() {}
@@ -141,27 +144,31 @@ void HyMD::LoadDataInternal() {
 unsigned long long HyMD::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
     SimilarityData::ColMatchesInfo column_matches_info;
+    std::optional<util::WorkerThreadPool> pool_opt;
+    util::WorkerThreadPool* pool_ptr = nullptr;
+    if (threads_ > 1) {
+        pool_opt.emplace(threads_);
+        pool_ptr = &*pool_opt;
+    }
     for (auto const& [left_column_name, right_column_name, creator] : column_matches_option_) {
-        column_matches_info.emplace_back(creator->MakeMeasure(),
+        column_matches_info.emplace_back(creator->MakeMeasure(pool_ptr),
                                          left_schema_->GetColumn(left_column_name)->GetIndex(),
                                          right_schema_->GetColumn(right_column_name)->GetIndex());
     }
     std::size_t const column_match_number = column_matches_info.size();
     assert(column_match_number != 0);
     // TODO: make infrastructure for depth level
-    auto threads = std::max(std::thread::hardware_concurrency(), 2u);
-    util::WorkerThreadPool pool{threads};
     SimilarityData similarity_data =
-            SimilarityData::CreateFrom(records_info_.get(), std::move(column_matches_info), pool);
+            SimilarityData::CreateFrom(records_info_.get(), std::move(column_matches_info));
     lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIds(),
                                prune_nondisjoint_, max_cardinality_,
                                similarity_data.CreateMaxRhs()};
     LatticeTraverser lattice_traverser{
             std::make_unique<lattice::cardinality::MinPickingLevelGetter>(&lattice),
-            {&pool, records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_,
+            {pool_ptr, records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_,
              &lattice},
-            &pool};
-    RecordPairInferrer record_pair_inferrer{&similarity_data, &lattice, &pool};
+            pool_ptr};
+    RecordPairInferrer record_pair_inferrer{&similarity_data, &lattice};
 
     bool done = false;
     do {

@@ -11,6 +11,7 @@
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "algorithms/md/md_algorithm.h"
 #include "config/tabular_data/input_table_type.h"
+#include "config/thread_number/type.h"
 #include "model/table/relational_schema.h"
 
 namespace algos::hymd {
@@ -32,7 +33,7 @@ private:
     std::size_t min_support_ = 0;
     bool prune_nondisjoint_ = true;
     std::size_t max_cardinality_ = -1;
-    // TODO: thread number limit
+    config::ThreadNumType threads_;
     // TODO: different level definitions (cardinality currently used)
     // TODO: comparing only some values during similarity calculation
     // TODO: automatically calculating minimal support

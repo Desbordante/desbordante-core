@@ -18,8 +18,12 @@ public:
         return similarity_measure_name_;
     }
 
-    virtual std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure> MakeMeasure()
-            const = 0;
+    virtual std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure> MakeMeasure(
+            util::WorkerThreadPool* thread_pool) const = 0;
+
+    std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure> MakeMeasure() {
+        return MakeMeasure(nullptr);
+    }
 
     virtual ~SimilarityMeasureCreator() = default;
 };
