@@ -5,6 +5,8 @@ option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
 option(BUILD_NATIVE "Build for host machine" ON)
+option(USE_LTO "Build using interprocedural optimization" OFF)
+option(GDB_DEBUG "Include debug information for use by GDB" OFF)
 set(SANITIZER "" CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB")
 
 set(PYTHON OFF CACHE STRING "Compile Python bindings")
@@ -85,6 +87,10 @@ else()
             "-O0")
     endif()
 
+    if (GDB_DEBUG)
+        add_compile_options(-ggdb3)
+    endif()
+
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
     add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 
@@ -127,6 +133,10 @@ else ()
     add_subdirectory("lib/easyloggingpp")
 endif ()
 set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
+
+if (USE_LTO)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 add_subdirectory("src/core")
 
