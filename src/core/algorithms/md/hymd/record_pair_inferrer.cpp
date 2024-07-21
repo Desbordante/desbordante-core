@@ -130,54 +130,56 @@ auto RecordPairInferrer::ProcessPairComparison(PairComparisonResult const& pair_
     return {mds_removed, all_rhss_removed, total_invalidated};
 }
 
+template <typename StatisticsType>
+bool RecordPairInferrer::ProcessCollection(auto& collection, auto get_sim_vec,
+                                           StatisticsType& statistics) {
+    while (!collection.empty()) {
+        switch (Evaluate(statistics)) {
+            case InferenceStatus::KeepGoing:
+                break;
+            case InferenceStatus::LatticeIsAlmostFinal:
+                heuristic_parameters.final_lattice_coefficient *=
+                        PhaseSwitchHeuristicParameters::kFinalLatticeGrowth;
+                [[fallthrough]];
+            case InferenceStatus::PairsAreStale:
+                return true;
+            default:
+                assert(false);
+                __builtin_unreachable();
+        }
+        PairComparisonResult const& pair_comparison_result =
+                get_sim_vec(collection.extract(collection.begin()).value());
+        if (avoid_same_comparison_processing_) {
+            bool const not_seen_before =
+                    processed_comparisons_.insert(pair_comparison_result).second;
+            if (!not_seen_before) {
+                statistics.AddSkipped();
+                continue;
+            }
+        }
+        statistics.AddPairStatistics(ProcessPairComparison(pair_comparison_result));
+    }
+    return false;
+}
+
 bool RecordPairInferrer::InferFromRecordPairs(Recommendations recommendations) {
     TotalStatistics statistics{};
 
-    auto process_collection = [&](auto& collection, auto get_sim_vec) {
-        while (!collection.empty()) {
-            switch (Evaluate(statistics)) {
-                case InferenceStatus::KeepGoing:
-                    break;
-                case InferenceStatus::LatticeIsAlmostFinal:
-                    heuristic_parameters.final_lattice_coefficient *=
-                            PhaseSwitchHeuristicParameters::kFinalLatticeGrowth;
-                    [[fallthrough]];
-                case InferenceStatus::PairsAreStale:
-                    return true;
-                default:
-                    assert(false);
-                    __builtin_unreachable();
-            }
-            PairComparisonResult const& pair_comparison_result =
-                    get_sim_vec(collection.extract(collection.begin()).value());
-            if (avoid_same_comparison_processing_) {
-                bool const not_seen_before =
-                        processed_comparisons_.insert(pair_comparison_result).second;
-                if (!not_seen_before) {
-                    statistics.AddSkipped();
-                    continue;
-                }
-            }
-            statistics.AddPairStatistics(ProcessPairComparison(pair_comparison_result));
-        }
-        return false;
+    auto compare_pair = [&](Recommendation& rec) {
+        // TODO: parallelize similarity vector calculation
+        return pair_comparer_.CompareRecords(*rec.left_record, *rec.right_record);
     };
-    if (process_collection(recommendations, [&](Recommendation& rec) {
-            // TODO: parallelize similarity vector calculation
-            return similarity_data_->CompareRecords(*rec.left_record, *rec.right_record);
-        })) {
+    if (ProcessCollection(recommendations, compare_pair, statistics)) {
         return false;
     }
     auto move_out = [&](PairComparisonResult& pair_comp_res) { return std::move(pair_comp_res); };
-    if (process_collection(comparisons_to_process_, move_out)) {
+    if (ProcessCollection(comparisons_to_process_, move_out, statistics)) {
         return false;
     }
-    std::size_t const left_size = similarity_data_->GetLeftSize();
-    while (next_left_record_ < left_size) {
+    while (pair_comparer_.SamplingUnfinished()) {
         ++statistics.samplings_started;
-        comparisons_to_process_ = similarity_data_->CompareAllWith(next_left_record_);
-        ++next_left_record_;
-        if (process_collection(comparisons_to_process_, move_out)) {
+        comparisons_to_process_ = pair_comparer_.SampleNext();
+        if (ProcessCollection(comparisons_to_process_, move_out, statistics)) {
             return false;
         }
     }
