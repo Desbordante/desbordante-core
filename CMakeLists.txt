@@ -68,12 +68,16 @@ else()
         set(ASAN_OPTS "-fsanitize=address")
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
+            "-Wno-error" # Use of -Werror is discouraged with sanitizers
+            # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
             "${ASAN_OPTS}")
         set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
     elseif (UBSAN)
         # Set DEBUG build options specific for build with UBSAN
         string(JOIN ";" UBSAN_OPTS "-fsanitize=undefined"
             "-fsanitize=float-divide-by-zero"
+            "-Wno-error" # Use of -Werror is discouraged with sanitizers
+            # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
             "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
             "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
             "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
