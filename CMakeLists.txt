@@ -28,8 +28,7 @@ if (SANITIZER)
 endif ()
 
 if (ASAN AND PYTHON)
-    message(WARNING "Disabling ASAN with python bindings")
-    set(ASAN OFF)
+    message(WARNING "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so")
 endif()
 
 # compiler and platform-dependent settings
