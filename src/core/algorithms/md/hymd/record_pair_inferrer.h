@@ -4,6 +4,7 @@
 #include <unordered_set>
 
 #include "algorithms/md/hymd/lattice/md_lattice.h"
+#include "algorithms/md/hymd/pair_comparer.h"
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/recommendation.h"
 #include "algorithms/md/hymd/similarity_data.h"
@@ -31,14 +32,12 @@ private:
         PairsAreStale,
     };
 
-    SimilarityData* const similarity_data_;
+    PairComparer pair_comparer_;
     lattice::MdLattice* const lattice_;
 
     // Metanome uses a linked list for some reason.
     std::unordered_set<PairComparisonResult> comparisons_to_process_;
     std::unordered_set<PairComparisonResult> processed_comparisons_;
-
-    RecordIdentifier next_left_record_ = 0;
 
     PhaseSwitchHeuristicParameters heuristic_parameters{1 / 100.};
 
@@ -47,10 +46,12 @@ private:
     PairStatistics ProcessPairComparison(PairComparisonResult const& pair_comparison_result);
     template <typename StatisticsType>
     InferenceStatus Evaluate(StatisticsType const& statistics) const noexcept;
+    template <typename StatisticsType>
+    bool ProcessCollection(auto& collection, auto get_sim_vec, StatisticsType& statistics);
 
 public:
-    RecordPairInferrer(SimilarityData* similarity_data, lattice::MdLattice* lattice) noexcept
-        : similarity_data_(similarity_data), lattice_(lattice) {}
+    RecordPairInferrer(PairComparer pair_comparer, lattice::MdLattice* lattice) noexcept
+        : pair_comparer_(std::move(pair_comparer)), lattice_(lattice) {}
 
     bool InferFromRecordPairs(Recommendations recommendations);
 };
