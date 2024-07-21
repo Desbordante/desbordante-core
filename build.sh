@@ -15,7 +15,8 @@ Possible options:
                                       Possible values of S: ADDRESS, UB.
                                       ADDRESS - Address Sanitizer
                                       UB      - Undefined Behavior Sanitizer
-
+  -l                                  Use Link Time Optimization
+  -g                                  Use GDB's debug information format
 EOF
 }
 
@@ -44,6 +45,12 @@ for i in "$@"
             ;;
         -s*) # Build with sanitizer S, short option
             SANITIZER="${i#*s}"
+            ;;
+         -l)
+            LTO=true
+            ;;
+         -g)
+            GDB_DEBUG=true
             ;;
         -h|--help|*) # Display help
             print_help
@@ -85,6 +92,14 @@ fi
 
 if [[ $PYBIND == true ]]; then
   PREFIX="$PREFIX -D PYTHON=COMPILE -D COPY_PYTHON_EXAMPLES=ON"
+fi
+
+if [[ $LTO == true ]]; then
+  PREFIX="$PREFIX -D USE_LTO=ON"
+fi
+
+if [[ $GDB_DEBUG == true ]]; then
+  PREFIX="$PREFIX -D GDB_DEBUG=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
