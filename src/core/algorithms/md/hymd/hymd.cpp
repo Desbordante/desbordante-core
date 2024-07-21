@@ -9,6 +9,7 @@
 #include "algorithms/md/hymd/lattice_traverser.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
+#include "algorithms/md/hymd/pair_comparer.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/record_pair_inferrer.h"
 #include "algorithms/md/hymd/similarity_data.h"
@@ -168,7 +169,10 @@ unsigned long long HyMD::ExecuteInternal() {
             {pool_ptr, records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_,
              &lattice},
             pool_ptr};
-    RecordPairInferrer record_pair_inferrer{&similarity_data, &lattice};
+    RecordPairInferrer record_pair_inferrer{
+            PairComparer{records_info_.get(), &similarity_data.GetColumnMatchesInfo(),
+                         records_info_->OneTableGiven()},
+            &lattice};
 
     bool done = false;
     do {
