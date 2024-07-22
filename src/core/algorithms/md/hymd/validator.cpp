@@ -417,8 +417,10 @@ void Validator::Validate(lattice::ValidationInfo& info, Result& result,
 void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
                                    std::vector<WorkingInfo>& working,
                                    AllRecomVecs& recommendations) {
+    boost::dynamic_bitset<> const& rhs_indices = info.rhs_indices;
+    if (rhs_indices.none()) return;
     MdLhs const& lhs = info.messenger->GetLhs();
-    IndexVector indices = util::BitsetToIndices<Index>(info.rhs_indices);
+    IndexVector indices = util::BitsetToIndices<Index>(rhs_indices);
     std::size_t const working_size = indices.size();
     working.reserve(working_size);
     recommendations.reserve(working_size);
