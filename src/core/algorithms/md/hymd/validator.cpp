@@ -45,10 +45,8 @@ RecSet const* Validator::GetSimilarRecords(ValueIdentifier value_id, model::Inde
     assert(lhs_ccv_id != kLowestCCValueId);
     indexes::SimilarityIndex const& similarity_index =
             (*column_matches_info_)[column_match_index].similarity_info.similarity_index;
-    indexes::MatchingRecsMapping const& val_index = similarity_index[value_id];
-    auto it = val_index.lower_bound(lhs_ccv_id);
-    if (it == val_index.end()) return nullptr;
-    return &it->second;
+    indexes::ValueUpperSetMapping const& mapping = similarity_index[value_id];
+    return mapping.GetUpperSet(lhs_ccv_id);
 }
 
 template <typename PairProvider>

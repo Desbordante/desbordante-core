@@ -54,8 +54,8 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
     std::size_t const value_number = transformed.size();
     upper_set_records.reserve(value_number);
     for (auto const& [row_results, valid_records_number] : transformed) {
-        indexes::MatchingRecsMapping& mapping = upper_set_records.emplace_back();
         if (row_results.empty()) {
+            upper_set_records.emplace_back();
             assert(valid_records_number == 0);
             continue;
         }
@@ -67,12 +67,16 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
             }
         };
         dec_until_le(row_results.front().first);
-        if (current == end) continue;
+        if (current == end) {
+            upper_set_records.emplace_back();
+            continue;
+        }
+        indexes::EndIdMap end_id_map;
         std::vector<RecordIdentifier> valid_records;
         valid_records.reserve(valid_records_number);
         for (auto const& [ccv_id, value_id] : row_results) {
             if (ccv_id < current_ccv_id) {
-                mapping.try_emplace(current_ccv_id, valid_records.begin(), valid_records.end());
+                end_id_map.try_emplace(end_id_map.end(), current_ccv_id, valid_records.size());
                 ++current;
                 dec_until_le(ccv_id);
                 if (current == end) goto end_loop;
@@ -80,8 +84,10 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
             indexes::PliCluster const& cluster = clusters_right[value_id];
             valid_records.insert(valid_records.end(), cluster.begin(), cluster.end());
         }
-        mapping.try_emplace(current_ccv_id, valid_records.begin(), valid_records.end());
-    end_loop:;
+        end_id_map.try_emplace(end_id_map.end(), current_ccv_id, valid_records.size());
+    end_loop:
+        upper_set_records.emplace_back(
+                indexes::FlatUpperSetIndex{std::move(valid_records), std::move(end_id_map)});
     }
     return upper_set_records;
 }
