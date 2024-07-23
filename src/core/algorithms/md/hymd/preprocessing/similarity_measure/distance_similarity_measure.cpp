@@ -1,83 +1,63 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/distance_similarity_measure.h"
 
-#include <cstddef>
-#include <unordered_set>
-#include <vector>
+#include "algorithms/md/hymd/preprocessing/similarity_measure/value_processing_worker.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-using SimInfo = std::map<Similarity, indexes::RecSet>;
+template <typename IndexType>
+class DistanceValueProcessingWorker : public ValueProcessingWorker<IndexType> {
+    using Base = ValueProcessingWorker<IndexType>;
+
+    std::function<double(std::byte const*, std::byte const*)> compute_distance_;
+    Similarity const min_sim_;
+
+public:
+    DistanceValueProcessingWorker(
+            std::shared_ptr<DataInfo const> const& data_info_left,
+            std::shared_ptr<DataInfo const> const& data_info_right,
+            std::vector<indexes::PliCluster> const& clusters_right,
+            ValidTableResults<Similarity>& task_data,
+            std::function<double(std::byte const*, std::byte const*)> compute_distance,
+            Similarity min_sim)
+        : Base(std::move(data_info_left), std::move(data_info_right), clusters_right, task_data),
+          compute_distance_(compute_distance),
+          min_sim_(min_sim) {}
+
+    bool CalcAndAdd(ValueIdentifier left_value_id, RowInfo<Similarity>& row_info,
+                    ValueIdentifier start_from) override {
+        bool dissimilar_found_here = false;
+        double max_distance = 0;
+        std::vector<double> distances(Base::data_right_size_);
+        std::byte const* left_value = Base::data_info_left_->GetAt(left_value_id);
+        for (ValueIdentifier right_index = start_from; right_index != Base::data_right_size_;
+             ++right_index) {
+            double distance =
+                    compute_distance_(left_value, Base::data_info_right_->GetAt(right_index));
+            distances[right_index] = distance;
+            if (distance > max_distance) {
+                max_distance = distance;
+            }
+        }
+        for (ValueIdentifier right_index = start_from; right_index != Base::data_right_size_;
+             ++right_index) {
+            double normalized_similarity =
+                    max_distance > 0 ? 1.0 - (distances[right_index] / max_distance) : 1.0;
+            if (normalized_similarity < min_sim_) {
+                dissimilar_found_here = true;
+                continue;
+            }
+            Base::AddValue(row_info, right_index, normalized_similarity);
+        }
+        return dissimilar_found_here;
+    }
+};
 
 indexes::SimilarityMeasureOutput DistanceSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
-        std::vector<indexes::PliCluster> const& clusters_right, util::WorkerThreadPool&) const {
-    std::vector<model::md::DecisionBoundary> decision_bounds;
-    indexes::SimilarityMatrix similarity_matrix;
-    indexes::SimilarityIndex similarity_index;
-    auto const& data_left_size = data_info_left->GetElementNumber();
-    auto const& data_right_size = data_info_right->GetElementNumber();
-    Similarity lowest = 1.0;
-    for (ValueIdentifier value_id_left = 0; value_id_left < data_left_size; ++value_id_left) {
-        std::vector<std::pair<Similarity, RecordIdentifier>> sim_rec_id_vec;
-        std::byte const* left_value = data_info_left->GetAt(value_id_left);
-        double max_distance = 0;
-        std::vector<double> distances;
-        distances.reserve(data_info_right->GetElementNumber());
-        for (ValueIdentifier right_index = 0; right_index < data_right_size; ++right_index) {
-            std::byte const* right_value = data_info_right->GetAt(right_index);
-            Similarity distance = compute_distance_(left_value, right_value);
-            distances.push_back(distance);
-            max_distance = std::max(max_distance, distance);
-        }
-        auto get_similarity = [max_distance, &distances](ValueIdentifier value_id_right) {
-            if (max_distance == 0) return 1.0;
-            Similarity distance = distances[value_id_right];
-            return static_cast<Similarity>(max_distance - distance) /
-                   static_cast<Similarity>(max_distance);
-        };
-        for (ValueIdentifier value_id_right = 0; value_id_right < data_right_size;
-             ++value_id_right) {
-            Similarity similarity = get_similarity(value_id_right);
-            if (similarity < min_sim_) {
-                lowest = 0.0;
-                continue;
-            }
-            if (lowest > similarity) lowest = similarity;
-            decision_bounds.push_back(similarity);
-            similarity_matrix[value_id_left][value_id_right] = similarity;
-            for (RecordIdentifier record_id : clusters_right.operator[](value_id_right)) {
-                sim_rec_id_vec.emplace_back(similarity, record_id);
-            }
-        }
-        if (sim_rec_id_vec.empty()) continue;
-        std::sort(sim_rec_id_vec.begin(), sim_rec_id_vec.end(), std::greater<>{});
-        std::vector<RecordIdentifier> records;
-        records.reserve(sim_rec_id_vec.size());
-        for (auto [_, rec] : sim_rec_id_vec) {
-            records.push_back(rec);
-        }
-        SimInfo sim_info;
-        Similarity previous_similarity = sim_rec_id_vec.begin()->first;
-        auto const it_begin = records.begin();
-        for (model::Index j = 0; j < sim_rec_id_vec.size(); ++j) {
-            Similarity const similarity = sim_rec_id_vec[j].first;
-            if (similarity == previous_similarity) continue;
-            auto const it_end = it_begin + static_cast<long>(j);
-            // TODO: use std::inplace_merge
-            std::sort(it_begin, it_end);
-            sim_info[previous_similarity] = {it_begin, it_end};
-            previous_similarity = similarity;
-        }
-        std::sort(records.begin(), records.end());
-        sim_info[previous_similarity] = {records.begin(), records.end()};
-        similarity_index[value_id_left] = std::move(sim_info);
-    }
-    std::sort(decision_bounds.begin(), decision_bounds.end());
-    decision_bounds.erase(std::unique(decision_bounds.begin(), decision_bounds.end()),
-                          decision_bounds.end());
-    return {std::move(decision_bounds),
-            {lowest, std::move(similarity_matrix), std::move(similarity_index)}};
+        std::vector<indexes::PliCluster> const& clusters_right) const {
+    return MakeIndexesTemplate<DistanceValueProcessingWorker>(data_info_left, data_info_right,
+                                                              clusters_right, pool_, picker_,
+                                                              compute_distance_, min_sim_);
 }
-
 }  // namespace algos::hymd::preprocessing::similarity_measure

@@ -7,6 +7,7 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
 
 namespace tests {
 
@@ -37,13 +38,27 @@ INSTANTIATE_TEST_SUITE_P(
                 SimilarityTestParams{LongestCommonSubsequence, "abcdef", "xyz", 0.0},
                 SimilarityTestParams{LongestCommonSubsequence, "aaa", "aaa", 3.0},
                 // jaccard
-                SimilarityTestParams{JaccardIndex, "", "", 1.0},
-                SimilarityTestParams{JaccardIndex, "hello", "", 0.0},
-                SimilarityTestParams{JaccardIndex, "", "world", 0.0},
-                SimilarityTestParams{JaccardIndex, "kitten", "sitting", 3.0 / 7.0},
-                SimilarityTestParams{JaccardIndex, "abcdef", "xyabdxe", 0.5},
-                SimilarityTestParams{JaccardIndex, "abcdef", "xyz", 0.0},
-                SimilarityTestParams{JaccardIndex, "aaa", "aaa", 1.0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "", "",
+                        1.0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "hello",
+                        "", 0.0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "",
+                        "world", 0.0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "abc cde",
+                        "abc", 0.5},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "abc cde",
+                        "abc def", 1.0 / 3.0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "word1",
+                        "word2", 0},
+                SimilarityTestParams{
+                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "word",
+                        "word", 1.0},
                 // levenshtein
                 SimilarityTestParams{LevenshteinDistance, "", "", 0},
                 SimilarityTestParams{LevenshteinDistance, "kitten", "", 6},
@@ -51,14 +66,28 @@ INSTANTIATE_TEST_SUITE_P(
                 SimilarityTestParams{LevenshteinDistance, "kitten", "sitting", 3},
                 SimilarityTestParams{LevenshteinDistance, "abcdef", "xyabdxe", 5},
                 SimilarityTestParams{LevenshteinDistance, "abcdef", "xyz", 6},
-                SimilarityTestParams{LevenshteinDistance, "aaa", "aaa", 0},
-                // monge-elkan
-                SimilarityTestParams{MongeElkan, "", "", 1},
-                SimilarityTestParams{MongeElkan, "", "xyz", 0.0},
-                SimilarityTestParams{MongeElkan, "xyz", "", 0.0},
-                SimilarityTestParams{MongeElkan, "abc def xyz", "def xyz abc", 1.0},
-                SimilarityTestParams{MongeElkan, "hello world", "world hello!", 0.9},
-                SimilarityTestParams{MongeElkan, "kitten", "sitting", 3.0 / 7.0},
-                SimilarityTestParams{MongeElkan, "abcdef", "xyz", 0.0}));
+                SimilarityTestParams{LevenshteinDistance, "aaa", "aaa", 0}));
+
+struct MongeElkanTestParams {
+    std::vector<std::string> vec1;
+    std::vector<std::string> vec2;
+    double expected;
+};
+
+class MongeElkanMetricTest : public ::testing::TestWithParam<MongeElkanTestParams> {};
+
+TEST_P(MongeElkanMetricTest, ComputesCorrectSimilarity) {
+    auto params = GetParam();
+    double result = MongeElkan(params.vec1, params.vec2);
+    EXPECT_NEAR(result, params.expected, 0.001);
+}
+
+INSTANTIATE_TEST_SUITE_P(
+        Default, MongeElkanMetricTest,
+        ::testing::Values(MongeElkanTestParams{{}, {}, 1.0}, MongeElkanTestParams{{"abc"}, {}, 0.0},
+                          MongeElkanTestParams{{}, {"abc"}, 0.0},
+                          MongeElkanTestParams{{"abc", "def", "xyz"}, {"def", "xyz", "abc"}, 1.0},
+                          MongeElkanTestParams{{"hello", "word"}, {"world", "helo"}, 7.0 / 8.0},
+                          MongeElkanTestParams{{"abc"}, {"xyz"}, 0.0}));
 
 }  // namespace tests
