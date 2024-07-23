@@ -1,18 +1,27 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_metric.h"
 
-#include <unordered_set>
+#include <algorithm>
+#include <iterator>
+#include <sstream>
 
-double JaccardIndex(std::string const& word1, std::string const& word2) {
-    std::unordered_set<char> set1(word1.begin(), word1.end());
-    std::unordered_set<char> set2(word2.begin(), word2.end());
+template <typename T>
+double JaccardIndex(std::set<T> const& set1, std::set<T> const& set2) {
+    if (set1.empty() && set2.empty()) return 1.0;
 
-    int intersection_size = 0;
-    for (auto c : set1) {
-        if (set2.find(c) != set2.end()) {
-            ++intersection_size;
-        }
-    }
-    double union_size = static_cast<double>(set1.size() + set2.size() - intersection_size);
+    std::set<T> intersection;
+    std::set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
+                          std::inserter(intersection, intersection.begin()));
+    size_t union_size = set1.size() + set2.size() - intersection.size();
 
-    return union_size == 0 ? 1.0 : intersection_size / union_size;
+    return union_size == 0 ? 1.0 : static_cast<double>(intersection.size()) / union_size;
+}
+
+double JaccardIndex(std::string const& s1, std::string const& s2) {
+    std::istringstream iss1(s1), iss2(s2);
+    std::set<std::string> set1{std::istream_iterator<std::string>{iss1},
+                               std::istream_iterator<std::string>{}};
+    std::set<std::string> set2{std::istream_iterator<std::string>{iss2},
+                               std::istream_iterator<std::string>{}};
+
+    return JaccardIndex(set1, set2);
 }

@@ -12,21 +12,24 @@ class JaccardSimilarityMeasure : public ImmediateSimilarityMeasure {
 public:
     class Creator final : public SimilarityMeasureCreator {
         model::md::DecisionBoundary const min_sim_;
+        std::size_t const size_limit_;
 
     public:
-        Creator(model::md::DecisionBoundary min_sim)
-            : SimilarityMeasureCreator(kName), min_sim_(min_sim) {
+        Creator(model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0)
+            : SimilarityMeasureCreator(kName), min_sim_(min_sim), size_limit_(size_limit) {
             if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
                 throw config::ConfigurationError("Minimum similarity out of range");
             }
         }
 
-        std::unique_ptr<SimilarityMeasure> MakeMeasure() const final {
-            return std::make_unique<JaccardSimilarityMeasure>(min_sim_);
+        std::unique_ptr<SimilarityMeasure> MakeMeasure(
+                util::WorkerThreadPool* thread_pool) const final {
+            return std::make_unique<JaccardSimilarityMeasure>(min_sim_, thread_pool, size_limit_);
         }
     };
 
-    JaccardSimilarityMeasure(model::md::DecisionBoundary min_sim)
+    JaccardSimilarityMeasure(model::md::DecisionBoundary min_sim, util::WorkerThreadPool* pool,
+                             std::size_t size_limit)
         : ImmediateSimilarityMeasure(
                   std::make_unique<model::StringType>(),
                   [min_sim](std::byte const* l, std::byte const* r) {
@@ -35,6 +38,7 @@ public:
                       Similarity sim = JaccardIndex(left, right);
                       if (sim < min_sim) return kLowestBound;
                       return sim;
-                  }) {}
+                  },
+                  pool, size_limit) {}
 };
 }  // namespace algos::hymd::preprocessing::similarity_measure

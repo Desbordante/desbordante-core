@@ -17,22 +17,25 @@ class DateSimilarityMeasure : public DistanceSimilarityMeasure {
 public:
     class Creator final : public SimilarityMeasureCreator {
         model::md::DecisionBoundary const min_sim_;
+        std::size_t const size_limit_;
 
     public:
-        Creator(model::md::DecisionBoundary min_sim)
-            : SimilarityMeasureCreator(kName), min_sim_(min_sim) {
+        Creator(model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0)
+            : SimilarityMeasureCreator(kName), min_sim_(min_sim), size_limit_(size_limit) {
             if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
                 throw config::ConfigurationError("Minimum similarity out of range");
             }
         }
 
-        std::unique_ptr<SimilarityMeasure> MakeMeasure() const final {
-            return std::make_unique<DateSimilarityMeasure>(min_sim_);
+        std::unique_ptr<SimilarityMeasure> MakeMeasure(
+                util::WorkerThreadPool* thread_pool) const final {
+            return std::make_unique<DateSimilarityMeasure>(min_sim_, thread_pool, size_limit_);
         }
     };
 
 public:
-    DateSimilarityMeasure(model::md::DecisionBoundary min_sim)
+    DateSimilarityMeasure(model::md::DecisionBoundary min_sim, util::WorkerThreadPool* pool,
+                          std::size_t size_limit)
         : DistanceSimilarityMeasure(
                   std::make_unique<model::DateType>(),
                   [](std::byte const* l, std::byte const* r) {
@@ -41,7 +44,7 @@ public:
                       size_t dist = DateDifference(left, right);
                       return dist;
                   },
-                  min_sim) {}
+                  min_sim, pool, size_limit) {}
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
