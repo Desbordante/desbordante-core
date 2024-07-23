@@ -14,6 +14,7 @@
 #include "model/table/column_index.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "model/types/builtin.h"
 
 namespace algos::dd {
 
@@ -28,6 +29,8 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
+
+    std::vector<model::TypeId> type_ids_;
 
     bool has_dif_table_;
 
@@ -48,6 +51,7 @@ private:
 
     void ResetState() final {
         dd_collection_.clear();
+        tuple_pairs_.clear();
     }
 
     double CalculateDistance(model::ColumnIndex column_index,
@@ -55,7 +59,7 @@ private:
     void InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
                         std::size_t second_index, double& min_dif, double& max_dif);
     bool CheckDF(DF const& dep, std::pair<std::size_t, std::size_t> tuple_pair);
-    bool VerifyDD(DD const& dep);
+    bool VerifyDD(DF const& lhs, DF const& rhs);
     void CalculateAllDistances();
     bool IsFeasible(DF const& d);
     std::vector<DF> SearchSpace(std::vector<model::ColumnIndex>& indices);
