@@ -1,78 +1,48 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 
-#include <cstddef>
-#include <functional>
-#include <numeric>
-#include <unordered_set>
-#include <vector>
+#include "algorithms/md/hymd/preprocessing/similarity_measure/value_processing_worker.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-Similarity GetSimilarity(DataInfo const& data_info_left, DataInfo const& data_info_right,
-                         SimilarityFunction const& compute_similarity,
-                         ValueIdentifier value_id_left, ValueIdentifier value_id_right) {
-    std::byte const* value_left = data_info_left.GetAt(value_id_left);
-    std::byte const* value_right = data_info_right.GetAt(value_id_right);
-    return compute_similarity(value_left, value_right);
-}
+template <typename IndexType>
+class ImmediateValueProcessingWorker : public ValueProcessingWorker<IndexType> {
+    using Base = ValueProcessingWorker<IndexType>;
 
-using SimInfo = std::map<Similarity, indexes::RecSet>;
+    std::function<Similarity(std::byte const*, std::byte const*)> compute_similarity_;
+
+public:
+    ImmediateValueProcessingWorker(
+            std::shared_ptr<DataInfo const> const& data_info_left,
+            std::shared_ptr<DataInfo const> const& data_info_right,
+            std::vector<indexes::PliCluster> const& clusters_right,
+            ValidTableResults<Similarity>& task_data,
+            std::function<Similarity(std::byte const*, std::byte const*)> compute_similarity)
+        : Base(std::move(data_info_left), std::move(data_info_right), clusters_right, task_data),
+          compute_similarity_(compute_similarity) {}
+
+    bool CalcAndAdd(ValueIdentifier left_value_id, RowInfo<Similarity>& row_info,
+                    ValueIdentifier start_from) override {
+        bool dissimilar_found_here = false;
+        std::byte const* left_value = Base::data_info_left_->GetAt(left_value_id);
+        for (ValueIdentifier right_index = start_from; right_index != Base::data_right_size_;
+             ++right_index) {
+            double similarity =
+                    compute_similarity_(left_value, Base::data_info_right_->GetAt(right_index));
+            if (similarity == kLowestBound) {
+                dissimilar_found_here = true;
+                continue;
+            }
+            Base::AddValue(row_info, right_index, similarity);
+        }
+        return dissimilar_found_here;
+    }
+};
 
 indexes::SimilarityMeasureOutput ImmediateSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
-        std::vector<indexes::PliCluster> const& clusters_right, util::WorkerThreadPool&) const {
-    std::vector<model::md::DecisionBoundary> decision_bounds;
-    indexes::SimilarityMatrix similarity_matrix;
-    indexes::SimilarityIndex similarity_index;
-    auto const& data_left_size = data_info_left->GetElementNumber();
-    auto const& data_right_size = data_info_right->GetElementNumber();
-    Similarity lowest = 1.0;
-    for (ValueIdentifier value_id_left = 0; value_id_left < data_left_size; ++value_id_left) {
-        std::vector<std::pair<Similarity, RecordIdentifier>> sim_rec_id_vec;
-        for (ValueIdentifier value_id_right = 0; value_id_right < data_right_size;
-             ++value_id_right) {
-            Similarity similarity = compute_similarity_(data_info_left->GetAt(value_id_left),
-                                                        data_info_right->GetAt(value_id_right));
-            if (similarity == kLowestBound) {
-                lowest = kLowestBound;
-                continue;
-            }
-            if (lowest > similarity) lowest = similarity;
-            decision_bounds.push_back(similarity);
-            similarity_matrix[value_id_left][value_id_right] = similarity;
-            for (RecordIdentifier record_id : clusters_right.operator[](value_id_right)) {
-                sim_rec_id_vec.emplace_back(similarity, record_id);
-            }
-        }
-        if (sim_rec_id_vec.empty()) continue;
-        std::sort(sim_rec_id_vec.begin(), sim_rec_id_vec.end(), std::greater<>{});
-        std::vector<RecordIdentifier> records;
-        records.reserve(sim_rec_id_vec.size());
-        for (auto [_, rec] : sim_rec_id_vec) {
-            records.push_back(rec);
-        }
-        SimInfo sim_info;
-        Similarity previous_similarity = sim_rec_id_vec.begin()->first;
-        auto const it_begin = records.begin();
-        for (model::Index j = 0; j < sim_rec_id_vec.size(); ++j) {
-            Similarity const similarity = sim_rec_id_vec[j].first;
-            if (similarity == previous_similarity) continue;
-            auto const it_end = it_begin + static_cast<long>(j);
-            // TODO: use std::inplace_merge
-            std::sort(it_begin, it_end);
-            sim_info[previous_similarity] = {it_begin, it_end};
-            previous_similarity = similarity;
-        }
-        std::sort(records.begin(), records.end());
-        sim_info[previous_similarity] = {records.begin(), records.end()};
-        similarity_index[value_id_left] = std::move(sim_info);
-    }
-    std::sort(decision_bounds.begin(), decision_bounds.end());
-    decision_bounds.erase(std::unique(decision_bounds.begin(), decision_bounds.end()),
-                          decision_bounds.end());
-    return {std::move(decision_bounds),
-            {lowest, std::move(similarity_matrix), std::move(similarity_index)}};
+        std::vector<indexes::PliCluster> const& clusters_right) const {
+    return MakeIndexesTemplate<ImmediateValueProcessingWorker>(
+            data_info_left, data_info_right, clusters_right, pool_, picker_, compute_similarity_);
 }
-
 }  // namespace algos::hymd::preprocessing::similarity_measure
