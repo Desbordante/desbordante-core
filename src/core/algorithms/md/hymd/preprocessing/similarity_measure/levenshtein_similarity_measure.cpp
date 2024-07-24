@@ -7,7 +7,6 @@
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 #include "algorithms/md/hymd/preprocessing/encode_results.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
@@ -87,18 +86,22 @@ std::size_t GetLargestStringSize(DataInfo const& data_info_left) {
     return max_size;
 }
 
-template <typename IndexType>
 class ValueProcessingWorker {
+    using BufPtr = std::unique_ptr<unsigned[]>;
+
+    struct Resource {
+        BufPtr buf;
+        bool dissimilar_found = false;
+    };
+
     std::shared_ptr<DataInfo const> const& data_info_left_;
     std::shared_ptr<DataInfo const> const& data_info_right_;
     std::vector<indexes::PliCluster> const& clusters_right_;
     Similarity const min_sim_;
-    ValidTableResults<Similarity>& task_data_;
     std::size_t const data_left_size_ = data_info_left_->GetElementNumber();
     std::size_t const data_right_size_ = data_info_right_->GetElementNumber();
-    std::size_t const largest_string_size_ = GetLargestStringSize(*data_info_left_);
-    std::atomic<bool> dissimilar_found_ = false;
-    IndexType current_index_ = 0;
+    ValidTableResults<Similarity> task_data_{data_left_size_};
+    std::size_t const buf_len_ = GetLargestStringSize(*data_info_left_) + 1;
 
     void AddValue(RowInfo<Similarity>& row_info, ValueIdentifier value_id, Similarity sim) {
         auto& [sim_value_id_vec, valid_records_number] = row_info;
@@ -106,36 +109,27 @@ class ValueProcessingWorker {
         valid_records_number += clusters_right_[value_id].size();
     }
 
-    void Start(auto method) {
-        std::size_t const buf_len = largest_string_size_ + 1;
-        auto buf = /* TODO: replace with std::make_unique_for_overwrite when GCC in CI is
-                      upgraded */
-                utility::MakeUniqueForOverwrite<unsigned[]>(buf_len * 2);
-        ValueIdentifier left_value_id;
-        auto buf1 = buf.get();
-        auto buf2 = buf1 + buf_len;
-        bool found_dissimilar = false;
-        while ((left_value_id = current_index_++) < data_left_size_) {
-            bool found_dissimilar_here = (this->*method)(left_value_id, buf1, buf2);
-            if (found_dissimilar_here) found_dissimilar = true;
-        }
-        current_index_ = data_left_size_;
-        if (found_dissimilar) dissimilar_found_.store(true, std::memory_order::release);
+    Resource AcquireResource() const {
+        // TODO: replace with std::make_unique_for_overwrite when GCC in CI is upgraded
+        return {utility::MakeUniqueForOverwrite<unsigned[]>(buf_len_ * 2)};
     }
 
-    bool ProcessFull(ValueIdentifier const left_value_id, unsigned* buf1, unsigned* buf2) {
-        return CalcAndAdd(left_value_id, buf1, buf2, task_data_[left_value_id], 0);
-    }
-
-    bool ProcessSame(ValueIdentifier const left_value_id, unsigned* buf1, unsigned* buf2) {
+    void ProcessSame(ValueIdentifier const left_value_id, Resource& resource) {
+        auto& [buf, dissimilar_found] = resource;
         RowInfo<Similarity>& row_info = task_data_[left_value_id];
         AddValue(row_info, left_value_id, 1.0);
-        return CalcAndAdd(left_value_id, buf1, buf2, row_info, left_value_id + 1);
+        dissimilar_found = CalcAndAdd(left_value_id, buf, row_info, left_value_id + 1);
     }
 
-    bool CalcAndAdd(ValueIdentifier left_value_id, unsigned* buf1, unsigned* buf2,
-                    RowInfo<Similarity>& row_info, ValueIdentifier start_from) {
-        // Ignore nulls and empty for now.
+    void ProcessFull(ValueIdentifier const left_value_id, Resource& resource) {
+        auto& [buf, dissimilar_found] = resource;
+        dissimilar_found = CalcAndAdd(left_value_id, buf, task_data_[left_value_id], 0);
+    }
+
+    bool CalcAndAdd(ValueIdentifier left_value_id, BufPtr const& buf, RowInfo<Similarity>& row_info,
+                    ValueIdentifier start_from) {
+        unsigned* buf1 = buf.get();
+        unsigned* buf2 = buf1 + buf_len_;
         auto const& left_string =
                 model::Type::GetValue<std::string>(data_info_left_->GetAt(left_value_id));
         std::size_t const left_size = left_string.size();
@@ -164,49 +158,57 @@ class ValueProcessingWorker {
         return dissimilar_found_here;
     }
 
+    auto Enumerate(bool dissimilar_found) {
+        auto additional_bounds = {1.0, kLowestBound};
+        std::span additional_results(additional_bounds.begin(), dissimilar_found ? 2 : 1);
+        return EncodeResults(std::move(task_data_), additional_results);
+    }
+
+    auto GetCalculationMethod() {
+        return OneTableGiven() ? &ValueProcessingWorker::ProcessSame
+                               : &ValueProcessingWorker::ProcessFull;
+    }
+
 public:
     ValueProcessingWorker(std::shared_ptr<DataInfo const> const& data_info_left,
                           std::shared_ptr<DataInfo const> const& data_info_right,
                           std::vector<indexes::PliCluster> const& clusters_right,
-                          Similarity const min_sim, ValidTableResults<Similarity>& task_data)
+                          Similarity const min_sim)
         : data_info_left_(data_info_left),
           data_info_right_(data_info_right),
           clusters_right_(clusters_right),
-          min_sim_(min_sim),
-          task_data_(task_data) {}
+          min_sim_(min_sim) {}
 
-    void StartFull() {
-        Start(&ValueProcessingWorker::ProcessFull);
+    bool OneTableGiven() const noexcept {
+        return data_info_left_ == data_info_right_;
     }
 
-    void StartSame() {
-        Start(&ValueProcessingWorker::ProcessSame);
+    auto ExecSingleThreaded() {
+        Resource resource = AcquireResource();
+        auto calculation_method = GetCalculationMethod();
+        for (ValueIdentifier left_value_id = 0; left_value_id != data_left_size_; ++left_value_id) {
+            (this->*calculation_method)(left_value_id, resource);
+        }
+        return Enumerate(resource.dissimilar_found);
     }
 
-    bool DissimilarFound() const noexcept {
-        return dissimilar_found_.load(std::memory_order::acquire);
+    auto ExecMultiThreaded(util::WorkerThreadPool& pool) {
+        std::atomic<bool> dissimilar_found = false;
+        auto calculation_method = GetCalculationMethod();
+        auto set_dissimilar = [&dissimilar_found](Resource resource) {
+            if (resource.dissimilar_found) dissimilar_found.store(true, std::memory_order::release);
+        };
+        // Only allocate memory once per thread.
+        auto calculate_with_buf = [this, calculation_method](ValueIdentifier left_value_id,
+                                                             Resource& resource) {
+            (this->*calculation_method)(left_value_id, resource);
+        };
+        auto acquire_resource = [this]() { return AcquireResource(); };
+        pool.ExecIndexWithResource(calculate_with_buf, acquire_resource, data_left_size_,
+                                   set_dissimilar);
+        return Enumerate(dissimilar_found.load(std::memory_order::acquire));
     }
 };
-
-template <typename IndexType>
-auto GetResults(std::shared_ptr<DataInfo const> const& data_info_left,
-                std::shared_ptr<DataInfo const> const& data_info_right,
-                std::vector<indexes::PliCluster> const& clusters_right,
-                preprocessing::Similarity min_sim, auto start_same, auto start_full, auto finish) {
-    ValidTableResults<Similarity> task_data{data_info_left->GetElementNumber()};
-    ValueProcessingWorker<IndexType> worker{data_info_left, data_info_right, clusters_right,
-                                            min_sim, task_data};
-    if (data_info_left == data_info_right) {
-        start_same(worker);
-    } else {
-        start_full(worker);
-    }
-    finish();
-
-    auto additional_bounds = {1.0, kLowestBound};
-    std::span additional_results(additional_bounds.begin(), worker.DissimilarFound() ? 2 : 1);
-    return EncodeResults(std::move(task_data), additional_results);
-}
 }  // namespace
 
 namespace algos::hymd::preprocessing::similarity_measure {
@@ -215,27 +217,15 @@ indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
         std::shared_ptr<DataInfo const> data_info_left,
         std::shared_ptr<DataInfo const> data_info_right,
         std::vector<indexes::PliCluster> const& clusters_right) const {
-    std::pair<std::vector<preprocessing::Similarity>, EnumeratedValidTableResults> results;
-    if (pool_ == nullptr) {
-        results = GetResults<model::Index>(
-                data_info_left, data_info_right, clusters_right, min_sim_,
-                [](auto& worker) { worker.StartSame(); }, [](auto& worker) { worker.StartFull(); },
-                []() {});
-    } else {
-        results = GetResults<std::atomic<model::Index>>(
-                data_info_left, data_info_right, clusters_right, min_sim_,
-                [this](auto& worker) { pool_->SetWork([&worker]() { worker.StartSame(); }); },
-                [this](auto& worker) { pool_->SetWork([&worker]() { worker.StartFull(); }); },
-                [this]() { pool_->WorkUntilComplete(); });
-    }
-    auto& [similarities, enumerated_results] = results;
-    if (data_info_left == data_info_right) SymmetricClosure(enumerated_results, clusters_right);
+    ValueProcessingWorker worker{data_info_left, data_info_right, clusters_right, min_sim_};
+    auto [similarities, enumerated_results] =
+            pool_ == nullptr ? worker.ExecSingleThreaded() : worker.ExecMultiThreaded(*pool_);
+    // Relying on Levenshtein being symmetrical, only values following the left value were compared.
+    // Fill in the other value pairs' results.
+    if (worker.OneTableGiven()) SymmetricClosure(enumerated_results, clusters_right);
 
-    auto pick_index_uniform = [this](auto const& bounds) {
-        return ccv_id_pickers::IndexUniform(bounds.size(), size_limit_);
-    };
     return BuildIndexes(std::move(enumerated_results), std::move(similarities), clusters_right,
-                        pick_index_uniform);
+                        picker_);
 }
 
 LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim,

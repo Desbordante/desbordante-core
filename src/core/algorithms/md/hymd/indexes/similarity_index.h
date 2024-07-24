@@ -43,7 +43,6 @@ public:
 
 class CachingUpperSetMapping {
     FlatUpperSetIndex flat_;
-    // TODO: insert empty first, then fill
     UpperSetMapping sets_;
 
 public:
