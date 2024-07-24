@@ -92,6 +92,9 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
     return upper_set_records;
 }
 
+// For symmetrical similarity measures. Assumes that the left and the right columns were the same
+// and only the values following the value on the left were compared. Fills in the rest of value
+// pair comparison results.
 inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
                              std::vector<indexes::PliCluster> const& clusters_right) {
     std::size_t const enumerated_size = enumerated.size();
@@ -101,7 +104,7 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
                 enumerated[left_value_id].first;
         if (row_results.empty()) continue;
         for (auto const& [ccv_id, right_value_id] : row_results) {
-            if (right_value_id <= left_value_id) continue;
+            if (right_value_id <= left_value_id) break;
             auto& [next_val_row_results, valid_records_number] = enumerated[right_value_id];
             next_val_row_results.emplace_back(ccv_id, left_value_id);
             valid_records_number += clusters_right[left_value_id].size();
@@ -112,10 +115,10 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
 template <typename ResultType>
 indexes::SimilarityMeasureOutput BuildIndexes(
         EnumeratedValidTableResults enumerated, std::vector<ResultType> classifier_values,
-        std::vector<indexes::PliCluster> const& clusters_right, auto create_lhs_ids) {
+        std::vector<indexes::PliCluster> const& clusters_right, auto const& lhs_ids_picker) {
     SortAllRows(enumerated);
 
-    std::vector<ColumnClassifierValueId> lhs_ids = create_lhs_ids(classifier_values);
+    std::vector<ColumnClassifierValueId> lhs_ids = lhs_ids_picker.PickLhsIds(classifier_values);
 
     indexes::SimilarityMatrix value_matrix = CreateValueMatrix(enumerated);
 

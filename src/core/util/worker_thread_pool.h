@@ -61,16 +61,27 @@ public:
         });
     }
 
-    template <typename FunctionType>
-    void ExecIndex(FunctionType func, model::Index size) {
-        auto work = [func, size, index = std::make_shared<std::atomic<model::Index>>()]() mutable {
+    void ExecIndexWithResource(auto do_work, auto acquire_resource, model::Index size,
+                               auto finish) {
+        std::atomic<model::Index> index = 0;
+        auto work = [do_work = std::move(do_work), acquire_resource = std::move(acquire_resource),
+                     size, finish = std::move(finish), &index]() {
             model::Index i;
-            while ((i = (*index)++) < size) {
-                func(i);
+            auto resource = acquire_resource();
+            while ((i = index++) < size) {
+                do_work(i, resource);
             }
-            *index = size;
+            index = size;
+            finish(std::move(resource));
         };
         SetWork(work);
+        WorkUntilComplete();
+    }
+
+    template <typename FunctionType>
+    void ExecIndex(FunctionType func, model::Index size) {
+        ExecIndexWithResource([func = std::move(func)](model::Index i, auto) { func(i); },
+                              []() { return std::monostate{}; }, size, [](auto&&...) {});
     }
 
     // Main thread must call this to finish.

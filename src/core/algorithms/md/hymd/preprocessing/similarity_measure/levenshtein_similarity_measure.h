@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 
@@ -11,6 +12,8 @@ class LevenshteinSimilarityMeasure final : public SimilarityMeasure {
     model::md::DecisionBoundary const min_sim_;
     std::size_t const size_limit_;
     util::WorkerThreadPool* const pool_;
+    // TODO: make picker interface.
+    ccv_id_pickers::IndexUniform picker_{size_limit_};
     static constexpr auto kName = "levenshtein_similarity";
 
 public:

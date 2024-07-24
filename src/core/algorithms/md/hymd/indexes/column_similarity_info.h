@@ -12,7 +12,6 @@ struct ColumnMatchSimilarityInfo {
     std::vector<preprocessing::Similarity> classifier_values;
     SimilarityMatrix similarity_matrix;
     SimilarityIndex similarity_index;
-    // TODO: add slim similarity index
 };
 
 struct SimilarityMeasureOutput {

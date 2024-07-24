@@ -494,7 +494,6 @@ auto Validator::ValidateAll(std::vector<lattice::ValidationInfo>& validation_inf
         }
     } else {
         pool_->ExecIndex(validate_at_index, validation_info_size);
-        pool_->WorkUntilComplete();
     }
     return results_;
 }
