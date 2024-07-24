@@ -12,6 +12,12 @@ namespace algos::hymd {
 
 class LatticeTraverser {
 private:
+    struct LatticeStatistics {
+        std::size_t all_mds_num = 0;
+        std::size_t invalidated_mds_num = 0;
+        static constexpr double kRatioBound = 0.01;
+    };
+
     Recommendations recommendations_;
 
     std::unique_ptr<lattice::LevelGetter> const level_getter_;
