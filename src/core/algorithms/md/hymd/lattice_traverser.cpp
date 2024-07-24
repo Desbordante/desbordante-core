@@ -6,12 +6,16 @@ namespace algos::hymd {
 
 bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
     using model::Index;
+    LatticeStatistics lattice_statistics;
     while (level_getter_->AreLevelsLeft()) {
         std::vector<lattice::ValidationInfo> validations = level_getter_->GetCurrentMds();
         if (validations.empty()) {
             continue;
         }
 
+        for (auto const& validation : validations) {
+            lattice_statistics.all_mds_num += validation.rhs_indices.count();
+        }
         std::vector<Validator::Result> const& results = validator_.ValidateAll(validations);
         auto viol_func = [this, &results]() {
             for (Validator::Result const& result : results) {
@@ -29,6 +33,7 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
         std::size_t const validations_size = validations.size();
         for (Index i = 0; i != validations_size; ++i) {
             Validator::Result const& result = results[i];
+            lattice_statistics.invalidated_mds_num += result.invalidated.Size();
             lattice::MdLattice::MdVerificationMessenger& messenger = *validations[i].messenger;
             if (result.is_unsupported) {
                 messenger.MarkUnsupported();
@@ -37,7 +42,11 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
             }
         }
         if (pool_ != nullptr) pool_->WorkUntilComplete();
-        if (!traverse_all) return false;
+        if (!traverse_all &&
+            lattice_statistics.invalidated_mds_num >
+                    lattice_statistics.kRatioBound * (lattice_statistics.all_mds_num -
+                                                      lattice_statistics.invalidated_mds_num))
+            return false;
     }
     return true;
 }
