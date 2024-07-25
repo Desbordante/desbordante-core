@@ -7,6 +7,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <variant>
 #include <vector>
 
 #include "model/index.h"
