@@ -26,6 +26,9 @@ public:
 
     Operator(OperatorType type) : op_(type) {}
 
+    Operator(Operator&&) = default;
+    Operator(Operator const&) = default;
+
     bool operator==(Operator const& rhs) const {
         return op_ == rhs.op_;
     }

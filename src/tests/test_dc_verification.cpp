@@ -1,4 +1,4 @@
-#include "../core/algorithms/dc/dc_verification.h"
+#include "dc/dc_verification.h"
 #include "algorithms/algo_factory.h"
 #include "all_csv_configs.h"
 #include "gmock/gmock.h"
@@ -8,8 +8,6 @@
 namespace tests {
 
 namespace mo = model;
-
-static CSVConfig const kTestDC{"input_data/TestDC.csv", ',', true};
 
 static algos::StdParamsMap GetParamMap(CSVConfig const &csv_config, std::string dc) {
     using namespace config::names;
@@ -55,6 +53,14 @@ TEST(TestDCVerification, TestOneInequalityOnStrings) {
     std::string dc_string = "!(s.Col3 < t.Col7 and s.Col1 == t.Col1)";
     std::unique_ptr<algos::DCVerification> dc_verifier =
             algos::CreateAndLoadAlgorithm<algos::DCVerification>(GetParamMap(kTestDC, dc_string));
+    dc_verifier->Execute();
+    EXPECT_TRUE(dc_verifier->DCHolds());
+}
+
+TEST(TestDCVerification, TestRowHomogeneousInequalities) {
+    std::string dc_string = "!(s.Salary < t.Salary and s.State == t.State and s.FedTaxRate > t.FedTaxRate)";
+    std::unique_ptr<algos::DCVerification> dc_verifier =
+            algos::CreateAndLoadAlgorithm<algos::DCVerification>(GetParamMap(kTestDC1, dc_string));
     dc_verifier->Execute();
     EXPECT_TRUE(dc_verifier->DCHolds());
 }

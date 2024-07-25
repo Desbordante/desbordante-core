@@ -108,7 +108,7 @@ include_directories(
         "src/core/config"
 )
 
-include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include")
+include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include" "lib/kdtree/src")
 
 # adding submodules
 if (COMPILE_TESTS)

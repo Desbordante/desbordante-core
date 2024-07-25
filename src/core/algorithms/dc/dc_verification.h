@@ -4,6 +4,8 @@
 #include "config/tabular_data/input_table/option.h"
 #include "config/tabular_data/input_table_type.h"
 #include "dc.h"
+#include "kdtree.h"
+#include "point.h"
 #include "predicate_provider.h"
 #include "table/typed_column_data.h"
 
@@ -11,20 +13,20 @@ namespace algos {
 
 class DCVerification final : public Algorithm {
 private:
-    model::DC dc_;
-    std::string dc_string_;
-    bool result_;
-    config::InputTable input_table_;
-    std::vector<model::TypedColumnData> data_;
     std::unique_ptr<ColumnLayoutRelationData> relation_;
+    std::vector<model::TypedColumnData> data_;
+    config::InputTable input_table_;
+    std::string dc_string_;
+    model::DC dc_;
+    bool result_;
 
-    // Verify a DC in general case
+    std::vector<model::Predicate> SplitDC(std::string dc_string);
+
+    // Verify a DC in case if it contains only row homogeneous inequality and eqaulity
     bool VerifyDC();
 
-    // Converts all unequal predicates to a 
+    // Converts all unequal predicates to a
     void ConvertToInequality();
-
-    model::DC ParseDCString(std::string dc_string);
 
     // Check DC for containting only one predicate of form s.A op t.B
     bool CheckOneInequality();
@@ -39,8 +41,16 @@ private:
     // Verify DC in case if it contains all equality predicates
     bool VerifyAllEquality();
     std::vector<std::byte const*> GetTuple(size_t row);
-    std::vector<unsigned> ByteVecToUnsignedVec(const std::vector<std::byte const*> vec,
-                                               std::vector<unsigned> const& indices);
+    uint HashTuple(std::vector<std::byte const*> const& vec, std::vector<uint> const& indices);
+
+    Point<Component> MakePoint(std::vector<std::byte const*> const& vec,
+                               std::vector<uint> const& indices,
+                               ValType val_type = ValType::kFinite, kdtree<Point<Component>> const& tree = kdtree<Point<Component>>());
+
+    std::pair<Point<Component>, Point<Component>> SearchRange(
+            std::vector<std::byte const*> const& tuple);
+    std::pair<Point<Component>, Point<Component>> InvertRange(Point<Component> const& pt1,
+                                                              Point<Component> const& pt2);
 
     void RegisterOptions();
     void MakeExecuteOptsAvailable();
