@@ -614,14 +614,21 @@ void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
 void MdLattice::RaiseInterestingnessCCVIds(
         MdNode const& cur_node, MdLhs const& lhs,
         std::vector<ColumnClassifierValueId>& cur_interestingness_ccv_ids,
-        MdLhs::iterator cur_lhs_iter, std::vector<Index> const& indices) const {
+        MdLhs::iterator cur_lhs_iter, std::vector<Index> const& indices,
+        std::vector<ColumnClassifierValueId> const& ccv_id_bounds, std::size_t& max_count) const {
+    std::size_t const indices_size = indices.size();
     {
-        std::size_t const indices_size = indices.size();
         for (Index i = 0; i < indices_size; ++i) {
             ColumnClassifierValueId const cur_node_rhs_ccv_id = cur_node.rhs[indices[i]];
             ColumnClassifierValueId& cur_interestingness_ccv_id = cur_interestingness_ccv_ids[i];
             if (cur_node_rhs_ccv_id > cur_interestingness_ccv_id) {
                 cur_interestingness_ccv_id = cur_node_rhs_ccv_id;
+                if (cur_interestingness_ccv_id == ccv_id_bounds[i]) {
+                    max_count++;
+                    if (max_count == indices_size) {
+                        return;
+                    }
+                }
                 // The original paper mentions checking for the case where all decision bounds are
                 // 1.0, but if such a situation occurs for any one RHS, and the generalization with
                 // that RHS happens to be valid on the data, it would make inference from record
@@ -643,7 +650,8 @@ void MdLattice::RaiseInterestingnessCCVIds(
         for (auto const& [generalization_ccv_id, node] : *cur_node.children[child_array_index]) {
             if (generalization_ccv_id > generalization_ccv_id_limit) break;
             RaiseInterestingnessCCVIds(node, lhs, cur_interestingness_ccv_ids, cur_lhs_iter,
-                                       indices);
+                                       indices, ccv_id_bounds, max_count);
+            if (max_count == indices_size) return;
         }
     }
 }
@@ -672,7 +680,8 @@ void MdLattice::AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& in
 }
 
 std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
-        MdLhs const& lhs, std::vector<Index> const& indices) const {
+        MdLhs const& lhs, std::vector<Index> const& indices,
+        std::vector<ColumnClassifierValueId> const& ccv_id_bounds) const {
     std::vector<ColumnClassifierValueId> interestingness_ccv_ids;
     std::size_t indices_size = indices.size();
     if (prune_nondisjoint_) {
@@ -704,7 +713,17 @@ std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
         };
         fill_interestingness_ccv_ids();
     }
-    RaiseInterestingnessCCVIds(md_root_, lhs, interestingness_ccv_ids, lhs.begin(), indices);
+    std::size_t max_count = 0;
+    for (Index i = 0; i < indices_size; ++i) {
+        if (interestingness_ccv_ids[i] == ccv_id_bounds[i]) {
+            max_count++;
+        }
+    }
+    if (max_count == indices_size) {
+        return interestingness_ccv_ids;
+    }
+    RaiseInterestingnessCCVIds(md_root_, lhs, interestingness_ccv_ids, lhs.begin(), indices,
+                               ccv_id_bounds, max_count);
     return interestingness_ccv_ids;
 }
 
