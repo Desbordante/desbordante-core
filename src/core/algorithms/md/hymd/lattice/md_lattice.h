@@ -122,7 +122,9 @@ private:
     void RaiseInterestingnessCCVIds(
             MdNode const& cur_node, MdLhs const& lhs,
             std::vector<ColumnClassifierValueId>& cur_interestingness_ccv_ids,
-            MdLhs::iterator cur_lhs_iter, std::vector<model::Index> const& indices) const;
+            MdLhs::iterator cur_lhs_iter, std::vector<model::Index> const& indices,
+            std::vector<ColumnClassifierValueId> const& ccv_id_bounds,
+            std::size_t& max_count) const;
 
     void TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
                        PairComparisonResult const& pair_comparison_result,
@@ -214,7 +216,8 @@ public:
     }
 
     std::vector<ColumnClassifierValueId> GetInterestingnessCCVIds(
-            MdLhs const& lhs, std::vector<model::Index> const& indices) const;
+            MdLhs const& lhs, std::vector<model::Index> const& indices,
+            std::vector<ColumnClassifierValueId> const& ccv_id_bounds) const;
     std::vector<ColumnClassifierValueId> RemoveExisting(MdLhs const& lhs,
                                                         std::vector<model::Index> const& indices);
     void AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& indices,
