@@ -118,12 +118,12 @@ class ValueProcessingWorker {
         auto& [buf, dissimilar_found] = resource;
         RowInfo<Similarity>& row_info = task_data_[left_value_id];
         AddValue(row_info, left_value_id, 1.0);
-        dissimilar_found = CalcAndAdd(left_value_id, buf, row_info, left_value_id + 1);
+        if (CalcAndAdd(left_value_id, buf, row_info, left_value_id + 1)) dissimilar_found = true;
     }
 
     void ProcessFull(ValueIdentifier const left_value_id, Resource& resource) {
         auto& [buf, dissimilar_found] = resource;
-        dissimilar_found = CalcAndAdd(left_value_id, buf, task_data_[left_value_id], 0);
+        if (CalcAndAdd(left_value_id, buf, task_data_[left_value_id], 0)) dissimilar_found = true;
     }
 
     bool CalcAndAdd(ValueIdentifier left_value_id, BufPtr const& buf, RowInfo<Similarity>& row_info,
