@@ -93,8 +93,9 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
 }
 
 // For symmetrical similarity measures. Assumes that the left and the right columns were the same
-// and only the values following the value on the left were compared. Fills in the rest of value
-// pair comparison results.
+// and only the values following the value on the left were compared. Assumes that if equal values
+// were compared, they are at the beginning of each row. Fills in the rest of value pair comparison
+// results.
 inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
                              std::vector<indexes::PliCluster> const& clusters_right) {
     std::size_t const enumerated_size = enumerated.size();
@@ -103,8 +104,9 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
         ValidRowResults<ColumnClassifierValueId> const& row_results =
                 enumerated[left_value_id].first;
         if (row_results.empty()) continue;
-        for (auto const& [ccv_id, right_value_id] : row_results) {
-            if (right_value_id <= left_value_id) break;
+        for (auto const& [ccv_id, right_value_id] :
+             std::ranges::drop_view{row_results, row_results.front().second == left_value_id}) {
+            if (right_value_id < left_value_id) break;
             auto& [next_val_row_results, valid_records_number] = enumerated[right_value_id];
             next_val_row_results.emplace_back(ccv_id, left_value_id);
             valid_records_number += clusters_right[left_value_id].size();
