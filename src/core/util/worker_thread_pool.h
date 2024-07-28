@@ -64,15 +64,15 @@ public:
 
     void ExecIndexWithResource(auto do_work, auto acquire_resource, model::Index size,
                                auto finish) {
+        DESBORDANTE_ASSUME(size + ThreadNum() <= std::size_t{} - 1);
         std::atomic<model::Index> index = 0;
         auto work = [do_work = std::move(do_work), acquire_resource = std::move(acquire_resource),
                      size, finish = std::move(finish), &index]() {
             model::Index i;
             auto resource = acquire_resource();
-            while ((i = index++) < size) {
+            while ((i = index.fetch_add(1, std::memory_order::acquire)) < size) {
                 do_work(i, resource);
             }
-            index = size;
             finish(std::move(resource));
         };
         SetWork(work);
