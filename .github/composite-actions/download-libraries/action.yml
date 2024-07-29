@@ -22,7 +22,10 @@ runs:
       shell: bash
 
     - name: Install Boost
-      run: sudo apt-get install libboost-all-dev -y
+      run: |
+        sudo add-apt-repository ppa:mhier/libboost-latest
+        sudo apt update
+        sudo apt-get install libboost1.81-all-dev -y
       shell: bash
 
     - name: Make lib directory

@@ -84,14 +84,14 @@ jobs:
         uses: actions/cache@v3
         id: cache-unpacked-boost
         with:
-          path: ${{github.workspace}}/lib/boost_1_78_0
-          key: ${{ runner.os }}-boost-for-wheels-78
+          path: ${{github.workspace}}/lib/boost_1_81_0
+          key: ${{ runner.os }}-boost-for-wheels-81
 
       - name: Download & unpack Boost
         run: |
           cd ${{github.workspace}}/lib
-          wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
-          tar xzf boost_1_78_0.tar.gz
+          wget -O boost_1_81_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.gz/download
+          tar xzf boost_1_81_0.tar.gz
         shell: bash
         if: steps.cache-unpacked-boost.outputs.cache-hit != 'true'
 
@@ -101,7 +101,7 @@ jobs:
           only: ${{ matrix.only }}
         env:
           CIBW_BEFORE_ALL: >
-            cd lib/boost_1_78_0 && 
+            cd lib/boost_1_81_0 && 
             ./bootstrap.sh --prefix=/usr/local &&
             ./b2 install -j4 --prefix=/usr/local
           CIBW_TEST_COMMAND: >
