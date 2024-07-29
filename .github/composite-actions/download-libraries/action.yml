@@ -11,6 +11,11 @@ inputs:
     description: 'Download googletest'
     default: true
 
+  install-boost:
+    type: boolean
+    description: 'Install boost'
+    default: true
+
 runs:
   using: 'composite'
   steps:
@@ -19,10 +24,6 @@ runs:
       run: |
         sudo apt-get update -y
         sudo apt-get install gcc-10 g++-10 cmake build-essential -y
-      shell: bash
-
-    - name: Install Boost
-      run: sudo apt-get install libboost-all-dev -y
       shell: bash
 
     - name: Make lib directory
@@ -65,6 +66,36 @@ runs:
       with:
         directory: atomicbitvector
         download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
+
+    - name: Cache Boost
+      uses: actions/cache@v3
+      id: cache-boost
+      with:
+        path: ${{github.workspace}}/lib/boost_1_81_0
+        key: ${{ runner.os }}-boost-81
+
+    - name: Download and unpack Boost
+      run: |
+        cd lib
+        wget -O boost_1_81_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.gz/download
+        tar xzvf boost_1_81_0.tar.gz
+      shell: bash
+      if: steps.cache-boost.outputs.cache-hit != 'true'
+
+    - name: Copy boost
+      run: |
+        cd lib
+        # Avoid caching build files
+        cp -r boost_1_81_0 boost
+      shell: bash
+
+    - name: Install Boost
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --prefix=/usr
+        sudo ./b2 install --prefix=/usr
+      shell: bash
+      if: inputs.install-boost != 'false'
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs
