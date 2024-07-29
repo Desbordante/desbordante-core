@@ -79,21 +79,7 @@ jobs:
         with:
           download-pybind: true
           download-googletest: false
-
-      - name: Cache unpacked Boost
-        uses: actions/cache@v3
-        id: cache-unpacked-boost
-        with:
-          path: ${{github.workspace}}/lib/boost_1_78_0
-          key: ${{ runner.os }}-boost-for-wheels-78
-
-      - name: Download & unpack Boost
-        run: |
-          cd ${{github.workspace}}/lib
-          wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
-          tar xzf boost_1_78_0.tar.gz
-        shell: bash
-        if: steps.cache-unpacked-boost.outputs.cache-hit != 'true'
+          install-boost: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
@@ -101,9 +87,9 @@ jobs:
           only: ${{ matrix.only }}
         env:
           CIBW_BEFORE_ALL: >
-            cd lib/boost_1_78_0 && 
-            ./bootstrap.sh --prefix=/usr/local &&
-            ./b2 install -j4 --prefix=/usr/local
+            cd lib/boost &&
+            ./bootstrap.sh --prefix=/usr &&
+            ./b2 install -j4 --prefix=/usr
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
             cp {project}/test_input_data/transactional_data/rules-kaggle-rows.csv {project}/src/python_bindings &&

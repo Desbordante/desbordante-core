@@ -102,7 +102,7 @@ endif()
 
 # configuring boost
 set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost 1.72.0 REQUIRED COMPONENTS container thread graph)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
 include_directories(${Boost_INCLUDE_DIRS})
 message(${Boost_INCLUDE_DIRS})
 
