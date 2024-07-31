@@ -15,8 +15,11 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
     column_matches_info.reserve(col_match_number);
     std::vector<std::vector<model::Index>> column_matches_lhs_ids;
     column_matches_lhs_ids.reserve(col_match_number);
+    std::vector<std::pair<std::size_t, model::Index>> lhs_size_to_index;
+    lhs_size_to_index.reserve(col_match_number);
     auto const& left_records = records_info->GetLeftCompressor();
     auto const& right_records = records_info->GetRightCompressor();
+    std::size_t column_match_index = 0;
     for (auto const& [measure, left_col_index, right_col_index] : column_matches_info_initial) {
         auto const& left_pli = left_records.GetPli(left_col_index);
         // TODO: cache DataInfo.
@@ -32,10 +35,24 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
         // TODO: sort column matches on the number of LHS CCV IDs.
         auto [lhs_ccv_ids, indexes] = measure->MakeIndexes(
                 std::move(data_info_left), std::move(data_info_right), right_pli.GetClusters());
+        lhs_size_to_index.emplace_back(lhs_ccv_ids.size(), column_match_index++);
         column_matches_info.emplace_back(std::move(indexes), left_col_index, right_col_index);
         column_matches_lhs_ids.push_back(std::move(lhs_ccv_ids));
     }
-    return {records_info, std::move(column_matches_info), std::move(column_matches_lhs_ids)};
+    std::sort(lhs_size_to_index.begin(), lhs_size_to_index.end());
+    std::vector<model::Index> sorted_to_original;
+    sorted_to_original.reserve(col_match_number);
+    std::vector<ColumnMatchInfo> sorted_column_matches_info;
+    sorted_column_matches_info.reserve(col_match_number);
+    std::vector<std::vector<model::Index>> sorted_column_matches_lhs_ids;
+    sorted_column_matches_lhs_ids.reserve(col_match_number);
+    for (auto const& [size, index] : lhs_size_to_index) {
+        sorted_to_original.push_back(index);
+        sorted_column_matches_info.push_back(std::move(column_matches_info[index]));
+        sorted_column_matches_lhs_ids.push_back(std::move(column_matches_lhs_ids[index]));
+    }
+    return {records_info, std::move(sorted_column_matches_info),
+            std::move(sorted_column_matches_lhs_ids), std::move(sorted_to_original)};
 }
 
 model::md::DecisionBoundary SimilarityData::GetLhsDecisionBoundary(

@@ -201,13 +201,14 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
                                             ->GetSimilarityMeasureName());
     }
     std::vector<model::MD> mds;
+    auto const& sorted_to_original = similarity_data.GetIndexMapping();
     auto convert_lhs = [&](MdLhs const& lattice_lhs) {
         std::vector<model::md::LhsColumnSimilarityClassifier> lhs;
         lhs.reserve(column_match_number);
         Index lhs_index = 0;
         for (auto const& [child_index, ccv_id] : lattice_lhs) {
             for (Index lhs_limit = lhs_index + child_index; lhs_index != lhs_limit; ++lhs_index) {
-                lhs.emplace_back(std::nullopt, lhs_index, kLowestBound);
+                lhs.emplace_back(std::nullopt, sorted_to_original[lhs_index], kLowestBound);
             }
             assert(ccv_id != kLowestCCValueId);
             model::md::DecisionBoundary lhs_bound =
@@ -218,12 +219,18 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
             lhs.emplace_back(max_disproved_bound == kLowestBound
                                      ? std::optional<model::md::DecisionBoundary>{std::nullopt}
                                      : max_disproved_bound,
-                             lhs_index, lhs_bound);
+                             sorted_to_original[lhs_index], lhs_bound);
             ++lhs_index;
         }
         for (; lhs_index != column_match_number; ++lhs_index) {
-            lhs.emplace_back(std::nullopt, lhs_index, kLowestBound);
+            lhs.emplace_back(std::nullopt, sorted_to_original[lhs_index], kLowestBound);
         }
+        std::sort(lhs.begin(), lhs.end(),
+                  [](model::md::LhsColumnSimilarityClassifier const& left_classifier,
+                     model::md::LhsColumnSimilarityClassifier const& right_classifier) {
+                      return left_classifier.GetColumnMatchIndex() <
+                             right_classifier.GetColumnMatchIndex();
+                  });
         return lhs;
     };
     {
@@ -234,7 +241,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
             model::md::DecisionBoundary rhs_bound =
                     similarity_data.GetDecisionBoundary(rhs_index, kLowestCCValueId);
             if (rhs_bound == kLowestBound) continue;
-            model::md::ColumnSimilarityClassifier rhs{rhs_index, rhs_bound};
+            model::md::ColumnSimilarityClassifier rhs{sorted_to_original[rhs_index], rhs_bound};
             mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, empty_lhs,
                              rhs);
         }
@@ -247,7 +254,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
             if (rhs_value_id == kLowestCCValueId) continue;
             model::md::DecisionBoundary rhs_bound =
                     similarity_data.GetDecisionBoundary(rhs_index, rhs_value_id);
-            model::md::ColumnSimilarityClassifier rhs{rhs_index, rhs_bound};
+            model::md::ColumnSimilarityClassifier rhs{sorted_to_original[rhs_index], rhs_bound};
             mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, lhs, rhs);
         }
     }
