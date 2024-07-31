@@ -31,6 +31,8 @@ private:
     std::vector<ColumnMatchInfo> const column_matches_sim_info_;
     std::vector<std::vector<ColumnClassifierValueId>> const column_matches_lhs_ids_;
 
+    std::vector<model::Index> const sorted_to_original_;
+
     indexes::DictionaryCompressor const& GetLeftCompressor() const noexcept {
         return records_info_->GetLeftCompressor();
     }
@@ -40,13 +42,14 @@ private:
     }
 
 public:
-    SimilarityData(
-            indexes::RecordsInfo* records_info,
-            std::vector<ColumnMatchInfo> column_matches_sim_info,
-            std::vector<std::vector<ColumnClassifierValueId>> column_matches_lhs_ids) noexcept
+    SimilarityData(indexes::RecordsInfo* records_info,
+                   std::vector<ColumnMatchInfo> column_matches_sim_info,
+                   std::vector<std::vector<ColumnClassifierValueId>> column_matches_lhs_ids,
+                   std::vector<model::Index> sorted_to_original) noexcept
         : records_info_(records_info),
           column_matches_sim_info_(std::move(column_matches_sim_info)),
-          column_matches_lhs_ids_(std::move(column_matches_lhs_ids)) {}
+          column_matches_lhs_ids_(std::move(column_matches_lhs_ids)),
+          sorted_to_original_(std::move(sorted_to_original)) {}
 
     static SimilarityData CreateFrom(indexes::RecordsInfo* records_info,
                                      ColMatchesInfo column_matches_info);
@@ -76,6 +79,10 @@ public:
             model::Index index) const {
         auto const& [_, left_column_index, right_column_index] = column_matches_sim_info_[index];
         return {left_column_index, right_column_index};
+    }
+
+    [[nodiscard]] std::vector<model::Index> const& GetIndexMapping() const noexcept {
+        return sorted_to_original_;
     }
 
     [[nodiscard]] model::md::DecisionBoundary GetLhsDecisionBoundary(
