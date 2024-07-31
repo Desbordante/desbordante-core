@@ -13,7 +13,7 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
     std::size_t const col_match_number = column_matches_info_initial.size();
     std::vector<ColumnMatchInfo> column_matches_info;
     column_matches_info.reserve(col_match_number);
-    std::vector<std::vector<model::Index>> column_matches_lhs_ids;
+    std::vector<std::vector<ColumnClassifierValueId>> column_matches_lhs_ids;
     column_matches_lhs_ids.reserve(col_match_number);
     std::vector<std::pair<std::size_t, model::Index>> lhs_size_to_index;
     lhs_size_to_index.reserve(col_match_number);
@@ -44,7 +44,7 @@ SimilarityData SimilarityData::CreateFrom(indexes::RecordsInfo* const records_in
     sorted_to_original.reserve(col_match_number);
     std::vector<ColumnMatchInfo> sorted_column_matches_info;
     sorted_column_matches_info.reserve(col_match_number);
-    std::vector<std::vector<model::Index>> sorted_column_matches_lhs_ids;
+    std::vector<std::vector<ColumnClassifierValueId>> sorted_column_matches_lhs_ids;
     sorted_column_matches_lhs_ids.reserve(col_match_number);
     for (auto const& [size, index] : lhs_size_to_index) {
         sorted_to_original.push_back(index);
