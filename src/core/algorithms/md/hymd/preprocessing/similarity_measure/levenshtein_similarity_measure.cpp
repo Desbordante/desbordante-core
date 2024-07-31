@@ -165,7 +165,7 @@ class ValueProcessingWorker {
     }
 
     auto GetCalculationMethod() {
-        return OneTableGiven() ? &ValueProcessingWorker::ProcessSame
+        return OneColumnGiven() ? &ValueProcessingWorker::ProcessSame
                                : &ValueProcessingWorker::ProcessFull;
     }
 
@@ -179,7 +179,7 @@ public:
           clusters_right_(clusters_right),
           min_sim_(min_sim) {}
 
-    bool OneTableGiven() const noexcept {
+    bool OneColumnGiven() const noexcept {
         return data_info_left_ == data_info_right_;
     }
 
@@ -222,7 +222,7 @@ indexes::SimilarityMeasureOutput LevenshteinSimilarityMeasure::MakeIndexes(
             pool_ == nullptr ? worker.ExecSingleThreaded() : worker.ExecMultiThreaded(*pool_);
     // Relying on Levenshtein being symmetrical, only values following the left value were compared.
     // Fill in the other value pairs' results.
-    if (worker.OneTableGiven()) SymmetricClosure(enumerated_results, clusters_right);
+    if (worker.OneColumnGiven()) SymmetricClosure(enumerated_results, clusters_right);
 
     return BuildIndexes(std::move(enumerated_results), std::move(similarities), clusters_right,
                         picker_);
