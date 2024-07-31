@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "model/index.h"
+#include "util/desbordante_assume.h"
 
 namespace util {
 class WorkerThreadPool {
@@ -79,6 +80,11 @@ public:
         WorkUntilComplete();
     }
 
+    void ExecIndexWithResource(auto do_work, auto acquire_resource, model::Index size) {
+        ExecIndexWithResource(std::move(do_work), std::move(acquire_resource), size,
+                              [](auto&&...) {});
+    }
+
     template <typename FunctionType>
     void ExecIndex(FunctionType func, model::Index size) {
         ExecIndexWithResource([func = std::move(func)](model::Index i, auto) { func(i); },
@@ -87,12 +93,13 @@ public:
 
     // Main thread must call this to finish.
     void WorkUntilComplete() {
-        auto call_unchecked = [](Worker const& w) {
-            if (!w) __builtin_unreachable();
-            w();
-        };
-        call_unchecked(work_);
+        DESBORDANTE_ASSUME(work_);
+        work_();
         barrier_.arrive_and_wait();
+    }
+
+    std::size_t ThreadNum() const noexcept {
+        return worker_threads_.size() + 1;
     }
 
     ~WorkerThreadPool() {
