@@ -10,7 +10,7 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
         std::vector<MdLattice::MdVerificationMessenger>& level_lattice_info) {
     min_picker_.NewBatch(level_lattice_info.size());
     for (MdLattice::MdVerificationMessenger& messenger : level_lattice_info) {
-        std::size_t const column_match_number = messenger.GetRhs().size();
+        std::size_t const column_match_number = messenger.GetRhs().size;
         boost::dynamic_bitset<> const& previously_picked_rhs =
                 picked_.try_emplace(messenger.GetLhs(), column_match_number).first->second;
         boost::dynamic_bitset<> indices(column_match_number);
@@ -37,7 +37,7 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
         }
     }
     for (ValidationInfo const& validation_info : collected) {
-        std::size_t const column_match_number = validation_info.messenger->GetRhs().size();
+        std::size_t const column_match_number = validation_info.messenger->GetRhs().size;
         boost::dynamic_bitset<>& validated_indices =
                 picked_.try_emplace(validation_info.messenger->GetLhs(), column_match_number)
                         .first->second;
