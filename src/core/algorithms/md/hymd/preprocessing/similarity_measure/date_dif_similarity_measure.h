@@ -39,8 +39,8 @@ public:
         : DistanceSimilarityMeasure(
                   std::make_unique<model::DateType>(),
                   [](std::byte const* l, std::byte const* r) {
-                      const auto& left = model::Type::GetValue<model::Date>(l);
-                      const auto& right = model::Type::GetValue<model::Date>(r);
+                      auto const& left = model::Type::GetValue<model::Date>(l);
+                      auto const& right = model::Type::GetValue<model::Date>(r);
                       size_t dist = DateDifference(left, right);
                       return dist;
                   },

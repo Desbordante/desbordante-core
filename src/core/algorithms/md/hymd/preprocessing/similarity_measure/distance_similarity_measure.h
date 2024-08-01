@@ -30,7 +30,7 @@ public:
           compute_distance_(std::move(compute_distance)),
           min_sim_(min_sim),
           pool_(thread_pool),
-          size_limit_(size_limit){};
+          size_limit_(size_limit) {};
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
