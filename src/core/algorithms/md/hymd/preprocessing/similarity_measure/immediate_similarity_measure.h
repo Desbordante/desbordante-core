@@ -27,7 +27,7 @@ public:
         : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>()),
           compute_similarity_(std::move(compute_similarity)),
           pool_(thread_pool),
-          size_limit_(size_limit){};
+          size_limit_(size_limit) {};
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure
