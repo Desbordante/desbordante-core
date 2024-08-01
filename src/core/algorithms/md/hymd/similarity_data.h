@@ -69,10 +69,10 @@ public:
     }
 
     [[nodiscard]] lattice::Rhs CreateMaxRhs() const noexcept {
-        lattice::Rhs max_rhs;
-        max_rhs.reserve(GetColumnMatchNumber());
+        lattice::Rhs max_rhs(GetColumnMatchNumber());
+        model::Index i = 0;
         for (ColumnMatchInfo const& cm_info : column_matches_sim_info_) {
-            max_rhs.push_back(cm_info.similarity_info.classifier_values.size() - 1);
+            max_rhs.Set(i++, cm_info.similarity_info.classifier_values.size() - 1);
         }
         return max_rhs;
     }
