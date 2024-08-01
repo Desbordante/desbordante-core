@@ -1,2 +1,2 @@
 template <typename T>
-double EqualityMetric(const T& obj1, const T& obj2);
+double EqualityMetric(T const& obj1, T const& obj2);
