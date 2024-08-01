@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <set>
+#include <span>
 #include <unordered_map>
 #include <utility>
 #include <vector>
