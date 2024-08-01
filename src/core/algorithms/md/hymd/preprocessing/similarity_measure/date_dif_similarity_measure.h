@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 #include <cstdlib>
 
@@ -6,11 +8,11 @@
 #include "config/exceptions.h"
 #include "model/types/date_type.h"
 
-size_t DateDifference(model::Date const& left, model::Date const& right) {
+namespace algos::hymd::preprocessing::similarity_measure {
+inline size_t DateDifference(model::Date const& left, model::Date const& right) {
     return std::abs((left - right).days());
 }
 
-namespace algos::hymd::preprocessing::similarity_measure {
 class DateSimilarityMeasure : public DistanceSimilarityMeasure {
     static constexpr auto kName = "date_similarity";
 

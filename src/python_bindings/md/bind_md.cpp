@@ -44,25 +44,30 @@ void BindMd(py::module_& main_module) {
     py::class_<MongeElkanSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<MongeElkanSimilarityMeasure::Creator>>(measures_module,
                                                                       "MongeElkanSimilarity")
-            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0);
 
     py::class_<JaccardSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<JaccardSimilarityMeasure::Creator>>(measures_module,
                                                                    "JaccardSimilarity")
-            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0);
 
     py::class_<DateSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<DateSimilarityMeasure::Creator>>(measures_module, "DateSimilarity")
-            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0);
 
     py::class_<NumberSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<NumberSimilarityMeasure::Creator>>(measures_module,
                                                                   "NumberSimilarity")
-            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0);
 
     py::class_<LcsSimilarityMeasure::Creator, SimilarityMeasureCreator,
                std::shared_ptr<LcsSimilarityMeasure::Creator>>(measures_module, "LcsSimilarity")
-            .def(py::init<model::md::DecisionBoundary>(), "minimum_similarity"_a = 0.7);
+            .def(py::init<model::md::DecisionBoundary, std::size_t>(), "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0);
 
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }

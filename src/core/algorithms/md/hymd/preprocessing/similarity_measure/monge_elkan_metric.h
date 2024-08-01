@@ -1,9 +1,12 @@
+#pragma once
+
 #include <functional>
 #include <string>
 #include <vector>
 
 #include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
 
+namespace algos::hymd::preprocessing::similarity_measure {
 template <typename SimilarityFunction>
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b,
                   SimilarityFunction similarityFunction) {
@@ -22,3 +25,4 @@ double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> co
 }
 
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b);
+}  // namespace algos::hymd::preprocessing::similarity_measure

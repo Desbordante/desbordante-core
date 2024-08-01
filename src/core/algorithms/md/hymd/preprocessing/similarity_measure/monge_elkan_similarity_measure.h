@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_metric.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
@@ -6,7 +8,7 @@
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-std::vector<std::string> Tokenize(std::string const& text) {
+inline std::vector<std::string> Tokenize(std::string const& text) {
     std::istringstream iss(text);
     std::vector<std::string> tokens;
     std::string token;

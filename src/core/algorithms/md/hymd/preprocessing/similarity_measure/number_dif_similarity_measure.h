@@ -1,12 +1,14 @@
+#pragma once
+
 #include "algorithms/md/hymd/preprocessing/similarity_measure/distance_similarity_measure.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "config/exceptions.h"
 
-double NumberDifference(model::Double left, model::Double right) {
+namespace algos::hymd::preprocessing::similarity_measure {
+inline double NumberDifference(model::Double left, model::Double right) {
     return std::abs(left - right);
 }
 
-namespace algos::hymd::preprocessing::similarity_measure {
 class NumberSimilarityMeasure : public DistanceSimilarityMeasure {
     static constexpr auto kName = "number_similarity";
 

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/lcs.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"
