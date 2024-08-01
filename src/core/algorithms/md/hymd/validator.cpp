@@ -132,7 +132,11 @@ public:
             support += cluster.size() * similar.size();
             util::EraseIfReplace(working_, [&](WorkingInfo& info) {
                 Status const status = LowerForColumnMatch(info, cluster, similar);
-                return status == Status::kInvalidated;
+                if (status == Status::kInvalidated) {
+                    result_.invalidated.PushBack(info.old_rhs, kLowestCCValueId);
+                    return true;
+                }
+                return false;
             });
             bool all_invalid = working_.empty();
             if (all_invalid) {
