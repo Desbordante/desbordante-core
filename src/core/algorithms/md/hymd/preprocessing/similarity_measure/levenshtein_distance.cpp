@@ -4,6 +4,7 @@
 #include <numeric>
 #include <vector>
 
+namespace algos::hymd::preprocessing::similarity_measure {
 unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
     std::size_t r_size = r.size();
     std::size_t l_size = l.size();
@@ -44,3 +45,5 @@ unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
         return v0[r_size];
     }
 }
+
+}  // namespace algos::hymd::preprocessing::similarity_measure

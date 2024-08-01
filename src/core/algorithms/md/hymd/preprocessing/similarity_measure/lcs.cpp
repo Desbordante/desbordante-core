@@ -2,6 +2,7 @@
 
 #include <vector>
 
+namespace algos::hymd::preprocessing::similarity_measure {
 double LongestCommonSubsequence(std::string const& word1, std::string const& word2) {
     size_t m = word1.size();
     size_t n = word2.size();
@@ -20,3 +21,4 @@ double LongestCommonSubsequence(std::string const& word1, std::string const& wor
 
     return lcs_table[m][n];
 }
+}  // namespace algos::hymd::preprocessing::similarity_measure

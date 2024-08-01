@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algorithms/md/hymd/preprocessing/similarity_measure/immediate_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_distance.h"
 #include "algorithms/md/hymd/similarity_measure_creator.h"

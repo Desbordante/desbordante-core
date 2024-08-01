@@ -9,6 +9,8 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
 
+using namespace algos::hymd::preprocessing::similarity_measure;
+
 namespace tests {
 
 struct SimilarityTestParams {
@@ -88,6 +90,10 @@ INSTANTIATE_TEST_SUITE_P(
                           MongeElkanTestParams{{}, {"abc"}, 0.0},
                           MongeElkanTestParams{{"abc", "def", "xyz"}, {"def", "xyz", "abc"}, 1.0},
                           MongeElkanTestParams{{"hello", "word"}, {"world", "helo"}, 7.0 / 8.0},
-                          MongeElkanTestParams{{"abc"}, {"xyz"}, 0.0}));
+                          MongeElkanTestParams{{"abc"}, {"xyz"}, 0.0},
+                          MongeElkanTestParams{{"abc", "def"}, {"abc"}, std::sqrt(0.5)},
+                          MongeElkanTestParams{{"abc"}, {"abc", "def"}, std::sqrt(0.5)},
+                          MongeElkanTestParams{{"abc"}, {"abc", "abc"}, 1.0},
+                          MongeElkanTestParams{{"word1", "word2"}, {"Word2", "Word1"}, 4.0 / 5.0}));
 
 }  // namespace tests

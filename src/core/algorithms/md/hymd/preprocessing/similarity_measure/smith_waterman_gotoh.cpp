@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <vector>
 
+namespace {
 double SubstitutionCompare(char a, char b) {
     return (a == b) ? 1.0 : -2.0;
 }
@@ -26,7 +27,9 @@ double SmithWatermanGotoh(std::string const& s, std::string const& t, double gap
 
     return max;
 }
+}  // namespace
 
+namespace algos::hymd::preprocessing::similarity_measure {
 double NormalizedSmithWatermanGotoh(std::string const& s, std::string const& t, double gapValue) {
     if (s.empty() && t.empty()) {
         return 1.0;
@@ -39,3 +42,4 @@ double NormalizedSmithWatermanGotoh(std::string const& s, std::string const& t, 
     double max_distance = std::min(s.length(), t.length()) * std::max(1.0, gapValue);
     return SmithWatermanGotoh(s, t, gapValue) / max_distance;
 }
+}  // namespace algos::hymd::preprocessing::similarity_measure
