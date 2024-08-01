@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <numeric>
 #include <set>
+#include <span>
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
@@ -166,7 +167,7 @@ class ValueProcessingWorker {
 
     auto GetCalculationMethod() {
         return OneColumnGiven() ? &ValueProcessingWorker::ProcessSame
-                               : &ValueProcessingWorker::ProcessFull;
+                                : &ValueProcessingWorker::ProcessFull;
     }
 
 public:
