@@ -15,12 +15,12 @@
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lattice/single_level_func.h"
 #include "algorithms/md/hymd/lattice/support_node.h"
+#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "algorithms/md/hymd/md_element.h"
 #include "algorithms/md/hymd/md_lhs.h"
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/rhss.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "model/index.h"
 #include "util/excl_optional.h"
 
@@ -204,8 +204,8 @@ private:
 
 public:
     explicit MdLattice(SingleLevelFunc single_level_func,
-                       std::vector<LhsCCVIdsInfo> const& lhs_ccv_ids_info,
-                       bool prune_nondisjoint, std::size_t max_cardinality, Rhs max_rhs);
+                       std::vector<LhsCCVIdsInfo> const& lhs_ccv_ids_info, bool prune_nondisjoint,
+                       std::size_t max_cardinality, Rhs max_rhs);
 
     std::size_t GetColMatchNumber() const noexcept {
         return column_matches_size_;

@@ -20,11 +20,6 @@ template <typename MdInfoType>
 using MdGenChecker = TotalGeneralizationChecker<MdNode, MdInfoType>;
 template <typename MdInfoType>
 using MdSpecGenChecker = SpecGeneralizationChecker<MdNode, MdInfoType>;
-
-bool NotEmpty(Rhs const& rhs) {
-    auto not_lowest = [](ColumnClassifierValueId ccv_id) { return ccv_id != kLowestCCValueId; };
-    return std::any_of(rhs.begin(), rhs.end(), not_lowest);
-}
 }  // namespace
 
 namespace algos::hymd::lattice {
@@ -33,7 +28,7 @@ namespace algos::hymd::lattice {
 MdLattice::MdLattice(SingleLevelFunc single_level_func,
                      std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info, bool prune_nondisjoint,
                      std::size_t max_cardinality, Rhs max_rhs)
-    : column_matches_size_(max_rhs.size()),
+    : column_matches_size_(max_rhs.size),
       md_root_(std::move(max_rhs)),
       support_root_(column_matches_size_),
       get_single_level_(std::move(single_level_func)),
@@ -124,8 +119,7 @@ inline void MdLattice::SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id,
                         enabled_rhss.GetEnabled().set(i, false);
                     } else {
                         ColumnClassifierValueId const ccv_id_triviality_bound =
-                                (*lhs_ccv_id_info_)[lhs_spec_index]
-                                        .lhs_to_rhs_map
+                                (*lhs_ccv_id_info_)[lhs_spec_index].lhs_to_rhs_map
                                         [lhs_spec.specialization_data.new_child.ccv_id];
                         if (rhs.ccv_id <= ccv_id_triviality_bound)
                             enabled_rhss.GetEnabled().set(i, false);
@@ -183,7 +177,7 @@ inline void MdLattice::DoSpecialize(MdLhs const& lhs, auto get_lhs_ccv_id, auto 
 template <typename MdInfoType>
 inline void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md,
                                      MdLhs::iterator cur_node_iter, auto handle_level_update_tail) {
-    assert(!NotEmpty(cur_node.rhs));
+    assert(cur_node.rhs.IsEmpty());
     assert(cur_node_iter >= md.lhs_specialization.specialization_data.spec_before);
     auto set_rhs = [&](MdNode* node) { node->SetRhs(md.GetRhs()); };
     AddUnchecked(&cur_node, md.lhs_specialization.old_lhs, cur_node_iter, set_rhs);
@@ -220,20 +214,16 @@ private:
     MdElement const rhs_;
     MdNode* node_;
     MdGenChecker<Md>& gen_checker_;
-    ColumnClassifierValueId* cur_node_rhs_ptr_;
 
 public:
     GeneralizationHelper(MdNode& root, auto& gen_checker) noexcept
-        : rhs_(gen_checker.GetUnspecialized().rhs),
-          node_(&root),
-          gen_checker_(gen_checker),
-          cur_node_rhs_ptr_(&node_->rhs[rhs_.index]) {}
+        : rhs_(gen_checker.GetUnspecialized().rhs), node_(&root), gen_checker_(gen_checker) {}
 
     bool SetAndCheck(MdNode* node_ptr) noexcept {
         node_ = node_ptr;
         if (!node_) return true;
-        cur_node_rhs_ptr_ = &node_->rhs[rhs_.index];
-        return *cur_node_rhs_ptr_ >= rhs_.ccv_id;
+        if (node_->rhs.IsEmpty()) return false;
+        return node_->rhs[rhs_.index] >= rhs_.ccv_id;
     }
 
     MdNode& CurNode() noexcept {
@@ -245,7 +235,7 @@ public:
     }
 
     void SetRhsOnCurrent() noexcept {
-        *cur_node_rhs_ptr_ = rhs_.ccv_id;
+        node_->rhs.Set(rhs_.index, rhs_.ccv_id);
     }
 
     auto& GetTotalChecker() noexcept {
@@ -466,8 +456,7 @@ std::size_t MdLattice::MdRefiner::Refine() {
     std::size_t removed = 0;
     for (auto new_rhs : invalidated_.GetUpdateView()) {
         auto const& [rhs_index, new_ccv_id] = new_rhs;
-        ColumnClassifierValueId& prev_ccv_id_ref = (*node_info_.rhs)[rhs_index];
-        prev_ccv_id_ref = kLowestCCValueId;
+        node_info_.rhs->Set(rhs_index, kLowestCCValueId);
         bool const trivial = new_ccv_id == kLowestCCValueId;
         if (trivial) {
             ++removed;
@@ -478,7 +467,7 @@ std::size_t MdLattice::MdRefiner::Refine() {
             ++removed;
             continue;
         }
-        prev_ccv_id_ref = new_ccv_id;
+        node_info_.rhs->Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), *pair_similarities_, invalidated_.GetInvalidated());
     return removed;
@@ -531,7 +520,9 @@ void MdLattice::CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefin
                                            MdLhs& cur_node_lhs,
                                            PairComparisonResult const& pair_comparison_result,
                                            Index cur_node_index) {
-    TryAddRefiner(found, cur_node.rhs, pair_comparison_result, cur_node_lhs);
+    if (!cur_node.rhs.IsEmpty()) {
+        TryAddRefiner(found, cur_node.rhs, pair_comparison_result, cur_node_lhs);
+    }
 
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
         Index const column_match_index = cur_node_index + child_array_index;
@@ -583,7 +574,7 @@ void MdLattice::MdVerificationMessenger::MarkUnsupported() {
 void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
         utility::InvalidatedRhss const& invalidated) {
     for (auto [rhs_index, new_ccv_id] : invalidated.GetUpdateView()) {
-        GetRhs()[rhs_index] = new_ccv_id;
+        GetRhs().Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), invalidated.GetInvalidated());
 }
@@ -595,26 +586,29 @@ void MdLattice::RaiseInterestingnessCCVIds(
         std::vector<ColumnClassifierValueId> const& ccv_id_bounds, std::size_t& max_count) const {
     std::size_t const indices_size = indices.size();
     {
-        for (Index i = 0; i < indices_size; ++i) {
-            ColumnClassifierValueId const cur_node_rhs_ccv_id = cur_node.rhs[indices[i]];
-            ColumnClassifierValueId& cur_interestingness_ccv_id = cur_interestingness_ccv_ids[i];
-            if (cur_node_rhs_ccv_id > cur_interestingness_ccv_id) {
-                cur_interestingness_ccv_id = cur_node_rhs_ccv_id;
-                if (cur_interestingness_ccv_id == ccv_id_bounds[i]) {
-                    max_count++;
-                    if (max_count == indices_size) {
-                        return;
+        if (!cur_node.rhs.IsEmpty()) {
+            for (Index i = 0; i < indices_size; ++i) {
+                ColumnClassifierValueId const cur_node_rhs_ccv_id = cur_node.rhs[indices[i]];
+                ColumnClassifierValueId& cur_interestingness_ccv_id =
+                        cur_interestingness_ccv_ids[i];
+                if (cur_node_rhs_ccv_id > cur_interestingness_ccv_id) {
+                    cur_interestingness_ccv_id = cur_node_rhs_ccv_id;
+                    if (cur_interestingness_ccv_id == ccv_id_bounds[i]) {
+                        max_count++;
+                        if (max_count == indices_size) {
+                            return;
+                        }
                     }
+                    // The original paper mentions checking for the case where all decision bounds
+                    // are 1.0, but if such a situation occurs for any one RHS, and the
+                    // generalization with that RHS happens to be valid on the data, it would make
+                    // inference from record pairs give an incorrect result, meaning the algorithm
+                    // is incorrect. However, it is possible to stop traversing when the bound's
+                    // index in the list of natural decision boundaries (that being column
+                    // classifier value ID) is exactly one less than the RHS bound's index.
+                    // TODO: abort traversal as above.
+                    // assert(cur_node_rhs_ccv_id != 1.0);
                 }
-                // The original paper mentions checking for the case where all decision bounds are
-                // 1.0, but if such a situation occurs for any one RHS, and the generalization with
-                // that RHS happens to be valid on the data, it would make inference from record
-                // pairs give an incorrect result, meaning the algorithm is incorrect.
-                // However, it is possible to stop traversing when the bound's index in the list of
-                // natural decision boundaries (that being column classifier value ID) is exactly
-                // one less than the RHS bound's index.
-                // TODO: abort traversal as above.
-                // assert(cur_node_rhs_ccv_id != 1.0);
             }
         }
     }
@@ -639,9 +633,8 @@ std::vector<ColumnClassifierValueId> MdLattice::RemoveExisting(
     std::vector<ColumnClassifierValueId> ccv_ids;
     ccv_ids.reserve(indices.size());
     for (model::Index index : indices) {
-        ColumnClassifierValueId& rhs_ccv_id = node_rhs[index];
-        ccv_ids.push_back(rhs_ccv_id);
-        rhs_ccv_id = kLowestCCValueId;
+        ccv_ids.push_back(node_rhs[index]);
+        node_rhs.Set(index, kLowestCCValueId);
     }
     return ccv_ids;
 }
@@ -652,7 +645,7 @@ void MdLattice::AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& in
     assert(indices.size() == ccv_ids.size());
     auto ccv_id_iter = ccv_ids.begin();
     for (Index index : indices) {
-        node_rhs[index] = *ccv_id_iter++;
+        node_rhs.Set(index, *ccv_id_iter++);
     }
 }
 
@@ -716,7 +709,7 @@ void MdLattice::GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>&
                          std::size_t const level_left) {
     Rhs& rhs = cur_node.rhs;
     if (level_left == 0) {
-        if (NotEmpty(rhs)) collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &rhs});
+        if (!rhs.IsEmpty()) collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &rhs});
         return;
     }
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
@@ -749,7 +742,7 @@ auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationM
 void MdLattice::GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected,
                        MdLhs& cur_node_lhs, Index const this_node_index) {
     lattice::Rhs& rhs = cur_node.rhs;
-    if (NotEmpty(rhs)) collected.emplace_back(cur_node_lhs, &rhs);
+    if (!rhs.IsEmpty()) collected.emplace_back(cur_node_lhs, &rhs);
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
         Index const next_node_index = this_node_index + child_array_index;
         ColumnClassifierValueId& next_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);

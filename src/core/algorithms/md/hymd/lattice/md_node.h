@@ -25,10 +25,12 @@ public:
     }
 
     bool ContainsGeneralizationOf(Specialization::Unspecialized const& md) const noexcept {
+        if (rhs.IsEmpty()) return false;
         return ContainsGeneralizationOf(md.rhs);
     }
 
     bool ContainsGeneralizationOf(MultiMd& md) const noexcept {
+        if (rhs.IsEmpty()) return false;
         return md.rhss.CheckEnabled([this](MdElement const& md_element) {
             return ContainsGeneralizationOf(md_element);
         });
@@ -47,16 +49,16 @@ public:
     }
 
     static void SetRhs(Rhs& node_rhs, MdElement rhs) {
-        node_rhs[rhs.index] = rhs.ccv_id;
+        node_rhs.Set(rhs.index, rhs.ccv_id);
     }
 
     MdNode* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id) {
-        return AddOneUncheckedBase(child_array_index, ccv_id, rhs.size());
+        return AddOneUncheckedBase(child_array_index, ccv_id, rhs.size);
     }
 
     MdNode(std::size_t attributes_num, std::size_t children_number)
         : NodeBase<MdNode>(children_number), rhs(attributes_num) {}
 
-    explicit MdNode(Rhs rhs) : NodeBase<MdNode>(rhs.size()), rhs(std::move(rhs)) {}
+    explicit MdNode(Rhs rhs) : NodeBase<MdNode>(rhs.size), rhs(std::move(rhs)) {}
 };
 }  // namespace algos::hymd::lattice
