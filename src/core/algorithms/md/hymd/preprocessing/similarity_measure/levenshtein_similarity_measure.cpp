@@ -140,11 +140,11 @@ class ValueProcessingWorker {
             auto const& right_string =
                     model::Type::GetValue<std::string>(data_info_right_->GetAt(value_id_right));
             std::size_t const max_dist = std::max(left_size, right_string.size());
-            // Left has to be second since that's what the function uses to determine the buffer
-            // size it needs
             Similarity similarity = 1.0;
             if (max_dist != 0) {
                 unsigned lim = max_dist * (1 - min_sim_);
+                // Left has to be second since that's what the function uses to determine the buffer
+                // size it needs
                 unsigned dist = LevenshteinDistance(&right_string, &left_string, buf1, buf2, lim);
                 similarity = (max_dist - dist) / static_cast<Similarity>(max_dist);
                 // Don't store 0.0 no matter the value of min_sim.
