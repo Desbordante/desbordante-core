@@ -21,7 +21,8 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
             for (Validator::Result const& result : results) {
                 /*if (result.is_unsupported) continue; ???*/
                 for (std::vector<Recommendation> const& rhs_violations : result.recommendations) {
-                    recommendations_.insert(rhs_violations.begin(), rhs_violations.end());
+                    recommendations_.insert(recommendations_.end(), rhs_violations.begin(),
+                                            rhs_violations.end());
                 };
             }
         };

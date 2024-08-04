@@ -23,10 +23,11 @@ private:
 
 public:
     DistanceSimilarityMeasure(std::unique_ptr<model::Type> arg_type,
-                              DistanceFunction compute_distance,
+                              bool is_symmetrical_and_eq_is_max, DistanceFunction compute_distance,
                               model::md::DecisionBoundary min_sim,
                               util::WorkerThreadPool* thread_pool, std::size_t size_limit)
-        : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>()),
+        : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>(),
+                            is_symmetrical_and_eq_is_max),
           compute_distance_(std::move(compute_distance)),
           min_sim_(min_sim),
           pool_(thread_pool),

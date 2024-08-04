@@ -115,6 +115,7 @@ indexes::SimilarityMeasureOutput MakeIndexesTemplate(
     } else {
         results = GetResults<WorkerType<std::atomic<model::Index>>>(
                 data_info_left, data_info_right, clusters_right,
+                // TODO: account for "bad" measures (not symmetric or equality is not 1.0)
                 [pool](auto& worker) { pool->SetWork([&worker]() { worker.StartSame(); }); },
                 [pool](auto& worker) { pool->SetWork([&worker]() { worker.StartFull(); }); },
                 [pool]() { pool->WorkUntilComplete(); }, std::forward<Args>(args)...);

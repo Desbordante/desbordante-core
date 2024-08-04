@@ -24,45 +24,19 @@ bool NotEmpty(Rhs const& rhs) {
     auto not_lowest = [](ColumnClassifierValueId ccv_id) { return ccv_id != kLowestCCValueId; };
     return std::any_of(rhs.begin(), rhs.end(), not_lowest);
 }
-
-using ColClassifierValIds = std::vector<std::vector<ColumnClassifierValueId>>;
-
-auto MakeRhsMap(ColClassifierValIds const& lhs_ccv_ids, Rhs const& max_rhs) {
-    assert(lhs_ccv_ids.size() == max_rhs.size());
-    std::size_t rhs_size = max_rhs.size();
-    ColClassifierValIds map;
-    map.reserve(lhs_ccv_ids.size());
-    for (model::Index i = 0; i < rhs_size; ++i) {
-        std::vector<ColumnClassifierValueId> const& cm_ccv_ids = lhs_ccv_ids[i];
-        assert(!cm_ccv_ids.empty() && cm_ccv_ids.front() == kLowestCCValueId);
-        std::vector<ColumnClassifierValueId> cm_map;
-        ColumnClassifierValueId last_rhs_size = max_rhs[i] + 1;
-        cm_map.reserve(last_rhs_size);
-        auto next = cm_ccv_ids.begin(), prev = next++, end = cm_ccv_ids.end();
-        cm_map.insert(cm_map.end(), cm_ccv_ids.front(), kLowestCCValueId);
-        model::Index cur_i = 0;
-        for (; next != end; ++prev, ++next, ++cur_i) {
-            cm_map.insert(cm_map.end(), *next - *prev, cur_i);
-        }
-        cm_map.insert(cm_map.end(), last_rhs_size - *prev, cur_i);
-        map.push_back(std::move(cm_map));
-    }
-    return map;
-}
 }  // namespace
 
 namespace algos::hymd::lattice {
 
 // TODO: remove recursion
 MdLattice::MdLattice(SingleLevelFunc single_level_func,
-                     std::vector<std::vector<ColumnClassifierValueId>> const& lhs_ccv_ids,
-                     bool prune_nondisjoint, std::size_t max_cardinality, Rhs max_rhs)
+                     std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info, bool prune_nondisjoint,
+                     std::size_t max_cardinality, Rhs max_rhs)
     : column_matches_size_(max_rhs.size()),
-      rhs_to_lhs_ccv_id_map_(MakeRhsMap(lhs_ccv_ids, max_rhs)),
       md_root_(std::move(max_rhs)),
       support_root_(column_matches_size_),
       get_single_level_(std::move(single_level_func)),
-      lhs_ccv_ids_(&lhs_ccv_ids),
+      lhs_ccv_id_info_(&lhs_ccv_id_info),
       prune_nondisjoint_(prune_nondisjoint),
       max_cardinality_(max_cardinality) {
     enabled_rhs_indices_.resize(column_matches_size_, true);
@@ -72,7 +46,7 @@ inline void MdLattice::Specialize(MdLhs const& lhs,
                                   PairComparisonResult const& pair_comparison_result,
                                   Rhss const& rhss) {
     auto get_pair_lhs_ccv_id = [&](Index index, ...) {
-        return rhs_to_lhs_ccv_id_map_[index][pair_comparison_result[index]];
+        return (*lhs_ccv_id_info_)[index].rhs_to_lhs_map[pair_comparison_result[index]];
     };
     Specialize(lhs, rhss, get_pair_lhs_ccv_id, get_pair_lhs_ccv_id);
 }
@@ -88,7 +62,8 @@ inline void MdLattice::SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::ite
                                          ColumnClassifierValueId spec_past,
                                          model::Index lhs_spec_index, auto support_check_method,
                                          auto add_rhs) {
-    std::vector<ColumnClassifierValueId> const& lhs_ccv_ids = (*lhs_ccv_ids_)[lhs_spec_index];
+    std::vector<ColumnClassifierValueId> const& lhs_ccv_ids =
+            (*lhs_ccv_id_info_)[lhs_spec_index].lhs_to_rhs_map;
     // TODO: remove those before starting.
     // if (lhs_ccv_ids.size() == 1) return;
     // TODO: enforce this with a special class (basically a vector that guarantees this condition).
@@ -124,8 +99,8 @@ inline void MdLattice::SpecializeSingle(MdLhs const& lhs, auto get_lhs_ccv_id,
             if (index == lhs_spec_index) {
                 if (prune_nondisjoint_) return;
                 ColumnClassifierValueId const ccv_id_triviality_bound =
-                        (*lhs_ccv_ids_)[lhs_spec_index]
-                                       [lhs_spec.specialization_data.new_child.ccv_id];
+                        (*lhs_ccv_id_info_)[lhs_spec_index]
+                                .lhs_to_rhs_map[lhs_spec.specialization_data.new_child.ccv_id];
                 if (ccv_id <= ccv_id_triviality_bound) return;
             }
             (this->*add_method)({lhs_spec, rhs});
@@ -148,8 +123,9 @@ inline void MdLattice::SpecializeMulti(MdLhs const& lhs, auto get_lhs_ccv_id,
                         enabled_rhss.GetEnabled().set(i, false);
                     } else {
                         ColumnClassifierValueId const ccv_id_triviality_bound =
-                                (*lhs_ccv_ids_)[lhs_spec_index]
-                                               [lhs_spec.specialization_data.new_child.ccv_id];
+                                (*lhs_ccv_id_info_)[lhs_spec_index]
+                                        .lhs_to_rhs_map
+                                        [lhs_spec.specialization_data.new_child.ccv_id];
                         if (rhs.ccv_id <= ccv_id_triviality_bound)
                             enabled_rhss.GetEnabled().set(i, false);
                     }
@@ -531,7 +507,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
         if (pair_ccv_id < rhs_ccv_id) {
             MdElement invalid{rhs_index, rhs_ccv_id};
             ColumnClassifierValueId cur_lhs_triviality_bound =
-                    (*lhs_ccv_ids_)[cur_lhs_index][lhs_ccv_id];
+                    (*lhs_ccv_id_info_)[cur_lhs_index].lhs_to_rhs_map[lhs_ccv_id];
             if (cur_lhs_triviality_bound == pair_ccv_id) {
                 invalidated.PushBack(invalid, kLowestCCValueId);
             } else {
@@ -561,7 +537,7 @@ void MdLattice::CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefin
         ColumnClassifierValueId& cur_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);
         ColumnClassifierValueId pair_rhs_ccv_id = pair_comparison_result[column_match_index];
         std::vector<ColumnClassifierValueId> const& cm_lhs_ccv_ids =
-                (*lhs_ccv_ids_)[column_match_index];
+                (*lhs_ccv_id_info_)[column_match_index].lhs_to_rhs_map;
         for (auto& [generalization_ccv_id, node] : child_map) {
             if (cm_lhs_ccv_ids[generalization_ccv_id] > pair_rhs_ccv_id) break;
             cur_lhs_ccv_id = generalization_ccv_id;
@@ -697,17 +673,20 @@ std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
                 cur_index += child_index;
                 Index index;
                 while ((index = *index_it) < cur_index) {
-                    interestingness_ccv_ids.push_back((*lhs_ccv_ids_)[index][kLowestCCValueId]);
+                    interestingness_ccv_ids.push_back(
+                            (*lhs_ccv_id_info_)[index].lhs_to_rhs_map[kLowestCCValueId]);
                     if (++index_it == index_end) return;
                 }
                 if (cur_index == index) {
-                    interestingness_ccv_ids.push_back((*lhs_ccv_ids_)[index][lhs_ccv_id]);
+                    interestingness_ccv_ids.push_back(
+                            (*lhs_ccv_id_info_)[index].lhs_to_rhs_map[lhs_ccv_id]);
                     if (++index_it == index_end) return;
                 }
                 ++cur_index;
             }
             while (index_it != index_end) {
-                interestingness_ccv_ids.push_back((*lhs_ccv_ids_)[*index_it][kLowestCCValueId]);
+                interestingness_ccv_ids.push_back(
+                        (*lhs_ccv_id_info_)[*index_it].lhs_to_rhs_map[kLowestCCValueId]);
                 ++index_it;
             }
         };

@@ -33,7 +33,7 @@ public:
     LcsSimilarityMeasure(model::md::DecisionBoundary min_sim, util::WorkerThreadPool* pool,
                          std::size_t size_limit)
         : ImmediateSimilarityMeasure(
-                  std::make_unique<model::StringType>(),
+                  std::make_unique<model::StringType>(), true,
                   [min_sim](std::byte const* l, std::byte const* r) {
                       std::string const& left = model::Type::GetValue<model::String>(l);
                       std::string const& right = model::Type::GetValue<model::String>(r);
