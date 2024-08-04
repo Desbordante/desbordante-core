@@ -22,9 +22,11 @@ private:
 
 public:
     ImmediateSimilarityMeasure(std::unique_ptr<model::Type> arg_type,
+                               bool is_symmetrical_and_eq_is_max,
                                SimilarityFunction compute_similarity,
                                util::WorkerThreadPool* thread_pool, std::size_t size_limit)
-        : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>()),
+        : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>(),
+                            is_symmetrical_and_eq_is_max),
           compute_similarity_(std::move(compute_similarity)),
           pool_(thread_pool),
           size_limit_(size_limit) {};

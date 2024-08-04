@@ -233,7 +233,7 @@ LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(model::md::DecisionBo
                                                            std::size_t size_limit,
                                                            util::WorkerThreadPool* thread_pool)
     : SimilarityMeasure(std::make_unique<model::StringType>(),
-                        std::make_unique<model::DoubleType>()),
+                        std::make_unique<model::DoubleType>(), true),
       min_sim_(min_sim),
       size_limit_(size_limit),
       pool_(thread_pool) {}

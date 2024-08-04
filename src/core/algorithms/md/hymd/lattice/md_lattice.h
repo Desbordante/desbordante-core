@@ -20,6 +20,7 @@
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/rhss.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
+#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "model/index.h"
 #include "util/excl_optional.h"
 
@@ -102,13 +103,12 @@ public:
 private:
     std::size_t max_level_ = 0;
     std::size_t const column_matches_size_;
-    std::vector<std::vector<ColumnClassifierValueId>> const rhs_to_lhs_ccv_id_map_;
     MdNode md_root_;
     SupportNode support_root_;
     // Is there a way to define a level in such a way that one cannot use each CCV ID independently
     // to determine an MD's level but the lattice traversal algorithm still works?
     SingleLevelFunc const get_single_level_;
-    std::vector<std::vector<ColumnClassifierValueId>> const* const lhs_ccv_ids_;
+    std::vector<LhsCCVIdsInfo> const* const lhs_ccv_id_info_;
     bool const prune_nondisjoint_;
     std::size_t const max_cardinality_;
     boost::dynamic_bitset<> enabled_rhs_indices_;
@@ -204,7 +204,7 @@ private:
 
 public:
     explicit MdLattice(SingleLevelFunc single_level_func,
-                       std::vector<std::vector<ColumnClassifierValueId>> const& lhs_ids,
+                       std::vector<LhsCCVIdsInfo> const& lhs_ccv_ids_info,
                        bool prune_nondisjoint, std::size_t max_cardinality, Rhs max_rhs);
 
     std::size_t GetColMatchNumber() const noexcept {

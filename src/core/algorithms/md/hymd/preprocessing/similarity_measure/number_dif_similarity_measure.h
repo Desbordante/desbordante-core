@@ -35,7 +35,7 @@ public:
     NumberSimilarityMeasure(model::md::DecisionBoundary min_sim, util::WorkerThreadPool* pool,
                             std::size_t size_limit)
         : DistanceSimilarityMeasure(
-                  std::make_unique<model::DoubleType>(),
+                  std::make_unique<model::DoubleType>(), true,
                   [](std::byte const* l, std::byte const* r) {
                       model::Double left_val = model::Type::GetValue<model::Double>(l);
                       model::Double right_val = model::Type::GetValue<model::Double>(r);

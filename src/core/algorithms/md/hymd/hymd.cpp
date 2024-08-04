@@ -9,7 +9,6 @@
 #include "algorithms/md/hymd/lattice_traverser.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/pair_comparer.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/record_pair_inferrer.h"
 #include "algorithms/md/hymd/similarity_data.h"
@@ -156,29 +155,26 @@ unsigned long long HyMD::ExecuteInternal() {
                                          left_schema_->GetColumn(left_column_name)->GetIndex(),
                                          right_schema_->GetColumn(right_column_name)->GetIndex());
     }
-    std::size_t const column_match_number = column_matches_info.size();
-    assert(column_match_number != 0);
     // TODO: make infrastructure for depth level
-    SimilarityData similarity_data =
+    auto [similarity_data, short_sampling_enable] =
             SimilarityData::CreateFrom(records_info_.get(), std::move(column_matches_info));
-    lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIds(),
+    lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIdsInfo(),
                                prune_nondisjoint_, max_cardinality_,
                                similarity_data.CreateMaxRhs()};
+    auto [record_pair_inferrer, done] = RecordPairInferrer::Create(
+            &lattice, records_info_.get(), &similarity_data.GetColumnMatchesInfo(),
+            similarity_data.GetLhsIdsInfo(), std::move(short_sampling_enable), pool_ptr);
     LatticeTraverser lattice_traverser{
             std::make_unique<lattice::cardinality::MinPickingLevelGetter>(&lattice),
             {pool_ptr, records_info_.get(), similarity_data.GetColumnMatchesInfo(), min_support_,
              &lattice},
             pool_ptr};
-    RecordPairInferrer record_pair_inferrer{
-            PairComparer{records_info_.get(), &similarity_data.GetColumnMatchesInfo(),
-                         records_info_->OneTableGiven()},
-            &lattice};
+    done = lattice_traverser.TraverseLattice(done);
 
-    bool done = false;
-    do {
+    while (!done) {
         done = record_pair_inferrer.InferFromRecordPairs(lattice_traverser.TakeRecommendations());
         done = lattice_traverser.TraverseLattice(done);
-    } while (!done);
+    }
 
     RegisterResults(similarity_data, lattice.GetAll());
 
