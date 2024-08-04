@@ -18,11 +18,15 @@ private:
     std::unique_ptr<model::Type> const arg_type_;
     // Doesn't have to be a double, just any type with total order.
     std::unique_ptr<model::INumericType> const ret_type_;
+    bool is_symmetrical_and_eq_is_max_ = false;
 
 public:
     SimilarityMeasure(std::unique_ptr<model::Type> arg_type,
-                      std::unique_ptr<model::INumericType> ret_type) noexcept
-        : arg_type_(std::move(arg_type)), ret_type_(std::move(ret_type)) {}
+                      std::unique_ptr<model::INumericType> ret_type,
+                      bool is_symmetrical_and_eq_is_max) noexcept
+        : arg_type_(std::move(arg_type)),
+          ret_type_(std::move(ret_type)),
+          is_symmetrical_and_eq_is_max_(is_symmetrical_and_eq_is_max) {}
 
     virtual ~SimilarityMeasure() = default;
 
@@ -38,6 +42,10 @@ public:
             std::shared_ptr<DataInfo const> data_info_left,
             std::shared_ptr<DataInfo const> data_info_right,
             std::vector<indexes::PliCluster> const& clusters_right) const = 0;
+
+    [[nodiscard]] virtual bool IsSymmetricalAndEqIsMax() const noexcept {
+        return is_symmetrical_and_eq_is_max_;
+    }
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure

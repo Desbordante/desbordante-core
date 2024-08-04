@@ -39,7 +39,7 @@ public:
     DateSimilarityMeasure(model::md::DecisionBoundary min_sim, util::WorkerThreadPool* pool,
                           std::size_t size_limit)
         : DistanceSimilarityMeasure(
-                  std::make_unique<model::DateType>(),
+                  std::make_unique<model::DateType>(), true,
                   [](std::byte const* l, std::byte const* r) {
                       auto const& left = model::Type::GetValue<model::Date>(l);
                       auto const& right = model::Type::GetValue<model::Date>(r);

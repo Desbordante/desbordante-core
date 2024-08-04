@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include "algorithms/md/hymd/md_lhs.h"
+#include "util/desbordante_assume.h"
 
 namespace algos::hymd::lattice::cardinality {
 
@@ -102,8 +103,7 @@ void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& mess
             case ComparisonResult::Incomparable:
                 break;
             default:
-                assert(false);
-                __builtin_unreachable();
+                DESBORDANTE_ASSUME(false);
         }
     }
     assert(!considered_indices.none());

@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "algorithms/md/hymd/column_classifier_value_id.h"
+#include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "algorithms/md/hymd/table_identifiers.h"
 
@@ -22,9 +23,9 @@ EnumeratedValidTableResults EnumerateResults(
     enumerated.reserve(results.size());
     for (auto const& [row_results, valid_records_number] : results) {
         ValidRowResults<ColumnClassifierValueId> row;
-        row.reserve(row_results.size());
         for (auto const& [result, value_id] : row_results) {
-            row.emplace_back(id_map.find(result)->second, value_id);
+            ColumnClassifierValueId const ccv_id = id_map.find(result)->second;
+            if (ccv_id != kLowestCCValueId) row.emplace_back(ccv_id, value_id);
         }
         enumerated.emplace_back(std::move(row), valid_records_number);
     }

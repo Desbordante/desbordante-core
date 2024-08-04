@@ -19,7 +19,7 @@ struct Recommendation {
     }
 };
 
-using Recommendations = std::unordered_set<Recommendation>;
+using Recommendations = std::vector<Recommendation>;
 }  // namespace algos::hymd
 
 namespace std {

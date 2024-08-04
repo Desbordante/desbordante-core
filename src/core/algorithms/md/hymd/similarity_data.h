@@ -12,6 +12,7 @@
 #include "algorithms/md/hymd/column_match_info.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lattice/rhs.h"
+#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "model/index.h"
@@ -29,7 +30,7 @@ private:
     indexes::RecordsInfo const* const records_info_;
 
     std::vector<ColumnMatchInfo> const column_matches_sim_info_;
-    std::vector<std::vector<ColumnClassifierValueId>> const column_matches_lhs_ids_;
+    std::vector<LhsCCVIdsInfo> const column_matches_lhs_ids_info_;
 
     std::vector<model::Index> const sorted_to_original_;
 
@@ -44,15 +45,15 @@ private:
 public:
     SimilarityData(indexes::RecordsInfo* records_info,
                    std::vector<ColumnMatchInfo> column_matches_sim_info,
-                   std::vector<std::vector<ColumnClassifierValueId>> column_matches_lhs_ids,
+                   std::vector<LhsCCVIdsInfo> column_matches_lhs_ids_info,
                    std::vector<model::Index> sorted_to_original) noexcept
         : records_info_(records_info),
           column_matches_sim_info_(std::move(column_matches_sim_info)),
-          column_matches_lhs_ids_(std::move(column_matches_lhs_ids)),
+          column_matches_lhs_ids_info_(std::move(column_matches_lhs_ids_info)),
           sorted_to_original_(std::move(sorted_to_original)) {}
 
-    static SimilarityData CreateFrom(indexes::RecordsInfo* records_info,
-                                     ColMatchesInfo column_matches_info);
+    static std::pair<SimilarityData, std::vector<bool>> CreateFrom(
+            indexes::RecordsInfo* records_info, ColMatchesInfo column_matches_info);
 
     [[nodiscard]] std::size_t GetColumnMatchNumber() const noexcept {
         return column_matches_sim_info_.size();
@@ -67,8 +68,8 @@ public:
         return max_rhs;
     }
 
-    std::vector<std::vector<ColumnClassifierValueId>> const& GetLhsIds() const noexcept {
-        return column_matches_lhs_ids_;
+    std::vector<LhsCCVIdsInfo> const& GetLhsIdsInfo() const noexcept {
+        return column_matches_lhs_ids_info_;
     }
 
     [[nodiscard]] std::vector<ColumnMatchInfo> const& GetColumnMatchesInfo() const noexcept {
