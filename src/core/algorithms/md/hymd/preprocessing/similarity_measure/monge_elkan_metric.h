@@ -1,27 +1,31 @@
 #pragma once
 
-#include <functional>
+#include <cmath>
 #include <string>
 #include <vector>
 
-#include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
-
 namespace algos::hymd::preprocessing::similarity_measure {
-template <typename SimilarityFunction>
-double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b,
-                  SimilarityFunction similarityFunction) {
-    if (a.empty() && b.empty()) return 1.0;
-    double sum = 0.0;
-    for (auto const& s : a) {
-        double max_sim = 0.0;
-        for (auto const& q : b) {
-            double similarity = similarityFunction(s, q);
-            max_sim = std::max(max_sim, similarity);
-        }
-        sum += max_sim;
-    }
+double MongeElkan(std::vector<std::string> const& left, std::vector<std::string> const& right,
+                  auto const& similarity_function) {
+    if (left.empty() && right.empty()) return 1.0;
+    if (left.empty() || right.empty()) return 0.0;
 
-    return a.empty() ? 0 : sum / a.size();
+    auto monge_elkan = [&](std::vector<std::string> const& left,
+                           std::vector<std::string> const& right) {
+        double sum = 0.0;
+        for (std::string const& s : left) {
+            auto right_it = right.begin();
+            double max_sim = similarity_function(s, *right_it);
+            for (auto const right_end = right.end(); ++right_it != right_end;) {
+                double const similarity = similarity_function(s, *right_it);
+                if (similarity > max_sim) max_sim = similarity;
+            }
+            sum += max_sim;
+        }
+        return sum / left.size();
+    };
+
+    return std::sqrt(monge_elkan(left, right) * monge_elkan(right, left));
 }
 
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b);

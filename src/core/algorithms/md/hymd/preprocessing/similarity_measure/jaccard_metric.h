@@ -1,20 +1,27 @@
 #pragma once
 
 #include <algorithm>
-#include <set>
 #include <string>
+#include <unordered_set>
+
+#include "util/intersection_size.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 template <typename T>
-double JaccardIndex(std::set<T> const& set1, std::set<T> const& set2) {
-    if (set1.empty() && set2.empty()) return 1.0;
+double JaccardIndex(std::unordered_set<T> const& set1, std::unordered_set<T> const& set2) {
+    std::size_t const first_size = set1.size();
+    std::size_t const second_size = set2.size();
+    bool const first_empty = first_size == 0;
+    bool const second_empty = second_size == 0;
+    if (first_empty && second_empty) return 1.0;
+    if (first_empty || second_empty) return 0.0;
 
-    std::set<T> intersection;
-    std::set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
-                          std::inserter(intersection, intersection.begin()));
-    size_t union_size = set1.size() + set2.size() - intersection.size();
+    std::size_t const intersection_size = first_size > second_size
+                                                  ? util::IntersectionSize(set2, set1)
+                                                  : util::IntersectionSize(set1, set2);
+    std::size_t const union_size = first_size + second_size - intersection_size;
 
-    return union_size == 0 ? 1.0 : static_cast<double>(intersection.size()) / union_size;
+    return static_cast<double>(intersection_size) / union_size;
 }
 
 double JaccardIndex(std::string const& s1, std::string const& s2);
