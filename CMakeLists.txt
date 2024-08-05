@@ -5,6 +5,8 @@ option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
 option(BUILD_NATIVE "Build for host machine" ON)
+option(USE_LTO "Build using interprocedural optimization" OFF)
+option(GDB_DEBUG "Include debug information for use by GDB" OFF)
 set(SANITIZER "" CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB")
 
 set(PYTHON OFF CACHE STRING "Compile Python bindings")
@@ -26,8 +28,7 @@ if (SANITIZER)
 endif ()
 
 if (ASAN AND PYTHON)
-    message(WARNING "Disabling ASAN with python bindings")
-    set(ASAN OFF)
+    message(WARNING "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so")
 endif()
 
 # compiler and platform-dependent settings
@@ -66,12 +67,16 @@ else()
         set(ASAN_OPTS "-fsanitize=address")
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
+            "-Wno-error" # Use of -Werror is discouraged with sanitizers
+            # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
             "${ASAN_OPTS}")
         set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
     elseif (UBSAN)
         # Set DEBUG build options specific for build with UBSAN
         string(JOIN ";" UBSAN_OPTS "-fsanitize=undefined"
             "-fsanitize=float-divide-by-zero"
+            "-Wno-error" # Use of -Werror is discouraged with sanitizers
+            # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
             "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
             "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
             "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
@@ -83,6 +88,10 @@ else()
         # No sanitizer, just debug build
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O0")
+    endif()
+
+    if (GDB_DEBUG)
+        add_compile_options(-ggdb3)
     endif()
 
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
@@ -127,6 +136,10 @@ else ()
     add_subdirectory("lib/easyloggingpp")
 endif ()
 set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
+
+if (USE_LTO)
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
 
 add_subdirectory("src/core")
 
