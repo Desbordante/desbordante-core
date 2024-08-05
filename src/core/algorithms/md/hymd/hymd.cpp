@@ -53,17 +53,16 @@ void HyMD::RegisterOptions() {
     };
 
     auto column_matches_default = [this]() {
-        std::vector<std::tuple<std::string, std::string, std::shared_ptr<SimilarityMeasureCreator>>>
-                column_matches_option;
+        std::vector<std::shared_ptr<SimilarityMeasureCreator>> column_matches_option;
         if (records_info_->OneTableGiven()) {
             std::size_t const num_columns = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns);
             for (Index i = 0; i < num_columns; ++i) {
                 std::string const column_name = left_schema_->GetColumn(i)->GetName();
                 column_matches_option.emplace_back(
-                        column_name, column_name,
                         std::make_shared<preprocessing::similarity_measure::
-                                                 LevenshteinSimilarityMeasure::Creator>(0.7, 0));
+                                                 LevenshteinSimilarityMeasure::Creator>(i, i, 0.7,
+                                                                                        0));
             }
         } else {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
@@ -74,10 +73,9 @@ void HyMD::RegisterOptions() {
                 for (Index j = 0; j < num_columns_right; ++j) {
                     std::string const column_name_right = right_schema_->GetColumn(j)->GetName();
                     column_matches_option.emplace_back(
-                            column_name_left, column_name_right,
                             std::make_shared<preprocessing::similarity_measure::
-                                                     LevenshteinSimilarityMeasure::Creator>(0.7,
-                                                                                            0));
+                                                     LevenshteinSimilarityMeasure::Creator>(
+                                    i, j, 0.7, 0));
                 }
             }
         }
@@ -87,15 +85,11 @@ void HyMD::RegisterOptions() {
     auto not_null = [](config::InputTable const& table) {
         if (table == nullptr) throw config::ConfigurationError("Left table may not be null.");
     };
-    auto column_matches_check = [this](ColMatchesVector const& col_matches) {
+    auto column_matches_check = [this](MeasureCreators const& col_matches) {
         if (col_matches.empty())
             throw config::ConfigurationError("Mining with empty column matches is meaningless.");
-        for (auto const& [left_name, right_name, creator] : col_matches) {
-            if (!left_schema_->IsColumnInSchema(left_name))
-                throw config::ConfigurationError("Column " + left_name + " is not in left table.");
-            if (!right_schema_->IsColumnInSchema(right_name))
-                throw config::ConfigurationError("Column " + right_name +
-                                                 " is not in right table.");
+        for (auto const& creator : col_matches) {
+            creator->CheckIndices(*left_schema_, *right_schema_);
         }
     };
 
@@ -143,21 +137,16 @@ void HyMD::LoadDataInternal() {
 
 unsigned long long HyMD::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
-    SimilarityData::ColMatchesInfo column_matches_info;
+    SimilarityData::MeasureCreators column_matches_info;
     std::optional<util::WorkerThreadPool> pool_opt;
     util::WorkerThreadPool* pool_ptr = nullptr;
     if (threads_ > 1) {
         pool_opt.emplace(threads_);
         pool_ptr = &*pool_opt;
     }
-    for (auto const& [left_column_name, right_column_name, creator] : column_matches_option_) {
-        column_matches_info.emplace_back(creator->MakeMeasure(pool_ptr),
-                                         left_schema_->GetColumn(left_column_name)->GetIndex(),
-                                         right_schema_->GetColumn(right_column_name)->GetIndex());
-    }
     // TODO: make infrastructure for depth level
-    auto [similarity_data, short_sampling_enable] =
-            SimilarityData::CreateFrom(records_info_.get(), std::move(column_matches_info));
+    auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
+            records_info_.get(), column_matches_option_, left_schema_, right_schema_, pool_ptr);
     lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIdsInfo(),
                                prune_nondisjoint_, max_cardinality_,
                                similarity_data.CreateMaxRhs()};
@@ -192,9 +181,9 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
          ++column_match_index) {
         auto [left_col_index, right_col_index] =
                 similarity_data.GetColMatchIndices(column_match_index);
-        column_matches.emplace_back(left_col_index, right_col_index,
-                                    std::get<2>(column_matches_option_[column_match_index])
-                                            ->GetSimilarityMeasureName());
+        column_matches.emplace_back(
+                left_col_index, right_col_index,
+                column_matches_option_[column_match_index]->GetSimilarityMeasureName());
     }
     std::vector<model::MD> mds;
     auto const& sorted_to_original = similarity_data.GetIndexMapping();

@@ -8,10 +8,11 @@
 namespace algos::hymd {
 
 std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
-        indexes::RecordsInfo* const records_info,
-        ColMatchesInfo const column_matches_info_initial) {
+        indexes::RecordsInfo* const records_info, MeasureCreators const& measure_creators,
+        std::shared_ptr<RelationalSchema> const& left_schema,
+        std::shared_ptr<RelationalSchema> const& right_schema, util::WorkerThreadPool* pool_ptr) {
     bool const one_table_given = records_info->OneTableGiven();
-    std::size_t const col_match_number = column_matches_info_initial.size();
+    std::size_t const col_match_number = measure_creators.size();
     std::vector<bool> short_sampling_enable;
     short_sampling_enable.reserve(col_match_number);
     std::vector<ColumnMatchInfo> column_matches_info;
@@ -23,7 +24,11 @@ std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
     auto const& left_records = records_info->GetLeftCompressor();
     auto const& right_records = records_info->GetRightCompressor();
     std::size_t column_match_index = 0;
-    for (auto const& [measure, left_col_index, right_col_index] : column_matches_info_initial) {
+    for (std::shared_ptr<SimilarityMeasureCreator> const& creator : measure_creators) {
+        auto const [left_col_index, right_col_index] =
+                creator->GetIndices(*left_schema, *right_schema);
+        std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure> measure =
+                creator->MakeMeasure(pool_ptr);
         auto const& left_pli = left_records.GetPli(left_col_index);
         // TODO: cache DataInfo.
         std::shared_ptr<preprocessing::DataInfo const> data_info_left =

@@ -17,8 +17,12 @@ public:
         std::size_t const size_limit_;
 
     public:
-        Creator(model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0)
-            : SimilarityMeasureCreator(kName), min_sim_(min_sim), size_limit_(size_limit) {
+        Creator(ColumnIdentifier column1_identifier, ColumnIdentifier column2_identifier,
+                model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0)
+            : SimilarityMeasureCreator(kName, std::move(column1_identifier),
+                                       std::move(column2_identifier)),
+              min_sim_(min_sim),
+              size_limit_(size_limit) {
             if (!(0.0 <= min_sim_ && min_sim_ <= 1.0)) {
                 throw config::ConfigurationError("Minimum similarity out of range");
             }
