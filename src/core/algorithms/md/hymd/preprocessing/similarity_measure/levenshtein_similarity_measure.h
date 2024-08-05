@@ -22,7 +22,8 @@ public:
         std::size_t const size_limit_;
 
     public:
-        Creator(model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0);
+        Creator(ColumnIdentifier column1_identifier, ColumnIdentifier column2_identifier,
+                model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0);
 
         std::unique_ptr<SimilarityMeasure> MakeMeasure(
                 util::WorkerThreadPool* thread_pool) const final {

@@ -83,7 +83,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::InputFormat, kPyStr>,
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
-            {typeid(algos::hymd::HyMD::ColMatchesVector),
+            {typeid(algos::hymd::HyMD::MeasureCreators),
              []() {
                  return MakeTypeTuple(kPyList, kPyTuple, kPyStr, kPyStr,
                                       py::type::of<algos::hymd::SimilarityMeasureCreator>());
