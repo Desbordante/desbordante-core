@@ -40,7 +40,6 @@ std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
         } else {
             data_info_right = preprocessing::DataInfo::MakeFrom(right_pli, measure->GetArgType());
         }
-        // TODO: sort column matches on the number of LHS CCV IDs.
         auto [lhs_ccv_id_info, indexes] = measure->MakeIndexes(
                 std::move(data_info_left), std::move(data_info_right), right_pli.GetClusters());
         lhs_size_to_index.emplace_back(lhs_ccv_id_info.lhs_to_rhs_map.size(), column_match_index++);
