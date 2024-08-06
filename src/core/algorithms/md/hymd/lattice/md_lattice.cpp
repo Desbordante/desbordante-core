@@ -9,6 +9,7 @@
 #include "algorithms/md/hymd/lattice/spec_generalization_checker.h"
 #include "algorithms/md/hymd/lattice/total_generalization_checker.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
+#include "util/desbordante_assume.h"
 #include "util/erase_if_replace.h"
 
 namespace {
@@ -501,7 +502,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
         for (; rhs_index != cur_lhs_index; ++rhs_index) {
             try_push_no_match_classifier();
         }
-        assert(rhs_index < column_matches_size_);
+        DESBORDANTE_ASSUME(rhs_index < column_matches_size_);
         ColumnClassifierValueId const pair_ccv_id = pair_comparison_result[rhs_index];
         ColumnClassifierValueId const rhs_ccv_id = rhs[rhs_index];
         if (pair_ccv_id < rhs_ccv_id) {
@@ -511,7 +512,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
             if (cur_lhs_triviality_bound == pair_ccv_id) {
                 invalidated.PushBack(invalid, kLowestCCValueId);
             } else {
-                assert(pair_ccv_id > cur_lhs_triviality_bound);
+                DESBORDANTE_ASSUME(pair_ccv_id > cur_lhs_triviality_bound);
                 invalidated.PushBack(invalid, pair_ccv_id);
             }
         }
