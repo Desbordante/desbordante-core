@@ -6,8 +6,8 @@ namespace algos::hymd {
 
 bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
     using model::Index;
-    LatticeStatistics lattice_statistics;
     while (level_getter_->AreLevelsLeft()) {
+        LatticeStatistics lattice_statistics;
         std::vector<lattice::ValidationInfo> validations = level_getter_->GetCurrentMds();
         if (validations.empty()) {
             continue;

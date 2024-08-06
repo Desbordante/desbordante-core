@@ -429,14 +429,12 @@ void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
     working.reserve(working_size);
     recommendations.reserve(working_size);
     std::vector<ColumnClassifierValueId> removed_ccv_ids = lattice_->RemoveExisting(lhs, indices);
-    for (std::size_t i = 0; i < removed_ccv_ids.size(); ++i) {
-        --removed_ccv_ids[i];
-    }
+    std::for_each(removed_ccv_ids.begin(), removed_ccv_ids.end(),
+                  [](ColumnClassifierValueId& ccv_id) { --ccv_id; });
     std::vector<ColumnClassifierValueId> const interestingness_ccv_ids =
             lattice_->GetInterestingnessCCVIds(lhs, indices, removed_ccv_ids);
-    for (std::size_t i = 0; i < removed_ccv_ids.size(); ++i) {
-        ++removed_ccv_ids[i];
-    }
+    std::for_each(removed_ccv_ids.begin(), removed_ccv_ids.end(),
+                  [](ColumnClassifierValueId& ccv_id) { ++ccv_id; });
     lattice_->AddRemoved(lhs, indices, removed_ccv_ids);
 
     auto old_iter = removed_ccv_ids.begin();
