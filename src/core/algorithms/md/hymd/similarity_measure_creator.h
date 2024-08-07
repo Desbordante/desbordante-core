@@ -52,15 +52,14 @@ public:
                             if (!schema.IsColumnInSchema(arg))
                                 throw config::ConfigurationError("No column named \"" + arg +
                                                                  "\" in the " + name + "table");
-                        } else if constexpr (std::is_same_v<T, model::Index>) {
+                        } else {
+                            static_assert(std::is_same_v<T, model::Index>);
                             std::size_t const num_columns = schema.GetNumColumns();
                             if (arg >= num_columns)
                                 throw config::ConfigurationError(
                                         "No column with index " + std::to_string(arg) + " in the " +
                                         name + " table, this table only has " +
                                         std::to_string(num_columns) + " columns.");
-                        } else {
-                            static_assert(false);
                         }
                     },
                     identifier);
