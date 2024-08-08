@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <map>
+#include <mutex>
 #include <vector>
 
 #include <boost/container/flat_map.hpp>
@@ -42,8 +43,9 @@ public:
 };
 
 class CachingUpperSetMapping {
+    using SetCont = std::pair<std::shared_ptr<std::mutex>, RecSet>;
     FlatUpperSetIndex flat_;
-    UpperSetMapping sets_;
+    boost::container::flat_map<ColumnClassifierValueId, SetCont> sets_;
 
 public:
     FlatUpperSetIndex const& GetFlat() const noexcept {
@@ -54,11 +56,14 @@ public:
         auto it = sets_.lower_bound(lhs_ccv_id);
         auto const end = sets_.end();
         if (it == end) return nullptr;
-        auto& set = const_cast<RecSet&>(it->second);
-        if (set.empty()) {
-            auto start_it = flat_.sorted_records.begin();
-            assert(flat_.end_ids.find(it->first) == flat_.end_ids.begin() + (it - end - 1));
-            set.insert(start_it, start_it + (flat_.end_ids.begin() + (it - end - 1))->second);
+        auto& [mutex, set] = const_cast<SetCont&>(it->second);
+        {
+            auto lock = std::lock_guard(*mutex);
+            if (set.empty()) {
+                auto start_it = flat_.sorted_records.begin();
+                assert(flat_.end_ids.find(it->first) == flat_.end_ids.begin() + (end - it - 1));
+                set.insert(start_it, start_it + (flat_.end_ids.begin() + (end - it - 1))->second);
+            }
         }
         return &set;
     }

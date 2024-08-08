@@ -18,13 +18,14 @@ boost::container::flat_map<ColumnClassifierValueId, RecSet> FillSets(
     return sets;
 }
 
-boost::container::flat_map<ColumnClassifierValueId, RecSet> PrepareSets(
+using SetCont = std::pair<std::shared_ptr<std::mutex>, RecSet>;
+boost::container::flat_map<ColumnClassifierValueId, SetCont> PrepareSets(
         FlatUpperSetIndex const& flat) {
-    boost::container::flat_map<ColumnClassifierValueId, RecSet> sets;
+    boost::container::flat_map<ColumnClassifierValueId, SetCont> sets;
     auto const& end_ids = flat.end_ids;
     sets.reserve(end_ids.size());
     for (auto const& [ccv_id, end_index] : end_ids | std::views::reverse) {
-        sets.try_emplace(sets.end(), ccv_id);
+        sets.try_emplace(sets.end(), ccv_id, SetCont{std::make_shared<std::mutex>(), RecSet{}});
     }
     return sets;
 }
