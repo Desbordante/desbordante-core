@@ -22,8 +22,8 @@ void BindUcc(py::module_& main_module) {
     py::class_<UCC>(ucc_module, "UCC")
             .def("__str__", &UCC::ToIndicesString)
             .def_property_readonly("indices", &UCC::GetColumnIndicesAsVector);
-    BindPrimitive<HyUCC, PyroUCC>(ucc_module,
-                                  py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_),
-                                  "UccAlgorithm", "get_uccs", {"HyUCC", "PyroUCC"});
+    BindPrimitive<HyUCC, PyroUCC, HPIValid>(
+            ucc_module, py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_), "UccAlgorithm",
+            "get_uccs", {"HyUCC", "PyroUCC", "HPIValid"});
 }
 }  // namespace python_bindings
