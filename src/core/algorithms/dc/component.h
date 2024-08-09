@@ -1,6 +1,8 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include <string>
+
 #include <easylogging++.h>
 
 #include "type.h"
@@ -15,39 +17,54 @@ private:
     ValType val_type_;
 
 public:
-    Component() : value_(nullptr), type_(nullptr), val_type_(kFinite) {};
+    Component() noexcept : value_(nullptr), type_(nullptr), val_type_(kFinite){};
 
-    Component(std::byte const* value, model::Type const* type, ValType val_type = kFinite)
-        : value_(value), type_(type), val_type_(val_type) {}
+    Component(std::byte const* value, model::Type const* type, ValType val_type = kFinite) noexcept
+        : value_(value), type_(type), val_type_(val_type){};
 
-    Component(Component const& comp) {
-        value_ = comp.value_;
-        type_ = comp.type_;
-    };
+    Component(Component const& comp) noexcept = default;
 
-    Component(Component&& comp) {
-        value_ = comp.value_;
-        type_ = comp.type_;
-    };
+    Component(Component&& comp) noexcept = default;
 
-    Component& operator=(Component const& comp) {
-        value_ = comp.value_;
-        type_ = comp.type_;
-        return *this;
-    };
+    Component& operator=(Component const& comp) noexcept = default;
 
-    Component& operator=(Component&& comp) = default;
+    Component& operator=(Component&& comp) noexcept = default;
+
+    std::string ToString() const {
+        if (val_type_ == kPlusInf) return "+Inf";
+        if (val_type_ == kMinusInf) return "-Inf";
+
+        model::TypeId type_id = type_->GetTypeId();
+        switch (type_id) {
+            case model::TypeId::kInt:
+                return std::to_string(model::Type::GetValue<model::Int>(value_));
+                break;
+            case model::TypeId::kDouble:
+                return std::to_string(model::Type::GetValue<model::Double>(value_));
+                break;
+            case model::TypeId::kString:
+                return model::Type::GetValue<model::String>(value_);
+                break;
+            default:
+                assert(false);
+                __builtin_unreachable();
+        }
+    }
 
     bool operator<(Component const& comp) const {
-        LOG(INFO) << comp.GetType()->GetTypeId();
-        LOG(INFO) << type_->GetTypeId();
         assert(type_->GetTypeId() == comp.type_->GetTypeId());
 
-        if (val_type_ == kMinusInf or comp.val_type_ == kPlusInf or
-            type_->Compare(value_, comp.value_) == model::CompareResult::kLess)
-            return true;
+        if (comp.val_type_ == kFinite) {
+            if (val_type_ == kMinusInf) return true;
+            if (val_type_ == kPlusInf) return false;
+        }
 
-        return false;
+        if (val_type_ == kFinite) {
+            if (comp.val_type_ == kPlusInf) return true;
+            if (comp.val_type_ == kMinusInf) return false;
+        }
+
+        return type_->Compare(value_, comp.value_) == model::CompareResult::kLess;
     }
 
     bool operator<=(Component const& comp) const {
@@ -69,6 +86,16 @@ public:
         return false;
     }
 
+    bool operator==(Component const& comp) const {
+        return *this <= comp and *this >= comp;
+    }
+
+    void Swap(Component& comp) {
+        std::swap(value_, comp.value_);
+        std::swap(type_, comp.type_);
+        std::swap(val_type_, comp.val_type_);
+    }
+
     ValType& GetValType() {
         return val_type_;
     }
@@ -77,7 +104,7 @@ public:
         return type_;
     }
 
-    const std::byte* GetVal() {
+    std::byte const* GetVal() {
         return value_;
     }
 };

@@ -14,9 +14,9 @@ class DC {
     std::vector<model::Predicate> predicates_;
 
 public:
-    DC(std::vector<model::Predicate> predicates) : predicates_(std::move(predicates)) {};
-    DC(const DC& dc) : predicates_(dc.predicates_) {};
-    DC(DC&& dc) : predicates_(std::move(dc.predicates_)) {};
+    DC(std::vector<model::Predicate> predicates) : predicates_(std::move(predicates)){};
+    DC(const DC& dc) : predicates_(dc.predicates_){};
+    DC(DC&& dc) : predicates_(std::move(dc.predicates_)){};
 
     DC& operator=(DC&& dc) {
         predicates_ = std::move(dc.predicates_);

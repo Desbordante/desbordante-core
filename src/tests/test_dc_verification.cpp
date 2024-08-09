@@ -1,6 +1,6 @@
-#include "dc/dc_verification.h"
 #include "algorithms/algo_factory.h"
 #include "all_csv_configs.h"
+#include "dc/dc_verification.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "names_and_descriptions.h"
@@ -38,7 +38,7 @@ TEST(TestDCVerification, TestOneInequalityOnInts) {
     std::unique_ptr<algos::DCVerification> dc_verifier =
             algos::CreateAndLoadAlgorithm<algos::DCVerification>(GetParamMap(kTestDC, dc_string));
     dc_verifier->Execute();
-    EXPECT_TRUE(dc_verifier->DCHolds());    
+    EXPECT_TRUE(dc_verifier->DCHolds());
 }
 
 TEST(TestDCVerification, TestOneInequalityOnDoubles) {
@@ -58,11 +58,21 @@ TEST(TestDCVerification, TestOneInequalityOnStrings) {
 }
 
 TEST(TestDCVerification, TestRowHomogeneousInequalities) {
-    std::string dc_string = "!(s.Salary < t.Salary and s.State == t.State and s.FedTaxRate > t.FedTaxRate)";
+    std::string dc_string =
+            "!(s.Salary < t.Salary and s.State == t.State and s.FedTaxRate > t.FedTaxRate)";
     std::unique_ptr<algos::DCVerification> dc_verifier =
             algos::CreateAndLoadAlgorithm<algos::DCVerification>(GetParamMap(kTestDC1, dc_string));
     dc_verifier->Execute();
     EXPECT_TRUE(dc_verifier->DCHolds());
+}
+
+TEST(TestDCVerification, TestRowHomogeneousInequalitiesV2) {
+    std::string dc_string =
+            "!(s.Salary <= t.Salary and s.State == t.State and s.FedTaxRate > t.FedTaxRate)";
+    std::unique_ptr<algos::DCVerification> dc_verifier =
+            algos::CreateAndLoadAlgorithm<algos::DCVerification>(GetParamMap(kTestDC1, dc_string));
+    dc_verifier->Execute();
+    EXPECT_FALSE(dc_verifier->DCHolds());
 }
 
 }  // namespace tests

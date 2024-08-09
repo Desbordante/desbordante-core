@@ -45,12 +45,10 @@ private:
 
     Point<Component> MakePoint(std::vector<std::byte const*> const& vec,
                                std::vector<uint> const& indices,
-                               ValType val_type = ValType::kFinite, kdtree<Point<Component>> const& tree = kdtree<Point<Component>>());
+                               ValType val_type = ValType::kFinite);
 
-    std::pair<Point<Component>, Point<Component>> SearchRange(
-            std::vector<std::byte const*> const& tuple);
-    std::pair<Point<Component>, Point<Component>> InvertRange(Point<Component> const& pt1,
-                                                              Point<Component> const& pt2);
+    kdt::rect<Point<Component>> SearchRange(std::vector<std::byte const*> const& tuple);
+    kdt::rect<Point<Component>> InvertRange(kdt::rect<Point<Component>> const& box);
 
     void RegisterOptions();
     void MakeExecuteOptsAvailable();

@@ -12,8 +12,6 @@
 #include <boost/functional/hash/hash.hpp>
 #include <boost/geometry/geometries/register/box.hpp>
 #include <boost/geometry/geometries/register/point.hpp>
-// #include <boost/geometry/index/rtree.hpp>
-#include <easylogging++.h>
 
 #include "component.h"
 #include "config/names_and_descriptions.h"
@@ -29,24 +27,9 @@ using point = Point<Component>;
 
 // using rtree = boost::geometry::index::rtree<point, boost::geometry::index::quadratic<10>>;
 
-void print_tree(kdtree<point> const& hash) {
-    auto l = hash.as_vector();
-    for (auto& x : l) {
-        for (size_t i = 0; i < x.get_dim(); i++) {
-            auto val = x[i].GetVal();
-            auto type = x[i].GetType();
-
-            if (!i) LOG(INFO) << type->GetValue<mo::Int>(val);
-            if (i) LOG(INFO) << type->GetValue<mo::Double>(val);
-        }
-    }
-}
-
 point DCVerification::MakePoint(std::vector<std::byte const*> const& vec,
-                                std::vector<uint> const& indices, ValType val_type /* = kFinite */,
-                                kdtree<point> const& hash) {
-    print_tree(hash);
-
+                                std::vector<uint> const& indices,
+                                ValType val_type /* = kFinite */) {
     std::vector<Component> pt;
     for (auto ind : indices) {
         mo::Type const& type = data_[ind].GetType();
@@ -119,14 +102,16 @@ unsigned long long int DCVerification::ExecuteInternal() {
 void DCVerification::ConvertToInequality() {}
 
 bool DCVerification::VerifyDC() {
+    using namespace kdt;
+
     std::vector<uint> eq_cols = dc_.GetColumnIndicesWithOperator(
             [](mo::Operator op) { return op.GetType() == mo::OperatorType::kEqual; });
 
     std::unordered_map<uint, kdtree<point>> hash;
+    std::vector<point> points;
     for (size_t i = 0; i < data_[0].GetNumRows(); i++) {
         std::vector<std::byte const*> tuple = GetTuple(i);
         uint key = HashTuple(tuple, eq_cols);
-        print_tree(hash[key]);
         std::vector<uint> ineq_cols = dc_.GetColumnIndicesWithOperator([](mo::Operator op) {
             return op.GetType() != mo::OperatorType::kEqual and
                    op.GetType() != mo::OperatorType::kUnequal;
@@ -134,22 +119,19 @@ bool DCVerification::VerifyDC() {
 
         if (hash.find(key) == hash.end()) hash[key] = kdtree<point>();
 
-        // Upper and Lower bounds
-        auto [L, U] = SearchRange(tuple);
-        auto [L_inv, U_inv] = InvertRange(L, U);
-        // if (hash[key].query_search(L, U).size() != 0 or
-        //     hash[key].query_search(L_inv, U_inv).size() != 0)
-        //     return false;
+        rect<point> box = SearchRange(tuple);
+        rect<point> inv_box = InvertRange(box);
 
-        point p = MakePoint(tuple, ineq_cols, kFinite, hash[key]);
-        hash[key].insert(p);
+        if (hash[key].query_search(box).size() != 0 or hash[key].query_search(inv_box).size() != 0)
+            return false;
+
+        hash[key].insert(MakePoint(tuple, ineq_cols));
     }
 
     return true;
 }
 
-std::pair<point, point> DCVerification::SearchRange(std::vector<std::byte const*> const& tuple) {
-    std::vector<mo::Predicate> preds = dc_.GetPredicates();
+kdt::rect<point> DCVerification::SearchRange(std::vector<std::byte const*> const& tuple) {
     std::vector<uint> ineq_cols = dc_.GetColumnIndicesWithOperator([](mo::Operator op) {
         return op.GetType() != mo::OperatorType::kEqual and
                op.GetType() != mo::OperatorType::kUnequal;
@@ -159,7 +141,7 @@ std::pair<point, point> DCVerification::SearchRange(std::vector<std::byte const*
     // create n-dimensional vectors where each component has the
     // same type as the corresponding column which is in a
     // predicate with inequality operator
-    std::vector<std::byte const*> empty_vec(ineq_cols.size(), nullptr);
+    std::vector<std::byte const*> empty_vec(tuple.size(), nullptr);
     point L = MakePoint(empty_vec, ineq_cols, kMinusInf);
     point U = MakePoint(empty_vec, ineq_cols, kPlusInf);
 
@@ -168,35 +150,49 @@ std::pair<point, point> DCVerification::SearchRange(std::vector<std::byte const*
                op.GetType() != mo::OperatorType::kUnequal;
     });
 
+    using bound_type = kdt::rect<point>::bound_type;
+    using enum kdt::rect<point>::bound_type;
+    
+    std::vector<bound_type> lower_bound_type(ineq_preds.size(), kClosed);
+    std::vector<bound_type> upper_bound_type(ineq_preds.size(), kClosed);
+
     for (size_t i = 0; i < ineq_preds.size(); i++) {
         mo::OperatorType op_type = ineq_preds[i].GetOperator().GetType();
-        uint left = preds[i].GetLeftOperand().GetColumn()->GetIndex();
-        uint right = preds[i].GetRightOperand().GetColumn()->GetIndex();
+        uint left = ineq_preds[i].GetLeftOperand().GetColumn()->GetIndex();
+        uint right = ineq_preds[i].GetRightOperand().GetColumn()->GetIndex();
         assert(left == right);  // DC should be row homogeneous
 
         if (op_type == mo::OperatorType::kLessEqual or op_type == mo::OperatorType::kLess) {
             U[i] = Component(tuple[left], &data_[left].GetType());
+            if (op_type == mo::OperatorType::kLess) upper_bound_type[i] = kOpen;
         } else if (op_type == mo::OperatorType::kGreaterEqual or
                    op_type == mo::OperatorType::kGreater) {
             L[i] = Component(tuple[left], &data_[left].GetType());
+            if (op_type == mo::OperatorType::kGreater) lower_bound_type[i] = kOpen;
         }
     }
 
-    return {L, U};
+    kdt::rect<point> box(L, U);
+    box.set_bound_type(lower_bound_type, upper_bound_type);
+
+    return box;
 }
 
-std::pair<point, point> DCVerification::InvertRange(point const& L, point const& U) {
-    size_t n = L.get_dim();
-    assert(n == U.get_dim());
-    for (size_t i = 0; i < n; i++) {
+kdt::rect<point> DCVerification::InvertRange(kdt::rect<point> const& box) {
+    point L = box.lower_bound_, U = box.upper_bound_;
+    for (size_t i = 0; i < L.get_dim(); i++) {
         ValType& l_val_type = L[i].GetValType();
         ValType& u_val_type = U[i].GetValType();
-        // std::swap(L[i], U[i]);
+        L[i].Swap(U[i]);
+
         if (l_val_type == kPlusInf) l_val_type = kMinusInf;
         if (u_val_type == kMinusInf) u_val_type = kPlusInf;
     }
 
-    return {L, U};
+    kdt::rect<point> res(L, U);
+    res.set_bound_type(box.upper_bound_type_, box.lower_bound_type_);
+
+    return res;
 }
 
 bool DCVerification::CheckAllEquality() {

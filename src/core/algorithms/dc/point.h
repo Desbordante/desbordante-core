@@ -14,11 +14,25 @@ private:
 public:
     Point() = default;
 
-    Point(std::vector<T> const& comps) : comps_(comps) {}
+    Point(std::vector<T> const& comps) {
+        comps_ = comps;
+    }
 
-    Point(Point const& point) : comps_(point.comps_) {};
+    Point(Point const& point) {
+        comps_ = point.comps_;
+    }
 
-    Point(Point&& point) : comps_(std::move(point.comps_)) {};
+    Point(Point&& point) : comps_(std::move(point.comps_)){};
+
+    std::string ToString() const {
+        std::string res = "";
+        for (size_t i = 0; i < comps_.size(); i++) {
+            res += comps_[i].ToString();
+            if (i != comps_.size() - 1) res += ", ";
+        }
+
+        return "(" + res + ")";
+    }
 
     size_t get_dim() const {
         return comps_.size();

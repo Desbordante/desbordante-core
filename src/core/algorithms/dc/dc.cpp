@@ -1,7 +1,3 @@
 #include "dc.h"
 
-namespace model {
-
-
-
-}  // namespace model
+namespace model {}  // namespace model
