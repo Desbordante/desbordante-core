@@ -108,4 +108,5 @@ constexpr auto kDNUmColumns = "Use only first N columns of the table";
 constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
+constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 }  // namespace config::descriptions

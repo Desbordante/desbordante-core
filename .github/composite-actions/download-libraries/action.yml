@@ -65,6 +65,11 @@ runs:
       with:
         directory: atomicbitvector
         download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
+    - name: Download kdtree
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: kdtree
+        download-command: git clone https://github.com/xJoskiy/kdtree.git
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs
