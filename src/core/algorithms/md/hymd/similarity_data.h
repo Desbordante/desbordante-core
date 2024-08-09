@@ -31,6 +31,7 @@ private:
     std::vector<LhsCCVIdsInfo> const column_matches_lhs_ids_info_;
 
     std::vector<model::Index> const sorted_to_original_;
+    std::vector<std::pair<TrivialColumnMatchInfo, model::Index>> trivial_column_matches_info_;
 
     indexes::DictionaryCompressor const& GetLeftCompressor() const noexcept {
         return records_info_->GetLeftCompressor();
@@ -44,11 +45,14 @@ public:
     SimilarityData(indexes::RecordsInfo* records_info,
                    std::vector<ColumnMatchInfo> column_matches_sim_info,
                    std::vector<LhsCCVIdsInfo> column_matches_lhs_ids_info,
-                   std::vector<model::Index> sorted_to_original) noexcept
+                   std::vector<model::Index> sorted_to_original,
+                   std::vector<std::pair<TrivialColumnMatchInfo, model::Index>>
+                           trivial_column_matches_info) noexcept
         : records_info_(records_info),
           column_matches_sim_info_(std::move(column_matches_sim_info)),
           column_matches_lhs_ids_info_(std::move(column_matches_lhs_ids_info)),
-          sorted_to_original_(std::move(sorted_to_original)) {}
+          sorted_to_original_(std::move(sorted_to_original)),
+          trivial_column_matches_info_(std::move(trivial_column_matches_info)) {}
 
     static std::pair<SimilarityData, std::vector<bool>> CreateFrom(
             indexes::RecordsInfo* records_info, MeasureCreators const& measure_creators,
@@ -58,6 +62,10 @@ public:
 
     [[nodiscard]] std::size_t GetColumnMatchNumber() const noexcept {
         return column_matches_sim_info_.size();
+    }
+
+    [[nodiscard]] std::size_t GetTrivialColumnMatchNumber() const noexcept {
+        return trivial_column_matches_info_.size();
     }
 
     [[nodiscard]] lattice::Rhs CreateMaxRhs() const noexcept {
@@ -83,6 +91,15 @@ public:
         return {left_column_index, right_column_index};
     }
 
+    [[nodiscard]] std::pair<model::Index, model::Index> GetTrivialColMatchIndices(
+            model::Index index) const {
+        model::Index const left_column_index =
+                trivial_column_matches_info_[index].first.left_column_index;
+        model::Index const right_column_index =
+                trivial_column_matches_info_[index].first.right_column_index;
+        return {left_column_index, right_column_index};
+    }
+
     [[nodiscard]] std::vector<model::Index> const& GetIndexMapping() const noexcept {
         return sorted_to_original_;
     }
@@ -94,6 +111,12 @@ public:
     [[nodiscard]] model::md::DecisionBoundary GetDecisionBoundary(
             model::Index column_match_index,
             ColumnClassifierValueId classifier_value_id) const noexcept;
+
+    [[nodiscard]] model::md::DecisionBoundary GetTrivialDecisionBoundary(
+            model::Index trivial_column_match_index) const noexcept;
+
+    [[nodiscard]] model::Index GetTrivialColumnMatchIndex(
+            model::Index trivial_column_match_index) const noexcept;
 };
 
 }  // namespace algos::hymd

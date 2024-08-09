@@ -11,4 +11,10 @@ struct ColumnMatchInfo {
     model::Index right_column_index;
 };
 
+struct TrivialColumnMatchInfo {
+    preprocessing::Similarity similarity;
+    model::Index left_column_index;
+    model::Index right_column_index;
+};
+
 }  // namespace algos::hymd

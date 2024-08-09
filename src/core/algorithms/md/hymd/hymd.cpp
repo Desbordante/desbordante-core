@@ -172,21 +172,34 @@ unsigned long long HyMD::ExecuteInternal() {
 void HyMD::RegisterResults(SimilarityData const& similarity_data,
                            std::vector<lattice::MdLatticeNodeInfo> lattice_mds) {
     std::size_t const column_match_number = similarity_data.GetColumnMatchNumber();
-    std::vector<model::md::ColumnMatch> column_matches;
-    column_matches.reserve(column_match_number);
+    std::size_t const trivial_column_match_number = similarity_data.GetTrivialColumnMatchNumber();
+    std::size_t const all_column_match_number = column_match_number + trivial_column_match_number;
+    auto const& sorted_to_original = similarity_data.GetIndexMapping();
+    std::vector<model::md::ColumnMatch> column_matches =
+            std::vector<model::md::ColumnMatch>(all_column_match_number);
     for (Index column_match_index = 0; column_match_index < column_match_number;
          ++column_match_index) {
         auto [left_col_index, right_col_index] =
                 similarity_data.GetColMatchIndices(column_match_index);
-        column_matches.emplace_back(
+        column_matches[sorted_to_original[column_match_index]] = {
                 left_col_index, right_col_index,
-                column_matches_option_[column_match_index]->GetSimilarityMeasureName());
+                column_matches_option_[sorted_to_original[column_match_index]]
+                        ->GetSimilarityMeasureName()};
+    }
+    for (Index trivial_column_match_index = 0;
+         trivial_column_match_index != trivial_column_match_number; ++trivial_column_match_index) {
+        auto [left_col_index, right_col_index] =
+                similarity_data.GetTrivialColMatchIndices(trivial_column_match_index);
+        column_matches[similarity_data.GetTrivialColumnMatchIndex(trivial_column_match_index)] = {
+                left_col_index, right_col_index,
+                column_matches_option_[similarity_data.GetTrivialColumnMatchIndex(
+                                               trivial_column_match_index)]
+                        ->GetSimilarityMeasureName()};
     }
     std::vector<model::MD> mds;
-    auto const& sorted_to_original = similarity_data.GetIndexMapping();
     auto convert_lhs = [&](MdLhs const& lattice_lhs) {
         std::vector<model::md::LhsColumnSimilarityClassifier> lhs;
-        lhs.reserve(column_match_number);
+        lhs.reserve(all_column_match_number);
         Index lhs_index = 0;
         for (auto const& [child_index, ccv_id] : lattice_lhs) {
             for (Index lhs_limit = lhs_index + child_index; lhs_index != lhs_limit; ++lhs_index) {
@@ -207,6 +220,12 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
         for (; lhs_index != column_match_number; ++lhs_index) {
             lhs.emplace_back(std::nullopt, sorted_to_original[lhs_index], kLowestBound);
         }
+        for (Index lhs_trivial_index = 0; lhs_trivial_index != trivial_column_match_number;
+             ++lhs_trivial_index) {
+            lhs.emplace_back(std::nullopt,
+                             similarity_data.GetTrivialColumnMatchIndex(lhs_trivial_index),
+                             kLowestBound);
+        }
         std::sort(lhs.begin(), lhs.end(),
                   [](model::md::LhsColumnSimilarityClassifier const& left_classifier,
                      model::md::LhsColumnSimilarityClassifier const& right_classifier) {
@@ -224,6 +243,16 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
                     similarity_data.GetDecisionBoundary(rhs_index, kLowestCCValueId);
             if (rhs_bound == kLowestBound) continue;
             model::md::ColumnSimilarityClassifier rhs{sorted_to_original[rhs_index], rhs_bound};
+            mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, empty_lhs,
+                             rhs);
+        }
+        for (Index rhs_trivial_index = 0; rhs_trivial_index != trivial_column_match_number;
+             ++rhs_trivial_index) {
+            model::md::DecisionBoundary rhs_bound =
+                    similarity_data.GetTrivialDecisionBoundary(rhs_trivial_index);
+            if (rhs_bound == kLowestBound) continue;
+            model::md::ColumnSimilarityClassifier rhs{
+                    similarity_data.GetTrivialColumnMatchIndex(rhs_trivial_index), rhs_bound};
             mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, empty_lhs,
                              rhs);
         }
