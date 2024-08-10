@@ -7,6 +7,7 @@
 #include <span>
 #include <vector>
 
+#include <boost/sort/spreadsort/string_sort.hpp>
 #include <easylogging++.h>
 
 namespace algos::hymd {
@@ -145,9 +146,8 @@ bool RecordPairInferrer::ShortSamplingClusterComparer::operator()(
     return false;
 }
 
-bool RecordPairInferrer::ShortSamplingNonClusterComparer::operator()(
+bool RecordPairInferrer::ShortSamplingNonClusterComparer::RecLessThan(
         RecordIdentifier record1, RecordIdentifier record2) const noexcept {
-    using ValueMatrixRowRef = indexes::SimilarityMatrixRow const&;
     auto rv = std::ranges::reverse_view{cluster_span};
     auto compare_on = [&](Info info) {
         auto const& [pli_index, rhs_lhs_map, matrix] = info;
@@ -171,6 +171,23 @@ bool RecordPairInferrer::ShortSamplingNonClusterComparer::operator()(
     auto next_res = compare_on(next_info);
     if (next_res != std::strong_ordering::equal) return next_res == std::strong_ordering::less;
     return record1 < record2;
+}
+
+std::uint16_t RecordPairInferrer::ShortSamplingNonClusterComparer::GetBracket(
+        RecordIdentifier record_id, model::Index offset) {
+    model::Index cluster_record_index = long_block ? offset / 2 : offset;
+    indexes::SimilarityMatrix const* matrix = &prev_info.matrix;
+    model::Index pli_index = prev_info.pli_index;
+    std::vector<ColumnClassifierValueId> const* rhs_lhs_map = &prev_info.rhs_lhs_map;
+    if (cluster_record_index >= cluster_size) {
+        cluster_record_index -= cluster_size;
+        matrix = &next_info.matrix;
+        pli_index = next_info.pli_index;
+        rhs_lhs_map = &next_info.rhs_lhs_map;
+    }
+    ValueMatrixRowRef rec_row = (*matrix)[records[record_id][pli_index]];
+    auto it = rec_row.find(cluster_span[cluster_size - (cluster_record_index + 1)]);
+    return it == rec_row.end() ? kLowestCCValueId : (*rhs_lhs_map)[it->second];
 }
 
 // Short sampling uses a sliding window.
@@ -224,17 +241,24 @@ struct RecordPairInferrer::InitializeLoopBody<true, ObtainValueRecords> {
         for (RecordIdentifier record_id : right_records) {
             if (!cluster_set.contains(record_id)) value_ranked_records.push_back(record_id);
         }
-        ShortSamplingNonClusterComparer non_cluster_comparer =
-                inferrer.CreateShortSamplingNonClusterCompare(column_match_index, cluster_span);
+        /*ShortSamplingNonClusterComparer non_cluster_comparer =
+                inferrer.CreateShortSamplingNonClusterComparer(column_match_index, cluster_span);
         DESBORDANTE_ASSUME(!end_id_map.empty());
         auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++;
         auto const begin_iter = value_ranked_records.begin();
-        std::sort(begin_iter + cluster.size(), begin_iter + cur_iter->second, non_cluster_comparer);
+        std::size_t const cluster_size = cluster.size();
+        auto bracket_getter = non_cluster_comparer.BracketGetter();
+        auto size_getter = non_cluster_comparer.SizeGetter();
+        auto record_comparer = non_cluster_comparer.RecordComparer();
+        boost::sort::spreadsort::string_sort(begin_iter + cluster_size,
+                                             begin_iter + cur_iter->second, bracket_getter,
+                                             size_getter, record_comparer);
         for (auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++, end_iter = end_id_map.end();
              fol_iter != end_iter; ++fol_iter, ++cur_iter) {
-            std::sort(begin_iter + cur_iter->second, begin_iter + fol_iter->second,
-                      non_cluster_comparer);
-        }
+            boost::sort::spreadsort::string_sort(begin_iter + cur_iter->second,
+                                                 begin_iter + fol_iter->second, bracket_getter,
+                                                 size_getter, record_comparer);
+        }*/
     }
 };
 
@@ -256,6 +280,7 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
         value_ranked_records.insert(value_ranked_records.end(), right_records.begin(),
                                     right_records.end());
         indexes::PliCluster const& cluster = left_clusters[left_value_id];
+        /*
         FullSamplingSortComparer comparer =
                 inferrer.CreateComparer(cluster, value_ranked_records, column_match_index);
         DESBORDANTE_ASSUME(!end_id_map.empty());
@@ -266,6 +291,7 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
              fol_iter != end_iter; ++fol_iter, ++cur_iter) {
             std::sort(begin_iter + cur_iter->second, begin_iter + fol_iter->second, comparer);
         }
+        */
     }
 };
 

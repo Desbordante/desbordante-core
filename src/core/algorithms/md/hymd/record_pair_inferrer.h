@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
 #include <list>
 #include <queue>
 #include <span>
@@ -81,21 +82,50 @@ private:
     }
 
     struct ShortSamplingNonClusterComparer {
+        using ValueMatrixRowRef = indexes::SimilarityMatrixRow const&;
+
         struct Info {
             model::Index const pli_index;
             std::vector<ColumnClassifierValueId> const& rhs_lhs_map;
             indexes::SimilarityMatrix const& matrix;
         };
 
+        bool LongBlock(ColumnClassifierValueId num) {
+            static_assert(sizeof(ColumnClassifierValueId) == 2);
+            return num >= 256;
+        }
+
         std::span<RecordIdentifier> cluster_span;
         std::vector<CompressedRecord> const& records;
         Info prev_info;
         Info next_info;
+        std::size_t const cluster_size = cluster_span.size();
+        bool long_block =
+                LongBlock(prev_info.rhs_lhs_map.back()) || LongBlock(next_info.rhs_lhs_map.back());
 
-        bool operator()(RecordIdentifier rec1, RecordIdentifier rec2) const noexcept;
+        bool RecLessThan(RecordIdentifier rec1, RecordIdentifier rec2) const noexcept;
+
+        auto RecordComparer() {
+            return [this](RecordIdentifier rec1, RecordIdentifier rec2) {
+                return RecLessThan(rec1, rec2);
+            };
+        }
+
+        std::uint16_t GetBracket(RecordIdentifier record_id, model::Index offset);
+
+        auto BracketGetter() {
+            return [this](RecordIdentifier record_id, model::Index offset) {
+                return GetBracket(record_id, offset);
+            };
+        }
+
+        auto SizeGetter() {
+            std::size_t size = cluster_span.size() * 2;
+            return [size](RecordIdentifier) { return size; };
+        }
     };
 
-    ShortSamplingNonClusterComparer CreateShortSamplingNonClusterCompare(
+    ShortSamplingNonClusterComparer CreateShortSamplingNonClusterComparer(
             model::Index const column_match_index,
             std::span<RecordIdentifier> cluster_span) const noexcept {
         auto const [prev_column_match_index, next_column_match_index] =
