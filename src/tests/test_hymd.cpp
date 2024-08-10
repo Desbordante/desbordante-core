@@ -36,16 +36,15 @@ protected:
         using namespace config::names;
         using namespace algos::hymd;
         config::InputTable table = std::make_unique<CSVParser>(csv_config);
-        std::shared_ptr<SimilarityMeasureCreator> measure_creator = std::make_shared<
-                preprocessing::similarity_measure::LevenshteinSimilarityMeasure::Creator>(
-                minimum_similarity);
-        std::vector<std::tuple<std::string, std::string, std::shared_ptr<SimilarityMeasureCreator>>>
-                column_matches_option;
+        HyMD::MeasureCreators column_matches_option;
         std::size_t const number_of_columns = table->GetNumberOfColumns();
         column_matches_option.reserve(number_of_columns);
         for (model::Index i = 0; i < number_of_columns; ++i) {
             std::string const column_name = table->GetColumnName(i);
-            column_matches_option.emplace_back(column_name, column_name, measure_creator);
+            column_matches_option.push_back(
+                    std::make_shared<preprocessing::similarity_measure::
+                                             LevenshteinSimilarityMeasure::Creator>(
+                            i, i, minimum_similarity));
         }
         algos::StdParamsMap param_map = {
                 {kLeftTable, table},
@@ -73,10 +72,9 @@ TEST_F(HyMDTest, DrunkAnimalsNormal) {
     algos::ConfigureFromMap(*hymd, param_map);
     hymd->Execute();
     auto actual_mds = hymd->MdList();
-    std::transform(actual_mds.begin(), actual_mds.end(), std::back_inserter(actual),
-                   [](model::MD const& md) -> MdPair {
-                       return {md.GetLhsDecisionBounds(), md.GetRhs()};
-                   });
+    std::transform(
+            actual_mds.begin(), actual_mds.end(), std::back_inserter(actual),
+            [](model::MD const& md) -> MdPair { return {md.GetLhsDecisionBounds(), md.GetRhs()}; });
     ASSERT_EQ(expected, actual);
 }
 
@@ -105,10 +103,9 @@ TEST_F(HyMDTest, DrunkAnimalsNoLimits) {
     algos::ConfigureFromMap(*hymd, param_map);
     hymd->Execute();
     auto actual_mds = hymd->MdList();
-    std::transform(actual_mds.begin(), actual_mds.end(), std::back_inserter(actual),
-                   [](model::MD const& md) -> MdPair {
-                       return {md.GetLhsDecisionBounds(), md.GetRhs()};
-                   });
+    std::transform(
+            actual_mds.begin(), actual_mds.end(), std::back_inserter(actual),
+            [](model::MD const& md) -> MdPair { return {md.GetLhsDecisionBounds(), md.GetRhs()}; });
     ASSERT_EQ(expected, actual);
 }
 
