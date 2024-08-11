@@ -53,13 +53,12 @@ void HyMD::RegisterOptions() {
     };
 
     auto column_matches_default = [this]() {
-        std::vector<std::shared_ptr<SimilarityMeasureCreator>> column_matches_option;
+        MeasureCreators column_matches_option;
         if (records_info_->OneTableGiven()) {
             std::size_t const num_columns = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns);
-            for (Index i = 0; i < num_columns; ++i) {
-                std::string const column_name = left_schema_->GetColumn(i)->GetName();
-                column_matches_option.emplace_back(
+            for (Index i = 0; i != num_columns; ++i) {
+                column_matches_option.push_back(
                         std::make_shared<preprocessing::similarity_measure::
                                                  LevenshteinSimilarityMeasure::Creator>(i, i, 0.7,
                                                                                         0));
@@ -68,11 +67,9 @@ void HyMD::RegisterOptions() {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
             std::size_t const num_columns_right = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns_left * num_columns_right);
-            for (Index i = 0; i < num_columns_left; ++i) {
-                std::string const column_name_left = left_schema_->GetColumn(i)->GetName();
-                for (Index j = 0; j < num_columns_right; ++j) {
-                    std::string const column_name_right = right_schema_->GetColumn(j)->GetName();
-                    column_matches_option.emplace_back(
+            for (Index i = 0; i != num_columns_left; ++i) {
+                for (Index j = 0; j != num_columns_right; ++j) {
+                    column_matches_option.push_back(
                             std::make_shared<preprocessing::similarity_measure::
                                                      LevenshteinSimilarityMeasure::Creator>(
                                     i, j, 0.7, 0));
