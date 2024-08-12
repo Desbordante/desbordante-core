@@ -279,8 +279,7 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
         value_ranked_records.reserve(right_records.size());
         value_ranked_records.insert(value_ranked_records.end(), right_records.begin(),
                                     right_records.end());
-        indexes::PliCluster const& cluster = left_clusters[left_value_id];
-        /*
+        /*indexes::PliCluster const& cluster = left_clusters[left_value_id];
         FullSamplingSortComparer comparer =
                 inferrer.CreateComparer(cluster, value_ranked_records, column_match_index);
         DESBORDANTE_ASSUME(!end_id_map.empty());
