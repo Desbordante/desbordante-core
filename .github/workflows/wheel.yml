@@ -55,10 +55,6 @@ jobs:
       CIBW_ARCHS_LINUX: x86_64
       # Builds wheels for PyPy & CPython on manylinux
       CIBW_BUILD: "*manylinux*"
-      # musllinux crashes during Boost 1.78.0 compilation
-      # May be related to https://bugs.gentoo.org/829147
-      # Perhaps that bumping Boost version in workflow can solve the issue
-      CIBW_SKIP: "*musllinux*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
