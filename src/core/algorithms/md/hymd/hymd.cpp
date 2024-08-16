@@ -65,7 +65,7 @@ void HyMD::RegisterOptions() {
             }
         } else {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
-            std::size_t const num_columns_right = left_schema_->GetNumColumns();
+            std::size_t const num_columns_right = right_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns_left * num_columns_right);
             for (Index i = 0; i != num_columns_left; ++i) {
                 for (Index j = 0; j != num_columns_right; ++j) {
