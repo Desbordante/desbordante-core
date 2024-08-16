@@ -29,4 +29,5 @@ double MongeElkan(std::vector<std::string> const& left, std::vector<std::string>
 }
 
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b);
+double MongeElkanString(std::string const& a, std::string const& b);
 }  // namespace algos::hymd::preprocessing::similarity_measure

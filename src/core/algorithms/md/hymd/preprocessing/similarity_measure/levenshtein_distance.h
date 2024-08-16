@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 
 namespace algos::hymd::preprocessing::similarity_measure {
-unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept;
+double LevenshteinDistance(std::string const& l, std::string const& r) noexcept;
 }  // namespace algos::hymd::preprocessing::similarity_measure

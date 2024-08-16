@@ -36,14 +36,14 @@ protected:
         using namespace config::names;
         using namespace algos::hymd;
         config::InputTable table = std::make_unique<CSVParser>(csv_config);
-        HyMD::MeasureCreators column_matches_option;
+        HyMD::Measures column_matches_option;
         std::size_t const number_of_columns = table->GetNumberOfColumns();
         column_matches_option.reserve(number_of_columns);
         for (model::Index i = 0; i < number_of_columns; ++i) {
             std::string const column_name = table->GetColumnName(i);
             column_matches_option.push_back(
-                    std::make_shared<preprocessing::similarity_measure::
-                                             LevenshteinSimilarityMeasure::Creator>(
+                    std::make_shared<
+                            preprocessing::similarity_measure::LevenshteinSimilarityMeasure>(
                             i, i, minimum_similarity));
         }
         algos::StdParamsMap param_map = {
