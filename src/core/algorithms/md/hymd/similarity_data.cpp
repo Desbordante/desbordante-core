@@ -22,11 +22,9 @@ struct IndexInfo {
 namespace algos::hymd {
 
 std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
-        indexes::RecordsInfo* const records_info, MeasureCreators const& measure_creators,
-        std::shared_ptr<RelationalSchema> const& left_schema,
-        std::shared_ptr<RelationalSchema> const& right_schema, util::WorkerThreadPool* pool_ptr) {
-    bool const one_table_given = records_info->OneTableGiven();
-    std::size_t const col_match_number = measure_creators.size();
+        indexes::RecordsInfo* const records_info, Measures const& measures,
+        util::WorkerThreadPool* pool_ptr) {
+    std::size_t const col_match_number = measures.size();
     std::vector<bool> short_sampling_enable;
     short_sampling_enable.reserve(col_match_number);
     std::vector<ColumnMatchInfo> column_matches_info;
@@ -36,28 +34,11 @@ std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
     std::vector<LhsCCVIdsInfo> all_lhs_ccv_ids_info;
     all_lhs_ccv_ids_info.reserve(col_match_number);
     std::vector<std::pair<TrivialColumnMatchInfo, model::Index>> trivial_column_matches_info;
-    auto const& left_records = records_info->GetLeftCompressor();
-    auto const& right_records = records_info->GetRightCompressor();
     model::Index column_match_index = 0;
     model::Index non_trivial_column_match_index = 0;
-    for (std::shared_ptr<SimilarityMeasureCreator> const& creator : measure_creators) {
-        auto const [left_col_index, right_col_index] =
-                creator->GetIndices(*left_schema, *right_schema);
-        std::unique_ptr<preprocessing::similarity_measure::SimilarityMeasure> measure =
-                creator->MakeMeasure(pool_ptr);
-        auto const& left_pli = left_records.GetPli(left_col_index);
-        // TODO: cache DataInfo.
-        std::shared_ptr<preprocessing::DataInfo const> data_info_left =
-                preprocessing::DataInfo::MakeFrom(left_pli, measure->GetArgType());
-        std::shared_ptr<preprocessing::DataInfo const> data_info_right;
-        auto const& right_pli = right_records.GetPli(right_col_index);
-        if (one_table_given && left_col_index == right_col_index) {
-            data_info_right = data_info_left;
-        } else {
-            data_info_right = preprocessing::DataInfo::MakeFrom(right_pli, measure->GetArgType());
-        }
-        auto [lhs_ccv_id_info, indexes] = measure->MakeIndexes(
-                std::move(data_info_left), std::move(data_info_right), right_pli.GetClusters());
+    for (MeasurePtr const& measure : measures) {
+        auto [left_col_index, right_col_index] = measure->GetIndices();
+        auto [lhs_ccv_id_info, indexes] = measure->MakeIndexes(pool_ptr, *records_info);
         IndexInfo& last_index_info = col_match_index_info.emplace_back(
                 lhs_ccv_id_info.lhs_to_rhs_map.size(), indexes.classifier_values.size(),
                 column_match_index);

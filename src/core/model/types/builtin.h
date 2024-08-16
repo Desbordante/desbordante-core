@@ -111,6 +111,17 @@ struct TypeConverter<Empty> {
     };
 };
 
+template <>
+struct TypeConverter<Date> {
+    inline static constexpr auto kConvert = [](std::string const& v) {
+        try {
+            return Date(boost::gregorian::from_simple_string(v));
+        } catch (...) {
+            return Date(boost::gregorian::from_undelimited_string(v));
+        }
+    };
+};
+
 enum class CompareResult { kLess = -1, kGreater = 1, kEqual = 0, kNotEqual = 2 };
 
 namespace detail {

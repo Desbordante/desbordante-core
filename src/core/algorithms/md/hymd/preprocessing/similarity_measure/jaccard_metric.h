@@ -24,5 +24,5 @@ double JaccardIndex(std::unordered_set<T> const& set1, std::unordered_set<T> con
     return static_cast<double>(intersection_size) / union_size;
 }
 
-double JaccardIndex(std::string const& s1, std::string const& s2);
+double StringJaccardIndex(std::string const& s1, std::string const& s2);
 }  // namespace algos::hymd::preprocessing::similarity_measure

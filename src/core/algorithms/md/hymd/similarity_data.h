@@ -14,7 +14,7 @@
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "algorithms/md/hymd/pair_comparison_result.h"
-#include "algorithms/md/hymd/similarity_measure_creator.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "model/index.h"
 #include "util/worker_thread_pool.h"
 
@@ -22,7 +22,8 @@ namespace algos::hymd {
 
 class SimilarityData {
 public:
-    using MeasureCreators = std::vector<std::shared_ptr<SimilarityMeasureCreator>>;
+    using MeasurePtr = std::shared_ptr<preprocessing::similarity_measure::SimilarityMeasure>;
+    using Measures = std::vector<MeasurePtr>;
 
 private:
     indexes::RecordsInfo const* const records_info_;
@@ -55,9 +56,7 @@ public:
           trivial_column_matches_info_(std::move(trivial_column_matches_info)) {}
 
     static std::pair<SimilarityData, std::vector<bool>> CreateFrom(
-            indexes::RecordsInfo* records_info, MeasureCreators const& measure_creators,
-            std::shared_ptr<RelationalSchema> const& left_schema,
-            std::shared_ptr<RelationalSchema> const& right_schema,
+            indexes::RecordsInfo* records_info, Measures const& measures,
             util::WorkerThreadPool* pool_ptr);
 
     [[nodiscard]] std::size_t GetColumnMatchNumber() const noexcept {

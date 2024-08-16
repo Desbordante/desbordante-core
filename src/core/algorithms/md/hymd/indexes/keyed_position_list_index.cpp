@@ -2,10 +2,11 @@
 
 namespace algos::hymd::indexes {
 
-ValueIdentifier KeyedPositionListIndex::AddNextValue(std::string value) {
-    auto [it, is_value_new] = value_id_mapping_.try_emplace(std::move(value), next_value_id_);
+ValueIdentifier KeyedPositionListIndex::AddNextValue(GlobalValueIdentifier value) {
+    auto [it, is_value_new] = value_id_mapping_.try_emplace(value, next_value_id_);
     if (is_value_new) {
         clusters_.emplace_back();
+        value_ids_.push_back(value);
         ++next_value_id_;
     }
     clusters_[it->second].emplace_back(cur_record_id_);

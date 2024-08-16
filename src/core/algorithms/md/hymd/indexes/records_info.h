@@ -1,10 +1,16 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 namespace algos::hymd::indexes {
 
 class RecordsInfo {
+    std::vector<std::string> const values_;
     std::shared_ptr<DictionaryCompressor const> const left_compressor_;
     std::shared_ptr<DictionaryCompressor const> const right_compressor_;
 
@@ -25,22 +31,27 @@ public:
         return GetLeftCompressor().GetNumberOfRecords() * GetRightCompressor().GetNumberOfRecords();
     }
 
-    RecordsInfo(std::shared_ptr<DictionaryCompressor> left_compressor,
+    RecordsInfo(std::vector<std::string> values,
+                std::shared_ptr<DictionaryCompressor> compressor) noexcept
+        : values_(std::move(values)),
+          left_compressor_(std::move(compressor)),
+          right_compressor_(left_compressor_) {}
+
+    RecordsInfo(std::vector<std::string> values,
+                std::shared_ptr<DictionaryCompressor> left_compressor,
                 std::shared_ptr<DictionaryCompressor> right_compressor) noexcept
-        : left_compressor_(std::move(left_compressor)),
+        : values_(std::move(values)),
+          left_compressor_(std::move(left_compressor)),
           right_compressor_(std::move(right_compressor)) {}
 
-    static std::unique_ptr<RecordsInfo> CreateFrom(model::IDatasetStream& left_table) {
-        std::shared_ptr<DictionaryCompressor> left_compressor =
-                DictionaryCompressor::CreateFrom(left_table);
-        return std::make_unique<RecordsInfo>(left_compressor, left_compressor);
+    std::vector<std::string> const& GetValues() const noexcept {
+        return values_;
     }
 
+    static std::unique_ptr<RecordsInfo> CreateFrom(model::IDatasetStream& left_table);
+
     static std::unique_ptr<RecordsInfo> CreateFrom(model::IDatasetStream& left_table,
-                                                   model::IDatasetStream& right_table) {
-        return std::make_unique<RecordsInfo>(DictionaryCompressor::CreateFrom(left_table),
-                                             DictionaryCompressor::CreateFrom(right_table));
-    }
+                                                   model::IDatasetStream& right_table);
 };
 
 }  // namespace algos::hymd::indexes
