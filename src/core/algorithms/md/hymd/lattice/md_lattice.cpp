@@ -605,9 +605,8 @@ void MdLattice::RaiseInterestingnessCCVIds(
                     // inference from record pairs give an incorrect result, meaning the algorithm
                     // is incorrect. However, it is possible to stop traversing when the bound's
                     // index in the list of natural decision boundaries (that being column
-                    // classifier value ID) is exactly one less than the RHS bound's index.
-                    // TODO: abort traversal as above.
-                    // assert(cur_node_rhs_ccv_id != 1.0);
+                    // classifier value ID) is exactly one less than the RHS bound's index, which is
+                    // done here.
                 }
             }
         }
