@@ -1,44 +1,62 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
-#include "algorithms/md/hymd/similarity_measure_creator.h"
+#include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "algorithms/md/hymd/preprocessing/similarity.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
+#include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
+#include "model/types/builtin.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
+namespace detail {
+class LevenshteinComparerCreator {
+    struct Comparer {
+        std::unique_ptr<unsigned[]> buf;
+        unsigned* r_buf;
+        preprocessing::Similarity min_sim_;
 
-class LevenshteinSimilarityMeasure final : public SimilarityMeasure {
-    model::md::DecisionBoundary const min_sim_;
-    std::size_t const size_limit_;
-    util::WorkerThreadPool* const pool_;
-    // TODO: make picker interface.
-    ccv_id_pickers::IndexUniform picker_{size_limit_};
+        preprocessing::Similarity operator()(model::String const& l, model::String const& r);
+    };
+
+    preprocessing::Similarity min_sim_;
+    std::size_t const buf_len_;
+
+    static std::size_t GetLargestStringSize(std::vector<model::String> const& elements);
+
+public:
+    LevenshteinComparerCreator(preprocessing::Similarity min_sim,
+                               std::vector<model::String> const* left_elements,
+                               std::vector<model::String> const*,
+                               indexes::KeyedPositionListIndex const&)
+        : min_sim_(min_sim), buf_len_(GetLargestStringSize(*left_elements) + 1) {}
+
+    Comparer operator()() const {
+        // TODO: replace with std::make_unique_for_overwrite when GCC in CI is upgraded
+        auto buf = utility::MakeUniqueForOverwrite<unsigned[]>(buf_len_ * 2);
+        auto* buf_ptr = buf.get();
+        return {std::move(buf), buf_ptr + buf_len_, min_sim_};
+    }
+};
+
+using LevenshteinTransformer = TypeTransformer<model::String>;
+
+using LevenshteinBase =
+        ColumnSimilarityMeasure<LevenshteinTransformer,
+                                BasicCalculator<LevenshteinComparerCreator, true, true>>;
+}  // namespace detail
+
+class LevenshteinSimilarityMeasure final : public detail::LevenshteinBase {
     static constexpr auto kName = "levenshtein_similarity";
 
 public:
-    class Creator final : public SimilarityMeasureCreator {
-        model::md::DecisionBoundary const min_sim_;
-        std::size_t const size_limit_;
-
-    public:
-        Creator(ColumnIdentifier column1_identifier, ColumnIdentifier column2_identifier,
-                model::md::DecisionBoundary min_sim = 0.7, std::size_t size_limit = 0);
-
-        std::unique_ptr<SimilarityMeasure> MakeMeasure(
-                util::WorkerThreadPool* thread_pool) const final {
-            return std::make_unique<LevenshteinSimilarityMeasure>(min_sim_, size_limit_,
-                                                                  thread_pool);
-        }
-    };
-
-    [[nodiscard]] indexes::SimilarityMeasureOutput MakeIndexes(
-            std::shared_ptr<DataInfo const> data_info_left,
-            std::shared_ptr<DataInfo const> data_info_right,
-            std::vector<indexes::PliCluster> const& clusters_right) const final;
-
-    LevenshteinSimilarityMeasure(model::md::DecisionBoundary min_sim, std::size_t size_limit,
-                                 util::WorkerThreadPool* thread_pool);
+    LevenshteinSimilarityMeasure(
+            ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
+            model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
+            detail::LevenshteinTransformer::TransformFunctionsOption funcs = {});
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure

@@ -41,26 +41,26 @@ INSTANTIATE_TEST_SUITE_P(
                 SimilarityTestParams{LongestCommonSubsequence, "aaa", "aaa", 3.0},
                 // jaccard
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "", "",
-                        1.0},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); }, "",
+                        "", 1.0},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "hello",
-                        "", 0.0},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
+                        "hello", "", 0.0},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "",
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); }, "",
                         "world", 0.0},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "abc cde",
-                        "abc", 0.5},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
+                        "abc cde", "abc", 0.5},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "abc cde",
-                        "abc def", 1.0 / 3.0},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
+                        "abc cde", "abc def", 1.0 / 3.0},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "word1",
-                        "word2", 0},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
+                        "word1", "word2", 0},
                 SimilarityTestParams{
-                        [](std::string a, std::string b) { return JaccardIndex(a, b); }, "word",
-                        "word", 1.0},
+                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
+                        "word", "word", 1.0},
                 // levenshtein
                 SimilarityTestParams{LevenshteinDistance, "", "", 0},
                 SimilarityTestParams{LevenshteinDistance, "kitten", "", 6},

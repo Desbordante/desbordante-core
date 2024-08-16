@@ -1,35 +1,70 @@
 #pragma once
 
+#include <type_traits>
+
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
-#include "model/types/double_type.h"
+#include "algorithms/md/hymd/preprocessing/similarity.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
+#include "model/types/builtin.h"
+#include "util/argument_type.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 using SimilarityFunction = std::function<Similarity(std::byte const*, std::byte const*)>;
 
-class ImmediateSimilarityMeasure : public SimilarityMeasure {
-private:
-    SimilarityFunction const compute_similarity_;
-    util::WorkerThreadPool* const pool_;
-    std::size_t const size_limit_;
-    ccv_id_pickers::IndexUniform picker_{size_limit_};
+namespace detail {
+template <auto Function>
+class BasicComparerCreator {
+    struct Comparer {
+        preprocessing::Similarity min_sim_;
+        using T = util::ArgumentType<decltype(Function), 0>;
 
-    [[nodiscard]] indexes::SimilarityMeasureOutput MakeIndexes(
-            std::shared_ptr<DataInfo const> data_info_left,
-            std::shared_ptr<DataInfo const> data_info_right,
-            std::vector<indexes::PliCluster> const& clusters_right) const final;
+        preprocessing::Similarity operator()(T const& l, T const& r) {
+            preprocessing::Similarity sim = Function(l, r);
+            return sim < min_sim_ ? kLowestBound : sim;
+        }
+    };
+
+    preprocessing::Similarity min_sim_;
 
 public:
-    ImmediateSimilarityMeasure(std::unique_ptr<model::Type> arg_type,
-                               bool is_symmetrical_and_eq_is_max,
-                               SimilarityFunction compute_similarity,
-                               util::WorkerThreadPool* thread_pool, std::size_t size_limit)
-        : SimilarityMeasure(std::move(arg_type), std::make_unique<model::DoubleType>(),
-                            is_symmetrical_and_eq_is_max),
-          compute_similarity_(std::move(compute_similarity)),
-          pool_(thread_pool),
-          size_limit_(size_limit) {};
+    template <typename... Args>
+    BasicComparerCreator(preprocessing::Similarity min_sim, Args&&...) : min_sim_(min_sim) {}
+
+    Comparer operator()() const {
+        return {min_sim_};
+    }
 };
+
+template <auto Function>
+using ImmediateBaseTypeTransformer =
+        TypeTransformer<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
+                        std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>>;
+
+template <auto Function, bool... Params>
+using ImmediateBase =
+        ColumnSimilarityMeasure<ImmediateBaseTypeTransformer<Function>,
+                                BasicCalculator<BasicComparerCreator<Function>, Params...>>;
+}  // namespace detail
+
+template <auto Function, bool kSymmetric, bool kEqMax, bool... Params>
+class ImmediateSimilarityMeasure
+    : public detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...> {
+public:
+    ImmediateSimilarityMeasure(
+            std::string name, ColumnIdentifier left_column_identifier,
+            ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+            std::size_t size_limit = 0,
+            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
+        : detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...>(
+                  kSymmetric && kEqMax, std::move(name), std::move(left_column_identifier),
+                  std::move(right_column_identifier), {std::move(funcs)},
+                  {min_sim, ccv_id_pickers::IndexUniform{size_limit}}) {};
+};
+
+template <auto Function>
+using NormalImmediateSimilarityMeasure = ImmediateSimilarityMeasure<Function, true, true, true>;
 
 }  // namespace algos::hymd::preprocessing::similarity_measure

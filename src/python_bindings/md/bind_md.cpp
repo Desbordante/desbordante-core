@@ -9,7 +9,6 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
-#include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "algorithms/md/md.h"
 #include "algorithms/md/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
@@ -17,6 +16,25 @@
 namespace {
 namespace py = pybind11;
 using model::MD;
+using namespace algos;
+using namespace algos::hymd;
+using namespace algos::hymd::preprocessing::similarity_measure;
+using namespace py::literals;
+
+template <typename MeasureType>
+void BindMeasure(auto&& name, auto&& measures_module) {
+    py::class_<MeasureType, SimilarityMeasure, std::shared_ptr<MeasureType>>(measures_module, name)
+            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
+                          std::size_t, typename MeasureType::TransformFunctionsOption>(),
+                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
+                 "bound_number_limit"_a = 0, "column_functions"_a)
+            .def(py::init([](ColumnIdentifier l, ColumnIdentifier r,
+                             model::md::DecisionBoundary min_sim,
+                             MeasureType::TransformFunctionsOption funcs) {
+                return std::make_shared<MeasureType>(std::move(l), std::move(r), min_sim, 0,
+                                                     std::move(funcs));
+            }));
+}
 }  // namespace
 
 namespace python_bindings {
@@ -34,52 +52,14 @@ void BindMd(py::module_& main_module) {
             .def("to_short_string", &MD::ToStringShort)
             .def("__str__", &MD::ToStringShort);
     auto measures_module = md_module.def_submodule("similarity_measures");
-    py::class_<SimilarityMeasureCreator, std::shared_ptr<SimilarityMeasureCreator>>(
-            measures_module, "SimilarityMeasure");
-    py::class_<LevenshteinSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<LevenshteinSimilarityMeasure::Creator>>(measures_module,
-                                                                       "LevenshteinSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
-    py::class_<MongeElkanSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<MongeElkanSimilarityMeasure::Creator>>(measures_module,
-                                                                      "MongeElkanSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
-
-    py::class_<JaccardSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<JaccardSimilarityMeasure::Creator>>(measures_module,
-                                                                   "JaccardSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
-
-    py::class_<DateSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<DateSimilarityMeasure::Creator>>(measures_module, "DateSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
-
-    py::class_<NumberSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<NumberSimilarityMeasure::Creator>>(measures_module,
-                                                                  "NumberSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
-
-    py::class_<LcsSimilarityMeasure::Creator, SimilarityMeasureCreator,
-               std::shared_ptr<LcsSimilarityMeasure::Creator>>(measures_module, "LcsSimilarity")
-            .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0);
+    py::class_<SimilarityMeasure, std::shared_ptr<SimilarityMeasure>>(measures_module,
+                                                                      "SimilarityMeasure");
+    BindMeasure<LevenshteinSimilarityMeasure>("LevenshteinSimilarity", measures_module);
+    BindMeasure<MongeElkanSimilarityMeasure>("MongeElkanSimilarity", measures_module);
+    BindMeasure<JaccardSimilarityMeasure>("JaccardSimilarity", measures_module);
+    BindMeasure<DateSimilarityMeasure>("DateSimilarity", measures_module);
+    BindMeasure<NumberSimilarityMeasure>("NumberSimilarity", measures_module);
+    BindMeasure<LcsSimilarityMeasure>("LcsSimilarity", measures_module);
 
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});
 }

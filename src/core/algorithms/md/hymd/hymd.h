@@ -8,7 +8,6 @@
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
 #include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/hymd/similarity_measure_creator.h"
 #include "algorithms/md/md_algorithm.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/thread_number/type.h"
@@ -18,7 +17,7 @@ namespace algos::hymd {
 
 class HyMD final : public MdAlgorithm {
 public:
-    using MeasureCreators = std::vector<std::shared_ptr<SimilarityMeasureCreator>>;
+    using Measures = SimilarityData::Measures;
 
 private:
     config::InputTable left_table_;
@@ -39,7 +38,7 @@ private:
     // TODO: limit LHS bounds searched (currently only size limit is implemented)
     // TODO: memory conservation mode (load only some columns)
 
-    MeasureCreators column_matches_option_;
+    Measures column_matches_option_;
 
     void RegisterOptions();
 

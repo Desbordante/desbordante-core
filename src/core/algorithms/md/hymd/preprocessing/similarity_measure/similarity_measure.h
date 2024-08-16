@@ -1,50 +1,39 @@
 #pragma once
 
-#include <memory>
 #include <string>
-#include <tuple>
 
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/indexes/pli_cluster.h"
-#include "algorithms/md/hymd/preprocessing/data_info.h"
-#include "model/types/numeric_type.h"
-#include "model/types/type.h"
+#include "algorithms/md/hymd/indexes/records_info.h"
+#include "model/table/relational_schema.h"
 #include "util/worker_thread_pool.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
 class SimilarityMeasure {
 private:
-    std::unique_ptr<model::Type> const arg_type_;
-    // Doesn't have to be a double, just any type with total order.
-    std::unique_ptr<model::INumericType> const ret_type_;
-    bool is_symmetrical_and_eq_is_max_ = false;
+    bool is_symmetrical_and_eq_is_max_;
+    std::string name_;
 
 public:
-    SimilarityMeasure(std::unique_ptr<model::Type> arg_type,
-                      std::unique_ptr<model::INumericType> ret_type,
-                      bool is_symmetrical_and_eq_is_max) noexcept
-        : arg_type_(std::move(arg_type)),
-          ret_type_(std::move(ret_type)),
-          is_symmetrical_and_eq_is_max_(is_symmetrical_and_eq_is_max) {}
+    SimilarityMeasure(bool is_symmetrical_and_eq_is_max, std::string name) noexcept
+        : is_symmetrical_and_eq_is_max_(is_symmetrical_and_eq_is_max), name_(std::move(name)) {}
 
     virtual ~SimilarityMeasure() = default;
 
-    [[nodiscard]] model::TypeId GetArgTypeId() const noexcept {
-        return arg_type_->GetTypeId();
-    }
-
-    [[nodiscard]] model::Type const& GetArgType() const noexcept {
-        return *arg_type_;
-    }
-
     [[nodiscard]] virtual indexes::SimilarityMeasureOutput MakeIndexes(
-            std::shared_ptr<DataInfo const> data_info_left,
-            std::shared_ptr<DataInfo const> data_info_right,
-            std::vector<indexes::PliCluster> const& clusters_right) const = 0;
+            util::WorkerThreadPool* pool_ptr, indexes::RecordsInfo const& records_info) const = 0;
 
-    [[nodiscard]] virtual bool IsSymmetricalAndEqIsMax() const noexcept {
+    virtual void SetParameters(RelationalSchema const& left_schema,
+                               RelationalSchema const& right_schema) = 0;
+
+    virtual std::pair<model::Index, model::Index> GetIndices() const noexcept = 0;
+
+    [[nodiscard]] bool IsSymmetricalAndEqIsMax() const noexcept {
         return is_symmetrical_and_eq_is_max_;
+    }
+
+    std::string const& GetName() const noexcept {
+        return name_;
     }
 };
 

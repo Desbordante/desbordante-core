@@ -53,15 +53,15 @@ void HyMD::RegisterOptions() {
     };
 
     auto column_matches_default = [this]() {
-        MeasureCreators column_matches_option;
+        Measures column_matches_option;
         if (records_info_->OneTableGiven()) {
             std::size_t const num_columns = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns);
             for (Index i = 0; i != num_columns; ++i) {
                 column_matches_option.push_back(
-                        std::make_shared<preprocessing::similarity_measure::
-                                                 LevenshteinSimilarityMeasure::Creator>(i, i, 0.7,
-                                                                                        0));
+                        std::make_shared<
+                                preprocessing::similarity_measure::LevenshteinSimilarityMeasure>(
+                                i, i, 0.7));
             }
         } else {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
@@ -71,8 +71,7 @@ void HyMD::RegisterOptions() {
                 for (Index j = 0; j != num_columns_right; ++j) {
                     column_matches_option.push_back(
                             std::make_shared<preprocessing::similarity_measure::
-                                                     LevenshteinSimilarityMeasure::Creator>(
-                                    i, j, 0.7, 0));
+                                                     LevenshteinSimilarityMeasure>(i, j, 0.7));
                 }
             }
         }
@@ -82,11 +81,11 @@ void HyMD::RegisterOptions() {
     auto not_null = [](config::InputTable const& table) {
         if (table == nullptr) throw config::ConfigurationError("Left table may not be null.");
     };
-    auto column_matches_check = [this](MeasureCreators const& col_matches) {
+    auto column_matches_check = [this](Measures const& col_matches) {
         if (col_matches.empty())
             throw config::ConfigurationError("Mining with empty column matches is meaningless.");
-        for (auto const& creator : col_matches) {
-            creator->CheckIndices(*left_schema_, *right_schema_);
+        for (auto const& measure : col_matches) {
+            measure->SetParameters(*left_schema_, *right_schema_);
         }
     };
 
@@ -141,8 +140,8 @@ unsigned long long HyMD::ExecuteInternal() {
         pool_ptr = &*pool_opt;
     }
     // TODO: make infrastructure for depth level
-    auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
-            records_info_.get(), column_matches_option_, left_schema_, right_schema_, pool_ptr);
+    auto [similarity_data, short_sampling_enable] =
+            SimilarityData::CreateFrom(records_info_.get(), column_matches_option_, pool_ptr);
     lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIdsInfo(),
                                prune_nondisjoint_, max_cardinality_,
                                similarity_data.CreateMaxRhs()};
@@ -182,8 +181,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
                 similarity_data.GetColMatchIndices(column_match_index);
         column_matches[sorted_to_original[column_match_index]] = {
                 left_col_index, right_col_index,
-                column_matches_option_[sorted_to_original[column_match_index]]
-                        ->GetSimilarityMeasureName()};
+                column_matches_option_[sorted_to_original[column_match_index]]->GetName()};
     }
     for (Index trivial_column_match_index = 0;
          trivial_column_match_index != trivial_column_match_number; ++trivial_column_match_index) {
@@ -193,7 +191,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
                 left_col_index, right_col_index,
                 column_matches_option_[similarity_data.GetTrivialColumnMatchIndex(
                                                trivial_column_match_index)]
-                        ->GetSimilarityMeasureName()};
+                        ->GetName()};
     }
     std::vector<model::MD> mds;
     auto convert_lhs = [&](MdLhs const& lattice_lhs) {

@@ -1,9 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
-#include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/compressed_records.h"
@@ -21,7 +18,7 @@ private:
 
 public:
     explicit DictionaryCompressor(std::size_t attribute_num);
-    void AddRecord(std::vector<std::string> record);
+    void AddRecord(std::vector<GlobalValueIdentifier> const& record);
 
     [[nodiscard]] std::size_t GetPliNumber() const {
         return plis_.size();
@@ -38,8 +35,6 @@ public:
     [[nodiscard]] std::size_t GetNumberOfRecords() const noexcept {
         return records_processed_;
     }
-
-    static std::unique_ptr<DictionaryCompressor> CreateFrom(model::IDatasetStream& stream);
 };
 
 }  // namespace algos::hymd::indexes

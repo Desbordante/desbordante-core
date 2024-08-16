@@ -7,7 +7,7 @@
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-double JaccardIndex(std::string const& s1, std::string const& s2) {
+double StringJaccardIndex(std::string const& s1, std::string const& s2) {
     std::istringstream iss1(s1), iss2(s2);
     std::unordered_set<std::string> set1{std::istream_iterator<std::string>{iss1},
                                          std::istream_iterator<std::string>{}};

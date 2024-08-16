@@ -5,9 +5,10 @@
 #include <vector>
 
 namespace algos::hymd::preprocessing::similarity_measure {
-unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
+double LevenshteinDistance(std::string const& l, std::string const& r) noexcept {
     std::size_t r_size = r.size();
     std::size_t l_size = l.size();
+    std::size_t const max_size = std::max(l_size, r_size);
     std::vector<unsigned> v0(r_size + 1);
     std::vector<unsigned> v1(r_size + 1);
 
@@ -39,10 +40,10 @@ unsigned LevenshteinDistance(std::string_view l, std::string_view r) noexcept {
         --l_size;
         loop_to_l_size();
         compute_arrays(v0, v1, l_size);
-        return v1[r_size];
+        return static_cast<double>(v1[r_size]) / static_cast<double>(max_size);
     } else {
         loop_to_l_size();
-        return v0[r_size];
+        return static_cast<double>(v0[r_size]) / static_cast<double>(max_size);
     }
 }
 
