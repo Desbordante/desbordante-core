@@ -8,19 +8,16 @@ namespace algos {
 
 namespace dc {
 
-/**
- * @brief Represents a predicate for Denial Constraint (DC).
- *
- * DCs involve comparisons between pairs of rows within a dataset.
- * A typical DC example, derived from a Functional Dependency such as A -> B,
- * is expressed as: `forall t, s in r, not (t.A = s.A and t.B != s.B)`
- * This denotes that for any pair of rows in the relation, it should not be the case
- * that while the values in column "A" are equal, the values in column "B" are unequal.
- *
- * A predicate in this context (e.g., t.A == s.A) comprises three elements to be fully
- * represented: the column operand from the first tuple ("t.A"), the comparison operator
- * ("="), and the column operand from the second tuple ("s.A").
- */
+//  @brief Represents a predicate for Denial Constraint (DC).
+//  DCs involve comparisons between pairs of rows within a dataset.
+//  A typical DC example, derived from a Functional Dependency such as A -> B,
+//  is expressed as: `forall t, s in R, not (t.A == s.A and t.B != s.B)`
+//  This denotes that for any pair of rows in the relation, it should not be the case
+//  that while the values in column "A" are equal, the values in column "B" are unequal.
+//
+//  A predicate in this context (e.g., t.A == s.A) comprises three elements to be fully
+//  represented: the column operand from the first tuple ("t.A"), the comparison operator
+//  ("=="), and the column operand from the second tuple ("s.A").
 class Predicate {
 private:
     Operator op_;
@@ -47,6 +44,10 @@ public:
         return l_.GetColumn() != r_.GetColumn();
     }
 
+    bool IsCrossTuple() const {
+        return l_.GetTuple() != r_.GetTuple();
+    }
+
     bool HasSameOperandsAs(Predicate const& rhs) const {
         return l_ == rhs.GetLeftOperand() && r_ == rhs.GetRightOperand();
     }
@@ -59,6 +60,3 @@ public:
 }  // namespace dc
 
 }  // namespace algos
-
-
-

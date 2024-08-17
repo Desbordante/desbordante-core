@@ -38,6 +38,11 @@ public:
             {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
             {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
             {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
+
+    static constexpr frozen::unordered_map<frozen::string, OperatorType, 6> kStringToOperatorType{
+            {"==", OperatorType::kEqual},        {"!=", OperatorType::kUnequal},
+            {">", OperatorType::kGreater},       {"<", OperatorType::kLess},
+            {">=", OperatorType::kGreaterEqual}, {"<=", OperatorType::kLessEqual}};
 };
 
 }  // namespace dc
