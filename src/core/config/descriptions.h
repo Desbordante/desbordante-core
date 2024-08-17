@@ -159,4 +159,5 @@ constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
+constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 }  // namespace config::descriptions
