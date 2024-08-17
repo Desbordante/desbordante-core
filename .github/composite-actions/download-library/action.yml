@@ -10,7 +10,7 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: actions/cache@v3
+    - uses: actions/cache/restore@v4
       id: cache-library
       with:
         path: ${{github.workspace}}/lib/${{inputs.directory}}
@@ -20,11 +20,8 @@ runs:
         ${{inputs.download-command}}
       shell: bash
       if: steps.cache-library.outputs.cache-hit != 'true'
-    - run: |
-        if ! test -d lib/'${{inputs.directory}}'; then
-          echo 'Library directory name is not correct:' '${{inputs.directory}}'
-          ls lib
-          exit 1
-        fi
-        exit 0
-      shell: bash
+    - uses: actions/cache/save@v4
+      with:
+        path: ${{github.workspace}}/lib/${{inputs.directory}}
+        key: ${{runner.os}}-${{inputs.directory}}
+      if: steps.cache-library.outputs.cache-hit != 'true'
