@@ -218,10 +218,6 @@ public:
     std::vector<ColumnClassifierValueId> GetInterestingnessCCVIds(
             MdLhs const& lhs, std::vector<model::Index> const& indices,
             std::vector<ColumnClassifierValueId> const& ccv_id_bounds) const;
-    std::vector<ColumnClassifierValueId> RemoveExisting(MdLhs const& lhs,
-                                                        std::vector<model::Index> const& indices);
-    void AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& indices,
-                    std::vector<ColumnClassifierValueId> const& ccv_ids);
     std::vector<MdVerificationMessenger> GetLevel(std::size_t level);
     std::vector<MdRefiner> CollectRefinersForViolated(
             PairComparisonResult const& pair_comparison_result);
