@@ -4,7 +4,9 @@
 #include "frozen/unordered_map.h"
 #include "model/types/type.h"
 
-namespace model {
+namespace algos {
+
+namespace dc {
 
 enum class OperatorType { kEqual, kUnequal, kGreater, kLess, kGreaterEqual, kLessEqual };
 
@@ -16,12 +18,16 @@ public:
     Operator(OperatorType type) : op_(type) {}
 
     std::string ToString() const {
-        frozen::string str = OperatorTypeToString.at(op_);
+        frozen::string str = kOperatorTypeToString.at(op_);
         return std::string(str.begin(), str.end());
     }
 
     bool operator==(Operator const& rhs) const {
         return op_ == rhs.op_;
+    }
+
+    bool operator!=(Operator const& rhs) const {
+        return op_ != rhs.op_;
     }
 
     OperatorType GetType() const {
@@ -34,4 +40,6 @@ public:
             {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
 };
 
-}  // namespace model
+}  // namespace dc
+
+}  // namespace algos
