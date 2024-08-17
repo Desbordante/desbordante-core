@@ -528,10 +528,10 @@ void MdLattice::CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefin
         Index const column_match_index = cur_node_index + child_array_index;
         ColumnClassifierValueId& cur_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);
         ColumnClassifierValueId pair_rhs_ccv_id = pair_comparison_result[column_match_index];
-        std::vector<ColumnClassifierValueId> const& cm_lhs_ccv_ids =
-                (*lhs_ccv_id_info_)[column_match_index].lhs_to_rhs_map;
+        ColumnClassifierValueId const pair_max_lhs_match =
+                (*lhs_ccv_id_info_)[column_match_index].rhs_to_lhs_map[pair_rhs_ccv_id];
         for (auto& [generalization_ccv_id, node] : child_map) {
-            if (cm_lhs_ccv_ids[generalization_ccv_id] > pair_rhs_ccv_id) break;
+            if (generalization_ccv_id > pair_max_lhs_match) break;
             cur_lhs_ccv_id = generalization_ccv_id;
             CollectRefinersForViolated(node, found, cur_node_lhs, pair_comparison_result,
                                        column_match_index + 1);
