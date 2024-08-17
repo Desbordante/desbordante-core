@@ -456,6 +456,7 @@ std::size_t MdLattice::MdRefiner::Refine() {
     std::size_t removed = 0;
     for (auto new_rhs : invalidated_.GetUpdateView()) {
         auto const& [rhs_index, new_ccv_id] = new_rhs;
+        DESBORDANTE_ASSUME(node_info_.rhs->begin[rhs_index] != kLowestCCValueId);
         node_info_.rhs->Set(rhs_index, kLowestCCValueId);
         bool const trivial = new_ccv_id == kLowestCCValueId;
         if (trivial) {
@@ -467,6 +468,8 @@ std::size_t MdLattice::MdRefiner::Refine() {
             ++removed;
             continue;
         }
+        DESBORDANTE_ASSUME(node_info_.rhs->begin[rhs_index] == kLowestCCValueId &&
+                           new_ccv_id != kLowestCCValueId);
         node_info_.rhs->Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), *pair_similarities_, invalidated_.GetInvalidated());
@@ -573,8 +576,10 @@ void MdLattice::MdVerificationMessenger::MarkUnsupported() {
 
 void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
         utility::InvalidatedRhss const& invalidated) {
+    Rhs& rhs = GetRhs();
     for (auto [rhs_index, new_ccv_id] : invalidated.GetUpdateView()) {
-        GetRhs().Set(rhs_index, new_ccv_id);
+        DESBORDANTE_ASSUME(rhs[rhs_index] != kLowestCCValueId);
+        rhs.Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), invalidated.GetInvalidated());
 }
@@ -623,28 +628,6 @@ void MdLattice::RaiseInterestingnessCCVIds(
                                        indices, ccv_id_bounds, max_count);
             if (max_count == indices_size) return;
         }
-    }
-}
-
-std::vector<ColumnClassifierValueId> MdLattice::RemoveExisting(
-        MdLhs const& lhs, std::vector<model::Index> const& indices) {
-    Rhs& node_rhs = GetRhs(lhs);
-    std::vector<ColumnClassifierValueId> ccv_ids;
-    ccv_ids.reserve(indices.size());
-    for (model::Index index : indices) {
-        ccv_ids.push_back(node_rhs[index]);
-        node_rhs.Set(index, kLowestCCValueId);
-    }
-    return ccv_ids;
-}
-
-void MdLattice::AddRemoved(MdLhs const& lhs, std::vector<model::Index> const& indices,
-                           std::vector<ColumnClassifierValueId> const& ccv_ids) {
-    Rhs& node_rhs = GetRhs(lhs);
-    assert(indices.size() == ccv_ids.size());
-    auto ccv_id_iter = ccv_ids.begin();
-    for (Index index : indices) {
-        node_rhs.Set(index, *ccv_id_iter++);
     }
 }
 

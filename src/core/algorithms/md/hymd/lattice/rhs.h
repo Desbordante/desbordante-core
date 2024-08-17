@@ -7,6 +7,8 @@
 
 #include "algorithms/md/hymd/column_classifier_value_id.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
+#include "model/index.h"
+#include "util/desbordante_assume.h"
 
 namespace algos::hymd::lattice {
 struct Rhs {
@@ -29,6 +31,29 @@ struct Rhs {
 
     bool IsEmpty() const {
         return non_zero_count == 0;
+    }
+
+    std::vector<ColumnClassifierValueId> DisableAndDo(std::vector<model::Index> const& indices,
+                                                      auto action) {
+        std::vector<ColumnClassifierValueId> ccv_ids;
+        ccv_ids.reserve(indices.size());
+        std::size_t old_count = non_zero_count;
+        // NOTE: not thread-safe
+        non_zero_count = 0;
+        for (model::Index index : indices) {
+            ColumnClassifierValueId& removed_ccv_id = begin[index];
+            DESBORDANTE_ASSUME(removed_ccv_id != kLowestCCValueId);
+            ccv_ids.push_back(removed_ccv_id);
+            removed_ccv_id = kLowestCCValueId;
+        }
+        action(ccv_ids);
+        non_zero_count = old_count;
+        auto ccv_ids_it = ccv_ids.begin();
+        for (model::Index index : indices) {
+            DESBORDANTE_ASSUME(*ccv_ids_it != kLowestCCValueId);
+            begin[index] = *ccv_ids_it;
+        }
+        return ccv_ids;
     }
 
     void Set(std::size_t const index, ColumnClassifierValueId const value) {
