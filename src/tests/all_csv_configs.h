@@ -102,4 +102,6 @@ extern CSVConfig const kTestDynamicFDUpdateBad3;
 extern CSVConfig const kTestDynamicFDUpdateBad4;
 extern CSVConfig const kLineItem;
 extern CSVConfig const kAnimalsBeverages;
+extern CSVConfig const kTestDC;
+extern CSVConfig const kTestDC1;
 }  // namespace tests
