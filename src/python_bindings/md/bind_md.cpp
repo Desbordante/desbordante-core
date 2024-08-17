@@ -1,5 +1,6 @@
 #include "md/bind_md.h"
 
+#include <pybind11/functional.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -26,14 +27,9 @@ void BindMeasure(auto&& name, auto&& measures_module) {
     py::class_<MeasureType, SimilarityMeasure, std::shared_ptr<MeasureType>>(measures_module, name)
             .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
                           std::size_t, typename MeasureType::TransformFunctionsOption>(),
-                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7,
-                 "bound_number_limit"_a = 0, "column_functions"_a)
-            .def(py::init([](ColumnIdentifier l, ColumnIdentifier r,
-                             model::md::DecisionBoundary min_sim,
-                             MeasureType::TransformFunctionsOption funcs) {
-                return std::make_shared<MeasureType>(std::move(l), std::move(r), min_sim, 0,
-                                                     std::move(funcs));
-            }));
+                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7, py::kw_only(),
+                 "bound_number_limit"_a = 0,
+                 "column_functions"_a = typename MeasureType::TransformFunctionsOption{});
 }
 }  // namespace
 
