@@ -61,7 +61,6 @@ TEST(TestDCVerifier, TestMixedNamesColNums) {
 }
 
 TEST(TestDCVerifier, TestNoHeader) {
-    CSVConfig const kTestAR{"TestAR.csv", ',', false};
     std::string dc_string = "!(s.0 == t.1 and s.1 == t.2 and s.2 == t.3)";
     std::unique_ptr<DCVerifier> dc_verifier =
             algos::CreateAndLoadAlgorithm<DCVerifier>(GetParamMap(kBernoulliRelation, dc_string));
