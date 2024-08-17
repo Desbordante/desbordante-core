@@ -2,7 +2,9 @@
 
 #include "table/column.h"
 
-namespace model {
+namespace algos {
+
+namespace dc {
 
 /**
  * @brief Represents a predicate for Denial Constraint (DC).
@@ -48,4 +50,6 @@ public:
     }
 };
 
-}  // namespace model
+}  // namespace dc
+
+}  // namespace algos

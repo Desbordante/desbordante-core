@@ -4,7 +4,9 @@
 #include "operator.h"
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos {
+
+namespace dc {
 
 /**
  * @brief Represents a predicate for Denial Constraint (DC).
@@ -54,4 +56,9 @@ public:
     }
 };
 
-}  // namespace model
+}  // namespace dc
+
+}  // namespace algos
+
+
+
