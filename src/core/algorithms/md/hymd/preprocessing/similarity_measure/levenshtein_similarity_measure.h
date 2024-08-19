@@ -29,9 +29,7 @@ class LevenshteinComparerCreator {
 
 public:
     LevenshteinComparerCreator(preprocessing::Similarity min_sim,
-                               std::vector<model::String> const* left_elements,
-                               std::vector<model::String> const*,
-                               indexes::KeyedPositionListIndex const&)
+                               std::vector<model::String> const* left_elements)
         : min_sim_(min_sim), buf_len_(GetLargestStringSize(*left_elements) + 1) {}
 
     Comparer operator()() const {
@@ -42,11 +40,24 @@ public:
     }
 };
 
+class LevenshteinComparerCreatorSupplier {
+    preprocessing::Similarity min_sim_;
+
+public:
+    LevenshteinComparerCreatorSupplier(preprocessing::Similarity min_sim) : min_sim_(min_sim) {}
+
+    LevenshteinComparerCreator operator()(std::vector<model::String> const* left_elements,
+                                          std::vector<model::String> const*,
+                                          indexes::KeyedPositionListIndex const&) const {
+        return {min_sim_, left_elements};
+    }
+};
+
 using LevenshteinTransformer = TypeTransformer<model::String>;
 
 using LevenshteinBase =
         ColumnSimilarityMeasure<LevenshteinTransformer,
-                                BasicCalculator<LevenshteinComparerCreator, true, true>>;
+                                BasicCalculator<LevenshteinComparerCreatorSupplier, true, true>>;
 }  // namespace detail
 
 class LevenshteinSimilarityMeasure final : public detail::LevenshteinBase {
