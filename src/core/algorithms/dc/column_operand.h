@@ -1,17 +1,15 @@
 #pragma once
 
-#include <boost/functional/hash.hpp>
-
 #include "table/column.h"
 
 namespace model {
 
 /**
- * @brief Represents a column operand within a predicate for FastADC.
+ * @brief Represents a predicate for Denial Constraint (DC).
  *
- * FastADC processes Denial Constraints (DCs) that involve comparisons between
- * pairs of rows within a dataset. A typical DC example, derived from a Functional
- * Dependency such as A -> B, is expressed as: `forall t, s in r, not (t.A = s.A and t.B != s.B)`
+ * DCs involve comparisons between pairs of rows within a dataset.
+ * A typical DC example, derived from a Functional Dependency such as A -> B,
+ * is expressed as: `forall t, s in r, not (t.A = s.A and t.B != s.B)`
  * This denotes that for any pair of rows in the relation, it should not be the case
  * that while the values in column "A" are equal, the values in column "B" are unequal.
  *
@@ -45,31 +43,9 @@ public:
         return tuple_;
     }
 
-    // here TS means (t, s)
-    ColumnOperand GetInvTS() const {
-        return ColumnOperand(column_, !tuple_);
-    }
-
     std::string ToString() const {
         return (tuple_ ? "t." : "s.") + column_->GetName();
     }
 };
 
-// NOLINTBEGIN(readability-identifier-naming)
-size_t hash_value(model::ColumnOperand const& k) noexcept;
-// NOLINTEND(readability-identifier-naming)
-
 }  // namespace model
-
-namespace std {
-template <>
-struct hash<model::ColumnOperand> {
-    size_t operator()(model::ColumnOperand const& k) const noexcept {
-        size_t seed = 0;
-        boost::hash_combine(seed, k.GetColumn()->GetIndex());
-        boost::hash_combine(seed, k.GetTuple());
-        return seed;
-    }
-};
-
-}  // namespace std
