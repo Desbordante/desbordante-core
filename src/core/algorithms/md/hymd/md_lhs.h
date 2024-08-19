@@ -25,8 +25,8 @@ public:
     using FasterType = void;
     using iterator = Nodes::const_iterator;
 
-    MdLhs(std::size_t column_match_number) {
-        values_.reserve(column_match_number);
+    MdLhs(std::size_t max_values) {
+        values_.reserve(max_values);
     }
 
     ColumnClassifierValueId& AddNext(model::Index child_array_index) {

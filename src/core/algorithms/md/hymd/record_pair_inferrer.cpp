@@ -473,15 +473,15 @@ void RecordPairInferrer::SampleSeq(Efficiency& efficiency) {
 
 PairComparisonResult RecordPairInferrer::CompareRecords(
         CompressedRecord const& left_record, CompressedRecord const& right_record) const {
-    PairComparisonResult comparison_result;
-    comparison_result.reserve(column_match_number_);
+    std::vector<ColumnClassifierValueId> rhss;
+    rhss.reserve(column_match_number_);
     for (auto const& [sim_info, left_col_index, right_col_index] : *column_matches_sim_info_) {
         indexes::SimilarityMatrixRow const& row =
                 sim_info.similarity_matrix[left_record[left_col_index]];
         auto sim_it = row.find(right_record[right_col_index]);
-        comparison_result.push_back(sim_it == row.end() ? kLowestCCValueId : sim_it->second);
+        rhss.push_back(sim_it == row.end() ? kLowestCCValueId : sim_it->second);
     }
-    return comparison_result;
+    return {std::move(rhss), *lhs_ccv_id_info_};
 }
 
 bool RecordPairInferrer::InferFromRecordPairs(Recommendations recommendations) {
