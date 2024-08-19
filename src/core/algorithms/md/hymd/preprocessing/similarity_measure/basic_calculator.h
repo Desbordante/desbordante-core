@@ -16,13 +16,21 @@
 #include "util/worker_thread_pool.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
-template <typename ComparerCreator, bool kSymmetric, bool kEqMax, bool kMultiThreaded = true>
+template <typename ComparerCreatorSupplier, bool kSymmetric, bool kEqMax,
+          bool kMultiThreaded = true>
 class BasicCalculator {
     using LeftElementType =
-            std::remove_cvref_t<util::ArgumentType<decltype(std::declval<ComparerCreator>()()), 0>>;
+            std::remove_pointer_t<util::ArgumentType<ComparerCreatorSupplier, 0>>::value_type;
     using RightElementType =
-            std::remove_cvref_t<util::ArgumentType<decltype(std::declval<ComparerCreator>()()), 1>>;
-    using Comparer = decltype(std::declval<ComparerCreator>()());
+            std::remove_pointer_t<util::ArgumentType<ComparerCreatorSupplier, 1>>::value_type;
+    // Acquires resources for Comparer based on the data.
+    using ComparerCreator =
+            std::invoke_result_t<ComparerCreatorSupplier, std::vector<LeftElementType> const*,
+                                 std::vector<RightElementType> const*,
+                                 indexes::KeyedPositionListIndex const&>;
+    // Does the actual comparisons between values, may store resources acquired prior, like a memory
+    // buffer
+    using Comparer = std::invoke_result_t<ComparerCreator>;
 
     struct ThreadResource {
         Comparer comparer;
@@ -148,22 +156,21 @@ class BasicCalculator {
         }
     };
 
-    preprocessing::Similarity min_sim_;
+    // May store the comparison function.
+    ComparerCreatorSupplier creator_supplier_;
     // TODO: make picker interface.
     ccv_id_pickers::IndexUniform picker_;
 
 public:
-    BasicCalculator(preprocessing::Similarity min_sim, ccv_id_pickers::IndexUniform picker)
-        : min_sim_(min_sim), picker_(std::move(picker)) {
-        if (!(0.0 <= min_sim && min_sim <= 1.0))
-            throw config::ConfigurationError("Minimum similarity out of range");
-    }
+    BasicCalculator(ComparerCreatorSupplier creator_supplier, ccv_id_pickers::IndexUniform picker)
+        : creator_supplier_(std::move(creator_supplier)), picker_(std::move(picker)) {}
 
     indexes::SimilarityMeasureOutput Calculate(std::vector<LeftElementType> const* left_elements,
                                                std::vector<RightElementType> const* right_elements,
                                                indexes::KeyedPositionListIndex const& right_pli,
                                                util::WorkerThreadPool* pool_ptr) const {
-        ComparerCreator create_comparer{min_sim_, left_elements, right_elements, right_pli};
+        ComparerCreator create_comparer =
+                creator_supplier_(left_elements, right_elements, right_pli);
         std::vector<indexes::PliCluster> const& right_clusters = right_pli.GetClusters();
         Worker worker{left_elements, right_elements, right_clusters, std::move(create_comparer)};
         auto [similarities, enumerated_results] = kMultiThreaded && pool_ptr != nullptr

@@ -19,9 +19,10 @@ template <auto Function>
 class BasicComparerCreator {
     struct Comparer {
         preprocessing::Similarity min_sim_;
-        using T = util::ArgumentType<decltype(Function), 0>;
+        using LType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>;
+        using RType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>;
 
-        preprocessing::Similarity operator()(T const& l, T const& r) {
+        preprocessing::Similarity operator()(LType const& l, RType const& r) {
             preprocessing::Similarity sim = Function(l, r);
             return sim < min_sim_ ? kLowestBound : sim;
         }
@@ -30,11 +31,25 @@ class BasicComparerCreator {
     preprocessing::Similarity min_sim_;
 
 public:
-    template <typename... Args>
-    BasicComparerCreator(preprocessing::Similarity min_sim, Args&&...) : min_sim_(min_sim) {}
+    explicit BasicComparerCreator(preprocessing::Similarity min_sim) : min_sim_(min_sim) {}
 
     Comparer operator()() const {
         return {min_sim_};
+    }
+};
+
+template <auto Function>
+class BasicComparerCreatorSupplier {
+    using LeftElementType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>;
+    using RightElementType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>;
+    preprocessing::Similarity min_sim_;
+
+public:
+    BasicComparerCreatorSupplier(preprocessing::Similarity min_sim) : min_sim_(min_sim) {}
+
+    auto operator()(std::vector<LeftElementType> const*, std::vector<RightElementType> const*,
+                    indexes::KeyedPositionListIndex const&) const {
+        return BasicComparerCreator<Function>{min_sim_};
     }
 };
 
@@ -46,7 +61,7 @@ using ImmediateBaseTypeTransformer =
 template <auto Function, bool... Params>
 using ImmediateBase =
         ColumnSimilarityMeasure<ImmediateBaseTypeTransformer<Function>,
-                                BasicCalculator<BasicComparerCreator<Function>, Params...>>;
+                                BasicCalculator<BasicComparerCreatorSupplier<Function>, Params...>>;
 }  // namespace detail
 
 template <auto Function, bool kSymmetric, bool kEqMax, bool... Params>
@@ -61,7 +76,7 @@ public:
         : detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...>(
                   kSymmetric && kEqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
-                  {min_sim, ccv_id_pickers::IndexUniform{size_limit}}) {};
+                  {{min_sim}, ccv_id_pickers::IndexUniform{size_limit}}) {};
 };
 
 template <auto Function>
