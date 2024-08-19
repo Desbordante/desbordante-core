@@ -54,7 +54,7 @@ runs:
       uses: ./.github/composite-actions/download-library
       with:
         directory: pybind11
-        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.10 --depth 1
+        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
       if: inputs.download-pybind != 'false'
     - name: Download emhash
       uses: ./.github/composite-actions/download-library
