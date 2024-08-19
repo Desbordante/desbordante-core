@@ -77,6 +77,9 @@ fi
 if [[ ! -d "atomicbitvector" ]] ; then
   git clone https://github.com/ekg/atomicbitvector.git --depth 1
 fi
+if [[ ! -d "frozen" ]] ; then
+  git clone https://github.com/serge-sans-paille/frozen.git --depth 1
+fi
 
 if [[ $NO_TESTS == true ]]; then
   PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
