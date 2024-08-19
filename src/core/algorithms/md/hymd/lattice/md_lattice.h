@@ -48,15 +48,15 @@ public:
 
     class MdRefiner {
         MdLattice* lattice_;
-        PairComparisonResult const* pair_similarities_;
+        PairComparisonResult const* pair_comparison_result_;
         MdLatticeNodeInfo node_info_;
         utility::InvalidatedRhss invalidated_;
 
     public:
-        MdRefiner(MdLattice* lattice, PairComparisonResult const* pair_similarities,
+        MdRefiner(MdLattice* lattice, PairComparisonResult const* pair_comparison_result,
                   MdLatticeNodeInfo node_info, utility::InvalidatedRhss invalidated)
             : lattice_(lattice),
-              pair_similarities_(pair_similarities),
+              pair_comparison_result_(pair_comparison_result),
               node_info_(std::move(node_info)),
               invalidated_(std::move(invalidated)) {}
 
@@ -130,9 +130,8 @@ private:
                        PairComparisonResult const& pair_comparison_result,
                        MdLhs const& cur_node_lhs);
     void CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
-                                    MdLhs& cur_node_lhs,
-                                    PairComparisonResult const& pair_comparison_result,
-                                    model::Index cur_node_index);
+                                    MdLhs& cur_node_lhs, MdLhs::iterator cur_lhs_iter,
+                                    PairComparisonResult const& pair_comparison_result);
 
     bool IsUnsupported(MdLhs const& lhs) const;
 

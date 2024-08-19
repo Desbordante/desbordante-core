@@ -42,7 +42,7 @@ inline void MdLattice::Specialize(MdLhs const& lhs,
                                   PairComparisonResult const& pair_comparison_result,
                                   Rhss const& rhss) {
     auto get_pair_lhs_ccv_id = [&](Index index, ...) {
-        return (*lhs_ccv_id_info_)[index].rhs_to_lhs_map[pair_comparison_result[index]];
+        return (*lhs_ccv_id_info_)[index].rhs_to_lhs_map[pair_comparison_result.rhss[index]];
     };
     Specialize(lhs, rhss, get_pair_lhs_ccv_id, get_pair_lhs_ccv_id);
 }
@@ -472,7 +472,7 @@ std::size_t MdLattice::MdRefiner::Refine() {
                            new_ccv_id != kLowestCCValueId);
         node_info_.rhs->Set(rhs_index, new_ccv_id);
     }
-    lattice_->Specialize(GetLhs(), *pair_similarities_, invalidated_.GetInvalidated());
+    lattice_->Specialize(GetLhs(), *pair_comparison_result_, invalidated_.GetInvalidated());
     return removed;
 }
 
@@ -483,7 +483,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
     Index rhs_index = 0;
     Index cur_lhs_index = 0;
     auto try_push_no_match_classifier = [&]() {
-        ColumnClassifierValueId pair_ccv_id = pair_comparison_result[rhs_index];
+        ColumnClassifierValueId pair_ccv_id = pair_comparison_result.rhss[rhs_index];
         ColumnClassifierValueId rhs_ccv_id = rhs[rhs_index];
         if (pair_ccv_id < rhs_ccv_id) {
             invalidated.PushBack({rhs_index, rhs_ccv_id}, pair_ccv_id);
@@ -495,7 +495,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
             try_push_no_match_classifier();
         }
         DESBORDANTE_ASSUME(rhs_index < column_matches_size_);
-        ColumnClassifierValueId const pair_ccv_id = pair_comparison_result[rhs_index];
+        ColumnClassifierValueId const pair_ccv_id = pair_comparison_result.rhss[rhs_index];
         ColumnClassifierValueId const rhs_ccv_id = rhs[rhs_index];
         if (pair_ccv_id < rhs_ccv_id) {
             MdElement invalid{rhs_index, rhs_ccv_id};
@@ -520,35 +520,36 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
 }
 
 void MdLattice::CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
-                                           MdLhs& cur_node_lhs,
-                                           PairComparisonResult const& pair_comparison_result,
-                                           Index cur_node_index) {
+                                           MdLhs& cur_node_lhs, MdLhs::iterator cur_lhs_iter,
+                                           PairComparisonResult const& pair_comparison_result) {
     if (!cur_node.rhs.IsEmpty()) {
         TryAddRefiner(found, cur_node.rhs, pair_comparison_result, cur_node_lhs);
     }
 
-    auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
-        Index const column_match_index = cur_node_index + child_array_index;
+    Index child_array_index = 0;
+    for (MdLhs::iterator end = pair_comparison_result.maximal_matching_lhs.end();
+         cur_lhs_iter != end; ++child_array_index) {
+        auto const& [offset, generalization_ccv_id_limit] = *cur_lhs_iter;
+        ++cur_lhs_iter;
+        child_array_index += offset;
         ColumnClassifierValueId& cur_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);
-        ColumnClassifierValueId pair_rhs_ccv_id = pair_comparison_result[column_match_index];
-        ColumnClassifierValueId const pair_max_lhs_match =
-                (*lhs_ccv_id_info_)[column_match_index].rhs_to_lhs_map[pair_rhs_ccv_id];
-        for (auto& [generalization_ccv_id, node] : child_map) {
-            if (generalization_ccv_id > pair_max_lhs_match) break;
+        for (auto& [generalization_ccv_id, node] : *cur_node.children[child_array_index]) {
+            if (generalization_ccv_id > generalization_ccv_id_limit) break;
             cur_lhs_ccv_id = generalization_ccv_id;
-            CollectRefinersForViolated(node, found, cur_node_lhs, pair_comparison_result,
-                                       column_match_index + 1);
+            CollectRefinersForViolated(node, found, cur_node_lhs, cur_lhs_iter,
+                                       pair_comparison_result);
         }
         cur_node_lhs.RemoveLast();
-    };
-    cur_node.ForEachNonEmpty(collect);
+    }
 }
 
 auto MdLattice::CollectRefinersForViolated(PairComparisonResult const& pair_comparison_result)
         -> std::vector<MdRefiner> {
     std::vector<MdRefiner> found;
-    MdLhs current_lhs(column_matches_size_);
-    CollectRefinersForViolated(md_root_, found, current_lhs, pair_comparison_result, 0);
+    MdLhs current_lhs(pair_comparison_result.maximal_matching_lhs.Cardinality());
+    CollectRefinersForViolated(md_root_, found, current_lhs,
+                               pair_comparison_result.maximal_matching_lhs.begin(),
+                               pair_comparison_result);
     // TODO: traverse support trie simultaneously.
     util::EraseIfReplace(found, [this](MdRefiner& refiner) {
         bool const unsupported = IsUnsupported(refiner.GetLhs());
