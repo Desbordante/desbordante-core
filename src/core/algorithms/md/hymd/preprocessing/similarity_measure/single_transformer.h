@@ -99,7 +99,8 @@ private:
     auto CreateVec(std::vector<std::string> const& string_values,
                    std::vector<indexes::GlobalValueIdentifier> const& pli_keys, auto&& func,
                    auto&& default_func) const {
-        using T = std::invoke_result_t<decltype(default_func), model::String const&>;
+        using T = std::invoke_result_t<std::remove_cvref_t<decltype(default_func)>,
+                                       model::String const&>;
         std::vector<T> values;
         values.reserve(pli_keys.size());
         if (func) {
