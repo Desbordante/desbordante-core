@@ -8,14 +8,14 @@
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 
 namespace algos::hymd::preprocessing::ccv_id_pickers {
-class IndexUniform {
+template <typename T>
+class IndexUniform final {
     std::size_t size_limit_;
 
 public:
     IndexUniform(std::size_t size_limit) : size_limit_(size_limit) {}
 
-    template <typename T>
-    std::vector<ColumnClassifierValueId> PickLhsIds(std::vector<T> const& ccvs) const {
+    std::vector<ColumnClassifierValueId> operator()(std::vector<T> const& ccvs) const {
         std::size_t ccv_number = ccvs.size();
         std::vector<ColumnClassifierValueId> lhs_ccv_ids;
         if (size_limit_ == 0 || ccv_number <= size_limit_) {

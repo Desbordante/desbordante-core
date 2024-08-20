@@ -172,10 +172,18 @@ preprocessing::Similarity detail::LevenshteinComparerCreator::Comparer::operator
 
 LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(
         ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
+        model::md::DecisionBoundary min_sim, ccv_id_pickers::SimilaritiesPicker picker,
+        detail::LevenshteinTransformer::TransformFunctionsOption funcs)
+    : detail::LevenshteinBase(true, kName, std::move(left_column_identifier),
+                              std::move(right_column_identifier), {std::move(funcs)},
+                              {min_sim, std::move(picker)}) {}
+
+LevenshteinSimilarityMeasure::LevenshteinSimilarityMeasure(
+        ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
         model::md::DecisionBoundary min_sim, std::size_t size_limit,
         detail::LevenshteinTransformer::TransformFunctionsOption funcs)
     : detail::LevenshteinBase(true, kName, std::move(left_column_identifier),
                               std::move(right_column_identifier), {std::move(funcs)},
-                              {min_sim, ccv_id_pickers::IndexUniform{size_limit}}) {}
+                              {min_sim, ccv_id_pickers::IndexUniform<Similarity>(size_limit)}) {}
 
 }  // namespace algos::hymd::preprocessing::similarity_measure

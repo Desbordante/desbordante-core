@@ -22,8 +22,14 @@ namespace py = pybind11;
 using model::MD;
 using namespace algos;
 using namespace algos::hymd;
+using namespace algos::hymd::preprocessing;
 using namespace algos::hymd::preprocessing::similarity_measure;
 using namespace py::literals;
+using namespace python_bindings;
+
+std::vector<ColumnClassifierValueId> PickAll(std::vector<Similarity> const& similarities) {
+    return ccv_id_pickers::IndexUniform<Similarity>{0}(similarities);
+}
 
 template <typename MeasureType>
 auto BindMeasure(auto&& name, auto&& measures_module) {
@@ -34,12 +40,28 @@ auto BindMeasure(auto&& name, auto&& measures_module) {
 
 template <typename MeasureType, typename... Args>
 void BindMeasureWithConstructor(Args&&... args) {
+    using ColumnFunctions = MeasureType::TransformFunctionsOption;
     BindMeasure<MeasureType>(std::forward<Args>(args)...)
             .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
-                          std::size_t, typename MeasureType::TransformFunctionsOption>(),
+                          std::size_t, ColumnFunctions>(),
                  "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7, py::kw_only(),
-                 "bound_number_limit"_a = 0,
-                 "column_functions"_a = typename MeasureType::TransformFunctionsOption{});
+                 "bound_number_limit"_a = 0, "column_functions"_a = ColumnFunctions{})
+            .def(py::init([](ColumnIdentifier left_column, ColumnIdentifier right_column,
+                             model::md::DecisionBoundary min_sim,
+                             py::typing::Callable<std::vector<ColumnClassifierValueId>(
+                                     std::vector<Similarity> const&)>
+                                     similarities_picker,
+                             ColumnFunctions column_functions) {
+                     return std::make_shared<MeasureType>(
+                             std::move(left_column), std::move(right_column), min_sim,
+                             PyLhsCCVIDsPicker(std::move(similarities_picker)),
+                             std::move(column_functions));
+                 }),
+                 "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7, py::kw_only(),
+                 py::arg_v("pick_lhs_indices", ccv_id_pickers::SimilaritiesPicker(PickAll),
+                           "pick_all")
+                         .none(false),
+                 "column_functions"_a = ColumnFunctions{});
 }
 }  // namespace
 
@@ -83,6 +105,18 @@ void BindMd(py::module_& main_module) {
                  "comparer"_a, "left_column"_a, "right_column"_a, "classic_measure"_a,
                  py::kw_only(), "column_functions"_a = ObjMeasureTransformFuncs{},
                  "min_sim"_a = 0.7, "measure_name"_a = "custom_measure", "size_limit"_a = 0)
+            .def(py::init<py::typing::Callable<preprocessing::Similarity(py::object, py::object)>,
+                          ColumnIdentifier, ColumnIdentifier, ObjMeasureTransformFuncs, bool, bool,
+                          model::md::DecisionBoundary, std::string,
+                          py::typing::Callable<std::vector<ColumnClassifierValueId>(
+                                  std::vector<Similarity> const&)>>(),
+                 "comparer"_a, "left_column"_a, "right_column"_a, py::kw_only(),
+                 "column_functions"_a = ObjMeasureTransformFuncs{}, "symmetrical"_a = false,
+                 "equality_is_max"_a = false, "min_sim"_a = 0.7,
+                 "measure_name"_a = "custom_measure",
+                 py::arg_v("pick_lhs_indices", ccv_id_pickers::SimilaritiesPicker(PickAll),
+                           "pick_all")
+                         .none(false))
             .doc() = R"(Defines a custom similarity measure.)";
 
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"});

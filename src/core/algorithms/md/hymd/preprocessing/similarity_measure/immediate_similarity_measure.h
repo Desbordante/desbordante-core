@@ -12,8 +12,6 @@
 #include "util/argument_type.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
-using SimilarityFunction = std::function<Similarity(std::byte const*, std::byte const*)>;
-
 namespace detail {
 template <auto Function>
 class BasicComparerCreator {
@@ -71,12 +69,22 @@ public:
     ImmediateSimilarityMeasure(
             std::string name, ColumnIdentifier left_column_identifier,
             ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
-            std::size_t size_limit = 0,
+            ccv_id_pickers::SimilaritiesPicker picker,
             detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
         : detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...>(
                   kSymmetric && kEqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
-                  {{min_sim}, ccv_id_pickers::IndexUniform{size_limit}}) {};
+                  {{min_sim}, std::move(picker)}) {};
+
+    ImmediateSimilarityMeasure(
+            std::string name, ColumnIdentifier left_column_identifier,
+            ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+            std::size_t size_limit = 0,
+            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
+        : ImmediateSimilarityMeasure(std::move(name), std::move(left_column_identifier),
+                                     std::move(right_column_identifier), min_sim,
+                                     ccv_id_pickers::IndexUniform<Similarity>(size_limit),
+                                     std::move(funcs)) {};
 };
 
 template <auto Function>
