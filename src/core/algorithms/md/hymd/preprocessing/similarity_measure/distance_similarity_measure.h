@@ -3,6 +3,7 @@
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
+#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
 #include "algorithms/md/hymd/preprocessing/encode_results.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
@@ -22,8 +23,7 @@ class LVNormalizedDistanceCalculator {
             std::invoke_result_t<decltype(Function), LeftElementType, RightElementType>;
 
     preprocessing::Similarity min_sim_;
-    // TODO: make picker interface.
-    ccv_id_pickers::IndexUniform picker_;
+    ccv_id_pickers::SimilaritiesPicker picker_;
 
     class Worker {
         using RowInfoSimilarity = RowInfo<Similarity>;
@@ -119,7 +119,7 @@ class LVNormalizedDistanceCalculator {
 
 public:
     LVNormalizedDistanceCalculator(preprocessing::Similarity min_sim,
-                                   ccv_id_pickers::IndexUniform picker)
+                                   ccv_id_pickers::SimilaritiesPicker picker)
         : min_sim_(min_sim), picker_(std::move(picker)) {
         if (!(0.0 <= min_sim && min_sim <= 1.0))
             throw config::ConfigurationError("Minimum similarity out of range");
@@ -157,12 +157,22 @@ public:
 
     DistanceSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
                               ColumnIdentifier right_column_identifier,
-                              model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
+                              model::md::DecisionBoundary min_sim,
+                              ccv_id_pickers::SimilaritiesPicker picker,
                               TransformFunctionsOption funcs = {})
         : detail::DistanceBase<Function, Params...>(
                   kSymmetricAndEq0, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
-                  {min_sim, ccv_id_pickers::IndexUniform{size_limit}}) {};
+                  {min_sim, std::move(picker)}) {};
+
+    DistanceSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
+                              ColumnIdentifier right_column_identifier,
+                              model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
+                              TransformFunctionsOption funcs = {})
+        : DistanceSimilarityMeasure(std::move(name), std::move(left_column_identifier),
+                                    std::move(right_column_identifier), min_sim,
+                                    ccv_id_pickers::IndexUniform<Similarity>{size_limit},
+                                    std::move(funcs)) {}
 };
 
 }  // namespace algos::hymd::preprocessing::similarity_measure

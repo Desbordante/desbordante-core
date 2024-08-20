@@ -1,9 +1,11 @@
 #pragma once
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
@@ -80,11 +82,11 @@ class PyBasicCalculator {
     bool equality_max_;
     PyComparerCreatorSupplier creator_supplier_;
     // TODO: make picker interface.
-    algos::hymd::preprocessing::ccv_id_pickers::IndexUniform picker_;
+    algos::hymd::preprocessing::ccv_id_pickers::SimilaritiesPicker picker_;
 
 public:
     PyBasicCalculator(PyComparerCreatorSupplier creator_supplier,
-                      algos::hymd::preprocessing::ccv_id_pickers::IndexUniform picker,
+                      algos::hymd::preprocessing::ccv_id_pickers::SimilaritiesPicker picker,
                       bool symmetric, bool equality_max)
         : symmetric_(symmetric),
           equality_max_(equality_max),
@@ -120,10 +122,53 @@ using ObjMeasureBase = algos::hymd::preprocessing::similarity_measure::ColumnSim
         detail::PyGenericTypeTransformer, detail::PyBasicCalculator>;
 }  // namespace detail
 
+class PyLhsCCVIDsPicker {
+    pybind11::object picker_function_;
+
+public:
+    PyLhsCCVIDsPicker(pybind11::object picker_function)
+        : picker_function_(std::move(picker_function)) {}
+
+    std::vector<algos::hymd::ColumnClassifierValueId> operator()(
+            std::vector<algos::hymd::preprocessing::Similarity> const& similarities) {
+        auto lhs_ccv_ids = pybind11::cast<std::vector<algos::hymd::ColumnClassifierValueId>>(
+                picker_function_(similarities));
+        if (lhs_ccv_ids.empty()) throw std::domain_error("LHS indices must not be empty.");
+        auto ccv_ids_end = lhs_ccv_ids.end();
+        if (std::adjacent_find(lhs_ccv_ids.begin(), ccv_ids_end, std::greater_equal{}) !=
+            ccv_ids_end)
+            throw std::domain_error("LHS indices must be a strictly increasing sequence.");
+        auto last_ccv_id = lhs_ccv_ids.back();
+        std::size_t const similarities_size = similarities.size();
+        if (last_ccv_id >= similarities_size)
+            throw std::domain_error("Last LHS index out of range (" + std::to_string(last_ccv_id) +
+                                    " >= " + std::to_string(similarities_size) + ")");
+        return lhs_ccv_ids;
+    }
+};
+
 using ObjMeasureTransformFuncs = detail::PyGenericTypeTransformer::TransformFunctionsOption;
 
 class ObjectSimilarityMeasure : public detail::ObjMeasureBase {
 public:
+    ObjectSimilarityMeasure(
+            pybind11::object comparison_function,
+            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier left_column_identifier,
+            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier
+                    right_column_identifier,
+            ObjMeasureTransformFuncs transform_functions, bool symmetrical,
+            bool equality_is_highest, model::md::DecisionBoundary min_sim, std::string name,
+            pybind11::object lhs_indices_picker)
+        : detail::ObjMeasureBase{
+                  symmetrical && equality_is_highest,
+                  std::move(name),
+                  std::move(left_column_identifier),
+                  std::move(right_column_identifier),
+                  detail::PyGenericTypeTransformer{std::move(transform_functions)},
+                  detail::PyBasicCalculator({std::move(comparison_function), min_sim},
+                                            PyLhsCCVIDsPicker{std::move(lhs_indices_picker)},
+                                            symmetrical, equality_is_highest)} {}
+
     ObjectSimilarityMeasure(
             pybind11::object comparison_function,
             algos::hymd::preprocessing::similarity_measure::ColumnIdentifier left_column_identifier,
@@ -138,8 +183,11 @@ public:
                   std::move(left_column_identifier),
                   std::move(right_column_identifier),
                   detail::PyGenericTypeTransformer{std::move(transform_functions)},
-                  detail::PyBasicCalculator({std::move(comparison_function), min_sim}, {size_limit},
-                                            symmetrical, equality_is_highest)} {}
+                  detail::PyBasicCalculator(
+                          {std::move(comparison_function), min_sim},
+                          algos::hymd::preprocessing::ccv_id_pickers::IndexUniform<
+                                  algos::hymd::preprocessing::Similarity>{size_limit},
+                          symmetrical, equality_is_highest)} {}
 
     ObjectSimilarityMeasure(
             pybind11::object comparison_function,
@@ -154,7 +202,10 @@ public:
                   std::move(left_column_identifier),
                   std::move(right_column_identifier),
                   detail::PyGenericTypeTransformer{std::move(transform_functions)},
-                  detail::PyBasicCalculator({std::move(comparison_function), min_sim}, {size_limit},
-                                            classic_measure, classic_measure)} {}
+                  detail::PyBasicCalculator(
+                          {std::move(comparison_function), min_sim},
+                          algos::hymd::preprocessing::ccv_id_pickers::IndexUniform<
+                                  algos::hymd::preprocessing::Similarity>{size_limit},
+                          classic_measure, classic_measure)} {}
 };
 }  // namespace python_bindings

@@ -64,6 +64,12 @@ class LevenshteinSimilarityMeasure final : public detail::LevenshteinBase {
     static constexpr auto kName = "levenshtein_similarity";
 
 public:
+    LevenshteinSimilarityMeasure(ColumnIdentifier left_column_identifier,
+                                 ColumnIdentifier right_column_identifier,
+                                 model::md::DecisionBoundary min_sim,
+                                 ccv_id_pickers::SimilaritiesPicker picker,
+                                 detail::LevenshteinTransformer::TransformFunctionsOption funcs);
+
     LevenshteinSimilarityMeasure(
             ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
             model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,

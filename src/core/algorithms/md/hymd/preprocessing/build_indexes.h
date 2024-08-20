@@ -117,20 +117,21 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
 template <typename ResultType>
 indexes::SimilarityMeasureOutput BuildIndexes(
         EnumeratedValidTableResults enumerated, std::vector<ResultType> classifier_values,
-        std::vector<indexes::PliCluster> const& clusters_right, auto const& lhs_ids_picker) {
+        std::vector<indexes::PliCluster> const& clusters_right, auto const& pick_lhs_ccv_ids) {
     SortAllRows(enumerated);
 
-    std::vector<ColumnClassifierValueId> lhs_ids = lhs_ids_picker.PickLhsIds(classifier_values);
+    std::vector<ColumnClassifierValueId> lhs_ccv_ids = pick_lhs_ccv_ids(classifier_values);
 
     indexes::SimilarityMatrix value_matrix = CreateValueMatrix(enumerated);
 
-    if (lhs_ids.size() <= 1)
-        return {std::move(lhs_ids), {std::move(classifier_values), std::move(value_matrix), {}}};
+    if (lhs_ccv_ids.size() <= 1)
+        return {std::move(lhs_ccv_ids),
+                {std::move(classifier_values), std::move(value_matrix), {}}};
 
     indexes::SimilarityIndex upper_set_records =
-            CreateUpperSetRecords(enumerated, lhs_ids, clusters_right);
+            CreateUpperSetRecords(enumerated, lhs_ccv_ids, clusters_right);
 
-    return {std::move(lhs_ids),
+    return {std::move(lhs_ccv_ids),
             {std::move(classifier_values), std::move(value_matrix), std::move(upper_set_records)}};
 }
 }  // namespace algos::hymd::preprocessing

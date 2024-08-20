@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <type_traits>
 
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
@@ -7,6 +8,7 @@
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
+#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
 #include "algorithms/md/hymd/preprocessing/encode_results.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
@@ -158,11 +160,11 @@ class BasicCalculator {
 
     // May store the comparison function.
     ComparerCreatorSupplier creator_supplier_;
-    // TODO: make picker interface.
-    ccv_id_pickers::IndexUniform picker_;
+    ccv_id_pickers::SimilaritiesPicker picker_;
 
 public:
-    BasicCalculator(ComparerCreatorSupplier creator_supplier, ccv_id_pickers::IndexUniform picker)
+    BasicCalculator(ComparerCreatorSupplier creator_supplier,
+                    ccv_id_pickers::SimilaritiesPicker picker)
         : creator_supplier_(std::move(creator_supplier)), picker_(std::move(picker)) {}
 
     indexes::SimilarityMeasureOutput Calculate(std::vector<LeftElementType> const* left_elements,
