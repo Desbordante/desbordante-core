@@ -56,7 +56,7 @@ class SpecGeneralizationChecker {
 
     bool ReplaceFinalCheck(NodeType const& node, model::Index child_array_index,
                            MdLhs::iterator spec_iter, ColumnClassifierValueId ccv_id,
-                           std::size_t spec_delta) {
+                           [[maybe_unused]] std::size_t spec_delta) {
         assert(spec_iter != specialization_.GetLhsSpecialization().old_lhs.end() &&
                spec_iter->child_array_index == spec_delta);
         ColumnClassifierValueId const old_ccv_id = spec_iter->ccv_id;
@@ -79,8 +79,7 @@ class SpecGeneralizationChecker {
     }
 
 public:
-    SpecGeneralizationChecker(Specialization& specialization)
-        : specialization_(specialization) {}
+    SpecGeneralizationChecker(Specialization& specialization) : specialization_(specialization) {}
 
     bool HasGeneralizationInChildrenReplace(NodeType const& node, MdLhs::iterator next_node_iter,
                                             model::Index child_array_index = 0) {

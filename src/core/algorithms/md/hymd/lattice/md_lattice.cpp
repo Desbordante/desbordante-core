@@ -60,8 +60,6 @@ inline void MdLattice::SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::ite
                                          auto add_rhs) {
     std::vector<ColumnClassifierValueId> const& lhs_ccv_ids =
             (*lhs_ccv_id_info_)[lhs_spec_index].lhs_to_rhs_map;
-    // TODO: remove those before starting.
-    // if (lhs_ccv_ids.size() == 1) return;
     // TODO: enforce this with a special class (basically a vector that guarantees this condition).
     assert(!lhs_ccv_ids.empty());
     ++spec_past;

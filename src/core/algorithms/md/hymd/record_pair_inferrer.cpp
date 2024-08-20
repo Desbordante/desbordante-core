@@ -31,15 +31,12 @@ bool RecordPairInferrer::Initialize() {
         // TODO: enforce this invariant with a class.
         DESBORDANTE_ASSUME(!lhs_rhs_map.empty());
         if (lhs_rhs_map.size() == 1) {
-            // TODO: enforce this invariant with a class.
-            DESBORDANTE_ASSUME(!rhs_lhs_map.empty());
-            if (rhs_lhs_map.size() != 1) {
-                // TODO: sort based on column matches where the number of LHS values is greater
-                // than 1, discard pairs with the highest CCV ID.
-                LOG(WARNING) << "Sampling for column match " << column_match_index
-                             << " not implemented.";
-            }
-            // else No point in sampling, skip. TODO: remove those in advance.
+            DESBORDANTE_ASSUME(rhs_lhs_map.size() > 1);
+            // TODO: sort based on column matches where the number of LHS values is greater
+            // than 1, discard pairs with the highest CCV ID.
+            LOG(WARNING) << "Sampling for column match " << column_match_index
+                         << " not implemented.";
+            // else No point in sampling.
             continue;
         }
         InitMethod method = full_method;
