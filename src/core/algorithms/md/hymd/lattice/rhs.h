@@ -14,13 +14,11 @@ namespace algos::hymd::lattice {
 struct Rhs {
     std::unique_ptr<ColumnClassifierValueId[]> begin;
     std::size_t non_zero_count;
-    std::size_t const size;
 
     Rhs(std::size_t size)
-        : begin(std::make_unique<ColumnClassifierValueId[]>(size)), non_zero_count(0), size(size) {}
+        : begin(std::make_unique<ColumnClassifierValueId[]>(size)), non_zero_count(0) {}
 
     ColumnClassifierValueId const& operator[](std::size_t index) const noexcept {
-        assert(index < size);
         assert(non_zero_count != 0);
         return begin[index];
     }
@@ -51,13 +49,12 @@ struct Rhs {
         auto ccv_ids_it = ccv_ids.begin();
         for (model::Index index : indices) {
             DESBORDANTE_ASSUME(*ccv_ids_it != kLowestCCValueId);
-            begin[index] = *ccv_ids_it;
+            begin[index] = *ccv_ids_it++;
         }
         return ccv_ids;
     }
 
     void Set(std::size_t const index, ColumnClassifierValueId const value) {
-        assert(index < size);
         ColumnClassifierValueId& cur_value = begin[index];
         if (cur_value == kLowestCCValueId && value != kLowestCCValueId) {
             ++non_zero_count;
