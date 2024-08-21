@@ -52,13 +52,15 @@ public:
         node_rhs.Set(rhs.index, rhs.ccv_id);
     }
 
-    MdNode* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id) {
-        return AddOneUncheckedBase(child_array_index, ccv_id, rhs.size);
+    MdNode* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id,
+                            std::size_t column_matches_number) {
+        return AddOneUncheckedBase(child_array_index, ccv_id, column_matches_number);
     }
 
-    MdNode(std::size_t attributes_num, std::size_t children_number)
-        : NodeBase<MdNode>(children_number), rhs(attributes_num) {}
+    MdNode(std::size_t column_matches_number, std::size_t children_number)
+        : NodeBase<MdNode>(children_number), rhs(column_matches_number) {}
 
-    explicit MdNode(Rhs rhs) : NodeBase<MdNode>(rhs.size), rhs(std::move(rhs)) {}
+    explicit MdNode(std::size_t column_matches_number, Rhs rhs)
+        : NodeBase<MdNode>(column_matches_number), rhs(std::move(rhs)) {}
 };
 }  // namespace algos::hymd::lattice

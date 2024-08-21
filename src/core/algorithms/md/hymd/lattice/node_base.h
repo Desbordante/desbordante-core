@@ -69,13 +69,23 @@ protected:
 
 template <typename NodeType>
 void AddUnchecked(NodeType* cur_node_ptr, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter,
-                  auto final_node_action) {
+                  auto final_node_action, auto&& adder) {
     assert(cur_node_ptr->IsEmpty());
     for (auto lhs_end = lhs.end(); cur_lhs_iter != lhs_end; ++cur_lhs_iter) {
         auto const& [child_array_index, next_ccv_id] = *cur_lhs_iter;
-        cur_node_ptr = cur_node_ptr->AddOneUnchecked(child_array_index, next_ccv_id);
+        cur_node_ptr = adder(cur_node_ptr, child_array_index, next_ccv_id);
     }
     final_node_action(cur_node_ptr);
+}
+
+template <typename NodeType>
+void AddUnchecked(NodeType* cur_node_ptr, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter,
+                  auto final_node_action) {
+    AddUnchecked(cur_node_ptr, lhs, cur_lhs_iter, final_node_action,
+                 [](NodeType* node, model::Index child_array_index,
+                    ColumnClassifierValueId next_ccv_id) {
+                     return node->AddOneUnchecked(child_array_index, next_ccv_id);
+                 });
 }
 
 template <typename NodeType>
