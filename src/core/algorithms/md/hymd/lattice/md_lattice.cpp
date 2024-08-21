@@ -28,8 +28,8 @@ namespace algos::hymd::lattice {
 MdLattice::MdLattice(SingleLevelFunc single_level_func,
                      std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info, bool prune_nondisjoint,
                      std::size_t max_cardinality, Rhs max_rhs)
-    : column_matches_size_(max_rhs.size),
-      md_root_(std::move(max_rhs)),
+    : column_matches_size_(lhs_ccv_id_info.size()),
+      md_root_(column_matches_size_, std::move(max_rhs)),
       support_root_(column_matches_size_),
       get_single_level_(std::move(single_level_func)),
       lhs_ccv_id_info_(&lhs_ccv_id_info),
@@ -178,7 +178,11 @@ inline void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md,
     assert(cur_node.rhs.IsEmpty());
     assert(cur_node_iter >= md.lhs_specialization.specialization_data.spec_before);
     auto set_rhs = [&](MdNode* node) { node->SetRhs(md.GetRhs()); };
-    AddUnchecked(&cur_node, md.lhs_specialization.old_lhs, cur_node_iter, set_rhs);
+    AddUnchecked(
+            &cur_node, md.lhs_specialization.old_lhs, cur_node_iter, set_rhs,
+            [&](MdNode* node, model::Index child_array_index, ColumnClassifierValueId next_ccv_id) {
+                return node->AddOneUnchecked(child_array_index, next_ccv_id, column_matches_size_);
+            });
     UpdateMaxLevel(md.lhs_specialization, handle_level_update_tail);
 }
 
@@ -430,8 +434,9 @@ inline void MdLattice::AddIfMinimalInsert(MdInfoType md) {
     std::size_t const fol_spec_child_index = old_child_array_index + offset;
     auto add_all = [](auto add_until_end, ...) { add_until_end(); };
     auto fol_add = [&](MdNode& node) {
-        AddNewMinimal(*node.AddOneUnchecked(fol_spec_child_index, next_lhs_ccv_id), md,
-                      spec_iter + 1, add_all);
+        AddNewMinimal(
+                *node.AddOneUnchecked(fol_spec_child_index, next_lhs_ccv_id, column_matches_size_),
+                md, spec_iter + 1, add_all);
     };
     auto handle_tail = [&](auto& helper) {
         auto& total_checker = helper.GetTotalChecker();
