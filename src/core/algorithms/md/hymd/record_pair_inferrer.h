@@ -377,7 +377,9 @@ public:
     template <typename... Args>
     static std::pair<RecordPairInferrer, bool> Create(Args&&... args) {
         auto inferrer = RecordPairInferrer{std::forward<Args>(args)...};
-        return {std::move(inferrer), inferrer.Initialize()};
+        bool done = inferrer.Initialize();
+        if (done) return {std::move(inferrer), true};
+        return {std::move(inferrer), inferrer.InferFromRecordPairs({})};
     }
 
     bool InferFromRecordPairs(Recommendations recommendations);
