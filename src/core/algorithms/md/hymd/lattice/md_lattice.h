@@ -88,7 +88,11 @@ public:
         }
 
         Rhs& GetRhs() {
-            return *node_info_.rhs;
+            return node_info_.node->rhs;
+        }
+
+        MdNode const& GetNode() const {
+            return *node_info_.node;
         }
 
         void MarkUnsupported();
@@ -98,6 +102,12 @@ public:
         }
 
         void LowerAndSpecialize(utility::InvalidatedRhss const& invalidated);
+    };
+
+    struct PathInfo {
+        MdNode* node_ptr;
+        MdOptionalMap* map_ptr;
+        MdCCVIdChildMap::iterator map_it;
     };
 
 private:
@@ -126,7 +136,7 @@ private:
             std::vector<ColumnClassifierValueId> const& ccv_id_bounds,
             std::size_t& max_count) const;
 
-    void TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
+    void TryAddRefiner(std::vector<MdRefiner>& found, MdNode& cur_node,
                        PairComparisonResult const& pair_comparison_result,
                        MdLhs const& cur_node_lhs);
     void CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefiner>& found,
@@ -173,6 +183,9 @@ private:
     // Generalization check, specialization (add if minimal)
     void MarkNewLhs(SupportNode& cur_node, MdLhs const& lhs, MdLhs::iterator cur_lhs_iter);
     void MarkUnsupported(MdLhs const& lhs);
+
+    template <bool MayNotExist>
+    void TryDeleteEmptyNode(MdLhs const& lhs);
 
     void SpecializeElement(MdLhs const& lhs, auto& rhs, MdLhs::iterator lhs_iter,
                            model::Index spec_child_index, ColumnClassifierValueId spec_past,
