@@ -382,7 +382,7 @@ struct RecordPairInferrer::SampleLoopBody<false> {
     SamplingBodyVariables variables;
 
     template <typename AddComparisonType>
-    void operator()(ValueIdentifier value_id, AddComparisonType add_comparison) {
+    void operator()(ValueIdentifier value_id, AddComparisonType&& add_comparison) {
         auto const [left_records, right_records, clusters, ranked_column_match_records,
                     record_rank] = variables;
         ValueRankedRecords const& ranked_list = ranked_column_match_records[value_id];
@@ -399,24 +399,30 @@ struct RecordPairInferrer::SampleLoopBody<false> {
 template <>
 struct RecordPairInferrer::SampleLoopBody<true> {
     SamplingBodyVariables variables;
+    SampleLoopBody<false> full_loop{variables};
 
     template <typename AddComparisonType>
-    void operator()(ValueIdentifier value_id, AddComparisonType add_comparison) {
+    void operator()(ValueIdentifier value_id, AddComparisonType&& add_comparison) {
         auto const [left_records, right_records, clusters, ranked_column_match_records,
                     window_size] = variables;
         ValueRankedRecords const& ranked_list = ranked_column_match_records[value_id];
-        if (window_size >= ranked_list.size()) return;
+        std::size_t const ranked_list_size = ranked_list.size();
+        if (window_size >= ranked_list_size) return;
         indexes::PliCluster const& cluster = clusters[value_id];
-        DESBORDANTE_ASSUME(ranked_list.size() >= cluster.size());
-        std::size_t limit = std::min(ranked_list.size() - window_size, cluster.size());
-        auto cluster_it = ranked_list.begin();
-        auto cluster_end = ranked_list.begin() + limit;
-        auto list_it = ranked_list.begin() + window_size;
-        while (cluster_it != cluster_end) {
-            RecordIdentifier left_record_id = *cluster_it++;
-            RecordIdentifier right_record_id = *list_it++;
-            CompressedRecord const& right_record = right_records[right_record_id];
+        std::size_t const cluster_size = cluster.size();
+        if (window_size >= cluster_size) {
+            full_loop(value_id, add_comparison);
+            return;
+        }
+        auto pivot = ranked_list.begin();
+        auto partner = ranked_list.begin() + window_size;
+        DESBORDANTE_ASSUME(ranked_list_size >= cluster_size);
+        auto const end = ranked_list.begin() + cluster_size;
+        while (partner != end) {
+            RecordIdentifier const left_record_id = *pivot++;
+            RecordIdentifier const right_record_id = *partner++;
             CompressedRecord const& left_record = left_records[left_record_id];
+            CompressedRecord const& right_record = right_records[right_record_id];
             add_comparison(left_record, right_record);
         }
     }
