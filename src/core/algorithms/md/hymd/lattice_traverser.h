@@ -18,6 +18,20 @@ private:
         static constexpr double kRatioBound = 0.01;
     };
 
+    class ClearingRecRef {
+        Recommendations& recommendations_;
+    public:
+        ClearingRecRef(Recommendations& recommendations) : recommendations_(recommendations){}
+
+        operator Recommendations const& () const {
+            return recommendations_;
+        }
+
+        ~ClearingRecRef() {
+            recommendations_.clear();
+        }
+    };
+
     Recommendations recommendations_;
 
     std::unique_ptr<lattice::LevelGetter> const level_getter_;
@@ -32,10 +46,8 @@ public:
 
     bool TraverseLattice(bool traverse_all);
 
-    Recommendations TakeRecommendations() noexcept {
-        auto recommendations = std::move(recommendations_);
-        recommendations_.clear();
-        return recommendations;
+    ClearingRecRef TakeRecommendations() noexcept {
+        return recommendations_;
     }
 };
 
