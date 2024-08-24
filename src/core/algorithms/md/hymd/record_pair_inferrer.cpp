@@ -361,7 +361,7 @@ void RecordPairInferrer::ParallelCompareAndProcess(auto compare, std::size_t ind
     }
 }
 
-void RecordPairInferrer::ProcessRecommendationsParallel(Recommendations recommendations) {
+void RecordPairInferrer::ProcessRecommendationsParallel(Recommendations const& recommendations) {
     auto compare_pair = [&](model::Index index, Comparisons* vec) {
         auto const& [left_record_ptr, right_record_ptr] = recommendations[index];
         vec->push_back(CompareRecords(*left_record_ptr, *right_record_ptr));
@@ -372,7 +372,7 @@ void RecordPairInferrer::ProcessRecommendationsParallel(Recommendations recommen
     ParallelCompareAndProcess(compare_pair, recommendations.size(), try_process);
 }
 
-void RecordPairInferrer::ProcessRecommendationsSeq(Recommendations recommendations) {
+void RecordPairInferrer::ProcessRecommendationsSeq(Recommendations const& recommendations) {
     for (auto const& [left_record_ptr, right_record_ptr] : recommendations) {
         TryProcessComparison(CompareRecords(*left_record_ptr, *right_record_ptr));
     }
@@ -488,8 +488,8 @@ PairComparisonResult RecordPairInferrer::CompareRecords(
     return {std::move(rhss), *lhs_ccv_id_info_};
 }
 
-bool RecordPairInferrer::InferFromRecordPairs(Recommendations recommendations) {
-    (this->*recom_process_method_)(std::move(recommendations));
+bool RecordPairInferrer::InferFromRecordPairs(Recommendations const& recommendations) {
+    (this->*recom_process_method_)(recommendations);
 
     constexpr double kTopThresholdDecrease = 0.9;
     DESBORDANTE_ASSUME(!efficiency_queue_.empty());
