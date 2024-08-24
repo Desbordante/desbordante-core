@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <stack>
 
 #include "algorithms/md/hymd/lattice/md_specialization.h"
 #include "algorithms/md/hymd/lattice/multi_md_specialization.h"
@@ -457,10 +458,11 @@ inline void MdLattice::AddIfMinimalInsert(MdInfoType md) {
 
 std::size_t MdLattice::MdRefiner::Refine() {
     std::size_t removed = 0;
+    Rhs& rhs = node_info_.node->rhs;
     for (auto new_rhs : invalidated_.GetUpdateView()) {
         auto const& [rhs_index, new_ccv_id] = new_rhs;
-        DESBORDANTE_ASSUME(node_info_.rhs->begin[rhs_index] != kLowestCCValueId);
-        node_info_.rhs->Set(rhs_index, kLowestCCValueId);
+        DESBORDANTE_ASSUME(rhs.begin[rhs_index] != kLowestCCValueId);
+        rhs.Set(rhs_index, kLowestCCValueId);
         bool const trivial = new_ccv_id == kLowestCCValueId;
         if (trivial) {
             ++removed;
@@ -471,17 +473,21 @@ std::size_t MdLattice::MdRefiner::Refine() {
             ++removed;
             continue;
         }
-        DESBORDANTE_ASSUME(node_info_.rhs->begin[rhs_index] == kLowestCCValueId &&
+        DESBORDANTE_ASSUME(rhs.begin[rhs_index] == kLowestCCValueId &&
                            new_ccv_id != kLowestCCValueId);
-        node_info_.rhs->Set(rhs_index, new_ccv_id);
+        rhs.Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), *pair_comparison_result_, invalidated_.GetInvalidated());
+    if (rhs.IsEmpty() && node_info_.node->IsEmpty()) {
+        lattice_->TryDeleteEmptyNode<false>(GetLhs());
+    }
     return removed;
 }
 
-void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
+void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, MdNode& cur_node,
                               PairComparisonResult const& pair_comparison_result,
                               MdLhs const& cur_node_lhs) {
+    Rhs& rhs = cur_node.rhs;
     utility::InvalidatedRhss invalidated;
     Index rhs_index = 0;
     Index cur_lhs_index = 0;
@@ -518,7 +524,7 @@ void MdLattice::TryAddRefiner(std::vector<MdRefiner>& found, Rhs& rhs,
         try_push_no_match_classifier();
     }
     if (invalidated.IsEmpty()) return;
-    found.emplace_back(this, &pair_comparison_result, MdLatticeNodeInfo{cur_node_lhs, &rhs},
+    found.emplace_back(this, &pair_comparison_result, MdLatticeNodeInfo{cur_node_lhs, &cur_node},
                        std::move(invalidated));
 }
 
@@ -526,7 +532,7 @@ void MdLattice::CollectRefinersForViolated(MdNode& cur_node, std::vector<MdRefin
                                            MdLhs& cur_node_lhs, MdLhs::iterator cur_lhs_iter,
                                            PairComparisonResult const& pair_comparison_result) {
     if (!cur_node.rhs.IsEmpty()) {
-        TryAddRefiner(found, cur_node.rhs, pair_comparison_result, cur_node_lhs);
+        TryAddRefiner(found, cur_node, pair_comparison_result, cur_node_lhs);
     }
 
     Index child_array_index = 0;
@@ -556,10 +562,39 @@ auto MdLattice::CollectRefinersForViolated(PairComparisonResult const& pair_comp
     // TODO: traverse support trie simultaneously.
     util::EraseIfReplace(found, [this](MdRefiner& refiner) {
         bool const unsupported = IsUnsupported(refiner.GetLhs());
-        if (unsupported) refiner.ZeroRhs();
+        if (unsupported) {
+            refiner.ZeroRhs();
+            TryDeleteEmptyNode<true>(refiner.GetLhs());
+        }
         return unsupported;
     });
     return found;
+}
+
+template <bool MayNotExist>
+void MdLattice::TryDeleteEmptyNode(MdLhs const& lhs) {
+    std::stack<PathInfo> path_to_node;
+    MdNode* cur_node_ptr = &md_root_;
+    for (auto const& [offset, ccv_id] : lhs) {
+        auto& map = cur_node_ptr->children[offset];
+        auto it = map->find(ccv_id);
+        if constexpr (MayNotExist) {
+            if (it == map->end()) return;
+        } else {
+            DESBORDANTE_ASSUME(it != map->end());
+        }
+        path_to_node.emplace(cur_node_ptr, &map, it);
+        cur_node_ptr = &it->second;
+    }
+
+    while (!path_to_node.empty()) {
+        auto& [last_node, map_ptr, it] = path_to_node.top();
+        (*map_ptr)->erase(it);
+        if (map_ptr->HasValue()) break;
+        if (!last_node->rhs.IsEmpty()) break;
+        if (!last_node->IsEmpty()) break;
+        path_to_node.pop();
+    }
 }
 
 bool MdLattice::IsUnsupported(MdLhs const& lhs) const {
@@ -576,6 +611,7 @@ void MdLattice::MdVerificationMessenger::MarkUnsupported() {
     ZeroRhs();
 
     lattice_->MarkUnsupported(GetLhs());
+    lattice_->TryDeleteEmptyNode<true>(GetLhs());
 }
 
 void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
@@ -586,6 +622,9 @@ void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
         rhs.Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), invalidated.GetInvalidated());
+    if (GetRhs().IsEmpty() && GetNode().IsEmpty()) {
+        lattice_->TryDeleteEmptyNode<false>(GetLhs());
+    }
 }
 
 void MdLattice::RaiseInterestingnessCCVIds(
@@ -693,9 +732,9 @@ bool MdLattice::HasGeneralization(Md const& md) const {
 void MdLattice::GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>& collected,
                          MdLhs& cur_node_lhs, Index const cur_node_index,
                          std::size_t const level_left) {
-    Rhs& rhs = cur_node.rhs;
     if (level_left == 0) {
-        if (!rhs.IsEmpty()) collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &rhs});
+        if (!cur_node.rhs.IsEmpty())
+            collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &cur_node});
         return;
     }
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
@@ -719,7 +758,10 @@ auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationM
     // TODO: traverse support trie simultaneously.
     util::EraseIfReplace(collected, [this](MdVerificationMessenger& messenger) {
         bool is_unsupported = IsUnsupported(messenger.GetLhs());
-        if (is_unsupported) messenger.ZeroRhs();
+        if (is_unsupported) {
+            messenger.ZeroRhs();
+            TryDeleteEmptyNode<true>(messenger.GetLhs());
+        }
         return is_unsupported;
     });
     return collected;
@@ -727,8 +769,7 @@ auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationM
 
 void MdLattice::GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected,
                        MdLhs& cur_node_lhs, Index const this_node_index) {
-    lattice::Rhs& rhs = cur_node.rhs;
-    if (!rhs.IsEmpty()) collected.emplace_back(cur_node_lhs, &rhs);
+    if (!cur_node.rhs.IsEmpty()) collected.emplace_back(cur_node_lhs, &cur_node);
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
         Index const next_node_index = this_node_index + child_array_index;
         ColumnClassifierValueId& next_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);
