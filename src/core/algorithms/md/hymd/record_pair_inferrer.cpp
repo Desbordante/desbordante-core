@@ -341,10 +341,11 @@ bool RecordPairInferrer::InitializeShortParallel(Efficiency& efficiency) {
     return InitializeParallelImpl<true>(efficiency);
 }
 
-void RecordPairInferrer::ProcessPairComparison(PairComparisonResult const& pair_comparison_result) {
+bool RecordPairInferrer::ProcessPairComparison(PairComparisonResult const& pair_comparison_result) {
     using MdRefiner = lattice::MdLattice::MdRefiner;
     std::vector<MdRefiner> refiners = lattice_->CollectRefinersForViolated(pair_comparison_result);
     std::for_each(refiners.begin(), refiners.end(), std::mem_fn(&MdRefiner::Refine));
+    return !refiners.empty();
 }
 
 void RecordPairInferrer::ParallelCompareAndProcess(auto compare, std::size_t index_limit,

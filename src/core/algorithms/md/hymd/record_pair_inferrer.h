@@ -255,7 +255,7 @@ private:
             MultiThreaded() ? &RecordPairInferrer::ProcessRecommendationsParallel
                             : &RecordPairInferrer::ProcessRecommendationsSeq;
 
-    void ProcessPairComparison(PairComparisonResult const& pair_comparison_result);
+    bool ProcessPairComparison(PairComparisonResult const& pair_comparison_result);
 
     // Short sampling: do nearest neighbor comparison similar to HyFD, parameter is window size,
     // sort based on CCV ID in the column match, then on the CCV ID to the left, then to the right
@@ -266,8 +266,8 @@ private:
 
     bool TryProcessComparison(PairComparisonResult&& comparison) {
         auto const& [it, not_seen_before] = processed_comparisons_.insert(std::move(comparison));
-        if (not_seen_before) ProcessPairComparison(*it);
-        return not_seen_before;
+        if (not_seen_before) return ProcessPairComparison(*it);
+        return false;
     }
 
     void AddComparison(Efficiency& efficiency, PairComparisonResult&& comparison) {
