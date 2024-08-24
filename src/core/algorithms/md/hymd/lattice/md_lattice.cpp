@@ -563,7 +563,6 @@ auto MdLattice::CollectRefinersForViolated(PairComparisonResult const& pair_comp
     util::EraseIfReplace(found, [this](MdRefiner& refiner) {
         bool const unsupported = IsUnsupported(refiner.GetLhs());
         if (unsupported) {
-            refiner.ZeroRhs();
             TryDeleteEmptyNode<true>(refiner.GetLhs());
         }
         return unsupported;
@@ -608,7 +607,6 @@ void MdLattice::MdVerificationMessenger::MarkUnsupported() {
     // This matters. Violation search can find a node with a specialized LHS but higher RHS column
     // classifier value ID, leading to extra work (though no influence on correctness, as MDs with
     // unsupported LHSs are filtered out).
-    ZeroRhs();
 
     lattice_->MarkUnsupported(GetLhs());
     lattice_->TryDeleteEmptyNode<true>(GetLhs());
@@ -759,7 +757,6 @@ auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationM
     util::EraseIfReplace(collected, [this](MdVerificationMessenger& messenger) {
         bool is_unsupported = IsUnsupported(messenger.GetLhs());
         if (is_unsupported) {
-            messenger.ZeroRhs();
             TryDeleteEmptyNode<true>(messenger.GetLhs());
         }
         return is_unsupported;
