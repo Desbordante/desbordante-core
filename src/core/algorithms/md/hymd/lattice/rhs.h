@@ -23,10 +23,6 @@ struct Rhs {
         return begin[index];
     }
 
-    void ZeroRhs() {
-        non_zero_count = 0;
-    }
-
     bool IsEmpty() const {
         return non_zero_count == 0;
     }
