@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "algorithms/md/hymd/lattice/md_node.h"
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/md_lhs.h"
 
@@ -9,10 +10,10 @@ namespace algos::hymd::lattice {
 
 struct MdLatticeNodeInfo {
     MdLhs lhs;
-    Rhs* rhs;
+    MdNode* node;
 
     void ZeroRhs() {
-        rhs->ZeroRhs();
+        node->rhs.ZeroRhs();
     }
 };
 

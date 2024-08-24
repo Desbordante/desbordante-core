@@ -256,7 +256,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
     }
     for (lattice::MdLatticeNodeInfo const& md : lattice_mds) {
         std::vector<model::md::LhsColumnSimilarityClassifier> const lhs = convert_lhs(md.lhs);
-        lattice::Rhs const& rhs = *md.rhs;
+        lattice::Rhs const& rhs = md.node->rhs;
         for (Index rhs_index = 0; rhs_index != column_match_number; ++rhs_index) {
             ColumnClassifierValueId const rhs_value_id = rhs[rhs_index];
             if (rhs_value_id == kLowestCCValueId) continue;
