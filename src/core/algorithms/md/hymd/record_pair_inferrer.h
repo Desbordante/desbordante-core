@@ -247,10 +247,10 @@ private:
     SamplingMethod sampling_method_ =
             MultiThreaded() ? &RecordPairInferrer::SampleParallel : &RecordPairInferrer::SampleSeq;
 
-    void ProcessRecommendationsParallel(Recommendations recommendations);
-    void ProcessRecommendationsSeq(Recommendations recommendations);
+    void ProcessRecommendationsParallel(Recommendations const& recommendations);
+    void ProcessRecommendationsSeq(Recommendations const& recommendations);
 
-    using ProcessRecommendationsMethod = void (RecordPairInferrer::*)(Recommendations);
+    using ProcessRecommendationsMethod = void (RecordPairInferrer::*)(Recommendations const&);
     ProcessRecommendationsMethod recom_process_method_ =
             MultiThreaded() ? &RecordPairInferrer::ProcessRecommendationsParallel
                             : &RecordPairInferrer::ProcessRecommendationsSeq;
@@ -382,7 +382,7 @@ public:
         return {std::move(inferrer), inferrer.InferFromRecordPairs({})};
     }
 
-    bool InferFromRecordPairs(Recommendations recommendations);
+    bool InferFromRecordPairs(Recommendations const& recommendations);
 };
 
 }  // namespace algos::hymd
