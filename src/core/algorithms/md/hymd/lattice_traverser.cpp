@@ -48,6 +48,7 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
                     lattice_statistics.kRatioBound * (lattice_statistics.all_mds_num -
                                                       lattice_statistics.invalidated_mds_num))
             return false;
+        recommendations_.clear();
     }
     return true;
 }
