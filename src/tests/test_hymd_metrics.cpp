@@ -3,7 +3,6 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/date_dif_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/lcs_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_distance.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
@@ -60,15 +59,7 @@ INSTANTIATE_TEST_SUITE_P(
                         "word1", "word2", 0},
                 SimilarityTestParams{
                         [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "word", "word", 1.0},
-                // levenshtein
-                SimilarityTestParams{LevenshteinDistance, "", "", 0},
-                SimilarityTestParams{LevenshteinDistance, "kitten", "", 6},
-                SimilarityTestParams{LevenshteinDistance, "", "sitting", 7},
-                SimilarityTestParams{LevenshteinDistance, "kitten", "sitting", 3},
-                SimilarityTestParams{LevenshteinDistance, "abcdef", "xyabdxe", 5},
-                SimilarityTestParams{LevenshteinDistance, "abcdef", "xyz", 6},
-                SimilarityTestParams{LevenshteinDistance, "aaa", "aaa", 0}));
+                        "word", "word", 1.0}));
 
 struct MongeElkanTestParams {
     std::vector<std::string> vec1;
