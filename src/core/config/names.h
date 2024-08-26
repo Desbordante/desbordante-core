@@ -79,4 +79,5 @@ constexpr auto kPruneNonDisjoint = "prune_nondisjoint";
 constexpr auto kMinSupport = "min_support";
 constexpr auto kColumnMatches = "column_matches";
 constexpr auto kMaxCardinality = "max_cardinality";
+constexpr auto kLevelDefinition = "level_definition";
 }  // namespace config::names

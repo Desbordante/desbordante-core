@@ -6,6 +6,7 @@
 
 #include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
+#include "algorithms/md/hymd/lattice/single_level_func.h"
 #include "algorithms/md/hymd/lattice_traverser.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
@@ -32,8 +33,8 @@ HyMD::HyMD() : MdAlgorithm({}) {
 
 void HyMD::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable(
-            {kMinSupport, kPruneNonDisjoint, kColumnMatches, kMaxCardinality, kThreads});
+    MakeOptionsAvailable({kMinSupport, kPruneNonDisjoint, kColumnMatches, kMaxCardinality, kThreads,
+                          kLevelDefinition});
 }
 
 void HyMD::RegisterOptions() {
@@ -104,6 +105,8 @@ void HyMD::RegisterOptions() {
     RegisterOption(Option{&max_cardinality_, kMaxCardinality, kDMaxCardinality,
                           std::numeric_limits<std::size_t>::max()});
     RegisterOption(config::kThreadNumberOpt(&threads_));
+    RegisterOption(Option{&level_definition_, kLevelDefinition, kDLevelDefinition,
+                          +LevelDefinition::cardinality});
 }
 
 void HyMD::ResetStateMd() {}
@@ -142,7 +145,18 @@ unsigned long long HyMD::ExecuteInternal() {
     // TODO: make infrastructure for depth level
     auto [similarity_data, short_sampling_enable] =
             SimilarityData::CreateFrom(records_info_.get(), column_matches_option_, pool_ptr);
-    lattice::MdLattice lattice{[](...) { return 1; }, similarity_data.GetLhsIdsInfo(),
+    lattice::SingleLevelFunc single_level_func;
+    switch (level_definition_) {
+        case +LevelDefinition::cardinality:
+            single_level_func = [](...) { return 1; };
+            break;
+        case +LevelDefinition::lattice:
+            single_level_func = lattice::SingleLevelFunc{nullptr};
+            break;
+        default:
+            DESBORDANTE_ASSUME(false);
+    }
+    lattice::MdLattice lattice{single_level_func, similarity_data.GetLhsIdsInfo(),
                                prune_nondisjoint_, max_cardinality_,
                                similarity_data.CreateMaxRhs()};
     auto [record_pair_inferrer, done] = RecordPairInferrer::Create(

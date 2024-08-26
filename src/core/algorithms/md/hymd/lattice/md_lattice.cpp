@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <stack>
+#include <type_traits>
 
 #include "algorithms/md/hymd/lattice/md_specialization.h"
 #include "algorithms/md/hymd/lattice/multi_md_specialization.h"
@@ -184,7 +185,7 @@ inline void MdLattice::AddNewMinimal(MdNode& cur_node, MdInfoType const& md,
             [&](MdNode* node, model::Index child_array_index, ColumnClassifierValueId next_ccv_id) {
                 return node->AddOneUnchecked(child_array_index, next_ccv_id, column_matches_size_);
             });
-    UpdateMaxLevel(md.lhs_specialization, handle_level_update_tail);
+    if (get_single_level_) UpdateMaxLevel(md.lhs_specialization, handle_level_update_tail);
 }
 
 inline void MdLattice::UpdateMaxLevel(LhsSpecialization const& lhs, auto handle_tail) {
@@ -752,7 +753,11 @@ void MdLattice::GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>&
 auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationMessenger> {
     std::vector<MdVerificationMessenger> collected;
     MdLhs current_lhs(column_matches_size_);
-    GetLevel(md_root_, collected, current_lhs, 0, level);
+    if (!get_single_level_) {
+        GetAll(md_root_, collected, current_lhs, 0);
+    } else {
+        GetLevel(md_root_, collected, current_lhs, 0, level);
+    }
     // TODO: traverse support trie simultaneously.
     util::EraseIfReplace(collected, [this](MdVerificationMessenger& messenger) {
         bool is_unsupported = IsUnsupported(messenger.GetLhs());
@@ -764,9 +769,17 @@ auto MdLattice::GetLevel(std::size_t const level) -> std::vector<MdVerificationM
     return collected;
 }
 
-void MdLattice::GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected,
-                       MdLhs& cur_node_lhs, Index const this_node_index) {
-    if (!cur_node.rhs.IsEmpty()) collected.emplace_back(cur_node_lhs, &cur_node);
+template <typename NodeInfo>
+void MdLattice::GetAll(MdNode& cur_node, std::vector<NodeInfo>& collected, MdLhs& cur_node_lhs,
+                       Index const this_node_index) {
+    if (!cur_node.rhs.IsEmpty()) {
+        if constexpr (std::is_same_v<NodeInfo, MdLatticeNodeInfo>) {
+            collected.emplace_back(cur_node_lhs, &cur_node);
+        } else {
+            static_assert(std::is_same_v<NodeInfo, MdVerificationMessenger>);
+            collected.emplace_back(this, MdLatticeNodeInfo{cur_node_lhs, &cur_node});
+        }
+    }
     auto collect = [&](MdCCVIdChildMap& child_map, model::Index child_array_index) {
         Index const next_node_index = this_node_index + child_array_index;
         ColumnClassifierValueId& next_lhs_ccv_id = cur_node_lhs.AddNext(child_array_index);

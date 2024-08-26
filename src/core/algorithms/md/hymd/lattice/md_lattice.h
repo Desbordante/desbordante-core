@@ -195,8 +195,9 @@ private:
                     Rhss const& rhss);
     void Specialize(MdLhs const& lhs, Rhss const& rhss);
 
-    void GetAll(MdNode& cur_node, std::vector<MdLatticeNodeInfo>& collected, MdLhs& cur_node_lhs,
-                model::Index this_node_index);
+    template <typename NodeInfo>
+    void GetAll(MdNode& cur_node, std::vector<NodeInfo>& collected, MdLhs& cur_node_lhs,
+                model::Index const this_node_index);
 
     Rhs& GetRhs(MdLhs const& lhs) {
         MdNode* node = &md_root_;
