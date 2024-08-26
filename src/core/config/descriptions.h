@@ -5,6 +5,7 @@
 
 #include "algorithms/cfd/enums.h"
 #include "algorithms/fd/tane/enums.h"
+#include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/enum_to_available_values.h"
 
@@ -21,6 +22,9 @@ std::string const kDPfdErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::PfdErrorMeasure>();
 std::string const kDAfdErrorMeasureString =
         "AFD error measure to use\n" + util::EnumToAvailableValues<algos::AfdErrorMeasure>();
+std::string const kDLevelDefinitionString =
+        "MD lattice level definition to use\n" +
+        util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -154,4 +158,5 @@ constexpr auto kDPruneNonDisjoint =
 constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
+auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 }  // namespace config::descriptions

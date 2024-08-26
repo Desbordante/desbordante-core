@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
@@ -32,6 +33,7 @@ private:
     bool prune_nondisjoint_ = true;
     std::size_t max_cardinality_ = -1;
     config::ThreadNumType threads_;
+    LevelDefinition level_definition_ = +LevelDefinition::cardinality;
     // TODO: different level definitions (cardinality currently used)
     // TODO: comparing only some values during similarity calculation
     // TODO: automatically calculating minimal support
