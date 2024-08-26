@@ -9,6 +9,7 @@
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"
+#include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
@@ -126,6 +127,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<config::AfdErrorMeasureType>,
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
+        kEnumConvPair<algos::hymd::LevelDefinition>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
