@@ -26,6 +26,9 @@ public:
     template <typename T>
     T GetValueAs(std::byte const* value) const;
 
+    virtual CompareResult CompareNumeric(std::byte const* l, INumericType const* l_type,
+                                         std::byte const* r, INumericType const* r_type) const = 0;
+
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
     virtual std::byte* Sub(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -79,8 +82,10 @@ public:
 
     explicit NumericType(TypeId id) : INumericType(id) {}
 
-    CompareResult Compare(std::byte const* l, std::byte const* r) const override;
     void ValueFromStr(std::byte* buf, std::string s) const override;
+    CompareResult Compare(std::byte const* l, std::byte const* r) const override;
+    CompareResult CompareNumeric(std::byte const* l, INumericType const* l_type, std::byte const* r,
+                                 INumericType const* r_type) const override;
 
     std::byte* Negate(std::byte const* value, std::byte* res) const override;
     std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const override;
@@ -147,6 +152,20 @@ void NumericType<T>::CastTo(std::byte* value, TypeId to_type) const {
             break;
         }
     }
+}
+
+template <typename T>
+CompareResult NumericType<T>::CompareNumeric(std::byte const* l, INumericType const* l_type,
+                                             std::byte const* r, INumericType const* r_type) const {
+    Double l_val = l_type->GetValueAs<Double>(l);
+    Double r_val = r_type->GetValueAs<Double>(r);
+    if (l_val == r_val) {
+        return CompareResult::kEqual;
+    }
+    if (l_val < r_val) {
+        return CompareResult::kLess;
+    }
+    return CompareResult::kGreater;
 }
 
 template <typename T>
