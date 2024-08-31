@@ -26,7 +26,7 @@ INITIALIZE_EASYLOGGINGPP
 
 namespace python_bindings {
 
-PYBIND11_MODULE(desbordante, module) {
+PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
     using namespace pybind11::literals;
 
     if (std::filesystem::exists("logging.conf")) {
