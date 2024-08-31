@@ -9,15 +9,17 @@ double MongeElkan(std::vector<std::string> const& left, std::vector<std::string>
                   auto const& similarity_function) {
     if (left.empty() && right.empty()) return 1.0;
     if (left.empty() || right.empty()) return 0.0;
+    // float for StringMetrics (used in Metanome) equivalence
+    using FloatingPointType = float;
 
     auto monge_elkan = [&](std::vector<std::string> const& left,
                            std::vector<std::string> const& right) {
-        double sum = 0.0;
+        FloatingPointType sum = 0.0;
         for (std::string const& s : left) {
             auto right_it = right.begin();
-            double max_sim = similarity_function(s, *right_it);
+            FloatingPointType max_sim = similarity_function(s, *right_it);
             for (auto const right_end = right.end(); ++right_it != right_end;) {
-                double const similarity = similarity_function(s, *right_it);
+                FloatingPointType const similarity = similarity_function(s, *right_it);
                 if (similarity > max_sim) max_sim = similarity;
             }
             sum += max_sim;
