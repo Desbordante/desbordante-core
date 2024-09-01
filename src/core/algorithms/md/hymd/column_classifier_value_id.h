@@ -3,5 +3,5 @@
 #include <cstdint>
 
 namespace algos::hymd {
-using ColumnClassifierValueId = std::uint16_t;
+using ColumnClassifierValueId = std::uint32_t;
 }  // namespace algos::hymd
