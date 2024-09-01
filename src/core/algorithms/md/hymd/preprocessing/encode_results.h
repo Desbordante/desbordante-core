@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <limits>
 #include <set>
 #include <span>
 #include <unordered_map>
@@ -11,6 +12,7 @@
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "algorithms/md/hymd/table_identifiers.h"
+#include "util/desbordante_assume.h"
 
 namespace algos::hymd::preprocessing {
 
@@ -50,6 +52,7 @@ CreateCCValueIdMap(std::span<ResultType const> additional_results,
 
     ColumnClassifierValueId ccv_id = 0;
     for (ResultType const& result : ordered_results) {
+        DESBORDANTE_ASSUME(ccv_id != std::numeric_limits<ColumnClassifierValueId>::max());
         value_map[result] = ccv_id++;
     }
     return {std::move(ordered_results), std::move(value_map)};
