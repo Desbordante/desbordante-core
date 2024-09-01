@@ -37,6 +37,8 @@ private:
             std::tuple<indexes::SimilarityIndex const&, std::vector<indexes::PliCluster> const&>;
     using InitializationVariables =
             std::tuple<std::size_t, ColumnMatchRankedRecords&, InitializationBodyVariables>;
+
+#if 0
     using SamplingOrderStats = std::vector<std::pair<ColumnClassifierValueId, unsigned>>;
 
     struct FullSamplingSortComparer {
@@ -47,6 +49,7 @@ private:
 
         bool operator()(RecordIdentifier rec1, RecordIdentifier rec2) const noexcept;
     };
+#endif
 
     struct ShortSamplingClusterComparer {
         struct Info {
@@ -81,6 +84,7 @@ private:
         return {records, prev_info, next_info};
     }
 
+#if 0
     struct ShortSamplingNonClusterComparer {
         using ValueMatrixRowRef = indexes::SimilarityMatrixRow const&;
 
@@ -157,6 +161,7 @@ private:
 
         return {cluster_span, records, prev_info, next_info};
     }
+#endif
 
     class Efficiency {
     private:
@@ -215,9 +220,12 @@ private:
     // One table + all sim measures are symmetrical + equality means 1.0
     std::vector<bool> sample_short_;
     std::priority_queue<Efficiency> efficiency_queue_;
-    // Sets for nearest-neighbor comparison for short sampling, RHS records for full sampling (LHS
-    // records are left table's clusters' records)
-    // Records are ranked lexicographically, where words are the numbers of CCV IDs in comparisons.
+    // For short sampling: cluster records are first, then same order as full sampling.
+    // For full sampling: RHS records for full sampling (LHS records are left table's clusters'
+    // records)
+    // If full sorting is enabled, records are ranked lexicographically, where words are the numbers
+    // of CCV IDs in comparisons.
+    // If sorting is disabled, the most similar records of the sampled column match go first.
     std::vector<ColumnMatchRankedRecords> ranked_records_;
 
     std::unordered_set<PairComparisonResult> processed_comparisons_;
@@ -324,6 +332,7 @@ private:
         return {prev_column_match_index, next_column_match_index};
     }
 
+#if 0
     FullSamplingSortComparer CreateComparer(indexes::PliCluster const& cluster,
                                             ValueRankedRecords const& right_records,
                                             model::Index column_match_index) const {
@@ -341,6 +350,7 @@ private:
         }
         return {std::move(order_stats_prev), std::move(order_stats_next)};
     }
+#endif
 
     template <bool IsShort>
     struct SampleLoopBody;
@@ -361,17 +371,21 @@ private:
 
     void ParallelCompareAndProcess(auto compare, std::size_t index_limit, auto comparison_action);
 
+#if 0
     SamplingOrderStats CreateStats(RecordIdentifier right_record_id,
                                    model::Index column_match_index,
                                    indexes::PliCluster const& cluster) const;
+#endif
     bool InitializeShortSeq(Efficiency& efficiency);
     bool InitializeFullSeq(Efficiency& efficiency);
     bool InitializeShortParallel(Efficiency& efficiency);
     bool InitializeFullParallel(Efficiency& efficiency);
 
     bool Initialize();
+#if 0
     static std::strong_ordering CompareRecStats(SamplingOrderStats const& rec1_stats,
                                                 SamplingOrderStats const& rec2_stats) noexcept;
+#endif
 
 public:
     template <typename... Args>
