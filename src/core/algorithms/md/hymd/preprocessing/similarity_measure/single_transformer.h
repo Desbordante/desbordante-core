@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/transformed_columns_holder.h"
 #include "model/types/builtin.h"
 #include "util/desbordante_assume.h"
 
@@ -50,30 +51,6 @@ struct TypeConverterCallable<model::String> {
     }
 };
 }  // namespace detail
-
-template <typename L, typename R>
-struct TransformedColumnsHolder {
-    using LeftVec = std::vector<L>;
-    using RightVec = std::vector<R>;
-    using VecPair = std::pair<LeftVec, RightVec>;
-
-    std::variant<LeftVec, std::pair<LeftVec, RightVec>> values;
-    LeftVec* left_ptr;
-    RightVec* right_ptr;
-
-    TransformedColumnsHolder(LeftVec left_vec)
-        : values(std::move(left_vec)),
-          left_ptr(std::get_if<LeftVec>(&values)),
-          right_ptr(left_ptr) {}
-
-    TransformedColumnsHolder(LeftVec left_vec, RightVec right_vec)
-        : values(std::in_place_type<VecPair>, std::move(left_vec), std::move(right_vec)),
-          left_ptr(&std::get<VecPair>(values).first),
-          right_ptr(&std::get<VecPair>(values).second) {}
-
-    TransformedColumnsHolder(LeftVec* left_ptr, RightVec* right_ptr)
-        : left_ptr(left_ptr), right_ptr(right_ptr) {}
-};
 
 template <typename DefaultLeft, typename DefaultRight>
 class SingleTransformer {
