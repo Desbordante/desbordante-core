@@ -66,21 +66,23 @@ template <auto Function, bool Symmetric, bool EqMax, bool... Params>
 class ImmediateSimilarityMeasure
     : public detail::ImmediateBase<Function, Symmetric, EqMax, Params...> {
 public:
-    ImmediateSimilarityMeasure(
-            std::string name, ColumnIdentifier left_column_identifier,
-            ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
-            ccv_id_pickers::SimilaritiesPicker picker,
-            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
+    using TransformFunctionsOption =
+            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption;
+
+    ImmediateSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
+                               ColumnIdentifier right_column_identifier,
+                               model::md::DecisionBoundary min_sim,
+                               ccv_id_pickers::SimilaritiesPicker picker,
+                               TransformFunctionsOption funcs = {})
         : detail::ImmediateBase<Function, Symmetric, EqMax, Params...>(
                   Symmetric && EqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
                   {{min_sim}, std::move(picker)}) {};
 
-    ImmediateSimilarityMeasure(
-            std::string name, ColumnIdentifier left_column_identifier,
-            ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
-            std::size_t size_limit = 0,
-            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
+    ImmediateSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
+                               ColumnIdentifier right_column_identifier,
+                               model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
+                               TransformFunctionsOption funcs = {})
         : ImmediateSimilarityMeasure(std::move(name), std::move(left_column_identifier),
                                      std::move(right_column_identifier), min_sim,
                                      ccv_id_pickers::IndexUniform<Similarity>(size_limit),

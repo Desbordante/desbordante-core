@@ -26,8 +26,6 @@ class ColumnSimilarityMeasure : public SimilarityMeasure {
     model::Index right_column_index_;
 
 public:
-    using TransformFunctionsOption = Transformer::TransformFunctionsOption;
-
     ColumnSimilarityMeasure(bool is_symmetrical_and_eq_is_max, std::string name,
                             ColumnIdentifier left_column_identifier,
                             ColumnIdentifier right_column_identifier, Transformer transformer,
