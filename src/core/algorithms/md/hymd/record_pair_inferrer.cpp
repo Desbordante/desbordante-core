@@ -53,6 +53,7 @@ bool RecordPairInferrer::Initialize() {
     return efficiency_queue_.empty();
 }
 
+#if 0
 std::strong_ordering RecordPairInferrer::CompareRecStats(
         SamplingOrderStats const& rec1_stats, SamplingOrderStats const& rec2_stats) noexcept {
     if (rec1_stats.size() > rec2_stats.size()) {
@@ -129,6 +130,7 @@ bool RecordPairInferrer::FullSamplingSortComparer::operator()(
     if (next_res != std::strong_ordering::equal) return next_res == std::strong_ordering::less;
     return rec1 < rec2;
 }
+#endif
 
 bool RecordPairInferrer::ShortSamplingClusterComparer::operator()(
         RecordIdentifier record_id1, RecordIdentifier record_id2) const noexcept {
@@ -143,6 +145,7 @@ bool RecordPairInferrer::ShortSamplingClusterComparer::operator()(
     return false;
 }
 
+#if 0
 bool RecordPairInferrer::ShortSamplingNonClusterComparer::RecLessThan(
         RecordIdentifier record1, RecordIdentifier record2) const noexcept {
     auto rv = std::ranges::reverse_view{cluster_span};
@@ -186,6 +189,7 @@ std::uint16_t RecordPairInferrer::ShortSamplingNonClusterComparer::GetBracket(
     auto it = rec_row.find(cluster_span[cluster_size - (cluster_record_index + 1)]);
     return it == rec_row.end() ? kLowestCCValueId : (*rhs_lhs_map)[it->second];
 }
+#endif
 
 // Short sampling uses a sliding window.
 // Short sort: put the records in such an order that the sorted list of CCV IDs from the left column
@@ -238,7 +242,8 @@ struct RecordPairInferrer::InitializeLoopBody<true, ObtainValueRecords> {
         for (RecordIdentifier record_id : right_records) {
             if (!cluster_set.contains(record_id)) value_ranked_records.push_back(record_id);
         }
-        /*ShortSamplingNonClusterComparer non_cluster_comparer =
+#if 0
+        ShortSamplingNonClusterComparer non_cluster_comparer =
                 inferrer.CreateShortSamplingNonClusterComparer(column_match_index, cluster_span);
         DESBORDANTE_ASSUME(!end_id_map.empty());
         auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++;
@@ -255,7 +260,8 @@ struct RecordPairInferrer::InitializeLoopBody<true, ObtainValueRecords> {
             boost::sort::spreadsort::string_sort(begin_iter + cur_iter->second,
                                                  begin_iter + fol_iter->second, bracket_getter,
                                                  size_getter, record_comparer);
-        }*/
+        }
+#endif
     }
 };
 
@@ -276,7 +282,8 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
         value_ranked_records.reserve(right_records.size());
         value_ranked_records.insert(value_ranked_records.end(), right_records.begin(),
                                     right_records.end());
-        /*indexes::PliCluster const& cluster = left_clusters[left_value_id];
+#if 0
+        indexes::PliCluster const& cluster = left_clusters[left_value_id];
         FullSamplingSortComparer comparer =
                 inferrer.CreateComparer(cluster, value_ranked_records, column_match_index);
         DESBORDANTE_ASSUME(!end_id_map.empty());
@@ -287,7 +294,7 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
              fol_iter != end_iter; ++fol_iter, ++cur_iter) {
             std::sort(begin_iter + cur_iter->second, begin_iter + fol_iter->second, comparer);
         }
-        */
+#endif
     }
 };
 
