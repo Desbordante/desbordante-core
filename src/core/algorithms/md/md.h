@@ -28,6 +28,7 @@ public:
 
     [[nodiscard]] std::string ToStringFull() const;
     [[nodiscard]] std::string ToStringShort() const;
+    [[nodiscard]] std::string ToStringActiveLhsOnly() const;
     [[nodiscard]] std::vector<md::DecisionBoundary> GetLhsDecisionBounds() const;
     [[nodiscard]] std::pair<Index, md::DecisionBoundary> GetRhs() const noexcept;
 };

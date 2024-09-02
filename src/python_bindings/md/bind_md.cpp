@@ -78,6 +78,7 @@ void BindMd(py::module_& main_module) {
             .def_property_readonly("rhs", &MD::GetRhs)
             .def("to_long_string", &MD::ToStringFull)
             .def("to_short_string", &MD::ToStringShort)
+            .def("to_string_active", &MD::ToStringActiveLhsOnly)
             .def("__str__", &MD::ToStringShort);
     auto measures_module = md_module.def_submodule("similarity_measures");
     py::class_<SimilarityMeasure, std::shared_ptr<SimilarityMeasure>>(measures_module,
