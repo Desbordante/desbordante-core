@@ -60,6 +60,33 @@ std::string MD::ToStringShort() const {
     return ss.str();
 }
 
+std::string MD::ToStringActiveLhsOnly() const {
+    std::stringstream ss;
+    ss << "[";
+    bool any_active = false;
+    for (auto const& classifier : lhs_) {
+        md::DecisionBoundary const decision_boundary = classifier.GetDecisionBoundary();
+        if (decision_boundary == 0.0) continue;
+        any_active = true;
+        auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+        ss << " ";
+        ss << column_match.similarity_function_name << "("
+           << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
+           << right_schema_->GetColumn(column_match.right_col_index)->GetName()
+           << ")>=" << decision_boundary << " ";
+        ss << "|";
+    }
+    if (any_active) ss.seekp(-1, std::stringstream::cur);
+    ss << "] -> ";
+    auto const& classifier = rhs_;
+    auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+    ss << column_match.similarity_function_name << "("
+       << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
+       << right_schema_->GetColumn(column_match.right_col_index)->GetName()
+       << ")>=" << classifier.GetDecisionBoundary();
+    return ss.str();
+}
+
 std::vector<md::DecisionBoundary> MD::GetLhsDecisionBounds() const {
     std::vector<md::DecisionBoundary> decision_bounds;
     decision_bounds.reserve(lhs_.size());
