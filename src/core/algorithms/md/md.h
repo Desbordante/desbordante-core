@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/column_similarity_classifier.h"
 #include "algorithms/md/decision_boundary.h"
@@ -14,17 +16,18 @@ namespace model {
 // Koumarelas, and Felix Naumann.
 class MD {
 private:
-    RelationalSchema const *left_schema_;
-    RelationalSchema const *right_schema_;
-    std::vector<md::ColumnMatch> column_matches_;
+    std::shared_ptr<RelationalSchema const> left_schema_;
+    std::shared_ptr<RelationalSchema const> right_schema_;
+    std::shared_ptr<std::vector<md::ColumnMatch> const> column_matches_;
     std::vector<md::LhsColumnSimilarityClassifier> lhs_;
     md::ColumnSimilarityClassifier rhs_;
 
 public:
-    MD(RelationalSchema const *left_schema, RelationalSchema const *right_schema,
-       std::vector<md::ColumnMatch> column_matches,
-       std::vector<md::LhsColumnSimilarityClassifier> lhs, md::ColumnSimilarityClassifier rhs)
-    noexcept;
+    MD(std::shared_ptr<RelationalSchema const> left_schema,
+       std::shared_ptr<RelationalSchema const> right_schema,
+       std::shared_ptr<std::vector<md::ColumnMatch> const> column_matches,
+       std::vector<md::LhsColumnSimilarityClassifier> lhs,
+       md::ColumnSimilarityClassifier rhs) noexcept;
 
     [[nodiscard]] std::string ToStringFull() const;
     [[nodiscard]] std::string ToStringShort() const;

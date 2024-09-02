@@ -4,12 +4,13 @@
 
 namespace model {
 
-MD::MD(RelationalSchema const* left_schema, RelationalSchema const* right_schema,
-       std::vector<md::ColumnMatch> column_matches,
+MD::MD(std::shared_ptr<RelationalSchema const> left_schema,
+       std::shared_ptr<RelationalSchema const> right_schema,
+       std::shared_ptr<std::vector<md::ColumnMatch> const> column_matches,
        std::vector<md::LhsColumnSimilarityClassifier> lhs,
        md::ColumnSimilarityClassifier rhs) noexcept
-    : left_schema_(left_schema),
-      right_schema_(right_schema),
+    : left_schema_(std::move(left_schema)),
+      right_schema_(std::move(right_schema)),
       column_matches_(std::move(column_matches)),
       lhs_(std::move(lhs)),
       rhs_(rhs) {}
@@ -19,7 +20,7 @@ std::string MD::ToStringFull() const {
     ss << "[";
     for (auto const& classifier : lhs_) {
         // if (classifier.GetDecisionBoundary() == 0.0) continue;
-        auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+        auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
         ss << " ";
         ss << column_match.similarity_function_name << "(" << left_schema_->GetName() << ":"
            << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
@@ -35,7 +36,7 @@ std::string MD::ToStringFull() const {
     ss.seekp(-1, std::stringstream::cur);
     ss << "] -> ";
     auto const& classifier = rhs_;
-    auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+    auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
     ss << column_match.similarity_function_name << "(" << left_schema_->GetName() << ":"
        << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
        << right_schema_->GetName() << ":"
@@ -68,7 +69,7 @@ std::string MD::ToStringActiveLhsOnly() const {
         md::DecisionBoundary const decision_boundary = classifier.GetDecisionBoundary();
         if (decision_boundary == 0.0) continue;
         any_active = true;
-        auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+        auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
         ss << " ";
         ss << column_match.similarity_function_name << "("
            << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
@@ -79,7 +80,7 @@ std::string MD::ToStringActiveLhsOnly() const {
     if (any_active) ss.seekp(-1, std::stringstream::cur);
     ss << "] -> ";
     auto const& classifier = rhs_;
-    auto const& column_match = column_matches_[classifier.GetColumnMatchIndex()];
+    auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
     ss << column_match.similarity_function_name << "("
        << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
        << right_schema_->GetColumn(column_match.right_col_index)->GetName()

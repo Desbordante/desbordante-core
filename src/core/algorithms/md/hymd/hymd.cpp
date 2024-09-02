@@ -187,13 +187,13 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
     std::size_t const trivial_column_match_number = similarity_data.GetTrivialColumnMatchNumber();
     std::size_t const all_column_match_number = column_match_number + trivial_column_match_number;
     auto const& sorted_to_original = similarity_data.GetIndexMapping();
-    std::vector<model::md::ColumnMatch> column_matches =
-            std::vector<model::md::ColumnMatch>(all_column_match_number);
+    auto column_matches =
+            std::make_shared<std::vector<model::md::ColumnMatch>>(all_column_match_number);
     for (Index column_match_index = 0; column_match_index < column_match_number;
          ++column_match_index) {
         auto [left_col_index, right_col_index] =
                 similarity_data.GetColMatchIndices(column_match_index);
-        column_matches[sorted_to_original[column_match_index]] = {
+        (*column_matches)[sorted_to_original[column_match_index]] = {
                 left_col_index, right_col_index,
                 column_matches_option_[sorted_to_original[column_match_index]]->GetName()};
     }
@@ -201,11 +201,11 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
          trivial_column_match_index != trivial_column_match_number; ++trivial_column_match_index) {
         auto [left_col_index, right_col_index] =
                 similarity_data.GetTrivialColMatchIndices(trivial_column_match_index);
-        column_matches[similarity_data.GetTrivialColumnMatchIndex(trivial_column_match_index)] = {
-                left_col_index, right_col_index,
-                column_matches_option_[similarity_data.GetTrivialColumnMatchIndex(
-                                               trivial_column_match_index)]
-                        ->GetName()};
+        (*column_matches)[similarity_data.GetTrivialColumnMatchIndex(trivial_column_match_index)] =
+                {left_col_index, right_col_index,
+                 column_matches_option_[similarity_data.GetTrivialColumnMatchIndex(
+                                                trivial_column_match_index)]
+                         ->GetName()};
     }
     std::vector<model::MD> mds;
     auto convert_lhs = [&](MdLhs const& lattice_lhs) {
@@ -254,8 +254,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
                     similarity_data.GetDecisionBoundary(rhs_index, kLowestCCValueId);
             if (rhs_bound == kLowestBound) continue;
             model::md::ColumnSimilarityClassifier rhs{sorted_to_original[rhs_index], rhs_bound};
-            mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, empty_lhs,
-                             rhs);
+            mds.emplace_back(left_schema_, right_schema_, column_matches, empty_lhs, rhs);
         }
         for (Index rhs_trivial_index = 0; rhs_trivial_index != trivial_column_match_number;
              ++rhs_trivial_index) {
@@ -264,8 +263,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
             if (rhs_bound == kLowestBound) continue;
             model::md::ColumnSimilarityClassifier rhs{
                     similarity_data.GetTrivialColumnMatchIndex(rhs_trivial_index), rhs_bound};
-            mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, empty_lhs,
-                             rhs);
+            mds.emplace_back(left_schema_, right_schema_, column_matches, empty_lhs, rhs);
         }
     }
     for (lattice::MdLatticeNodeInfo const& md : lattice_mds) {
@@ -277,7 +275,7 @@ void HyMD::RegisterResults(SimilarityData const& similarity_data,
             model::md::DecisionBoundary rhs_bound =
                     similarity_data.GetDecisionBoundary(rhs_index, rhs_value_id);
             model::md::ColumnSimilarityClassifier rhs{sorted_to_original[rhs_index], rhs_bound};
-            mds.emplace_back(left_schema_.get(), right_schema_.get(), column_matches, lhs, rhs);
+            mds.emplace_back(left_schema_, right_schema_, column_matches, lhs, rhs);
         }
     }
     std::sort(mds.begin(), mds.end(), utility::MdLess);
