@@ -226,7 +226,7 @@ Prior to cloning the repository and attempting to build the project, ensure that
 
 - GNU GCC, version 10+
 - CMake, version 3.13+
-- Boost library built with GCC, version 1.74.0+
+- Boost library built with GCC, version 1.81.0+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
