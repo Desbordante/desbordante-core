@@ -95,7 +95,7 @@ jobs:
             python3 {project}/src/python_bindings/test_bindings.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ matrix.only }}
           if-no-files-found: ignore
@@ -108,12 +108,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download all artifacts from previous step
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: wheel-artifacts
 
       - name: Delete old artifacts
-        uses: geekyeggo/delete-artifact@v2
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: artifact-*
           failOnError: false
@@ -123,7 +123,7 @@ jobs:
         run: find wheel-artifacts -mindepth 2 -type f -exec mv -i '{}' wheelhouse ';'
 
       - name: Upload a single artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: wheelhouse/*.whl
@@ -142,7 +142,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels
           path: dist
