@@ -7,6 +7,7 @@
 #include <pybind11/typing.h>
 
 #include "algorithms/md/hymd/preprocessing/similarity_measure/date_dif_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/similarity_measure/equality_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/lcs_similarity_measure.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
@@ -91,6 +92,8 @@ void BindMd(py::module_& main_module) {
     BindMeasureWithConstructor<DateSimilarityMeasure>("DateSimilarity", measures_module);
     BindMeasureWithConstructor<NumberSimilarityMeasure>("NumberSimilarity", measures_module);
     BindMeasureWithConstructor<LcsSimilarityMeasure>("LcsSimilarity", measures_module);
+    BindMeasure<EqualitySimilarityMeasure>("EqualitySimilarity", measures_module)
+            .def(py::init<ColumnIdentifier, ColumnIdentifier>(), "left_column"_a, "right_column"_a);
 
     BindMeasure<ObjectSimilarityMeasure>("ObjectSimilarityMeasure", measures_module)
             .def(py::init<py::typing::Callable<preprocessing::Similarity(py::object, py::object)>,
