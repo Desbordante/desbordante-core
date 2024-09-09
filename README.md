@@ -11,13 +11,16 @@ Desbordante is a high-performance data profiler that is capable of discovering a
 
 The **Discovery** task is designed to identify all instances of a specified pattern *type* of a given dataset.
 
-The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values).
+The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values). 
+
+For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
 The currently supported data patterns are:
 * Functional dependency variants:
     - Exact functional dependencies (discovery and validation)
     - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
     - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
+    - Dynamic validation of exact and approximate functional dependencies
 * Graph functional dependencies (validation)
 * Conditional functional dependencies (discovery)
 * Inclusion dependencies (discovery)
@@ -26,6 +29,7 @@ The currently supported data patterns are:
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
+* Differential Dependencies (discovery)
 * Unique column combinations:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
@@ -46,46 +50,7 @@ A brief introduction to the tool and its use cases can be found [here](https://m
 
 ## Console
 
-Usage examples:
-1) Discover all exact functional dependencies in a table stored in a comma-separated file with a header row. In this example the default FD discovery algorithm (HyFD) is used.
-
-```sh
-python3 cli.py --task=fd --table=../examples/datasets/university_fd.csv , True
-```
-
-```text
-[Course Classroom] -> Professor
-[Classroom Semester] -> Professor
-[Classroom Semester] -> Course
-[Professor] -> Course
-[Professor Semester] -> Classroom
-[Course Semester] -> Classroom
-[Course Semester] -> Professor
-```
-
-2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default AFD discovery algorithm (Pyro) is used.
-
-```sh
-python3 cli.py --task=afd --table=../examples/datasets/inventory_afd.csv , True --error=0.1
-```
-
-```text
-[Id] -> ProductName
-[Id] -> Price
-[ProductName] -> Price
-```
-
-3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
-
-```sh
-python3 cli.py --task=mfd_verification --table=../examples/datasets/theatres_mfd.csv , True --lhs_indices=0 --rhs_indices=2 --metric=euclidean --parameter=5
-```
-
-```text
-True
-```
-
-For more information consult documentation and help files.
+For information about the console interface check the [repository](https://github.com/Desbordante/desbordante-cli).
 
 ## Python bindings
 
@@ -232,7 +197,9 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [N. Koudas et al. "Metric Functional Dependencies," 2009 IEEE 25th International Conference on Data Engineering, Shanghai, China, 2009, pp. 1275-1278.](https://ieeexplore.ieee.org/document/4812519)
 * Fuzzy algebraic constraints
    - [Paul G. Brown and Peter J. Hass. 2003. BHUNT: automatic discovery of Fuzzy algebraic constraints in relational data. In Proceedings of the 29th international conference on Very large data bases - Volume 29 (VLDB '03), Vol. 29. VLDB Endowment, 668–679.](https://www.vldb.org/conf/2003/papers/S20P03.pdf)
-* Unique column combinations:
+* Differential dependencies
+   - [Shaoxu Song and Lei Chen. 2011. Differential dependencies: Reasoning and discovery. ACM Trans. Database Syst. 36, 3, Article 16 (August 2011), 41 pages.](https://sxsong.github.io/doc/11tods.pdf)
+* Unique column combinations
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
@@ -250,30 +217,66 @@ $ pip install desbordante
 
 However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
 
-## CLI installation
-
-**NOTE**: Only Python 3.11+ is supported for CLI
-
-Сlone the repository, change the current directory to the project directory and run the following commands:
-
-```sh
-pip install -r cli/requirements.txt
-python3 cli/cli.py --help
-```
-
 ## Build instructions
 
-### Ubuntu
-The following instructions were tested on Ubuntu 20.04+ LTS.
+### Ubuntu and MacOS
+The following instructions were tested on Ubuntu 20.04+ LTS and MacOS 14.0+ (Apple Silicon).
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
-- GNU g++ compiler, version 10+
+- GNU GCC, version 10+
 - CMake, version 3.13+
-- Boost library, version 1.74.0+
+- Boost library built with GCC, version 1.81.0+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
+
+#### Ubuntu dependencies installation
+
+Run the following commands:
+```sh 
+sudo apt install gcc g++ cmake libboost-all-dev git-lfs
+export CC=gcc
+export CXX=g++
+```
+The last 2 lines set gcc as CMake compiler in your terminal session.
+You can also add them to the end of `~/.profile` to set this by default in all sessions.
+
+#### MacOS dependencies installation
+
+To install GCC and CMake on MacOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+installed, run the following commands:
+```sh
+brew install gcc cmake 
+```
+After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
+homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
+`~/.bash_profile` (for Bash) and add to the end of the file the output of `brew shellenv`.
+After that, restart the terminal and check the version of CMake again, now it should be displayed.
+
+Then, check the installed version of GCC:`brew info gcc`. You must see something like `==> gcc: stable X.Y.Z ...`. 
+Check that `gcc-X` and `g++-X` commands work, where X is the version from this output 
+(this designation continues to be used further).
+
+After you need to install Boost library. Please, don't use Homebrew for this, as it may not work correctly.
+Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/).
+After downloading, unpack the archive to the `/usr/local` directory or another directory of your
+choice.
+
+Go to unpacked boost directory in the terminal and run the following commands:
+```sh
+./bootstrap.sh 
+echo "using gcc : : g++-X ;" > user-config.jam
+./b2 --user-config=user-config.jam
+export BOOST_ROOT=$(pwd)
+``` 
+You can also add last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
+
+Before building project you must set GCC as default compiler by changing the following environment variables:
+```sh
+export CC=gcc-X
+export CXX=g++-X
+```
 
 ### Building the project
 #### Building the Python module using pip
@@ -363,6 +366,8 @@ If you use this software for research, please cite one of our papers:
 2) George Chernishev, et al. "Desbordante: from benchmarking suite to high-performance science-intensive data profiler (preprint)". CoRR abs/2301.05965. (2023).
 3) M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354, doi: 10.23919/FRUCT52173.2021.9435469.
 4) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "Fast Discovery of Inclusion Dependencies with Desbordante," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275, doi: 10.23919/FRUCT58615.2023.10143047.
+5) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
+6) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
 
 # Contacts and Q&A
 

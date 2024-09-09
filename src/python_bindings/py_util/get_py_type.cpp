@@ -8,6 +8,7 @@
 #include <Python.h>
 #include <pybind11/stl/filesystem.h>
 
+#include "algorithms/cfd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/error_measure/type.h"
@@ -25,6 +26,7 @@ constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
 constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
+constexpr PyTypeObject* const kPySet = &PySet_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -66,7 +68,7 @@ py::tuple GetPyType(std::type_index type_index) {
     // unpredictable and can lead to errors related to garbage collection.
     static std::unordered_map<std::type_index, std::function<py::tuple()>> const type_map{
             PyTypePair<bool, kPyBool>,
-            PyTypePair<ushort, kPyInt>,
+            PyTypePair<unsigned short, kPyInt>,
             PyTypePair<int, kPyInt>,
             PyTypePair<unsigned int, kPyInt>,
             PyTypePair<double, kPyFloat>,
@@ -75,6 +77,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::ErrorMeasureType, kPyStr>,
             PyTypePair<algos::InputFormat, kPyStr>,
+            PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
@@ -82,6 +85,7 @@ py::tuple GetPyType(std::type_index type_index) {
              []() { return MakeTypeTuple(kPyList, py::type::of<config::InputTable>()); }},
             PyTypePair<std::filesystem::path, kPyStr>,
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
+            PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
     };
     return type_map.at(type_index)();
 }

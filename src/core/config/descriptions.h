@@ -34,6 +34,7 @@ constexpr auto kDThreads =
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 auto const kDErrorMeasure = details::kDErrorMeasureString.c_str();
 constexpr auto kDMaximumLhs = "max considered LHS size";
+constexpr auto kDMaximumArity = "max considered arity";
 constexpr auto kDSeed = "RNG seed";
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
 constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)";
@@ -92,7 +93,6 @@ constexpr auto kDHllAccuracy =
 constexpr auto kDSampleSize =
         "Size of a table sample. Greater value - more correct answers, but higher memory "
         "consumption.\n Applies to all tables";
-constexpr auto kDFindNary = "Detect n-ary inclusion dependencies [true|false]";
 constexpr auto kDIgnoreNullCols =
         "Ignore INDs which contain columns filled only with NULLs. May increase "
         "performance but impacts the result. [true|false]";
@@ -102,4 +102,11 @@ constexpr auto kDIgnoreConstantCols =
 constexpr auto kDGraphData = "Path to dot-file with graph";
 constexpr auto kDGfdData = "Path to file with GFD";
 constexpr auto kDMemLimitMB = "memory limit im MBs";
+constexpr auto kDDifferenceTable = "CSV table containing difference limits for each column";
+constexpr auto kDNumRows = "Use only first N rows of the table";
+constexpr auto kDNUmColumns = "Use only first N columns of the table";
+constexpr auto kDInsertStatements = "Rows to be inserted into the table using the insert operation";
+constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
+constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
+constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
 }  // namespace config::descriptions

@@ -55,10 +55,6 @@ jobs:
       CIBW_ARCHS_LINUX: x86_64
       # Builds wheels for PyPy & CPython on manylinux
       CIBW_BUILD: "*manylinux*"
-      # musllinux crashes during Boost 1.78.0 compilation
-      # May be related to https://bugs.gentoo.org/829147
-      # Perhaps that bumping Boost version in workflow can solve the issue
-      CIBW_SKIP: "*musllinux*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
@@ -79,21 +75,7 @@ jobs:
         with:
           download-pybind: true
           download-googletest: false
-
-      - name: Cache unpacked Boost
-        uses: actions/cache@v3
-        id: cache-unpacked-boost
-        with:
-          path: ${{github.workspace}}/lib/boost_1_78_0
-          key: ${{ runner.os }}-boost-for-wheels-78
-
-      - name: Download & unpack Boost
-        run: |
-          cd ${{github.workspace}}/lib
-          wget -O boost_1_78_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.78.0/boost_1_78_0.tar.gz/download
-          tar xzf boost_1_78_0.tar.gz
-        shell: bash
-        if: steps.cache-unpacked-boost.outputs.cache-hit != 'true'
+          install-boost: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
@@ -101,9 +83,9 @@ jobs:
           only: ${{ matrix.only }}
         env:
           CIBW_BEFORE_ALL: >
-            cd lib/boost_1_78_0 && 
-            ./bootstrap.sh --prefix=/usr/local &&
-            ./b2 install -j4 --prefix=/usr/local
+            cd lib/boost &&
+            ./bootstrap.sh --prefix=/usr &&
+            ./b2 install -j4 --prefix=/usr
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
             cp {project}/test_input_data/transactional_data/rules-kaggle-rows.csv {project}/src/python_bindings &&
@@ -113,7 +95,7 @@ jobs:
             python3 {project}/src/python_bindings/test_bindings.py
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: artifact-${{ matrix.only }}
           if-no-files-found: ignore
@@ -126,12 +108,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download all artifacts from previous step
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           path: wheel-artifacts
 
       - name: Delete old artifacts
-        uses: geekyeggo/delete-artifact@v2
+        uses: geekyeggo/delete-artifact@v5
         with:
           name: artifact-*
           failOnError: false
@@ -141,7 +123,7 @@ jobs:
         run: find wheel-artifacts -mindepth 2 -type f -exec mv -i '{}' wheelhouse ';'
 
       - name: Upload a single artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: wheels
           path: wheelhouse/*.whl
@@ -160,7 +142,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download wheels
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: wheels
           path: dist

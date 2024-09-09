@@ -1,0 +1,13 @@
+Flight Number,Date,Departure,Arrival,Distance,Duration
+SU 35,2024-03-06,Saint Petersburg (LED),Moscow (SVO),598,64
+FV 6015,2024-03-06,Saint Petersburg (LED),Moscow (VKO),624,63
+FV 6027,2024-03-06,Saint Petersburg (LED),Moscow (SVO),598,66
+FV 6024,2024-03-03,Moscow (VKO),Saint Petersburg (LED),624,58
+SU 6,2024-03-06,Moscow (SVO),Saint Petersburg (LED),598,62
+S7 1009,2024-03-01,Moscow (DME),Saint Petersburg (LED),664,66
+S7 1010,2024-03-02,Saint Petersburg (LED),Moscow (DME),664,70
+B2 978,2024-03-07,Moscow (SVO),Minsk (MSQ),641,58
+DP 967,2024-03-07,Moscow (VKO),Minsk (MSQ),622,73
+B2 981,2024-03-08,Minsk (MSQ),Moscow (VKO),622,61
+DP 261,2024-03-06,Moscow (VKO),Kaliningrad (KGD),1059,144
+DP 536,2024-03-05,Kaliningrad (KGD),Saint Petersburg (LED),798,92

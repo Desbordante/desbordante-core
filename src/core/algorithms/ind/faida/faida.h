@@ -4,6 +4,7 @@
 #include "algorithms/ind/faida/preprocessing/preprocessor.h"
 #include "algorithms/ind/faida/util/simple_ind.h"
 #include "algorithms/ind/ind_algorithm.h"
+#include "config/max_arity/type.h"
 #include "config/thread_number/type.h"
 
 namespace algos {
@@ -18,7 +19,7 @@ private:
 
     int sample_size_;
     double hll_accuracy_;
-    bool detect_nary_;
+    config::MaxArityType max_arity_;
     bool ignore_null_cols_;
     bool ignore_const_cols_;
     config::ThreadNumType number_of_threads_;

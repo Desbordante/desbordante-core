@@ -3,7 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/gfd/mining_algorithms.h"
+#include "algorithms/gfd/verification_algorithms.h"
 #include "py_util/bind_primitive.h"
 
 namespace {

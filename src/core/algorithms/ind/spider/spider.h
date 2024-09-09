@@ -47,9 +47,6 @@ private:
     void LoadINDAlgorithmDataInternal() final;
     void MakeExecuteOptsAvailable() final;
 
-    using INDAlgorithm::RegisterIND;
-    void RegisterIND(model::ColumnCombination lhs, model::ColumnCombination rhs);
-
     /* execution stage functions */
     void MineINDs();
     void MineAINDs();

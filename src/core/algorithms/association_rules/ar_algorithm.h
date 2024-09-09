@@ -49,7 +49,7 @@ private:
     virtual void ResetStateAr() = 0;
 
 protected:
-    std::unique_ptr<model::TransactionalData> transactional_data_;
+    std::shared_ptr<model::TransactionalData> transactional_data_;
     double minsup_;
 
     void GenerateRulesFrom(std::vector<unsigned> const& frequent_itemset, double support);

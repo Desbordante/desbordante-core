@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "algorithms/fd/fd_algorithm.h"
 #include "algorithms/statistics/statistic.h"
 #include "config/equal_nulls/type.h"
@@ -28,10 +30,30 @@ class DataStats : public Algorithm {
     // Returns vector with indices satisfying the predicate
     template <class Pred, class Data>
     std::vector<size_t> FilterIndices(Pred pred, Data const& data) const;
+    // checks if all the letters in a word a are uppercase
+    static bool IsEntirelyUppercase(std::string word);
+    // checks if all the letters in a word a are lowercase
+    static bool IsEntirelyLowercase(std::string word);
+    // Returns the amount of words in a string
+    static size_t GetNumberOfWordsInString(std::string line);
+    // Returns a vector of words in a string
+    static std::vector<std::string> GetWordsInString(std::string line);
 
+    // Calculates values via a certain predivate and returns the minimal of them
+    template <class Pred>
+    Statistic GetStringMinOf(size_t index, Pred pred) const;
+    // Calculates values via a certain predivate and returns the maximal of them
+    template <class Pred>
+    Statistic GetStringMaxOf(size_t index, Pred pred) const;
+    // Calculates values via a certain predivate and returns the sum of them
+    template <class Pred>
+    Statistic GetStringSumOf(size_t index, Pred pred) const;
     // Returns number of chars in a column satisfying the predicate
     template <class Pred>
     Statistic CountIfInColumn(Pred pred, size_t index) const;
+    // Returns number of words in a column satisfying the predicate
+    template <class Pred>
+    Statistic CountIfInColumnForWords(Pred pred, size_t index) const;
 
     // Base method for number of negatives and number of zeros statistics
     Statistic CountIfInBinaryRelationWithZero(size_t index, model::CompareResult res) const;
@@ -120,10 +142,30 @@ public:
     Statistic GetNumberOfLowercaseChars(size_t index) const;
     // Returns number of digit chars in a string column.
     Statistic GetNumberOfUppercaseChars(size_t index) const;
+    // Returns the minimal amount of chars in a column.
+    Statistic GetMinNumberOfChars(size_t index) const;
+    // Returns the maximal amount of chars in a column.
+    Statistic GetMaxNumberOfChars(size_t index) const;
+    // Returns all distinct words of the column as a set of strings.
+    std::set<std::string> GetWords(size_t index) const;
+    // Returns the minimal amount of words in a column.
+    Statistic GetMinNumberOfWords(size_t index) const;
+    // Returns the maximal amount of words in a column.
+    Statistic GetMaxNumberOfWords(size_t index) const;
+    // Returns the total amount of words in a column.
+    Statistic GetNumberOfWords(size_t index) const;
     // Returns total number of characters in a string column.
     Statistic GetNumberOfChars(size_t index) const;
     // Returns average number of chars in a string column.
     Statistic GetAvgNumberOfChars(size_t index) const;
+    // Returns top k most frequent chars in a string column as a vector of chars.
+    std::vector<char> GetTopKChars(size_t index, size_t k) const;
+    // Returns top k most frequent words in a string column as a vector of strings.
+    std::vector<std::string> GetTopKWords(size_t index, size_t k) const;
+    // Returns the amount of entirely uppercase words in a string column.
+    Statistic GetNumberOfEntirelyUppercaseWords(size_t index) const;
+    // Returns the amount of entirely lowercase words in a string column.
+    Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

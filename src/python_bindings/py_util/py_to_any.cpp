@@ -8,6 +8,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
+#include "algorithms/cfd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/error_measure/type.h"
@@ -114,18 +115,20 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<unsigned int>,
         kNormalConvPair<long double>,
         kNormalConvPair<std::vector<unsigned int>>,
-        kNormalConvPair<ushort>,
+        kNormalConvPair<unsigned short>,
         kNormalConvPair<int>,
         kNormalConvPair<size_t>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::ErrorMeasureType>,
         kEnumConvPair<algos::InputFormat>,
+        kEnumConvPair<algos::cfd::Substrategy>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
+        kNormalConvPair<std::unordered_set<size_t>>,
 };
 
 }  // namespace
