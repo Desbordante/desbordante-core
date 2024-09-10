@@ -19,6 +19,7 @@ boost::container::flat_map<ColumnClassifierValueId, RecSet> FillSets(
 }
 
 using SetCont = std::pair<std::shared_ptr<std::mutex>, RecSet>;
+
 boost::container::flat_map<ColumnClassifierValueId, SetCont> PrepareSets(
         FlatUpperSetIndex const& flat) {
     boost::container::flat_map<ColumnClassifierValueId, SetCont> sets;

@@ -43,8 +43,8 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
     }
     for (ValidationInfo const& validation_info : collected) {
         boost::dynamic_bitset<> const& new_rhs_indices = validation_info.rhs_indices;
-        auto [it, new_validation] = new_picked.try_emplace(validation_info.messenger->GetLhs(),
-                                                           new_rhs_indices);
+        auto [it, new_validation] =
+                new_picked.try_emplace(validation_info.messenger->GetLhs(), new_rhs_indices);
         if (new_validation) continue;
         boost::dynamic_bitset<>& previously_picked_rhs = it->second;
         assert((previously_picked_rhs & new_rhs_indices).none());
