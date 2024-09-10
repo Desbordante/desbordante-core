@@ -42,7 +42,7 @@ bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
                 messenger.LowerAndSpecialize(result.invalidated);
             }
         }
-        if (pool_ != nullptr) pool_->WorkUntilComplete();
+        if (pool_ != nullptr) pool_->Wait();
         if (!traverse_all &&
             lattice_statistics.invalidated_mds_num >
                     lattice_statistics.kRatioBound * (lattice_statistics.all_mds_num -

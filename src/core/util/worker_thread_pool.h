@@ -1,7 +1,7 @@
 #pragma once
 
 #include <atomic>
-#include <barrier>
+#include <condition_variable>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -11,31 +11,42 @@
 #include <vector>
 
 #include "model/index.h"
+#include "util/barrier.h"
 #include "util/desbordante_assume.h"
 
 namespace util {
 class WorkerThreadPool {
 public:
-    // Both functions must be thread-safe. Worker must return false when no work is left.
+    // Must be thread-safe.
     using Worker = std::function<void()>;
 
 private:
     struct Completion {
-        WorkerThreadPool& thread_pool;
+        WorkerThreadPool& pool;
 
-        void operator()() noexcept {
-            thread_pool.is_working_.clear();
+        void operator()() {
+            pool.IsWorkingAction([](bool& is_working) { is_working = false; });
         }
     };
 
     Worker work_;
     std::vector<std::jthread> worker_threads_;
-    std::barrier<Completion> barrier_;
-    std::atomic_flag is_working_;
+    util::Barrier<Completion> barrier_;
+    std::condition_variable working_var_;
+    std::mutex working_mutex_;
+    bool is_working_ = false;
+
+    void IsWorkingAction(auto action) {
+        std::unique_lock<std::mutex> lk{working_mutex_};
+        action(is_working_);
+    }
 
     void Work() {
         while (true) {
-            is_working_.wait(false);
+            {
+                std::unique_lock<std::mutex> lk{working_mutex_};
+                working_var_.wait(lk, [this]() { return is_working_; });
+            }
             if (!work_) break;
             WorkUntilComplete();
         }
@@ -45,6 +56,12 @@ private:
         SetWork(nullptr);
     }
 
+    void WorkUntilComplete() {
+        DESBORDANTE_ASSUME(work_);
+        work_();
+        barrier_.ArriveAndWait();
+    }
+
 public:
     WorkerThreadPool(std::size_t thread_num);
 
@@ -52,8 +69,8 @@ public:
     template <typename WorkerType>
     void SetWork(WorkerType work) {
         work_ = std::move(work);
-        is_working_.test_and_set();
-        is_working_.notify_all();
+        IsWorkingAction([](bool& is_working) { is_working = true; });
+        working_var_.notify_all();
     }
 
     template <typename FunctionType>
@@ -77,7 +94,7 @@ public:
             finish(std::move(resource));
         };
         SetWork(work);
-        WorkUntilComplete();
+        Wait();
     }
 
     void ExecIndexWithResource(auto do_work, auto acquire_resource, model::Index size) {
@@ -92,10 +109,8 @@ public:
     }
 
     // Main thread must call this to finish.
-    void WorkUntilComplete() {
-        DESBORDANTE_ASSUME(work_);
-        work_();
-        barrier_.arrive_and_wait();
+    void Wait() {
+        WorkUntilComplete();
     }
 
     std::size_t ThreadNum() const noexcept {
