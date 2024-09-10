@@ -5,7 +5,7 @@
 #include "util/construct.h"
 
 namespace util {
-template <typename T, bool (*HasValueCheck)(T const&), T(*GetDefault)() = Construct<T>>
+template <typename T, bool (*HasValueCheck)(T const&), T (*GetDefault)() = Construct<T>>
 class ExclOptional {
     T value_ = GetDefault();
 

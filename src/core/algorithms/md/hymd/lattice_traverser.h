@@ -20,10 +20,11 @@ private:
 
     class ClearingRecRef {
         Recommendations& recommendations_;
-    public:
-        ClearingRecRef(Recommendations& recommendations) : recommendations_(recommendations){}
 
-        operator Recommendations const& () const {
+    public:
+        ClearingRecRef(Recommendations& recommendations) : recommendations_(recommendations) {}
+
+        operator Recommendations const&() const {
             return recommendations_;
         }
 
