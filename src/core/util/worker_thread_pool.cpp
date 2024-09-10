@@ -13,7 +13,7 @@ WorkerThreadPool::WorkerThreadPool(std::size_t thread_num)
         }
     } catch (std::system_error&) {
         Terminate();
-        barrier_.wait(barrier_.arrive(++thread_num));
+        barrier_.Wait(barrier_.Arrive(++thread_num));
         throw;
     }
 }
