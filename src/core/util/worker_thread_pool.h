@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <cstddef>
 #include <functional>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -29,8 +30,22 @@ private:
         }
     };
 
+    struct DoWork {
+        void operator()(WorkerThreadPool& pool) {
+            DESBORDANTE_ASSUME(pool.work_);
+            try {
+                pool.work_();
+            } catch (...) {
+                pool.barrier_.ArriveAndWait();
+                throw;
+            }
+            pool.barrier_.ArriveAndWait();
+        }
+    };
+
     Worker work_;
     std::vector<std::jthread> worker_threads_;
+    std::vector<std::packaged_task<void(WorkerThreadPool&)>> tasks_;
     util::Barrier<Completion> barrier_;
     std::condition_variable working_var_;
     std::mutex working_mutex_;
@@ -41,14 +56,14 @@ private:
         action(is_working_);
     }
 
-    void Work() {
+    void Work(std::packaged_task<void(WorkerThreadPool&)>& thread_task) {
         while (true) {
             {
                 std::unique_lock<std::mutex> lk{working_mutex_};
                 working_var_.wait(lk, [this]() { return is_working_; });
             }
             if (!work_) break;
-            WorkUntilComplete();
+            ResetAndWork(thread_task);
         }
     }
 
@@ -56,10 +71,9 @@ private:
         SetWork(nullptr);
     }
 
-    void WorkUntilComplete() {
-        DESBORDANTE_ASSUME(work_);
-        work_();
-        barrier_.ArriveAndWait();
+    void ResetAndWork(std::packaged_task<void(WorkerThreadPool&)>& thread_task) {
+        thread_task.reset();
+        thread_task(*this);
     }
 
 public:
@@ -110,7 +124,12 @@ public:
 
     // Main thread must call this to finish.
     void Wait() {
-        WorkUntilComplete();
+        std::packaged_task<void(WorkerThreadPool&)>& main_task = tasks_.front();
+        ResetAndWork(main_task);
+        // Rethrow exceptions
+        for (std::packaged_task<void(WorkerThreadPool&)>& task : tasks_) {
+            task.get_future().get();
+        }
     }
 
     std::size_t ThreadNum() const noexcept {
