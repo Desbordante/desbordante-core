@@ -22,11 +22,14 @@ jobs:
           fetch-depth: 0
       - name: Pull clang-format
         run: |
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+          wget https://apt.llvm.org/llvm-snapshot.gpg.key
+          sudo apt-key add llvm-snapshot.gpg.key
           sudo apt-get update
-          sudo apt-get install -y clang-format-14
+          sudo apt-get install -y clang-format-18
       - name: Check formatting
         run: |
-          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-14 -p 1)
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-18 -p 1)
 
           if [ "$formatterOutput" != "" ]
           then
