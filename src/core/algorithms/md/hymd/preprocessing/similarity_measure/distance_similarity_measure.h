@@ -15,7 +15,7 @@ namespace algos::hymd::preprocessing::similarity_measure {
 using DistanceFunction = std::function<size_t(std::byte const*, std::byte const*)>;
 
 namespace detail {
-template <auto Function, bool kMultiThreaded = true>
+template <auto Function, bool MultiThreaded = true>
 class LVNormalizedDistanceCalculator {
     using LeftElementType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>;
     using RightElementType = std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>;
@@ -131,7 +131,7 @@ public:
                                                util::WorkerThreadPool* pool_ptr) const {
         std::vector<indexes::PliCluster> const& right_clusters = right_pli.GetClusters();
         Worker worker{*left_elements, *right_elements, right_clusters, min_sim_};
-        auto [similarities, enumerated_results] = kMultiThreaded && pool_ptr != nullptr
+        auto [similarities, enumerated_results] = MultiThreaded && pool_ptr != nullptr
                                                           ? worker.ExecMultiThreaded(*pool_ptr)
                                                           : worker.ExecSingleThreaded();
         return BuildIndexes(std::move(enumerated_results), std::move(similarities), right_clusters,
@@ -149,7 +149,7 @@ using DistanceBase = ColumnSimilarityMeasure<DistanceBaseTypeTransformer<Functio
                                              LVNormalizedDistanceCalculator<Function, Params...>>;
 }  // namespace detail
 
-template <auto Function, bool kSymmetricAndEq0, bool... Params>
+template <auto Function, bool SymmetricAndEq0, bool... Params>
 class DistanceSimilarityMeasure : public detail::DistanceBase<Function, Params...> {
 public:
     using TransformFunctionsOption =
@@ -161,7 +161,7 @@ public:
                               ccv_id_pickers::SimilaritiesPicker picker,
                               TransformFunctionsOption funcs = {})
         : detail::DistanceBase<Function, Params...>(
-                  kSymmetricAndEq0, std::move(name), std::move(left_column_identifier),
+                  SymmetricAndEq0, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
                   {min_sim, std::move(picker)}) {};
 

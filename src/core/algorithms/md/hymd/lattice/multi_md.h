@@ -1,5 +1,6 @@
 #pragma once
 
+#include "algorithms/md/hymd/lattice/md.h"
 #include "algorithms/md/hymd/md_element.h"
 #include "algorithms/md/hymd/md_lhs.h"
 #include "algorithms/md/hymd/utility/exclusion_list.h"

@@ -15,9 +15,9 @@ namespace algos::hymd::lattice::cardinality {
 class OneByOnePicker {
 private:
     enum class ComparisonResult {
-        Specialization,
-        Generalization,
-        Incomparable,
+        kSpecialization,
+        kGeneralization,
+        kIncomparable,
     };
 
     std::vector<ValidationInfo> currently_picked_;

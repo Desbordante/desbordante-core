@@ -62,17 +62,17 @@ using ImmediateBase =
                                 BasicCalculator<BasicComparerCreatorSupplier<Function>, Params...>>;
 }  // namespace detail
 
-template <auto Function, bool kSymmetric, bool kEqMax, bool... Params>
+template <auto Function, bool Symmetric, bool EqMax, bool... Params>
 class ImmediateSimilarityMeasure
-    : public detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...> {
+    : public detail::ImmediateBase<Function, Symmetric, EqMax, Params...> {
 public:
     ImmediateSimilarityMeasure(
             std::string name, ColumnIdentifier left_column_identifier,
             ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
             ccv_id_pickers::SimilaritiesPicker picker,
             detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption funcs = {})
-        : detail::ImmediateBase<Function, kSymmetric, kEqMax, Params...>(
-                  kSymmetric && kEqMax, std::move(name), std::move(left_column_identifier),
+        : detail::ImmediateBase<Function, Symmetric, EqMax, Params...>(
+                  Symmetric && EqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
                   {{min_sim}, std::move(picker)}) {};
 

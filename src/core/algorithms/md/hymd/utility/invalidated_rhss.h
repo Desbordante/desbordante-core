@@ -24,15 +24,15 @@ public:
             : invalidated_info_(invalidated_info) {}
 
     public:
-        class update_iterator {
+        class UpdateIterator {
             using NewCCVIdsIterator = NewCCVIds::const_iterator;
             using InvalidatedIterator = Rhss::const_iterator;
 
             InvalidatedIterator invalidated_iter_;
             NewCCVIdsIterator new_ccv_ids_iter_;
 
-            update_iterator(InvalidatedIterator invalidated_iter,
-                            NewCCVIdsIterator new_ccv_ids_iter) noexcept
+            UpdateIterator(InvalidatedIterator invalidated_iter,
+                           NewCCVIdsIterator new_ccv_ids_iter) noexcept
                 : invalidated_iter_(invalidated_iter), new_ccv_ids_iter_(new_ccv_ids_iter) {}
 
         public:
@@ -42,23 +42,23 @@ public:
             using pointer = void;
             using reference = void;
 
-            update_iterator operator++() noexcept {
+            UpdateIterator operator++() noexcept {
                 ++invalidated_iter_;
                 ++new_ccv_ids_iter_;
                 return *this;
             }
 
-            update_iterator operator++(int) noexcept {
-                update_iterator old = *this;
+            UpdateIterator operator++(int) noexcept {
+                UpdateIterator old = *this;
                 ++(*this);
                 return old;
             }
 
-            friend bool operator==(update_iterator const& iter1, update_iterator const& iter2) {
+            friend bool operator==(UpdateIterator const& iter1, UpdateIterator const& iter2) {
                 return iter1.invalidated_iter_ == iter2.invalidated_iter_;
             }
 
-            friend bool operator!=(update_iterator const& iter1, update_iterator const& iter2) {
+            friend bool operator!=(UpdateIterator const& iter1, UpdateIterator const& iter2) {
                 return !(iter1 == iter2);
             }
 
@@ -69,11 +69,11 @@ public:
             friend UpdateView;
         };
 
-        update_iterator begin() const noexcept {
+        UpdateIterator begin() const noexcept {
             return {invalidated_info_.invalidated_.begin(), invalidated_info_.new_ccv_ids_.begin()};
         }
 
-        update_iterator end() const noexcept {
+        UpdateIterator end() const noexcept {
             return {invalidated_info_.invalidated_.end(), invalidated_info_.new_ccv_ids_.end()};
         }
 

@@ -55,26 +55,26 @@ auto OneByOnePicker::CompareLhss(MdLhs const& cur, MdLhs const& prev) -> Compari
     MdLhs::iterator const prev_end = prev.end();
     while (cur_it != cur_end) {     // cur still has LHS elements.
         if (prev_it == prev_end) {  // prev has no more LHS elements, prev generalizes cur.
-            return ComparisonResult::Specialization;
+            return ComparisonResult::kSpecialization;
         }
         auto const& [cur_child_index, cur_ccv_id] = *cur_it;
         auto const& [prev_child_index, prev_ccv_id] = *prev_it;
         if (cur_child_index > prev_child_index) {  // prev cannot be a generalization of cur.
             if (IsGeneralization(cur_it, prev_it, cur_end, prev_end))
-                return ComparisonResult::Generalization;
-            return ComparisonResult::Incomparable;
+                return ComparisonResult::kGeneralization;
+            return ComparisonResult::kIncomparable;
         } else if (cur_child_index < prev_child_index) {  // cur cannot be a generalization of prev.
             if (IsGeneralization(prev_it, cur_it, prev_end, cur_end))
-                return ComparisonResult::Specialization;
-            return ComparisonResult::Incomparable;
+                return ComparisonResult::kSpecialization;
+            return ComparisonResult::kIncomparable;
         } else if (cur_ccv_id < prev_ccv_id) {  // prev cannot be a generalization of cur.
             if (IsGeneralizationIncr(cur_it, prev_it, cur_end, prev_end))
-                return ComparisonResult::Generalization;
-            return ComparisonResult::Incomparable;
+                return ComparisonResult::kGeneralization;
+            return ComparisonResult::kIncomparable;
         } else if (prev_ccv_id < cur_ccv_id) {  // cur cannot be a generalization of prev.
             if (IsGeneralizationIncr(prev_it, cur_it, prev_end, cur_end))
-                return ComparisonResult::Specialization;
-            return ComparisonResult::Incomparable;
+                return ComparisonResult::kSpecialization;
+            return ComparisonResult::kIncomparable;
         }
         ++cur_it;
         ++prev_it;
@@ -82,7 +82,7 @@ auto OneByOnePicker::CompareLhss(MdLhs const& cur, MdLhs const& prev) -> Compari
     // Assuming all LHSs are distinct.
     assert(prev_it != prev_end);
     // cur has no more LHS elements, cur generalizes prev.
-    return ComparisonResult::Generalization;
+    return ComparisonResult::kGeneralization;
 }
 
 void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& messenger,
@@ -93,14 +93,14 @@ void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& mess
         MdLhs const& lhs_prev = prev_info.messenger->GetLhs();
         boost::dynamic_bitset<>& indices_prev = prev_info.rhs_indices;
         switch (CompareLhss(lhs_cur, lhs_prev)) {
-            case ComparisonResult::Specialization:
+            case ComparisonResult::kSpecialization:
                 considered_indices -= indices_prev;
                 if (considered_indices.none()) return;
                 break;
-            case ComparisonResult::Generalization:
+            case ComparisonResult::kGeneralization:
                 indices_prev -= considered_indices;
                 break;
-            case ComparisonResult::Incomparable:
+            case ComparisonResult::kIncomparable:
                 break;
             default:
                 DESBORDANTE_ASSUME(false);

@@ -18,8 +18,7 @@
 #include "util/worker_thread_pool.h"
 
 namespace algos::hymd::preprocessing::similarity_measure {
-template <typename ComparerCreatorSupplier, bool kSymmetric, bool kEqMax,
-          bool kMultiThreaded = true>
+template <typename ComparerCreatorSupplier, bool Symmetric, bool EqMax, bool MultiThreaded = true>
 class BasicCalculator {
     using LeftElementType =
             std::remove_pointer_t<util::ArgumentType<ComparerCreatorSupplier, 0>>::value_type;
@@ -87,10 +86,10 @@ class BasicCalculator {
                          bool& dissimilar_found) {
             LeftElementType const& left_element = left_elements_[value_id_left];
             RowInfoSimilarity& row_info = task_data_[value_id_left];
-            if constexpr (!kSymmetric) {
+            if constexpr (!Symmetric) {
                 CalcLoop(comparer, row_info, left_element, dissimilar_found, 0, value_id_left);
             }
-            if constexpr (kEqMax) {
+            if constexpr (EqMax) {
                 AddValue(row_info, value_id_left, 1.0);
             } else {
                 CalcOnePair(comparer, row_info, left_element, value_id_left, dissimilar_found);
@@ -175,10 +174,10 @@ public:
                 creator_supplier_(left_elements, right_elements, right_pli);
         std::vector<indexes::PliCluster> const& right_clusters = right_pli.GetClusters();
         Worker worker{left_elements, right_elements, right_clusters, std::move(create_comparer)};
-        auto [similarities, enumerated_results] = kMultiThreaded && pool_ptr != nullptr
+        auto [similarities, enumerated_results] = MultiThreaded && pool_ptr != nullptr
                                                           ? worker.ExecMultiThreaded(*pool_ptr)
                                                           : worker.ExecSingleThreaded();
-        if constexpr (kSymmetric) {
+        if constexpr (Symmetric) {
             if (worker.OneColumnGiven()) SymmetricClosure(enumerated_results, right_clusters);
         }
         return BuildIndexes(std::move(enumerated_results), std::move(similarities), right_clusters,
