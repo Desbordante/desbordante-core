@@ -73,9 +73,9 @@ public:
         : comparison_function_(std::move(comparison_function)), min_sim_(min_sim) {}
 };
 
-template <bool kSymmetric, bool kEqMax>
+template <bool Symmetric, bool EqMax>
 using Calculator = algos::hymd::preprocessing::similarity_measure::BasicCalculator<
-        PyComparerCreatorSupplier, kSymmetric, kEqMax, kEnablePythonMultithreading>;
+        PyComparerCreatorSupplier, Symmetric, EqMax, kEnablePythonMultithreading>;
 
 class PyBasicCalculator {
     bool symmetric_;
