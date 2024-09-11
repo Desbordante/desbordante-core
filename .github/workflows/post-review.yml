@@ -21,3 +21,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           lgtm_comment_body: ''
+        if: ${{ github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.conclusion != 'skipped' }}
