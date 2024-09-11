@@ -230,6 +230,7 @@ private:
 
     std::unordered_set<PairComparisonResult> processed_comparisons_;
 
+    static constexpr double kTopThresholdDecrease = 0.9;
     static constexpr double kNormalThresholdDecrease = 0.5;
     // the first sampling round multiplies by this constant
     double efficiency_threshold_ = 0.01 / kNormalThresholdDecrease;

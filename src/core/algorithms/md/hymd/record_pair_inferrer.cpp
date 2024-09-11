@@ -498,7 +498,6 @@ PairComparisonResult RecordPairInferrer::CompareRecords(
 bool RecordPairInferrer::InferFromRecordPairs(Recommendations const& recommendations) {
     (this->*recom_process_method_)(recommendations);
 
-    constexpr double kTopThresholdDecrease = 0.9;
     DESBORDANTE_ASSUME(!efficiency_queue_.empty());
     Efficiency best_efficiency = efficiency_queue_.top();
     efficiency_queue_.pop();

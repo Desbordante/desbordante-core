@@ -3,7 +3,10 @@
 #include <vector>
 
 #include "algorithms/md/hymd/column_classifier_value_id.h"
+#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
+#include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/md_lhs.h"
+#include "util/desbordante_assume.h"
 #include "util/py_tuple_hash.h"
 
 namespace algos::hymd {
