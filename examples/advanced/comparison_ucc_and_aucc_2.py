@@ -38,9 +38,9 @@ print('The following table contains records about employees:')
 print(CYAN, end='')
 print_table(TABLE)
 print(ENDC, end='')
-print('We\'ll try to find typos, using UCC AUCC mining algorithms.\n')
+print('We\'ll try to find typos, using UCC and AUCC mining algorithms.\n')
 
-print('Let\'s run AUCC mining algorithm with:')
+print('Let\'s run AUCC mining algorithm with threshold = 0.013:')
 a_algo = desbordante.ucc.algorithms.PyroUCC()
 a_algo.load_data(table=(TABLE, ',', True))
 a_algo.execute(error=0.013)
@@ -72,15 +72,15 @@ print()
 print(f'''{CYAN}[Last_name Grade Salary]{ENDC} has cardinality of 3 -- it\'s "accidental" UCC.
 {CYAN}[First_name Grade]{ENDC} and {CYAN}[First_name Salary]{ENDC} may not hold -- people with the
 same first name may have same grade or salary. But {CYAN}[First_name Last_name]{ENDC} must
-hold -- even if two employees has same names, they should have different records in table.
-Let\'s look at the table again:''')
+hold -- even if two employees have same names, their records in our table should be uniquely
+identifiable by {CYAN}[First_name Last_name]{ENDC} pair. Let\'s look at the table again:''')
 print(CYAN, end='')
 print_table(TABLE)
 print(ENDC)
 
 print(f'''There are two {CYAN}Allens{ENDC} without the last name and two {CYAN}Dorothy
-Weawer's{ENDC}. All they have different experience, so all they are different employees -- it\'s a
-typo. Let\'s correct it:''')
+Weawer's{ENDC}. All they have different experience, therefore all of them are different
+employees. Thus, it is an oversight or typo in the table. Let\'s improve the quality of this data:''')
 print(CYAN, end='')
 print_table(CORRECT_TABLE)
 print(ENDC)
@@ -94,3 +94,6 @@ uccs = e_algo.get_uccs()
 print('Found UCCs:')
 for ucc in uccs:
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
+print()
+print(f'''UCC {CYAN}[First_name Last_name]{ENDC} holds, and we have found and resolved two
+inconsistencies in the data.''')

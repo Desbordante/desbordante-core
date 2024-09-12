@@ -50,7 +50,7 @@ for ucc in uccs:
 print()
 
 print('There are no unary UCCs, so there is no column that can define a key.')
-print('Let\'s run algorithm with bigger threshold:')
+print('Let\'s run algorithm with bigger threshold (= 0.1):')
 algo = desbordante.ucc.algorithms.PyroUCC()
 algo.load_data(table=(TABLE, ',', True))
 algo.execute(error=0.1)
@@ -61,8 +61,8 @@ for ucc in uccs:
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
 print()
 
-print('Now, all columns are considered to be unique. It\'s not what we wanted.')
-print('Let\'s select a smaller threshold:')
+print('Now, almost all columns are considered to be unique. It\'s not what we wanted.')
+print('Let\'s select a smaller threshold (= 0.05):')
 algo = desbordante.ucc.algorithms.PyroUCC()
 algo.load_data(table=(TABLE, ',', True))
 algo.execute(error=0.05)
@@ -73,20 +73,21 @@ for ucc in uccs:
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
 print()
 
-print(f'{CYAN}Name{ENDC} requires the smallest threshold to be "unique".')
-print('Let\'s look at the table again:')
+print(f'''Out of single-column UCCs, {CYAN}Name{ENDC} requires the smallest threshold to be "unique".
+Let\'s look at the table again, paying a special attention to the {CYAN}Name{ENDC} column:''')
 print(CYAN, end='')
 print_table(TABLE)
 print(ENDC)
 
-print(f'''There are two {CYAN}Harrys{ENDC}. They have different work experience, so it\'s
-two different employees. If they had unique names, AUCC would hold with threshold = 0, and
-{CYAN}Name{ENDC} could be used as a key:''')
+print(f'''There are two {CYAN}Harrys{ENDC}. They have different work experience and salary,
+therefore it\'s two different employees. This is most likely an error/oversight in data.
+If we representeed their records using unique names, the {CYAN}Name{ENDC} AUCC would hold with
+threshold = 0, and {CYAN}Name{ENDC} could be used as a key:''')
 print(CYAN, end='')
 print_table(CORRECT_TABLE)
 print(ENDC)
 
-print('Let\'s run algorithm with threshold = 0:')
+print('Let\'s run algorithm once more with threshold = 0:')
 algo = desbordante.ucc.algorithms.PyroUCC()
 algo.load_data(table=(CORRECT_TABLE, ',', True))
 algo.execute(error=0)

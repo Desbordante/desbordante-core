@@ -84,3 +84,6 @@ uccs = algo.get_uccs()
 print('Found UCCs:')
 for ucc in uccs:
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
+print()
+
+print(f'Now, we have cleaned the data and now {CYAN}Name{ENDC} can be used as a key.')
