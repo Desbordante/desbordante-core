@@ -87,8 +87,8 @@ void ARAlgorithm::GenerateRulesFrom(std::vector<unsigned> const& frequent_itemse
         auto const lhs_support = GetSupport(lhs);
         auto const confidence = support / lhs_support;
         if (confidence >= minconf_) {
-            auto const& new_ar =
-                    ar_collection_.emplace_back(std::move(lhs), std::move(rhs), confidence);
+            auto const& new_ar = ar_collection_.emplace_back(std::move(lhs), std::move(rhs),
+                                                             confidence, support);
             root_.children.emplace_back(new_ar);
         }
     }
@@ -146,8 +146,8 @@ bool ARAlgorithm::MergeRules(std::vector<unsigned> const& frequent_itemset, doub
             auto const lhs_support = GetSupport(lhs);
             auto const confidence = support / lhs_support;
             if (confidence >= minconf_) {
-                auto const& new_ar =
-                        ar_collection_.emplace_back(std::move(lhs), std::move(rhs), confidence);
+                auto const& new_ar = ar_collection_.emplace_back(std::move(lhs), std::move(rhs),
+                                                                 confidence, support);
                 child_iter->children.emplace_back(new_ar);
                 is_rule_produced = true;
             }
