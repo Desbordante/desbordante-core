@@ -691,8 +691,10 @@ std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
                 cur_index += child_index;
                 Index index;
                 while ((index = *index_it) < cur_index) {
-                    interestingness_ccv_ids.push_back(
-                            (*lhs_ccv_id_info_)[index].lhs_to_rhs_map[kLowestCCValueId]);
+                    DESBORDANTE_ASSUME(
+                            (*lhs_ccv_id_info_)[index].lhs_to_rhs_map[kLowestCCValueId] ==
+                            kLowestCCValueId);
+                    interestingness_ccv_ids.push_back(kLowestCCValueId);
                     if (++index_it == index_end) return;
                 }
                 if (cur_index == index) {
@@ -703,8 +705,10 @@ std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
                 ++cur_index;
             }
             while (index_it != index_end) {
-                interestingness_ccv_ids.push_back(
-                        (*lhs_ccv_id_info_)[*index_it].lhs_to_rhs_map[kLowestCCValueId]);
+                DESBORDANTE_ASSUME(
+                        (*lhs_ccv_id_info_)[*index_it].lhs_to_rhs_map[kLowestCCValueId] ==
+                        kLowestCCValueId);
+                interestingness_ccv_ids.push_back(kLowestCCValueId);
                 ++index_it;
             }
         };

@@ -8,6 +8,7 @@
 #include <pybind11/stl.h>
 
 #include "algorithms/md/hymd/lowest_bound.h"
+#include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
 #include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
@@ -133,17 +134,23 @@ public:
             std::vector<algos::hymd::preprocessing::Similarity> const& similarities) {
         auto lhs_ccv_ids = pybind11::cast<std::vector<algos::hymd::ColumnClassifierValueId>>(
                 picker_function_(similarities));
-        if (lhs_ccv_ids.empty()) throw std::domain_error("LHS indices must not be empty.");
         auto ccv_ids_end = lhs_ccv_ids.end();
         if (std::adjacent_find(lhs_ccv_ids.begin(), ccv_ids_end, std::greater_equal{}) !=
             ccv_ids_end)
             throw std::domain_error("LHS indices must be a strictly increasing sequence.");
+        auto first_ccv_id = lhs_ccv_ids.front();
+        if (first_ccv_id == algos::hymd::kLowestCCValueId)
+            throw std::domain_error("0 must not be used in the LHS index list.");
         auto last_ccv_id = lhs_ccv_ids.back();
         std::size_t const similarities_size = similarities.size();
         if (last_ccv_id >= similarities_size)
             throw std::domain_error("Last LHS index out of range (" + std::to_string(last_ccv_id) +
                                     " >= " + std::to_string(similarities_size) + ")");
-        return lhs_ccv_ids;
+        std::vector<algos::hymd::ColumnClassifierValueId> ccv_ids;
+        ccv_ids.reserve(lhs_ccv_ids.size() + 1);
+        ccv_ids.push_back(algos::hymd::kLowestCCValueId);
+        ccv_ids.insert(ccv_ids.end(), lhs_ccv_ids.begin(), lhs_ccv_ids.end());
+        return ccv_ids;
     }
 };
 
