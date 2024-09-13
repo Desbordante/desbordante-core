@@ -27,6 +27,8 @@ def print_ars(ars):
     print('Total count of ARs:', len(ars))
     print('The first 10 ARs:')
     for ar in ars[:10]:
+        print('conf: ', end='')
+
         if ar.confidence > 0.9:
             print(COLOR_CODES['bold_green'], end='')
         elif ar.confidence > 0.3:
@@ -35,6 +37,17 @@ def print_ars(ars):
             print(COLOR_CODES['bold_red'], end='')
 
         print('{:1.2f}'.format(ar.confidence), 
+              COLOR_CODES['default'], end='\t')
+        print('sup: ', end='')
+
+        if ar.support > 0.9:
+            print(COLOR_CODES['bold_green'], end='')
+        elif ar.support > 0.3:
+            print(COLOR_CODES['bold_yellow'], end='')
+        else:
+            print(COLOR_CODES['bold_red'], end='')
+
+        print('{:1.2f}'.format(ar.support),
               COLOR_CODES['default'], end='\t')
         print(ar.left, '->', ar.right, )
 
@@ -47,7 +60,7 @@ def print_itemnames(itemnames):
 
 def scenario_tabular():
     algo = desbordante.ar.algorithms.Default()
-    algo.load_data(table=(TABLE_TABULAR, ',', True), input_format='tabular')
+    algo.load_data(table=(TABLE_TABULAR, ',', False), input_format='tabular')
     algo.execute(minconf=1)
     table = pandas.read_csv(TABLE_TABULAR, header=None)
 
@@ -60,20 +73,21 @@ def scenario_tabular():
     print("\nLet's see the first 10 association rules (ARs) that are present "
           'in the dataset with minconf=1. As no minsup is specified, '
           'the default value of minsup=0 is used.\n')
+
     print_ars(algo.get_ars())
-    print("\n['Eggs'] -> ['Milk'] with confidence 1 means that whenever eggs "
-          'are found in the receipt, milk will '
+    print("\n['Butter'] -> ['Bread'] with confidence 1 means that whenever butter "
+          'is found in the receipt, bread will '
           f'{COLOR_CODES["green"]}always{COLOR_CODES["default"]} '
           'be present as well. The same holds true for all other rules with '
           f'{COLOR_CODES["bold_green"]}confidence 1{COLOR_CODES["default"]}.')
 
     print("\n\nNow, let's examine the same dataset with "
-          f'{COLOR_CODES["yellow"]}minconf=0.7{COLOR_CODES["default"]}.')
-    algo.execute(minconf=0.7)
+          f'{COLOR_CODES["yellow"]}minconf=0.6{COLOR_CODES["default"]}.')
+    algo.execute(minconf=0.6)
     print_ars(algo.get_ars())
-    print("\n['Milk'] -> ['Eggs'] with confidence 0.75 means that when milk "
+    print("\n['Yogurt'] -> ['Eggs'] with confidence 0.67 means that when milk "
           'is found in the receipt, the chance of eggs being '
-          'present amounts to 75%. So, customers are '
+          'present amounts to 67%. So, customers are '
           f'{COLOR_CODES["bold_yellow"]}likely{COLOR_CODES["default"]} '
           'to buy eggs with milk.')
 
@@ -89,24 +103,21 @@ def scenario_tabular():
           'Since the default support value is 0, the system discovers '
           'all association rules, even those that only occur once '
           "in the dataset. Now, let's see the results with "
-          f'{COLOR_CODES["yellow"]}minsup=0.5{COLOR_CODES["default"]} and '
-          f'{COLOR_CODES["yellow"]}minconf=0.5{COLOR_CODES["default"]}.\n')
-    algo.execute(minsup=0.5, minconf=0.5)
+          f'{COLOR_CODES["yellow"]}minsup=0.4{COLOR_CODES["default"]} and '
+          f'{COLOR_CODES["yellow"]}minconf=0.6{COLOR_CODES["default"]}.\n')
+    algo.execute(minsup=0.4, minconf=0.6)
     print_ars(algo.get_ars())
     print('\nNow you can see that the number of association rules have decreased '
-          'significantly. This happened due to minsup being set to 0.5. '
-          'Unfortunately, if you want to know what the support value is for a '
-          'particular association rule in a dataset, '
-          "you can't get it with Desbordante.\n"
+          'significantly. This happened due to minsup being set to 0.5. \n'
           '\nA typical approach to controlling the algorithm is to employ '
           f'{COLOR_CODES["bold_yellow"]}"usefulness"{COLOR_CODES["default"]}, '
           'which is defined as confidence * support. '
           'In the last example, we set up min '
-          '"usefulness" = 0.5 * 0.5 = 0.25. \n\nNow, let\'s try with '
-          f'{COLOR_CODES["green"]}minsup=0.7{COLOR_CODES["default"]}, '
-          f'{COLOR_CODES["green"]}minconf=0.7{COLOR_CODES["default"]} and '
-          f'{COLOR_CODES["bold_yellow"]}"usefulness"=0.49{COLOR_CODES["default"]}.\n')
-    algo.execute(minsup=0.7, minconf=0.7)
+          '"usefulness" = 0.6 * 0.4 = 0.24. \n\nNow, let\'s try with '
+          f'{COLOR_CODES["green"]}minsup=0.6{COLOR_CODES["default"]}, '
+          f'{COLOR_CODES["green"]}minconf=0.6{COLOR_CODES["default"]} and '
+          f'{COLOR_CODES["bold_yellow"]}"usefulness"=0.36{COLOR_CODES["default"]}.\n')
+    algo.execute(minsup=0.6, minconf=0.6)
     print_ars(algo.get_ars())
     print('\nSo, now the total number of returned association rules '
           'is only four. We reduced the amount of "noisy" information '
@@ -117,7 +128,7 @@ def scenario_tabular():
 
 def scenario_singular():
     algo = desbordante.ar.algorithms.Default()
-    algo.load_data(table=(TABLE_SINGULAR, ',', True), input_format='singular')
+    algo.load_data(table=(TABLE_SINGULAR, ',', False), input_format='singular')
     algo.execute()
     table = pandas.read_csv(TABLE_SINGULAR, header=None, index_col=0)
 
