@@ -22,12 +22,14 @@ void BindAr(py::module_& main_module) {
             .def("__str__", &ARStrings::ToString)
             .def_readonly("left", &ARStrings::left)
             .def_readonly("right", &ARStrings::right)
-            .def_readonly("confidence", &ARStrings::confidence);
+            .def_readonly("confidence", &ARStrings::confidence)
+            .def_readonly("support", &ARStrings::support);
 
     py::class_<ArIDs>(ar_module, "ArIDs")
             .def_readonly("left", &ArIDs::left)
             .def_readonly("right", &ArIDs::right)
-            .def_readonly("confidence", &ArIDs::confidence);
+            .def_readonly("confidence", &ArIDs::confidence)
+            .def_readonly("support", &ArIDs::support);
 
     py::class_<ARAlgorithm, Algorithm>(ar_module, "ArAlgorithm")
             .def("get_ars", &ARAlgorithm::GetArStringsList, py::return_value_policy::move)
