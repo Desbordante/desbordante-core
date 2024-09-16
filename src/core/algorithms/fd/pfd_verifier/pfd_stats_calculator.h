@@ -11,8 +11,7 @@ namespace algos {
 class PFDStatsCalculator {
 private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
-    config::ErrorType max_fd_error_;
-    config::ErrorMeasureType error_measure_;
+    config::PfdErrorMeasureType error_measure_;
 
     std::vector<model::PLI::Cluster> clusters_violating_pfd_;
     size_t num_rows_violating_pfd_ = 0;
@@ -20,17 +19,13 @@ private:
 
 public:
     explicit PFDStatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
-                                config::ErrorMeasureType measure, config::ErrorType max_fd_error)
-        : relation_(std::move(relation)), max_fd_error_(max_fd_error), error_measure_(measure) {}
+                                config::PfdErrorMeasureType measure)
+        : relation_(std::move(relation)), error_measure_(measure) {}
 
     void ResetState() {
         clusters_violating_pfd_.clear();
         num_rows_violating_pfd_ = 0;
         error_ = 0;
-    }
-
-    bool PFDHolds() const {
-        return error_ <= max_fd_error_;
     }
 
     size_t GetNumViolatingClusters() const {
@@ -79,7 +74,7 @@ public:
                 clusters_violating_pfd_.push_back(x_cluster);
             }
             num_rows_violating_pfd_ += x_cluster_size - max;
-            sum += error_measure_ == +ErrorMeasure::per_tuple
+            sum += error_measure_ == +PfdErrorMeasure::per_tuple
                            ? static_cast<double>(max)
                            : static_cast<double>(max) / x_cluster_size;
             cluster_rows_count += x_cluster.size();
@@ -87,9 +82,9 @@ public:
         unsigned int unique_rows =
                 static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
         double probability =
-                static_cast<double>(sum + unique_rows) / (error_measure_ == +ErrorMeasure::per_tuple
-                                                                  ? x_pli->GetRelationSize()
-                                                                  : x_index.size() + unique_rows);
+                static_cast<double>(sum + unique_rows) /
+                (error_measure_ == +PfdErrorMeasure::per_tuple ? x_pli->GetRelationSize()
+                                                               : x_index.size() + unique_rows);
         error_ = 1.0 - probability;
     }
 };

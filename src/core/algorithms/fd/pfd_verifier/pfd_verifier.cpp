@@ -4,12 +4,11 @@
 #include <memory>
 
 #include "algorithms/algorithm.h"
+#include "config/equal_nulls/option.h"
+#include "config/error_measure/option.h"
+#include "config/indices/option.h"
 #include "config/names.h"
 #include "config/tabular_data/input_table/option.h"
-#include "equal_nulls/option.h"
-#include "error/option.h"
-#include "error_measure/option.h"
-#include "indices/option.h"
 
 namespace algos {
 
@@ -19,13 +18,12 @@ void PFDVerifier::RegisterOptions() {
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
-    RegisterOption(config::kErrorMeasureOpt(&error_measure_));
-    RegisterOption(config::kErrorOpt(&max_fd_error_));
+    RegisterOption(config::kPfdErrorMeasureOpt(&error_measure_));
 }
 
 void PFDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kLhsIndices, kRhsIndices, kErrorMeasure, kError});
+    MakeOptionsAvailable({kLhsIndices, kRhsIndices, kPfdErrorMeasure});
 }
 
 void PFDVerifier::LoadDataInternal() {
@@ -37,8 +35,7 @@ void PFDVerifier::LoadDataInternal() {
 
 unsigned long long PFDVerifier::ExecuteInternal() {
     auto start_time = std::chrono::system_clock::now();
-    stats_calculator_ =
-            std::make_unique<PFDStatsCalculator>(relation_, error_measure_, max_fd_error_);
+    stats_calculator_ = std::make_unique<PFDStatsCalculator>(relation_, error_measure_);
     VerifyPFD();
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
