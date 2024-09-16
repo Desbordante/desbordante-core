@@ -21,7 +21,6 @@ private:
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
     config::EqNullsType is_null_equal_null_;
-    config::ErrorType max_fd_error_;
     config::ErrorMeasureType error_measure_ = +ErrorMeasure::per_tuple;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
@@ -41,11 +40,6 @@ private:
     std::shared_ptr<model::PLI const> CalculatePLI(config::IndicesType const& indices) const;
 
 public:
-    bool PFDHolds() const {
-        assert(stats_calculator_);
-        return stats_calculator_->PFDHolds();
-    }
-
     size_t GetNumViolatingClusters() const {
         assert(stats_calculator_);
         return stats_calculator_->GetNumViolatingClusters();

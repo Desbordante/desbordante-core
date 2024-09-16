@@ -11,7 +11,6 @@ namespace algos {
 class PFDStatsCalculator {
 private:
     std::shared_ptr<ColumnLayoutRelationData> relation_;
-    config::ErrorType max_fd_error_;
     config::ErrorMeasureType error_measure_;
 
     std::vector<model::PLI::Cluster> clusters_violating_pfd_;
@@ -20,17 +19,13 @@ private:
 
 public:
     explicit PFDStatsCalculator(std::shared_ptr<ColumnLayoutRelationData> relation,
-                                config::ErrorMeasureType measure, config::ErrorType max_fd_error)
-        : relation_(std::move(relation)), max_fd_error_(max_fd_error), error_measure_(measure) {}
+                                config::ErrorMeasureType measure)
+        : relation_(std::move(relation)), error_measure_(measure) {}
 
     void ResetState() {
         clusters_violating_pfd_.clear();
         num_rows_violating_pfd_ = 0;
         error_ = 0;
-    }
-
-    bool PFDHolds() const {
-        return error_ <= max_fd_error_;
     }
 
     size_t GetNumViolatingClusters() const {

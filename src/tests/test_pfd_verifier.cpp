@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/fd/pfdtane/pfd_verifier/pfd_verifier.h"
+#include "algorithms/fd/pfd_verifier/pfd_verifier.h"
 #include "all_csv_configs.h"
 #include "config/indices/type.h"
 #include "config/names.h"
@@ -23,12 +23,13 @@ struct PFDVerifyingParams {
                        size_t num_violating_clusters, size_t num_violating_rows,
                        std::vector<model::PLI::Cluster> clusters_violating_pfd,
                        CSVConfig const& csv_config)
-        : params({{onam::kCsvConfig, csv_config},
+        : params({
+                  {onam::kCsvConfig, csv_config},
                   {onam::kEqualNulls, true},
                   {onam::kLhsIndices, std::move(lhs_indices)},
                   {onam::kRhsIndices, std::move(rhs_indices)},
                   {onam::kErrorMeasure, error_measure},
-                  {onam::kError, error}}),
+          }),
           expected_error(error),
           num_violating_clusters(num_violating_clusters),
           num_violating_rows(num_violating_rows),
@@ -44,7 +45,6 @@ TEST_P(TestPFDVerifying, DefaultTest) {
     auto verifier = algos::CreateAndLoadAlgorithm<algos::PFDVerifier>(p.params);
     double const eps = 0.0001;
     verifier->Execute();
-    EXPECT_TRUE(verifier->PFDHolds());
     EXPECT_NEAR(p.expected_error, verifier->GetError(), eps);
     EXPECT_EQ(p.num_violating_clusters, verifier->GetNumViolatingClusters());
     EXPECT_EQ(p.num_violating_rows, verifier->GetNumViolatingRows());
