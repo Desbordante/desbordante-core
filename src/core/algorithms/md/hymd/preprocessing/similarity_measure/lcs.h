@@ -3,5 +3,5 @@
 #include <string>
 
 namespace algos::hymd::preprocessing::similarity_measure {
-double LongestCommonSubsequence(std::string const& word1, std::string const& word2);
+float LongestCommonSubsequence(std::string const& left, std::string const& right);
 }  // namespace algos::hymd::preprocessing::similarity_measure
