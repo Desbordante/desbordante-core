@@ -1,24 +1,40 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/lcs.h"
 
+#include <algorithm>
 #include <vector>
 
 namespace algos::hymd::preprocessing::similarity_measure {
-double LongestCommonSubsequence(std::string const& word1, std::string const& word2) {
-    size_t m = word1.size();
-    size_t n = word2.size();
 
-    std::vector<std::vector<size_t>> lcs_table(m + 1, std::vector<size_t>(n + 1, 0));
+int Lcs(std::string const& left, std::string const& right) {
+    int const n = left.size();
+    int const m = right.size();
 
-    for (size_t i = 1; i <= m; ++i) {
-        for (size_t j = 1; j <= n; ++j) {
-            if (word1[i - 1] == word2[j - 1]) {
-                lcs_table[i][j] = lcs_table[i - 1][j - 1] + 1;
+    std::vector<int> v0(m + 1, 0);
+    std::vector<int> v1(m + 1, 0);
+
+    for (int i = 1; i <= n; ++i) {
+        for (int j = 1; j <= m; ++j) {
+            if (left[i - 1] == right[j - 1]) {
+                v1[j] = v0[j - 1] + 1;
             } else {
-                lcs_table[i][j] = std::max(lcs_table[i - 1][j], lcs_table[i][j - 1]);
+                v1[j] = std::max(v1[j - 1], v0[j]);
             }
         }
+        std::swap(v0, v1);
     }
 
-    return lcs_table[m][n];
+    return v0[m];
+}
+
+float LongestCommonSubsequence(std::string const& left, std::string const& right) {
+    if (left.empty() && right.empty()) {
+        return 1.0f;
+    }
+
+    if (left.empty() || right.empty()) {
+        return 0.0f;
+    }
+
+    return static_cast<float>(Lcs(left, right)) / std::max(left.size(), right.size());
 }
 }  // namespace algos::hymd::preprocessing::similarity_measure
