@@ -3,6 +3,6 @@
 #include <string>
 
 namespace algos::hymd::preprocessing::similarity_measure {
-double NormalizedSmithWatermanGotoh(std::string const& s, std::string const& t,
-                                    double gapValue = -0.5);
+float NormalizedSmithWatermanGotoh(std::string const& a, std::string const& b,
+                                   float gap_value = -0.5f);
 }  // namespace algos::hymd::preprocessing::similarity_measure
