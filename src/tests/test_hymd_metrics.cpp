@@ -31,13 +31,12 @@ INSTANTIATE_TEST_SUITE_P(
         Default, SimilarityMetricTest,
         ::testing::Values(
                 // lcs
-                SimilarityTestParams{LongestCommonSubsequence, "", "", 0.0},
-                SimilarityTestParams{LongestCommonSubsequence, "hello", "", 0.0},
-                SimilarityTestParams{LongestCommonSubsequence, "", "world", 0.0},
-                SimilarityTestParams{LongestCommonSubsequence, "kitten", "sitting", 4.0},
-                SimilarityTestParams{LongestCommonSubsequence, "abcdef", "xyabdxe", 4.0},
-                SimilarityTestParams{LongestCommonSubsequence, "abcdef", "xyz", 0.0},
-                SimilarityTestParams{LongestCommonSubsequence, "aaa", "aaa", 3.0},
+                SimilarityTestParams{Lcs, "", "", 0}, SimilarityTestParams{Lcs, "hello", "", 0},
+                SimilarityTestParams{Lcs, "", "world", 0},
+                SimilarityTestParams{Lcs, "kitten", "sitting", 4},
+                SimilarityTestParams{Lcs, "abcdef", "xyabdxe", 4},
+                SimilarityTestParams{Lcs, "abcdef", "xyz", 0},
+                SimilarityTestParams{Lcs, "aaa", "aaa", 3},
                 // jaccard
                 SimilarityTestParams{
                         [](std::string a, std::string b) { return StringJaccardIndex(a, b); }, "",

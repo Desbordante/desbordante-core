@@ -5,7 +5,7 @@
 
 namespace algos::hymd::preprocessing::similarity_measure {
 
-int Lcs(std::string const& left, std::string const& right) {
+size_t Lcs(std::string const& left, std::string const& right) {
     int const n = left.size();
     int const m = right.size();
 
@@ -26,7 +26,7 @@ int Lcs(std::string const& left, std::string const& right) {
     return v0[m];
 }
 
-float LongestCommonSubsequence(std::string const& left, std::string const& right) {
+double LongestCommonSubsequence(std::string const& left, std::string const& right) {
     if (left.empty() && right.empty()) {
         return 1.0f;
     }
@@ -35,6 +35,6 @@ float LongestCommonSubsequence(std::string const& left, std::string const& right
         return 0.0f;
     }
 
-    return static_cast<float>(Lcs(left, right)) / std::max(left.size(), right.size());
+    return static_cast<double>(Lcs(left, right)) / std::max(left.size(), right.size());
 }
 }  // namespace algos::hymd::preprocessing::similarity_measure
