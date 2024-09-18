@@ -4,37 +4,64 @@
 #include <vector>
 
 namespace {
-double SubstitutionCompare(char a, char b) {
-    return a == b ? 1.0 : -2.0;
+float MaxOfThree(float a, float b, float c) {
+    return std::max(a, std::max(b, c));
 }
 
-double SmithWatermanGotoh(std::string const& s, std::string const& t, double gapValue = -0.5) {
-    std::vector<double> v0(t.size() + 1, 0.0);
-    std::vector<double> v1(t.size() + 1, 0.0);
+float MaxOfFour(float a, float b, float c, float d) {
+    return MaxOfThree(a, b, std::max(c, d));
+}
 
-    double max = 0.0;
+float SubstitutionCompare(char a, char b) {
+    return a == b ? 1.0f : -2.0f;
+}
 
-    for (size_t i = 1; i <= s.size(); ++i) {
-        for (size_t j = 1; j <= t.size(); ++j) {
-            double match = v0[j - 1] + SubstitutionCompare(s[i - 1], t[j - 1]);
-            double delete_from_s = v0[j] + gapValue;
-            double delete_from_t = v1[j - 1] + gapValue;
-            v1[j] = std::max({0.0, match, delete_from_s, delete_from_t});
-            max = std::max(max, v1[j]);
+float SmithWatermanGotoh(std::string const& s, std::string const& t, float gap_value = -0.5f) {
+    size_t m = s.size();
+    size_t n = t.size();
+
+    std::vector<float> v0(n, 0.0f);
+    std::vector<float> v1(n, 0.0f);
+
+    float max_score = 0.0f;
+
+    for (size_t j = 0; j < n; ++j) {
+        v0[j] = std::max(0.0f, j * gap_value + SubstitutionCompare(s[0], t[j]));
+        max_score = std::max(max_score, v0[j]);
+    }
+
+    for (size_t i = 1; i < m; ++i) {
+        v1[0] = MaxOfThree(0.0f, v0[0] + gap_value, SubstitutionCompare(s[i], t[0]));
+
+        max_score = std::max(max_score, v1[0]);
+
+        for (size_t j = 1; j < n; ++j) {
+            v1[j] = MaxOfFour(0.0f, v0[j] + gap_value, v1[j - 1] + gap_value,
+                              v0[j - 1] + SubstitutionCompare(s[i], t[j]));
+            max_score = std::max(max_score, v1[j]);
         }
+
         std::swap(v0, v1);
     }
 
-    return max;
+    return max_score;
 }
+
 }  // namespace
 
 namespace algos::hymd::preprocessing::similarity_measure {
-double NormalizedSmithWatermanGotoh(std::string const& s, std::string const& t, double gapValue) {
-    if (s.empty() && t.empty()) return 1.0;
-    if (s.empty() || t.empty()) return 0.0;
 
-    double max_distance = std::min(s.size(), t.size()) * std::max(1.0, gapValue);
-    return SmithWatermanGotoh(s, t, gapValue) / max_distance;
+float NormalizedSmithWatermanGotoh(std::string const& a, std::string const& b,
+                                   float gap_value = -0.5f) {
+    if (a.empty() && b.empty()) {
+        return 1.0f;
+    }
+    if (a.empty() || b.empty()) {
+        return 0.0f;
+    }
+
+    float max_distance = std::min(a.size(), b.size()) * std::max(1.0f, gap_value);
+    return SmithWatermanGotoh(a, b, gap_value) / max_distance;
 }
+
 }  // namespace algos::hymd::preprocessing::similarity_measure
