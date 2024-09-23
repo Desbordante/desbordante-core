@@ -1,4 +1,4 @@
-#include "pfdtane.h"
+#include "tane_common.h"
 
 #include <chrono>
 #include <iomanip>
@@ -8,94 +8,34 @@
 #include <easylogging++.h>
 
 #include "config/error/option.h"
-#include "config/error_measure/option.h"
-#include "config/max_lhs/option.h"
-#include "enums.h"
-#include "fd/tane/lattice_level.h"
-#include "fd/tane/lattice_vertex.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "fd/tane/model/lattice_level.h"
+#include "fd/tane/model/lattice_vertex.h"
 #include "model/table/column_data.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/relational_schema.h"
 
 namespace algos {
 using boost::dynamic_bitset;
-using Cluster = model::PositionListIndex::Cluster;
 
-config::ErrorType PFDTane::CalculateZeroAryFdError(ColumnData const* rhs) {
-    std::size_t max = 1;
-    model::PositionListIndex const* x_pli = rhs->GetPositionListIndex();
-    for (Cluster const& x_cluster : x_pli->GetIndex()) {
-        max = std::max(max, x_cluster.size());
-    }
-    return 1.0 - static_cast<double>(max) / x_pli->GetRelationSize();
-}
+namespace tane {
 
-config::ErrorType PFDTane::CalculateFdError(model::PositionListIndex const* x_pli,
-                                            model::PositionListIndex const* xa_pli,
-                                            ErrorMeasure measure) {
-    std::deque<Cluster> xa_index = xa_pli->GetIndex();
-    std::shared_ptr<Cluster const> probing_table = x_pli->CalculateAndGetProbingTable();
-    std::sort(xa_index.begin(), xa_index.end(),
-              [&probing_table](Cluster const& a, Cluster const& b) {
-                  return probing_table->at(a.front()) < probing_table->at(b.front());
-              });
-    double sum = 0.0;
-    std::size_t cluster_rows_count = 0;
-    std::deque<Cluster> const& x_index = x_pli->GetIndex();
-    auto xa_cluster_it = xa_index.begin();
-
-    for (Cluster const& x_cluster : x_index) {
-        std::size_t max = 1;
-        for (int x_row : x_cluster) {
-            if (xa_cluster_it == xa_index.end()) {
-                break;
-            }
-            if (x_row == xa_cluster_it->at(0)) {
-                max = std::max(max, xa_cluster_it->size());
-                xa_cluster_it++;
-            }
-        }
-        sum += measure == +ErrorMeasure::per_tuple ? static_cast<double>(max)
-                                                   : static_cast<double>(max) / x_cluster.size();
-        cluster_rows_count += x_cluster.size();
-    }
-    unsigned int unique_rows =
-            static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
-    double probability = static_cast<double>(sum + unique_rows) /
-                         (measure == +ErrorMeasure::per_tuple ? x_pli->GetRelationSize()
-                                                              : x_index.size() + unique_rows);
-    return 1.0 - probability;
-}
-
-void PFDTane::RegisterOptions() {
-    RegisterOption(config::kErrorOpt(&max_ucc_error_));
-    RegisterOption(config::kErrorMeasureOpt(&error_measure_));
-}
-
-void PFDTane::MakeExecuteOptsAvailableFDInternal() {
-    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kErrorMeasureOpt.GetName()});
-}
-
-void PFDTane::ResetStateFd() {}
-
-PFDTane::PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager)
+TaneCommon::TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager)
     : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {
-    RegisterOptions();
+    RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
-double PFDTane::CalculateUccError(model::PositionListIndex const* pli,
-                                  ColumnLayoutRelationData const* relation_data) {
+double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
+                                     ColumnLayoutRelationData const* relation_data) {
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-void PFDTane::RegisterAndCountFd(Vertical const& lhs, Column const* rhs,
-                                 [[maybe_unused]] config::ErrorType error,
-                                 [[maybe_unused]] RelationalSchema const* schema) {
+void TaneCommon::RegisterAndCountFd(Vertical const& lhs, Column const* rhs) {
     dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
     PliBasedFDAlgorithm::RegisterFd(lhs, *rhs);
 }
 
-void PFDTane::Prune(model::LatticeLevel* level) {
+void TaneCommon::Prune(model::LatticeLevel* level) {
     RelationalSchema const* schema = relation_->GetSchema();
     std::list<model::LatticeVertex*> key_vertices;
     for (auto& [map_key, vertex] : level->GetVertices()) {
@@ -104,7 +44,6 @@ void PFDTane::Prune(model::LatticeLevel* level) {
         if (vertex->GetIsKeyCandidate()) {
             double ucc_error = CalculateUccError(vertex->GetPositionListIndex(), relation_.get());
             if (ucc_error <= max_ucc_error_) {  // If a key candidate is an approx UCC
-                // TODO: do smth with UCC
 
                 vertex->SetKeyCandidate(false);
                 if (ucc_error == 0) {
@@ -130,13 +69,11 @@ void PFDTane::Prune(model::LatticeLevel* level) {
                             }
                             // Found fd: vertex->rhs => register it
                             if (is_rhs_candidate) {
-                                RegisterAndCountFd(columns, schema->GetColumn(rhs_index), 0,
-                                                   schema);
+                                RegisterAndCountFd(columns, schema->GetColumn(rhs_index));
                             }
                         }
                     }
                     key_vertices.push_back(vertex.get());
-                    // cout << "--------------------------" << endl << "KeyVert: " << *vertex;
                 }
             }
         }
@@ -150,7 +87,7 @@ void PFDTane::Prune(model::LatticeLevel* level) {
     }
 }
 
-void PFDTane::ComputeDependencies(model::LatticeLevel* level) {
+void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
     RelationalSchema const* schema = relation_->GetSchema();
     for (auto& [key_map, xa_vertex] : level->GetVertices()) {
         if (xa_vertex->GetIsInvalid()) {
@@ -170,25 +107,20 @@ void PFDTane::ComputeDependencies(model::LatticeLevel* level) {
         for (auto const& x_vertex : xa_vertex->GetParents()) {
             Vertical const& lhs = x_vertex->GetVertical();
 
-            // Find index of A in XA. If a is not a candidate, continue. TODO: possible to do it
-            // easier??
-            // like "a_index = xa_indices - x_indices;"
-            int a_index = xa_indices.find_first();
-            dynamic_bitset<> x_indices = lhs.GetColumnIndices();
-            while (a_index >= 0 && x_indices[a_index]) {
-                a_index = xa_indices.find_next(a_index);
-            }
+            // Find index of A in XA.
+            dynamic_bitset<> differing_bits = xa_indices ^ lhs.GetColumnIndices();
+            std::size_t a_index = differing_bits.find_first();
             if (!a_candidates[a_index]) {
                 continue;
             }
             auto x_pli = x_vertex->GetPositionListIndex();
 
             // Check X -> A
-            config::ErrorType error = CalculateFdError(x_pli, xa_pli, error_measure_);
+            config::ErrorType error = CalculateFdError(x_pli, xa_pli);
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 
-                RegisterAndCountFd(lhs, rhs, error, schema);
+                RegisterAndCountFd(lhs, rhs);
                 xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                 if (error == 0) {
                     xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
@@ -198,7 +130,7 @@ void PFDTane::ComputeDependencies(model::LatticeLevel* level) {
     }
 }
 
-unsigned long long PFDTane::ExecuteInternal() {
+unsigned long long TaneCommon::ExecuteInternal() {
     long apriori_millis = 0;
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
@@ -244,7 +176,7 @@ unsigned long long PFDTane::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAndCountFd(*schema->empty_vertical_, column.get(), fd_error, schema);
+            RegisterAndCountFd(*schema->empty_vertical_, column.get());
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -271,7 +203,7 @@ unsigned long long PFDTane::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterAndCountFd(column, schema->GetColumn(rhs_index), 0, schema);
+                        RegisterAndCountFd(column, schema->GetColumn(rhs_index));
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
@@ -323,5 +255,7 @@ unsigned long long PFDTane::ExecuteInternal() {
     LOG(DEBUG) << "HASH: " << Fletcher16();
     return apriori_millis;
 }
+
+}  // namespace tane
 
 }  // namespace algos
