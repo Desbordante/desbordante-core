@@ -7,6 +7,7 @@
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd/fd_mine/fd_mine.h"
 #include "algorithms/fd/pyro/pyro.h"
+#include "algorithms/fd/tane/pfdtane.h"
 #include "algorithms/fd/tane/tane.h"
 #include "config/error/type.h"
 #include "config/names.h"
