@@ -5,6 +5,7 @@
 
 #include "algorithms/cfd/enums.h"
 #include "algorithms/fd/pfdtane/enums.h"
+#include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/enum_to_available_values.h"
 
@@ -19,6 +20,9 @@ std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to us
                                            util::EnumToAvailableValues<algos::cfd::Substrategy>();
 std::string const kDErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::ErrorMeasure>();
+std::string const kDLevelDefinitionString =
+        "MD lattice level definition to use\n" +
+        util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -109,4 +113,13 @@ constexpr auto kDInsertStatements = "Rows to be inserted into the table using th
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+constexpr auto kDLeftTable = "first table processed by the algorithm";
+constexpr auto kDRightTable = "second table processed by the algorithm";
+constexpr auto kDPruneNonDisjoint =
+        "don't search for dependencies where the LHS decision boundary at the same index as the "
+        "RHS decision boundary limits the number of records matched";
+constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
+constexpr auto kDColumnMatches = "column matches to examine";
+constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
+auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 }  // namespace config::descriptions

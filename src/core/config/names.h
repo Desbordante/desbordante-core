@@ -62,4 +62,11 @@ constexpr auto kNumColumns = "num_columns";
 constexpr auto kInsertStatements = "insert";
 constexpr auto kDeleteStatements = "delete";
 constexpr auto kUpdateStatements = "update";
+constexpr auto kLeftTable = "left_table";
+constexpr auto kRightTable = "right_table";
+constexpr auto kPruneNonDisjoint = "prune_nondisjoint";
+constexpr auto kMinSupport = "min_support";
+constexpr auto kColumnMatches = "column_matches";
+constexpr auto kMaxCardinality = "max_cardinality";
+constexpr auto kLevelDefinition = "level_definition";
 }  // namespace config::names
