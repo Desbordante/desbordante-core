@@ -62,7 +62,11 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
 
             candidate_types_bitset &= new_candidate_types_bitset;
             if (candidate_types_bitset.none()) {
-                return +TypeId::kMixed;
+                if (treat_mixed_as_string_) {
+                    candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
+                } else {
+                    return +TypeId::kMixed;
+                }
             }
         }
     }
@@ -251,7 +255,8 @@ TypedColumnData TypedColumnDataFactory::CreateFrom() {
 std::vector<TypedColumnData> CreateTypedColumnData(IDatasetStream& dataset_stream,
                                                    bool is_null_equal_null) {
     std::unique_ptr<model::ColumnLayoutTypedRelationData> relation_data =
-            model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream, is_null_equal_null);
+            model::ColumnLayoutTypedRelationData::CreateFrom(dataset_stream, is_null_equal_null,
+                                                             false);
     std::vector<model::TypedColumnData> col_data = std::move(relation_data->GetColumnData());
     return col_data;
 }
