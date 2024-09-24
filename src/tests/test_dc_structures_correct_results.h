@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 std::vector<std::string> different_column_predicates_expected = {
@@ -55,3 +56,8 @@ std::bitset<64> VectorToBitset(std::vector<size_t> const& positions) {
     }
     return bset;
 }
+
+std::unordered_map<uint64_t, size_t> expected_clue_set = {
+        {2082, 1},   {65570, 1},  {67584, 1},  {67616, 1},  {131104, 1}, {133122, 1}, {133157, 1},
+        {148101, 1}, {166152, 1}, {166408, 1}, {168096, 1}, {172448, 1}, {172680, 1}, {172682, 1},
+        {172711, 1}, {172712, 1}, {172714, 1}, {174087, 1}, {174728, 1}, {174730, 1}};
