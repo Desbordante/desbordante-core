@@ -5,6 +5,7 @@
 
 #include "all_csv_configs.h"
 #include "csv_parser/csv_parser.h"
+#include "dc/clue_set_builder.h"
 #include "dc/column_operand.h"
 #include "dc/operator.h"
 #include "dc/utils.h"
@@ -383,6 +384,35 @@ TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
 
     for (size_t i = 0; i < correction_map.size(); ++i) {
         EXPECT_EQ(correction_map[i], VectorToBitset(expected_correction_map[i]));
+    }
+}
+
+TEST(FastADC, ClueSet) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+
+    model::PredicateBuilder pbuilder(true);
+    pbuilder.BuildPredicateSpace(col_data);
+
+    model::ClueSetBuilder cluebuilder(pbuilder);
+
+    model::PliShardBuilder plibuilder;
+    plibuilder.BuildPliShards(col_data);
+
+    model::ClueSet clue_set = cluebuilder.BuildClueSet(plibuilder.GetPliShards());
+
+    for (auto const& [expected_clue, expected_count] : expected_clue_set) {
+        auto found = clue_set.find(std::bitset<64>(expected_clue));
+        ASSERT_NE(found, clue_set.end()) << "Expected clue " << expected_clue << " not found!";
+        ASSERT_EQ(found->second, expected_count) << "Count mismatch for clue " << expected_clue;
+    }
+
+    // Check that no additional clues are present
+    for (auto const& [generated_clue, count] : clue_set) {
+        uint64_t clue_value = generated_clue.to_ullong();
+        ASSERT_NE(expected_clue_set.find(clue_value), expected_clue_set.end())
+                << "Unexpected clue " << clue_value << " found!";
     }
 }
 
