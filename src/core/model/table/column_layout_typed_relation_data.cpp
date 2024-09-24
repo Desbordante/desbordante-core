@@ -5,7 +5,7 @@
 namespace model {
 
 std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::CreateFrom(
-        IDatasetStream& data_stream, bool is_null_eq_null) {
+        IDatasetStream& data_stream, bool is_null_eq_null, bool treat_mixed_as_string) {
     auto schema = std::make_unique<RelationalSchema>(data_stream.GetRelationName());
     size_t const num_columns = data_stream.GetNumberOfColumns();
 
@@ -35,7 +35,8 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
         Column column(schema.get(), data_stream.GetColumnName(i), i);
         schema->AppendColumn(std::move(column));
         TypedColumnData typed_column_data = model::TypedColumnDataFactory::CreateFrom(
-                schema->GetColumn(i), std::move(columns[i]), is_null_eq_null);
+                schema->GetColumn(i), std::move(columns[i]), is_null_eq_null,
+                treat_mixed_as_string);
         column_data.emplace_back(std::move(typed_column_data));
     }
 
