@@ -140,4 +140,6 @@ constexpr auto kDDelta =
         "greater than minimum_cardinality_.";
 constexpr auto kDMaxAmountOfCategories =
         "Max amount of categories for the chi-squared test in case the data is not skewed";
+constexpr auto kDGfdK = "Max size of mined gfds";
+constexpr auto kDGfdSigma = "Min frequency of mined gfds";
 }  // namespace config::descriptions
