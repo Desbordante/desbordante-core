@@ -159,4 +159,6 @@ constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
+constexpr auto kDGfdK = "Max size of mined gfds";
+constexpr auto kDGfdSigma = "Min frequency of mined gfds";
 }  // namespace config::descriptions
