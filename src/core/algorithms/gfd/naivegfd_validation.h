@@ -7,6 +7,8 @@
 
 namespace algos {
 
+using namespace details;
+
 class NaiveGfdValidation : public GfdHandler {
 public:
     std::vector<Gfd> GenerateSatisfiedGfds(graph_t const& graph, std::vector<Gfd> const& gfds);

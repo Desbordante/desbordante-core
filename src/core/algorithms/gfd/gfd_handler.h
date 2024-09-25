@@ -8,6 +8,8 @@
 
 namespace algos {
 
+using namespace details;
+
 class GfdHandler : public Algorithm {
 protected:
     std::filesystem::path graph_path_;

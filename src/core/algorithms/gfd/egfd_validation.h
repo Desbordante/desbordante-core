@@ -5,6 +5,7 @@
 
 namespace algos {
 
+using namespace details;
 using CPI = std::map<std::pair<vertex_t, vertex_t>, std::map<vertex_t, std::set<vertex_t>>>;
 
 class EGfdValidation : public GfdHandler {

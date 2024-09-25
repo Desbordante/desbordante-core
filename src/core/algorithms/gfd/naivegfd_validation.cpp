@@ -10,6 +10,8 @@
 
 namespace {
 
+using namespace details;
+
 class CheckCallback {
 private:
     graph_t const& query_;
@@ -119,6 +121,8 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
 }  // namespace
 
 namespace algos {
+
+using namespace details;
 
 std::vector<Gfd> NaiveGfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
                                                            std::vector<Gfd> const& gfds) {

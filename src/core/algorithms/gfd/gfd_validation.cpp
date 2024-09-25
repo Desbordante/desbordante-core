@@ -20,6 +20,7 @@
 namespace {
 
 using namespace algos;
+using namespace details;
 
 std::vector<std::vector<vertex_t>> GetPartition(std::vector<vertex_t> const& candidates,
                                                 config::ThreadNumType const& threads_num) {

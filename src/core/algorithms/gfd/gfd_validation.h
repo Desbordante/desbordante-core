@@ -9,6 +9,8 @@
 
 namespace algos {
 
+using namespace details;
+
 using Request = std::tuple<int, vertex_t, int, std::vector<vertex_t>>;
 using Message = std::tuple<int, vertex_t, vertex_t>;
 
