@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "graph_descriptor.h"
+#include "algorithms/gfd/graph_descriptor.h"
 
 namespace model {
 
@@ -27,34 +28,40 @@ private:
 public:
     Gfd() = default;
 
-    Gfd(graph_t& pattern, std::vector<Literal>& premises, std::vector<Literal>& conclusion)
-        : pattern_(pattern), premises_(premises), conclusion_(conclusion) {}
+    template <typename T1, typename T2>
+    Gfd(T1&& pattern, T2&& premises, T2&& conclusion)
+        : pattern_(std::forward<T1>(pattern)),
+          premises_(std::forward<T2>(premises)),
+          conclusion_(std::forward<T2>(conclusion)) {}
 
-    graph_t GetPattern() const {
+    graph_t const& GetPattern() const noexcept {
         return pattern_;
     }
 
-    std::vector<Literal> GetPremises() const {
+    std::vector<Literal> const& GetPremises() const noexcept {
         return premises_;
     }
 
-    std::vector<Literal> GetConclusion() const {
+    std::vector<Literal> const& GetConclusion() const noexcept {
         return conclusion_;
     }
 
-    void SetPattern(graph_t& pattern) {
+    void SetPattern(graph_t const& pattern) {
         pattern_ = pattern;
     }
 
-    void SetPremises(std::vector<Literal>& premises) {
+    void SetPremises(std::vector<Literal> const& premises) {
         premises_ = premises;
     }
 
-    void SetConclusion(std::vector<Literal>& conclusion) {
+    void SetConclusion(std::vector<Literal> const& conclusion) {
         conclusion_ = conclusion;
     }
 
-    std::string ToString();
+    bool operator==(Gfd const& gfd) const;
+    bool operator!=(Gfd const& gfd) const = default;
+
+    std::string ToString() const;
 };
 
 }  // namespace model
