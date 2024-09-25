@@ -109,4 +109,6 @@ constexpr auto kDInsertStatements = "Rows to be inserted into the table using th
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+constexpr auto kDGfdK = "Max size of mined gfds";
+constexpr auto kDGfdSigma = "Min frequency of mined gfds";
 }  // namespace config::descriptions
