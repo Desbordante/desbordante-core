@@ -68,7 +68,7 @@ fi
 if [[ ! -d "better-enums" ]] ; then
   git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
 fi
-if [[ ! -d "pybind" ]] ; then
+if [[ ! -d "pybind11" ]] ; then
   git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
 fi
 if [[ ! -d "emhash" ]] ; then
