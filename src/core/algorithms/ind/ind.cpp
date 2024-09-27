@@ -24,6 +24,10 @@ std::string IND::ToShortString() const {
 
     std::stringstream ss;
     ss << cc_to_short_string(GetLhs()) << " -> " << cc_to_short_string(GetRhs());
+    if (GetError() != 0.0) {
+        ss << " with error threshold = " << GetError();
+    }
+
     return ss.str();
 }
 
@@ -45,6 +49,10 @@ std::string IND::ToLongString() const {
 
     std::stringstream ss;
     ss << cc_to_long_string(GetLhs()) << " -> " << cc_to_long_string(GetRhs());
+    if (GetError() != 0.0) {
+        ss << " with error threshold = " << GetError();
+    }
+
     return ss.str();
 }
 
