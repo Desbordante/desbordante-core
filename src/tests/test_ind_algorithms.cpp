@@ -7,6 +7,7 @@
 #include "config/names.h"
 #include "config/thread_number/type.h"
 #include "csv_config_util.h"
+#include "error/type.h"
 #include "max_arity/type.h"
 #include "test_hash_util.h"
 #include "test_ind_util.h"
@@ -43,7 +44,15 @@ protected:
             try {
                 auto ind_algo = CreateAlgorithmInstance(csv_configs, test_config);
                 ind_algo->Execute();
-                EXPECT_EQ(HashVec(ToSortedINDTestVec(ind_algo->INDList()), HashPair), hash)
+
+                std::list<model::IND> const& inds = ind_algo->INDList();
+                // in this test we're mining only exact INDs
+                for (auto const& ind : inds) {
+                    EXPECT_EQ(ind.GetError(), config::ErrorType{0.0})
+                            << "Error threshold mismatch for IND: " << ind.ToShortString();
+                }
+
+                EXPECT_EQ(HashVec(ToSortedINDTestVec(inds), HashPair), hash)
                         << "Wrong hash on datasets " << TableNamesToString(csv_configs);
             } catch (std::exception const& e) {
                 std::cerr << "An exception with message: " << e.what()
