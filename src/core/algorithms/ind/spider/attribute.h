@@ -84,6 +84,12 @@ public:
 
     /// get referenced attribute indices
     std::vector<AttributeIndex> GetRefIds(config::ErrorType max_error) const;
+
+    /// get error threshold
+    config::ErrorType GetError(AttributeIndex ref_id) const noexcept {
+        auto const dep_count = static_cast<config::ErrorType>(occurrences_[id_]);
+        return 1 - occurrences_[ref_id] / dep_count;
+    }
 };
 
 /// attribute for IND
