@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include "algorithms/ind/ind_algorithm.h"
 #include "config/error/type.h"
@@ -44,7 +45,13 @@ private:
     bool SetExternalOption(std::string_view option_name, boost::any const& value) override;
     void LoadINDAlgorithmDataInternal() override;
 
-    bool TestCandidate(RawIND const& raw_ind);
+    ///
+    /// Test a given IND candidate to determine if it should be registered.
+    ///
+    /// \return `std::nullopt` if the candidate should not be registered,
+    ///         otherwise return the error threshold at which AIND holds.
+    ///
+    std::optional<config::ErrorType> TestCandidate(RawIND const& raw_ind);
 
     void MineUnaryINDs();
     void MineNaryINDs();

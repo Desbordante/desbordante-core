@@ -21,7 +21,8 @@ void BindInd(py::module_& main_module) {
             .def("to_short_string", &IND::ToShortString)
             .def("to_long_string", &IND::ToLongString)
             .def("get_lhs", &IND::GetLhs)
-            .def("get_rhs", &IND::GetRhs);
+            .def("get_rhs", &IND::GetRhs)
+            .def("get_error", &IND::GetError);
 
     static constexpr auto kSpiderName = "Spider";
     static constexpr auto kMindName = "Mind";
