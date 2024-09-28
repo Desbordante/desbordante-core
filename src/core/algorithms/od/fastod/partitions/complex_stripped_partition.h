@@ -5,11 +5,22 @@
 #include <vector>
 
 #include "algorithms/od/fastod/storage/data_frame.h"
+#include "table/tuple_index.h"
 
 namespace algos::fastod {
 
 class ComplexStrippedPartition {
 private:
+    struct Tuple {
+        model::TupleIndex tuple_index;
+        int left_value;
+        int right_value;
+
+        // For vector::emplace_back() to work on x86 macos gcc
+        Tuple(model::TupleIndex tuple_index, int left_value, int right_value)
+            : tuple_index(tuple_index), left_value(left_value), right_value(right_value) {}
+    };
+
     std::shared_ptr<std::vector<size_t>> sp_indexes_;
     std::shared_ptr<std::vector<size_t>> sp_begins_;
     std::shared_ptr<std::vector<DataFrame::Range>> rb_indexes_;
@@ -40,6 +51,8 @@ private:
     ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
                              std::shared_ptr<std::vector<DataFrame::Range>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
+    std::vector<Tuple> GetTuplesForColumns(model::ColumnIndex left, model::ColumnIndex right,
+                                           size_t group_ptr) const;
 
 public:
     ComplexStrippedPartition();
