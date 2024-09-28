@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "algorithms/od/fastod/storage/data_frame.h"
+#include "algorithms/od/fastod/od_ordering.h"
 #include "table/tuple_index.h"
 
 namespace algos::fastod {
@@ -67,8 +68,9 @@ public:
     bool ShouldBeConvertedToStrippedPartition() const;
     void ToStrippedPartition();
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const;
+
     template <bool RangeBasedMode>
     static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data);
 };
