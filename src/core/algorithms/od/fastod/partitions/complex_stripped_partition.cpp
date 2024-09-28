@@ -171,9 +171,9 @@ template bool ComplexStrippedPartition::Swap<od::Ordering::ascending>(
 template bool ComplexStrippedPartition::Swap<od::Ordering::descending>(
         model::ColumnIndex left, model::ColumnIndex right) const;
 
-template <bool RangeBasedMode>
+template <ComplexStrippedPartition::Type PartitionType>
 ComplexStrippedPartition ComplexStrippedPartition::Create(std::shared_ptr<DataFrame> data) {
-    if constexpr (RangeBasedMode) {
+    if constexpr (PartitionType == Type::kRangeBased) {
         auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
         auto rb_begins = std::make_unique<std::vector<size_t>>();
 
@@ -207,10 +207,10 @@ ComplexStrippedPartition ComplexStrippedPartition::Create(std::shared_ptr<DataFr
     return ComplexStrippedPartition(std::move(data), std::move(sp_indexes), std::move(sp_begins));
 }
 
-template ComplexStrippedPartition ComplexStrippedPartition::Create<true>(
-        std::shared_ptr<DataFrame> data);
-template ComplexStrippedPartition ComplexStrippedPartition::Create<false>(
-        std::shared_ptr<DataFrame> data);
+template ComplexStrippedPartition ComplexStrippedPartition::Create<
+        ComplexStrippedPartition::Type::kRangeBased>(std::shared_ptr<DataFrame> data);
+template ComplexStrippedPartition ComplexStrippedPartition::Create<
+        ComplexStrippedPartition::Type::kStripped>(std::shared_ptr<DataFrame> data);
 
 std::string ComplexStrippedPartition::CommonToString() const {
     std::stringstream result;
