@@ -56,6 +56,8 @@ private:
                                            size_t group_ptr) const;
 
 public:
+    enum class Type { kStripped, kRangeBased };
+
     ComplexStrippedPartition();
     ComplexStrippedPartition(ComplexStrippedPartition const& origin) = default;
 
@@ -71,7 +73,7 @@ public:
     template <od::Ordering Ordering>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const;
 
-    template <bool RangeBasedMode>
+    template <Type PartitionType>
     static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data);
 };
 

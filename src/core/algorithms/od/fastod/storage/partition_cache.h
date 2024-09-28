@@ -54,8 +54,10 @@ public:
 
         if (!is_product_called) {
             result_partition = data->IsAttributesMostlyRangeBased(attribute_set)
-                                       ? ComplexStrippedPartition::Create<true>(data)
-                                       : ComplexStrippedPartition::Create<false>(data);
+                                       ? ComplexStrippedPartition::Create<
+                                                 ComplexStrippedPartition::Type::kRangeBased>(data)
+                                       : ComplexStrippedPartition::Create<
+                                                 ComplexStrippedPartition::Type::kStripped>(data);
 
             attribute_set.Iterate([this, &result_partition](model::ColumnIndex attr) {
                 CallProductWithAttribute(result_partition, attr);
