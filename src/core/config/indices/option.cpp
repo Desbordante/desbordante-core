@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
+#include "config/column_index/validate_index.h"
 #include "config/exceptions.h"
-#include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
 
 namespace config {
