@@ -148,8 +148,8 @@ void Fastod::ComputeODs() {
 
         CCPut(context, context_cc);
 
-        AddCandidates<false>(context, del_attrs);
-        AddCandidates<true>(context, del_attrs);
+        AddCandidates<od::Ordering::descending>(context, del_attrs);
+        AddCandidates<od::Ordering::ascending>(context, del_attrs);
     }
 
     size_t delete_index = 0;
@@ -181,8 +181,8 @@ void Fastod::ComputeODs() {
                     }
                 });
 
-        CalculateODs<false>(context, del_attrs);
-        CalculateODs<true>(context, del_attrs);
+        CalculateODs<od::Ordering::descending>(context, del_attrs);
+        CalculateODs<od::Ordering::ascending>(context, del_attrs);
     }
 }
 
@@ -193,8 +193,9 @@ void Fastod::PruneLevels() {
 
     for (auto attribute_set_it = context_in_current_level_.begin();
          attribute_set_it != context_in_current_level_.end();) {
-        if (IsEmptySet(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
-            CSGet<false>(*attribute_set_it).empty()) {
+        if (IsEmptySet(CCGet(*attribute_set_it)) &&
+            CSGet<od::Ordering::ascending>(*attribute_set_it).empty() &&
+            CSGet<od::Ordering::descending>(*attribute_set_it).empty()) {
             context_in_current_level_.erase(attribute_set_it++);
         } else {
             ++attribute_set_it;
