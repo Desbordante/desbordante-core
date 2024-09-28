@@ -1,4 +1,4 @@
-#include "config/indices/validate_index.h"
+#include "config/column_index/validate_index.h"
 
 #include "config/exceptions.h"
 
