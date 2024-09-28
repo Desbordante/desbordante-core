@@ -6,7 +6,6 @@
 
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
-#include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
