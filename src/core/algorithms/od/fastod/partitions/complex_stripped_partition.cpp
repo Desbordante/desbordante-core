@@ -93,6 +93,115 @@ void ComplexStrippedPartition::ToStrippedPartition() {
     should_be_converted_to_sp_ = false;
 }
 
+template <bool Ascending>
+bool ComplexStrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right) const {
+    size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+
+    for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
+        size_t const group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
+                                                          : (*rb_begins_)[begin_pointer];
+
+        size_t const group_end = is_stripped_partition_ ? (*sp_begins_)[begin_pointer + 1]
+                                                        : (*rb_begins_)[begin_pointer + 1];
+
+        std::vector<std::pair<int, int>> values;
+
+        if (is_stripped_partition_) {
+            values.reserve(group_end - group_begin);
+
+            for (size_t i = group_begin; i < group_end; ++i) {
+                size_t const index = (*sp_indexes_)[i];
+
+                values.emplace_back(data_->GetValue(index, left), data_->GetValue(index, right));
+            }
+        } else {
+            for (size_t i = group_begin; i < group_end; ++i) {
+                DataFrame::Range const range = (*rb_indexes_)[i];
+
+                for (size_t j = range.first; j <= range.second; ++j) {
+                    values.emplace_back(data_->GetValue(j, left), data_->GetValue(j, right));
+                }
+            }
+        }
+
+        if constexpr (Ascending) {
+            std::sort(values.begin(), values.end(),
+                      [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
+        } else {
+            std::sort(values.begin(), values.end(),
+                      [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
+        }
+
+        size_t prev_group_max_index = 0;
+        size_t current_group_max_index = 0;
+        bool is_first_group = true;
+
+        for (size_t i = 0; i < values.size(); i++) {
+            auto const& [first, second] = values[i];
+
+            if (i != 0 && values[i - 1].first != first) {
+                is_first_group = false;
+                prev_group_max_index = current_group_max_index;
+                current_group_max_index = i;
+            } else if (values[current_group_max_index].second <= second) {
+                current_group_max_index = i;
+            }
+
+            if (!is_first_group && values[prev_group_max_index].second > second) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+template bool ComplexStrippedPartition::Swap<true>(model::ColumnIndex left,
+                                                   model::ColumnIndex right) const;
+template bool ComplexStrippedPartition::Swap<false>(model::ColumnIndex left,
+                                                    model::ColumnIndex right) const;
+
+template <bool RangeBasedMode>
+ComplexStrippedPartition ComplexStrippedPartition::Create(std::shared_ptr<DataFrame> data) {
+    if constexpr (RangeBasedMode) {
+        auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
+        auto rb_begins = std::make_unique<std::vector<size_t>>();
+
+        size_t const tuple_count = data->GetTupleCount();
+        rb_begins->push_back(0);
+
+        if (tuple_count != 0) {
+            rb_indexes->push_back({0, tuple_count - 1});
+            rb_begins->push_back(1);
+        }
+
+        return ComplexStrippedPartition(std::move(data), std::move(rb_indexes),
+                                        std::move(rb_begins));
+    }
+
+    auto sp_indexes = std::make_unique<std::vector<size_t>>();
+    auto sp_begins = std::make_unique<std::vector<size_t>>();
+
+    sp_indexes->reserve(data->GetTupleCount());
+
+    for (size_t i = 0; i < data->GetTupleCount(); i++) {
+        sp_indexes->push_back(i);
+    }
+
+    if (data->GetTupleCount() != 0) {
+        sp_begins->push_back(0);
+    }
+
+    sp_begins->push_back(data->GetTupleCount());
+
+    return ComplexStrippedPartition(std::move(data), std::move(sp_indexes), std::move(sp_begins));
+}
+
+template ComplexStrippedPartition ComplexStrippedPartition::Create<true>(
+        std::shared_ptr<DataFrame> data);
+template ComplexStrippedPartition ComplexStrippedPartition::Create<false>(
+        std::shared_ptr<DataFrame> data);
+
 std::string ComplexStrippedPartition::CommonToString() const {
     std::stringstream result;
     std::string indexes_string;
