@@ -6,23 +6,23 @@
 
 namespace algos::fastod {
 
-template <bool Ascending>
-CanonicalOD<Ascending>::CanonicalOD(AttributeSet const& context, model::ColumnIndex left,
-                                    model::ColumnIndex right)
+template <od::Ordering Ordering>
+CanonicalOD<Ordering>::CanonicalOD(AttributeSet const& context, model::ColumnIndex left,
+                                   model::ColumnIndex right)
     : context_(std::move(context)), ap_(left, right) {}
 
-template <bool Ascending>
-bool CanonicalOD<Ascending>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
-    return !(cache.GetStrippedPartition(context_, data)
-                     .template Swap<Ascending>(ap_.left, ap_.right));
+template <od::Ordering Ordering>
+bool CanonicalOD<Ordering>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
+    return !(cache.GetStrippedPartition(context_, data).Swap<Ordering>(ap_.left, ap_.right));
 }
 
-template <bool Ascending>
-std::string CanonicalOD<Ascending>::ToString() const {
+template <od::Ordering Ordering>
+std::string CanonicalOD<Ordering>::ToString() const {
     std::stringstream result;
 
-    result << context_.ToString() << " : " << ap_.left + 1 << (Ascending ? "<=" : ">=") << " ~ "
-           << ap_.right + 1 << "<=";
+    result << context_.ToString() << " : " << ap_.left + 1
+           << ((Ordering == +od::Ordering::ascending) ? "<=" : ">=") << " ~ " << ap_.right + 1
+           << "<=";
 
     return result.str();
 }
@@ -43,15 +43,18 @@ std::string SimpleCanonicalOD::ToString() const {
     return result.str();
 }
 
-bool operator==(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+bool operator==(CanonicalOD<od::Ordering::ascending> const& x,
+                CanonicalOD<od::Ordering::ascending> const& y) {
     return x.context_ == y.context_ && x.ap_ == y.ap_;
 }
 
-bool operator!=(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+bool operator!=(CanonicalOD<od::Ordering::ascending> const& x,
+                CanonicalOD<od::Ordering::ascending> const& y) {
     return !(x == y);
 }
 
-bool operator<(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+bool operator<(CanonicalOD<od::Ordering::ascending> const& x,
+               CanonicalOD<od::Ordering::ascending> const& y) {
     if (x.ap_ != y.ap_) {
         return x.ap_ < y.ap_;
     }
@@ -59,15 +62,18 @@ bool operator<(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
     return x.context_ < y.context_;
 }
 
-bool operator==(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+bool operator==(CanonicalOD<od::Ordering::descending> const& x,
+                CanonicalOD<od::Ordering::descending> const& y) {
     return x.context_ == y.context_ && x.ap_ == y.ap_;
 }
 
-bool operator!=(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+bool operator!=(CanonicalOD<od::Ordering::descending> const& x,
+                CanonicalOD<od::Ordering::descending> const& y) {
     return !(x == y);
 }
 
-bool operator<(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+bool operator<(CanonicalOD<od::Ordering::descending> const& x,
+               CanonicalOD<od::Ordering::descending> const& y) {
     if (x.ap_ != y.ap_) {
         return x.ap_ < y.ap_;
     }
@@ -91,7 +97,7 @@ bool operator<(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y) {
     return x.context_ < y.context_;
 }
 
-template class CanonicalOD<true>;
-template class CanonicalOD<false>;
+template class CanonicalOD<od::Ordering::ascending>;
+template class CanonicalOD<od::Ordering::descending>;
 
 }  // namespace algos::fastod
