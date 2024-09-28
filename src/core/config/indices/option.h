@@ -14,7 +14,9 @@ struct IndicesOption {
     IndicesOption(
             std::string_view name, std::string_view description,
             typename Option<config::IndicesType>::NormalizeFunc normalize_func = NormalizeIndices,
-            typename Option<config::IndicesType>::DefaultFunc calculate_default = nullptr);
+            typename Option<config::IndicesType>::DefaultFunc calculate_default = nullptr,
+            bool allow_empty = false);
+    IndicesOption(std::string_view name, std::string_view description, bool allow_empty);
 
     static void NormalizeIndices(config::IndicesType& indices);
 
@@ -29,6 +31,7 @@ struct IndicesOption {
 private:
     bool normalize_;
     CommonOption<config::IndicesType> const common_option_;
+    bool allow_empty_;
 };
 
 extern IndicesOption const kLhsIndicesOpt;
