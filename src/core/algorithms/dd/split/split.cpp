@@ -52,11 +52,28 @@ void Split::LoadDataInternal() {
     input_table_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
                                                                        false);  // nulls are ignored
+    if (typed_relation_->GetColumnData().empty()) {
+        throw std::runtime_error("Got an empty dataset: DD mining is meaningless.");
+    }
 }
 
 void Split::SetLimits() {
-    if (num_rows_ == 0) num_rows_ = typed_relation_->GetNumRows();
-    if (num_columns_ == 0) num_columns_ = typed_relation_->GetNumColumns();
+    unsigned all_rows_num = typed_relation_->GetNumRows();
+    model::ColumnIndex all_columns_num = typed_relation_->GetNumColumns();
+    if (num_rows_ > all_rows_num) {
+        throw std::invalid_argument(
+                "'num_rows' must be less or equal to the number of rows in the table (total "
+                "rows: " +
+                std::to_string(all_rows_num) + ")");
+    }
+    if (num_columns_ > all_columns_num) {
+        throw std::invalid_argument(
+                "'num_columns' must be less or equal to the number of columns in the table (total "
+                "columns: " +
+                std::to_string(all_columns_num) + ")");
+    }
+    if (num_rows_ == 0) num_rows_ = all_rows_num;
+    if (num_columns_ == 0) num_columns_ = all_columns_num;
 }
 
 void Split::ParseDifferenceTable() {
@@ -66,7 +83,11 @@ void Split::ParseDifferenceTable() {
         difference_typed_relation_ =
                 model::ColumnLayoutTypedRelationData::CreateFrom(*difference_table_,
                                                                  false);  // nulls are ignored
-        assert(typed_relation_->GetNumColumns() == difference_typed_relation_->GetNumColumns());
+        if (typed_relation_->GetNumColumns() != num_columns_) {
+            throw std::invalid_argument(
+                    "The number of columns in the difference table must be equal to the number of "
+                    "columns in the loaded table or to 'num_columns' if specified");
+        }
     }
 }
 
