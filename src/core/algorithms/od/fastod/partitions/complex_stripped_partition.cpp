@@ -93,61 +93,64 @@ void ComplexStrippedPartition::ToStrippedPartition() {
     should_be_converted_to_sp_ = false;
 }
 
+std::vector<ComplexStrippedPartition::Tuple> ComplexStrippedPartition::GetTuplesForColumns(
+        model::ColumnIndex left, model::ColumnIndex right, size_t group_ptr) const {
+    std::vector<Tuple> values;
+
+    if (is_stripped_partition_) {
+        size_t const group_begin = (*sp_begins_)[group_ptr];
+        size_t const group_end = (*sp_begins_)[group_ptr + 1];
+
+        values.reserve(group_end - group_begin);
+
+        for (size_t i = group_begin; i < group_end; ++i) {
+            size_t const index = (*sp_indexes_)[i];
+
+            values.emplace_back(index, data_->GetValue(index, left), data_->GetValue(index, right));
+        }
+    } else {
+        size_t const group_begin = (*rb_begins_)[group_ptr];
+        size_t const group_end = (*rb_begins_)[group_ptr + 1];
+
+        for (size_t i = group_begin; i < group_end; ++i) {
+            DataFrame::Range const range = (*rb_indexes_)[i];
+
+            for (size_t j = range.first; j <= range.second; ++j) {
+                values.emplace_back(j, data_->GetValue(j, left), data_->GetValue(j, right));
+            }
+        }
+    }
+    return values;
+}
+
 template <bool Ascending>
 bool ComplexStrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right) const {
     size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
 
     for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
-        size_t const group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
-                                                          : (*rb_begins_)[begin_pointer];
+        std::vector<Tuple> values = GetTuplesForColumns(left, right, begin_pointer);
 
-        size_t const group_end = is_stripped_partition_ ? (*sp_begins_)[begin_pointer + 1]
-                                                        : (*rb_begins_)[begin_pointer + 1];
-
-        std::vector<std::pair<int, int>> values;
-
-        if (is_stripped_partition_) {
-            values.reserve(group_end - group_begin);
-
-            for (size_t i = group_begin; i < group_end; ++i) {
-                size_t const index = (*sp_indexes_)[i];
-
-                values.emplace_back(data_->GetValue(index, left), data_->GetValue(index, right));
-            }
-        } else {
-            for (size_t i = group_begin; i < group_end; ++i) {
-                DataFrame::Range const range = (*rb_indexes_)[i];
-
-                for (size_t j = range.first; j <= range.second; ++j) {
-                    values.emplace_back(data_->GetValue(j, left), data_->GetValue(j, right));
-                }
-            }
-        }
-
-        if constexpr (Ascending) {
-            std::sort(values.begin(), values.end(),
-                      [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
-        } else {
-            std::sort(values.begin(), values.end(),
-                      [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
-        }
+        using Comp = std::conditional_t<Ascending, std::less<int>, std::greater<int>>;
+        std::sort(values.begin(), values.end(), [](auto const& p1, auto const& p2) {
+            return Comp()(p1.left_value, p2.left_value);
+        });
 
         size_t prev_group_max_index = 0;
         size_t current_group_max_index = 0;
         bool is_first_group = true;
 
-        for (size_t i = 0; i < values.size(); i++) {
-            auto const& [first, second] = values[i];
+        for (size_t i = 1; i < values.size(); i++) {
+            auto const& [_, left_value, right_value] = values[i];
 
-            if (i != 0 && values[i - 1].first != first) {
+            if (values[i - 1].left_value != left_value) {
                 is_first_group = false;
                 prev_group_max_index = current_group_max_index;
                 current_group_max_index = i;
-            } else if (values[current_group_max_index].second <= second) {
+            } else if (values[current_group_max_index].right_value <= right_value) {
                 current_group_max_index = i;
             }
 
-            if (!is_first_group && values[prev_group_max_index].second > second) {
+            if (!is_first_group && values[prev_group_max_index].right_value > right_value) {
                 return true;
             }
         }
