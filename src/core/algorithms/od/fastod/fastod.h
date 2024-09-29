@@ -46,7 +46,7 @@ private:
     PartitionCache partition_cache_;
 
     AttributeSet schema_;
-    std::shared_ptr<DataFrame> data_;
+    DataFrame data_;
     config::InputTable input_table_;
 
     void MakeExecuteOptsAvailable() override;
@@ -118,12 +118,12 @@ private:
     void AddCandidates(AttributeSet const& context,
                        std::vector<AttributeSet> const& deleted_attrs) {
         if (level_ == 2) {
-            for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); i++) {
-                for (model::ColumnIndex j = 0; j < data_->GetColumnCount(); j++) {
+            for (model::ColumnIndex i = 0; i < data_.GetColumnCount(); i++) {
+                for (model::ColumnIndex j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j) continue;
                     CSPut<Ordering>(fastod::CreateAttributeSet(
                                             std::initializer_list<model::ColumnIndex>{i, j},
-                                            data_->GetColumnCount()),
+                                            data_.GetColumnCount()),
                                     AttributePair(i, j));
                 }
             }
@@ -169,7 +169,7 @@ private:
                 fastod::CanonicalOD<Ordering> od(fastod::DeleteAttribute(deleted_attrs[a], b), a,
                                                  b);
 
-                if (od.IsValid(*data_, partition_cache_)) {
+                if (od.IsValid(data_, partition_cache_)) {
                     AddToResult(std::move(od));
                     cs_for_con.erase(it++);
                 } else {

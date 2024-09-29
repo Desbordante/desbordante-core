@@ -46,7 +46,7 @@ void Fastod::MakeExecuteOptsAvailable() {
 }
 
 void Fastod::LoadDataInternal() {
-    data_ = std::make_shared<DataFrame>(DataFrame::FromInputTable(input_table_));
+    data_ = DataFrame::FromInputTable(input_table_);
 }
 
 void Fastod::ResetState() {
@@ -113,13 +113,13 @@ std::vector<fastod::SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() co
 void Fastod::Initialize() {
     timer_.Start();
 
-    schema_ = AttributeSet(data_->GetColumnCount(), (1 << data_->GetColumnCount()) - 1);
+    schema_ = AttributeSet(data_.GetColumnCount(), (1 << data_.GetColumnCount()) - 1);
 
-    AttributeSet empty_set(data_->GetColumnCount());
+    AttributeSet empty_set(data_.GetColumnCount());
     CCPut(std::move(empty_set), schema_);
 
-    for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); ++i)
-        context_in_current_level_.emplace(data_->GetColumnCount(), 1 << i);
+    for (model::ColumnIndex i = 0; i < data_.GetColumnCount(); ++i)
+        context_in_current_level_.emplace(data_.GetColumnCount(), 1 << i);
 }
 
 void Fastod::ComputeODs() {
@@ -129,9 +129,9 @@ void Fastod::ComputeODs() {
 
     for (AttributeSet const& context : context_in_current_level_) {
         auto& del_attrs = deleted_attrs[context_ind++];
-        del_attrs.reserve(data_->GetColumnCount());
+        del_attrs.reserve(data_.GetColumnCount());
 
-        for (model::ColumnIndex column = 0; column < data_->GetColumnCount(); ++column) {
+        for (model::ColumnIndex column = 0; column < data_.GetColumnCount(); ++column) {
             del_attrs.push_back(fastod::DeleteAttribute(context, column));
         }
 
@@ -169,7 +169,7 @@ void Fastod::ComputeODs() {
                 [this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
                     SimpleCanonicalOD od(del_attrs[attr], attr);
 
-                    if (od.IsValid(*data_, partition_cache_)) {
+                    if (od.IsValid(data_, partition_cache_)) {
                         AddToResult(std::move(od));
                         CCPut(context, fastod::DeleteAttribute(cc, attr));
 
