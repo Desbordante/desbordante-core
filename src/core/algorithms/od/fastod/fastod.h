@@ -169,7 +169,7 @@ private:
                 fastod::CanonicalOD<Ordering> od(fastod::DeleteAttribute(deleted_attrs[a], b), a,
                                                  b);
 
-                if (od.IsValid(data_, partition_cache_)) {
+                if (od.IsValid(*data_, partition_cache_)) {
                     AddToResult(std::move(od));
                     cs_for_con.erase(it++);
                 } else {
