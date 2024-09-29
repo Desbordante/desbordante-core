@@ -3,11 +3,12 @@
 #include <easylogging++.h>
 
 #include "dc/clue_set_builder.h"
+#include "dc/evidence_set.h"
 
 namespace model {
 
 /**
- * Creates evidence set
+ * Creates EvidenceSet, which is just a vector of evidences with some extra methods
  */
 class EvidenceSetBuilder {
 public:
@@ -19,8 +20,24 @@ public:
         BuildCardinalityMask(pbuilder);
     }
 
+    void BuildEvidenceSet() {
+        evidence_set_.Reserve(clue_set_.size());
+
+        for (auto const& [clue, count] : clue_set_) {
+            evidence_set_.EmplaceBack(clue, count, cardinality_mask_, correction_map_);
+        }
+
+        LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set_.Size();
+        LOG(DEBUG) << " [Evidence] Accumulated evidence count: " << evidence_set_.GetTotalCount();
+    }
+
+    // For tests
     Clue const& GetCardinalityMask() const {
         return cardinality_mask_;
+    }
+
+    EvidenceSet&& GetEvidenceSet() {
+        return std::move(evidence_set_);
     }
 
 private:
@@ -29,6 +46,7 @@ private:
     ClueSet clue_set_;
     std::vector<Clue> correction_map_;
     Clue cardinality_mask_;
+    EvidenceSet evidence_set_;
 };
 
 }  // namespace model
