@@ -169,7 +169,7 @@ void Fastod::ComputeODs() {
                 [this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
                     SimpleCanonicalOD od(del_attrs[attr], attr);
 
-                    if (od.IsValid(data_, partition_cache_)) {
+                    if (od.IsValid(*data_, partition_cache_)) {
                         AddToResult(std::move(od));
                         CCPut(context, fastod::DeleteAttribute(cc, attr));
 

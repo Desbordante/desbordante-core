@@ -44,7 +44,7 @@ public:
     }
 
     ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
-                                                  std::shared_ptr<DataFrame> data) {
+                                                  DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
@@ -53,7 +53,7 @@ public:
         bool is_product_called = CallProductWithAttributesInCache(result_partition, attribute_set);
 
         if (!is_product_called) {
-            result_partition = data->IsAttributesMostlyRangeBased(attribute_set)
+            result_partition = data.IsAttributesMostlyRangeBased(attribute_set)
                                        ? ComplexStrippedPartition::Create<
                                                  ComplexStrippedPartition::Type::kRangeBased>(data)
                                        : ComplexStrippedPartition::Create<
