@@ -12,7 +12,7 @@ CanonicalOD<Ordering>::CanonicalOD(AttributeSet const& context, model::ColumnInd
     : context_(std::move(context)), ap_(left, right) {}
 
 template <od::Ordering Ordering>
-bool CanonicalOD<Ordering>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
+bool CanonicalOD<Ordering>::IsValid(DataFrame const& data, PartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Swap<Ordering>(ap_.left, ap_.right));
 }
 
@@ -32,7 +32,7 @@ SimpleCanonicalOD::SimpleCanonicalOD() : right_(0) {}
 SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right)
     : context_(context), right_(right) {}
 
-bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
+bool SimpleCanonicalOD::IsValid(DataFrame const& data, PartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Split(right_));
 }
 
