@@ -7,6 +7,7 @@
 #include "csv_parser/csv_parser.h"
 #include "dc/clue_set_builder.h"
 #include "dc/column_operand.h"
+#include "dc/evidence_set_builder.h"
 #include "dc/operator.h"
 #include "dc/utils.h"
 #include "dc/pli_shard.h"
@@ -414,6 +415,22 @@ TEST(FastADC, ClueSet) {
         ASSERT_NE(expected_clue_set.find(clue_value), expected_clue_set.end())
                 << "Unexpected clue " << clue_value << " found!";
     }
+}
+
+TEST(FastADC, CardinalityMask) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+
+    model::PredicateBuilder pbuilder(true);
+    pbuilder.BuildPredicateSpace(col_data);
+
+    model::PliShardBuilder plibuilder;
+    plibuilder.BuildPliShards(col_data);
+
+    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+
+    EXPECT_EQ(evibuilder.GetCardinalityMask(), VectorToBitset(expected_cardinality_mask));
 }
 
 }  // namespace tests
