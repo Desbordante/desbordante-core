@@ -433,4 +433,35 @@ TEST(FastADC, CardinalityMask) {
     EXPECT_EQ(evibuilder.GetCardinalityMask(), VectorToBitset(expected_cardinality_mask));
 }
 
+TEST(FastADC, EvidenceSet) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+
+    model::PredicateBuilder pbuilder(true);
+    pbuilder.BuildPredicateSpace(col_data);
+
+    model::PliShardBuilder plibuilder;
+    plibuilder.BuildPliShards(col_data);
+
+    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    evibuilder.BuildEvidenceSet();
+
+    auto const& evidence_set = evibuilder.GetEvidenceSet();
+
+    std::unordered_set<std::bitset<64>> expected_set;
+    for (auto const& expected_vec : expected_evidence_set) {
+        expected_set.insert(VectorToBitset(expected_vec));
+    }
+
+    for (size_t i = 0; i < evidence_set.Size(); ++i) {
+        auto const& actual_evidence = evidence_set[i].evidence;
+        EXPECT_TRUE(expected_set.find(actual_evidence) != expected_set.end())
+                << "Unexpected evidence: " << actual_evidence;
+    }
+
+    EXPECT_EQ(evidence_set.Size(), expected_set.size())
+            << "Size mismatch: evidence_set has extra elements.";
+}
+
 }  // namespace tests
