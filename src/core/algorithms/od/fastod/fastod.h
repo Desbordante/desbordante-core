@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <initializer_list>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -120,7 +121,9 @@ private:
             for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); i++) {
                 for (model::ColumnIndex j = 0; j < data_->GetColumnCount(); j++) {
                     if (i == j) continue;
-                    CSPut<Ordering>(fastod::CreateAttributeSet({i, j}, data_->GetColumnCount()),
+                    CSPut<Ordering>(fastod::CreateAttributeSet(
+                                            std::initializer_list<model::ColumnIndex>{i, j},
+                                            data_->GetColumnCount()),
                                     AttributePair(i, j));
                 }
             }
