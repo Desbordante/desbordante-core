@@ -6,6 +6,7 @@
 
 #include "algorithms/od/fastod/storage/data_frame.h"
 #include "algorithms/od/fastod/od_ordering.h"
+#include "algorithms/od/fastod/model/removal_set.h"
 #include "table/tuple_index.h"
 
 namespace algos::fastod {
@@ -26,7 +27,7 @@ private:
     std::shared_ptr<std::vector<size_t>> sp_begins_;
     std::shared_ptr<std::vector<DataFrame::Range>> rb_indexes_;
     std::shared_ptr<std::vector<size_t>> rb_begins_;
-    std::shared_ptr<DataFrame> data_;
+    DataFrame const* data_;
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
 
@@ -45,11 +46,10 @@ private:
                                                                 size_t group_start,
                                                                 size_t group_end);
 
-    ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
-                             std::shared_ptr<std::vector<size_t>> indexes,
+    ComplexStrippedPartition(DataFrame const& data, std::shared_ptr<std::vector<size_t>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
-    ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
+    ComplexStrippedPartition(DataFrame const& data,
                              std::shared_ptr<std::vector<DataFrame::Range>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
     std::vector<Tuple> GetTuplesForColumns(model::ColumnIndex left, model::ColumnIndex right,
@@ -59,9 +59,6 @@ public:
     enum class Type { kStripped, kRangeBased };
 
     ComplexStrippedPartition();
-    ComplexStrippedPartition(ComplexStrippedPartition const& origin) = default;
-
-    ComplexStrippedPartition& operator=(ComplexStrippedPartition const& other);
 
     std::string ToString() const;
     void Product(model::ColumnIndex attribute);
@@ -72,9 +69,8 @@ public:
 
     template <od::Ordering Ordering>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const;
-
     template <Type PartitionType>
-    static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data);
+    static ComplexStrippedPartition Create(DataFrame const& data);
 };
 
 }  // namespace algos::fastod

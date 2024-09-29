@@ -15,41 +15,23 @@ using Comp =
 ComplexStrippedPartition::ComplexStrippedPartition()
     : data_(nullptr), is_stripped_partition_(true), should_be_converted_to_sp_(false) {}
 
-ComplexStrippedPartition::ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
+ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
                                                    std::shared_ptr<std::vector<size_t>> indexes,
                                                    std::shared_ptr<std::vector<size_t>> begins)
     : sp_indexes_(indexes),
       sp_begins_(begins),
-      data_(data),
+      data_(&data),
       is_stripped_partition_(true),
       should_be_converted_to_sp_(false) {}
 
 ComplexStrippedPartition::ComplexStrippedPartition(
-        std::shared_ptr<DataFrame> data, std::shared_ptr<std::vector<DataFrame::Range>> indexes,
+        DataFrame const& data, std::shared_ptr<std::vector<DataFrame::Range>> indexes,
         std::shared_ptr<std::vector<size_t>> begins)
     : rb_indexes_(indexes),
       rb_begins_(begins),
-      data_(data),
+      data_(&data),
       is_stripped_partition_(false),
       should_be_converted_to_sp_(false) {}
-
-ComplexStrippedPartition& ComplexStrippedPartition::operator=(
-        ComplexStrippedPartition const& other) {
-    if (this == &other) {
-        return *this;
-    }
-
-    sp_indexes_ = other.sp_indexes_;
-    sp_begins_ = other.sp_begins_;
-    rb_indexes_ = other.rb_indexes_;
-    rb_begins_ = other.rb_begins_;
-    data_ = other.data_;
-
-    should_be_converted_to_sp_ = other.should_be_converted_to_sp_;
-    is_stripped_partition_ = other.is_stripped_partition_;
-
-    return *this;
-}
 
 std::string ComplexStrippedPartition::ToString() const {
     return is_stripped_partition_ ? CommonToString() : RangeBasedToString();
@@ -172,12 +154,12 @@ template bool ComplexStrippedPartition::Swap<od::Ordering::descending>(
         model::ColumnIndex left, model::ColumnIndex right) const;
 
 template <ComplexStrippedPartition::Type PartitionType>
-ComplexStrippedPartition ComplexStrippedPartition::Create(std::shared_ptr<DataFrame> data) {
+ComplexStrippedPartition ComplexStrippedPartition::Create(DataFrame const& data) {
     if constexpr (PartitionType == Type::kRangeBased) {
         auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
         auto rb_begins = std::make_unique<std::vector<size_t>>();
 
-        size_t const tuple_count = data->GetTupleCount();
+        size_t const tuple_count = data.GetTupleCount();
         rb_begins->push_back(0);
 
         if (tuple_count != 0) {
@@ -185,32 +167,31 @@ ComplexStrippedPartition ComplexStrippedPartition::Create(std::shared_ptr<DataFr
             rb_begins->push_back(1);
         }
 
-        return ComplexStrippedPartition(std::move(data), std::move(rb_indexes),
-                                        std::move(rb_begins));
+        return ComplexStrippedPartition(data, std::move(rb_indexes), std::move(rb_begins));
     }
 
     auto sp_indexes = std::make_unique<std::vector<size_t>>();
     auto sp_begins = std::make_unique<std::vector<size_t>>();
 
-    sp_indexes->reserve(data->GetTupleCount());
+    sp_indexes->reserve(data.GetTupleCount());
 
-    for (size_t i = 0; i < data->GetTupleCount(); i++) {
+    for (size_t i = 0; i < data.GetTupleCount(); i++) {
         sp_indexes->push_back(i);
     }
 
-    if (data->GetTupleCount() != 0) {
+    if (data.GetTupleCount() != 0) {
         sp_begins->push_back(0);
     }
 
-    sp_begins->push_back(data->GetTupleCount());
+    sp_begins->push_back(data.GetTupleCount());
 
-    return ComplexStrippedPartition(std::move(data), std::move(sp_indexes), std::move(sp_begins));
+    return ComplexStrippedPartition(data, std::move(sp_indexes), std::move(sp_begins));
 }
 
 template ComplexStrippedPartition ComplexStrippedPartition::Create<
-        ComplexStrippedPartition::Type::kRangeBased>(std::shared_ptr<DataFrame> data);
-template ComplexStrippedPartition ComplexStrippedPartition::Create<
-        ComplexStrippedPartition::Type::kStripped>(std::shared_ptr<DataFrame> data);
+        ComplexStrippedPartition::Type::kRangeBased>(DataFrame const& data);
+template ComplexStrippedPartition
+ComplexStrippedPartition::Create<ComplexStrippedPartition::Type::kStripped>(DataFrame const& data);
 
 std::string ComplexStrippedPartition::CommonToString() const {
     std::stringstream result;
