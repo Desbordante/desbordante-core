@@ -4,6 +4,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <ranges>
 
 #include <boost/functional/hash.hpp>
 
@@ -176,11 +177,11 @@ struct boost::hash<algos::fastod::AttributeSet> {
 
 namespace algos::fastod {
 
-inline AttributeSet CreateAttributeSet(std::initializer_list<model::ColumnIndex> attributes,
+inline AttributeSet CreateAttributeSet(std::ranges::input_range auto const& attributes,
                                        model::ColumnIndex size) {
     AttributeSet attr_set(size);
 
-    for (auto const attr : attributes) {
+    for (model::ColumnIndex const attr : attributes) {
         attr_set.Set(attr);
     }
 
