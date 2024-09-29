@@ -15,7 +15,7 @@ PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type) {
     return it == predicates.end() ? nullptr : *it;
 }
 
-bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, int t, int s) const {
+bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, size_t t, size_t s) const {
     TypedColumnData const& lhs = col_data[l_.GetColumn()->GetIndex()];
     TypedColumnData const& rhs = col_data[r_.GetColumn()->GetIndex()];
 

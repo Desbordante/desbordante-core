@@ -45,7 +45,7 @@ public:
         : op_(op), l_(l), r_(r) {}
 
     // FIXME: mb pass some table representation other than vector of columns data?
-    bool Satisfies(std::vector<model::TypedColumnData>& col_data, int t, int s) const;
+    bool Satisfies(std::vector<model::TypedColumnData>& col_data, size_t t, size_t s) const;
 
     PredicatePtr GetSymmetric() const;
 
