@@ -11,7 +11,6 @@
 
 #include "algorithms/nd/nd_verifier/util/stats_calculator.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "algorithms/nd/nd_verifier/util/vector_to_string.h"
 #include "config/descriptions.h"
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
@@ -23,6 +22,7 @@
 #include "model/table/typed_column_data.h"
 #include "model/types/builtin.h"
 #include "model/types/type.h"
+#include "util/range_to_string.h"
 #include "util/timed_invoke.h"
 
 namespace algos::nd_verifier {
@@ -62,8 +62,8 @@ unsigned long long NDVerifier::ExecuteInternal() {
     LOG(INFO) << "Parameters of NDVerifier:";
     LOG(INFO) << "\tInput table: " << input_table_->GetRelationName();
     LOG(INFO) << "\tNull equals null: " << is_null_equal_null_;
-    LOG(INFO) << "\tLhs indices: " << util::VectorToString(lhs_indices_);
-    LOG(INFO) << "\tRhs indices: " << util::VectorToString(rhs_indices_);
+    LOG(INFO) << "\tLhs indices: " << ::util::RangeToString(lhs_indices_);
+    LOG(INFO) << "\tRhs indices: " << ::util::RangeToString(rhs_indices_);
     LOG(INFO) << "\tWeight: " << weight_;
 
     auto verification_time = ::util::TimedInvoke(&NDVerifier::VerifyND, this);
