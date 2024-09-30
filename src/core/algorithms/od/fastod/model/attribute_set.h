@@ -2,9 +2,10 @@
 
 #include <bitset>
 #include <functional>
+#include <ranges>
 #include <stdexcept>
 #include <string>
-#include <ranges>
+#include <vector>
 
 #include <boost/functional/hash.hpp>
 
@@ -120,6 +121,7 @@ public:
 
     std::string ToString() const;
     void Iterate(std::function<void(model::ColumnIndex)> callback) const;
+    std::vector<model::ColumnIndex> AsVector() const;
 
     friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept;
