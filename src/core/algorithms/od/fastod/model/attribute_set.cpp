@@ -30,4 +30,11 @@ void AttributeSet::Iterate(std::function<void(model::ColumnIndex)> callback) con
     }
 }
 
+std::vector<model::ColumnIndex> AttributeSet::AsVector() const {
+    std::vector<model::ColumnIndex> attrs;
+    attrs.reserve(Count());
+    Iterate([&attrs](model::ColumnIndex attr) { attrs.push_back(attr); });
+    return attrs;
+}
+
 }  // namespace algos::fastod
