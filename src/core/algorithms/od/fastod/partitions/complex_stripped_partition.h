@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "algorithms/od/fastod/od_ordering.h"
 #include "algorithms/od/fastod/model/removal_set.h"
+#include "algorithms/od/fastod/od_ordering.h"
+#include "algorithms/od/fastod/storage/data_frame.h"
 #include "table/tuple_index.h"
 
 namespace algos::fastod {
@@ -37,10 +37,12 @@ private:
     std::string CommonToString() const;
     void CommonProduct(model::ColumnIndex attribute);
     bool CommonSplit(model::ColumnIndex right) const;
+    od::RemovalSetAsVec CommonSplitRemovalSet(model::ColumnIndex right) const;
 
     std::string RangeBasedToString() const;
     void RangeBasedProduct(model::ColumnIndex attribute);
     bool RangeBasedSplit(model::ColumnIndex right) const;
+    od::RemovalSetAsVec RangeBasedSplitRemovalSet(model::ColumnIndex right) const;
 
     std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
                                                                 size_t group_start,
@@ -69,6 +71,11 @@ public:
 
     template <od::Ordering Ordering>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const;
+    template <od::Ordering Ordering>
+    od::RemovalSetAsVec CalculateSwapRemovalSet(model::ColumnIndex left,
+                                                model::ColumnIndex right) const;
+    od::RemovalSetAsVec CalculateSplitRemovalSet(model::ColumnIndex right) const;
+
     template <Type PartitionType>
     static ComplexStrippedPartition Create(DataFrame const& data);
 };

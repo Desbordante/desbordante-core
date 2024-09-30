@@ -8,6 +8,7 @@
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "algorithms/nar/des/enums.h"
+#include "algorithms/od/fastod/od_ordering.h"
 #include "util/enum_to_available_values.h"
 
 namespace config::descriptions {
@@ -29,6 +30,8 @@ std::string const kDLevelDefinitionString =
 std::string const kDDifferentialStrategyString =
         "DES mutation strategy to use\n" +
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
+std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
+                                     util::EnumToAvailableValues<algos::od::Ordering>();
 }  // namespace details
 
 // Common
@@ -216,4 +219,11 @@ constexpr auto kDUCCIndices = "column indices for UCC verification";
 // MD verifier
 constexpr auto kDMDLHS = "Left-hand side of Matching Dependancy";
 constexpr auto kDMDRHS = "Right-hand side of Matching Dependancy";
+// AOD verifier
+constexpr auto kDOcContext = "Context of the OC to verify";
+constexpr auto kDOcLeftIndex = "Index of the left attribute of the OC to verify";
+constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verify";
+auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
+constexpr auto kDOFDContext = "Context of the OFD to verify";
+constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
 }  // namespace config::descriptions
