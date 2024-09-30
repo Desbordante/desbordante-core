@@ -29,8 +29,11 @@ public:
         return entries_.at(key);
     }
 
-    void Set(const K& key, const V& value) {
-        if (!entries_.try_emplace(key, value).second) return;
+    V const& Set(K const& key, V const& value) {
+        auto [it, inserted] = entries_.try_emplace(key, value);
+        if (!inserted) {
+            return it->second;
+        }
 
         if (keys_in_order_.size() >= max_size_) {
             entries_.erase(keys_in_order_.front());
@@ -38,6 +41,7 @@ public:
         }
 
         keys_in_order_.push(key);
+        return it->second;
     }
 };
 

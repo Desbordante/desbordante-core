@@ -43,8 +43,8 @@ public:
         cache_.Clear();
     }
 
-    ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
-                                                  DataFrame const& data) {
+    ComplexStrippedPartition const& GetStrippedPartition(AttributeSet const& attribute_set,
+                                                         DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
@@ -64,8 +64,7 @@ public:
             });
         }
 
-        cache_.Set(attribute_set, result_partition);
-        return result_partition;
+        return cache_.Set(attribute_set, result_partition);
     }
 };
 
