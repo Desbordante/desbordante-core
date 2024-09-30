@@ -174,4 +174,9 @@ std::string_view Algorithm::GetDescription(std::string_view option_name) const {
     }
 }
 
+[[nodiscard]] bool Algorithm::OptionIsSet(std::string_view option_name) const {
+    auto it = possible_options_.find(option_name);
+    return it != possible_options_.end() && it->second->IsSet();
+}
+
 }  // namespace algos
