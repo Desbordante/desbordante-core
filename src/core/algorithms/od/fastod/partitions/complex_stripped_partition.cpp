@@ -153,6 +153,148 @@ template bool ComplexStrippedPartition::Swap<od::Ordering::ascending>(
 template bool ComplexStrippedPartition::Swap<od::Ordering::descending>(
         model::ColumnIndex left, model::ColumnIndex right) const;
 
+namespace {
+
+struct ValueAndIndex {
+    int value;
+    model::TupleIndex index;
+
+    // For vector::emplace_back() to work on x86 macos gcc
+    ValueAndIndex(int value, model::TupleIndex index) : value(value), index(index) {}
+};
+
+od::RemovalSetAsVec SplitRemovalSet(std::vector<ValueAndIndex> const& values) {
+    assert(!values.empty());
+    od::RemovalSetAsVec removal_set;
+    std::unordered_map<int, size_t> occurrences;
+
+    for (auto const& [value, index] : values) {
+        occurrences[value]++;
+    }
+
+    auto it = std::max_element(occurrences.begin(), occurrences.end(),
+                               [](auto const& l, auto const& r) { return l.second < r.second; });
+    assert(it != occurrences.end());
+    for (auto const& [value, index] : values) {
+        if (value != it->first) {
+            assert(std::find(removal_set.begin(), removal_set.end(), index) == removal_set.end());
+            removal_set.push_back(index);
+        }
+    }
+
+    return removal_set;
+}
+
+}  // namespace
+
+template <od::Ordering Ordering>
+od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet(
+        model::ColumnIndex left, model::ColumnIndex right) const {
+    size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+    od::RemovalSetAsVec removal_set;
+
+    for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
+        std::vector<Tuple> values = GetTuplesForColumns(left, right, begin_pointer);
+
+        std::sort(values.begin(), values.end(), [](auto const& t1, auto const& t2) {
+            return Comp<Ordering>()(t1.left_value, t2.left_value) ||
+                   (t1.left_value == t2.left_value && t1.right_value < t2.right_value);
+        });
+
+        size_t const values_size = values.size();
+        std::vector<int> subseq_len_to_last(values_size + 1, std::numeric_limits<int>::max());
+        subseq_len_to_last.front() = std::numeric_limits<int>::min();
+        std::vector<size_t> predecessors(values_size, std::numeric_limits<size_t>::max());
+        std::vector<size_t> subseq_len_to_index(values_size + 1,
+                                                std::numeric_limits<size_t>::max());
+
+        size_t longest_subseq = 0;
+        for (size_t i = 0; i != values_size; ++i) {
+            int right_value = values[i].right_value;
+            auto it = std::upper_bound(subseq_len_to_last.begin(), subseq_len_to_last.end(),
+                                       right_value);
+            size_t subseq_len = std::distance(subseq_len_to_last.begin(), it);
+            if (subseq_len > longest_subseq) {
+                longest_subseq = subseq_len;
+            }
+
+            assert(it != subseq_len_to_last.begin());
+            assert(it != subseq_len_to_last.end());
+            *it = right_value;
+            predecessors[i] = subseq_len_to_index[subseq_len - 1];
+            subseq_len_to_index[subseq_len] = i;
+        }
+
+        std::unordered_set<model::TupleIndex> longest_subseq_elements;
+        for (size_t i = subseq_len_to_index[longest_subseq];
+             i != std::numeric_limits<model::TupleIndex>::max(); i = predecessors[i]) {
+            longest_subseq_elements.insert(values[i].tuple_index);
+        }
+
+        for (auto const& [index, left_value, right_value] : values) {
+            if (!longest_subseq_elements.contains(index)) {
+                removal_set.push_back(index);
+            }
+        }
+    }
+
+    return removal_set;
+}
+
+template od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet<
+        od::Ordering::ascending>(model::ColumnIndex left, model::ColumnIndex right) const;
+template od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet<
+        od::Ordering::descending>(model::ColumnIndex left, model::ColumnIndex right) const;
+
+od::RemovalSetAsVec ComplexStrippedPartition::CommonSplitRemovalSet(
+        model::ColumnIndex right) const {
+    od::RemovalSetAsVec removal_set;
+
+    for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
+        size_t const group_begin = (*sp_begins_)[begin_pointer];
+        size_t const group_end = (*sp_begins_)[begin_pointer + 1];
+
+        std::vector<ValueAndIndex> values;
+        values.reserve(group_end - group_begin);
+        for (size_t i = group_begin; i < group_end; i++) {
+            model::TupleIndex const tuple_index = (*sp_indexes_)[i];
+            values.emplace_back(data_->GetValue(tuple_index, right), tuple_index);
+        }
+        od::RemovalSetAsVec cur_removal_set = SplitRemovalSet(values);
+        removal_set.insert(removal_set.end(), cur_removal_set.begin(), cur_removal_set.end());
+    }
+
+    return removal_set;
+}
+
+od::RemovalSetAsVec ComplexStrippedPartition::RangeBasedSplitRemovalSet(
+        model::ColumnIndex right) const {
+    od::RemovalSetAsVec removal_set;
+
+    for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
+        size_t const group_begin = (*rb_begins_)[begin_pointer];
+        size_t const group_end = (*rb_begins_)[begin_pointer + 1];
+
+        std::vector<ValueAndIndex> values;
+        for (size_t i = group_begin; i < group_end; ++i) {
+            DataFrame::Range const range = (*rb_indexes_)[i];
+
+            for (size_t j = range.first; j <= range.second; ++j) {
+                values.emplace_back(data_->GetValue(j, right), j);
+            }
+        }
+        od::RemovalSetAsVec cur_removal_set = SplitRemovalSet(values);
+        removal_set.insert(removal_set.end(), cur_removal_set.begin(), cur_removal_set.end());
+    }
+
+    return removal_set;
+}
+
+od::RemovalSetAsVec ComplexStrippedPartition::CalculateSplitRemovalSet(
+        model::ColumnIndex right) const {
+    return is_stripped_partition_ ? CommonSplitRemovalSet(right) : RangeBasedSplitRemovalSet(right);
+}
+
 template <ComplexStrippedPartition::Type PartitionType>
 ComplexStrippedPartition ComplexStrippedPartition::Create(DataFrame const& data) {
     if constexpr (PartitionType == Type::kRangeBased) {
