@@ -3,6 +3,7 @@
 #include <memory>
 #include <string_view>
 #include <typeindex>
+#include <vector>
 
 #include "boost/any.hpp"
 
