@@ -7,6 +7,7 @@
 
 #include "config/tabular_data/input_table/option.h"
 #include "config/time_limit/option.h"
+#include "error/option.h"
 #include "util/timed_invoke.h"
 
 namespace algos {
@@ -35,6 +36,7 @@ void Fastod::PrepareOptions() {
 void Fastod::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kTimeLimitSecondsOpt(&time_limit_seconds_));
+    RegisterOption(config::kErrorOpt(&error_));
 }
 
 void Fastod::MakeLoadOptionsAvailable() {
@@ -42,7 +44,7 @@ void Fastod::MakeLoadOptionsAvailable() {
 }
 
 void Fastod::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::kTimeLimitSecondsOpt.GetName()});
+    MakeOptionsAvailable({config::kTimeLimitSecondsOpt.GetName(), config::kErrorOpt.GetName()});
 }
 
 void Fastod::LoadDataInternal() {
@@ -169,7 +171,7 @@ void Fastod::ComputeODs() {
                 [this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
                     SimpleCanonicalOD od(del_attrs[attr], attr);
 
-                    if (od.IsValid(data_, partition_cache_)) {
+                    if (od.IsValid(data_, partition_cache_, error_)) {
                         AddToResult(std::move(od));
                         CCPut(context, fastod::DeleteAttribute(cc, attr));
 
