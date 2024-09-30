@@ -84,6 +84,11 @@ bool TypoMiner::SetExternalOption(std::string_view option_name, boost::any const
     return TrySetOption(option_name, value, value) != 0;
 }
 
+bool TypoMiner::ExternalOptionIsRequired(std::string_view option_name) const {
+    return precise_algo_->OptionIsRequired(option_name) ||
+           approx_algo_->OptionIsRequired(option_name);
+}
+
 int TypoMiner::TrySetOption(std::string_view option_name, boost::any const& value_precise,
                             boost::any const& value_approx) {
     int successes{};

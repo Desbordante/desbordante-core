@@ -15,6 +15,10 @@ std::type_index Algorithm::GetExternalTypeIndex(std::string_view) const {
     return typeid(void);
 }
 
+bool Algorithm::ExternalOptionIsRequired([[maybe_unused]] std::string_view option_name) const {
+    return false;
+}
+
 void Algorithm::AddSpecificNeededOptions(
         [[maybe_unused]] std::unordered_set<std::string_view>& previous_options) const {}
 
@@ -114,6 +118,18 @@ void Algorithm::SetOption(std::string_view option_name, boost::any const& value)
     MakeOptionsAvailable(new_opts);
     std::vector<std::string_view>& child_opts = opt_parents_[name];
     child_opts.insert(child_opts.end(), new_opts.begin(), new_opts.end());
+}
+
+bool Algorithm::OptionIsRequired(std::string_view option_name) const {
+    if (bool ext_opt_is_required = ExternalOptionIsRequired(option_name); ext_opt_is_required) {
+        return true;
+    }
+
+    auto it = possible_options_.find(option_name);
+    if (it == possible_options_.end()) {
+        return false;
+    }
+    return it->second->IsRequired();
 }
 
 std::unordered_set<std::string_view> Algorithm::GetNeededOptions() const {
