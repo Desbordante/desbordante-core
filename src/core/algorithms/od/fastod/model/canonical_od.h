@@ -20,6 +20,7 @@ public:
     CanonicalOD(AttributeSet const& context, model::ColumnIndex left, model::ColumnIndex right);
 
     bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
     AttributeSet const& GetContext() const noexcept {
@@ -37,6 +38,8 @@ public:
     model::ColumnIndex GetRightColumn() const noexcept {
         return ap_.right;
     }
+
+    constexpr static auto kName = "OC";
 
     friend bool operator==(CanonicalOD<od::Ordering::ascending> const& x,
                            CanonicalOD<od::Ordering::ascending> const& y);
@@ -67,6 +70,7 @@ public:
     SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right);
 
     bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
     AttributeSet const& GetContext() const noexcept {
@@ -76,6 +80,8 @@ public:
     model::ColumnIndex GetRight() const noexcept {
         return right_;
     }
+
+    constexpr static auto kName = "OFD";
 
     friend bool operator==(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);
     friend bool operator!=(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);

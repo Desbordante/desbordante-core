@@ -38,8 +38,12 @@ Option<config::IndicesType> IndicesOption::operator()(
                           value_check_func = std::move(value_check_func), normalize = normalize_,
                           option_name = common_option_.GetName(),
                           allow_empty = allow_empty_](config::IndicesType const& indices) {
-        if (!allow_empty && indices.empty()) {
-            throw ConfigurationError(std::string{option_name} + " cannot be empty");
+        if (indices.empty()) {
+            if (allow_empty) {
+                return;
+            } else {
+                throw ConfigurationError(std::string{option_name} + " cannot be empty");
+            }
         }
         static_assert(std::is_unsigned_v<config::IndexType>);
 

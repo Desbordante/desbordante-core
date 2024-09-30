@@ -17,6 +17,13 @@ bool CanonicalOD<Ordering>::IsValid(DataFrame const& data, PartitionCache& cache
 }
 
 template <od::Ordering Ordering>
+od::RemovalSetAsVec CanonicalOD<Ordering>::CalculateRemovalSet(DataFrame const& data,
+                                                               PartitionCache& cache) const {
+    return cache.GetStrippedPartition(context_, data)
+            .CalculateSwapRemovalSet<Ordering>(ap_.left, ap_.right);
+}
+
+template <od::Ordering Ordering>
 std::string CanonicalOD<Ordering>::ToString() const {
     std::stringstream result;
 
@@ -34,6 +41,11 @@ SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, model::ColumnI
 
 bool SimpleCanonicalOD::IsValid(DataFrame const& data, PartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Split(right_));
+}
+
+od::RemovalSetAsVec SimpleCanonicalOD::CalculateRemovalSet(DataFrame const& data,
+                                                           PartitionCache& cache) const {
+    return cache.GetStrippedPartition(context_, data).CalculateSplitRemovalSet(right_);
 }
 
 std::string SimpleCanonicalOD::ToString() const {
