@@ -70,6 +70,7 @@ protected:
     // pipeline.
     virtual std::type_index GetExternalTypeIndex(std::string_view) const;
 
+    virtual bool ExternalOptionIsRequired(std::string_view option_name) const;
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
@@ -96,6 +97,7 @@ public:
     unsigned long long Execute();
 
     void SetOption(std::string_view option_name, boost::any const& value = {});
+    bool OptionIsRequired(std::string_view option_name) const;
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
