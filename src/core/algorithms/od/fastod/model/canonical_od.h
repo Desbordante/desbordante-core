@@ -20,6 +20,7 @@ public:
     CanonicalOD(AttributeSet const& context, model::ColumnIndex left, model::ColumnIndex right);
 
     bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
     AttributeSet const& GetContext() const noexcept {
@@ -67,6 +68,7 @@ public:
     SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right);
 
     bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
     AttributeSet const& GetContext() const noexcept {
