@@ -20,6 +20,7 @@
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
+#include "od/fastod/od_ordering.h"
 #include "parser/csv_parser/csv_parser.h"
 #include "py_util/create_dataframe_reader.h"
 #include "util/enum_to_available_values.h"
@@ -134,6 +135,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
+        kEnumConvPair<algos::od::Ordering>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},

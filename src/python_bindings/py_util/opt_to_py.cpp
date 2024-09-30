@@ -16,6 +16,7 @@
 #include "config/indices/type.h"
 #include "config/max_lhs/type.h"
 #include "config/thread_number/type.h"
+#include "od/fastod/od_ordering.h"
 
 namespace {
 namespace py = pybind11;
@@ -45,7 +46,8 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
-        enum_conv_pair<algos::hymd::LevelDefinition>};
+        enum_conv_pair<algos::hymd::LevelDefinition>,
+        enum_conv_pair<algos::od::Ordering>};
 }  // namespace
 
 namespace python_bindings {
