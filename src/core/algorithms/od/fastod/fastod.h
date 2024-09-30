@@ -15,6 +15,7 @@
 #include "algorithms/od/fastod/util/timer.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/time_limit/type.h"
+#include "error/type.h"
 
 namespace algos {
 
@@ -48,6 +49,7 @@ private:
     AttributeSet schema_;
     DataFrame data_;
     config::InputTable input_table_;
+    config::ErrorType error_;
 
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
@@ -169,7 +171,7 @@ private:
                 fastod::CanonicalOD<Ordering> od(fastod::DeleteAttribute(deleted_attrs[a], b), a,
                                                  b);
 
-                if (od.IsValid(data_, partition_cache_)) {
+                if (od.IsValid(data_, partition_cache_, error_)) {
                     AddToResult(std::move(od));
                     cs_for_con.erase(it++);
                 } else {

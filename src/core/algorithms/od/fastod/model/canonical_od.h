@@ -6,6 +6,7 @@
 #include "algorithms/od/fastod/od_ordering.h"
 #include "algorithms/od/fastod/storage/partition_cache.h"
 #include "attribute_pair.h"
+#include "error/type.h"
 
 namespace algos::fastod {
 
@@ -19,7 +20,7 @@ public:
     CanonicalOD() noexcept = default;
     CanonicalOD(AttributeSet const& context, model::ColumnIndex left, model::ColumnIndex right);
 
-    bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    bool IsValid(DataFrame const& data, PartitionCache& cache, config::ErrorType error = 0) const;
     od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
@@ -69,7 +70,7 @@ public:
     SimpleCanonicalOD();
     SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right);
 
-    bool IsValid(DataFrame const& data, PartitionCache& cache) const;
+    bool IsValid(DataFrame const& data, PartitionCache& cache, config::ErrorType error = 0) const;
     od::RemovalSetAsVec CalculateRemovalSet(DataFrame const& data, PartitionCache& cache) const;
     std::string ToString() const;
 
