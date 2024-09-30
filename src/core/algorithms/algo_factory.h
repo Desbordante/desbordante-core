@@ -18,8 +18,21 @@ template <typename FuncType>
 void ConfigureFromFunction(Algorithm& algorithm, FuncType get_opt_value_by_name) {
     std::unordered_set<std::string_view> needed;
     while (!(needed = algorithm.GetNeededOptions()).empty()) {
+        std::vector<std::string_view> needed_but_empty;
         for (std::string_view option_name : needed) {
-            algorithm.SetOption(option_name, get_opt_value_by_name(option_name));
+            boost::any value = get_opt_value_by_name(option_name);
+            if (value.empty()) {
+                needed_but_empty.push_back(option_name);
+                continue;
+            }
+            algorithm.SetOption(option_name, value);
+        }
+
+        // After we set some other options these options may become non-required
+        for (std::string_view option_name : needed_but_empty) {
+            if (algorithm.OptionIsRequired(option_name)) {
+                algorithm.SetOption(option_name, boost::any{});
+            }
         }
     }
 }

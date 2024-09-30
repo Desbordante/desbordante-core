@@ -38,6 +38,7 @@ private:
     void ClearOptions() noexcept;
     virtual void LoadDataInternal() = 0;
     virtual unsigned long long ExecuteInternal() = 0;
+    bool AllRequiredOptionsAreSet() const noexcept;
 
 protected:
     void AddProgress(double val) noexcept {
