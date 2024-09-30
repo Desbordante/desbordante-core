@@ -16,19 +16,19 @@ ComplexStrippedPartition::ComplexStrippedPartition()
     : data_(nullptr), is_stripped_partition_(true), should_be_converted_to_sp_(false) {}
 
 ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
-                                                   std::shared_ptr<std::vector<size_t>> indexes,
-                                                   std::shared_ptr<std::vector<size_t>> begins)
-    : sp_indexes_(indexes),
-      sp_begins_(begins),
+                                                   std::vector<size_t> indexes,
+                                                   std::vector<size_t> begins)
+    : sp_indexes_(std::move(indexes)),
+      sp_begins_(std::move(begins)),
       data_(&data),
       is_stripped_partition_(true),
       should_be_converted_to_sp_(false) {}
 
-ComplexStrippedPartition::ComplexStrippedPartition(
-        DataFrame const& data, std::shared_ptr<std::vector<DataFrame::Range>> indexes,
-        std::shared_ptr<std::vector<size_t>> begins)
-    : rb_indexes_(indexes),
-      rb_begins_(begins),
+ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
+                                                   std::vector<DataFrame::Range> indexes,
+                                                   std::vector<size_t> begins)
+    : rb_indexes_(std::move(indexes)),
+      rb_begins_(std::move(begins)),
       data_(&data),
       is_stripped_partition_(false),
       should_be_converted_to_sp_(false) {}
@@ -54,30 +54,30 @@ bool ComplexStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
 }
 
 void ComplexStrippedPartition::ToStrippedPartition() {
-    sp_begins_ = std::make_unique<std::vector<size_t>>();
-    sp_indexes_ = std::make_unique<std::vector<size_t>>();
+    assert(sp_begins_.empty());
+    assert(sp_indexes_.empty());
 
     size_t sp_begin = 0;
-    sp_begins_->push_back(sp_begin);
+    sp_begins_.push_back(sp_begin);
 
-    for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; begin_pointer++) {
-        size_t const group_begin = (*rb_begins_)[begin_pointer];
-        size_t const group_end = (*rb_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < rb_begins_.size() - 1; begin_pointer++) {
+        size_t const group_begin = rb_begins_[begin_pointer];
+        size_t const group_end = rb_begins_[begin_pointer + 1];
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::Range const range = (*rb_indexes_)[i];
+            DataFrame::Range const range = rb_indexes_[i];
             sp_begin += RangeSize(range);
 
             for (size_t sp_index = range.first; sp_index <= range.second; ++sp_index) {
-                sp_indexes_->push_back(sp_index);
+                sp_indexes_.push_back(sp_index);
             }
         }
 
-        sp_begins_->push_back(sp_begin);
+        sp_begins_.push_back(sp_begin);
     }
 
-    rb_begins_->clear();
-    rb_indexes_->clear();
+    rb_begins_.clear();
+    rb_indexes_.clear();
 
     is_stripped_partition_ = true;
     should_be_converted_to_sp_ = false;
@@ -88,22 +88,22 @@ std::vector<ComplexStrippedPartition::Tuple> ComplexStrippedPartition::GetTuples
     std::vector<Tuple> values;
 
     if (is_stripped_partition_) {
-        size_t const group_begin = (*sp_begins_)[group_ptr];
-        size_t const group_end = (*sp_begins_)[group_ptr + 1];
+        size_t const group_begin = sp_begins_[group_ptr];
+        size_t const group_end = sp_begins_[group_ptr + 1];
 
         values.reserve(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            size_t const index = (*sp_indexes_)[i];
+            size_t const index = sp_indexes_[i];
 
             values.emplace_back(index, data_->GetValue(index, left), data_->GetValue(index, right));
         }
     } else {
-        size_t const group_begin = (*rb_begins_)[group_ptr];
-        size_t const group_end = (*rb_begins_)[group_ptr + 1];
+        size_t const group_begin = rb_begins_[group_ptr];
+        size_t const group_end = rb_begins_[group_ptr + 1];
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::Range const range = (*rb_indexes_)[i];
+            DataFrame::Range const range = rb_indexes_[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 values.emplace_back(j, data_->GetValue(j, left), data_->GetValue(j, right));
@@ -115,7 +115,7 @@ std::vector<ComplexStrippedPartition::Tuple> ComplexStrippedPartition::GetTuples
 
 template <od::Ordering Ordering>
 bool ComplexStrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right) const {
-    size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+    size_t const group_count = is_stripped_partition_ ? sp_begins_.size() : rb_begins_.size();
 
     for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
         std::vector<Tuple> values = GetTuplesForColumns(left, right, begin_pointer);
@@ -190,7 +190,7 @@ od::RemovalSetAsVec SplitRemovalSet(std::vector<ValueAndIndex> const& values) {
 template <od::Ordering Ordering>
 od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet(
         model::ColumnIndex left, model::ColumnIndex right) const {
-    size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+    size_t const group_count = is_stripped_partition_ ? sp_begins_.size() : rb_begins_.size();
     od::RemovalSetAsVec removal_set;
 
     for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
@@ -250,14 +250,14 @@ od::RemovalSetAsVec ComplexStrippedPartition::CommonSplitRemovalSet(
         model::ColumnIndex right) const {
     od::RemovalSetAsVec removal_set;
 
-    for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
-        size_t const group_begin = (*sp_begins_)[begin_pointer];
-        size_t const group_end = (*sp_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < sp_begins_.size() - 1; begin_pointer++) {
+        size_t const group_begin = sp_begins_[begin_pointer];
+        size_t const group_end = sp_begins_[begin_pointer + 1];
 
         std::vector<ValueAndIndex> values;
         values.reserve(group_end - group_begin);
         for (size_t i = group_begin; i < group_end; i++) {
-            model::TupleIndex const tuple_index = (*sp_indexes_)[i];
+            model::TupleIndex const tuple_index = sp_indexes_[i];
             values.emplace_back(data_->GetValue(tuple_index, right), tuple_index);
         }
         od::RemovalSetAsVec cur_removal_set = SplitRemovalSet(values);
@@ -271,13 +271,13 @@ od::RemovalSetAsVec ComplexStrippedPartition::RangeBasedSplitRemovalSet(
         model::ColumnIndex right) const {
     od::RemovalSetAsVec removal_set;
 
-    for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
-        size_t const group_begin = (*rb_begins_)[begin_pointer];
-        size_t const group_end = (*rb_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < rb_begins_.size() - 1; ++begin_pointer) {
+        size_t const group_begin = rb_begins_[begin_pointer];
+        size_t const group_end = rb_begins_[begin_pointer + 1];
 
         std::vector<ValueAndIndex> values;
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::Range const range = (*rb_indexes_)[i];
+            DataFrame::Range const range = rb_indexes_[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 values.emplace_back(data_->GetValue(j, right), j);
@@ -298,34 +298,34 @@ od::RemovalSetAsVec ComplexStrippedPartition::CalculateSplitRemovalSet(
 template <ComplexStrippedPartition::Type PartitionType>
 ComplexStrippedPartition ComplexStrippedPartition::Create(DataFrame const& data) {
     if constexpr (PartitionType == Type::kRangeBased) {
-        auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
-        auto rb_begins = std::make_unique<std::vector<size_t>>();
+        auto rb_indexes = std::vector<DataFrame::Range>();
+        auto rb_begins = std::vector<size_t>();
 
         size_t const tuple_count = data.GetTupleCount();
-        rb_begins->push_back(0);
+        rb_begins.push_back(0);
 
         if (tuple_count != 0) {
-            rb_indexes->push_back({0, tuple_count - 1});
-            rb_begins->push_back(1);
+            rb_indexes.push_back({0, tuple_count - 1});
+            rb_begins.push_back(1);
         }
 
         return ComplexStrippedPartition(data, std::move(rb_indexes), std::move(rb_begins));
     }
 
-    auto sp_indexes = std::make_unique<std::vector<size_t>>();
-    auto sp_begins = std::make_unique<std::vector<size_t>>();
+    auto sp_indexes = std::vector<size_t>();
+    auto sp_begins = std::vector<size_t>();
 
-    sp_indexes->reserve(data.GetTupleCount());
+    sp_indexes.reserve(data.GetTupleCount());
 
     for (size_t i = 0; i < data.GetTupleCount(); i++) {
-        sp_indexes->push_back(i);
+        sp_indexes.push_back(i);
     }
 
     if (data.GetTupleCount() != 0) {
-        sp_begins->push_back(0);
+        sp_begins.push_back(0);
     }
 
-    sp_begins->push_back(data.GetTupleCount());
+    sp_begins.push_back(data.GetTupleCount());
 
     return ComplexStrippedPartition(data, std::move(sp_indexes), std::move(sp_begins));
 }
@@ -339,22 +339,22 @@ std::string ComplexStrippedPartition::CommonToString() const {
     std::stringstream result;
     std::string indexes_string;
 
-    for (size_t i = 0; i < sp_indexes_->size(); i++) {
+    for (size_t i = 0; i < sp_indexes_.size(); i++) {
         if (i != 0) {
             indexes_string += ", ";
         }
 
-        indexes_string += std::to_string((*sp_indexes_)[i]);
+        indexes_string += std::to_string(sp_indexes_[i]);
     }
 
     std::string begins_string;
 
-    for (size_t i = 0; i < sp_begins_->size(); i++) {
+    for (size_t i = 0; i < sp_begins_.size(); i++) {
         if (i != 0) {
             begins_string += ", ";
         }
 
-        begins_string += std::to_string((*sp_begins_)[i]);
+        begins_string += std::to_string(sp_begins_[i]);
     }
 
     result << "ComplexStrippedPartition[SP mode] { indexes = [ " << indexes_string
@@ -364,20 +364,20 @@ std::string ComplexStrippedPartition::CommonToString() const {
 }
 
 void ComplexStrippedPartition::CommonProduct(model::ColumnIndex attribute) {
-    auto new_indexes = std::make_unique<std::vector<size_t>>();
-    new_indexes->reserve(data_->GetColumnCount());
+    auto new_indexes = std::vector<size_t>();
+    new_indexes.reserve(data_->GetColumnCount());
 
-    auto new_begins = std::make_unique<std::vector<size_t>>();
+    auto new_begins = std::vector<size_t>();
     size_t fill_pointer = 0;
 
-    for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
-        size_t const group_begin = (*sp_begins_)[begin_pointer];
-        size_t const group_end = (*sp_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < sp_begins_.size() - 1; begin_pointer++) {
+        size_t const group_begin = sp_begins_[begin_pointer];
+        size_t const group_end = sp_begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, size_t>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; i++) {
-            size_t const index = (*sp_indexes_)[i];
+            size_t const index = sp_indexes_[i];
             values[i - group_begin] = {data_->GetValue(index, attribute), index};
         }
 
@@ -391,11 +391,11 @@ void ComplexStrippedPartition::CommonProduct(model::ColumnIndex attribute) {
             size_t const group_size = i - group_start;
 
             if (group_size > 1) {
-                new_begins->push_back(fill_pointer);
+                new_begins.push_back(fill_pointer);
                 fill_pointer += group_size;
 
                 for (size_t j = group_start; j < group_start + group_size; ++j) {
-                    new_indexes->push_back(values[j].second);
+                    new_indexes.push_back(values[j].second);
                 }
             }
 
@@ -409,21 +409,21 @@ void ComplexStrippedPartition::CommonProduct(model::ColumnIndex attribute) {
         add_group();
     }
 
-    new_begins->push_back(new_indexes->size());
+    new_begins.push_back(new_indexes.size());
 
     sp_indexes_ = std::move(new_indexes);
     sp_begins_ = std::move(new_begins);
 }
 
 bool ComplexStrippedPartition::CommonSplit(model::ColumnIndex right) const {
-    for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
-        size_t const group_begin = (*sp_begins_)[begin_pointer];
-        size_t const group_end = (*sp_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < sp_begins_.size() - 1; begin_pointer++) {
+        size_t const group_begin = sp_begins_[begin_pointer];
+        size_t const group_end = sp_begins_[begin_pointer + 1];
 
-        int const group_value = data_->GetValue((*sp_indexes_)[group_begin], right);
+        int const group_value = data_->GetValue(sp_indexes_[group_begin], right);
 
         for (size_t i = group_begin + 1; i < group_end; i++) {
-            if (data_->GetValue((*sp_indexes_)[i], right) != group_value) {
+            if (data_->GetValue(sp_indexes_[i], right) != group_value) {
                 return true;
             }
         }
@@ -436,23 +436,23 @@ std::string ComplexStrippedPartition::RangeBasedToString() const {
     std::stringstream result;
     std::string indexes_string;
 
-    for (size_t i = 0; i < rb_indexes_->size(); i++) {
+    for (size_t i = 0; i < rb_indexes_.size(); i++) {
         if (i != 0) {
             indexes_string += ", ";
         }
 
-        indexes_string += "(" + std::to_string((*rb_indexes_)[i].first) + ";" +
-                          std::to_string((*rb_indexes_)[i].second) + ")";
+        indexes_string += "(" + std::to_string(rb_indexes_[i].first) + ";" +
+                          std::to_string(rb_indexes_[i].second) + ")";
     }
 
     std::string begins_string;
 
-    for (size_t i = 0; i < rb_begins_->size(); i++) {
+    for (size_t i = 0; i < rb_begins_.size(); i++) {
         if (i != 0) {
             begins_string += ", ";
         }
 
-        begins_string += std::to_string((*rb_begins_)[i]);
+        begins_string += std::to_string(rb_begins_[i]);
     }
 
     result << "ComplexStrippedPartition[RB mode] { indexes = [ " << indexes_string
@@ -462,14 +462,14 @@ std::string ComplexStrippedPartition::RangeBasedToString() const {
 }
 
 void ComplexStrippedPartition::RangeBasedProduct(model::ColumnIndex attribute) {
-    auto new_begins = std::make_unique<std::vector<size_t>>();
-    auto new_indexes = std::make_unique<std::vector<DataFrame::Range>>();
+    auto new_begins = std::vector<size_t>();
+    auto new_indexes = std::vector<DataFrame::Range>();
 
     size_t curr_begin = 0;
 
-    for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
-        size_t const group_begin = (*rb_begins_)[begin_pointer];
-        size_t const group_end = (*rb_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < rb_begins_.size() - 1; ++begin_pointer) {
+        size_t const group_begin = rb_begins_[begin_pointer];
+        size_t const group_end = rb_begins_[begin_pointer + 1];
 
         std::vector<DataFrame::ValueIndices> intersection =
                 IntersectWithAttribute(attribute, group_begin, group_end - 1);
@@ -494,10 +494,10 @@ void ComplexStrippedPartition::RangeBasedProduct(model::ColumnIndex attribute) {
                     small_ranges_count++;
                 }
 
-                new_indexes->push_back(std::move(range));
+                new_indexes.push_back(std::move(range));
             }
 
-            new_begins->push_back(curr_begin);
+            new_begins.push_back(curr_begin);
             curr_begin += end_index - start_index + 1;
         };
 
@@ -519,21 +519,21 @@ void ComplexStrippedPartition::RangeBasedProduct(model::ColumnIndex attribute) {
         }
     }
 
-    new_begins->push_back(new_indexes->size());
+    new_begins.push_back(new_indexes.size());
 
     rb_indexes_ = std::move(new_indexes);
     rb_begins_ = std::move(new_begins);
 }
 
 bool ComplexStrippedPartition::RangeBasedSplit(model::ColumnIndex right) const {
-    for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
-        size_t const group_begin = (*rb_begins_)[begin_pointer];
-        size_t const group_end = (*rb_begins_)[begin_pointer + 1];
+    for (size_t begin_pointer = 0; begin_pointer < rb_begins_.size() - 1; ++begin_pointer) {
+        size_t const group_begin = rb_begins_[begin_pointer];
+        size_t const group_end = rb_begins_[begin_pointer + 1];
 
-        int const group_value = data_->GetValue((*rb_indexes_)[group_begin].first, right);
+        int const group_value = data_->GetValue(rb_indexes_[group_begin].first, right);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::Range const range = (*rb_indexes_)[i];
+            DataFrame::Range const range = rb_indexes_[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 if (data_->GetValue(j, right) != group_value) {
@@ -553,7 +553,7 @@ std::vector<DataFrame::ValueIndices> ComplexStrippedPartition::IntersectWithAttr
     std::vector<DataFrame::ValueIndices> const& attr_ranges = data_->GetDataRanges()[attribute];
 
     for (size_t i = group_start; i <= group_end; ++i) {
-        DataFrame::Range const& range = (*rb_indexes_)[i];
+        DataFrame::Range const& range = rb_indexes_[i];
 
         size_t const lower_bound_range_index = data_->GetRangeIndexByItem(range.first, attribute);
         size_t const upper_bound_range_index = data_->GetRangeIndexByItem(range.second, attribute);

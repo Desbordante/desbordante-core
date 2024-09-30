@@ -23,10 +23,10 @@ private:
             : tuple_index(tuple_index), left_value(left_value), right_value(right_value) {}
     };
 
-    std::shared_ptr<std::vector<size_t>> sp_indexes_;
-    std::shared_ptr<std::vector<size_t>> sp_begins_;
-    std::shared_ptr<std::vector<DataFrame::Range>> rb_indexes_;
-    std::shared_ptr<std::vector<size_t>> rb_begins_;
+    std::vector<size_t> sp_indexes_;
+    std::vector<size_t> sp_begins_;
+    std::vector<DataFrame::Range> rb_indexes_;
+    std::vector<size_t> rb_begins_;
     DataFrame const* data_;
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
@@ -48,12 +48,11 @@ private:
                                                                 size_t group_start,
                                                                 size_t group_end);
 
-    ComplexStrippedPartition(DataFrame const& data, std::shared_ptr<std::vector<size_t>> indexes,
-                             std::shared_ptr<std::vector<size_t>> begins);
+    ComplexStrippedPartition(DataFrame const& data, std::vector<size_t> indexes,
+                             std::vector<size_t> begins);
 
-    ComplexStrippedPartition(DataFrame const& data,
-                             std::shared_ptr<std::vector<DataFrame::Range>> indexes,
-                             std::shared_ptr<std::vector<size_t>> begins);
+    ComplexStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> indexes,
+                             std::vector<size_t> begins);
     std::vector<Tuple> GetTuplesForColumns(model::ColumnIndex left, model::ColumnIndex right,
                                            size_t group_ptr) const;
 
