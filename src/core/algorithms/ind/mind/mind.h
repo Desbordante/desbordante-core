@@ -45,6 +45,7 @@ private:
     bool SetExternalOption(std::string_view option_name, boost::any const& value) override;
     std::type_index GetExternalTypeIndex(std::string_view option_name) const override;
 
+    bool ExternalOptionIsRequired(std::string_view option_name) const override;
     void LoadINDAlgorithmDataInternal() override;
 
     ///

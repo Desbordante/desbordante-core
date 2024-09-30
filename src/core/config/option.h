@@ -24,6 +24,7 @@ class Option : public IOption {
 public:
     using DefaultFunc = std::function<T()>;
     using ValueCheckFunc = std::function<void(T const &)>;
+    using IsRequiredFunc = std::function<bool()>;
     using CondCheckFunc = std::function<bool(T const &val)>;
     using OptCondVector = std::vector<std::pair<CondCheckFunc, std::vector<std::string_view>>>;
     using NormalizeFunc = std::function<void(T &)>;
@@ -90,8 +91,18 @@ public:
         return *this;
     }
 
+    Option &SetIsRequiredFunc(IsRequiredFunc is_required) {
+        assert(!is_required_);
+        is_required_ = std::move(is_required);
+        return *this;
+    }
+
     OptValue GetOptValue() const override {
         return OptValue{std::type_index(typeid(T)), boost::any(*value_ptr_)};
+    }
+
+    bool IsRequired() const noexcept override {
+        return is_required_ == nullptr || is_required_();
     }
 
 private:
@@ -103,6 +114,7 @@ private:
     std::string_view description_;
     DefaultFunc default_func_;
     ValueCheckFunc value_check_{};
+    IsRequiredFunc is_required_{};
     OptCondVector opt_cond_{};
     NormalizeFunc normalize_func_{};
 };
