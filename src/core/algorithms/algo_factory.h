@@ -25,6 +25,7 @@ void ConfigureFromFunction(Algorithm& algorithm, FuncType get_opt_value_by_name)
 }
 
 void ConfigureFromMap(Algorithm& algorithm, StdParamsMap const& options);
+void LoadAlgorithmData(Algorithm& algorithm, StdParamsMap const& options);
 void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options);
 
 template <typename T>
