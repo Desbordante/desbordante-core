@@ -32,7 +32,7 @@ public:
     }
 
     // For tests
-    Clue const& GetCardinalityMask() const {
+    PredicateBitset const& GetCardinalityMask() const {
         return cardinality_mask_;
     }
 
@@ -44,8 +44,8 @@ private:
     void BuildCardinalityMask(PredicateBuilder const& pbuilder);
 
     ClueSet clue_set_;
-    std::vector<Clue> correction_map_;
-    Clue cardinality_mask_;
+    std::vector<PredicateBitset> correction_map_;
+    PredicateBitset cardinality_mask_;
     EvidenceSet evidence_set_;
 };
 
