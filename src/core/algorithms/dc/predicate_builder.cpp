@@ -42,9 +42,6 @@ void PredicateBuilder::BuildMutexMap() {
     mutex_map_.resize(predicates_.size());
 
     for (auto const& p1 : predicates_) {
-        // TODO: what if we use: if (index >= bitset.size()) bitset.resize(index + 1);
-        mutex_map_[PredIdx(p1)].resize(predicates_.size());
-
         for (auto const& p2 : predicates_) {
             if (p2->HasSameOperandsAs(p1)) mutex_map_[PredIdx(p1)].set(PredIdx(p2));
         }

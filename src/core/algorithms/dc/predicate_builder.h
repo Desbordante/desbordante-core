@@ -48,7 +48,7 @@ private:
     PredicatesVector str_cross_column_predicates_;
 
     // i (predicate num from PredicateIndexProvider) -> predicates with the same column pair as i
-    std::vector<boost::dynamic_bitset<>> mutex_map_;
+    std::vector<PredicateBitset> mutex_map_;
     // i -> index of predicate having inverse operator to predicate i
     std::vector<size_t> inverse_map_;
 
@@ -109,7 +109,7 @@ public:
         return predicates_.size();
     }
 
-    std::vector<boost::dynamic_bitset<>>&& GetMutexMap() noexcept {
+    std::vector<PredicateBitset>&& GetMutexMap() noexcept {
         return std::move(mutex_map_);
     }
 

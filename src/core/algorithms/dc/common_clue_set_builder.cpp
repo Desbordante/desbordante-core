@@ -1,10 +1,9 @@
-#include <easylogging++.h>
-
 #include "common_clue_set_builder.h"
+
+#include <easylogging++.h>
 
 #include "index_provider.h"
 #include "operator.h"
-#include "index_provider.h"
 
 namespace model {
 
@@ -13,11 +12,11 @@ std::vector<PredicatePack> CommonClueSetBuilder::str_single_packs_;
 std::vector<PredicatePack> CommonClueSetBuilder::str_cross_packs_;
 std::vector<PredicatePack> CommonClueSetBuilder::num_single_packs_;
 std::vector<PredicatePack> CommonClueSetBuilder::num_cross_packs_;
-std::vector<Clue> CommonClueSetBuilder::correction_map_;
+std::vector<PredicateBitset> CommonClueSetBuilder::correction_map_;
 
-Clue CommonClueSetBuilder::BuildCorrectionMask(PredicatesSpan group,
-                                               std::initializer_list<OperatorType>& types) {
-    Clue mask;
+PredicateBitset CommonClueSetBuilder::BuildCorrectionMask(
+        PredicatesSpan group, std::initializer_list<OperatorType>& types) {
+    PredicateBitset mask;
 
     for (auto& p : group) {
         if (std::any_of(types.begin(), types.end(),
@@ -28,7 +27,7 @@ Clue CommonClueSetBuilder::BuildCorrectionMask(PredicatesSpan group,
                 mask.set(index);
             } else {
                 throw std::runtime_error(
-                        "Predicate index exceeds the size of ClueBitset, "
+                        "Predicate index exceeds the size of PredicateBitset, "
                         "such amount of predicates is not supported.");
             }
         }
