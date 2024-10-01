@@ -14,15 +14,20 @@ CanonicalOD<Ordering>::CanonicalOD(AttributeSet const& context, model::ColumnInd
 template <od::Ordering Ordering>
 bool CanonicalOD<Ordering>::IsValid(DataFrame const& data, PartitionCache& cache,
                                     config::ErrorType error) const {
-    od::RemovalSetAsVec removal_set = CalculateRemovalSet(data, cache);
-    return removal_set.size() <= error * data.GetTupleCount();
+    if (error == 0.0) {
+        return !cache.GetStrippedPartition(context_, data)
+                        .template Swap<Ordering>(ap_.left, ap_.right);
+    } else {
+        od::RemovalSetAsVec removal_set = CalculateRemovalSet(data, cache);
+        return removal_set.size() <= error * data.GetTupleCount();
+    }
 }
 
 template <od::Ordering Ordering>
 od::RemovalSetAsVec CanonicalOD<Ordering>::CalculateRemovalSet(DataFrame const& data,
                                                                PartitionCache& cache) const {
     return cache.GetStrippedPartition(context_, data)
-            .CalculateSwapRemovalSet<Ordering>(ap_.left, ap_.right);
+            .template CalculateSwapRemovalSet<Ordering>(ap_.left, ap_.right);
 }
 
 template <od::Ordering Ordering>
@@ -43,8 +48,12 @@ SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, model::ColumnI
 
 bool SimpleCanonicalOD::IsValid(DataFrame const& data, PartitionCache& cache,
                                 config::ErrorType error) const {
-    od::RemovalSetAsVec removal_set = CalculateRemovalSet(data, cache);
-    return removal_set.size() <= error * data.GetTupleCount();
+    if (error == 0.0) {
+        return !cache.GetStrippedPartition(context_, data).Split(right_);
+    } else {
+        od::RemovalSetAsVec removal_set = CalculateRemovalSet(data, cache);
+        return removal_set.size() <= error * data.GetTupleCount();
+    }
 }
 
 od::RemovalSetAsVec SimpleCanonicalOD::CalculateRemovalSet(DataFrame const& data,
