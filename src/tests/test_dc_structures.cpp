@@ -9,11 +9,12 @@
 #include "dc/column_operand.h"
 #include "dc/evidence_set_builder.h"
 #include "dc/operator.h"
-#include "dc/utils.h"
 #include "dc/pli_shard.h"
 #include "dc/predicate.h"
 #include "dc/predicate_builder.h"
+#include "dc/predicate_organizer.h"
 #include "dc/single_clue_set_builder.h"
+#include "dc/utils.h"
 #include "table/column_layout_typed_relation_data.h"
 #include "table/typed_column_data.h"
 #include "test_dc_structures_correct_results.h"
@@ -463,6 +464,43 @@ TEST(FastADC, EvidenceSet) {
 
     EXPECT_EQ(evidence_set.Size(), expected_set.size())
             << "Size mismatch: evidence_set has extra elements.";
+}
+
+TEST(FastADC, TransformedEvidenceSetAndMutexMap) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+
+    model::PredicateBuilder pbuilder(true);
+    pbuilder.BuildPredicateSpace(col_data);
+
+    model::PliShardBuilder plibuilder;
+    plibuilder.BuildPliShards(col_data);
+
+    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    evibuilder.BuildEvidenceSet();
+
+    model::PredicateOrganizer organizer(pbuilder.PredicateCount(),
+                                        std::move(evibuilder.GetEvidenceSet()),
+                                        std::move(pbuilder.GetMutexMap()));
+
+    std::vector<model::Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
+
+    std::unordered_set<model::PredicateBitset> expected;
+    for (auto const& expected_vec : expected_transformed_evidence_set) {
+        expected.insert(VectorToBitset(expected_vec));
+    }
+
+    for (auto const& evidence : transfromed_evidence_set) {
+        auto const& actual_evidence = evidence.evidence;
+        EXPECT_TRUE(expected.find(actual_evidence) != expected.end())
+                << "Unexpected evidence: " << actual_evidence;
+    }
+
+    std::vector<model::PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
+    for (size_t i = 0; i < transfromed_mutex_map.size(); i++) {
+        EXPECT_EQ(transfromed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
+    }
 }
 
 }  // namespace tests
