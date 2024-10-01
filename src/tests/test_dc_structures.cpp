@@ -300,11 +300,12 @@ TEST(FastADC, InverseAndMutexMaps) {
         auto const& predicate = predicates[i];
         auto const& mutex_bits = mutex_map[i];
 
-        for (size_t bit = mutex_bits.find_first(); bit != boost::dynamic_bitset<>::npos;
-             bit = mutex_bits.find_next(bit)) {
-            EXPECT_TRUE(predicate->HasSameOperandsAs(*predicates[bit]))
-                    << "Predicate at index " << i << " is not mutex with predicate at index "
-                    << bit;
+        for (size_t bit = 0; bit < mutex_bits.size(); ++bit) {
+            if (mutex_bits.test(bit)) {
+                EXPECT_TRUE(predicate->HasSameOperandsAs(*predicates[bit]))
+                        << "Predicate at index " << i << " is not mutex with predicate at index "
+                        << bit;
+            }
         }
     }
 }
@@ -367,7 +368,7 @@ TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     pbuilder.BuildPredicateSpace(col_data);
 
     // won't be used, just to build some ClueSetBuilder to check generic static fields
-    auto dummy_pli_shard = model::PliShard({}, 0, 1);
+    auto dummy_pli_shard = model::PliShard({}, 0, 0);
     model::SingleClueSetBuilder builder(pbuilder, dummy_pli_shard);
 
     ASSERT_EQ(builder.GetNumberOfBitsInClue(), 18);
@@ -404,7 +405,7 @@ TEST(FastADC, ClueSet) {
     model::ClueSet clue_set = cluebuilder.BuildClueSet(plibuilder.GetPliShards());
 
     for (auto const& [expected_clue, expected_count] : expected_clue_set) {
-        auto found = clue_set.find(std::bitset<64>(expected_clue));
+        auto found = clue_set.find(model::PredicateBitset(expected_clue));
         ASSERT_NE(found, clue_set.end()) << "Expected clue " << expected_clue << " not found!";
         ASSERT_EQ(found->second, expected_count) << "Count mismatch for clue " << expected_clue;
     }
@@ -449,7 +450,7 @@ TEST(FastADC, EvidenceSet) {
 
     auto const& evidence_set = evibuilder.GetEvidenceSet();
 
-    std::unordered_set<std::bitset<64>> expected_set;
+    std::unordered_set<model::PredicateBitset> expected_set;
     for (auto const& expected_vec : expected_evidence_set) {
         expected_set.insert(VectorToBitset(expected_vec));
     }

@@ -8,9 +8,9 @@ namespace model {
 struct Evidence {
     int64_t count;
     Clue clue;
-    Clue evidence;
+    PredicateBitset evidence;
 
-    Evidence(Clue satisfied, int64_t count, Clue const& cardinalityMask,
+    Evidence(Clue satisfied, int64_t count, PredicateBitset const& cardinalityMask,
              std::vector<Clue> const& correctionMap)
         : count(count), clue(satisfied) {
         evidence = cardinalityMask;
