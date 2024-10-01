@@ -12,6 +12,7 @@
 #include "dynamic/bind_dynamic_fd_verification.h"
 #include "fd/bind_fd.h"
 #include "fd/bind_fd_verification.h"
+#include "gfd/bind_gfd_mining.h"
 #include "gfd/bind_gfd_verification.h"
 #include "ind/bind_ind.h"
 #include "md/bind_md.h"
@@ -58,7 +59,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindDynamicFdVerification,
                            BindNdVerification,
                            BindSFD,
-                           BindMd}) {
+                           BindMd,
+                           BindGfdMining}) {
         bind_func(module);
     }
 }
