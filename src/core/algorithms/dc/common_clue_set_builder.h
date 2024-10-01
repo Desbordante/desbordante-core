@@ -92,7 +92,7 @@ public:
     }
 
     /* For tests */
-    static std::vector<Clue> GetCorrectionMap() {
+    static std::vector<PredicateBitset> GetCorrectionMap() {
         return correction_map_;
     }
 
@@ -103,8 +103,8 @@ private:
      */
     static void BuildPredicatePacksAndCorrectionMap(PredicateBuilder const& pBuilder);
 
-    static Clue BuildCorrectionMask(PredicatesSpan group,
-                                    std::initializer_list<OperatorType>& types);
+    static PredicateBitset BuildCorrectionMask(PredicatesSpan group,
+                                               std::initializer_list<OperatorType>& types);
 
     using PackAction = std::function<void(PredicatesSpan, std::vector<PredicatePack>&, size_t&)>;
 
@@ -157,7 +157,7 @@ protected:
     /** Numerical cross-column predicate packs */
     static std::vector<PredicatePack> num_cross_packs_;
     /** Predicate id -> its correction mask */
-    static std::vector<Clue> correction_map_;
+    static std::vector<PredicateBitset> correction_map_;
 };
 
 }  // namespace model
