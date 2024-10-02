@@ -68,6 +68,7 @@ CSVConfig const kIndTest3aryInds = CreateCsvConfig("ind_data/Test-3ary-inds.csv"
 CSVConfig const kIndTestTableFirst = CreateCsvConfig("ind_data/two_tables/first.csv", ',', false);
 CSVConfig const kIndTestTableSecond = CreateCsvConfig("ind_data/two_tables/second.csv", ',', false);
 CSVConfig const kIndTestNulls = CreateCsvConfig("INDTestNulls.csv", ',', true);
+CSVConfig const kIndTestTypos = CreateCsvConfig("ind_data/IndTestTypos.csv", ',', true);
 CSVConfig const kTestZeros = CreateCsvConfig("TestZeros.csv", ',', true);
 CSVConfig const kNullEmpty = CreateCsvConfig("NullEmpty.csv", ',', true);
 CSVConfig const kSimpleTypes = CreateCsvConfig("SimpleTypes.csv", ',', true);
