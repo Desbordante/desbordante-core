@@ -23,6 +23,10 @@ void BindDataTypes(py::module_& main_module) {
     using namespace model;
     py::class_<ColumnCombination>(data_module, "ColumnCombination")
             .def("__str__", &ColumnCombination::ToString)
+            .def("to_index_tuple",
+                 [](ColumnCombination const& cc) {
+                     return py::make_tuple(cc.GetTableIndex(), py::cast(cc.GetColumnIndices()));
+                 })
             .def_property_readonly("table_index", &ColumnCombination::GetTableIndex)
             .def_property_readonly("column_indices", &ColumnCombination::GetColumnIndices);
 }
