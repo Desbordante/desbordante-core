@@ -60,7 +60,7 @@ public:
 
     PredicatePtr GetInverse() const;
 
-    std::vector<PredicatePtr> GetImplications() const;
+    std::vector<PredicatePtr> const& GetImplications() const;
 
     Operator GetOperator() const {
         return op_;
