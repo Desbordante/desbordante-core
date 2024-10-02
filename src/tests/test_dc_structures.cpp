@@ -5,6 +5,7 @@
 
 #include "all_csv_configs.h"
 #include "csv_parser/csv_parser.h"
+#include "dc/approximate_evidence_inverter.h"
 #include "dc/clue_set_builder.h"
 #include "dc/column_operand.h"
 #include "dc/evidence_set_builder.h"
@@ -500,6 +501,39 @@ TEST(FastADC, TransformedEvidenceSetAndMutexMap) {
     std::vector<model::PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
     for (size_t i = 0; i < transfromed_mutex_map.size(); i++) {
         EXPECT_EQ(transfromed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
+    }
+}
+
+struct ToStringComparator {
+    bool operator()(model::DenialConstraint const& a, model::DenialConstraint const& b) const {
+        return a.ToString() < b.ToString();
+    }
+};
+
+TEST(FastADC, DenialConstraints) {
+    CSVParser parser{kTestDC};
+    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    auto col_data = std::move(table->GetColumnData());
+
+    model::PredicateBuilder pbuilder(true);
+    pbuilder.BuildPredicateSpace(col_data);
+
+    model::PliShardBuilder plibuilder;
+    plibuilder.BuildPliShards(col_data);
+
+    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    evibuilder.BuildEvidenceSet();
+
+    model::ApproxEvidenceInverter dcbuilder(pbuilder, 0.01, std::move(evibuilder.GetEvidenceSet()));
+    auto dcs = dcbuilder.BuildDenialConstraints();
+
+    std::vector<model::DenialConstraint> result = std::move(dcs.GetResult());
+    std::set<model::DenialConstraint, ToStringComparator> ordered_result(
+            std::make_move_iterator(result.begin()), std::make_move_iterator(result.end()));
+
+    for (size_t i = 0; i < expected_denial_constraints.size(); i++) {
+        std::string dc = std::next(ordered_result.begin(), i)->ToString();
+        EXPECT_EQ(dc, expected_denial_constraints[i]) << "Unexpected denial constraint: " << dc;
     }
 }
 
