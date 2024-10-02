@@ -60,6 +60,7 @@ extern CSVConfig const kIndTest3aryInds;
 extern CSVConfig const kIndTestTableFirst;
 extern CSVConfig const kIndTestTableSecond;
 extern CSVConfig const kIndTestNulls;
+extern CSVConfig const kIndTestTypos;
 extern CSVConfig const kTestZeros;
 extern CSVConfig const kNullEmpty;
 extern CSVConfig const kSimpleTypes;
