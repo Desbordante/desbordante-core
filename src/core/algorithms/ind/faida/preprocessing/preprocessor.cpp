@@ -1,5 +1,7 @@
 #include "preprocessor.h"
 
+#include <cassert>
+
 #include "algorithms/ind/faida/hashing/hashing.h"
 
 namespace algos::faida {
@@ -7,9 +9,7 @@ namespace algos::faida {
 std::unique_ptr<Preprocessor> Preprocessor::CreateHashedStores(
         std::string const& dataset_name,
         std::vector<std::shared_ptr<model::IDatasetStream>> const& data_streams, int sample_goal) {
-    if (data_streams.empty()) {
-        throw std::runtime_error("Got an empty dataset: IND mining is meaningless.");
-    }
+    assert(!data_streams.empty());
 
     std::vector<std::unique_ptr<AbstractColumnStore>> stores;
     stores.reserve(data_streams.size());
