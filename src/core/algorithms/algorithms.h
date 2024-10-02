@@ -8,6 +8,7 @@
 #include "algorithms/fd/sfd/cords.h"
 #include "algorithms/fd/verification_algorithms.h"
 #include "algorithms/gfd/verification_algorithms.h"
+#include "algorithms/ind/ind_verifier/ind_verifier.h"
 #include "algorithms/ind/mining_algorithms.h"
 #include "algorithms/md/mining_algorithms.h"
 #include "algorithms/metric/verification_algorithms.h"
