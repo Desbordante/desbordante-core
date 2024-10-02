@@ -49,7 +49,7 @@ PredicatePtr Predicate::GetInverse() const {
     return inverse_;
 }
 
-std::vector<PredicatePtr> Predicate::GetImplications() const {
+std::vector<PredicatePtr> const& Predicate::GetImplications() const {
     if (implications_.empty()) {
         auto op_implications = op_.GetImplications();
         for (auto const& op_implication : op_implications) {
