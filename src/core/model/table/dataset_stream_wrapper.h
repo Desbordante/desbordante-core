@@ -38,17 +38,18 @@ private:
 
 public:
     template <typename Stream>
-    explicit DatasetStreamWrapperData(Stream&& stream) requires
-            type_traits::is_ptr_like_v<DatasetStream> ||
-            std::is_base_of_v<IDatasetStream, DatasetStream>
+    explicit DatasetStreamWrapperData(Stream&& stream)
+        requires type_traits::is_ptr_like_v<DatasetStream> ||
+                 std::is_base_of_v<IDatasetStream, DatasetStream>
         : stream_(std::forward<Stream>(stream)) {}
 
     auto operator->() {
         if constexpr (type_traits::is_ptr_like_v<DatasetStream>) {
             if constexpr (std::is_pointer_v<DatasetStream>) {
                 return stream_;
+            } else {
+                return stream_.get();
             }
-            return stream_.get();
         } else {
             return &stream_;
         }
@@ -58,8 +59,9 @@ public:
         if constexpr (type_traits::is_ptr_like_v<DatasetStream>) {
             if constexpr (std::is_pointer_v<DatasetStream>) {
                 return stream_;
+            } else {
+                return stream_.get();
             }
-            return stream_.get();
         } else {
             return &stream_;
         }
