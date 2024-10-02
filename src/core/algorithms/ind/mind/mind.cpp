@@ -166,35 +166,34 @@ std::optional<config::ErrorType> Mind::TestCandidate(RawIND const& raw_ind) {
         return DatasetStreamFixedProjection{table, cc.GetColumnIndices()};
     };
 
-    HashSet const s_hash_set{CreateHashSet(create_projected_stream(raw_ind.rhs))};
+    HashSet const rhs_hash_set{CreateHashSet(create_projected_stream(raw_ind.rhs))};
 
     if (max_ind_error_ == 0) {
-        DatasetStreamFixedProjection r_stream = create_projected_stream(raw_ind.lhs);
-        while (r_stream.HasNextRow()) {
-            if (!s_hash_set.contains(r_stream.GetNextRow())) {
+        DatasetStreamFixedProjection lhs_stream = create_projected_stream(raw_ind.lhs);
+        while (lhs_stream.HasNextRow()) {
+            if (!rhs_hash_set.contains(lhs_stream.GetNextRow())) {
                 return std::nullopt;
             }
         }
         return config::ErrorType{0.0};
     }
 
-    HashSet const r_hash_set{CreateHashSet(create_projected_stream(raw_ind.lhs))};
-
-    auto const r_cardinality = static_cast<model::TupleIndex>(r_hash_set.size());
-    model::TupleIndex const disqualify_row_limit = std::floor(r_cardinality * max_ind_error_) + 1;
+    HashSet const lhs_hash_set{CreateHashSet(create_projected_stream(raw_ind.lhs))};
+    auto const lhs_cardinality = static_cast<model::TupleIndex>(lhs_hash_set.size());
+    model::TupleIndex const disqualify_row_limit = std::floor(lhs_cardinality * max_ind_error_) + 1;
     model::TupleIndex disqualify_row_count = 0;
-    for (Row const& row : r_hash_set) {
-        if (!s_hash_set.contains(row)) {
+    for (Row const& row : lhs_hash_set) {
+        if (!rhs_hash_set.contains(row)) {
             ++disqualify_row_count;
             if (disqualify_row_count == disqualify_row_limit) {
-                assert(static_cast<config::ErrorType>(disqualify_row_count) / r_cardinality >
+                assert(static_cast<config::ErrorType>(disqualify_row_count) / lhs_cardinality >
                        max_ind_error_);
                 return std::nullopt;
             }
         }
     }
 
-    auto const error = static_cast<config::ErrorType>(disqualify_row_count) / r_cardinality;
+    auto const error = static_cast<config::ErrorType>(disqualify_row_count) / lhs_cardinality;
     if (error <= max_ind_error_)
         return error;
     else
