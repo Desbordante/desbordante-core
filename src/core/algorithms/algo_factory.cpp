@@ -55,10 +55,6 @@ void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options) {
             return boost::any{table};
         } else if (option_name == kTables && options.find(std::string{kTables}) == options.end()) {
             auto csv_configs = GetOptionValue<std::vector<CSVConfig>>(options, kCsvConfigs);
-            if (csv_configs.empty()) {
-                throw config::ConfigurationError("Expected collection of csv configs");
-            }
-
             config::InputTables tables;
             tables.reserve(csv_configs.size());
             std::transform(csv_configs.begin(), csv_configs.end(), std::back_inserter(tables),
