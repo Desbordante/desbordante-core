@@ -2,8 +2,7 @@
 
 #include <vector>
 
-#include "predicate.h"
-#include "table/typed_column_data.h"
+#include "../model/predicate.h"
 
 namespace algos::fastadc {
 
@@ -19,11 +18,11 @@ namespace algos::fastadc {
  */
 class PredicateBuilder {
 private:
-    bool IsJoinable(TypedColumnData const& c1, TypedColumnData const& c2);
-    bool IsComparable(TypedColumnData const& c1, TypedColumnData const& c2);
+    bool IsJoinable(model::TypedColumnData const& c1, model::TypedColumnData const& c2);
+    bool IsComparable(model::TypedColumnData const& c1, model::TypedColumnData const& c2);
     void AddAndCategorizePredicate(ColumnOperand const& c1, ColumnOperand const& c2,
                                    bool comparable);
-    void ProcessColumnPair(size_t i, size_t j, std::vector<TypedColumnData> const& input);
+    void ProcessColumnPair(size_t i, size_t j, std::vector<model::TypedColumnData> const& input);
     void CategorizeLastPredicate(bool comparable);
 
     /**
@@ -33,7 +32,7 @@ private:
      * whether we can form menaningful predicates with the current pair
      * by measuring how data in these columns are similar to each other.
      */
-    void BuildAndCategorizePredicates(std::vector<TypedColumnData> const& input);
+    void BuildAndCategorizePredicates(std::vector<model::TypedColumnData> const& input);
     void BuildMutexMap();
     void BuildInverseMap();
 
@@ -83,7 +82,7 @@ public:
 
     // TODO: can we pass just a vector of TypedColumnData, or there should be another table
     // representation?
-    void BuildPredicateSpace(std::vector<TypedColumnData> const& input);
+    void BuildPredicateSpace(std::vector<model::TypedColumnData> const& input);
 
     PredicatesVector const& GetNumSingleColumnPredicates() const noexcept {
         return num_single_column_predicates_;

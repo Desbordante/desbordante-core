@@ -125,7 +125,7 @@ public:
      * Each shard covers a segment of rows defined by `shard_length_`.
      * This method processes the entire table, creating a Pli for each column in each shard.
      */
-    void BuildPliShards(std::vector<TypedColumnData> const& input);
+    void BuildPliShards(std::vector<model::TypedColumnData> const& input);
 
     std::vector<PliShard> const& GetPliShards() const noexcept {
         return pli_shards_;

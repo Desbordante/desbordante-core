@@ -3,7 +3,7 @@
 #include <numeric>
 #include <easylogging++.h>
 
-#include "dc/evidence.h"
+#include "evidence.h"
 
 namespace algos::fastadc {
 

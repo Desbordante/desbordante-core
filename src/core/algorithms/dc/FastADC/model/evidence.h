@@ -1,7 +1,4 @@
-#include <vector>
-#include <easylogging++.h>
-
-#include "dc/common_clue_set_builder.h"
+#include "../util/common_clue_set_builder.h"
 
 namespace algos::fastadc {
 

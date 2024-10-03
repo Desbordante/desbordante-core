@@ -2,12 +2,13 @@
 
 #include <easylogging++.h>
 
-#include "dc/utils.h"
+#include "misc.h"
 
 namespace algos::fastadc {
 
 template <typename T>
-static double GetSharedPercentageTyped(TypedColumnData const& c1, TypedColumnData const& c2) {
+static double GetSharedPercentageTyped(model::TypedColumnData const& c1,
+                                       model::TypedColumnData const& c2) {
     std::unordered_map<T, size_t> freq_map1;
     std::unordered_map<T, size_t> freq_map2;
 
@@ -32,7 +33,7 @@ static double GetSharedPercentageTyped(TypedColumnData const& c1, TypedColumnDat
 }
 
 template <typename T>
-static double CalculateAverageTyped(TypedColumnData const& column) {
+static double CalculateAverageTyped(model::TypedColumnData const& column) {
     double sum = 0.0;
 
     if (column.GetNumRows() == 0) {
@@ -46,15 +47,15 @@ static double CalculateAverageTyped(TypedColumnData const& column) {
     return sum / column.GetNumRows();
 }
 
-double GetSharedPercentage(TypedColumnData const& c1, TypedColumnData const& c2) {
+double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnData const& c2) {
     if (c1.GetColumn() == c2.GetColumn()) return 1.;
 
     switch (c1.GetTypeId()) {
-        case TypeId::kInt:
+        case model::TypeId::kInt:
             return GetSharedPercentageTyped<int64_t>(c1, c2);
-        case TypeId::kDouble:
+        case model::TypeId::kDouble:
             return GetSharedPercentageTyped<double>(c1, c2);
-        case TypeId::kString:
+        case model::TypeId::kString:
             return GetSharedPercentageTyped<std::string>(c1, c2);
         default:
             LOG(DEBUG) << "Column " << c1.GetColumn()->ToString() << " with type "
@@ -64,17 +65,17 @@ double GetSharedPercentage(TypedColumnData const& c1, TypedColumnData const& c2)
     }
 }
 
-double GetAverageRatio(TypedColumnData const& c1, TypedColumnData const& c2) {
+double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData const& c2) {
     if (c1.GetColumn() == c2.GetColumn()) return 1.;
 
     double avg1 = 0.0, avg2 = 0.0;
 
     switch (c1.GetTypeId()) {
-        case TypeId::kInt:
+        case model::TypeId::kInt:
             avg1 = CalculateAverageTyped<int64_t>(c1);
             avg2 = CalculateAverageTyped<int64_t>(c2);
             break;
-        case TypeId::kDouble:
+        case model::TypeId::kDouble:
             avg1 = CalculateAverageTyped<double>(c1);
             avg2 = CalculateAverageTyped<double>(c2);
             break;

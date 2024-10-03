@@ -1,9 +1,9 @@
-#include "dc/pli_shard.h"
+#include "pli_shard.h"
 
 #include <easylogging++.h>
 
-#include "dc/index_provider.h"
-#include "dc/utils.h"
+#include "../misc/misc.h"
+#include "../providers/index_provider.h"
 
 namespace algos::fastadc {
 
@@ -73,28 +73,29 @@ PliShardBuilder::~PliShardBuilder() {
 }
 
 template <typename T>
-static size_t AddValueToHash(TypedColumnData const& column, size_t row) {
+static size_t AddValueToHash(model::TypedColumnData const& column, size_t row) {
     return IndexProvider<T>::GetInstance()->GetIndex(GetValue<T>(column, row));
 }
 
 template <typename T>
-static void ColumnToHashTyped(std::vector<size_t>& hashed_column, TypedColumnData const& column) {
+static void ColumnToHashTyped(std::vector<size_t>& hashed_column,
+                              model::TypedColumnData const& column) {
     for (size_t i = 0; i < column.GetNumRows(); i++) {
         hashed_column[i] = AddValueToHash<T>(column, i);
     }
 }
 
-static std::vector<size_t> ColumnToHash(TypedColumnData const& column) {
+static std::vector<size_t> ColumnToHash(model::TypedColumnData const& column) {
     std::vector<size_t> hashed_column(column.GetNumRows());
 
     switch (column.GetTypeId()) {
-        case TypeId::kInt:
+        case model::TypeId::kInt:
             ColumnToHashTyped<int64_t>(hashed_column, column);
             break;
-        case TypeId::kDouble:
+        case model::TypeId::kDouble:
             ColumnToHashTyped<double>(hashed_column, column);
             break;
-        case TypeId::kString:
+        case model::TypeId::kString:
             ColumnToHashTyped<std::string>(hashed_column, column);
             break;
         default:
@@ -112,19 +113,19 @@ static std::vector<size_t> ColumnToHash(TypedColumnData const& column) {
  * creating table with values as keys (hashes), we need to store all values in the
  * related three Providers and sort them.
  */
-void AddTableToHashAndSortProviders(std::vector<TypedColumnData> const& input) {
+void AddTableToHashAndSortProviders(std::vector<model::TypedColumnData> const& input) {
     for (size_t col = 0; col < input.size(); col++) {
         auto const& column = input[col];
         size_t rows = column.GetNumRows();
 
         switch (column.GetTypeId()) {
-            case TypeId::kInt:
+            case model::TypeId::kInt:
                 for (size_t row = 0; row < rows; row++) AddValueToHash<int64_t>(column, row);
                 break;
-            case TypeId::kDouble:
+            case model::TypeId::kDouble:
                 for (size_t row = 0; row < rows; row++) AddValueToHash<double>(column, row);
                 break;
-            case TypeId::kString:
+            case model::TypeId::kString:
                 for (size_t row = 0; row < rows; row++) AddValueToHash<std::string>(column, row);
                 break;
             default:
@@ -136,7 +137,7 @@ void AddTableToHashAndSortProviders(std::vector<TypedColumnData> const& input) {
     DoubleIndexProvider::GetInstance()->Sort();
 }
 
-void PliShardBuilder::BuildPliShards(std::vector<TypedColumnData> const& input) {
+void PliShardBuilder::BuildPliShards(std::vector<model::TypedColumnData> const& input) {
     size_t cols_num = input.size();
     assert(cols_num != 0);
     std::vector<std::vector<size_t>> hashed_input(cols_num, std::vector<size_t>());

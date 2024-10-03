@@ -1,10 +1,5 @@
 #pragma once
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-
-#include "dc/predicate.h"
+#include "../model/predicate.h"
 #include "dc_candidate.h"
 
 namespace algos::fastadc {
