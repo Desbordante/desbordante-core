@@ -8,33 +8,31 @@
 
 namespace algos::fastadc {
 
-PredicateBuilder::PredicateBuilder(bool allow_different_columns, double minimum_shared_value,
+PredicateBuilder::PredicateBuilder(PredicateProvider* predicate_provider,
+                                   PredicateIndexProvider* predicate_index_provider,
+                                   bool allow_cross_columns, double minimum_shared_value,
                                    double comparable_threshold)
-    : allow_cross_columns_(allow_different_columns),
+    : allow_cross_columns_(allow_cross_columns),
       minimum_shared_value_(minimum_shared_value),
-      comparable_threshold_(comparable_threshold) {
-    PredicateProvider::CreateInstance();
-    PredicateIndexProvider::CreateInstance();
-}
-
-PredicateBuilder::~PredicateBuilder() {
-    PredicateProvider::ClearInstance();
-    PredicateIndexProvider::ClearInstance();
+      comparable_threshold_(comparable_threshold),
+      predicate_index_provider(predicate_index_provider),
+      predicate_provider(predicate_provider) {
+    assert(predicate_index_provider);
+    assert(predicate_provider);
 }
 
 void PredicateBuilder::BuildPredicateSpace(std::vector<model::TypedColumnData> const& input) {
     BuildAndCategorizePredicates(input);
 
-    // Populate global PredicateIndexProvider with built predicates.
-    PredicateIndexProvider::GetInstance()->AddAll(predicates_);
+    predicate_index_provider->AddAll(predicates_);
     BuildMutexMap();
     BuildInverseMap();
 
     LOG(DEBUG) << " [Predicate] Predicate space size: " << predicates_.size();
 }
 
-static size_t PredIdx(PredicatePtr const& p) {
-    return PredicateIndexProvider::GetInstance()->GetIndex(p);
+size_t PredicateBuilder::PredIdx(PredicatePtr const& p) {
+    return predicate_index_provider->GetIndex(p);
 }
 
 void PredicateBuilder::BuildMutexMap() {
@@ -51,7 +49,7 @@ void PredicateBuilder::BuildInverseMap() {
     inverse_map_.resize(predicates_.size());
 
     for (auto const& p1 : predicates_) {
-        inverse_map_[PredIdx(p1)] = PredIdx(p1->GetInverse());
+        inverse_map_[PredIdx(p1)] = PredIdx(p1->GetInverse(predicate_provider));
     }
 }
 
@@ -101,7 +99,7 @@ void PredicateBuilder::AddAndCategorizePredicate(ColumnOperand const& left,
                 comparable || op == OperatorType::kEqual || op == OperatorType::kUnequal;
 
         if (should_add_predicate) {
-            predicates_.push_back(GetPredicate(Operator(op), left, right));
+            predicates_.push_back(predicate_provider->GetPredicate(Operator(op), left, right));
             CategorizeLastPredicate(comparable);
         }
     }

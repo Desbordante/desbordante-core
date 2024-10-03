@@ -5,35 +5,35 @@
 #include <vector>
 
 #include "../model/predicate.h"
-#include "base_provider.h"
 
 namespace algos::fastadc {
 
 /**
- * @brief Singleton manager of unique indices for a collection of objects.
+ * @brief Manager of unique indices for a collection of objects.
  *
  * This template class assigns a unique index to each distinct object added to it and maintains
  * a bidirectional mapping between objects and their indices.
  */
 template <std::totally_ordered<> T>
-class IndexProvider : public BaseProvider<IndexProvider<T>> {
+class IndexProvider {
 private:
     size_t next_index_ = 0;
     std::vector<T> objects_;
     std::unordered_map<T, size_t> indexes_;
 
-    friend BaseProvider<IndexProvider<T>>;
-
-    static std::string ClassName() {
-        return "IndexProvider";
-    }
-
-    static void Clear() {
-        BaseProvider<IndexProvider<T>>::instance_->objects_.clear();
-        BaseProvider<IndexProvider<T>>::instance_->indexes_.clear();
+    void Clear() {
+        objects_.clear();
+        indexes_.clear();
+        next_index_ = 0;
     }
 
 public:
+    IndexProvider() = default;
+    IndexProvider(IndexProvider const&) = delete;
+    IndexProvider& operator=(IndexProvider const&) = delete;
+    IndexProvider(IndexProvider&&) = default;
+    IndexProvider& operator=(IndexProvider&&) = default;
+
     size_t GetIndex(T object);
 
     void AddAll(std::vector<T> const& objects);

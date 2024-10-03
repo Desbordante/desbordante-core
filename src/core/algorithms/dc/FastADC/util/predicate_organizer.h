@@ -56,8 +56,9 @@ public:
     boost::dynamic_bitset<> Retransform(boost::dynamic_bitset<> const& bitset) const {
         boost::dynamic_bitset<> valid{64};
 
-        for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = bitset.find_next(i)) {
-            valid.set(indexes_[i]); //indexes_[i] is <= than number of predicates
+        for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
+             i = bitset.find_next(i)) {
+            valid.set(indexes_[i]);  // indexes_[i] is <= than number of predicates
         }
 
         return valid;

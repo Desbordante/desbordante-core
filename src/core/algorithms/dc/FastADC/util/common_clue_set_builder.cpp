@@ -14,13 +14,14 @@ std::vector<PredicatePack> CommonClueSetBuilder::num_cross_packs_;
 std::vector<PredicateBitset> CommonClueSetBuilder::correction_map_;
 
 PredicateBitset CommonClueSetBuilder::BuildCorrectionMask(
-        PredicatesSpan group, std::initializer_list<OperatorType>& types) {
+        PredicatesSpan group, std::initializer_list<OperatorType>& types,
+        PredicateIndexProvider* provider) {
     PredicateBitset mask;
 
     for (auto& p : group) {
         if (std::any_of(types.begin(), types.end(),
                         [p](OperatorType type) { return p->GetOperator() == type; })) {
-            auto index = PredicateIndexProvider::GetInstance()->GetIndex(p);
+            auto index = provider->GetIndex(p);
 
             if (index < mask.size()) {
                 mask.set(index);
@@ -39,7 +40,8 @@ PredicateBitset CommonClueSetBuilder::BuildCorrectionMask(
 void CommonClueSetBuilder::BuildPacksAndCorrectionMap(PredicatesVector const& predicates,
                                                       size_t group_size, PackAction action,
                                                       std::vector<PredicatePack>& pack,
-                                                      size_t& count) {
+                                                      size_t& count,
+                                                      PredicateIndexProvider* provider) {
     assert(predicates.size() % group_size == 0);
     size_t num_groups = predicates.size() / group_size;
 
@@ -47,14 +49,15 @@ void CommonClueSetBuilder::BuildPacksAndCorrectionMap(PredicatesVector const& pr
         size_t base_index = i * group_size;
         PredicatesSpan group_span(predicates.begin() + base_index, group_size);
 
-        action(group_span, pack, count);
+        action(group_span, pack, count, provider);
     }
 }
 
 void CommonClueSetBuilder::BuildNumPacks(PredicatesVector const& predicates,
-                                         std::vector<PredicatePack>& pack, size_t& count) {
+                                         std::vector<PredicatePack>& pack, size_t& count,
+                                         PredicateIndexProvider* provider) {
     PackAction action = [](PredicatesSpan group_span, std::vector<PredicatePack>& pack,
-                           size_t& count) {
+                           size_t& count, PredicateIndexProvider* provider) {
         PredicatePtr eq = GetPredicateByType(group_span, OperatorType::kEqual);
         PredicatePtr gt = GetPredicateByType(group_span, OperatorType::kGreater);
         static std::initializer_list<OperatorType> eq_list = {
@@ -64,31 +67,32 @@ void CommonClueSetBuilder::BuildNumPacks(PredicatesVector const& predicates,
                 OperatorType::kLess, OperatorType::kGreater, OperatorType::kLessEqual,
                 OperatorType::kGreaterEqual};
 
-        correction_map_[count] = BuildCorrectionMask(group_span, eq_list);
-        correction_map_[count + 1] = BuildCorrectionMask(group_span, gt_list);
+        correction_map_[count] = BuildCorrectionMask(group_span, eq_list, provider);
+        correction_map_[count + 1] = BuildCorrectionMask(group_span, gt_list, provider);
 
         pack.emplace_back(eq, count, gt, count + 1);
         count += 2;
     };
 
-    BuildPacksAndCorrectionMap(predicates, 6, action, pack, count);
+    BuildPacksAndCorrectionMap(predicates, 6, action, pack, count, provider);
 }
 
 void CommonClueSetBuilder::BuildCatPacks(PredicatesVector const& predicates,
-                                         std::vector<PredicatePack>& pack, size_t& count) {
+                                         std::vector<PredicatePack>& pack, size_t& count,
+                                         PredicateIndexProvider* provider) {
     PackAction action = [](PredicatesSpan group_span, std::vector<PredicatePack>& pack,
-                           size_t& count) {
+                           size_t& count, PredicateIndexProvider* provider) {
         PredicatePtr eq = GetPredicateByType(group_span, OperatorType::kEqual);
         static std::initializer_list<OperatorType> eq_list = {OperatorType::kEqual,
                                                               OperatorType::kUnequal};
 
-        correction_map_[count] = BuildCorrectionMask(group_span, eq_list);
+        correction_map_[count] = BuildCorrectionMask(group_span, eq_list, provider);
 
         pack.emplace_back(eq, count);
         count++;
     };
 
-    BuildPacksAndCorrectionMap(predicates, 2, action, pack, count);
+    BuildPacksAndCorrectionMap(predicates, 2, action, pack, count, provider);
 }
 
 void CommonClueSetBuilder::BuildPredicatePacksAndCorrectionMap(PredicateBuilder const& pBuilder) {
@@ -109,10 +113,11 @@ void CommonClueSetBuilder::BuildPredicatePacksAndCorrectionMap(PredicateBuilder 
     correction_map_.resize(cat_single.size() / 2 + cat_cross.size() / 2 +
                            2 * num_single.size() / 6 + 2 * num_cross.size() / 6);
 
-    BuildCatPacks(cat_single, str_single_packs_, count);
-    BuildCatPacks(cat_cross, str_cross_packs_, count);
-    BuildNumPacks(num_single, num_single_packs_, count);
-    BuildNumPacks(num_cross, num_cross_packs_, count);
+    auto* provider = pBuilder.predicate_index_provider;
+    BuildCatPacks(cat_single, str_single_packs_, count, provider);
+    BuildCatPacks(cat_cross, str_cross_packs_, count, provider);
+    BuildNumPacks(num_single, num_single_packs_, count, provider);
+    BuildNumPacks(num_cross, num_cross_packs_, count, provider);
 
     LOG(DEBUG) << "  [CLUE] # of bits in clue: " << count;
     assert(count <= 64);

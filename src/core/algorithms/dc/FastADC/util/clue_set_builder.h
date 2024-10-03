@@ -12,7 +12,11 @@ namespace algos::fastadc {
  */
 class ClueSetBuilder {
 public:
-    ClueSetBuilder(PredicateBuilder const& pbuilder) : predicate_builder_(pbuilder){};
+    ClueSetBuilder(PredicateBuilder const& pbuilder) : predicate_builder_(pbuilder) {};
+    ClueSetBuilder(ClueSetBuilder const& other) = delete;
+    ClueSetBuilder& operator=(ClueSetBuilder const& other) = delete;
+    ClueSetBuilder(ClueSetBuilder&& other) noexcept = default;
+    ClueSetBuilder& operator=(ClueSetBuilder&& other) noexcept = delete;
 
     ClueSet BuildClueSet(std::vector<PliShard> const& pliShards) {
         ClueSet clue_set;

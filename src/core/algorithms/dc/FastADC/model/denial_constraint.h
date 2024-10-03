@@ -14,10 +14,14 @@ private:
 public:
     explicit DenialConstraint(PredicateSet const& predicateSet) : predicate_set_(predicateSet) {}
 
-    DenialConstraint(boost::dynamic_bitset<> const& predicates) : predicate_set_(predicates) {}
+    DenialConstraint(boost::dynamic_bitset<> const& predicates,
+                     PredicateIndexProvider* predicate_index_provider)
+        : predicate_set_(predicates, predicate_index_provider) {
+        assert(predicate_index_provider);
+    }
 
-    DenialConstraint GetInvT1T2DC() const {
-        return DenialConstraint(predicate_set_.GetInvTS());
+    DenialConstraint GetInvT1T2DC(PredicateProvider* predicate_provider) const {
+        return DenialConstraint(predicate_set_.GetInvTS(predicate_provider));
     }
 
     PredicateSet const& GetPredicateSet() const {
