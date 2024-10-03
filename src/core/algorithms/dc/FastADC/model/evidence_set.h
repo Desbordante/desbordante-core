@@ -1,6 +1,7 @@
 #pragma once
 
 #include <numeric>
+
 #include <easylogging++.h>
 
 #include "evidence.h"

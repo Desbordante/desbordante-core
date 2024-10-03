@@ -2,9 +2,6 @@
 
 #include <easylogging++.h>
 
-#include "../misc/misc.h"
-#include "../providers/index_provider.h"
-
 namespace algos::fastadc {
 
 Pli::Pli(std::vector<Cluster> raw_clusters, std::vector<size_t> keys,
@@ -60,32 +57,19 @@ std::string PliShard::ToString() const {
     return ss.str();
 }
 
-PliShardBuilder::PliShardBuilder(size_t shard_length) : shard_length_(shard_length) {
-    IntIndexProvider::CreateInstance();
-    DoubleIndexProvider::CreateInstance();
-    StringIndexProvider::CreateInstance();
+PliShardBuilder::PliShardBuilder(IntIndexProvider* int_provider,
+                                 DoubleIndexProvider* double_provider,
+                                 StringIndexProvider* string_provider, size_t shard_length)
+    : shard_length_(shard_length),
+      int_provider_(int_provider),
+      double_provider_(double_provider),
+      string_provider_(string_provider) {
+    assert(int_provider_);
+    assert(double_provider_);
+    assert(string_provider_);
 }
 
-PliShardBuilder::~PliShardBuilder() {
-    IntIndexProvider::ClearInstance();
-    DoubleIndexProvider::ClearInstance();
-    StringIndexProvider::ClearInstance();
-}
-
-template <typename T>
-static size_t AddValueToHash(model::TypedColumnData const& column, size_t row) {
-    return IndexProvider<T>::GetInstance()->GetIndex(GetValue<T>(column, row));
-}
-
-template <typename T>
-static void ColumnToHashTyped(std::vector<size_t>& hashed_column,
-                              model::TypedColumnData const& column) {
-    for (size_t i = 0; i < column.GetNumRows(); i++) {
-        hashed_column[i] = AddValueToHash<T>(column, i);
-    }
-}
-
-static std::vector<size_t> ColumnToHash(model::TypedColumnData const& column) {
+std::vector<size_t> PliShardBuilder::ColumnToHash(model::TypedColumnData const& column) {
     std::vector<size_t> hashed_column(column.GetNumRows());
 
     switch (column.GetTypeId()) {
@@ -113,7 +97,8 @@ static std::vector<size_t> ColumnToHash(model::TypedColumnData const& column) {
  * creating table with values as keys (hashes), we need to store all values in the
  * related three Providers and sort them.
  */
-void AddTableToHashAndSortProviders(std::vector<model::TypedColumnData> const& input) {
+void PliShardBuilder::AddTableToHashAndSortProviders(
+        std::vector<model::TypedColumnData> const& input) {
     for (size_t col = 0; col < input.size(); col++) {
         auto const& column = input[col];
         size_t rows = column.GetNumRows();
@@ -133,8 +118,8 @@ void AddTableToHashAndSortProviders(std::vector<model::TypedColumnData> const& i
         }
     }
 
-    IntIndexProvider::GetInstance()->Sort();
-    DoubleIndexProvider::GetInstance()->Sort();
+    int_provider_->Sort();
+    double_provider_->Sort();
 }
 
 void PliShardBuilder::BuildPliShards(std::vector<model::TypedColumnData> const& input) {
@@ -149,7 +134,7 @@ void PliShardBuilder::BuildPliShards(std::vector<model::TypedColumnData> const& 
     size_t row_beg = 0, row_end = input[0].GetNumRows();
     size_t shards_num = (row_end - row_beg - 1) / shard_length_ + 1;
 
-    pli_shards_.reserve(shards_num);
+    pli_shards.reserve(shards_num);
 
     for (size_t i = 0; i < shards_num; i++) {
         size_t shard_beg = row_beg + i * shard_length_;
@@ -164,7 +149,7 @@ void PliShardBuilder::BuildPliShards(std::vector<model::TypedColumnData> const& 
             }
         }
 
-        pli_shards_.emplace_back(plis, shard_beg, shard_end);
+        pli_shards.emplace_back(plis, shard_beg, shard_end);
     }
 }
 
