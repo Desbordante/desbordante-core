@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "../providers/index_provider.h"
 #include "predicate_builder.h"
 
 namespace algos::fastadc {
@@ -104,9 +105,11 @@ private:
     static void BuildPredicatePacksAndCorrectionMap(PredicateBuilder const& pBuilder);
 
     static PredicateBitset BuildCorrectionMask(PredicatesSpan group,
-                                               std::initializer_list<OperatorType>& types);
+                                               std::initializer_list<OperatorType>& types,
+                                               PredicateIndexProvider* provider);
 
-    using PackAction = std::function<void(PredicatesSpan, std::vector<PredicatePack>&, size_t&)>;
+    using PackAction = std::function<void(PredicatesSpan, std::vector<PredicatePack>&, size_t&,
+                                          PredicateIndexProvider*)>;
 
     /**
      * Splits vector @predicates by groups of @group_size, applies @action to them
@@ -116,7 +119,7 @@ private:
      */
     static void BuildPacksAndCorrectionMap(PredicatesVector const& predicates, size_t group_size,
                                            PackAction action, std::vector<PredicatePack>& pack,
-                                           size_t& count);
+                                           size_t& count, PredicateIndexProvider* provider);
 
     /**
      * Processes numerical single-column predicates from a flat list, where each group
@@ -125,7 +128,7 @@ private:
      * "flatten([[6 preds], [6 preds], ..., [6 preds]])"
      */
     static void BuildNumPacks(PredicatesVector const& predicates, std::vector<PredicatePack>& pack,
-                              size_t& count);
+                              size_t& count, PredicateIndexProvider* provider);
 
     /**
      * Processes categorical single-column predicates from a flat list, where each group
@@ -133,7 +136,7 @@ private:
      * one after another, like "flatten([[2 preds], [2 preds], ..., [2 preds]])"
      */
     static void BuildCatPacks(PredicatesVector const& predicates, std::vector<PredicatePack>& pack,
-                              size_t& count);
+                              size_t& count, PredicateIndexProvider* provider);
 
 protected:
     template <typename... Vectors>

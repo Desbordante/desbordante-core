@@ -10,9 +10,9 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
+#include "../model/evidence_set.h"
 #include "dc_candidate_trie.h"
 #include "denial_constraint_set.h"
-#include "../model/evidence_set.h"
 #include "predicate_organizer.h"
 
 namespace algos::fastadc {
@@ -40,14 +40,21 @@ public:
           evi_count_(evidence_set.GetTotalCount()),
           target_(static_cast<int64_t>(std::ceil((1 - threshold) * evi_count_))),
           organizer_(n_predicates_, std::move(evidence_set), std::move(pbuilder.GetMutexMap())),
-          approx_covers_(n_predicates_) {
+          approx_covers_(n_predicates_),
+          predicate_provider_(pbuilder.predicate_provider),
+          predicate_index_provider_(pbuilder.predicate_index_provider) {
         LOG(DEBUG) << " [AEI] Violate at most " << evi_count_ - target_ << " tuple pairs";
         evidences_ = organizer_.TransformEvidenceSet();
         mutex_map_ = organizer_.TransformMutexMap();
     }
 
+    ApproxEvidenceInverter(ApproxEvidenceInverter const& other) = delete;
+    ApproxEvidenceInverter& operator=(ApproxEvidenceInverter const& other) = delete;
+    ApproxEvidenceInverter(ApproxEvidenceInverter&& other) noexcept = default;
+    ApproxEvidenceInverter& operator=(ApproxEvidenceInverter&& other) noexcept = default;
+
     DenialConstraintSet BuildDenialConstraints() {
-        if (target_ == 0) return {};
+        if (target_ == 0) return {predicate_provider_};
 
         std::sort(evidences_.begin(), evidences_.end(),
                   [](Evidence const& o1, Evidence const& o2) { return o2.count < o1.count; });
@@ -61,8 +68,9 @@ public:
 
         LOG(DEBUG) << "  [AEI] Min cover size: " << raw_dcs.size();
 
-        DenialConstraintSet constraints;
-        for (auto const& raw_dc : raw_dcs) constraints.Add(DenialConstraint(raw_dc));
+        DenialConstraintSet constraints(predicate_provider_);
+        for (auto const& raw_dc : raw_dcs)
+            constraints.Add(DenialConstraint(raw_dc, predicate_index_provider_));
 
         LOG(DEBUG) << "  [AEI] Total DC size: " << constraints.TotalDCSize();
 
@@ -81,6 +89,8 @@ private:
     std::vector<PredicateBitset> mutex_map_;
     PredicateOrganizer organizer_;
     DCCandidateTrie approx_covers_;
+    PredicateProvider* predicate_provider_;
+    PredicateIndexProvider* predicate_index_provider_;
 
     struct SearchNode {
         size_t e;
@@ -213,8 +223,7 @@ private:
         for (; e < evidences_.size(); ++e) {
             if (!(IsSubset(dc, evidences_[e].evidence))) {
                 target -= evidences_[e].count;
-                if (target <= 0)
-                    return true;
+                if (target <= 0) return true;
             }
         }
         return false;

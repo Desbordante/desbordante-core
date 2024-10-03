@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "common_clue_set_builder.h"
 #include "../model/pli_shard.h"
+#include "common_clue_set_builder.h"
 
 namespace algos::fastadc {
 
@@ -13,6 +13,10 @@ namespace algos::fastadc {
 class SingleClueSetBuilder : public CommonClueSetBuilder {
 public:
     SingleClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard);
+    SingleClueSetBuilder(SingleClueSetBuilder const& other) = delete;
+    SingleClueSetBuilder& operator=(SingleClueSetBuilder const& other) = delete;
+    SingleClueSetBuilder(SingleClueSetBuilder&& other) noexcept = default;
+    SingleClueSetBuilder& operator=(SingleClueSetBuilder&& other) noexcept = delete;
 
     ClueSet BuildClueSet() override;
 

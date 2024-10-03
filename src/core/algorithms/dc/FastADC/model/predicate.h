@@ -11,7 +11,9 @@ namespace algos::fastadc {
 class Predicate;
 using PredicatePtr = Predicate const*;
 using PredicatesVector = std::vector<PredicatePtr>;
-using PredicatesSpan = std::span<const PredicatePtr>;
+using PredicatesSpan = std::span<PredicatePtr const>;
+
+class PredicateProvider;
 /*
  * TODO: Java code uses LongBitSet, which is like boost::dynamic_bitset, but
  * restructs number of bits in the clue to 64. Need to investigate further whether
@@ -52,13 +54,13 @@ public:
     // FIXME: mb pass some table representation other than vector of columns data?
     bool Satisfies(std::vector<model::TypedColumnData>& col_data, size_t t, size_t s) const;
 
-    PredicatePtr GetSymmetric() const;
+    PredicatePtr GetSymmetric(PredicateProvider* provider) const;
 
-    PredicatePtr GetInvTS() const;
+    PredicatePtr GetInvTS(PredicateProvider* provider) const;
 
-    PredicatePtr GetInverse() const;
+    PredicatePtr GetInverse(PredicateProvider* provider) const;
 
-    std::vector<PredicatePtr> const& GetImplications() const;
+    std::vector<PredicatePtr> const& GetImplications(PredicateProvider* provider) const;
 
     Operator GetOperator() const {
         return op_;
@@ -92,9 +94,6 @@ public:
         return l_.ToString() + " " + op_.ToString() + " " + r_.ToString();
     }
 };
-
-/** Create predicate object and return pointer to it or obtain it from cache */
-PredicatePtr GetPredicate(Operator const& op, ColumnOperand const& l, ColumnOperand const& r);
 
 PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type);
 
