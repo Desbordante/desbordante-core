@@ -37,7 +37,7 @@ PredicatePtr Predicate::GetSymmetric() const {
 
 PredicatePtr Predicate::GetInvTS() const {
     if (!inv_TS_) {
-        inv_TS_ = GetPredicate(op_, r_.GetInvTS(), l_.GetInvTS());
+        inv_TS_ = GetPredicate(op_, l_.GetInvTS(), r_.GetInvTS());
     }
     return inv_TS_;
 }
