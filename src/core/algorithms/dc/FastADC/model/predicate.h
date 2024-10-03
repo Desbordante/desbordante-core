@@ -2,8 +2,6 @@
 
 #include <span>
 
-#include <boost/functional/hash.hpp>
-
 #include "column_operand.h"
 #include "operator.h"
 #include "table/typed_column_data.h"
@@ -104,8 +102,8 @@ PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type);
 
 namespace std {
 template <>
-struct hash<model::Predicate> {
-    size_t operator()(model::Predicate const& k) const noexcept {
+struct hash<algos::fastadc::Predicate> {
+    size_t operator()(algos::fastadc::Predicate const& k) const noexcept {
         std::size_t seed = 0;
         boost::hash_combine(seed, k.GetOperator());
         boost::hash_combine(seed, k.GetLeftOperand());
@@ -114,10 +112,4 @@ struct hash<model::Predicate> {
     }
 };
 
-template <>
-struct hash<std::shared_ptr<model::Predicate>> {
-    size_t operator()(std::shared_ptr<model::Predicate> const& k) const {
-        return std::hash<model::Predicate>()(*k);
-    }
-};
 };  // namespace std

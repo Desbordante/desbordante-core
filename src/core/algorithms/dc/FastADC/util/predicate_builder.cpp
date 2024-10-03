@@ -2,10 +2,9 @@
 
 #include <easylogging++.h>
 
-#include "index_provider.h"
-#include "operator.h"
-#include "predicate_provider.h"
-#include "typed_column_data_value_differences.h"
+#include "../misc/typed_column_data_value_differences.h"
+#include "../providers/index_provider.h"
+#include "../providers/predicate_provider.h"
 
 namespace algos::fastadc {
 
@@ -23,7 +22,7 @@ PredicateBuilder::~PredicateBuilder() {
     PredicateIndexProvider::ClearInstance();
 }
 
-void PredicateBuilder::BuildPredicateSpace(std::vector<TypedColumnData> const& input) {
+void PredicateBuilder::BuildPredicateSpace(std::vector<model::TypedColumnData> const& input) {
     BuildAndCategorizePredicates(input);
 
     // Populate global PredicateIndexProvider with built predicates.
@@ -31,7 +30,7 @@ void PredicateBuilder::BuildPredicateSpace(std::vector<TypedColumnData> const& i
     BuildMutexMap();
     BuildInverseMap();
 
-    LOG(DEBUG) <<" [Predicate] Predicate space size: " <<predicates_.size();
+    LOG(DEBUG) << " [Predicate] Predicate space size: " << predicates_.size();
 }
 
 static size_t PredIdx(PredicatePtr const& p) {
@@ -56,7 +55,8 @@ void PredicateBuilder::BuildInverseMap() {
     }
 }
 
-void PredicateBuilder::BuildAndCategorizePredicates(std::vector<TypedColumnData> const& input) {
+void PredicateBuilder::BuildAndCategorizePredicates(
+        std::vector<model::TypedColumnData> const& input) {
     size_t columns_num = input.size();
     predicates_.reserve((columns_num * (columns_num + 1)) / 2);
 
@@ -68,7 +68,7 @@ void PredicateBuilder::BuildAndCategorizePredicates(std::vector<TypedColumnData>
 }
 
 void PredicateBuilder::ProcessColumnPair(size_t i, size_t j,
-                                         std::vector<TypedColumnData> const& input) {
+                                         std::vector<model::TypedColumnData> const& input) {
     bool joinable = IsJoinable(input[i], input[j]);
     bool comparable = IsComparable(input[i], input[j]);
 
@@ -107,7 +107,8 @@ void PredicateBuilder::AddAndCategorizePredicate(ColumnOperand const& left,
     }
 }
 
-bool PredicateBuilder::IsJoinable(TypedColumnData const& c1, TypedColumnData const& c2) {
+bool PredicateBuilder::IsJoinable(model::TypedColumnData const& c1,
+                                  model::TypedColumnData const& c2) {
     if (!allow_cross_columns_) return c1.GetColumn() == c2.GetColumn();
 
     if (c1.GetTypeId() != c2.GetTypeId()) return false;
@@ -116,7 +117,8 @@ bool PredicateBuilder::IsJoinable(TypedColumnData const& c1, TypedColumnData con
     return GetSharedPercentage(c1, c2) > minimum_shared_value_;
 }
 
-bool PredicateBuilder::IsComparable(TypedColumnData const& c1, TypedColumnData const& c2) {
+bool PredicateBuilder::IsComparable(model::TypedColumnData const& c1,
+                                    model::TypedColumnData const& c2) {
     if (!allow_cross_columns_) return c1.GetColumn() == c2.GetColumn() && (c1.IsNumeric());
 
     if (c1.GetTypeId() != c2.GetTypeId()) return false;

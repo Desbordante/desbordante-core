@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "dc/common_clue_set_builder.h"
-#include "dc/pli_shard.h"
+#include "common_clue_set_builder.h"
+#include "../model/pli_shard.h"
 
 namespace algos::fastadc {
 

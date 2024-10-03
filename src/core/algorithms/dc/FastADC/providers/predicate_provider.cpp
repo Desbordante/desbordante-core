@@ -1,7 +1,4 @@
-#include "dc/predicate_provider.h"
-
-#include "dc/column_operand.h"
-#include "dc/operator.h"
+#include "predicate_provider.h"
 
 namespace algos::fastadc {
 

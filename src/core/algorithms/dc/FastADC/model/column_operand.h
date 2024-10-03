@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/functional/hash.hpp>
-
 #include "table/column.h"
 
 namespace algos::fastadc {
@@ -56,15 +54,15 @@ public:
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
-size_t hash_value(model::ColumnOperand const& k) noexcept;
+size_t hash_value(ColumnOperand const& k) noexcept;
 // NOLINTEND(readability-identifier-naming)
 
 }  // namespace algos::fastadc
 
 namespace std {
 template <>
-struct hash<model::ColumnOperand> {
-    size_t operator()(model::ColumnOperand const& k) const noexcept {
+struct hash<algos::fastadc::ColumnOperand> {
+    size_t operator()(algos::fastadc::ColumnOperand const& k) const noexcept {
         size_t seed = 0;
         boost::hash_combine(seed, k.GetColumn()->GetIndex());
         boost::hash_combine(seed, k.GetTuple());

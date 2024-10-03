@@ -1,6 +1,7 @@
-#include "dc/predicate.h"
 
-#include "dc/predicate_provider.h"
+#include "predicate.h"
+
+#include "../providers/predicate_provider.h"
 
 namespace algos::fastadc {
 
@@ -16,11 +17,11 @@ PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type) {
 }
 
 bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, size_t t, size_t s) const {
-    TypedColumnData const& lhs = col_data[l_.GetColumn()->GetIndex()];
-    TypedColumnData const& rhs = col_data[r_.GetColumn()->GetIndex()];
+    model::TypedColumnData const& lhs = col_data[l_.GetColumn()->GetIndex()];
+    model::TypedColumnData const& rhs = col_data[r_.GetColumn()->GetIndex()];
 
     // Assumes that types in both columns are the same (and they should)
-    Type const& type = lhs.GetType();
+    model::Type const& type = lhs.GetType();
 
     std::byte const* l_val = lhs.GetValue(l_.GetTuple() ? t : s);
     std::byte const* r_val = rhs.GetValue(r_.GetTuple() ? t : s);

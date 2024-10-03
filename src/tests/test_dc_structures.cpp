@@ -4,26 +4,26 @@
 #include <gtest/gtest.h>
 
 #include "all_csv_configs.h"
+#include "create_type.h"
 #include "csv_parser/csv_parser.h"
-#include "dc/approximate_evidence_inverter.h"
-#include "dc/clue_set_builder.h"
-#include "dc/column_operand.h"
-#include "dc/evidence_set_builder.h"
-#include "dc/operator.h"
-#include "dc/pli_shard.h"
-#include "dc/predicate.h"
-#include "dc/predicate_builder.h"
-#include "dc/predicate_organizer.h"
-#include "dc/single_clue_set_builder.h"
-#include "dc/utils.h"
+#include "dc/FastADC/model/denial_constraint.h"
+#include "dc/FastADC/model/operator.h"
+#include "dc/FastADC/model/pli_shard.h"
+#include "dc/FastADC/util/approximate_evidence_inverter.h"
+#include "dc/FastADC/util/clue_set_builder.h"
+#include "dc/FastADC/util/evidence_set_builder.h"
+#include "dc/FastADC/util/predicate_builder.h"
+#include "dc/FastADC/util/predicate_organizer.h"
+#include "dc/FastADC/util/single_clue_set_builder.h"
+#include "dc/FastADC/misc/misc.h"
+#include "int_type.h"
+#include "string_type.h"
 #include "table/column_layout_typed_relation_data.h"
-#include "table/typed_column_data.h"
 #include "test_dc_structures_correct_results.h"
 
 namespace tests {
 
-namespace fs = std::filesystem;
-namespace mo = model;
+using namespace algos::fastadc;
 
 class TestOperatorInt : public ::testing::Test {
 private:
@@ -31,17 +31,16 @@ private:
     std::unique_ptr<std::byte[]> right_owner_;
 
 protected:
-    std::unique_ptr<mo::IntType> type_;
+    std::unique_ptr<model::IntType> type_;
     std::byte* left_ptr_;
     std::byte* right_ptr_;
-    std::array<mo::Operator, 6> all_operators_ = {
-            {mo::Operator(mo::OperatorType::kEqual), mo::Operator(mo::OperatorType::kUnequal),
-             mo::Operator(mo::OperatorType::kGreater), mo::Operator(mo::OperatorType::kLess),
-             mo::Operator(mo::OperatorType::kGreaterEqual),
-             mo::Operator(mo::OperatorType::kLessEqual)}};
+    std::array<Operator, 6> all_operators_ = {
+            {Operator(OperatorType::kEqual), Operator(OperatorType::kUnequal),
+             Operator(OperatorType::kGreater), Operator(OperatorType::kLess),
+             Operator(OperatorType::kGreaterEqual), Operator(OperatorType::kLessEqual)}};
 
     void SetUp() override {
-        type_ = std::make_unique<mo::IntType>();
+        type_ = std::make_unique<model::IntType>();
         left_owner_.reset(type_->MakeValue(0));
         right_owner_.reset(type_->MakeValue(0));
         left_ptr_ = left_owner_.get();
@@ -49,13 +48,13 @@ protected:
     }
 
     void SetVals(int left, int right) {
-        mo::Type::GetValue<int>(left_ptr_) = left;
-        mo::Type::GetValue<int>(right_ptr_) = right;
+        model::Type::GetValue<int>(left_ptr_) = left;
+        model::Type::GetValue<int>(right_ptr_) = right;
     }
 };
 
 TEST_F(TestOperatorInt, Equal) {
-    mo::Operator op(mo::OperatorType::kEqual);
+    Operator op(OperatorType::kEqual);
 
     auto test = [&](int l, int r, bool res) {
         this->SetVals(l, r);
@@ -68,7 +67,7 @@ TEST_F(TestOperatorInt, Equal) {
 }
 
 TEST_F(TestOperatorInt, Greater) {
-    mo::Operator op(mo::OperatorType::kGreater);
+    Operator op(OperatorType::kGreater);
 
     auto test = [&](int l, int r, bool res) {
         this->SetVals(l, r);
@@ -198,14 +197,14 @@ TEST_F(TestOperatorInt, Transitives) {
 }
 
 TEST(TestOperatorString, Compare) {
-    std::unique_ptr<mo::Type> type(mo::CreateType(mo::TypeId::kString, true));
-    mo::StringType const* s = static_cast<mo::StringType const*>(type.get());
+    std::unique_ptr<model::Type> type(CreateType(model::TypeId::kString, true));
+    model::StringType const* s = static_cast<model::StringType const*>(type.get());
 
-    mo::Operator eq(mo::OperatorType::kEqual);
-    mo::Operator neq(mo::OperatorType::kUnequal);
+    Operator eq(OperatorType::kEqual);
+    Operator neq(OperatorType::kUnequal);
 
-    auto test = [&](std::string l, std::string r, bool res, mo::Operator& op) {
-        using Owner = std::unique_ptr<std::byte[], mo::StringTypeDeleter>;
+    auto test = [&](std::string l, std::string r, bool res, Operator& op) {
+        using Owner = std::unique_ptr<std::byte[], model::StringTypeDeleter>;
 
         Owner l_owner(s->MakeValue(l), s->GetDeleter());
         Owner r_owner(s->MakeValue(r), s->GetDeleter());
@@ -225,22 +224,22 @@ TEST(TestOperatorString, Compare) {
 TEST(Predicate, PredicateCreatesCorrectly) {
     CSVParser parser{kTmpDC};
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
-            mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
+            model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
     // Hack for the required singleton classes to be created (for the sake of test simplicity)
-    mo::PredicateBuilder builder(true);
+    PredicateBuilder builder(true);
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
 
-    mo::PredicatePtr s_a_less_t_b =
-            mo::GetPredicate(mo::Operator(mo::OperatorType::kLess), mo::ColumnOperand(first, true),
-                             mo::ColumnOperand(second, false));
+    PredicatePtr s_a_less_t_b =
+            GetPredicate(Operator(OperatorType::kLess), ColumnOperand(first, true),
+                         ColumnOperand(second, false));
 
     EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 0, 1));
     EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 1, 0));
 
-    mo::PredicatePtr s_a_neq_t_a =
-            GetPredicate(mo::Operator(mo::OperatorType::kUnequal), mo::ColumnOperand(first, true),
-                         mo::ColumnOperand(first, false));
+    PredicatePtr s_a_neq_t_a =
+            GetPredicate(Operator(OperatorType::kUnequal), ColumnOperand(first, true),
+                         ColumnOperand(first, false));
 
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 0, 1));
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 1, 0));
@@ -249,9 +248,9 @@ TEST(Predicate, PredicateCreatesCorrectly) {
 TEST(FastADC, DifferentColumnPredicateSpace) {
     CSVParser parser{kTestDC};
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
-            mo::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    std::vector<mo::TypedColumnData> col_data = std::move(table->GetColumnData());
-    mo::PredicateBuilder builder(true);
+            model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
+    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
+    PredicateBuilder builder(true);
 
     auto check_preds = [](auto const& actual, auto const& expected, std::string const& name) {
         ASSERT_EQ(actual.size(), expected.size())
@@ -281,7 +280,7 @@ TEST(FastADC, InverseAndMutexMaps) {
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
             model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
-    model::PredicateBuilder builder(true);
+    PredicateBuilder builder(true);
 
     builder.BuildPredicateSpace(col_data);
 
@@ -316,9 +315,9 @@ template <typename T>
 void AssertClusterValues(model::TypedColumnData const& column, std::vector<size_t> const& cluster) {
     ASSERT_FALSE(cluster.empty()) << "Cluster is unexpectedly empty.";
 
-    auto expected = model::GetValue<T>(column, cluster.front());
+    auto expected = GetValue<T>(column, cluster.front());
     for (auto row_index : cluster) {
-        auto actual = model::GetValue<T>(column, row_index);
+        auto actual = GetValue<T>(column, row_index);
         ASSERT_EQ(expected, actual) << "Mismatch in cluster for key at row " << row_index;
     }
 }
@@ -327,7 +326,7 @@ TEST(FastADC, PliShards) {
     CSVParser parser{kTestDC};
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
-    model::PliShardBuilder builder;
+    PliShardBuilder builder;
 
     builder.BuildPliShards(col_data);
     auto& pli_shards = builder.GetPliShards();
@@ -344,13 +343,13 @@ TEST(FastADC, PliShards) {
                 if (cluster.size() <= 1) continue;
 
                 switch (column.GetTypeId()) {
-                    case mo::TypeId::kInt:
+                    case model::TypeId::kInt:
                         AssertClusterValues<int64_t>(column, cluster);
                         break;
-                    case mo::TypeId::kDouble:
+                    case model::TypeId::kDouble:
                         AssertClusterValues<double>(column, cluster);
                         break;
-                    case mo::TypeId::kString:
+                    case model::TypeId::kString:
                         AssertClusterValues<std::string>(column, cluster);
                         break;
                     default:
@@ -365,13 +364,13 @@ TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     CSVParser parser{kTestDC};
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
 
     pbuilder.BuildPredicateSpace(col_data);
 
     // won't be used, just to build some ClueSetBuilder to check generic static fields
-    auto dummy_pli_shard = model::PliShard({}, 0, 0);
-    model::SingleClueSetBuilder builder(pbuilder, dummy_pli_shard);
+    auto dummy_pli_shard = PliShard({}, 0, 0);
+    SingleClueSetBuilder builder(pbuilder, dummy_pli_shard);
 
     ASSERT_EQ(builder.GetNumberOfBitsInClue(), 18);
     auto packs = builder.GetPredicatePacks();
@@ -396,18 +395,18 @@ TEST(FastADC, ClueSet) {
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
 
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
     pbuilder.BuildPredicateSpace(col_data);
 
-    model::ClueSetBuilder cluebuilder(pbuilder);
+    ClueSetBuilder cluebuilder(pbuilder);
 
-    model::PliShardBuilder plibuilder;
+    PliShardBuilder plibuilder;
     plibuilder.BuildPliShards(col_data);
 
-    model::ClueSet clue_set = cluebuilder.BuildClueSet(plibuilder.GetPliShards());
+    ClueSet clue_set = cluebuilder.BuildClueSet(plibuilder.GetPliShards());
 
     for (auto const& [expected_clue, expected_count] : expected_clue_set) {
-        auto found = clue_set.find(model::PredicateBitset(expected_clue));
+        auto found = clue_set.find(PredicateBitset(expected_clue));
         ASSERT_NE(found, clue_set.end()) << "Expected clue " << expected_clue << " not found!";
         ASSERT_EQ(found->second, expected_count) << "Count mismatch for clue " << expected_clue;
     }
@@ -425,13 +424,13 @@ TEST(FastADC, CardinalityMask) {
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
 
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
     pbuilder.BuildPredicateSpace(col_data);
 
-    model::PliShardBuilder plibuilder;
+    PliShardBuilder plibuilder;
     plibuilder.BuildPliShards(col_data);
 
-    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
 
     EXPECT_EQ(evibuilder.GetCardinalityMask(), VectorToBitset(expected_cardinality_mask));
 }
@@ -441,18 +440,18 @@ TEST(FastADC, EvidenceSet) {
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
 
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
     pbuilder.BuildPredicateSpace(col_data);
 
-    model::PliShardBuilder plibuilder;
+    PliShardBuilder plibuilder;
     plibuilder.BuildPliShards(col_data);
 
-    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
     evibuilder.BuildEvidenceSet();
 
     auto const& evidence_set = evibuilder.GetEvidenceSet();
 
-    std::unordered_set<model::PredicateBitset> expected_set;
+    std::unordered_set<PredicateBitset> expected_set;
     for (auto const& expected_vec : expected_evidence_set) {
         expected_set.insert(VectorToBitset(expected_vec));
     }
@@ -472,22 +471,21 @@ TEST(FastADC, TransformedEvidenceSetAndMutexMap) {
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
 
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
     pbuilder.BuildPredicateSpace(col_data);
 
-    model::PliShardBuilder plibuilder;
+    PliShardBuilder plibuilder;
     plibuilder.BuildPliShards(col_data);
 
-    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
     evibuilder.BuildEvidenceSet();
 
-    model::PredicateOrganizer organizer(pbuilder.PredicateCount(),
-                                        std::move(evibuilder.GetEvidenceSet()),
-                                        std::move(pbuilder.GetMutexMap()));
+    PredicateOrganizer organizer(pbuilder.PredicateCount(), std::move(evibuilder.GetEvidenceSet()),
+                                 std::move(pbuilder.GetMutexMap()));
 
-    std::vector<model::Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
+    std::vector<Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
 
-    std::unordered_set<model::PredicateBitset> expected;
+    std::unordered_set<PredicateBitset> expected;
     for (auto const& expected_vec : expected_transformed_evidence_set) {
         expected.insert(VectorToBitset(expected_vec));
     }
@@ -498,14 +496,14 @@ TEST(FastADC, TransformedEvidenceSetAndMutexMap) {
                 << "Unexpected evidence: " << actual_evidence;
     }
 
-    std::vector<model::PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
+    std::vector<PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
     for (size_t i = 0; i < transfromed_mutex_map.size(); i++) {
         EXPECT_EQ(transfromed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
     }
 }
 
 struct ToStringComparator {
-    bool operator()(model::DenialConstraint const& a, model::DenialConstraint const& b) const {
+    bool operator()(DenialConstraint const& a, DenialConstraint const& b) const {
         return a.ToString() < b.ToString();
     }
 };
@@ -515,20 +513,20 @@ TEST(FastADC, DenialConstraints) {
     auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     auto col_data = std::move(table->GetColumnData());
 
-    model::PredicateBuilder pbuilder(true);
+    PredicateBuilder pbuilder(true);
     pbuilder.BuildPredicateSpace(col_data);
 
-    model::PliShardBuilder plibuilder;
+    PliShardBuilder plibuilder;
     plibuilder.BuildPliShards(col_data);
 
-    model::EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
+    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
     evibuilder.BuildEvidenceSet();
 
-    model::ApproxEvidenceInverter dcbuilder(pbuilder, 0.01, std::move(evibuilder.GetEvidenceSet()));
+    ApproxEvidenceInverter dcbuilder(pbuilder, 0.01, std::move(evibuilder.GetEvidenceSet()));
     auto dcs = dcbuilder.BuildDenialConstraints();
 
-    std::vector<model::DenialConstraint> result = std::move(dcs.GetResult());
-    std::set<model::DenialConstraint, ToStringComparator> ordered_result(
+    std::vector<DenialConstraint> result = std::move(dcs.GetResult());
+    std::set<DenialConstraint, ToStringComparator> ordered_result(
             std::make_move_iterator(result.begin()), std::make_move_iterator(result.end()));
 
     for (size_t i = 0; i < expected_denial_constraints.size(); i++) {

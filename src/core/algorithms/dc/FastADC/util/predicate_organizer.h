@@ -1,11 +1,6 @@
 #pragma once
-#include <algorithm>
-#include <cassert>
-#include <numeric>
-#include <vector>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
-#include "evidence_set.h"
+#include "../model/evidence_set.h"
 
 namespace algos::fastadc {
 
