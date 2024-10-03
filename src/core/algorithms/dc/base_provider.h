@@ -3,7 +3,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace model {
+namespace algos::fastadc {
 
 class PredicateBuilder;
 class PliShardBuilder;
@@ -54,4 +54,4 @@ public:
 template <typename Derived>
 std::shared_ptr<Derived> BaseProvider<Derived>::instance_ = nullptr;
 
-}  // namespace model
+}  // namespace algos::fastadc

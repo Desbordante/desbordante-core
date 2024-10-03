@@ -4,7 +4,7 @@
 
 #include <easylogging++.h>
 
-namespace model {
+namespace algos::fastadc {
 
 template <std::totally_ordered<> T>
 size_t IndexProvider<T>::GetIndex(T object) {
@@ -44,4 +44,4 @@ template class IndexProvider<PredicatePtr>;
 template class IndexProvider<int64_t>;
 template class IndexProvider<double>;
 template class IndexProvider<std::string>;
-}  // namespace model
+}  // namespace algos::fastadc

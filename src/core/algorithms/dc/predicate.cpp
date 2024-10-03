@@ -2,7 +2,7 @@
 
 #include "dc/predicate_provider.h"
 
-namespace model {
+namespace algos::fastadc {
 
 PredicatePtr GetPredicate(Operator const& op, ColumnOperand const& l, ColumnOperand const& r) {
     return PredicateProvider::GetInstance()->GetPredicate(op, l, r);
@@ -59,4 +59,4 @@ std::vector<PredicatePtr> const& Predicate::GetImplications() const {
     return implications_;
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

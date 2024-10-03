@@ -7,7 +7,7 @@
 #include "predicate_provider.h"
 #include "typed_column_data_value_differences.h"
 
-namespace model {
+namespace algos::fastadc {
 
 PredicateBuilder::PredicateBuilder(bool allow_different_columns, double minimum_shared_value,
                                    double comparable_threshold)
@@ -125,4 +125,4 @@ bool PredicateBuilder::IsComparable(TypedColumnData const& c1, TypedColumnData c
     return c1.IsNumeric() && GetAverageRatio(c1, c2) > comparable_threshold_;
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

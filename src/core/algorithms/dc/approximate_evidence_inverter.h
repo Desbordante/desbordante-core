@@ -15,7 +15,7 @@
 #include "evidence_set.h"
 #include "predicate_organizer.h"
 
-namespace model {
+namespace algos::fastadc {
 
 boost::dynamic_bitset<>& operator&=(boost::dynamic_bitset<>& lhs, PredicateBitset const& rhs) {
     size_t rhs_size = rhs.size();
@@ -237,4 +237,4 @@ private:
     }
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

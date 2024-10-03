@@ -8,7 +8,7 @@
 #include "operator.h"
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos::fastadc {
 
 class Predicate;
 using PredicatePtr = Predicate const*;
@@ -100,7 +100,7 @@ PredicatePtr GetPredicate(Operator const& op, ColumnOperand const& l, ColumnOper
 
 PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type);
 
-}  // namespace model
+}  // namespace algos::fastadc
 
 namespace std {
 template <>

@@ -1,6 +1,6 @@
 #include "cross_clue_set_builder.h"
 
-namespace model {
+namespace algos::fastadc {
 
 CrossClueSetBuilder::CrossClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard1,
                                          PliShard const& shard2)
@@ -177,4 +177,4 @@ void CrossClueSetBuilder::CorrectNumCross(std::vector<Clue>& forwardArray, Pli c
     }
 }
 
-}  // namespace model
+}  // namespace algos::fastadc
