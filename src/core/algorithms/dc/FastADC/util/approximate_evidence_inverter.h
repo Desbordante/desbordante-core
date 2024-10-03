@@ -12,7 +12,7 @@
 
 #include "dc_candidate_trie.h"
 #include "denial_constraint_set.h"
-#include "evidence_set.h"
+#include "../model/evidence_set.h"
 #include "predicate_organizer.h"
 
 namespace algos::fastadc {

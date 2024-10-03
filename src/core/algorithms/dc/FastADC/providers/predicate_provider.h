@@ -1,9 +1,7 @@
 #pragma once
 
-#include "dc/base_provider.h"
-#include "dc/column_operand.h"
-#include "operator.h"
-#include "predicate.h"
+#include "../model/predicate.h"
+#include "base_provider.h"
 
 namespace algos::fastadc {
 

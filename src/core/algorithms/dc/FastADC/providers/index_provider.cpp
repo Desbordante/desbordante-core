@@ -1,8 +1,4 @@
-#include "dc/index_provider.h"
-
-#include <algorithm>
-
-#include <easylogging++.h>
+#include "index_provider.h"
 
 namespace algos::fastadc {
 

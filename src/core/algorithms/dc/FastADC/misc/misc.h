@@ -1,6 +1,6 @@
 #pragma once
 
-#include "table/typed_column_data.h"
+#include "model/table/typed_column_data.h"
 
 namespace algos::fastadc {
 
@@ -11,8 +11,8 @@ struct DependentFalse : std::false_type {};
 }  // namespace
 
 template <typename T>
-[[nodiscard]] inline T const& GetValue(TypedColumnData const& column, size_t row) {
-    Type const& type = column.GetType();
+[[nodiscard]] inline T const& GetValue(model::TypedColumnData const& column, size_t row) {
+    model::Type const& type = column.GetType();
 
     if (!column.IsNullOrEmpty(row)) {
         return type.GetValue<T>(column.GetValue(row));
@@ -20,23 +20,22 @@ template <typename T>
 
     /*
      * Mimicking the Java behavior:
-     * https://github.com/ol-imorozko/FastADC/blob/c5e51f8864c225f13496ddb6aa4dbd4d79c30783/src/main/java/de/metanome/algorithms/dcfinder/input/Column.java#L71
+     * https://github.com/RangerShaw/FastADC/blob/master/src/main/java/de/metanome/algorithms/dcfinder/input/Column.java#L71
      *
-     *     public Long getLong(int line) {
-     *         return values.get(line).isEmpty() ? Long.MIN_VALUE :
-     *                 Long.parseLong(values.get(line));
-     *     }
+     * public Long getLong(int line) {
+     *     return values.get(line).isEmpty() ? Long.MIN_VALUE :
+     *             Long.parseLong(values.get(line));
+     * }
      *
-     *     public Double getDouble(int line) {
-     *         return values.get(line).isEmpty() ? Double.MIN_VALUE :
-     *                Double.parseDouble(values.get(line));
-     *     }
+     * public Double getDouble(int line) {
+     *     return values.get(line).isEmpty() ? Double.MIN_VALUE :
+     *            Double.parseDouble(values.get(line));
+     * }
      *
-     *     public String getString(int line) {
-     *         return values.get(line) == null ? "" : values.get(line);
-     *     }
+     * public String getString(int line) {
+     *     return values.get(line) == null ? "" : values.get(line);
+     * }
      */
-
     if constexpr (std::is_same_v<T, std::string>) {
         static std::string const kEmptyStr = "";
         return kEmptyStr;
