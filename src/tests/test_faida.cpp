@@ -25,7 +25,7 @@ protected:
     static std::unique_ptr<algos::INDAlgorithm> CreateFaidaInstance(CSVConfigs const& csv_configs,
                                                                     Config const& config) {
         using namespace config::names;
-        return algos::CreateAndLoadAlgorithm<algos::Mind>(algos::StdParamsMap{
+        return algos::CreateAndLoadAlgorithm<algos::Faida>(algos::StdParamsMap{
                 {kCsvConfigs, csv_configs},
                 {kSampleSize, config.sample_size},
                 {kHllAccuracy, config.hll_accuracy},
