@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <boost/dynamic_bitset.hpp>
 
-namespace model {
+namespace algos::fastadc {
 class NTreeSearch {
 public:
     NTreeSearch() = default;
@@ -59,4 +59,4 @@ private:
         return nullptr;
     }
 };
-}  // namespace model
+}  // namespace algos::fastadc

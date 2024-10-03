@@ -1,6 +1,6 @@
 #include "dc_candidate_trie.h"
 
-namespace model {
+namespace algos::fastadc {
 
 DCCandidateTrie::DCCandidateTrie(size_t max_subtrees) : max_subtrees_(max_subtrees) {
     subtrees_.resize(max_subtrees_);
@@ -108,4 +108,4 @@ void DCCandidateTrie::ForEach(std::function<void(DCCandidate const&)> const& con
     }
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

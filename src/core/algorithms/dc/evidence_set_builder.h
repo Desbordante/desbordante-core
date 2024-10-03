@@ -5,7 +5,7 @@
 #include "dc/clue_set_builder.h"
 #include "dc/evidence_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * Creates EvidenceSet, which is just a vector of evidences with some extra methods
@@ -49,4 +49,4 @@ private:
     EvidenceSet evidence_set_;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

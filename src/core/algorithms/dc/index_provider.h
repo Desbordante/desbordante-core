@@ -7,7 +7,7 @@
 #include "dc/base_provider.h"
 #include "dc/predicate.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * @brief Singleton manager of unique indices for a collection of objects.
@@ -54,4 +54,4 @@ using IntIndexProvider = IndexProvider<int64_t>;
 using DoubleIndexProvider = IndexProvider<double>;
 using StringIndexProvider = IndexProvider<std::string>;
 
-}  // namespace model
+}  // namespace algos::fastadc

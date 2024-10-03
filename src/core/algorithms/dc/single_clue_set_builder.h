@@ -5,7 +5,7 @@
 #include "dc/common_clue_set_builder.h"
 #include "dc/pli_shard.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * Constructs a clue set for a single PLI shard.
@@ -36,4 +36,4 @@ private:
                          Clue const& eqMask, Clue const& gtMask);
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

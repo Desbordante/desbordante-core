@@ -5,7 +5,7 @@
 #include "index_provider.h"
 #include "operator.h"
 
-namespace model {
+namespace algos::fastadc {
 
 // Define static members
 std::vector<PredicatePack> CommonClueSetBuilder::str_single_packs_;
@@ -119,4 +119,4 @@ void CommonClueSetBuilder::BuildPredicatePacksAndCorrectionMap(PredicateBuilder 
     assert(count <= 64);
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

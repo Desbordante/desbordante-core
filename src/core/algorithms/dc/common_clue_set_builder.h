@@ -4,7 +4,7 @@
 
 #include "predicate_builder.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /* Maximum supported number of bits in clue is 64 */
 using Clue = std::bitset<64>;
@@ -160,4 +160,4 @@ protected:
     static std::vector<PredicateBitset> correction_map_;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

@@ -1,6 +1,6 @@
 #include "algorithms/dc/operator.h"
 
-namespace model {
+namespace algos::fastadc {
 
 bool Operator::Eval(std::byte const* v1, std::byte const* v2, Type const& type) const {
     CompareResult cr = type.Compare(v1, v2);
@@ -89,4 +89,4 @@ size_t hash_value(model::Operator const& k) noexcept {
     return std::hash<model::Operator>()(k);
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

@@ -1,6 +1,6 @@
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * Computes the shared percentage of values between two columns of the same type.
@@ -29,4 +29,4 @@ double GetSharedPercentage(TypedColumnData const& c1, TypedColumnData const& c2)
  */
 double GetAverageRatio(TypedColumnData const& c1, TypedColumnData const& c2);
 
-}  // namespace model
+}  // namespace algos::fastadc

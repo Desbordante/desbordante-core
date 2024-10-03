@@ -8,7 +8,7 @@
 #include "predicate.h"
 #include "predicate_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 class Closure {
 private:
@@ -138,4 +138,4 @@ private:
     }
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

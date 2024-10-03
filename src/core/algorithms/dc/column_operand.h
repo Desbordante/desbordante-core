@@ -4,7 +4,7 @@
 
 #include "table/column.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * @brief Represents a column operand within a predicate for FastADC.
@@ -59,7 +59,7 @@ public:
 size_t hash_value(model::ColumnOperand const& k) noexcept;
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace model
+}  // namespace algos::fastadc
 
 namespace std {
 template <>

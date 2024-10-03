@@ -4,7 +4,7 @@
 
 #include "dc/utils.h"
 
-namespace model {
+namespace algos::fastadc {
 
 template <typename T>
 static double GetSharedPercentageTyped(TypedColumnData const& c1, TypedColumnData const& c2) {
@@ -86,4 +86,4 @@ double GetAverageRatio(TypedColumnData const& c1, TypedColumnData const& c2) {
     return std::min(avg1, avg2) / std::max(avg1, avg2);
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

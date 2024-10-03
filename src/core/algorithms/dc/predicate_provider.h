@@ -5,7 +5,7 @@
 #include "operator.h"
 #include "predicate.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * @brief Singleton storage for Predicate objects.
@@ -42,4 +42,4 @@ public:
                               ColumnOperand const& right);
 };
 
-}  // namespace model
+}  // namespace algos::fastadc
