@@ -10,7 +10,8 @@ bool DCCandidateTrie::Add(DCCandidate const& add_dc) {
     boost::dynamic_bitset<> const& bitset = add_dc.bitset;
     DCCandidateTrie* tree_node = this;
 
-    for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos; i = bitset.find_next(i)) {
+    for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
+         i = bitset.find_next(i)) {
         auto& subtree = tree_node->subtrees_[i];
         if (!subtree) {
             subtree = std::make_unique<DCCandidateTrie>(max_subtrees_);

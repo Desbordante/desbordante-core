@@ -4,7 +4,7 @@ namespace algos::fastadc {
 
 struct Evidence {
     int64_t count;
-    Clue clue;
+    Clue clue;  // TODO: why?
     PredicateBitset evidence;
 
     Evidence(Clue satisfied, int64_t count, PredicateBitset const& cardinalityMask,

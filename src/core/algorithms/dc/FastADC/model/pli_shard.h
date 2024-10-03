@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "../misc/misc.h"
+#include "../providers/index_provider.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {
@@ -107,17 +109,46 @@ struct PliShard {
 class PliShardBuilder {
 private:
     size_t shard_length_;
-    std::vector<PliShard> pli_shards_;
     Pli BuildPli(std::vector<size_t> const& col_values, bool is_num, size_t beg, size_t end);
 
+    IntIndexProvider* int_provider_;
+    DoubleIndexProvider* double_provider_;
+    StringIndexProvider* string_provider_;
+
+    template <typename T>
+    size_t AddValueToHash(model::TypedColumnData const& column, size_t row) {
+        if constexpr (std::is_same_v<T, int64_t>)
+            return int_provider_->GetIndex(GetValue<int64_t>(column, row));
+        else if constexpr (std::is_same_v<T, double>)
+            return double_provider_->GetIndex(GetValue<double>(column, row));
+        else if constexpr (std::is_same_v<T, std::string>)
+            return string_provider_->GetIndex(GetValue<std::string>(column, row));
+        else
+            static_assert(DependentFalse<T>::value, "PliShardBuilder does not unsupport that type");
+    }
+
+    template <typename T>
+    void ColumnToHashTyped(std::vector<size_t>& hashed_column,
+                           model::TypedColumnData const& column) {
+        for (size_t i = 0; i < column.GetNumRows(); i++) {
+            hashed_column[i] = AddValueToHash<T>(column, i);
+        }
+    }
+
+    std::vector<size_t> ColumnToHash(model::TypedColumnData const& column);
+
+    void AddTableToHashAndSortProviders(std::vector<model::TypedColumnData> const& input);
+
 public:
+    std::vector<PliShard> pli_shards;
+
     PliShardBuilder(PliShardBuilder const& other) = delete;
     PliShardBuilder& operator=(PliShardBuilder const& other) = delete;
     PliShardBuilder(PliShardBuilder&& other) noexcept = default;
     PliShardBuilder& operator=(PliShardBuilder&& other) noexcept = default;
-    ~PliShardBuilder();
 
-    PliShardBuilder(size_t shard_length = 350);
+    PliShardBuilder(IntIndexProvider* int_provider, DoubleIndexProvider* double_provider,
+                    StringIndexProvider* string_provider, size_t shard_length = 350);
 
     /**
      * Construct PliShards from the provided table data.
@@ -126,10 +157,6 @@ public:
      * This method processes the entire table, creating a Pli for each column in each shard.
      */
     void BuildPliShards(std::vector<model::TypedColumnData> const& input);
-
-    std::vector<PliShard> const& GetPliShards() const noexcept {
-        return pli_shards_;
-    };
 };
 
 }  // namespace algos::fastadc

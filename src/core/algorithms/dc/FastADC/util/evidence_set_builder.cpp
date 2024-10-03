@@ -5,13 +5,13 @@
 namespace algos::fastadc {
 
 void EvidenceSetBuilder::BuildCardinalityMask(PredicateBuilder const& pBuilder) {
-    auto add_predicate_to_mask = [this](PredicatesSpan group_span,
-                                        std::initializer_list<OperatorType> types) {
+    auto add_predicate_to_mask = [&](PredicatesSpan group_span,
+                                     std::initializer_list<OperatorType> types) {
         for (auto& predicate : group_span) {
             if (std::any_of(types.begin(), types.end(), [&predicate](OperatorType type) {
                     return predicate->GetOperator() == type;
                 })) {
-                size_t index = PredicateIndexProvider::GetInstance()->GetIndex(predicate);
+                size_t index = pBuilder.predicate_index_provider->GetIndex(predicate);
                 if (index < cardinality_mask_.size()) {
                     cardinality_mask_.set(index);
                 } else {

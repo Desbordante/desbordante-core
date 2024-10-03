@@ -12,32 +12,33 @@ namespace algos::fastadc {
  */
 class EvidenceSetBuilder {
 public:
-    EvidenceSetBuilder(PredicateBuilder const& pbuilder, std::vector<PliShard> const& pli_shards) {
-        ClueSetBuilder cluebuilder(pbuilder);
+    EvidenceSet evidence_set;
 
-        clue_set_ = cluebuilder.BuildClueSet(pli_shards);
+    EvidenceSetBuilder(PredicateBuilder const& pbuilder, std::vector<PliShard> const& pli_shards) {
+        clue_set_ = ClueSetBuilder{pbuilder}.BuildClueSet(pli_shards);
         correction_map_ = CommonClueSetBuilder::GetCorrectionMap();
         BuildCardinalityMask(pbuilder);
     }
 
+    EvidenceSetBuilder(EvidenceSetBuilder const& other) = delete;
+    EvidenceSetBuilder& operator=(EvidenceSetBuilder const& other) = delete;
+    EvidenceSetBuilder(EvidenceSetBuilder&& other) noexcept = default;
+    EvidenceSetBuilder& operator=(EvidenceSetBuilder&& other) noexcept = default;
+
     void BuildEvidenceSet() {
-        evidence_set_.Reserve(clue_set_.size());
+        evidence_set.Reserve(clue_set_.size());
 
         for (auto const& [clue, count] : clue_set_) {
-            evidence_set_.EmplaceBack(clue, count, cardinality_mask_, correction_map_);
+            evidence_set.EmplaceBack(clue, count, cardinality_mask_, correction_map_);
         }
 
-        LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set_.Size();
-        LOG(DEBUG) << " [Evidence] Accumulated evidence count: " << evidence_set_.GetTotalCount();
+        LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set.Size();
+        LOG(DEBUG) << " [Evidence] Accumulated evidence count: " << evidence_set.GetTotalCount();
     }
 
     // For tests
     PredicateBitset const& GetCardinalityMask() const {
         return cardinality_mask_;
-    }
-
-    EvidenceSet&& GetEvidenceSet() {
-        return std::move(evidence_set_);
     }
 
 private:
@@ -46,7 +47,6 @@ private:
     ClueSet clue_set_;
     std::vector<PredicateBitset> correction_map_;
     PredicateBitset cardinality_mask_;
-    EvidenceSet evidence_set_;
 };
 
 }  // namespace algos::fastadc

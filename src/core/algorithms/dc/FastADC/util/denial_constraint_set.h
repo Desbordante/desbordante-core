@@ -25,6 +25,7 @@ class DenialConstraintSet {
 private:
     std::unordered_set<DenialConstraint> constraints_;
     std::vector<DenialConstraint> result_;
+    PredicateProvider* predicate_provider_;
 
     struct MinimalDCCandidate {
         DenialConstraint const* dc = nullptr;
@@ -61,7 +62,15 @@ private:
     };
 
 public:
-    DenialConstraintSet() = default;
+    DenialConstraintSet(PredicateProvider* predicate_provider)
+        : predicate_provider_(predicate_provider) {
+        assert(predicate_provider);
+    }
+
+    DenialConstraintSet(DenialConstraintSet const& other) = delete;
+    DenialConstraintSet& operator=(DenialConstraintSet const& other) = delete;
+    DenialConstraintSet(DenialConstraintSet&& other) noexcept = default;
+    DenialConstraintSet& operator=(DenialConstraintSet&& other) noexcept = default;
 
     bool Contains(DenialConstraint const& dc) const {
         return constraints_.contains(dc);
@@ -96,7 +105,7 @@ public:
         // Construct closures for each denial constraint
         for (auto const& dc : constraints_) {
             PredicateSet predicate_set = dc.GetPredicateSet();
-            Closure closure(predicate_set);
+            Closure closure(predicate_set, predicate_provider_);
             if (closure.Construct()) {
                 MinimalDCCandidate candidate(dc);
                 PredicateSet closure_set = closure.GetClosure();
@@ -122,9 +131,9 @@ public:
                 continue;
             }
 
-            DenialConstraint inv = candidate.dc->GetInvT1T2DC();
+            DenialConstraint inv = candidate.dc->GetInvT1T2DC(predicate_provider_);
             if (inv.GetPredicateSet().Size() > 0) {
-                Closure inv_closure(inv.GetPredicateSet());
+                Closure inv_closure(inv.GetPredicateSet(), predicate_provider_);
                 if (!inv_closure.Construct()) {
                     continue;
                 }

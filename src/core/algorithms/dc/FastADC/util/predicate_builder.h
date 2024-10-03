@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "../model/predicate.h"
+#include "../providers/index_provider.h"
 
 namespace algos::fastadc {
 
@@ -35,6 +36,7 @@ private:
     void BuildAndCategorizePredicates(std::vector<model::TypedColumnData> const& input);
     void BuildMutexMap();
     void BuildInverseMap();
+    size_t PredIdx(PredicatePtr const& p);
 
     bool allow_cross_columns_;
     double minimum_shared_value_;
@@ -52,11 +54,13 @@ private:
     std::vector<size_t> inverse_map_;
 
 public:
+    PredicateIndexProvider* predicate_index_provider;
+    PredicateProvider* predicate_provider;
+
     PredicateBuilder(PredicateBuilder const& other) = delete;
     PredicateBuilder& operator=(PredicateBuilder const& other) = delete;
     PredicateBuilder(PredicateBuilder&& other) noexcept = default;
     PredicateBuilder& operator=(PredicateBuilder&& other) noexcept = default;
-    ~PredicateBuilder();
 
     /**
      * Constructs a PredicateBuilder with specified configuration parameters.
@@ -77,8 +81,9 @@ public:
      * operators (<, <=, >, >=) to be generated between them.
      * It's expressed as a fraction between 0 and 1.
      */
-    PredicateBuilder(bool allow_cross_columns, double minimum_shared_value = 0.3,
-                     double comparable_threshold = 0.1);
+    PredicateBuilder(PredicateProvider* predicate_provider,
+                     PredicateIndexProvider* predicate_index_provider, bool allow_cross_columns,
+                     double minimum_shared_value = 0.3, double comparable_threshold = 0.1);
 
     // TODO: can we pass just a vector of TypedColumnData, or there should be another table
     // representation?
