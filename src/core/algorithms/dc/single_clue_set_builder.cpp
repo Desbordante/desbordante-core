@@ -1,6 +1,6 @@
 #include "single_clue_set_builder.h"
 
-namespace model {
+namespace algos::fastadc {
 
 SingleClueSetBuilder::SingleClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard)
     : plis_(shard.plis),
@@ -140,4 +140,4 @@ void SingleClueSetBuilder::CorrectNumCross(std::vector<Clue>& clues, Pli const& 
     }
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

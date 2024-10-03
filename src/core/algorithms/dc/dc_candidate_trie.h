@@ -7,7 +7,7 @@
 #include "dc/predicate.h"
 #include "dc_candidate.h"
 
-namespace model {
+namespace algos::fastadc {
 class DCCandidateTrie {
 public:
     explicit DCCandidateTrie(size_t max_subtrees);
@@ -39,4 +39,4 @@ private:
 
     bool NoSubtree() const;
 };
-}  // namespace model
+}  // namespace algos::fastadc

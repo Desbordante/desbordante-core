@@ -8,7 +8,7 @@
 #include "index_provider.h"
 #include "predicate.h"
 
-namespace model {
+namespace algos::fastadc {
 
 class PredicateSet {
 private:
@@ -131,7 +131,7 @@ public:
     std::string ToString() const;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc
 
 namespace std {
 template <>

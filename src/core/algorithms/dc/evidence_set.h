@@ -5,7 +5,7 @@
 
 #include "dc/evidence.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * EvidenceSet is vector of Evidences with extra methods
@@ -62,4 +62,4 @@ private:
     std::vector<Evidence> evidences_;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

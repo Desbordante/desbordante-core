@@ -10,7 +10,7 @@
 #include "denial_constraint.h"
 #include "predicate_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 // Java way of comparing bitsets
 int CompareBitsets(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
@@ -149,4 +149,4 @@ public:
     }
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

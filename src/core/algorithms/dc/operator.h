@@ -4,7 +4,7 @@
 
 #include "type.h"
 
-namespace model {
+namespace algos::fastadc {
 
 enum class OperatorType { kEqual, kUnequal, kGreater, kLess, kGreaterEqual, kLessEqual };
 
@@ -83,7 +83,7 @@ public:
 size_t hash_value(model::Operator const& k) noexcept;
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace model
+}  // namespace algos::fastadc
 
 namespace std {
 template <>

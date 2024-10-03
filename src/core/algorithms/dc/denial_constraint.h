@@ -5,7 +5,7 @@
 
 #include "predicate_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 class DenialConstraint {
 private:
@@ -48,7 +48,7 @@ public:
     bool operator==(DenialConstraint const& other) const = default;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc
 
 namespace std {
 template <>

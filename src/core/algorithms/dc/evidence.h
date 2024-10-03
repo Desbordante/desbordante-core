@@ -3,7 +3,7 @@
 
 #include "dc/common_clue_set_builder.h"
 
-namespace model {
+namespace algos::fastadc {
 
 struct Evidence {
     int64_t count;
@@ -29,4 +29,4 @@ struct Evidence {
     Evidence(Clue bitSet, int64_t count) : count(count), evidence(bitSet) {}
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

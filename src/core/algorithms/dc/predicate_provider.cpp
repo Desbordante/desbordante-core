@@ -3,7 +3,7 @@
 #include "dc/column_operand.h"
 #include "dc/operator.h"
 
-namespace model {
+namespace algos::fastadc {
 
 PredicatePtr PredicateProvider::GetPredicate(Operator const& op, ColumnOperand const& left,
                                              ColumnOperand const& right) {
@@ -11,4 +11,4 @@ PredicatePtr PredicateProvider::GetPredicate(Operator const& op, ColumnOperand c
     return &iter->second;
 }
 
-}  // namespace model
+}  // namespace algos::fastadc
