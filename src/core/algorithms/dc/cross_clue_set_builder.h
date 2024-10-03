@@ -5,7 +5,7 @@
 #include "dc/common_clue_set_builder.h"
 #include "dc/pli_shard.h"
 
-namespace model {
+namespace algos::fastadc {
 
 class CrossClueSetBuilder : public CommonClueSetBuilder {
 public:
@@ -38,4 +38,4 @@ private:
                          Clue const& eqMask, Clue const& gtMask);
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

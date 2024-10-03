@@ -2,7 +2,7 @@
 
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos::fastadc {
 
 namespace {
 // Helper to trigger a compile-time error for unsupported types
@@ -53,4 +53,4 @@ template <typename T>
     }
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

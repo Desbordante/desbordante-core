@@ -2,7 +2,7 @@
 
 #include "dc/index_provider.h"
 
-namespace model {
+namespace algos::fastadc {
 
 void EvidenceSetBuilder::BuildCardinalityMask(PredicateBuilder const& pBuilder) {
     auto add_predicate_to_mask = [this](PredicatesSpan group_span,
@@ -54,4 +54,4 @@ void EvidenceSetBuilder::BuildCardinalityMask(PredicateBuilder const& pBuilder) 
     }
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

@@ -7,7 +7,7 @@
 
 #include "evidence_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 // re-order predicates by evidence coverage to accelerate trie
 class PredicateOrganizer {
@@ -99,4 +99,4 @@ private:
     }
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

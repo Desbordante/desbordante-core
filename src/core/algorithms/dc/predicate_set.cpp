@@ -1,6 +1,6 @@
 #include "predicate_set.h"
 
-namespace model {
+namespace algos::fastadc {
 
 bool PredicateSet::Add(PredicatePtr predicate) {
     auto index = PredicateIndexProvider::GetInstance()->GetIndex(predicate);
@@ -51,4 +51,4 @@ std::string PredicateSet::ToString() const {
     return result;
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

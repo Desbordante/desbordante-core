@@ -5,7 +5,7 @@
 #include "predicate.h"
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * @brief Constructs the predicate space for a given table and organizes predicates into categories.
@@ -118,4 +118,4 @@ public:
     }
 };
 
-}  // namespace model
+}  // namespace algos::fastadc
