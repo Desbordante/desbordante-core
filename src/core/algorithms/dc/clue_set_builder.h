@@ -7,7 +7,7 @@
 #include "dc/predicate_builder.h"
 #include "dc/single_clue_set_builder.h"
 
-namespace model {
+namespace algos::fastadc {
 
 /**
  * Manages construction of a set of clues based on PliShard inputs.
@@ -47,4 +47,4 @@ private:
     PredicateBuilder const& predicate_builder_;
 };
 
-}  // namespace model
+}  // namespace algos::fastadc

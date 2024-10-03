@@ -5,7 +5,7 @@
 #include "dc/index_provider.h"
 #include "dc/utils.h"
 
-namespace model {
+namespace algos::fastadc {
 
 Pli::Pli(std::vector<Cluster> raw_clusters, std::vector<size_t> keys,
          std::unordered_map<size_t, size_t> translator)
@@ -191,4 +191,4 @@ Pli PliShardBuilder::BuildPli(std::vector<size_t> const& col_values, bool is_num
     return Pli(clusters, keys, key_to_cluster_id);
 }
 
-}  // namespace model
+}  // namespace algos::fastadc

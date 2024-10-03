@@ -5,7 +5,7 @@
 
 #include "table/typed_column_data.h"
 
-namespace model {
+namespace algos::fastadc {
 
 struct PliShard;
 
@@ -132,4 +132,4 @@ public:
     };
 };
 
-}  // namespace model
+}  // namespace algos::fastadc
