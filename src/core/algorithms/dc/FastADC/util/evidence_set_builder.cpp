@@ -1,6 +1,6 @@
-#include "dc/evidence_set_builder.h"
+#include "evidence_set_builder.h"
 
-#include "dc/index_provider.h"
+#include "../providers/index_provider.h"
 
 namespace algos::fastadc {
 

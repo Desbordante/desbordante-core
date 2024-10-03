@@ -1,23 +1,23 @@
-#include "algorithms/dc/operator.h"
+#include "operator.h"
 
 namespace algos::fastadc {
 
-bool Operator::Eval(std::byte const* v1, std::byte const* v2, Type const& type) const {
-    CompareResult cr = type.Compare(v1, v2);
+bool Operator::Eval(std::byte const* v1, std::byte const* v2, model::Type const& type) const {
+    model::CompareResult cr = type.Compare(v1, v2);
 
     switch (op_) {
         case OperatorType::kEqual:
-            return cr == CompareResult::kEqual;
+            return cr == model::CompareResult::kEqual;
         case OperatorType::kUnequal:
-            return cr != CompareResult::kEqual;
+            return cr != model::CompareResult::kEqual;
         case OperatorType::kGreater:
-            return cr == CompareResult::kGreater;
+            return cr == model::CompareResult::kGreater;
         case OperatorType::kLess:
-            return cr == CompareResult::kLess;
+            return cr == model::CompareResult::kLess;
         case OperatorType::kGreaterEqual:
-            return cr == CompareResult::kGreater || cr == CompareResult::kEqual;
+            return cr == model::CompareResult::kGreater || cr == model::CompareResult::kEqual;
         case OperatorType::kLessEqual:
-            return cr == CompareResult::kLess || cr == CompareResult::kEqual;
+            return cr == model::CompareResult::kLess || cr == model::CompareResult::kEqual;
         default:
             return false;
     }
@@ -84,9 +84,5 @@ std::unordered_map<OperatorType, std::vector<OperatorType>> const Operator::kTra
         Operator::InitializeTransitivesMap();
 std::unordered_map<OperatorType, std::string> const Operator::kShortStringMap =
         Operator::InitializeShortStringMap();
-
-size_t hash_value(model::Operator const& k) noexcept {
-    return std::hash<model::Operator>()(k);
-}
 
 }  // namespace algos::fastadc

@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "dc/base_provider.h"
-#include "dc/predicate.h"
+#include "../model/predicate.h"
+#include "base_provider.h"
 
 namespace algos::fastadc {
 

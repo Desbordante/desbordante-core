@@ -2,8 +2,7 @@
 
 #include <easylogging++.h>
 
-#include "index_provider.h"
-#include "operator.h"
+#include "../providers/index_provider.h"
 
 namespace algos::fastadc {
 
