@@ -1,43 +1,44 @@
 #pragma once
 
 #include "../model/predicate.h"
-#include "base_provider.h"
 
 namespace algos::fastadc {
 
 /**
- * @brief Singleton storage for Predicate objects.
+ * @brief Storage for Predicate objects.
  *
  * A Predicate represents a relational condition between two rows from potentially different
  * columns, denoted as "t.A_i op s.A_j", where t and s represent different row identifiers, A_i
  * and A_j represent columns (which may be the same or different), and 'op' is a relational operator
  * (one of <, <=, >, >=, ==, !=). This class manages a centralized repository of Predicate objects.
  *
- * Usage:
- * To access or create a Predicate, use PredicateProvider::GetInstance()->GetPredicate(op, operand1,
- * operand2), where 'op' is the relational operator, and 'operand1' and 'operand2' are the column
- * operands involved.
+ * Copying of this class has been deleted, since this class in only supposed to be created in
+ * FastADC algorithm and passed via pointer if needed to FastADC's structures
  */
-class PredicateProvider : public BaseProvider<PredicateProvider> {
+class PredicateProvider {
 private:
     using ColumnMap = std::unordered_map<ColumnOperand, Predicate>;
     using OperatorMap = std::unordered_map<ColumnOperand, ColumnMap>;
     // predicates_[op][col1][col2] corresponds to the related Predicate object
     std::unordered_map<Operator, OperatorMap> predicates_;
 
-    friend BaseProvider<PredicateProvider>;
-
-    static std::string ClassName() {
-        return "PredicateProvider";
-    }
-
-    static void Clear() {
-        instance_->predicates_.clear();
+    void Clear() {
+        predicates_.clear();
     }
 
 public:
+    PredicateProvider() = default;
+    PredicateProvider(PredicateProvider const&) = delete;
+    PredicateProvider& operator=(PredicateProvider const&) = delete;
+    PredicateProvider(PredicateProvider&&) = default;
+    PredicateProvider& operator=(PredicateProvider&&) = default;
+
+    /** Create predicate object and return pointer to it or obtain it from cache */
     PredicatePtr GetPredicate(Operator const& op, ColumnOperand const& left,
-                              ColumnOperand const& right);
+                              ColumnOperand const& right) {
+        auto [iter, _] = predicates_[op][left].try_emplace(right, op, left, right);
+        return &iter->second;
+    }
 };
 
 }  // namespace algos::fastadc

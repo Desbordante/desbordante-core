@@ -6,6 +6,7 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
 #include "../providers/index_provider.h"
+#include "predicate.h"
 
 namespace algos::fastadc {
 
@@ -15,32 +16,39 @@ private:
     mutable std::unique_ptr<PredicateSet> inv_set_TS_;  // Cached inverse set
 
 public:
-    PredicateSet() = default;
+    // We want to iterate over PredicateSet with range-based for.
+    // In order to do this, PredicateSet should contain valid predicate
+    // index provider, hence deleting the default constructor
+    PredicateSet() = delete;
 
-    explicit PredicateSet(boost::dynamic_bitset<> const& bitset) : bitset_(bitset) {}
+    PredicateIndexProvider* provider = nullptr;
 
-    PredicateSet(PredicateSet const& other) : bitset_(other.bitset_) {
+    explicit PredicateSet(PredicateIndexProvider* predicate_index_provider)
+        : bitset_(0), provider(predicate_index_provider) {
+        assert(predicate_index_provider);
+    }
+
+    explicit PredicateSet(boost::dynamic_bitset<> const& bitset,
+                          PredicateIndexProvider* predicate_index_provider)
+        : bitset_(bitset), provider(predicate_index_provider) {
+        assert(predicate_index_provider);
+    }
+
+    PredicateSet(PredicateSet const& other) : bitset_(other.bitset_), provider(other.provider) {
         // Do not copy inv_set_TS_ to avoid unnecessary pre-caching
     }
 
     PredicateSet& operator=(PredicateSet const& other) {
         if (this != &other) {
             bitset_ = other.bitset_;
+            provider = other.provider;
             inv_set_TS_.reset();
         }
         return *this;
     }
 
-    PredicateSet(PredicateSet&& other) noexcept
-        : bitset_(std::move(other.bitset_)), inv_set_TS_(std::move(other.inv_set_TS_)) {}
-
-    PredicateSet& operator=(PredicateSet&& other) noexcept {
-        if (this != &other) {
-            bitset_ = std::move(other.bitset_);
-            inv_set_TS_ = std::move(other.inv_set_TS_);
-        }
-        return *this;
-    }
+    PredicateSet(PredicateSet&& other) noexcept = default;
+    PredicateSet& operator=(PredicateSet&& other) noexcept = default;
 
     // Adds a predicate to the set. Returns true if the predicate was newly added.
     bool Add(PredicatePtr predicate);
@@ -56,7 +64,7 @@ public:
     }
 
     // Retrieves the inverse TS predicate set (with caching).
-    PredicateSet GetInvTS() const;
+    PredicateSet GetInvTS(PredicateProvider* predicate_provider) const;
 
     class Iterator {
     public:
@@ -80,7 +88,7 @@ public:
         }
 
         reference operator*() const {
-            return PredicateIndexProvider::GetInstance()->GetObject(current_index_);
+            return set_->provider->GetObject(current_index_);
         }
 
         pointer operator->() const {

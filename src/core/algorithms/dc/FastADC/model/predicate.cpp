@@ -1,13 +1,8 @@
-
 #include "predicate.h"
 
 #include "../providers/predicate_provider.h"
 
 namespace algos::fastadc {
-
-PredicatePtr GetPredicate(Operator const& op, ColumnOperand const& l, ColumnOperand const& r) {
-    return PredicateProvider::GetInstance()->GetPredicate(op, l, r);
-}
 
 PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type) {
     auto it = std::find_if(predicates.begin(), predicates.end(),
@@ -29,32 +24,32 @@ bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, size_t 
     return op_.Eval(l_val, r_val, type);
 }
 
-PredicatePtr Predicate::GetSymmetric() const {
+PredicatePtr Predicate::GetSymmetric(PredicateProvider* provider) const {
     if (!symmetric_) {
-        symmetric_ = GetPredicate(op_.GetSymmetric(), r_, l_);
+        symmetric_ = provider->GetPredicate(op_.GetSymmetric(), r_, l_);
     }
     return symmetric_;
 }
 
-PredicatePtr Predicate::GetInvTS() const {
+PredicatePtr Predicate::GetInvTS(PredicateProvider* provider) const {
     if (!inv_TS_) {
-        inv_TS_ = GetPredicate(op_, l_.GetInvTS(), r_.GetInvTS());
+        inv_TS_ = provider->GetPredicate(op_, l_.GetInvTS(), r_.GetInvTS());
     }
     return inv_TS_;
 }
 
-PredicatePtr Predicate::GetInverse() const {
+PredicatePtr Predicate::GetInverse(PredicateProvider* provider) const {
     if (!inverse_) {
-        inverse_ = GetPredicate(op_.GetInverse(), l_, r_);
+        inverse_ = provider->GetPredicate(op_.GetInverse(), l_, r_);
     }
     return inverse_;
 }
 
-std::vector<PredicatePtr> const& Predicate::GetImplications() const {
+std::vector<PredicatePtr> const& Predicate::GetImplications(PredicateProvider* provider) const {
     if (implications_.empty()) {
         auto op_implications = op_.GetImplications();
         for (auto const& op_implication : op_implications) {
-            implications_.push_back(GetPredicate(op_implication, l_, r_));
+            implications_.push_back(provider->GetPredicate(op_implication, l_, r_));
         }
     }
     return implications_;

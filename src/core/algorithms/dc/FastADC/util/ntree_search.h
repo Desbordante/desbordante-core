@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <unordered_map>
+
 #include <boost/dynamic_bitset.hpp>
 
 namespace algos::fastadc {

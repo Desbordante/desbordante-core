@@ -5,26 +5,32 @@
 #include <vector>
 
 #include "../model/predicate_set.h"
+#include "../providers/predicate_provider.h"
 
 namespace algos::fastadc {
 
 class Closure {
 private:
     PredicateSet start_;
-    PredicateSet closure_{};
+    PredicateSet closure_;
     bool added_{false};
     std::unordered_map<Operator, std::vector<PredicatePtr>> grouped_;
+    PredicateProvider* provider_;
 
 public:
-    explicit Closure(PredicateSet const& start) : start_(start) {}
+    explicit Closure(PredicateSet const& start, PredicateProvider* provider)
+        : start_(start), closure_(start.provider), provider_(provider) {
+        assert(provider);
+    }
 
     bool Construct() {
         // Add all implications and symmetric implications from the start set
         for (PredicatePtr p : start_) {
-            if (!AddAll(p->GetImplications())) {
+            if (!AddAll(p->GetImplications(provider_))) {
                 return false;
             }
-            if (p->GetSymmetric() != nullptr && !AddAll(p->GetSymmetric()->GetImplications())) {
+            if (p->GetSymmetric(provider_) != nullptr &&
+                !AddAll(p->GetSymmetric(provider_)->GetImplications(provider_))) {
                 return false;
             }
         }
@@ -50,11 +56,12 @@ private:
 
         // Add implications and symmetric implications to additions
         std::for_each(closure_.begin(), closure_.end(), [&](PredicatePtr p) {
-            if (p->GetSymmetric() != nullptr) {
-                auto const& sym_implications = p->GetSymmetric()->GetImplications();
+            if (p->GetSymmetric(provider_) != nullptr) {
+                auto const& sym_implications =
+                        p->GetSymmetric(provider_)->GetImplications(provider_);
                 additions.insert(sym_implications.begin(), sym_implications.end());
             }
-            auto const& implications = p->GetImplications();
+            auto const& implications = p->GetImplications(provider_);
             additions.insert(implications.begin(), implications.end());
         });
 
@@ -71,15 +78,15 @@ private:
 
                         // Transitive inference: A -> B; B -> C
                         if (p->GetRightOperand() == p2->GetLeftOperand()) {
-                            PredicatePtr new_pred =
-                                    GetPredicate(op, p->GetLeftOperand(), p2->GetRightOperand());
+                            PredicatePtr new_pred = provider_->GetPredicate(op, p->GetLeftOperand(),
+                                                                            p2->GetRightOperand());
                             additions.insert(new_pred);
                         }
 
                         // Transitive inference: C -> A; A -> B
                         if (p2->GetRightOperand() == p->GetLeftOperand()) {
-                            PredicatePtr new_pred =
-                                    GetPredicate(op, p2->GetLeftOperand(), p->GetRightOperand());
+                            PredicatePtr new_pred = provider_->GetPredicate(
+                                    op, p2->GetLeftOperand(), p->GetRightOperand());
                             additions.insert(new_pred);
                         }
                     }
@@ -91,15 +98,16 @@ private:
         auto const& uneq_list_it = grouped_.find(OperatorType::kUnequal);
         if (uneq_list_it != grouped_.end()) {
             for (PredicatePtr p : uneq_list_it->second) {
-                if (closure_.Contains(GetPredicate(OperatorType::kLessEqual, p->GetLeftOperand(),
-                                                   p->GetRightOperand()))) {
-                    additions.insert(GetPredicate(OperatorType::kLess, p->GetLeftOperand(),
-                                                  p->GetRightOperand()));
+                if (closure_.Contains(provider_->GetPredicate(
+                            OperatorType::kLessEqual, p->GetLeftOperand(), p->GetRightOperand()))) {
+                    additions.insert(provider_->GetPredicate(
+                            OperatorType::kLess, p->GetLeftOperand(), p->GetRightOperand()));
                 }
-                if (closure_.Contains(GetPredicate(OperatorType::kGreaterEqual, p->GetLeftOperand(),
-                                                   p->GetRightOperand()))) {
-                    additions.insert(GetPredicate(OperatorType::kGreater, p->GetLeftOperand(),
-                                                  p->GetRightOperand()));
+                if (closure_.Contains(provider_->GetPredicate(OperatorType::kGreaterEqual,
+                                                              p->GetLeftOperand(),
+                                                              p->GetRightOperand()))) {
+                    additions.insert(provider_->GetPredicate(
+                            OperatorType::kGreater, p->GetLeftOperand(), p->GetRightOperand()));
                 }
             }
         }
@@ -107,10 +115,11 @@ private:
         auto const& leq_list_it = grouped_.find(OperatorType::kLessEqual);
         if (leq_list_it != grouped_.end()) {
             for (PredicatePtr p : leq_list_it->second) {
-                if (closure_.Contains(GetPredicate(OperatorType::kGreaterEqual, p->GetLeftOperand(),
-                                                   p->GetRightOperand()))) {
-                    additions.insert(GetPredicate(OperatorType::kEqual, p->GetLeftOperand(),
-                                                  p->GetRightOperand()));
+                if (closure_.Contains(provider_->GetPredicate(OperatorType::kGreaterEqual,
+                                                              p->GetLeftOperand(),
+                                                              p->GetRightOperand()))) {
+                    additions.insert(provider_->GetPredicate(
+                            OperatorType::kEqual, p->GetLeftOperand(), p->GetRightOperand()));
                 }
             }
         }
@@ -125,7 +134,7 @@ private:
     bool AddAll(Container const& predicates) {
         for (PredicatePtr p : predicates) {
             if (closure_.Add(p)) {
-                if (closure_.Contains(p->GetInverse())) {
+                if (closure_.Contains(p->GetInverse(provider_))) {
                     return false;  // Conflict detected
                 }
                 grouped_[p->GetOperator()].push_back(p);
