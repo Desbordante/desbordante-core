@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/functional/hash.hpp>
-
 #include "type.h"
 
 namespace algos::fastadc {
@@ -28,7 +26,7 @@ public:
         return op_ == rhs.op_;
     }
 
-    bool Eval(std::byte const* v1, std::byte const* v2, Type const& type) const;
+    bool Eval(std::byte const* v1, std::byte const* v2, model::Type const& type) const;
 
     // 'a op b' <=> !'a op.inverse b'
     Operator GetInverse() const {
@@ -80,15 +78,15 @@ public:
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
-size_t hash_value(model::Operator const& k) noexcept;
+size_t hash_value(Operator const& k) noexcept;
 // NOLINTEND(readability-identifier-naming)
 
 }  // namespace algos::fastadc
 
 namespace std {
 template <>
-struct hash<model::Operator> {
-    size_t operator()(model::Operator const& k) const noexcept {
+struct hash<algos::fastadc::Operator> {
+    size_t operator()(algos::fastadc::Operator const& k) const noexcept {
         return static_cast<size_t>(k.GetType());
     }
 };

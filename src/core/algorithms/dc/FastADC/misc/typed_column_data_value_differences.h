@@ -1,4 +1,4 @@
-#include "table/typed_column_data.h"
+#include "model/table/typed_column_data.h"
 
 namespace algos::fastadc {
 
@@ -15,7 +15,7 @@ namespace algos::fastadc {
  *         that there are no similaties whatsoever) if the column types are not
  *         supported for comparison
  */
-double GetSharedPercentage(TypedColumnData const& c1, TypedColumnData const& c2);
+double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnData const& c2);
 
 /**
  * Calculates the ratio of the smaller average to the larger average of two columns.
@@ -27,6 +27,6 @@ double GetSharedPercentage(TypedColumnData const& c1, TypedColumnData const& c2)
  *         that there are no similaties whatsoever) if the column types are not
  *         types are not numeric.
  */
-double GetAverageRatio(TypedColumnData const& c1, TypedColumnData const& c2);
+double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData const& c2);
 
 }  // namespace algos::fastadc

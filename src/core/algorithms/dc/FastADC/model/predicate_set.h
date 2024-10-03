@@ -5,8 +5,7 @@
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
-#include "index_provider.h"
-#include "predicate.h"
+#include "../providers/index_provider.h"
 
 namespace algos::fastadc {
 
@@ -135,8 +134,8 @@ public:
 
 namespace std {
 template <>
-struct hash<model::PredicateSet> {
-    size_t operator()(model::PredicateSet const& k) const noexcept {
+struct hash<algos::fastadc::PredicateSet> {
+    size_t operator()(algos::fastadc::PredicateSet const& k) const noexcept {
         return k.Hash();
     }
 };

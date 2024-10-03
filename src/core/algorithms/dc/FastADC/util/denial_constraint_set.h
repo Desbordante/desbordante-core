@@ -1,14 +1,8 @@
 #pragma once
 
-#include <algorithm>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-
+#include "../model/denial_constraint.h"
 #include "closure.h"
-#include "dc/ntree_search.h"
-#include "denial_constraint.h"
-#include "predicate_set.h"
+#include "ntree_search.h"
 
 namespace algos::fastadc {
 

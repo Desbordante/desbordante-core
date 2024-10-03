@@ -2,10 +2,8 @@
 
 #include <easylogging++.h>
 
-#include "dc/cross_clue_set_builder.h"
-#include "dc/pli_shard.h"
-#include "dc/predicate_builder.h"
-#include "dc/single_clue_set_builder.h"
+#include "cross_clue_set_builder.h"
+#include "single_clue_set_builder.h"
 
 namespace algos::fastadc {
 

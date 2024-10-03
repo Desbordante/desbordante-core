@@ -4,9 +4,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "operator.h"
-#include "predicate.h"
-#include "predicate_set.h"
+#include "../model/predicate_set.h"
 
 namespace algos::fastadc {
 

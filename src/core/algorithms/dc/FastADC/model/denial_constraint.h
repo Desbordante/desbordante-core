@@ -52,8 +52,8 @@ public:
 
 namespace std {
 template <>
-struct hash<model::DenialConstraint> {
-    size_t operator()(model::DenialConstraint const& k) const noexcept {
+struct hash<algos::fastadc::DenialConstraint> {
+    size_t operator()(algos::fastadc::DenialConstraint const& k) const noexcept {
         return k.GetPredicateSet().Hash();
     }
 };
