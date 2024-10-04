@@ -226,31 +226,74 @@ TEST(Predicate, PredicateCreatesCorrectly) {
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
             model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
-    // Hack for the required singleton classes to be created (for the sake of test simplicity)
-    PredicateBuilder builder(true);
+    PredicateProvider pred_provider;
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
 
     PredicatePtr s_a_less_t_b =
-            GetPredicate(Operator(OperatorType::kLess), ColumnOperand(first, true),
-                         ColumnOperand(second, false));
+            pred_provider.GetPredicate(Operator(OperatorType::kLess), ColumnOperand(first, true),
+                                       ColumnOperand(second, false));
 
     EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 0, 1));
     EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 1, 0));
 
     PredicatePtr s_a_neq_t_a =
-            GetPredicate(Operator(OperatorType::kUnequal), ColumnOperand(first, true),
-                         ColumnOperand(first, false));
+            pred_provider.GetPredicate(Operator(OperatorType::kUnequal), ColumnOperand(first, true),
+                                       ColumnOperand(first, false));
 
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 0, 1));
     EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 1, 0));
 }
 
-TEST(FastADC, DifferentColumnPredicateSpace) {
-    CSVParser parser{kTestDC};
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
-            model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
-    PredicateBuilder builder(true);
+class FastADC : public ::testing::Test {
+protected:
+    std::unique_ptr<CSVParser> parser_;
+    std::unique_ptr<model::ColumnLayoutTypedRelationData> table_;
+    std::vector<model::TypedColumnData> col_data_;
+
+    PredicateIndexProvider pred_index_provider_;
+    PredicateProvider pred_provider_;
+    IntIndexProvider int_prov_;
+    DoubleIndexProvider double_prov_;
+    StringIndexProvider string_prov_;
+
+    PredicateBuilder* predicate_builder_ = nullptr;
+    PliShardBuilder* pli_shard_builder_ = nullptr;
+    EvidenceSetBuilder* evidence_set_builder_ = nullptr;
+
+    CSVConfig const csv_file_ = kTestDC;
+    bool allow_cross_columns_ = true;
+    bool has_header_ = true;
+
+    void SetUp() override {
+        parser_ = std::make_unique<CSVParser>(csv_file_);
+        table_ = model::ColumnLayoutTypedRelationData::CreateFrom(*parser_, has_header_);
+        col_data_ = std::move(table_->GetColumnData());
+    }
+
+    void TearDown() override {
+        delete predicate_builder_;
+        delete pli_shard_builder_;
+        delete evidence_set_builder_;
+    }
+
+    void CreatePredicateBuilder() {
+        predicate_builder_ =
+                new PredicateBuilder(&pred_provider_, &pred_index_provider_, allow_cross_columns_);
+    }
+
+    void CreatePliShardBuilder() {
+        pli_shard_builder_ = new PliShardBuilder(&int_prov_, &double_prov_, &string_prov_);
+    }
+
+    void CreateEvidenceSetBuilder() {
+        evidence_set_builder_ =
+                new EvidenceSetBuilder(*predicate_builder_, pli_shard_builder_->pli_shards);
+    }
+};
+
+TEST_F(FastADC, DifferentColumnPredicateSpace) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
 
     auto check_preds = [](auto const& actual, auto const& expected, std::string const& name) {
         ASSERT_EQ(actual.size(), expected.size())
@@ -262,30 +305,24 @@ TEST(FastADC, DifferentColumnPredicateSpace) {
         }
     };
 
-    builder.BuildPredicateSpace(col_data);
-
-    check_preds(builder.GetPredicates(), different_column_predicates_expected, "all predicates");
-    check_preds(builder.GetNumSingleColumnPredicates(), num_single_column_predicate_group_expected,
-                "numeric single column predicates");
-    check_preds(builder.GetNumCrossColumnPredicates(), num_cross_column_predicate_group_expected,
-                "numeric cross column predicates");
-    check_preds(builder.GetStrSingleColumnPredicates(), str_single_column_predicate_group_expected,
-                "string single column predicates");
-    check_preds(builder.GetStrCrossColumnPredicates(), str_cross_column_predicate_group_expected,
-                "string cross column predicates");
+    check_preds(predicate_builder_->GetPredicates(), different_column_predicates_expected,
+                "all predicates");
+    check_preds(predicate_builder_->GetNumSingleColumnPredicates(),
+                num_single_column_predicate_group_expected, "numeric single column predicates");
+    check_preds(predicate_builder_->GetNumCrossColumnPredicates(),
+                num_cross_column_predicate_group_expected, "numeric cross column predicates");
+    check_preds(predicate_builder_->GetStrSingleColumnPredicates(),
+                str_single_column_predicate_group_expected, "string single column predicates");
+    check_preds(predicate_builder_->GetStrCrossColumnPredicates(),
+                str_cross_column_predicate_group_expected, "string cross column predicates");
 }
 
-TEST(FastADC, InverseAndMutexMaps) {
-    CSVParser parser{kTestDC};
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
-            model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
-    PredicateBuilder builder(true);
+TEST_F(FastADC, InverseAndMutexMaps) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
 
-    builder.BuildPredicateSpace(col_data);
-
-    auto const& predicates = builder.GetPredicates();
-    auto const& inverse_map = builder.GetInverseMap();
+    auto const& predicates = predicate_builder_->GetPredicates();
+    auto const& inverse_map = predicate_builder_->GetInverseMap();
     for (size_t i = 0; i < predicates.size(); ++i) {
         auto const& predicate = predicates[i];
         auto inverse_idx = inverse_map[i];
@@ -296,7 +333,7 @@ TEST(FastADC, InverseAndMutexMaps) {
                 << " does not have the correct inverse operator at index " << inverse_idx;
     }
 
-    auto const& mutex_map = builder.GetMutexMap();
+    auto const& mutex_map = predicate_builder_->GetMutexMap();
     for (size_t i = 0; i < predicates.size(); ++i) {
         auto const& predicate = predicates[i];
         auto const& mutex_bits = mutex_map[i];
@@ -322,21 +359,17 @@ void AssertClusterValues(model::TypedColumnData const& column, std::vector<size_
     }
 }
 
-TEST(FastADC, PliShards) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
-    PliShardBuilder builder;
-
-    builder.BuildPliShards(col_data);
-    auto& pli_shards = builder.GetPliShards();
+TEST_F(FastADC, PliShards) {
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
+    auto pli_shards = std::move(pli_shard_builder_->pli_shards);
 
     for (auto const& shard : pli_shards) {
         for (size_t i = 0; i < shard.plis.size(); ++i) {
             auto const& pli = shard.plis[i];
             auto const& keys = pli.GetKeys();
             auto const& clusters = pli.GetClusters();
-            auto const& column = col_data[i];
+            auto const& column = col_data_[i];
 
             for (auto key : keys) {
                 auto const& cluster = clusters[pli.GetClusterIdByKey(key)];
@@ -360,17 +393,13 @@ TEST(FastADC, PliShards) {
     }
 }
 
-TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
-    PredicateBuilder pbuilder(true);
-
-    pbuilder.BuildPredicateSpace(col_data);
+TEST_F(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
 
     // won't be used, just to build some ClueSetBuilder to check generic static fields
     auto dummy_pli_shard = PliShard({}, 0, 0);
-    SingleClueSetBuilder builder(pbuilder, dummy_pli_shard);
+    SingleClueSetBuilder builder(*predicate_builder_, dummy_pli_shard);
 
     ASSERT_EQ(builder.GetNumberOfBitsInClue(), 18);
     auto packs = builder.GetPredicatePacks();
@@ -390,20 +419,15 @@ TEST(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     }
 }
 
-TEST(FastADC, ClueSet) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
+TEST_F(FastADC, ClueSet) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
 
-    PredicateBuilder pbuilder(true);
-    pbuilder.BuildPredicateSpace(col_data);
+    ClueSetBuilder cluebuilder(*predicate_builder_);
 
-    ClueSetBuilder cluebuilder(pbuilder);
-
-    PliShardBuilder plibuilder;
-    plibuilder.BuildPliShards(col_data);
-
-    ClueSet clue_set = cluebuilder.BuildClueSet(plibuilder.GetPliShards());
+    ClueSet clue_set = cluebuilder.BuildClueSet(pli_shard_builder_->pli_shards);
 
     for (auto const& [expected_clue, expected_count] : expected_clue_set) {
         auto found = clue_set.find(PredicateBitset(expected_clue));
@@ -419,37 +443,26 @@ TEST(FastADC, ClueSet) {
     }
 }
 
-TEST(FastADC, CardinalityMask) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
+TEST_F(FastADC, CardinalityMask) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
+    CreateEvidenceSetBuilder();
 
-    PredicateBuilder pbuilder(true);
-    pbuilder.BuildPredicateSpace(col_data);
-
-    PliShardBuilder plibuilder;
-    plibuilder.BuildPliShards(col_data);
-
-    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
-
-    EXPECT_EQ(evibuilder.GetCardinalityMask(), VectorToBitset(expected_cardinality_mask));
+    EXPECT_EQ(evidence_set_builder_->GetCardinalityMask(),
+              VectorToBitset(expected_cardinality_mask));
 }
 
-TEST(FastADC, EvidenceSet) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
+TEST_F(FastADC, EvidenceSet) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
+    CreateEvidenceSetBuilder();
+    evidence_set_builder_->BuildEvidenceSet();
 
-    PredicateBuilder pbuilder(true);
-    pbuilder.BuildPredicateSpace(col_data);
-
-    PliShardBuilder plibuilder;
-    plibuilder.BuildPliShards(col_data);
-
-    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
-    evibuilder.BuildEvidenceSet();
-
-    auto const& evidence_set = evibuilder.GetEvidenceSet();
+    auto evidence_set = std::move(evidence_set_builder_->evidence_set);
 
     std::unordered_set<PredicateBitset> expected_set;
     for (auto const& expected_vec : expected_evidence_set) {
@@ -466,22 +479,18 @@ TEST(FastADC, EvidenceSet) {
             << "Size mismatch: evidence_set has extra elements.";
 }
 
-TEST(FastADC, TransformedEvidenceSetAndMutexMap) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
+TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
+    CreateEvidenceSetBuilder();
+    evidence_set_builder_->BuildEvidenceSet();
 
-    PredicateBuilder pbuilder(true);
-    pbuilder.BuildPredicateSpace(col_data);
+    auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
-    PliShardBuilder plibuilder;
-    plibuilder.BuildPliShards(col_data);
-
-    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
-    evibuilder.BuildEvidenceSet();
-
-    PredicateOrganizer organizer(pbuilder.PredicateCount(), std::move(evibuilder.GetEvidenceSet()),
-                                 std::move(pbuilder.GetMutexMap()));
+    PredicateOrganizer organizer(predicate_builder_->PredicateCount(), std::move(evidence_set),
+                                 std::move(predicate_builder_->GetMutexMap()));
 
     std::vector<Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
 
@@ -508,21 +517,17 @@ struct ToStringComparator {
     }
 };
 
-TEST(FastADC, DenialConstraints) {
-    CSVParser parser{kTestDC};
-    auto table = model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
-    auto col_data = std::move(table->GetColumnData());
+TEST_F(FastADC, DenialConstraints) {
+    CreatePredicateBuilder();
+    predicate_builder_->BuildPredicateSpace(col_data_);
+    CreatePliShardBuilder();
+    pli_shard_builder_->BuildPliShards(col_data_);
+    CreateEvidenceSetBuilder();
+    evidence_set_builder_->BuildEvidenceSet();
 
-    PredicateBuilder pbuilder(true);
-    pbuilder.BuildPredicateSpace(col_data);
+    auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
-    PliShardBuilder plibuilder;
-    plibuilder.BuildPliShards(col_data);
-
-    EvidenceSetBuilder evibuilder(pbuilder, plibuilder.GetPliShards());
-    evibuilder.BuildEvidenceSet();
-
-    ApproxEvidenceInverter dcbuilder(pbuilder, 0.01, std::move(evibuilder.GetEvidenceSet()));
+    ApproxEvidenceInverter dcbuilder(*predicate_builder_, 0.01, std::move(evidence_set));
     auto dcs = dcbuilder.BuildDenialConstraints();
 
     std::vector<DenialConstraint> result = std::move(dcs.GetResult());
