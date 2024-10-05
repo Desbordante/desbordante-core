@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "../model/pli_shard.h"
-#include "pack_and_correction_map_builder.h"
+#include "evidence_aux_structures_builder.h"
 
 namespace algos::fastadc {
 
