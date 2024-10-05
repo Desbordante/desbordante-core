@@ -22,12 +22,15 @@ ClueSet AccumulateClues(Vectors const&... vectors) {
     ClueSet clue_set;
     int64_t clue_zero_count = 0;
 
+    clue_set.reserve((vectors.size() + ...));
+
     auto insert_clues = [&](std::vector<Clue> const& clues) {
         for (auto const& clue : clues) {
             if (clue.none()) {
                 ++clue_zero_count;
             } else {
-                clue_set[clue]++;
+                auto [it, inserted] = clue_set.try_emplace(clue, 1);
+                if (!inserted) it->second++;
             }
         }
     };

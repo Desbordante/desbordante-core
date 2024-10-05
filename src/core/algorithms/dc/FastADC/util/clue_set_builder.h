@@ -24,7 +24,10 @@ inline ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePac
             }
 
             for (auto const& [clue, count] : partial_clue_set) {
-                clue_set[clue] += count;
+                auto [it, inserted] = clue_set.try_emplace(clue, count);
+                if (!inserted) {
+                    it->second += count;
+                }
             }
         }
     }
