@@ -3,22 +3,22 @@
 #include <vector>
 
 #include "../model/pli_shard.h"
-#include "common_clue_set_builder.h"
+#include "pack_and_correction_map_builder.h"
 
 namespace algos::fastadc {
 
 /**
  * Constructs a clue set for a single PLI shard.
  */
-class SingleClueSetBuilder : public CommonClueSetBuilder {
+class SingleClueSetBuilder {
 public:
-    SingleClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard);
+    SingleClueSetBuilder(PliShard const& shard);
     SingleClueSetBuilder(SingleClueSetBuilder const& other) = delete;
     SingleClueSetBuilder& operator=(SingleClueSetBuilder const& other) = delete;
     SingleClueSetBuilder(SingleClueSetBuilder&& other) noexcept = default;
     SingleClueSetBuilder& operator=(SingleClueSetBuilder&& other) noexcept = delete;
 
-    ClueSet BuildClueSet() override;
+    ClueSet BuildClueSet(PredicatePacks const& packs);
 
 private:
     std::vector<Pli> const& plis_;

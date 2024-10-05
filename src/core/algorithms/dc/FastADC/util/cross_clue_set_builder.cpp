@@ -2,34 +2,31 @@
 
 namespace algos::fastadc {
 
-CrossClueSetBuilder::CrossClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard1,
-                                         PliShard const& shard2)
-    : plis1_(shard1.plis), plis2_(shard2.plis), evidence_count_(shard1.Range() * shard2.Range()) {
-    ConfigureOnce(pbuilder);
-}
+CrossClueSetBuilder::CrossClueSetBuilder(PliShard const& shard1, PliShard const& shard2)
+    : plis1_(shard1.plis), plis2_(shard2.plis), evidence_count_(shard1.Range() * shard2.Range()) {}
 
-ClueSet CrossClueSetBuilder::BuildClueSet() {
+ClueSet CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
     std::vector<Clue> forward_clues(evidence_count_, 0);
     std::vector<Clue> reverse_clues(evidence_count_, 0);
 
-    for (auto const& cat_pack : str_single_packs_) {
+    for (auto const& cat_pack : packs.str_single) {
         CorrectStrSingle(forward_clues, reverse_clues, plis1_[cat_pack.left_idx],
                          plis2_[cat_pack.right_idx], cat_pack.eq_mask);
     }
 
-    for (auto const& cat_pack : str_cross_packs_) {
+    for (auto const& cat_pack : packs.str_cross) {
         CorrectStrCross(forward_clues, plis1_[cat_pack.left_idx], plis2_[cat_pack.right_idx],
                         cat_pack.eq_mask);
         CorrectStrCross(reverse_clues, plis2_[cat_pack.left_idx], plis1_[cat_pack.right_idx],
                         cat_pack.eq_mask);
     }
 
-    for (auto const& num_pack : num_single_packs_) {
+    for (auto const& num_pack : packs.num_single) {
         CorrectNumSingle(forward_clues, reverse_clues, plis1_[num_pack.left_idx],
                          plis2_[num_pack.right_idx], num_pack.eq_mask, num_pack.gt_mask);
     }
 
-    for (auto const& num_pack : num_cross_packs_) {
+    for (auto const& num_pack : packs.num_cross) {
         CorrectNumCross(forward_clues, plis1_[num_pack.left_idx], plis2_[num_pack.right_idx],
                         num_pack.eq_mask, num_pack.gt_mask);
         CorrectNumCross(reverse_clues, plis2_[num_pack.left_idx], plis1_[num_pack.right_idx],
