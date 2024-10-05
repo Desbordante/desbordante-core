@@ -5,15 +5,14 @@ namespace algos::fastadc {
 
 struct Evidence {
     int64_t count;
-    Clue clue;  // TODO: why?
     PredicateBitset evidence;
 
     Evidence(Clue satisfied, int64_t count, PredicateBitset const& cardinalityMask,
              std::vector<PredicateBitset> const& correctionMap)
-        : count(count), clue(satisfied) {
+        : count(count) {
         evidence = cardinalityMask;
 
-        Clue tmp = clue;
+        Clue tmp = satisfied;
         size_t pos = 0;
         while (tmp.any()) {
             if (tmp.test(0)) {
