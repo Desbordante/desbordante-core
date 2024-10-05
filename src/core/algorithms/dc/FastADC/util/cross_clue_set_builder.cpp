@@ -5,9 +5,14 @@ namespace algos::fastadc {
 CrossClueSetBuilder::CrossClueSetBuilder(PliShard const& shard1, PliShard const& shard2)
     : plis1_(shard1.plis), plis2_(shard2.plis), evidence_count_(shard1.Range() * shard2.Range()) {}
 
-ClueSet CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
-    std::vector<Clue> forward_clues(evidence_count_, 0);
-    std::vector<Clue> reverse_clues(evidence_count_, 0);
+void CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs,
+                                       std::vector<Clue>& forward_clues,
+                                       std::vector<Clue>& reverse_clues, ClueSet& clue_set) {
+    forward_clues.assign(evidence_count_, Clue());
+    reverse_clues.assign(evidence_count_, Clue());
+
+    if (forward_clues.size() < evidence_count_) forward_clues.resize(evidence_count_, Clue());
+    if (reverse_clues.size() < evidence_count_) reverse_clues.resize(evidence_count_, Clue());
 
     for (auto const& cat_pack : packs.str_single) {
         CorrectStrSingle(forward_clues, reverse_clues, plis1_[cat_pack.left_idx],
@@ -33,7 +38,7 @@ ClueSet CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
                         num_pack.eq_mask, num_pack.gt_mask);
     }
 
-    return AccumulateClues(forward_clues, reverse_clues);
+    AccumulateClues(clue_set, forward_clues, reverse_clues);
 }
 
 void CrossClueSetBuilder::SetSingleEQ(std::vector<Clue>& clues1, std::vector<Clue>& clues2,
