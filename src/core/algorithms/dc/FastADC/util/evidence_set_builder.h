@@ -14,22 +14,22 @@ class EvidenceSetBuilder {
 public:
     EvidenceSet evidence_set;
 
-    EvidenceSetBuilder(PredicateBuilder const& pbuilder, std::vector<PliShard> const& pli_shards) {
-        clue_set_ = ClueSetBuilder{pbuilder}.BuildClueSet(pli_shards);
-        correction_map_ = CommonClueSetBuilder::GetCorrectionMap();
+    EvidenceSetBuilder(PredicateBuilder const& pbuilder, std::vector<PliShard> const& pli_shards,
+                       PredicatePacks const& packs) {
+        clue_set_ = BuildClueSet(pli_shards, packs);
         BuildCardinalityMask(pbuilder);
     }
 
     EvidenceSetBuilder(EvidenceSetBuilder const& other) = delete;
     EvidenceSetBuilder& operator=(EvidenceSetBuilder const& other) = delete;
     EvidenceSetBuilder(EvidenceSetBuilder&& other) noexcept = default;
-    EvidenceSetBuilder& operator=(EvidenceSetBuilder&& other) noexcept = default;
+    EvidenceSetBuilder& operator=(EvidenceSetBuilder&& other) noexcept = delete;
 
-    void BuildEvidenceSet() {
+    void BuildEvidenceSet(std::vector<PredicateBitset> const& correction_map) {
         evidence_set.Reserve(clue_set_.size());
 
         for (auto const& [clue, count] : clue_set_) {
-            evidence_set.EmplaceBack(clue, count, cardinality_mask_, correction_map_);
+            evidence_set.EmplaceBack(clue, count, cardinality_mask_, correction_map);
         }
 
         LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set.Size();
@@ -45,7 +45,6 @@ private:
     void BuildCardinalityMask(PredicateBuilder const& pbuilder);
 
     ClueSet clue_set_;
-    std::vector<PredicateBitset> correction_map_;
     PredicateBitset cardinality_mask_;
 };
 

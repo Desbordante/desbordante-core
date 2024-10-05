@@ -3,20 +3,19 @@
 #include <vector>
 
 #include "../model/pli_shard.h"
-#include "common_clue_set_builder.h"
+#include "pack_and_correction_map_builder.h"
 
 namespace algos::fastadc {
 
-class CrossClueSetBuilder : public CommonClueSetBuilder {
+class CrossClueSetBuilder {
 public:
-    CrossClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard1,
-                        PliShard const& shard2);
+    CrossClueSetBuilder(PliShard const& shard1, PliShard const& shard2);
     CrossClueSetBuilder(CrossClueSetBuilder const& other) = delete;
     CrossClueSetBuilder& operator=(CrossClueSetBuilder const& other) = delete;
     CrossClueSetBuilder(CrossClueSetBuilder&& other) noexcept = default;
     CrossClueSetBuilder& operator=(CrossClueSetBuilder&& other) noexcept = delete;
 
-    ClueSet BuildClueSet() override;
+    ClueSet BuildClueSet(PredicatePacks const& packs);
 
 private:
     std::vector<Pli> const& plis1_;

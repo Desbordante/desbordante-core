@@ -1,4 +1,5 @@
 #include "../util/common_clue_set_builder.h"
+#include "predicate.h"
 
 namespace algos::fastadc {
 
@@ -8,7 +9,7 @@ struct Evidence {
     PredicateBitset evidence;
 
     Evidence(Clue satisfied, int64_t count, PredicateBitset const& cardinalityMask,
-             std::vector<Clue> const& correctionMap)
+             std::vector<PredicateBitset> const& correctionMap)
         : count(count), clue(satisfied) {
         evidence = cardinalityMask;
 

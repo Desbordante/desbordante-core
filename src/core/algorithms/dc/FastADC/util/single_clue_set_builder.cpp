@@ -2,31 +2,29 @@
 
 namespace algos::fastadc {
 
-SingleClueSetBuilder::SingleClueSetBuilder(PredicateBuilder const& pbuilder, PliShard const& shard)
+SingleClueSetBuilder::SingleClueSetBuilder(PliShard const& shard)
     : plis_(shard.plis),
       tid_beg_(shard.beg),
       tid_range_(shard.Range()),
-      evidence_count_(tid_range_ * tid_range_) {
-    ConfigureOnce(pbuilder);
-}
+      evidence_count_(tid_range_ * tid_range_) {}
 
-ClueSet SingleClueSetBuilder::BuildClueSet() {
+ClueSet SingleClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
     std::vector<Clue> clues(evidence_count_, 0);
 
-    for (auto const& cat_pack : str_single_packs_) {
+    for (auto const& cat_pack : packs.str_single) {
         CorrectStrSingle(clues, plis_[cat_pack.left_idx], cat_pack.eq_mask);
     }
 
-    for (auto const& cat_pack : str_cross_packs_) {
+    for (auto const& cat_pack : packs.str_cross) {
         CorrectStrCross(clues, plis_[cat_pack.left_idx], plis_[cat_pack.right_idx],
                         cat_pack.eq_mask);
     }
 
-    for (auto const& num_pack : num_single_packs_) {
+    for (auto const& num_pack : packs.num_single) {
         CorrectNumSingle(clues, plis_[num_pack.left_idx], num_pack.eq_mask, num_pack.gt_mask);
     }
 
-    for (auto const& num_pack : num_cross_packs_) {
+    for (auto const& num_pack : packs.num_cross) {
         CorrectNumCross(clues, plis_[num_pack.left_idx], plis_[num_pack.right_idx],
                         num_pack.eq_mask, num_pack.gt_mask);
     }
