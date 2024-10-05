@@ -4,7 +4,6 @@
 #include <cmath>
 #include <memory>
 #include <stack>
-#include <string>
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
@@ -99,18 +98,15 @@ private:
         std::shared_ptr<DCCandidateTrie> dc_candidates;
         std::vector<DCCandidate> invalid_dcs;
         int64_t target;
-        std::string H;
 
         SearchNode(size_t e, boost::dynamic_bitset<> const& addable_predicates,
                    std::shared_ptr<DCCandidateTrie> dc_candidates,
-                   std::vector<DCCandidate> const& invalid_dcs, int64_t target,
-                   std::string const& H)
+                   std::vector<DCCandidate> const& invalid_dcs, int64_t target)
             : e(e),
               addable_predicates(addable_predicates),
               dc_candidates(std::move(dc_candidates)),
               invalid_dcs(invalid_dcs),
-              target(target),
-              H(H) {}
+              target(target) {}
     };
 
     void InverseEvidenceSet() {
@@ -124,7 +120,7 @@ private:
         auto dc_candidates = std::make_shared<DCCandidateTrie>(n_predicates_);
         dc_candidates->Add(DCCandidate{.cand = full_mask});
 
-        Walk(0, full_mask, dc_candidates, target_, nodes, "");
+        Walk(0, full_mask, dc_candidates, target_, nodes);
 
         while (!nodes.empty()) {
             SearchNode nd = std::move(nodes.top());
@@ -132,20 +128,19 @@ private:
             if (nd.e >= evidences_.size() || nd.addable_predicates.none()) continue;
             Hit(nd);  // Hit evidences_[e]
             if (nd.target > 0)
-                Walk(nd.e + 1, nd.addable_predicates, nd.dc_candidates, nd.target, nodes, nd.H);
+                Walk(nd.e + 1, nd.addable_predicates, nd.dc_candidates, nd.target, nodes);
         }
     }
 
     void Walk(size_t e, boost::dynamic_bitset<>& addable_predicates,
               std::shared_ptr<DCCandidateTrie> dc_candidates, int64_t target,
-              std::stack<SearchNode>& nodes, std::string const& status) {
+              std::stack<SearchNode>& nodes) {
         while (e < evidences_.size() && !dc_candidates->IsEmpty()) {
             PredicateBitset evi = evidences_[e].evidence;
             auto unhit_evi_dcs = dc_candidates->GetAndRemoveGeneralizations(evi);
 
             // Hit evidences_[e] later
-            SearchNode nd(e, addable_predicates, dc_candidates, unhit_evi_dcs, target,
-                          status + std::to_string(e));
+            SearchNode nd(e, addable_predicates, dc_candidates, unhit_evi_dcs, target);
             nodes.push(std::move(nd));
 
             // Unhit evidences_[e]
