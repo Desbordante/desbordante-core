@@ -18,11 +18,9 @@ struct ClueHash {
 using ClueSet = std::unordered_map<Clue, int64_t, ClueHash>;
 
 template <typename... Vectors>
-ClueSet AccumulateClues(Vectors const&... vectors) {
-    ClueSet clue_set;
+ClueSet AccumulateClues(ClueSet& clue_set, Vectors const&... vectors) {
+    clue_set.clear();
     int64_t clue_zero_count = 0;
-
-    clue_set.reserve((vectors.size() + ...));
 
     auto insert_clues = [&](std::vector<Clue> const& clues) {
         for (auto const& clue : clues) {

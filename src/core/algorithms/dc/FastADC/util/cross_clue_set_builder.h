@@ -15,7 +15,8 @@ public:
     CrossClueSetBuilder(CrossClueSetBuilder&& other) noexcept = default;
     CrossClueSetBuilder& operator=(CrossClueSetBuilder&& other) noexcept = delete;
 
-    ClueSet BuildClueSet(PredicatePacks const& packs);
+    void BuildClueSet(PredicatePacks const& packs, std::vector<Clue>& forward_clues,
+                      std::vector<Clue>& reverse_clues, ClueSet& clue_set);
 
 private:
     std::vector<Pli> const& plis1_;

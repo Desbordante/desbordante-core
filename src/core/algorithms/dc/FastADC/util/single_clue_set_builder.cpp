@@ -8,8 +8,11 @@ SingleClueSetBuilder::SingleClueSetBuilder(PliShard const& shard)
       tid_range_(shard.Range()),
       evidence_count_(tid_range_ * tid_range_) {}
 
-ClueSet SingleClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
-    std::vector<Clue> clues(evidence_count_, 0);
+void SingleClueSetBuilder::BuildClueSet(PredicatePacks const& packs, std::vector<Clue>& clues,
+                                        ClueSet& clue_set) {
+    clues.assign(evidence_count_, Clue());
+
+    if (clues.size() < evidence_count_) clues.resize(evidence_count_, Clue());
 
     for (auto const& cat_pack : packs.str_single) {
         CorrectStrSingle(clues, plis_[cat_pack.left_idx], cat_pack.eq_mask);
@@ -29,14 +32,12 @@ ClueSet SingleClueSetBuilder::BuildClueSet(PredicatePacks const& packs) {
                         num_pack.eq_mask, num_pack.gt_mask);
     }
 
-    ClueSet clue_set = AccumulateClues(clues);
+    AccumulateClues(clue_set, clues);
 
     // Reflex evidence check and removal:
     Clue reflex_clue{};  // All bits zero
     clue_set[reflex_clue] -= tid_range_;
     if (clue_set[reflex_clue] == 0) clue_set.erase(clue_set.find(reflex_clue));
-
-    return clue_set;
 }
 
 void SingleClueSetBuilder::SetSingleEQ(std::vector<Clue>& clues, Pli::Cluster const& cluster,
