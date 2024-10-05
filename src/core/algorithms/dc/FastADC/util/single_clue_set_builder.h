@@ -18,7 +18,7 @@ public:
     SingleClueSetBuilder(SingleClueSetBuilder&& other) noexcept = default;
     SingleClueSetBuilder& operator=(SingleClueSetBuilder&& other) noexcept = delete;
 
-    ClueSet BuildClueSet(PredicatePacks const& packs);
+    void BuildClueSet(PredicatePacks const& packs, std::vector<Clue>& clues, ClueSet& clue_set);
 
 private:
     std::vector<Pli> const& plis_;
