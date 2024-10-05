@@ -12,8 +12,8 @@
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/approximate_evidence_inverter.h"
 #include "dc/FastADC/util/clue_set_builder.h"
+#include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
-#include "dc/FastADC/util/pack_and_correction_map_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
 #include "dc/FastADC/util/predicate_organizer.h"
 #include "int_type.h"
@@ -258,7 +258,7 @@ protected:
 
     PredicateBuilder* predicate_builder_ = nullptr;
     PliShardBuilder* pli_shard_builder_ = nullptr;
-    PackAndCorrectionMapBuilder* pack_and_correction_map_builder_ = nullptr;
+    EvidenceAuxStructuresBuilder* evidence_aux_structures_builder_ = nullptr;
     EvidenceSetBuilder* evidence_set_builder_ = nullptr;
 
     CSVConfig const csv_file_ = kTestDC;
@@ -274,7 +274,7 @@ protected:
     void TearDown() override {
         delete predicate_builder_;
         delete pli_shard_builder_;
-        delete pack_and_correction_map_builder_;
+        delete evidence_aux_structures_builder_;
         delete evidence_set_builder_;
     }
 
@@ -288,13 +288,13 @@ protected:
     }
 
     void CreatePackAndCorrectionMapBuilder() {
-        pack_and_correction_map_builder_ = new PackAndCorrectionMapBuilder(*predicate_builder_);
+        evidence_aux_structures_builder_ = new EvidenceAuxStructuresBuilder(*predicate_builder_);
     }
 
     void CreateEvidenceSetBuilder() {
         evidence_set_builder_ =
-                new EvidenceSetBuilder(*predicate_builder_, pli_shard_builder_->pli_shards,
-                                       pack_and_correction_map_builder_->GetPredicatePacks());
+                new EvidenceSetBuilder(pli_shard_builder_->pli_shards,
+                                       evidence_aux_structures_builder_->GetPredicatePacks());
     }
 };
 
@@ -404,11 +404,11 @@ TEST_F(FastADC, ClueSetPredicatePacksAndCorrectionMap) {
     CreatePredicateBuilder();
     predicate_builder_->BuildPredicateSpace(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
+    evidence_aux_structures_builder_->BuildAll();
 
-    ASSERT_EQ(pack_and_correction_map_builder_->GetNumberOfBitsInClue(), 18);
-    auto packs = pack_and_correction_map_builder_->GetPredicatePacksAsOneVector();
-    auto correction_map = pack_and_correction_map_builder_->GetCorrectionMap();
+    ASSERT_EQ(evidence_aux_structures_builder_->GetNumberOfBitsInClue(), 18);
+    auto packs = evidence_aux_structures_builder_->GetPredicatePacksAsOneVector();
+    auto correction_map = evidence_aux_structures_builder_->GetCorrectionMap();
 
     for (size_t i = 0; i < packs.size(); ++i) {
         EXPECT_EQ(packs[i].left_idx, expected_column_indices[i].first);
@@ -430,10 +430,10 @@ TEST_F(FastADC, ClueSet) {
     CreatePliShardBuilder();
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
+    evidence_aux_structures_builder_->BuildAll();
 
     ClueSet clue_set = BuildClueSet(pli_shard_builder_->pli_shards,
-                                    pack_and_correction_map_builder_->GetPredicatePacks());
+                                    evidence_aux_structures_builder_->GetPredicatePacks());
 
     for (auto const& [expected_clue, expected_count] : expected_clue_set) {
         auto found = clue_set.find(PredicateBitset(expected_clue));
@@ -455,10 +455,9 @@ TEST_F(FastADC, CardinalityMask) {
     CreatePliShardBuilder();
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
-    CreateEvidenceSetBuilder();
+    evidence_aux_structures_builder_->BuildAll();
 
-    EXPECT_EQ(evidence_set_builder_->GetCardinalityMask(),
+    EXPECT_EQ(evidence_aux_structures_builder_->GetCardinalityMask(),
               VectorToBitset(expected_cardinality_mask));
 }
 
@@ -468,9 +467,10 @@ TEST_F(FastADC, EvidenceSet) {
     CreatePliShardBuilder();
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
+    evidence_aux_structures_builder_->BuildAll();
     CreateEvidenceSetBuilder();
-    evidence_set_builder_->BuildEvidenceSet(pack_and_correction_map_builder_->GetCorrectionMap());
+    evidence_set_builder_->BuildEvidenceSet(evidence_aux_structures_builder_->GetCorrectionMap(),
+                                            evidence_aux_structures_builder_->GetCardinalityMask());
 
     auto evidence_set = std::move(evidence_set_builder_->evidence_set);
 
@@ -495,9 +495,10 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
     CreatePliShardBuilder();
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
+    evidence_aux_structures_builder_->BuildAll();
     CreateEvidenceSetBuilder();
-    evidence_set_builder_->BuildEvidenceSet(pack_and_correction_map_builder_->GetCorrectionMap());
+    evidence_set_builder_->BuildEvidenceSet(evidence_aux_structures_builder_->GetCorrectionMap(),
+                                            evidence_aux_structures_builder_->GetCardinalityMask());
 
     auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
@@ -535,9 +536,10 @@ TEST_F(FastADC, DenialConstraints) {
     CreatePliShardBuilder();
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
-    pack_and_correction_map_builder_->BuildAll();
+    evidence_aux_structures_builder_->BuildAll();
     CreateEvidenceSetBuilder();
-    evidence_set_builder_->BuildEvidenceSet(pack_and_correction_map_builder_->GetCorrectionMap());
+    evidence_set_builder_->BuildEvidenceSet(evidence_aux_structures_builder_->GetCorrectionMap(),
+                                            evidence_aux_structures_builder_->GetCardinalityMask());
 
     auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
