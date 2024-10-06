@@ -174,6 +174,10 @@ private:
     inline static std::vector<TypeId> const kAllCandidateTypes = {
             +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
     inline static std::unordered_map<TypeId, std::regex> const kTypeIdToRegex = {
+            {TypeId::kDate,
+             std::regex(
+                     R"(^([0-9]{4})[-.\/]?(1[0-2]|0[1-9]|[1-9])[-.\/]?(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
+            {TypeId::kDouble, std::regex(R"(^([0-9]|\+|-|\.|e|E|i|I|n|N|f|F|a|A)+$)")},
             {+TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
             {+TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
             {+TypeId::kNull, std::regex(Null::kValue.data())},
@@ -204,32 +208,38 @@ private:
                 }
                 return is_simple_date;
             };
+    inline static std::function<bool(std::string const&)> const kDoubleCheck =
+            [](std::string const& val) {
+                bool is_double = false;
+                try {
+                    std::size_t pos = 0;
+                    std::stod(val, &pos);
+                    if (pos == val.size()) {
+                        is_double = true;
+                    }
+                } catch (...) {
+                }
+                return is_double;
+            };
     inline static std::unordered_map<TypeId, std::function<bool(std::string const&)>> const
-            kTypeIdToChecker = {{TypeId::kDouble,
-                                 [](std::string const& val) {
-                                     bool is_double = false;
-                                     try {
-                                         std::size_t pos = 0;
-                                         std::stod(val, &pos);
-                                         if (pos == val.size()) {
-                                             is_double = true;
-                                         }
-                                     } catch (...) {
-                                     }
-                                     return is_double;
-                                 }},
-                                {TypeId::kBigInt,
-                                 [](std::string const& val) {
-                                     return std::regex_match(val,
-                                                             kTypeIdToRegex.at(+TypeId::kBigInt));
-                                 }},
-                                {TypeId::kInt,
-                                 [](std::string const& val) {
-                                     return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
-                                 }},
-                                {TypeId::kDate, [](std::string const& val) {
-                                     return kDelimitedDateCheck(val) || kUndelimitedDateCheck(val);
-                                 }}};
+            kTypeIdToChecker = {
+                    {TypeId::kDouble,
+                     [](std::string const& val) {
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble)) &&
+                                kDoubleCheck(val);
+                     }},
+                    {TypeId::kBigInt,
+                     [](std::string const& val) {
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
+                     }},
+                    {TypeId::kInt,
+                     [](std::string const& val) {
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
+                     }},
+                    {TypeId::kDate, [](std::string const& val) {
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
+                                (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
+                     }}};
     // each 1 represents a possible type from kAllCandidateTypes
     inline static std::unordered_map<TypeId, std::bitset<5>> const kTypeIdToBitset = {
             {+TypeId::kDate, std::bitset<5>("00001")},  // bitset for delimited dates
