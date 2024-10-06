@@ -119,4 +119,6 @@ CSVConfig const kTestDynamicFDUpdateBad3 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad3.csv", ',', true);
 CSVConfig const kTestDynamicFDUpdateBad4 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
+CSVConfig const kTestSeparator = CreateCsvConfig("TestSeparator.csv", ',', false);
+CSVConfig const kTestSeparator1 = CreateCsvConfig("TestSeparator1.csv", ',', false);
 }  // namespace tests

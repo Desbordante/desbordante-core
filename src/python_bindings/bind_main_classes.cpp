@@ -13,6 +13,7 @@
 #include "py_util/get_py_type.h"
 #include "py_util/opt_to_py.h"
 #include "py_util/py_to_any.h"
+#include "separator_validator.h"
 
 namespace {
 namespace py = pybind11;
@@ -41,6 +42,12 @@ void BindMainClasses(py::module_& main_module) {
 
     py::register_exception<config::ConfigurationError>(main_module, "ConfigurationError",
                                                        PyExc_ValueError);
+
+    auto util_module = main_module.def_submodule("util");
+    util_module.def(
+            "validate_separator",
+            [](std::string const& path, char sep) { return util::ValidateSeparator(path, sep); },
+            "Validate separator for a CSV table");
 
 #define CERTAIN_SCRIPTS_ONLY                                                       \
     "\nThis option is only expected to be used by Python scripts in which it is\n" \
