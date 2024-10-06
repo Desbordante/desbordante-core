@@ -4,10 +4,12 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../model/predicate.h"
+
 namespace algos::fastadc {
 
-/* Maximum supported number of bits in clue is 64 */
-using Clue = std::bitset<64>;
+/* Maximum supported number of bits in clue is kPredicateBits */
+using Clue = std::bitset<kPredicateBits>;
 
 struct ClueHash {
     std::size_t operator()(Clue const& clue) const noexcept {
