@@ -16,11 +16,12 @@ using PredicatesSpan = std::span<PredicatePtr const>;
 class PredicateProvider;
 /*
  * TODO: Java code uses LongBitSet, which is like boost::dynamic_bitset, but
- * restructs number of bits in the clue to 64. Need to investigate further whether
- * the Java's algorithm could work with predicate space more than 64.
- * But for now we use 64 as maxumum amount of predicates
+ * restructs number of bits in the clue to kPredicateBits. Need to investigate further whether
+ * the Java's algorithm could work with predicate space more than kPredicateBits.
+ * But for now we use kPredicateBits as maxumum amount of predicates
  */
-using PredicateBitset = std::bitset<64>;
+constexpr auto kPredicateBits = 128;
+using PredicateBitset = std::bitset<kPredicateBits>;
 
 /**
  * @brief Represents a predicate for FastADC.

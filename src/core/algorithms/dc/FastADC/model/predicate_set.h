@@ -12,7 +12,7 @@ namespace algos::fastadc {
 
 class PredicateSet {
 private:
-    boost::dynamic_bitset<> bitset_{64};
+    boost::dynamic_bitset<> bitset_{kPredicateBits};
     mutable std::unique_ptr<PredicateSet> inv_set_TS_;  // Cached inverse set
 
 public:

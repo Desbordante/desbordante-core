@@ -105,7 +105,7 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
     ProcessNumPredicates(num_cross_, packs_.num_cross, count);
 
     LOG(DEBUG) << "  [CLUE] # of bits in clue: " << count;
-    assert(count <= 64);
+    assert(count <= kPredicateBits);
 }
 
 }  // namespace algos::fastadc
