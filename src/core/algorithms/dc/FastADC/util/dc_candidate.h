@@ -5,8 +5,8 @@
 namespace algos::fastadc {
 
 struct DCCandidate {
-    boost::dynamic_bitset<> bitset{64};
-    boost::dynamic_bitset<> cand{64};
+    boost::dynamic_bitset<> bitset{kPredicateBits};
+    boost::dynamic_bitset<> cand{kPredicateBits};
 };
 
 }  // namespace algos::fastadc
