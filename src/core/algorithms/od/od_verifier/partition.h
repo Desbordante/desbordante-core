@@ -4,25 +4,27 @@
 
 namespace algos::od_verifier {
 
-class Partition : protected algos::fastod::ComplexStrippedPartition {
+class ComplaxStrippedPartition : protected algos::fastod::ComplexStrippedPartition {
 private:
-    std::vector<std::pair<int, int>> CommonViolationBySplit(model::ColumnIndex right) const;
+    using ViolationDescription = std::pair<int, int>;
 
-    std::vector<std::pair<int, int>> RangeBasedViolationBySplit(model::ColumnIndex right) const;
+    std::vector<ViolationDescription> CommonViolationBySplit(model::ColumnIndex right) const;
+
+    std::vector<ViolationDescription> RangeBasedViolationBySplit(model::ColumnIndex right) const;
 
 public:
-    Partition() : algos::fastod::ComplexStrippedPartition() {}
+    ComplaxStrippedPartition() : algos::fastod::ComplexStrippedPartition() {}
 
-    Partition(algos::fastod::ComplexStrippedPartition const& daddy)
+    ComplaxStrippedPartition(algos::fastod::ComplexStrippedPartition const& daddy)
         : algos::fastod::ComplexStrippedPartition(daddy) {}
 
-    std::vector<std::pair<int, int>> FindViolationsBySplit(model::ColumnIndex right) const;
+    std::vector<ViolationDescription> FindViolationsBySplit(model::ColumnIndex right) const;
 
     template <bool Ascending>
-    std::vector<std::pair<int, int>> FindViolationsBySwap(model::ColumnIndex left,
-                                                          model::ColumnIndex right) const {
+    std::vector<ViolationDescription> FindViolationsBySwap(model::ColumnIndex left,
+                                                           model::ColumnIndex right) const {
         size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
-        std::vector<std::pair<int, int>> violates;
+        std::vector<ComplaxStrippedPartition::ViolationDescription> violates;
 
         for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
             size_t const group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
@@ -78,7 +80,7 @@ public:
                 }
 
                 if (!is_first_group && values[prev_group_max_index].second > second) {
-                    violates.push_back(std::pair<int, int>(right, row_pos[i]));
+                    violates.emplace_back(right, row_pos[i]);
                 }
             }
         }

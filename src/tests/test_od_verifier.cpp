@@ -9,8 +9,8 @@ namespace tests {
 
 struct ODVerifyingParams {
     algos::StdParamsMap params;
-    size_t const row_violate_ods_by_split = 0;
-    size_t const row_violate_ods_by_swap = 0;
+    size_t const number_of_rows_violate_by_split = 0;
+    size_t const number_of_rows_violate_by_swap = 0;
 
     ODVerifyingParams(config::IndicesType lhs_indices, config::IndicesType rhs_indices,
                       config::IndicesType context, bool ascending, size_t const row_error_split = 0,
@@ -21,8 +21,8 @@ struct ODVerifyingParams {
                   {config::names::kRhsIndices, std::move(rhs_indices)},
                   {config::names::kODContext, std::move(context)},
                   {config::names::kAscendingOD, ascending}}),
-          row_violate_ods_by_split(row_error_split),
-          row_violate_ods_by_swap(row_error_swap) {}
+          number_of_rows_violate_by_split(row_error_split),
+          number_of_rows_violate_by_swap(row_error_swap) {}
 };
 
 class TestODVerifying : public ::testing::TestWithParam<ODVerifyingParams> {};
@@ -32,8 +32,8 @@ TEST_P(TestODVerifying, DefaultTest) {
     auto mp = algos::StdParamsMap(p.params);
     auto verifier = algos::CreateAndLoadAlgorithm<algos::od_verifier::ODVerifier>(mp);
     verifier->Execute();
-    EXPECT_EQ(verifier->GetNumRowsViolateBySwap(), p.row_violate_ods_by_swap);
-    EXPECT_EQ(verifier->GetNumRowsViolateBySplit(), p.row_violate_ods_by_split);
+    EXPECT_EQ(verifier->GetNumRowsViolateBySwap(), p.number_of_rows_violate_by_swap);
+    EXPECT_EQ(verifier->GetNumRowsViolateBySplit(), p.number_of_rows_violate_by_split);
 }
 
 // clang-format off

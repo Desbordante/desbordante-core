@@ -4,6 +4,7 @@
 #include "algorithms/od/fastod/model/canonical_od.h"
 #include "config/indices/type.h"
 #include "model/table/column_layout_relation_data.h"
+#include "partition.h"
 
 namespace algos::od_verifier {
 
@@ -21,8 +22,8 @@ private:
     // input data
     config::InputTable input_table_;
     config::EqNullsType is_null_equal_null_;
-    IndicesType lhs_indices_;
-    IndicesType rhs_indices_;
+    IndexType lhs_indicex_;
+    IndexType rhs_indicex_;
     IndicesType context_indices_;
     bool ascending_;
 
@@ -45,7 +46,37 @@ private:
 
     // checks whether OD is violated and finds the rows where it is violated
     template <bool Ascending>
-    void VerifyOD();
+    void VerifyOD() {
+        AttributeSet context;
+
+        for (auto column : context_indices_) context.Set(column);
+
+        fastod::ComplexStrippedPartition stripped_partition_swap(
+                (partition_cache_.GetStrippedPartition(context, data_)));
+
+        if (stripped_partition_swap.Swap<Ascending>(lhs_indicex_, rhs_indicex_)) {
+            ComplaxStrippedPartition part{stripped_partition_swap};
+            std::vector<std::pair<int, int>> violates(
+                    part.FindViolationsBySwap<Ascending>(lhs_indicex_, rhs_indicex_));
+
+            for (auto position_violate : violates)
+                row_violate_ods_by_swap_.push_back(position_violate.second + 1);
+        }
+
+        context.Set(lhs_indicex_);
+        fastod::ComplexStrippedPartition stripped_partition_split(
+                partition_cache_.GetStrippedPartition(context, data_));
+
+        if (stripped_partition_split.Split(rhs_indicex_)) {
+            ComplaxStrippedPartition part{stripped_partition_split};
+            std::vector<std::pair<int, int>> violates(part.FindViolationsBySplit(rhs_indicex_));
+
+            for (auto position_violate : violates)
+                row_violate_ods_by_split_.push_back(position_violate.second + 1);
+        }
+        std::sort(row_violate_ods_by_split_.begin(), row_violate_ods_by_split_.end());
+        std::sort(row_violate_ods_by_swap_.begin(), row_violate_ods_by_swap_.end());
+    }
 
     // reset statistic of violations
     void ResetState() override {
@@ -54,23 +85,17 @@ private:
     }
 
 public:
-    // checks whether the OD has broken
-    bool ODHolds() const {
-        return row_violate_ods_by_swap_.empty() && row_violate_ods_by_split_.empty();
-    }
-
     // base constructor
     ODVerifier();
 
+    // checks whether the OD has broken
+    bool ODHolds() const;
+
     // Returns the number of rows that violate the OD by split
-    size_t GetNumRowsViolateBySplit() const {
-        return row_violate_ods_by_split_.size();
-    }
+    size_t GetNumRowsViolateBySplit() const;
 
     // Returns the number of rows that violate the OD by swap
-    size_t GetNumRowsViolateBySwap() const {
-        return row_violate_ods_by_swap_.size();
-    }
+    size_t GetNumRowsViolateBySwap() const;
 };
 
 }  // namespace algos::od_verifier

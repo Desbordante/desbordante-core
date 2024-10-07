@@ -10,6 +10,7 @@
 #include "algorithms/ind/mining_algorithms.h"
 #include "algorithms/metric/verification_algorithms.h"
 #include "algorithms/od/mining_algorithms.h"
+#include "algorithms/od/verification_algorithms.h"
 #include "algorithms/statistics/algorithms.h"
 #include "algorithms/ucc/mining_algorithms.h"
 #include "algorithms/ucc/verification_algorithms.h"
