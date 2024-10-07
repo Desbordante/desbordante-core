@@ -5,20 +5,19 @@
 #include <vector>
 
 #include "algorithms/fd/hycommon/primitive_validations.h"
-#include "algorithms/fd/hyfd/model/fd_tree.h"
 #include "algorithms/fd/raw_fd.h"
+#include "model/FDTrees/fd_tree.h"
 #include "model/table/position_list_index.h"
 #include "types.h"
 
 namespace algos::hyfd {
 
-using LhsPair = fd_tree::LhsPair;
+using LhsPair = model::LhsPair;
 
 class Validator {
-private:
     using FDValidations = hy::PrimitiveValidations<RawFD>;
 
-    std::shared_ptr<fd_tree::FDTree> fds_;
+    std::shared_ptr<model::FDTree> fds_;
 
     hy::PLIsPtr plis_;
     hy::RowsPtr compressed_records_;
@@ -38,7 +37,7 @@ private:
     }
 
 public:
-    Validator(std::shared_ptr<fd_tree::FDTree> fds, hy::PLIsPtr plis,
+    Validator(std::shared_ptr<model::FDTree> fds, hy::PLIsPtr plis,
               hy::RowsPtr compressed_records) noexcept
         : fds_(std::move(fds)),
           plis_(std::move(plis)),
