@@ -18,6 +18,7 @@
 #include "nd/bind_nd.h"
 #include "nd/bind_nd_verification.h"
 #include "od/bind_od.h"
+#include "od/bind_od_verification.h"
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
@@ -40,7 +41,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
     for (auto bind_func :
          {BindMainClasses, BindDataTypes, BindFd, BindCfd, BindAr, BindUcc, BindAc, BindOd, BindNd,
           BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd,
-          BindGfdVerification, BindSplit, BindDynamicFdVerification, BindNdVerification}) {
+          BindGfdVerification, BindSplit, BindDynamicFdVerification, BindNdVerification,
+          BindAODVerification}) {
         bind_func(module);
     }
 }

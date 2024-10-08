@@ -38,6 +38,7 @@ private:
     void ClearOptions() noexcept;
     virtual void LoadDataInternal() = 0;
     virtual unsigned long long ExecuteInternal() = 0;
+    bool AllRequiredOptionsAreSet() const noexcept;
 
 protected:
     void AddProgress(double val) noexcept {
@@ -64,6 +65,7 @@ protected:
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.
     virtual bool SetExternalOption(std::string_view option_name, boost::any const& value);
+    virtual bool ExternalOptionIsRequired(std::string_view option_name) const;
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
@@ -90,6 +92,7 @@ public:
     unsigned long long Execute();
 
     void SetOption(std::string_view option_name, boost::any const& value = {});
+    bool OptionIsRequired(std::string_view option_name) const;
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 

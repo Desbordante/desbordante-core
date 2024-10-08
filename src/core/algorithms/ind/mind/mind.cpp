@@ -49,6 +49,10 @@ bool Mind::SetExternalOption(std::string_view option_name, boost::any const& val
     return false;
 }
 
+bool Mind::ExternalOptionIsRequired(std::string_view option_name) const {
+    return auind_algo_->OptionIsRequired(option_name);
+}
+
 void Mind::LoadINDAlgorithmDataInternal() {
     timings_.load = util::TimedInvoke(&Algorithm::LoadData, auind_algo_);
 }

@@ -6,6 +6,7 @@
 #include "algorithms/cfd/enums.h"
 #include "algorithms/fd/tane/enums.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/od/fastod/od_ordering.h"
 #include "util/enum_to_available_values.h"
 
 namespace config::descriptions {
@@ -19,6 +20,8 @@ std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to us
                                            util::EnumToAvailableValues<algos::cfd::Substrategy>();
 std::string const kDErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::ErrorMeasure>();
+std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
+                                     util::EnumToAvailableValues<algos::od::Ordering>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -109,4 +112,10 @@ constexpr auto kDInsertStatements = "Rows to be inserted into the table using th
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+constexpr auto kDOcContext = "Context of the OC to verify";
+constexpr auto kDOcLeftIndex = "Index of the left attribute of the OC to verify";
+constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verify";
+auto const kDODLeftOrdering = details::kDODLeftOrdering;
+constexpr auto kDOFDContext = "Context of the OFD to verify";
+constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
 }  // namespace config::descriptions

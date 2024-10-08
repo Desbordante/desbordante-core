@@ -25,7 +25,7 @@ The currently supported data patterns are:
 * Conditional functional dependencies (discovery)
 * Inclusion dependencies (discovery)
 * Order dependencies:
-   - set-based axiomatization (discovery)
+   - set-based axiomatization (discovery and validation including approximate)
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints (discovery)
