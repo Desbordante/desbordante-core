@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "error/type.h"
 #include "ind.h"
 #include "model/table/relational_schema.h"
 #include "tabular_data/input_tables_type.h"
@@ -39,13 +40,15 @@ protected:
     explicit INDAlgorithm(std::vector<std::string_view> phase_names);
 
     virtual void RegisterIND(std::shared_ptr<model::ColumnCombination> lhs,
-                             std::shared_ptr<model::ColumnCombination> rhs) {
-        ind_collection_.Register(std::move(lhs), std::move(rhs), schemas_);
+                             std::shared_ptr<model::ColumnCombination> rhs,
+                             config::ErrorType error = 0.0) {
+        ind_collection_.Register(std::move(lhs), std::move(rhs), schemas_, error);
     }
 
-    void RegisterIND(model::ColumnCombination lhs, model::ColumnCombination rhs) {
+    void RegisterIND(model::ColumnCombination lhs, model::ColumnCombination rhs,
+                     config::ErrorType error = 0.0) {
         RegisterIND(std::make_shared<model::ColumnCombination>(std::move(lhs)),
-                    std::make_shared<model::ColumnCombination>(std::move(rhs)));
+                    std::make_shared<model::ColumnCombination>(std::move(rhs)), error);
     }
 
     virtual void RegisterIND(IND ind) {

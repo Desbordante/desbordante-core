@@ -9,11 +9,9 @@ namespace algos::spider {
 
 std::vector<AttributeIndex> AINDAttribute::GetRefIds(config::ErrorType max_error) const {
     std::vector<AttributeIndex> refs;
-    auto const dep_count = static_cast<double>(occurrences_[id_]);
     for (size_t ref_id = 0; ref_id != occurrences_.size(); ++ref_id) {
         if (id_ == ref_id) continue;
-        config::ErrorType const error = 1 - occurrences_[ref_id] / dep_count;
-        if (error <= max_error) {
+        if (GetError(ref_id) <= max_error) {
             refs.push_back(ref_id);
         }
     }

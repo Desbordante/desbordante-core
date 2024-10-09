@@ -11,9 +11,10 @@
 #include "algorithms/create_algorithm.h"
 #include "config/error/option.h"
 #include "config/names_and_descriptions.h"
-#include "dataset_stream_projection.h"
+#include "error/type.h"
 #include "ind/ind_algorithm.h"
 #include "max_arity/option.h"
+#include "model/table/dataset_stream_projection.h"
 #include "table/column_combination.h"
 #include "table/dataset_stream_fixed.h"
 #include "tabular_data/input_table_type.h"
@@ -156,7 +157,7 @@ HashSet CreateHashSet(DatasetStreamFixedProjection&& stream) {
 }  // namespace
 }  // namespace mind
 
-bool Mind::TestCandidate(RawIND const& raw_ind) {
+std::pair<bool, std::optional<config::ErrorType>> Mind::TestCandidate(RawIND const& raw_ind) {
     using namespace mind;
 
     auto const create_projected_stream = [&](model::ColumnCombination const& cc) {
@@ -165,34 +166,36 @@ bool Mind::TestCandidate(RawIND const& raw_ind) {
         return DatasetStreamFixedProjection{table, cc.GetColumnIndices()};
     };
 
-    HashSet const s_hash_set{CreateHashSet(create_projected_stream(raw_ind.rhs))};
+    HashSet const rhs_hash_set{CreateHashSet(create_projected_stream(raw_ind.rhs))};
 
     if (max_ind_error_ == 0) {
-        DatasetStreamFixedProjection r_stream = create_projected_stream(raw_ind.lhs);
-        while (r_stream.HasNextRow()) {
-            if (!s_hash_set.contains(r_stream.GetNextRow())) return false;
+        DatasetStreamFixedProjection lhs_stream = create_projected_stream(raw_ind.lhs);
+        while (lhs_stream.HasNextRow()) {
+            if (!rhs_hash_set.contains(lhs_stream.GetNextRow())) return {false, std::nullopt};
         }
-        return true;
+        return {true, config::ErrorType{0.0}};
     }
 
-    HashSet const r_hash_set{CreateHashSet(create_projected_stream(raw_ind.lhs))};
-
-    auto const r_cardinality = static_cast<model::TupleIndex>(r_hash_set.size());
-    model::TupleIndex const disqualify_row_limit = std::floor(r_cardinality * max_ind_error_) + 1;
+    HashSet const lhs_hash_set{CreateHashSet(create_projected_stream(raw_ind.lhs))};
+    auto const lhs_cardinality = static_cast<model::TupleIndex>(lhs_hash_set.size());
+    model::TupleIndex const disqualify_row_limit = std::floor(lhs_cardinality * max_ind_error_) + 1;
     model::TupleIndex disqualify_row_count = 0;
-    for (Row const& row : r_hash_set) {
-        if (!s_hash_set.contains(row)) {
+    for (Row const& row : lhs_hash_set) {
+        if (!rhs_hash_set.contains(row)) {
             ++disqualify_row_count;
             if (disqualify_row_count == disqualify_row_limit) {
-                assert(static_cast<config::ErrorType>(disqualify_row_count) / r_cardinality >
+                assert(static_cast<config::ErrorType>(disqualify_row_count) / lhs_cardinality >
                        max_ind_error_);
-                return false;
+                return {false, std::nullopt};
             }
         }
     }
 
-    auto const error = static_cast<config::ErrorType>(disqualify_row_count) / r_cardinality;
-    return error <= max_ind_error_;
+    auto const error = static_cast<config::ErrorType>(disqualify_row_count) / lhs_cardinality;
+    if (error <= max_ind_error_)
+        return {true, error};
+    else
+        return {false, std::nullopt};
 }
 
 /*
@@ -246,8 +249,9 @@ void Mind::MineNaryINDs() {
         prev_it = std::prev(INDList().end()); /*< last element of the previous lattice level */
         prev_raw_inds.clear();
         for (RawIND const& candidate : candidates) {
-            if (TestCandidate(candidate)) {
-                RegisterIND(candidate.lhs, candidate.rhs);
+            auto const& [is_valid, error_opt] = TestCandidate(candidate);
+            if (is_valid) {
+                RegisterIND(candidate.lhs, candidate.rhs, error_opt.value());
                 prev_raw_inds.insert(candidate);
             }
         }
