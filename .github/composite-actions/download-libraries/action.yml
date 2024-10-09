@@ -79,6 +79,11 @@ runs:
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost != 'false'
+    - name: Download frozen
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: frozen
+        download-command: git clone https://github.com/serge-sans-paille/frozen.git --depth 1
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs
