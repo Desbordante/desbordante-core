@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0144 NEW)
 project(Desbordante)
 
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
@@ -101,8 +102,12 @@ else()
 endif()
 
 # configuring boost
+if (DEFINED ENV{BOOST_COMPILER})
+    set(Boost_COMPILER $ENV{BOOST_COMPILER})
+endif()
+
 set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph CONFIG)
 include_directories(${Boost_INCLUDE_DIRS})
 message(${Boost_INCLUDE_DIRS})
 
