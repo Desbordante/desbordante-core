@@ -102,6 +102,10 @@ else()
 endif()
 
 # configuring boost
+if (DEFINED ENV{BOOST_COMPILER})
+    set(Boost_COMPILER $ENV{BOOST_COMPILER})
+endif()
+
 set(Boost_USE_STATIC_LIBS OFF)
 find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph CONFIG)
 include_directories(${Boost_INCLUDE_DIRS})
