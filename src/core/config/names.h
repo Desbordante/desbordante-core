@@ -62,4 +62,10 @@ constexpr auto kNumColumns = "num_columns";
 constexpr auto kInsertStatements = "insert";
 constexpr auto kDeleteStatements = "delete";
 constexpr auto kUpdateStatements = "update";
+constexpr auto kOcContext = "oc_context";
+constexpr auto kOcLeftIndex = "oc_left_index";
+constexpr auto kOcRightIndex = "oc_right_index";
+constexpr auto kOcLeftOrdering = "left_ordering";
+constexpr auto kOFDContext = "ofd_context";
+constexpr auto kOFDRightIndex = "ofd_right_index";
 }  // namespace config::names

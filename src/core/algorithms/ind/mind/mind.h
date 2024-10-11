@@ -42,6 +42,7 @@ private:
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const override;
     bool SetExternalOption(std::string_view option_name, boost::any const& value) override;
+    bool ExternalOptionIsRequired(std::string_view option_name) const override;
     void LoadINDAlgorithmDataInternal() override;
 
     bool TestCandidate(RawIND const& raw_ind);

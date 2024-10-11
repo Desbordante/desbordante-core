@@ -24,6 +24,8 @@ class Option : public IOption {
 public:
     using DefaultFunc = std::function<T()>;
     using ValueCheckFunc = std::function<void(T const &)>;
+    using BeforeSetFunc = std::function<void()>;
+    using IsRequiredFunc = std::function<bool()>;
     using CondCheckFunc = std::function<bool(T const &val)>;
     using OptCondVector = std::vector<std::pair<CondCheckFunc, std::vector<std::string_view>>>;
     using NormalizeFunc = std::function<void(T &)>;
@@ -90,8 +92,24 @@ public:
         return *this;
     }
 
+    Option &SetBeforeSetCallback(BeforeSetFunc before_set) {
+        assert(!before_set_);
+        before_set_ = std::move(before_set);
+        return *this;
+    }
+
+    Option &SetIsRequiredFunc(IsRequiredFunc is_required) {
+        assert(!is_required_);
+        is_required_ = std::move(is_required);
+        return *this;
+    }
+
     OptValue GetOptValue() const override {
         return OptValue{std::type_index(typeid(T)), boost::any(*value_ptr_)};
+    }
+
+    bool IsRequired() const noexcept override {
+        return (is_required_ == nullptr) ? true : is_required_();
     }
 
 private:
@@ -103,6 +121,8 @@ private:
     std::string_view description_;
     DefaultFunc default_func_;
     ValueCheckFunc value_check_{};
+    BeforeSetFunc before_set_{};
+    IsRequiredFunc is_required_{};
     OptCondVector opt_cond_{};
     NormalizeFunc normalize_func_{};
 };
@@ -113,6 +133,7 @@ std::vector<std::string_view> Option<T>::Set(boost::any const &value) {
     T converted_value = ConvertValue(value);
     if (normalize_func_) normalize_func_(converted_value);
     if (value_check_) value_check_(converted_value);
+    if (before_set_) before_set_();
 
     assert(value_ptr_ != nullptr);
     is_set_ = true;

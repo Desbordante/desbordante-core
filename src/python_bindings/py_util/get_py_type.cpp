@@ -15,6 +15,7 @@
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
 #include "model/table/column_combination.h"
+#include "od/fastod/od_ordering.h"
 
 namespace py = pybind11;
 
@@ -78,6 +79,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<config::ErrorMeasureType, kPyStr>,
             PyTypePair<algos::InputFormat, kPyStr>,
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
+            PyTypePair<algos::od::Ordering, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
