@@ -15,11 +15,12 @@
 #include "util/bitset_utils.h"
 #include "util/erase_if_replace.h"
 #include "util/py_tuple_hash.h"
+#include "util/get_preallocated_vector.h"
 #include "util/reserve_more.h"
 
-namespace {
+namespace algos::hymd {
+
 using model::Index;
-using namespace algos::hymd;
 using indexes::CompressedRecords;
 using indexes::PliCluster;
 using indexes::RecSet;
@@ -29,16 +30,6 @@ using IndexVector = std::vector<Index>;
 using RecIdVec = std::vector<RecordIdentifier>;
 using RecPtr = CompressedRecord const*;
 using RecordCluster = std::vector<RecPtr>;
-
-template <typename ElementType>
-std::vector<ElementType> GetAllocatedVector(std::size_t size) {
-    std::vector<ElementType> vec;
-    vec.reserve(size);
-    return vec;
-}
-}  // namespace
-
-namespace algos::hymd {
 
 RecSet const* Validator::GetSimilarRecords(ValueIdentifier value_id, model::Index lhs_ccv_id,
                                            Index column_match_index) const {
@@ -210,7 +201,7 @@ auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatch(
     assert(!working_info.ShouldStop());
 
     assert(!similar_records.empty());
-    RecordCluster cluster_records = GetAllocatedVector<RecPtr>(cluster.size());
+    RecordCluster cluster_records = util::GetPreallocatedVector<RecPtr>(cluster.size());
     for (RecordIdentifier left_record_id : cluster) {
         cluster_records.push_back(&left_records_[left_record_id]);
     }
