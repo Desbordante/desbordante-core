@@ -12,8 +12,6 @@ struct ColumnMatch {
     Index right_col_index;
     std::string similarity_function_name;
 
-    ColumnMatch() = default;
-
     ColumnMatch(Index left_col_index, Index right_col_index,
                 std::string similarity_function_name) noexcept
         : left_col_index(left_col_index),
