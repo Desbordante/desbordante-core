@@ -392,8 +392,8 @@ public:
     template <typename... Args>
     static std::pair<RecordPairInferrer, bool> Create(Args&&... args) {
         auto inferrer = RecordPairInferrer{std::forward<Args>(args)...};
-        bool done = inferrer.Initialize();
-        if (done) return {std::move(inferrer), true};
+        bool out_of_pairs = inferrer.Initialize();
+        if (out_of_pairs) return {std::move(inferrer), true};
         return {std::move(inferrer), inferrer.InferFromRecordPairs({})};
     }
 

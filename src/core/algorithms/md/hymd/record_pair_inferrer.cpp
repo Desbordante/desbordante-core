@@ -97,7 +97,7 @@ auto RecordPairInferrer::CreateStats(
     indexes::SimilarityMatrix const& sim_matrix = cm_info.similarity_info.similarity_matrix;
     std::vector<ColumnClassifierValueId> const& rhs_lhs_map =
             (*lhs_ccv_id_info_)[column_match_index].rhs_to_lhs_map;
-    model::Index const left_pli_index = cm_info.right_column_index;
+    model::Index const left_pli_index = cm_info.left_column_index;
     model::Index const right_pli_index = cm_info.right_column_index;
     ValueIdentifier const right_value_id =
             records_info_->GetRightCompressor().GetRecords()[right_record_id][right_pli_index];

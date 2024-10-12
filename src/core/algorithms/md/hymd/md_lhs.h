@@ -25,6 +25,10 @@ public:
     using FasterType = void;
     using iterator = Nodes::const_iterator;
 
+    // Placeholder for empty LHS.
+    MdLhs() = default;
+
+    // Cardinality must not exceed this value.
     MdLhs(std::size_t max_values) {
         values_.reserve(max_values);
     }

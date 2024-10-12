@@ -35,15 +35,15 @@ private:
 
     Recommendations recommendations_;
 
-    std::unique_ptr<lattice::LevelGetter> const level_getter_;
+    lattice::LevelGetter& level_getter_;
     Validator validator_;
 
     util::WorkerThreadPool* pool_;
 
 public:
-    LatticeTraverser(std::unique_ptr<lattice::LevelGetter> level_getter, Validator validator,
+    LatticeTraverser(lattice::LevelGetter& level_getter, Validator validator,
                      util::WorkerThreadPool* pool) noexcept
-        : level_getter_(std::move(level_getter)), validator_(std::move(validator)), pool_(pool) {}
+        : level_getter_(level_getter), validator_(std::move(validator)), pool_(pool) {}
 
     bool TraverseLattice(bool traverse_all);
 
