@@ -115,7 +115,7 @@ TEST_F(SplitAlgorithmTest, Test3) {
                                      {{{"Col1", 1, 1}}, {{"Col3", 7, 12}}},
                                      {{{"Col1", 1, 1}, {"Col2", 4, 4}}, {{"Col3", 12, 12}}}};
 
-    CompareDDStringLists(expected_results, actual_results);
+    CompareDDStringLists(also_expected_results, actual_results);
 }
 
 TEST_F(SplitAlgorithmTest, Test4) {
