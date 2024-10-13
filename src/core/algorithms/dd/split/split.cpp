@@ -595,11 +595,20 @@ std::list<DD> Split::InstanceExclusionReduce(
     std::vector<std::pair<std::size_t, std::size_t>> remaining_tuple_pairs;
 
     cnt++;
+    bool last_dd_holds = true;
+    bool no_pairs_left = true;
     for (auto pair : tuple_pairs) {
-        if (CheckDF(first_df, pair) && !CheckDF(rhs, pair)) remaining_tuple_pairs.push_back(pair);
+        if (!CheckDF(rhs, pair)) {
+            if (CheckDF(first_df, pair)) {
+                remaining_tuple_pairs.push_back(pair);
+                no_pairs_left = false;
+            }
+            if (last_dd_holds && CheckDF(last_df, pair)) last_dd_holds = false;
+            if (!no_pairs_left && !last_dd_holds) break;
+        }
     }
 
-    if (!remaining_tuple_pairs.size()) {
+    if (no_pairs_left) {
         if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
@@ -608,15 +617,8 @@ std::list<DD> Split::InstanceExclusionReduce(
     }
 
     cnt++;
-    bool dd_holds = true;
-    for (auto pair : tuple_pairs) {
-        if (CheckDF(last_df, pair) && !CheckDF(rhs, pair)) {
-            dd_holds = false;
-            break;
-        }
-    }
 
-    if (!dd_holds) {
+    if (!last_dd_holds) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
     }
