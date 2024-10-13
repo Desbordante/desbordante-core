@@ -579,7 +579,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
                                            unsigned& cnt) {
     if (!search.size()) return {};
 
-    DF const last_df = *search.rbegin();
+    DF const last_df = search.back();
 
     cnt++;
     if (!VerifyDD(last_df, rhs)) {
@@ -604,8 +604,8 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     if (!search.size()) return {};
 
     std::list<DD> dds;
-    DF const first_df = *search.begin();
-    DF const last_df = *search.rbegin();
+    DF const first_df = search.front();
+    DF const last_df = search.back();
 
     cnt++;
     if (VerifyDD(first_df, rhs)) {
@@ -639,8 +639,8 @@ std::list<DD> Split::InstanceExclusionReduce(
     if (!search.size()) return {};
 
     std::list<DD> dds;
-    DF const first_df = *search.begin();
-    DF const last_df = *search.rbegin();
+    DF const first_df = search.front();
+    DF const last_df = search.back();
     std::vector<std::pair<std::size_t, std::size_t>> remaining_tuple_pairs;
 
     cnt++;
