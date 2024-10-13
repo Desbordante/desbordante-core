@@ -433,11 +433,7 @@ std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
                 intersect[k] = {std::max(first_df[k].lower_bound, second_df[k].lower_bound),
                                 std::min(first_df[k].upper_bound, second_df[k].upper_bound)};
             }
-            if (IsFeasible(intersect)) {
-                merged_search_space.push_back(intersect);
-            } else if (!has_dif_table_) {
-                break;
-            }
+            merged_search_space.push_back(intersect);
         }
     }
     return merged_search_space;
@@ -545,7 +541,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (!dds.size()) dds.emplace_back(last_df, rhs);
+    if (!dds.size() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -564,7 +560,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
 
     cnt++;
     if (VerifyDD(first_df, rhs)) {
-        dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = HybridPruningReduce(rhs, remainder, cnt);
         dds.splice(dds.end(), remaining_dds);
@@ -604,7 +600,7 @@ std::list<DD> Split::InstanceExclusionReduce(
     }
 
     if (!remaining_tuple_pairs.size()) {
-        dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
         dds.splice(dds.end(), remaining_dds);
