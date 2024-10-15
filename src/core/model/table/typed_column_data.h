@@ -1,10 +1,9 @@
 #pragma once
 
 #include <bitset>
+#include <regex>
 #include <string>
 #include <vector>
-
-#include <boost/regex.hpp>
 
 #include "abstract_column_data.h"
 #include "idataset_stream.h"
@@ -174,24 +173,24 @@ private:
 
     inline static std::vector<TypeId> const kAllCandidateTypes = {
             +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
-    inline static std::unordered_map<TypeId, boost::regex> const kTypeIdToRegex = {
+    inline static std::unordered_map<TypeId, std::regex> const kTypeIdToRegex = {
             {TypeId::kDate,
-             boost::regex(
+             std::regex(
                      R"(^(\d{4})([-.\/]?)(1[0-2]|0[1-9]|[1-9])\2(3[0-1]|0[1-9]|[1-9]|[1-2][0-9])$)")},
             {TypeId::kDouble,
-             boost::regex(
+             std::regex(
                      R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
                      R"(^[+-]?(?i)(inf|nan)(?-i)$|)"
                      R"(^[+-]?0[xX](((\d|[a-f]|[A-F]))+(\.(\d|[a-f]|[A-F])*)?|\.(\d|[a-f]|[A-F])+)([pP][+-]?\d+)?$)")},
-            {+TypeId::kBigInt, boost::regex(R"(^(\+|-)?\d{20,}$)")},
-            {+TypeId::kInt, boost::regex(R"(^(\+|-)?\d{1,19}$)")},
-            {+TypeId::kNull, boost::regex(Null::kValue.data())},
-            {+TypeId::kEmpty, boost::regex(R"(^$)")}};
+            {+TypeId::kBigInt, std::regex(R"(^(\+|-)?\d{20,}$)")},
+            {+TypeId::kInt, std::regex(R"(^(\+|-)?\d{1,19}$)")},
+            {+TypeId::kNull, std::regex(Null::kValue.data())},
+            {+TypeId::kEmpty, std::regex(R"(^$)")}};
     inline static auto const kNullCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kNull));
+        return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kNull));
     };
     inline static auto const kEmptyCheck = [](std::string const& val) {
-        return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kEmpty));
+        return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kEmpty));
     };
     inline static std::function<bool(std::string const&)> const kUndelimitedDateCheck =
             [](std::string const& val) {
@@ -217,18 +216,18 @@ private:
             kTypeIdToChecker = {
                     {TypeId::kDouble,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kDouble));
                      }},
                     {TypeId::kBigInt,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kBigInt));
                      }},
                     {TypeId::kInt,
                      [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kInt));
                      }},
                     {TypeId::kDate, [](std::string const& val) {
-                         return boost::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
+                         return std::regex_match(val, kTypeIdToRegex.at(+TypeId::kDate)) &&
                                 (kDelimitedDateCheck(val) || kUndelimitedDateCheck(val));
                      }}};
     // each 1 represents a possible type from kAllCandidateTypes
