@@ -10,9 +10,9 @@
 #include "model/table/tuple_index.h"
 
 namespace algos {
-Sample::Sample(unsigned long long sample_size, model::TupleIndex rows, model::ColumnIndex lhs,
-               model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
-               RelationalSchema const *rel_schema_)
+Sample::Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIndex rows,
+               model::ColumnIndex lhs, model::ColumnIndex rhs,
+               std::vector<model::TypedColumnData> const &data, RelationalSchema const *rel_schema_)
     : lhs_col_(rel_schema_, rel_schema_->GetColumn(lhs)->GetName(), lhs),
       rhs_col_(rel_schema_, rel_schema_->GetColumn(rhs)->GetName(), rhs) {
     auto seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
@@ -24,7 +24,8 @@ Sample::Sample(unsigned long long sample_size, model::TupleIndex rows, model::Co
     std::unordered_set<std::string> map_cardinality;
 
     for (model::ColumnIndex i = 0; i < sample_size; i++) {
-        model::TupleIndex row = distribution(gen);
+        model::TupleIndex row = (fixed_sample) ? i : distribution(gen);
+
         row_indices_.push_back(row);
         map_lhs.insert(data[lhs].GetDataAsString(row));
         map_rhs.insert(data[rhs].GetDataAsString(row));

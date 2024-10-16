@@ -67,6 +67,8 @@ void Cords::RegisterOptions() {
     RegisterOption(
             Option{&max_amount_of_categories_, kMaxAmountOfCategories, kDMaxAmountOfCategories}
                     .SetValueCheck(check_positive));
+
+    RegisterOption(Option{&fixed_sample_, kFixedSample, kDFixedSample, false});
 }
 
 void Cords::MakeExecuteOptsAvailableFDInternal() {
@@ -190,7 +192,8 @@ unsigned long long Cords::ExecuteInternal() {
                     handler_.GetColumnCardinality(col_i), handler_.GetColumnCardinality(col_k),
                     max_false_positive_probability_, delta_);
 
-            Sample smp(sample_size, row_count, col_i, col_k, data, typed_relation_->GetSchema());
+            Sample smp(fixed_sample_, sample_size, row_count, col_i, col_k, data,
+                       typed_relation_->GetSchema());
 
             bool sfd_detected = DetectSFD(smp);
 

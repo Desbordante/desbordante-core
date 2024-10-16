@@ -118,6 +118,7 @@ public:
     struct Config {
         bool is_null_equal_null;
         bool only_sfd;
+        bool fixed_sample;
         long double min_cardinality;
         long double max_diff_vals_proportion;
         long double min_sfd_strength_measure;
@@ -145,7 +146,8 @@ public:
                 {kMaxFalsePositiveProbability, test_config.max_false_positive_probability},
                 {kDelta, test_config.delta},
                 {kMaxAmountOfCategories, test_config.max_amount_of_categories},
-                {kMaximumLhs, test_config.max_lhs}};
+                {kMaximumLhs, test_config.max_lhs},
+                {kFixedSample, test_config.fixed_sample}};
     }
 
     static std::unique_ptr<algos::Cords> CreateCordsInstance(CSVConfig const& csv_config,
@@ -158,6 +160,7 @@ using TestConfig = CordsAlgorithmTest::Config;
 TestConfig const kTestConfigDefault{
         .is_null_equal_null = true,
         .only_sfd = false,
+        .fixed_sample = true,
         .min_cardinality = 0.04L,
         .max_diff_vals_proportion = 0.4L,
         .min_sfd_strength_measure = 0.3L,
