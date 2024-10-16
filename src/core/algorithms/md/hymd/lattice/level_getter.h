@@ -9,25 +9,30 @@
 namespace algos::hymd::lattice {
 
 class LevelGetter {
-protected:
-    std::size_t cur_level_ = 0;
-    MdLattice* const lattice_;
-    // Prevent lifetime issues.
+    // Store here, use pointers elsewhere.
     std::vector<MdLattice::MdVerificationMessenger> messengers_;
+    MdLattice* const lattice_;
 
-    virtual std::vector<ValidationInfo> GetCurrentMdsInternal(
+    virtual std::vector<ValidationInfo> GetPendingGroupedMinimalLhsMds(
             std::vector<MdLattice::MdVerificationMessenger>& level_mds) = 0;
+
+    std::size_t cur_level_ = 0;
+
+protected:
+    void NextLevel() noexcept {
+        ++cur_level_;
+    }
 
 public:
     LevelGetter(MdLattice* lattice) : lattice_(lattice) {}
 
-    bool AreLevelsLeft() const noexcept {
-        return cur_level_ <= lattice_->GetMaxLevel();
-    }
-
-    std::vector<ValidationInfo> GetCurrentMds() {
-        messengers_ = lattice_->GetLevel(cur_level_);
-        return GetCurrentMdsInternal(messengers_);
+    std::vector<ValidationInfo> GetPendingGroupedMinimalLhsMds() {
+        while (cur_level_ <= lattice_->GetMaxLevel()) {
+            messengers_ = lattice_->GetLevel(cur_level_);
+            std::vector<ValidationInfo> validations = GetPendingGroupedMinimalLhsMds(messengers_);
+            if (!validations.empty()) return validations;
+        }
+        return {};
     }
 
     virtual ~LevelGetter() = default;

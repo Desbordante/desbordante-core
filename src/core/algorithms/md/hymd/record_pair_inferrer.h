@@ -21,6 +21,7 @@
 
 namespace algos::hymd {
 
+// NOTE: sorting in sampling is disabled because it takes too long for little benefit.
 class RecordPairInferrer {
 private:
     using Comparisons = std::vector<PairComparisonResult>;

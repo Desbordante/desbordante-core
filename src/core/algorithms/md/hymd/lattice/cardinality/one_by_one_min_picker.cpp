@@ -91,7 +91,7 @@ void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& mess
     assert(!lhs_cur.IsEmpty() || currently_picked_.empty());
     for (ValidationInfo& prev_info : currently_picked_) {
         MdLhs const& lhs_prev = prev_info.messenger->GetLhs();
-        boost::dynamic_bitset<>& indices_prev = prev_info.rhs_indices;
+        boost::dynamic_bitset<>& indices_prev = prev_info.rhs_indices_to_validate;
         switch (CompareLhss(lhs_cur, lhs_prev)) {
             case ComparisonResult::kSpecialization:
                 considered_indices -= indices_prev;

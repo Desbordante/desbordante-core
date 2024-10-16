@@ -22,7 +22,7 @@ void MinPickerLattice::ExcludeGeneralizationRhs(Node const& cur_node,
                                                 MdLhs::iterator cur_lhs_iter,
                                                 boost::dynamic_bitset<>& considered_indices) {
     if (cur_node.task_info != nullptr) {
-        boost::dynamic_bitset<> const& cur_node_indices = cur_node.task_info->rhs_indices;
+        boost::dynamic_bitset<> const& cur_node_indices = cur_node.task_info->rhs_indices_to_validate;
         considered_indices -= cur_node_indices;
         return;
     }
@@ -45,7 +45,7 @@ void MinPickerLattice::RemoveSpecializations(Node& cur_node,
     if (cur_lhs_iter == lhs.end()) {
         assert(cur_node.IsEmpty());
         if (task_info != nullptr) {
-            boost::dynamic_bitset<>& this_node_rhs_indices = task_info->rhs_indices;
+            boost::dynamic_bitset<>& this_node_rhs_indices = task_info->rhs_indices_to_validate;
             this_node_rhs_indices -= picked_indices;
             if (this_node_rhs_indices.none()) task_info = nullptr;
         }

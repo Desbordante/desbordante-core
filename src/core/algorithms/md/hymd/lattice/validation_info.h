@@ -11,7 +11,7 @@ namespace algos::hymd::lattice {
 
 struct ValidationInfo {
     MdLattice::MdVerificationMessenger* messenger;
-    boost::dynamic_bitset<> rhs_indices;
+    boost::dynamic_bitset<> rhs_indices_to_validate;
 };
 
 }  // namespace algos::hymd::lattice
