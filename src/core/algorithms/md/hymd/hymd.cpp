@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <limits>
-#include <ranges>
 
 #include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
@@ -14,6 +13,7 @@
 #include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
 #include "algorithms/md/hymd/record_pair_inferrer.h"
 #include "algorithms/md/hymd/similarity_data.h"
+#include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/inverse_permutation.h"
 #include "algorithms/md/hymd/utility/md_less.h"
 #include "config/names_and_descriptions.h"
@@ -101,7 +101,7 @@ void HyMD::RegisterOptions() {
         if (records_info_->OneTableGiven()) {
             std::size_t const num_columns = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns);
-            for (Index i = 0; i != num_columns; ++i) {
+            for (Index i : utility::IndexRange(num_columns)) {
                 column_matches_option.push_back(
                         std::make_shared<
                                 preprocessing::similarity_measure::LevenshteinSimilarityMeasure>(
@@ -111,8 +111,8 @@ void HyMD::RegisterOptions() {
             std::size_t const num_columns_left = left_schema_->GetNumColumns();
             std::size_t const num_columns_right = right_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns_left * num_columns_right);
-            for (Index i = 0; i != num_columns_left; ++i) {
-                for (Index j = 0; j != num_columns_right; ++j) {
+            for (Index i : utility::IndexRange(num_columns_left)) {
+                for (Index j : utility::IndexRange(num_columns_right)) {
                     column_matches_option.push_back(
                             std::make_shared<preprocessing::similarity_measure::
                                                      LevenshteinSimilarityMeasure>(
@@ -158,7 +158,7 @@ void HyMD::ResetStateMd() {}
 void HyMD::LoadDataInternal() {
     left_schema_ = std::make_shared<RelationalSchema>(left_table_->GetRelationName());
     std::size_t const left_table_cols = left_table_->GetNumberOfColumns();
-    for (Index i = 0; i != left_table_cols; ++i) {
+    for (Index i : utility::IndexRange(left_table_cols)) {
         left_schema_->AppendColumn(left_table_->GetColumnName(i));
     }
 
@@ -169,7 +169,7 @@ void HyMD::LoadDataInternal() {
     } else {
         right_schema_ = std::make_unique<RelationalSchema>(right_table_->GetRelationName());
         std::size_t const right_table_cols = right_table_->GetNumberOfColumns();
-        for (Index i = 0; i != right_table_cols; ++i) {
+        for (Index i : utility::IndexRange(right_table_cols)) {
             right_schema_->AppendColumn(right_table_->GetColumnName(i));
         }
 
@@ -295,7 +295,7 @@ public:
         // All RHSs in the lattice root are 0 at this point.
         auto empty_lhs = ConvertLhs({});
 
-        for (Index rhs_index : std::views::iota(0ul, column_match_number_)) {
+        for (Index rhs_index : utility::IndexRange(column_match_number_)) {
             model::md::DecisionBoundary const rhs_bound =
                     similarity_data_.GetDecisionBoundary(rhs_index, kLowestCCValueId);
             if (rhs_bound == kLowestBound) continue;
@@ -313,7 +313,7 @@ public:
         for (lattice::MdLatticeNodeInfo const& md : lattice_mds) {
             std::vector<model::md::LhsColumnSimilarityClassifier> const lhs = ConvertLhs(md.lhs);
             lattice::Rhs const& rhs = md.node->rhs;
-            for (Index rhs_index : std::views::iota(0ul, column_match_number_)) {
+            for (Index rhs_index : utility::IndexRange(column_match_number_)) {
                 ColumnClassifierValueId const rhs_value_id = rhs[rhs_index];
                 if (rhs_value_id == kLowestCCValueId) continue;
                 model::md::DecisionBoundary rhs_bound =

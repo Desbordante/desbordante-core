@@ -6,7 +6,7 @@
 
 namespace algos::hymd::lattice::cardinality {
 
-std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
+std::vector<ValidationInfo> MinPickingLevelGetter::GetPendingGroupedMinimalLhsMds(
         std::vector<MdLattice::MdVerificationMessenger>& level_lattice_info) {
     min_picker_.NewBatch(level_lattice_info.size());
     std::unordered_map<MdLhs, boost::dynamic_bitset<>> new_picked;
@@ -33,16 +33,16 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
     if constexpr (MinPickerType::kNeedsEmptyRemoval) {
         if constexpr (kEraseEmptyKeepOrder) {
             std::erase_if(collected, [](ValidationInfo const& validation_info) {
-                return validation_info.rhs_indices.none();
+                return validation_info.rhs_indices_to_validate.none();
             });
         } else {
             util::EraseIfReplace(collected, [](ValidationInfo const& validation_info) {
-                return validation_info.rhs_indices.none();
+                return validation_info.rhs_indices_to_validate.none();
             });
         }
     }
     for (ValidationInfo const& validation_info : collected) {
-        boost::dynamic_bitset<> const& new_rhs_indices = validation_info.rhs_indices;
+        boost::dynamic_bitset<> const& new_rhs_indices = validation_info.rhs_indices_to_validate;
         auto [it, new_validation] =
                 new_picked.try_emplace(validation_info.messenger->GetLhs(), new_rhs_indices);
         if (new_validation) continue;
@@ -52,7 +52,7 @@ std::vector<ValidationInfo> MinPickingLevelGetter::GetCurrentMdsInternal(
     }
     if (collected.empty()) {
         picked_.clear();
-        ++cur_level_;
+        NextLevel();
     }
     picked_ = std::move(new_picked);
     return collected;

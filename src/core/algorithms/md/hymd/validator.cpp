@@ -411,8 +411,8 @@ void Validator::Validate(lattice::ValidationInfo& info, Result& result,
 
 void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
                                    std::vector<WorkingInfo>& working,
-                                   AllRecomVecs& recommendations) {
-    boost::dynamic_bitset<> const& rhs_indices = info.rhs_indices;
+                                   AllRhsRecommendations& recommendations) {
+    boost::dynamic_bitset<> const& rhs_indices = info.rhs_indices_to_validate;
     if (rhs_indices.none()) return;
     MdLhs const& lhs = info.messenger->GetLhs();
     IndexVector indices = util::BitsetToIndices<Index>(rhs_indices);
@@ -434,7 +434,7 @@ void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
     auto intrestingness_iter = interestingness_ccv_ids.begin();
     indexes::CompressedRecords const& right_records = GetRightCompressor().GetRecords();
     for (Index index : indices) {
-        RecommendationVector& last_recs = recommendations.emplace_back();
+        OneRhsRecommendations& last_recs = recommendations.emplace_back();
         auto const& [sim_info, left_index, right_index] = (*column_matches_info_)[index];
         MdElement rhs{index, *old_iter++};
         working.emplace_back(rhs, last_recs, GetLeftValueNum(index), *intrestingness_iter++,
@@ -451,7 +451,7 @@ inline void Validator::Initialize(std::vector<lattice::ValidationInfo>& validati
     for (lattice::ValidationInfo& info : validation_info) {
         MdLhs const& lhs = info.messenger->GetLhs();
         Result& result = results_.emplace_back();
-        boost::dynamic_bitset<>& indices_bitset = info.rhs_indices;
+        boost::dynamic_bitset<>& indices_bitset = info.rhs_indices_to_validate;
         std::vector<WorkingInfo>& working = current_working_.emplace_back();
         lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
         switch (lhs.Cardinality()) {
@@ -472,10 +472,10 @@ inline void Validator::Initialize(std::vector<lattice::ValidationInfo>& validati
                     result.invalidated.PushBack({non_zero_index, lattice_rhs[non_zero_index]},
                                                 kLowestCCValueId);
                 }
-                MakeWorkingAndRecs(info, working, result.recommendations);
+                MakeWorkingAndRecs(info, working, result.all_rhs_recommendations);
             } break;
             default: {
-                MakeWorkingAndRecs(info, working, result.recommendations);
+                MakeWorkingAndRecs(info, working, result.all_rhs_recommendations);
             } break;
         }
     }
