@@ -12,23 +12,34 @@ namespace algos::hymd {
 
 class LatticeTraverser {
 private:
-    struct LatticeStatistics {
+    class LatticeStatistics {
         std::size_t all_mds_num = 0;
         std::size_t invalidated_mds_num = 0;
         static constexpr double kRatioBound = 0.01;
+
+    public:
+        bool TraversalInefficient() const noexcept {
+            return invalidated_mds_num > kRatioBound * (all_mds_num - invalidated_mds_num);
+        }
+
+        void CountOne(lattice::ValidationInfo& validation, Validator::Result const& result) {
+            invalidated_mds_num += result.invalidated.Size();
+            all_mds_num += validation.rhs_indices_to_validate.count();
+        }
     };
 
     class ClearingRecRef {
         Recommendations& recommendations_;
 
     public:
-        ClearingRecRef(Recommendations& recommendations) : recommendations_(recommendations) {}
+        ClearingRecRef(Recommendations& recommendations) noexcept
+            : recommendations_(recommendations) {}
 
-        operator Recommendations const&() const {
+        operator Recommendations const&() const noexcept {
             return recommendations_;
         }
 
-        ~ClearingRecRef() {
+        ~ClearingRecRef() noexcept {
             recommendations_.clear();
         }
     };
@@ -39,6 +50,12 @@ private:
     Validator validator_;
 
     util::WorkerThreadPool* pool_;
+
+    void AddRecommendations(std::vector<Validator::Result> const& results);
+    static LatticeStatistics AdjustLattice(std::vector<lattice::ValidationInfo>& validations,
+                                           std::vector<Validator::Result> const& results);
+    LatticeStatistics ProcessResults(std::vector<lattice::ValidationInfo>& validations,
+                                     std::vector<Validator::Result> const& results);
 
 public:
     LatticeTraverser(lattice::LevelGetter& level_getter, Validator validator,

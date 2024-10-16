@@ -18,11 +18,11 @@ namespace algos::hymd {
 
 class Validator {
 public:
-    using RecommendationVector = std::vector<Recommendation>;
-    using AllRecomVecs = std::vector<RecommendationVector>;
+    using OneRhsRecommendations = std::vector<Recommendation>;
+    using AllRhsRecommendations = std::vector<OneRhsRecommendations>;
 
     struct Result {
-        AllRecomVecs recommendations;
+        AllRhsRecommendations all_rhs_recommendations;
         utility::InvalidatedRhss invalidated;
         bool is_unsupported;
     };
@@ -34,7 +34,7 @@ private:
     class MultiCardPairProvider;
 
     struct WorkingInfo {
-        RecommendationVector* recommendations;
+        OneRhsRecommendations* recommendations;
         MdElement old_rhs;
         ColumnClassifierValueId current_ccv_id;
         std::size_t col_match_values;
@@ -56,7 +56,7 @@ private:
             return current_ccv_id == kLowestCCValueId && EnoughRecommendations();
         }
 
-        WorkingInfo(MdElement old_rhs, RecommendationVector& recommendations,
+        WorkingInfo(MdElement old_rhs, OneRhsRecommendations& recommendations,
                     std::size_t col_match_values, ColumnClassifierValueId interestingness_id,
                     indexes::CompressedRecords const& right_records,
                     indexes::SimilarityMatrix const& similarity_matrix,
@@ -108,7 +108,7 @@ private:
                                                            model::Index lhs_ccv_id,
                                                            model::Index column_match_index) const;
     void MakeWorkingAndRecs(lattice::ValidationInfo const& info, std::vector<WorkingInfo>& working,
-                            AllRecomVecs& recommendations);
+                            AllRhsRecommendations& recommendations);
     void Initialize(std::vector<lattice::ValidationInfo>& validation_info);
 
 public:

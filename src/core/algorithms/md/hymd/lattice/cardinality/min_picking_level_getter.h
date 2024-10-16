@@ -15,7 +15,7 @@ private:
     MinPickerType min_picker_;
     std::unordered_map<MdLhs, boost::dynamic_bitset<>> picked_;
 
-    std::vector<ValidationInfo> GetCurrentMdsInternal(
+    std::vector<ValidationInfo> GetPendingGroupedMinimalLhsMds(
             std::vector<MdLattice::MdVerificationMessenger>& level_lattice_info) final;
 
     // false simulates Metanome, true is faster, but the order changes may lead to

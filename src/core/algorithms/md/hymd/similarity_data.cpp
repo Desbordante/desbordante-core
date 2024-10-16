@@ -7,6 +7,7 @@
 
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
+#include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
 #include "model/index.h"
 #include "util/get_preallocated_vector.h"
@@ -93,7 +94,7 @@ public:
         std::vector<model::Index> non_trivial_indices =
                 util::GetPreallocatedVector<model::Index>(col_match_number);
 
-        for (model::Index column_match_index : std::views::iota(0ul, col_match_number)) {
+        for (model::Index column_match_index : utility::IndexRange(col_match_number)) {
             ProcessMeasureIndexes(column_match_index, column_matches_info, all_lhs_ccv_ids_info,
                                   short_sampling_enable, trivial_column_matches_info,
                                   non_trivial_indices);

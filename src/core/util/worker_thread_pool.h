@@ -77,6 +77,28 @@ private:
     }
 
 public:
+    class Waiter {
+        bool active_ = true;
+        WorkerThreadPool& pool_;
+
+    public:
+        Waiter(WorkerThreadPool& pool) : pool_(pool) {}
+
+        ~Waiter() {
+            if (active_) {
+                try {
+                    Wait();
+                } catch (...) {
+                }
+            }
+        }
+
+        void Wait() {
+            active_ = false;
+            pool_.Wait();
+        }
+    };
+
     WorkerThreadPool(std::size_t thread_num);
 
     // Previous tasks must be finished before calling this.
