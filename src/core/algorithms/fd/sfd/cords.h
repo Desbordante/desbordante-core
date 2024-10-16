@@ -26,6 +26,7 @@ private:
     std::unique_ptr<TypedRelation> typed_relation_;
 
     bool only_sfd_;
+    bool fixed_sample_ = false;
 
     long double minimum_cardinality_;
     long double max_diff_vals_proportion_;

@@ -71,4 +71,5 @@ constexpr auto kMinStructuralZeroesAmount = "min_structural_zeroes_amount";
 constexpr auto kMaxFalsePositiveProbability = "max_false_positive_probability";
 constexpr auto kDelta = "delta";
 constexpr auto kMaxAmountOfCategories = "max_amount_of_categories";
+constexpr auto kFixedSample = "fixed_sample";
 }  // namespace config::names
