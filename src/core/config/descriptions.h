@@ -140,4 +140,7 @@ constexpr auto kDDelta =
         "greater than minimum_cardinality_.";
 constexpr auto kDMaxAmountOfCategories =
         "Max amount of categories for the chi-squared test in case the data is not skewed";
+constexpr auto kDFixedSample =
+        "Indicates that instead of random generated sample CORDS uses sample consisting of n first "
+        "rows of the given table. Intended for tests only.";
 }  // namespace config::descriptions

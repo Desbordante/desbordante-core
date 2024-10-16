@@ -25,7 +25,7 @@ private:
     size_t concat_cardinality_;
 
 public:
-    Sample(unsigned long long sample_size, size_t rows, model::ColumnIndex lhs,
+    Sample(bool fixed_sample, unsigned long long sample_size, size_t rows, model::ColumnIndex lhs,
            model::ColumnIndex rhs, std::vector<model::TypedColumnData> const &data,
            RelationalSchema const *rel_schema_);
     void Filter(FrequencyHandler const &handler, std::vector<model::TypedColumnData> const &data,
