@@ -5,6 +5,6 @@
 
 namespace config {
 
-extern CommonOption<ErrorMeasureType> const kErrorMeasureOpt;
-
-}
+extern CommonOption<PfdErrorMeasureType> const kPfdErrorMeasureOpt;
+extern CommonOption<AfdErrorMeasureType> const kAfdErrorMeasureOpt;
+}  // namespace config
