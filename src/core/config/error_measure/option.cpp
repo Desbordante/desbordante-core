@@ -4,7 +4,11 @@
 #include "fd/tane/enums.h"
 
 namespace config {
-using names::kErrorMeasure, descriptions::kDErrorMeasure;
-extern CommonOption<ErrorMeasureType> const kErrorMeasureOpt{kErrorMeasure, kDErrorMeasure,
-                                                             algos::ErrorMeasure::_values()[0]};
+using names::kPfdErrorMeasure, names::kAfdErrorMeasure, descriptions::kDPfdErrorMeasure,
+        descriptions::kDAfdErrorMeasure;
+extern CommonOption<PfdErrorMeasureType> const kPfdErrorMeasureOpt{
+        kPfdErrorMeasure, kDPfdErrorMeasure, algos::PfdErrorMeasure::_values()[0]};
+
+extern CommonOption<AfdErrorMeasureType> const kAfdErrorMeasureOpt{
+        kAfdErrorMeasure, kDAfdErrorMeasure, algos::AfdErrorMeasure::_values()[0]};
 }  // namespace config

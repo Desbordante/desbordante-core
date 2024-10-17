@@ -114,9 +114,9 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
                 continue;
             }
             auto x_pli = x_vertex->GetPositionListIndex();
-
+            auto a_pli = relation_->GetColumnData(a_index).GetPositionListIndex();
             // Check X -> A
-            config::ErrorType error = CalculateFdError(x_pli, xa_pli);
+            config::ErrorType error = CalculateFdError(x_pli, a_pli, xa_pli);
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 
