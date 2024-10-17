@@ -24,7 +24,7 @@ Sample::Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIn
     std::unordered_set<std::string> map_cardinality;
 
     for (model::ColumnIndex i = 0; i < sample_size; i++) {
-        model::TupleIndex row = (fixed_sample) ? i : distribution(gen);
+        model::TupleIndex row = (fixed_sample) ? i % rows : distribution(gen);
 
         row_indices_.push_back(row);
         map_lhs.insert(data[lhs].GetDataAsString(row));

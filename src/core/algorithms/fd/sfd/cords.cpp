@@ -75,7 +75,8 @@ void Cords::MakeExecuteOptsAvailableFDInternal() {
     using namespace config::names;
     MakeOptionsAvailable({kOnlySFD, kMinCard, kMaxDiffValsProportion, kMinSFDStrengthMeasure,
                           kMinSkewThreshold, kMinStructuralZeroesAmount,
-                          kMaxFalsePositiveProbability, kDelta, kMaxAmountOfCategories});
+                          kMaxFalsePositiveProbability, kDelta, kMaxAmountOfCategories,
+                          kFixedSample});
 }
 
 void Cords::ResetStateFd() {
