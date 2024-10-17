@@ -11,7 +11,7 @@ using AlgorithmTypes =
                    Apriori, metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
                    PyroUCC, HPIValid, cfd::FDFirstAlgorithm, ACAlgorithm, UCCVerifier, Faida,
                    Spider, Mind, Fastod, GfdValidation, EGfdValidation, NaiveGfdValidation,
-                   order::Order, dd::Split, Cords>;
+                   order::Order, dd::Split, Cords, PFDVerifier>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
@@ -80,7 +80,10 @@ BETTER_ENUM(AlgorithmType, char,
     split,
 
 /* SFD mining algorithm */
-    cords
+    cords,
+
+/* PFD verifier algorithm */
+    pfd_verifier
 )
 // clang-format on
 
