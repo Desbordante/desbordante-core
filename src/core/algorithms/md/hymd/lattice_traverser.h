@@ -4,6 +4,7 @@
 #include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 #include "algorithms/md/hymd/lattice/level_getter.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
+#include "algorithms/md/hymd/recommendation.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/hymd/validator.h"
 #include "util/worker_thread_pool.h"
