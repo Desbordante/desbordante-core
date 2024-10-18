@@ -3,5 +3,6 @@
 #include "fd/tane/enums.h"
 
 namespace config {
-using ErrorMeasureType = algos::ErrorMeasure;
+using PfdErrorMeasureType = algos::PfdErrorMeasure;
+using AfdErrorMeasureType = algos::AfdErrorMeasure;
 }  // namespace config

@@ -10,11 +10,11 @@ namespace algos {
 using Cluster = model::PositionListIndex::Cluster;
 
 void PFDTane::RegisterOptions() {
-    RegisterOption(config::kErrorMeasureOpt(&error_measure_));
+    RegisterOption(config::kPfdErrorMeasureOpt(&pfd_error_measure_));
 }
 
 void PFDTane::MakeExecuteOptsAvailableFDInternal() {
-    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kErrorMeasureOpt.GetName()});
+    MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kPfdErrorMeasureOpt.GetName()});
 }
 
 PFDTane::PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager)
@@ -26,9 +26,11 @@ config::ErrorType PFDTane::CalculateZeroAryFdError(ColumnData const* rhs) {
     return CalculateZeroAryPFDError(rhs);
 }
 
-config::ErrorType PFDTane::CalculateFdError(model::PositionListIndex const* lhs_pli,
-                                            model::PositionListIndex const* joint_pli) {
-    return CalculatePFDError(lhs_pli, joint_pli, error_measure_);
+config::ErrorType PFDTane::CalculateFdError(
+        model::PositionListIndex const* lhs_pli,
+        [[maybe_unused]] model::PositionListIndex const* rhs_pli,
+        model::PositionListIndex const* joint_pli) {
+    return CalculatePFDError(lhs_pli, joint_pli, pfd_error_measure_);
 }
 
 config::ErrorType PFDTane::CalculateZeroAryPFDError(ColumnData const* rhs) {
@@ -42,7 +44,7 @@ config::ErrorType PFDTane::CalculateZeroAryPFDError(ColumnData const* rhs) {
 
 config::ErrorType PFDTane::CalculatePFDError(model::PositionListIndex const* x_pli,
                                              model::PositionListIndex const* xa_pli,
-                                             ErrorMeasure measure) {
+                                             PfdErrorMeasure measure) {
     std::deque<Cluster> xa_index = xa_pli->GetIndex();
     std::shared_ptr<Cluster const> probing_table_ptr = x_pli->CalculateAndGetProbingTable();
     auto const& probing_table = *probing_table_ptr;
@@ -66,15 +68,15 @@ config::ErrorType PFDTane::CalculatePFDError(model::PositionListIndex const* x_p
                 xa_cluster_it++;
             }
         }
-        sum += measure == +ErrorMeasure::per_tuple ? static_cast<double>(max)
-                                                   : static_cast<double>(max) / x_cluster.size();
+        sum += measure == +PfdErrorMeasure::per_tuple ? static_cast<double>(max)
+                                                      : static_cast<double>(max) / x_cluster.size();
         cluster_rows_count += x_cluster.size();
     }
     unsigned int unique_rows =
             static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
     double probability = static_cast<double>(sum + unique_rows) /
-                         (measure == +ErrorMeasure::per_tuple ? x_pli->GetRelationSize()
-                                                              : x_index.size() + unique_rows);
+                         (measure == +PfdErrorMeasure::per_tuple ? x_pli->GetRelationSize()
+                                                                 : x_index.size() + unique_rows);
     return 1.0 - probability;
 }
 
