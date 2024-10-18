@@ -4,57 +4,132 @@
 #include <atomic>
 #include <cstddef>
 #include <ranges>
-#include <span>
 #include <vector>
 
-#include <boost/sort/spreadsort/string_sort.hpp>
 #include <easylogging++.h>
+
+#include "algorithms/md/hymd/utility/index_range.h"
+#include "util/get_preallocated_vector.h"
+
+namespace {
+algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,
+                                              algos::hymd::ValueIdentifier rhs_value) {
+    auto ccv_id_it = row.find(rhs_value);
+    return ccv_id_it == row.end() ? algos::hymd::kLowestCCValueId : ccv_id_it->second;
+}
+}  // namespace
 
 namespace algos::hymd {
 
-bool RecordPairInferrer::Initialize() {
-    std::vector<Efficiency> efficiencies;
-    efficiencies.reserve(column_match_number_);
-    ranked_records_.assign(column_match_number_, {});
+// NOTE: non-cluster sorting in sampling is disabled because it takes too long for little benefit.
+class RecordPairInferrer::RecordRanker {
+    using RankingBodyVariables =
+            std::tuple<indexes::SimilarityIndex const&, std::vector<indexes::PliCluster> const&>;
+    using RankingVariables = std::tuple<std::size_t, RankingBodyVariables>;
 
-    using InitMethod = bool (RecordPairInferrer::*)(Efficiency&);
-    InitMethod short_method = &RecordPairInferrer::InitializeShortSeq;
-    InitMethod full_method = &RecordPairInferrer::InitializeFullSeq;
-    if (MultiThreaded()) {
-        short_method = &RecordPairInferrer::InitializeShortParallel;
-        full_method = &RecordPairInferrer::InitializeFullParallel;
-    }
-
-    for (model::Index column_match_index = 0; column_match_index != column_match_number_;
-         ++column_match_index) {
-        auto const& [lhs_rhs_map, rhs_lhs_map] = (*lhs_ccv_id_info_)[column_match_index];
-        // TODO: enforce this invariant with a class.
-        DESBORDANTE_ASSUME(!lhs_rhs_map.empty());
-        if (lhs_rhs_map.size() == 1) {
-            DESBORDANTE_ASSUME(rhs_lhs_map.size() > 1);
-            // TODO: sort based on column matches where the number of LHS values is greater
-            // than 1, discard pairs with the highest CCV ID.
-            LOG(WARNING) << "Sampling for column match " << column_match_index
-                         << " not implemented.";
-            // else No point in sampling.
-            continue;
-        }
-        InitMethod method = full_method;
-        std::size_t initial_parameter = 0;
-        if (ShortSamplingEnabled(column_match_index)) {
-            method = short_method;
-            initial_parameter = 1;
-        }
-        Efficiency& efficiency = efficiencies.emplace_back(column_match_index, initial_parameter);
-        if (!(this->*method)(efficiency)) efficiencies.pop_back();
-    }
-    efficiency_queue_ = std::priority_queue<Efficiency>{
-            decltype(efficiency_queue_)::value_compare{}, std::move(efficiencies)};
-    return efficiency_queue_.empty();
-}
+    RecordPairInferrer const& inferrer_;
 
 #if 0
-std::strong_ordering RecordPairInferrer::CompareRecStats(
+    using SamplingOrderStats = std::vector<std::pair<ColumnClassifierValueId, unsigned>>;
+
+    struct FullSamplingSortComparer {
+        using StatMap = boost::unordered::unordered_flat_map<RecordIdentifier, SamplingOrderStats>;
+
+        StatMap order_stats_prev;
+        StatMap order_stats_next;
+
+        bool operator()(RecordIdentifier rec1, RecordIdentifier rec2) const noexcept;
+    };
+#endif
+
+    struct ShortSamplingClusterComparer {
+        struct Info {
+            model::Index const left_pli_index;
+            model::Index const right_pli_index;
+        };
+
+        std::vector<CompressedRecord> const& records;
+        Info prev_info;
+        Info next_info;
+
+        bool operator()(RecordIdentifier record_id1, RecordIdentifier record_id2) const noexcept;
+    };
+
+    template <bool IsShort, typename ObtainValueRecords>
+    struct RankRecordsLoopBody;
+
+    std::pair<model::Index, model::Index> GetPrevAndNext(
+            model::Index const column_match_index) const noexcept {
+        // Prevented in the main part of the algorithm.
+        DESBORDANTE_ASSUME(inferrer_.column_match_number_ != 0);
+        model::Index const last_cm = inferrer_.column_match_number_ - 1;
+        model::Index const prev_column_match_index =
+                column_match_index == 0 ? last_cm : column_match_index - 1;
+        model::Index const next_column_match_index =
+                column_match_index == last_cm ? 0 : column_match_index + 1;
+        return {prev_column_match_index, next_column_match_index};
+    }
+
+    ShortSamplingClusterComparer CreateShortSamplingClusterComparer(
+            model::Index const column_match_index) const noexcept {
+        auto const [prev_column_match_index, next_column_match_index] =
+                GetPrevAndNext(column_match_index);
+        std::vector<CompressedRecord> const& records =
+                inferrer_.records_info_->GetLeftCompressor().GetRecords();
+        std::vector<ColumnMatchInfo> const& cm_sim_info = *inferrer_.column_matches_sim_info_;
+
+        ColumnMatchInfo const& prev_cm_info = cm_sim_info[prev_column_match_index];
+        ColumnMatchInfo const& next_cm_info = cm_sim_info[next_column_match_index];
+        ShortSamplingClusterComparer::Info prev_info{prev_cm_info.left_column_index,
+                                                     prev_cm_info.right_column_index};
+        ShortSamplingClusterComparer::Info next_info{next_cm_info.left_column_index,
+                                                     next_cm_info.right_column_index};
+        return {records, prev_info, next_info};
+    }
+
+    RankingVariables GetRankingVariables(model::Index const column_match_index) {
+        ColumnMatchInfo const& column_match_info =
+                (*inferrer_.column_matches_sim_info_)[column_match_index];
+
+        indexes::DictionaryCompressor const& left_compressor =
+                inferrer_.records_info_->GetLeftCompressor();
+        model::Index const left_pli_index = column_match_info.left_column_index;
+        std::vector<indexes::PliCluster> const& left_clusters =
+                left_compressor.GetPli(left_pli_index).GetClusters();
+
+        indexes::SimilarityIndex const& upper_set_index =
+                column_match_info.similarity_info.similarity_index;
+
+        std::size_t const total_left_values = left_clusters.size();
+        return {total_left_values, {upper_set_index, left_clusters}};
+    }
+
+#if 0
+    SamplingOrderStats CreateStats(RecordIdentifier right_record_id,
+                                   model::Index column_match_index,
+                                   indexes::PliCluster const& cluster) const;
+#endif
+
+    template <bool IsShort>
+    void RankRecordsSeq(model::Index const column_match_index,
+                        RankedRecordsColumnMatch& column_match_ranked_records);
+    template <bool IsShort>
+    void RankRecordsParallel(model::Index const column_match_index,
+                             RankedRecordsColumnMatch& column_match_ranked_records);
+
+#if 0
+    static std::strong_ordering CompareRecStats(SamplingOrderStats const& rec1_stats,
+                                                SamplingOrderStats const& rec2_stats) noexcept;
+#endif
+
+public:
+    RecordRanker(RecordPairInferrer const& inferrer) : inferrer_(inferrer) {}
+
+    std::vector<RankedRecordsColumnMatch> RankRecords();
+};
+
+#if 0
+std::strong_ordering RecordPairInferrer::RecordRanker::CompareRecStats(
         SamplingOrderStats const& rec1_stats, SamplingOrderStats const& rec2_stats) noexcept {
     if (rec1_stats.size() > rec2_stats.size()) {
         auto rec1_stats_it = rec1_stats.begin();
@@ -89,7 +164,7 @@ std::strong_ordering RecordPairInferrer::CompareRecStats(
     return std::strong_ordering::equal;
 }
 
-auto RecordPairInferrer::CreateStats(
+auto RecordPairInferrer::RecordRanker::CreateStats(
         RecordIdentifier right_record_id, model::Index column_match_index,
         indexes::PliCluster const& cluster) const -> SamplingOrderStats {
     std::unordered_map<ColumnClassifierValueId, unsigned> stats;
@@ -113,179 +188,111 @@ auto RecordPairInferrer::CreateStats(
         ++stats[lhs_ccv_id];
     }
     SamplingOrderStats stats_flat{stats.begin(), stats.end()};
-    std::sort(stats_flat.begin(), stats_flat.end());
+    std::ranges::sort(stats_flat);
     return stats_flat;
 }
 
-bool RecordPairInferrer::FullSamplingSortComparer::operator()(
-        RecordIdentifier rec1, RecordIdentifier rec2) const noexcept {
-    SamplingOrderStats const& rec1_prev_stats = order_stats_prev.find(rec1)->second;
-    SamplingOrderStats const& rec2_prev_stats = order_stats_prev.find(rec2)->second;
+// Full sort: compare every record pairwise with the cluster's records, sort every CCV ID span
+// lexicographically based on the sorted list of CCV IDs in the left column match, then the right
+// column match as tie breaker.
+bool RecordPairInferrer::RecordRanker::FullSamplingSortComparer::operator()(
+        RecordIdentifier record_id1, RecordIdentifier record_id2) const noexcept {
+    SamplingOrderStats const& rec1_prev_stats = order_stats_prev.find(record_id1)->second;
+    SamplingOrderStats const& rec2_prev_stats = order_stats_prev.find(record_id2)->second;
     std::strong_ordering prev_res = CompareRecStats(rec1_prev_stats, rec2_prev_stats);
     if (prev_res != std::strong_ordering::equal) return prev_res == std::strong_ordering::less;
 
-    SamplingOrderStats const& rec1_next_stats = order_stats_next.find(rec1)->second;
-    SamplingOrderStats const& rec2_next_stats = order_stats_next.find(rec2)->second;
+    SamplingOrderStats const& rec1_next_stats = order_stats_next.find(record_id1)->second;
+    SamplingOrderStats const& rec2_next_stats = order_stats_next.find(record_id2)->second;
     std::strong_ordering next_res = CompareRecStats(rec1_next_stats, rec2_next_stats);
     if (next_res != std::strong_ordering::equal) return next_res == std::strong_ordering::less;
-    return rec1 < rec2;
+    return record_id1 < record_id2;
 }
 #endif
 
-bool RecordPairInferrer::ShortSamplingClusterComparer::operator()(
+// Using the sorting from HyFD. It can work okay here if equality implies highest CCV ID, which is
+// the case for all built-in similarity measures.
+bool RecordPairInferrer::RecordRanker::ShortSamplingClusterComparer::operator()(
         RecordIdentifier record_id1, RecordIdentifier record_id2) const noexcept {
     CompressedRecord const& record1 = records[record_id1];
     CompressedRecord const& record2 = records[record_id2];
-    auto v_comp = [&](model::Index pli_index) { return record1[pli_index] <=> record2[pli_index]; };
-    for (model::Index pli_index : {prev_info.left_pli_index, prev_info.right_pli_index,
-                                   next_info.left_pli_index, next_info.right_pli_index}) {
-        auto comp_res = v_comp(pli_index);
-        if (comp_res != std::strong_ordering::equal) return comp_res == std::strong_ordering::less;
+    for (model::Index column_index : {prev_info.left_pli_index, prev_info.right_pli_index,
+                                      next_info.left_pli_index, next_info.right_pli_index}) {
+        auto value_id_order = record1[column_index] <=> record2[column_index];
+        if (value_id_order != std::strong_ordering::equal)
+            return value_id_order == std::strong_ordering::less;
     }
     return false;
 }
 
-#if 0
-bool RecordPairInferrer::ShortSamplingNonClusterComparer::RecLessThan(
-        RecordIdentifier record1, RecordIdentifier record2) const noexcept {
-    auto rv = std::ranges::reverse_view{cluster_span};
-    auto compare_on = [&](Info info) {
-        auto const& [pli_index, rhs_lhs_map, matrix] = info;
-        ValueMatrixRowRef rec1_row = matrix[records[record1][pli_index]];
-        ValueMatrixRowRef rec2_row = matrix[records[record2][pli_index]];
-        for (RecordIdentifier cluster_record_id : rv) {
-            ValueIdentifier cur_value_id = records[cluster_record_id][pli_index];
-            auto it1 = rec1_row.find(cur_value_id);
-            auto it2 = rec2_row.find(cur_value_id);
-            ColumnClassifierValueId lhs1_ccv_id =
-                    it1 == rec1_row.end() ? kLowestCCValueId : rhs_lhs_map[it1->second];
-            ColumnClassifierValueId lhs2_ccv_id =
-                    it2 == rec2_row.end() ? kLowestCCValueId : rhs_lhs_map[it2->second];
-            if (lhs1_ccv_id != lhs2_ccv_id) return lhs1_ccv_id <=> lhs2_ccv_id;
-        }
-        return std::strong_ordering::equal;
-    };
-    auto prev_res = compare_on(prev_info);
-    if (prev_res != std::strong_ordering::equal) return prev_res == std::strong_ordering::less;
-
-    auto next_res = compare_on(next_info);
-    if (next_res != std::strong_ordering::equal) return next_res == std::strong_ordering::less;
-    return record1 < record2;
-}
-
-std::uint16_t RecordPairInferrer::ShortSamplingNonClusterComparer::GetBracket(
-        RecordIdentifier record_id, model::Index offset) {
-    model::Index cluster_record_index = long_block ? offset / 2 : offset;
-    indexes::SimilarityMatrix const* matrix = &prev_info.matrix;
-    model::Index pli_index = prev_info.pli_index;
-    std::vector<ColumnClassifierValueId> const* rhs_lhs_map = &prev_info.rhs_lhs_map;
-    if (cluster_record_index >= cluster_size) {
-        cluster_record_index -= cluster_size;
-        matrix = &next_info.matrix;
-        pli_index = next_info.pli_index;
-        rhs_lhs_map = &next_info.rhs_lhs_map;
-    }
-    ValueMatrixRowRef rec_row = (*matrix)[records[record_id][pli_index]];
-    auto it = rec_row.find(cluster_span[cluster_size - (cluster_record_index + 1)]);
-    return it == rec_row.end() ? kLowestCCValueId : (*rhs_lhs_map)[it->second];
-}
-#endif
-
-// Short sampling uses a sliding window.
-// Short sort: put the records in such an order that the sorted list of CCV IDs from the left column
-// match is the greatest lexicographically for the first sampling round (window_size = 1), if equal,
-// same for the subsequent rounds until not equal. If all equal, sort in the same way for the right
-// column. Apply the above to every span of the same CCV ID in the current column match. This is the
-// desired order, but establishing is an NP-hard problem.
-// Instead, this adapts HyFD's approach. The cluster's records are stored first, sorted in a similar
-// way to HyFD, followed by other records, sorted by their CCV ID in column_match_index. The
-// non-cluster records in every CCV ID span are sorted lexicographically by the CCV IDs in
-// comparisons with the cluster's records (reversed), first on the left column match, then the
-// right. That is, if the cluster part is stored as [1 2 3 4 5 6 7], record 8 is in the upper set
-// index (aka similarity index) then the value in record 8 is first compared with the value of
-// record 7, then 6, then ..., the resulting list for record 8 may look something like
-// [3 60 33 5 5 1 9], these lists are compared lexicographically.
+//  Short sampling uses a sliding window for sampling cluster records.
+//  Short sort, ideally: put the records in such an order that the sorted list of CCV IDs from the
+// previous column match is the greatest lexicographically for the first sampling round (window_size
+// = 1), if equal, same for the subsequent rounds until not equal. If all equal, sort in the same
+// way for the right column match. Apply the above to every span of the same CCV ID in the current
+// column match. This is the desired order, but finding it is NP-hard.
+//  Instead, this adapts HyFD's approach. The cluster's records are stored first, sorted in a
+// similar way to HyFD, followed by other records, sorted by their CCV ID in column_match_index.
+//  Full sorting is not implemented.
 template <typename ObtainValueRecords>
-struct RecordPairInferrer::InitializeLoopBody<true, ObtainValueRecords> {
-    using Info = std::tuple<indexes::SimilarityMatrix const&, model::Index, model::Index,
-                            indexes::SimilarityMatrix const&, model::Index, model::Index,
-                            std::vector<CompressedRecord> const&>;
-    RecordPairInferrer const& inferrer;
-    InitializationBodyVariables const variables;
+struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<true, ObtainValueRecords> {
+    RecordRanker const& ranker;
+    RankingBodyVariables const variables;
     ObtainValueRecords obtain_value_records;
     model::Index const column_match_index;
 
     // Sorting the cluster in a way that the first round of sampling yields the most of the highest
     // CCV IDs is an NP-hard problem: an algorithm obtaining such a permutation can be used for
     // solving the Hamiltonian path problem, which is NP-complete.
-    void OrderCluster(std::span<RecordIdentifier> cluster_span) const noexcept {
+    void OrderCluster(std::vector<RecordIdentifier>& cluster_records) const noexcept {
         ShortSamplingClusterComparer comparer =
-                inferrer.CreateShortSamplingClusterComparer(column_match_index);
-        std::sort(cluster_span.begin(), cluster_span.end(), comparer);
+                ranker.CreateShortSamplingClusterComparer(column_match_index);
+        std::ranges::sort(cluster_records, comparer);
     }
 
     void operator()(ValueIdentifier left_value_id) {
         auto const [upper_set_index, left_clusters] = variables;
         auto const& [right_records, end_id_map] = upper_set_index[left_value_id].GetFlat();
-        ValueRankedRecords& value_ranked_records = obtain_value_records(left_value_id);
+
+        RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
         value_ranked_records.reserve(right_records.size());
+
         indexes::PliCluster const& cluster = left_clusters[left_value_id];
-        assert(std::all_of(cluster.begin(), cluster.end(), [&](RecordIdentifier left_record_id) {
-            auto right_recs_end = right_records.begin() + end_id_map.begin()->second;
-            return std::find(right_records.begin(), right_recs_end, left_record_id) !=
-                   right_recs_end;
+        assert(std::ranges::all_of(cluster, [&](RecordIdentifier left_record_id) {
+            return std::ranges::find(right_records, left_record_id) != right_records.end();
         }));
         value_ranked_records.insert(value_ranked_records.end(), cluster.begin(), cluster.end());
-        std::span cluster_span{value_ranked_records.begin(), value_ranked_records.end()};
-        OrderCluster(cluster_span);
+
+        OrderCluster(value_ranked_records);
+
         std::unordered_set<RecordIdentifier> cluster_set(cluster.begin(), cluster.end());
         for (RecordIdentifier record_id : right_records) {
             if (!cluster_set.contains(record_id)) value_ranked_records.push_back(record_id);
         }
-#if 0
-        ShortSamplingNonClusterComparer non_cluster_comparer =
-                inferrer.CreateShortSamplingNonClusterComparer(column_match_index, cluster_span);
-        DESBORDANTE_ASSUME(!end_id_map.empty());
-        auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++;
-        auto const begin_iter = value_ranked_records.begin();
-        std::size_t const cluster_size = cluster.size();
-        auto bracket_getter = non_cluster_comparer.BracketGetter();
-        auto size_getter = non_cluster_comparer.SizeGetter();
-        auto record_comparer = non_cluster_comparer.RecordComparer();
-        boost::sort::spreadsort::string_sort(begin_iter + cluster_size,
-                                             begin_iter + cur_iter->second, bracket_getter,
-                                             size_getter, record_comparer);
-        for (auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++, end_iter = end_id_map.end();
-             fol_iter != end_iter; ++fol_iter, ++cur_iter) {
-            boost::sort::spreadsort::string_sort(begin_iter + cur_iter->second,
-                                                 begin_iter + fol_iter->second, bracket_getter,
-                                                 size_getter, record_comparer);
-        }
-#endif
+        // Full sampling sorting goes here.
     }
 };
 
-// Full sort: compare every record pairwise with the cluster's records, sort every CCV ID span
-// lexicographically based on the sorted list of CCV IDs in the left column match, then the right
-// column match.
 template <typename ObtainValueRecords>
-struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
-    RecordPairInferrer const& inferrer;
-    InitializationBodyVariables const variables;
+struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<false, ObtainValueRecords> {
+    RecordRanker const& ranker;
+    RankingBodyVariables const variables;
     ObtainValueRecords obtain_value_records;
     model::Index const column_match_index;
 
     void operator()(ValueIdentifier left_value_id) {
         auto const [upper_set_index, left_clusters] = variables;
         auto const& [right_records, end_id_map] = upper_set_index[left_value_id].GetFlat();
-        ValueRankedRecords& value_ranked_records = obtain_value_records(left_value_id);
+
+        RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
         value_ranked_records.reserve(right_records.size());
+
         value_ranked_records.insert(value_ranked_records.end(), right_records.begin(),
                                     right_records.end());
 #if 0
         indexes::PliCluster const& cluster = left_clusters[left_value_id];
         FullSamplingSortComparer comparer =
-                inferrer.CreateComparer(cluster, value_ranked_records, column_match_index);
+                ranker.CreateComparer(cluster, value_ranked_records, column_match_index);
         DESBORDANTE_ASSUME(!end_id_map.empty());
         auto fol_iter = end_id_map.begin(), cur_iter = fol_iter++;
         auto const begin_iter = value_ranked_records.begin();
@@ -298,225 +305,355 @@ struct RecordPairInferrer::InitializeLoopBody<false, ObtainValueRecords> {
     }
 };
 
-bool RecordPairInferrer::InitializeShortSeq(Efficiency& efficiency) {
-    return InitializeSeqImpl<true>(efficiency);
-}
-
-bool RecordPairInferrer::InitializeFullSeq(Efficiency& efficiency) {
-    return InitializeSeqImpl<false>(efficiency);
-}
-
 template <bool IsShort>
-bool RecordPairInferrer::InitializeSeqImpl(Efficiency& efficiency) {
-    auto const [total_left_values, column_match_ranked_records, variables] =
-            GetInitializationVariables(efficiency);
+void RecordPairInferrer::RecordRanker::RankRecordsParallel(
+        model::Index const column_match_index,
+        RankedRecordsColumnMatch& column_match_ranked_records) {
+    auto const [total_left_values, variables] = GetRankingVariables(column_match_index);
+    // The table is not empty, so there are values.
     DESBORDANTE_ASSUME(total_left_values != 0);
-    auto obtain_value_records = [&](model::Index) -> decltype(auto) {
-        return column_match_ranked_records.emplace_back();
-    };
-    auto loop_body = InitializeLoopBody<IsShort, decltype(obtain_value_records)>{
-            *this, variables, obtain_value_records, efficiency.GetColumnMatchIndex()};
-    for (ValueIdentifier left_value_id = 0; left_value_id != total_left_values; ++left_value_id) {
-        loop_body(left_value_id);
-    }
-    SampleSeqImpl<IsShort>(efficiency);
-    return efficiency.GetComparisons();
-}
 
-template <bool IsShort>
-bool RecordPairInferrer::InitializeParallelImpl(Efficiency& efficiency) {
-    auto const [total_left_values, column_match_ranked_records, variables] =
-            GetInitializationVariables(efficiency);
-    DESBORDANTE_ASSUME(total_left_values != 0);
     column_match_ranked_records.assign(total_left_values, {});
-    auto obtain_value_records = [&](ValueIdentifier value_id) -> decltype(auto) {
+    auto obtain_at_index = [&](ValueIdentifier value_id) -> decltype(auto) {
         return column_match_ranked_records[value_id];
     };
-    auto loop_body = InitializeLoopBody<IsShort, decltype(obtain_value_records)>{
-            *this, variables, obtain_value_records, efficiency.GetColumnMatchIndex()};
-    auto fill_for = [&](ValueIdentifier left_value_id) { loop_body(left_value_id); };
-    pool_->ExecIndex(fill_for, total_left_values);
-    SampleParallelImpl<IsShort>(efficiency);
-    return efficiency.GetComparisons();
+    auto loop_body = RankRecordsLoopBody<IsShort, decltype(obtain_at_index)>{
+            *this, variables, obtain_at_index, column_match_index};
+    auto rank_for = [&](ValueIdentifier left_value_id) { loop_body(left_value_id); };
+    inferrer_.pool_->ExecIndex(rank_for, total_left_values);
 }
 
-bool RecordPairInferrer::InitializeFullParallel(Efficiency& efficiency) {
-    return InitializeParallelImpl<false>(efficiency);
+template <bool IsShort>
+void RecordPairInferrer::RecordRanker::RankRecordsSeq(
+        model::Index const column_match_index,
+        RankedRecordsColumnMatch& column_match_ranked_records) {
+    auto const [total_left_values, variables] = GetRankingVariables(column_match_index);
+    // The table is not empty, so there are values.
+    DESBORDANTE_ASSUME(total_left_values != 0);
+
+    auto obtain_new = [&](model::Index) -> decltype(auto) {
+        return column_match_ranked_records.emplace_back();
+    };
+    auto loop_body = RankRecordsLoopBody<IsShort, decltype(obtain_new)>{
+            *this, variables, obtain_new, column_match_index};
+    for (ValueIdentifier left_value_id : utility::IndexRange(total_left_values)) {
+        loop_body(left_value_id);
+    }
 }
 
-bool RecordPairInferrer::InitializeShortParallel(Efficiency& efficiency) {
-    return InitializeParallelImpl<true>(efficiency);
+auto RecordPairInferrer::RecordRanker::RankRecords() -> std::vector<RankedRecordsColumnMatch> {
+    std::vector<RankedRecordsColumnMatch> ranked_records =
+            util::GetPreallocatedVector<RankedRecordsColumnMatch>(inferrer_.column_match_number_);
+
+    using InitMethod = void (RecordRanker::*)(model::Index const, RankedRecordsColumnMatch&);
+    InitMethod short_method = &RecordRanker::RankRecordsSeq<true>;
+    InitMethod full_method = &RecordRanker::RankRecordsSeq<false>;
+    if (inferrer_.MultiThreaded()) {
+        short_method = &RecordRanker::RankRecordsParallel<true>;
+        full_method = &RecordRanker::RankRecordsParallel<false>;
+    }
+
+    for (model::Index const column_match_index :
+         utility::IndexRange(inferrer_.column_match_number_)) {
+        RankedRecordsColumnMatch& column_match_ranked_records = ranked_records.emplace_back();
+        // See CreateSamplingQueue comments.
+        if ((*inferrer_.lhs_ccv_id_info_)[column_match_index].lhs_to_rhs_map.size() == 1) continue;
+
+        InitMethod fill_records =
+                inferrer_.ShortSamplingEnabled(column_match_index) ? short_method : full_method;
+        (this->*fill_records)(column_match_index, column_match_ranked_records);
+    }
+
+    return ranked_records;
 }
 
-bool RecordPairInferrer::ProcessPairComparison(PairComparisonResult const& pair_comparison_result) {
+auto RecordPairInferrer::CreateSamplingQueue() -> std::priority_queue<ColumnMatchSamplingInfo> {
+    std::vector<ColumnMatchSamplingInfo> sampling_info =
+            util::GetPreallocatedVector<ColumnMatchSamplingInfo>(column_match_number_);
+    for (model::Index column_match_index : utility::IndexRange(column_match_number_)) {
+        auto const& [lhs_rhs_map, rhs_lhs_map] = (*lhs_ccv_id_info_)[column_match_index];
+        // TODO: enforce this invariant with a class.
+        DESBORDANTE_ASSUME(!lhs_rhs_map.empty());
+        // No records are matched.
+        if (lhs_rhs_map.size() == 1) {
+            // Trivial column matches have been excluded.
+            DESBORDANTE_ASSUME(rhs_lhs_map.size() > 1);
+            // TODO: sort based on column matches where the number of LHS values is greater
+            // than 1, discard pairs with the highest CCV ID.
+            LOG(WARNING) << "Sampling for column match " << column_match_index
+                         << " not implemented.";
+            continue;
+        }
+
+        std::size_t const initial_parameter = ShortSamplingEnabled(column_match_index) ? 1 : 0;
+        ColumnMatchSamplingInfo& column_match_sampling_info =
+                sampling_info.emplace_back(column_match_index, initial_parameter);
+        DoSamplingRound(column_match_sampling_info);
+        // No pairs have been sampled, and no pairs are going to be sampled if the parameter is
+        // increased either.
+        if (column_match_sampling_info.GetSampledNumber() == 0) {
+            sampling_info.pop_back();
+        } else {
+            column_match_sampling_info.IncrementParameter();
+        }
+    }
+    return std::priority_queue<ColumnMatchSamplingInfo>{decltype(sampling_queue_)::value_compare{},
+                                                        std::move(sampling_info)};
+}
+
+RecordPairInferrer::RecordPairInferrer(InternalConstructToken, lattice::MdLattice* lattice,
+                                       indexes::RecordsInfo const* records_info,
+                                       std::vector<ColumnMatchInfo> const* column_matches_sim_info,
+                                       std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info,
+                                       std::vector<bool> sample_short, util::WorkerThreadPool* pool)
+    : lattice_(lattice),
+      records_info_(records_info),
+      column_matches_sim_info_(column_matches_sim_info),
+      lhs_ccv_id_info_(&lhs_ccv_id_info),
+      sample_short_(std::move(sample_short)),
+      pool_(pool),
+      ranked_records_(RecordRanker{*this}.RankRecords()),
+      sampling_queue_(CreateSamplingQueue()) {}
+
+PairComparisonResult RecordPairInferrer::CompareRecords(
+        CompressedRecord const& left_record, CompressedRecord const& right_record) const {
+    std::vector<ColumnClassifierValueId> rhss =
+            util::GetPreallocatedVector<ColumnClassifierValueId>(column_match_number_);
+    for (auto const& [sim_info, left_col_index, right_col_index] : *column_matches_sim_info_) {
+        indexes::SimilarityMatrixRow const& row =
+                sim_info.similarity_matrix[left_record[left_col_index]];
+        rhss.push_back(GetCCVId(row, right_record[right_col_index]));
+    }
+    return {std::move(rhss), *lhs_ccv_id_info_};
+}
+
+bool RecordPairInferrer::InferFromNew(PairComparisonResult const& pair_comparison_result) {
     using MdRefiner = lattice::MdLattice::MdRefiner;
     std::vector<MdRefiner> refiners = lattice_->CollectRefinersForViolated(pair_comparison_result);
     std::for_each(refiners.begin(), refiners.end(), std::mem_fn(&MdRefiner::Refine));
     return !refiners.empty();
 }
 
-void RecordPairInferrer::ParallelCompareAndProcess(auto compare, std::size_t index_limit,
-                                                   auto comparison_action) {
-    std::vector<Comparisons> comparisons(pool_->ThreadNum());
-    std::atomic<Comparisons*> current_ptr = &comparisons.front();
-    auto get_thread_vec = [&]() { return current_ptr.fetch_add(1, std::memory_order::acquire); };
-    pool_->ExecIndexWithResource(compare, get_thread_vec, index_limit);
-    for (Comparisons& thread_comparisons : comparisons) {
-        for (PairComparisonResult& comparison : thread_comparisons) {
-            comparison_action(std::move(comparison));
-        }
-    }
-}
+template <bool ShortSampling>
+class RecordPairInferrer::Sampler {
+    indexes::CompressedRecords const& left_records_;
+    indexes::CompressedRecords const& right_records_;
+    std::vector<indexes::PliCluster> const& clusters_;
+    RankedRecordsColumnMatch const& ranked_records_column_match_;
+    model::Index const parameter_;
 
-void RecordPairInferrer::ProcessRecommendationsParallel(Recommendations const& recommendations) {
-    auto compare_pair = [&](model::Index index, Comparisons* vec) {
-        auto const& [left_record_ptr, right_record_ptr] = recommendations[index];
-        vec->push_back(CompareRecords(*left_record_ptr, *right_record_ptr));
-    };
-    auto try_process = [this](PairComparisonResult&& comparison) {
-        TryProcessComparison(std::move(comparison));
-    };
-    ParallelCompareAndProcess(compare_pair, recommendations.size(), try_process);
-}
+    void SampleWholeCluster(indexes::PliCluster const& cluster,
+                            RankedRecordsValue const& ranked_records_value,
+                            auto&& record_pair_action) const {
+        std::size_t const record_rank = parameter_;
 
-void RecordPairInferrer::ProcessRecommendationsSeq(Recommendations const& recommendations) {
-    for (auto const& [left_record_ptr, right_record_ptr] : recommendations) {
-        TryProcessComparison(CompareRecords(*left_record_ptr, *right_record_ptr));
-    }
-}
-
-template <>
-struct RecordPairInferrer::SampleLoopBody<false> {
-    SamplingBodyVariables variables;
-
-    template <typename AddComparisonType>
-    void operator()(ValueIdentifier value_id, AddComparisonType&& add_comparison) {
-        auto const [left_records, right_records, clusters, ranked_column_match_records,
-                    record_rank] = variables;
-        ValueRankedRecords const& ranked_list = ranked_column_match_records[value_id];
-        if (record_rank >= ranked_list.size()) return;
-        CompressedRecord const& right_record = right_records[ranked_list[record_rank]];
-        indexes::PliCluster const& cluster = clusters[value_id];
+        CompressedRecord const& right_record = right_records_[ranked_records_value[record_rank]];
         for (RecordIdentifier left_record_id : cluster) {
-            CompressedRecord const& left_record = left_records[left_record_id];
-            add_comparison(left_record, right_record);
+            CompressedRecord const& left_record = left_records_[left_record_id];
+            record_pair_action(left_record, right_record);
         }
     }
-};
 
-template <>
-struct RecordPairInferrer::SampleLoopBody<true> {
-    SamplingBodyVariables variables;
-    SampleLoopBody<false> full_loop{variables};
+    void SampleSlidingWindow(std::size_t const cluster_size,
+                             RankedRecordsValue const& ranked_records_value,
+                             auto&& record_pair_action) const {
+        std::size_t const window_size = parameter_;
 
-    template <typename AddComparisonType>
-    void operator()(ValueIdentifier value_id, AddComparisonType&& add_comparison) {
-        auto const [left_records, right_records, clusters, ranked_column_match_records,
-                    window_size] = variables;
-        ValueRankedRecords const& ranked_list = ranked_column_match_records[value_id];
-        std::size_t const ranked_list_size = ranked_list.size();
-        if (window_size >= ranked_list_size) return;
-        indexes::PliCluster const& cluster = clusters[value_id];
+        // Short sampling relies on equal values being similar.
+        DESBORDANTE_ASSUME(ranked_records_value.size() >= cluster_size);
+        auto const pivot = ranked_records_value.begin();
+
+        // Other records, if compared with the cluster's records, will not always yield a lot of the
+        // same similarity sets, like they would if they were from the cluster, so the argument to
+        // treat the cluster's records specially does not apply to them. If we did use sliding
+        // window sampling for other records, the expression for the end iterator would need to be a
+        // little more complicated.
+        DESBORDANTE_ASSUME(window_size < cluster_size);
+        auto const partner = pivot + window_size;
+        auto const end = pivot + cluster_size;
+
+        for (auto const [left_record_id, right_record_id] : utility::Zip(end, pivot, partner)) {
+            CompressedRecord const& right_record = right_records_[right_record_id];
+            CompressedRecord const& left_record = left_records_[left_record_id];
+            record_pair_action(left_record, right_record);
+        }
+    }
+
+    void SampleShort(indexes::PliCluster const& cluster,
+                     RankedRecordsValue const& ranked_records_value,
+                     auto&& record_pair_action) const {
         std::size_t const cluster_size = cluster.size();
-        if (window_size >= cluster_size) {
-            full_loop(value_id, add_comparison);
-            return;
+        if (parameter_ < cluster_size) {
+            SampleSlidingWindow(cluster_size, ranked_records_value, record_pair_action);
+        } else {
+            SampleWholeCluster(cluster, ranked_records_value, record_pair_action);
         }
-        auto pivot = ranked_list.begin();
-        auto partner = ranked_list.begin() + window_size;
-        DESBORDANTE_ASSUME(ranked_list_size >= cluster_size);
-        auto const end = ranked_list.begin() + cluster_size;
-        while (partner != end) {
-            RecordIdentifier const left_record_id = *pivot++;
-            RecordIdentifier const right_record_id = *partner++;
-            CompressedRecord const& left_record = left_records[left_record_id];
-            CompressedRecord const& right_record = right_records[right_record_id];
-            add_comparison(left_record, right_record);
+    }
+
+public:
+    Sampler(indexes::CompressedRecords const& left_records,
+            indexes::CompressedRecords const& right_records,
+            std::vector<indexes::PliCluster> const& clusters,
+            RankedRecordsColumnMatch const& ranked_records_column_match, model::Index parameter)
+        : left_records_(left_records),
+          right_records_(right_records),
+          clusters_(clusters),
+          ranked_records_column_match_(ranked_records_column_match),
+          parameter_(parameter) {}
+
+    void Sample(ValueIdentifier value_id, auto&& record_pair_action) const {
+        RankedRecordsValue const& ranked_records_value = ranked_records_column_match_[value_id];
+        std::size_t const similar_record_number = ranked_records_value.size();
+        if (parameter_ >= similar_record_number) return;
+
+        if constexpr (ShortSampling) {
+            SampleShort(clusters_[value_id], ranked_records_value, record_pair_action);
+        } else {
+            SampleWholeCluster(clusters_[value_id], ranked_records_value, record_pair_action);
         }
     }
 };
 
+template <bool SampleShort>
+auto RecordPairInferrer::CreateSampler(ColumnMatchSamplingInfo const& column_match_sampling_info)
+        -> std::pair<std::size_t, Sampler<SampleShort>> {
+    indexes::DictionaryCompressor const& left_compressor = records_info_->GetLeftCompressor();
+    indexes::CompressedRecords const& left_records = left_compressor.GetRecords();
+
+    indexes::CompressedRecords const& right_records =
+            records_info_->GetRightCompressor().GetRecords();
+
+    model::Index const column_match_index = column_match_sampling_info.GetColumnMatchIndex();
+
+    ColumnMatchInfo const& column_match_info = (*column_matches_sim_info_)[column_match_index];
+    model::Index const left_pli_index = column_match_info.left_column_index;
+    indexes::KeyedPositionListIndex const& left_pli = left_compressor.GetPli(left_pli_index);
+    std::vector<indexes::PliCluster> const& clusters = left_pli.GetClusters();
+
+    RankedRecordsColumnMatch const& ranked_column_match_records =
+            ranked_records_[column_match_index];
+
+    model::Index const parameter = column_match_sampling_info.GetParameter();
+
+    std::size_t const left_values_number = clusters.size();
+
+    return {left_values_number,
+            {left_records, right_records, clusters, ranked_column_match_records, parameter}};
+}
+
+auto RecordPairInferrer::CollectParallelComparisonResults(auto compare_at, std::size_t index_limit)
+        -> std::vector<Comparisons> {
+    std::vector<Comparisons> all_thread_comparisons(pool_->ThreadNum());
+    std::atomic<Comparisons*> current_thread_comparisons = &all_thread_comparisons.front();
+    auto get_thread_comparisons = [&current_thread_comparisons]() {
+        return current_thread_comparisons.fetch_add(1, std::memory_order::acquire);
+    };
+
+    pool_->ExecIndexWithResource(compare_at, get_thread_comparisons, index_limit);
+    return all_thread_comparisons;
+}
+
+void RecordPairInferrer::ParallelCompareAndInfer(auto compare_at, std::size_t index_limit,
+                                                 auto infer_from) {
+    std::vector<Comparisons> collected = CollectParallelComparisonResults(compare_at, index_limit);
+
+    for (Comparisons& thread_comparisons : collected) {
+        for (PairComparisonResult& comparison : thread_comparisons) {
+            infer_from(std::move(comparison));
+        }
+    }
+}
+
 template <bool IsShort>
-void RecordPairInferrer::SampleParallelImpl(Efficiency& efficiency) {
-    auto const [clusters_number, variables] = GetSamplingVariables(efficiency);
-    auto loop_body = SampleLoopBody<IsShort>{variables};
-    auto compare_window = [&](ValueIdentifier value_id, Comparisons* vec) {
-        auto compare_and_push_back = [&](CompressedRecord const& left_record,
-                                         CompressedRecord const& right_record) {
-            vec->push_back(CompareRecords(left_record, right_record));
+void RecordPairInferrer::DoSamplingRoundParallel(
+        ColumnMatchSamplingInfo& column_match_sampling_info) {
+    auto const [left_values_number, sampler] = CreateSampler<IsShort>(column_match_sampling_info);
+
+    auto compare_and_store_all_for_value = [this, &sampler](ValueIdentifier left_value_id,
+                                                            Comparisons* thread_comparisons) {
+        auto compare_and_store = [this, thread_comparisons](CompressedRecord const& left_record,
+                                                            CompressedRecord const& right_record) {
+            thread_comparisons->push_back(CompareRecords(left_record, right_record));
         };
-        loop_body(value_id, compare_and_push_back);
+        sampler.Sample(left_value_id, compare_and_store);
     };
-    auto add_comparison = [&](PairComparisonResult&& comparison) {
-        AddComparison(efficiency, std::move(comparison));
-    };
-    ParallelCompareAndProcess(compare_window, clusters_number, add_comparison);
-}
 
-void RecordPairInferrer::SampleParallel(Efficiency& efficiency) {
-    if (ShortSamplingEnabled(efficiency.GetColumnMatchIndex())) {
-        SampleParallelImpl<true>(efficiency);
-    } else {
-        SampleParallelImpl<false>(efficiency);
-    }
+    auto infer_from_compared = [&](PairComparisonResult&& comparison) {
+        CountAndInfer(column_match_sampling_info, std::move(comparison));
+    };
+    ParallelCompareAndInfer(compare_and_store_all_for_value, left_values_number,
+                            infer_from_compared);
 }
 
 template <bool IsShort>
-void RecordPairInferrer::SampleSeqImpl(Efficiency& efficiency) {
-    auto const [clusters_number, variables] = GetSamplingVariables(efficiency);
-    auto compare_and_add = [&](CompressedRecord const& left_record,
-                               CompressedRecord const& right_record) {
-        AddComparison(efficiency, CompareRecords(left_record, right_record));
+void RecordPairInferrer::DoSamplingRoundSeq(ColumnMatchSamplingInfo& column_match_sampling_info) {
+    auto const [left_values_number, sampler] = CreateSampler<IsShort>(column_match_sampling_info);
+
+    auto infer_immediately = [&](CompressedRecord const& left_record,
+                                 CompressedRecord const& right_record) {
+        CountAndInfer(column_match_sampling_info, CompareRecords(left_record, right_record));
     };
-    auto loop_body = SampleLoopBody<IsShort>{variables};
-    for (ValueIdentifier value_id = 0; value_id != clusters_number; ++value_id) {
-        loop_body(value_id, compare_and_add);
+
+    for (ValueIdentifier left_value_id : utility::IndexRange(left_values_number)) {
+        sampler.Sample(left_value_id, infer_immediately);
     }
 }
 
-void RecordPairInferrer::SampleSeq(Efficiency& efficiency) {
-    if (ShortSamplingEnabled(efficiency.GetColumnMatchIndex())) {
-        SampleSeqImpl<true>(efficiency);
-    } else {
-        SampleSeqImpl<false>(efficiency);
-    }
+void RecordPairInferrer::SampleAndRequeue(ColumnMatchSamplingInfo& column_match_sampling_info) {
+    std::size_t const sampled_previously = column_match_sampling_info.GetSampledNumber();
+    DoSamplingRound(column_match_sampling_info);
+    std::size_t const sampled_after_round = column_match_sampling_info.GetSampledNumber();
+    bool const out_of_pairs = sampled_previously == sampled_after_round;
+    if (out_of_pairs) return;
+
+    column_match_sampling_info.IncrementParameter();
+    sampling_queue_.push(column_match_sampling_info);
 }
 
-PairComparisonResult RecordPairInferrer::CompareRecords(
-        CompressedRecord const& left_record, CompressedRecord const& right_record) const {
-    std::vector<ColumnClassifierValueId> rhss;
-    rhss.reserve(column_match_number_);
-    for (auto const& [sim_info, left_col_index, right_col_index] : *column_matches_sim_info_) {
-        indexes::SimilarityMatrixRow const& row =
-                sim_info.similarity_matrix[left_record[left_col_index]];
-        auto sim_it = row.find(right_record[right_col_index]);
-        rhss.push_back(sim_it == row.end() ? kLowestCCValueId : sim_it->second);
+bool RecordPairInferrer::SampleAndInfer() {
+    // Method should not be called if the queue is empty, signaled by the return value of Create and
+    // InferFromRecordPairs.
+    DESBORDANTE_ASSUME(!sampling_queue_.empty());
+    ColumnMatchSamplingInfo best = sampling_queue_.top();
+    sampling_queue_.pop();
+
+    efficiency_threshold_ = std::min(efficiency_threshold_ * kNewRoundThresholdMultiplier,
+                                     best.CalcEfficiency() * kBestThresholdMultiplier);
+
+    while (true) {
+        SampleAndRequeue(best);
+        if (sampling_queue_.empty()) break;
+
+        best = sampling_queue_.top();
+        if (best.CalcEfficiency() < efficiency_threshold_) return false;
+        sampling_queue_.pop();
+    };
+    return true;
+}
+
+void RecordPairInferrer::InferFromRecommendationsParallel(Recommendations const& recommendations) {
+    auto compare_records_and_store = [this, &recommendations](model::Index index,
+                                                              Comparisons* thread_comparisons) {
+        auto const& [left_record_ptr, right_record_ptr] = recommendations[index];
+        thread_comparisons->push_back(CompareRecords(*left_record_ptr, *right_record_ptr));
+    };
+    auto infer = [this](PairComparisonResult&& comparison) {
+        InferFromComparison(std::move(comparison));
+    };
+    ParallelCompareAndInfer(compare_records_and_store, recommendations.size(), infer);
+}
+
+void RecordPairInferrer::InferFromRecommendationsSeq(Recommendations const& recommendations) {
+    for (auto const& [left_record_ptr, right_record_ptr] : recommendations) {
+        InferFromComparison(CompareRecords(*left_record_ptr, *right_record_ptr));
     }
-    return {std::move(rhss), *lhs_ccv_id_info_};
 }
 
 bool RecordPairInferrer::InferFromRecordPairs(Recommendations const& recommendations) {
-    (this->*recom_process_method_)(recommendations);
+    InferFromRecommendations(recommendations);
 
-    DESBORDANTE_ASSUME(!efficiency_queue_.empty());
-    Efficiency best_efficiency = efficiency_queue_.top();
-    efficiency_queue_.pop();
-    efficiency_threshold_ = std::min(efficiency_threshold_ * kNormalThresholdDecrease,
-                                     best_efficiency.CalcEfficiency() * kTopThresholdDecrease);
-
-    do {
-        std::size_t const prev_comparisons = best_efficiency.GetComparisons();
-        (this->*sampling_method_)(best_efficiency);
-        if (prev_comparisons != best_efficiency.GetComparisons()) [[likely]] {
-            // Something was compared.
-            best_efficiency.IncrementParameter();
-            efficiency_queue_.push(best_efficiency);
-        }
-        best_efficiency = efficiency_queue_.top();
-        if (best_efficiency.CalcEfficiency() < efficiency_threshold_) return false;
-        efficiency_queue_.pop();
-    } while (!efficiency_queue_.empty());
-    return true;
+    bool const nothing_to_sample = SampleAndInfer();
+    return nothing_to_sample;
 }
 
 }  // namespace algos::hymd
