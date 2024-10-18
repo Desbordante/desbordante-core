@@ -189,6 +189,12 @@ unsigned long long HyMD::ExecuteInternal() {
 
     auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
             records_info_.get(), column_matches_option_, pool_holder.GetPtr());
+    if (similarity_data.GetColumnMatchNumber() == 0) {
+        RegisterResults(similarity_data, {});
+        return std::chrono::duration_cast<std::chrono::milliseconds>(
+                       std::chrono::system_clock::now() - start_time)
+                .count();
+    }
 
     lattice::MdLattice lattice{GetLevelDefinitionFunc(level_definition_),
                                similarity_data.GetLhsIdsInfo(), prune_nondisjoint_,
@@ -260,7 +266,7 @@ private:
             for (Index lhs_limit = lhs_index + child_index; lhs_index != lhs_limit; ++lhs_index) {
                 lhs.emplace_back(std::nullopt, sorted_to_original_[lhs_index], kLowestBound);
             }
-            assert(ccv_id != kLowestCCValueId);
+            assert(lhs_ccv_id != kLowestCCValueId);
             model::md::DecisionBoundary const lhs_bound =
                     similarity_data_.GetLhsDecisionBoundary(lhs_index, lhs_ccv_id);
             assert(lhs_bound != kLowestBound);
@@ -326,7 +332,7 @@ public:
     }
 
     void SortMds() {
-        std::sort(mds_.begin(), mds_.end(), utility::MdLess);
+        std::ranges::sort(mds_, utility::MdLess);
     }
 
     std::vector<model::MD> const& GetMds() {
