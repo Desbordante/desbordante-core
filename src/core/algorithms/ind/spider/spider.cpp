@@ -116,7 +116,7 @@ void Spider::MineAINDs() {
     std::vector const attrs = GetProcessedAttributes<AINDAttribute>(domains_, is_null_equal_null_);
     for (auto const& dep : attrs) {
         for (AttributeIndex ref_id : dep.GetRefIds(max_ind_error_)) {
-            RegisterIND(dep.ToCC(), attrs[ref_id].ToCC());
+            RegisterIND(dep.ToCC(), attrs[ref_id].ToCC(), dep.GetError(ref_id));
         }
     }
 }
