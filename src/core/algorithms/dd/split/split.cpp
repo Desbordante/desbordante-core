@@ -1,5 +1,6 @@
 #include "algorithms/dd/split/split.h"
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -8,6 +9,7 @@
 #include <list>
 #include <regex>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -53,6 +55,14 @@ void Split::LoadDataInternal() {
 }
 
 void Split::SetLimits() {
+    if (num_rows_ > typed_relation_->GetNumRows()) {
+        throw std::invalid_argument(
+                "'num_rows' must be less or equal to the number of rows in the table");
+    }
+    if (num_columns_ > typed_relation_->GetNumColumns()) {
+        throw std::invalid_argument(
+                "'num_columns' must be less or equal to the number of columns in the table");
+    }
     if (num_rows_ == 0) num_rows_ = typed_relation_->GetNumRows();
     if (num_columns_ == 0) num_columns_ = typed_relation_->GetNumColumns();
 }
@@ -64,7 +74,11 @@ void Split::ParseDifferenceTable() {
         difference_typed_relation_ =
                 model::ColumnLayoutTypedRelationData::CreateFrom(*difference_table_,
                                                                  false);  // nulls are ignored
-        assert(typed_relation_->GetNumColumns() == difference_typed_relation_->GetNumColumns());
+        if (typed_relation_->GetNumColumns() != num_columns_) {
+            throw std::invalid_argument(
+                    "The number of columns in the difference table must be equal to the number of "
+                    "columns in the loaded table or to 'num_columns' if specified");
+        }
     }
 }
 
@@ -76,19 +90,21 @@ unsigned long long Split::ExecuteInternal() {
     LOG(DEBUG) << "Start";
 
     CalculateAllDistances();
+    CalculateIndexSearchSpaces();
 
     if (reduce_method_ == +Reduce::IEHybrid) {
         CalculateTuplePairs();
     }
 
-    LOG(DEBUG) << "Calculated distances";
+    LOG(INFO) << "Calculated distances";
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
-    LOG(DEBUG) << "Minimum and maximum distances for each column:";
+    LOG(INFO) << "Minimum and maximum distances for each column with non-empty search space:";
 
     for (model::ColumnIndex index = 0; index < num_columns_; index++)
-        LOG(DEBUG) << min_max_dif_[index].lower_bound << " " << min_max_dif_[index].upper_bound;
+        LOG(INFO) << input_table_->GetColumnName(non_empty_cols_[index]) << ": "
+                  << min_max_dif_[index].lower_bound << ", " << min_max_dif_[index].upper_bound;
 
     unsigned const search_size = ReduceDDs(start_time);
 
@@ -96,20 +112,20 @@ unsigned long long Split::ExecuteInternal() {
 
     unsigned num_cycles = RemoveRedundantDDs();
 
-    LOG(DEBUG) << "Removed redundant dependencies";
+    LOG(INFO) << "Removed redundant dependencies";
     LOG(DEBUG) << "Cycles: " << num_cycles;
 
     num_cycles = RemoveTransitiveDDs();
 
-    LOG(DEBUG) << "Removed transitive dependencies";
+    LOG(INFO) << "Removed transitive dependencies";
     LOG(DEBUG) << "Cycles: " << num_cycles;
-    LOG(DEBUG) << "Search space size: " << search_size;
+    LOG(INFO) << "Search space size: " << search_size;
 
     PrintResults();
 
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "Algorithm time: " << elapsed_milliseconds.count();
+    LOG(INFO) << "Algorithm time: " << elapsed_milliseconds.count();
     return elapsed_milliseconds.count();
 }
 
@@ -127,7 +143,8 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         search = SearchSpace(indices);
         dfs_y = SearchSpace(index);
         search_size += search.size() * (dfs_y.size() - 1);
-        LOG(DEBUG) << "Calculated search spaces for column " << index;
+        LOG(DEBUG) << "Calculated search spaces for column "
+                   << input_table_->GetColumnName(non_empty_cols_[index]);
         auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
         LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
@@ -136,7 +153,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
 
         for (auto& df_y : dfs_y) {
             unsigned cnt = 0;
-            if (df_y[index] != min_max_dif_[index]) {
+            if (df_y != dfs_y.front()) {
                 switch (reduce_method_) {
                     case +Reduce::Negative:
                         reduced = NegativePruningReduce(df_y, search, cnt);
@@ -156,7 +173,8 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         }
         elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
-        LOG(DEBUG) << "Reduced dependencies with their rhs on column " << index;
+        LOG(INFO) << "Reduced dependencies with their rhs on column "
+                  << input_table_->GetColumnName(non_empty_cols_[index]);
         LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
     }
     return search_size;
@@ -221,10 +239,31 @@ unsigned Split::RemoveTransitiveDDs() {
     return num_cycles;
 }
 
+void Split::CalculateIndexSearchSpaces() {
+    std::vector<DFConstraint> new_min_max_dif;
+    std::vector<std::vector<std::vector<double>>> new_distances;
+    for (model::ColumnIndex index = 0; index < num_columns_; index++) {
+        std::vector<DFConstraint> cur_index_search_space = IndexSearchSpace(index);
+        if (cur_index_search_space.size() > 1) {
+            index_search_spaces_.push_back(std::move(cur_index_search_space));
+            non_empty_cols_.push_back(index);
+            new_min_max_dif.push_back(min_max_dif_[index]);
+            new_distances.push_back(std::move(distances_[index]));
+        }
+    }
+    num_columns_ = non_empty_cols_.size();
+    min_max_dif_ = std::move(new_min_max_dif);
+    distances_ = std::move(new_distances);
+}
+
 double Split::CalculateDistance(model::ColumnIndex column_index,
                                 std::pair<std::size_t, std::size_t> tuple_pair) {
     model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
     model::TypeId type_id = column.GetTypeId();
+
+    if (type_ids_[column_index] == +model::TypeId::kUndefined) {
+        type_ids_[column_index] = type_id;
+    }
 
     if (type_id == +model::TypeId::kUndefined) {
         throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
@@ -254,17 +293,29 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
 inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         double const dif = distances_[column_index][tuple_pair.first][tuple_pair.second];
-        if (dif < dif_func[column_index].lower_bound || dif > dif_func[column_index].upper_bound) {
-            return false;
+
+        if (type_ids_[column_index] == +model::TypeId::kDouble) {
+            // this is faster than direct model::Less and model::Greater calls
+            if ((dif < dif_func[column_index].lower_bound &&
+                 !model::IsEqual(dif, dif_func[column_index].lower_bound)) ||
+                (dif > dif_func[column_index].upper_bound &&
+                 !model::IsEqual(dif, dif_func[column_index].upper_bound))) {
+                return false;
+            }
+        } else {
+            if (dif < dif_func[column_index].lower_bound ||
+                dif > dif_func[column_index].upper_bound) {
+                return false;
+            }
         }
     }
     return true;
 }
 
-bool Split::VerifyDD(DD const& dep) {
+bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
     for (std::size_t i = 0; i < num_rows_; i++) {
         for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(dep.lhs, {i, j}) && !CheckDF(dep.rhs, {i, j})) return false;
+            if (CheckDF(lhs, {i, j}) && !CheckDF(rhs, {i, j})) return false;
         }
     }
     return true;
@@ -290,6 +341,7 @@ void Split::CalculateAllDistances() {
             num_columns_,
             std::vector<std::vector<double>>(num_rows_, std::vector<double>(num_rows_, 0)));
     min_max_dif_ = std::vector<model::DFConstraint>(num_columns_, {0, 0});
+    type_ids_ = std::vector<model::TypeId>(num_columns_, model::TypeId::kUndefined);
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         std::shared_ptr<model::PLI const> pli =
@@ -334,17 +386,16 @@ bool Split::IsFeasible(DF const& d) {
     return false;
 }
 
-std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
-    std::vector<DF> dfs;
-    DF d = min_max_dif_;
-    dfs.push_back(d);
+std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
+    std::vector<DFConstraint> dfs;
+    dfs.push_back(min_max_dif_[index]);
 
     if (!has_dif_table_) {
         // differential functions should be put in this exact order for further reducing
         for (int i = num_dfs_per_column_ - 1; i >= 0; i--) {
-            if (i >= min_max_dif_[index].lower_bound && i < min_max_dif_[index].upper_bound) {
-                d[index] = {min_max_dif_[index].lower_bound, (double)i};
-                dfs.push_back(d);
+            if (model::GreaterOrEqual(i, min_max_dif_[index].lower_bound) &&
+                model::Less(i, min_max_dif_[index].upper_bound)) {
+                dfs.emplace_back(min_max_dif_[index].lower_bound, (double)i);
             }
         }
         return dfs;
@@ -353,51 +404,54 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
     std::size_t dif_num_rows = difference_typed_relation_->GetNumRows();
 
     model::TypedColumnData const& dif_column = difference_typed_relation_->GetColumnData(index);
-    model::Type const& type = dif_column.GetType();
 
     auto pair_compare = [](model::DFConstraint const& first_pair,
                            model::DFConstraint const& second_pair) {
         double const first_pair_length = first_pair.upper_bound - first_pair.lower_bound;
         double const second_pair_length = second_pair.upper_bound - second_pair.lower_bound;
         return (first_pair_length > second_pair_length) ||
-               (first_pair_length == second_pair_length &&
+               (model::IsEqual(first_pair_length, second_pair_length) &&
                 (first_pair.lower_bound > second_pair.lower_bound));
     };
 
     std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
 
     // accepts a string in the following format: [a;b], where a and b are double type values
-    std::regex df_regex(R"(\[(\d{1,19}(\.\d*)?)\;(\d{1,19}(\.\d*)?)\]$)");
+    std::regex df_regex(R"(\[(.*)\;(.*)\]$)");
+    auto double_check = [](std::string const& val) {
+        bool is_double = false;
+        try {
+            std::size_t pos = 0;
+            std::stod(val, &pos);
+            if (pos == val.size()) {
+                is_double = true;
+            }
+        } catch (...) {
+        }
+        return is_double;
+    };
 
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
         if (type_id == +model::TypeId::kString) {
-            std::string df_str;
-            if (dif_column.IsMixed()) {
-                model::MixedType const* mixed_type = dif_column.GetIfMixed();
-                std::byte const* df_string = dif_column.GetValue(row_index);
-                std::unique_ptr<model::Type> t = mixed_type->RetrieveType(df_string);
-                std::byte const* df_string_value = mixed_type->RetrieveValue(df_string);
-                model::StringType const* str_type = static_cast<model::StringType const*>(t.get());
-                df_str = str_type->ValueToString(df_string_value);
-            } else {
-                model::StringType const& str_type = static_cast<model::StringType const&>(type);
-                std::byte const* df_string = dif_column.GetValue(row_index);
-                df_str = str_type.ValueToString(df_string);
-            }
-
+            std::string df_str = dif_column.GetDataAsString(row_index);
             std::smatch matches;
             if (std::regex_match(df_str, matches, df_regex)) {
-                double const lower_limit = model::TypeConverter<double>::kConvert(matches[1].str());
-                double const upper_limit = model::TypeConverter<double>::kConvert(matches[3].str());
+                if (double_check(matches[1].str()) && double_check(matches[2].str())) {
+                    double const lower_limit =
+                            model::TypeConverter<double>::kConvert(matches[1].str());
+                    double const upper_limit =
+                            model::TypeConverter<double>::kConvert(matches[2].str());
 
-                if (upper_limit >= min_max_dif_[index].lower_bound &&
-                    lower_limit <= min_max_dif_[index].upper_bound && lower_limit <= upper_limit) {
-                    model::DFConstraint intersect = {
-                            std::max(lower_limit, min_max_dif_[index].lower_bound),
-                            std::min(upper_limit, min_max_dif_[index].upper_bound)};
-                    if (intersect != min_max_dif_[index]) {
-                        limits.insert(intersect);
+                    if (model::GreaterOrEqual(upper_limit, min_max_dif_[index].lower_bound) &&
+                        model::LessOrEqual(lower_limit, min_max_dif_[index].upper_bound) &&
+                        model::LessOrEqual(lower_limit, upper_limit)) {
+                        model::DFConstraint intersect = {
+                                std::max(lower_limit, min_max_dif_[index].lower_bound),
+                                std::min(upper_limit, min_max_dif_[index].upper_bound)};
+                        if (intersect != min_max_dif_[index]) {
+                            limits.insert(intersect);
+                        }
                     }
                 }
             }
@@ -406,16 +460,24 @@ std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
 
     // differential functions should be put in this exact order for further reducing
     for (auto limit : limits) {
-        d[index] = limit;
+        dfs.push_back(limit);
+    }
+    return dfs;
+}
+
+std::vector<DF> Split::SearchSpace(model::ColumnIndex index) {
+    DF d = min_max_dif_;
+    std::vector<DF> dfs;
+    for (auto const& df : index_search_spaces_[index]) {
+        d[index] = df;
         dfs.push_back(d);
     }
     return dfs;
 }
 
 std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
-    if (indices.size() == 1) return SearchSpace(*indices.begin());
-    model::ColumnIndex const last_index = *indices.rbegin();
-    std::vector<DF> const last_column_search_space = SearchSpace(last_index);
+    if (indices.size() == 1) return SearchSpace(indices.front());
+    std::vector<DF> const last_column_search_space = SearchSpace(indices.back());
     indices.pop_back();
     std::vector<DF> const previous_columns_search_space = SearchSpace(indices);
     std::vector<DF> merged_search_space;
@@ -426,11 +488,7 @@ std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
                 intersect[k] = {std::max(first_df[k].lower_bound, second_df[k].lower_bound),
                                 std::min(first_df[k].upper_bound, second_df[k].upper_bound)};
             }
-            if (IsFeasible(intersect)) {
-                merged_search_space.push_back(intersect);
-            } else {
-                break;
-            }
+            merged_search_space.push_back(intersect);
         }
     }
     return merged_search_space;
@@ -438,8 +496,10 @@ std::vector<DF> Split::SearchSpace(std::vector<model::ColumnIndex>& indices) {
 
 bool Split::Subsume(DF const& df1, DF const& df2) {
     for (model::ColumnIndex i = 0; i < num_columns_; i++) {
-        if (df2[i].lower_bound < df1[i].lower_bound || df2[i].upper_bound > df1[i].upper_bound)
+        if (model::Less(df2[i].lower_bound, df1[i].lower_bound) ||
+            model::Greater(df2[i].upper_bound, df1[i].upper_bound)) {
             return false;
+        }
     }
     return true;
 }
@@ -526,10 +586,10 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
                                            unsigned& cnt) {
     if (!search.size()) return {};
 
-    DF const last_df = *search.rbegin();
+    DF const last_df = search.back();
 
     cnt++;
-    if (!VerifyDD({last_df, rhs})) {
+    if (!VerifyDD(last_df, rhs)) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return NegativePruningReduce(rhs, remainder, cnt);
     }
@@ -537,7 +597,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (!dds.size()) dds.push_back({last_df, rhs});
+    if (!dds.size() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -551,12 +611,12 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     if (!search.size()) return {};
 
     std::list<DD> dds;
-    DF const first_df = *search.begin();
-    DF const last_df = *search.rbegin();
+    DF const first_df = search.front();
+    DF const last_df = search.back();
 
     cnt++;
-    if (VerifyDD({first_df, rhs})) {
-        dds.push_back({first_df, rhs});
+    if (VerifyDD(first_df, rhs)) {
+        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = HybridPruningReduce(rhs, remainder, cnt);
         dds.splice(dds.end(), remaining_dds);
@@ -564,7 +624,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     }
 
     cnt++;
-    if (!VerifyDD({last_df, rhs})) {
+    if (!VerifyDD(last_df, rhs)) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return HybridPruningReduce(rhs, remainder, cnt);
     }
@@ -586,32 +646,35 @@ std::list<DD> Split::InstanceExclusionReduce(
     if (!search.size()) return {};
 
     std::list<DD> dds;
-    DF const first_df = *search.begin();
-    DF const last_df = *search.rbegin();
+    DF const first_df = search.front();
+    DF const last_df = search.back();
     std::vector<std::pair<std::size_t, std::size_t>> remaining_tuple_pairs;
 
     cnt++;
+    bool last_dd_holds = true;
+    bool no_pairs_left = true;
     for (auto pair : tuple_pairs) {
-        if (CheckDF(first_df, pair) && !CheckDF(rhs, pair)) remaining_tuple_pairs.push_back(pair);
+        if (!CheckDF(rhs, pair)) {
+            if (CheckDF(first_df, pair)) {
+                remaining_tuple_pairs.push_back(pair);
+                no_pairs_left = false;
+            }
+            if (last_dd_holds && CheckDF(last_df, pair)) last_dd_holds = false;
+            if (!no_pairs_left && !last_dd_holds) break;
+        }
     }
 
-    if (!remaining_tuple_pairs.size()) {
-        dds.push_back({first_df, rhs});
+    if (no_pairs_left) {
+        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
         dds.splice(dds.end(), remaining_dds);
         return dds;
     }
 
-    std::vector<std::pair<std::size_t, std::size_t>> other_remaining_tuple_pairs;
-
     cnt++;
-    for (auto pair : tuple_pairs) {
-        if (CheckDF(last_df, pair) && !CheckDF(rhs, pair))
-            other_remaining_tuple_pairs.push_back(pair);
-    }
 
-    if (other_remaining_tuple_pairs.size()) {
+    if (!last_dd_holds) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
         return InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
     }
@@ -638,7 +701,7 @@ void Split::CalculateTuplePairs() {
 
 void Split::PrintResults() {
     std::list<model::DDString> const result_strings = GetDDStringList();
-    LOG(DEBUG) << "Minimal cover size: " << result_strings.size();
+    LOG(INFO) << "Minimal cover size: " << result_strings.size();
     for (auto const& result_str : result_strings) {
         LOG(DEBUG) << result_str.ToString();
     }
@@ -656,14 +719,14 @@ model::DDString Split::DDToDDString(DD const& dd) const {
     model::DDString dd_string;
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         if (dd.lhs[index] != min_max_dif_[index]) {
-            dd_string.left.emplace_back(input_table_->GetColumnName(index),
+            dd_string.left.emplace_back(input_table_->GetColumnName(non_empty_cols_[index]),
                                         dd.lhs[index].lower_bound, dd.lhs[index].upper_bound);
         }
     }
 
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         if (dd.rhs[index] != min_max_dif_[index]) {
-            dd_string.right.emplace_back(input_table_->GetColumnName(index),
+            dd_string.right.emplace_back(input_table_->GetColumnName(non_empty_cols_[index]),
                                          dd.rhs[index].lower_bound, dd.rhs[index].upper_bound);
         }
     }
