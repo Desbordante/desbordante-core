@@ -63,9 +63,14 @@ private:
                              std::pair<std::size_t, std::size_t> tuple_pair);
     void InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
                         std::size_t second_index, double& min_dif, double& max_dif);
-    bool CheckDF(DF const& dep, std::pair<std::size_t, std::size_t> tuple_pair);
+    [[gnu::always_inline, gnu::hot]] bool CheckDFConstraint(
+            DFConstraint const& dif_constraint, model::ColumnIndex column_index,
+            std::pair<std::size_t, std::size_t> tuple_pair);
+    [[gnu::always_inline, gnu::hot]] bool CheckDF(DF const& dep,
+                                                  std::pair<std::size_t, std::size_t> tuple_pair);
     bool VerifyDD(DF const& lhs, DF const& rhs);
     void CalculateIndexSearchSpaces();
+    void CalculateTuplePairs();
     void CalculateAllDistances();
     bool IsFeasible(DF const& d);
     std::vector<DF> SearchSpace(std::vector<model::ColumnIndex>& indices);
@@ -86,7 +91,6 @@ private:
     std::list<DD> InstanceExclusionReduce(
             std::vector<std::pair<std::size_t, std::size_t>> const& tuple_pairs,
             std::vector<DF> const& search, DF const& rhs, unsigned& cnt);
-    void CalculateTuplePairs();
     unsigned ReduceDDs(auto const& start_time);
     unsigned RemoveRedundantDDs();
     unsigned RemoveTransitiveDDs();
