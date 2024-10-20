@@ -9,6 +9,7 @@
 
 #include "algorithms/algorithm.h"
 #include "algorithms/dd/dd.h"
+#include "algorithms/dd/split/model/distance_position_list_index.h"
 #include "config/tabular_data/input_table_type.h"
 #include "enums.h"
 #include "model/table/column_index.h"
@@ -26,7 +27,6 @@ class Split : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
@@ -40,6 +40,7 @@ private:
     Reduce const reduce_method_ = Reduce::IEHybrid;  // currently, the fastest method
     unsigned const num_dfs_per_column_ = 5;
 
+    std::vector<DistancePositionListIndex> plis_;
     std::vector<DFConstraint> min_max_dif_;
     std::vector<std::vector<std::vector<double>>> distances_;
     std::vector<std::pair<std::size_t, std::size_t>> tuple_pairs_;

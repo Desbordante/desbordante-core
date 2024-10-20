@@ -4,7 +4,6 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <deque>
 #include <limits>
 #include <list>
 #include <set>
@@ -15,6 +14,7 @@
 #include <boost/regex.hpp>
 #include <easylogging++.h>
 
+#include "algorithms/dd/split/model/distance_position_list_index.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
@@ -47,9 +47,6 @@ void Split::MakeExecuteOptsAvailable() {
 }
 
 void Split::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, false);  // nulls are
-                                                                             // ignored
-    input_table_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
                                                                        false);  // nulls are ignored
     if (typed_relation_->GetColumnData().empty()) {
@@ -249,8 +246,10 @@ unsigned Split::RemoveTransitiveDDs() {
 void Split::CalculateIndexSearchSpaces() {
     std::vector<DFConstraint> new_min_max_dif;
     std::vector<std::vector<std::vector<double>>> new_distances;
+    std::vector<DistancePositionListIndex> new_plis;
     new_min_max_dif.reserve(num_columns_);
     new_distances.reserve(num_columns_);
+    new_plis.reserve(num_columns_);
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         std::vector<DFConstraint> cur_index_search_space = IndexSearchSpace(index);
         if (!cur_index_search_space.empty()) {
@@ -258,11 +257,13 @@ void Split::CalculateIndexSearchSpaces() {
             non_empty_cols_.push_back(index);
             new_min_max_dif.push_back(min_max_dif_[index]);
             new_distances.push_back(std::move(distances_[index]));
+            new_plis.push_back(std::move(plis_[index]));
         }
     }
     num_columns_ = non_empty_cols_.size();
     min_max_dif_ = std::move(new_min_max_dif);
     distances_ = std::move(new_distances);
+    plis_ = std::move(new_plis);
 }
 
 double Split::CalculateDistance(model::ColumnIndex column_index,
@@ -301,7 +302,10 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
 // must be inline for optimization (gcc 11.4.0)
 inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
-        double const dif = distances_[column_index][tuple_pair.first][tuple_pair.second];
+        ClusterIndex const first_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.first];
+        ClusterIndex const second_cluster =
+                plis_[column_index].GetInvertedIndex()[tuple_pair.second];
+        double const dif = distances_[column_index][first_cluster][second_cluster];
 
         if (type_ids_[column_index] == +model::TypeId::kDouble) {
             if (!dif_func[column_index].Contains(dif)) {
@@ -326,59 +330,35 @@ bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
     return true;
 }
 
-void Split::InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
-                           std::size_t second_index, double& min_dif, double& max_dif) {
-    if (first_index < second_index) {
-        double const dif = CalculateDistance(column_index, {first_index, second_index});
-        max_dif = std::max(max_dif, dif);
-        min_dif = std::min(min_dif, dif);
-        distances_[column_index][first_index][second_index] = dif;
-    } else if (first_index == second_index) {
-        distances_[column_index][first_index][second_index] = 0;
-    } else {
-        distances_[column_index][first_index][second_index] =
-                distances_[column_index][second_index][first_index];
-    }
-}
-
 void Split::CalculateAllDistances() {
-    distances_ = std::vector<std::vector<std::vector<double>>>(
-            num_columns_,
-            std::vector<std::vector<double>>(num_rows_, std::vector<double>(num_rows_, 0)));
-    min_max_dif_ = std::vector<model::DFConstraint>(num_columns_, {0, 0});
-    type_ids_ = std::vector<model::TypeId>(num_columns_, model::TypeId::kUndefined);
+    plis_.resize(num_columns_);
+    distances_ = std::vector<std::vector<std::vector<double>>>(num_columns_);
+    min_max_dif_.resize(num_columns_, {0, 0});
+    type_ids_.resize(num_columns_, model::TypeId::kUndefined);
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
-        std::shared_ptr<model::PLI const> pli =
-                relation_->GetColumnData(column_index).GetPliOwnership();
-        std::deque<model::PLI::Cluster> const& index = pli->GetIndex();
-        std::shared_ptr<std::vector<int> const> probing_table = pli->CalculateAndGetProbingTable();
-        model::PLI::Cluster const& pt = *probing_table.get();
+        DistancePositionListIndex pli(typed_relation_->GetColumnData(column_index), num_rows_);
+        std::vector<ClusterInfo> const& clusters = pli.GetClusters();
+        std::size_t const num_clusters = clusters.size();
+        std::vector<std::vector<double>> cur_column_distances = std::vector<std::vector<double>>(
+                num_clusters, std::vector<double>(num_clusters, 0));
 
         double max_dif = 0, min_dif = std::numeric_limits<double>::max();
-        for (std::size_t i = 0; i < index.size(); i++) {
-            for (std::size_t j = 0; j < index.size(); j++) {
-                std::size_t const first_index = index[i][0];
-                std::size_t const second_index = index[j][0];
-                if (first_index < num_rows_ && second_index < num_rows_) {
-                    InsertDistance(column_index, first_index, second_index, min_dif, max_dif);
-                }
+        for (ClusterIndex i = 0; i < num_clusters; i++) {
+            for (ClusterIndex j = i + 1; j < num_clusters; j++) {
+                std::size_t const first_index = clusters[i].first_tuple_index;
+                std::size_t const second_index = clusters[j].first_tuple_index;
+                double const dif = CalculateDistance(column_index, {first_index, second_index});
+                max_dif = std::max(max_dif, dif);
+                min_dif = std::min(min_dif, dif);
+                cur_column_distances[i][j] = dif;
+                cur_column_distances[j][i] = dif;
             }
-        }
-        for (std::size_t i = 0; i < num_rows_; i++) {
-            for (std::size_t j = 0; j < num_rows_; j++) {
-                if (pt[i] != 0 && pt[j] != 0) {
-                    distances_[column_index][i][j] =
-                            distances_[column_index][index[pt[i] - 1][0]][index[pt[j] - 1][0]];
-                    if (i != j && pt[i] == pt[j]) {
-                        min_dif = 0;
-                    }
-                } else {
-                    InsertDistance(column_index, i, j, min_dif, max_dif);
-                }
-            }
+            if (clusters[i].size > 1) min_dif = 0;
         }
         min_max_dif_[column_index] = {min_dif, max_dif};
+        distances_[column_index] = std::move(cur_column_distances);
+        plis_[column_index] = std::move(pli);
     }
 }
 
