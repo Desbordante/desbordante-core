@@ -8,9 +8,11 @@
 #include <list>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/regex.hpp>
 #include <easylogging++.h>
 
@@ -116,22 +118,27 @@ void Split::ParseDifferenceTable() {
 }
 
 unsigned long long Split::ExecuteInternal() {
+    auto const start_time = std::chrono::system_clock::now();
+    LOG(DEBUG) << "Start";
+
     SetLimits();
     CheckTypes();
     ParseDifferenceTable();
 
-    auto const start_time = std::chrono::system_clock::now();
-    LOG(DEBUG) << "Start";
-
     CalculateAllDistances();
     CalculateIndexSearchSpaces();
+
+    LOG(INFO) << "Calculated distances";
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+    LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
 
     if (reduce_method_ == +Reduce::IEHybrid) {
         CalculateTuplePairs();
     }
 
-    LOG(INFO) << "Calculated distances";
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+    LOG(INFO) << "Calculated tuple pairs";
+    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
     LOG(INFO) << "Minimum and maximum distances for each column with non-empty search space:";
@@ -295,6 +302,33 @@ void Split::CalculateIndexSearchSpaces() {
     plis_ = std::move(new_plis);
 }
 
+void Split::CalculateTuplePairs() {
+    std::size_t df_search_space_num = 0;
+    for (model::ColumnIndex index = 0; index < num_columns_; index++) {
+        df_search_space_num += index_search_spaces_[index].size();
+    }
+    std::unordered_set<boost::dynamic_bitset<>> tuple_pair_set;
+    for (std::size_t first_index = 0; first_index < num_rows_; first_index++) {
+        for (std::size_t second_index = first_index + 1; second_index < num_rows_; second_index++) {
+            boost::dynamic_bitset<> pair_bitset(df_search_space_num);
+            std::size_t df_index = 0;
+            for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
+                for (auto const& df_constraint : index_search_spaces_[column_index]) {
+                    if (CheckDFConstraint(df_constraint, column_index,
+                                          {first_index, second_index})) {
+                        pair_bitset.set(df_index);
+                    }
+                    df_index++;
+                }
+            }
+            auto const [it, is_new] = tuple_pair_set.insert(std::move(pair_bitset));
+            if (is_new) {
+                tuple_pairs_.emplace_back(first_index, second_index);
+            }
+        }
+    }
+}
+
 double Split::CalculateDistance(model::ColumnIndex column_index,
                                 std::pair<std::size_t, std::size_t> tuple_pair) {
     model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
@@ -309,33 +343,38 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
     return dif;
 }
 
+inline bool Split::CheckDFConstraint(DFConstraint const& dif_constraint,
+                                     model::ColumnIndex column_index,
+                                     std::pair<std::size_t, std::size_t> tuple_pair) {
+    ClusterIndex const first_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.first];
+    ClusterIndex const second_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.second];
+    double const dif = distances_[column_index][first_cluster][second_cluster];
+
+    if (type_ids_[column_index] == +model::TypeId::kDouble) {
+        if (!dif_constraint.Contains(dif)) {
+            return false;
+        }
+    } else {
+        if (dif < dif_constraint.lower_bound || dif > dif_constraint.upper_bound) {
+            return false;
+        }
+    }
+    return true;
+}
+
 // must be inline for optimization (gcc 11.4.0)
 inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
-        ClusterIndex const first_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.first];
-        ClusterIndex const second_cluster =
-                plis_[column_index].GetInvertedIndex()[tuple_pair.second];
-        double const dif = distances_[column_index][first_cluster][second_cluster];
-
-        if (type_ids_[column_index] == +model::TypeId::kDouble) {
-            if (!dif_func[column_index].Contains(dif)) {
-                return false;
-            }
-        } else {
-            if (dif < dif_func[column_index].lower_bound ||
-                dif > dif_func[column_index].upper_bound) {
-                return false;
-            }
+        if (!CheckDFConstraint(dif_func[column_index], column_index, tuple_pair)) {
+            return false;
         }
     }
     return true;
 }
 
 bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(lhs, {i, j}) && !CheckDF(rhs, {i, j})) return false;
-        }
+    for (auto const& pair : tuple_pairs_) {
+        if (CheckDF(lhs, pair) && !CheckDF(rhs, pair)) return false;
     }
     return true;
 }
@@ -372,10 +411,8 @@ void Split::CalculateAllDistances() {
 }
 
 bool Split::IsFeasible(DF const& d) {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(d, {i, j})) return true;
-        }
+    for (auto const& pair : tuple_pairs_) {
+        if (CheckDF(d, pair)) return true;
     }
     return false;
 }
@@ -667,14 +704,6 @@ std::list<DD> Split::InstanceExclusionReduce(
     dds.splice(dds.end(), merged_dds);
 
     return dds;
-}
-
-void Split::CalculateTuplePairs() {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            tuple_pairs_.push_back({i, j});
-        }
-    }
 }
 
 void Split::PrintResults() {
