@@ -16,11 +16,17 @@ The **Validation** task is different: it is designed to check whether a specifie
 For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
 The currently supported data patterns are:
-* Functional dependency variants:
-    - Exact functional dependencies (discovery and validation)
-    - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
-    - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
-    - Dynamic validation of exact and approximate functional dependencies
+* Exact functional dependencies (discovery and validation)
+* Approximate functional dependencies, with 
+    - $g_1$ metric — classic AFDs (discovery and validation)
+    - $\mu+$ metric (discovery)
+    - $\tau$ metric (discovery)
+    - $pdep$ metric (discovery)
+    - $\rho$ metric (discovery)
+* Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
+* Classic soft functional dependencies, with $\rho$ metric (discovery and validation)
+* Dynamic validation of exact and approximate ($g_1$) functional dependencies
+* Numeric functional dependencies (validation)
 * Graph functional dependencies (validation)
 * Conditional functional dependencies (discovery)
 * Inclusion dependencies (discovery)
@@ -32,7 +38,7 @@ The currently supported data patterns are:
 * Differential Dependencies (discovery)
 * Unique column combinations:
    - Exact unique column combination (discovery and validation)
-   - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
+   - Approximate unique column combination, with $g_1$ metric (discovery and validation)
 * Association rules (discovery)
 
 The discovered patterns can have many uses:
