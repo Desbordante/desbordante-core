@@ -49,6 +49,7 @@ private:
 
     void RegisterOptions();
     void SetLimits();
+    void CheckTypes();
     void ParseDifferenceTable();
 
     void ResetState() final {

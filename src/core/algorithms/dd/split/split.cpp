@@ -73,6 +73,34 @@ void Split::SetLimits() {
     if (num_columns_ == 0) num_columns_ = all_columns_num;
 }
 
+void Split::CheckTypes() {
+    type_ids_.resize(num_columns_, model::TypeId::kUndefined);
+    for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
+        model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
+        model::TypeId type_id = column.GetTypeId();
+
+        if (type_id == +model::TypeId::kUndefined) {
+            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
+                                        "\" type undefined.");
+        }
+        if (type_id == +model::TypeId::kMixed) {
+            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
+                                        "\" contains values of different types.");
+        }
+
+        type_ids_[column_index] = type_id;
+
+        for (std::size_t row_index = 0; row_index < num_rows_; row_index++) {
+            if (column.IsNull(row_index)) {
+                throw std::runtime_error("Some of the value coordinates are nulls.");
+            }
+            if (column.IsEmpty(row_index)) {
+                throw std::runtime_error("Some of the value coordinates are empty.");
+            }
+        }
+    }
+}
+
 void Split::ParseDifferenceTable() {
     if (difference_table_) {
         difference_typed_relation_ =
@@ -88,6 +116,7 @@ void Split::ParseDifferenceTable() {
 
 unsigned long long Split::ExecuteInternal() {
     SetLimits();
+    CheckTypes();
     ParseDifferenceTable();
 
     auto const start_time = std::chrono::system_clock::now();
@@ -269,26 +298,7 @@ void Split::CalculateIndexSearchSpaces() {
 double Split::CalculateDistance(model::ColumnIndex column_index,
                                 std::pair<std::size_t, std::size_t> tuple_pair) {
     model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
-    model::TypeId type_id = column.GetTypeId();
 
-    if (type_ids_[column_index] == +model::TypeId::kUndefined) {
-        type_ids_[column_index] = type_id;
-    }
-
-    if (type_id == +model::TypeId::kUndefined) {
-        throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                    "\" type undefined.");
-    }
-    if (type_id == +model::TypeId::kMixed) {
-        throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                    "\" contains values of different types.");
-    }
-    if (column.IsNull(tuple_pair.first) || column.IsNull(tuple_pair.second)) {
-        throw std::runtime_error("Some of the value coordinates are nulls.");
-    }
-    if (column.IsEmpty(tuple_pair.first) || column.IsEmpty(tuple_pair.second)) {
-        throw std::runtime_error("Some of the value coordinates are empty.");
-    }
     double dif = 0;
     if (column.GetType().IsMetrizable()) {
         std::byte const* first_value = column.GetValue(tuple_pair.first);
@@ -334,7 +344,6 @@ void Split::CalculateAllDistances() {
     plis_.resize(num_columns_);
     distances_ = std::vector<std::vector<std::vector<double>>>(num_columns_);
     min_max_dif_.resize(num_columns_, {0, 0});
-    type_ids_.resize(num_columns_, model::TypeId::kUndefined);
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         DistancePositionListIndex pli(typed_relation_->GetColumnData(column_index), num_rows_);
