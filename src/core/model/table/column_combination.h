@@ -6,12 +6,9 @@
 
 #include "arity_index.h"
 #include "column_index.h"
+#include "table_index.h"
 
 namespace model {
-
-// Represents an index for a table within a set of tables.
-// As an example, this type is used in inclusion dependencies.
-using TableIndex = unsigned int;
 
 class ColumnCombination {
 protected:
