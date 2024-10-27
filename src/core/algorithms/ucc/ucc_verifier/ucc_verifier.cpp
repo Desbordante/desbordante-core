@@ -27,8 +27,9 @@ void UCCVerifier::RegisterOptions() {
     };
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
-    RegisterOption(config::IndicesOption{kUCCIndices, kDUCCIndices, std::move(calculate_default)}(
-            &column_indices_, std::move(get_schema_cols)));
+    RegisterOption(config::IndicesOption{
+            kUCCIndices, kDUCCIndices, config::IndicesOption::NormalizeIndices,
+            std::move(calculate_default)}(&column_indices_, std::move(get_schema_cols)));
 }
 
 void UCCVerifier::MakeExecuteOptsAvailable() {
