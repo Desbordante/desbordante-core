@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "model/table/column_combination.h"
+#include "model/table/table_index.h"
 #include "table/column_index.h"
 
 namespace algos::faida {

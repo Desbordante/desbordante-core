@@ -8,6 +8,7 @@
 #include "algorithms/ind/ind.h"
 #include "algorithms/ind/ind_algorithm.h"
 #include "csv_config_util.h"
+#include "model/table/table_index.h"
 
 namespace tests {
 

@@ -5,9 +5,10 @@
 
 #include "algorithms/ind/faida/hashing/hashing.h"
 #include "irow_iterator.h"
-#include "model/table/column_combination.h"
+#include "model/table/column_index.h"
 #include "model/table/idataset_stream.h"
 #include "model/table/relational_schema.h"
+#include "model/table/table_index.h"
 
 namespace algos::faida {
 
