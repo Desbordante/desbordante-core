@@ -156,6 +156,7 @@ private:
         } else {
             (this->*full_sampling_method_)(column_match_sampling_info);
         }
+        column_match_sampling_info.IncrementParameter();
     }
 
     std::vector<Comparisons> CollectParallelComparisonResults(auto compare_at,

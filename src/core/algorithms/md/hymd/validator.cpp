@@ -8,492 +8,675 @@
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/table_identifiers.h"
+#include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "algorithms/md/hymd/utility/java_hash.h"
 #include "algorithms/md/hymd/utility/size_t_vector_hash.h"
+#include "algorithms/md/hymd/utility/trivial_array.h"
+#include "algorithms/md/hymd/utility/zip.h"
 #include "model/index.h"
 #include "util/bitset_utils.h"
 #include "util/erase_if_replace.h"
-#include "util/py_tuple_hash.h"
 #include "util/get_preallocated_vector.h"
+#include "util/py_tuple_hash.h"
 #include "util/reserve_more.h"
 
 namespace algos::hymd {
-
-using model::Index;
 using indexes::CompressedRecords;
 using indexes::PliCluster;
 using indexes::RecSet;
-using indexes::SimilarityMatrix;
-using utility::InvalidatedRhss;
+using model::Index;
 using IndexVector = std::vector<Index>;
 using RecIdVec = std::vector<RecordIdentifier>;
-using RecPtr = CompressedRecord const*;
-using RecordCluster = std::vector<RecPtr>;
 
-RecSet const* Validator::GetSimilarRecords(ValueIdentifier value_id, model::Index lhs_ccv_id,
-                                           Index column_match_index) const {
-    assert(lhs_ccv_id != kLowestCCValueId);
+// There are several partitions that are going to be mentioned here.
+// Firstly, a partition of the left table based on equality of values of some set of attributes
+// (`LTVsPartition` in code, from "left table values partition"). Note that we already create a
+// partition for each attribute in the preprocessing stage (`SLTVPartition` here, from "single left
+// table value partition"), which is represented as a PLI for each column. Thus, for any partition
+// where the key contains multiple attributes we can obtain the sets of the partition with multiple
+// attributes in its key by partitioning each set of any attribute "properly" only on the other
+// attributes (`SLTVPEPartition`, "single left table value partition element partition").
+
+// Finally, partition of the set of record pairs that are matched by an LHS (`LHSMRPartition`, "LHS
+// matched records partition"). Its sets can be obtained by inspecting each set of the first
+// partition with the partition key being a set of the left table columns of the LHS's similarity
+// classifiers (if \psi is the set of column classifiers with non-zero decision boundaries of the
+// LHS, then the set is {l | \exists r,sim,value ((l, r, sim), value) \in \psi}). Along with the
+// partition values, each left table's record in this set also shares the set of right table's
+// records that are matched by the LHS to it with the others, if any. The Cartesian products of the
+// described sets are the elements of the second partition.
+
+// This class represents an element of the LHSMRPartition, containing the factors for each
+// Cartesian product.
+template <typename LhsRecordIdsType, typename RhsRecordIdsType>
+struct LHSMRPartitionElement {
+    LhsRecordIdsType const& lhs_records;
+    RhsRecordIdsType const& matched_rhs_records;
+
+    std::size_t GetPairsNumber() const noexcept {
+        return lhs_records.size() * matched_rhs_records.size();
+    }
+};
+
+RecSet const* BatchValidator::GetSimilarRecords(Index const column_match_index,
+                                                ValueIdentifier const value_id,
+                                                model::Index const lhs_ccv_id) const {
     indexes::SimilarityIndex const& similarity_index =
             (*column_matches_info_)[column_match_index].similarity_info.similarity_index;
     indexes::ValueUpperSetMapping const& mapping = similarity_index[value_id];
+    // Upper sets for zero CCV IDs are the entire right table and should be neither stored nor
+    // requested.
+    DESBORDANTE_ASSUME(lhs_ccv_id != kLowestCCValueId);
     return mapping.GetUpperSet(lhs_ccv_id);
 }
 
-template <typename PairProvider>
-class Validator::SetPairProcessor {
-    Validator const* const validator_;
-    std::vector<ColumnMatchInfo> const& column_matches_info_ = *validator_->column_matches_info_;
+template <typename LHSMRPartitionElementProvider>
+class BatchValidator::LHSMRPartitionInspector {
+    using PartitionElement = LHSMRPartitionElementProvider::PartitionElement;
+
+    BatchValidator const* const validator_;
     CompressedRecords const& left_records_ = validator_->GetLeftCompressor().GetRecords();
-    CompressedRecords const& right_records_ = validator_->GetRightCompressor().GetRecords();
     Result& result_;
-    std::vector<WorkingInfo>& working_;
-    MdLhs const& lhs_;
-    PairProvider pair_provider_;
+    SameLhsValidators& rhs_validators_;
+    LHSMRPartitionElementProvider lhsmr_partition_element_provider_;
+    std::size_t lhs_support_ = 0;
 
-    enum class Status { kInvalidated, kCheckedAll };
+    [[nodiscard]] MdValidationStatus LowerCCVIDsAndCollectPairs(
+            RhsValidator& rhs_validator, PliCluster const& cluster,
+            RecSet const& similar_records) const;
+    [[nodiscard]] MdValidationStatus LowerCCVIDsAndCollectPairs(
+            RhsValidator& rhs_validator, RecordCluster const& matched_records,
+            RecIdVec const& similar_records) const;
 
-    [[nodiscard]] Status LowerForColumnMatch(WorkingInfo& working_info, PliCluster const& cluster,
-                                             RecSet const& similar_records) const;
-    [[nodiscard]] Status LowerForColumnMatch(WorkingInfo& working_info,
-                                             RecordCluster const& matched_records,
-                                             RecIdVec const& similar_records) const;
-
-    template <typename Collection>
-    Status LowerForColumnMatchNoCheck(WorkingInfo& working_info,
-                                      RecordCluster const& matched_records,
-                                      Collection const& similar_records) const;
-
-    bool Supported(std::size_t support) {
-        return validator_->Supported(support);
+    bool LhsIsSupported() {
+        return validator_->Supported(lhs_support_);
     }
 
-    void MakeAllInvalidatedAndSupportedResult() {
-        result_.is_unsupported = false;
-        for (WorkingInfo const& working_info : working_) {
-            result_.invalidated.PushBack(working_info.old_rhs, kLowestCCValueId);
-        }
-    }
-
-    void MakeOutOfClustersResult(std::size_t support) {
-        if (!Supported(support)) {
-            result_.is_unsupported = true;
+    void MakeOutOfClustersResult() {
+        if (!LhsIsSupported()) {
+            result_.lhs_is_unsupported = true;
             return;
         }
-        result_.is_unsupported = false;
-        for (WorkingInfo const& working_info : working_) {
-            ColumnClassifierValueId const new_ccv_id = working_info.current_ccv_id;
-            MdElement old_rhs = working_info.old_rhs;
-            if (new_ccv_id == old_rhs.ccv_id) continue;
-            result_.invalidated.PushBack(old_rhs, new_ccv_id);
+
+        result_.lhs_is_unsupported = false;
+        // If we ran out of clusters, then it means some RHSs were not invalidated and their
+        // corresponding validators were not removed.
+        DESBORDANTE_ASSUME(!rhs_validators_.empty());
+        for (RhsValidator const& rhs_validator : rhs_validators_) {
+            rhs_validator.AddIfInvalid(result_.invalidated_rhss);
         }
     }
 
-    void MakeAllInvalidatedResult(std::size_t support) {
-        if (Supported(support)) {
-            MakeAllInvalidatedAndSupportedResult();
-            return;
+    void ForEachPartitionElement(auto element_action, auto finish_out_of_pairs) {
+        while (true) {
+            std::optional<PartitionElement> partition_element_opt =
+                    lhsmr_partition_element_provider_.TryGetNextLHSMRPartitionElement();
+            if (!partition_element_opt.has_value()) break;
+
+            lhs_support_ += partition_element_opt->GetPairsNumber();
+
+            bool const finish_early = element_action(*partition_element_opt);
+            if (finish_early) return;
         }
-        while (pair_provider_.TryGetNextPair()) {
-            auto const& cluster = pair_provider_.GetCluster();
-            auto const& similar = pair_provider_.GetSimilarRecords();
-            support += cluster.size() * similar.size();
-            if (Supported(support)) {
-                MakeAllInvalidatedAndSupportedResult();
-                return;
+        finish_out_of_pairs();
+    }
+
+    void MakeAllInvalidatedResult() {
+        // All RHSs that were invalidated should have had their validators deleted.
+        DESBORDANTE_ASSUME(rhs_validators_.empty());
+        auto check_support = [&](auto&&...) {
+            if (LhsIsSupported()) {
+                result_.lhs_is_unsupported = false;
+                return true;
             }
-        }
-        result_.is_unsupported = true;
+            return false;
+        };
+        if (check_support()) return;
+
+        ForEachPartitionElement(check_support, [this]() { result_.lhs_is_unsupported = true; });
+    }
+
+    // Lower CCV IDs, collect prospective pairs, remove invalidated (i.e. with CCV ID 0) RHSs.
+    bool InspectPartitionElement(PartitionElement element) {
+        auto [lhs_records, matched_rhs_records] = element;
+        util::EraseIfReplace(rhs_validators_, [&](RhsValidator& rhs_validator) {
+            MdValidationStatus const status =
+                    LowerCCVIDsAndCollectPairs(rhs_validator, lhs_records, matched_rhs_records);
+            if (status == MdValidationStatus::kInvalidated) {
+                result_.invalidated_rhss.PushBack(rhs_validator.GetOldRhs(), kLowestCCValueId);
+                return true;
+            }
+            return false;
+        });
+        return rhs_validators_.empty();
     }
 
 public:
-    SetPairProcessor(Validator const* validator, Result& result, std::vector<WorkingInfo>& working,
-                     MdLhs const& lhs)
+    LHSMRPartitionInspector(BatchValidator const* validator, Result& result,
+                            SameLhsValidators& rhs_validators, MdLhs const& lhs)
         : validator_(validator),
           result_(result),
-          working_(working),
-          lhs_(lhs),
-          pair_provider_(validator, lhs) {}
+          rhs_validators_(rhs_validators),
+          lhsmr_partition_element_provider_(validator, lhs) {}
 
-    void ProcessPairs() {
-        std::size_t support = 0;
-        while (pair_provider_.TryGetNextPair()) {
-            auto const& cluster = pair_provider_.GetCluster();
-            auto const& similar = pair_provider_.GetSimilarRecords();
-            support += cluster.size() * similar.size();
-            util::EraseIfReplace(working_, [&](WorkingInfo& info) {
-                Status const status = LowerForColumnMatch(info, cluster, similar);
-                if (status == Status::kInvalidated) {
-                    result_.invalidated.PushBack(info.old_rhs, kLowestCCValueId);
-                    return true;
-                }
-                return false;
-            });
-            bool all_invalid = working_.empty();
+    void InspectLHSMRPartition() {
+        auto inspect_check_all_invalid = [&](PartitionElement partition_element) {
+            bool const all_invalid = InspectPartitionElement(partition_element);
+
             if (all_invalid) {
-                MakeAllInvalidatedResult(support);
-                return;
+                MakeAllInvalidatedResult();
+                return true;
             }
-        }
-        MakeOutOfClustersResult(support);
+            return false;
+        };
+
+        ForEachPartitionElement(inspect_check_all_invalid, [this]() { MakeOutOfClustersResult(); });
     }
 };
 
-template <typename PairProvider>
 template <typename Collection>
-auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatchNoCheck(
-        WorkingInfo& working_info, RecordCluster const& matched_records,
-        Collection const& similar_records) const -> Status {
-    assert(!similar_records.empty());
-    assert(!matched_records.empty());
+auto BatchValidator::RhsValidator::LowerCCVIDAndCollectRecommendations(
+        RecordCluster const& lhs_records,
+        Collection const& matched_rhs_records) -> MdValidationStatus {
+    // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
+    // 3), non-minimal are considered invalidated (4).
+    DESBORDANTE_ASSUME(current_ccv_id_ != kLowestCCValueId);        // 1
+    DESBORDANTE_ASSUME(!matched_rhs_records.empty());               // 2
+    DESBORDANTE_ASSUME(!lhs_records.empty());                       // 3
+    DESBORDANTE_ASSUME(interestingness_ccv_id_ < current_ccv_id_);  // 4
 
-    std::unordered_map<ValueIdentifier, RecordCluster> grouped(
-            std::min(matched_records.size(), working_info.col_match_values));
-    for (RecPtr left_record_ptr : matched_records) {
-        grouped[(*left_record_ptr)[working_info.left_index]].push_back(left_record_ptr);
-    }
-    ColumnClassifierValueId& current_rhs_id = working_info.current_ccv_id;
-    SimilarityMatrix const& similarity_matrix = *working_info.similarity_matrix;
-    for (auto const& [left_value_id, records_left] : grouped) {
-        for (RecordIdentifier record_id_right : similar_records) {
-            CompressedRecord const& right_record = (*working_info.right_records)[record_id_right];
-            auto add_recommendations = [&records_left, &right_record, &working_info]() {
-                for (RecPtr left_record_ptr : records_left) {
-                    working_info.recommendations->emplace_back(left_record_ptr, &right_record);
-                }
-            };
-            auto const& row = similarity_matrix[left_value_id];
-            ValueIdentifier const right_value_id = right_record[working_info.right_index];
-            auto it_right = row.find(right_value_id);
-            if (it_right == row.end()) {
-            rhs_not_valid:
-                add_recommendations();
-                // rhs_not_valid:
-                current_rhs_id = kLowestCCValueId;
-                if (working_info.EnoughRecommendations()) return Status::kInvalidated;
-                continue;
+    LeftValueGroupedLhsRecords grouped_lhs_records = GroupLhsRecords(lhs_records);
+
+    for (auto const& [left_column_value_id, same_left_value_records] : grouped_lhs_records) {
+        DESBORDANTE_ASSUME(matched_rhs_records.begin() != matched_rhs_records.end());
+        for (RecordIdentifier rhs_record_id : matched_rhs_records) {
+            CompressedRecord const& right_record = (*right_records_)[rhs_record_id];
+
+            bool const md_invalidated = LowerCCVID(left_column_value_id, right_record);
+            if (md_invalidated) {
+                RhsIsInvalid(same_left_value_records, right_record);
+                return MdValidationStatus::kInvalidated;
             }
-
-            ColumnClassifierValueId const pair_id = it_right->second;
-            // NOTE: I believe the purpose of inference from record pairs is to cut down on the
-            // number of costly validations. But a validation still happens if the value was lowered
-            // but not to zero.
-            // if (pair_id < working_info.old_rhs.ccv_id) add_recommendations();
-            if (pair_id < current_rhs_id) current_rhs_id = pair_id;
-            if (current_rhs_id <= working_info.interestingness_id) goto rhs_not_valid;
         }
     }
-    return Status::kCheckedAll;
+    return MdValidationStatus::kCheckedAll;
 }
 
-template <typename PairProvider>
-auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatch(
-        WorkingInfo& working_info, RecordCluster const& matched_records,
-        RecIdVec const& similar_records) const -> Status {
-    assert(!working_info.ShouldStop());
-    return LowerForColumnMatchNoCheck(working_info, matched_records, similar_records);
+template <typename LHSMRPartitionElementProvider>
+auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
+        LowerCCVIDsAndCollectPairs(RhsValidator& rhs_validator, RecordCluster const& lhs_records,
+                                   RecIdVec const& matched_rhs_records) const
+        -> MdValidationStatus {
+    return rhs_validator.LowerCCVIDAndCollectRecommendations(lhs_records, matched_rhs_records);
 }
 
-template <typename PairProvider>
-auto Validator::SetPairProcessor<PairProvider>::LowerForColumnMatch(
-        WorkingInfo& working_info, PliCluster const& cluster,
-        RecSet const& similar_records) const -> Status {
-    assert(!working_info.ShouldStop());
+template <typename LHSMRPartitionElementProvider>
+auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
+        LowerCCVIDsAndCollectPairs(RhsValidator& rhs_validator, PliCluster const& cluster,
+                                   RecSet const& matched_rhs_records) const -> MdValidationStatus {
+    // See LowerCCVIDAndCollectRecommendations comment
+    DESBORDANTE_ASSUME(!matched_rhs_records.empty());
 
-    assert(!similar_records.empty());
     RecordCluster cluster_records = util::GetPreallocatedVector<RecPtr>(cluster.size());
+
+    DESBORDANTE_ASSUME(!cluster.empty());
     for (RecordIdentifier left_record_id : cluster) {
         cluster_records.push_back(&left_records_[left_record_id]);
     }
-    return LowerForColumnMatchNoCheck(working_info, cluster_records, similar_records);
+    return rhs_validator.LowerCCVIDAndCollectRecommendations(cluster_records, matched_rhs_records);
 }
 
-class Validator::OneCardPairProvider {
-    Validator const* const validator_;
-    ValueIdentifier value_id_ = ValueIdentifier(-1);
-    Index const non_zero_index_;
-    ColumnClassifierValueId const ccv_id_;
+// Each left table column's PLI already stores the desired partition of the left table. The sets of
+// records that are matched by each partition key's value are already stored in similarity indexes.
+class BatchValidator::OneCardPartitionElementProvider {
+    BatchValidator const* const validator_;
+    ValueIdentifier current_value_id_ = ValueIdentifier(-1);
+    Index const lhs_column_match_index_;
+    ColumnClassifierValueId const lhs_ccv_id_;
     std::vector<PliCluster> const& clusters_ =
             validator_->GetLeftCompressor()
-                    .GetPli(validator_->GetLeftPliIndex(non_zero_index_))
+                    .GetPli(validator_->GetLeftPliIndex(lhs_column_match_index_))
                     .GetClusters();
     std::size_t const clusters_size_ = clusters_.size();
-    RecSet const* similar_records_ptr_{};
 
 public:
-    OneCardPairProvider(Validator const* validator, MdLhs const& lhs)
+    using PartitionElement = LHSMRPartitionElement<PliCluster, RecSet>;
+
+    OneCardPartitionElementProvider(BatchValidator const* validator, MdLhs const& lhs)
         : validator_(validator),
-          non_zero_index_(lhs.begin()->child_array_index),
-          ccv_id_(lhs.begin()->ccv_id) {}
+          lhs_column_match_index_(lhs.begin()->child_array_index),
+          lhs_ccv_id_(lhs.begin()->ccv_id) {}
 
-    bool TryGetNextPair() {
-        for (++value_id_; value_id_ != clusters_size_; ++value_id_) {
-            similar_records_ptr_ =
-                    validator_->GetSimilarRecords(value_id_, ccv_id_, non_zero_index_);
-            if (similar_records_ptr_ != nullptr) return true;
+    std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
+        while (++current_value_id_ != clusters_size_) {
+            RecSet const* const similar_records_ptr = validator_->GetSimilarRecords(
+                    lhs_column_match_index_, current_value_id_, lhs_ccv_id_);
+            if (similar_records_ptr != nullptr)
+                return {{clusters_[current_value_id_], *similar_records_ptr}};
         }
-        return false;
-    }
-
-    PliCluster const& GetCluster() const {
-        return clusters_[value_id_];
-    }
-
-    RecSet const& GetSimilarRecords() const {
-        return *similar_records_ptr_;
+        return std::nullopt;
     }
 };
 
-class Validator::MultiCardPairProvider {
-    using MatchingInfo = std::vector<std::tuple<Index, Index, ColumnClassifierValueId>>;
+class BatchValidator::MultiCardPartitionElementProvider {
+    // Represented by left table's column indices.
+    using SLTVPEPartitionKey = std::vector<Index>;
 
-    struct InitInfo {
-        Validator const* validator;
-        MatchingInfo matching_info;
-        IndexVector non_first_indices;
-        Index first_pli_index;
-        std::size_t plis_involved = 1;
+    // Used in place of a normal SLTVPEPartition key index to indicate that the SLTVPartition value
+    // should be used.
+    static constexpr Index kSLTVPartitionColumn = -1;
 
-        InitInfo(Validator const* validator, MdLhs const& lhs) : validator(validator) {
-            using AbsoluteLhsElements = std::vector<MdElement>;
-            std::size_t const cardinality = lhs.Cardinality();
-            matching_info.reserve(cardinality);
+    // Find RHS records that have a value similar with respect to `ccv_id` to
+    // `sltvpe_partition_value[partition_key_index]` according to the measure of the column match at
+    // index `column_match_index`.
+    struct RhsRecordsMatchingCriterion {
+        Index column_match_index;
+        // kSLTVPartitionColumn here means we should use the SLTVPartition's partition value
+        Index partition_key_index;
+        ColumnClassifierValueId ccv_id;
+    };
 
-            std::size_t const left_pli_number = validator->GetLeftCompressor().GetPliNumber();
-            non_first_indices.reserve(std::min(cardinality, left_pli_number));
-            std::vector<AbsoluteLhsElements> pli_map(left_pli_number);
-            Index col_match_index = 0;
-            for (auto const& [child_array_index, ccv_id] : lhs) {
-                col_match_index += child_array_index;
-                pli_map[validator->GetLeftPliIndex(col_match_index)].emplace_back(col_match_index,
-                                                                                  ccv_id);
-                ++col_match_index;
-            }
+    using RhsRecordsMatchingCriteria = std::vector<RhsRecordsMatchingCriterion>;
 
-            Index pli_idx = 0;
-            while (pli_map[pli_idx].empty()) ++pli_idx;
+    class Initializer {
+        BatchValidator const* validator_;
 
-            Index value_ids_index = 0;
-            auto fill_for_value_ids_idx = [this,
-                                           &value_ids_index](AbsoluteLhsElements const& elements) {
-                for (auto const& [col_match_idx, ccv_id] : elements) {
-                    matching_info.emplace_back(col_match_idx, value_ids_index, ccv_id);
+        MdLhs::iterator lhs_iter_;
+        MdLhs::iterator const lhs_end_;
+
+        std::size_t const total_left_column_number_ =
+                validator_->GetLeftCompressor().GetPliNumber();
+
+        RhsRecordsMatchingCriteria rhs_records_matching_criteria_;
+        SLTVPEPartitionKey sltvpe_partition_key_;
+
+        Index cur_col_match_index_ = lhs_iter_->child_array_index;
+
+        // TODO: investigate impact of different columns here on performance.
+        Index sltv_partition_column_index_ = validator_->GetLeftPliIndex(cur_col_match_index_);
+
+        // Used to indicate that the SLTVPEPartition key index for a column has not been determined.
+        static constexpr std::size_t kNoIndex = -2;
+
+        std::vector<Index> left_column_to_sltv_partition_key_index_mapping_ =
+                std::vector<Index>(total_left_column_number_, kNoIndex);
+
+        std::size_t GetClusterNumber(Index left_pli_index) {
+            return validator_->GetLeftCompressor().GetPli(left_pli_index).GetClusters().size();
+        }
+
+        void AddFirstRhsRecordsMatchingCriterion() {
+            left_column_to_sltv_partition_key_index_mapping_[sltv_partition_column_index_] =
+                    kSLTVPartitionColumn;
+            // LHS has cardinality greater than 1, so is not empty.
+            DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
+            rhs_records_matching_criteria_.emplace_back(cur_col_match_index_, kSLTVPartitionColumn,
+                                                        lhs_iter_->ccv_id);
+            ++cur_col_match_index_;
+            ++lhs_iter_;
+        }
+
+        void AddOtherRhsRecordsMatchingCriteria() {
+            Index next_partition_key_index = 0;
+            // LHS has cardinality greater than 1, so it has at least one more element.
+            DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
+            for (auto const& [child_array_index, ccv_id] : std::span{lhs_iter_, lhs_end_}) {
+                cur_col_match_index_ += child_array_index;
+                Index const left_column_index = validator_->GetLeftPliIndex(cur_col_match_index_);
+                Index& partition_key_index =
+                        left_column_to_sltv_partition_key_index_mapping_[left_column_index];
+
+                if (partition_key_index == kNoIndex) {
+                    partition_key_index = next_partition_key_index++;
+
+                    sltvpe_partition_key_.push_back(left_column_index);
                 }
-                ++value_ids_index;
-            };
-            first_pli_index = pli_idx;
-            fill_for_value_ids_idx(pli_map[pli_idx]);
-            for (++pli_idx; pli_idx != left_pli_number; ++pli_idx) {
-                AbsoluteLhsElements const& pli_col_matches = pli_map[pli_idx];
-                if (pli_col_matches.empty()) continue;
-                ++plis_involved;
-                non_first_indices.push_back(pli_idx);
-                fill_for_value_ids_idx(pli_col_matches);
+
+                rhs_records_matching_criteria_.emplace_back(cur_col_match_index_,
+                                                            partition_key_index, ccv_id);
+                ++cur_col_match_index_;
             }
+        }
+
+    public:
+        Initializer(BatchValidator const* validator, MdLhs const& lhs)
+            : validator_(validator), lhs_iter_(lhs.begin()), lhs_end_(lhs.end()) {
+            std::size_t const cardinality = lhs.Cardinality();
+            // This class is adapted for this case and should only be created if this holds.
+            DESBORDANTE_ASSUME(cardinality > 1);
+            rhs_records_matching_criteria_.reserve(cardinality);
+            sltvpe_partition_key_.reserve(std::min(cardinality, total_left_column_number_));
+
+            AddFirstRhsRecordsMatchingCriterion();
+            AddOtherRhsRecordsMatchingCriteria();
+        }
+
+        BatchValidator const* GetValidator() const noexcept {
+            return validator_;
+        }
+
+        SLTVPEPartitionKey& GetPartitionKey() noexcept {
+            return sltvpe_partition_key_;
+        }
+
+        Index GetSLTVPEPartitionColumnIndex() const noexcept {
+            return sltv_partition_column_index_;
+        }
+
+        RhsRecordsMatchingCriteria& GetRhsRecordsMatchingCriteria() noexcept {
+            return rhs_records_matching_criteria_;
         }
     };
 
-    using GroupMap = std::unordered_map<std::vector<ValueIdentifier>, RecordCluster>;
+    using ValueIdArray = utility::TrivialArray<ValueIdentifier>;
+    using GroupMap = std::unordered_map<ValueIdArray, RecordCluster, ValueIdArray::Hasher,
+                                        ValueIdArray::ArrEqual>;
 
-    Validator const* const validator_;
-    GroupMap grouped_;
-    GroupMap::iterator cur_group_iter_ = grouped_.begin();
-    GroupMap::iterator end_group_iter_ = grouped_.end();
-    ValueIdentifier first_value_id_ = ValueIdentifier(-1);
-    std::vector<ValueIdentifier> value_ids_;
-    std::vector<RecSet const*> rec_sets_;
-    IndexVector const non_first_indices_;
-    IndexVector::const_iterator non_first_start_ = non_first_indices_.begin();
-    IndexVector::const_iterator non_first_end_ = non_first_indices_.end();
-    std::vector<PliCluster> const& first_pli_;
-    std::size_t first_pli_size_ = first_pli_.size();
+    BatchValidator const* const validator_;
+
+    SLTVPEPartitionKey const sltvpe_partition_key_;
+    std::size_t const sltvpe_partition_key_size_ = sltvpe_partition_key_.size();
+    ValueIdArray partition_value_scratch_{sltvpe_partition_key_size_};
+
+    std::vector<PliCluster> const& sltv_partition_;
+    std::size_t const sltv_partition_size_ = sltv_partition_.size();
+
+    RhsRecordsMatchingCriteria const rhs_records_matching_criteria_;
+
+    GroupMap sltvpe_partition_{0, ValueIdArray::Hasher(sltvpe_partition_key_size_),
+                               ValueIdArray::ArrEqual(sltvpe_partition_key_size_)};
+    GroupMap::iterator sltvpe_partition_iter_ = sltvpe_partition_.begin();
+
+    ValueIdentifier sltv_partition_value_ = 0;
+
+    std::vector<RecSet const*> matched_rhs_rec_sets_scratch_;
     CompressedRecords const& left_records_ = validator_->GetLeftCompressor().GetRecords();
-    MatchingInfo const matching_info_;
-    RecIdVec similar_records_;
-    RecordCluster const* cluster_ptr_;
+    RecIdVec rhs_set_intersection_;
 
-    MultiCardPairProvider(InitInfo init_info)
-        : validator_(init_info.validator),
-          non_first_indices_(std::move(init_info.non_first_indices)),
-          first_pli_(
-                  validator_->GetLeftCompressor().GetPli(init_info.first_pli_index).GetClusters()),
-          matching_info_(std::move(init_info.matching_info)) {
-        value_ids_.reserve(init_info.plis_involved);
-        rec_sets_.reserve(matching_info_.size());
+    MultiCardPartitionElementProvider(Initializer init_info)
+        : validator_(init_info.GetValidator()),
+          sltvpe_partition_key_(std::move(init_info.GetPartitionKey())),
+          sltv_partition_(validator_->GetLeftCompressor()
+                                  .GetPli(init_info.GetSLTVPEPartitionColumnIndex())
+                                  .GetClusters()),
+          rhs_records_matching_criteria_(std::move(init_info.GetRhsRecordsMatchingCriteria())) {
+        matched_rhs_rec_sets_scratch_.reserve(rhs_records_matching_criteria_.size());
+
+        // Tables are guaranteed to not be empty, so a partition can't be empty either.
+        DESBORDANTE_ASSUME(sltv_partition_size_ != 0);
+        CreateSLTVPEPartition();
     }
 
-    bool TryGetNextGroup() {
-        if (++first_value_id_ == first_pli_size_) return false;
-        grouped_.clear();
-        PliCluster const& cluster = first_pli_[first_value_id_];
-        value_ids_.push_back(first_value_id_);
-        for (RecordIdentifier record_id : cluster) {
+    void CreateSLTVPEPartition() {
+        PliCluster const& sltv_partition_element_ = sltv_partition_[sltv_partition_value_];
+        for (RecordIdentifier const record_id : sltv_partition_element_) {
+            utility::PointerArrayBackInserter inserter{partition_value_scratch_.GetFiller()};
             std::vector<ValueIdentifier> const& record = left_records_[record_id];
-            for (auto ind_it = non_first_start_; ind_it != non_first_end_; ++ind_it) {
-                value_ids_.push_back(record[*ind_it]);
+            for (Index const index : sltvpe_partition_key_) {
+                inserter.PushBack(record[index]);
             }
-            grouped_[value_ids_].push_back(&record);
-            value_ids_.erase(++value_ids_.begin(), value_ids_.end());
+            sltvpe_partition_[partition_value_scratch_.GetSpan(sltvpe_partition_key_size_)]
+                    .push_back(&record);
         }
-        value_ids_.clear();
-        cur_group_iter_ = grouped_.begin();
-        end_group_iter_ = grouped_.end();
+        sltvpe_partition_iter_ = sltvpe_partition_.begin();
+    }
+
+    bool NextSLTVPEPartition() {
+        if (++sltv_partition_value_ == sltv_partition_size_) return false;
+        // This method must not be called after false is returned.
+        DESBORDANTE_ASSUME(sltv_partition_value_ < sltv_partition_size_);
+        sltvpe_partition_.clear();
+        CreateSLTVPEPartition();
         return true;
     }
 
-public:
-    MultiCardPairProvider(Validator const* validator, MdLhs const& lhs)
-        : MultiCardPairProvider(InitInfo{validator, lhs}) {}
-
-    bool TryGetNextPair() {
-        similar_records_.clear();
-        do {
-            while (cur_group_iter_ != end_group_iter_) {
-                auto const& [val_ids, cluster] = *cur_group_iter_;
-                rec_sets_.clear();
-                ++cur_group_iter_;
-                for (auto const& [column_match_index, value_ids_index, ccv_id] : matching_info_) {
-                    RecSet const* similar_records_ptr = validator_->GetSimilarRecords(
-                            val_ids[value_ids_index], ccv_id, column_match_index);
-                    if (similar_records_ptr == nullptr) goto no_similar_records;
-                    rec_sets_.push_back(similar_records_ptr);
-                }
-                goto matched_on_all;
-            no_similar_records:
-                continue;
-            matched_on_all:
-                auto check_set_begin = rec_sets_.begin();
-                auto check_set_end = rec_sets_.end();
-                using CRecSet = RecSet const;
-                auto size_cmp = [](CRecSet* p1, CRecSet* p2) { return p1->size() < p2->size(); };
-                std::sort(check_set_begin, check_set_end, size_cmp);
-                CRecSet& first = **check_set_begin;
-                ++check_set_begin;
-                for (RecordIdentifier rec : first) {
-                    auto rec_cont = [rec](CRecSet* set_ptr) { return set_ptr->contains(rec); };
-                    if (std::all_of(check_set_begin, check_set_end, rec_cont)) {
-                        similar_records_.push_back(rec);
-                    }
-                }
-                if (similar_records_.empty()) continue;
-                cluster_ptr_ = &cluster;
-                return true;
-            }
-        } while (TryGetNextGroup());
+    bool FindMatchedRhsRecordSets(ValueIdArray const& sltvpe_partition_value) {
+        matched_rhs_rec_sets_scratch_.clear();
+        for (auto const& [column_match_index, sltvpe_partition_key_index, ccv_id] :
+             rhs_records_matching_criteria_) {
+            ValueIdentifier const value_id =
+                    sltvpe_partition_key_index == kSLTVPartitionColumn
+                            ? sltv_partition_value_
+                            : sltvpe_partition_value[sltvpe_partition_key_index];
+            RecSet const* similar_records_ptr =
+                    validator_->GetSimilarRecords(column_match_index, value_id, ccv_id);
+            if (similar_records_ptr == nullptr) return true;
+            // Empty sets shouldn't be stored in similarity indexes.
+            DESBORDANTE_ASSUME(!similar_records_ptr->empty());
+            matched_rhs_rec_sets_scratch_.push_back(similar_records_ptr);
+        }
         return false;
     }
 
-    RecordCluster const& GetCluster() const {
-        return *cluster_ptr_;
+    void SortMatchedRhsRecordSetsBySize() {
+        // Allows to loop through the smallest possible number of elements due to the smallest set
+        // being placed first. As for the other sets, we can say that the smaller a set is, the more
+        // likely it is that an element won't be contained in it, making us stop an iteration for an
+        // element sooner on average when they are sorted by size.
+        auto size_cmp = [](RecSet const* p1, RecSet const* p2) { return p1->size() < p2->size(); };
+        // At least two column matches are considered, so this is impossible, use assumption to
+        // avoid an extra check in std::sort.
+        DESBORDANTE_ASSUME(!matched_rhs_rec_sets_scratch_.empty());
+        std::ranges::sort(matched_rhs_rec_sets_scratch_, size_cmp);
     }
 
-    RecIdVec const& GetSimilarRecords() const {
-        return similar_records_;
+    void IntersectMatchedRhsRecordSets() {
+        // `rhs_set_intersection_` should be treated as if it is the return value of this method. It
+        // is not literally that for performance purposes (collection reuse).
+        DESBORDANTE_ASSUME(rhs_set_intersection_.empty());
+
+        SortMatchedRhsRecordSetsBySize();
+
+        RecSet const& first = *matched_rhs_rec_sets_scratch_.front();
+        std::span other_record_set_ptrs{matched_rhs_rec_sets_scratch_.begin() + 1,
+                                        matched_rhs_rec_sets_scratch_.end()};
+        // Empty sets have been excluded prior to the call.
+        DESBORDANTE_ASSUME(first.begin() != first.end());
+        for (RecordIdentifier rec : first) {
+            auto contains_record = [rec](RecSet const* set_ptr) { return set_ptr->contains(rec); };
+            // At least two column matches are considered.
+            DESBORDANTE_ASSUME(other_record_set_ptrs.begin() != other_record_set_ptrs.end());
+            if (std::ranges::all_of(other_record_set_ptrs, contains_record)) {
+                rhs_set_intersection_.push_back(rec);
+            }
+        }
+    }
+
+public:
+    using PartitionElement = LHSMRPartitionElement<RecordCluster, RecIdVec>;
+
+    MultiCardPartitionElementProvider(BatchValidator const* validator, MdLhs const& lhs)
+        : MultiCardPartitionElementProvider(Initializer{validator, lhs}) {}
+
+    std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
+        rhs_set_intersection_.clear();
+        do {
+            while (sltvpe_partition_iter_ != sltvpe_partition_.end()) {
+                auto const& [sltvpe_partition_value, lhs_record_ids] = *sltvpe_partition_iter_++;
+
+                bool const empty_set_found = FindMatchedRhsRecordSets(sltvpe_partition_value);
+                if (empty_set_found) continue;
+
+                IntersectMatchedRhsRecordSets();
+                if (rhs_set_intersection_.empty()) continue;
+
+                return {{lhs_record_ids, rhs_set_intersection_}};
+            }
+        } while (NextSLTVPEPartition());
+        return std::nullopt;
     }
 };
 
-void Validator::Validate(lattice::ValidationInfo& info, Result& result,
-                         std::vector<WorkingInfo>& working) const {
-    MdLhs const& lhs = info.messenger->GetLhs();
-    switch (lhs.Cardinality()) {
+void BatchValidator::Validate(lattice::ValidationInfo& info, Result& result,
+                              SameLhsValidators& same_lhs_validators) const {
+    switch (MdLhs const& lhs = info.messenger->GetLhs(); lhs.Cardinality()) {
         [[unlikely]] case 0:
+            // Already validated.
             break;
         case 1: {
-            SetPairProcessor<OneCardPairProvider> processor(this, result, working, lhs);
-            processor.ProcessPairs();
+            LHSMRPartitionInspector<OneCardPartitionElementProvider> inspector(
+                    this, result, same_lhs_validators, lhs);
+            inspector.InspectLHSMRPartition();
         } break;
         default: {
-            SetPairProcessor<MultiCardPairProvider> processor(this, result, working, lhs);
-            processor.ProcessPairs();
+            LHSMRPartitionInspector<MultiCardPartitionElementProvider> inspector(
+                    this, result, same_lhs_validators, lhs);
+            inspector.InspectLHSMRPartition();
         } break;
     }
 }
 
-void Validator::MakeWorkingAndRecs(lattice::ValidationInfo const& info,
-                                   std::vector<WorkingInfo>& working,
-                                   AllRhsRecommendations& recommendations) {
-    boost::dynamic_bitset<> const& rhs_indices = info.rhs_indices_to_validate;
-    if (rhs_indices.none()) return;
+auto BatchValidator::GetRemovedAndInterestingness(lattice::ValidationInfo const& info,
+                                                  std::vector<model::Index> const& indices)
+        -> RemovedAndInterestingnessCCVIds {
     MdLhs const& lhs = info.messenger->GetLhs();
-    IndexVector indices = util::BitsetToIndices<Index>(rhs_indices);
-    std::size_t const working_size = indices.size();
-    working.reserve(working_size);
-    recommendations.reserve(working_size);
+
     std::vector<ColumnClassifierValueId> interestingness_ccv_ids;
-    auto get_interestingness_ccv_ids = [&](std::vector<ColumnClassifierValueId>& removed_ccv_ids) {
-        std::for_each(removed_ccv_ids.begin(), removed_ccv_ids.end(),
-                      [](ColumnClassifierValueId& ccv_id) { --ccv_id; });
+    auto set_interestingness_ccv_ids = [&](std::vector<ColumnClassifierValueId>& removed_ccv_ids) {
+        std::ranges::for_each(removed_ccv_ids, [](ColumnClassifierValueId& ccv_id) { --ccv_id; });
         interestingness_ccv_ids = lattice_->GetInterestingnessCCVIds(lhs, indices, removed_ccv_ids);
-        std::for_each(removed_ccv_ids.begin(), removed_ccv_ids.end(),
-                      [](ColumnClassifierValueId& ccv_id) { ++ccv_id; });
+        std::ranges::for_each(removed_ccv_ids, [](ColumnClassifierValueId& ccv_id) { ++ccv_id; });
     };
     std::vector<ColumnClassifierValueId> removed_ccv_ids =
-            info.messenger->GetRhs().DisableAndDo(indices, get_interestingness_ccv_ids);
+            info.messenger->GetRhs().DisableAndDo(indices, set_interestingness_ccv_ids);
+    return {std::move(removed_ccv_ids), std::move(interestingness_ccv_ids)};
+}
 
-    auto old_iter = removed_ccv_ids.begin();
-    auto intrestingness_iter = interestingness_ccv_ids.begin();
-    indexes::CompressedRecords const& right_records = GetRightCompressor().GetRecords();
-    for (Index index : indices) {
+void BatchValidator::FillValidators(
+        SameLhsValidators& same_lhs_validators, AllRhsRecommendations& recommendations,
+        std::vector<Index> const& pending_rhs_indices,
+        RemovedAndInterestingnessCCVIds const& removed_and_interestingness) const {
+    {
+        std::size_t const rhss_number = pending_rhs_indices.size();
+        same_lhs_validators.reserve(rhss_number);
+        recommendations.reserve(rhss_number);
+    }
+
+    CompressedRecords const& right_records = GetRightCompressor().GetRecords();
+    for (auto const& [removed_ccv_ids, interestingness_ccv_ids] = removed_and_interestingness;
+         auto [column_match_index, old_ccv_id, interestingness_ccv_id] :
+         utility::Zip(pending_rhs_indices, removed_ccv_ids, interestingness_ccv_ids)) {
         OneRhsRecommendations& last_recs = recommendations.emplace_back();
-        auto const& [sim_info, left_index, right_index] = (*column_matches_info_)[index];
-        MdElement rhs{index, *old_iter++};
-        working.emplace_back(rhs, last_recs, GetLeftValueNum(index), *intrestingness_iter++,
-                             right_records, sim_info.similarity_matrix, left_index, right_index);
+        auto const& [sim_info, left_column_index, right_column_index] =
+                (*column_matches_info_)[column_match_index];
+        MdElement rhs{column_match_index, old_ccv_id};
+        same_lhs_validators.emplace_back(
+                rhs, last_recs, GetLeftTableColumnValueNum(column_match_index),
+                interestingness_ccv_id, right_records, sim_info.similarity_matrix,
+                left_column_index, right_column_index);
     }
 }
 
-inline void Validator::Initialize(std::vector<lattice::ValidationInfo>& validation_info) {
-    std::size_t const validations_size = validation_info.size();
-    results_.clear();
-    current_working_.clear();
-    util::ReserveMore(results_, validations_size);
-    util::ReserveMore(current_working_, validations_size);
-    for (lattice::ValidationInfo& info : validation_info) {
-        MdLhs const& lhs = info.messenger->GetLhs();
-        Result& result = results_.emplace_back();
-        boost::dynamic_bitset<>& indices_bitset = info.rhs_indices_to_validate;
-        std::vector<WorkingInfo>& working = current_working_.emplace_back();
-        lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
-        switch (lhs.Cardinality()) {
-            [[unlikely]] case 0: {
-                util::ForEachIndex(indices_bitset, [&](auto index) {
-                    ColumnClassifierValueId old_cc_value_id = lattice_rhs[index];
-                    if (old_cc_value_id == kLowestCCValueId) [[likely]]
-                        return;
-                    result.invalidated.PushBack({index, old_cc_value_id}, kLowestCCValueId);
-                });
-                result.is_unsupported = !Supported(GetTotalPairsNum());
-            } break;
-            case 1: {
-                Index const non_zero_index = lhs.begin()->child_array_index;
-                // Never happens when disjointedness pruning is on.
-                if (indices_bitset.test_set(non_zero_index, false)) {
-                    assert(lattice_rhs[non_zero_index] != kLowestCCValueId);
-                    result.invalidated.PushBack({non_zero_index, lattice_rhs[non_zero_index]},
-                                                kLowestCCValueId);
-                }
-                MakeWorkingAndRecs(info, working, result.all_rhs_recommendations);
-            } break;
-            default: {
-                MakeWorkingAndRecs(info, working, result.all_rhs_recommendations);
-            } break;
-        }
+void BatchValidator::CreateValidators(lattice::ValidationInfo const& info,
+                                      SameLhsValidators& same_lhs_validators,
+                                      AllRhsRecommendations& recommendations) {
+    boost::dynamic_bitset<> const& pending_rhs_indices_bitset = info.rhs_indices_to_validate;
+    if (pending_rhs_indices_bitset.none()) return;
+
+    // NOTE: converting to indices because the index list is iterated through many times in
+    // MdLattice::GetInterestingnessCCVIds, and it is faster to allocate and iterate through a
+    // vector than a bitset.
+    std::vector<Index> const pending_rhs_indices =
+            util::BitsetToIndices<Index>(pending_rhs_indices_bitset);
+
+    RemovedAndInterestingnessCCVIds removed_and_interestingness =
+            GetRemovedAndInterestingness(info, pending_rhs_indices);
+
+    FillValidators(same_lhs_validators, recommendations, pending_rhs_indices,
+                   removed_and_interestingness);
+}
+
+void BatchValidator::ValidateEmptyLhs(Result& result,
+                                      boost::dynamic_bitset<> const& rhs_indices_to_validate,
+                                      lattice::Rhs const& lattice_rhs) const {
+    util::ForEachIndex(rhs_indices_to_validate, [&](auto index) {
+        ColumnClassifierValueId const old_cc_value_id = lattice_rhs[index];
+        if (old_cc_value_id == kLowestCCValueId) [[likely]]
+            return;
+        result.invalidated_rhss.PushBack({index, old_cc_value_id}, kLowestCCValueId);
+    });
+    result.lhs_is_unsupported = !Supported(GetTotalPairsNum());
+}
+
+void BatchValidator::RemoveTrivialForCardinality1Lhs(
+        model::Index const lhs_index, Result& result,
+        boost::dynamic_bitset<>& rhs_indices_to_validate, lattice::Rhs const& lattice_rhs) {
+    // If LHS has cardinality 1 and the column classifier uses a natural decision boundary, then it
+    // follows that the RHS column classifier decision boundary must be equal to it, giving us a
+    // trivial dependency, no need to go through the full validation process for it.
+    // NOTE: this assumes that all LHS boundaries are natural, which may not be true for a more
+    // general case.
+    // NOTE: Never true when disjointedness pruning is on.
+    if (rhs_indices_to_validate.test_set(lhs_index, false)) {
+        // Zero CCV ID RHSs are treated as removed and their validation should not be requested.
+        DESBORDANTE_ASSUME(lattice_rhs[lhs_index] != kLowestCCValueId);
+        result.invalidated_rhss.PushBack({lhs_index, lattice_rhs[lhs_index]}, kLowestCCValueId);
     }
 }
 
-auto Validator::ValidateAll(std::vector<lattice::ValidationInfo>& validation_info)
-        -> std::vector<Result> const& {
-    Initialize(validation_info);
-    auto validate_at_index = [&](Index i) {
-        Validate(validation_info[i], results_[i], current_working_[i]);
-    };
-    std::size_t const validation_info_size = validation_info.size();
-    if (pool_ == nullptr) {
-        for (model::Index i = 0; i != validation_info_size; ++i) {
-            validate_at_index(i);
-        }
+template <bool PerformValidation>
+decltype(auto) BatchValidator::GetRhsValidatorsContainer() {
+    if constexpr (PerformValidation) {
+        return SameLhsValidators{};
     } else {
-        pool_->ExecIndex(validate_at_index, validation_info_size);
+        return current_validator_batch_.emplace_back();
+    }
+}
+
+template <bool PerformValidation>
+void BatchValidator::CreateResult(lattice::ValidationInfo& info) {
+    Result& result = results_.emplace_back();
+
+    // Store locally if validation is performed, store in current_validator_batch_ if postponed.
+    auto&& rhs_validators = GetRhsValidatorsContainer<PerformValidation>();
+
+    boost::dynamic_bitset<>& rhs_indices_to_validate = info.rhs_indices_to_validate;
+    lattice::Rhs& lattice_rhs = info.messenger->GetRhs();
+
+    switch (MdLhs const& lhs = info.messenger->GetLhs(); lhs.Cardinality()) {
+        [[unlikely]] case 0:
+            // Very cheap, converting to indices is not needed, so might as well validate
+            // immediately.
+            ValidateEmptyLhs(result, rhs_indices_to_validate, lattice_rhs);
+            break;
+        case 1:
+            RemoveTrivialForCardinality1Lhs(lhs.begin()->child_array_index, result,
+                                            rhs_indices_to_validate, lattice_rhs);
+            [[fallthrough]];
+        default:
+            CreateValidators(info, rhs_validators, result.all_rhs_recommendations);
+            if constexpr (PerformValidation) Validate(info, result, rhs_validators);
+            break;
+    }
+}
+
+template <bool PerformValidation>
+void BatchValidator::CreateResults(std::vector<lattice::ValidationInfo>& all_validation_info) {
+    std::size_t const validations_number = all_validation_info.size();
+    results_.clear();
+    util::ReserveMore(results_, validations_number);
+
+    if constexpr (!PerformValidation) {
+        current_validator_batch_.clear();
+        util::ReserveMore(current_validator_batch_, validations_number);
+    }
+
+    for (lattice::ValidationInfo& info : all_validation_info) {
+        CreateResult<PerformValidation>(info);
+    }
+}
+
+auto BatchValidator::ValidateBatch(std::vector<lattice::ValidationInfo>& minimal_lhs_mds)
+        -> std::vector<Result> const& {
+    if (pool_ == nullptr) {
+        CreateResults<true>(minimal_lhs_mds);
+    } else {
+        CreateResults<false>(minimal_lhs_mds);
+        auto validate_at_index = [&](Index i) {
+            Validate(minimal_lhs_mds[i], results_[i], current_validator_batch_[i]);
+        };
+        pool_->ExecIndex(validate_at_index, minimal_lhs_mds.size());
     }
     return results_;
 }
