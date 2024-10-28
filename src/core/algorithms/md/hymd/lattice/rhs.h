@@ -9,6 +9,7 @@
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "model/index.h"
 #include "util/desbordante_assume.h"
+#include "util/get_preallocated_vector.h"
 
 namespace algos::hymd::lattice {
 struct Rhs {
@@ -29,9 +30,9 @@ struct Rhs {
 
     std::vector<ColumnClassifierValueId> DisableAndDo(std::vector<model::Index> const& indices,
                                                       auto action) {
-        std::vector<ColumnClassifierValueId> ccv_ids;
-        ccv_ids.reserve(indices.size());
-        std::size_t old_count = non_zero_count;
+        std::vector<ColumnClassifierValueId> ccv_ids =
+                util::GetPreallocatedVector<ColumnClassifierValueId>(indices.size());
+        std::size_t const old_count = non_zero_count;
         // NOTE: not thread-safe
         non_zero_count = 0;
         for (model::Index index : indices) {

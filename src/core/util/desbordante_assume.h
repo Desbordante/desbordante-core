@@ -2,6 +2,7 @@
 
 #ifndef NDEBUG
 #include <cassert>
+// Only use if you're certain the expression will be optimized away.
 #define DESBORDANTE_ASSUME(expr)                      \
     {                                                 \
         auto const holds = static_cast<bool>((expr)); \
