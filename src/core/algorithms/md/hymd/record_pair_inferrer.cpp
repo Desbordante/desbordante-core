@@ -391,11 +391,7 @@ auto RecordPairInferrer::CreateSamplingQueue() -> std::priority_queue<ColumnMatc
         DoSamplingRound(column_match_sampling_info);
         // No pairs have been sampled, and no pairs are going to be sampled if the parameter is
         // increased either.
-        if (column_match_sampling_info.GetSampledNumber() == 0) {
-            sampling_info.pop_back();
-        } else {
-            column_match_sampling_info.IncrementParameter();
-        }
+        if (column_match_sampling_info.GetSampledNumber() == 0) sampling_info.pop_back();
     }
     return std::priority_queue<ColumnMatchSamplingInfo>{decltype(sampling_queue_)::value_compare{},
                                                         std::move(sampling_info)};
@@ -606,7 +602,6 @@ void RecordPairInferrer::SampleAndRequeue(ColumnMatchSamplingInfo& column_match_
     bool const out_of_pairs = sampled_previously == sampled_after_round;
     if (out_of_pairs) return;
 
-    column_match_sampling_info.IncrementParameter();
     sampling_queue_.push(column_match_sampling_info);
 }
 
