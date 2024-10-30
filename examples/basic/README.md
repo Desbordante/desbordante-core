@@ -26,4 +26,4 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [verifying_nd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_nd) — a scenario showing how to verify numerical dependencies.
 + [verifying_mfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_mfd.py) — a scenario showing how to verify metric functional dependencies.
 + [verifying_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_ucc.py) — a scenario showing how to verify a unique column combination.
-
++ [verifying_dc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_dc.py) — a scenario showing how to verify a denial constraint.

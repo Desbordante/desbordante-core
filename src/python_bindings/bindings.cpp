@@ -8,6 +8,7 @@
 #include "bind_main_classes.h"
 #include "cfd/bind_cfd.h"
 #include "data/bind_data_types.h"
+#include "dc/bind_dc_verification.h"
 #include "dd/bind_split.h"
 #include "dynamic/bind_dynamic_fd_verification.h"
 #include "fd/bind_fd.h"
@@ -58,7 +59,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindDynamicFdVerification,
                            BindNdVerification,
                            BindSFD,
-                           BindMd}) {
+                           BindMd,
+                           BindDCVerification}) {
         bind_func(module);
     }
 }
