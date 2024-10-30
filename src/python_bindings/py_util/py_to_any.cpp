@@ -134,6 +134,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
+        kNormalConvPair<std::string>,
 };
 
 }  // namespace
