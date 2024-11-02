@@ -72,6 +72,8 @@ CSVConfig const kTestZeros = CreateCsvConfig("TestZeros.csv", ',', true);
 CSVConfig const kNullEmpty = CreateCsvConfig("NullEmpty.csv", ',', true);
 CSVConfig const kSimpleTypes = CreateCsvConfig("SimpleTypes.csv", ',', true);
 CSVConfig const kRulesBook = CreateCsvConfig("transactional_data/rules-book.csv", ',', false);
+CSVConfig const kRulesBookRows =
+        CreateCsvConfig("transactional_data/rules-book-rows.csv", ',', false);
 CSVConfig const kRulesPresentationExtended =
         CreateCsvConfig("transactional_data/rules-presentation-extended.csv", ',', false);
 CSVConfig const kRulesPresentation =
