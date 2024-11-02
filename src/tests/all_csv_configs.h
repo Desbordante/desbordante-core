@@ -64,6 +64,7 @@ extern CSVConfig const kTestZeros;
 extern CSVConfig const kNullEmpty;
 extern CSVConfig const kSimpleTypes;
 extern CSVConfig const kRulesBook;
+extern CSVConfig const kRulesBookRows;
 extern CSVConfig const kRulesPresentationExtended;
 extern CSVConfig const kRulesPresentation;
 extern CSVConfig const kRulesSynthetic2;
