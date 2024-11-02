@@ -53,7 +53,7 @@ public:
     }
 
     bool operator>(Vertical const& rhs) const {
-        return !(*this < rhs && *this == rhs);
+        return !(*this < rhs || *this == rhs);
     }
 
     boost::dynamic_bitset<> GetColumnIndices() const {
