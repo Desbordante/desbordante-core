@@ -36,23 +36,23 @@ public:
     }
 
     bool HasGeneralizationInChildren(NodeType const& node, MdLhs::iterator next_iter,
-                                     model::Index child_array_index = 0) {
+                                     model::Index total_offset = 0) {
         MdLhs const& lhs = NodeType::GetLhs(unspecialized_);
-        for (MdLhs::iterator end_iter = lhs.end(); next_iter != end_iter; ++child_array_index) {
-            auto const& [index_delta, lhs_ccv_id] = *next_iter;
-            child_array_index += index_delta;
+        for (MdLhs::iterator end_iter = lhs.end(); next_iter != end_iter; ++total_offset) {
+            auto const& [next_node_offset, lhs_ccv_id] = *next_iter;
+            total_offset += next_node_offset;
             ++next_iter;
-            CCVIdChildMap const& map = *node.children[child_array_index];
+            CCVIdChildMap const& map = node.children[total_offset];
             if (HasGeneralizationInCCVIdMap(next_iter, lhs_ccv_id, map)) return true;
         }
         return false;
     }
 
     bool HasGeneralization(NodeType const& node, MdLhs::iterator next_iter,
-                           model::Index child_array_index = 0) {
+                           model::Index starting_offset = 0) {
         if (CheckNode(node)) return true;
         // TODO: try switching from MultiMd to Md if only one RHS is left
-        return HasGeneralizationInChildren(node, next_iter, child_array_index);
+        return HasGeneralizationInChildren(node, next_iter, starting_offset);
     }
 
     bool HasGeneralization(NodeType const& node) {
@@ -64,6 +64,10 @@ public:
     }
 
     Unspecialized const& GetUnspecialized() const noexcept {
+        return unspecialized_;
+    }
+
+    Unspecialized& GetUnspecialized() noexcept {
         return unspecialized_;
     }
 };

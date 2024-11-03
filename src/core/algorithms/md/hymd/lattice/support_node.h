@@ -20,8 +20,8 @@ public:
         return is_unsupported;
     }
 
-    SupportNode* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id) {
-        return AddOneUncheckedBase(child_array_index, ccv_id);
+    SupportNode* AddOneUnchecked(model::Index next_node_offset, ColumnClassifierValueId ccv_id) {
+        return AddOneUncheckedBase(next_node_offset, ccv_id);
     }
 
     SupportNode(std::size_t children_number) : NodeBase<SupportNode>(children_number) {}

@@ -17,8 +17,8 @@ private:
     struct Node : NodeBase<Node> {
         ValidationInfo* task_info = nullptr;
 
-        Node* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id) {
-            return AddOneUncheckedBase(child_array_index, ccv_id);
+        Node* AddOneUnchecked(model::Index offset, ColumnClassifierValueId ccv_id) {
+            return AddOneUncheckedBase(offset, ccv_id);
         }
 
         Node(std::size_t children_number) : NodeBase<Node>(children_number) {}

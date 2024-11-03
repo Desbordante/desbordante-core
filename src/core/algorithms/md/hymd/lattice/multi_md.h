@@ -19,5 +19,9 @@ struct MultiMd {
     FasterType ToFasterType() const noexcept {
         return {lhs, rhss.GetElements()[rhss.GetEnabled().find_first()]};
     }
+
+    utility::ExclusionList<MdElement>& GetRhs() noexcept {
+        return rhss;
+    }
 };
 }  // namespace algos::hymd::lattice

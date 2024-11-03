@@ -8,14 +8,14 @@ namespace algos::hymd::lattice {
 struct MdSpecialization {
     using Unspecialized = Md;
 
-    LhsSpecialization const& lhs_specialization;
+    LhsSpecialization lhs_specialization;
     MdElement rhs;
 
     Unspecialized ToUnspecialized() const noexcept {
         return {lhs_specialization.ToUnspecialized(), rhs};
     }
 
-    LhsSpecialization const& GetLhsSpecialization() const noexcept {
+    LhsSpecialization& GetLhsSpecialization() noexcept {
         return lhs_specialization;
     }
 
