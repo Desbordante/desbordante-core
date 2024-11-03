@@ -4,21 +4,21 @@
 
 namespace algos::hymd::lattice {
 struct SpecializationData {
-    MdLhs::iterator const spec_before;
-    LhsNode const new_child;
+    MdLhs::iterator spec_before;
+    LhsNode new_child;
 };
 
 struct LhsSpecialization {
     using Unspecialized = MdLhs const&;
 
-    MdLhs const& old_lhs;
-    SpecializationData const specialization_data;
+    Unspecialized old_lhs;
+    SpecializationData specialization_data;
 
     Unspecialized ToUnspecialized() const noexcept {
         return old_lhs;
     }
 
-    LhsSpecialization const& GetLhsSpecialization() const noexcept {
+    LhsSpecialization& GetLhsSpecialization() noexcept {
         return *this;
     }
 };

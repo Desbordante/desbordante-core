@@ -9,5 +9,9 @@ struct Md {
 
     MdLhs const& lhs;
     MdElement rhs;
+
+    auto& GetRhs() const noexcept {
+        return rhs;
+    }
 };
 }  // namespace algos::hymd::lattice

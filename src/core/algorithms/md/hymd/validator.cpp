@@ -245,7 +245,7 @@ public:
 
     OneCardPartitionElementProvider(BatchValidator const* validator, MdLhs const& lhs)
         : validator_(validator),
-          lhs_column_match_index_(lhs.begin()->child_array_index),
+          lhs_column_match_index_(lhs.begin()->offset),
           lhs_ccv_id_(lhs.begin()->ccv_id) {}
 
     std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
@@ -291,7 +291,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
         RhsRecordsMatchingCriteria rhs_records_matching_criteria_;
         SLTVPEPartitionKey sltvpe_partition_key_;
 
-        Index cur_col_match_index_ = lhs_iter_->child_array_index;
+        Index cur_col_match_index_ = lhs_iter_->offset;
 
         // TODO: investigate impact of different columns here on performance.
         Index sltv_partition_column_index_ = validator_->GetLeftPliIndex(cur_col_match_index_);
@@ -321,8 +321,8 @@ class BatchValidator::MultiCardPartitionElementProvider {
             Index next_partition_key_index = 0;
             // LHS has cardinality greater than 1, so it has at least one more element.
             DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
-            for (auto const& [child_array_index, ccv_id] : std::span{lhs_iter_, lhs_end_}) {
-                cur_col_match_index_ += child_array_index;
+            for (auto const& [next_node_offset, ccv_id] : std::span{lhs_iter_, lhs_end_}) {
+                cur_col_match_index_ += next_node_offset;
                 Index const left_column_index = validator_->GetLeftPliIndex(cur_col_match_index_);
                 Index& partition_key_index =
                         left_column_to_sltv_partition_key_index_mapping_[left_column_index];
@@ -641,8 +641,8 @@ void BatchValidator::CreateResult(lattice::ValidationInfo& info) {
             ValidateEmptyLhs(result, rhs_indices_to_validate, lattice_rhs);
             break;
         case 1:
-            RemoveTrivialForCardinality1Lhs(lhs.begin()->child_array_index, result,
-                                            rhs_indices_to_validate, lattice_rhs);
+            RemoveTrivialForCardinality1Lhs(lhs.begin()->offset, result, rhs_indices_to_validate,
+                                            lattice_rhs);
             [[fallthrough]];
         default:
             CreateValidators(info, rhs_validators, result.all_rhs_recommendations);

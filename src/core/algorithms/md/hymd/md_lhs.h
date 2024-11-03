@@ -9,11 +9,11 @@
 
 namespace algos::hymd {
 struct LhsNode {
-    model::Index child_array_index;
+    model::Index offset;
     ColumnClassifierValueId ccv_id;
 
     friend bool operator==(LhsNode const& l, LhsNode const& r) {
-        return l.child_array_index == r.child_array_index && l.ccv_id == r.ccv_id;
+        return l.offset == r.offset && l.ccv_id == r.ccv_id;
     }
 };
 
@@ -33,8 +33,8 @@ public:
         values_.reserve(max_values);
     }
 
-    ColumnClassifierValueId& AddNext(model::Index child_array_index) {
-        return values_.emplace_back(child_array_index).ccv_id;
+    ColumnClassifierValueId& AddNext(model::Index offset) {
+        return values_.emplace_back(offset).ccv_id;
     }
 
     void RemoveLast() {
@@ -70,9 +70,9 @@ struct hash<algos::hymd::MdLhs> {
     std::size_t operator()(algos::hymd::MdLhs const& p) const noexcept {
         using model::Index, algos::hymd::ColumnClassifierValueId;
         util::PyTupleHash main_hasher(p.Cardinality());
-        for (auto const& [child_array_index, ccv_id] : p) {
+        for (auto const& [node_offset, ccv_id] : p) {
             util::PyTupleHash pair_hasher(2);
-            pair_hasher.AppendHash(std::hash<Index>{}(child_array_index));
+            pair_hasher.AppendHash(std::hash<Index>{}(node_offset));
             pair_hasher.AppendHash(std::hash<ColumnClassifierValueId>{}(ccv_id));
             main_hasher.AppendHash(pair_hasher.GetResult());
         }

@@ -52,9 +52,9 @@ public:
         node_rhs.Set(rhs.index, rhs.ccv_id);
     }
 
-    MdNode* AddOneUnchecked(model::Index child_array_index, ColumnClassifierValueId ccv_id,
+    MdNode* AddOneUnchecked(model::Index offset, ColumnClassifierValueId ccv_id,
                             std::size_t column_matches_number) {
-        return AddOneUncheckedBase(child_array_index, ccv_id, column_matches_number);
+        return AddOneUncheckedBase(offset, ccv_id, column_matches_number);
     }
 
     MdNode(std::size_t column_matches_number, std::size_t children_number)

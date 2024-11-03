@@ -22,13 +22,14 @@ void MinPickerLattice::ExcludeGeneralizationRhs(Node const& cur_node,
                                                 MdLhs::iterator cur_lhs_iter,
                                                 boost::dynamic_bitset<>& considered_indices) {
     if (cur_node.task_info != nullptr) {
-        boost::dynamic_bitset<> const& cur_node_indices = cur_node.task_info->rhs_indices_to_validate;
+        boost::dynamic_bitset<> const& cur_node_indices =
+                cur_node.task_info->rhs_indices_to_validate;
         considered_indices -= cur_node_indices;
         return;
     }
-    auto const& [child_array_index, lhs_ccv_id] = *cur_lhs_iter;
+    auto const& [cur_node_offset, lhs_ccv_id] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    for (auto const& [ccv_id, node] : *cur_node.children[child_array_index]) {
+    for (auto const& [ccv_id, node] : cur_node.children[cur_node_offset]) {
         if (ccv_id > lhs_ccv_id) break;
         ExcludeGeneralizationRhs(node, messenger, cur_lhs_iter, considered_indices);
         if (considered_indices.none()) return;
@@ -51,9 +52,9 @@ void MinPickerLattice::RemoveSpecializations(Node& cur_node,
         }
         return;
     }
-    auto const& [child_array_index, next_ccv_id] = *cur_lhs_iter;
+    auto const& [cur_node_offset, next_ccv_id] = *cur_lhs_iter;
     ++cur_lhs_iter;
-    CCVIdChildMap& child_map = *cur_node.children[child_array_index];
+    CCVIdChildMap& child_map = cur_node.children[cur_node_offset];
     auto mapping_end = child_map.end();
     for (auto it_map = child_map.lower_bound(next_ccv_id); it_map != mapping_end; ++it_map) {
         auto& node = it_map->second;
