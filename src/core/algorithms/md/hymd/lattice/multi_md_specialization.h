@@ -10,18 +10,18 @@ namespace algos::hymd::lattice {
 struct MultiMdSpecialization {
     using Unspecialized = MultiMd;
 
-    LhsSpecialization const& lhs_specialization;
+    LhsSpecialization lhs_specialization;
     utility::ExclusionList<MdElement>& rhss;
 
     Unspecialized ToUnspecialized() const noexcept {
         return {lhs_specialization.ToUnspecialized(), rhss};
     }
 
-    LhsSpecialization const& GetLhsSpecialization() const noexcept {
+    LhsSpecialization& GetLhsSpecialization() noexcept {
         return lhs_specialization;
     }
 
-    utility::ExclusionList<MdElement> const& GetRhs() const noexcept {
+    utility::ExclusionList<MdElement>& GetRhs() noexcept {
         return rhss;
     }
 };
