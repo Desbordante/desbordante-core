@@ -59,10 +59,10 @@ protected:
     }
 };
 
-TEST_F(HyMDTest, DrunkAnimalsNormal) {
+TEST_F(HyMDTest, AnimalsBeveragesNormal) {
     using model::md::DecisionBoundary, model::Index, model::MD;
     using MdPair = std::pair<std::vector<DecisionBoundary>, std::pair<Index, DecisionBoundary>>;
-    auto param_map = GetParamMap(kDrunkAnimals);
+    auto param_map = GetParamMap(kAnimalsBeverages);
     auto hymd = algos::CreateAndLoadAlgorithm<algos::hymd::HyMD>(param_map);
     std::vector<MdPair> expected = {
             {{0.0, 0.0, 0.0, 0.75}, {2, 0.75}},
@@ -78,9 +78,9 @@ TEST_F(HyMDTest, DrunkAnimalsNormal) {
     ASSERT_EQ(expected, actual);
 }
 
-TEST_F(HyMDTest, DrunkAnimalsNoLimits) {
+TEST_F(HyMDTest, AnimalsBeveragesNoLimits) {
     using model::md::DecisionBoundary, model::Index, model::MD, algos::hymd::utility::MdPair;
-    auto param_map = GetParamMap(kDrunkAnimals, 0, false, 0.0);
+    auto param_map = GetParamMap(kAnimalsBeverages, 0, false, 0.0);
     auto hymd = algos::CreateAndLoadAlgorithm<algos::hymd::HyMD>(param_map);
     std::vector<MdPair> expected = {
             {{0, 0, 0, 0}, {1, 1 / 6.}},   {{0.2, 0, 0, 0}, {3, 1}},

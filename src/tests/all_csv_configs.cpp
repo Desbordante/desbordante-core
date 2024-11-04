@@ -120,5 +120,5 @@ CSVConfig const kTestDynamicFDUpdateBad3 =
 CSVConfig const kTestDynamicFDUpdateBad4 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
-CSVConfig const kDrunkAnimals = CreateCsvConfig("drunk_animals.csv", ',', true);
+CSVConfig const kAnimalsBeverages = CreateCsvConfig("animals_beverages.csv", ',', true);
 }  // namespace tests
