@@ -139,8 +139,8 @@ class BatchValidator::LHSMRPartitionInspector {
 
     // Lower CCV IDs, collect prospective pairs, remove invalidated (i.e. with CCV ID 0) RHSs.
     bool InspectPartitionElement(PartitionElement element) {
-        auto [lhs_records, matched_rhs_records] = element;
         util::EraseIfReplace(rhs_validators_, [&](RhsValidator& rhs_validator) {
+            auto const& [lhs_records, matched_rhs_records] = element;
             MdValidationStatus const status =
                     LowerCCVIDsAndCollectPairs(rhs_validator, lhs_records, matched_rhs_records);
             if (status == MdValidationStatus::kInvalidated) {
@@ -409,8 +409,8 @@ class BatchValidator::MultiCardPartitionElementProvider {
     }
 
     void CreateSLTVPEPartition() {
-        PliCluster const& sltv_partition_element_ = sltv_partition_[sltv_partition_value_];
-        for (RecordIdentifier const record_id : sltv_partition_element_) {
+        PliCluster const& sltv_partition_element = sltv_partition_[sltv_partition_value_];
+        for (RecordIdentifier const record_id : sltv_partition_element) {
             utility::PointerArrayBackInserter inserter{partition_value_scratch_.GetFiller()};
             std::vector<ValueIdentifier> const& record = left_records_[record_id];
             for (Index const index : sltvpe_partition_key_) {

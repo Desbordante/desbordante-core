@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <memory>
 #include <ranges>
+#include <span>
 #include <type_traits>
 
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
