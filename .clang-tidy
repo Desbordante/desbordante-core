@@ -19,3 +19,6 @@ CheckOptions:
   - { key: readability-identifier-naming.MemberConstantPrefix, value: k }
   - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
   - { key: readability-identifier-naming.StaticConstantPrefix, value: k }
+# Bugged, ignores all method names
+# - { key: readability-identifier-naming.PublicMethodIgnoredRegexp, value: '(begin|end)' }
+  - { key: readability-identifier-naming.FunctionIgnoredRegexp, value: '(begin|end)' }
