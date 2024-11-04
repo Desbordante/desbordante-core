@@ -9,8 +9,9 @@ double MongeElkan(std::vector<std::string> const& left, std::vector<std::string>
                   auto const& similarity_function) {
     if (left.empty() && right.empty()) return 1.0;
     if (left.empty() || right.empty()) return 0.0;
-    // float for StringMetrics (used in Metanome) equivalence
-    using FloatingPointType = float;
+    // NOTE: for equivalence with Metanome, use the previous SWG implementation and set this to
+    // float.
+    using FloatingPointType = double;
 
     auto monge_elkan = [&](std::vector<std::string> const& left,
                            std::vector<std::string> const& right) {
