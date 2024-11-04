@@ -236,7 +236,7 @@ private:
     std::size_t const column_match_number_ = similarity_data_.GetColumnMatchNumber();
     std::size_t const trivial_column_match_number_ = similarity_data_.GetTrivialColumnMatchNumber();
     std::vector<Index> const& sorted_to_original_ = similarity_data_.GetIndexMapping();
-    std::size_t const total_column_matches = column_matches_option_.size();
+    std::size_t const total_column_matches_ = column_matches_option_.size();
 
     std::shared_ptr<std::vector<model::md::ColumnMatch>> column_matches_ = MakeColumnMatchesPtr();
 
@@ -244,7 +244,7 @@ private:
 
     std::shared_ptr<std::vector<model::md::ColumnMatch>> MakeColumnMatchesPtr() {
         std::vector<model::md::ColumnMatch> column_matches =
-                util::GetPreallocatedVector<model::md::ColumnMatch>(total_column_matches);
+                util::GetPreallocatedVector<model::md::ColumnMatch>(total_column_matches_);
 
         for (SimilarityData::MeasurePtr const& measure_ptr : column_matches_option_) {
             auto [left_column_index, right_column_index] = measure_ptr->GetIndices();
@@ -259,7 +259,7 @@ private:
             MdLhs const& lattice_lhs) const {
         std::vector<model::md::LhsColumnSimilarityClassifier> lhs =
                 util::GetPreallocatedVector<model::md::LhsColumnSimilarityClassifier>(
-                        total_column_matches);
+                        total_column_matches_);
 
         Index lhs_index = 0;
         for (auto const& [child_index, lhs_ccv_id] : lattice_lhs) {
@@ -285,7 +285,7 @@ private:
             lhs.emplace_back(std::nullopt, cm_index, kLowestBound);
         }
         utility::InversePermutation(
-                total_column_matches, [&](model::Index i) { return lhs[i].GetColumnMatchIndex(); },
+                total_column_matches_, [&](model::Index i) { return lhs[i].GetColumnMatchIndex(); },
                 [&](model::Index i, model::Index j) { std::swap(lhs[i], lhs[j]); });
         return lhs;
     }

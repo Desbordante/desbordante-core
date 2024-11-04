@@ -142,7 +142,8 @@ std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
     Creator creator{records_info, measures, pool_ptr};
 
     Creator::PreprocessingResult result = creator.CalculateIndexes();
-    creator.Reorder(result);
+    // clang-tidy does not like the use of uninitialized array
+    creator.Reorder(result);  // NOLINT(clang-analyzer-core.CallAndMessage)
 
     auto& [column_matches_info, all_lhs_ccv_ids_info, trivial_column_matches_info,
            short_sampling_enable, non_trivial_indices] = result;

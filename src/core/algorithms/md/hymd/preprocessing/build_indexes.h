@@ -14,6 +14,7 @@
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "algorithms/md/hymd/table_identifiers.h"
+#include "util/desbordante_assume.h"
 
 namespace algos::hymd::preprocessing {
 inline void SortAllRows(EnumeratedValidTableResults& tr_res) {
@@ -59,9 +60,12 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
             assert(valid_records_number == 0);
             continue;
         }
+        DESBORDANTE_ASSUME(!lhs_ids.empty());
         auto end = --lhs_ids.crend(), current = lhs_ids.crbegin();
-        ColumnClassifierValueId current_ccv_id;
-        auto dec_until_le = [&](ColumnClassifierValueId value) {
+        // clang-tidy can't tell that dec_until_le initializes this variable if left uninitialized
+        // here but gcc optimizes this initialization away.
+        ColumnClassifierValueId current_ccv_id{};
+        auto dec_until_le = [&current_ccv_id, &end, &current](ColumnClassifierValueId value) {
             for (; current != end; ++current) {
                 if ((current_ccv_id = *current) <= value) return;
             }

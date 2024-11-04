@@ -14,18 +14,18 @@ namespace algos::hymd {
 class LatticeTraverser {
 private:
     class LatticeStatistics {
-        std::size_t all_mds_num = 0;
-        std::size_t invalidated_mds_num = 0;
+        std::size_t all_mds_num_ = 0;
+        std::size_t invalidated_mds_num_ = 0;
         static constexpr double kRatioBound = 0.01;
 
     public:
         bool TraversalInefficient() const noexcept {
-            return invalidated_mds_num > kRatioBound * (all_mds_num - invalidated_mds_num);
+            return invalidated_mds_num_ > kRatioBound * (all_mds_num_ - invalidated_mds_num_);
         }
 
         void CountOne(lattice::ValidationInfo& validation, BatchValidator::Result const& result) {
-            invalidated_mds_num += result.invalidated_rhss.Size();
-            all_mds_num += validation.rhs_indices_to_validate.count();
+            invalidated_mds_num_ += result.invalidated_rhss.Size();
+            all_mds_num_ += validation.rhs_indices_to_validate.count();
         }
     };
 
