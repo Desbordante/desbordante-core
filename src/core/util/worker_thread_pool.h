@@ -26,7 +26,7 @@ private:
         WorkerThreadPool& pool;
 
         void operator()() {
-            pool.IsWorkingAction([](bool& is_working) { is_working = false; });
+            pool.SetWorkingStatus(false);
         }
     };
 
@@ -51,9 +51,9 @@ private:
     std::mutex working_mutex_;
     bool is_working_ = false;
 
-    void IsWorkingAction(auto action) {
+    void SetWorkingStatus(bool value) {
         std::unique_lock<std::mutex> lk{working_mutex_};
-        action(is_working_);
+        is_working_ = value;
     }
 
     void Work(std::packaged_task<void(WorkerThreadPool&)>& thread_task) {
@@ -74,6 +74,24 @@ private:
     void ResetAndWork(std::packaged_task<void(WorkerThreadPool&)>& thread_task) {
         thread_task.reset();
         thread_task(*this);
+    }
+
+    // Must be called from the main thread to finish.
+    void Wait() {
+        std::packaged_task<void(WorkerThreadPool&)>& main_task = tasks_.front();
+        ResetAndWork(main_task);
+        // Rethrow exceptions
+        for (std::packaged_task<void(WorkerThreadPool&)>& task : tasks_) {
+            task.get_future().get();
+        }
+    }
+
+    // Previous tasks must be finished before calling this.
+    template <typename WorkerType>
+    void SetWork(WorkerType work) {
+        work_ = std::move(work);
+        SetWorkingStatus(true);
+        working_var_.notify_all();
     }
 
 public:
@@ -101,19 +119,13 @@ public:
 
     WorkerThreadPool(std::size_t thread_num);
 
-    // Previous tasks must be finished before calling this.
-    template <typename WorkerType>
-    void SetWork(WorkerType work) {
-        work_ = std::move(work);
-        IsWorkingAction([](bool& is_working) { is_working = true; });
-        working_var_.notify_all();
-    }
-
+    // Return Waiter object to force user to wait on pool.
     template <typename FunctionType>
-    void ExecSingle(FunctionType func) {
-        SetWork([func, flag = std::make_shared<std::once_flag>()]() {
-            std::call_once(*flag, func);
+    [[nodiscard]] Waiter SubmitSingleTask(FunctionType task) {
+        SetWork([task, flag = std::make_shared<std::once_flag>()]() {
+            std::call_once(*flag, task);
         });
+        return {*this};
     }
 
     void ExecIndexWithResource(auto do_work, auto acquire_resource, model::Index size,
@@ -142,16 +154,6 @@ public:
     void ExecIndex(FunctionType func, model::Index size) {
         ExecIndexWithResource([func = std::move(func)](model::Index i, auto) { func(i); },
                               []() { return std::monostate{}; }, size, [](auto&&...) {});
-    }
-
-    // Main thread must call this to finish.
-    void Wait() {
-        std::packaged_task<void(WorkerThreadPool&)>& main_task = tasks_.front();
-        ResetAndWork(main_task);
-        // Rethrow exceptions
-        for (std::packaged_task<void(WorkerThreadPool&)>& task : tasks_) {
-            task.get_future().get();
-        }
     }
 
     std::size_t ThreadNum() const noexcept {

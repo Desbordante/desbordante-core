@@ -44,8 +44,8 @@ auto LatticeTraverser::ProcessResults(std::vector<lattice::ValidationInfo>& vali
         return AdjustLattice(validations, results);
     } else {
         LatticeStatistics lattice_statistics;
-        pool_->ExecSingle([&]() { lattice_statistics = AdjustLattice(validations, results); });
-        util::WorkerThreadPool::Waiter waiter{*pool_};
+        util::WorkerThreadPool::Waiter waiter = pool_->SubmitSingleTask(
+                [&]() { lattice_statistics = AdjustLattice(validations, results); });
         AddRecommendations(results);
         waiter.Wait();
         return lattice_statistics;
