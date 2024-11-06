@@ -1,7 +1,7 @@
 #pragma once
 
 #include "algorithms/algorithm.h"
-#include "algorithms/md/md_verifier/metrics/metrics.h"
+#include "algorithms/md/md_verifier/similarities/similarities.h"
 #include "algorithms/md/md_verifier/thresholds_type.h"
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
@@ -18,8 +18,8 @@ private:
     config::IndicesType rhs_indices_;
     ThresholdsType lhs_thresholds_;
     ThresholdsType rhs_thresholds_;
-    MetricsType lhs_metrics_;
-    MetricsType rhs_metrics_;
+    SimilaritiesType lhs_similarity_measures_;
+    SimilaritiesType rhs_similarity_measures_;
 
     config::EqNullsType is_null_equal_null_;
     bool dist_from_null_is_infinity_;
@@ -29,14 +29,15 @@ private:
     bool md_holds_ = false;
 
     void InitDefaultThresholds();
-    void InitDefaultMetrics();
+    void InitDefaultSimilarityMeasures();
 
     void InitDefault() {
         void InitDefaultThresholds();
-        void InitDefaultMetrics();
+        void InitDefaultSimilarityMeasures();
     }
 
-    void ValidateIndices(config::IndicesType const& indices, MetricsType const& metrics);
+    void ValidateIndices(config::IndicesType const& indices,
+                         SimilaritiesType const& similarity_measures);
     static void ValidateThresholds(config::IndicesType const& indices,
                                    ThresholdsType const& thresholds);
 
