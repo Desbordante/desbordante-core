@@ -92,4 +92,8 @@ constexpr auto kAllowCrossColumns = "allow_cross_columns";
 constexpr auto kMinimumSharedValue = "minimum_shared_value";
 constexpr auto kComparableThreshold = "comparable_threshold";
 constexpr auto kEvidenceThreshold = "evidence_threshold";
+constexpr auto KMDLhsThresholds = "lhs_thresholds";
+constexpr auto KMDRhsThresholds = "rhs_thresholds";
+constexpr auto KMDLhsMetrics = "lhs_metrics";
+constexpr auto KMDRhsMetrics = "rhs_metrics";
 }  // namespace config::names
