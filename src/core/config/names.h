@@ -96,4 +96,8 @@ constexpr auto KMDLhsThresholds = "lhs_thresholds";
 constexpr auto KMDRhsThresholds = "rhs_thresholds";
 constexpr auto KMDLhsMetrics = "lhs_metrics";
 constexpr auto KMDRhsMetrics = "rhs_metrics";
+constexpr auto kMDLhsThresholds = "lhs_thresholds";
+constexpr auto kMDRhsThresholds = "rhs_thresholds";
+constexpr auto kMDLhsSimilarityMeasures = "lhs_similarity_measures";
+constexpr auto kMDRhsSimilarityMeasures = "rhs_similarity_measures";
 }  // namespace config::names

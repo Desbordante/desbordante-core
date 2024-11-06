@@ -10,6 +10,7 @@
 namespace algos::md {
 MDVerifier::MDVerifier() : Algorithm({}) {
     RegisterOptions();
+    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
 void MDVerifier::InitDefaultThresholds() {
@@ -17,15 +18,15 @@ void MDVerifier::InitDefaultThresholds() {
     rhs_thresholds_ = std::vector<double>(rhs_indices_.size(), 1.0);
 }
 
-void MDVerifier::InitDefaultMetrics() {
+void MDVerifier::InitDefaultSimilarityMeasures() {
     for (auto index : lhs_indices_) {
         model::TypedColumnData const& column = relation_->GetColumnData(index);
         model::TypeId type_id = column.GetTypeId();
 
         if (column.IsNumeric()) {
-            lhs_metrics_.push_back(Metric::kEuclidean);
+            lhs_similarity_measures_.push_back(SimilarityMeasure::kEuclidean);
         } else if (type_id == +model::TypeId::kString) {
-            lhs_metrics_.push_back(Metric::kLevenshtein);
+            lhs_similarity_measures_.push_back(SimilarityMeasure::kLevenshtein);
         } else {
             throw config::ConfigurationError("Column with index \"" + std::to_string(index) +
                                              "\" has upsupported data type.");
@@ -36,9 +37,9 @@ void MDVerifier::InitDefaultMetrics() {
         model::TypeId type_id = column.GetTypeId();
 
         if (column.IsNumeric()) {
-            rhs_metrics_.push_back(Metric::kEuclidean);
+            rhs_similarity_measures_.push_back(SimilarityMeasure::kEuclidean);
         } else if (type_id == +model::TypeId::kString) {
-            rhs_metrics_.push_back(Metric::kLevenshtein);
+            rhs_similarity_measures_.push_back(SimilarityMeasure::kLevenshtein);
         } else {
             throw config::ConfigurationError("Column with index \"" + std::to_string(index) +
                                              "\" has upsupported data type.");
@@ -46,8 +47,9 @@ void MDVerifier::InitDefaultMetrics() {
     }
 }
 
-void MDVerifier::ValidateIndices(config::IndicesType const& indices, MetricsType const& metrics) {
-    assert(indices.size() == metrics.size());
+void MDVerifier::ValidateIndices(config::IndicesType const& indices,
+                                 SimilaritiesType const& similarity_measures) {
+    assert(indices.size() == similarity_measures.size());
     for (int i = 0; i < indices.size(); ++i) {
         model::TypedColumnData const& column = relation_->GetColumnData(indices[i]);
         model::TypeId type_id = column.GetTypeId();
@@ -61,13 +63,16 @@ void MDVerifier::ValidateIndices(config::IndicesType const& indices, MetricsType
                                              "\" contains values of different types.");
         }
 
-        if (metrics[i] == +Metric::kLevenshtein && type_id != +model::TypeId::kString) {
-            throw config::ConfigurationError("Metric for column \"" + std::to_string(indices[i]) +
+        if (similarity_measures[i] == +SimilarityMeasure::kLevenshtein &&
+            type_id != +model::TypeId::kString) {
+            throw config::ConfigurationError("Similarity measure for column \"" +
+                                             std::to_string(indices[i]) +
                                              "\" is only available for string type columns.");
         }
 
         if (!column.IsNumeric()) {
-            throw config::ConfigurationError("Metric for column \"" + std::to_string(indices[i]) +
+            throw config::ConfigurationError("Similarity measure for column \"" +
+                                             std::to_string(indices[i]) +
                                              "\" is only available for numeric type columns.");
         }
     }
@@ -103,11 +108,11 @@ void MDVerifier::RegisterOptions() {
     auto get_schema_columns = [this]() { return relation_->GetSchema()->GetNumColumns(); };
 
     auto check_lhs_indices = [this](config::IndicesType const& lhs_indices) {
-        ValidateIndices(lhs_indices, lhs_metrics_);
+        ValidateIndices(lhs_indices, lhs_similarity_measures_);
     };
 
     auto check_rhs_indices = [this](config::IndicesType const& rhs_indices) {
-        ValidateIndices(rhs_indices, rhs_metrics_);
+        ValidateIndices(rhs_indices, rhs_similarity_measures_);
     };
 
     auto check_lhs_thresholds = [this](ThresholdsType const& lhs_thresholds) {
@@ -118,12 +123,12 @@ void MDVerifier::RegisterOptions() {
         ValidateThresholds(rhs_indices_, rhs_thresholds_);
     };
 
-    auto check_lhs_metrics = [this](MetricsType const& lhs_metrics) {
-        ValidateIndices(lhs_indices_, lhs_metrics);
+    auto check_lhs_similarity_measures = [this](SimilaritiesType const& lhs_similarity_measures) {
+        ValidateIndices(lhs_indices_, lhs_similarity_measures);
     };
 
-    auto check_rhs_metrics = [this](MetricsType const& rhs_metrics) {
-        ValidateIndices(rhs_indices_, rhs_metrics);
+    auto check_rhs_similarity_measures = [this](SimilaritiesType const& rhs_similarity_measures) {
+        ValidateIndices(rhs_indices_, rhs_similarity_measures);
     };
 
     RegisterOption(config::kTableOpt(&input_table_));
@@ -132,14 +137,16 @@ void MDVerifier::RegisterOptions() {
                           kDDistFromNullIsInfinity, false});
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_columns, check_lhs_indices));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_columns, check_rhs_indices));
-    RegisterOption(Option{&lhs_thresholds_, KMDLhsThresholds, KDMDLhsThresholds}.SetValueCheck(
+    RegisterOption(Option{&lhs_thresholds_, kMDLhsThresholds, kDMDLhsThresholds}.SetValueCheck(
             check_lhs_thresholds));
-    RegisterOption(Option{&rhs_thresholds_, KMDRhsThresholds, KDMDRhsThresholds}.SetValueCheck(
+    RegisterOption(Option{&rhs_thresholds_, kMDRhsThresholds, kDMDRhsThresholds}.SetValueCheck(
             check_rhs_thresholds));
     RegisterOption(
-            Option{&lhs_metrics_, KMDLhsMetrics, KDMDLhsMetrics}.SetValueCheck(check_lhs_metrics));
+            Option{&lhs_similarity_measures_, kMDLhsSimilarityMeasures, kDMDLhsSimilarityMeasures}
+                    .SetValueCheck(check_lhs_similarity_measures));
     RegisterOption(
-            Option{&rhs_metrics_, KMDRhsMetrics, KDMDRhsMetrics}.SetValueCheck(check_rhs_metrics));
+            Option{&rhs_similarity_measures_, kMDRhsSimilarityMeasures, kDMDRhsSimilarityMeasures}
+                    .SetValueCheck(check_rhs_similarity_measures));
 }
 
 void MDVerifier::MakeExecuteOptsAvailable() {}
