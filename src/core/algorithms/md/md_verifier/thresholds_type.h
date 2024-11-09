@@ -1,5 +1,5 @@
 #include <vector>
 
 namespace algos::md {
-using ThresholdsType = std::vector<double>;
+using ThresholdsType = std::vector<long double>;
 }  // namespace algos::md
