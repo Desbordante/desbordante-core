@@ -14,8 +14,8 @@ MDVerifier::MDVerifier() : Algorithm({}) {
 }
 
 void MDVerifier::InitDefaultThresholds() {
-    lhs_thresholds_ = std::vector<double>(lhs_indices_.size(), 1.0);
-    rhs_thresholds_ = std::vector<double>(rhs_indices_.size(), 1.0);
+    lhs_thresholds_ = std::vector<long double>(lhs_indices_.size(), 1.0);
+    rhs_thresholds_ = std::vector<long double>(rhs_indices_.size(), 1.0);
 }
 
 void MDVerifier::InitDefaultSimilarityMeasures() {
