@@ -80,7 +80,7 @@ void BindMd(py::module_& main_module) {
             .def("to_long_string", &MD::ToStringFull)
             .def("to_short_string", &MD::ToStringShort)
             .def("to_string_active", &MD::ToStringActiveLhsOnly)
-            .def("__str__", &MD::ToStringShort);
+            .def("__str__", &MD::ToStringActiveLhsOnly);
     auto column_matches_module = md_module.def_submodule("column_matches");
     py::class_<ColumnMatch, std::shared_ptr<ColumnMatch>>(column_matches_module, "ColumnMatch");
     BindColumnMatchWithConstructor<Levenshtein>("Levenshtein", column_matches_module);
