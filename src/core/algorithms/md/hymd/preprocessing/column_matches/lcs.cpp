@@ -1,11 +1,12 @@
-#include "algorithms/md/hymd/preprocessing/similarity_measure/lcs.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/lcs.h"
 
 #include <algorithm>
+#include <string>
 #include <vector>
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches::similarity_measures {
 
-size_t Lcs(std::string const& left, std::string const& right) {
+std::size_t Lcs(std::string const& left, std::string const& right) {
     int const n = left.size();
     int const m = right.size();
 
@@ -37,4 +38,4 @@ double LongestCommonSubsequence(std::string const& left, std::string const& righ
 
     return static_cast<double>(Lcs(left, right)) / std::max(left.size(), right.size());
 }
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches::similarity_measures

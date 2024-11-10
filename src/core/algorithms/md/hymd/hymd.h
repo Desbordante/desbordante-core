@@ -7,7 +7,7 @@
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/md_algorithm.h"
 #include "config/tabular_data/input_table_type.h"
@@ -48,7 +48,7 @@ namespace algos::hymd {
 // 6) Validator only returns invalidated MDs.
 class HyMD final : public MdAlgorithm {
 public:
-    using Measures = SimilarityData::Measures;
+    using ColumnMatches = SimilarityData::ColumnMatches;
 
 private:
     config::InputTable left_table_;
@@ -70,7 +70,7 @@ private:
     // TODO: limit LHS bounds searched (currently only size limit is implemented)
     // TODO: memory conservation mode (load only some columns)
 
-    Measures column_matches_option_;
+    ColumnMatches column_matches_option_;
 
     void RegisterOptions();
 

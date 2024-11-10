@@ -1,12 +1,12 @@
-#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_metric.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
 
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <string>
 #include <unordered_set>
 
-namespace algos::hymd::preprocessing::similarity_measure {
-
+namespace algos::hymd::preprocessing::column_matches::similarity_measures {
 double StringJaccardIndex(std::string const& s1, std::string const& s2) {
     std::istringstream iss1(s1), iss2(s2);
     std::unordered_set<std::string> set1{std::istream_iterator<std::string>{iss1},
@@ -16,5 +16,4 @@ double StringJaccardIndex(std::string const& s1, std::string const& s2) {
 
     return JaccardIndex(set1, set2);
 }
-
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches::similarity_measures

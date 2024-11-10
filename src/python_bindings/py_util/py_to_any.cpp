@@ -120,7 +120,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<unsigned short>,
         kNormalConvPair<int>,
         kNormalConvPair<size_t>,
-        kNormalConvPair<algos::hymd::HyMD::Measures>,
+        kNormalConvPair<algos::hymd::HyMD::ColumnMatches>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,

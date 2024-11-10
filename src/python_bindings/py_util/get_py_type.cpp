@@ -85,11 +85,11 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
-            {typeid(algos::hymd::HyMD::Measures),
+            {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {
-                 return MakeTypeTuple(kPyList,
-                                      py::type::of<algos::hymd::preprocessing::similarity_measure::
-                                                           SimilarityMeasure>());
+                 return MakeTypeTuple(
+                         kPyList,
+                         py::type::of<algos::hymd::preprocessing::column_matches::ColumnMatch>());
              }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},

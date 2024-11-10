@@ -7,11 +7,11 @@
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/global_value_identifier.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/transformed_columns_holder.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
 #include "model/types/builtin.h"
 #include "util/desbordante_assume.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 template <typename ReturnType>
 using TransformFunc = std::function<ReturnType(std::string const&)>;
 template <typename L, typename R>
@@ -143,4 +143,4 @@ public:
 template <typename LType, typename RType = LType>
 using TypeTransformer = SingleTransformer<detail::TypeConverterCallable<LType>,
                                           detail::TypeConverterCallable<RType>>;
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches

@@ -8,16 +8,16 @@
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/global_value_identifier.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "config/exceptions.h"
 #include "model/index.h"
 #include "model/table/column.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 using ColumnIdentifier = std::variant<std::string, model::Index>;
 
 template <typename Transformer, typename Calculator>
-class ColumnSimilarityMeasure : public SimilarityMeasure {
+class ColumnMatchImpl : public ColumnMatch {
     Transformer transformer_;
     Calculator calculator_;
     ColumnIdentifier left_column_identifier_;
@@ -26,17 +26,17 @@ class ColumnSimilarityMeasure : public SimilarityMeasure {
     model::Index right_column_index_;
 
 public:
-    ColumnSimilarityMeasure(bool is_symmetrical_and_eq_is_max, std::string name,
-                            ColumnIdentifier left_column_identifier,
-                            ColumnIdentifier right_column_identifier, Transformer transformer,
-                            Calculator calculator)
-        : SimilarityMeasure(is_symmetrical_and_eq_is_max, std::move(name)),
+    ColumnMatchImpl(bool is_symmetrical_and_eq_is_max, std::string name,
+                    ColumnIdentifier left_column_identifier,
+                    ColumnIdentifier right_column_identifier, Transformer transformer,
+                    Calculator calculator)
+        : ColumnMatch(is_symmetrical_and_eq_is_max, std::move(name)),
           transformer_(std::move(transformer)),
           calculator_(std::move(calculator)),
           left_column_identifier_(std::move(left_column_identifier)),
           right_column_identifier_(std::move(right_column_identifier)) {}
 
-    [[nodiscard]] indexes::SimilarityMeasureOutput MakeIndexes(
+    [[nodiscard]] indexes::ColumnPairMeasurements MakeIndexes(
             util::WorkerThreadPool* pool_ptr,
             indexes::RecordsInfo const& records_info) const final {
         indexes::KeyedPositionListIndex const& right_pli =
@@ -49,8 +49,8 @@ public:
                                      pool_ptr);
     }
 
-    void SetParameters(RelationalSchema const& left_schema,
-                       RelationalSchema const& right_schema) final {
+    void SetColumns(RelationalSchema const& left_schema,
+                    RelationalSchema const& right_schema) final {
         auto check_and_set_index = [](RelationalSchema const& schema,
                                       ColumnIdentifier const& identifier,
                                       model::Index& column_index, auto&& name) {
@@ -60,9 +60,10 @@ public:
                         if constexpr (std::is_same_v<T, std::string>) {
                             if (!schema.IsColumnInSchema(arg))
                                 throw config::ConfigurationError("No column named \"" + arg +
-                                                                 "\" in the " + name + "table");
+                                                                 "\" in the " + name + " table");
                         } else {
                             static_assert(std::is_same_v<T, model::Index>);
+                            static_assert(std::is_unsigned_v<model::Index>);
                             std::size_t const num_columns = schema.GetNumColumns();
                             if (arg >= num_columns)
                                 throw config::ConfigurationError(
@@ -82,4 +83,4 @@ public:
         return {left_column_index_, right_column_index_};
     }
 };
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches

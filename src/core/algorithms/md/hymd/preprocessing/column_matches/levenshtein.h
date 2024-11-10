@@ -4,14 +4,14 @@
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
 #include "model/types/builtin.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 namespace detail {
 class LevenshteinComparerCreator {
     struct Comparer {
@@ -56,26 +56,23 @@ public:
 using LevenshteinTransformer = TypeTransformer<model::String>;
 
 using LevenshteinBase =
-        ColumnSimilarityMeasure<LevenshteinTransformer,
-                                BasicCalculator<LevenshteinComparerCreatorSupplier, true, true>>;
+        ColumnMatchImpl<LevenshteinTransformer,
+                        BasicCalculator<LevenshteinComparerCreatorSupplier, true, true>>;
 }  // namespace detail
 
-class LevenshteinSimilarityMeasure final : public detail::LevenshteinBase {
-    static constexpr auto kName = "levenshtein_similarity";
+class Levenshtein final : public detail::LevenshteinBase {
+    static constexpr auto kName = "levenshtein";
 
 public:
     using TransformFunctionsOption = detail::LevenshteinTransformer::TransformFunctionsOption;
 
-    LevenshteinSimilarityMeasure(ColumnIdentifier left_column_identifier,
-                                 ColumnIdentifier right_column_identifier,
-                                 model::md::DecisionBoundary min_sim,
-                                 ccv_id_pickers::SimilaritiesPicker picker,
-                                 TransformFunctionsOption funcs);
+    Levenshtein(ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
+                model::md::DecisionBoundary min_sim, ccv_id_pickers::SimilaritiesPicker picker,
+                TransformFunctionsOption funcs);
 
-    LevenshteinSimilarityMeasure(ColumnIdentifier left_column_identifier,
-                                 ColumnIdentifier right_column_identifier,
-                                 model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
-                                 TransformFunctionsOption funcs = {});
+    Levenshtein(ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier,
+                model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
+                TransformFunctionsOption funcs = {});
 };
 
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches

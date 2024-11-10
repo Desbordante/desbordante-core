@@ -1,11 +1,11 @@
-#include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_metric.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
 
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
 namespace {
 std::vector<std::string> Tokenize(std::string const& text) {
@@ -19,7 +19,7 @@ std::vector<std::string> Tokenize(std::string const& text) {
 }
 }  // namespace
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches::similarity_measures {
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b) {
     return MongeElkan(a, b, [](std::string const& s1, std::string const& s2) {
         return NormalizedSmithWatermanGotoh(s1, s2);
@@ -29,4 +29,4 @@ double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> co
 double MongeElkanString(std::string const& a, std::string const& b) {
     return MongeElkan(Tokenize(a), Tokenize(b));
 }
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches::similarity_measures

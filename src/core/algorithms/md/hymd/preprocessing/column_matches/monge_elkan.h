@@ -1,12 +1,15 @@
 #pragma once
 
-#include <cmath>
 #include <string>
+#include <utility>
 #include <vector>
 
-namespace algos::hymd::preprocessing::similarity_measure {
+#include "algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
+
+namespace algos::hymd::preprocessing::column_matches {
+namespace similarity_measures {
 double MongeElkan(std::vector<std::string> const& left, std::vector<std::string> const& right,
-                  auto const& similarity_function) {
+                  auto&& similarity_function) {
     if (left.empty() && right.empty()) return 1.0;
     if (left.empty() || right.empty()) return 0.0;
     // NOTE: for equivalence with Metanome, use the previous SWG implementation and set this to
@@ -33,4 +36,15 @@ double MongeElkan(std::vector<std::string> const& left, std::vector<std::string>
 
 double MongeElkan(std::vector<std::string> const& a, std::vector<std::string> const& b);
 double MongeElkanString(std::string const& a, std::string const& b);
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace similarity_measures
+
+class MongeElkan : public NormalPairwise<similarity_measures::MongeElkanString> {
+    static constexpr auto kName = "monge_elkan";
+
+public:
+    template <typename... Args>
+    MongeElkan(Args&&... args)
+        : NormalPairwise<similarity_measures::MongeElkanString>(kName,
+                                                                std::forward<Args>(args)...) {}
+};
+}  // namespace algos::hymd::preprocessing::column_matches

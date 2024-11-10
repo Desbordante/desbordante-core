@@ -9,11 +9,11 @@
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
 #include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
 #include "algorithms/md/hymd/lowest_bound.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/transformed_columns_holder.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 namespace detail {
 using namespace indexes;
 
@@ -29,10 +29,10 @@ public:
 
 class EqualityCalculator {
 public:
-    SimilarityMeasureOutput Calculate(std::vector<GlobalValueIdentifier> const* left_elements,
-                                      std::vector<GlobalValueIdentifier> const* right_elements,
-                                      KeyedPositionListIndex const& right_pli,
-                                      util::WorkerThreadPool*) const {
+    ColumnPairMeasurements Calculate(std::vector<GlobalValueIdentifier> const* left_elements,
+                                     std::vector<GlobalValueIdentifier> const* right_elements,
+                                     KeyedPositionListIndex const& right_pli,
+                                     util::WorkerThreadPool*) const {
         std::vector<ColumnClassifierValueId> lhs_ccv_ids;
         std::vector<Similarity> classifier_values;
         SimilarityMatrix similarity_matrix;
@@ -86,17 +86,16 @@ public:
     }
 };
 
-using EqualityBase = ColumnSimilarityMeasure<EqualityTransformer, EqualityCalculator>;
+using EqualityBase = ColumnMatchImpl<EqualityTransformer, EqualityCalculator>;
 }  // namespace detail
 
-class EqualitySimilarityMeasure final : public detail::EqualityBase {
-    static constexpr auto kName = "equality_similarity";
+class Equality final : public detail::EqualityBase {
+    static constexpr auto kName = "equality";
 
 public:
-    EqualitySimilarityMeasure(ColumnIdentifier left_column_identifier,
-                              ColumnIdentifier right_column_identifier)
+    Equality(ColumnIdentifier left_column_identifier, ColumnIdentifier right_column_identifier)
         : detail::EqualityBase(true, kName, std::move(left_column_identifier),
                                std::move(right_column_identifier), {}, {}) {}
 };
 
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches
