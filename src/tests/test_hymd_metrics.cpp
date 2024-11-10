@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/md/hymd/preprocessing/similarity_measure/date_dif_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/lcs_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/lcs.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
-using namespace algos::hymd::preprocessing::similarity_measure;
+using namespace algos::hymd::preprocessing::column_matches;
 
 namespace tests {
 
@@ -31,34 +31,42 @@ INSTANTIATE_TEST_SUITE_P(
         Default, SimilarityMetricTest,
         ::testing::Values(
                 // lcs
-                SimilarityTestParams{Lcs, "", "", 0}, SimilarityTestParams{Lcs, "hello", "", 0},
-                SimilarityTestParams{Lcs, "", "world", 0},
-                SimilarityTestParams{Lcs, "kitten", "sitting", 4},
-                SimilarityTestParams{Lcs, "abcdef", "xyabdxe", 4},
-                SimilarityTestParams{Lcs, "abcdef", "xyz", 0},
-                SimilarityTestParams{Lcs, "aaa", "aaa", 3},
+                SimilarityTestParams{similarity_measures::Lcs, "", "", 0},
+                SimilarityTestParams{similarity_measures::Lcs, "hello", "", 0},
+                SimilarityTestParams{similarity_measures::Lcs, "", "world", 0},
+                SimilarityTestParams{similarity_measures::Lcs, "kitten", "sitting", 4},
+                SimilarityTestParams{similarity_measures::Lcs, "abcdef", "xyabdxe", 4},
+                SimilarityTestParams{similarity_measures::Lcs, "abcdef", "xyz", 0},
+                SimilarityTestParams{similarity_measures::Lcs, "aaa", "aaa", 3},
                 // jaccard
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); }, "",
-                        "", 1.0},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "hello", "", 0.0},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); }, "",
-                        "world", 0.0},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "abc cde", "abc", 0.5},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "abc cde", "abc def", 1.0 / 3.0},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "word1", "word2", 0},
-                SimilarityTestParams{
-                        [](std::string a, std::string b) { return StringJaccardIndex(a, b); },
-                        "word", "word", 1.0}));
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "", "", 1.0},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "hello", "", 0.0},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "", "world", 0.0},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "abc cde", "abc", 0.5},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "abc cde", "abc def", 1.0 / 3.0},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "word1", "word2", 0},
+                SimilarityTestParams{[](std::string a, std::string b) {
+                                         return similarity_measures::StringJaccardIndex(a, b);
+                                     },
+                                     "word", "word", 1.0}));
 
 struct MongeElkanTestParams {
     std::vector<std::string> vec1;
@@ -70,7 +78,7 @@ class MongeElkanMetricTest : public ::testing::TestWithParam<MongeElkanTestParam
 
 TEST_P(MongeElkanMetricTest, ComputesCorrectSimilarity) {
     auto params = GetParam();
-    double result = MongeElkan(params.vec1, params.vec2);
+    double result = similarity_measures::MongeElkan(params.vec1, params.vec2);
     EXPECT_NEAR(result, params.expected, 0.001);
 }
 

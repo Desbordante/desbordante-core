@@ -1,4 +1,4 @@
-#include "algorithms/md/hymd/preprocessing/similarity_measure/smith_waterman_gotoh.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
 #include <algorithm>
 #include <vector>
@@ -41,7 +41,7 @@ double SmithWatermanGotoh(std::string const& s, std::string const& t, double gap
 
 }  // namespace
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 
 double NormalizedSmithWatermanGotoh(std::string const& a, std::string const& b, double gap_value) {
     if (a.empty() && b.empty()) {
@@ -55,4 +55,4 @@ double NormalizedSmithWatermanGotoh(std::string const& a, std::string const& b, 
     return SmithWatermanGotoh(a, b, gap_value) / max_distance;
 }
 
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches

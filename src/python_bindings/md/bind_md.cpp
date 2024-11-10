@@ -6,13 +6,13 @@
 #include <pybind11/stl.h>
 #include <pybind11/typing.h>
 
-#include "algorithms/md/hymd/preprocessing/similarity_measure/date_dif_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/equality_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/jaccard_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/lcs_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/monge_elkan_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/number_dif_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/equality.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/lcs.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
 #include "algorithms/md/md.h"
 #include "algorithms/md/mining_algorithms.h"
 #include "md/object_similarity_measure.h"
@@ -24,7 +24,7 @@ using model::MD;
 using namespace algos;
 using namespace algos::hymd;
 using namespace algos::hymd::preprocessing;
-using namespace algos::hymd::preprocessing::similarity_measure;
+using namespace algos::hymd::preprocessing::column_matches;
 using namespace py::literals;
 using namespace python_bindings;
 
@@ -33,16 +33,16 @@ std::vector<ColumnClassifierValueId> PickAll(std::vector<Similarity> const& simi
 }
 
 template <typename MeasureType>
-auto BindMeasure(auto&& name, auto&& measures_module) {
-    auto cls = py::class_<MeasureType, SimilarityMeasure, std::shared_ptr<MeasureType>>(
-            measures_module, name);
+auto BindColumnMatch(auto&& name, auto&& measures_module) {
+    auto cls = py::class_<MeasureType, ColumnMatch, std::shared_ptr<MeasureType>>(measures_module,
+                                                                                  name);
     return cls;
 }
 
 template <typename MeasureType, typename... Args>
-void BindMeasureWithConstructor(Args&&... args) {
+void BindColumnMatchWithConstructor(Args&&... args) {
     using ColumnFunctions = MeasureType::TransformFunctionsOption;
-    BindMeasure<MeasureType>(std::forward<Args>(args)...)
+    BindColumnMatch<MeasureType>(std::forward<Args>(args)...)
             .def(py::init<ColumnIdentifier, ColumnIdentifier, model::md::DecisionBoundary,
                           std::size_t, ColumnFunctions>(),
                  "left_column"_a, "right_column"_a, "minimum_similarity"_a = 0.7, py::kw_only(),
@@ -70,7 +70,7 @@ namespace python_bindings {
 void BindMd(py::module_& main_module) {
     using namespace algos;
     using namespace algos::hymd;
-    using namespace algos::hymd::preprocessing::similarity_measure;
+    using namespace algos::hymd::preprocessing::column_matches;
     using namespace py::literals;
 
     auto md_module = main_module.def_submodule("md");
@@ -81,21 +81,20 @@ void BindMd(py::module_& main_module) {
             .def("to_short_string", &MD::ToStringShort)
             .def("to_string_active", &MD::ToStringActiveLhsOnly)
             .def("__str__", &MD::ToStringShort);
-    auto measures_module = md_module.def_submodule("similarity_measures");
-    py::class_<SimilarityMeasure, std::shared_ptr<SimilarityMeasure>>(measures_module,
-                                                                      "SimilarityMeasure");
-    BindMeasureWithConstructor<LevenshteinSimilarityMeasure>("LevenshteinSimilarity",
-                                                             measures_module);
-    BindMeasureWithConstructor<MongeElkanSimilarityMeasure>("MongeElkanSimilarity",
-                                                            measures_module);
-    BindMeasureWithConstructor<JaccardSimilarityMeasure>("JaccardSimilarity", measures_module);
-    BindMeasureWithConstructor<DateSimilarityMeasure>("DateSimilarity", measures_module);
-    BindMeasureWithConstructor<NumberSimilarityMeasure>("NumberSimilarity", measures_module);
-    BindMeasureWithConstructor<LcsSimilarityMeasure>("LcsSimilarity", measures_module);
-    BindMeasure<EqualitySimilarityMeasure>("EqualitySimilarity", measures_module)
+    auto column_matches_module = md_module.def_submodule("column_matches");
+    py::class_<ColumnMatch, std::shared_ptr<ColumnMatch>>(column_matches_module, "ColumnMatch");
+    BindColumnMatchWithConstructor<Levenshtein>("Levenshtein", column_matches_module);
+    BindColumnMatchWithConstructor<MongeElkan>("MongeElkan", column_matches_module);
+    BindColumnMatchWithConstructor<Jaccard>("Jaccard", column_matches_module);
+    BindColumnMatchWithConstructor<LVNormDateDifference>("LVNormDateDistance",
+                                                         column_matches_module);
+    BindColumnMatchWithConstructor<LVNormNumberDistance>("LVNormNumberDistance",
+                                                         column_matches_module);
+    BindColumnMatchWithConstructor<Lcs>("Lcs", column_matches_module);
+    BindColumnMatch<Equality>("Equality", column_matches_module)
             .def(py::init<ColumnIdentifier, ColumnIdentifier>(), "left_column"_a, "right_column"_a);
 
-    BindMeasure<ObjectSimilarityMeasure>("ObjectSimilarityMeasure", measures_module)
+    BindColumnMatch<Custom>("Custom", column_matches_module)
             .def(py::init<py::typing::Callable<preprocessing::Similarity(py::object, py::object)>,
                           ColumnIdentifier, ColumnIdentifier, ObjMeasureTransformFuncs, bool, bool,
                           model::md::DecisionBoundary, std::string, std::size_t>(),
@@ -116,12 +115,11 @@ void BindMd(py::module_& main_module) {
                                   std::vector<Similarity> const&)>>(),
                  "comparer"_a, "left_column"_a, "right_column"_a, py::kw_only(),
                  "column_functions"_a = ObjMeasureTransformFuncs{}, "symmetrical"_a = false,
-                 "equality_is_max"_a = false, "min_sim"_a = 0.7,
-                 "measure_name"_a = "custom_measure",
+                 "equality_is_max"_a = false, "min_sim"_a = 0.7, "measure_name"_a = "custom",
                  py::arg_v("pick_lhs_indices", ccv_id_pickers::SimilaritiesPicker(PickAll),
                            "pick_all")
                          .none(false))
-            .doc() = R"(Defines a custom similarity measure.)";
+            .doc() = R"(Defines a column match with a custom similarity measure.)";
 
     BindPrimitive<HyMD>(md_module, &MdAlgorithm::MdList, "MdAlgorithm", "get_mds", {"HyMD"},
                         pybind11::return_value_policy::copy);

@@ -119,9 +119,10 @@ inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
 }
 
 template <typename ResultType>
-indexes::SimilarityMeasureOutput BuildIndexes(
-        EnumeratedValidTableResults enumerated, std::vector<ResultType> classifier_values,
-        std::vector<indexes::PliCluster> const& clusters_right, auto const& pick_lhs_ccv_ids) {
+indexes::ColumnPairMeasurements BuildIndexes(EnumeratedValidTableResults enumerated,
+                                             std::vector<ResultType> classifier_values,
+                                             std::vector<indexes::PliCluster> const& clusters_right,
+                                             auto const& pick_lhs_ccv_ids) {
     SortAllRows(enumerated);
 
     std::vector<ColumnClassifierValueId> lhs_ccv_ids = pick_lhs_ccv_ids(classifier_values);

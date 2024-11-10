@@ -21,6 +21,7 @@ private:
     std::shared_ptr<std::vector<md::ColumnMatch> const> column_matches_;
     std::vector<md::LhsColumnSimilarityClassifier> lhs_;
     md::ColumnSimilarityClassifier rhs_;
+    // TODO: add support
 
 public:
     MD(std::shared_ptr<RelationalSchema const> left_schema,

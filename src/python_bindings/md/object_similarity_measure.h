@@ -9,10 +9,10 @@
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
 
 namespace python_bindings {
 namespace detail {
@@ -27,8 +27,7 @@ public:
 constexpr bool kEnablePythonMultithreading = false;
 
 using PyGenericTypeTransformer =
-        algos::hymd::preprocessing::similarity_measure::SingleTransformer<StrTransform,
-                                                                          StrTransform>;
+        algos::hymd::preprocessing::column_matches::SingleTransformer<StrTransform, StrTransform>;
 
 class PyComparerCreator {
     struct Comparer {
@@ -75,7 +74,7 @@ public:
 };
 
 template <bool Symmetric, bool EqMax>
-using Calculator = algos::hymd::preprocessing::similarity_measure::BasicCalculator<
+using Calculator = algos::hymd::preprocessing::column_matches::BasicCalculator<
         PyComparerCreatorSupplier, Symmetric, EqMax, kEnablePythonMultithreading>;
 
 class PyBasicCalculator {
@@ -94,7 +93,7 @@ public:
           creator_supplier_(std::move(creator_supplier)),
           picker_(std::move(picker)) {}
 
-    algos::hymd::indexes::SimilarityMeasureOutput Calculate(
+    algos::hymd::indexes::ColumnPairMeasurements Calculate(
             std::vector<pybind11::object> const* left_elements,
             std::vector<pybind11::object> const* right_elements,
             algos::hymd::indexes::KeyedPositionListIndex const& right_pli,
@@ -119,7 +118,7 @@ public:
     }
 };
 
-using ObjMeasureBase = algos::hymd::preprocessing::similarity_measure::ColumnSimilarityMeasure<
+using ObjMeasureBase = algos::hymd::preprocessing::column_matches::ColumnMatchImpl<
         detail::PyGenericTypeTransformer, detail::PyBasicCalculator>;
 }  // namespace detail
 
@@ -156,16 +155,14 @@ public:
 
 using ObjMeasureTransformFuncs = detail::PyGenericTypeTransformer::TransformFunctionsOption;
 
-class ObjectSimilarityMeasure : public detail::ObjMeasureBase {
+class Custom : public detail::ObjMeasureBase {
 public:
-    ObjectSimilarityMeasure(
-            pybind11::object comparison_function,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier left_column_identifier,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier
-                    right_column_identifier,
-            ObjMeasureTransformFuncs transform_functions, bool symmetrical,
-            bool equality_is_highest, model::md::DecisionBoundary min_sim, std::string name,
-            pybind11::object lhs_indices_picker)
+    Custom(pybind11::object comparison_function,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier left_column_identifier,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier right_column_identifier,
+           ObjMeasureTransformFuncs transform_functions, bool symmetrical, bool equality_is_highest,
+           model::md::DecisionBoundary min_sim, std::string name,
+           pybind11::object lhs_indices_picker)
         : detail::ObjMeasureBase{
                   symmetrical && equality_is_highest,
                   std::move(name),
@@ -176,14 +173,11 @@ public:
                                             PyLhsCCVIDsPicker{std::move(lhs_indices_picker)},
                                             symmetrical, equality_is_highest)} {}
 
-    ObjectSimilarityMeasure(
-            pybind11::object comparison_function,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier left_column_identifier,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier
-                    right_column_identifier,
-            ObjMeasureTransformFuncs transform_functions, bool symmetrical,
-            bool equality_is_highest, model::md::DecisionBoundary min_sim, std::string name,
-            std::size_t size_limit)
+    Custom(pybind11::object comparison_function,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier left_column_identifier,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier right_column_identifier,
+           ObjMeasureTransformFuncs transform_functions, bool symmetrical, bool equality_is_highest,
+           model::md::DecisionBoundary min_sim, std::string name, std::size_t size_limit)
         : detail::ObjMeasureBase{
                   symmetrical && equality_is_highest,
                   std::move(name),
@@ -196,13 +190,11 @@ public:
                                   algos::hymd::preprocessing::Similarity>{size_limit},
                           symmetrical, equality_is_highest)} {}
 
-    ObjectSimilarityMeasure(
-            pybind11::object comparison_function,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier left_column_identifier,
-            algos::hymd::preprocessing::similarity_measure::ColumnIdentifier
-                    right_column_identifier,
-            bool classic_measure, ObjMeasureTransformFuncs transform_functions,
-            model::md::DecisionBoundary min_sim, std::string name, std::size_t size_limit)
+    Custom(pybind11::object comparison_function,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier left_column_identifier,
+           algos::hymd::preprocessing::column_matches::ColumnIdentifier right_column_identifier,
+           bool classic_measure, ObjMeasureTransformFuncs transform_functions,
+           model::md::DecisionBoundary min_sim, std::string name, std::size_t size_limit)
         : detail::ObjMeasureBase{
                   classic_measure,
                   std::move(name),

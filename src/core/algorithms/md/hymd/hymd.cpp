@@ -10,7 +10,7 @@
 #include "algorithms/md/hymd/lattice_traverser.h"
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/levenshtein_similarity_measure.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
 #include "algorithms/md/hymd/record_pair_inferrer.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/hymd/utility/index_range.h"
@@ -97,14 +97,13 @@ void HyMD::RegisterOptions() {
 
     static constexpr model::md::DecisionBoundary kDefaultDecisionBoundary = 0.7;
     auto column_matches_default = [this]() {
-        Measures column_matches_option;
+        ColumnMatches column_matches_option;
         if (records_info_->OneTableGiven()) {
             std::size_t const num_columns = left_schema_->GetNumColumns();
             column_matches_option.reserve(num_columns);
             for (Index i : utility::IndexRange(num_columns)) {
                 column_matches_option.push_back(
-                        std::make_shared<
-                                preprocessing::similarity_measure::LevenshteinSimilarityMeasure>(
+                        std::make_shared<preprocessing::column_matches::Levenshtein>(
                                 i, i, kDefaultDecisionBoundary));
             }
         } else {
@@ -114,19 +113,18 @@ void HyMD::RegisterOptions() {
             for (Index i : utility::IndexRange(num_columns_left)) {
                 for (Index j : utility::IndexRange(num_columns_right)) {
                     column_matches_option.push_back(
-                            std::make_shared<preprocessing::similarity_measure::
-                                                     LevenshteinSimilarityMeasure>(
+                            std::make_shared<preprocessing::column_matches::Levenshtein>(
                                     i, j, kDefaultDecisionBoundary));
                 }
             }
         }
         return column_matches_option;
     };
-    auto column_matches_check = [this](Measures const& col_matches) {
+    auto column_matches_check = [this](ColumnMatches const& col_matches) {
         if (col_matches.empty())
             throw config::ConfigurationError("Mining with empty column matches is meaningless.");
-        for (auto const& measure : col_matches) {
-            measure->SetParameters(*left_schema_, *right_schema_);
+        for (SimilarityData::CMPtr const& column_match : col_matches) {
+            column_match->SetColumns(*left_schema_, *right_schema_);
         }
     };
 
@@ -231,7 +229,7 @@ class HyMD::RegisterHelper {
 private:
     std::shared_ptr<RelationalSchema>& left_schema_;
     std::shared_ptr<RelationalSchema>& right_schema_;
-    Measures const& column_matches_option_;
+    ColumnMatches const& column_matches_option_;
     SimilarityData const& similarity_data_;
     std::size_t const column_match_number_ = similarity_data_.GetColumnMatchNumber();
     std::size_t const trivial_column_match_number_ = similarity_data_.GetTrivialColumnMatchNumber();
@@ -246,10 +244,9 @@ private:
         std::vector<model::md::ColumnMatch> column_matches =
                 util::GetPreallocatedVector<model::md::ColumnMatch>(total_column_matches_);
 
-        for (SimilarityData::MeasurePtr const& measure_ptr : column_matches_option_) {
-            auto [left_column_index, right_column_index] = measure_ptr->GetIndices();
-            column_matches.emplace_back(left_column_index, right_column_index,
-                                        measure_ptr->GetName());
+        for (SimilarityData::CMPtr const& cm_ptr : column_matches_option_) {
+            auto [left_column_index, right_column_index] = cm_ptr->GetIndices();
+            column_matches.emplace_back(left_column_index, right_column_index, cm_ptr->GetName());
         }
 
         return std::make_shared<std::vector<model::md::ColumnMatch>>(std::move(column_matches));

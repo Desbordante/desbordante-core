@@ -4,7 +4,7 @@
 #include <variant>
 #include <vector>
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 template <typename L, typename R>
 struct TransformedColumnsHolder {
     using LeftVec = std::vector<L>;
@@ -29,4 +29,4 @@ struct TransformedColumnsHolder {
         : left_ptr(left_ptr), right_ptr(right_ptr) {}
 };
 
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches
