@@ -17,7 +17,7 @@ struct ColumnMatchSimilarityInfo {
     SimilarityIndex similarity_index;
 };
 
-struct SimilarityMeasureOutput {
+struct ColumnPairMeasurements {
     LhsCCVIdsInfo lhs_ccv_ids_info;
     ColumnMatchSimilarityInfo indexes;
 
@@ -36,8 +36,8 @@ struct SimilarityMeasureOutput {
         return {std::move(lhs_ids), std::move(cm_map)};
     }
 
-    SimilarityMeasureOutput(std::vector<ColumnClassifierValueId> lhs_ids,
-                            ColumnMatchSimilarityInfo indexes)
+    ColumnPairMeasurements(std::vector<ColumnClassifierValueId> lhs_ids,
+                           ColumnMatchSimilarityInfo indexes)
         : lhs_ccv_ids_info(MakeLhsCCVIdsInfo(std::move(lhs_ids), indexes)),
           indexes(std::move(indexes)) {}
 };

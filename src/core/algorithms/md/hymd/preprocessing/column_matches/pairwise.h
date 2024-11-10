@@ -4,14 +4,14 @@
 
 #include "algorithms/md/hymd/lowest_bound.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/basic_calculator.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
 #include "model/types/builtin.h"
 #include "util/argument_type.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 namespace detail {
 template <auto Function>
 class BasicComparerCreator {
@@ -52,44 +52,38 @@ public:
 };
 
 template <auto Function>
-using ImmediateBaseTypeTransformer =
+using PairwiseBaseTypeTransformer =
         TypeTransformer<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
                         std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>>;
 
 template <auto Function, bool... Params>
-using ImmediateBase =
-        ColumnSimilarityMeasure<ImmediateBaseTypeTransformer<Function>,
-                                BasicCalculator<BasicComparerCreatorSupplier<Function>, Params...>>;
+using PairwiseBase =
+        ColumnMatchImpl<PairwiseBaseTypeTransformer<Function>,
+                        BasicCalculator<BasicComparerCreatorSupplier<Function>, Params...>>;
 }  // namespace detail
 
-template <auto Function, bool Symmetric, bool EqMax, bool... Params>
-class ImmediateSimilarityMeasure
-    : public detail::ImmediateBase<Function, Symmetric, EqMax, Params...> {
+template <auto SimilarityMeasure, bool Symmetric, bool EqMax, bool... Params>
+class Pairwise : public detail::PairwiseBase<SimilarityMeasure, Symmetric, EqMax, Params...> {
 public:
     using TransformFunctionsOption =
-            detail::ImmediateBaseTypeTransformer<Function>::TransformFunctionsOption;
+            detail::PairwiseBaseTypeTransformer<SimilarityMeasure>::TransformFunctionsOption;
 
-    ImmediateSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
-                               ColumnIdentifier right_column_identifier,
-                               model::md::DecisionBoundary min_sim,
-                               ccv_id_pickers::SimilaritiesPicker picker,
-                               TransformFunctionsOption funcs = {})
-        : detail::ImmediateBase<Function, Symmetric, EqMax, Params...>(
+    Pairwise(std::string name, ColumnIdentifier left_column_identifier,
+             ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+             ccv_id_pickers::SimilaritiesPicker picker, TransformFunctionsOption funcs = {})
+        : detail::PairwiseBase<SimilarityMeasure, Symmetric, EqMax, Params...>(
                   Symmetric && EqMax, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
                   {{min_sim}, std::move(picker)}) {};
 
-    ImmediateSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
-                               ColumnIdentifier right_column_identifier,
-                               model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
-                               TransformFunctionsOption funcs = {})
-        : ImmediateSimilarityMeasure(std::move(name), std::move(left_column_identifier),
-                                     std::move(right_column_identifier), min_sim,
-                                     ccv_id_pickers::IndexUniform<Similarity>(size_limit),
-                                     std::move(funcs)) {};
+    Pairwise(std::string name, ColumnIdentifier left_column_identifier,
+             ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+             std::size_t size_limit = 0, TransformFunctionsOption funcs = {})
+        : Pairwise(std::move(name), std::move(left_column_identifier),
+                   std::move(right_column_identifier), min_sim,
+                   ccv_id_pickers::IndexUniform<Similarity>(size_limit), std::move(funcs)) {};
 };
 
-template <auto Function>
-using NormalImmediateSimilarityMeasure = ImmediateSimilarityMeasure<Function, true, true, true>;
-
-}  // namespace algos::hymd::preprocessing::similarity_measure
+template <auto SimilarityMeasure>
+using NormalPairwise = Pairwise<SimilarityMeasure, true, true, true>;
+}  // namespace algos::hymd::preprocessing::column_matches

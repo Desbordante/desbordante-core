@@ -16,19 +16,19 @@ namespace algos::hymd {
 
 class SimilarityData::Creator {
     indexes::RecordsInfo* const records_info_;
-    Measures const& measures_;
+    ColumnMatches const& column_matches_;
     util::WorkerThreadPool* pool_ptr_;
 
-    void ProcessMeasureIndexes(model::Index column_match_index,
-                               std::vector<ColumnMatchInfo>& column_matches_info,
-                               std::vector<LhsCCVIdsInfo>& all_lhs_ccv_ids_info,
-                               std::vector<bool>& short_sampling_enable,
-                               std::vector<std::pair<model::md::DecisionBoundary, model::Index>>&
-                                       trivial_column_matches_info,
-                               std::vector<model::Index>& non_trivial_indices) {
-        MeasurePtr const& measure = measures_[column_match_index];
-        auto [left_col_index, right_col_index] = measure->GetIndices();
-        auto [lhs_ccv_id_info, indexes] = measure->MakeIndexes(pool_ptr_, *records_info_);
+    void MeasureColumnPairValues(model::Index column_match_index,
+                                 std::vector<ColumnMatchInfo>& column_matches_info,
+                                 std::vector<LhsCCVIdsInfo>& all_lhs_ccv_ids_info,
+                                 std::vector<bool>& short_sampling_enable,
+                                 std::vector<std::pair<model::md::DecisionBoundary, model::Index>>&
+                                         trivial_column_matches_info,
+                                 std::vector<model::Index>& non_trivial_indices) {
+        CMPtr const& column_match = column_matches_[column_match_index];
+        auto [left_col_index, right_col_index] = column_match->GetIndices();
+        auto [lhs_ccv_id_info, indexes] = column_match->MakeIndexes(pool_ptr_, *records_info_);
         bool const is_trivial = indexes.classifier_values.size() == 1;
         if (is_trivial) {
             // These column matches are excluded from the normal operations and accounted for at the
@@ -44,7 +44,7 @@ class SimilarityData::Creator {
             non_trivial_indices.push_back(column_match_index);
             column_matches_info.emplace_back(std::move(indexes), left_col_index, right_col_index);
             all_lhs_ccv_ids_info.push_back(std::move(lhs_ccv_id_info));
-            short_sampling_enable.push_back(measure->IsSymmetricalAndEqIsMax());
+            short_sampling_enable.push_back(column_match->IsSymmetricalAndEqIsMax());
         }
     }
 
@@ -77,12 +77,12 @@ public:
                        std::vector<std::pair<model::md::DecisionBoundary, model::Index>>,
                        std::vector<bool>, std::vector<model::Index>>;
 
-    Creator(indexes::RecordsInfo* const records_info, Measures const& measures,
+    Creator(indexes::RecordsInfo* const records_info, ColumnMatches const& column_matches,
             util::WorkerThreadPool* pool_ptr)
-        : records_info_(records_info), measures_(measures), pool_ptr_(pool_ptr) {}
+        : records_info_(records_info), column_matches_(column_matches), pool_ptr_(pool_ptr) {}
 
     PreprocessingResult CalculateIndexes() {
-        std::size_t const col_match_number = measures_.size();
+        std::size_t const col_match_number = column_matches_.size();
         std::vector<ColumnMatchInfo> column_matches_info =
                 util::GetPreallocatedVector<ColumnMatchInfo>(col_match_number);
         std::vector<LhsCCVIdsInfo> all_lhs_ccv_ids_info =
@@ -95,9 +95,9 @@ public:
                 util::GetPreallocatedVector<model::Index>(col_match_number);
 
         for (model::Index column_match_index : utility::IndexRange(col_match_number)) {
-            ProcessMeasureIndexes(column_match_index, column_matches_info, all_lhs_ccv_ids_info,
-                                  short_sampling_enable, trivial_column_matches_info,
-                                  non_trivial_indices);
+            MeasureColumnPairValues(column_match_index, column_matches_info, all_lhs_ccv_ids_info,
+                                    short_sampling_enable, trivial_column_matches_info,
+                                    non_trivial_indices);
         }
 
         return {std::move(column_matches_info), std::move(all_lhs_ccv_ids_info),
@@ -137,9 +137,9 @@ public:
 };
 
 std::pair<SimilarityData, std::vector<bool>> SimilarityData::CreateFrom(
-        indexes::RecordsInfo* const records_info, Measures const& measures,
+        indexes::RecordsInfo* const records_info, ColumnMatches const& column_matches,
         util::WorkerThreadPool* pool_ptr) {
-    Creator creator{records_info, measures, pool_ptr};
+    Creator creator{records_info, column_matches, pool_ptr};
 
     Creator::PreprocessingResult result = creator.CalculateIndexes();
     // clang-tidy does not like the use of uninitialized array

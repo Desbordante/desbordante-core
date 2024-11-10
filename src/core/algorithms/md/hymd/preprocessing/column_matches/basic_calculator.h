@@ -17,7 +17,7 @@
 #include "util/get_preallocated_vector.h"
 #include "util/worker_thread_pool.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 template <typename ComparerCreatorSupplier, bool Symmetric, bool EqMax, bool MultiThreaded = true>
 class BasicCalculator {
     using LeftElementType =
@@ -166,10 +166,10 @@ public:
                     ccv_id_pickers::SimilaritiesPicker picker)
         : creator_supplier_(std::move(creator_supplier)), picker_(std::move(picker)) {}
 
-    indexes::SimilarityMeasureOutput Calculate(std::vector<LeftElementType> const* left_elements,
-                                               std::vector<RightElementType> const* right_elements,
-                                               indexes::KeyedPositionListIndex const& right_pli,
-                                               util::WorkerThreadPool* pool_ptr) const {
+    indexes::ColumnPairMeasurements Calculate(std::vector<LeftElementType> const* left_elements,
+                                              std::vector<RightElementType> const* right_elements,
+                                              indexes::KeyedPositionListIndex const& right_pli,
+                                              util::WorkerThreadPool* pool_ptr) const {
         ComparerCreator create_comparer =
                 creator_supplier_(left_elements, right_elements, right_pli);
         std::vector<indexes::PliCluster> const& right_clusters = right_pli.GetClusters();
@@ -184,4 +184,4 @@ public:
                             picker_);
     }
 };
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches

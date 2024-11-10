@@ -4,14 +4,14 @@
 #include "algorithms/md/hymd/preprocessing/build_indexes.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
 #include "algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/encode_results.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/column_similarity_measure.h"
-#include "algorithms/md/hymd/preprocessing/similarity_measure/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/valid_table_results.h"
 #include "util/argument_type.h"
 #include "util/get_preallocated_vector.h"
 
-namespace algos::hymd::preprocessing::similarity_measure {
+namespace algos::hymd::preprocessing::column_matches {
 using DistanceFunction = std::function<size_t(std::byte const*, std::byte const*)>;
 
 namespace detail {
@@ -125,10 +125,10 @@ public:
             throw config::ConfigurationError("Minimum similarity out of range");
     }
 
-    indexes::SimilarityMeasureOutput Calculate(std::vector<LeftElementType> const* left_elements,
-                                               std::vector<RightElementType> const* right_elements,
-                                               indexes::KeyedPositionListIndex const& right_pli,
-                                               util::WorkerThreadPool* pool_ptr) const {
+    indexes::ColumnPairMeasurements Calculate(std::vector<LeftElementType> const* left_elements,
+                                              std::vector<RightElementType> const* right_elements,
+                                              indexes::KeyedPositionListIndex const& right_pli,
+                                              util::WorkerThreadPool* pool_ptr) const {
         std::vector<indexes::PliCluster> const& right_clusters = right_pli.GetClusters();
         Worker worker{*left_elements, *right_elements, right_clusters, min_sim_};
         auto [similarities, enumerated_results] = MultiThreaded && pool_ptr != nullptr
@@ -145,34 +145,30 @@ using DistanceBaseTypeTransformer =
                         std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>>;
 
 template <auto Function, bool... Params>
-using DistanceBase = ColumnSimilarityMeasure<DistanceBaseTypeTransformer<Function>,
-                                             LVNormalizedDistanceCalculator<Function, Params...>>;
+using DistanceBase = ColumnMatchImpl<DistanceBaseTypeTransformer<Function>,
+                                     LVNormalizedDistanceCalculator<Function, Params...>>;
 }  // namespace detail
 
 template <auto Function, bool SymmetricAndEq0, bool... Params>
-class DistanceSimilarityMeasure : public detail::DistanceBase<Function, Params...> {
+class LVNormalized : public detail::DistanceBase<Function, Params...> {
 public:
     using TransformFunctionsOption =
             detail::DistanceBaseTypeTransformer<Function>::TransformFunctionsOption;
 
-    DistanceSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
-                              ColumnIdentifier right_column_identifier,
-                              model::md::DecisionBoundary min_sim,
-                              ccv_id_pickers::SimilaritiesPicker picker,
-                              TransformFunctionsOption funcs = {})
+    LVNormalized(std::string name, ColumnIdentifier left_column_identifier,
+                 ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+                 ccv_id_pickers::SimilaritiesPicker picker, TransformFunctionsOption funcs = {})
         : detail::DistanceBase<Function, Params...>(
                   SymmetricAndEq0, std::move(name), std::move(left_column_identifier),
                   std::move(right_column_identifier), {std::move(funcs)},
                   {min_sim, std::move(picker)}) {};
 
-    DistanceSimilarityMeasure(std::string name, ColumnIdentifier left_column_identifier,
-                              ColumnIdentifier right_column_identifier,
-                              model::md::DecisionBoundary min_sim, std::size_t size_limit = 0,
-                              TransformFunctionsOption funcs = {})
-        : DistanceSimilarityMeasure(std::move(name), std::move(left_column_identifier),
-                                    std::move(right_column_identifier), min_sim,
-                                    ccv_id_pickers::IndexUniform<Similarity>{size_limit},
-                                    std::move(funcs)) {}
+    LVNormalized(std::string name, ColumnIdentifier left_column_identifier,
+                 ColumnIdentifier right_column_identifier, model::md::DecisionBoundary min_sim,
+                 std::size_t size_limit = 0, TransformFunctionsOption funcs = {})
+        : LVNormalized(std::move(name), std::move(left_column_identifier),
+                       std::move(right_column_identifier), min_sim,
+                       ccv_id_pickers::IndexUniform<Similarity>{size_limit}, std::move(funcs)) {}
 };
 
-}  // namespace algos::hymd::preprocessing::similarity_measure
+}  // namespace algos::hymd::preprocessing::column_matches
