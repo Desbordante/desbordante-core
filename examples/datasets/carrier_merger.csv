@@ -1,0 +1,13 @@
+id,Source,From,To,Distance (km)
+1,ac1,Saint-Petersburg,Helsinki,315
+2,ac2,St-Petersburg,Helsinki,301
+3,ac2,Moscow,St-Petersburg,650
+4,ac2,Moscow,St-Petersburg,638
+5,ac1,Moscow,Saint-Petersburg,670
+6,ac1,Moscow,Yekaterinburg,1417
+7,ac2,Trondheim,Copenhagen,877
+8,ac1,Copenhagen,Trondheim,877
+9,ac2,Dobfany,Helsinki,1396
+10,ac2,St-Petersburg,Kostroma,659
+11,ac2,St-Petersburg,Moscow,650
+12,ac1,Varstu,Helsinki,315
