@@ -57,6 +57,7 @@ private:
         tuple_pairs_.clear();
         non_empty_cols_.clear();
         index_search_spaces_.clear();
+        distances_.clear();
     }
 
     double CalculateDistance(model::ColumnIndex column_index,
