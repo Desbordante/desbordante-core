@@ -348,9 +348,12 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
 inline bool Split::CheckDFConstraint(DFConstraint const& dif_constraint,
                                      model::ColumnIndex column_index,
                                      std::pair<std::size_t, std::size_t> tuple_pair) {
-    ClusterIndex const first_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.first];
-    ClusterIndex const second_cluster = plis_[column_index].GetInvertedIndex()[tuple_pair.second];
-    double const dif = distances_[column_index][first_cluster][second_cluster];
+    std::vector<ClusterIndex> const& cur_index = plis_[column_index].GetInvertedIndex();
+    ClusterIndex const first_cluster = cur_index[tuple_pair.first];
+    ClusterIndex const second_cluster = cur_index[tuple_pair.second];
+    ClusterIndex const min_cluster = std::min(first_cluster, second_cluster);
+    ClusterIndex const max_cluster = std::max(first_cluster, second_cluster);
+    double const dif = distances_[column_index][min_cluster][max_cluster - min_cluster];
 
     if (type_ids_[column_index] == +model::TypeId::kDouble) {
         return dif_constraint.Contains(dif);
@@ -375,31 +378,33 @@ bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
 
 void Split::CalculateAllDistances() {
     plis_.resize(num_columns_);
-    distances_ = std::vector<std::vector<std::vector<double>>>(num_columns_);
+    distances_.reserve(num_columns_);
     min_max_dif_.resize(num_columns_, {0, 0});
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
         DistancePositionListIndex pli(typed_relation_->GetColumnData(column_index), num_rows_);
         std::vector<ClusterInfo> const& clusters = pli.GetClusters();
         std::size_t const num_clusters = clusters.size();
-        std::vector<std::vector<double>> cur_column_distances = std::vector<std::vector<double>>(
-                num_clusters, std::vector<double>(num_clusters, 0));
+        std::vector<std::vector<double>> cur_column_distances;
+        cur_column_distances.reserve(num_clusters);
 
         double max_dif = 0, min_dif = std::numeric_limits<double>::max();
         for (ClusterIndex i = 0; i < num_clusters; i++) {
+            cur_column_distances.emplace_back();
+            cur_column_distances[i].reserve(num_clusters - i);
+            cur_column_distances[i].push_back(0);
             for (ClusterIndex j = i + 1; j < num_clusters; j++) {
                 std::size_t const first_index = clusters[i].first_tuple_index;
                 std::size_t const second_index = clusters[j].first_tuple_index;
                 double const dif = CalculateDistance(column_index, {first_index, second_index});
                 max_dif = std::max(max_dif, dif);
                 min_dif = std::min(min_dif, dif);
-                cur_column_distances[i][j] = dif;
-                cur_column_distances[j][i] = dif;
+                cur_column_distances[i].push_back(dif);
             }
             if (clusters[i].size > 1) min_dif = 0;
         }
         min_max_dif_[column_index] = {min_dif, max_dif};
-        distances_[column_index] = std::move(cur_column_distances);
+        distances_.emplace_back(std::move(cur_column_distances));
         plis_[column_index] = std::move(pli);
     }
 }
