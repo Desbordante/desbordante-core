@@ -10,13 +10,13 @@ namespace model::md {
 struct ColumnMatch {
     Index left_col_index;
     Index right_col_index;
-    std::string similarity_function_name;
+    std::string name;
 
     ColumnMatch(Index left_col_index, Index right_col_index,
                 std::string similarity_function_name) noexcept
         : left_col_index(left_col_index),
           right_col_index(right_col_index),
-          similarity_function_name(std::move(similarity_function_name)) {}
+          name(std::move(similarity_function_name)) {}
 };
 
 }  // namespace model::md

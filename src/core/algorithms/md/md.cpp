@@ -1,6 +1,9 @@
 #include "algorithms/md/md.h"
 
+#include <ranges>
+
 #include "model/table/column.h"
+#include "util/get_preallocated_vector.h"
 
 namespace model {
 
@@ -22,7 +25,7 @@ std::string MD::ToStringFull() const {
         // if (classifier.GetDecisionBoundary() == 0.0) continue;
         auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
         ss << " ";
-        ss << column_match.similarity_function_name << "(" << left_schema_->GetName() << ":"
+        ss << column_match.name << "(" << left_schema_->GetName() << ":"
            << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
            << right_schema_->GetName() << ":"
            << right_schema_->GetColumn(column_match.right_col_index)->GetName()
@@ -37,7 +40,7 @@ std::string MD::ToStringFull() const {
     ss << "] -> ";
     auto const& classifier = rhs_;
     auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
-    ss << column_match.similarity_function_name << "(" << left_schema_->GetName() << ":"
+    ss << column_match.name << "(" << left_schema_->GetName() << ":"
        << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
        << right_schema_->GetName() << ":"
        << right_schema_->GetColumn(column_match.right_col_index)->GetName()
@@ -71,7 +74,7 @@ std::string MD::ToStringActiveLhsOnly() const {
         any_active = true;
         auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
         ss << " ";
-        ss << column_match.similarity_function_name << "("
+        ss << column_match.name << "("
            << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
            << right_schema_->GetColumn(column_match.right_col_index)->GetName()
            << ")>=" << decision_boundary << " ";
@@ -81,7 +84,7 @@ std::string MD::ToStringActiveLhsOnly() const {
     ss << "] -> ";
     auto const& classifier = rhs_;
     auto const& column_match = (*column_matches_)[classifier.GetColumnMatchIndex()];
-    ss << column_match.similarity_function_name << "("
+    ss << column_match.name << "("
        << left_schema_->GetColumn(column_match.left_col_index)->GetName() << ", "
        << right_schema_->GetColumn(column_match.right_col_index)->GetName()
        << ")>=" << classifier.GetDecisionBoundary();
@@ -91,14 +94,35 @@ std::string MD::ToStringActiveLhsOnly() const {
 std::vector<md::DecisionBoundary> MD::GetLhsDecisionBounds() const {
     std::vector<md::DecisionBoundary> decision_bounds;
     decision_bounds.reserve(lhs_.size());
-    std::transform(
-            lhs_.begin(), lhs_.end(), std::back_inserter(decision_bounds),
+    std::ranges::transform(
+            lhs_, std::back_inserter(decision_bounds),
             [](md::LhsColumnSimilarityClassifier const& lhs) { return lhs.GetDecisionBoundary(); });
     return decision_bounds;
 }
 
 std::pair<Index, md::DecisionBoundary> MD::GetRhs() const noexcept {
     return {rhs_.GetColumnMatchIndex(), rhs_.GetDecisionBoundary()};
+}
+
+ColumnMatchDescription MD::GetColumnMatchDescription(model::Index index) const {
+    auto const& [left_col_index, right_col_index, column_match_name] = (*column_matches_)[index];
+    return {{left_schema_->GetColumn(left_col_index)->GetName(), left_col_index},
+            {right_schema_->GetColumn(right_col_index)->GetName(), right_col_index},
+            column_match_name};
+}
+
+MDDescription MD::GetDescription() const {
+    std::vector<LhsSimilarityClassifierDesctription> lhs_description =
+            util::GetPreallocatedVector<LhsSimilarityClassifierDesctription>(lhs_.size());
+    for (md::LhsColumnSimilarityClassifier const& lhs_classifier : lhs_) {
+        lhs_description.emplace_back(
+                GetColumnMatchDescription(lhs_classifier.GetColumnMatchIndex()),
+                lhs_classifier.GetDecisionBoundary(), lhs_classifier.GetMaxDisprovedBound());
+    }
+    return {left_schema_->GetName(),
+            right_schema_->GetName(),
+            std::move(lhs_description),
+            {GetColumnMatchDescription(rhs_.GetColumnMatchIndex()), rhs_.GetDecisionBoundary()}};
 }
 
 }  // namespace model
