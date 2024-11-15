@@ -11,6 +11,35 @@
 
 namespace model {
 
+struct ColumnDescription {
+    std::string column_name;
+    Index column_index;
+};
+
+struct ColumnMatchDescription {
+    ColumnDescription left_column_description;
+    ColumnDescription right_column_description;
+    std::string column_match_name;
+};
+
+struct LhsSimilarityClassifierDesctription {
+    ColumnMatchDescription column_match_description;
+    md::DecisionBoundary decision_boundary;
+    std::optional<md::DecisionBoundary> max_invalid_bound;
+};
+
+struct RhsSimilarityClassifierDesctription {
+    ColumnMatchDescription column_match_description;
+    md::DecisionBoundary decision_boundary;
+};
+
+struct MDDescription {
+    std::string left_table_name;
+    std::string right_table_name;
+    std::vector<LhsSimilarityClassifierDesctription> lhs;
+    RhsSimilarityClassifierDesctription rhs;
+};
+
 // Based on the definition given in the article titled "Efficient Discovery of
 // Matching Dependencies" by Philipp Schirmer, Thorsten Papenbrock, Ioannis
 // Koumarelas, and Felix Naumann.
@@ -22,6 +51,8 @@ private:
     std::vector<md::LhsColumnSimilarityClassifier> lhs_;
     md::ColumnSimilarityClassifier rhs_;
     // TODO: add support
+
+    [[nodiscard]] ColumnMatchDescription GetColumnMatchDescription(Index index) const;
 
 public:
     MD(std::shared_ptr<RelationalSchema const> left_schema,
@@ -35,6 +66,12 @@ public:
     [[nodiscard]] std::string ToStringActiveLhsOnly() const;
     [[nodiscard]] std::vector<md::DecisionBoundary> GetLhsDecisionBounds() const;
     [[nodiscard]] std::pair<Index, md::DecisionBoundary> GetRhs() const noexcept;
+
+    [[nodiscard]] bool SingleTable() const noexcept {
+        return left_schema_ == right_schema_;
+    }
+
+    [[nodiscard]] MDDescription GetDescription() const;
 };
 
 }  // namespace model
