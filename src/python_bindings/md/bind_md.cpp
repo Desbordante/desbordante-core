@@ -72,15 +72,50 @@ void BindMd(py::module_& main_module) {
     using namespace algos::hymd;
     using namespace algos::hymd::preprocessing::column_matches;
     using namespace py::literals;
+    using namespace model;
 
     auto md_module = main_module.def_submodule("md");
+    py::class_<ColumnDescription>(md_module, "ColumnDescription")
+            .def_readonly("column_name", &ColumnDescription::column_name)
+            .def_readonly("column_index", &ColumnDescription::column_index);
+
+    py::class_<ColumnMatchDescription>(md_module, "ColumnMatchDescription")
+            .def_readonly("left_column_description",
+                          &ColumnMatchDescription::left_column_description)
+            .def_readonly("right_column_description",
+                          &ColumnMatchDescription::right_column_description)
+            .def_readonly("column_match_name", &ColumnMatchDescription::column_match_name);
+
+    py::class_<LhsSimilarityClassifierDesctription>(md_module,
+                                                    "LhsSimilarityClassifierDesctription")
+            .def_readonly("column_match_description",
+                          &LhsSimilarityClassifierDesctription::column_match_description)
+            .def_readonly("decision_boundary",
+                          &LhsSimilarityClassifierDesctription::decision_boundary)
+            .def_readonly("max_invalid_bound",
+                          &LhsSimilarityClassifierDesctription::max_invalid_bound);
+
+    py::class_<RhsSimilarityClassifierDesctription>(md_module,
+                                                    "RhsSimilarityClassifierDesctription")
+            .def_readonly("column_match_description",
+                          &RhsSimilarityClassifierDesctription::column_match_description)
+            .def_readonly("decision_boundary",
+                          &RhsSimilarityClassifierDesctription::decision_boundary);
+    py::class_<MDDescription>(md_module, "MDDescription")
+            .def_readonly("left_table_name", &MDDescription::left_table_name)
+            .def_readonly("right_table_name", &MDDescription::right_table_name)
+            .def_readonly("lhs", &MDDescription::lhs)
+            .def_readonly("rhs", &MDDescription::rhs);
+
     py::class_<MD>(md_module, "MD")
             .def_property_readonly("lhs_bounds", &MD::GetLhsDecisionBounds)
             .def_property_readonly("rhs", &MD::GetRhs)
             .def("to_long_string", &MD::ToStringFull)
             .def("to_short_string", &MD::ToStringShort)
             .def("to_string_active", &MD::ToStringActiveLhsOnly)
-            .def("__str__", &MD::ToStringActiveLhsOnly);
+            .def("__str__", &MD::ToStringActiveLhsOnly)
+            .def_property_readonly("single_table", &MD::SingleTable)
+            .def("get_description", &MD::GetDescription);
     auto column_matches_module = md_module.def_submodule("column_matches");
     py::class_<ColumnMatch, std::shared_ptr<ColumnMatch>>(column_matches_module, "ColumnMatch");
     BindColumnMatchWithConstructor<Levenshtein>("Levenshtein", column_matches_module);
