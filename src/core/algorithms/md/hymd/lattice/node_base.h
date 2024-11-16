@@ -10,7 +10,6 @@
 #include "algorithms/md/hymd/md_lhs.h"
 #include "model/index.h"
 #include "util/desbordante_assume.h"
-#include "util/excl_optional.h"
 
 namespace algos::hymd::lattice {
 
