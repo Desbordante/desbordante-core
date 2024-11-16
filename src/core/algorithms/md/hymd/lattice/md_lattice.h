@@ -22,7 +22,6 @@
 #include "algorithms/md/hymd/rhss.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "model/index.h"
-#include "util/excl_optional.h"
 
 namespace algos::hymd::lattice {
 

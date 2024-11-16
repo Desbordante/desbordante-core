@@ -11,6 +11,7 @@
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
 #include "algorithms/md/hymd/utility/java_hash.h"
+#include "algorithms/md/hymd/utility/reserve_more.h"
 #include "algorithms/md/hymd/utility/size_t_vector_hash.h"
 #include "algorithms/md/hymd/utility/trivial_array.h"
 #include "algorithms/md/hymd/utility/zip.h"
@@ -19,7 +20,6 @@
 #include "util/erase_if_replace.h"
 #include "util/get_preallocated_vector.h"
 #include "util/py_tuple_hash.h"
-#include "util/reserve_more.h"
 
 namespace algos::hymd {
 using indexes::CompressedRecords;
@@ -655,11 +655,11 @@ template <bool PerformValidation>
 void BatchValidator::CreateResults(std::vector<lattice::ValidationInfo>& all_validation_info) {
     std::size_t const validations_number = all_validation_info.size();
     results_.clear();
-    util::ReserveMore(results_, validations_number);
+    utility::ReserveMore(results_, validations_number);
 
     if constexpr (!PerformValidation) {
         current_validator_batch_.clear();
-        util::ReserveMore(current_validator_batch_, validations_number);
+        utility::ReserveMore(current_validator_batch_, validations_number);
     }
 
     for (lattice::ValidationInfo& info : all_validation_info) {

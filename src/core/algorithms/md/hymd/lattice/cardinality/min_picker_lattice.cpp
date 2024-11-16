@@ -2,14 +2,11 @@
 
 #include <cassert>
 
-#include "util/reserve_more.h"
-
-namespace {
-using namespace algos::hymd;
-using model::Index;
-}  // namespace
+#include "algorithms/md/hymd/utility/reserve_more.h"
 
 namespace algos::hymd::lattice::cardinality {
+using namespace algos::hymd;
+using model::Index;
 
 void MinPickerLattice::AddNewLhs(Node& cur_node, ValidationInfo* validation_info,
                                  MdLhs::iterator cur_lhs_iter) {
@@ -83,7 +80,7 @@ void MinPickerLattice::Add(ValidationInfo* validation_info) {
 
 void MinPickerLattice::NewBatch(std::size_t max_elements) {
     info_.clear();
-    util::ReserveMore(info_, max_elements);
+    utility::ReserveMore(info_, max_elements);
     root_ = {root_.children.size()};
 }
 
