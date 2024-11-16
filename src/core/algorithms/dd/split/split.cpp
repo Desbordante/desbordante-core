@@ -176,6 +176,12 @@ unsigned Split::ReduceDDs(auto const& start_time) {
     std::vector<DF> search, dfs_y;
     std::list<DD> reduced;
 
+    std::vector<std::size_t> tuple_pair_indices;
+    if (reduce_method_ == +Reduce::IEHybrid) {
+        tuple_pair_indices.resize(tuple_pair_num_);
+        std::iota(tuple_pair_indices.begin(), tuple_pair_indices.end(), 0);
+    }
+
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         std::vector<model::ColumnIndex> indices;
         for (model::ColumnIndex j = 0; j < num_columns_; j++) {
@@ -204,7 +210,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
                         reduced = HybridPruningReduce(df_y, search, cnt);
                         break;
                     case +Reduce::IEHybrid:
-                        reduced = InstanceExclusionReduce(tuple_pairs_, search, df_y, cnt);
+                        reduced = InstanceExclusionReduce(tuple_pair_indices, search, df_y, cnt);
                         break;
                     default:
                         break;
@@ -328,6 +334,7 @@ void Split::CalculateTuplePairs() {
             }
         }
     }
+    tuple_pair_num_ = tuple_pairs_.size();
 }
 
 double Split::CalculateDistance(model::ColumnIndex column_index,
@@ -652,23 +659,24 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     return dds;
 }
 
-std::list<DD> Split::InstanceExclusionReduce(
-        std::vector<std::pair<std::size_t, std::size_t>> const& tuple_pairs,
-        std::vector<DF> const& search, DF const& rhs, unsigned& cnt) {
+std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tuple_pair_indices,
+                                             std::vector<DF> const& search, DF const& rhs,
+                                             unsigned& cnt) {
     if (!search.size()) return {};
 
     std::list<DD> dds;
     DF const first_df = search.front();
     DF const last_df = search.back();
-    std::vector<std::pair<std::size_t, std::size_t>> remaining_tuple_pairs;
+    std::vector<std::size_t> remaining_tuple_pair_indices;
 
     cnt++;
     bool last_dd_holds = true;
     bool no_pairs_left = true;
-    for (auto pair : tuple_pairs) {
+    for (auto index : tuple_pair_indices) {
+        auto const& pair = tuple_pairs_[index];
         if (!CheckDF(rhs, pair)) {
             if (CheckDF(first_df, pair)) {
-                remaining_tuple_pairs.push_back(pair);
+                remaining_tuple_pair_indices.push_back(index);
                 no_pairs_left = false;
             }
             if (last_dd_holds && CheckDF(last_df, pair)) last_dd_holds = false;
@@ -679,8 +687,9 @@ std::list<DD> Split::InstanceExclusionReduce(
     if (no_pairs_left) {
         if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
-        std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
-        dds.splice(dds.end(), remaining_dds);
+        std::list<DD> remaining_dds =
+                InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
+        dds.splice(dds.end(), std::move(remaining_dds));
         return dds;
     }
 
@@ -688,17 +697,17 @@ std::list<DD> Split::InstanceExclusionReduce(
 
     if (!last_dd_holds) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
-        return InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
+        return InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
     }
 
     auto const [prune, remainder] = PositiveSplit(search, first_df);
 
-    dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
+    dds = InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
     std::list<DD> const pruning_dds =
-            InstanceExclusionReduce(remaining_tuple_pairs, prune, rhs, cnt);
+            InstanceExclusionReduce(remaining_tuple_pair_indices, prune, rhs, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, pruning_dds);
-    dds.splice(dds.end(), merged_dds);
+    dds.splice(dds.end(), std::move(merged_dds));
 
     return dds;
 }
