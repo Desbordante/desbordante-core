@@ -31,6 +31,7 @@ private:
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
     std::vector<model::ColumnIndex> non_empty_cols_;
+    std::size_t tuple_pair_num_;
 
     std::vector<model::TypeId> type_ids_;
 
@@ -89,9 +90,9 @@ private:
     std::list<DD> NegativePruningReduce(DF const& rhs, std::vector<DF> const& search,
                                         unsigned& cnt);
     std::list<DD> HybridPruningReduce(DF const& rhs, std::vector<DF> const& search, unsigned& cnt);
-    std::list<DD> InstanceExclusionReduce(
-            std::vector<std::pair<std::size_t, std::size_t>> const& tuple_pairs,
-            std::vector<DF> const& search, DF const& rhs, unsigned& cnt);
+    std::list<DD> InstanceExclusionReduce(std::vector<std::size_t> const& tuple_pair_indices,
+                                          std::vector<DF> const& search, DF const& rhs,
+                                          unsigned& cnt);
     unsigned ReduceDDs(auto const& start_time);
     unsigned RemoveRedundantDDs();
     unsigned RemoveTransitiveDDs();
