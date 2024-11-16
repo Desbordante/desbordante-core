@@ -72,6 +72,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<int, kPyInt>,
             PyTypePair<unsigned int, kPyInt>,
             PyTypePair<double, kPyFloat>,
+            PyTypePair<size_t, kPyInt>,
             PyTypePair<long double, kPyFloat>,
             PyTypePair<algos::metric::Metric, kPyStr>,
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
