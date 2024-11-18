@@ -9,6 +9,7 @@ venv/
 # IDE and related files
 .cache/
 .idea/
+.sconsign.dblite
 .vscode/
 
 # OS Generated file
