@@ -4,6 +4,7 @@
 #include "algorithms/fd/depminer/depminer.h"
 #include "algorithms/fd/dfd/dfd.h"
 #include "algorithms/fd/eulerfd/eulerfd.h"
+#include "algorithms/fd/dynfd/dynfd.h"
 #include "algorithms/fd/fastfds/fastfds.h"
 #include "algorithms/fd/fd_mine/fd_mine.h"
 #include "algorithms/fd/fdep/fdep.h"

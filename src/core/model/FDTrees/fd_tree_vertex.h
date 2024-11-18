@@ -8,13 +8,10 @@
 
 #include "algorithms/fd/raw_fd.h"
 
-namespace algos::hyfd::fd_tree {
+namespace model {
 
 class FDTreeVertex;
 
-/**
- * Pair of pointer ot FD tree node and the corresponding LHS.
- */
 using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>>;
 
 /**
@@ -27,6 +24,10 @@ using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>
  * RHS of the FD is represented by the fds attribute of the node.
  */
 class FDTreeVertex : public std::enable_shared_from_this<FDTreeVertex> {
+    /**
+     * Pair of pointer ot FD tree node and the corresponding LHS.
+     */
+
 private:
     std::vector<std::shared_ptr<FDTreeVertex>> children_;
     boost::dynamic_bitset<> fds_;
@@ -95,14 +96,36 @@ private:
     void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
+    void GetGeneralsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
+                              size_t rhs, size_t cur_bit,
+                              std::vector<boost::dynamic_bitset<>>& result) const;
+
     void GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
                                    boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit,
                                    std::vector<boost::dynamic_bitset<>>& result) const;
 
-    bool FindFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
-                                  size_t cur_bit) const;
+    void GetSpecialsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
+                              size_t rhs, size_t cur_bit,
+                              std::vector<boost::dynamic_bitset<>>& result) const;
+
+    void GetFdAndSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
+                                   boost::dynamic_bitset<>& cur_lhs, size_t rhs, size_t cur_bit,
+                                   std::vector<boost::dynamic_bitset<>>& result) const;
+
+    bool ContainsFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                                      size_t cur_bit) const;
+
+    // TODO: make shorter the name of the 3rd parameter
+    bool ContainsFdOrSpecialRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                                      size_t next_after_last_lhs_set_bit, size_t cur_bit) const;
 
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
+
+    void RemoveGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
+                                 boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit);
+
+    void RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
+                                 boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit);
 
     bool IsLastNodeOf(size_t rhs) const noexcept;
 
@@ -155,4 +178,4 @@ public:
     }
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace model
