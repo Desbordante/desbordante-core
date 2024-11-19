@@ -9,7 +9,7 @@ algo = desbordante.pfd.algorithms.PFDTane()
 algo.load_data(table=('examples/datasets/pfd.csv', ',', True))
 
 for ERROR_MEASURE in ['per_value', 'per_tuple']:
-    algo.execute(error=ERROR_1, error_measure=ERROR_MEASURE)
+    algo.execute(error=ERROR_1, pfd_error_measure=ERROR_MEASURE)
     result = algo.get_fds()
     print(ERROR_MEASURE, 'pFDs:')
     for fd in result:
