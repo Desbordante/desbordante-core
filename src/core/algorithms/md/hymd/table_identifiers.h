@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstddef>
+#include "model/index.h"
 
 namespace algos::hymd {
-using ValueIdentifier = std::size_t;
-using RecordIdentifier = std::size_t;
+using ValueIdentifier = model::Index;
+using RecordIdentifier = model::Index;
 }  // namespace algos::hymd
