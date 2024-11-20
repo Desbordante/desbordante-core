@@ -52,6 +52,7 @@ The currently supported data patterns are:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
 * Association rules (discovery)
+* Matching dependencies (discovery)
 
 This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the
 algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
@@ -205,6 +206,8 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
+* Matching deoendencies
+   - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
 
 ## Installation
 
