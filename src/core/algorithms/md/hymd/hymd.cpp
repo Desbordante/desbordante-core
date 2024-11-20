@@ -134,7 +134,6 @@ void HyMD::LoadDataInternal() {
 
 unsigned long long HyMD::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
-    SimilarityData::MeasureCreators column_matches_info;
     std::optional<util::WorkerThreadPool> pool_opt;
     util::WorkerThreadPool* pool_ptr = nullptr;
     if (threads_ > 1) {
