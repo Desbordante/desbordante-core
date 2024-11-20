@@ -29,7 +29,7 @@ public:
 
     [[nodiscard]] KeyedPositionListIndex const& GetPli(model::Index column_index) const {
         return plis_[column_index];
-    };
+    }
 
     [[nodiscard]] CompressedRecords const& GetRecords() const noexcept {
         return records_;

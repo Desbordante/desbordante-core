@@ -8,6 +8,7 @@
 
 #include "algorithms/md/hymd/indexes/pli_cluster.h"
 #include "algorithms/md/hymd/table_identifiers.h"
+#include "util/desbordante_assume.h"
 
 namespace algos::hymd::indexes {
 
