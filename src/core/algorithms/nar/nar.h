@@ -35,11 +35,11 @@ private:
 
     static bool MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> map,
                              size_t feature_index, std::byte const* value);
-                             
+
 public:
     std::string ToString() const;
     void SetQualities(TypedRelation const* typed_relation);
-    model::NARQualities const& GetQualities() const;
+    NARQualities const& GetQualities() const;
     void InsertInAnte(size_t feature_index, std::shared_ptr<ValueRange> range);
     void InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range);
 };
