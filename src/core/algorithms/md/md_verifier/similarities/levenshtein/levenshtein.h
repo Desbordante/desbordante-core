@@ -1,10 +1,11 @@
 #include <string_view>
 
-#include "core/algorithms/md/md_verifier/similarities/similarities.h"
+#include "algorithms/md/md_verifier/similarities/similarities.h"
 
 namespace algos::md {
-class LevenshteinSimilarity : public AbstractSimilarityMeasure<std::string_view&> {
+class LevenshteinSimilarity : public StringSimilarityMeasure {
 public:
-    long double operator()(std::string_view& left, std::string_view& right) override;
+    LevenshteinSimilarity() : StringSimilarityMeasure("levenshtein") {}
+    long double operator()(std::string_view left, std::string_view right) override;
 };
 }  // namespace algos::md
