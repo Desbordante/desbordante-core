@@ -22,16 +22,15 @@ public:
     std::vector<String> domain;
     explicit StringValueRange(TypedColumnData const& column);
 
-    StringValueRange(String value) : domain() {
-        domain.emplace_back(value);
-    };
+    StringValueRange(String value)
+    : domain{std::move(value)} {};
 
     TypeId GetTypeId() const override {
         return TypeId::kString;
     }
 
     bool Includes(std::byte const* value) const override {
-        String svalue = Type::GetValue<String>(value);
+        String const& svalue = Type::GetValue<String>(value);
         return std::find(domain.begin(), domain.end(), svalue) != domain.end();
     }
 
