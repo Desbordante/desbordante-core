@@ -7,9 +7,14 @@
 namespace algos::des {
 
 class EncodedNAR {
+private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;
     using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;
+    double implication_sign_pos_ = -1;
+    std::vector<EncodedValueRange> encoded_value_ranges_ = std::vector<EncodedValueRange>();
 
+    model::NARQualities qualities_;
+    bool qualities_consistent_ = false;
 public:
     size_t VectorSize();
     size_t FeatureCount();
@@ -23,12 +28,6 @@ public:
     EncodedNAR(FeatureDomains domains, TypedRelation const* typed_relation);
     EncodedNAR(size_t feature_count);
 
-private:
-    double implication_sign_pos_ = -1;
-    std::vector<EncodedValueRange> encoded_value_ranges_ = std::vector<EncodedValueRange>();
-
-    model::NARQualities qualities_;
-    bool qualities_consistent_ = false;
 };
 
 }  // namespace algos::des
