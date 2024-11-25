@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Stop on error:
+set -e
+
 function print_help() {
 cat << EOF
 Usage: ./build.sh [options]
@@ -116,5 +119,5 @@ fi
 cd ..
 mkdir -p build
 cd build
-rm CMakeCache.txt
+rm -f CMakeCache.txt
 cmake $PREFIX .. && make $JOBS_OPTION
