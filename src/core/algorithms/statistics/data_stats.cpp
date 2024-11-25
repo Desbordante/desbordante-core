@@ -464,8 +464,8 @@ Statistic DataStats::GetMedianAD(size_t index) const {
         return all_stats_[index].median_ad;
     }
     mo::TypedColumnData const& col = col_data_[index];
-    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
     if (!col.IsNumeric()) return {};
+    auto const& type = static_cast<mo::INumericType const&>(col.GetType());
 
     std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
     std::byte* median = MedianOfNumericVector(data, type);

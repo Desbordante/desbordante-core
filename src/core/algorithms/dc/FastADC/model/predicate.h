@@ -54,7 +54,6 @@ private:
     ColumnOperand r_;
 
     mutable PredicatePtr symmetric_{};
-    mutable PredicatePtr operator_symmetric_{};
     mutable PredicatePtr inv_TS_{};
     mutable PredicatePtr inverse_{};
     mutable PredicatesVector implications_;
