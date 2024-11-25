@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Stop on error:
+set -e
+
 function print_help() {
 cat << EOF
 Usage: ./build.sh [options]
@@ -85,7 +88,7 @@ if [[ $NO_TESTS == true ]]; then
   PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
 else
   if [[ ! -d "googletest" ]] ; then
-    git clone https://github.com/google/googletest/ --branch v1.13.0 --depth 1
+    git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
   fi
 fi
 
@@ -116,5 +119,5 @@ fi
 cd ..
 mkdir -p build
 cd build
-rm CMakeCache.txt
+rm -f CMakeCache.txt
 cmake $PREFIX .. && make $JOBS_OPTION
