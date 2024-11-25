@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
+
 namespace algos::fastod {
 
 template <bool Ascending>
@@ -11,7 +13,8 @@ CanonicalOD<Ascending>::CanonicalOD(AttributeSet const& context, model::ColumnIn
 
 template <bool Ascending>
 bool CanonicalOD<Ascending>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
-    return !(cache.GetStrippedPartition(context_, data).Swap<Ascending>(ap_.left, ap_.right));
+    return !(cache.GetStrippedPartition(context_, data)
+                     .template Swap<Ascending>(ap_.left, ap_.right));
 }
 
 template <bool Ascending>

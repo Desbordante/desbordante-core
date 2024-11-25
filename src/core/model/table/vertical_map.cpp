@@ -425,7 +425,7 @@ void VerticalMap<Value>::Shrink(double factor, std::function<bool(Entry, Entry)>
             key_queue.push(entry);
         }
     });
-    unsigned int num_of_removed = 0;
+    // unsigned int num_of_removed = 0;
     unsigned int target_size = size_ * factor;
     while (!key_queue.empty() && size_ > target_size) {
         auto key = key_queue.top().first;
@@ -433,7 +433,7 @@ void VerticalMap<Value>::Shrink(double factor, std::function<bool(Entry, Entry)>
 
         // insert additional logging
 
-        num_of_removed++;
+        // num_of_removed++;
         Remove(key);
     }
     shrink_invocations_++;
@@ -467,14 +467,14 @@ void VerticalMap<Value>::Shrink(std::unordered_map<Vertical, unsigned int>& usag
                     key_queue.push(entry);
                 }
             });
-    unsigned int num_of_removed = 0;
+    // unsigned int num_of_removed = 0;
     while (!key_queue.empty()) {
         auto key = key_queue.front().first;
         key_queue.pop();
 
         // insert additional logging
 
-        num_of_removed++;
+        // num_of_removed++;
         Remove(key);
         RemoveFromUsageCounter(usage_counter, key);
     }
