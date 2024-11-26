@@ -36,10 +36,11 @@ void DES::MakeExecuteOptsAvailable() {
 }
 
 FeatureDomains DES::FindFeatureDomains(TypedRelation const* typed_relation) {
-    auto feature_domains = std::vector<std::shared_ptr<ValueRange>>();
+    std::vector<std::shared_ptr<ValueRange>> feature_domains;
+    feature_domains.reserve(typed_relation->GetNumColumns());
     for (size_t i = 0; i < typed_relation->GetNumColumns(); i++) {
         std::shared_ptr<ValueRange> domain = CreateValueRange(typed_relation->GetColumnData(i));
-        feature_domains.emplace_back(domain);
+        feature_domains.push_back(std::move(domain));
     }
     return feature_domains;
 }
