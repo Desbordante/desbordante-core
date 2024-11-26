@@ -38,22 +38,30 @@ jobs:
         with:
           download-pybind: true
           download-googletest: false
-      - name: Build pip package and test it
-        working-directory: ${{github.workspace}}
+      - name: Build pip package
         shell: bash
         run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          python3 -m pip install .
+      - name: Test pip package
+        shell: bash
+        run: |
+          source venv/bin/activate
+
           cp test_input_data/WDC_satellites.csv src/python_bindings/
           cp test_input_data/TestLong.csv src/python_bindings/
           cp test_input_data/TestWide.csv src/python_bindings/
           cp test_input_data/transactional_data/rules-kaggle-rows.csv src/python_bindings/
-          pip install .
+
           cd src/python_bindings
           python test_bindings.py
-          cd ${{github.workspace}}
       - name: Test data stats
         working-directory: ${{github.workspace}}
         shell: bash
         run: |
+          source venv/bin/activate
+
           cp test_input_data/TestDataStats.csv src/python_bindings
           cd src/python_bindings
           python test_pybind_data_stats.py
