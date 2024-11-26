@@ -45,12 +45,10 @@ FeatureDomains DES::FindFeatureDomains(TypedRelation const* typed_relation) {
     return feature_domains;
 }
 
-std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains domains) const {
-    auto population = std::vector<EncodedNAR>();
-    for (int i = 0; i < population_size_; i++) {
-        population.emplace_back(EncodedNAR(domains, typed_relation_.get()));
-    }
-    auto compare_by_fitness = [](EncodedNAR const& a, EncodedNAR const& b) -> bool {
+std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& domains) const {
+    std::vector<EncodedNAR> population(population_size_,
+                                       EncodedNAR(domains, typed_relation_.get()));
+    auto compare_by_fitness = [](EncodedNAR const& a, EncodedNAR const& b) {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
     std::sort(population.begin(), population.end(), compare_by_fitness);

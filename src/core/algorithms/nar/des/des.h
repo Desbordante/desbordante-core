@@ -19,7 +19,7 @@ private:
     void RegisterOptions();
 
     static FeatureDomains FindFeatureDomains(TypedRelation const* typed_relation);
-    std::vector<EncodedNAR> GetRandomPopulationInDomains(FeatureDomains domains) const;
+    std::vector<EncodedNAR> GetRandomPopulationInDomains(FeatureDomains const& domains) const;
     void EvolvePopulation(std::vector<EncodedNAR>& population) const;
     EncodedNAR MutateIndividual(std::vector<EncodedNAR> population, size_t at);
 
