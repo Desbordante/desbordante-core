@@ -88,7 +88,7 @@ if [[ $NO_TESTS == true ]]; then
   PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
 else
   if [[ ! -d "googletest" ]] ; then
-    git clone https://github.com/google/googletest/ --branch v1.13.0 --depth 1
+    git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
   fi
 fi
 
