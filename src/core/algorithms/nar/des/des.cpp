@@ -55,7 +55,7 @@ std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& 
     return population;
 }
 
-EncodedNAR DES::MutateIndividual(std::vector<EncodedNAR> population, size_t at) {
+EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at) {
     MutationFunction diff_func =
             EnumToMutationStrategy(differential_options_.differential_strategy);
     return (*diff_func)(population, at, differential_options_);
@@ -68,7 +68,7 @@ unsigned long long DES::ExecuteInternal() {
     for (int i = 0; i < num_evaluations_;
          i++) {  // TODO: change num_evaluations type to something unsigned
         size_t candidate_i = i % population_size_;
-        EncodedNAR mutant = MutateIndividual(population, candidate_i);
+        EncodedNAR mutant = MutatedIndividual(population, candidate_i);
         NAR mutant_decoded = mutant.SetQualities(feature_domains, typed_relation_.get());
         double candidate_fitness = population[candidate_i].GetQualities().fitness;
 

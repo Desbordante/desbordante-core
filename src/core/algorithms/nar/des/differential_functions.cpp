@@ -17,7 +17,7 @@ std::unordered_set<size_t> GetRandIndices(size_t except_index, size_t population
     return indices;
 }
 
-EncodedNAR Rand1Bin(std::vector<EncodedNAR> population, size_t candidate_index,
+EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,
                     DifferentialOptions options) {
     auto candidate = population[candidate_index];
     auto sample_indices = GetRandIndices(candidate_index, population.size(), 3);
@@ -41,7 +41,7 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> population, size_t candidate_index,
     return new_individual;
 }
 
-typedef EncodedNAR (*MutationFunction)(std::vector<EncodedNAR> population, size_t candidate_index,
+typedef EncodedNAR (*MutationFunction)(std::vector<EncodedNAR> const& population, size_t candidate_index,
                                        DifferentialOptions options);
 
 // TODO: name is probably inconsistent with how it's called in the field.
