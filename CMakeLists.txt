@@ -122,7 +122,7 @@ include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emha
 
 # adding submodules
 if (COMPILE_TESTS)
-    add_subdirectory("lib/googletest")
+    add_subdirectory("lib/googletest" SYSTEM)
 endif()
 
 set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )
