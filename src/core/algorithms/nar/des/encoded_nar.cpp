@@ -63,12 +63,12 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
     };
     std::sort(feature_order.begin(), feature_order.end(), compare_by_permutation);
 
-    uint implication_sign_after = implication_sign_pos_ * (encoded_value_ranges_.size() - 1);
-    uint handling_feat_num = -1;
+    size_t implication_sign_after = implication_sign_pos_ * (encoded_value_ranges_.size() - 1);
+    size_t handling_feat_num = 0;
     for (size_t feature_index : feature_order) {
-        handling_feat_num++;
         EncodedValueRange encoded_feature = encoded_value_ranges_[feature_index];
         if (encoded_feature.threshold < RNG().Next()) {
+            handling_feat_num++;
             continue;
         }
         auto domain = domains[feature_index];
@@ -78,6 +78,7 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
         } else {
             resulting_nar.InsertInAnte(feature_index, decoded);
         }
+        handling_feat_num++;
     }
     return resulting_nar;
 }
