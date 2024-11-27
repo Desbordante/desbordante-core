@@ -8,7 +8,7 @@ namespace algos::des {
 
 class EncodedValueRange {
 public:
-    static size_t const kFieldCount = 4;
+    static size_t constexpr kFieldCount = 4;
     double permutation;
     double threshold;
     double bound1;
