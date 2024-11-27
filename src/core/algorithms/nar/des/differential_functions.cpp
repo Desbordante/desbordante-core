@@ -10,7 +10,7 @@ std::unordered_set<size_t> GetRandIndices(size_t except_index, size_t population
     std::unordered_set<size_t> indices;
     indices.insert(except_index);
     while (indices.size() < number_of_indices + 1) {
-        size_t random_index = (size_t)(RNG().Next() * population);
+        size_t random_index = RNG().Next() * population;
         indices.insert(random_index);
     }
     indices.erase(except_index);
