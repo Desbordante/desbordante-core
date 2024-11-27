@@ -38,7 +38,6 @@ double const& EncodedNAR::operator[](size_t index) const {
     }
 }
 
-
 NAR EncodedNAR::SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation) {
     NAR this_decoded = Decode(domains);
     this_decoded.SetQualities(typed_relation);
@@ -58,8 +57,8 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
     NAR resulting_nar;
     std::vector<size_t> feature_order(encoded_value_ranges_.size());
     std::iota(std::begin(feature_order), std::end(feature_order), 0);
-    auto compare_by_permutation = [e = encoded_value_ranges_](size_t& a, size_t& b) -> bool {
-        return e[a].permutation > e[b].permutation;
+    auto compare_by_permutation = [this](size_t a, size_t b) {
+        return encoded_value_ranges_[a].permutation > encoded_value_ranges_[b].permutation;
     };
     std::sort(feature_order.begin(), feature_order.end(), compare_by_permutation);
 
