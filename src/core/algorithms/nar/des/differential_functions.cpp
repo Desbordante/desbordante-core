@@ -41,9 +41,6 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_
     return new_individual;
 }
 
-typedef EncodedNAR (*MutationFunction)(std::vector<EncodedNAR> const& population, size_t candidate_index,
-                                       DifferentialOptions options);
-
 // TODO: name is probably inconsistent with how it's called in the field.
 MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy) {
     switch (strategy) {
