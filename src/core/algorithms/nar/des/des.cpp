@@ -72,8 +72,8 @@ unsigned long long DES::ExecuteInternal() {
         double candidate_fitness = population[candidate_i].GetQualities().fitness;
 
         if (mutant.GetQualities().fitness > candidate_fitness) {
-            population[candidate_i] = mutant;
-            nar_collection_.emplace_back(mutant_decoded);
+            population[candidate_i] = std::move(mutant);
+            nar_collection_.emplace_back(std::move(mutant_decoded));
         }
     }
 
