@@ -19,16 +19,12 @@ public:
         switch (index) {
             case 0:
                 return permutation;
-                break;
             case 1:
                 return threshold;
-                break;
             case 2:
                 return bound1;
-                break;
             case 3:
                 return bound2;
-                break;
             default:
                 throw std::out_of_range("Index out of range for value range.");
         }
@@ -38,16 +34,12 @@ public:
         switch (index) {
             case 0:
                 return permutation;
-                break;
             case 1:
                 return threshold;
-                break;
             case 2:
                 return bound1;
-                break;
             case 3:
                 return bound2;
-                break;
             default:
                 throw std::out_of_range("Index out of range for value range.");
         }

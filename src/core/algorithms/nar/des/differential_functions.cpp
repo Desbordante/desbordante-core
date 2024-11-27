@@ -49,7 +49,6 @@ MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy) {
     switch (strategy) {
         case DifferentialStrategy::rand1Bin:
             return Rand1Bin;
-            break;
         default:
             throw std::logic_error("No mutation function corresponding to DifferentialStategy.");
     }
