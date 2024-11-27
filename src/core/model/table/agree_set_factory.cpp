@@ -159,8 +159,8 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
          */
         unsigned short const actual_threads_num =
                 std::min(max_representation.size(), (size_t)config_.threads_num);
-        auto task = [&identifier_sets, &agree_sets, percent_per_cluster, actual_threads_num,
-                     &map_init_mutex, this, &threads_agree_sets, &map_init_cv,
+        auto task = [&identifier_sets, percent_per_cluster, actual_threads_num, &map_init_mutex,
+                     this, &threads_agree_sets, &map_init_cv,
                      &map_initialized](SetOfVectors::value_type const& cluster) {
             std::thread::id const thread_id = std::this_thread::get_id();
 
