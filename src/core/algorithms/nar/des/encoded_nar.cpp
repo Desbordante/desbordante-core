@@ -7,13 +7,15 @@ namespace algos::des {
 
 using model::NAR;
 
-size_t EncodedNAR::VectorSize() {
-    return encoded_value_ranges_.size() * EncodedValueRange().kFieldCount + 1;
+size_t EncodedNAR::VectorSize() const {
+    return encoded_value_ranges_.size() * EncodedValueRange::kFieldCount + 1;
 }
 
-size_t EncodedNAR::FeatureCount() {
+size_t EncodedNAR::FeatureCount() const {
     return encoded_value_ranges_.size();
 }
+
+double GetElementAtIndex() }
 
 // TODO: remove code duplication here
 double& EncodedNAR::operator[](size_t index) {
@@ -38,6 +40,7 @@ double const& EncodedNAR::operator[](size_t index) const {
         return encoded_value_ranges_[feature][feature_field];
     }
 }
+
 
 NAR EncodedNAR::SetQualities(FeatureDomains domains, TypedRelation const* typed_relation) {
     NAR this_decoded = Decode(domains);

@@ -15,9 +15,10 @@ private:
 
     model::NARQualities qualities_;
     bool qualities_consistent_ = false;
+    double& GetElementAtIndex(size_t index) const;
 public:
-    size_t VectorSize();
-    size_t FeatureCount();
+    size_t VectorSize() const;
+    size_t FeatureCount() const;
     double& operator[](size_t index);
     double const& operator[](size_t index) const;
 
