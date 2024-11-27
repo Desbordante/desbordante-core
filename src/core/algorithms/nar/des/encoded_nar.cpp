@@ -39,7 +39,7 @@ double const& EncodedNAR::operator[](size_t index) const {
 }
 
 
-NAR EncodedNAR::SetQualities(FeatureDomains domains, TypedRelation const* typed_relation) {
+NAR EncodedNAR::SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation) {
     NAR this_decoded = Decode(domains);
     this_decoded.SetQualities(typed_relation);
     qualities_ = this_decoded.GetQualities();
@@ -54,9 +54,8 @@ model::NARQualities const& EncodedNAR::GetQualities() const {
     return qualities_;
 }
 
-NAR EncodedNAR::Decode(FeatureDomains domains) const {
-    auto resulting_nar = model::NAR();
-
+NAR EncodedNAR::Decode(FeatureDomains& domains) const {
+    NAR resulting_nar;
     std::vector<size_t> feature_order(encoded_value_ranges_.size());
     std::iota(std::begin(feature_order), std::end(feature_order), 0);
     auto compare_by_permutation = [e = encoded_value_ranges_](size_t& a, size_t& b) -> bool {
@@ -83,7 +82,7 @@ NAR EncodedNAR::Decode(FeatureDomains domains) const {
     return resulting_nar;
 }
 
-EncodedNAR::EncodedNAR(FeatureDomains domains, TypedRelation const* typed_relation) {
+EncodedNAR::EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation) {
     size_t feature_count = domains.size();
     for (size_t feature_index = 0; feature_index < feature_count; feature_index++) {
         encoded_value_ranges_.emplace_back(EncodedValueRange());

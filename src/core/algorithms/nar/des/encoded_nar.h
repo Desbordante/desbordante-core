@@ -23,10 +23,10 @@ public:
     double const& operator[](size_t index) const;
 
     model::NARQualities const& GetQualities() const;
-    model::NAR SetQualities(FeatureDomains domains, TypedRelation const* typed_relation);
+    model::NAR SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation);
 
-    model::NAR Decode(FeatureDomains domains) const;
-    EncodedNAR(FeatureDomains domains, TypedRelation const* typed_relation);
+    model::NAR Decode(FeatureDomains& domains) const;
+    EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation);
     EncodedNAR(size_t feature_count);
 
 };
