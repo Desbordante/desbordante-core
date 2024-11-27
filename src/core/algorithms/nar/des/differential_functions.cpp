@@ -5,7 +5,7 @@
 namespace algos::des {
 
 // gets slow if population ~= number_of_indices
-std::unordered_set<size_t> GetRandIndices(size_t except_index, size_t population,
+std::vector<size_t> GetRandIndices(size_t except_index, size_t population,
                                           size_t number_of_indices) {
     assert(number_of_indices <= population - 1);
     std::unordered_set<size_t> indices;
@@ -15,7 +15,10 @@ std::unordered_set<size_t> GetRandIndices(size_t except_index, size_t population
         indices.insert(random_index);
     }
     indices.erase(except_index);
-    return indices;
+    std::vector<size_t> ind_vec;
+    ind_vec.reserve(number_of_indices);
+    ind_vec.insert(ind_vec.end(), indices.begin(), indices.end());
+    return ind_vec;
 }
 
 EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,
