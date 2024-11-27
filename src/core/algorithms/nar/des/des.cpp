@@ -18,9 +18,9 @@ void DES::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     DifferentialStrategy default_strategy = DifferentialStrategy::rand1Bin;
-    RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize, 100});
+    RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize, 100u});
     RegisterOption(
-            Option{&num_evaluations_, kMaxFitnessEvaluations, kDMaxFitnessEvaluations, 1000});
+            Option{&num_evaluations_, kMaxFitnessEvaluations, kDMaxFitnessEvaluations, 1000u});
     RegisterOption(Option{&differential_options_.differential_scale, kDifferentialScale,
                           kDDifferentialScale, 0.5});
     RegisterOption(Option{&differential_options_.crossover_probability, kCrossoverProbability,
@@ -65,8 +65,7 @@ unsigned long long DES::ExecuteInternal() {
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
     std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains);
 
-    for (int i = 0; i < num_evaluations_;
-         i++) {  // TODO: change num_evaluations type to something unsigned
+    for (unsigned i = 0; i < num_evaluations_; i++) {
         size_t candidate_i = i % population_size_;
         EncodedNAR mutant = MutatedIndividual(population, candidate_i);
         NAR mutant_decoded = mutant.SetQualities(feature_domains, typed_relation_.get());

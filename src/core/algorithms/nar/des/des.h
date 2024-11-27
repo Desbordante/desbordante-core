@@ -12,8 +12,8 @@ using TypedRelation = model::ColumnLayoutTypedRelationData;
 
 class DES : public NARAlgorithm {
 private:
-    int population_size_;
-    int num_evaluations_;
+    unsigned int population_size_;
+    unsigned int num_evaluations_;
     DifferentialOptions differential_options_;
 
     void RegisterOptions();
