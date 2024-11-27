@@ -47,16 +47,16 @@ void CheckSupportAndConfidence(std::list<model::ARStrings> const& actual,
         std::set<std::string> actual_rhs(rule.right.begin(), rule.right.end());
 
         if (lhs == actual_lhs && rhs == actual_rhs) {
-            ASSERT_DOUBLE_EQ(rule.support, expected_support)
+            EXPECT_DOUBLE_EQ(rule.support, expected_support)
                     << "supports don't match: expected " << expected_support
                     << ", got: " << rule.support;
-            ASSERT_DOUBLE_EQ(rule.confidence, expected_confidence)
+            EXPECT_DOUBLE_EQ(rule.confidence, expected_confidence)
                     << "confidences don't match: expected " << expected_confidence
                     << ", got: " << rule.confidence;
             return;
         }
     }
-    FAIL() << "expected rule not found in generated rules";
+    ADD_FAILURE() << "expected rule not found in generated rules";
 }
 
 static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
