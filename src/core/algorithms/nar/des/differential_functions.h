@@ -17,7 +17,7 @@ struct DifferentialOptions {
 EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,
                     DifferentialOptions options);
 
-typedef EncodedNAR (*MutationFunction)(std::vector<EncodedNAR> const& population, size_t candidate_index,
+using MutationFunction = EncodedNAR (*)(std::vector<EncodedNAR> const& population, size_t candidate_index,
                                        DifferentialOptions options);
 
 MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy);
