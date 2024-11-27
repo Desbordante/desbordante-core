@@ -1,0 +1,182 @@
+name: 'Install dependencies'
+description: 'Download and install build system and libraries'
+inputs:
+  download-pybind:
+    type: boolean
+    description: 'Download pybind11'
+    default: false
+
+  download-googletest:
+    type: boolean
+    description: 'Download googletest'
+    default: true
+
+  os:
+    type: string
+    required: true
+
+  toolset:
+    type: choice
+    options:
+      gcc
+      llvm-clang
+      apple-clang
+    default: gcc
+
+  install-toolset:
+    type: boolean
+    default: true
+
+  install-boost:
+    type: boolean
+    default: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Get short OS name
+      shell: bash
+      run: |
+        function get_short_os_name() {
+          if [[ $1 == *"ubuntu"* ]]; then
+            echo "ubuntu"
+          elif [[ $1 == *"macos"* ]]; then
+            echo "macos"
+          else
+            echo "ERROR: unknown OS"
+            exit 1
+          fi
+        }
+
+        echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
+
+    - name: Install build tools using apt
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install cmake build-essential -y
+      shell: bash
+      if: env.OS == 'ubuntu'
+    - name: Install build tools using brew
+      run: brew install make cmake
+      shell: bash
+      if: env.OS == 'macos'
+
+    - name: Install GCC toolset
+      run: |
+        sudo apt-get install gcc-10 g++-10 -y
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc'
+    - name: Install Clang toolset (on Linux)
+      # "all" option is needed to install libc++ and libc++abi
+      # apt is hardcoded in llvm.sh, so we can't use it everywhere
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17 all
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install LLVM Clang toolset (on macOS)
+      run: brew install llvm@17
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+    # Apple Clang is installed by default on macOS runner
+
+    - name: Make lib directory
+      run: |
+        mkdir -p lib
+      shell: bash
+
+    - name: Download googletest
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: googletest
+        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
+      if: inputs.download-googletest != 'false'
+
+    - name: Download easyloggingpp
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: easyloggingpp
+        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+
+    - name: Download better-enums
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: better-enums
+        download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
+
+    - name: Download pybind11
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: pybind11
+        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
+      if: inputs.download-pybind != 'false'
+    - name: Download emhash
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: emhash
+        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
+    - name: Download atomicbitvector
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: atomicbitvector
+        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
+    - name: Download boost
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: boost
+        download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
+
+    - name: Install Boost built with GCC
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --prefix=/usr
+        sudo ./b2 install --prefix=/usr
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc'
+    - name: Install Boost built with Clang (on Linux)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh
+        sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
+         linkflags="-stdlib=libc++"
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install Boost built with LLVM Clang (on macOS)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh
+        echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
+        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
+         cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
+         linkflags="-L$(brew --prefix llvm@17)/lib/c++"
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+    - name: Install Boost built with Apple Clang
+      run: brew install boost
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'apple-clang'
+
+    - name: Download frozen
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: frozen
+        download-command: git clone https://github.com/serge-sans-paille/frozen.git --depth 1
+
+#    Uncomment this if we set up our own git lfs server
+#    - name: Install git-lfs
+#      run: |
+#         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+#         git lfs install
+#      shell: bash
+#    - name: Generate lfs file list
+#      run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+#      shell: bash
+#    - name: Restore lfs cache
+#      uses: actions/cache@v3
+#      id: lfs-cache
+#      with:
+#        path: .git/lfs
+#        key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
