@@ -65,7 +65,7 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
     size_t implication_sign_after = implication_sign_pos_ * (encoded_value_ranges_.size() - 1);
     size_t handling_feat_num = 0;
     for (size_t feature_index : feature_order) {
-        EncodedValueRange encoded_feature = encoded_value_ranges_[feature_index];
+        EncodedValueRange const& encoded_feature = encoded_value_ranges_[feature_index];
         if (encoded_feature.threshold < RNG().Next()) {
             handling_feat_num++;
             continue;
