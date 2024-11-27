@@ -49,9 +49,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Download libraries
-        uses: ./.github/composite-actions/download-libraries
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
         with:
+          os: ubuntu
+          toolset: gcc
           download-pybind: true
       - name: Generate compile_commands.json
         run: |

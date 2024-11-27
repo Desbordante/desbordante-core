@@ -70,12 +70,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Download libraries
-        uses: ./.github/composite-actions/download-libraries
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
         with:
+          os: ubuntu
+          toolset: gcc
+          install-boost: false
           download-pybind: true
           download-googletest: false
-          install-boost: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2

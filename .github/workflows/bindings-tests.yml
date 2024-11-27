@@ -30,23 +30,46 @@ on:
   workflow_dispatch:
 jobs:
   test-python-bindings:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            compiler: gcc
+            env: CC=gcc-10 CXX=g++-10
+          - os: ubuntu-latest
+            compiler: llvm-clang
+            env: CC=clang-17 CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+          # Uncomment this to enable macOS-llvm-clang tests:
+          # - os: macos-latest
+          #   compiler: llvm-clang
+          #   env: CC=$(brew --prefix llvm@17)/bin/clang CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
+          #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+          - os: macos-latest
+            compiler: apple-clang
+            env: CC=clang CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
-      - name: Download libraries
-        uses: ./.github/composite-actions/download-libraries
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
         with:
+          os: ${{ matrix.os }}
+          toolset: ${{ matrix.compiler }}
           download-pybind: true
           download-googletest: false
       - name: Build pip package
         shell: bash
         run: |
+          export ${{ matrix.env }}
+
           python3 -m venv venv
           source venv/bin/activate
           python3 -m pip install .
       - name: Test pip package
         shell: bash
         run: |
+          export ${{ matrix.runtime-env }}
+
           source venv/bin/activate
 
           cp test_input_data/WDC_satellites.csv src/python_bindings/
@@ -60,6 +83,8 @@ jobs:
         working-directory: ${{github.workspace}}
         shell: bash
         run: |
+          export ${{ matrix.runtime-env }}
+
           source venv/bin/activate
 
           cp test_input_data/TestDataStats.csv src/python_bindings
