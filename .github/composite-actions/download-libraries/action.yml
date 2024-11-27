@@ -16,6 +16,11 @@ inputs:
     description: 'Install boost'
     default: true
 
+  install-clang:
+    type: boolean
+    description: 'Install clang'
+    default: false
+
 runs:
   using: 'composite'
   steps:
@@ -25,6 +30,18 @@ runs:
         sudo apt-get update -y
         sudo apt-get install gcc-10 g++-10 cmake build-essential -y
       shell: bash
+      if: inputs.install-clang != 'true'
+
+    - name: Install clang
+      # llvm.sh installs all needed libraries, no need in build-essential
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install cmake make -y
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17
+      shell: bash
+      if: inputs.install-clang != 'false'
 
     - name: Make lib directory
       run: |
@@ -35,7 +52,7 @@ runs:
       uses: ./.github/composite-actions/download-library
       with:
         directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch release-1.12.1 --depth 1
+        download-command: git clone https://github.com/google/googletest/ --branch release-1.14.0 --depth 1
       if: inputs.download-googletest != 'false'
 
     - name: Download easyloggingpp

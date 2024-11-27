@@ -95,6 +95,16 @@ else()
         add_compile_options(-ggdb3)
     endif()
 
+    # Workaround clang-18 bug:
+    # https://github.com/llvm/llvm-project/issues/76515?ysclid=m406q4it5k674680045
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        string(FIND "${CMAKE_CXX_COMPILER_VERSION}" "18" IDX)
+        if (IDX EQUAL 0)  # clang major version is 18
+            message(WARNING "C++ compiler is Clang++-18. Supressing deprecated declaration warnings. Consider using another version of Clang")
+            string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-Wno-deprecated-declarations")
+        endif()
+    endif()
+
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
     add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 
