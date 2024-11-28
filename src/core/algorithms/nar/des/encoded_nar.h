@@ -13,7 +13,7 @@ private:
     using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;
 
     double implication_sign_pos_ = -1;
-    std::vector<EncodedValueRange> encoded_value_ranges_ = std::vector<EncodedValueRange>();
+    std::vector<EncodedValueRange> encoded_value_ranges_{};
 
     model::NARQualities qualities_;
     bool qualities_consistent_ = false;

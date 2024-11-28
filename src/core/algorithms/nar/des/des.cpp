@@ -1,3 +1,8 @@
+#include <algorithm>
+#include <cstddef>
+#include <vector>
+#include <memory>
+
 #include "des.h"
 
 #include "algorithms/nar/value_range.h"
@@ -10,7 +15,6 @@ namespace algos::des {
 using model::ValueRange;
 
 DES::DES() : NARAlgorithm({}) {
-    using namespace config::names;
     RegisterOptions();
 }
 
