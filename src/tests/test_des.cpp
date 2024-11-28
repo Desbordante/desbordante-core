@@ -28,7 +28,7 @@ protected:
 };
 
 TEST_F(DESTest, LaunchTest) {
-    auto algorithm = CreateAlgorithmInstance(kAbalone, 0.5, 0.6, 100, 100, 0.9, 0.5,
+    auto algorithm = CreateAlgorithmInstance(kAbalone, 0.5, 0.6, 100u, 100u, 0.9, 0.5,
                                              algos::des::DifferentialStrategy::rand1Bin);
     algorithm->Execute();
     SUCCEED();
