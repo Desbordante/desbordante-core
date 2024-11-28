@@ -32,14 +32,15 @@ double const& EncodedNAR::operator[](size_t index) const {
         return implication_sign_pos_;
     } else {
         index--;
-        size_t feature = index / EncodedValueRange().kFieldCount;
-        size_t feature_field = index % EncodedValueRange().kFieldCount;
+        size_t feature = index / EncodedValueRange::kFieldCount;
+        size_t feature_field = index % EncodedValueRange::kFieldCount;
         return encoded_value_ranges_[feature][feature_field];
     }
 }
 
-NAR EncodedNAR::SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation) {
-    NAR this_decoded = Decode(domains);
+NAR EncodedNAR::SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation,
+                             RNG& rng) {
+    NAR this_decoded = Decode(domains, rng);
     this_decoded.SetQualities(typed_relation);
     qualities_ = this_decoded.GetQualities();
     qualities_consistent_ = true;
@@ -53,7 +54,7 @@ model::NARQualities const& EncodedNAR::GetQualities() const {
     return qualities_;
 }
 
-NAR EncodedNAR::Decode(FeatureDomains& domains) const {
+NAR EncodedNAR::Decode(FeatureDomains& domains, RNG& rng) const {
     NAR resulting_nar;
     std::vector<size_t> feature_order(encoded_value_ranges_.size());
     std::iota(std::begin(feature_order), std::end(feature_order), 0);
@@ -66,7 +67,7 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
     size_t handling_feat_num = 0;
     for (size_t feature_index : feature_order) {
         EncodedValueRange const& encoded_feature = encoded_value_ranges_[feature_index];
-        if (encoded_feature.threshold < RNG().Next()) {
+        if (encoded_feature.threshold < rng.Next()) {
             handling_feat_num++;
             continue;
         }
@@ -82,20 +83,20 @@ NAR EncodedNAR::Decode(FeatureDomains& domains) const {
     return resulting_nar;
 }
 
-EncodedNAR::EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation) {
+EncodedNAR::EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng) {
     size_t feature_count = domains.size();
     for (size_t feature_index = 0; feature_index < feature_count; feature_index++) {
-        encoded_value_ranges_.emplace_back(EncodedValueRange());
+        encoded_value_ranges_.emplace_back(EncodedValueRange(rng));
     }
-    implication_sign_pos_ = RNG().Next();
-    SetQualities(domains, typed_relation);
+    implication_sign_pos_ = rng.Next();
+    SetQualities(domains, typed_relation, rng);
 }
 
-EncodedNAR::EncodedNAR(size_t feature_count) {
+EncodedNAR::EncodedNAR(size_t feature_count, RNG& rng) {
     for (size_t feature_index = 0; feature_index < feature_count; feature_index++) {
-        encoded_value_ranges_.emplace_back(EncodedValueRange());
+        encoded_value_ranges_.emplace_back(EncodedValueRange(rng));
     }
-    implication_sign_pos_ = RNG().Next();
+    implication_sign_pos_ = rng.Next();
 }
 
 }  // namespace algos::des

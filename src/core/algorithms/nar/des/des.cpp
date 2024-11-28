@@ -45,9 +45,10 @@ FeatureDomains DES::FindFeatureDomains(TypedRelation const* typed_relation) {
     return feature_domains;
 }
 
-std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& domains) const {
+std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& domains,
+                                                          RNG& rng) const {
     std::vector<EncodedNAR> population(population_size_,
-                                       EncodedNAR(domains, typed_relation_.get()));
+                                       EncodedNAR(domains, typed_relation_.get(), rng));
     auto compare_by_fitness = [](EncodedNAR const& a, EncodedNAR const& b) {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
@@ -55,20 +56,20 @@ std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& 
     return population;
 }
 
-EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at) {
+EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at, RNG& rng) {
     MutationFunction diff_func =
             EnumToMutationStrategy(differential_options_.differential_strategy);
-    return (*diff_func)(population, at, differential_options_);
+    return (*diff_func)(population, at, differential_options_, rng);
 }
 
 unsigned long long DES::ExecuteInternal() {
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
-    std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains);
+    std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains, rng_);
 
     for (unsigned i = 0; i < num_evaluations_; i++) {
         size_t candidate_i = i % population_size_;
-        EncodedNAR mutant = MutatedIndividual(population, candidate_i);
-        NAR mutant_decoded = mutant.SetQualities(feature_domains, typed_relation_.get());
+        EncodedNAR mutant = MutatedIndividual(population, candidate_i, rng_);
+        NAR mutant_decoded = mutant.SetQualities(feature_domains, typed_relation_.get(), rng_);
         double candidate_fitness = population[candidate_i].GetQualities().fitness;
 
         if (mutant.GetQualities().fitness > candidate_fitness) {

@@ -5,13 +5,13 @@
 namespace algos::des {
 
 // gets slow if population ~= number_of_indices
-std::vector<size_t> GetRandIndices(size_t except_index, size_t population,
-                                          size_t number_of_indices) {
+std::vector<size_t> GetRandIndices(size_t except_index, size_t population, size_t number_of_indices,
+                                   RNG& rng) {
     assert(number_of_indices <= population - 1);
     std::unordered_set<size_t> indices;
     indices.insert(except_index);
     while (indices.size() < number_of_indices + 1) {
-        size_t random_index = RNG().Next() * population;
+        size_t random_index = rng.Next() * population;
         indices.insert(random_index);
     }
     indices.erase(except_index);
@@ -22,8 +22,8 @@ std::vector<size_t> GetRandIndices(size_t except_index, size_t population,
 }
 
 EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,
-                    DifferentialOptions options) {
-    auto sample_indices = GetRandIndices(candidate_index, population.size(), 3);
+                    DifferentialOptions options, RNG& rng) {
+    auto sample_indices = GetRandIndices(candidate_index, population.size(), 3, rng);
     size_t sample_index1 = sample_indices[0];
     size_t sample_index2 = sample_indices[1];
     size_t sample_index3 = sample_indices[2];
@@ -34,7 +34,7 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_
     auto sample3 = population[sample_index3];
 
     for (size_t i = 0; i < new_individual.VectorSize(); i++) {
-        if (RNG().Next() < options.crossover_probability) {
+        if (rng.Next() < options.crossover_probability) {
             double new_feature_val =
                     sample1[i] + options.differential_scale * (sample2[i] - sample3[i]);
             new_feature_val = std::clamp(new_feature_val, 0.0, 1.0);

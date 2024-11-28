@@ -17,7 +17,6 @@ private:
 
     model::NARQualities qualities_;
     bool qualities_consistent_ = false;
-    double& GetElementAtIndex(size_t index) const;
 
 public:
     size_t VectorSize() const;
@@ -26,11 +25,11 @@ public:
     double const& operator[](size_t index) const;
 
     model::NARQualities const& GetQualities() const;
-    NAR SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation);
+    NAR SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng);
 
-    NAR Decode(FeatureDomains& domains) const;
-    EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation);
-    EncodedNAR(size_t feature_count);
+    NAR Decode(FeatureDomains& domains, RNG& rng) const;
+    EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng);
+    EncodedNAR(size_t feature_count, RNG& rng);
 };
 
 }  // namespace algos::des

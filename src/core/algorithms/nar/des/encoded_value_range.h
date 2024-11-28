@@ -93,11 +93,11 @@ public:
         }
     }
 
-    EncodedValueRange() {
-        permutation = RNG().Next();
-        threshold = RNG().Next();
-        bound1 = RNG().Next();
-        bound2 = RNG().Next();
+    EncodedValueRange(RNG& rng) {
+        permutation = rng.Next();
+        threshold = rng.Next();
+        bound1 = rng.Next();
+        bound2 = rng.Next();
     }
 };
 

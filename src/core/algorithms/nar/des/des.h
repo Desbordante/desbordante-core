@@ -5,6 +5,7 @@
 #include "differential_functions.h"
 #include "encoded_nar.h"
 #include "enums.h"
+#include "rng.h"
 
 namespace algos::des {
 using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;
@@ -15,13 +16,14 @@ private:
     unsigned int population_size_;
     unsigned int num_evaluations_;
     DifferentialOptions differential_options_;
-
+    RNG rng_;
     void RegisterOptions();
 
     static FeatureDomains FindFeatureDomains(TypedRelation const* typed_relation);
-    std::vector<EncodedNAR> GetRandomPopulationInDomains(FeatureDomains const& domains) const;
+    std::vector<EncodedNAR> GetRandomPopulationInDomains(FeatureDomains const& domains,
+                                                         RNG& rng) const;
     void EvolvePopulation(std::vector<EncodedNAR>& population) const;
-    EncodedNAR MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at);
+    EncodedNAR MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at, RNG& rng);
 
 protected:
     void MakeExecuteOptsAvailable() override;
