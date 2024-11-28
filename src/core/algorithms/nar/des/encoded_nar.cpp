@@ -30,12 +30,11 @@ double& EncodedNAR::operator[](size_t index) {
 double const& EncodedNAR::operator[](size_t index) const {
     if (index == 0) {
         return implication_sign_pos_;
-    } else {
-        index--;
-        size_t feature = index / EncodedValueRange::kFieldCount;
-        size_t feature_field = index % EncodedValueRange::kFieldCount;
-        return encoded_value_ranges_[feature][feature_field];
     }
+    index--;
+    size_t feature = index / EncodedValueRange::kFieldCount;
+    size_t feature_field = index % EncodedValueRange::kFieldCount;
+    return encoded_value_ranges_[feature][feature_field];
 }
 
 NAR EncodedNAR::SetQualities(FeatureDomains& domains, TypedRelation const* typed_relation,
