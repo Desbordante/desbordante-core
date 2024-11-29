@@ -4,13 +4,13 @@ namespace model {
 
 StringValueRange::StringValueRange(model::TypedColumnData const& column) {
     domain = std::vector<std::string>();
-    for (size_t row_index = 0; row_index < column.GetNumRows(); row_index++) {
+    for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
         std::string string_value = model::Type::GetValue<std::string>(value);
         bool first_occurrence =
                 std::find(domain.begin(), domain.end(), string_value) == domain.end();
         if (first_occurrence) {
-            domain.emplace_back(string_value);
+            domain.push_back(std::move(string_value));
         }
     }
 }
@@ -21,7 +21,7 @@ std::string StringValueRange::ToString() const {
     if (domain.size() > 0) {
         result += domain[0];
     }
-    for (size_t i = 1; i < domain.size(); i++) {
+    for (size_t i = 1; i < domain.size(); ++i) {
         result += (", " + domain[i]);
     }
     result += "]";
@@ -40,7 +40,7 @@ std::string IntValueRange::ToString() const {
 
 IntValueRange::IntValueRange(model::TypedColumnData const& column) {
     bool initialized = false;
-    for (size_t row_index = 0; row_index < column.GetNumRows(); row_index++) {
+    for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
         long int int_value = model::Type::GetValue<model::Int>(value);
         if (!initialized) {
@@ -60,7 +60,7 @@ IntValueRange::IntValueRange(model::TypedColumnData const& column) {
 
 DoubleValueRange::DoubleValueRange(model::TypedColumnData const& column) {
     bool initialized = false;
-    for (size_t row_index = 0; row_index < column.GetNumRows(); row_index++) {
+    for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
         double double_value = model::Type::GetValue<model::Double>(
                 value);  // is it okay to use a non-long double here? clion says GetValue returns

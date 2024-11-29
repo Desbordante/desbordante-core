@@ -42,7 +42,7 @@ void DES::MakeExecuteOptsAvailable() {
 FeatureDomains DES::FindFeatureDomains(TypedRelation const* typed_relation) {
     std::vector<std::shared_ptr<ValueRange>> feature_domains;
     feature_domains.reserve(typed_relation->GetNumColumns());
-    for (size_t i = 0; i < typed_relation->GetNumColumns(); i++) {
+    for (size_t i = 0; i < typed_relation->GetNumColumns(); ++i) {
         std::shared_ptr<ValueRange> domain = CreateValueRange(typed_relation->GetColumnData(i));
         feature_domains.push_back(std::move(domain));
     }
@@ -72,7 +72,7 @@ unsigned long long DES::ExecuteInternal() {
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
     std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains, rng_);
 
-    for (unsigned i = 0; i < num_evaluations_; i++) {
+    for (unsigned i = 0; i < num_evaluations_; ++i) {
         size_t candidate_i = i % population_size_;
         EncodedNAR mutant = MutatedIndividual(population, candidate_i, rng_);
         NAR mutant_decoded = mutant.SetQualities(feature_domains, typed_relation_.get(), rng_);

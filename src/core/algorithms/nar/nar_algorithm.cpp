@@ -15,6 +15,10 @@ NARAlgorithm::NARAlgorithm(std::vector<std::string_view> phase_names)
 
 void NARAlgorithm::LoadDataInternal() {
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, true);
+    input_table_->Reset();
+    if (typed_relation_->GetColumnData().empty()) {
+        throw std::runtime_error("Got an empty dataset: Numeric AR mining is meaningless.");
+    }
 }
 
 void NARAlgorithm::ResetState() {

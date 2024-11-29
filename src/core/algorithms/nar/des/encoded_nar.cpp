@@ -67,7 +67,7 @@ NAR EncodedNAR::Decode(FeatureDomains& domains, RNG& rng) const {
     for (size_t feature_index : feature_order) {
         EncodedValueRange const& encoded_feature = encoded_value_ranges_[feature_index];
         if (encoded_feature.threshold < rng.Next()) {
-            handling_feat_num++;
+            ++handling_feat_num;
             continue;
         }
         auto const& domain = domains[feature_index];
@@ -77,14 +77,14 @@ NAR EncodedNAR::Decode(FeatureDomains& domains, RNG& rng) const {
         } else {
             resulting_nar.InsertInAnte(feature_index, decoded);
         }
-        handling_feat_num++;
+        ++handling_feat_num;
     }
     return resulting_nar;
 }
 
 EncodedNAR::EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relation, RNG& rng) {
     size_t feature_count = domains.size();
-    for (size_t feature_index = 0; feature_index < feature_count; feature_index++) {
+    for (size_t feature_index = 0; feature_index < feature_count; ++feature_index) {
         encoded_value_ranges_.emplace_back(rng);
     }
     implication_sign_pos_ = rng.Next();
@@ -92,7 +92,7 @@ EncodedNAR::EncodedNAR(FeatureDomains& domains, TypedRelation const* typed_relat
 }
 
 EncodedNAR::EncodedNAR(size_t feature_count, RNG& rng) {
-    for (size_t feature_index = 0; feature_index < feature_count; feature_index++) {
+    for (size_t feature_index = 0; feature_index < feature_count; ++feature_index) {
         encoded_value_ranges_.emplace_back(rng);
     }
     implication_sign_pos_ = rng.Next();

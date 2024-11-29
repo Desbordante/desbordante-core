@@ -33,7 +33,7 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_
     auto sample2 = population[sample_index2];
     auto sample3 = population[sample_index3];
 
-    for (size_t i = 0; i < new_individual.VectorSize(); i++) {
+    for (size_t i = 0; i < new_individual.VectorSize(); ++i) {
         if (rng.Next() < options.crossover_probability) {
             double new_feature_val =
                     sample1[i] + options.differential_scale * (sample2[i] - sample3[i]);

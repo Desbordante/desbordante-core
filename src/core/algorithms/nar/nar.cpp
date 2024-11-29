@@ -53,10 +53,10 @@ void NAR::SetQualities(TypedRelation const* typed_relation) {
     }
     size_t num_rows_fit_ante = 0;
     size_t num_rows_fit_ante_and_cons = 0;
-    for (size_t rowi = 0; rowi < typed_relation->GetNumRows(); rowi++) {
+    for (size_t rowi = 0; rowi < typed_relation->GetNumRows(); ++rowi) {
         bool row_fits_ante = true;
         bool row_fits_cons = true;
-        for (size_t coli = 0; coli < typed_relation->GetNumColumns(); coli++) {
+        for (size_t coli = 0; coli < typed_relation->GetNumColumns(); ++coli) {
             model::TypedColumnData const& column = typed_relation->GetColumnData(coli);
             auto value = column.GetValue(rowi);
             row_fits_ante &= AnteFitsValue(coli, value);
@@ -84,7 +84,7 @@ model::NARQualities const& NAR::GetQualities() const {
 
 void NAR::InsertInAnte(size_t feature_index, std::shared_ptr<ValueRange> range) {
     qualities_consistent_ = false;
-    ante_.insert({feature_index,  std::move(range)});
+    ante_.insert({feature_index, std::move(range)});
 }
 
 void NAR::InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range) {
@@ -92,8 +92,8 @@ void NAR::InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range) 
     cons_.insert({feature_index, std::move(range)});
 }
 
-bool NAR::MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> const& map, size_t feature_index,
-                       std::byte const* value) {
+bool NAR::MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> const& map,
+                       size_t feature_index, std::byte const* value) {
     if (!map.contains(feature_index)) {
         return true;
     }
