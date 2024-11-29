@@ -84,20 +84,20 @@ model::NARQualities const& NAR::GetQualities() const {
 
 void NAR::InsertInAnte(size_t feature_index, std::shared_ptr<ValueRange> range) {
     qualities_consistent_ = false;
-    ante_.insert({feature_index, range});
+    ante_.insert({feature_index,  std::move(range)});
 }
 
 void NAR::InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range) {
     qualities_consistent_ = false;
-    cons_.insert({feature_index, range});
+    cons_.insert({feature_index, std::move(range)});
 }
 
-bool NAR::MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> map, size_t feature_index,
+bool NAR::MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> const& map, size_t feature_index,
                        std::byte const* value) {
     if (!map.contains(feature_index)) {
         return true;
     }
-    return map[feature_index]->Includes(value);
+    return map.at(feature_index)->Includes(value);
 }
 
 }  // namespace model

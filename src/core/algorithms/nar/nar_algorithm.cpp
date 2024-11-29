@@ -10,7 +10,7 @@ NARAlgorithm::NARAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     using namespace config::names;
     RegisterOptions();
-    algos::Algorithm::MakeOptionsAvailable({kTable});
+    MakeOptionsAvailable({kTable});
 }
 
 void NARAlgorithm::LoadDataInternal() {

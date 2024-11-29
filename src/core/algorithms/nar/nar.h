@@ -20,10 +20,8 @@ private:
     NARQualities qualities_;
     bool qualities_consistent_ = false;
 
-    std::map<size_t, std::shared_ptr<ValueRange>> ante_ =
-            std::map<size_t, std::shared_ptr<ValueRange>>();
-    std::map<size_t, std::shared_ptr<ValueRange>> cons_ =
-            std::map<size_t, std::shared_ptr<ValueRange>>();
+    std::map<size_t, std::shared_ptr<ValueRange>> ante_{};
+    std::map<size_t, std::shared_ptr<ValueRange>> cons_{};
 
     bool AnteFitsValue(size_t feature_index, std::byte const* value_of_feature) const {
         return MapFitsValue(ante_, feature_index, value_of_feature);
@@ -33,7 +31,7 @@ private:
         return MapFitsValue(cons_, feature_index, value_of_feature);
     }
 
-    static bool MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> map,
+    static bool MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> const& map,
                              size_t feature_index, std::byte const* value);
 
 public:
