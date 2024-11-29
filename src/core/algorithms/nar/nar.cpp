@@ -37,16 +37,16 @@ NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_an
         result.confidence = 0.0;
         return result;
     }
-    result.confidence = num_rows_fit_ante_and_cons / (double)num_rows_fit_ante;
+    result.confidence = num_rows_fit_ante_and_cons / static_cast<double>(num_rows_fit_ante);
 
-    result.support = num_rows_fit_ante_and_cons / (double)num_rows;
+    result.support = num_rows_fit_ante_and_cons / static_cast<double>(num_rows);
     if (result.support == 0.0) {
         result.fitness = 0.0;
         result.support = 0.0;
         return result;
     }
 
-    double inclusion = included_features / (double)feature_count;
+    double inclusion = included_features / static_cast<double>(feature_count);
     result.fitness = (result.confidence + result.support + inclusion) / 3.0;
     return result;
 }
