@@ -62,9 +62,7 @@ DoubleValueRange::DoubleValueRange(model::TypedColumnData const& column) {
     bool initialized = false;
     for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
-        double double_value = model::Type::GetValue<model::Double>(
-                value);  // is it okay to use a non-long double here? clion says GetValue returns
-                         // just double.
+        double double_value = model::Type::GetValue<model::Double>(value);
         if (!initialized) {
             lower_bound = double_value;
             upper_bound = double_value;
