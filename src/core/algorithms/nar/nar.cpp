@@ -5,7 +5,7 @@ std::string NAR::ToString() const {
     std::string result;
     result += std::to_string(qualities_.fitness);
     result += " {";
-       for (auto it{ante_.begin()}; it != ante_.end(); ++it) {
+    for (auto it{ante_.begin()}; it != ante_.end(); ++it) {
         if (it != ante_.begin()) {
             result += ", ";
         }
@@ -36,9 +36,9 @@ NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_an
         result.fitness = 0.0;
         result.confidence = 0.0;
         return result;
-    } else {
-        result.confidence = num_rows_fit_ante_and_cons / (double)num_rows_fit_ante;
     }
+    result.confidence = num_rows_fit_ante_and_cons / (double)num_rows_fit_ante;
+
     result.support = num_rows_fit_ante_and_cons / (double)num_rows;
     if (result.support == 0.0) {
         result.fitness = 0.0;
