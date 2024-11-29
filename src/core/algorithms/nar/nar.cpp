@@ -31,24 +31,17 @@ std::string NAR::ToString() const {
 
 NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_and_cons,
                            size_t included_features, size_t feature_count, size_t num_rows) {
-    NARQualities result;
     if (num_rows_fit_ante == 0) {
-        result.fitness = 0.0;
-        result.confidence = 0.0;
-        return result;
+        return {0.0, 0.0, 0.0};
     }
-    result.confidence = num_rows_fit_ante_and_cons / static_cast<double>(num_rows_fit_ante);
-
-    result.support = num_rows_fit_ante_and_cons / static_cast<double>(num_rows);
-    if (result.support == 0.0) {
-        result.fitness = 0.0;
-        result.support = 0.0;
-        return result;
+    double support = num_rows_fit_ante_and_cons / static_cast<double>(num_rows);
+    if (support == 0.0) {
+        return {0.0, 0.0, 0.0};
     }
-
+    double confidence = num_rows_fit_ante_and_cons / static_cast<double>(num_rows_fit_ante);
     double inclusion = included_features / static_cast<double>(feature_count);
-    result.fitness = (result.confidence + result.support + inclusion) / 3.0;
-    return result;
+    double fitness = (confidence + support + inclusion) / 3.0;
+    return {fitness, support, confidence};
 }
 
 // TODO: this function is way too big and cluttered
@@ -58,7 +51,6 @@ void NAR::SetQualities(TypedRelation const* typed_relation) {
         qualities_consistent_ = true;
         return;
     }
-
     size_t num_rows_fit_ante = 0;
     size_t num_rows_fit_ante_and_cons = 0;
     for (size_t rowi = 0; rowi < typed_relation->GetNumRows(); rowi++) {
@@ -102,14 +94,10 @@ void NAR::InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range) 
 
 bool NAR::MapFitsValue(std::map<size_t, std::shared_ptr<ValueRange>> map, size_t feature_index,
                        std::byte const* value) {
-    bool map_binds_feature = map.find(feature_index) != map.end();
-    if (!map_binds_feature) {
+    if (!map.contains(feature_index)) {
         return true;
-    } else if (map.at(feature_index)->Includes(value)) {
-        return true;
-    } else {
-        return false;
     }
+    return map[feature_index]->Includes(value);
 }
 
 }  // namespace model
