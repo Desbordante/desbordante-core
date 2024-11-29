@@ -63,7 +63,7 @@ EncodedValueRange::DecodeTypedValueRange<model::String, model::StringValueRange>
     } else {
         result = string_vector[span * this->bound1];
     }
-    return std::make_shared<StringValueRange>(StringValueRange(result));
+    return std::make_shared<StringValueRange>(result);
 }
 
 std::shared_ptr<model::ValueRange> EncodedValueRange::Decode(
