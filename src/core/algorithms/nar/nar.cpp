@@ -5,26 +5,22 @@ std::string NAR::ToString() const {
     std::string result;
     result += std::to_string(qualities_.fitness);
     result += " {";
-    size_t antecounter = 0;
-    for (auto const& [key, value] : ante_) {
-        if (antecounter > 0) {
+       for (auto it{ante_.begin()}; it != ante_.end(); ++it) {
+        if (it != ante_.begin()) {
             result += ", ";
         }
-        result += std::to_string(key);
+        result += std::to_string(it->first);
         result += ": ";
-        result += value->ToString();
-        antecounter++;
+        result += it->second->ToString();
     }
     result += "} ===> {";
-    size_t conscounter = 0;
-    for (auto const& [key, value] : cons_) {
-        if (conscounter > 0) {
+    for (auto it{cons_.begin()}; it != cons_.end(); ++it) {
+        if (it != cons_.begin()) {
             result += ", ";
         }
-        result += std::to_string(key);
+        result += std::to_string(it->first);
         result += ": ";
-        result += value->ToString();
-        conscounter++;
+        result += it->second->ToString();
     }
     result += "} s: ";
     result += std::to_string(qualities_.support);
