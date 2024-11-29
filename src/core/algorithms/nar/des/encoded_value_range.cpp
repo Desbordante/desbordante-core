@@ -87,11 +87,7 @@ std::shared_ptr<model::ValueRange> EncodedValueRange::Decode(
     }
 }
 
-EncodedValueRange::EncodedValueRange(RNG& rng) {
-    permutation = rng.Next();
-    threshold = rng.Next();
-    bound1 = rng.Next();
-    bound2 = rng.Next();
-}
+EncodedValueRange::EncodedValueRange(RNG& rng)
+    : permutation(rng.Next()), threshold(rng.Next()), bound1(rng.Next()), bound2(rng.Next()) {}
 
 }  // namespace algos::des
