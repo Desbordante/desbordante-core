@@ -8,6 +8,7 @@
 #include <boost/functional/hash.hpp>
 
 #include "model/table/column_index.h"
+#include "util/bitset_extensions.h"
 
 namespace algos::fastod {
 
@@ -93,11 +94,11 @@ public:
     }
 
     model::ColumnIndex FindFirst() const noexcept {
-        return bitset_._Find_first();
+        return util::FindFirst(bitset_);
     }
 
     model::ColumnIndex FindNext(model::ColumnIndex pos) const noexcept {
-        return bitset_._Find_next(pos);
+        return util::FindNext(bitset_, pos);
     }
 
     std::string ToString() const;
