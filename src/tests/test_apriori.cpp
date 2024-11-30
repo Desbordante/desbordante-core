@@ -39,6 +39,26 @@ void CheckAssociationRulesListsEquality(
     SUCCEED();
 }
 
+void CheckSupportAndConfidence(std::list<model::ARStrings> const& actual,
+                               std::set<std::string> const& lhs, std::set<std::string> const& rhs,
+                               double expected_support, double expected_confidence) {
+    for (auto const& rule : actual) {
+        std::set<std::string> actual_lhs(rule.left.begin(), rule.left.end());
+        std::set<std::string> actual_rhs(rule.right.begin(), rule.right.end());
+
+        if (lhs == actual_lhs && rhs == actual_rhs) {
+            EXPECT_DOUBLE_EQ(rule.support, expected_support)
+                    << "supports don't match: expected " << expected_support
+                    << ", got: " << rule.support;
+            EXPECT_DOUBLE_EQ(rule.confidence, expected_confidence)
+                    << "confidences don't match: expected " << expected_confidence
+                    << ", got: " << rule.confidence;
+            return;
+        }
+    }
+    ADD_FAILURE() << "expected rule not found in generated rules";
+}
+
 static std::set<std::pair<std::set<std::string>, std::set<std::string>>> ToSet(
         std::list<model::ARStrings> const& rules) {
     std::set<std::pair<std::set<std::string>, std::set<std::string>>> set;
@@ -316,6 +336,30 @@ TEST_F(ARAlgorithmTest, RepeatedExecutionConsistentResult) {
         algorithm->Execute();
         CheckAssociationRulesListsEquality(algorithm->GetArStringsList(), first_result);
     }
+}
+
+TEST_F(ARAlgorithmTest, SupportAndConfidenceSingular) {
+    auto algorithm = CreateAlgorithmInstance(kRulesBook, 0.2, 0.5, 0, 1);
+    algorithm->Execute();
+    auto result = algorithm->GetArStringsList();
+    CheckSupportAndConfidence(result, {"Eggs"}, {"Milk"}, 0.6, 1);
+    CheckSupportAndConfidence(result, {"Bread"}, {"Eggs"}, 0.2, 0.5);
+    CheckSupportAndConfidence(result, {"Yogurt"}, {"Milk"}, 0.6, 1);
+    CheckSupportAndConfidence(result, {"Bread"}, {"Milk"}, 0.4, 1);
+    CheckSupportAndConfidence(result, {"Cheese"}, {"Milk"}, 0.4, 1);
+    CheckSupportAndConfidence(result, {"Milk", "Bread"}, {"Eggs"}, 0.2, 0.5);
+}
+
+TEST_F(ARAlgorithmTest, SupportAndConfidenceTabular) {
+    auto algorithm = CreateAlgorithmInstance(kRulesBookRows, 0.2, 0.5, false);
+    algorithm->Execute();
+    auto result = algorithm->GetArStringsList();
+    CheckSupportAndConfidence(result, {"Eggs"}, {"Milk"}, 0.6, 1);
+    CheckSupportAndConfidence(result, {"Bread"}, {"Eggs"}, 0.2, 0.5);
+    CheckSupportAndConfidence(result, {"Yogurt"}, {"Milk"}, 0.6, 1);
+    CheckSupportAndConfidence(result, {"Bread"}, {"Milk"}, 0.4, 1);
+    CheckSupportAndConfidence(result, {"Cheese"}, {"Milk"}, 0.4, 1);
+    CheckSupportAndConfidence(result, {"Milk", "Bread"}, {"Eggs"}, 0.2, 0.5);
 }
 
 }  // namespace tests

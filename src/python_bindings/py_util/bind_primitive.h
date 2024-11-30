@@ -7,6 +7,7 @@
 #include <pybind11/pybind11.h>
 
 #include "algorithms/algorithm.h"
+#include "util/mem_ptr_deduce.h"
 
 namespace python_bindings {
 
@@ -62,7 +63,7 @@ auto BindPrimitive(pybind11::module_& module, auto result_method, char const* ba
 
     using ResultMethodType = std::decay_t<decltype(result_method)>;
     static_assert(std::is_member_pointer_v<ResultMethodType>);
-    using Base = detail::MemberPointerClass<ResultMethodType>;
+    using Base = util::MemPtrDeduce<ResultMethodType>::Class;
     py::class_<Base, Algorithm>(module, base_name)
             .def(base_result_method_name, result_method, result_rv_policy);
     auto algos_module = module.def_submodule("algorithms");

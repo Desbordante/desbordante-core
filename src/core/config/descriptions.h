@@ -5,6 +5,7 @@
 
 #include "algorithms/cfd/enums.h"
 #include "algorithms/fd/tane/enums.h"
+#include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "util/enum_to_available_values.h"
 
@@ -21,6 +22,9 @@ std::string const kDPfdErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::PfdErrorMeasure>();
 std::string const kDAfdErrorMeasureString =
         "AFD error measure to use\n" + util::EnumToAvailableValues<algos::AfdErrorMeasure>();
+std::string const kDLevelDefinitionString =
+        "MD lattice level definition to use\n" +
+        util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -146,4 +150,14 @@ constexpr auto kDMaxAmountOfCategories =
 constexpr auto kDFixedSample =
         "Indicates that instead of random generated sample CORDS uses sample consisting of n first "
         "rows of the given table. Intended for tests only.";
+constexpr auto kDLeftTable = "first table processed by the algorithm";
+constexpr auto kDRightTable = "second table processed by the algorithm";
+constexpr auto kDPruneNonDisjoint =
+        "don't search for dependencies where the LHS decision boundary at the same index as the "
+        "RHS decision boundary limits the number of records matched";
+constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
+constexpr auto kDColumnMatches = "column matches to examine";
+constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
+auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
+constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 }  // namespace config::descriptions

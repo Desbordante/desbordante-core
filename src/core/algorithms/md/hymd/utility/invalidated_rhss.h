@@ -1,0 +1,104 @@
+#pragma once
+
+#include <cstddef>
+#include <iterator>
+#include <vector>
+
+#include "algorithms/md/hymd/column_classifier_value_id.h"
+#include "algorithms/md/hymd/md_element.h"
+#include "algorithms/md/hymd/rhss.h"
+#include "model/index.h"
+
+namespace algos::hymd::utility {
+class InvalidatedRhss {
+    using NewCCVIds = std::vector<ColumnClassifierValueId>;
+
+    Rhss invalidated_;
+    NewCCVIds new_ccv_ids_;
+
+public:
+    class UpdateView {
+        InvalidatedRhss const& invalidated_info_;
+
+        UpdateView(InvalidatedRhss const& invalidated_info) noexcept
+            : invalidated_info_(invalidated_info) {}
+
+    public:
+        class UpdateIterator {
+            using NewCCVIdsIterator = NewCCVIds::const_iterator;
+            using InvalidatedIterator = Rhss::const_iterator;
+
+            InvalidatedIterator invalidated_iter_;
+            NewCCVIdsIterator new_ccv_ids_iter_;
+
+            UpdateIterator(InvalidatedIterator invalidated_iter,
+                           NewCCVIdsIterator new_ccv_ids_iter) noexcept
+                : invalidated_iter_(invalidated_iter), new_ccv_ids_iter_(new_ccv_ids_iter) {}
+
+        public:
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type = std::ptrdiff_t;
+            using value_type = MdElement;
+            using pointer = void;
+            using reference = void;
+
+            UpdateIterator operator++() noexcept {
+                ++invalidated_iter_;
+                ++new_ccv_ids_iter_;
+                return *this;
+            }
+
+            UpdateIterator operator++(int) noexcept {
+                UpdateIterator old = *this;
+                ++(*this);
+                return old;
+            }
+
+            friend bool operator==(UpdateIterator const& iter1, UpdateIterator const& iter2) {
+                return iter1.invalidated_iter_ == iter2.invalidated_iter_;
+            }
+
+            friend bool operator!=(UpdateIterator const& iter1, UpdateIterator const& iter2) {
+                return !(iter1 == iter2);
+            }
+
+            value_type operator*() const noexcept {
+                return {invalidated_iter_->index, *new_ccv_ids_iter_};
+            }
+
+            friend UpdateView;
+        };
+
+        UpdateIterator begin() const noexcept {
+            return {invalidated_info_.invalidated_.begin(), invalidated_info_.new_ccv_ids_.begin()};
+        }
+
+        UpdateIterator end() const noexcept {
+            return {invalidated_info_.invalidated_.end(), invalidated_info_.new_ccv_ids_.end()};
+        }
+
+        friend InvalidatedRhss;
+    };
+
+    void PushBack(MdElement old_rhs, ColumnClassifierValueId new_ccv_id) {
+        invalidated_.push_back(old_rhs);
+        new_ccv_ids_.push_back(new_ccv_id);
+    }
+
+    UpdateView GetUpdateView() const noexcept {
+        return {*this};
+    }
+
+    Rhss const& GetInvalidated() const noexcept {
+        return invalidated_;
+    }
+
+    bool IsEmpty() const noexcept {
+        return invalidated_.empty();
+    }
+
+    std::size_t Size() const noexcept {
+        return invalidated_.size();
+    }
+};
+}  // namespace algos::hymd::utility

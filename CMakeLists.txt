@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0144 NEW)
 project(Desbordante)
 
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
@@ -102,7 +103,7 @@ endif()
 
 # configuring boost
 set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
+find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph CONFIG)
 include_directories(${Boost_INCLUDE_DIRS})
 message(${Boost_INCLUDE_DIRS})
 
@@ -117,7 +118,7 @@ include_directories(
         "src/core/config"
 )
 
-include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include")
+include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include" "lib/frozen/include")
 
 # adding submodules
 if (COMPILE_TESTS)

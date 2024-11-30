@@ -40,6 +40,7 @@ The currently supported data patterns are:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with $g_1$ metric (discovery and validation)
 * Association rules (discovery)
+* Matching dependencies (discovery)
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
@@ -214,6 +215,8 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
+* Matching dependencies
+   - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
 
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
@@ -230,8 +233,8 @@ However, as Desbordante core uses C++, additional requirements on the machine ar
 
 ## Build instructions
 
-### Ubuntu and MacOS
-The following instructions were tested on Ubuntu 20.04+ LTS and MacOS 14.0+ (Apple Silicon).
+### Ubuntu and macOS
+The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.7 (Apple Silicon).
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
@@ -255,39 +258,49 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 
 #### MacOS dependencies installation
 
-To install GCC and CMake on MacOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+Install Xcode Command Line Tools if you don't have them. Run:
+```sh
+xcode-select --install
+```
+Follow the prompts to continue.
+
+To install GCC and CMake on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
 installed, run the following commands:
 ```sh
-brew install gcc cmake 
+brew install gcc@14 cmake
 ```
 After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
 homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
 `~/.bash_profile` (for Bash) and add to the end of the file the output of `brew shellenv`.
 After that, restart the terminal and check the version of CMake again, now it should be displayed.
 
-Then, check the installed version of GCC:`brew info gcc`. You must see something like `==> gcc: stable X.Y.Z ...`. 
-Check that `gcc-X` and `g++-X` commands work, where X is the version from this output 
-(this designation continues to be used further).
-
-After you need to install Boost library. Please, don't use Homebrew for this, as it may not work correctly.
-Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/).
-After downloading, unpack the archive to the `/usr/local` directory or another directory of your
-choice.
-
-Go to unpacked boost directory in the terminal and run the following commands:
+Then you need to install Boost library built with GCC. Please avoid using Homebrew for this, as the Boost version provided by Homebrew
+is built with Clang, which has a different ABI. Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/) and unpack the archive to the `/usr/local/` directory or another directory of your choice:
+```sh
+cd /usr/local/
+curl https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2 --output "boost_1_86_0.tar.bz2"
+tar xvjf boost_1_86_0.tar.bz2
+rm boost_1_86_0.tar.bz2
+cd boost_1_86_0
+```
+Navigate to the unpacked Boost directory in the terminal and run the following commands:
 ```sh
 ./bootstrap.sh 
-echo "using gcc : : g++-X ;" > user-config.jam
-./b2 --user-config=user-config.jam
-export BOOST_ROOT=$(pwd)
+echo "using darwin : : g++-14 ;" > user-config.jam
+./b2 install --user-config=user-config.jam --layout=versioned
+export BOOST_ROOT=$(pwd) # export Boost_ROOT=$(pwd) for CMake 3.26 and below.
 ``` 
-You can also add last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
+You can also add the last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
 
-Before building project you must set GCC as default compiler by changing the following environment variables:
+Before building the project you must set locally or in the above-mentioned dotfiles the following CMake environment variables:
 ```sh
-export CC=gcc-X
-export CXX=g++-X
+export CC=gcc-14
+export CXX=g++-14
+export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/
 ```
+The first two lines set GCC as the default compiler in CMake. The last export is also necessary due to issues with GCC 14 and
+the last MacOSX15.0.sdk used by CMake by default, you can read more about this [here](https://gist.github.com/scivision/d69faebbc56da9714798087b56de925a)
+and [here](https://github.com/iains/gcc-14-branch/issues/11).
 
 ### Building the project
 #### Building the Python module using pip

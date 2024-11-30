@@ -72,6 +72,8 @@ CSVConfig const kTestZeros = CreateCsvConfig("TestZeros.csv", ',', true);
 CSVConfig const kNullEmpty = CreateCsvConfig("NullEmpty.csv", ',', true);
 CSVConfig const kSimpleTypes = CreateCsvConfig("SimpleTypes.csv", ',', true);
 CSVConfig const kRulesBook = CreateCsvConfig("transactional_data/rules-book.csv", ',', false);
+CSVConfig const kRulesBookRows =
+        CreateCsvConfig("transactional_data/rules-book-rows.csv", ',', false);
 CSVConfig const kRulesPresentationExtended =
         CreateCsvConfig("transactional_data/rules-presentation-extended.csv", ',', false);
 CSVConfig const kRulesPresentation =
@@ -120,4 +122,7 @@ CSVConfig const kTestDynamicFDUpdateBad3 =
 CSVConfig const kTestDynamicFDUpdateBad4 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
+CSVConfig const kAnimalsBeverages = CreateCsvConfig("animals_beverages.csv", ',', true);
+CSVConfig const kTestDC = CreateCsvConfig("TestDC.csv", ',', true);
+CSVConfig const kTestDC1 = CreateCsvConfig("TestDC1.csv", ',', true);
 }  // namespace tests
