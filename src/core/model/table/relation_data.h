@@ -16,7 +16,7 @@ public:
     using ColumnType = T;
 
 protected:
-    std::unique_ptr<RelationalSchema> schema_;
+    std::shared_ptr<RelationalSchema const> schema_;
     std::vector<ColumnType> column_data_;
 
 public:
@@ -64,6 +64,10 @@ public:
 
     RelationalSchema const* GetSchema() const {
         return schema_.get();
+    }
+
+    std::shared_ptr<RelationalSchema const> const& GetSharedPtrSchema() const {
+        return schema_;
     }
 };
 
