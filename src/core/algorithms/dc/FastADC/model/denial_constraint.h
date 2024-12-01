@@ -54,11 +54,9 @@ public:
 
 }  // namespace algos::fastadc
 
-namespace std {
 template <>
-struct hash<algos::fastadc::DenialConstraint> {
+struct std::hash<algos::fastadc::DenialConstraint> {
     size_t operator()(algos::fastadc::DenialConstraint const& k) const noexcept {
         return k.GetPredicateSet().Hash();
     }
 };
-}  // namespace std
