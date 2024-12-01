@@ -124,7 +124,8 @@ private:
         else if constexpr (std::is_same_v<T, std::string>)
             return string_provider_->GetIndex(GetValue<std::string>(column, row));
         else
-            static_assert(DependentFalse<T>::value, "PliShardBuilder does not unsupport that type");
+            static_assert(details::DependentFalse<T>::value,
+                          "PliShardBuilder does not unsupport that type");
     }
 
     template <typename T>
