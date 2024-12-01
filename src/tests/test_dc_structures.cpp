@@ -329,7 +329,7 @@ TEST_F(FastADC, InverseAndMutexMaps) {
     predicate_builder_->BuildPredicateSpace(col_data_);
 
     auto const& predicates = predicate_builder_->GetPredicates();
-    auto const& inverse_map = predicate_builder_->GetInverseMap();
+    auto const& inverse_map = predicate_builder_->TakeInverseMap();
     for (size_t i = 0; i < predicates.size(); ++i) {
         auto const& predicate = predicates[i];
         auto inverse_idx = inverse_map[i];
@@ -340,7 +340,7 @@ TEST_F(FastADC, InverseAndMutexMaps) {
                 << " does not have the correct inverse operator at index " << inverse_idx;
     }
 
-    auto const& mutex_map = predicate_builder_->GetMutexMap();
+    auto const& mutex_map = predicate_builder_->TakeMutexMap();
     for (size_t i = 0; i < predicates.size(); ++i) {
         auto const& predicate = predicates[i];
         auto const& mutex_bits = mutex_map[i];
@@ -503,7 +503,7 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
     auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
     PredicateOrganizer organizer(predicate_builder_->PredicateCount(), std::move(evidence_set),
-                                 std::move(predicate_builder_->GetMutexMap()));
+                                 std::move(predicate_builder_->TakeMutexMap()));
 
     std::vector<Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
 
