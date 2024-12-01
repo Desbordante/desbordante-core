@@ -105,7 +105,27 @@ public:
     void BuildAll();
 
 private:
-    PredicateBitset BuildMask(PredicatesSpan group, std::initializer_list<OperatorType>& types);
+    template <std::size_t N>
+    PredicateBitset BuildMask(PredicatesSpan group, OperatorType const (&types)[N]) {
+        PredicateBitset mask;
+
+        for (auto& p : group) {
+            if (std::any_of(std::begin(types), std::end(types),
+                            [p](OperatorType type) { return p->GetOperator() == type; })) {
+                auto index = provider_->GetIndex(p);
+
+                if (index < mask.size()) {
+                    mask.set(index);
+                } else {
+                    throw std::runtime_error(
+                            "Predicate index exceeds the size of PredicateBitset, "
+                            "such amount of predicates is not supported.");
+                }
+            }
+        }
+
+        return mask;
+    }
 
     using PackAction = std::function<void(PredicatesSpan)>;
 
