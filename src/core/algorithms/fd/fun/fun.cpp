@@ -188,7 +188,7 @@ unsigned long long FUN::ExecuteInternal() {
     int total_fds = 0;
     for (auto const& [rhs, lverticals] : fds_) {
         for (Vertical const& lhs : lverticals) {
-            RegisterFd(lhs, rhs);
+            RegisterFd(lhs, rhs, relation_->GetSharedPtrSchema());
             total_fds++;
         }
     }

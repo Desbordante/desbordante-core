@@ -21,7 +21,7 @@ public:
 private:
     config::InputTable input_table_;
 
-    std::unique_ptr<RelationalSchema> schema_{};
+    std::shared_ptr<RelationalSchema> schema_{};
 
     std::vector<std::string> column_names_;
     size_t number_attributes_{};

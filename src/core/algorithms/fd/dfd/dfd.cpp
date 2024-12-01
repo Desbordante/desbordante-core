@@ -52,31 +52,31 @@ unsigned long long DFD::ExecuteInternal() {
     boost::asio::thread_pool search_space_pool(number_of_threads_);
 
     for (auto& rhs : schema->GetColumns()) {
-        boost::asio::post(
-                search_space_pool, [this, &rhs, schema, progress_step, &partition_storage]() {
-                    ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
-                    model::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
+        boost::asio::post(search_space_pool, [this, &rhs, schema, progress_step,
+                                              &partition_storage]() {
+            ColumnData const& rhs_data = relation_->GetColumnData(rhs->GetIndex());
+            model::PositionListIndex const* const rhs_pli = rhs_data.GetPositionListIndex();
 
-                    /* if all the rows have the same value, then we register FD with empty LHS
-                     * if we have minimal FD like []->RHS, it is impossible to find smaller FD with
-                     * this RHS, so we register it and move to the next RHS
-                     * */
-                    if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
-                        RegisterFd(*(schema->empty_vertical_), *rhs);
-                        AddProgress(progress_step);
-                        return;
-                    }
+            /* if all the rows have the same value, then we register FD with empty LHS
+             * if we have minimal FD like []->RHS, it is impossible to find smaller FD with
+             * this RHS, so we register it and move to the next RHS
+             * */
+            if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
+                RegisterFd(*(schema->empty_vertical_), *rhs, relation_->GetSharedPtrSchema());
+                AddProgress(progress_step);
+                return;
+            }
 
-                    auto search_space = LatticeTraversal(rhs.get(), relation_.get(),
-                                                         unique_columns_, partition_storage.get());
-                    auto const minimal_deps = search_space.FindLHSs();
+            auto search_space = LatticeTraversal(rhs.get(), relation_.get(), unique_columns_,
+                                                 partition_storage.get());
+            auto const minimal_deps = search_space.FindLHSs();
 
-                    for (auto const& minimal_dependency_lhs : minimal_deps) {
-                        RegisterFd(minimal_dependency_lhs, *rhs);
-                    }
-                    AddProgress(progress_step);
-                    LOG(INFO) << static_cast<int>(GetProgress().second);
-                });
+            for (auto const& minimal_dependency_lhs : minimal_deps) {
+                RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
+            }
+            AddProgress(progress_step);
+            LOG(INFO) << static_cast<int>(GetProgress().second);
+        });
     }
 
     search_space_pool.join();

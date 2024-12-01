@@ -19,7 +19,7 @@ void Aid::LoadDataInternal() {
         throw std::runtime_error("Unable to work on an empty dataset.");
     }
 
-    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName());
+    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_of_attributes_; ++i) {
         std::string const& column_name = input_table_->GetColumnName(static_cast<int>(i));
@@ -161,7 +161,7 @@ void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
          attr_num = constant_columns_.find_next(attr_num)) {
         attributes[attr_num] = false;
         Column rhs = *schema_->GetColumn(attr_num);
-        RegisterFd(lhs, rhs);
+        RegisterFd(lhs, rhs, schema_);
     }
 }
 
@@ -246,7 +246,7 @@ void Aid::RegisterFDs(size_t rhs_attribute,
     Column rhs = *schema_->GetColumn(rhs_attribute);
     for (auto const& lhs_attributes : list_of_lhs_attributes) {
         Vertical lhs = schema_->GetVertical(lhs_attributes);
-        RegisterFd(lhs, rhs);
+        RegisterFd(lhs, rhs, schema_);
     }
 }
 

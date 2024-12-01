@@ -199,7 +199,8 @@ unsigned long long Cords::ExecuteInternal() {
             bool sfd_detected = DetectSFD(smp);
 
             if (sfd_detected) {
-                RegisterFd(smp.GetLhsVertical(), smp.GetRhsColumn());
+                RegisterFd(smp.GetLhsVertical(), smp.GetRhsColumn(),
+                           typed_relation_->GetSharedPtrSchema());
             }
 
             if (sfd_detected || only_sfd_) {

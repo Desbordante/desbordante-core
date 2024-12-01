@@ -22,7 +22,7 @@ Pyro::Pyro(std::optional<ColumnLayoutRelationDataManager> relation_manager)
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
         this->DiscoverFd(fd);
-        this->FDAlgorithm::RegisterFd(fd.lhs_, fd.rhs_);
+        this->FDAlgorithm::RegisterFd(fd.lhs_, fd.rhs_, relation_->GetSharedPtrSchema());
     };
     ucc_consumer_ = nullptr;
 }
