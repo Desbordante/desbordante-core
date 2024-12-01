@@ -8,8 +8,6 @@
 namespace algos::fastadc {
 class NTreeSearch {
 public:
-    NTreeSearch() = default;
-
     bool Add(boost::dynamic_bitset<> const& bs) {
         Add(bs, bs.find_first());
         return true;
