@@ -113,11 +113,11 @@ public:
         return predicates_.size();
     }
 
-    std::vector<PredicateBitset>&& GetMutexMap() noexcept {
+    std::vector<PredicateBitset>&& TakeMutexMap() noexcept {
         return std::move(mutex_map_);
     }
 
-    std::vector<size_t>&& GetInverseMap() noexcept {
+    std::vector<size_t>&& TakeInverseMap() noexcept {
         return std::move(inverse_map_);
     }
 };

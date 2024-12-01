@@ -39,7 +39,7 @@ public:
         : n_predicates_(pbuilder.PredicateCount()),
           evi_count_(evidence_set.GetTotalCount()),
           target_(static_cast<int64_t>(std::ceil((1 - threshold) * evi_count_))),
-          organizer_(n_predicates_, std::move(evidence_set), std::move(pbuilder.GetMutexMap())),
+          organizer_(n_predicates_, std::move(evidence_set), std::move(pbuilder.TakeMutexMap())),
           approx_covers_(n_predicates_),
           predicate_provider_(pbuilder.predicate_provider),
           predicate_index_provider_(pbuilder.predicate_index_provider) {
