@@ -41,6 +41,6 @@ void BindUcc(py::module_& main_module) {
             .def("__hash__", [](UCC const& ucc) { return py::hash(MakeUCCNameTuple(ucc)); });
     BindPrimitive<HyUCC, PyroUCC, HPIValid>(
             ucc_module, py::overload_cast<>(&UCCAlgorithm::UCCList, py::const_), "UccAlgorithm",
-            "get_uccs", {"HyUCC", "PyroUCC", "HPIValid"});
+            "get_uccs", {"HyUCC", "PyroUCC", "HPIValid"}, pybind11::return_value_policy::copy);
 }
 }  // namespace python_bindings
