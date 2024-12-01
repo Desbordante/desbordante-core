@@ -245,7 +245,7 @@ The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
-- GNU GCC, version 10+
+- GNU GCC, version 10+ or Clang, version 16+
 - CMake, version 3.13+
 - Boost library built with GCC, version 1.81.0+
 
@@ -254,6 +254,7 @@ To use test datasets you will need:
 
 #### Ubuntu dependencies installation
 
+##### GCC
 Run the following commands:
 ```sh 
 sudo apt install gcc g++ cmake libboost-all-dev git-lfs
@@ -261,6 +262,18 @@ export CC=gcc
 export CXX=g++
 ```
 The last 2 lines set gcc as CMake compiler in your terminal session.
+You can also add them to the end of `~/.profile` to set this by default in all sessions.
+
+##### Clang
+Run the following commands:
+```sh
+sudo apt install cmake libboost-all-dev git-lfs
+bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+export CC=clang
+export CXX=clang++
+```
+Second command installs the latest version of LLVM (which includes Clang). For other installation options, see [LLVM packages page](https://apt.llvm.org/).
+The last 2 lines set Clang as CMake compiler in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 #### MacOS dependencies installation
