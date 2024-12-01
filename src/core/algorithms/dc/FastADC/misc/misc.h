@@ -4,11 +4,11 @@
 
 namespace algos::fastadc {
 
-namespace {
+namespace details {
 // Helper to trigger a compile-time error for unsupported types
 template <typename T>
 struct DependentFalse : std::false_type {};
-}  // namespace
+}  // namespace details
 
 template <typename T>
 [[nodiscard]] inline T const& GetValue(model::TypedColumnData const& column, size_t row) {
@@ -46,7 +46,7 @@ template <typename T>
         static double const kMinDouble = std::numeric_limits<double>::lowest();
         return kMinDouble;
     } else {
-        static_assert(DependentFalse<T>::value,
+        static_assert(details::DependentFalse<T>::value,
                       "FastADC algorithm supports only int64_t, string, or double as column types. "
                       "This function should not be called with other types.");
     }
