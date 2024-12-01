@@ -243,15 +243,15 @@ void FDTreeElement::PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std
     }
 }
 
-void FDTreeElement::FillFdCollection(RelationalSchema const& scheme, std::list<FD>& fd_collection,
-                                     unsigned int max_lhs) const {
+void FDTreeElement::FillFdCollection(std::shared_ptr<RelationalSchema> const& scheme,
+                                     std::list<FD>& fd_collection, unsigned int max_lhs) const {
     std::bitset<kMaxAttrNum> active_path;
     this->TransformTreeFdCollection(active_path, fd_collection, scheme, max_lhs);
 }
 
 void FDTreeElement::TransformTreeFdCollection(std::bitset<kMaxAttrNum>& active_path,
                                               std::list<FD>& fd_collection,
-                                              RelationalSchema const& scheme,
+                                              std::shared_ptr<RelationalSchema> const& scheme,
                                               unsigned int max_lhs) const {
     if (active_path.count() > max_lhs) return;
 
@@ -262,9 +262,9 @@ void FDTreeElement::TransformTreeFdCollection(std::bitset<kMaxAttrNum>& active_p
                  i = active_path._Find_next(i)) {
                 lhs_bitset.set(i - 1);
             }
-            Vertical lhs(&scheme, lhs_bitset);
-            Column rhs(&scheme, scheme.GetColumn(attr - 1)->GetName(), attr - 1);
-            fd_collection.emplace_back(FD{lhs, rhs});
+            Vertical lhs(scheme.get(), lhs_bitset);
+            Column rhs(scheme.get(), scheme->GetColumn(attr - 1)->GetName(), attr - 1);
+            fd_collection.emplace_back(FD{lhs, rhs, scheme});
         }
     }
 

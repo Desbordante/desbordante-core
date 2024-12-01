@@ -32,7 +32,7 @@ double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
 
 void TaneCommon::RegisterAndCountFd(Vertical const& lhs, Column const* rhs) {
     dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
-    PliBasedFDAlgorithm::RegisterFd(lhs, *rhs);
+    PliBasedFDAlgorithm::RegisterFd(lhs, *rhs, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {

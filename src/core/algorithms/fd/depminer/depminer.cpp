@@ -119,7 +119,7 @@ void Depminer::LhsForColumn(std::unique_ptr<Column> const& column,
     auto const pli = relation_->GetColumnData(column->GetIndex()).GetPositionListIndex();
     bool column_contains_only_equal_values = pli->IsConstant();
     if (column_contains_only_equal_values) {
-        RegisterFd(Vertical(), *column);
+        RegisterFd(Vertical(), *column, relation_->GetSharedPtrSchema());
         return;
     }
 
@@ -138,7 +138,7 @@ void Depminer::LhsForColumn(std::unique_ptr<Column> const& column,
             // 6
             if (is_fd) {
                 if (!l.Contains(*column)) {
-                    this->RegisterFd(l, *column);
+                    this->RegisterFd(l, *column, relation_->GetSharedPtrSchema());
                 }
                 level_copy.erase(l);
             }
