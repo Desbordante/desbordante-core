@@ -10,9 +10,11 @@ class FD {
 private:
     Vertical lhs_;
     Column rhs_;
+    std::shared_ptr<RelationalSchema const> schema_;
 
 public:
-    FD(Vertical const& lhs, Column const& rhs) : lhs_(lhs), rhs_(rhs) {}
+    FD(Vertical const& lhs, Column const& rhs, std::shared_ptr<RelationalSchema const> schema)
+        : lhs_(lhs), rhs_(rhs), schema_(std::move(schema)) {}
 
     std::string ToJSONString() const {
         return "{\"lhs\": " + lhs_.ToIndicesString() + ", \"rhs\": " + rhs_.ToIndicesString() + "}";

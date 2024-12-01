@@ -73,7 +73,7 @@ void HyFD::RegisterFDs(std::vector<RawFD>&& fds, std::vector<hy::ClusterId> cons
         auto const mapped_rhs = og_mapping[rhs];
         Column rhs_c(schema, schema->GetColumn(mapped_rhs)->GetName(), mapped_rhs);
 
-        RegisterFd(std::move(lhs_v), std::move(rhs_c));
+        RegisterFd(std::move(lhs_v), std::move(rhs_c), relation_->GetSharedPtrSchema());
     }
 }
 

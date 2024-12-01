@@ -27,7 +27,7 @@ private:
     void RegisterOptions();
 
     void ResetState() final;
-    virtual void MakeExecuteOptsAvailableFDInternal(){};
+    virtual void MakeExecuteOptsAvailableFDInternal() {};
     void MakeExecuteOptsAvailable() override;
     virtual void ResetStateFd() = 0;
 
@@ -43,8 +43,10 @@ protected:
     /* Registers new FD.
      * Should be overrided if custom behavior is needed
      */
-    virtual void RegisterFd(Vertical lhs, Column rhs) {
-        if (lhs.GetArity() <= max_lhs_) fd_collection_.Register(std::move(lhs), std::move(rhs));
+    virtual void RegisterFd(Vertical lhs, Column rhs,
+                            std::shared_ptr<RelationalSchema const> const& schema) {
+        if (lhs.GetArity() <= max_lhs_)
+            fd_collection_.Register(std::move(lhs), std::move(rhs), schema);
     }
 
     virtual void RegisterFd(FD fd_to_register) {

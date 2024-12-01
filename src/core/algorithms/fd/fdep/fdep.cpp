@@ -28,7 +28,7 @@ void FDep::LoadDataInternal() {
     }
     column_names_.resize(number_attributes_);
 
-    schema_ = std::make_unique<RelationalSchema>(input_table_->GetRelationName());
+    schema_ = std::make_shared<RelationalSchema>(input_table_->GetRelationName());
 
     for (size_t i = 0; i < number_attributes_; ++i) {
         column_names_[i] = input_table_->GetColumnName(static_cast<int>(i));
@@ -65,7 +65,7 @@ unsigned long long FDep::ExecuteInternal() {
     std::bitset<FDTreeElement::kMaxAttrNum> active_path;
     CalculatePositiveCover(*this->neg_cover_tree_, active_path);
 
-    pos_cover_tree_->FillFdCollection(*this->schema_, FdList(), max_lhs_);
+    pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
