@@ -11,7 +11,7 @@ struct DependentFalse : std::false_type {};
 }  // namespace details
 
 template <typename T>
-[[nodiscard]] inline T const& GetValue(model::TypedColumnData const& column, size_t row) {
+[[nodiscard]] T const& GetValue(model::TypedColumnData const& column, size_t row) {
     model::Type const& type = column.GetType();
 
     if (!column.IsNullOrEmpty(row)) {
