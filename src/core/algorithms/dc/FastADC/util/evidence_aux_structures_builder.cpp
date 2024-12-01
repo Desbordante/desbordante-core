@@ -4,28 +4,6 @@
 
 namespace algos::fastadc {
 
-PredicateBitset EvidenceAuxStructuresBuilder::BuildMask(
-        PredicatesSpan group, std::initializer_list<OperatorType>& types) {
-    PredicateBitset mask;
-
-    for (auto& p : group) {
-        if (std::any_of(types.begin(), types.end(),
-                        [p](OperatorType type) { return p->GetOperator() == type; })) {
-            auto index = provider_->GetIndex(p);
-
-            if (index < mask.size()) {
-                mask.set(index);
-            } else {
-                throw std::runtime_error(
-                        "Predicate index exceeds the size of PredicateBitset, "
-                        "such amount of predicates is not supported.");
-            }
-        }
-    }
-
-    return mask;
-}
-
 // TODO: no, just accept lambda by typaname Func with &&, cast to std::function is costly
 void EvidenceAuxStructuresBuilder::BuildAll(PredicatesVector const& predicates, size_t group_size,
                                             PackAction action) {
@@ -46,18 +24,19 @@ void EvidenceAuxStructuresBuilder::ProcessNumPredicates(PredicatesVector const& 
     PackAction action = [&](PredicatesSpan const& group_span) {
         PredicatePtr eq = GetPredicateByType(group_span, OperatorType::kEqual);
         PredicatePtr gt = GetPredicateByType(group_span, OperatorType::kGreater);
-        static std::initializer_list<OperatorType> eq_list = {
-                OperatorType::kEqual, OperatorType::kUnequal, OperatorType::kLess,
-                OperatorType::kGreaterEqual};
-        static std::initializer_list<OperatorType> gt_list = {
-                OperatorType::kLess, OperatorType::kGreater, OperatorType::kLessEqual,
-                OperatorType::kGreaterEqual};
-        static std::initializer_list<OperatorType> cardinality = {
-                OperatorType::kUnequal, OperatorType::kLess, OperatorType::kLessEqual};
 
-        correction_map_[count] = BuildMask(group_span, eq_list);
-        correction_map_[count + 1] = BuildMask(group_span, gt_list);
-        cardinality_mask_ |= BuildMask(group_span, cardinality);
+        static constexpr OperatorType kEqList[] = {OperatorType::kEqual, OperatorType::kUnequal,
+                                                   OperatorType::kLess,
+                                                   OperatorType::kGreaterEqual};
+        static constexpr OperatorType kGtList[] = {OperatorType::kLess, OperatorType::kGreater,
+                                                   OperatorType::kLessEqual,
+                                                   OperatorType::kGreaterEqual};
+        static constexpr OperatorType kCardinality[] = {OperatorType::kUnequal, OperatorType::kLess,
+                                                        OperatorType::kLessEqual};
+
+        correction_map_[count] = BuildMask(group_span, kEqList);
+        correction_map_[count + 1] = BuildMask(group_span, kGtList);
+        cardinality_mask_ |= BuildMask(group_span, kCardinality);
 
         pack.emplace_back(eq, count, gt, count + 1);
         count += 2;
@@ -71,12 +50,12 @@ void EvidenceAuxStructuresBuilder::ProcessCatPredicates(PredicatesVector const& 
                                                         size_t& count) {
     PackAction action = [&](PredicatesSpan const& group_span) {
         PredicatePtr eq = GetPredicateByType(group_span, OperatorType::kEqual);
-        static std::initializer_list<OperatorType> eq_list = {OperatorType::kEqual,
-                                                              OperatorType::kUnequal};
-        static std::initializer_list<OperatorType> cardinality = {OperatorType::kUnequal};
 
-        correction_map_[count] = BuildMask(group_span, eq_list);
-        cardinality_mask_ |= BuildMask(group_span, cardinality);
+        static constexpr OperatorType kEqList[] = {OperatorType::kEqual, OperatorType::kUnequal};
+        static constexpr OperatorType kCardinality[] = {OperatorType::kUnequal};
+
+        correction_map_[count] = BuildMask(group_span, kEqList);
+        cardinality_mask_ |= BuildMask(group_span, kCardinality);
 
         pack.emplace_back(eq, count);
         count++;
