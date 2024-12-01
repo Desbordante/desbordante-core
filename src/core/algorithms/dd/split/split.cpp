@@ -449,9 +449,7 @@ std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
     }
 
     // differential functions should be put in this exact order for further reducing
-    for (auto limit : limits) {
-        dfs.push_back(limit);
-    }
+    dfs.insert(dfs.end(), limits.begin(), limits.end());
     return dfs;
 }
 
