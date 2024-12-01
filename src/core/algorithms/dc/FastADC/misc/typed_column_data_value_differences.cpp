@@ -85,6 +85,10 @@ double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData 
             return -1;
     }
 
+    if (avg1 == 0.0 && avg2 == 0.0) {
+        return 0.0;
+    }
+
     return std::min(avg1, avg2) / std::max(avg1, avg2);
 }
 
