@@ -70,7 +70,7 @@ unsigned long long HPIValid::ExecuteInternal() {
 
 void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {
     std::vector<model::RawUCC> ucc_vector = rc.GetUCCs();
-    auto const* const schema = relation_->GetSchema();
+    std::shared_ptr<RelationalSchema const> const& schema = relation_->GetSharedPtrSchema();
     for (auto&& ucc : ucc_vector) {
         ucc_collection_.Register(schema, std::move(ucc));
     }
