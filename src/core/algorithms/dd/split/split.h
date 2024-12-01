@@ -34,8 +34,6 @@ private:
 
     std::vector<model::TypeId> type_ids_;
 
-    bool has_dif_table_;
-
     config::InputTable difference_table_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation_;
 

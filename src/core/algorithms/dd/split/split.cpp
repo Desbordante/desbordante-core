@@ -77,9 +77,7 @@ void Split::SetLimits() {
 }
 
 void Split::ParseDifferenceTable() {
-    has_dif_table_ = (difference_table_.get() != nullptr);
-
-    if (has_dif_table_) {
+    if (difference_table_) {
         difference_typed_relation_ =
                 model::ColumnLayoutTypedRelationData::CreateFrom(*difference_table_,
                                                                  false);  // nulls are ignored
@@ -396,7 +394,7 @@ bool Split::IsFeasible(DF const& d) {
 std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
     std::vector<DFConstraint> dfs;
 
-    if (!has_dif_table_) {
+    if (!difference_table_) {
         // differential functions should be put in this exact order for further reducing
         for (int i = num_dfs_per_column_ - 1; i >= 0; i--) {
             if (min_max_dif_[index].IsWithinExclusive(i)) {
