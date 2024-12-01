@@ -68,7 +68,8 @@ double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnD
 double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData const& c2) {
     if (c1.GetColumn() == c2.GetColumn()) return 1.;
 
-    double avg1 = 0.0, avg2 = 0.0;
+    double avg1 = 0.0;
+    double avg2 = 0.0;
 
     switch (c1.GetTypeId()) {
         case model::TypeId::kInt:
