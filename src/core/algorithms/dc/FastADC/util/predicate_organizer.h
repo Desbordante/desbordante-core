@@ -89,7 +89,7 @@ private:
         std::iota(indexes.begin(), indexes.end(), 0);
 
         std::stable_sort(indexes.begin(), indexes.end(),
-                         [&](int i, int j) { return coverages[i] < coverages[j]; });
+                         [&coverages](int i, int j) { return coverages[i] < coverages[j]; });
 
         return indexes;
     }
