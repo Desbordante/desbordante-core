@@ -83,11 +83,9 @@ size_t hash_value(Operator const& k) noexcept;
 
 }  // namespace algos::fastadc
 
-namespace std {
 template <>
-struct hash<algos::fastadc::Operator> {
+struct std::hash<algos::fastadc::Operator> {
     size_t operator()(algos::fastadc::Operator const& k) const noexcept {
         return static_cast<size_t>(k.GetType());
     }
 };
-};  // namespace std

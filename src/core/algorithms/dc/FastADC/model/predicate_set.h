@@ -140,11 +140,9 @@ public:
 
 }  // namespace algos::fastadc
 
-namespace std {
 template <>
-struct hash<algos::fastadc::PredicateSet> {
+struct std::hash<algos::fastadc::PredicateSet> {
     size_t operator()(algos::fastadc::PredicateSet const& k) const noexcept {
         return k.Hash();
     }
 };
-}  // namespace std

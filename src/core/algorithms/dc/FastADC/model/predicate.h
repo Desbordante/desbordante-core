@@ -100,9 +100,8 @@ PredicatePtr GetPredicateByType(PredicatesSpan predicates, OperatorType type);
 
 }  // namespace algos::fastadc
 
-namespace std {
 template <>
-struct hash<algos::fastadc::Predicate> {
+struct std::hash<algos::fastadc::Predicate> {
     size_t operator()(algos::fastadc::Predicate const& k) const noexcept {
         std::size_t seed = 0;
         boost::hash_combine(seed, k.GetOperator());
@@ -111,5 +110,3 @@ struct hash<algos::fastadc::Predicate> {
         return seed;
     }
 };
-
-};  // namespace std

@@ -59,9 +59,8 @@ size_t hash_value(ColumnOperand const& k) noexcept;
 
 }  // namespace algos::fastadc
 
-namespace std {
 template <>
-struct hash<algos::fastadc::ColumnOperand> {
+struct std::hash<algos::fastadc::ColumnOperand> {
     size_t operator()(algos::fastadc::ColumnOperand const& k) const noexcept {
         size_t seed = 0;
         boost::hash_combine(seed, k.GetColumn()->GetIndex());
@@ -69,5 +68,3 @@ struct hash<algos::fastadc::ColumnOperand> {
         return seed;
     }
 };
-
-}  // namespace std
