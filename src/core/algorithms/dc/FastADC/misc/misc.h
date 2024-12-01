@@ -10,8 +10,9 @@ template <typename T>
 struct DependentFalse : std::false_type {};
 }  // namespace details
 
+// TODO: look at performance, is returning by const reference here beneficial?
 template <typename T>
-[[nodiscard]] T const& GetValue(model::TypedColumnData const& column, size_t row) {
+[[nodiscard]] T GetValue(model::TypedColumnData const& column, size_t row) {
     model::Type const& type = column.GetType();
 
     if (!column.IsNullOrEmpty(row)) {
@@ -37,14 +38,11 @@ template <typename T>
      * }
      */
     if constexpr (std::is_same_v<T, std::string>) {
-        static std::string const kEmptyStr = "";
-        return kEmptyStr;
+        return "";
     } else if constexpr (std::is_same_v<T, int64_t>) {
-        static int64_t const kMinInt = std::numeric_limits<int64_t>::min();
-        return kMinInt;
+        return std::numeric_limits<int64_t>::min();
     } else if constexpr (std::is_same_v<T, double>) {
-        static double const kMinDouble = std::numeric_limits<double>::lowest();
-        return kMinDouble;
+        return std::numeric_limits<double>::lowest();
     } else {
         static_assert(details::DependentFalse<T>::value,
                       "FastADC algorithm supports only int64_t, string, or double as column types. "
