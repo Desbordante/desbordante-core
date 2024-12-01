@@ -1,6 +1,7 @@
 #include "fd_tree_element.h"
 
 #include "boost/dynamic_bitset.hpp"
+#include "util/bitset_extensions.h"
 
 FDTreeElement::FDTreeElement(size_t max_attribute_number)
     : max_attribute_number_(max_attribute_number) {
@@ -45,7 +46,7 @@ bool FDTreeElement::ContainsGeneralization(std::bitset<kMaxAttrNum> const& lhs, 
         return true;
     }
 
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = util::FindNext(lhs, current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -71,7 +72,7 @@ bool FDTreeElement::GetGeneralizationAndDelete(std::bitset<kMaxAttrNum> const& l
         return true;
     }
 
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = util::FindNext(lhs, current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -104,7 +105,7 @@ bool FDTreeElement::GetSpecialization(std::bitset<kMaxAttrNum> const& lhs, size_
 
     bool found = false;
     size_t attr = (current_attr > 1 ? current_attr : 1);
-    size_t next_set_attr = lhs._Find_next(current_attr);
+    size_t next_set_attr = util::FindNext(lhs, current_attr);
 
     if (next_set_attr == kMaxAttrNum) {
         while (!found && attr <= this->max_attribute_number_) {
@@ -153,7 +154,8 @@ void FDTreeElement::AddFunctionalDependency(std::bitset<kMaxAttrNum> const& lhs,
     FDTreeElement* current_node = this;
     this->AddRhsAttribute(attr_num);
 
-    for (size_t i = lhs._Find_first(); i != kMaxAttrNum; i = lhs._Find_next(i)) {
+    auto iter = util::MakeBitsetIterator(lhs);
+    for (size_t i = iter->Pos(); i != kMaxAttrNum; iter->Next(), i = iter->Pos()) {
         if (current_node->children_[i - 1] == nullptr) {
             current_node->children_[i - 1] =
                     std::make_unique<FDTreeElement>(this->max_attribute_number_);
@@ -215,8 +217,8 @@ void FDTreeElement::PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std
         if (this->is_fd_[attr - 1]) {
             out = "{";
 
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
+            auto iter = util::MakeBitsetIterator(active_path);
+            for (size_t i = iter->Pos(); i != kMaxAttrNum; iter->Next(), i = iter->Pos()) {
                 if (!column_id.empty())
                     out += column_id + std::to_string(std::stoi(column_names[i - 1]) + 1) + ",";
                 else
@@ -257,11 +259,8 @@ void FDTreeElement::TransformTreeFdCollection(std::bitset<kMaxAttrNum>& active_p
 
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
         if (this->is_fd_[attr - 1]) {
-            boost::dynamic_bitset<> lhs_bitset(this->max_attribute_number_);
-            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
-                 i = active_path._Find_next(i)) {
-                lhs_bitset.set(i - 1);
-            }
+            auto lhs_bitset = util::CreateDynamicBitset<kMaxAttrNum>(active_path,
+                                                                     this->max_attribute_number_);
             Vertical lhs(scheme.get(), lhs_bitset);
             Column rhs(scheme.get(), scheme->GetColumn(attr - 1)->GetName(), attr - 1);
             fd_collection.emplace_back(FD{lhs, rhs, scheme});
