@@ -226,7 +226,7 @@ private:
     }
 
     template <typename T, typename U>
-    inline bool IsSubset(T const& bitset1, U const& bitset2) {
+    bool IsSubset(T const& bitset1, U const& bitset2) {
         size_t min_size = std::min(bitset1.size(), bitset2.size());
         for (size_t i = 0; i < min_size; ++i) {
             if (bitset1.test(i) && !bitset2.test(i)) {
