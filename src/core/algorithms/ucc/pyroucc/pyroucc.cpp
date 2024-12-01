@@ -19,7 +19,7 @@ PyroUCC::PyroUCC() : UCCAlgorithm({kDefaultPhaseName}) {
     fd_consumer_ = nullptr;
     ucc_consumer_ = [this](auto const& ucc) {
         this->DiscoverUcc(ucc);
-        ucc_collection_.Register(ucc.vertical_);
+        ucc_collection_.Register(model::UCC(this->relation_->GetSharedPtrSchema(), ucc.vertical_));
     };
 }
 

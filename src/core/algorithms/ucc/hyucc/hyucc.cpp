@@ -67,7 +67,7 @@ unsigned long long HyUCC::ExecuteInternal() {
 
 void HyUCC::RegisterUCCs(std::vector<boost::dynamic_bitset<>>&& uccs,
                          std::vector<hy::ClusterId> const& og_mapping) {
-    auto const* const schema = relation_->GetSchema();
+    std::shared_ptr<RelationalSchema const> const& schema = relation_->GetSharedPtrSchema();
     for (auto&& ucc : uccs) {
         boost::dynamic_bitset<> mapped_ucc =
                 hy::RestoreAgreeSet(ucc, og_mapping, schema->GetNumColumns());
