@@ -4,9 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string>
-#include <vector>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "dc/FastADC/misc/misc.h"
 #include "dc/FastADC/providers/index_provider.h"

@@ -1,17 +1,18 @@
 #include "predicate_builder.h"
 
-#include <easylogging++.h>
-#include <assert.h>
 #include <array>
+#include <assert.h>
 #include <bitset>
 
-#include "dc/FastADC/misc/typed_column_data_value_differences.h"
-#include "dc/FastADC/providers/index_provider.h"
-#include "dc/FastADC/providers/predicate_provider.h"
+#include <easylogging++.h>
+
 #include "builtin.h"
+#include "dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/providers/index_provider.h"
+#include "dc/FastADC/providers/predicate_provider.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {

@@ -1,12 +1,13 @@
 #include "pli_shard.h"
 
-#include <easylogging++.h>
 #include <algorithm>
 #include <functional>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
+
+#include <easylogging++.h>
 
 #include "builtin.h"
 #include "dc/FastADC/providers/index_provider.h"
