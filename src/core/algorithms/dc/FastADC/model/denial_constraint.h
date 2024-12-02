@@ -48,6 +48,7 @@ public:
     }
 
     bool operator==(DenialConstraint const& other) const = default;
+    bool operator!=(DenialConstraint const& other) const = default;
 };
 
 }  // namespace algos::fastadc
