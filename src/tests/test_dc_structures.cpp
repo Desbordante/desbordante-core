@@ -229,19 +229,20 @@ TEST(Predicate, PredicateCreatesCorrectly) {
     PredicateProvider pred_provider;
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
 
-    PredicatePtr s_a_less_t_b =
-            pred_provider.GetPredicate(Operator(OperatorType::kLess), ColumnOperand(first, true),
-                                       ColumnOperand(second, false));
+    ColumnOperand t_a(first, ColumnOperandTuple::t);
+    ColumnOperand s_a(first, ColumnOperandTuple::s);
+    ColumnOperand s_b(second, ColumnOperandTuple::s);
 
-    EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 0, 1));
-    EXPECT_TRUE(s_a_less_t_b->Satisfies(col_data, 1, 0));
+    PredicatePtr t_a_less_s_b = pred_provider.GetPredicate(Operator(OperatorType::kLess), t_a, s_b);
 
-    PredicatePtr s_a_neq_t_a =
-            pred_provider.GetPredicate(Operator(OperatorType::kUnequal), ColumnOperand(first, true),
-                                       ColumnOperand(first, false));
+    EXPECT_TRUE(t_a_less_s_b->Satisfies(col_data, 0, 1));
+    EXPECT_TRUE(t_a_less_s_b->Satisfies(col_data, 1, 0));
 
-    EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 0, 1));
-    EXPECT_FALSE(s_a_neq_t_a->Satisfies(col_data, 1, 0));
+    PredicatePtr t_a_neq_s_a =
+            pred_provider.GetPredicate(Operator(OperatorType::kUnequal), t_a, s_a);
+
+    EXPECT_FALSE(t_a_neq_s_a->Satisfies(col_data, 0, 1));
+    EXPECT_FALSE(t_a_neq_s_a->Satisfies(col_data, 1, 0));
 }
 
 class FastADC : public ::testing::Test {
