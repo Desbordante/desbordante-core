@@ -71,8 +71,9 @@ void PredicateBuilder::ProcessColumnPair(size_t i, size_t j,
     bool comparable = IsComparable(input[i], input[j]);
 
     if (joinable || comparable) {
-        AddAndCategorizePredicate(ColumnOperand(input[i].GetColumn(), true),
-                                  ColumnOperand(input[j].GetColumn(), false), comparable);
+        AddAndCategorizePredicate(ColumnOperand(input[i].GetColumn(), ColumnOperandTuple::t),
+                                  ColumnOperand(input[j].GetColumn(), ColumnOperandTuple::s),
+                                  comparable);
     }
 }
 
