@@ -9,7 +9,7 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "../model/evidence_set.h"
+#include "dc/FastADC/model/evidence_set.h"
 #include "dc_candidate_trie.h"
 #include "denial_constraint_set.h"
 #include "predicate_builder.h"

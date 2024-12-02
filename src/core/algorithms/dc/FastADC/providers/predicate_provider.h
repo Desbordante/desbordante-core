@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../model/predicate.h"
+#include "dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 

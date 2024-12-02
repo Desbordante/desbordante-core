@@ -4,8 +4,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../model/predicate_set.h"
-#include "../providers/predicate_provider.h"
+#include "dc/FastADC/model/predicate_set.h"
+#include "dc/FastADC/providers/predicate_provider.h"
 
 namespace algos::fastadc {
 

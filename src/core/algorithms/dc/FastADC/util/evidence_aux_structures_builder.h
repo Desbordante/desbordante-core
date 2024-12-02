@@ -6,7 +6,7 @@
 #include <span>
 #include <stdexcept>
 
-#include "../model/predicate.h"
+#include "dc/FastADC/model/predicate.h"
 #include "common_clue_set_builder.h"
 #include "predicate_builder.h"
 #include "dc/FastADC/model/column_operand.h"
