@@ -29,15 +29,11 @@ public:
     PredicateIndexProvider* provider = nullptr;
 
     explicit PredicateSet(PredicateIndexProvider* predicate_index_provider)
-        : bitset_(0), provider(predicate_index_provider) {
-        assert(predicate_index_provider);
-    }
+        : bitset_(0), provider(predicate_index_provider) {}
 
     explicit PredicateSet(boost::dynamic_bitset<> const& bitset,
                           PredicateIndexProvider* predicate_index_provider)
-        : bitset_(bitset), provider(predicate_index_provider) {
-        assert(predicate_index_provider);
-    }
+        : bitset_(bitset), provider(predicate_index_provider) {}
 
     PredicateSet(PredicateSet const& other) : bitset_(other.bitset_), provider(other.provider) {
         // Do not copy inv_set_TS_ to avoid unnecessary pre-caching
