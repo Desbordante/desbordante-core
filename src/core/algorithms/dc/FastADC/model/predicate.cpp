@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include "../providers/predicate_provider.h"
+#include "dc/FastADC/providers/predicate_provider.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "table/column.h"
