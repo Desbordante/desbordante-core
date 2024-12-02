@@ -2,6 +2,8 @@
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
+#include "dc/FastADC/model/predicate.h"
+
 namespace algos::fastadc {
 
 struct DCCandidate {

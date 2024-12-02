@@ -1,7 +1,12 @@
 #pragma once
 
+#include <assert.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <utility>
 
 #include "../misc/misc.h"
 #include "../providers/index_provider.h"

@@ -1,9 +1,13 @@
 #pragma once
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <assert.h>
+#include <boost/move/utility_core.hpp>
 #include <iterator>
 #include <memory>
-
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <cstddef>
+#include <string>
+#include <variant>
 
 #include "../providers/index_provider.h"
 #include "predicate.h"

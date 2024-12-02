@@ -1,8 +1,17 @@
 #include "typed_column_data_value_differences.h"
 
 #include <easylogging++.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <algorithm>
+#include <string>
+#include <unordered_map>
 
 #include "misc.h"
+#include "builtin.h"
+#include "table/column.h"
+#include "table/typed_column_data.h"
+#include "type.h"
 
 namespace algos::fastadc {
 

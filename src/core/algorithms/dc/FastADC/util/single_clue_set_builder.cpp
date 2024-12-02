@@ -1,5 +1,11 @@
 #include "single_clue_set_builder.h"
 
+#include <stdexcept>
+#include <stdint.h>
+
+#include "dc/FastADC/model/pli_shard.h"
+#include "dc/FastADC/util/evidence_aux_structures_builder.h"
+
 namespace algos::fastadc {
 
 SingleClueSetBuilder::SingleClueSetBuilder(PliShard const& shard)
