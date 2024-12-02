@@ -20,11 +20,21 @@ constexpr std::array<OperatorType, 6> kAllOperatorTypes = {
 class Operator {
 private:
     OperatorType op_;
-    static std::unordered_map<OperatorType, OperatorType> const kInverseMap;
-    static std::unordered_map<OperatorType, OperatorType> const kSymmetricMap;
-    static std::unordered_map<OperatorType, std::vector<OperatorType>> const kImplicationsMap;
-    static std::unordered_map<OperatorType, std::vector<OperatorType>> const kTransitivesMap;
-    static std::unordered_map<OperatorType, std::string> const kShortStringMap;
+
+    template <typename V>
+    using OperatorMap = std::unordered_map<OperatorType, V>;
+
+    static OperatorMap<OperatorType> const kInverseMap;
+    static OperatorMap<OperatorType> const kSymmetricMap;
+    static OperatorMap<std::vector<OperatorType>> const kImplicationsMap;
+    static OperatorMap<std::vector<OperatorType>> const kTransitivesMap;
+    static OperatorMap<std::string> const kShortStringMap;
+
+    static OperatorMap<OperatorType> InitializeInverseMap();
+    static OperatorMap<OperatorType> InitializeSymmetricMap();
+    static OperatorMap<std::vector<OperatorType>> InitializeImplicationsMap();
+    static OperatorMap<std::vector<OperatorType>> InitializeTransitivesMap();
+    static OperatorMap<std::string> InitializeShortStringMap();
 
 public:
     Operator(OperatorType type) : op_(type) {}
@@ -70,18 +80,6 @@ public:
     OperatorType GetType() const {
         return op_;
     }
-
-    static std::unordered_map<OperatorType, OperatorType> const InitializeInverseMap();
-
-    static std::unordered_map<OperatorType, OperatorType> const InitializeSymmetricMap();
-
-    static std::unordered_map<OperatorType, std::vector<OperatorType>> const
-    InitializeImplicationsMap();
-
-    static std::unordered_map<OperatorType, std::vector<OperatorType>> const
-    InitializeTransitivesMap();
-
-    static std::unordered_map<OperatorType, std::string> const InitializeShortStringMap();
 };
 
 // NOLINTBEGIN(readability-identifier-naming)
