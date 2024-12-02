@@ -1,14 +1,15 @@
 #include "typed_column_data_value_differences.h"
 
-#include <easylogging++.h>
+#include <algorithm>
 #include <stddef.h>
 #include <stdint.h>
-#include <algorithm>
 #include <string>
 #include <unordered_map>
 
-#include "misc.h"
+#include <easylogging++.h>
+
 #include "builtin.h"
+#include "misc.h"
 #include "table/column.h"
 #include "table/typed_column_data.h"
 #include "type.h"
