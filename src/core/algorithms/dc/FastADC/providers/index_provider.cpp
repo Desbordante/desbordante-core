@@ -1,5 +1,7 @@
 #include "index_provider.h"
 
+#include "dc/FastADC/model/predicate.h"
+
 namespace algos::fastadc {
 
 template <std::totally_ordered<> T>

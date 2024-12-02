@@ -1,8 +1,12 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdint.h>
 #include <concepts>
 #include <unordered_map>
 #include <vector>
+#include <algorithm>
+#include <string>
 
 #include "../model/predicate.h"
 
