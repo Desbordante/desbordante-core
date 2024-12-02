@@ -16,9 +16,7 @@ public:
 
     DenialConstraint(boost::dynamic_bitset<> const& predicates,
                      PredicateIndexProvider* predicate_index_provider)
-        : predicate_set_(predicates, predicate_index_provider) {
-        assert(predicate_index_provider);
-    }
+        : predicate_set_(predicates, predicate_index_provider) {}
 
     DenialConstraint GetInvT1T2DC(PredicateProvider* predicate_provider) const {
         return DenialConstraint(predicate_set_.GetInvTS(predicate_provider));
