@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../model/evidence_set.h"
+#include "dc/FastADC/model/evidence_set.h"
 
 namespace algos::fastadc {
 

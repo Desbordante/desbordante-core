@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <vector>
 
-#include "../model/pli_shard.h"
+#include "dc/FastADC/model/pli_shard.h"
 #include "evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/common_clue_set_builder.h"
 

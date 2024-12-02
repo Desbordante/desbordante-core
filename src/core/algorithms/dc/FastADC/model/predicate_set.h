@@ -9,7 +9,7 @@
 #include <string>
 #include <variant>
 
-#include "../providers/index_provider.h"
+#include "dc/FastADC/providers/index_provider.h"
 #include "predicate.h"
 
 namespace algos::fastadc {

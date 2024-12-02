@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../model/predicate.h"
+#include "dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 

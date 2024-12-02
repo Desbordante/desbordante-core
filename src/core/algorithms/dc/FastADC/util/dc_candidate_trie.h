@@ -6,7 +6,7 @@
 #include <optional>
 #include <vector>
 
-#include "../model/predicate.h"
+#include "dc/FastADC/model/predicate.h"
 #include "dc_candidate.h"
 
 namespace algos::fastadc {
