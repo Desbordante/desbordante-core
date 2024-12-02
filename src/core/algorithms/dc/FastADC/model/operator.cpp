@@ -1,5 +1,10 @@
 #include "operator.h"
 
+#include <utility>
+
+#include "builtin.h"
+#include "type.h"
+
 namespace algos::fastadc {
 
 bool Operator::Eval(std::byte const* v1, std::byte const* v2, model::Type const& type) const {

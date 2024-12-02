@@ -1,4 +1,11 @@
 #pragma once
+#include <stddef.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <vector>
+
 #include "../model/predicate.h"
 #include "dc_candidate.h"
 

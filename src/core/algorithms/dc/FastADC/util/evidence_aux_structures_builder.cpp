@@ -1,6 +1,11 @@
 #include "evidence_aux_structures_builder.h"
 
+#include <assert.h>
+#include <stddef.h>
+
 #include <easylogging++.h>
+
+#include "dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 
