@@ -1,9 +1,18 @@
 #pragma once
 #include <vector>
+#include <bitset>
+#include <cstddef>
+#include <functional>
+#include <span>
+#include <stdexcept>
 
 #include "../model/predicate.h"
 #include "common_clue_set_builder.h"
 #include "predicate_builder.h"
+#include "dc/FastADC/model/column_operand.h"
+#include "dc/FastADC/model/operator.h"
+#include "dc/FastADC/providers/index_provider.h"
+#include "table/column.h"
 
 namespace algos::fastadc {
 

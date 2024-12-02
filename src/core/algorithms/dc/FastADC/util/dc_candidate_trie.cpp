@@ -1,5 +1,8 @@
 #include "dc_candidate_trie.h"
 
+#include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/util/dc_candidate.h"
+
 namespace algos::fastadc {
 
 DCCandidateTrie::DCCandidateTrie(size_t max_subtrees) : max_subtrees_(max_subtrees) {

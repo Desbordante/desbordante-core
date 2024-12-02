@@ -1,5 +1,9 @@
 #include "predicate_set.h"
 
+#include <algorithm>
+
+#include "dc/FastADC/model/predicate.h"
+
 namespace algos::fastadc {
 
 bool PredicateSet::Add(PredicatePtr predicate) {

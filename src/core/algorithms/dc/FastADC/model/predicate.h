@@ -1,6 +1,12 @@
 #pragma once
 
+#include <boost/container_hash/hash.hpp>
 #include <span>
+#include <bitset>
+#include <cstddef>
+#include <string>
+#include <variant>
+#include <vector>
 
 #include "column_operand.h"
 #include "operator.h"
@@ -9,11 +15,13 @@
 namespace algos::fastadc {
 
 class Predicate;
+
 using PredicatePtr = Predicate const*;
 using PredicatesVector = std::vector<PredicatePtr>;
 using PredicatesSpan = std::span<PredicatePtr const>;
 
 class PredicateProvider;
+
 /*
  * TODO: Java code uses LongBitSet, which is like boost::dynamic_bitset, but
  * restructs number of bits in the clue to kPredicateBits. Need to investigate further whether

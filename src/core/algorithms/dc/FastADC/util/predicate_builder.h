@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stddef.h>
 #include <vector>
+#include <utility>
 
 #include "../model/predicate.h"
 #include "../providers/index_provider.h"
