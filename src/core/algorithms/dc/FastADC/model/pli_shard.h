@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../misc/misc.h"
-#include "../providers/index_provider.h"
+#include "dc/FastADC/misc/misc.h"
+#include "dc/FastADC/providers/index_provider.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {

@@ -2,7 +2,7 @@
 
 #include <easylogging++.h>
 
-#include "../model/evidence_set.h"
+#include "dc/FastADC/model/evidence_set.h"
 #include "clue_set_builder.h"
 
 namespace algos::fastadc {
