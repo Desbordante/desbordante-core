@@ -39,9 +39,8 @@ private:
 public:
     Operator(OperatorType type) : op_(type) {}
 
-    bool operator==(Operator const& rhs) const {
-        return op_ == rhs.op_;
-    }
+    bool operator==(Operator const& rhs) const = default;
+    bool operator!=(Operator const& rhs) const = default;
 
     bool Eval(std::byte const* v1, std::byte const* v2, model::Type const& type) const;
 
