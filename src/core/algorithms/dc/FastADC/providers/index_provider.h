@@ -1,12 +1,12 @@
 #pragma once
 
+#include <algorithm>
+#include <concepts>
 #include <stddef.h>
 #include <stdint.h>
-#include <concepts>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <algorithm>
-#include <string>
 
 #include "dc/FastADC/model/predicate.h"
 

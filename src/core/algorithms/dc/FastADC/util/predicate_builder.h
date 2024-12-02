@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stddef.h>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"

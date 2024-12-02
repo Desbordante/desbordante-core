@@ -1,12 +1,13 @@
 #pragma once
 
-#include <boost/container_hash/hash.hpp>
-#include <span>
 #include <bitset>
 #include <cstddef>
+#include <span>
 #include <string>
 #include <variant>
 #include <vector>
+
+#include <boost/container_hash/hash.hpp>
 
 #include "column_operand.h"
 #include "operator.h"
