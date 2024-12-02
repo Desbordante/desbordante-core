@@ -28,7 +28,7 @@ bool Operator::Eval(std::byte const* v1, std::byte const* v2, model::Type const&
     }
 }
 
-std::unordered_map<OperatorType, OperatorType> const Operator::InitializeInverseMap() {
+Operator::OperatorMap<OperatorType> Operator::InitializeInverseMap() {
     return {{OperatorType::kEqual, OperatorType::kUnequal},
             {OperatorType::kUnequal, OperatorType::kEqual},
             {OperatorType::kGreater, OperatorType::kLessEqual},
@@ -37,7 +37,7 @@ std::unordered_map<OperatorType, OperatorType> const Operator::InitializeInverse
             {OperatorType::kLessEqual, OperatorType::kGreater}};
 }
 
-std::unordered_map<OperatorType, OperatorType> const Operator::InitializeSymmetricMap() {
+Operator::OperatorMap<OperatorType> Operator::InitializeSymmetricMap() {
     return {{OperatorType::kEqual, OperatorType::kEqual},
             {OperatorType::kUnequal, OperatorType::kUnequal},
             {OperatorType::kGreater, OperatorType::kLess},
@@ -46,8 +46,7 @@ std::unordered_map<OperatorType, OperatorType> const Operator::InitializeSymmetr
             {OperatorType::kLessEqual, OperatorType::kGreaterEqual}};
 }
 
-std::unordered_map<OperatorType, std::vector<OperatorType>> const
-Operator::InitializeImplicationsMap() {
+Operator::OperatorMap<std::vector<OperatorType>> Operator::InitializeImplicationsMap() {
     return {{OperatorType::kEqual,
              {OperatorType::kEqual, OperatorType::kGreaterEqual, OperatorType::kLessEqual}},
             {OperatorType::kUnequal, {OperatorType::kUnequal}},
@@ -59,8 +58,7 @@ Operator::InitializeImplicationsMap() {
             {OperatorType::kLessEqual, {OperatorType::kLessEqual}}};
 }
 
-std::unordered_map<OperatorType, std::vector<OperatorType>> const
-Operator::InitializeTransitivesMap() {
+Operator::OperatorMap<std::vector<OperatorType>> Operator::InitializeTransitivesMap() {
     return {{OperatorType::kEqual, {OperatorType::kEqual}},
             {OperatorType::kUnequal, {OperatorType::kEqual}},
             {OperatorType::kGreater,
@@ -73,21 +71,18 @@ Operator::InitializeTransitivesMap() {
              {OperatorType::kLess, OperatorType::kLessEqual, OperatorType::kEqual}}};
 }
 
-std::unordered_map<OperatorType, std::string> const Operator::InitializeShortStringMap() {
+Operator::OperatorMap<std::string> Operator::InitializeShortStringMap() {
     return {{OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
             {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
             {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
 }
 
-std::unordered_map<OperatorType, OperatorType> const Operator::kInverseMap =
-        Operator::InitializeInverseMap();
-std::unordered_map<OperatorType, OperatorType> const Operator::kSymmetricMap =
-        Operator::InitializeSymmetricMap();
-std::unordered_map<OperatorType, std::vector<OperatorType>> const Operator::kImplicationsMap =
-        Operator::InitializeImplicationsMap();
-std::unordered_map<OperatorType, std::vector<OperatorType>> const Operator::kTransitivesMap =
-        Operator::InitializeTransitivesMap();
-std::unordered_map<OperatorType, std::string> const Operator::kShortStringMap =
-        Operator::InitializeShortStringMap();
+Operator::OperatorMap<OperatorType> const Operator::kInverseMap = InitializeInverseMap();
+Operator::OperatorMap<OperatorType> const Operator::kSymmetricMap = InitializeSymmetricMap();
+Operator::OperatorMap<std::vector<OperatorType>> const Operator::kImplicationsMap =
+        InitializeImplicationsMap();
+Operator::OperatorMap<std::vector<OperatorType>> const Operator::kTransitivesMap =
+        InitializeTransitivesMap();
+Operator::OperatorMap<std::string> const Operator::kShortStringMap = InitializeShortStringMap();
 
 }  // namespace algos::fastadc
