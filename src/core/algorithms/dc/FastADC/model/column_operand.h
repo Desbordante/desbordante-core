@@ -1,5 +1,7 @@
 #pragma once
 
+#include <enum.h>
+
 #include "table/column.h"
 
 namespace algos::fastadc {
@@ -19,17 +21,24 @@ namespace algos::fastadc {
  * encapsulates the column operand part of a predicate, such as "t.A" or "s.A".
  *
  * The class distinguishes between operands derived from the first tuple (t) and those
- * from the second tuple (s) using a boolean flag `tuple_`, where `true` indicates an
- * operand from the first tuple (t), and `false` indicates an operand from the second
- * tuple (s).
+ * from the second tuple (s) using an enum `ColumnOperandTuple`, where `ColumnOperandTuple::T`
+ * indicates an operand from the first tuple (t), and `ColumnOperandTuple::S` indicates an operand
+ * from the second tuple (s).
  */
+BETTER_ENUM(ColumnOperandTuple, char, t, s);
+
 class ColumnOperand {
 private:
     Column const* column_;
-    bool tuple_;
+    ColumnOperandTuple tuple_;
+
+    static ColumnOperandTuple Invert(ColumnOperandTuple tuple) {
+        return tuple == +ColumnOperandTuple::t ? ColumnOperandTuple::s : ColumnOperandTuple::t;
+    }
 
 public:
-    ColumnOperand(Column const* column, bool tuple) : column_(column), tuple_(tuple) {}
+    ColumnOperand(Column const* column, ColumnOperandTuple tuple)
+        : column_(column), tuple_(tuple) {}
 
     bool operator==(ColumnOperand const& rhs) const {
         return column_ == rhs.column_ && tuple_ == rhs.tuple_;
@@ -39,17 +48,17 @@ public:
         return column_;
     }
 
-    bool GetTuple() const {
+    ColumnOperandTuple GetTuple() const {
         return tuple_;
     }
 
     // here TS means (t, s)
     ColumnOperand GetInvTS() const {
-        return ColumnOperand(column_, !tuple_);
+        return ColumnOperand(column_, Invert(tuple_));
     }
 
     std::string ToString() const {
-        return (tuple_ ? "t." : "s.") + column_->GetName();
+        return std::string(tuple_._to_string()) + "." + column_->GetName();
     }
 };
 
@@ -64,7 +73,7 @@ struct std::hash<algos::fastadc::ColumnOperand> {
     size_t operator()(algos::fastadc::ColumnOperand const& k) const noexcept {
         size_t seed = 0;
         boost::hash_combine(seed, k.GetColumn()->GetIndex());
-        boost::hash_combine(seed, k.GetTuple());
+        boost::hash_combine(seed, k.GetTuple()._value);
         return seed;
     }
 };
