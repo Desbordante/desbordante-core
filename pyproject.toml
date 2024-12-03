@@ -24,7 +24,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/Desbordante/Desbordante", issues = "https://github.com/Desbordante/Desbordante/issues" }
+urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/desbordante/desbordante-core", issues = "https://github.com/desbordante/desbordante-core/issues" }
 
 [tool.scikit-build.cmake.define]
 PYTHON = "INSTALL"
