@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "desbordante"
-version = "2.1.0"
+version = "2.2.0"
 description = "Science-intensive high-performance data profiler"
 requires-python = ">=3.7"
 readme = "README_PYPI.md"
@@ -19,11 +19,12 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/Mstrutov/Desbordante", issues = "https://github.com/Mstrutov/Desbordante/issues" }
+urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/Desbordante/Desbordante", issues = "https://github.com/Desbordante/Desbordante/issues" }
 
 [tool.scikit-build.cmake.define]
 PYTHON = "INSTALL"
