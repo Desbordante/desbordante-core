@@ -50,6 +50,10 @@ bool Mind::SetExternalOption(std::string_view option_name, boost::any const& val
     return false;
 }
 
+std::type_index Mind::GetExternalTypeIndex(std::string_view option_name) const {
+    return auind_algo_->GetTypeIndex(option_name);
+};
+
 void Mind::LoadINDAlgorithmDataInternal() {
     timings_.load = util::TimedInvoke(&Algorithm::LoadData, auind_algo_);
 }
