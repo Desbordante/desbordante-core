@@ -64,6 +64,12 @@ protected:
     // Overload this if you want to work with options outside of
     // possible_options_ map. Useful for pipelines.
     virtual bool SetExternalOption(std::string_view option_name, boost::any const& value);
+
+    // Override this function if your algorithm uses options outside possible_options_.
+    // For example, when you need to resolve the type index of one of the algorithms inside the
+    // pipeline.
+    virtual std::type_index GetExternalTypeIndex(std::string_view) const;
+
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
