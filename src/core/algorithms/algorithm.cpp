@@ -11,6 +11,10 @@ bool Algorithm::SetExternalOption([[maybe_unused]] std::string_view option_name,
     return false;
 }
 
+std::type_index Algorithm::GetExternalTypeIndex(std::string_view) const {
+    return typeid(void);
+}
+
 void Algorithm::AddSpecificNeededOptions(
         [[maybe_unused]] std::unordered_set<std::string_view>& previous_options) const {}
 
@@ -125,7 +129,9 @@ std::unordered_set<std::string_view> Algorithm::GetNeededOptions() const {
 
 std::type_index Algorithm::GetTypeIndex(std::string_view option_name) const {
     auto it = possible_options_.find(option_name);
-    if (it == possible_options_.end()) return typeid(void);
+    if (it == possible_options_.end()) {
+        return GetExternalTypeIndex(option_name);
+    }
     return it->second->GetTypeIndex();
 }
 
