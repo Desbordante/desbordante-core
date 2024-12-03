@@ -34,14 +34,22 @@ The **Validation** task is different: it is designed to check whether a specifie
 For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
 The currently supported data patterns are:
-* Functional dependency variants:
-    - Exact functional dependencies (discovery and validation)
-    - Approximate functional dependencies, with g<sub>1</sub> metric (discovery and validation)
-    - Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery)
-    - Dynamic validation of exact and approximate functional dependencies
+* Exact functional dependencies (discovery and validation)
+* Approximate functional dependencies, with 
+    - $g_1$ metric — classic AFDs (discovery and validation)
+    - $\mu+$ metric (discovery)
+    - $\tau$ metric (discovery)
+    - $pdep$ metric (discovery)
+    - $\rho$ metric (discovery)
+* Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery and validation)
+* Classic soft functional dependencies (with corellations), with $\rho$ metric (discovery and validation)
+* Dynamic validation of exact and approximate ($g_1$) functional dependencies
+* Numerical dependencies (validation)
 * Graph functional dependencies (validation)
 * Conditional functional dependencies (discovery)
-* Inclusion dependencies (discovery)
+* Inclusion dependencies
+   - Exact inclusion dependencies (discovery and validation)
+   - Approximate inclusion dependencies, with $g^{'}_{3}$ metric (discovery and validation)
 * Order dependencies:
    - set-based axiomatization (discovery)
    - list-based axiomatization (discovery)
@@ -50,12 +58,12 @@ The currently supported data patterns are:
 * Differential Dependencies (discovery)
 * Unique column combinations:
    - Exact unique column combination (discovery and validation)
-   - Approximate unique column combination, with g<sub>1</sub> metric (discovery and validation)
+   - Approximate unique column combination, with $g_1$ metric (discovery and validation)
 * Association rules (discovery)
 * Matching dependencies (discovery)
+* Variable heterogeneous denial constraints (validation)
 
-This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the
-algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
+This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
 
 ## Usage examples
 
@@ -177,22 +185,28 @@ No worries! Desbordante offers a novel type of data profiling, which may require
 
 Here is a list of papers about patterns, organized in the recommended reading order in each item:
 
-* Functional dependency variants:
-    - Exact functional dependencies
-       - [Thorsten Papenbrock et al. 2015. Functional dependency discovery: an experimental evaluation of seven algorithms. Proc. VLDB Endow. 8, 10 (June 2015), 1082–1093.](http://www.vldb.org/pvldb/vol8/p1082-papenbrock.pdf)
-       - [Thorsten Papenbrock and Felix Naumann. 2016. A Hybrid Approach to Functional Dependency Discovery. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 821–833.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2016_papenbrock_a.pdf)
-    - Approximate functional dependencies, with g<sub>1</sub> metric
-       - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
-    - Probabilistic functional dependencies, with PerTuple and PerValue metrics
-       - [Daisy Zhe Wang et al. Functional Dependency Generation and Applications in Pay-As-You-Go Data Integration Systems. WebDB 2009](http://webdb09.cse.buffalo.edu/papers/Paper18/webdb09.pdf)
-       - [Daisy Zhe Wang et al. Discovering Functional Dependencies in Pay-As-You-Go Data Integration Systems. Tech Rep. UCB/EECS-2009-119.](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2009/EECS-2009-119.pdf)
+* Exact functional dependencies
+   - [Thorsten Papenbrock et al. 2015. Functional dependency discovery: an experimental evaluation of seven algorithms. Proc. VLDB Endow. 8, 10 (June 2015), 1082–1093.](http://www.vldb.org/pvldb/vol8/p1082-papenbrock.pdf)
+   - [Thorsten Papenbrock and Felix Naumann. 2016. A Hybrid Approach to Functional Dependency Discovery. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 821–833.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2016_papenbrock_a.pdf)
+* Approximate functional dependencies ($g_{1}, \mu+, \tau, pdep, \rho$ metrics)
+   - [Marcel Parciak et al. 2024. Measuring Approximate Functional Dependencies: A Comparative Study. In Proceedings 2024 IEEE 40th International Conference on Data Engineering (ICDE), Utrecht, Netherlands, 2024, pp. 3505-3518](https://arxiv.org/abs/2312.06296)
+   - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
+   - [Yka Huhtala et al. 1999. TANE: An Efficient Algorithm for Discovering Functional and Approximate Dependencies. Comput. J. 42(2): 100-111](https://dm-gatech.github.io/CS8803-Fall2018-DML-Papers/tane.pdf)
+* Probabilistic functional dependencies ($PerTuple$ and $PerValue$ metrics)
+   - [Daisy Zhe Wang et al. Functional Dependency Generation and Applications in Pay-As-You-Go Data Integration Systems. WebDB 2009](http://webdb09.cse.buffalo.edu/papers/Paper18/webdb09.pdf)
+   - [Daisy Zhe Wang et al. Discovering Functional Dependencies in Pay-As-You-Go Data Integration Systems. Tech Rep. UCB/EECS-2009-119.](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2009/EECS-2009-119.pdf)
+* Classic soft functional dependencies ($\rho$ metric)
+   - [Ihab F. Ilyas et al. 2004. CORDS: automatic discovery of correlations and soft functional dependencies. In Proceedings of the 2004 ACM SIGMOD international conference on Management of data (SIGMOD '04). Association for Computing Machinery, New York, NY, USA, 647–658. ](https://cs.uwaterloo.ca/~ilyas/papers/cords.pdf)
+* Numerical Dependencies
+   - [Paolo Ciaccia et al. 2013. Efficient derivation of numerical dependencies. Information Systems, Volume 38, Issue 3. Pages 410-429.](https://www.sciencedirect.com/science/article/abs/pii/S0306437912001044)
 * Graph functional dependencies
     - [Wenfei Fan, Yinghui Wu, and Jingbo Xu. 2016. Functional Dependencies for Graphs. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 1843–1857.](https://dl.acm.org/doi/pdf/10.1145/2882903.2915232)
 * Conditional functional dependencies
     - [Rammelaere, J., Geerts, F. (2019). Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”. Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2018. ](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_33)
-* Inclusion dependencies (discovery)
+* Exact and approximate inclusion dependencies
     - [Falco Dürsch et al. 2019. Inclusion Dependency Discovery: An Experimental Evaluation of Thirteen Algorithms. In Proceedings of the 28th ACM International Conference on Information and Knowledge Management (CIKM '19). Association for Computing Machinery, New York, NY, USA, 219–228.](https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2019_duersch_inclusion.pdf)
-    - [Sebastian Kruse, et al: Fast Approximate Discovery of Inclusion Dependencies. BTW 2017: 207-226](http://btw2017.informatik.uni-stuttgart.de/slidesandpapers/F4-10-47/paper_web.pdf)
+    - [Sebastian Kruse, et al. Fast Approximate Discovery of Inclusion Dependencies. BTW 2017: 207-226](http://btw2017.informatik.uni-stuttgart.de/slidesandpapers/F4-10-47/paper_web.pdf)
+    - [Marchi, F.D., Lopes, S. & Petit, JM. Unary and n-ary inclusion dependency discovery in relational databases. J Intell Inf Syst 32, 53–73 (2009)](https://liris.cnrs.fr/Documents/Liris-3034.pdf)
 * Order dependencies:
    - [Jaroslaw Szlichta et al. 2017. Effective and complete discovery of order dependencies via set-based axiomatization. Proc. VLDB Endow. 10, 7 (March 2017), 721–732.](http://www.vldb.org/pvldb/vol10/p721-szlichta.pdf)
    - [Langer, P., Naumann, F. Efficient order dependency detection. The VLDB Journal 25, 223–241 (2016)](https://link.springer.com/article/10.1007/s00778-015-0412-3)
@@ -202,12 +216,15 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Paul G. Brown and Peter J. Hass. 2003. BHUNT: automatic discovery of Fuzzy algebraic constraints in relational data. In Proceedings of the 29th international conference on Very large data bases - Volume 29 (VLDB '03), Vol. 29. VLDB Endowment, 668–679.](https://www.vldb.org/conf/2003/papers/S20P03.pdf)
 * Differential dependencies
    - [Shaoxu Song and Lei Chen. 2011. Differential dependencies: Reasoning and discovery. ACM Trans. Database Syst. 36, 3, Article 16 (August 2011), 41 pages.](https://sxsong.github.io/doc/11tods.pdf)
-* Unique column combinations
+* Exact and approximate unique column combinations
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
-* Matching deoendencies
+* Matching dependencies
    - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
+* Denial constraints
+   - [X. Chu, I. F. Ilyas and P. Papotti. Holistic data cleaning: Putting violations into context. 2013. IEEE 29th International Conference on Data Engineering (ICDE), Brisbane, QLD, Australia, 2013, pp. 458-469,](https://cs.uwaterloo.ca/~ilyas/papers/XuICDE2013.pdf)
+   - [Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia Floratou. 2024. Rapidash: Efficient Detection of Constraint Violations. Proc. VLDB Endow. 17, 8 (April 2024), 2009–2021.](https://arxiv.org/pdf/2309.12436)
 
 ## Installation
 
@@ -252,6 +269,8 @@ If you use this software for research, please cite one of our papers:
 4) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "Fast Discovery of Inclusion Dependencies with Desbordante," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275, doi: 10.23919/FRUCT58615.2023.10143047.
 5) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
 6) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
+7) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "Lightning Fast Matching Dependency Discovery with Desbordante," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
+
 
 # Contacts and Q&A
 
