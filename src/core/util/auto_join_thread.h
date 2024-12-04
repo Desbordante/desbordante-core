@@ -8,7 +8,7 @@ namespace util::jthread {
 /// @remark The class is inspired by Scott Meyers' ThreadRAII (from Effective Modern C++)
 class AutoJoinThread {
 public:
-    explicit AutoJoinThread(std::thread&& t) : t(std::move(t)) {}
+    explicit AutoJoinThread(std::thread&& t) : t_(std::move(t)) {}
 
     AutoJoinThread(AutoJoinThread&&) = default;
     AutoJoinThread& operator=(AutoJoinThread&&) = default;
@@ -21,17 +21,17 @@ public:
         : AutoJoinThread(std::thread{std::forward<F>(f), std::forward<Args>(args)...}) {}
 
     ~AutoJoinThread() {
-        if (t.joinable()) {
-            t.join();
+        if (t_.joinable()) {
+            t_.join();
         }
     }
 
-    std::thread& get() {
-        return t;
+    std::thread& Get() {
+        return t_;
     }
 
 private:
-    std::thread t;
+    std::thread t_;
 };
 
 }  // namespace util::jthread
