@@ -191,12 +191,12 @@ size_t KDTree<PointType>::Size() const {
 
 template <SubscriptableOrder PointType>
 KDTree<PointType>::KDTree(std::vector<PointType> const& points) : KDTree<PointType>() {
-    std::for_each(points.begin(), points.end(), this->Insert);
+    std::for_each(points.begin(), points.end(), &Insert);
 }
 
 template <SubscriptableOrder PointType>
 KDTree<PointType>::KDTree(std::initializer_list<PointType> const& points) : KDTree<PointType>() {
-    std::for_each(points.begin(), points.end(), this->Insert);
+    std::for_each(points.begin(), points.end(), &Insert);
 }
 
 template <SubscriptableOrder PointType>
