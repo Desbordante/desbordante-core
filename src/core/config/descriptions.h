@@ -113,6 +113,8 @@ constexpr auto kDMinStructuralZeroesAmount =
 constexpr auto kDOnlySFD = "Don't mine correlations";
 // DC verifier
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
+// DD verifier
+constexpr auto kDDDString = "Differential dependency that needs to be verified";
 // DES
 constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
 constexpr auto kDDifferentialScale = "the magnitude of mutations";
