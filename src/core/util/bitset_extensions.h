@@ -73,7 +73,7 @@ public:
 
 /// @brief Test if T has method _Find_next
 template <typename T>
-constexpr bool TestBitsetV = TestBitset<T>::kValue;
+constexpr bool kTestBitsetV = TestBitset<T>::kValue;
 
 /// @brief Wrapper for std::bitset to iterate through set bits using temporary
 /// boost::dynamic_bitset.
@@ -129,27 +129,27 @@ public:
 }  // namespace bitset_extensions
 
 /// @brief Call bs._Find_first if it's availible, use custom implementation otherwise
-template <size_t S, typename std::enable_if<bitset_extensions::TestBitsetV<std::bitset<S>>,
+template <size_t S, typename std::enable_if<bitset_extensions::kTestBitsetV<std::bitset<S>>,
                                             bool>::type = true>
 inline size_t FindFirst(std::bitset<S> const& bs) noexcept {
     return bs._Find_first();
 }
 
 /// @brief Call bs._Find_first if it's availible, use custom implementation otherwise
-template <size_t S, typename = std::enable_if_t<!bitset_extensions::TestBitsetV<std::bitset<S>>>>
+template <size_t S, typename = std::enable_if_t<!bitset_extensions::kTestBitsetV<std::bitset<S>>>>
 inline size_t FindFirst(std::bitset<S> const& bs) noexcept {
     return bitset_extensions::FindFirstFixedWidth(bs);
 }
 
 /// @brief Call bs._Find_next if it's availible, use custom implementation otherwise
-template <size_t S, typename std::enable_if<bitset_extensions::TestBitsetV<std::bitset<S>>,
+template <size_t S, typename std::enable_if<bitset_extensions::kTestBitsetV<std::bitset<S>>,
                                             bool>::type = true>
 inline size_t FindNext(std::bitset<S> const& bs, size_t pos) noexcept {
     return bs._Find_next(pos);
 }
 
 /// @brief Call bs._Find_next if it's availible, use custom implementation otherwise
-template <size_t S, typename = std::enable_if_t<!bitset_extensions::TestBitsetV<std::bitset<S>>>>
+template <size_t S, typename = std::enable_if_t<!bitset_extensions::kTestBitsetV<std::bitset<S>>>>
 inline size_t FindNext(std::bitset<S> const& bs, size_t pos) noexcept {
     if constexpr (S == 64) {
         return bitset_extensions::FindNextFixedWidth(bs, pos);
@@ -163,7 +163,7 @@ inline size_t FindNext(std::bitset<S> const& bs, size_t pos) noexcept {
 
 /// @brief If _Find_next is availible, copy every set bit, else copy biset to dynamic_bitset
 /// through string representation
-template <size_t S, typename std::enable_if<bitset_extensions::TestBitsetV<std::bitset<S>>,
+template <size_t S, typename std::enable_if<bitset_extensions::kTestBitsetV<std::bitset<S>>,
                                             bool>::type = true>
 inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
                                                    std::size_t size = S) noexcept {
@@ -176,7 +176,7 @@ inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
 
 /// @brief If _Find_next is availible, copy every set bit, else copy biset to dynamic_bitset
 /// through string representation
-template <size_t S, typename = std::enable_if_t<!bitset_extensions::TestBitsetV<std::bitset<S>>>>
+template <size_t S, typename = std::enable_if_t<!bitset_extensions::kTestBitsetV<std::bitset<S>>>>
 inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
                                                    [[maybe_unused]] std::size_t size = S) noexcept {
     return boost::dynamic_bitset(bs.to_string());
@@ -184,7 +184,7 @@ inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
 
 /// @brief If _Find_next is availible, create std::bitset set-bits-iterator, else
 /// boost::dynamic_bitset set-bits-iterator
-template <size_t S, typename std::enable_if<bitset_extensions::TestBitsetV<std::bitset<S>>,
+template <size_t S, typename std::enable_if<bitset_extensions::kTestBitsetV<std::bitset<S>>,
                                             bool>::type = true>
 inline std::unique_ptr<IBitsetIterator> MakeBitsetIterator(std::bitset<S> const& bs) {
     return std::make_unique<bitset_extensions::BitsetIterator<S>>(bs);
@@ -192,7 +192,7 @@ inline std::unique_ptr<IBitsetIterator> MakeBitsetIterator(std::bitset<S> const&
 
 /// @brief If _Find_next is availible, create std::bitset set-bits-iterator, else
 /// boost::dynamic_bitset set-bits-iterator
-template <size_t S, typename = std::enable_if_t<!bitset_extensions::TestBitsetV<std::bitset<S>>>>
+template <size_t S, typename = std::enable_if_t<!bitset_extensions::kTestBitsetV<std::bitset<S>>>>
 inline std::unique_ptr<IBitsetIterator> MakeBitsetIterator(std::bitset<S> const& bs) {
     return std::make_unique<bitset_extensions::DynamicBitsetIterator<S>>(bs);
 }
