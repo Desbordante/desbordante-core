@@ -102,9 +102,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Download libraries
-        run: |
-          brew install llvm@17 make boost
+        run: brew install llvm@17 make boost
         shell: bash
+      - name: Download datasets
+        uses: ./.github/composite-actions/download-datasets
       - name: Build
         run: |
           export CC=$(brew --prefix llvm@17)/bin/clang
