@@ -20,7 +20,7 @@ public:
 
 class StringValueRange : public ValueRange {
 public:
-    std::vector<String> domain;
+    std::vector<String> domain{};
 
     explicit StringValueRange(TypedColumnData const& column);
     StringValueRange(String value) : domain{std::move(value)} {};
@@ -39,49 +39,54 @@ public:
     ~StringValueRange() = default;
 };
 
-class DoubleValueRange : public ValueRange {
+template <typename T>
+class NumericValueRange : public ValueRange {
 public:
-    Double lower_bound;
-    Double upper_bound;
+    T lower_bound{};
+    T upper_bound{};
 
-    explicit DoubleValueRange(TypedColumnData const& column);
-    DoubleValueRange(Double lower_bound, Double upper_bound)
-        : lower_bound(lower_bound), upper_bound(upper_bound) {};
+    explicit NumericValueRange(TypedColumnData const& column) {
+        bool initialized = false;
+        for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
+            std::byte const* value = column.GetValue(row_index);
+            T numeric_value = Type::GetValue<T>(value);
+            if (!initialized) {
+                lower_bound = numeric_value;
+                upper_bound = numeric_value;
+                initialized = true;
+            } else {
+                if (numeric_value < lower_bound) {
+                    lower_bound = numeric_value;
+                }
+                if (numeric_value > upper_bound) {
+                    upper_bound = numeric_value;
+                }
+            }
+        }
+    }
+
+    explicit NumericValueRange(T lower_bound, T upper_bound)
+        : lower_bound(lower_bound), upper_bound(upper_bound) {}
+
+    [[nodiscard]] bool Includes(std::byte const* value) const override {
+        T numeric_value = Type::GetValue<T>(value);
+        return numeric_value >= lower_bound && numeric_value <= upper_bound;
+    }
 
     TypeId GetTypeId() const override {
-        return TypeId::kDouble;
+        if (std::is_same<T, Double>::value) {
+            return TypeId::kDouble;
+        } else if (std::is_same<T, Int>::value) {
+            return TypeId::kInt;
+        }
+        throw std::logic_error("No TypeId corresponding to NumericValueRange's template type.");
     }
 
-    bool Includes(std::byte const* value) const override {
-        Double dvalue = Type::GetValue<Double>(value);
-        return dvalue >= lower_bound && dvalue <= upper_bound;
+    [[nodiscard]] std::string ToString() const override {
+        return "[" + std::to_string(lower_bound) + " - " + std::to_string(upper_bound) + "]";
     }
 
-    std::string ToString() const override;
-    ~DoubleValueRange() = default;
-};
-
-class IntValueRange : public ValueRange {
-public:
-    Int lower_bound;
-    Int upper_bound;
-
-    explicit IntValueRange(TypedColumnData const& column);
-    IntValueRange(Int lower_bound, Int upper_bound)
-        : lower_bound(lower_bound), upper_bound(upper_bound) {};
-
-    TypeId GetTypeId() const override {
-        return TypeId::kInt;
-    }
-
-    bool Includes(std::byte const* value) const override {
-        Int ivalue = Type::GetValue<Int>(value);
-        return ivalue >= lower_bound && ivalue <= upper_bound;
-    }
-
-    std::string ToString() const override;
-
-    ~IntValueRange() = default;
+    ~NumericValueRange() = default;
 };
 
 std::shared_ptr<ValueRange> CreateValueRange(TypedColumnData const& column);

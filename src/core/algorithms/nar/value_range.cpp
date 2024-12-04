@@ -2,34 +2,7 @@
 
 namespace model {
 
-template <typename T, typename RangeT>
-RangeT FindRangeOf(model::TypedColumnData const& column) {
-    bool initialized = false;
-    T lower_bound;
-    T upper_bound;
-    for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
-        std::byte const* value = column.GetValue(row_index);
-        T encountered_value = model::Type::GetValue<T>(value);
-        if (!initialized) {
-            lower_bound = encountered_value;
-            upper_bound = encountered_value;
-            initialized = true;
-            continue;
-        }
-        if (encountered_value > upper_bound) {
-            upper_bound = encountered_value;
-        }
-        if (encountered_value < lower_bound) {
-            lower_bound = encountered_value;
-        }
-    }
-    return RangeT(lower_bound, upper_bound);
-}
-
-template <>
-StringValueRange FindRangeOf<model::String, model::StringValueRange>(
-        model::TypedColumnData const& column) {
-    std::vector<String> domain = {};
+StringValueRange::StringValueRange(TypedColumnData const& column) {
     for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
         std::string string_value = Type::GetValue<std::string>(value);
@@ -39,19 +12,6 @@ StringValueRange FindRangeOf<model::String, model::StringValueRange>(
             domain.push_back(std::move(string_value));
         }
     }
-    return StringValueRange(domain);
-}
-
-StringValueRange::StringValueRange(TypedColumnData const& column) {
-    *this = std::move(FindRangeOf<String, StringValueRange>(column));
-}
-
-DoubleValueRange::DoubleValueRange(TypedColumnData const& column) {
-    *this = std::move(FindRangeOf<Double, DoubleValueRange>(column));
-}
-
-IntValueRange::IntValueRange(TypedColumnData const& column) {
-    *this = std::move(FindRangeOf<Int, IntValueRange>(column));
 }
 
 std::shared_ptr<ValueRange> CreateValueRange(model::TypedColumnData const& column) {
@@ -59,9 +19,9 @@ std::shared_ptr<ValueRange> CreateValueRange(model::TypedColumnData const& colum
         case TypeId::kString:
             return std::make_shared<StringValueRange>(column);
         case TypeId::kDouble:
-            return std::make_shared<DoubleValueRange>(column);
+            return std::make_shared<NumericValueRange<Double>>(column);
         case TypeId::kInt:
-            return std::make_shared<IntValueRange>(column);
+            return std::make_shared<NumericValueRange<Int>>(column);
         default:
             throw std::invalid_argument(std::string("Column has invalid type_id in function: ") +
                                         __func__);
@@ -79,18 +39,6 @@ std::string StringValueRange::ToString() const {
         result << ", " + domain[i];
     }
     result << "]";
-    return result.str();
-}
-
-std::string DoubleValueRange::ToString() const {
-    std::ostringstream result;
-    result << "[" << lower_bound << " - " << upper_bound << "]";
-    return result.str();
-}
-
-std::string IntValueRange::ToString() const {
-    std::ostringstream result;
-    result << "[" << lower_bound << " - " << upper_bound << "]";
     return result.str();
 }
 

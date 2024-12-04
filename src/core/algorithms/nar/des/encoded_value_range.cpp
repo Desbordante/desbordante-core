@@ -70,14 +70,14 @@ std::shared_ptr<model::ValueRange> EncodedValueRange::Decode(
     using namespace model;
     auto domain_type_id = domain->GetTypeId();
     switch (domain_type_id) {
-        case TypeId::kInt: {
-            return DecodeTypedValueRange<Int, IntValueRange>(domain);
-        }
-        case TypeId::kDouble: {
-            return DecodeTypedValueRange<Double, DoubleValueRange>(domain);
-        }
         case TypeId::kString: {
             return DecodeTypedValueRange<String, StringValueRange>(domain);
+        }
+        case TypeId::kDouble: {
+            return DecodeTypedValueRange<Double, NumericValueRange<Double>>(domain);
+        }
+        case TypeId::kInt: {
+            return DecodeTypedValueRange<Int, NumericValueRange<Int>>(domain);
         }
         default:
             throw std::invalid_argument(std::string("ValueRange has invalid type_id: ") +
