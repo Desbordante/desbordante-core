@@ -11,6 +11,7 @@ class ValueRange {
 protected:
     ValueRange() {};
     virtual ~ValueRange() = default;
+
 public:
     virtual TypeId GetTypeId() const = 0;
     virtual bool Includes(std::byte const* value) const = 0;
@@ -20,15 +21,12 @@ public:
 class StringValueRange : public ValueRange {
 public:
     std::vector<String> domain;
+
     explicit StringValueRange(TypedColumnData const& column);
+    StringValueRange(String value) : domain{std::move(value)} {};
+    StringValueRange(std::vector<String> vec) : domain{std::move(vec)} {};
 
-    StringValueRange(String value)
-    : domain{std::move(value)} {};
-
-    TypeId GetTypeId() const override {
-        return TypeId::kString;
-    }
-
+    TypeId GetTypeId() const override {return TypeId::kString;}
     bool Includes(std::byte const* value) const override {
         String const& svalue = Type::GetValue<String>(value);
         return std::find(domain.begin(), domain.end(), svalue) != domain.end();
@@ -42,14 +40,12 @@ class DoubleValueRange : public ValueRange {
 public:
     Double lower_bound;
     Double upper_bound;
+
     explicit DoubleValueRange(TypedColumnData const& column);
     DoubleValueRange(Double lower_bound, Double upper_bound)
         : lower_bound(lower_bound), upper_bound(upper_bound) {};
 
-    TypeId GetTypeId() const override {
-        return TypeId::kDouble;
-    }
-
+    TypeId GetTypeId() const override {return TypeId::kDouble;}
     bool Includes(std::byte const* value) const override {
         Double dvalue = Type::GetValue<Double>(value);
         return dvalue >= lower_bound && dvalue <= upper_bound;
@@ -64,19 +60,18 @@ public:
     Int lower_bound;
     Int upper_bound;
 
-    TypeId GetTypeId() const override {
-        return TypeId::kInt;
-    }
+    explicit IntValueRange(TypedColumnData const& column);
+    IntValueRange(Int lower_bound, Int upper_bound)
+        : lower_bound(lower_bound), upper_bound(upper_bound) {};
 
+    TypeId GetTypeId() const override {return TypeId::kInt;}
     bool Includes(std::byte const* value) const override {
         Int ivalue = Type::GetValue<Int>(value);
         return ivalue >= lower_bound && ivalue <= upper_bound;
     }
 
     std::string ToString() const override;
-    explicit IntValueRange(TypedColumnData const& column);
-    IntValueRange(Int lower_bound, Int upper_bound)
-        : lower_bound(lower_bound), upper_bound(upper_bound) {};
+
     ~IntValueRange() = default;
 };
 
