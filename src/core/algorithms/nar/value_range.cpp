@@ -49,8 +49,8 @@ StringValueRange::StringValueRange(TypedColumnData const& column) {
 DoubleValueRange::DoubleValueRange(TypedColumnData const& column) {
     *this = std::move(FindRangeOf<Double, DoubleValueRange>(column));
 }
-
 IntValueRange::IntValueRange(TypedColumnData const& column) {
+
     *this = std::move(FindRangeOf<Int, IntValueRange>(column));
 }
 

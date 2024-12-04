@@ -36,10 +36,10 @@ double const& EncodedValueRange::operator[](size_t index) const {
 template <typename T, typename RangeT>
 std::shared_ptr<RangeT> EncodedValueRange::DecodeTypedValueRange(
         std::shared_ptr<model::ValueRange> const& domain) const {
-    std::shared_ptr<RangeT> int_domain = std::static_pointer_cast<RangeT>(domain);
-    T span = int_domain->upper_bound - int_domain->lower_bound;
-    T resulting_lower = int_domain->lower_bound + span * this->bound1;
-    T resulting_upper = int_domain->lower_bound + span * this->bound2;
+    auto typed_domain = std::static_pointer_cast<RangeT>(domain);
+    T span = typed_domain->upper_bound - typed_domain->lower_bound;
+    T resulting_lower = typed_domain->lower_bound + span * this->bound1;
+    T resulting_upper = typed_domain->lower_bound + span * this->bound2;
     if (resulting_lower > resulting_upper) {
         std::swap(resulting_lower, resulting_upper);
     }
@@ -51,8 +51,7 @@ std::shared_ptr<model::StringValueRange>
 EncodedValueRange::DecodeTypedValueRange<model::String, model::StringValueRange>(
         std::shared_ptr<model::ValueRange> const& domain) const {
     using namespace model;
-    std::shared_ptr<StringValueRange> string_domain =
-            std::static_pointer_cast<StringValueRange>(domain);
+    auto string_domain = std::static_pointer_cast<StringValueRange>(domain);
     std::vector<String> string_vector = string_domain->domain;
     size_t span = string_vector.size();
     // upper_bound is not used, resulting NARs bind categorical values with a single
