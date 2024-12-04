@@ -36,7 +36,6 @@ NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_an
     return {fitness, support, confidence};
 }
 
-// TODO: this function is way too big and cluttered
 void NAR::SetQualities(TypedRelation const* typed_relation) {
     if (ante_.size() == 0 || cons_.size() == 0) {
         qualities_ = {0.0, 0.0, 0.0};
@@ -53,14 +52,21 @@ void NAR::SetQualities(TypedRelation const* typed_relation) {
         for (size_t coli = 0; coli < num_columns; ++coli) {
             model::TypedColumnData const& column = typed_relation->GetColumnData(coli);
             auto value = column.GetValue(rowi);
-            row_fits_ante &= AnteFitsValue(coli, value);
-            if (!row_fits_ante) {
+            if (row_fits_ante) {
+                row_fits_ante = AnteFitsValue(coli, value);
+            } else {
                 break;
             }
-            row_fits_cons &= ConsFitsValue(coli, value);
+            if (row_fits_ante) {
+                row_fits_cons &= ConsFitsValue(coli, value);
+            }
         }
-        num_rows_fit_ante += row_fits_ante;
-        num_rows_fit_ante_and_cons += (row_fits_ante && row_fits_cons);
+        if (row_fits_ante) {
+            ++num_rows_fit_ante;
+            if (row_fits_cons) {
+                ++num_rows_fit_ante_and_cons;
+            }
+        }
     }
 
     qualities_ = CalcQualities(num_rows_fit_ante, num_rows_fit_ante_and_cons,
