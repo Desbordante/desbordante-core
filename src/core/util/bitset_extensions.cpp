@@ -5,7 +5,7 @@
 
 namespace util::bitset_extensions {
 
-constexpr unsigned char GetByte(unsigned long long val, size_t byte_num) {
+CONSTEXPR_IF_VECTOR_IS_CONSTEXPR unsigned char GetByte(unsigned long long val, size_t byte_num) {
     return (val & kBytes[byte_num]) >> (byte_num * 8);
 }
 

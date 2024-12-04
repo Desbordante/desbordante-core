@@ -39,7 +39,16 @@ static std::vector<unsigned long long> const kBytes{0xff,
 constexpr static size_t kNumBytes = 8;
 constexpr static size_t kWidth = 64;
 
-constexpr unsigned char GetByte(unsigned long long val, size_t byte_num);
+// std::vector::operator[] is constexpr only since GCC 12
+// (see https://en.cppreference.com/w/cpp/compiler_support)
+// FIXME(senichenkov): check old versions of other compilers
+#if defined(__GNUC__) && (__GNUC__ < 12)
+#define CONSTEXPR_IF_VECTOR_IS_CONSTEXPR /* Ignore */
+#else
+#define CONSTEXPR_IF_VECTOR_IS_CONSTEXPR conxtexpr
+#endif
+
+CONSTEXPR_IF_VECTOR_IS_CONSTEXPR unsigned char GetByte(unsigned long long val, size_t byte_num);
 
 size_t FindFirstFixedWidth(std::bitset<kWidth> const&);
 
