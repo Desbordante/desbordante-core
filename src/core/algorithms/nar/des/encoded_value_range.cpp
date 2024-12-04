@@ -38,8 +38,8 @@ std::shared_ptr<RangeT> EncodedValueRange::DecodeTypedValueRange(
         std::shared_ptr<model::ValueRange> const& domain) const {
     auto typed_domain = std::static_pointer_cast<RangeT>(domain);
     T span = typed_domain->upper_bound - typed_domain->lower_bound;
-    T resulting_lower = typed_domain->lower_bound + span * this->bound1;
-    T resulting_upper = typed_domain->lower_bound + span * this->bound2;
+    T resulting_lower = typed_domain->lower_bound + span * bound1;
+    T resulting_upper = typed_domain->lower_bound + span * bound2;
     if (resulting_lower > resulting_upper) {
         std::swap(resulting_lower, resulting_upper);
     }
@@ -60,7 +60,7 @@ EncodedValueRange::DecodeTypedValueRange<model::String, model::StringValueRange>
     if (bound1 == 1.0) {
         result = string_vector.back();
     } else {
-        result = string_vector[span * this->bound1];
+        result = string_vector[span * bound1];
     }
     return std::make_shared<StringValueRange>(result);
 }
