@@ -53,7 +53,7 @@ model::NARQualities const& EncodedNAR::GetQualities() const {
     return qualities_;
 }
 
-NAR EncodedNAR::Decode(FeatureDomains& domains, RNG& rng) const {
+NAR EncodedNAR::Decode(FeatureDomains const& domains, RNG& rng) const {
     NAR resulting_nar;
     std::vector<size_t> feature_order(encoded_value_ranges_.size());
     std::iota(std::begin(feature_order), std::end(feature_order), 0);
@@ -70,7 +70,7 @@ NAR EncodedNAR::Decode(FeatureDomains& domains, RNG& rng) const {
             ++handling_feat_num;
             continue;
         }
-        auto const& domain = domains[feature_index];
+        auto const& domain = domains.at(feature_index);
         auto const& decoded = encoded_value_ranges_[feature_index].Decode(domain);
         if (handling_feat_num > implication_sign_after) {
             resulting_nar.InsertInCons(feature_index, decoded);

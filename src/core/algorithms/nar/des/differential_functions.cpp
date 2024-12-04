@@ -15,9 +15,7 @@ std::vector<size_t> GetRandIndices(size_t except_index, size_t population, size_
         indices.insert(random_index);
     }
     indices.erase(except_index);
-    std::vector<size_t> ind_vec;
-    ind_vec.reserve(number_of_indices);
-    ind_vec.insert(ind_vec.end(), indices.begin(), indices.end());
+    std::vector<size_t> ind_vec = {indices.begin(), indices.end()};
     return ind_vec;
 }
 

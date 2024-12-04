@@ -1,9 +1,9 @@
+#include "des.h"
+
 #include <algorithm>
 #include <cstddef>
-#include <vector>
 #include <memory>
-
-#include "des.h"
+#include <vector>
 
 #include "algorithms/nar/value_range.h"
 #include "config/names_and_descriptions.h"
@@ -62,7 +62,8 @@ std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& 
     return population;
 }
 
-EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at, RNG& rng) const {
+EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, size_t at,
+                                  RNG& rng) const {
     MutationFunction diff_func =
             EnumToMutationStrategy(differential_options_.differential_strategy);
     return (*diff_func)(population, at, differential_options_, rng);

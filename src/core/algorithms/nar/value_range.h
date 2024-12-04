@@ -26,7 +26,10 @@ public:
     StringValueRange(String value) : domain{std::move(value)} {};
     StringValueRange(std::vector<String> vec) : domain{std::move(vec)} {};
 
-    TypeId GetTypeId() const override {return TypeId::kString;}
+    TypeId GetTypeId() const override {
+        return TypeId::kString;
+    }
+
     bool Includes(std::byte const* value) const override {
         String const& svalue = Type::GetValue<String>(value);
         return std::find(domain.begin(), domain.end(), svalue) != domain.end();
@@ -45,7 +48,10 @@ public:
     DoubleValueRange(Double lower_bound, Double upper_bound)
         : lower_bound(lower_bound), upper_bound(upper_bound) {};
 
-    TypeId GetTypeId() const override {return TypeId::kDouble;}
+    TypeId GetTypeId() const override {
+        return TypeId::kDouble;
+    }
+
     bool Includes(std::byte const* value) const override {
         Double dvalue = Type::GetValue<Double>(value);
         return dvalue >= lower_bound && dvalue <= upper_bound;
@@ -64,7 +70,10 @@ public:
     IntValueRange(Int lower_bound, Int upper_bound)
         : lower_bound(lower_bound), upper_bound(upper_bound) {};
 
-    TypeId GetTypeId() const override {return TypeId::kInt;}
+    TypeId GetTypeId() const override {
+        return TypeId::kInt;
+    }
+
     bool Includes(std::byte const* value) const override {
         Int ivalue = Type::GetValue<Int>(value);
         return ivalue >= lower_bound && ivalue <= upper_bound;

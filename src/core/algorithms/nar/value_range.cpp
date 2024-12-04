@@ -29,10 +29,10 @@ RangeT FindRangeOf(model::TypedColumnData const& column) {
 template <>
 StringValueRange FindRangeOf<model::String, model::StringValueRange>(
         model::TypedColumnData const& column) {
-    auto domain = std::vector<String>();
+    std::vector<String> domain = {};
     for (size_t row_index = 0; row_index < column.GetNumRows(); ++row_index) {
         std::byte const* value = column.GetValue(row_index);
-        std::string string_value = model::Type::GetValue<std::string>(value);
+        std::string string_value = Type::GetValue<std::string>(value);
         bool first_occurrence =
                 std::find(domain.begin(), domain.end(), string_value) == domain.end();
         if (first_occurrence) {
@@ -49,8 +49,8 @@ StringValueRange::StringValueRange(TypedColumnData const& column) {
 DoubleValueRange::DoubleValueRange(TypedColumnData const& column) {
     *this = std::move(FindRangeOf<Double, DoubleValueRange>(column));
 }
-IntValueRange::IntValueRange(TypedColumnData const& column) {
 
+IntValueRange::IntValueRange(TypedColumnData const& column) {
     *this = std::move(FindRangeOf<Int, IntValueRange>(column));
 }
 
@@ -71,11 +71,12 @@ std::shared_ptr<ValueRange> CreateValueRange(model::TypedColumnData const& colum
 std::string StringValueRange::ToString() const {
     std::ostringstream result;
     result << "[";
-    if (domain.size() > 0) {
-        result << domain[0];
+    if (domain.empty()) {
+        return "[]";
     }
+    result << domain.front();
     for (size_t i = 1; i < domain.size(); ++i) {
-        result << ", " << domain[i];
+        result << ", " + domain[i];
     }
     result << "]";
     return result.str();
