@@ -69,36 +69,28 @@ std::shared_ptr<ValueRange> CreateValueRange(model::TypedColumnData const& colum
 }
 
 std::string StringValueRange::ToString() const {
-    std::string result;
-    result += "[";
+    std::ostringstream result;
+    result << "[";
     if (domain.size() > 0) {
-        result += domain[0];
+        result << domain[0];
     }
     for (size_t i = 1; i < domain.size(); ++i) {
-        result += (", " + domain[i]);
+        result << ", " << domain[i];
     }
-    result += "]";
-    return result;
+    result << "]";
+    return result.str();
 }
 
 std::string DoubleValueRange::ToString() const {
-    std::string result;
-    result += "[";
-    result += std::to_string(lower_bound);
-    result += " - ";
-    result += std::to_string(upper_bound);
-    result += "]";
-    return result;
+    std::ostringstream result;
+    result << "[" << lower_bound << " - " << upper_bound << "]";
+    return result.str();
 }
 
 std::string IntValueRange::ToString() const {
-    std::string result;
-    result += "[";
-    result += std::to_string(lower_bound);
-    result += " - ";
-    result += std::to_string(upper_bound);
-    result += "]";
-    return result;
+    std::ostringstream result;
+    result << "[" << lower_bound << " - " << upper_bound << "]";
+    return result.str();
 }
 
 }  // namespace model

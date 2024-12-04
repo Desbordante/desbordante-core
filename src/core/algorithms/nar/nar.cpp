@@ -2,31 +2,23 @@
 
 namespace model {
 std::string NAR::ToString() const {
-    std::string result;
-    result += std::to_string(qualities_.fitness);
-    result += " {";
+    std::ostringstream result;
+    result << std::to_string(qualities_.fitness) << " {";
     for (auto it{ante_.begin()}; it != ante_.end(); ++it) {
         if (it != ante_.begin()) {
-            result += ", ";
+            result << ", ";
         }
-        result += std::to_string(it->first);
-        result += ": ";
-        result += it->second->ToString();
+        result << it->first << ": " << it->second->ToString();
     }
-    result += "} ===> {";
+    result << "} ===> {";
     for (auto it{cons_.begin()}; it != cons_.end(); ++it) {
         if (it != cons_.begin()) {
-            result += ", ";
+            result << ", ";
         }
-        result += std::to_string(it->first);
-        result += ": ";
-        result += it->second->ToString();
+        result << it->first << ": " << it->second->ToString();
     }
-    result += "} s: ";
-    result += std::to_string(qualities_.support);
-    result += " c: ";
-    result += std::to_string(qualities_.confidence);
-    return result;
+    result << "} s: " << qualities_.support << " c: " << qualities_.confidence;
+    return result.str();
 }
 
 NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_and_cons,
@@ -47,16 +39,18 @@ NARQualities CalcQualities(size_t num_rows_fit_ante, size_t num_rows_fit_ante_an
 // TODO: this function is way too big and cluttered
 void NAR::SetQualities(TypedRelation const* typed_relation) {
     if (ante_.size() == 0 || cons_.size() == 0) {
-        qualities_.fitness = 0.0;
+        qualities_ = {0.0, 0.0, 0.0};
         qualities_consistent_ = true;
         return;
     }
     size_t num_rows_fit_ante = 0;
     size_t num_rows_fit_ante_and_cons = 0;
+    size_t num_rows = typed_relation->GetNumRows();
+    size_t num_columns = typed_relation->GetNumColumns();
     for (size_t rowi = 0; rowi < typed_relation->GetNumRows(); ++rowi) {
         bool row_fits_ante = true;
         bool row_fits_cons = true;
-        for (size_t coli = 0; coli < typed_relation->GetNumColumns(); ++coli) {
+        for (size_t coli = 0; coli < num_columns; ++coli) {
             model::TypedColumnData const& column = typed_relation->GetColumnData(coli);
             auto value = column.GetValue(rowi);
             row_fits_ante &= AnteFitsValue(coli, value);
@@ -70,8 +64,7 @@ void NAR::SetQualities(TypedRelation const* typed_relation) {
     }
 
     qualities_ = CalcQualities(num_rows_fit_ante, num_rows_fit_ante_and_cons,
-                               ante_.size() + cons_.size(), typed_relation->GetNumColumns(),
-                               typed_relation->GetNumRows());
+                               ante_.size() + cons_.size(), num_columns, num_rows);
     qualities_consistent_ = true;
 }
 
