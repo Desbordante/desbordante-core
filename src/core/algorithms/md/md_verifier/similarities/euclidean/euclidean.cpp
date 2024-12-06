@@ -4,7 +4,7 @@
 
 namespace algos::md {
 
-long double EuclideanSimilarity::operator()(long double left, long double right) {
+long double EuclideanSimilarity::operator()(long double left, long double right) const {
     return 1.0 / (1.0 + util::EuclideanDistance({left}, {right}));
 }
 
