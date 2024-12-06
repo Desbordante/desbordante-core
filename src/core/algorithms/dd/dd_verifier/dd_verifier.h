@@ -15,10 +15,8 @@ namespace algos::dd {
         config::InputTable input_table_;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-        unsigned num_rows_;
-        model::ColumnIndex num_columns_;
         void RegisterOptions();
-        std::vector<model::PLI::Cluster> GetRowsHolds(DF constraint);
+        std::vector<std::pair<int, int>> GetRowsHolds(const std::list<model::DFStringConstraint> &constraints) const;
         double DDVerifier::CalculateDistance(model::ColumnIndex column_index,
                                          const std::pair<std::size_t, std::size_t> &tuple_pair) const;
     protected:
