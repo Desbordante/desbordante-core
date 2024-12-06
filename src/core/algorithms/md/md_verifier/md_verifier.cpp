@@ -21,7 +21,7 @@ MDVerifier::MDVerifier() : Algorithm({}), pairs_violating_md_({}) {
 void ValidateDecisionBoundaries(config::IndicesType const& indices,
                                 std::vector<DecisionBoundary> const& decision_boundaries) {
     assert(indices.size() == decision_boundaries.size());
-    for (int i = 0; i < decision_boundaries.size(); ++i) {
+    for (std::size_t i = 0; i < decision_boundaries.size(); ++i) {
         if (decision_boundaries[i] < 0.0 || decision_boundaries[i] > 1.0) {
             throw config::ConfigurationError("Decision boundaries for column with index \"" +
                                              std::to_string(i) + "\" out of range.");
@@ -54,6 +54,14 @@ void MDVerifier::RegisterOptions() {
                           kDDistFromNullIsInfinity, false});
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_columns));
     RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_columns));
+    RegisterOption(
+            Option{&lhs_desicion_bondaries_, kMDLhsDecisionBoundaries, kDMDLhsDecisionBoundaries});
+    RegisterOption(
+            Option{&rhs_desicion_bondaries_, kMDRhsDecisionBoundaries, kDMDRhsDecisionBoundaries});
+    RegisterOption(
+            Option{&lhs_similarity_measures_, kMDLhsSimilarityMeasures, kDMDLhsSimilarityMeasures});
+    RegisterOption(
+            Option{&rhs_similarity_measures_, kMDRhsSimilarityMeasures, kDMDRhsSimilarityMeasures});
 }
 
 void MDVerifier::MakeExecuteOptsAvailable() {
@@ -63,6 +71,10 @@ void MDVerifier::MakeExecuteOptsAvailable() {
             kEqualNulls,
             config::kLhsIndicesOpt.GetName(),
             config::kRhsIndicesOpt.GetName(),
+            kMDLhsDecisionBoundaries,
+            kMDRhsDecisionBoundaries,
+            kMDLhsSimilarityMeasures,
+            kMDRhsSimilarityMeasures,
     });
 }
 
@@ -76,19 +88,86 @@ unsigned long long MDVerifier::ExecuteInternal() {
     return duration_cast<milliseconds>(system_clock::now() - start_time).count();
 }
 
+DecisionBoundary MDVerifier::CalculateSimilarity(std::byte const* first_val,
+                                                 std::byte const* second_val, model::TypeId type_id,
+                                                 std::shared_ptr<SimilarityMeasure> measure) {
+    using namespace model;
+
+    switch (type_id) {
+        case TypeId::kInt: {
+            auto first = static_cast<DecisionBoundary>(INumericType::GetValue<Int>(first_val));
+            auto second = static_cast<DecisionBoundary>(INumericType::GetValue<Int>(second_val));
+            return (*AsNumericMeasure(measure))(first, second);
+        }
+
+        case TypeId::kDouble: {
+            auto first = static_cast<DecisionBoundary>(INumericType::GetValue<Double>(first_val));
+            auto second = static_cast<DecisionBoundary>(INumericType::GetValue<Double>(first_val));
+            return (*AsNumericMeasure(measure))(first, second);
+        }
+
+        case TypeId::kString: {
+            auto string_type = StringType();
+            auto first = string_type.ValueToString(first_val);
+            auto second = string_type.ValueToString(second_val);
+            return (*AsStringMeasure(measure))(first, second);
+        }
+
+        default:
+            assert(false);
+    }
+}
+
+bool MDVerifier::CheckRows(size_t first_row, size_t second_row) {
+    for (std::size_t i = 0; i < lhs_indices_.size(); ++i) {
+        auto index = lhs_indices_[i];
+        auto decision_boundary = lhs_desicion_bondaries_[i];
+        auto similarity_measure = lhs_similarity_measures_[i];
+
+        auto const& column = relation_->GetColumnData(index);
+        auto similarity =
+                CalculateSimilarity(column.GetValue(first_row), column.GetValue(second_row),
+                                    column.GetTypeId(), similarity_measure);
+        if (similarity < decision_boundary) {
+            return true;
+        }
+    }
+    bool holds_for_rhs = true;
+    for (std::size_t i = 0; i < rhs_indices_.size(); ++i) {
+        auto index = rhs_indices_[i];
+        auto decision_boundary = rhs_desicion_bondaries_[i];
+        auto similarity_measure = rhs_similarity_measures_[i];
+
+        auto const& column = relation_->GetColumnData(index);
+        auto similarity =
+                CalculateSimilarity(column.GetValue(first_row), column.GetValue(second_row),
+                                    column.GetTypeId(), similarity_measure);
+        if (similarity < decision_boundary) {
+            holds_for_rhs = false;
+            rhs_suggestion_boundaries_[i] = std::min(rhs_suggestion_boundaries_[i], similarity);
+        }
+    }
+    return holds_for_rhs;
+}
+
 void MDVerifier::VerifyMD() {
     assert(lhs_indices_.size() == lhs_desicion_bondaries_.size() &&
            lhs_indices_.size() == lhs_similarity_measures_.size());
     assert(rhs_indices_.size() == rhs_desicion_bondaries_.size() &&
            rhs_indices_.size() == rhs_similarity_measures_.size());
 
-    std::vector<DecisionBoundary> lhs_suggestion_boundaries = lhs_desicion_bondaries_;
-    std::vector<DecisionBoundary> rhs_suggestion_boundaries = rhs_desicion_bondaries_;
+    md_holds_ = true;
+
+    rhs_suggestion_boundaries_ = rhs_desicion_bondaries_;
 
     auto num_cols = relation_->GetNumRows();
 
     for (size_t first_row = 0; first_row < num_cols; ++first_row) {
         for (size_t second_row = first_row + 1; second_row < num_cols; ++second_row) {
+            if (!CheckRows(first_row, second_row)) {
+                md_holds_ = false;
+                pairs_violating_md_.insert(std::make_pair(first_row, second_row));
+            }
         }
     }
 }
