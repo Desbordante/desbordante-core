@@ -7,7 +7,8 @@ find_package(Threads REQUIRED)
 
 add_library(${BINARY} STATIC ${lib_sources}
         algorithms/dd/dd_verifier/dd_verifier.cpp
-        algorithms/dd/dd_verifier/dd_verifier.h)
+        algorithms/dd/dd_verifier/dd_verifier.h
+        algorithms/dd/dd_verifier/dd_verifier.cpp)
 set_property(TARGET ${BINARY} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(${BINARY} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
 target_link_libraries(${BINARY} PUBLIC easyloggingpp)
