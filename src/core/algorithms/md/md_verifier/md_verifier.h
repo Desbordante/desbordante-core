@@ -1,5 +1,6 @@
 #pragma once
 
+#include <set>
 #include <type_traits>
 
 #include "algorithms/algorithm.h"
@@ -35,7 +36,8 @@ private:
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> relation_;
 
-    std::unordered_set<std::pair<int, int>> pairs_violating_md_;
+    std::set<std::pair<int, int>> pairs_violating_md_;
+    std::vector<DecisionBoundary> rhs_suggestion_boundaries_;
 
     bool md_holds_ = false;
 
@@ -45,6 +47,10 @@ private:
 
     void ResetState() final;
     void RegisterOptions();
+    static DecisionBoundary CalculateSimilarity(std::byte const* first_val,
+                                                std::byte const* second_val, model::TypeId type_id,
+                                                std::shared_ptr<SimilarityMeasure> measure);
+    bool CheckRows(size_t first_row, size_t second_row);
     void VerifyMD();
 
 protected:
@@ -57,6 +63,14 @@ public:
 
     bool GetResult() const {
         return md_holds_;
+    }
+
+    std::set<std::pair<int, int>> const& GetPairsViolatingMD() const {
+        return pairs_violating_md_;
+    }
+
+    std::vector<DecisionBoundary> const& GetRhsSuggestions() const {
+        return rhs_suggestion_boundaries_;
     }
 };
 
