@@ -6,6 +6,6 @@ namespace algos::md {
 class LevenshteinSimilarity : public StringSimilarityMeasure {
 public:
     LevenshteinSimilarity() : StringSimilarityMeasure("levenshtein") {}
-    long double operator()(std::string_view left, std::string_view right) override;
+    long double operator()(std::string_view left, std::string_view right) const override;
 };
 }  // namespace algos::md
