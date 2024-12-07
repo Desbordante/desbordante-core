@@ -32,7 +32,12 @@ enum class DCType {
 //  Thus DC is simply represented as a vector of Predicates.
 //  The predicates in this context are 't.A == s.A' and  't.B != s.B'.
 class DC {
+private:
     std::vector<Predicate> predicates_;
+    bool CheckAllEquality() const;
+    bool CheckOneInequality() const;
+    bool CheckOneTuple() const;
+    bool CheckTwoTuples() const;
 
 public:
     DC(std::vector<Predicate>&& predicates) : predicates_(std::move(predicates)) {};
@@ -41,6 +46,8 @@ public:
 
     template <class Iter>
     DC(Iter first, Iter last) : predicates_(first, last){};
+
+    DCType GetType() const;
 
     // returns unique columns indices from each Predicate which satisfy the given predicate
     template <class Pred>
@@ -69,21 +76,7 @@ public:
         return res;
     }
 
-    std::string ToString() const {
-        if (predicates_.empty()) return {};
-
-        static constexpr char const* kNot = "!";
-        static constexpr char const* kAnd = " and ";
-
-        std::stringstream ss;
-        ss << kNot << '(' << predicates_.front().ToString();
-        for (auto pred = std::next(predicates_.begin()); pred != predicates_.end(); ++pred) {
-            ss << kAnd << pred->ToString();
-        }
-        ss << ')';
-
-        return ss.str();
-    }
+    std::string ToString() const;
 
     std::vector<Predicate> const& GetPredicates() const {
         return predicates_;

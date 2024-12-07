@@ -94,10 +94,9 @@ bool DCVerifier::Verify(dc::DC const& dc) {
         }
     }
 
-    size_t cur_dc_num = 0;
     size_t diseq_preds_count = diseq_preds.size();
     size_t all_comb_count = std::pow(2, diseq_preds_count);
-    dc::DCType dc_type = GetType(GetDC(no_diseq_preds, diseq_preds, cur_dc_num));
+    dc::DCType dc_type = dc.GetType();
     auto check = kDCTypeToVerificationMethod.at(dc_type);
 
     // TODO: check the article for optimization 2^l -> 2^(l-1) dc's
@@ -336,48 +335,6 @@ std::vector<std::byte const*> DCVerifier::GetRow(size_t row) {
     return res;
 }
 
-bool DCVerifier::CheckAllEquality(dc::DC const& dc) {
-    std::vector<dc::Predicate> predicates = dc.GetPredicates();
-
-    for (dc::Predicate const& pred : predicates) {
-        dc::Operator op = pred.GetOperator();
-        if (pred.IsCrossColumn() or !pred.IsCrossTuple() or op != dc::OperatorType::kEqual)
-            return false;
-    }
-
-    return true;
-}
-
-bool DCVerifier::CheckOneInequality(dc::DC const& dc) {
-    std::vector<dc::Predicate> predicates = dc.GetPredicates();
-    size_t count_eq = 0, count_ineq = 0;
-
-    for (dc::Predicate const& pred : predicates) {
-        dc::Operator op = pred.GetOperator();
-
-        if (op == dc::OperatorType::kEqual and !pred.IsCrossColumn()) {
-            count_eq++;
-        } else if (op != dc::OperatorType::kEqual and op != dc::OperatorType::kUnequal and
-                   pred.IsCrossTuple()) {
-            count_ineq++;
-        }
-    }
-
-    return count_eq + count_ineq == predicates.size() && count_ineq == 1;
-}
-
-bool DCVerifier::CheckOneTuple(dc::DC const& dc) {
-    std::vector<dc::Predicate> const& preds = dc.GetPredicates();
-
-    return std::none_of(preds.begin(), preds.end(), std::mem_fn(&dc::Predicate::IsCrossTuple));
-}
-
-bool DCVerifier::CheckTwoTuples(dc::DC const& dc) {
-    std::vector<dc::Predicate> const& preds = dc.GetPredicates();
-
-    return std::all_of(preds.begin(), preds.end(), std::mem_fn(&dc::Predicate::IsCrossTuple));
-}
-
 std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
         dc::DC const& dc, std::vector<std::byte const*> const& row) {
     std::vector<mo::ColumnIndex> ineq_cols = dc.GetColumnIndicesWithOperator([](dc::Operator op) {
@@ -500,19 +457,6 @@ bool DCVerifier::ContainsNullOrEmpty(std::vector<mo::ColumnIndex> const& indices
                                      size_t tuple_ind) const {
     auto l = [this, tuple_ind](mo::ColumnIndex ind) { return data_[ind].IsNullOrEmpty(tuple_ind); };
     return std::any_of(indices.begin(), indices.end(), l);
-}
-
-dc::DCType DCVerifier::GetType(dc::DC const& dc) {
-    if (CheckAllEquality(dc))
-        return dc::DCType::kAllEquality;
-    else if (CheckOneInequality(dc))
-        return dc::DCType::kOneInequality;
-    else if (CheckOneTuple(dc))
-        return dc::DCType::kOneTuple;
-    else if (CheckTwoTuples(dc))
-        return dc::DCType::kTwoTuples;
-    else
-        return dc::DCType::kMixed;
 }
 
 }  // namespace algos
