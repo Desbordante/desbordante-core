@@ -58,16 +58,6 @@ private:
     // Convert all two-tuple equality predicates: s.A == t.B -> (s.A <= t.B and s.A >= t.B)
     dc::DC ConvertEqualities(dc::DC const& dc);
 
-    bool CheckOneInequality(dc::DC const& dc);
-
-    bool CheckAllEquality(dc::DC const& dc);
-
-    bool CheckOneTuple(dc::DC const& dc);
-
-    bool CheckTwoTuples(dc::DC const& dc);
-
-    dc::DCType GetType(dc::DC const& dc);
-
     std::vector<std::byte const*> GetRow(size_t row);
 
     bool Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predicate> preds);
