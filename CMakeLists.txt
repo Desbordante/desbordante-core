@@ -97,6 +97,12 @@ else()
             "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
             "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
             "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
+            # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
+            # because libraries (STL, googletest, boost, etc.) are somehow broken
+            string(JOIN ";" UBSAN_OPTS
+                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/sanitizer_ignore_list.txt")
+        endif()
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
             "${UBSAN_OPTS}")
