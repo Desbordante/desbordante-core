@@ -115,7 +115,7 @@ TEST_F(SplitAlgorithmTest, Test3) {
                                      {{{"Col1", 1, 1}}, {{"Col3", 7, 12}}},
                                      {{{"Col1", 1, 1}, {"Col2", 4, 4}}, {{"Col3", 12, 12}}}};
 
-    CompareDDStringLists(expected_results, actual_results);
+    CompareDDStringLists(also_expected_results, actual_results);
 }
 
 TEST_F(SplitAlgorithmTest, Test4) {
@@ -137,6 +137,40 @@ TEST_F(SplitAlgorithmTest, Test4) {
                                      //{{{"Col1", 2, 2}}, {{"Col3", 7, 7}}},
                                      {{{"Col1", 2, 2}}, {{"Col2", 4, 4}}},
                                      {{{"Col2", 4, 4}}, {{"Col3", 7, 7}}}};
+    CompareDDStringLists(expected_results, actual_results);
+}
+
+TEST_F(SplitAlgorithmTest, Test5) {
+    auto algo = CreateSplitAlgorithmInstance(kTestDD4, kTestDif4);
+    algo->Execute();
+
+    auto actual_results = algo->GetDDStringList();
+
+    std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
+            expected_results = {{{{"Col2", 4, 8}}, {{"Col1", 1, 2}}},
+                                {{{"Col3", 5, 5}}, {{"Col1", 2, 2}}},
+                                {{{"Col2", 4, 4}, {"Col3", 5, 7}}, {{"Col1", 2, 2}}},
+                                {{{"Col2", 8, 8}}, {{"Col1", 1, 1}}},
+                                {{{"Col1", 2, 2}}, {{"Col2", 4, 8}}},
+                                {{{"Col1", 1, 2}, {"Col3", 5, 7}}, {{"Col2", 4, 8}}},
+                                {{{"Col1", 1, 1}, {"Col3", 5, 7}}, {{"Col2", 8, 8}}},
+                                {{{"Col3", 5, 5}}, {{"Col2", 4, 4}}},
+                                {{{"Col1", 2, 2}, {"Col3", 5, 12}}, {{"Col2", 4, 4}}},
+                                {{{"Col1", 1, 1}}, {{"Col3", 5, 12}}},
+                                {{{"Col2", 4, 4}}, {{"Col3", 5, 12}}},
+                                {{{"Col2", 8, 8}}, {{"Col3", 5, 7}}},
+                                {{{"Col1", 2, 2}, {"Col2", 4, 4}}, {{"Col3", 5, 5}}}};
+
+    CompareDDStringLists(expected_results, actual_results);
+}
+
+TEST_F(SplitAlgorithmTest, TestDoubleCompare) {
+    auto algo = CreateSplitAlgorithmInstance(kTestDD5, kTestDif5);
+    algo->Execute();
+
+    auto actual_results = algo->GetDDStringList();
+    std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
+            expected_results = {{{{"Col3", 5.1, 5.1}}, {{"Col2", 4, 4}}}};
     CompareDDStringLists(expected_results, actual_results);
 }
 

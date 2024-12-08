@@ -14,11 +14,13 @@
 #include "model/table/column_index.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "model/types/builtin.h"
 
 namespace algos::dd {
 
 using DF = model::DF;
 using DD = model::DD;
+using DFConstraint = model::DFConstraint;
 
 class Split : public Algorithm {
 private:
@@ -28,8 +30,9 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
+    std::vector<model::ColumnIndex> non_empty_cols_;
 
-    bool has_dif_table_;
+    std::vector<model::TypeId> type_ids_;
 
     config::InputTable difference_table_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation_;
@@ -37,9 +40,10 @@ private:
     Reduce const reduce_method_ = Reduce::IEHybrid;  // currently, the fastest method
     unsigned const num_dfs_per_column_ = 5;
 
-    std::vector<model::DFConstraint> min_max_dif_;
+    std::vector<DFConstraint> min_max_dif_;
     std::vector<std::vector<std::vector<double>>> distances_;
     std::vector<std::pair<std::size_t, std::size_t>> tuple_pairs_;
+    std::vector<std::vector<DFConstraint>> index_search_spaces_;
     std::list<DD> dd_collection_;
 
     void RegisterOptions();
@@ -48,6 +52,9 @@ private:
 
     void ResetState() final {
         dd_collection_.clear();
+        tuple_pairs_.clear();
+        non_empty_cols_.clear();
+        index_search_spaces_.clear();
     }
 
     double CalculateDistance(model::ColumnIndex column_index,
@@ -55,11 +62,13 @@ private:
     void InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
                         std::size_t second_index, double& min_dif, double& max_dif);
     bool CheckDF(DF const& dep, std::pair<std::size_t, std::size_t> tuple_pair);
-    bool VerifyDD(DD const& dep);
+    bool VerifyDD(DF const& lhs, DF const& rhs);
+    void CalculateIndexSearchSpaces();
     void CalculateAllDistances();
     bool IsFeasible(DF const& d);
     std::vector<DF> SearchSpace(std::vector<model::ColumnIndex>& indices);
     std::vector<DF> SearchSpace(model::ColumnIndex index);
+    std::vector<DFConstraint> IndexSearchSpace(model::ColumnIndex index);
     bool Subsume(DF const& df1, DF const& df2);
     std::vector<DF> DoNegativePruning(std::vector<DF> const& search, DF const& last_df);
     std::pair<std::vector<DF>, std::vector<DF>> NegativeSplit(std::vector<DF> const& search,
