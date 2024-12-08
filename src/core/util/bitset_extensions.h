@@ -162,11 +162,11 @@ inline size_t FindNext(std::bitset<S> const& bs, size_t pos) noexcept {
 }
 
 /// @brief If _Find_next is availible, copy every set bit, else copy biset to dynamic_bitset
-/// through string representation
-template <size_t S, typename std::enable_if<bitset_extensions::TestBitset<std::bitset<S>>::value,
+/// through string representation. Bitset is shifted 1 bit left.
+template <size_t S, typename std::enable_if<bitset_extensions::kTestBitsetV<std::bitset<S>>,
                                             bool>::type = true>
-inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
-                                                   std::size_t size = S) noexcept {
+inline boost::dynamic_bitset<> CreateShiftedDynamicBitset(std::bitset<S> const& bs,
+                                                          std::size_t size = S) noexcept {
     boost::dynamic_bitset<> dyn_bitset(size);
     for (size_t i = bs._Find_first(); i != S; i = bs._Find_next(i)) {
         dyn_bitset.set(i - 1);
@@ -175,12 +175,12 @@ inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
 }
 
 /// @brief If _Find_next is availible, copy every set bit, else copy biset to dynamic_bitset
-/// through string representation
-template <size_t S,
-          typename = std::enable_if_t<!bitset_extensions::TestBitset<std::bitset<S>>::value>>
-inline boost::dynamic_bitset<> CreateDynamicBitset(std::bitset<S> const& bs,
-                                                   [[maybe_unused]] std::size_t size = S) noexcept {
-    return boost::dynamic_bitset(bs.to_string());
+/// through string representation. Bitset is shifted 1 bit left.
+template <size_t S, typename = std::enable_if_t<!bitset_extensions::kTestBitsetV<std::bitset<S>>>>
+inline boost::dynamic_bitset<> CreateShiftedDynamicBitset(std::bitset<S> const& bs,
+                                                          std::size_t size = S) noexcept {
+    size_t start = S - size - 1;
+    return boost::dynamic_bitset(bs.to_string(), start, size);
 }
 
 /// @brief If _Find_next is availible, create std::bitset set-bits-iterator, else

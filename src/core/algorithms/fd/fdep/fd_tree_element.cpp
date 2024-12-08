@@ -259,8 +259,8 @@ void FDTreeElement::TransformTreeFdCollection(std::bitset<kMaxAttrNum>& active_p
 
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
         if (this->is_fd_[attr - 1]) {
-            auto lhs_bitset = util::CreateDynamicBitset<kMaxAttrNum>(active_path,
-                                                                     this->max_attribute_number_);
+            auto lhs_bitset =
+                    util::CreateShiftedDynamicBitset(active_path, this->max_attribute_number_);
             Vertical lhs(scheme.get(), lhs_bitset);
             Column rhs(scheme.get(), scheme->GetColumn(attr - 1)->GetName(), attr - 1);
             fd_collection.emplace_back(FD{lhs, rhs, scheme});
