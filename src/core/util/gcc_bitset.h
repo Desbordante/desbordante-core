@@ -43,6 +43,11 @@
  *  This is a Standard C++ Library header.
  */
 
+// >>> Modified by Pyotr Senichenkov
+// NOLINTBEGIN
+// clang-format off
+// <<< Modified by Pyotr Senichenkov
+
 #ifndef _GLIBCXX_BITSET
 #define _GLIBCXX_BITSET 1
 
@@ -1759,3 +1764,8 @@ _GLIBCXX_END_NAMESPACE_VERSION
 #endif
 
 #endif /* _GLIBCXX_BITSET */
+
+// >>> Modified by Pyotr Senichenkov
+// NOLINTEND
+// clang-format on
+// <<< Modified by Pyotr Senichenkov
