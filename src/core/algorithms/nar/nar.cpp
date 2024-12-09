@@ -54,11 +54,9 @@ void NAR::SetQualities(TypedRelation const* typed_relation) {
             auto value = column.GetValue(rowi);
             if (row_fits_ante) {
                 row_fits_ante = AnteFitsValue(coli, value);
+                row_fits_cons &= ConsFitsValue(coli, value);
             } else {
                 break;
-            }
-            if (row_fits_ante) {
-                row_fits_cons &= ConsFitsValue(coli, value);
             }
         }
         if (row_fits_ante) {
