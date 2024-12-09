@@ -163,7 +163,7 @@ unsigned long long Cords::ExecuteInternal() {
 
     Init(column_count, data);
 
-    auto start_time = std::chrono::high_resolution_clock::now();
+    auto start_time = std::chrono::system_clock::now();
 
     SetProgress(kTotalProgressPercent);
     ToNextProgressPhase();

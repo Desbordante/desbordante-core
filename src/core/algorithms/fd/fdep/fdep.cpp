@@ -5,6 +5,7 @@
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 #include "model/table/column_layout_relation_data.h"
+#include "util/bitset_extensions.h"
 
 // #ifndef PRINT_FDS
 // #define PRINT_FDS
@@ -96,8 +97,9 @@ void FDep::AddViolatedFDs(std::vector<size_t> const& t1, std::vector<size_t> con
     }
 
     equal_attr &= (~diff_attr);
-    for (size_t attr = diff_attr._Find_first(); attr != FDTreeElement::kMaxAttrNum;
-         attr = diff_attr._Find_next(attr)) {
+    auto iter = util::MakeBitsetIterator(diff_attr);
+    for (size_t attr = iter->Pos(); attr != FDTreeElement::kMaxAttrNum;
+         iter->Next(), attr = iter->Pos()) {
         this->neg_cover_tree_->AddFunctionalDependency(equal_attr, attr);
     }
 }
