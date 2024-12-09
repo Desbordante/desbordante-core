@@ -17,8 +17,9 @@ namespace algos::dd {
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
         void RegisterOptions();
         std::vector<std::pair<int, int>> GetRowsHolds(const std::list<model::DFStringConstraint> &constraints) const;
-        double DDVerifier::CalculateDistance(model::ColumnIndex column_index,
+        double CalculateDistance(model::ColumnIndex column_index,
                                          const std::pair<std::size_t, std::size_t> &tuple_pair) const;
+        bool CheckDFOnRhs(std::vector<std::pair<int, int>> lhs) const;
     protected:
         void LoadDataInternal() override;
         void MakeExecuteOptsAvailable() override;
