@@ -246,7 +246,7 @@ The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
 - GNU GCC, version 10+
-- CMake, version 3.13+
+- CMake, version 3.15+
 - Boost library built with GCC, version 1.81.0+
 
 To use test datasets you will need:

@@ -1,14 +1,15 @@
-cmake-build-debug/
+# Build directories, libraries and binary files
+**/myeasylog.log
 build/
-Build/
-BUILD/
-bUILD/
-Datasets/
-.sconsign.dblite
+cmake-build-debug/
+dist/
 lib/
-.csv
+venv/
+
+# IDE and related files
+.cache/
 .idea/
 .vscode/
-**/myeasylog.log
-dist
-venv
+
+# OS Generated file
+**/.DS_Store

@@ -1,5 +1,13 @@
-cmake_minimum_required(VERSION 3.13)
-cmake_policy(SET CMP0144 NEW)
+cmake_minimum_required(VERSION 3.15)
+if (POLICY CMP0167)
+    # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
+    # TODO: port project to "Modern CMake" https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
+    cmake_policy(SET CMP0167 OLD)
+endif()
+if (POLICY CMP0144)
+    cmake_policy(SET CMP0144 NEW)
+endif()
+
 project(Desbordante)
 
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
@@ -103,9 +111,16 @@ endif()
 
 # configuring boost
 set(Boost_USE_STATIC_LIBS OFF)
-find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph CONFIG)
-include_directories(${Boost_INCLUDE_DIRS})
-message(${Boost_INCLUDE_DIRS})
+
+find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
+if (Boost_FOUND)
+    message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
+    include_directories( ${Boost_INCLUDE_DIRS})
+    message(STATUS "Found Boost library dirs: ${Boost_LIBRARY_DIRS}")
+else ()
+    message(FATAL_ERROR "Boost not found. If boost is installed specify environment"
+        "variables like \"BOOST_ROOT\" for hint to CMake where to search")
+endif()
 
 # providing subdirectories for header inclusion
 include_directories(
