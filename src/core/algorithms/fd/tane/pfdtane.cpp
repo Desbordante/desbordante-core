@@ -1,5 +1,7 @@
 #include "pfdtane.h"
 
+#include <algorithm>
+
 #include "config/error/option.h"
 #include "config/error_measure/option.h"
 #include "enums.h"
@@ -48,10 +50,10 @@ config::ErrorType PFDTane::CalculatePFDError(model::PositionListIndex const* x_p
     std::deque<Cluster> xa_index = xa_pli->GetIndex();
     std::shared_ptr<Cluster const> probing_table_ptr = x_pli->CalculateAndGetProbingTable();
     auto const& probing_table = *probing_table_ptr;
-    std::sort(xa_index.begin(), xa_index.end(),
-              [&probing_table](Cluster const& a, Cluster const& b) {
-                  return probing_table[a.front()] < probing_table[b.front()];
-              });
+    std::stable_sort(xa_index.begin(), xa_index.end(),
+                     [&probing_table](Cluster const& a, Cluster const& b) {
+                         return probing_table[a.front()] < probing_table[b.front()];
+                     });
     double sum = 0.0;
     std::size_t cluster_rows_count = 0;
     std::deque<Cluster> const& x_index = x_pli->GetIndex();

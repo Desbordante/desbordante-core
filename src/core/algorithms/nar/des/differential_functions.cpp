@@ -8,8 +8,7 @@ namespace algos::des {
 std::vector<size_t> GetRandIndices(size_t except_index, size_t population, size_t number_of_indices,
                                    RNG& rng) {
     assert(number_of_indices <= population - 1);
-    std::unordered_set<size_t> indices;
-    indices.reserve(number_of_indices + 1);
+    std::set<size_t> indices;
     indices.insert(except_index);
     while (indices.size() < number_of_indices + 1) {
         size_t random_index = rng.Next() * population;

@@ -42,10 +42,11 @@ TEST_F(DESTest, LaunchTest1) {
                                              algos::des::DifferentialStrategy::rand1Bin);
     algorithm->Execute();
     auto result = ExtractFitnessValues(algorithm->GetNARVector());
-    std::vector<std::string> expected = {"0.634851", "0.566887", "0.549872", "0.520035",
-                                         "0.518598", "0.481561", "0.460124", "0.407567",
-                                         "0.333972", "0.313191", "0.274753", "0.190558",
-                                         "0.187335", "0.161869", "0.113770", "0.111297"};
+    std::vector<std::string> expected = {"0.609963", "0.518598", "0.514174", "0.497616", "0.483237",
+                                         "0.444604", "0.418879", "0.341235", "0.321052", "0.310425",
+                                         "0.299355", "0.296755", "0.296456", "0.259754", "0.235430",
+                                         "0.213631", "0.192706", "0.186377", "0.168266", "0.164281",
+                                         "0.098144", "0.085561", "0.076805", "0.076043"};
     ASSERT_EQ(result, expected);
 }
 
@@ -54,7 +55,8 @@ TEST_F(DESTest, LaunchTest2) {
                                              algos::des::DifferentialStrategy::rand1Bin);
     algorithm->Execute();
     auto result = ExtractFitnessValues(algorithm->GetNARVector());
-    std::vector<std::string> expected = {"0.735697", "0.622020", "0.606939", "0.564184"};
+    std::vector<std::string> expected = {"0.598929", "0.587854", "0.566134", "0.524618",
+                                         "0.522095", "0.489909", "0.376434"};
     ASSERT_EQ(result, expected);
 }
 
