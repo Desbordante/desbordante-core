@@ -129,6 +129,7 @@ constexpr auto kDInsertStatements = "Rows to be inserted into the table using th
 constexpr auto kDDeleteStatements = "Rows to be deleted from the table using the delete operation";
 constexpr auto kDUpdateStatements = "Rows to be replaced in the table using the update operation";
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+constexpr auto kDDDString = "Difference Dependency that needs to be verified";
 constexpr auto kDMinCard =
         " (1 - min_cardinality) * |R| (where |R| is amount of rows in table R) denotes minimum "
         "cardinality of a column to be considered a soft key. Value lies in (0, 1)";
