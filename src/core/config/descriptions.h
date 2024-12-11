@@ -187,4 +187,5 @@ constexpr auto kDEvidenceThreshold =
         "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
         "considered approximate.";
 constexpr auto kDDoCollectViolations = "Flag which tells whether to collect violations or not";
+constexpr auto kDDDString = "Difference Dependency that needs to be verified";
 }  // namespace config::descriptions
