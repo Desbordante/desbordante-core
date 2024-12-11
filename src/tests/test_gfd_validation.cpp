@@ -3,8 +3,8 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/gfd/gfd_validation.h"
+#include "all_paths.h"
 #include "config/names.h"
-#include "csv_config_util.h"
 
 using namespace algos;
 using algos::StdParamsMap;
@@ -12,8 +12,6 @@ using algos::StdParamsMap;
 namespace tests {
 
 namespace {
-
-auto current_path = kTestDataDir / "graph_data";
 
 template <typename T>
 class GfdValidationTest : public ::testing::Test {
@@ -30,10 +28,8 @@ protected:
 TYPED_TEST_SUITE_P(GfdValidationTest);
 
 TYPED_TEST_P(GfdValidationTest, TestTrivially) {
-    auto graph_path = current_path / "quadrangle.dot";
-    auto gfd_path = current_path / "quadrangle_gfd.dot";
-    std::vector<std::filesystem::path> gfd_paths = {gfd_path};
-    auto algorithm = TestFixture::CreateGfdValidationInstance(graph_path, gfd_paths);
+    std::vector<std::filesystem::path> gfd_paths = {kGfdTestQuadrangleGfd};
+    auto algorithm = TestFixture::CreateGfdValidationInstance(kGfdTestQuadrangleGraph, gfd_paths);
     int expected_size = 1;
     algorithm->Execute();
     std::vector<Gfd> gfd_list = algorithm->GfdList();
@@ -41,10 +37,8 @@ TYPED_TEST_P(GfdValidationTest, TestTrivially) {
 }
 
 TYPED_TEST_P(GfdValidationTest, TestExistingMatches) {
-    auto graph_path = current_path / "directors.dot";
-    auto gfd_path = current_path / "directors_gfd.dot";
-    std::vector<std::filesystem::path> gfd_paths = {gfd_path};
-    auto algorithm = TestFixture::CreateGfdValidationInstance(graph_path, gfd_paths);
+    std::vector<std::filesystem::path> gfd_paths = {kGfdTestDirectorsGfd};
+    auto algorithm = TestFixture::CreateGfdValidationInstance(kGfdTestDirectorsGraph, gfd_paths);
     int expected_size = 0;
     algorithm->Execute();
     std::vector<Gfd> gfd_list = algorithm->GfdList();
