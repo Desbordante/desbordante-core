@@ -19,14 +19,14 @@ namespace algos::dd {
         std::vector<std::pair<int, int>> GetRowsHolds(const std::list<model::DFStringConstraint> &constraints) const;
         double CalculateDistance(model::ColumnIndex column_index,
                                          const std::pair<std::size_t, std::size_t> &tuple_pair) const;
-        bool CheckDFOnRhs(std::vector<std::pair<int, int>> lhs) const;
+        std::vector<std::pair<int, int>> CheckDFOnRhs(const std::vector<std::pair<int, int>>& lhs) const;
     protected:
         void LoadDataInternal() override;
         void MakeExecuteOptsAvailable() override;
         unsigned long long ExecuteInternal() override;
     public:
-        DDVerifier(DD dd);
-        void VerifyDD();
+        explicit DDVerifier(DD dd);
+        bool VerifyDD() const;
 
 
 
