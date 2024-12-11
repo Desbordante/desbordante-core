@@ -1,4 +1,4 @@
-#include "gfd_handler.h"
+#include "algorithms/gfd/gfd_validator/gfd_handler.h"
 
 #include <iostream>
 #include <set>
@@ -10,7 +10,6 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "balancer.h"
 #include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
@@ -40,7 +39,7 @@ void GfdHandler::LoadDataInternal() {
     for (auto const& path : gfd_paths_) {
         auto gfd_path = path;
         f.open(gfd_path);
-        Gfd gfd = parser::graph_parser::ReadGfd(f);
+        model::Gfd gfd = parser::graph_parser::ReadGfd(f);
         f.close();
         gfds_.push_back(gfd);
     }

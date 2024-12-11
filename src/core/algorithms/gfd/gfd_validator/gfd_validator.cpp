@@ -1,4 +1,4 @@
-#include "gfd_validation.h"
+#include "algorithms/gfd/gfd_validator/gfd_validator.h"
 
 #include <iostream>
 #include <set>
@@ -10,7 +10,7 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "balancer.h"
+#include "algorithms/gfd/gfd_validator/balancer.h"
 #include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
@@ -21,9 +21,9 @@ namespace {
 
 using namespace algos;
 
-std::vector<std::vector<vertex_t>> GetPartition(std::vector<vertex_t> const& candidates,
-                                                config::ThreadNumType const& threads_num) {
-    std::vector<std::vector<vertex_t>> result = {};
+std::vector<std::vector<model::vertex_t>> GetPartition(
+        std::vector<model::vertex_t> const& candidates, config::ThreadNumType const& threads_num) {
+    std::vector<std::vector<model::vertex_t>> result = {};
 
     if (candidates.empty()) {
         return {};
@@ -32,18 +32,18 @@ std::vector<std::vector<vertex_t>> GetPartition(std::vector<vertex_t> const& can
     int musthave = candidates.size() / threads_num;
     int oversized_num = candidates.size() % threads_num;
 
-    std::vector<vertex_t>::const_iterator from, to;
+    std::vector<model::vertex_t>::const_iterator from, to;
     from = candidates.begin();
     to = std::next(candidates.begin(), musthave + 1);
     for (int i = 0; i < oversized_num; ++i) {
-        std::vector<vertex_t> temp(from, to);
+        std::vector<model::vertex_t> temp(from, to);
         result.push_back(temp);
         from = std::next(from, musthave + 1);
         to = std::next(to, musthave + 1);
     }
     to--;
     for (int i = 0; i < threads_num - oversized_num; ++i) {
-        std::vector<vertex_t> temp(from, to);
+        std::vector<model::vertex_t> temp(from, to);
         result.push_back(temp);
         from = std::next(from, musthave);
         to = std::next(to, musthave);
@@ -52,10 +52,10 @@ std::vector<std::vector<vertex_t>> GetPartition(std::vector<vertex_t> const& can
     return result;
 }
 
-std::vector<vertex_t> GetCandidates(graph_t const& graph, std::string const& label) {
-    std::vector<vertex_t> result = {};
+std::vector<model::vertex_t> GetCandidates(model::graph_t const& graph, std::string const& label) {
+    std::vector<model::vertex_t> result = {};
 
-    BGL_FORALL_VERTICES_T(v, graph, graph_t) {
+    BGL_FORALL_VERTICES_T(v, graph, model::graph_t) {
         if (graph[v].attributes.at("label") == label) {
             result.push_back(v);
         }
@@ -64,19 +64,19 @@ std::vector<vertex_t> GetCandidates(graph_t const& graph, std::string const& lab
     return result;
 }
 
-vertex_t GetCenter(graph_t const& pattern, int& radius) {
-    using DistanceProperty = boost::exterior_vertex_property<graph_t, int>;
+model::vertex_t GetCenter(model::graph_t const& pattern, int& radius) {
+    using DistanceProperty = boost::exterior_vertex_property<model::graph_t, int>;
     using DistanceMatrix = typename DistanceProperty::matrix_type;
     using DistanceMatrixMap = typename DistanceProperty::matrix_map_type;
 
-    using EccentricityProperty = boost::exterior_vertex_property<graph_t, int>;
+    using EccentricityProperty = boost::exterior_vertex_property<model::graph_t, int>;
     using EccentricityContainer = typename EccentricityProperty::container_type;
     using EccentricityMap = typename EccentricityProperty::map_type;
 
     DistanceMatrix distances(boost::num_vertices(pattern));
     DistanceMatrixMap dm(distances, pattern);
 
-    using WeightMap = boost::constant_property_map<edge_t, int>;
+    using WeightMap = boost::constant_property_map<model::edge_t, int>;
 
     WeightMap wm(1);
     boost::floyd_warshall_all_pairs_shortest_paths(pattern, dm, weight_map(wm));
@@ -87,13 +87,13 @@ vertex_t GetCenter(graph_t const& pattern, int& radius) {
     boost::tie(r, d) = all_eccentricities(pattern, dm, em);
     radius = r;
 
-    vertex_t result = 0;
-    typename boost::graph_traits<graph_t>::vertex_iterator i, end;
+    model::vertex_t result = 0;
+    typename boost::graph_traits<model::graph_t>::vertex_iterator i, end;
     for (boost::tie(i, end) = vertices(pattern); i != end; ++i) {
         bool is_center = true;
-        typename boost::graph_traits<graph_t>::vertex_iterator j;
+        typename boost::graph_traits<model::graph_t>::vertex_iterator j;
         for (j = vertices(pattern).first; j != end; ++j) {
-            if (get(get(dm, *i), *j) > r) {
+            if (boost::get(boost::get(dm, *i), *j) > r) {
                 is_center = false;
                 break;
             }
@@ -106,20 +106,21 @@ vertex_t GetCenter(graph_t const& pattern, int& radius) {
     return result;
 }
 
-void CalculateMessages(graph_t const& graph, std::vector<Request> const& requests,
-                       std::map<int, std::vector<Message>>& weighted_messages) {
-    for (Request const& request : requests) {
+void CalculateMessages(model::graph_t const& graph,
+                       std::vector<gfd_validator::Request> const& requests,
+                       std::map<int, std::vector<gfd_validator::Message>>& weighted_messages) {
+    for (gfd_validator::Request const& request : requests) {
         int gfd_index = std::get<0>(request);
-        vertex_t center = std::get<1>(request);
+        model::vertex_t center = std::get<1>(request);
         int radius = std::get<2>(request);
-        std::vector<vertex_t> candidates = std::get<3>(request);
-        for (vertex_t const& candidate : candidates) {
-            std::set<vertex_t> vertices = {candidate};
-            std::set<vertex_t> current = {candidate};
+        std::vector<model::vertex_t> candidates = std::get<3>(request);
+        for (model::vertex_t const& candidate : candidates) {
+            std::set<model::vertex_t> vertices = {candidate};
+            std::set<model::vertex_t> current = {candidate};
             for (int i = 0; i < radius; ++i) {
-                std::set<vertex_t> temp = {};
+                std::set<model::vertex_t> temp = {};
                 for (auto& v : current) {
-                    typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it,
+                    typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it,
                             adjacency_end;
                     boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(v, graph);
                     for (; adjacency_it != adjacency_end; ++adjacency_it) {
@@ -139,11 +140,11 @@ void CalculateMessages(graph_t const& graph, std::vector<Request> const& request
                     }
                 }
             }
-            Message message(gfd_index, center, candidate);
+            gfd_validator::Message message(gfd_index, center, candidate);
             if (weighted_messages.find(weight) != weighted_messages.end()) {
                 weighted_messages.at(weight).push_back(message);
             } else {
-                std::vector<Message> current = {message};
+                std::vector<gfd_validator::Message> current = {message};
                 weighted_messages.emplace(weight, current);
             }
         }
@@ -152,16 +153,16 @@ void CalculateMessages(graph_t const& graph, std::vector<Request> const& request
 
 class CheckCallback {
 private:
-    graph_t const& query_;
-    graph_t const& graph_;
-    std::vector<Literal> const premises_;
-    std::vector<Literal> const conclusion_;
+    model::graph_t const& query_;
+    model::graph_t const& graph_;
+    std::vector<model::Gfd::Literal> const premises_;
+    std::vector<model::Gfd::Literal> const conclusion_;
     bool& res_;
 
 public:
-    CheckCallback(graph_t const& query_, graph_t const& graph_,
-                  std::vector<Literal> const& premises_, std::vector<Literal> const& conclusion_,
-                  bool& res_)
+    CheckCallback(model::graph_t const& query_, model::graph_t const& graph_,
+                  std::vector<model::Gfd::Literal> const& premises_,
+                  std::vector<model::Gfd::Literal> const& conclusion_, bool& res_)
         : query_(query_),
           graph_(graph_),
           premises_(premises_),
@@ -170,8 +171,8 @@ public:
 
     template <typename CorrespondenceMap1To2, typename CorrespondenceMap2To1>
     bool operator()(CorrespondenceMap1To2 f, CorrespondenceMap2To1) const {
-        auto satisfied = [this, &f](std::vector<Literal> const literals) {
-            for (const Literal& l : literals) {
+        auto satisfied = [this, &f](std::vector<model::Gfd::Literal> const literals) {
+            for (model::Gfd::Literal const& l : literals) {
                 auto fst_token = l.first;
                 auto snd_token = l.second;
                 std::string fst;
@@ -179,9 +180,9 @@ public:
                 if (fst_token.first == -1) {
                     fst = fst_token.second;
                 } else {
-                    vertex_t v;
-                    vertex_t u = boost::vertex(fst_token.first, query_);
-                    v = get(f, u);
+                    model::vertex_t v;
+                    model::vertex_t u = boost::vertex(fst_token.first, query_);
+                    v = boost::get(f, u);
                     auto attrs = graph_[v].attributes;
                     if (attrs.find(fst_token.second) == attrs.end()) {
                         return false;
@@ -191,9 +192,9 @@ public:
                 if (snd_token.first == -1) {
                     snd = snd_token.second;
                 } else {
-                    vertex_t v;
-                    vertex_t u = boost::vertex(snd_token.first, query_);
-                    v = get(f, u);
+                    model::vertex_t v;
+                    model::vertex_t u = boost::vertex(snd_token.first, query_);
+                    v = boost::get(f, u);
                     auto attrs = graph_[v].attributes;
                     if (attrs.find(snd_token.second) == attrs.end()) {
                         return false;
@@ -219,12 +220,12 @@ public:
 };
 
 struct VCompare {
-    graph_t const& pattern;
-    graph_t const& graph;
-    vertex_t pinted_fr;
-    vertex_t pinted_to;
+    model::graph_t const& pattern;
+    model::graph_t const& graph;
+    model::vertex_t pinted_fr;
+    model::vertex_t pinted_to;
 
-    bool operator()(vertex_t fr, vertex_t to) const {
+    bool operator()(model::vertex_t fr, model::vertex_t to) const {
         if (fr == pinted_fr && to == pinted_to) {
             return true;
         }
@@ -236,27 +237,29 @@ struct VCompare {
 };
 
 struct ECompare {
-    graph_t const& pattern;
-    graph_t const& graph;
+    model::graph_t const& pattern;
+    model::graph_t const& graph;
 
-    bool operator()(edge_t fr, edge_t to) const {
+    bool operator()(model::edge_t fr, model::edge_t to) const {
         return pattern[fr].label == graph[to].label;
     }
 };
 
-void CalculateUnsatisfied(graph_t const& graph, std::vector<Message> const& messages,
-                          std::map<int, Gfd> const& indexed_gfds, std::set<int>& unsatisfied) {
+void CalculateUnsatisfied(model::graph_t const& graph,
+                          std::vector<gfd_validator::Message> const& messages,
+                          std::map<int, model::Gfd> const& indexed_gfds,
+                          std::set<int>& unsatisfied) {
     for (auto& message : messages) {
         int gfd_index = std::get<0>(message);
         if (unsatisfied.find(gfd_index) != unsatisfied.end()) {
             continue;
         }
 
-        vertex_t u = std::get<1>(message);
-        vertex_t v = std::get<2>(message);
+        model::vertex_t u = std::get<1>(message);
+        model::vertex_t v = std::get<2>(message);
 
-        Gfd gfd = indexed_gfds.at(gfd_index);
-        graph_t pattern = gfd.GetPattern();
+        model::Gfd gfd = indexed_gfds.at(gfd_index);
+        model::graph_t pattern = gfd.GetPattern();
 
         VCompare vcompare{pattern, graph, u, v};
         ECompare ecompare{pattern, graph};
@@ -264,9 +267,9 @@ void CalculateUnsatisfied(graph_t const& graph, std::vector<Message> const& mess
         bool satisfied = true;
         CheckCallback callback(pattern, graph, gfd.GetPremises(), gfd.GetConclusion(), satisfied);
 
-        boost::vf2_subgraph_iso(pattern, graph, callback, get(boost::vertex_index, pattern),
-                                get(boost::vertex_index, graph), vertex_order_by_mult(pattern),
-                                ecompare, vcompare);
+        boost::vf2_subgraph_iso(pattern, graph, callback, boost::get(boost::vertex_index, pattern),
+                                boost::get(boost::vertex_index, graph),
+                                vertex_order_by_mult(pattern), ecompare, vcompare);
         if (!satisfied) {
             unsatisfied.insert(gfd_index);
         }
@@ -277,30 +280,30 @@ void CalculateUnsatisfied(graph_t const& graph, std::vector<Message> const& mess
 
 namespace algos {
 
-GfdValidation::GfdValidation() : GfdHandler() {
+GfdValidator::GfdValidator() : GfdHandler() {
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
     MakeOptionsAvailable({config::kThreadNumberOpt.GetName()});
 };
 
-std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
-                                                      std::vector<Gfd> const& gfds) {
-    std::vector<std::vector<Request>> requests = {};
+std::vector<model::Gfd> GfdValidator::GenerateSatisfiedGfds(model::graph_t const& graph,
+                                                            std::vector<model::Gfd> const& gfds) {
+    std::vector<std::vector<gfd_validator::Request>> requests = {};
     for (int i = 0; i < threads_num_; ++i) {
-        std::vector<Request> empty = {};
+        std::vector<gfd_validator::Request> empty = {};
         requests.push_back(empty);
     }
 
-    std::map<int, Gfd> indexed_gfds;
+    std::map<int, model::Gfd> indexed_gfds;
     int index = 0;
     for (auto& gfd : gfds) {
         int radius = 0;
-        vertex_t center = GetCenter(gfd.GetPattern(), radius);
-        std::vector<vertex_t> candidates =
+        model::vertex_t center = GetCenter(gfd.GetPattern(), radius);
+        std::vector<model::vertex_t> candidates =
                 GetCandidates(graph, gfd.GetPattern()[center].attributes.at("label"));
         auto partition = GetPartition(candidates, threads_num_);
         for (std::size_t i = 0; i < partition.size(); ++i) {
             if (!partition.at(i).empty()) {
-                Request request(index, center, radius, partition.at(i));
+                gfd_validator::Request request(index, center, radius, partition.at(i));
                 requests[i].push_back(request);
             }
         }
@@ -308,9 +311,9 @@ std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
         index++;
     }
 
-    std::vector<std::map<int, std::vector<Message>>> weighted_messages;
+    std::vector<std::map<int, std::vector<gfd_validator::Message>>> weighted_messages;
     for (int i = 0; i < threads_num_; ++i) {
-        std::map<int, std::vector<Message>> empty;
+        std::map<int, std::vector<gfd_validator::Message>> empty;
         weighted_messages.push_back(empty);
     }
 
@@ -326,7 +329,7 @@ std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
         }
     }
 
-    std::map<int, std::vector<Message>> all_weighted_messages;
+    std::map<int, std::vector<gfd_validator::Message>> all_weighted_messages;
     for (int i = 0; i < threads_num_; ++i) {
         for (auto& kv : weighted_messages.at(i)) {
             all_weighted_messages.emplace(kv.first, kv.second);
@@ -341,18 +344,18 @@ std::vector<Gfd> GfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
     // balance
     Balancer balancer;
     std::vector<std::vector<int>> balanced_weights = balancer.Balance(weights, threads_num_);
-    std::vector<std::vector<Message>> balanced_messages = {};
+    std::vector<std::vector<gfd_validator::Message>> balanced_messages = {};
     for (std::size_t i = 0; i < balanced_weights.size(); ++i) {
-        std::vector<Message> messages = {};
+        std::vector<gfd_validator::Message> messages = {};
         for (int const& weight : balanced_weights.at(i)) {
-            Message message = *all_weighted_messages.at(weight).begin();
+            gfd_validator::Message message = *all_weighted_messages.at(weight).begin();
             all_weighted_messages.at(weight).erase(all_weighted_messages.at(weight).begin());
             messages.push_back(message);
         }
         balanced_messages.push_back(messages);
     }
 
-    std::vector<Gfd> result = {};
+    std::vector<model::Gfd> result = {};
     std::vector<std::set<int>> unsatisfied = {};
     for (int i = 0; i < threads_num_; ++i) {
         std::set<int> empty = {};

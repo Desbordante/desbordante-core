@@ -24,8 +24,8 @@ std::vector<std::string> Split(std::string str, std::string sep) {
     return result;
 };
 
-std::vector<Literal> ParseLiterals(std::istream& stream) {
-    std::vector<Literal> result = {};
+std::vector<model::Gfd::Literal> ParseLiterals(std::istream& stream) {
+    std::vector<model::Gfd::Literal> result = {};
 
     std::string line;
     std::getline(stream, line);
@@ -36,31 +36,31 @@ std::vector<Literal> ParseLiterals(std::istream& stream) {
         auto names1 = Split(custom_names.at(0), ".");
         int index1 = names1.size() == 1 ? -1 : stoi(names1.at(0));
         std::string name1 = *(--names1.end());
-        Token t1(index1, name1);
+        model::Gfd::Token t1(index1, name1);
 
         auto names2 = Split(custom_names.at(1), ".");
         int index2 = names2.size() == 1 ? -1 : stoi(names2.at(0));
         std::string name2 = *(--names2.end());
-        Token t2(index2, name2);
+        model::Gfd::Token t2(index2, name2);
 
-        result.push_back(Literal(t1, t2));
+        result.push_back(model::Gfd::Literal(t1, t2));
     }
 
     return result;
 };
 
-void WriteLiterals(std::ostream& stream, std::vector<Literal> const& literals) {
-    for (Literal const& l : literals) {
+void WriteLiterals(std::ostream& stream, std::vector<model::Gfd::Literal> const& literals) {
+    for (model::Gfd::Literal const& l : literals) {
         std::string token;
 
-        Token fst_token = l.first;
+        model::Gfd::Token fst_token = l.first;
         token = fst_token.first == -1 ? "" : (std::to_string(fst_token.first) + ".");
         token += fst_token.second;
         stream << token;
 
         stream << "=";
 
-        Token snd_token = l.second;
+        model::Gfd::Token snd_token = l.second;
         token = snd_token.first == -1 ? "" : (std::to_string(snd_token.first) + ".");
         token += snd_token.second;
         stream << token;
@@ -74,8 +74,9 @@ void WriteLiterals(std::ostream& stream, std::vector<Literal> const& literals) {
 
 namespace graph_parser {
 
-using AMap = boost::property_map<graph_t, std::map<std::string, std::string> Vertex::*>::type;
-using RMap = boost::property_map<graph_t, std::string Edge::*>::type;
+using AMap = boost::property_map<model::graph_t,
+                                 std::map<std::string, std::string> model::Vertex::*>::type;
+using RMap = boost::property_map<model::graph_t, std::string model::Edge::*>::type;
 
 namespace {
 struct NewAttr {
@@ -95,8 +96,8 @@ public:
     NewAttr(AMap a) : attrs(a) {}
 
     Ptr operator()(std::string const& name, boost::any const& descr, boost::any const&) const {
-        if (typeid(vertex_t) == descr.type())
-            return MakeDyn(boost::make_function_property_map<vertex_t>(
+        if (typeid(model::vertex_t) == descr.type())
+            return MakeDyn(boost::make_function_property_map<model::vertex_t>(
                     boost::bind(*this, boost::placeholders::_1, name)));
 
         return Ptr();
@@ -104,67 +105,64 @@ public:
 
     using result_type = std::string&;
 
-    std::string& operator()(vertex_t v, std::string const& name) const {
+    std::string& operator()(model::vertex_t v, std::string const& name) const {
         return attrs[v][name];
     }
 };
 }  // namespace
 
-graph_t ReadGraph(std::istream& stream) {
-    graph_t result;
-    NewAttr newattr(get(&Vertex::attributes, result));
+model::graph_t ReadGraph(std::istream& stream) {
+    model::graph_t result;
+    NewAttr newattr(boost::get(&model::Vertex::attributes, result));
     boost::dynamic_properties dp(newattr);
-    dp.property("label", get(&Edge::label, result));
-    dp.property("node_id", get(&Vertex::node_id, result));
+    dp.property("label", boost::get(&model::Edge::label, result));
+    dp.property("node_id", boost::get(&model::Vertex::node_id, result));
     read_graphviz(stream, result, dp);
     return result;
 };
 
-graph_t ReadGraph(std::filesystem::path const& path) {
+model::graph_t ReadGraph(std::filesystem::path const& path) {
     std::ifstream f(path);
-    graph_t result = ReadGraph(f);
+    model::graph_t result = ReadGraph(f);
     f.close();
     return result;
 };
 
-void WriteGraph(std::ostream& stream, graph_t& result) {
-    boost::attributes_writer<AMap> vw(get(&Vertex::attributes, result));
-    boost::label_writer<RMap> ew(get(&Edge::label, result));
+void WriteGraph(std::ostream& stream, model::graph_t& result) {
+    boost::attributes_writer<AMap> vw(boost::get(&model::Vertex::attributes, result));
+    boost::label_writer<RMap> ew(boost::get(&model::Edge::label, result));
     write_graphviz(stream, result, vw, ew);
 };
 
-void WriteGraph(std::filesystem::path const& path, graph_t& result) {
+void WriteGraph(std::filesystem::path const& path, model::graph_t& result) {
     std::ofstream f(path);
     WriteGraph(f, result);
     f.close();
 };
 
-Gfd ReadGfd(std::istream& stream) {
-    std::vector<Literal> premises = ParseLiterals(stream);
-    std::vector<Literal> conclusion = ParseLiterals(stream);
-    graph_t pattern = ReadGraph(stream);
-    Gfd result = Gfd();
-    result.SetPattern(pattern);
-    result.SetPremises(premises);
-    result.SetConclusion(conclusion);
+model::Gfd ReadGfd(std::istream& stream) {
+    model::Gfd result;
+    result.SetPremises(ParseLiterals(stream));
+    result.SetConclusion(ParseLiterals(stream));
+    result.SetPattern(ReadGraph(stream));
     return result;
 };
 
-Gfd ReadGfd(std::filesystem::path const& path) {
+model::Gfd ReadGfd(std::filesystem::path const& path) {
     std::ifstream f(path);
-    Gfd result = ReadGfd(f);
+    model::Gfd result = ReadGfd(f);
     f.close();
     return result;
 };
 
-void WriteGfd(std::ostream& stream, Gfd& result) {
+void WriteGfd(std::ostream& stream, model::Gfd const& result) {
     WriteLiterals(stream, result.GetPremises());
     WriteLiterals(stream, result.GetConclusion());
-    graph_t pattern = result.GetPattern();
+    model::graph_t pattern = result.GetPattern();
     WriteGraph(stream, pattern);
 };
 
-void WriteGfd(std::filesystem::path const& path, Gfd& result) {
+void WriteGfd(std::filesystem::path const& path, model::Gfd& result) {
     std::ofstream f(path);
     WriteGfd(f, result);
     f.close();
