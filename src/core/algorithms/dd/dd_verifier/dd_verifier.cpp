@@ -1,8 +1,6 @@
 #include "dd_verifier.h"
 
 #include <utility>
-#include <utility>
-#include <boost/mpl/pair.hpp>
 
 #include "descriptions.h"
 #include "names.h"
