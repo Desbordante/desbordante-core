@@ -81,6 +81,12 @@ else()
             "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
             "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
             "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
+            # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
+            # because libraries (STL, googletest, boost, etc.) are somehow broken
+            string(JOIN ";" UBSAN_OPTS
+                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/sanitizer_ignore_list.txt")
+        endif()
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
             "${UBSAN_OPTS}")
@@ -93,6 +99,16 @@ else()
 
     if (GDB_DEBUG)
         add_compile_options(-ggdb3)
+    endif()
+
+    # Workaround clang-18 bug:
+    # https://github.com/llvm/llvm-project/issues/76515?ysclid=m406q4it5k674680045
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        string(FIND "${CMAKE_CXX_COMPILER_VERSION}" "18" IDX)
+        if (IDX EQUAL 0)  # clang major version is 18
+            message(WARNING "C++ compiler is Clang++-18. Supressing deprecated declaration warnings. Consider using another version of Clang")
+            string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-Wno-deprecated-declarations")
+        endif()
     endif()
 
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
@@ -122,7 +138,7 @@ include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emha
 
 # adding submodules
 if (COMPILE_TESTS)
-    add_subdirectory("lib/googletest")
+    add_subdirectory("lib/googletest" SYSTEM)
 endif()
 
 set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )

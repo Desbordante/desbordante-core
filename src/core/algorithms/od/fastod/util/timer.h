@@ -4,7 +4,7 @@
 
 namespace algos::fastod {
 
-using TimePoint = std::chrono::_V2::high_resolution_clock::time_point;
+using TimePoint = std::chrono::high_resolution_clock::time_point;
 
 class Timer {
 private:
