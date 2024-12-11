@@ -71,7 +71,7 @@ namespace algos::dd {
                         if (const double dif = CalculateDistance(column_index, {first_index, second_index});
                             dif <= curr_constraint->upper_bound && dif >= curr_constraint->lower_bound) {
                             result.emplace_back(first_index, second_index);
-                        }
+                            }
                         ++curr_constraint;
                     }
                 }
@@ -81,7 +81,7 @@ namespace algos::dd {
                         dif > curr_constraint->upper_bound || dif < curr_constraint->lower_bound) {
                         result.erase(result.begin() + i);
                         i--;
-                    }
+                        }
                     ++curr_constraint;
                 }
             }
@@ -102,42 +102,29 @@ namespace algos::dd {
         MakeOptionsAvailable({kNumRows, kNumColumns});
     }
 
-    bool DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int> > lhs) const {
+    std::vector<std::pair<int, int>> DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> >& lhs) const {
         std::vector<model::ColumnIndex> columns;
-        for (auto dd : dd_.right) {
+        for (const auto& dd : dd_.right) {
             model::ColumnIndex column_index = relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
             columns.push_back(column_index);
         }
+        std::vector<std::pair<int, int>> pairs_not_holds;
         auto curr_constraint = dd_.right.cbegin();
         for ( auto pair: lhs){
             for (const auto column_index : columns) {
                 if (const double dif = CalculateDistance(column_index, pair); !(dif >= curr_constraint->lower_bound && dif <= curr_constraint->upper_bound)) {
-                    return false;
+                    pairs_not_holds.emplace_back(pair);
                 }
                 ++curr_constraint;
             }
         }
-        return true;
+        return pairs_not_holds;
     }
 
 
-    /*VerifyDD(){
-     *std::vector<std::pair
-     *<int, int>> lhs = GetRowsHolds(dd_.left);
-     *
-     *
-     *Intersection function that check holds dd or not
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     *
-     */
+    bool DDVerifier::VerifyDD() const {
+        const std::vector<std::pair<int, int>> lhs = GetRowsHolds(dd_.left);
+        const std::vector<std::pair<int, int>> pairs_not_holds = CheckDFOnRhs(lhs);
+        return pairs_not_holds.empty();
+    }
 }
