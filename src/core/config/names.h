@@ -69,6 +69,7 @@ constexpr auto kNumColumns = "num_columns";
 constexpr auto kInsertStatements = "insert";
 constexpr auto kDeleteStatements = "delete";
 constexpr auto kUpdateStatements = "update";
+constexpr auto kDDString = "dd";
 constexpr auto kOnlySFD = "only_sfd";
 constexpr auto kMinCard = "min_cardinality";
 constexpr auto kMaxDiffValsProportion = "max_different_values_proportion";
