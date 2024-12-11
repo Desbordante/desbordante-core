@@ -182,13 +182,10 @@ TYPED_TEST(TestNumeric, Pow) {
 
     test(0, 100);
     test(22, 12);
-    // 123^321 won't fit into long (i. e. IntType) -- it's UB
-    if constexpr (!std::is_same_v<Type, long>) {
-        test(123, 321);
-    }
     test(Type(2.72), 1.3123141);
-    // -102^11 and -123^123 won't fit into long (i. e. IntType) -- it's UB
-    if constexpr (!std::is_same_v<Type, long>) {
+    // 123^321, -102^11 and -123^123 won't fit into long (i. e. IntType) -- it's UB
+    if constexpr (!std::is_base_of_v<typename TypeParam::NumericType, mo::IntType>) {
+        test(123, 321);
         test(-102, 11);
         test(-123, 123);
     }
