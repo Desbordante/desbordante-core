@@ -8,16 +8,18 @@
 #include "tabular_data/input_table/option.h"
 
 namespace algos::dd {
-    DDVerifier::DDVerifier(DD dd) : Algorithm({}), dd_(std::move(dd)) {
+    DDVerifier::DDVerifier() : Algorithm({}) {
         RegisterOptions();
-        MakeOptionsAvailable({config::kTableOpt.GetName()});
+        MakeOptionsAvailable({config::kTableOpt.GetName(), config::names::kDDString});
     }
 
     void DDVerifier::RegisterOptions() {
         DESBORDANTE_OPTION_USING;
-        config::InputTable default_table;
+        const auto default_dd = DDs();
         RegisterOption(config::kTableOpt(&input_table_));
+        RegisterOption(Option{&dd_, kDDString, kDDDString});
     }
+
 
     //question -- Can I copy this func from Split algorithm
     double DDVerifier::CalculateDistance(const model::ColumnIndex column_index,
@@ -97,7 +99,11 @@ namespace algos::dd {
 
     void DDVerifier::MakeExecuteOptsAvailable() {
         using namespace config::names;
-        MakeOptionsAvailable({kNumRows, kNumColumns});
+        MakeOptionsAvailable({kDDString});
+    }
+
+    unsigned long long DDVerifier::ExecuteInternal() {
+        return 0;
     }
 
     std::vector<std::pair<int, int>> DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> >& lhs) const {
@@ -122,6 +128,9 @@ namespace algos::dd {
 
     bool DDVerifier::VerifyDD() const {
         const std::vector<std::pair<int, int>> lhs = GetRowsHolds(dd_.left);
+        if (lhs.empty()) {
+            return false;
+        }
         const std::vector<std::pair<int, int>> pairs_not_holds = CheckDFOnRhs(lhs);
         return pairs_not_holds.empty();
     }
