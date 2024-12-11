@@ -8,6 +8,7 @@ class ProfilingContext;
 #include "cache_eviction_method.h"
 #include "caching_method.h"
 #include "model/table/column_layout_relation_data.h"
+#include "util/maybe_unused.h"
 
 namespace model {
 
@@ -29,20 +30,23 @@ private:
     std::unique_ptr<VerticalMap<PositionListIndex>> index_;
     // usageCounter - for parallelism
 
-    int saved_intersections_ = 0;
+    // All these MAYBE_UNUSED variables are required to support Pyro's caching strategies from our
+    // ADBIS paper: https://link.springer.com/chapter/10.1007/978-3-030-30278-8_7
+
+    MAYBE_UNUSED int saved_intersections_ = 0;
 
     mutable std::mutex getting_pli_mutex_;
 
     CachingMethod caching_method_;
-    CacheEvictionMethod eviction_method_;
-    double caching_method_value_;
+    MAYBE_UNUSED CacheEvictionMethod eviction_method_;
+    MAYBE_UNUSED double caching_method_value_;
     // long long maximumAvailableMemory_ = 0;
     double maximum_entropy_;
-    double mean_entropy_;
-    double min_entropy_;
-    double median_entropy_;
-    double median_gini_;
-    double median_inverted_entropy_;
+    MAYBE_UNUSED double mean_entropy_;
+    MAYBE_UNUSED double min_entropy_;
+    MAYBE_UNUSED double median_entropy_;
+    MAYBE_UNUSED double median_gini_;
+    MAYBE_UNUSED double median_inverted_entropy_;
 
     std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> CachingProcess(
             Vertical const& vertical, std::unique_ptr<PositionListIndex> pli,
