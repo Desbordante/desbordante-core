@@ -191,4 +191,5 @@ constexpr auto kDEvidenceThreshold =
 constexpr auto kDDoCollectViolations = "Flag which tells whether to collect violations or not";
 constexpr auto kDGfdK = "Max size of mined gfds";
 constexpr auto kDGfdSigma = "Min frequency of mined gfds";
+constexpr auto kDDDString = "Difference Dependency that needs to be verified";
 }  // namespace config::descriptions
