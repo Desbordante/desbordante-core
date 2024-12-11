@@ -4,10 +4,21 @@
 
 #include "graph_descriptor.h"
 
-using Token = std::pair<int, std::string>;
-using Literal = std::pair<Token, Token>;
+namespace model {
 
 class Gfd {
+public:
+    // Defines a specific attribute of the pattern.
+    // The first element is the index of the vertex,
+    // the second is the name of the attribute.
+    // An alias for user convenience.
+    using Token = std::pair<int, std::string>;
+
+    // Concept from the article "Discovering Graph Functional Dependencies"
+    // by Fan Wenfei, Hu Chunming, Liu Xueli, and Lu Ping.
+    // An alias for user convenience.
+    using Literal = std::pair<Token, Token>;
+
 private:
     graph_t pattern_;
     std::vector<Literal> premises_;
@@ -45,3 +56,5 @@ public:
 
     std::string ToString();
 };
+
+}  // namespace model

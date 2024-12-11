@@ -1,4 +1,4 @@
-#include "balancer.h"
+#include "algorithms/gfd/gfd_validator/balancer.h"
 
 #include <algorithm>
 #include <map>

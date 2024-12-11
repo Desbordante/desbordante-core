@@ -1,4 +1,4 @@
-#include "egfd_validation.h"
+#include "algorithms/gfd/gfd_validator/egfd_validator.h"
 
 #include <iostream>
 
@@ -13,43 +13,48 @@
 namespace {
 
 using namespace algos;
-using Match = std::vector<std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator>>;
+using namespace algos::egfd_validator;
 
-void FstStepForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& rooted_subtree,
-                   std::map<vertex_t, vertex_t>& children_amount) {
-    typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+using Match = std::vector<
+        std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator>>;
+
+void FstStepForest(model::graph_t const& graph,
+                   std::map<model::vertex_t, std::set<model::vertex_t>>& rooted_subtree,
+                   std::map<model::vertex_t, model::vertex_t>& children_amount) {
+    typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
     for (boost::tie(it, end) = vertices(graph); it != end; ++it) {
         if (boost::degree(*it, graph) != 1) {
             continue;
         }
-        typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it =
+        typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it =
                 boost::adjacent_vertices(*it, graph).first;
 
         if (rooted_subtree.find(*adjacency_it) != rooted_subtree.end()) {
             rooted_subtree.at(*adjacency_it).insert(*it);
             children_amount[*adjacency_it]++;
         } else {
-            std::set<vertex_t> value = {*it};
+            std::set<model::vertex_t> value = {*it};
             rooted_subtree.emplace(*adjacency_it, value);
             children_amount.emplace(*adjacency_it, 1);
         }
     }
 }
 
-void BuildForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& rooted_subtree,
-                 std::map<vertex_t, vertex_t>& children_amount) {
+void BuildForest(model::graph_t const& graph,
+                 std::map<model::vertex_t, std::set<model::vertex_t>>& rooted_subtree,
+                 std::map<model::vertex_t, model::vertex_t>& children_amount) {
     bool changed = true;
     while (changed) {
         changed = false;
-        std::map<vertex_t, std::set<vertex_t>> temp;
-        std::map<vertex_t, vertex_t> children_temp;
+        std::map<model::vertex_t, std::set<model::vertex_t>> temp;
+        std::map<model::vertex_t, model::vertex_t> children_temp;
         for (auto const& kv : rooted_subtree) {
             auto desc = kv.first;
             auto children = kv.second;
 
             if (boost::degree(desc, graph) == (children_amount.at(desc) + 1)) {
                 changed = true;
-                typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it,
+                typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it,
                         adjacency_end;
                 boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(desc, graph);
                 for (; adjacency_it != adjacency_end; ++adjacency_it) {
@@ -57,7 +62,7 @@ void BuildForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& r
                         continue;
                     }
                     if (temp.find(*adjacency_it) != temp.end()) {
-                        std::set<vertex_t> value = {};
+                        std::set<model::vertex_t> value = {};
                         auto current = temp.at(*adjacency_it);
                         std::set_union(children.begin(), children.end(), current.begin(),
                                        current.end(), std::inserter(value, value.begin()));
@@ -65,7 +70,7 @@ void BuildForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& r
                         temp[*adjacency_it] = value;
                         children_temp[*adjacency_it]++;
                     } else {
-                        std::set<vertex_t> value = children;
+                        std::set<model::vertex_t> value = children;
                         value.insert(desc);
                         temp.emplace(*adjacency_it, value);
                         children_temp.emplace(*adjacency_it, 1);
@@ -82,28 +87,28 @@ void BuildForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& r
     }
 }
 
-void CfDecompose(graph_t const& graph, std::set<vertex_t>& core,
-                 std::vector<std::set<vertex_t>>& forest) {
+void CfDecompose(model::graph_t const& graph, std::set<model::vertex_t>& core,
+                 std::vector<std::set<model::vertex_t>>& forest) {
     if (boost::num_vertices(graph) == (boost::num_edges(graph) + 1)) {
-        typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+        typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
         for (boost::tie(it, end) = vertices(graph); it != end; ++it) {
             core.insert(*it);
         }
         return;
     }
 
-    std::map<vertex_t, std::set<vertex_t>> rooted_subtree;
-    std::map<vertex_t, vertex_t> children_amount;
+    std::map<model::vertex_t, std::set<model::vertex_t>> rooted_subtree;
+    std::map<model::vertex_t, model::vertex_t> children_amount;
     FstStepForest(graph, rooted_subtree, children_amount);
     BuildForest(graph, rooted_subtree, children_amount);
 
-    std::set<vertex_t> not_core_indices = {};
+    std::set<model::vertex_t> not_core_indices = {};
     for (auto const& kv : rooted_subtree) {
         for (int child : kv.second) {
             not_core_indices.insert(child);
         }
     }
-    typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+    typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
     for (boost::tie(it, end) = vertices(graph); it != end; ++it) {
         if (not_core_indices.find(*it) == not_core_indices.end()) {
             core.insert(*it);
@@ -111,14 +116,14 @@ void CfDecompose(graph_t const& graph, std::set<vertex_t>& core,
     }
 
     for (auto const& kv : rooted_subtree) {
-        std::set<vertex_t> indices(kv.second);
+        std::set<model::vertex_t> indices(kv.second);
         indices.insert(kv.first);
         forest.push_back(indices);
     }
 }
 
-int Mnd(graph_t const& graph, vertex_t const& v) {
-    typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it, adjacency_end;
+int Mnd(model::graph_t const& graph, model::vertex_t const& v) {
+    typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it, adjacency_end;
     boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(v, graph);
     std::size_t result = 0;
     for (; adjacency_it != adjacency_end; ++adjacency_it) {
@@ -129,9 +134,9 @@ int Mnd(graph_t const& graph, vertex_t const& v) {
     return result;
 }
 
-void CountLabelDegrees(graph_t const& graph, vertex_t const& v,
-                       std::map<std::string, vertex_t>& result) {
-    typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it, adjacency_end;
+void CountLabelDegrees(model::graph_t const& graph, model::vertex_t const& v,
+                       std::map<std::string, model::vertex_t>& result) {
+    typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it, adjacency_end;
     boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(v, graph);
     for (; adjacency_it != adjacency_end; ++adjacency_it) {
         if (result.find(graph[*adjacency_it].attributes.at("label")) != result.end()) {
@@ -142,13 +147,14 @@ void CountLabelDegrees(graph_t const& graph, vertex_t const& v,
     }
 }
 
-bool CandVerify(graph_t const& graph, vertex_t const& v, graph_t const& query, vertex_t const& u) {
+bool CandVerify(model::graph_t const& graph, model::vertex_t const& v, model::graph_t const& query,
+                model::vertex_t const& u) {
     if (Mnd(graph, v) < Mnd(query, u)) {
         return false;
     }
-    std::map<std::string, vertex_t> graph_label_degrees;
+    std::map<std::string, model::vertex_t> graph_label_degrees;
     CountLabelDegrees(graph, v, graph_label_degrees);
-    std::map<std::string, vertex_t> query_label_degrees;
+    std::map<std::string, model::vertex_t> query_label_degrees;
     CountLabelDegrees(query, u, query_label_degrees);
 
     for (auto const& label_degree : query_label_degrees) {
@@ -162,12 +168,14 @@ bool CandVerify(graph_t const& graph, vertex_t const& v, graph_t const& query, v
     return true;
 }
 
-void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t const& query,
-                    std::map<std::string, std::set<vertex_t>> const& label_classes) {
-    auto cmp_complexity = [&graph, &query, &label_classes](vertex_t const& a, vertex_t const& b) {
+void SortComplexity(std::vector<model::vertex_t>& order, model::graph_t const& graph,
+                    model::graph_t const& query,
+                    std::map<std::string, std::set<model::vertex_t>> const& label_classes) {
+    auto cmp_complexity = [&graph, &query, &label_classes](model::vertex_t const& a,
+                                                           model::vertex_t const& b) {
         std::size_t a_degree = boost::degree(a, query);
         int an = 0;
-        for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
+        for (model::vertex_t const& e : label_classes.at(query[a].attributes.at("label"))) {
             if (boost::degree(e, graph) >= a_degree) {
                 an++;
             }
@@ -175,7 +183,7 @@ void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t 
 
         std::size_t b_degree = boost::degree(b, query);
         int bn = 0;
-        for (const vertex_t& e : label_classes.at(query[b].attributes.at("label"))) {
+        for (model::vertex_t const& e : label_classes.at(query[b].attributes.at("label"))) {
             if (boost::degree(e, graph) >= b_degree) {
                 bn++;
             }
@@ -185,15 +193,15 @@ void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t 
     std::sort(order.begin(), order.end(), cmp_complexity);
 }
 
-void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
-                            graph_t const& query,
-                            std::map<std::string, std::set<vertex_t>> const& label_classes) {
+void SortAccurateComplexity(std::vector<model::vertex_t>& order, model::graph_t const& graph,
+                            model::graph_t const& query,
+                            std::map<std::string, std::set<model::vertex_t>> const& label_classes) {
     int top = std::min(int(order.size()), 3);
-    auto cmp_accurate_complexity = [&graph, &query, &label_classes](vertex_t const& a,
-                                                                    vertex_t const& b) {
+    auto cmp_accurate_complexity = [&graph, &query, &label_classes](model::vertex_t const& a,
+                                                                    model::vertex_t const& b) {
         int a_degree = boost::degree(a, query);
         int an = 0;
-        for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
+        for (model::vertex_t const& e : label_classes.at(query[a].attributes.at("label"))) {
             if (CandVerify(graph, e, query, a)) {
                 an++;
             }
@@ -201,7 +209,7 @@ void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
 
         int b_degree = boost::degree(b, query);
         int bn = 0;
-        for (const vertex_t& e : label_classes.at(query[b].attributes.at("label"))) {
+        for (model::vertex_t const& e : label_classes.at(query[b].attributes.at("label"))) {
             if (CandVerify(graph, e, query, b)) {
                 bn++;
             }
@@ -211,33 +219,36 @@ void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
     std::sort(order.begin(), std::next(order.begin(), top), cmp_accurate_complexity);
 }
 
-int GetRoot(graph_t const& graph, graph_t const& query, std::set<vertex_t> const& core) {
-    std::map<std::string, std::set<vertex_t>> label_classes;
-    typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+int GetRoot(model::graph_t const& graph, model::graph_t const& query,
+            std::set<model::vertex_t> const& core) {
+    std::map<std::string, std::set<model::vertex_t>> label_classes;
+    typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
     for (boost::tie(it, end) = vertices(graph); it != end; ++it) {
         if (label_classes.find(graph[*it].attributes.at("label")) != label_classes.end()) {
             label_classes[graph[*it].attributes.at("label")].insert(*it);
         } else {
-            std::set<vertex_t> value = {*it};
+            std::set<model::vertex_t> value = {*it};
             label_classes.emplace(graph[*it].attributes.at("label"), value);
         }
     }
-    std::vector<vertex_t> order(core.begin(), core.end());
+    std::vector<model::vertex_t> order(core.begin(), core.end());
 
     SortComplexity(order, graph, query, label_classes);
     SortAccurateComplexity(order, graph, query, label_classes);
     return *order.begin();
 }
 
-void MakeLevels(graph_t const& query, vertex_t const& root, std::vector<std::set<vertex_t>>& levels,
-                std::map<vertex_t, vertex_t>& parent) {
-    std::set<vertex_t> current = {root};
-    std::set<vertex_t> marked = {root};
+void MakeLevels(model::graph_t const& query, model::vertex_t const& root,
+                std::vector<std::set<model::vertex_t>>& levels,
+                std::map<model::vertex_t, model::vertex_t>& parent) {
+    std::set<model::vertex_t> current = {root};
+    std::set<model::vertex_t> marked = {root};
     while (!current.empty()) {
         levels.push_back(current);
-        std::set<vertex_t> next = {};
-        for (vertex_t const& vertex : current) {
-            typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it, adjacency_end;
+        std::set<model::vertex_t> next = {};
+        for (model::vertex_t const& vertex : current) {
+            typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it,
+                    adjacency_end;
             boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(vertex, query);
             for (; adjacency_it != adjacency_end; ++adjacency_it) {
                 if (marked.find(*adjacency_it) == marked.end()) {
@@ -251,12 +262,13 @@ void MakeLevels(graph_t const& query, vertex_t const& root, std::vector<std::set
     }
 }
 
-void MakeNte(graph_t const& query, std::vector<std::set<vertex_t>>& levels,
-             std::map<vertex_t, vertex_t>& parent, std::set<edge_t>& nte, std::set<edge_t>& snte) {
-    typename boost::graph_traits<graph_t>::edge_iterator it_edge, end_edge;
+void MakeNte(model::graph_t const& query, std::vector<std::set<model::vertex_t>>& levels,
+             std::map<model::vertex_t, model::vertex_t>& parent, std::set<model::edge_t>& nte,
+             std::set<model::edge_t>& snte) {
+    typename boost::graph_traits<model::graph_t>::edge_iterator it_edge, end_edge;
     for (boost::tie(it_edge, end_edge) = edges(query); it_edge != end_edge; ++it_edge) {
-        vertex_t origin = boost::source(*it_edge, query);
-        vertex_t finish = boost::target(*it_edge, query);
+        model::vertex_t origin = boost::source(*it_edge, query);
+        model::vertex_t finish = boost::target(*it_edge, query);
         if ((parent.find(origin) != parent.end()) && (parent.find(finish) != parent.end()) &&
             (parent.at(origin) != finish) && (parent.at(finish) != origin)) {
             int origin_level = 0;
@@ -277,20 +289,24 @@ void MakeNte(graph_t const& query, std::vector<std::set<vertex_t>>& levels,
     }
 }
 
-void BfsTree(graph_t const& query, vertex_t const& root, std::vector<std::set<vertex_t>>& levels,
-             std::map<vertex_t, vertex_t>& parent, std::set<edge_t>& nte, std::set<edge_t>& snte) {
+void BfsTree(model::graph_t const& query, model::vertex_t const& root,
+             std::vector<std::set<model::vertex_t>>& levels,
+             std::map<model::vertex_t, model::vertex_t>& parent, std::set<model::edge_t>& nte,
+             std::set<model::edge_t>& snte) {
     MakeLevels(query, root, levels, parent);
     MakeNte(query, levels, parent, nte, snte);
 }
 
-void DirectConstruction(std::set<vertex_t> const& lev, graph_t const& graph, graph_t const& query,
-                        std::map<vertex_t, std::set<vertex_t>>& candidates,
-                        std::map<vertex_t, int>& cnts,
-                        std::map<vertex_t, std::set<vertex_t>>& unvisited_neighbours,
-                        std::set<edge_t> const& snte, std::set<vertex_t>& visited) {
-    for (vertex_t const& u : lev) {
+void DirectConstruction(std::set<model::vertex_t> const& lev, model::graph_t const& graph,
+                        model::graph_t const& query,
+                        std::map<model::vertex_t, std::set<model::vertex_t>>& candidates,
+                        std::map<model::vertex_t, int>& cnts,
+                        std::map<model::vertex_t, std::set<model::vertex_t>>& unvisited_neighbours,
+                        std::set<model::edge_t> const& snte, std::set<model::vertex_t>& visited) {
+    for (model::vertex_t const& u : lev) {
         int cnt = 0;
-        typename boost::graph_traits<graph_t>::adjacency_iterator adjacency_it, adjacency_end;
+        typename boost::graph_traits<model::graph_t>::adjacency_iterator adjacency_it,
+                adjacency_end;
         boost::tie(adjacency_it, adjacency_end) = boost::adjacent_vertices(u, query);
         for (; adjacency_it != adjacency_end; ++adjacency_it) {
             if (visited.find(query[*adjacency_it].node_id) == visited.end() &&
@@ -298,12 +314,13 @@ void DirectConstruction(std::set<vertex_t> const& lev, graph_t const& graph, gra
                 if (unvisited_neighbours.find(u) != unvisited_neighbours.end()) {
                     unvisited_neighbours.at(u).insert(*adjacency_it);
                 } else {
-                    std::set<vertex_t> value = {*adjacency_it};
+                    std::set<model::vertex_t> value = {*adjacency_it};
                     unvisited_neighbours.emplace(u, value);
                 }
             } else if (visited.find(*adjacency_it) != visited.end()) {
-                for (vertex_t const& v : candidates.at(*adjacency_it)) {
-                    typename boost::graph_traits<graph_t>::adjacency_iterator g_adj_it, g_adj_end;
+                for (model::vertex_t const& v : candidates.at(*adjacency_it)) {
+                    typename boost::graph_traits<model::graph_t>::adjacency_iterator g_adj_it,
+                            g_adj_end;
                     boost::tie(g_adj_it, g_adj_end) = boost::adjacent_vertices(v, graph);
                     for (; g_adj_it != g_adj_end; ++g_adj_it) {
                         if (graph[*g_adj_it].attributes.at("label") ==
@@ -324,7 +341,7 @@ void DirectConstruction(std::set<vertex_t> const& lev, graph_t const& graph, gra
                 cnt++;
             }
         }
-        typename boost::graph_traits<graph_t>::vertex_iterator g_it, g_end;
+        typename boost::graph_traits<model::graph_t>::vertex_iterator g_it, g_end;
         for (boost::tie(g_it, g_end) = vertices(graph); g_it != g_end; ++g_it) {
             if (((cnts.find(*g_it) == cnts.end()) && (cnt == 0)) ||
                 ((cnts.find(*g_it) != cnts.end()) && (cnts.at(*g_it) == cnt))) {
@@ -338,17 +355,20 @@ void DirectConstruction(std::set<vertex_t> const& lev, graph_t const& graph, gra
     }
 }
 
-void ReverseConstruction(std::set<vertex_t> const& lev, graph_t const& graph, graph_t const& query,
-                         std::map<vertex_t, std::set<vertex_t>>& candidates,
-                         std::map<vertex_t, int>& cnts,
-                         std::map<vertex_t, std::set<vertex_t>>& unvisited_neighbours) {
+void ReverseConstruction(
+        std::set<model::vertex_t> const& lev, model::graph_t const& graph,
+        model::graph_t const& query,
+        std::map<model::vertex_t, std::set<model::vertex_t>>& candidates,
+        std::map<model::vertex_t, int>& cnts,
+        std::map<model::vertex_t, std::set<model::vertex_t>>& unvisited_neighbours) {
     for (auto j = lev.rbegin(); j != lev.rend(); ++j) {
-        vertex_t u = *j;
+        model::vertex_t u = *j;
         int cnt = 0;
         if (unvisited_neighbours.find(u) != unvisited_neighbours.end()) {
-            for (vertex_t const& un : unvisited_neighbours.at(u)) {
-                for (vertex_t const& v : candidates.at(un)) {
-                    typename boost::graph_traits<graph_t>::adjacency_iterator g_adj_it, g_adj_end;
+            for (model::vertex_t const& un : unvisited_neighbours.at(u)) {
+                for (model::vertex_t const& v : candidates.at(un)) {
+                    typename boost::graph_traits<model::graph_t>::adjacency_iterator g_adj_it,
+                            g_adj_end;
                     boost::tie(g_adj_it, g_adj_end) =
                             boost::adjacent_vertices(boost::vertex(v, graph), graph);
                     for (; g_adj_it != g_adj_end; ++g_adj_it) {
@@ -371,27 +391,28 @@ void ReverseConstruction(std::set<vertex_t> const& lev, graph_t const& graph, gr
             }
         }
 
-        std::set<vertex_t> to_delete = {};
-        for (vertex_t const& v : candidates.at(u)) {
+        std::set<model::vertex_t> to_delete = {};
+        for (model::vertex_t const& v : candidates.at(u)) {
             if (!(((cnts.find(v) == cnts.end()) && (cnt == 0)) ||
                   ((cnts.find(v) != cnts.end()) && (cnts.at(v) == cnt)))) {
                 to_delete.insert(v);
             }
         }
-        for (vertex_t const& d : to_delete) {
+        for (model::vertex_t const& d : to_delete) {
             candidates.at(u).erase(d);
         }
         cnts.clear();
     }
 }
 
-void FinalConstruction(std::set<vertex_t> const& lev, CPI& cpi, graph_t const& graph,
-                       graph_t const& query, std::map<vertex_t, vertex_t> const& parent,
-                       std::map<vertex_t, std::set<vertex_t>>& candidates) {
-    for (vertex_t const& u : lev) {
-        vertex_t up = parent.at(u);
-        for (vertex_t const& vp : candidates.at(up)) {
-            typename boost::graph_traits<graph_t>::adjacency_iterator g_adj_it, g_adj_end;
+void FinalConstruction(std::set<model::vertex_t> const& lev, CPI& cpi, model::graph_t const& graph,
+                       model::graph_t const& query,
+                       std::map<model::vertex_t, model::vertex_t> const& parent,
+                       std::map<model::vertex_t, std::set<model::vertex_t>>& candidates) {
+    for (model::vertex_t const& u : lev) {
+        model::vertex_t up = parent.at(u);
+        for (model::vertex_t const& vp : candidates.at(up)) {
+            typename boost::graph_traits<model::graph_t>::adjacency_iterator g_adj_it, g_adj_end;
             boost::tie(g_adj_it, g_adj_end) = boost::adjacent_vertices(vp, graph);
             for (; g_adj_it != g_adj_end; ++g_adj_it) {
                 if (graph[*g_adj_it].attributes.at("label") == query[u].attributes.at("label") &&
@@ -399,17 +420,17 @@ void FinalConstruction(std::set<vertex_t> const& lev, CPI& cpi, graph_t const& g
                     candidates.at(u).find(*g_adj_it) != candidates.at(u).end() &&
                     query[boost::edge(up, u, query).first].label ==
                             graph[boost::edge(vp, *g_adj_it, graph).first].label) {
-                    std::pair<vertex_t, vertex_t> cpi_edge(up, u);
+                    std::pair<model::vertex_t, model::vertex_t> cpi_edge(up, u);
                     if (cpi.find(cpi_edge) != cpi.end()) {
                         if (cpi.at(cpi_edge).find(vp) != cpi.at(cpi_edge).end()) {
                             cpi.at(cpi_edge).at(vp).insert(*g_adj_it);
                         } else {
-                            std::set<vertex_t> value = {*g_adj_it};
+                            std::set<model::vertex_t> value = {*g_adj_it};
                             cpi.at(cpi_edge).emplace(vp, value);
                         }
                     } else {
-                        std::map<vertex_t, std::set<vertex_t>> edge_map;
-                        std::set<vertex_t> value = {*g_adj_it};
+                        std::map<model::vertex_t, std::set<model::vertex_t>> edge_map;
+                        std::set<model::vertex_t> value = {*g_adj_it};
                         edge_map.emplace(vp, value);
                         cpi.emplace(cpi_edge, edge_map);
                     }
@@ -419,15 +440,15 @@ void FinalConstruction(std::set<vertex_t> const& lev, CPI& cpi, graph_t const& g
     }
 }
 
-void TopDownConstruct(CPI& cpi, graph_t const& graph, graph_t const& query,
-                      std::vector<std::set<vertex_t>> const& levels,
-                      std::map<vertex_t, vertex_t> const& parent,
-                      std::map<vertex_t, std::set<vertex_t>>& candidates,
-                      std::set<edge_t> const& snte) {
-    vertex_t root = *levels.at(0).begin();
-    typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+void TopDownConstruct(CPI& cpi, model::graph_t const& graph, model::graph_t const& query,
+                      std::vector<std::set<model::vertex_t>> const& levels,
+                      std::map<model::vertex_t, model::vertex_t> const& parent,
+                      std::map<model::vertex_t, std::set<model::vertex_t>>& candidates,
+                      std::set<model::edge_t> const& snte) {
+    model::vertex_t root = *levels.at(0).begin();
+    typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
     for (boost::tie(it, end) = vertices(query); it != end; ++it) {
-        std::set<vertex_t> empty = {};
+        std::set<model::vertex_t> empty = {};
         candidates.emplace(*it, empty);
     }
 
@@ -438,13 +459,13 @@ void TopDownConstruct(CPI& cpi, graph_t const& graph, graph_t const& query,
             candidates.at(root).insert(*it);
         }
     }
-    std::set<vertex_t> visited = {root};
-    std::map<vertex_t, std::set<vertex_t>> unvisited_neighbours;
-    std::map<vertex_t, int> cnts;
+    std::set<model::vertex_t> visited = {root};
+    std::map<model::vertex_t, std::set<model::vertex_t>> unvisited_neighbours;
+    std::map<model::vertex_t, int> cnts;
 
-    std::vector<std::set<vertex_t>>::const_iterator i = std::next(levels.cbegin());
+    std::vector<std::set<model::vertex_t>>::const_iterator i = std::next(levels.cbegin());
     for (; i != levels.cend(); ++i) {
-        std::set<vertex_t> lev = *i;
+        std::set<model::vertex_t> lev = *i;
         DirectConstruction(lev, graph, query, candidates, cnts, unvisited_neighbours, snte,
                            visited);
         ReverseConstruction(lev, graph, query, candidates, cnts, unvisited_neighbours);
@@ -452,16 +473,18 @@ void TopDownConstruct(CPI& cpi, graph_t const& graph, graph_t const& query,
     }
 }
 
-void InitialRefinement(vertex_t const& u, graph_t const& graph, graph_t const& query,
-                       std::map<vertex_t, vertex_t> const& parent,
-                       std::map<vertex_t, std::set<vertex_t>>& candidates,
-                       std::map<vertex_t, int>& cnts, int& cnt) {
-    typename boost::graph_traits<graph_t>::adjacency_iterator q_adj_it, q_adj_end;
+void InitialRefinement(model::vertex_t const& u, model::graph_t const& graph,
+                       model::graph_t const& query,
+                       std::map<model::vertex_t, model::vertex_t> const& parent,
+                       std::map<model::vertex_t, std::set<model::vertex_t>>& candidates,
+                       std::map<model::vertex_t, int>& cnts, int& cnt) {
+    typename boost::graph_traits<model::graph_t>::adjacency_iterator q_adj_it, q_adj_end;
     boost::tie(q_adj_it, q_adj_end) = boost::adjacent_vertices(u, query);
     for (; q_adj_it != q_adj_end; ++q_adj_it) {
         if ((parent.find(*q_adj_it) != parent.end()) && (parent.at(*q_adj_it) == u)) {
-            for (vertex_t const& v : candidates.at(*q_adj_it)) {
-                typename boost::graph_traits<graph_t>::adjacency_iterator g_adj_it, g_adj_end;
+            for (model::vertex_t const& v : candidates.at(*q_adj_it)) {
+                typename boost::graph_traits<model::graph_t>::adjacency_iterator g_adj_it,
+                        g_adj_end;
                 boost::tie(g_adj_it, g_adj_end) = boost::adjacent_vertices(v, graph);
                 for (; g_adj_it != g_adj_end; ++g_adj_it) {
                     if (graph[*g_adj_it].attributes.at("label") ==
@@ -484,16 +507,17 @@ void InitialRefinement(vertex_t const& u, graph_t const& graph, graph_t const& q
     }
 }
 
-void OddDeletion(vertex_t const& u, CPI& cpi, std::map<vertex_t, std::set<vertex_t>>& candidates,
-                 std::map<vertex_t, int>& cnts, int& cnt) {
-    std::set<vertex_t> to_delete = {};
-    for (vertex_t const& v : candidates.at(u)) {
+void OddDeletion(model::vertex_t const& u, CPI& cpi,
+                 std::map<model::vertex_t, std::set<model::vertex_t>>& candidates,
+                 std::map<model::vertex_t, int>& cnts, int& cnt) {
+    std::set<model::vertex_t> to_delete = {};
+    for (model::vertex_t const& v : candidates.at(u)) {
         if (!(((cnts.find(v) == cnts.end()) && (cnt == 0)) ||
               ((cnts.find(v) != cnts.end()) && (cnts.at(v) == cnt)))) {
             to_delete.insert(v);
         }
     }
-    for (vertex_t const& d : to_delete) {
+    for (model::vertex_t const& d : to_delete) {
         candidates.at(u).erase(d);
         for (auto const& e : cpi) {
             if (e.second.find(d) != e.second.end()) {
@@ -504,17 +528,17 @@ void OddDeletion(vertex_t const& u, CPI& cpi, std::map<vertex_t, std::set<vertex
     cnts.clear();
 }
 
-void FinalRefinement(vertex_t const& u, CPI& cpi, graph_t const& query,
-                     std::map<vertex_t, vertex_t> const& parent,
-                     std::map<vertex_t, std::set<vertex_t>>& candidates) {
-    for (vertex_t const& v : candidates.at(u)) {
-        typename boost::graph_traits<graph_t>::adjacency_iterator q_adj_it, q_adj_end;
+void FinalRefinement(model::vertex_t const& u, CPI& cpi, model::graph_t const& query,
+                     std::map<model::vertex_t, model::vertex_t> const& parent,
+                     std::map<model::vertex_t, std::set<model::vertex_t>>& candidates) {
+    for (model::vertex_t const& v : candidates.at(u)) {
+        typename boost::graph_traits<model::graph_t>::adjacency_iterator q_adj_it, q_adj_end;
         boost::tie(q_adj_it, q_adj_end) = boost::adjacent_vertices(u, query);
         for (; q_adj_it != q_adj_end; ++q_adj_it) {
-            vertex_t u2 = *q_adj_it;
+            model::vertex_t u2 = *q_adj_it;
             if ((parent.find(u2) != parent.end()) && (parent.at(u2) == u)) {
-                std::pair<vertex_t, vertex_t> cpi_edge(u, u2);
-                for (vertex_t const& v2 : cpi.at(cpi_edge).at(v)) {
+                std::pair<model::vertex_t, model::vertex_t> cpi_edge(u, u2);
+                for (model::vertex_t const& v2 : cpi.at(cpi_edge).at(v)) {
                     if (candidates.at(u2).find(v2) == candidates.at(u2).end()) {
                         cpi.at(cpi_edge).at(v).erase(v2);
                     }
@@ -524,15 +548,15 @@ void FinalRefinement(vertex_t const& u, CPI& cpi, graph_t const& query,
     }
 }
 
-void BottomUpRefinement(CPI& cpi, graph_t const& graph, graph_t const& query,
-                        std::vector<std::set<vertex_t>> const& levels,
-                        std::map<vertex_t, vertex_t> const& parent,
-                        std::map<vertex_t, std::set<vertex_t>>& candidates) {
-    std::map<vertex_t, int> cnts;
+void BottomUpRefinement(CPI& cpi, model::graph_t const& graph, model::graph_t const& query,
+                        std::vector<std::set<model::vertex_t>> const& levels,
+                        std::map<model::vertex_t, model::vertex_t> const& parent,
+                        std::map<model::vertex_t, std::set<model::vertex_t>>& candidates) {
+    std::map<model::vertex_t, int> cnts;
 
-    std::vector<std::set<vertex_t>>::const_iterator lev_it;
+    std::vector<std::set<model::vertex_t>>::const_iterator lev_it;
     for (lev_it = --levels.cend(); lev_it != std::next(levels.begin(), -1); --lev_it) {
-        for (vertex_t const& u : *lev_it) {
+        for (model::vertex_t const& u : *lev_it) {
             int cnt = 0;
             InitialRefinement(u, graph, query, parent, candidates, cnts, cnt);
             OddDeletion(u, cpi, candidates, cnts, cnt);
@@ -541,23 +565,25 @@ void BottomUpRefinement(CPI& cpi, graph_t const& graph, graph_t const& query,
     }
 }
 
-int NumOfEmbeddings(const CPI& cpi, std::vector<vertex_t> const& path, vertex_t const& origin) {
-    std::map<std::pair<vertex_t, vertex_t>, int> result;
-    std::pair<vertex_t, vertex_t> edge(*(std::next(path.end(), -2)), *(std::next(path.end(), -1)));
+int NumOfEmbeddings(const CPI& cpi, std::vector<model::vertex_t> const& path,
+                    model::vertex_t const& origin) {
+    std::map<std::pair<model::vertex_t, model::vertex_t>, int> result;
+    std::pair<model::vertex_t, model::vertex_t> edge(*(std::next(path.end(), -2)),
+                                                     *(std::next(path.end(), -1)));
     for (auto& vert_cans : cpi.at(edge)) {
-        for (vertex_t const& can : vert_cans.second) {
-            std::pair<vertex_t, vertex_t> key(*(std::next(path.end(), -1)), can);
+        for (model::vertex_t const& can : vert_cans.second) {
+            std::pair<model::vertex_t, model::vertex_t> key(*(std::next(path.end(), -1)), can);
             result.emplace(key, 1);
         }
     }
 
     for (int i = path.size() - 1; path.at(i) != origin; --i) {
-        std::map<std::pair<vertex_t, vertex_t>, int> new_result;
-        std::pair<vertex_t, vertex_t> cur_edge(path.at(i - 1), path.at(i));
+        std::map<std::pair<model::vertex_t, model::vertex_t>, int> new_result;
+        std::pair<model::vertex_t, model::vertex_t> cur_edge(path.at(i - 1), path.at(i));
         for (auto& vert_cans : cpi.at(cur_edge)) {
-            for (vertex_t const& can : vert_cans.second) {
-                std::pair<vertex_t, vertex_t> key(path.at(i - 1), vert_cans.first);
-                std::pair<vertex_t, vertex_t> counted(path.at(i), can);
+            for (model::vertex_t const& can : vert_cans.second) {
+                std::pair<model::vertex_t, model::vertex_t> key(path.at(i - 1), vert_cans.first);
+                std::pair<model::vertex_t, model::vertex_t> counted(path.at(i), can);
                 if (new_result.find(key) != new_result.end()) {
                     new_result[key] += result.at(counted);
                 } else {
@@ -574,7 +600,7 @@ int NumOfEmbeddings(const CPI& cpi, std::vector<vertex_t> const& path, vertex_t 
     return answer;
 }
 
-int CandidatesCardinality(const CPI& cpi, vertex_t const& u) {
+int CandidatesCardinality(const CPI& cpi, model::vertex_t const& u) {
     for (auto& edge_cans : cpi) {
         auto edge = edge_cans.first;
         if (edge.first == u) {
@@ -584,11 +610,12 @@ int CandidatesCardinality(const CPI& cpi, vertex_t const& u) {
     return 1;
 }
 
-void BuildOptimalSeq(const CPI& cpi, std::vector<std::vector<vertex_t>> const& paths_origin,
-                     std::vector<vertex_t> const& NTs,
-                     std::vector<std::vector<vertex_t>> const& paths, std::vector<vertex_t>& pi) {
-    auto cmp = [&cpi, &paths_origin, &NTs](std::vector<vertex_t> const& a,
-                                           std::vector<vertex_t> const& b) {
+void BuildOptimalSeq(const CPI& cpi, std::vector<std::vector<model::vertex_t>> const& paths_origin,
+                     std::vector<model::vertex_t> const& NTs,
+                     std::vector<std::vector<model::vertex_t>> const& paths,
+                     std::vector<model::vertex_t>& pi) {
+    auto cmp = [&cpi, &paths_origin, &NTs](std::vector<model::vertex_t> const& a,
+                                           std::vector<model::vertex_t> const& b) {
         int nta = NTs.at(std::find(paths_origin.begin(), paths_origin.end(), a) -
                          paths_origin.begin());
         int ntb = NTs.at(std::find(paths_origin.begin(), paths_origin.end(), b) -
@@ -605,12 +632,13 @@ void BuildOptimalSeq(const CPI& cpi, std::vector<std::vector<vertex_t>> const& p
     pi = *std::min_element(paths.begin(), paths.end(), cmp);
 }
 
-void BuildAccurateOptimalSeq(const CPI& cpi, std::vector<std::vector<vertex_t>> const& paths_origin,
-                             std::vector<vertex_t> const& origins,
-                             std::vector<std::vector<vertex_t>> const& paths,
-                             std::vector<vertex_t>& pi) {
-    auto cmp = [&cpi, &paths_origin, &origins](std::vector<vertex_t> const& a,
-                                               std::vector<vertex_t> const& b) {
+void BuildAccurateOptimalSeq(const CPI& cpi,
+                             std::vector<std::vector<model::vertex_t>> const& paths_origin,
+                             std::vector<model::vertex_t> const& origins,
+                             std::vector<std::vector<model::vertex_t>> const& paths,
+                             std::vector<model::vertex_t>& pi) {
+    auto cmp = [&cpi, &paths_origin, &origins](std::vector<model::vertex_t> const& a,
+                                               std::vector<model::vertex_t> const& b) {
         int a_origin = origins.at(std::find(paths_origin.begin(), paths_origin.end(), a) -
                                   paths_origin.begin());
         int b_origin = origins.at(std::find(paths_origin.begin(), paths_origin.end(), b) -
@@ -621,35 +649,35 @@ void BuildAccurateOptimalSeq(const CPI& cpi, std::vector<std::vector<vertex_t>> 
     pi = *std::min_element(paths.begin(), paths.end(), cmp);
 }
 
-std::vector<vertex_t> MatchingOrder(const CPI& cpi,
-                                    std::vector<std::vector<vertex_t>> const& paths_origin,
-                                    std::vector<vertex_t> const& NTs) {
-    std::vector<std::vector<vertex_t>> paths;
+std::vector<model::vertex_t> MatchingOrder(
+        const CPI& cpi, std::vector<std::vector<model::vertex_t>> const& paths_origin,
+        std::vector<model::vertex_t> const& NTs) {
+    std::vector<std::vector<model::vertex_t>> paths;
     std::copy(paths_origin.begin(), paths_origin.end(), std::back_inserter(paths));
 
-    std::vector<vertex_t> pi;
+    std::vector<model::vertex_t> pi;
     BuildOptimalSeq(cpi, paths_origin, NTs, paths, pi);
-    std::vector<vertex_t> origins;
+    std::vector<model::vertex_t> origins;
     for (auto& path : paths_origin) {
         if (path == pi) {
             origins.push_back(*path.begin());
             continue;
         }
-        std::vector<vertex_t>::iterator pi_it = pi.begin();
-        std::vector<vertex_t>::const_iterator path_it = path.cbegin();
+        std::vector<model::vertex_t>::iterator pi_it = pi.begin();
+        std::vector<model::vertex_t>::const_iterator path_it = path.cbegin();
         for (; *pi_it == *path_it; ++pi_it, ++path_it) {
         }
         origins.push_back(*(--pi_it));
     }
     paths.erase(std::remove(paths.begin(), paths.end(), pi), paths.end());
 
-    std::vector<vertex_t> seq;
+    std::vector<model::vertex_t> seq;
     std::copy(pi.begin(), pi.end(), std::back_inserter(seq));
     while (!paths.empty()) {
-        std::vector<vertex_t> pi_new;
+        std::vector<model::vertex_t> pi_new;
         BuildAccurateOptimalSeq(cpi, paths_origin, origins, paths, pi_new);
-        std::vector<vertex_t>::iterator pi_it = pi_new.begin();
-        std::vector<vertex_t>::iterator seq_it = seq.begin();
+        std::vector<model::vertex_t>::iterator pi_it = pi_new.begin();
+        std::vector<model::vertex_t>::iterator seq_it = seq.begin();
         for (; *pi_it == *seq_it; ++pi_it, ++seq_it) {
         }
         seq.insert(seq_it, pi_it, pi_new.end());
@@ -658,9 +686,9 @@ std::vector<vertex_t> MatchingOrder(const CPI& cpi,
     return seq;
 }
 
-bool ValidateNt(graph_t const& graph, vertex_t const& v, graph_t const& query, vertex_t const& u,
-                std::vector<vertex_t> const& seq, std::map<vertex_t, vertex_t> const& parent,
-                Match match) {
+bool ValidateNt(model::graph_t const& graph, model::vertex_t const& v, model::graph_t const& query,
+                model::vertex_t const& u, std::vector<model::vertex_t> const& seq,
+                std::map<model::vertex_t, model::vertex_t> const& parent, Match match) {
     int index = std::find(seq.begin(), seq.end(), u) - seq.begin();
     for (int i = 0; i < index; ++i) {
         if ((seq.at(i) != parent.at(u)) && boost::edge(seq.at(i), u, query).second) {
@@ -674,11 +702,12 @@ bool ValidateNt(graph_t const& graph, vertex_t const& v, graph_t const& query, v
     return true;
 }
 
-std::vector<std::vector<vertex_t>> GetPaths(std::set<vertex_t> const& indices,
-                                            std::map<vertex_t, vertex_t> const& parent_) {
-    std::vector<std::vector<vertex_t>> result = {};
-    std::map<vertex_t, vertex_t> parent(parent_);
-    std::set<vertex_t> to_delete = {};
+std::vector<std::vector<model::vertex_t>> GetPaths(
+        std::set<model::vertex_t> const& indices,
+        std::map<model::vertex_t, model::vertex_t> const& parent_) {
+    std::vector<std::vector<model::vertex_t>> result = {};
+    std::map<model::vertex_t, model::vertex_t> parent(parent_);
+    std::set<model::vertex_t> to_delete = {};
     for (auto& link : parent) {
         if (indices.find(link.first) == indices.end()) {
             to_delete.insert(link.first);
@@ -687,18 +716,18 @@ std::vector<std::vector<vertex_t>> GetPaths(std::set<vertex_t> const& indices,
     for (auto& index : to_delete) {
         parent.erase(index);
     }
-    std::set<vertex_t> keys = {};
-    std::set<vertex_t> values = {};
+    std::set<model::vertex_t> keys = {};
+    std::set<model::vertex_t> values = {};
     for (auto& kv : parent) {
         keys.insert(kv.first);
         values.insert(kv.second);
     }
-    std::set<vertex_t> leaves = {};
+    std::set<model::vertex_t> leaves = {};
     std::set_difference(keys.begin(), keys.end(), values.begin(), values.end(),
                         std::inserter(leaves, leaves.begin()));
-    for (vertex_t const& leaf : leaves) {
-        std::vector<vertex_t> path = {leaf};
-        vertex_t cur = leaf;
+    for (model::vertex_t const& leaf : leaves) {
+        std::vector<model::vertex_t> path = {leaf};
+        model::vertex_t cur = leaf;
         while ((parent.find(cur) != parent.end()) &&
                (indices.find(parent.at(cur)) != indices.end())) {
             cur = parent.at(cur);
@@ -710,7 +739,7 @@ std::vector<std::vector<vertex_t>> GetPaths(std::set<vertex_t> const& indices,
     return result;
 }
 
-bool Visited(Match const& match, vertex_t const& v, std::size_t const& index) {
+bool Visited(Match const& match, model::vertex_t const& v, std::size_t const& index) {
     for (std::size_t i = 0; i < match.size(); ++i) {
         if (i != index) {
             if ((match.at(i).first != match.at(i).second) && (*match.at(i).first == v)) {
@@ -721,9 +750,10 @@ bool Visited(Match const& match, vertex_t const& v, std::size_t const& index) {
     return false;
 }
 
-bool Satisfied(graph_t const& graph, graph_t const& query, std::vector<vertex_t> const& seq,
-               Match const& match, std::vector<Literal> const& literals) {
-    for (Literal const& l : literals) {
+bool Satisfied(model::graph_t const& graph, model::graph_t const& query,
+               std::vector<model::vertex_t> const& seq, Match const& match,
+               std::vector<model::Gfd::Literal> const& literals) {
+    for (model::Gfd::Literal const& l : literals) {
         auto fst_token = l.first;
         auto snd_token = l.second;
         std::string fst;
@@ -731,8 +761,8 @@ bool Satisfied(graph_t const& graph, graph_t const& query, std::vector<vertex_t>
         if (fst_token.first == -1) {
             fst = fst_token.second;
         } else {
-            vertex_t v;
-            vertex_t u = boost::vertex(fst_token.first, query);
+            model::vertex_t v;
+            model::vertex_t u = boost::vertex(fst_token.first, query);
             int index = std::find(seq.begin(), seq.end(), u) - seq.begin();
             v = *match.at(index).first;
             auto attrs = graph[v].attributes;
@@ -744,8 +774,8 @@ bool Satisfied(graph_t const& graph, graph_t const& query, std::vector<vertex_t>
         if (snd_token.first == -1) {
             snd = snd_token.second;
         } else {
-            vertex_t v;
-            vertex_t u = boost::vertex(snd_token.first, query);
+            model::vertex_t v;
+            model::vertex_t u = boost::vertex(snd_token.first, query);
             int index = std::find(seq.begin(), seq.end(), u) - seq.begin();
             v = *match.at(index).first;
             auto attrs = graph[v].attributes;
@@ -761,13 +791,14 @@ bool Satisfied(graph_t const& graph, graph_t const& query, std::vector<vertex_t>
     return true;
 }
 
-void FullNTs(std::vector<std::vector<vertex_t>> const& paths, std::set<edge_t> const& nte,
-             graph_t const& query, std::vector<vertex_t>& NTs) {
+void FullNTs(std::vector<std::vector<model::vertex_t>> const& paths,
+             std::set<model::edge_t> const& nte, model::graph_t const& query,
+             std::vector<model::vertex_t>& NTs) {
     for (auto& path : paths) {
         int nt = 0;
         for (auto& desc : nte) {
-            vertex_t source = boost::source(desc, query);
-            vertex_t target = boost::target(desc, query);
+            model::vertex_t source = boost::source(desc, query);
+            model::vertex_t target = boost::target(desc, query);
             if ((std::find(path.begin(), path.end(), source) != path.end()) ||
                 (std::find(path.begin(), path.end(), target) != path.end())) {
                 nt++;
@@ -777,18 +808,19 @@ void FullNTs(std::vector<std::vector<vertex_t>> const& paths, std::set<edge_t> c
     }
 }
 
-void CompleteSeq(CPI& cpi, std::vector<std::set<vertex_t>> const& forest,
-                 std::map<vertex_t, vertex_t> const& parent, graph_t const& query,
-                 std::set<edge_t> const& nte, std::vector<vertex_t>& seq) {
+void CompleteSeq(CPI& cpi, std::vector<std::set<model::vertex_t>> const& forest,
+                 std::map<model::vertex_t, model::vertex_t> const& parent,
+                 model::graph_t const& query, std::set<model::edge_t> const& nte,
+                 std::vector<model::vertex_t>& seq) {
     for (auto& tree : forest) {
-        std::vector<std::vector<vertex_t>> tree_paths = GetPaths(tree, parent);
+        std::vector<std::vector<model::vertex_t>> tree_paths = GetPaths(tree, parent);
 
-        std::vector<vertex_t> tree_nts = {};
+        std::vector<model::vertex_t> tree_nts = {};
         for (auto& path : tree_paths) {
             int nt = 0;
             for (auto& desc : nte) {
-                vertex_t source = boost::source(desc, query);
-                vertex_t target = boost::target(desc, query);
+                model::vertex_t source = boost::source(desc, query);
+                model::vertex_t target = boost::target(desc, query);
                 if ((std::find(path.begin(), path.end(), source) != path.end()) ||
                     (std::find(path.begin(), path.end(), target) != path.end())) {
                     nt++;
@@ -796,21 +828,21 @@ void CompleteSeq(CPI& cpi, std::vector<std::set<vertex_t>> const& forest,
             }
             tree_nts.push_back(nt);
         }
-        std::vector<vertex_t> tree_seq = MatchingOrder(cpi, tree_paths, tree_nts);
+        std::vector<model::vertex_t> tree_seq = MatchingOrder(cpi, tree_paths, tree_nts);
 
         seq.insert(seq.end(), ++tree_seq.begin(), tree_seq.end());
     }
 }
 
-bool FullMatch(CPI& cpi, Match& match, std::set<vertex_t> const& root_candidates,
-               std::set<vertex_t> const& core, std::vector<vertex_t> const& seq,
-               std::map<vertex_t, vertex_t> const& parent, graph_t const& graph,
-               graph_t const& query) {
+bool FullMatch(CPI& cpi, Match& match, std::set<model::vertex_t> const& root_candidates,
+               std::set<model::vertex_t> const& core, std::vector<model::vertex_t> const& seq,
+               std::map<model::vertex_t, model::vertex_t> const& parent,
+               model::graph_t const& graph, model::graph_t const& query) {
     match.push_back({root_candidates.begin(), root_candidates.end()});
     for (std::size_t i = 1; i < core.size(); ++i) {
-        std::pair<vertex_t, vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
+        std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
         int index = std::find(seq.begin(), seq.end(), parent.at(seq.at(i))) - seq.begin();
-        std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator> its(
+        std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator> its(
                 cpi.at(edge).at(*match.at(index).first).begin(),
                 cpi.at(edge).at(*match.at(index).first).end());
         match.push_back(its);
@@ -832,14 +864,15 @@ bool FullMatch(CPI& cpi, Match& match, std::set<vertex_t> const& root_candidates
 }
 
 void IncrementMatch(int& i, const CPI& cpi, Match& match,
-                    std::map<vertex_t, vertex_t> const& parent, std::set<vertex_t> const& core,
-                    std::vector<vertex_t> const& seq, graph_t const& graph, graph_t const& query) {
+                    std::map<model::vertex_t, model::vertex_t> const& parent,
+                    std::set<model::vertex_t> const& core, std::vector<model::vertex_t> const& seq,
+                    model::graph_t const& graph, model::graph_t const& query) {
     while ((i != static_cast<int>(core.size())) && (i != -1)) {
         if (match.at(i).first == match.at(i).second) {
-            std::pair<vertex_t, vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
+            std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
             std::size_t index =
                     std::find(seq.begin(), seq.end(), parent.at(seq.at(i))) - seq.begin();
-            std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator> its(
+            std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator> its(
                     cpi.at(edge).at(*match.at(index).first).begin(),
                     cpi.at(edge).at(*match.at(index).first).end());
             match[i] = its;
@@ -861,12 +894,14 @@ void IncrementMatch(int& i, const CPI& cpi, Match& match,
     }
 }
 
-bool CheckTrivially(const CPI& cpi, Match& match, std::map<vertex_t, vertex_t> const& parent,
-                    std::set<vertex_t> const& core, std::vector<vertex_t> const& seq) {
+bool CheckTrivially(const CPI& cpi, Match& match,
+                    std::map<model::vertex_t, model::vertex_t> const& parent,
+                    std::set<model::vertex_t> const& core,
+                    std::vector<model::vertex_t> const& seq) {
     for (std::size_t k = core.size(); k < seq.size(); ++k) {
-        std::pair<vertex_t, vertex_t> edge(parent.at(seq.at(k)), seq.at(k));
+        std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(k)), seq.at(k));
         std::size_t index = std::find(seq.begin(), seq.end(), parent.at(seq.at(k))) - seq.begin();
-        std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator> its(
+        std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator> its(
                 cpi.at(edge).at(*match.at(index).first).begin(),
                 cpi.at(edge).at(*match.at(index).first).end());
         match[k] = its;
@@ -882,19 +917,21 @@ bool CheckTrivially(const CPI& cpi, Match& match, std::map<vertex_t, vertex_t> c
     return false;
 }
 
-bool CheckMatch(const CPI& cpi, Match& match, std::map<vertex_t, vertex_t> const& parent,
-                std::set<vertex_t> const& core, std::vector<vertex_t> const& seq,
-                graph_t const& graph, graph_t const& query, Gfd const& gfd, int& amount) {
+bool CheckMatch(const CPI& cpi, Match& match,
+                std::map<model::vertex_t, model::vertex_t> const& parent,
+                std::set<model::vertex_t> const& core, std::vector<model::vertex_t> const& seq,
+                model::graph_t const& graph, model::graph_t const& query, model::Gfd const& gfd,
+                int& amount) {
     while (true) {
         std::size_t j = seq.size() - 1;
         while ((j != seq.size()) && (j != core.size() - 1)) {
             if (match.at(j).first == match.at(j).second) {
-                std::pair<vertex_t, vertex_t> edge(parent.at(seq.at(j)), seq.at(j));
+                std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(j)), seq.at(j));
                 std::size_t index =
                         std::find(seq.begin(), seq.end(), parent.at(seq.at(j))) - seq.begin();
-                std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator> its(
-                        cpi.at(edge).at(*match.at(index).first).begin(),
-                        cpi.at(edge).at(*match.at(index).first).end());
+                std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator>
+                        its(cpi.at(edge).at(*match.at(index).first).begin(),
+                            cpi.at(edge).at(*match.at(index).first).end());
                 match[j] = its;
             } else {
                 match.at(j).first++;
@@ -927,25 +964,28 @@ bool CheckMatch(const CPI& cpi, Match& match, std::map<vertex_t, vertex_t> const
     return true;
 }
 
-bool Check(CPI& cpi, graph_t const& graph, Gfd const& gfd, std::set<vertex_t> const& core,
-           std::vector<std::set<vertex_t>> const& forest,
-           std::map<vertex_t, vertex_t> const& parent, std::set<edge_t> const& nte) {
-    graph_t query = gfd.GetPattern();
-    std::vector<std::vector<vertex_t>> paths = GetPaths(core, parent);
+bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
+           std::set<model::vertex_t> const& core,
+           std::vector<std::set<model::vertex_t>> const& forest,
+           std::map<model::vertex_t, model::vertex_t> const& parent,
+           std::set<model::edge_t> const& nte) {
+    model::graph_t query = gfd.GetPattern();
+    std::vector<std::vector<model::vertex_t>> paths = GetPaths(core, parent);
 
-    std::vector<vertex_t> nts = {};
+    std::vector<model::vertex_t> nts = {};
     FullNTs(paths, nte, query, nts);
-    std::vector<vertex_t> seq = MatchingOrder(cpi, paths, nts);
+    std::vector<model::vertex_t> seq = MatchingOrder(cpi, paths, nts);
 
     CompleteSeq(cpi, forest, parent, query, nte, seq);
 
-    std::set<vertex_t> root_candidates = {};
-    std::pair<vertex_t, vertex_t> edge(*seq.begin(), *(++seq.begin()));
+    std::set<model::vertex_t> root_candidates = {};
+    std::pair<model::vertex_t, model::vertex_t> edge(*seq.begin(), *(++seq.begin()));
     for (auto& vertices : cpi.at(edge)) {
         root_candidates.insert(vertices.first);
     }
 
-    std::vector<std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator>> match = {};
+    std::vector<std::pair<std::set<model::vertex_t>::iterator, std::set<model::vertex_t>::iterator>>
+            match = {};
 
     if (FullMatch(cpi, match, root_candidates, core, seq, parent, graph, query)) {
         return true;
@@ -990,13 +1030,13 @@ bool Check(CPI& cpi, graph_t const& graph, Gfd const& gfd, std::set<vertex_t> co
     return true;
 }
 
-bool Validate(graph_t const& graph, Gfd const& gfd) {
+bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
     auto start_time = std::chrono::system_clock::now();
 
-    graph_t pat = gfd.GetPattern();
+    model::graph_t pat = gfd.GetPattern();
     std::set<std::string> graph_labels = {};
     std::set<std::string> pat_labels = {};
-    typename boost::graph_traits<graph_t>::vertex_iterator it, end;
+    typename boost::graph_traits<model::graph_t>::vertex_iterator it, end;
     for (boost::tie(it, end) = vertices(graph); it != end; ++it) {
         graph_labels.insert(graph[*it].attributes.at("label"));
     }
@@ -1009,18 +1049,18 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
         }
     }
 
-    std::set<vertex_t> core = {};
-    std::vector<std::set<vertex_t>> forest = {};
+    std::set<model::vertex_t> core = {};
+    std::vector<std::set<model::vertex_t>> forest = {};
     CfDecompose(pat, core, forest);
 
     int root = GetRoot(graph, pat, core);
-    std::vector<std::set<vertex_t>> levels = {};
-    std::map<vertex_t, vertex_t> parent;
-    std::set<edge_t> snte = {};
-    std::set<edge_t> nte = {};
+    std::vector<std::set<model::vertex_t>> levels = {};
+    std::map<model::vertex_t, model::vertex_t> parent;
+    std::set<model::edge_t> snte = {};
+    std::set<model::edge_t> nte = {};
     BfsTree(pat, root, levels, parent, nte, snte);
 
-    std::map<vertex_t, std::set<vertex_t>> candidates;
+    std::map<model::vertex_t, std::set<model::vertex_t>> candidates;
     CPI cpi;
     TopDownConstruct(cpi, graph, pat, levels, parent, candidates, snte);
     BottomUpRefinement(cpi, graph, pat, levels, parent, candidates);
@@ -1035,8 +1075,8 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
 
 namespace algos {
 
-std::vector<Gfd> EGfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
-                                                       std::vector<Gfd> const& gfds) {
+std::vector<model::Gfd> EGfdValidator::GenerateSatisfiedGfds(model::graph_t const& graph,
+                                                             std::vector<model::Gfd> const& gfds) {
     for (auto& gfd : gfds) {
         if (Validate(graph, gfd)) {
             result_.push_back(gfd);

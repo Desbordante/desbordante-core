@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "algorithms/gfd/gfd.h"
 #include "config/names_and_descriptions.h"
-#include "gfd.h"
 #include "parser/graph_parser/graph_parser.h"
 
 namespace algos {
@@ -13,9 +13,9 @@ protected:
     std::filesystem::path graph_path_;
     std::vector<std::filesystem::path> gfd_paths_;
 
-    graph_t graph_;
-    std::vector<Gfd> gfds_;
-    std::vector<Gfd> result_;
+    model::graph_t graph_;
+    std::vector<model::Gfd> gfds_;
+    std::vector<model::Gfd> result_;
 
     unsigned long long ExecuteInternal();
 
@@ -25,17 +25,17 @@ protected:
     void RegisterOptions();
 
 public:
-    virtual std::vector<Gfd> GenerateSatisfiedGfds(graph_t const& graph,
-                                                   std::vector<Gfd> const& gfds) = 0;
+    virtual std::vector<model::Gfd> GenerateSatisfiedGfds(model::graph_t const& graph,
+                                                          std::vector<model::Gfd> const& gfds) = 0;
 
     GfdHandler();
 
-    GfdHandler(graph_t graph_, std::vector<Gfd> gfds_)
+    GfdHandler(model::graph_t graph_, std::vector<model::Gfd> gfds_)
         : Algorithm({}), graph_(graph_), gfds_(gfds_) {
         ExecutePrepare();
     }
 
-    std::vector<Gfd> GfdList() {
+    std::vector<model::Gfd> GfdList() {
         return result_;
     }
 };
