@@ -2,11 +2,13 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "algorithms/gfd/gfd.h"
 #include "config/names_and_descriptions.h"
-#include "gfd.h"
 #include "parser/graph_parser/graph_parser.h"
 
 namespace algos {
+
+using namespace gfd;
 
 class GfdHandler : public Algorithm {
 protected:
