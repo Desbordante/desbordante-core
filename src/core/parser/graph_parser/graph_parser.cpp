@@ -10,6 +10,8 @@ namespace parser {
 
 namespace {
 
+using namespace details;
+
 std::vector<std::string> Split(std::string str, std::string sep) {
     std::vector<std::string> result = {};
     if (str == "") {
@@ -74,6 +76,7 @@ void WriteLiterals(std::ostream& stream, std::vector<Literal> const& literals) {
 
 namespace graph_parser {
 
+using namespace details;
 using AMap = boost::property_map<graph_t, std::map<std::string, std::string> Vertex::*>::type;
 using RMap = boost::property_map<graph_t, std::string Edge::*>::type;
 
@@ -157,7 +160,7 @@ Gfd ReadGfd(std::filesystem::path const& path) {
     return result;
 };
 
-void WriteGfd(std::ostream& stream, Gfd& result) {
+void WriteGfd(std::ostream& stream, Gfd const& result) {
     WriteLiterals(stream, result.GetPremises());
     WriteLiterals(stream, result.GetConclusion());
     graph_t pattern = result.GetPattern();
