@@ -2,8 +2,8 @@
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_handler.h"
-#include "gfd.h"
 
 namespace algos {
 

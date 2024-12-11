@@ -1,7 +1,7 @@
 #pragma once
+#include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_handler.h"
 #include "config/names_and_descriptions.h"
-#include "gfd.h"
 
 namespace algos {
 

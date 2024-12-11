@@ -2,10 +2,10 @@
 #include <thread>
 
 #include "algorithms/algorithm.h"
+#include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_handler.h"
 #include "config/names_and_descriptions.h"
 #include "config/thread_number/type.h"
-#include "gfd.h"
 
 namespace algos {
 

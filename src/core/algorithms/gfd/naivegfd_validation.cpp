@@ -1,4 +1,4 @@
-#include "naivegfd_validation.h"
+#include "algorithms/gfd/naivegfd_validation.h"
 
 #include <iostream>
 #include <set>
@@ -6,7 +6,7 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "gfd.h"
+#include "algorithms/gfd/gfd.h"
 
 namespace {
 
