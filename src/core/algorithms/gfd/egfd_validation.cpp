@@ -342,7 +342,7 @@ void ReverseConstruction(std::set<vertex_t> const& lev, graph_t const& graph, gr
                          std::map<vertex_t, std::set<vertex_t>>& candidates,
                          std::map<vertex_t, int>& cnts,
                          std::map<vertex_t, std::set<vertex_t>>& unvisited_neighbours) {
-    for (std::set<vertex_t>::iterator j = --lev.end(); j != std::next(lev.begin(), -1); --j) {
+    for (auto j = lev.rbegin(); j != lev.rend(); ++j) {
         vertex_t u = *j;
         int cnt = 0;
         if (unvisited_neighbours.find(u) != unvisited_neighbours.end()) {
