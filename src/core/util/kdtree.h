@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <concepts>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -70,6 +71,18 @@ struct Rect {
         }
 
         return true;
+    }
+
+    std::string ToString() const {
+        std::ostringstream ss;
+        char const open[]{'(', '['};
+        char const closed[]{')', ']'};
+        for (size_t i = 0; i < lower_bound_.GetDim(); i++) {
+            ss << open[lower_bound_type_[i]] << lower_bound_[i].ToString() << ", ";
+            ss << upper_bound_[i].ToString() << closed[upper_bound_type_[i]] << '\n';
+        }
+
+        return ss.str();
     }
 };
 
