@@ -247,7 +247,7 @@ Prior to cloning the repository and attempting to build the project, ensure that
 
 - GNU GCC, version 10+ or Clang, version 16+
 - CMake, version 3.13+
-- Boost library built with GCC, version 1.81.0+
+- Boost library built with compiler you're going to use (GCC or Clang), version 1.81.0+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
@@ -265,15 +265,42 @@ The last 2 lines set gcc as CMake compiler in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 ##### Clang
+Firstly, you'll need to build Boost with Clang, as packaged versions, distributed by package managers, are built with GCC and have different ABI.
+Instructions below are given for Boost-1.81.0, but you can use any version, that is greater than 1.81.0.
+For further details on Boost installation, please consult [Boost documentation](https://www.boost.org/doc/libs/1_87_0/more/getting_started/unix-variants.html).
+1) It's recommended to install Boost under `/usr/local`. You can use any other location, but you'll need to adapt instructions for it.
+```sh
+cd /usr/lib
+```
+2) Download an official Boost distribuition from [SourceForge](https://sourceforge.net/projects/boost/files/boost/1.81.0/)
+3) Unpack downloaded archive:
+```sh
+tar --bzip2 -xf boost_1_81_0.tar.bz2
+```
+4) Compile Boost:
+```sh
+./bootstrap --with-toolset=clang
+./b2 clean
+./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++"
+```
+5) Install Boost:
+```sh
+sudo ./b2 install
+```
+
 Run the following commands:
 ```sh
-sudo apt install cmake libboost-all-dev git-lfs
+sudo apt install cmake git-lfs
 bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
 export CC=clang
 export CXX=clang++
+export CXXFLAGS="-stdlib=libc++"
+# libc++ is fully compatible with GCC's ABI, so you can omit the next line if you want to use libstdc++ ABI:
+export LDFLAGS="-lc++abi"  # Use [libc++abi](https://libcxxabi.llvm.org/index.html).
+export BOOST_ROOT="/usr/local/"
 ```
 Second command installs the latest version of LLVM (which includes Clang). For other installation options, see [LLVM packages page](https://apt.llvm.org/).
-The last 2 lines set Clang as CMake compiler in your terminal session.
+The last 5 lines set Clang as CMake compiler in your terminal session and set directory where Boost libraries are located.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 #### MacOS dependencies installation
