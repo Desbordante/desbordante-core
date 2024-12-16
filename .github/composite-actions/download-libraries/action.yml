@@ -39,12 +39,13 @@ runs:
 
     - name: Install clang
       # llvm.sh installs all needed libraries, no need in build-essential
+      # "all" option is needed to install libc++ and libc++abi
       run: |
         sudo apt-get update -y
         sudo apt-get install cmake make -y
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh 17
+        sudo ./llvm.sh 17 all
       shell: bash
       if: inputs.install-clang != 'false'
 
@@ -101,7 +102,7 @@ runs:
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost-gcc != 'false'
-    - name: Install Boost build with clang
+    - name: Install Boost built with clang
       run: |
         cd lib/boost
         ./bootstrap.sh --prefix=/usr --with-toolset=clang
