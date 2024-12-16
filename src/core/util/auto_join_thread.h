@@ -1,6 +1,9 @@
 #pragma once
 
+#include <stdexcept>
 #include <thread>
+
+#include <easylogging++.h>
 
 namespace util::jthread {
 
@@ -20,10 +23,13 @@ public:
     explicit AutoJoinThread(F&& f, Args&&... args)
         : AutoJoinThread(std::thread{std::forward<F>(f), std::forward<Args>(args)...}) {}
 
-    ~AutoJoinThread() {
+    ~AutoJoinThread() try {
         if (t_.joinable()) {
             t_.join();
         }
+    } catch (std::system_error const& e) {
+        LOG(ERROR) << e.what();
+        return;  // Don't pass exception on
     }
 
     std::thread& Get() {
