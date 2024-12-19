@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -30,7 +31,9 @@ void FrequencyHandler::InitFrequencyHandler(std::vector<model::TypedColumnData> 
 
         auto cmp = [](std::pair<std::string, size_t> const &left,
                       std::pair<std::string, size_t> const &right) {
-            return left.second > right.second;
+            // Compare frequencies.
+            // If frequencies are equal, compare values lexicographically.
+            return std::tie(left.second, left.first) > std::tie(right.second, right.first);
         };
 
         std::sort(values_ordered_by_frequencies.begin(), values_ordered_by_frequencies.end(), cmp);
