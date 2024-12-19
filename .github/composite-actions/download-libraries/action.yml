@@ -21,9 +21,14 @@ inputs:
     description: 'Install boost built with clang'
     default: false
 
+  install-gcc:
+    type: boolean
+    description: 'Install GCC toolset (compiler and build tools)'
+    default: true
+
   install-clang:
     type: boolean
-    description: 'Install clang'
+    description: 'Install clang toolset (compiler and build tools)'
     default: false
 
 runs:
@@ -35,7 +40,7 @@ runs:
         sudo apt-get update -y
         sudo apt-get install gcc-10 g++-10 cmake build-essential -y
       shell: bash
-      if: inputs.install-clang != 'true'
+      if: inputs.install-gcc != 'false'
 
     - name: Install clang
       # llvm.sh installs all needed libraries, no need in build-essential
