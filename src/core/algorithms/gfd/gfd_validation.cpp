@@ -25,6 +25,10 @@ std::vector<std::vector<vertex_t>> GetPartition(std::vector<vertex_t> const& can
                                                 config::ThreadNumType const& threads_num) {
     std::vector<std::vector<vertex_t>> result = {};
 
+    if (candidates.empty()) {
+        return {};
+    }
+
     int musthave = candidates.size() / threads_num;
     int oversized_num = candidates.size() % threads_num;
 

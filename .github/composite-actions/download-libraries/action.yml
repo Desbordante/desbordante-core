@@ -11,10 +11,20 @@ inputs:
     description: 'Download googletest'
     default: true
 
-  install-boost:
+  install-boost-gcc:
     type: boolean
-    description: 'Install boost'
+    description: 'Install boost built with GCC'
     default: true
+
+  install-boost-clang:
+    type: boolean
+    description: 'Install boost built with clang'
+    default: false
+
+  install-clang:
+    type: boolean
+    description: 'Install clang'
+    default: false
 
 runs:
   using: 'composite'
@@ -25,6 +35,19 @@ runs:
         sudo apt-get update -y
         sudo apt-get install gcc-10 g++-10 cmake build-essential -y
       shell: bash
+      if: inputs.install-clang != 'true'
+
+    - name: Install clang
+      # llvm.sh installs all needed libraries, no need in build-essential
+      # "all" option is needed to install libc++ and libc++abi
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install cmake make -y
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17 all
+      shell: bash
+      if: inputs.install-clang != 'false'
 
     - name: Make lib directory
       run: |
@@ -35,7 +58,7 @@ runs:
       uses: ./.github/composite-actions/download-library
       with:
         directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch release-1.12.1 --depth 1
+        download-command: git clone https://github.com/google/googletest/ --branch release-1.14.0 --depth 1
       if: inputs.download-googletest != 'false'
 
     - name: Download easyloggingpp
@@ -72,13 +95,22 @@ runs:
         directory: boost
         download-command: wget -O boost_1_81_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.81.0/boost_1_81_0.tar.gz/download && tar xzvf boost_1_81_0.tar.gz && mv boost_1_81_0 boost
 
-    - name: Install Boost
+    - name: Install Boost built with GCC
       run: |
         cd lib/boost
         ./bootstrap.sh --prefix=/usr
         sudo ./b2 install --prefix=/usr
       shell: bash
-      if: inputs.install-boost != 'false'
+      if: inputs.install-boost-gcc != 'false'
+    - name: Install Boost built with clang
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --prefix=/usr --with-toolset=clang
+        ./b2 clean
+        ./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++"
+        sudo ./b2 install --prefix=/usr
+      shell: bash
+      if: inputs.install-boost-clang != 'false'
     - name: Download frozen
       uses: ./.github/composite-actions/download-library
       with:
