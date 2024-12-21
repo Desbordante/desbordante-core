@@ -75,7 +75,7 @@ jobs:
         with:
           download-pybind: true
           download-googletest: false
-          install-boost: false
+          install-boost-gcc: false
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
