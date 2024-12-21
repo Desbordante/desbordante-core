@@ -296,7 +296,7 @@ export CC=clang
 export CXX=clang++
 export CXXFLAGS="-stdlib=libc++"
 # libc++ is fully compatible with GCC's ABI, so you can omit the next line if you want to use libstdc++ ABI:
-export LDFLAGS="-lc++abi"  # Use [libc++abi](https://libcxxabi.llvm.org/index.html).
+export LDFLAGS="-lc++abi"
 export BOOST_ROOT="/usr/local/"
 ```
 Second command installs the latest version of LLVM (which includes Clang). For other installation options, see [LLVM packages page](https://apt.llvm.org/).
