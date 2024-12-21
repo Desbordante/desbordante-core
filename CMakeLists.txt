@@ -66,6 +66,22 @@ else()
     if (ASAN)
         # Set DEBUG build options specific for build with ASAN
         set(ASAN_OPTS "-fsanitize=address")
+
+        find_program(APT_FOUND apt-get)
+        if (APT_FOUND AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            # alloc-dealloc-mismatch generates false positives on boost exceptions
+            # This applies only to Ubuntu package:
+            # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
+            # Disable this check on files listed in address_sanitizer_ignore_list.txt if compiler
+            # is Clang and apt-get is installed on system:
+            # FIXME(senichenkov): apt-get is not an ideal check -- maybe it wouldn't be so hard to
+            # ask apt-get if repository is ubuntu-...?
+            message("Running on Ubuntu")
+            message(WARNING "ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch")
+            message(WARNING "check will be supressed. Consider using another distro for full ASAN coverage.")
+            string(JOIN ";" ASAN_OPTS "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/address_sanitizer_ignore_list.txt")
+        endif()
+
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
             "-Wno-error" # Use of -Werror is discouraged with sanitizers

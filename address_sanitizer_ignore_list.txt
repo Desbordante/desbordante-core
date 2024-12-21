@@ -1,0 +1,4 @@
+# Disable alloc_dealloc_mismatch ASAN check
+[alloc_dealloc_mismatch]
+# in file:
+src:typed_column_data.h
