@@ -270,7 +270,7 @@ Instructions below are given for Boost-1.81.0, but you can use any version, that
 For further details on Boost installation, please consult [Boost documentation](https://www.boost.org/doc/libs/1_87_0/more/getting_started/unix-variants.html).
 1) It's recommended to install Boost under `/usr/local`. You can use any other location, but you'll need to adapt instructions for it.
 ```sh
-cd /usr/lib
+cd /usr/local
 ```
 2) Download an official Boost distribuition from [SourceForge](https://sourceforge.net/projects/boost/files/boost/1.81.0/)
 3) Unpack downloaded archive:
