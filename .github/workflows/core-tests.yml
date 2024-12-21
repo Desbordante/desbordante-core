@@ -101,9 +101,17 @@ jobs:
           - { BUILD_TYPE: Debug, SANITIZER : UB }
     steps:
       - uses: actions/checkout@v3
-      - name: Download libraries
-        run: brew install llvm@17 make boost
+      - name: Download build system
+        run: brew install llvm@17 make
         shell: bash
+      - name: Download libraries
+        uses: ./.github/composite-actions/download-libraries
+        with:
+          install-gcc: false
+          install-clang: false
+          install-boost-gcc: false
+          install-boost-clang: false
+          install-boost-brew-clang: true
       - name: Download datasets
         uses: ./.github/composite-actions/download-datasets
       - name: Build

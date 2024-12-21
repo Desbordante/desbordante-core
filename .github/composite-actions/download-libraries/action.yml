@@ -21,6 +21,11 @@ inputs:
     description: 'Install boost built with clang'
     default: false
 
+  install-boost-brew-clang:
+    type: boolean
+    description: 'Install boost built with Homebrew Clang'
+    default: false
+
   install-gcc:
     type: boolean
     description: 'Install GCC toolset (compiler and build tools)'
@@ -116,6 +121,17 @@ runs:
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost-clang != 'false'
+    - name: Install Boost built with Homebrew Clang
+      # b2 doesn't recognize custom compilers, so some trick is needed:
+      run: |
+        cd lib/boost
+        export PATH=$(brew --prefix llvm@17)/bin:$PATH
+        ./bootstrap.sh --prefix=/usr --with-toolset=clang
+        ./b2 clean
+        ./b2 toolset=clang cxxflags="-std=c++11 -stdlib=libc++" linkflags="-stdlib=libc++"
+        sudo ./b2 install --prefix=/usr
+      shell: bash
+      if: inputs.install-boost-brew-clang != 'false'
     - name: Download frozen
       uses: ./.github/composite-actions/download-library
       with:
