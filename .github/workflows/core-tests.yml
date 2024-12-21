@@ -118,6 +118,7 @@ jobs:
         run: |
           export CC=$(brew --prefix llvm@17)/bin/clang
           export CXX=$(brew --prefix llvm@17)/bin/clang++
+          export BOOST_ROOT=/usr/local
           if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
             ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }}
           else

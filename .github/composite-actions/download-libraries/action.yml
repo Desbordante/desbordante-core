@@ -123,13 +123,14 @@ runs:
       if: inputs.install-boost-clang != 'false'
     - name: Install Boost built with Homebrew Clang
       # b2 doesn't recognize custom compilers, so some trick is needed:
+      # Also, /usr is read-only, so install into /usr/local
       run: |
         cd lib/boost
         export PATH=$(brew --prefix llvm@17)/bin:$PATH
-        ./bootstrap.sh --prefix=/usr --with-toolset=clang
+        ./bootstrap.sh --prefix=/usr/local --with-toolset=clang
         ./b2 clean
         ./b2 toolset=clang cxxflags="-std=c++11 -stdlib=libc++" linkflags="-stdlib=libc++"
-        sudo ./b2 install --prefix=/usr
+        sudo ./b2 install --prefix=/usr/local
       shell: bash
       if: inputs.install-boost-brew-clang != 'false'
     - name: Download frozen
