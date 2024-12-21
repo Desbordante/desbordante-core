@@ -68,7 +68,7 @@ runs:
       uses: ./.github/composite-actions/download-library
       with:
         directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch release-1.14.0 --depth 1
+        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
       if: inputs.download-googletest != 'false'
 
     - name: Download easyloggingpp
