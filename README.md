@@ -305,6 +305,7 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 
 #### MacOS dependencies installation
 
+##### GCC
 Install Xcode Command Line Tools if you don't have them. Run:
 ```sh
 xcode-select --install
@@ -348,6 +349,64 @@ export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/
 The first two lines set GCC as the default compiler in CMake. The last export is also necessary due to issues with GCC 14 and
 the last MacOSX15.0.sdk used by CMake by default, you can read more about this [here](https://gist.github.com/scivision/d69faebbc56da9714798087b56de925a)
 and [here](https://github.com/iains/gcc-14-branch/issues/11).
+
+##### Clang (LLVM)
+Instructions below are given for Clang-17. You can use any version that is greater than 16. Just replace `llvm@17` with `llvm@vv` everywhere.
+
+Install Xcode Command Line Tools if you don't have them. Run:
+```sh
+xcode-select --install
+```
+Follow the prompts to continue.
+
+To install Clang and CMake on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+installed, run the following commands:
+```sh
+brew install llvm@17 cmake
+```
+After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
+homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
+`~/.bash_profile` (for Bash) and add to the end of the file the output of `brew shellenv`.
+After that, restart the terminal and check the version of CMake again, now it should be displayed.
+
+Then you need to install Boost library built with LLVM Clang. Please avoid using Homebrew for this, as the Boost version provided by Homebrew
+is built with Apple Clang, which has a different ABI. Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/) and unpack the archive to the `/usr/local/` directory or another directory of your choice:
+```sh
+cd /usr/local/
+curl https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2 --output "boost_1_86_0.tar.bz2"
+tar xvjf boost_1_86_0.tar.bz2
+rm boost_1_86_0.tar.bz2
+cd boost_1_86_0
+```
+
+To use LLVM Clang instead of Apple Clang run the following command:
+```sh
+export PATH=$(brew --prefix llvm@17)/bin:$PATH
+```
+This will make LLVM Clang have greater priority than Apple Clang for your current session.
+If you want to have LLVM Clang as default compiler, add this line to your `~/.zprofile` (for Zsh) or
+`~/.bash_profile` (for Bash). In that case you can omit `$(brew --prefix llvm@17)/bin/` in all following commands
+(e. g. `export CC=$(brew --preifx llvm@17)/bin/clang` becomes `export CC=clang`).
+
+Navigate to the unpacked Boost directory in the terminal and run the following commands:
+```sh
+./bootstrap.sh --with-toolset=clang
+./b2 toolset=clang cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
+ linkflags="-L$(brew --prefix llvm@17)/lib/c++ -L$(brew --prefix llvm@17)/lib/unwind -lunwind"
+./b2 install --layout=versioned
+export BOOST_ROOT=$(pwd) # export Boost_ROOT=$(pwd) for CMake 3.26 and below.
+``` 
+You can also add the last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
+
+Before building the project you must set locally or in the above-mentioned dotfiles the following CMake environment variables:
+```sh
+export CC=$(brew --prefix llvm@17)/bin/clang
+export CXX=$(brew --prefix llvm@17)/bin/clang++
+export CXXFLAGS="-I$(brew --prefix llvm@17)/include"
+export LDFLAGS="-L$(brew --prefix llvm@17)/lib/c++ -L$(brew --prefix llvm@17)/lib/unwind -lunwind"
+```
+The first two lines set LLVM Clang as the default compiler in CMake. Other two lines tell Clang to use
+LLVM version of libc++. Note that commands are slightly different from the ones given in `brew info llvm@17`.
 
 ### Building the project
 #### Building the Python module using pip
