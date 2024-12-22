@@ -115,9 +115,9 @@ MDDescription MD::GetDescription() const {
     std::vector<LhsSimilarityClassifierDesctription> lhs_description =
             util::GetPreallocatedVector<LhsSimilarityClassifierDesctription>(lhs_.size());
     for (md::LhsColumnSimilarityClassifier const& lhs_classifier : lhs_) {
-        lhs_description.emplace_back(
-                GetColumnMatchDescription(lhs_classifier.GetColumnMatchIndex()),
-                lhs_classifier.GetDecisionBoundary(), lhs_classifier.GetMaxDisprovedBound());
+        lhs_description.push_back({GetColumnMatchDescription(lhs_classifier.GetColumnMatchIndex()),
+                                   lhs_classifier.GetDecisionBoundary(),
+                                   lhs_classifier.GetMaxDisprovedBound()});
     }
     return {left_schema_->GetName(),
             right_schema_->GetName(),

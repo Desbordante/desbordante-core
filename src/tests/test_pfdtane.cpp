@@ -32,6 +32,10 @@ struct PFDTaneValidationParams {
     std::vector<PFD> fds;
     algos::PfdErrorMeasure error_measure;
     CSVConfig csv_config;
+
+    PFDTaneValidationParams(std::vector<PFD>&& fds, algos::PfdErrorMeasure const& error_measure,
+                            CSVConfig const& csv_config)
+        : fds(fds), error_measure(error_measure), csv_config(csv_config) {}
 };
 
 class TestPFDTaneMining : public ::testing::TestWithParam<PFDTaneMiningParams> {};
