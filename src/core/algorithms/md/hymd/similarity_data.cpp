@@ -42,7 +42,7 @@ class SimilarityData::Creator {
                                                      column_match_index);
         } else {
             non_trivial_indices.push_back(column_match_index);
-            column_matches_info.emplace_back(std::move(indexes), left_col_index, right_col_index);
+            column_matches_info.push_back({std::move(indexes), left_col_index, right_col_index});
             all_lhs_ccv_ids_info.push_back(std::move(lhs_ccv_id_info));
             short_sampling_enable.push_back(column_match->IsSymmetricalAndEqIsMax());
         }

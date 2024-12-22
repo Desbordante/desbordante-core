@@ -428,7 +428,7 @@ std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
         // differential functions should be put in this exact order for further reducing
         for (int i = num_dfs_per_column_ - 1; i >= 0; i--) {
             if (min_max_dif_[index].IsWithinExclusive(i)) {
-                dfs.emplace_back(min_max_dif_[index].lower_bound, i);
+                dfs.push_back({min_max_dif_[index].lower_bound, static_cast<double>(i)});
             }
         }
         return dfs;
@@ -616,7 +616,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (dds.empty() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
+    if (dds.empty() && IsFeasible(last_df)) dds.push_back({last_df, rhs});
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -635,7 +635,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
 
     cnt++;
     if (VerifyDD(first_df, rhs)) {
-        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.push_back({first_df, rhs});
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = HybridPruningReduce(rhs, remainder, cnt);
         dds.splice(dds.end(), remaining_dds);
@@ -685,7 +685,7 @@ std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tup
     }
 
     if (no_pairs_left) {
-        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.push_back({first_df, rhs});
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds =
                 InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
@@ -749,7 +749,7 @@ model::DDString Split::DDToDDString(DD const& dd) const {
 std::list<model::DDString> Split::GetDDStringList() const {
     std::list<model::DDString> dd_strings;
     for (auto const& result_dd : dd_collection_) {
-        dd_strings.emplace_back(DDToDDString(result_dd));
+        dd_strings.push_back(DDToDDString(result_dd));
     }
     return dd_strings;
 }

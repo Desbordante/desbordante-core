@@ -12,7 +12,7 @@ void DistancePositionListIndex::AddValue(T&& value) {
     auto&& [it, is_value_new] =
             value_mapping_.try_emplace(std::forward<T>(value), next_cluster_index_);
     if (is_value_new) {
-        clusters_.emplace_back(cur_tuple_index_, 0);
+        clusters_.push_back({cur_tuple_index_, 0});
         ++next_cluster_index_;
     }
     ++clusters_[it->second].size;
