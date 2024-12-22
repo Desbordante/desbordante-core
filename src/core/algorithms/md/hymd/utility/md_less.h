@@ -25,9 +25,9 @@ inline bool MdLessPairs(MdPair const& pair_left, MdPair const& pair_right) {
     auto comp = lhs_left <=> lhs_right;
 #else
     signed char comp;
-    if (lhs_left < rhs_left) {
+    if (lhs_left < lhs_right) {
         comp = -1;
-    } else if (lhs_left == rhs_left) {
+    } else if (lhs_left == lhs_right) {
         comp = 0;
     } else {
         comp = 1;
