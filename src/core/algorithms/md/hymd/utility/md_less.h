@@ -20,7 +20,19 @@ inline bool MdLessPairs(MdPair const& pair_left, MdPair const& pair_right) {
     } else if (cardinality_left > cardinality_right) {
         return false;
     }
+
+#if __cpp_lib_three_way_comparison == 201907L
     auto comp = lhs_left <=> lhs_right;
+#else
+    signed char comp;
+    if (lhs_left < rhs_left) {
+        comp = -1;
+    } else if (lhs_left == rhs_left) {
+        comp = 0;
+    } else {
+        comp = 1;
+    }
+#endif
     if (comp < 0) {
         return true;
     } else if (comp > 0) {
