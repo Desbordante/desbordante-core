@@ -603,7 +603,7 @@ inline std::list<DD> Split::MergeReducedResults(std::list<DD> const& base_dds,
 
 std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const& search,
                                            unsigned& cnt) {
-    if (!search.size()) return {};
+    if (search.empty()) return {};
 
     DF const last_df = search.back();
 
@@ -616,7 +616,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (!dds.size() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
+    if (dds.empty() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -627,7 +627,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
 
 std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& search,
                                          unsigned& cnt) {
-    if (!search.size()) return {};
+    if (search.empty()) return {};
 
     std::list<DD> dds;
     DF const first_df = search.front();
@@ -662,7 +662,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
 std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tuple_pair_indices,
                                              std::vector<DF> const& search, DF const& rhs,
                                              unsigned& cnt) {
-    if (!search.size()) return {};
+    if (search.empty()) return {};
 
     std::list<DD> dds;
     DF const first_df = search.front();
