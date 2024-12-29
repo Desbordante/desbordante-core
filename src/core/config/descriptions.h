@@ -60,6 +60,8 @@ constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[sing
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
 constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)";
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
+constexpr auto kDARuleLeft = "left part of association rule to verify";
+constexpr auto kDARuleRight = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
 constexpr auto kDCfdColumnsNumber =
