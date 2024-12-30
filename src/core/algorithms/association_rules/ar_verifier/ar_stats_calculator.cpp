@@ -68,13 +68,13 @@ void ARStatsCalculator::CalculateConfidence() {
             std::ranges::count_if(jaccard_coefficients_,
                                   [&](auto const& pair) { return pair.second.first == 1.0; }) /
             data_->GetTransactions().size();
-    rule_.confidence = lhs_support != 0.0 ? support_ / lhs_support : 0.0;
+    confidence_ = lhs_support != 0.0 ? support_ / lhs_support : 0.0;
 }
 
 void ARStatsCalculator::ResetState() {
     jaccard_coefficients_.clear();
     support_ = 0.0;
-    rule_.confidence = 0.0;
+    confidence_ = 0.0;
     clusters_violating_ar_.clear();
     num_transactions_violating_ar_ = 0;
 }
@@ -83,8 +83,12 @@ void ARStatsCalculator::CalculateStatistics() {
     CalculateJaccardCoefficients();
     CalculateSupport();
     CalculateConfidence();
-    for (auto const& [transaction_id, coef] : jaccard_coefficients_) {
-        clusters_violating_ar_[CalculateClusterPriority(coef)].push_back(transaction_id);
+    for (auto const& [transaction_id, coefficients] : jaccard_coefficients_) {
+        clusters_violating_ar_[CalculateClusterPriority(coefficients)].push_back(transaction_id);
+    }
+
+    for (auto const& [order, cluster] : clusters_violating_ar_) {
+       num_transactions_violating_ar_ += cluster.size();
     }
 }
 }  // namespace algos

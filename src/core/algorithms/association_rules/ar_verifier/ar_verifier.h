@@ -25,10 +25,10 @@ private:
     ARStatsCalculator stats_calculator_;
     /* results of work */
     size_t num_transactions_violating_ar_ = 0;
-    std::vector<model::PLI::Cluster> clusters_violating_ar_;
+    std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
 
-    double minsup_;
-    double minconf_;
+    double minsup_ = 0.0;
+    double minconf_ = 0.0;
 
     void VerifyAR();
     void RegisterOptions();
