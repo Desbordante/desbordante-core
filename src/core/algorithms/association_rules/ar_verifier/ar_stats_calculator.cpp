@@ -47,11 +47,8 @@ size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> con
 void ARStatsCalculator::CalculateJaccardCoefficients() {
     for (auto const& [id, itemset] : data_->GetTransactions()) {
         double jaccard_left = JaccardSimilarity(itemset.GetItemsIDs(), rule_.left);
-
-        // testing threshold
-        if (double jaccard_right = JaccardSimilarity(itemset.GetItemsIDs(), rule_.right);
-            jaccard_left > jaccard_threshold_ &&
-            (jaccard_right > jaccard_threshold_ || jaccard_right == 0.0)) {
+        double jaccard_right = JaccardSimilarity(itemset.GetItemsIDs(), rule_.right);
+        if (jaccard_left > 0.0) {
             jaccard_coefficients_[id] = std::make_pair(jaccard_left, jaccard_right);
         }
     }
