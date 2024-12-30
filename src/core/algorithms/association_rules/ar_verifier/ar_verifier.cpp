@@ -35,7 +35,7 @@ ARVerifier::ARVerifier() : Algorithm({}) {
         }
         ar_right_id.push_back(std::distance(item_names_map.begin(), it));
     }
-    ar_ids_ = model::ArIDs(ar_left_id, ar_right_id, -1);
+    ar_ids_ = model::ArIDs(ar_left_id, ar_right_id, minconf_, minsup_);
 }
 
 void ARVerifier::RegisterOptions() {
