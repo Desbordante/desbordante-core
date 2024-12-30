@@ -14,6 +14,7 @@ private:
 
     model::ArIDs rule_;
     double support_ = 0.0;
+    double confidence_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
     std::unordered_map<size_t, std::pair<double, double>> jaccard_coefficients_;
     std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
