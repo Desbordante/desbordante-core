@@ -16,7 +16,6 @@ private:
     double support_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
     std::unordered_map<size_t, std::pair<double, double>> jaccard_coefficients_;
-    double jaccard_threshold_ = (rule_.left.size() - 2) / rule_.left.size();  // testing
     std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
 
     static double JaccardSimilarity(std::vector<unsigned> const& transaction_indices,
