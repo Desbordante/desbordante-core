@@ -13,6 +13,9 @@ namespace algos {
 ARVerifier::ARVerifier() : Algorithm({}) {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
+    if (string_rule_left_.empty()) {
+        throw std::runtime_error("Got an empty rule: AR verifying is meaningless.");
+    }
 
     std::vector<std::string> const& item_names_map = transactional_data_->GetItemUniverse();
 
