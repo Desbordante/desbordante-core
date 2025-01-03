@@ -266,9 +266,9 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 
 ##### Clang
 Firstly, you'll need to build Boost with Clang, as packaged versions, distributed by package managers, are built with GCC and have different ABI.
-Instructions below are given for Boost-1.81.0, but you can use any version, that is greater than 1.81.0.
-For further details on Boost installation, please consult [Boost documentation](https://www.boost.org/doc/libs/1_87_0/more/getting_started/unix-variants.html).
-1) It's recommended to install Boost under `/usr/local`. You can use any other location, but you'll need to adapt instructions for it.
+Instructions below are given for Boost-1.81.0. If you want to use another version, you'll need to change `tar ...` command on step 3.
+For further details on Boost installation, please consult [Boost documentation](https://www.boost.org/doc/libs/1_81_0/more/getting_started/unix-variants.html).
+1) It's recommended to install Boost into `/usr/local`. You can use any other location, but you'll need to adapt instructions for it.
 ```sh
 cd /usr/local
 ```
