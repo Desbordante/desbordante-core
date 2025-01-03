@@ -351,7 +351,7 @@ the last MacOSX15.0.sdk used by CMake by default, you can read more about this [
 and [here](https://github.com/iains/gcc-14-branch/issues/11).
 
 ##### Clang (LLVM)
-Instructions below are given for Clang-17. You can use any version that is greater than 16. Just replace `llvm@17` with `llvm@vv` everywhere.
+Instructions below are given for Clang-17. To use another version, replace `llvm@17` with `llvm@vv` everywhere.
 
 Install Xcode Command Line Tools if you don't have them. Run:
 ```sh
@@ -387,6 +387,12 @@ This will make LLVM Clang have greater priority than Apple Clang for your curren
 If you want to have LLVM Clang as default compiler, add this line to your `~/.zprofile` (for Zsh) or
 `~/.bash_profile` (for Bash). In that case you can omit `$(brew --prefix llvm@17)/bin/` in all following commands
 (e. g. `export CC=$(brew --preifx llvm@17)/bin/clang` becomes `export CC=clang`).
+
+To check that previous command succeeded, run
+```sh
+clang --version
+```
+The first line must contain "`Homebrew Clang`". If there's "`Apple Clang`", return to the previous step.
 
 Navigate to the unpacked Boost directory in the terminal and run the following commands:
 ```sh
