@@ -3,52 +3,42 @@
 #include <iostream>
 #include <map>
 #include <queue>
+#include <set>
 
 namespace algos {
 double ARStatsCalculator::JaccardSimilarity(std::vector<unsigned> const& transaction_indices,
                                             std::vector<unsigned> const& rule_part) {
-    if (transaction_indices.empty()) return 0.0;
-
-    std::map<unsigned, int> count_transaction;
-    for (unsigned x : transaction_indices) count_transaction[x]++;
-    std::map<unsigned, int> count_rule;
-    for (unsigned x : rule_part) count_rule[x]++;
-
-    long long intersection_count = 0;
-    long long union_count = 0;
-
-    for (auto const& pair_transaction : count_transaction) {
-        unsigned element = pair_transaction.first;
-        int count_in_transaction = pair_transaction.second;
-
-        if (auto it_rule = count_rule.find(element); it_rule != count_rule.end()) {
-            int const min_count = std::min(count_in_transaction, it_rule->second);
-            intersection_count += min_count;
-        }
-        union_count += count_in_transaction;
+    if (transaction_indices.empty()) {
+        return 0.0;
     }
 
-    for (auto const& [fst, snd] : count_rule) {
-        if (!count_transaction.contains(fst)) {
-            union_count += snd;
-        }
+    std::set transaction_set(transaction_indices.begin(), transaction_indices.end());
+    std::set rule_set(rule_part.begin(), rule_part.end());
+
+    std::vector<unsigned> intersection;
+    std::ranges::set_intersection(transaction_set, rule_set, std::back_inserter(intersection));
+    unsigned const intersection_count = intersection.size();
+
+    std::vector<unsigned> union_set;
+    std::ranges::set_union(transaction_set, rule_set, std::back_inserter(union_set));
+    unsigned const union_count = union_set.size();
+
+    if (union_count == 0) {
+        return 1.0;
     }
-
-    if (union_count == 0) return 1.0;
-
     return static_cast<double>(intersection_count) / union_count;
 }
 
 size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> const& jaccard) {
-    return 3 * static_cast<int>(std::floor(jaccard.first)) +
-           2 * static_cast<int>(std::floor(jaccard.second));
+    return static_cast<int>(std::floor(3 * jaccard.first)) +
+           static_cast<int>(std::floor(2 * jaccard.second));
 }
 
 void ARStatsCalculator::CalculateJaccardCoefficients() {
     for (auto const& [id, itemset] : data_->GetTransactions()) {
         double jaccard_left = JaccardSimilarity(itemset.GetItemsIDs(), rule_.left);
         double jaccard_right = JaccardSimilarity(itemset.GetItemsIDs(), rule_.right);
-        if (jaccard_left > 0.0) {
+        if (jaccard_left != 0.0) {
             jaccard_coefficients_[id] = std::make_pair(jaccard_left, jaccard_right);
         }
     }
@@ -88,7 +78,7 @@ void ARStatsCalculator::CalculateStatistics() {
     }
 
     for (auto const& [order, cluster] : clusters_violating_ar_) {
-       num_transactions_violating_ar_ += cluster.size();
+        num_transactions_violating_ar_ += cluster.size();
     }
 }
 }  // namespace algos
