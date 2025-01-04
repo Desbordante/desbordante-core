@@ -14,17 +14,17 @@
 
 namespace algos::dc {
 
-//  @brief Represents a column operand for Predicate.
+// @brief Represents a column operand for Predicate.
 //
-//  A predicate (e.g., t.A == s.A) comprises three elements:
-//  the column operand from the first tuple ("t.A"), the comparison operator
-//  ("=="), and the column operand from the second tuple ("s.A"). The `ColumnOperand` class
-//  encapsulates the column operand part of a predicate, such as "t.A" or "s.A".
+// A predicate (e.g., t.A == s.A) comprises three elements:
+// the column operand from the first tuple ("t.A"), the comparison operator
+// ("=="), and the column operand from the second tuple ("s.A"). The `ColumnOperand` class
+// encapsulates the column operand part of a predicate, such as "t.A" or "s.A".
 //
-//  The class distinguishes between operands derived from the first tuple (t) and those
-//  from the second tuple (s) using a boolean flag `is_first_tuple_`, where `true` indicates an
-//  operand from the first tuple (t), and `false` indicates an operand from the second
-//  tuple (s).
+// The class distinguishes between operands derived from the first tuple (t) and those
+// from the second tuple (s) using a boolean flag `is_first_tuple_`, where `true` indicates an
+// operand from the first tuple (t), and `false` indicates an operand from the second tuple (s).
+//
 class ColumnOperand {
 private:
     Column const* column_;

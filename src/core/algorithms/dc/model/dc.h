@@ -21,16 +21,17 @@ enum class DCType {
     kOneInequality  // DC is kAllEquality except one predicate of form s.A op t.B, op is inequality
 };
 
-//  @brief Represents a Denial Constraint (DC).
+// @brief Represents a Denial Constraint (DC).
 //
-//  DCs involve comparisons between pairs of rows within a dataset.
-//  A typical DC example, derived from a Functional Dependency such as A -> B,
-//  is expressed as: `forall t, s in R, not (t.A == s.A and t.B != s.B)`
-//  This denotes that for any pair of rows in the relation, it should not be the case
-//  that while the values in column "A" are equal, the values in column "B" are unequal.
+// DCs involve comparisons between pairs of rows within a dataset.
+// A typical DC example, derived from a Functional Dependency such as A -> B,
+// is expressed as: `forall t, s in R, not (t.A == s.A and t.B != s.B)`
+// This denotes that for any pair of rows in the relation, it should not be the case
+// that while the values in column "A" are equal, the values in column "B" are unequal.
 //
-//  Thus DC is simply represented as a vector of Predicates.
-//  The predicates in this context are 't.A == s.A' and  't.B != s.B'.
+// Thus DC is simply represented as a vector of Predicates.
+// The predicates in this context are 't.A == s.A' and 't.B != s.B'.
+//
 class DC {
     std::vector<Predicate> predicates_;
 
