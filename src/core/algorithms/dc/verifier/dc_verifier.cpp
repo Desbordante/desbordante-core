@@ -182,7 +182,11 @@ void DCVerifier::ProcessMixed(std::vector<dc::Predicate> const& preds, Tree& ins
             return;
         };
 
-        insert_tree.Insert(MakePoint(row, cols_indices, i + index_offset_));
+        size_t cur_ind = i + index_offset_;
+        AddHighlights(search_res, cur_ind);
+        AddHighlights(inv_search_res, cur_ind);
+
+        insert_tree.Insert(MakePoint(row, cols_indices, cur_ind));
     }
 
     res = true;
@@ -190,14 +194,19 @@ void DCVerifier::ProcessMixed(std::vector<dc::Predicate> const& preds, Tree& ins
 }
 
 bool DCVerifier::VerifyOneTuple(dc::DC const& dc) {
-    std::vector<mo::ColumnIndex> all_cols = dc.GetColumnIndices();
+    std::vector<Column::IndexType> all_cols = dc.GetColumnIndices();
+    bool res = true;
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(all_cols, i)) continue;
-        std::vector<std::byte const*> row = GetRow(i);
-        if (Eval(row, dc.GetPredicates())) return false;
+        std::vector<std::byte const*> tuple = GetRow(i);
+        if (Eval(tuple, dc.GetPredicates())){
+            res = false;
+            size_t cur_ind = i + index_offset_;
+            violations_.push_back({cur_ind, cur_ind});
+        }
     }
 
-    return true;
+    return res;
 }
 
 bool DCVerifier::VerifyTwoTuples(dc::DC const& dc) {
@@ -207,6 +216,7 @@ bool DCVerifier::VerifyTwoTuples(dc::DC const& dc) {
     std::vector<mo::ColumnIndex> ineq_cols = dc.GetColumnIndicesWithOperator(
             [](dc::Operator op) { return op.GetType() != dc::OperatorType::kEqual; });
 
+    bool res = true;
     std::vector<Point> points;
     std::unordered_map<Point, util::KDTree<Point>, Point::Hasher> hash;
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
@@ -216,29 +226,48 @@ bool DCVerifier::VerifyTwoTuples(dc::DC const& dc) {
         Point point = MakePoint(row, eq_cols);
         Tree& tree = hash[point];
 
+        size_t cur_ind = i + index_offset_;
         auto [box, inv_box] = SearchRanges(dc, row);
-        std::vector<Point> search_res = tree.QuerySearch(box);
-        std::vector<Point> inv_search_res = tree.QuerySearch(inv_box);
-        if (!search_res.empty() or !inv_search_res.empty()) return false;
+        std::vector<Point> search_res = hash[point].QuerySearch(box);
+        std::vector<Point> inv_search_res = hash[point].QuerySearch(inv_box);
+        if (!search_res.empty() or !inv_search_res.empty()) {
+            AddHighlights(search_res, cur_ind);
+            AddHighlights(inv_search_res, cur_ind);
+            res = false;
+        }
 
-        tree.Insert(MakePoint(row, ineq_cols, i + index_offset_));
+        tree.Insert(MakePoint(row, ineq_cols, cur_ind));
     }
 
-    return true;
+    return res;
+}
+
+void DCVerifier::AddHighlights(std::vector<Point> const& points, size_t index) {
+    for (auto const& point : points) {
+        violations_.emplace_back(point.GetIndex(), index);
+    }
 }
 
 bool DCVerifier::VerifyAllEquality(dc::DC const& dc) {
-    std::vector<mo::ColumnIndex> eq_cols = dc.GetColumnIndices();
-    std::unordered_set<Point, Point::Hasher> res_tuples;
+    bool res = true;
+    std::unordered_map<Point, std::vector<size_t>, Point::Hasher> res_tuples;
+    std::vector<Column::IndexType> const eq_cols = dc.GetColumnIndices();
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(eq_cols, i)) continue;
         std::vector<std::byte const*> row = GetRow(i);
+        size_t cur_ind =  i + index_offset_;
         Point point = MakePoint(row, eq_cols);
-        bool is_new_tuple = res_tuples.insert(point).second;
-        if (!is_new_tuple) return false;
+        if (res_tuples.find(point) != res_tuples.end()) {
+            std::vector<size_t> viol_indexes = res_tuples[point];
+            for (auto ind : viol_indexes) violations_.push_back({cur_ind, ind});
+            res_tuples[point].push_back(cur_ind);
+            res = false;
+        } else {
+            res_tuples[point] = {cur_ind};
+        }
     }
 
-    return true;
+    return res;
 }
 
 bool DCVerifier::VerifyOneInequality(dc::DC const& dc) {

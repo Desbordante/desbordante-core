@@ -11,7 +11,7 @@ namespace algos::dc {
 
 enum class ValType { kMinusInf, kFinite, kPlusInf };
 
-//  @brief Component of a k-dimensional point
+// @brief Component of a k-dimensional point
 class Component {
 private:
     std::byte const* val_;

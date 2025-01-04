@@ -8,11 +8,12 @@
 
 namespace algos::dc {
 
-//  @brief Represents a predicate for Denial Constraint (DC).
+// @brief Represents a predicate for Denial Constraint (DC).
 //
-//  A predicate (e.g., t.A == s.A) comprises three elements: the column
-//  operand from the first tuple ("t.A"), the comparison operator ("=="),
-//  and the column operand from the second tuple ("s.A").
+// A predicate (e.g., t.A == s.A) comprises three elements: the column
+// operand from the first tuple ("t.A"), the comparison operator ("=="),
+// and the column operand from the second tuple ("s.A").
+//
 class Predicate {
 private:
     Operator op_;
