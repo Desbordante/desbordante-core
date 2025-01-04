@@ -1,6 +1,7 @@
 #include "ar_verifier.h"
 
 #include <chrono>
+#include <iostream>
 #include <stdexcept>
 
 #include "config/equal_nulls/option.h"
@@ -12,33 +13,9 @@
 namespace algos {
 ARVerifier::ARVerifier() : Algorithm({}) {
     RegisterOptions();
-    MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
-    if (string_rule_left_.empty()) {
-        throw std::runtime_error("Got an empty rule: AR verifying is meaningless.");
-    }
-
-    std::vector<std::string> const& item_names_map = transactional_data_->GetItemUniverse();
-
-    std::vector<unsigned> ar_left_id;
-    for (auto const& item_name : string_rule_left_) {
-        auto it = std::ranges::find(item_names_map, item_name);
-        if (it == item_names_map.end()) {
-            throw std::runtime_error("Item in left rule part not found in item universe: " +
-                                     item_name);
-        }
-        ar_left_id.push_back(std::distance(item_names_map.begin(), it));
-    }
-
-    std::vector<unsigned> ar_right_id;
-    for (auto const& item_name : string_rule_right_) {
-        auto it = std::ranges::find(item_names_map, item_name);
-        if (it == item_names_map.end()) {
-            throw std::runtime_error("Item in right rule part not found in item universe: " +
-                                     item_name);
-        }
-        ar_right_id.push_back(std::distance(item_names_map.begin(), it));
-    }
-    ar_ids_ = model::ArIDs(ar_left_id, ar_right_id, minconf_, minsup_);
+    using namespace config::names;
+    MakeOptionsAvailable(
+            {kTable, kInputFormat, kARuleLeft, kARuleRight, kMinimumSupport, kMinimumConfidence});
 }
 
 void ARVerifier::RegisterOptions() {
@@ -80,6 +57,33 @@ void ARVerifier::LoadDataInternal() {
     if (transactional_data_->GetNumTransactions() == 0) {
         throw std::runtime_error("Got an empty dataset: AR verifying is meaningless.");
     }
+
+    if (string_rule_left_.empty()) {
+        throw std::runtime_error("Got an empty rule: AR verifying is meaningless.");
+    }
+
+    std::vector<std::string> const& item_names_map = transactional_data_->GetItemUniverse();
+
+    std::vector<unsigned> ar_left_id;
+    for (auto const& item_name : string_rule_left_) {
+        auto it = std::ranges::find(item_names_map, item_name);
+        if (it == item_names_map.end()) {
+            throw std::runtime_error("Item in left rule part not found in item universe: " +
+                                     item_name);
+        }
+        ar_left_id.push_back(std::distance(item_names_map.begin(), it));
+    }
+
+    std::vector<unsigned> ar_right_id;
+    for (auto const& item_name : string_rule_right_) {
+        auto it = std::ranges::find(item_names_map, item_name);
+        if (it == item_names_map.end()) {
+            throw std::runtime_error("Item in right rule part not found in item universe: " +
+                                     item_name);
+        }
+        ar_right_id.push_back(std::distance(item_names_map.begin(), it));
+    }
+    ar_ids_ = model::ArIDs(ar_left_id, ar_right_id, minconf_, minsup_);
 }
 
 unsigned long long ARVerifier::ExecuteInternal() {
