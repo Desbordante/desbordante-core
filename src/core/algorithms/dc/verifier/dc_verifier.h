@@ -21,6 +21,15 @@ namespace algos {
 
 class DCVerifier final : public Algorithm {
 private:
+    // @brief Represents violating tuples of a given table
+    // e.g. vector {{1, 4}, {1, 3}} tells us that records with
+    // number 1 and 4, 1 and 3 are violating the given Denial Constraint.
+    // Thus it is possible to remove first record so the DC holds.
+    //
+    // If a certain pair contains equal left and right record number
+    // it means that that DC is a one-tuple one and it sufficient
+    // for a single tuple to violate it. e.g. {{2, 2}}
+    std::vector<std::pair<size_t, size_t>> violations_;
     std::unique_ptr<ColumnLayoutRelationData> relation_;
     std::vector<model::TypedColumnData> data_;
     config::InputTable input_table_;
@@ -49,11 +58,6 @@ private:
     // Convert all two-tuple equality predicates: s.A == t.B -> (s.A <= t.B and s.A >= t.B)
     dc::DC ConvertEqualities(dc::DC const& dc);
 
-    // Convert all two-tuple disequality predicates:
-    // !(φ and s.A != t.B) -> !(φ and s.A < t.B) and !(φ and s.A > t.B)
-    // so the DC containing l disequality predicates converts into conjuction of 2^l DC
-    std::vector<dc::DC> ConvertDisequalities(dc::DC const& dc);
-
     bool CheckOneInequality(dc::DC const& dc);
 
     bool CheckAllEquality(dc::DC const& dc);
@@ -78,6 +82,8 @@ private:
                       util::KDTree<dc::Point<dc::Component>> const& search_tree, dc::DC const& dc,
                       size_t i, std::vector<Column::IndexType> const& cols_indices, bool& res);
 
+    void AddHighlights(std::vector<dc::Point<dc::Component>> const& vec, size_t index);
+
     dc::Point<dc::Component> MakePoint(std::vector<std::byte const*> const& vec,
                                        std::vector<Column::IndexType> const& indices,
                                        size_t point_ind = 0,
@@ -99,6 +105,10 @@ public:
 
     bool DCHolds() const noexcept {
         return result_;
+    }
+
+    auto const& GetViolations() {
+        return violations_;
     }
 
     void ResetState() final {};
