@@ -1,0 +1,12 @@
+State,Salary,FedTaxRate
+NewYork,3000,0.2
+NewYork,4000,0.25
+NewYork,5000,0.3
+Wisconsin,5000,0.15
+Wisconsin,6000,0.2
+Wisconsin,4000,0.1
+Wisconsin,4500,0.3
+Texas,5000,0.05
+Texas,1000,0.15
+Texas,2000,0.25
+Texas,3000,0.3
