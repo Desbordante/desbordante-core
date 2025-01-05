@@ -257,11 +257,10 @@ To use test datasets you will need:
 Run the following commands:
 ```sh 
 sudo apt install gcc g++ cmake libboost-all-dev git-lfs python3
-export CC=gcc
 export CXX=g++
 ```
-The last 2 lines set gcc as CMake compiler in your terminal session.
-You can also add them to the end of `~/.profile` to set this by default in all sessions.
+The last line sets GCC as CMake compiler in your terminal session.
+You can also add it to the end of `~/.profile` to set this by default in all sessions.
 
 #### MacOS dependencies installation
 
@@ -300,14 +299,10 @@ You can also add the last export with current path to `~/.zprofile` or `~/.bash_
 
 Before building the project you must set locally or in the above-mentioned dotfiles the following CMake environment variables:
 ```sh
-export CC=gcc-14
 export CXX=g++-14
-export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/
 export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
 ```
-The first two lines set GCC as the default compiler in CMake. The `SDKROOT` export is also necessary due to issues with GCC 14 and
-the last macOS 15 SDK used by CMake by default, you can read more about this [here](https://gist.github.com/scivision/d69faebbc56da9714798087b56de925a)
-and [here](https://github.com/iains/gcc-14-branch/issues/11). The last export is the solution for dynamic linking with python module.
+The first line sets GCC as the default compiler in CMake. The last export is the solution for dynamic linking with python module.
 
 ### Building the project
 #### Building the Python module using pip
