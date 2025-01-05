@@ -1,9 +1,10 @@
 #include "ar_stats_calculator.h"
 
 #include <iostream>
-#include <map>
 #include <queue>
 #include <set>
+
+#include <easylogging++.h>
 
 namespace algos {
 double ARStatsCalculator::JaccardSimilarity(std::vector<unsigned> const& transaction_indices,
@@ -12,21 +13,17 @@ double ARStatsCalculator::JaccardSimilarity(std::vector<unsigned> const& transac
         return 0.0;
     }
 
+    if (rule_part.empty()) {
+        return 1.0;
+    }
+
     std::set transaction_set(transaction_indices.begin(), transaction_indices.end());
     std::set rule_set(rule_part.begin(), rule_part.end());
 
     std::vector<unsigned> intersection;
-    std::ranges::set_intersection(transaction_set, rule_set, std::back_inserter(intersection));
-    unsigned const intersection_count = intersection.size();
+    std::ranges::set_intersection(rule_set, transaction_set, std::back_inserter(intersection));
 
-    std::vector<unsigned> union_set;
-    std::ranges::set_union(transaction_set, rule_set, std::back_inserter(union_set));
-    unsigned const union_count = union_set.size();
-
-    if (union_count == 0) {
-        return 1.0;
-    }
-    return static_cast<double>(intersection_count) / union_count;
+    return intersection.size() / rule_set.size();
 }
 
 size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> const& jaccard) {
@@ -50,14 +47,14 @@ void ARStatsCalculator::CalculateSupport() {
                                   [&](auto const& pair) {
                                       return pair.second.first == 1.0 && pair.second.second == 1.0;
                                   }) /
-            data_->GetTransactions().size();
+            static_cast<double>(data_->GetTransactions().size());
 }
 
 void ARStatsCalculator::CalculateConfidence() {
     double lhs_support =
             std::ranges::count_if(jaccard_coefficients_,
                                   [&](auto const& pair) { return pair.second.first == 1.0; }) /
-            data_->GetTransactions().size();
+            static_cast<double>(data_->GetTransactions().size());
     confidence_ = lhs_support != 0.0 ? support_ / lhs_support : 0.0;
 }
 

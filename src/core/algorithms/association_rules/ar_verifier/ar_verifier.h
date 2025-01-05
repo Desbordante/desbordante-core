@@ -47,8 +47,8 @@ private:
 public:
     /* Returns true if AR holds and false otherwise */
     bool ARHolds() const {
-        return stats_calculator_.GetConfidence() <= minsup_ &&
-               stats_calculator_.GetSupport() >= minconf_;
+        return (stats_calculator_.GetSupport() >= minsup_) &&
+               (stats_calculator_.GetConfidence() >= minconf_);
     }
 
     /* Returns the number of clusters where the AR is violated */
