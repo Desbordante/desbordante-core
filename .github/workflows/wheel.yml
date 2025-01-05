@@ -84,7 +84,7 @@ jobs:
         env:
           CIBW_BEFORE_ALL: >
             cd lib/boost &&
-            ./bootstrap.sh --prefix=/usr &&
+            ./bootstrap.sh --prefix=/usr --with-libraries=container,thread,graph &&
             ./b2 install -j4 --prefix=/usr
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&

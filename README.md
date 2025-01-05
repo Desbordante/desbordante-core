@@ -284,13 +284,13 @@ Then you need to install Boost library built with GCC. Please avoid using Homebr
 is built with Clang, which has a different ABI. Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/), open terminal and run:
 ```sh
 cd ~/Downloads
-curl https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2 --output "boost_1_86_0.tar.bz2"
-tar xvjf boost_1_86_0.tar.bz2 && rm boost_1_86_0.tar.bz2
-cd boost_1_86_0
+curl https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.bz2 --output "boost_1_87_0.tar.bz2"
+tar xvjf boost_1_87_0.tar.bz2 && rm boost_1_87_0.tar.bz2
+cd boost_1_87_0
 ```
 Navigate to the unpacked Boost directory in the terminal and run the following commands:
 ```sh
-./bootstrap.sh 
+./bootstrap.sh --with-libraries=container,thread,graph
 echo "using darwin : : g++-14 ;" > user-config.jam
 sudo ./b2 install --user-config=user-config.jam --layout=versioned
 export BOOST_ROOT=/usr/local/ # export Boost_ROOT=/usr/local/ for CMake 3.26 and below.

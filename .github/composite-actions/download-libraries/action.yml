@@ -75,7 +75,7 @@ runs:
     - name: Install Boost
       run: |
         cd lib/boost
-        ./bootstrap.sh --prefix=/usr
+        ./bootstrap.sh --prefix=/usr --with-libraries=container,thread,graph
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost != 'false'
