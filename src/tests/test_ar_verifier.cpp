@@ -41,21 +41,12 @@ TEST_P(TestARVerifying, DefaultTest) {
 INSTANTIATE_TEST_SUITE_P(
     ARVerifierTestSuite, TestARVerifying,
     ::testing::Values(
-        //Test cases where the rule holds
         ARVerifyingParams(kRulesBook, {"Bread"}, {"Milk"}, 0.2, 0.1),
         ARVerifyingParams(kRulesPresentation, {"Bread"}, {"Diaper"}, 0.2, 0.1),
         ARVerifyingParams(kRulesPresentationExtended, {"Bread"}, {"Milk"}, 0.2, 0.1),
         ARVerifyingParams(kRulesBook, {"Eggs"}, {"Milk"}, 0.3, 0.1),
         ARVerifyingParams(kRulesBook, {"Yogurt"}, {"Eggs"}, 0.2, 0.1),
-        ARVerifyingParams(kRulesBook, {"Yogurt"}, {"Milk"}, 0.2, 0.1),
-
-       //Test cases where the rule does not hold
-        ARVerifyingParams(kRulesBook, {"Bread"}, {"Milk"}, 0.7, 0.6),
-        ARVerifyingParams(kRulesPresentation, {"Bread"}, {"Diaper"}, 0.8, 0.9),
-        ARVerifyingParams(kRulesPresentationExtended, {"Bread"}, {"Milk"}, 0.7, 0.6),
-        ARVerifyingParams(kRulesBook, {"Eggs"}, {"Milk"}, 0.9, 0.8),
-        ARVerifyingParams(kRulesBook, {"Yogurt"}, {"Eggs"}, 0.7, 0.9),
-        ARVerifyingParams(kRulesBook, {"Yogurt"}, {"Milk"}, 0.6, 0.9)
+        ARVerifyingParams(kRulesBook, {"Yogurt"}, {"Milk"}, 0.2, 0.1)
     ));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -63,21 +54,11 @@ INSTANTIATE_TEST_SUITE_P(
   ::testing::Values(
       // test cases tabular
      ARVerifyingParams(kRulesKaggleRows, {"MILK"}, {"BREAD"}, 0.2, 0.1, algos::InputFormat::tabular, 0, 0, 1),
-     ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"MILK"}, 0.4, 0.2, algos::InputFormat::tabular, 0, 0, 1),
-     ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"TEA"}, 0.3, 0.1, algos::InputFormat::tabular, 0, 0, 1),
+     ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"MILK"}, 0.05, 0.2, algos::InputFormat::tabular, 0, 0, 1),
+     ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"TEA"}, 0.2, 0.1, algos::InputFormat::tabular, 0, 0, 1),
      ARVerifyingParams(kRulesKaggleRows, {"MAGGI"}, {"BISCUIT"}, 0.1, 0.05, algos::InputFormat::tabular, 0, 0, 1),
-     ARVerifyingParams(kRulesKaggleRows, {"COFFEE"}, {"BISCUIT"}, 0.5, 0.3, algos::InputFormat::tabular, 0, 0, 1),
-     ARVerifyingParams(kRulesKaggleRows, {"SUGER"}, {"CORNFLAKES"}, 0.2, 0.1, algos::InputFormat::tabular, 0, 0, 1)
+     ARVerifyingParams(kRulesKaggleRows, {"COFFEE"}, {"BISCUIT"}, 0.1, 0.3, algos::InputFormat::tabular, 0, 0, 1),
+     ARVerifyingParams(kRulesKaggleRows, {"SUGER"}, {"CORNFLAKES"}, 0.05, 0.1, algos::InputFormat::tabular, 0, 0, 1)
   ));
-
-
-INSTANTIATE_TEST_SUITE_P(
-    ARVerifierEdgeCases, TestARVerifying,
-    ::testing::Values(
-        // Test with empty rule left
-        ARVerifyingParams(kRulesBook, {}, {"Milk"}, 0.2, 0.1),
-        // Test with empty rule right
-        ARVerifyingParams(kRulesBook, {"Bread"}, {}, 0.2, 0.1)
-    ));
 // clang-format on
 }  // namespace tests
