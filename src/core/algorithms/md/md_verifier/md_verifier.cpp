@@ -13,24 +13,13 @@
 using DecisionBoundary = model::md::DecisionBoundary;
 
 namespace algos::md {
-MDVerifier::MDVerifier() : Algorithm({}), pairs_violating_md_({}) {
+MDVerifier::MDVerifier() : Algorithm({}) {
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
-void ValidateDecisionBoundaries(config::IndicesType const& indices,
-                                std::vector<DecisionBoundary> const& decision_boundaries) {
-    assert(indices.size() == decision_boundaries.size());
-    for (std::size_t i = 0; i < decision_boundaries.size(); ++i) {
-        if (decision_boundaries[i] < 0.0 || decision_boundaries[i] > 1.0) {
-            throw config::ConfigurationError("Decision boundaries for column with index \"" +
-                                             std::to_string(i) + "\" out of range.");
-        }
-    }
-}
-
 void MDVerifier::ResetState() {
-    pairs_violating_md_ = {};
+    highlights.Reset();
     md_holds_ = false;
 }
 
@@ -67,8 +56,8 @@ void MDVerifier::RegisterOptions() {
 void MDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({
-            kDistFromNullIsInfinity,
             kEqualNulls,
+            kDistFromNullIsInfinity,
             config::kLhsIndicesOpt.GetName(),
             config::kRhsIndicesOpt.GetName(),
             kMDLhsDecisionBoundaries,
@@ -144,6 +133,9 @@ bool MDVerifier::CheckRows(size_t first_row, size_t second_row) {
                                     column.GetTypeId(), similarity_measure);
         if (similarity < decision_boundary) {
             holds_for_rhs = false;
+            highlights.AddHighlight(std::make_pair(first_row, second_row),
+                                    {index, column.GetValue(first_row), column.GetValue(second_row),
+                                     column.GetTypeId(), similarity, decision_boundary});
             rhs_suggestion_boundaries_[i] = std::min(rhs_suggestion_boundaries_[i], similarity);
         }
     }
@@ -166,7 +158,6 @@ void MDVerifier::VerifyMD() {
         for (size_t second_row = first_row + 1; second_row < num_cols; ++second_row) {
             if (!CheckRows(first_row, second_row)) {
                 md_holds_ = false;
-                pairs_violating_md_.insert(std::make_pair(first_row, second_row));
             }
         }
     }
