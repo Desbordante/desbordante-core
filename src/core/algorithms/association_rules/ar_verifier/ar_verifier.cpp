@@ -1,14 +1,16 @@
 #include "ar_verifier.h"
 
 #include <chrono>
-#include <iostream>
 #include <stdexcept>
+
+#include <easylogging++.h>
 
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/timed_invoke.h"
 
 namespace algos {
 ARVerifier::ARVerifier() : Algorithm({}) {
@@ -87,15 +89,24 @@ void ARVerifier::LoadDataInternal() {
 }
 
 unsigned long long ARVerifier::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-    VerifyAR();
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
+    LOG(INFO) << "Parameters of ARVerifier:";
+    LOG(INFO) << "\tInput table: " << input_table_->GetRelationName();
+    LOG(INFO) << "\tInput format: " << input_format_;
+    LOG(INFO) << "\tARule to verify: "
+              << model::ARStrings(ar_ids_, transactional_data_.get()).ToString();
+
+    auto verification_time = ::util::TimedInvoke(&ARVerifier::VerifyAR, this);
+
+    LOG(DEBUG) << "AR verification took " << std::to_string(verification_time) << "ms";
+
+    auto stats_calculation_time = ::util::TimedInvoke(&ARVerifier::CalculateStatistics, this);
+
+    LOG(DEBUG) << "Statistics calculation took " << std::to_string(stats_calculation_time) << "ms";
+
+    return verification_time + stats_calculation_time;
 }
 
 void ARVerifier::VerifyAR() {
     stats_calculator_ = ARStatsCalculator(std::move(transactional_data_), std::move(ar_ids_));
 }
-
 }  // namespace algos
