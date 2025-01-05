@@ -1,10 +1,10 @@
 #pragma once
 
 #include <set>
-#include <type_traits>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/md/decision_boundary.h"
+#include "algorithms/md/md_verifier/highlights/highlights.h"
 #include "algorithms/md/md_verifier/similarities/euclidean/euclidean.h"
 #include "algorithms/md/md_verifier/similarities/levenshtein/levenshtein.h"
 #include "algorithms/md/md_verifier/similarities/similarities.h"
@@ -12,7 +12,6 @@
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
-#include "model/types/numeric_type.h"
 
 namespace algos::md {
 
@@ -36,14 +35,10 @@ private:
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> relation_;
 
-    std::set<std::pair<int, int>> pairs_violating_md_;
+    MDHighlights highlights;
     std::vector<DecisionBoundary> rhs_suggestion_boundaries_;
 
     bool md_holds_ = false;
-
-    static void ValidateDecisionBoundaries(
-            config::IndicesType const& indices,
-            std::vector<DecisionBoundary> const& decision_boundaries);
 
     void ResetState() final;
     void RegisterOptions();
@@ -65,8 +60,12 @@ public:
         return md_holds_;
     }
 
-    std::set<std::pair<int, int>> const& GetPairsViolatingMD() const {
-        return pairs_violating_md_;
+    std::vector<std::string> GetHighlights() const {
+        return highlights.AsStrings();
+    }
+
+    auto GetRawHighlights() const {
+        return highlights.GetRaw();
     }
 
     std::vector<DecisionBoundary> const& GetRhsSuggestions() const {
