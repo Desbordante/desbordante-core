@@ -21,6 +21,7 @@
 #include "ind/bind_ind.h"
 #include "ind/bind_ind_verification.h"
 #include "md/bind_md.h"
+#include "md/bind_md_verifier.h"
 #include "mfd/bind_mfd_verification.h"
 #include "nar/bind_nar.h"
 #include "nd/bind_nd.h"
