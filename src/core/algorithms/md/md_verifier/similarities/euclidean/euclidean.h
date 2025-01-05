@@ -1,3 +1,5 @@
+#pragma once
+
 #include "algorithms/md/md_verifier/similarities/similarities.h"
 
 namespace algos::md {
