@@ -60,12 +60,12 @@ public:
         return md_holds_;
     }
 
-    std::vector<std::string> GetHighlights() const {
-        return highlights.AsStrings();
+    std::vector<std::string> GetHighlightsAsStrings() const {
+        return highlights.GetHighlightsAsStrings();
     }
 
-    auto GetRawHighlights() const {
-        return highlights.GetRaw();
+    auto GetHighlights() const {
+        return highlights.GetHighlights();
     }
 
     std::vector<DecisionBoundary> const& GetRhsSuggestions() const {

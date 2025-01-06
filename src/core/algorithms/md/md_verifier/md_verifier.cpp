@@ -103,7 +103,8 @@ DecisionBoundary MDVerifier::CalculateSimilarity(std::byte const* first_val,
         }
 
         default:
-            assert(false);
+            throw std::runtime_error(
+                    "Failed to calcutate similarity measure: unsupported column type provided.");
     }
 }
 
@@ -133,9 +134,10 @@ bool MDVerifier::CheckRows(size_t first_row, size_t second_row) {
                                     column.GetTypeId(), similarity_measure);
         if (similarity < decision_boundary) {
             holds_for_rhs = false;
-            highlights.AddHighlight(std::make_pair(first_row, second_row),
-                                    {index, column.GetValue(first_row), column.GetValue(second_row),
-                                     column.GetTypeId(), similarity, decision_boundary});
+            highlights.AddHighlight({std::make_pair(first_row, second_row), index,
+                                     column.GetDataAsString(first_row),
+                                     column.GetDataAsString(second_row), similarity,
+                                     decision_boundary});
             rhs_suggestion_boundaries_[i] = std::min(rhs_suggestion_boundaries_[i], similarity);
         }
     }
@@ -143,10 +145,19 @@ bool MDVerifier::CheckRows(size_t first_row, size_t second_row) {
 }
 
 void MDVerifier::VerifyMD() {
-    assert(lhs_indices_.size() == lhs_desicion_bondaries_.size() &&
-           lhs_indices_.size() == lhs_similarity_measures_.size());
-    assert(rhs_indices_.size() == rhs_desicion_bondaries_.size() &&
-           rhs_indices_.size() == rhs_similarity_measures_.size());
+    if (lhs_indices_.size() != lhs_desicion_bondaries_.size() ||
+        lhs_indices_.size() != lhs_similarity_measures_.size()) {
+        throw std::length_error(
+                "Length of LHS Indices doesn't match length of LHS Decision Boundaries or/and LHS "
+                "Similarity Measures.");
+    }
+
+    if (rhs_indices_.size() != rhs_desicion_bondaries_.size() ||
+        rhs_indices_.size() != rhs_similarity_measures_.size()) {
+        throw std::length_error(
+                "Length of RHS Indices doesn't match length of RHS Decision Boundaries or/and RHS "
+                "Similarity Measures.");
+    }
 
     md_holds_ = true;
 
