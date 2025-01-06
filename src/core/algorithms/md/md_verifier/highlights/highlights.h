@@ -10,18 +10,13 @@ using DecisionBoundary = model::md::DecisionBoundary;
 
 class MDHighlights {
 public:
-    struct HighlightRecordInfo {
-        config::IndexType column;
-        std::byte const* first_value;
-        std::byte const* second_value;
-        model::TypeId type_id;
-        DecisionBoundary similarity;
-        DecisionBoundary decision_boundary;
-    };
-
     struct HighlightRecord {
         std::pair<int, int> rows;
-        HighlightRecordInfo info;
+        config::IndexType column;
+        std::string first_value;
+        std::string second_value;
+        DecisionBoundary similarity;
+        DecisionBoundary decision_boundary;
     };
 
 private:
@@ -31,13 +26,13 @@ private:
 
 public:
     MDHighlights() = default;
-    std::vector<std::string> AsStrings() const;
+    std::vector<std::string> GetHighlightsAsStrings() const;
 
-    std::vector<HighlightRecord> const& GetRaw() const {
+    std::vector<HighlightRecord> const& GetHighlights() const {
         return highlights;
     }
 
-    void AddHighlight(std::pair<int, int> rows, HighlightRecordInfo info);
+    void AddHighlight(HighlightRecord record);
     void Reset();
 };
 }  // namespace algos::md
