@@ -100,7 +100,7 @@ TEST_P(TestMDVerifierHighlights, DefaultCase) {
     auto md_result = ExecuteAlgo(*verifier);
 
     ASSERT_EQ(GetParam().expected, md_result);
-    ASSERT_EQ(GetParam().highlights, verifier->GetHighlights());
+    ASSERT_EQ(GetParam().highlights, verifier->GetHighlightsAsStrings());
 }
 
 auto const eps = std::numeric_limits<DecisionBoundary>::epsilon();
