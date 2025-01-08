@@ -12,6 +12,12 @@ struct NARQualities {
     double fitness = -1.0;
     double support = -1.0;
     double confidence = -1.0;
+
+    std::string ToString() const {
+        std::ostringstream ss;
+        ss << "fitness: " << fitness << " support: " << support << " confidence: " << confidence;
+        return ss.str();
+    }
 };
 
 class NAR {
@@ -38,6 +44,14 @@ public:
     std::string ToString() const;
     void SetQualities(TypedRelation const* typed_relation);
     NARQualities const& GetQualities() const;
+
+    auto const& GetAnte() const noexcept {
+        return ante_;
+    }
+
+    auto const& GetCons() const noexcept {
+        return cons_;
+    }
 
     void InsertInAnte(size_t feature_index, std::shared_ptr<ValueRange> range);
     void InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range);
