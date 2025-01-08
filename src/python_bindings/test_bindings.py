@@ -60,7 +60,7 @@ ALGO_CORRECT_OPTIONS_INFO = [
         get_common_option_container({"threads": 15}),
     ]),
     (desb.fd.algorithms.EulerFD, [
-        get_common_option_container({"custom_random": (False, 102)}),
+        get_common_option_container({"custom_random_seed": 102}),
     ]),
     (desb.fd_verification.algorithms.FDVerifier, [
         get_common_option_container(
