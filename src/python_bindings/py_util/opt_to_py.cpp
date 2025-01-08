@@ -9,7 +9,7 @@
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
-#include "config/custom_random/type.h"
+#include "config/custom_random_seed/type.h"
 #include "config/equal_nulls/type.h"
 #include "config/error/type.h"
 #include "config/indices/type.h"
@@ -36,7 +36,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<unsigned int>,
         normal_conv_pair<bool>,
         normal_conv_pair<config::ThreadNumType>,
-        normal_conv_pair<config::CustomRandomFlagType>,
+        normal_conv_pair<config::CustomRandomSeedType>,
         normal_conv_pair<config::MaxLhsType>,
         normal_conv_pair<config::ErrorType>,
         normal_conv_pair<config::IndicesType>,
