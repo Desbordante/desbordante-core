@@ -17,9 +17,7 @@ std::string NAR::ToString() const {
     };
 
     std::ostringstream result;
-    result << qualities_.fitness << " {";
-    result << map_to_string(ante_) << "} ===> {" << map_to_string(cons_);
-    result << "} s: " << qualities_.support << " c: " << qualities_.confidence;
+    result << "{" << map_to_string(ante_) << "} ===> {" << map_to_string(cons_) << "}";
     return result.str();
 }
 
