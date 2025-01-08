@@ -18,15 +18,15 @@ alg.load_data(table=(TABLE, ';', False))
 
 print("EulerFD is randomized algorithm. Answer is depended on seed: ")
 
-alg.execute(custom_random=(True, SEED_76_FD))
+alg.execute(custom_random_seed=SEED_76_FD)
 result76 = set(alg.get_fds())
 print(f"Seed is {SEED_76_FD}, number of FDs is {len(result76)}")
 
-alg.execute(custom_random=(True, SEED_78_FD))
+alg.execute(custom_random_seed=SEED_78_FD)
 result78 = set(alg.get_fds())
 print(f"Seed is {SEED_78_FD}, number of FDs is {len(result78)}")
 
-alg.execute(custom_random=(True, SEED_80_FD))
+alg.execute(custom_random_seed=SEED_80_FD)
 result80 = set(alg.get_fds())
 print(f"Seed is {SEED_80_FD}, number of FDs is {len(result80)}")
 

@@ -16,8 +16,8 @@
 
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
-#include "custom_random/option.h"
-#include "custom_random/type.h"
+#include "custom_random_seed/option.h"
+#include "custom_random_seed/type.h"
 #include "fd/fd_algorithm.h"
 #include "mlfq.h"
 #include "model/table/column.h"
@@ -33,7 +33,7 @@ class EulerFD : public FDAlgorithm {
     using RandomStrategy = Cluster::RandomStrategy;
 
     // Random strategy for unit tests
-    config::CustomRandomFlagType custom_random_opt_;
+    config::CustomRandomSeedType custom_random_opt_;
     RandomStrategy rand_function_;
     std::unique_ptr<CustomRandom> random_{};
     constexpr static std::size_t kRandomUpperBound = 3047102;

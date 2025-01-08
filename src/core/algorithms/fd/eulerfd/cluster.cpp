@@ -4,9 +4,9 @@
 
 namespace algos {
 
-// We want have same permutation of array on any platforms and compilers
-// (it is necessary for consistent hash values in test).
-// But implementation of std::shuffle depends on STL, so we can't use it
+// We want to have the same permutation of array on all platforms and compilers
+// (it is necessary for consistent hash values during testing).
+// But the implementation of std::shuffle depends on STL, so we can't use it.
 void Cluster::ShuffleData(RandomStrategy const& custom_rand) {
     if (cluster_data_.empty()) {
         return;

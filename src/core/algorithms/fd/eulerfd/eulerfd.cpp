@@ -378,8 +378,8 @@ unsigned long long EulerFD::ExecuteInternal() {
     }
 
     // Choose random strategy (it is necessary for stable unit tests)
-    if (custom_random_opt_.first) {
-        random_ = std::make_unique<CustomRandom>(custom_random_opt_.second);
+    if (custom_random_opt_.has_value()) {
+        random_ = std::make_unique<CustomRandom>(custom_random_opt_.value());
         rand_function_ = [&]() { return random_->NextInt(kRandomUpperBound); };
     } else {
         srand(time(NULL));

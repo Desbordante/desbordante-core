@@ -97,7 +97,7 @@ protected:
         using namespace config::names;
         return {
                 {kCsvConfig, csv_config},
-                {kCustomRandom, std::make_pair(true, 47)},
+                {kCustomRandom, std::optional<int>{47}},
         };
     }
 

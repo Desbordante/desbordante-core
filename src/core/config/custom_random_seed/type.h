@@ -1,6 +1,7 @@
 #pragma once
+#include <optional>
 #include <utility>
 
 namespace config {
-using CustomRandomFlagType = std::pair<bool, int>;
+using CustomRandomSeedType = std::optional<int>;
 }  // namespace config
