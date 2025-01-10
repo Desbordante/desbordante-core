@@ -2,20 +2,28 @@ import desbordante
 
 print('''
 =======================================================
-This example show how Desbardante can seaching
-functional dependencies (FD) approximately. There are 2
-algorithms: EulerFD and AidFD, which can approximately
-search FD, they may not find some FD or get false FD
-unlike exact FD algorithms, but works by several
-times faster.
+This example demonstrates how Desbordante can perform
+approximate functional dependency (FD) discovery
+methods.
+It utilizes two algorithms, EulerFD and AID-FD, which
+offer significant speed advantages over exact
+FD discovery methods. While these algorithms may not
+identify all true FDs or might occasionally yield
+false positives, they achieve substantially faster
+processing times.
 
-For more information consider:
+For more in-depth information, please refer
+to the following publications:
 1) EulerFD: An Efficient Double-Cycle Approximation
    of Functional Dependencies by
    Qiongqiong Lin, Yunfan Gu, Jingyan Sa et al.
-2) TODO: AidFD article
+2) Approximate Discovery of Functional Dependencies
+   for Large Datasets by Tobias Bleifuss,
+   Susanne Bulow, Johannes Frohnhofen et al.
 =======================================================\n
-Now, we are going to demonstrate how to use EulerFD and AidFD.''')
+We will now demonstrate how to invoke EulerFD and
+AID-FD in Desbordante.
+''')
 
 TABLE = 'examples/datasets/medical.csv'
 
@@ -31,7 +39,7 @@ for fd in result_euler:
 
 print('-------------------------------')
 
-print("AidFD: ")
+print("AID-FD: ")
 alg = desbordante.fd.algorithms.Aid()
 alg.load_data(table=(TABLE, ',', True))
 alg.execute()
@@ -41,4 +49,4 @@ result_aid = alg.get_fds()
 for fd in result_aid:
     print(fd)
 
-print("Also there is more complex example in advanced part with more work features of algorithms")
+print("In the advanced section, a more complex example will showcase additional features of the algorithms.")
