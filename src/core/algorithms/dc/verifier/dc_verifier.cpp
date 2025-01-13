@@ -49,10 +49,13 @@ void DCVerifier::RegisterOptions() {
 
     RegisterOption(Option<std::string>(&dc_string_, kDenialConstraint, kDDenialConstraint, ""));
     RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(Option<bool>(&do_collect_violations_, kDoCollectViolations,
+                                kDDoCollectViolations, false));
 }
 
 void DCVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::names::kDenialConstraint});
+    MakeOptionsAvailable({config::names::kDoCollectViolations});
 }
 
 void DCVerifier::LoadDataInternal() {
@@ -114,9 +117,11 @@ bool DCVerifier::Verify(dc::DC dc) {
     // Consider 'cur_signs' as a set of operators where each digit
     // in binary representation (0 or 1) means '<' or '>' respectively
     // e.g. 21 = 10101 is ">, <, >, <, >"
+    bool res = true;
     for (size_t cur_signs = 0; cur_signs < all_comb_count; ++cur_signs) {
         dc::DC cur_dc = GetDC(no_diseq_preds, diseq_preds, cur_signs);
-        (this->*check)(cur_dc);
+        res = (this->*check)(cur_dc);
+        if (!do_collect_violations_ and !res) return false;
     }
 
     return violations_.empty();

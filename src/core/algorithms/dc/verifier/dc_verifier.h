@@ -43,6 +43,7 @@ private:
     std::unique_ptr<ColumnLayoutRelationData> relation_;
     std::vector<model::TypedColumnData> data_;
     config::InputTable input_table_;
+    bool do_collect_violations_;
     std::string dc_string_;
     size_t index_offset_;
     bool result_;
