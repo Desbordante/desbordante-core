@@ -60,7 +60,7 @@ public:
     std::vector<Operator> GetImplications() const {
         std::vector<Operator> implications;
         for (auto type : kImplicationsMap.at(op_)) {
-            implications.push_back(Operator(type));
+            implications.emplace_back(type);
         }
         return implications;
     }
@@ -69,7 +69,7 @@ public:
     std::vector<Operator> GetTransitives() const {
         std::vector<Operator> transitives;
         for (auto type : kTransitivesMap.at(op_)) {
-            transitives.push_back(Operator(type));
+            transitives.emplace_back(type);
         }
         return transitives;
     }
