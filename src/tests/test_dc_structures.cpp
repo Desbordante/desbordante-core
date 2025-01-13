@@ -261,7 +261,7 @@ protected:
     EvidenceAuxStructuresBuilder* evidence_aux_structures_builder_ = nullptr;
     EvidenceSetBuilder* evidence_set_builder_ = nullptr;
 
-    CSVConfig const csv_file_ = kTestDC;
+    CSVConfig const csv_file_ = kTestDC2;
     bool allow_cross_columns_ = true;
     bool has_header_ = true;
 
