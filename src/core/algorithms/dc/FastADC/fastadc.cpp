@@ -14,7 +14,7 @@
 #include "descriptions.h"
 #include "names.h"
 
-namespace algos::fastadc {
+namespace algos::dc {
 
 FastADC::FastADC() : Algorithm({}) {
     RegisterOptions();
@@ -139,8 +139,9 @@ unsigned long long FastADC::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
+// TODO: mb make this a list?
 std::vector<DenialConstraint> const& FastADC::GetDCs() const {
     return dcs_.GetResult();
 }
 
-}  // namespace algos::fastadc
+}  // namespace algos::dc
