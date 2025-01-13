@@ -6,26 +6,27 @@
 
 namespace algos::fastadc {
 
-// Java way of comparing bitsets
-int CompareBitsets(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<> const& rhs) {
-    size_t max_size = std::max(lhs.size(), rhs.size());
-
-    for (size_t i = 0; i < max_size; ++i) {
-        bool lhs_bit = i < lhs.size() ? lhs[i] : false;
-        bool rhs_bit = i < rhs.size() ? rhs[i] : false;
-
-        if (lhs_bit != rhs_bit) {
-            return lhs_bit ? 1 : -1;  // lhs_bit is true and rhs_bit is false => lhs > rhs
-        }
-    }
-    return 0;  // bitsets are equal
-}
-
 class DenialConstraintSet {
 private:
     std::unordered_set<DenialConstraint> constraints_;
     std::vector<DenialConstraint> result_;
     PredicateProvider* predicate_provider_;
+
+    // Java way of comparing bitsets
+    static int CompareBitsets(boost::dynamic_bitset<> const& lhs,
+                              boost::dynamic_bitset<> const& rhs) {
+        size_t max_size = std::max(lhs.size(), rhs.size());
+
+        for (size_t i = 0; i < max_size; ++i) {
+            bool lhs_bit = i < lhs.size() ? lhs[i] : false;
+            bool rhs_bit = i < rhs.size() ? rhs[i] : false;
+
+            if (lhs_bit != rhs_bit) {
+                return lhs_bit ? 1 : -1;  // lhs_bit is true and rhs_bit is false => lhs > rhs
+            }
+        }
+        return 0;  // bitsets are equal
+    }
 
     struct MinimalDCCandidate {
         DenialConstraint const* dc = nullptr;
