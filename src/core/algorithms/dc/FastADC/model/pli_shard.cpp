@@ -60,10 +60,10 @@ std::string Pli::ToString() const {
 
 std::string PliShard::ToString() const {
     std::stringstream ss;
-    ss << "Range: [" << beg << ", " << end << ")\n";
-    for (size_t i = 0; i < plis.size(); ++i) {
+    ss << "Range: [" << beg_ << ", " << end_ << ")\n";
+    for (size_t i = 0; i < plis_.size(); ++i) {
         ss << "PLI #" << (i + 1) << "\n";
-        ss << plis[i].ToString();
+        ss << plis_[i].ToString();
     }
     return ss.str();
 }
