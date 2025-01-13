@@ -25,7 +25,7 @@ HyFD::HyFD(std::optional<ColumnLayoutRelationDataManager> relation_manager)
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
-void HyFD::MakeExecuteOptsAvailable() {
+void HyFD::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::names::kThreads});
 }
 
