@@ -49,10 +49,13 @@ void DCVerifier::RegisterOptions() {
 
     RegisterOption(Option<std::string>(&dc_string_, kDenialConstraint, kDDenialConstraint, ""));
     RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(Option<bool>(&do_collect_violations_, kDoCollectViolations,
+                                kDDoCollectViolations, false));
 }
 
 void DCVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({config::names::kDenialConstraint});
+    MakeOptionsAvailable({config::names::kDoCollectViolations});
 }
 
 void DCVerifier::LoadDataInternal() {
