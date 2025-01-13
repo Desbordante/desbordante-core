@@ -17,6 +17,8 @@ constexpr std::array<OperatorType, 6> kAllOperatorTypes = {
         OperatorType::kEqual, OperatorType::kUnequal,      OperatorType::kGreater,
         OperatorType::kLess,  OperatorType::kGreaterEqual, OperatorType::kLessEqual};
 
+// TODO: remove code duplication cause we already have "dc/model/operator.h" that is used for
+// DC verification.
 class Operator {
 private:
     OperatorType op_;
