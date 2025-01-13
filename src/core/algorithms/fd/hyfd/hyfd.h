@@ -44,7 +44,7 @@ private:
 
     void RegisterFDs(std::vector<RawFD>&& fds, std::vector<algos::hy::ClusterId> const& og_mapping);
 
-    void MakeExecuteOptsAvailable() override;
+    void MakeExecuteOptsAvailableFDInternal() override;
 
     config::ThreadNumType threads_num_ = 1;
 
