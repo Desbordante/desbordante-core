@@ -173,4 +173,5 @@ constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
+constexpr auto kDDoCollectViolations = "Flag which tells whether to collect violations or not";
 }  // namespace config::descriptions

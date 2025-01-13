@@ -18,7 +18,7 @@ namespace mo = model;
 
 static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config, std::string dc) {
     using namespace config::names;
-    return {{kCsvConfig, csv_config}, {kDenialConstraint, dc}};
+    return {{kCsvConfig, csv_config}, {kDenialConstraint, dc}, {kDoCollectViolations, true}};
 }
 
 struct DCTestParams {
