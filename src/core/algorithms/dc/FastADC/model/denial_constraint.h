@@ -7,6 +7,8 @@
 
 namespace algos::fastadc {
 
+// TODO: remove code duplication cause we already have "dc/model/dc.h" that is used for
+// DC verification.
 class DenialConstraint {
 private:
     PredicateSet predicate_set_;
