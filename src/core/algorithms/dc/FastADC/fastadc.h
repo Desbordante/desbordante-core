@@ -10,9 +10,9 @@
 #include "table/column_layout_typed_relation_data.h"
 #include "tabular_data/input_table_type.h"
 
-namespace algos::fastadc {
+namespace algos::dc {
 
-/* using namespace fastadc; */
+using namespace fastadc;
 
 class FastADC : public Algorithm {
 private:
@@ -47,6 +47,7 @@ private:
         string_prov_.Clear();
         dcs_.Clear();
     }
+
     unsigned long long ExecuteInternal() final;
 
     void RegisterOptions();
@@ -57,4 +58,4 @@ public:
     std::vector<DenialConstraint> const& GetDCs() const;
 };
 
-}  // namespace algos::fastadc
+}  // namespace algos::dc
