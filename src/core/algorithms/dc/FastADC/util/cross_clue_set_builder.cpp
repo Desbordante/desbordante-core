@@ -52,8 +52,10 @@ void CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs,
 void CrossClueSetBuilder::SetSingleEQ(std::vector<Clue>& clues1, std::vector<Clue>& clues2,
                                       Pli const& pli1, size_t i, Pli const& pli2, size_t j,
                                       Clue const& mask) {
-    size_t beg1 = pli1.pli_shard_->Beg(), range1 = pli1.pli_shard_->Range();
-    size_t beg2 = pli2.pli_shard_->Beg(), range2 = pli2.pli_shard_->Range();
+    size_t beg1 = pli1.pli_shard_->Beg();
+    size_t beg2 = pli2.pli_shard_->Beg();
+    size_t range1 = pli1.pli_shard_->Range();
+    size_t range2 = pli2.pli_shard_->Range();
 
     for (size_t tid1 : pli1.Get(i)) {
         int64_t t1 = tid1 - beg1, r1 = t1 * range2 - beg2;
@@ -80,7 +82,8 @@ void CrossClueSetBuilder::CorrectStrSingle(std::vector<Clue>& clues1, std::vecto
 void CrossClueSetBuilder::SetCrossEQ(std::vector<Clue>& clues, Pli const& pli1, size_t i,
                                      Pli const& pli2, size_t j, Clue const& mask) {
     size_t tid_beg1 = pli1.pli_shard_->Beg();
-    size_t tid_beg2 = pli2.pli_shard_->Beg(), tid_range2 = pli2.pli_shard_->Range();
+    size_t tid_beg2 = pli2.pli_shard_->Beg();
+    size_t tid_range2 = pli2.pli_shard_->Range();
 
     for (size_t tid1 : pli1.Get(i)) {
         int64_t r1 = (tid1 - tid_beg1) * tid_range2 - tid_beg2;
@@ -105,7 +108,8 @@ void CrossClueSetBuilder::CorrectStrCross(std::vector<Clue>& clues, Pli const& p
 void CrossClueSetBuilder::SetReverseGT(std::vector<Clue>& reverseArray, Pli const& probePli,
                                        size_t to, Pli const& pivotPli, size_t i, Clue const& mask) {
     size_t probe_beg = probePli.pli_shard_->Beg();
-    size_t pivot_beg = pivotPli.pli_shard_->Beg(), pivot_range = pivotPli.pli_shard_->Range();
+    size_t pivot_beg = pivotPli.pli_shard_->Beg();
+    size_t pivot_range = pivotPli.pli_shard_->Range();
 
     for (size_t j = 0; j < to; ++j) {
         for (size_t probe_tid : probePli.Get(j)) {
@@ -121,7 +125,8 @@ void CrossClueSetBuilder::SetForwardGT(std::vector<Clue>& forwardArray, Pli cons
                                        size_t i, Pli const& probePli, size_t from,
                                        Clue const& mask) {
     size_t pivot_beg = pivotPli.pli_shard_->Beg();
-    size_t probe_beg = probePli.pli_shard_->Beg(), probe_range = probePli.pli_shard_->Range();
+    size_t probe_beg = probePli.pli_shard_->Beg();
+    size_t probe_range = probePli.pli_shard_->Range();
 
     for (size_t pivot_tid : pivotPli.Get(i)) {
         int64_t r1 = (pivot_tid - pivot_beg) * probe_range - probe_beg;
