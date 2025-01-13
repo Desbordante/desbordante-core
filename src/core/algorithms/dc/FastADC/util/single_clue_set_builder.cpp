@@ -87,11 +87,9 @@ void SingleClueSetBuilder::CorrectStrCross(std::vector<Clue>& clues, Pli const& 
     auto const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
-        try {
-            size_t j = probePli.GetClusterIdByKey(pivot_keys[i]);
+        size_t j;
+        if (probePli.TryGetClusterIdByKey(pivot_keys[i], j)) {
             SetCrossEQ(clues, pivot_clusters[i], probe_clusters[j], mask);
-        } catch (std::runtime_error const&) {
-            // Ignore and continue if no cluster is found by key
         }
     }
 }

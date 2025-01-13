@@ -21,6 +21,15 @@ Pli::Pli(std::vector<Cluster> raw_clusters, std::vector<size_t> keys,
       keys_(std::move(keys)),
       key_to_cluster_id_map_(std::move(translator)) {}
 
+bool Pli::TryGetClusterIdByKey(size_t key, size_t& cluster_id) const {
+    auto it = key_to_cluster_id_map_.find(key);
+    if (it != key_to_cluster_id_map_.end()) {
+        cluster_id = it->second;
+        return true;
+    }
+    return false;
+}
+
 size_t Pli::GetClusterIdByKey(size_t key) const {
     auto it = key_to_cluster_id_map_.find(key);
     if (it != key_to_cluster_id_map_.end()) {
