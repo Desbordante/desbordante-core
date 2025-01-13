@@ -37,6 +37,13 @@ void IndexProvider<T>::Sort() {
     for (size_t i = 0; i < objects_.size(); ++i) indexes_[objects_[i]] = i;
 }
 
+template <std::totally_ordered<> T>
+void IndexProvider<T>::Clear() {
+    objects_.clear();
+    indexes_.clear();
+    next_index_ = 0;
+}
+
 template class IndexProvider<PredicatePtr>;
 
 template class IndexProvider<int64_t>;

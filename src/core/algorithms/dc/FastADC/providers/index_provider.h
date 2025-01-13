@@ -25,12 +25,6 @@ private:
     std::vector<T> objects_;
     std::unordered_map<T, size_t> indexes_;
 
-    void Clear() {
-        objects_.clear();
-        indexes_.clear();
-        next_index_ = 0;
-    }
-
 public:
     IndexProvider() = default;
     IndexProvider(IndexProvider const&) = delete;
@@ -47,6 +41,8 @@ public:
     size_t Size() const;
 
     void Sort();
+
+    void Clear();
 };
 
 using PredicateIndexProvider = IndexProvider<PredicatePtr>;

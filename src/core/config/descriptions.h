@@ -173,4 +173,17 @@ constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
+constexpr auto kDShardLength =
+        "Number of rows each shard will cover when building PLI shards. Determines the "
+        "segmentation of rows for parallel processing in the FastADC algorithm";
+constexpr auto kDAllowCrossColumns =
+        "Specifies whether to allow the construction of Denial Constraints between different "
+        "attributes";
+constexpr auto kDMinimumSharedValue =
+        "Minimum threshold for the shared percentage of values between two columns";
+constexpr auto kDComparableThreshold =
+        "Threshold for the ratio of smaller to larger average values between two numeric columns";
+constexpr auto kDEvidenceThreshold =
+        "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
+        "considered approximate.";
 }  // namespace config::descriptions

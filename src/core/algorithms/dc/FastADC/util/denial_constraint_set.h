@@ -68,6 +68,8 @@ public:
         assert(predicate_provider);
     }
 
+    DenialConstraintSet() : predicate_provider_(nullptr) {}
+
     DenialConstraintSet(DenialConstraintSet const& other) = delete;
     DenialConstraintSet& operator=(DenialConstraintSet const& other) = delete;
     DenialConstraintSet(DenialConstraintSet&& other) noexcept = default;
@@ -95,8 +97,18 @@ public:
         return out;
     }
 
-    std::vector<DenialConstraint>&& GetResult() {
+    std::vector<DenialConstraint>&& ObtainResult() {
         return std::move(result_);
+    }
+
+    std::vector<DenialConstraint> const& GetResult() const {
+        return std::move(result_);
+    }
+
+    void Clear() {
+        constraints_.clear();
+        result_.clear();
+        predicate_provider_ = nullptr;
     }
 
     // Minimize the set of denial constraints
