@@ -17,7 +17,8 @@
 
 namespace algos::fastadc {
 
-boost::dynamic_bitset<>& operator&=(boost::dynamic_bitset<>& lhs, PredicateBitset const& rhs) {
+inline boost::dynamic_bitset<>& operator&=(boost::dynamic_bitset<>& lhs,
+                                           PredicateBitset const& rhs) {
     size_t rhs_size = rhs.size();
     for (size_t i = 0; i < rhs_size && i < lhs.size(); ++i) {
         if (!rhs.test(i)) {
@@ -27,7 +28,8 @@ boost::dynamic_bitset<>& operator&=(boost::dynamic_bitset<>& lhs, PredicateBitse
     return lhs;
 }
 
-boost::dynamic_bitset<> operator&(boost::dynamic_bitset<> const& lhs, PredicateBitset const& rhs) {
+inline boost::dynamic_bitset<> operator&(boost::dynamic_bitset<> const& lhs,
+                                         PredicateBitset const& rhs) {
     boost::dynamic_bitset<> result(lhs);
     result &= rhs;
     return result;
