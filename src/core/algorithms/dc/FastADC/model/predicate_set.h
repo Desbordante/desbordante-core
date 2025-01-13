@@ -21,11 +21,6 @@ private:
     mutable std::unique_ptr<PredicateSet> inv_set_TS_;  // Cached inverse set
 
 public:
-    // We want to iterate over PredicateSet with range-based for.
-    // In order to do this, PredicateSet should contain valid predicate
-    // index provider, hence deleting the default constructor
-    PredicateSet() = delete;
-
     PredicateIndexProvider* provider = nullptr;
 
     explicit PredicateSet(PredicateIndexProvider* predicate_index_provider)
