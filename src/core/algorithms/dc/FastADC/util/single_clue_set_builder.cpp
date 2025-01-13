@@ -9,8 +9,8 @@
 namespace algos::fastadc {
 
 SingleClueSetBuilder::SingleClueSetBuilder(PliShard const& shard)
-    : plis_(shard.plis),
-      tid_beg_(shard.beg),
+    : plis_(shard.Plis()),
+      tid_beg_(shard.Beg()),
       tid_range_(shard.Range()),
       evidence_count_(tid_range_ * tid_range_) {}
 

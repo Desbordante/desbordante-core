@@ -14,7 +14,7 @@
 
 namespace algos::fastadc {
 
-struct PliShard;
+class PliShard;
 
 /**
  * Position List Index (PLI) for a specific column segment.
@@ -73,39 +73,48 @@ public:
  * Each PliShard contains multiple PLIs, each corresponding to a column within the shard's row
  * range. This division into shards allows for parallel processing of data.
  */
-struct PliShard {
-    std::vector<Pli> plis;
+class PliShard {
+    std::vector<Pli> plis_;
     /* The beginning row index of this shard */
-    size_t beg;
+    size_t beg_;
     /* The end row index of this shard (exclusive) */
-    size_t end;
+    size_t end_;
 
+public:
     PliShard(std::vector<Pli> plis, size_t beg, size_t end)
-        : plis(std::move(plis)), beg(beg), end(end) {
+        : plis_(std::move(plis)), beg_(beg), end_(end) {
         assert(beg < end);
-        for (auto& pli : this->plis) pli.pli_shard_ = this;
+        for (auto& pli : this->plis_) pli.pli_shard_ = this;
     }
 
     PliShard(PliShard const&) = delete;
     PliShard& operator=(PliShard const&) = delete;
 
     PliShard(PliShard&& other) noexcept
-        : plis(std::move(other.plis)), beg(other.beg), end(other.end) {
-        for (auto& pli : plis) pli.pli_shard_ = this;
+        : plis_(std::move(other.plis_)), beg_(other.beg_), end_(other.end_) {
+        for (auto& pli : plis_) pli.pli_shard_ = this;
     }
 
     PliShard& operator=(PliShard&& other) noexcept {
         if (this != &other) {
-            plis = std::move(other.plis);
-            beg = other.beg;
-            end = other.end;
-            for (auto& pli : plis) pli.pli_shard_ = this;
+            plis_ = std::move(other.plis_);
+            beg_ = other.beg_;
+            end_ = other.end_;
+            for (auto& pli : plis_) pli.pli_shard_ = this;
         }
         return *this;
     }
 
+    std::vector<Pli> const& Plis() const {
+        return plis_;
+    }
+
+    size_t Beg() const {
+        return beg_;
+    }
+
     size_t Range() const {
-        return end - beg;
+        return end_ - beg_;
     }
 
     std::string ToString() const;

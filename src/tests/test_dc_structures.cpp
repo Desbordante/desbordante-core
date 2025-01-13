@@ -373,8 +373,9 @@ TEST_F(FastADC, PliShards) {
     auto pli_shards = std::move(pli_shard_builder_->pli_shards);
 
     for (auto const& shard : pli_shards) {
-        for (size_t i = 0; i < shard.plis.size(); ++i) {
-            auto const& pli = shard.plis[i];
+        std::vector<Pli> const& plis = shard.Plis();
+        for (size_t i = 0; i < plis.size(); ++i) {
+            auto const& pli = plis[i];
             auto const& keys = pli.GetKeys();
             auto const& clusters = pli.GetClusters();
             auto const& column = col_data_[i];
