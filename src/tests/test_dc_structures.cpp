@@ -548,7 +548,7 @@ TEST_F(FastADC, DenialConstraints) {
     ApproxEvidenceInverter dcbuilder(*predicate_builder_, 0.01, std::move(evidence_set));
     auto dcs = dcbuilder.BuildDenialConstraints();
 
-    std::vector<DenialConstraint> result = std::move(dcs.GetResult());
+    std::vector<DenialConstraint> result = std::move(dcs.ObtainResult());
     std::set<DenialConstraint, ToStringComparator> ordered_result(
             std::make_move_iterator(result.begin()), std::make_move_iterator(result.end()));
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "descriptions.h"
 namespace config::names {
 constexpr auto kTable = "table";
 constexpr auto kTables = "tables";
@@ -87,4 +88,9 @@ constexpr auto kColumnMatches = "column_matches";
 constexpr auto kMaxCardinality = "max_cardinality";
 constexpr auto kLevelDefinition = "level_definition";
 constexpr auto kDenialConstraint = "denial_constraint";
+constexpr auto kShardLength = "shard_length";
+constexpr auto kAllowCrossColumns = "allow_cross_columns";
+constexpr auto kMinimumSharedValue = "minimum_shared_value";
+constexpr auto kComparableThreshold = "comparable_threshold";
+constexpr auto kEvidenceThreshold = "evidence_threshold";
 }  // namespace config::names

@@ -22,10 +22,6 @@ private:
     // predicates_[op][col1][col2] corresponds to the related Predicate object
     std::unordered_map<Operator, OperatorMap> predicates_;
 
-    void Clear() {
-        predicates_.clear();
-    }
-
 public:
     PredicateProvider() = default;
     PredicateProvider(PredicateProvider const&) = delete;
@@ -39,6 +35,11 @@ public:
         auto [iter, _] = predicates_[op][left].try_emplace(right, op, left, right);
         return &iter->second;
     }
+
+    void Clear() {
+        predicates_.clear();
+    }
+
 };
 
 }  // namespace algos::fastadc
