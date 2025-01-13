@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <stack>
 #include <vector>
 
@@ -97,13 +96,13 @@ private:
     struct SearchNode {
         size_t e;
         boost::dynamic_bitset<> addable_predicates;
-        std::shared_ptr<DCCandidateTrie> dc_candidates;
+        DCCandidateTrie dc_candidates;
         std::vector<DCCandidate> invalid_dcs;
         int64_t target;
 
         SearchNode(size_t e, boost::dynamic_bitset<> const& addable_predicates,
-                   std::shared_ptr<DCCandidateTrie> dc_candidates,
-                   std::vector<DCCandidate> const& invalid_dcs, int64_t target)
+                   DCCandidateTrie&& dc_candidates, std::vector<DCCandidate> const& invalid_dcs,
+                   int64_t target)
             : e(e),
               addable_predicates(addable_predicates),
               dc_candidates(std::move(dc_candidates)),
@@ -119,10 +118,10 @@ private:
         full_mask.set();
         std::stack<SearchNode> nodes;  // Manual stack, where evidences_[node.e] needs to be hit
 
-        auto dc_candidates = std::make_shared<DCCandidateTrie>(n_predicates_);
-        dc_candidates->Add(DCCandidate{.cand = full_mask});
+        DCCandidateTrie dc_candidates(n_predicates_);
+        dc_candidates.Add(DCCandidate{.cand = full_mask});
 
-        Walk(0, full_mask, dc_candidates, target_, nodes);
+        Walk(0, full_mask, std::move(dc_candidates), target_, nodes);
 
         while (!nodes.empty()) {
             SearchNode nd = std::move(nodes.top());
@@ -130,20 +129,20 @@ private:
             if (nd.e >= evidences_.size() || nd.addable_predicates.none()) continue;
             Hit(nd);  // Hit evidences_[e]
             if (nd.target > 0)
-                Walk(nd.e + 1, nd.addable_predicates, nd.dc_candidates, nd.target, nodes);
+                Walk(nd.e + 1, nd.addable_predicates, std::move(nd.dc_candidates), nd.target,
+                     nodes);
         }
     }
 
     void Walk(size_t e, boost::dynamic_bitset<>& addable_predicates,
-              std::shared_ptr<DCCandidateTrie> dc_candidates, int64_t target,
-              std::stack<SearchNode>& nodes) {
-        while (e < evidences_.size() && !dc_candidates->IsEmpty()) {
+              DCCandidateTrie&& dc_candidates, int64_t target, std::stack<SearchNode>& nodes) {
+        while (e < evidences_.size() && !dc_candidates.IsEmpty()) {
             PredicateBitset evi = evidences_[e].evidence;
-            auto unhit_evi_dcs = dc_candidates->GetAndRemoveGeneralizations(evi);
+            auto unhit_evi_dcs = dc_candidates.GetAndRemoveGeneralizations(evi);
 
             // Hit evidences_[e] later
-            SearchNode nd(e, addable_predicates, dc_candidates, unhit_evi_dcs, target);
-            nodes.push(std::move(nd));
+            nodes.push(SearchNode(e, addable_predicates, std::move(dc_candidates), unhit_evi_dcs,
+                                  target));
 
             // Unhit evidences_[e]
             if (unhit_evi_dcs.empty()) return;
@@ -158,19 +157,19 @@ private:
                     max_can_hit += evidences_[i].count;
             if (max_can_hit < target) return;
 
-            auto new_candidates = std::make_shared<DCCandidateTrie>(n_predicates_);
+            DCCandidateTrie new_candidates(n_predicates_);
             for (auto const& dc : unhit_evi_dcs) {
                 boost::dynamic_bitset<> unhit_cand = dc.cand & evi;
                 if (unhit_cand.any())
-                    new_candidates->Add(DCCandidate(dc.bitset, unhit_cand));
+                    new_candidates.Add(DCCandidate(dc.bitset, unhit_cand));
                 else if (!approx_covers_.ContainsSubset(dc) &&
                          IsApproxCover(dc.bitset, e + 1, target))
                     approx_covers_.Add(dc);
             }
-            if (new_candidates->IsEmpty()) return;
+            if (new_candidates.IsEmpty()) return;
 
             e++;
-            dc_candidates = new_candidates;
+            dc_candidates = std::move(new_candidates);
         }
     }
 
@@ -184,31 +183,43 @@ private:
         auto& dc_candidates = nd.dc_candidates;
 
         if (nd.target <= 0) {
-            dc_candidates->ForEach([this](DCCandidate const& dc) { approx_covers_.Add(dc); });
-            for (auto const& invalid_dc : nd.invalid_dcs) {
-                boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
-                for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
-                     i = can_add.find_next(i)) {
-                    DCCandidate valid_dc{.bitset = invalid_dc.bitset};
-                    valid_dc.bitset.set(i);
-                    if (!approx_covers_.ContainsSubset(valid_dc)) approx_covers_.Add(valid_dc);
-                }
-            }
+            ProcessValidCandidates(dc_candidates, nd.invalid_dcs, evi);
         } else {
-            for (auto const& invalid_dc : nd.invalid_dcs) {
-                boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
-                for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
-                     i = can_add.find_next(i)) {
-                    DCCandidate valid_dc = invalid_dc;
-                    valid_dc.bitset.set(i);
-                    valid_dc.cand &= (~mutex_map_[i]);
-                    if (!dc_candidates->ContainsSubset(valid_dc) &&
-                        !approx_covers_.ContainsSubset(valid_dc)) {
-                        if (valid_dc.cand.any())
-                            dc_candidates->Add(valid_dc);
-                        else if (IsApproxCover(valid_dc.bitset, nd.e + 1, nd.target))
-                            approx_covers_.Add(valid_dc);
-                    }
+            ProcessInvalidCandidates(dc_candidates, nd.invalid_dcs, evi, nd.e + 1, nd.target);
+        }
+    }
+
+    void ProcessValidCandidates(DCCandidateTrie& dc_candidates,
+                                std::vector<DCCandidate> const& invalid_dcs,
+                                PredicateBitset const& evi) {
+        dc_candidates.ForEach([this](DCCandidate const& dc) { approx_covers_.Add(dc); });
+        for (auto const& invalid_dc : invalid_dcs) {
+            boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
+            for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
+                 i = can_add.find_next(i)) {
+                DCCandidate valid_dc{.bitset = invalid_dc.bitset};
+                valid_dc.bitset.set(i);
+                if (!approx_covers_.ContainsSubset(valid_dc)) approx_covers_.Add(valid_dc);
+            }
+        }
+    }
+
+    void ProcessInvalidCandidates(DCCandidateTrie& dc_candidates,
+                                  std::vector<DCCandidate> const& invalid_dcs,
+                                  PredicateBitset const& evi, size_t e, int64_t target) {
+        for (auto const& invalid_dc : invalid_dcs) {
+            boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
+            for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
+                 i = can_add.find_next(i)) {
+                DCCandidate valid_dc = invalid_dc;
+                valid_dc.bitset.set(i);
+                valid_dc.cand &= (~mutex_map_[i]);
+                if (!dc_candidates.ContainsSubset(valid_dc) &&
+                    !approx_covers_.ContainsSubset(valid_dc)) {
+                    if (valid_dc.cand.any())
+                        dc_candidates.Add(valid_dc);
+                    else if (IsApproxCover(valid_dc.bitset, e, target))
+                        approx_covers_.Add(valid_dc);
                 }
             }
         }
