@@ -64,7 +64,7 @@ public:
         InverseEvidenceSet();
 
         std::vector<boost::dynamic_bitset<>> raw_dcs;
-        approx_covers_.ForEach([&](DCCandidate const& transDC) {
+        approx_covers_.ForEach([this, &raw_dcs](DCCandidate const& transDC) {
             raw_dcs.push_back(organizer_.Retransform(transDC.bitset));
         });
 
@@ -184,7 +184,7 @@ private:
         auto& dc_candidates = nd.dc_candidates;
 
         if (nd.target <= 0) {
-            dc_candidates->ForEach([&](DCCandidate const& dc) { approx_covers_.Add(dc); });
+            dc_candidates->ForEach([this](DCCandidate const& dc) { approx_covers_.Add(dc); });
             for (auto const& invalid_dc : nd.invalid_dcs) {
                 boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
                 for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
