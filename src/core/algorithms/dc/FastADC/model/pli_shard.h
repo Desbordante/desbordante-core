@@ -52,6 +52,8 @@ public:
         return clusters_[idx];
     }
 
+    bool TryGetClusterIdByKey(size_t key, size_t& cluster_id) const;
+
     size_t GetClusterIdByKey(size_t key) const;
 
     size_t GetFirstIndexWhereKeyIsLTE(size_t target, size_t l = 0) const;
