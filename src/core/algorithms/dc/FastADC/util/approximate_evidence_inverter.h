@@ -216,10 +216,11 @@ private:
                 valid_dc.cand &= (~mutex_map_[i]);
                 if (!dc_candidates.ContainsSubset(valid_dc) &&
                     !approx_covers_.ContainsSubset(valid_dc)) {
-                    if (valid_dc.cand.any())
+                    if (valid_dc.cand.any()) {
                         dc_candidates.Add(valid_dc);
-                    else if (IsApproxCover(valid_dc.bitset, e, target))
+                    } else if (IsApproxCover(valid_dc.bitset, e, target)) {
                         approx_covers_.Add(valid_dc);
+                    }
                 }
             }
         }
