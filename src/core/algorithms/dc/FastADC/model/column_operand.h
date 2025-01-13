@@ -27,6 +27,8 @@ namespace algos::fastadc {
  */
 BETTER_ENUM(ColumnOperandTuple, char, t, s);
 
+// TODO: remove code duplication cause we already have "dc/model/column_operand.h" that is used for
+// DC verification.
 class ColumnOperand {
 private:
     Column const* column_;

@@ -45,6 +45,9 @@ using PredicateBitset = std::bitset<kPredicateBits>;
  * represented: the column operand from the first tuple ("t.A"), the comparison operator
  * ("="), and the column operand from the second tuple ("s.A").
  */
+
+// TODO: remove code duplication cause we already have "dc/model/predicate.h" that is used for
+// DC verification.
 class Predicate {
 private:
     Operator op_;
