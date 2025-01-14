@@ -5,7 +5,7 @@
 namespace algos::fastadc {
 
 template <std::totally_ordered<> T>
-size_t IndexProvider<T>::GetIndex(const T& object) {
+size_t IndexProvider<T>::GetIndex(T const& object) {
     auto it = indexes_.find(object);
     if (it == indexes_.end()) {
         indexes_[object] = next_index_;
@@ -17,7 +17,7 @@ size_t IndexProvider<T>::GetIndex(const T& object) {
 
 template <std::totally_ordered<> T>
 void IndexProvider<T>::AddAll(std::vector<T> const& objects) {
-    for (const auto& object : objects) GetIndex(object);
+    for (auto const& object : objects) GetIndex(object);
 }
 
 template <std::totally_ordered<> T>

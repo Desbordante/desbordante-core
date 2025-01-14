@@ -32,7 +32,7 @@ public:
     IndexProvider(IndexProvider&&) = default;
     IndexProvider& operator=(IndexProvider&&) = default;
 
-    size_t GetIndex(const T& object);
+    size_t GetIndex(T const& object);
 
     void AddAll(std::vector<T> const& objects);
 

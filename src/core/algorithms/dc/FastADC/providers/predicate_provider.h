@@ -39,7 +39,6 @@ public:
     void Clear() {
         predicates_.clear();
     }
-
 };
 
 }  // namespace algos::fastadc
