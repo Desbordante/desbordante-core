@@ -21,6 +21,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_set_od_1.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_1.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 1.
 + [mining_set_od_2.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_set_od_2.py) — a scenario showing how to discover order dependencies based on set axiomatization, part 2.
 + [mining_ucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ucc.py) — a scenario showing how to discover exact unique column combinations.
++ [mining_adc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_adc.py) — a scenario showing how to discover an approximate denial constraints.
 + [verifying_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_aucc.py) — a scenario showing how to verify an approximate unique column combination.
 + [verifying_fd_afd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_fd_afd.py) — a scenario showing how to verify exact and approximate functional dependencies.
 + [verifying_gfd](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/verifying_gfd) — a scenario showing how to verify a graph functional dependency.
