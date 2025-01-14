@@ -222,7 +222,7 @@ TEST(TestOperatorString, Compare) {
 }
 
 TEST(Predicate, PredicateCreatesCorrectly) {
-    CSVParser parser{kTmpDC};
+    CSVParser parser{kTestDC3};
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table =
             model::ColumnLayoutTypedRelationData::CreateFrom(parser, true);
     std::vector<model::TypedColumnData> col_data = std::move(table->GetColumnData());
