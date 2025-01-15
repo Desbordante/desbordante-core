@@ -9,6 +9,7 @@ These scenarios showcase a single pattern by discussing its definition and provi
 + [mining_ac.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ac.py) — a scenario showing the discovery of algebraic constraints.
 + [mining_afd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_afd.py) — a scenario showing how to discover approximate functional dependencies.
 + [mining_ar.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_ar.py) — a scenario showing how to discover association rules.
++ [mining_nar.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_nar.py) — a scenario showing how to discover numerical association rules.
 + [mining_aucc.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_aucc.py) — a scenario showing how to discover approximate unique column combinations.
 + [mining_cfd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_cfd.py) — a scenario showing how to discover conditional functional dependencies.
 + [mining_dd.py](https://github.com/Desbordante/desbordante-core/tree/main/examples/basic/mining_dd.py) — a scenario showing how to discover differential dependencies.
