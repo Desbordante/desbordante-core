@@ -15,9 +15,9 @@ TEST(HelloTest, BasicAssertions) {
     lhs.upper_bound = 2;
     rhs.column_name = "Col1";
     rhs.lower_bound = 0;
-    rhs.upper_bound = 1;
-    dd.left.emplace_back(lhs);
-    dd.right.emplace_back(rhs);
+    rhs.upper_bound = 4;
+    dd.left.push_back(lhs);
+    dd.right.push_back(rhs);
     CSVConfig const& csv_config = tests::kTestDD1;
     auto mp = algos::StdParamsMap({{config::names::kCsvConfig, csv_config}, {config::names::kDDString, dd}});
     auto verifier = algos::CreateAndLoadAlgorithm<algos::dd::DDVerifier>(mp);
