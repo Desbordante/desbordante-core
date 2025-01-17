@@ -13,6 +13,8 @@ namespace algos::dd {
     private:
         DDs dd_;
         config::InputTable input_table_;
+        std::size_t num_rows_;
+        std::size_t num_columns_;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
         void RegisterOptions();
@@ -24,6 +26,7 @@ namespace algos::dd {
             dd_.left.clear();
             dd_.right.clear();
         }
+        void SetLimits();
     protected:
         void LoadDataInternal() override;
         void MakeExecuteOptsAvailable() override;
