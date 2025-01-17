@@ -7,6 +7,10 @@
 #include "option_using.h"
 #include "tabular_data/input_table/option.h"
 
+#include <easylogging++.h>
+
+#include "table/vertical.h"
+
 namespace algos::dd {
     DDVerifier::DDVerifier() : Algorithm({}) {
         RegisterOptions();
@@ -17,11 +21,14 @@ namespace algos::dd {
         DESBORDANTE_OPTION_USING;
         const auto default_dd = DDs();
         RegisterOption(config::kTableOpt(&input_table_));
-        RegisterOption(Option{&dd_, kDDString, kDDDString});
+        RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
     }
 
+    void DDVerifier::SetLimits() {
+        num_rows_ = typed_relation_->GetNumRows();
+        num_columns_ = typed_relation_->GetNumColumns();
+    }
 
-    //question -- Can I copy this func from Split algorithm
     double DDVerifier::CalculateDistance(const model::ColumnIndex column_index,
                                          const std::pair<std::size_t, std::size_t> &tuple_pair) const {
         model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
@@ -58,43 +65,38 @@ namespace algos::dd {
             model::ColumnIndex column_index = relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
             columns.push_back(column_index);
         }
-        auto curr_constraint = constraints.cbegin();
+        auto curr_constraint = constraints.begin();
         for (const auto column_index: columns) {
-            const std::shared_ptr<model::PLI const> pli =
-                    relation_->GetColumnData(column_index).GetPliOwnership();
-            std::deque<model::PLI::Cluster> const &index = pli->GetIndex();
             if (result.empty()) {
-                for (std::size_t i = 0; i < index.size(); i++) {
-                    for (std::size_t j = i; j < index.size(); j++) {
-                        int first_index = index[i][0];
-                        int second_index = index[j][0];
-                        if (const double dif = CalculateDistance(column_index, {first_index, second_index});
-                            dif <= curr_constraint->upper_bound && dif >= curr_constraint->lower_bound) {
-                            result.emplace_back(first_index, second_index);
-                            }
-                        ++curr_constraint;
+                for (size_t i = 0; i < num_rows_; i++) {
+                    for (size_t j = i; j < num_rows_; j++) {
+                        auto dif = CalculateDistance(column_index, {i, j});
+                        LOG(INFO) << "Difference: " << dif;
+                        if (dif <= curr_constraint->upper_bound && dif >= curr_constraint->lower_bound) {
+                            result.emplace_back(i, j);
+                        }
                     }
                 }
-            } else {
-                for (std::size_t i = 0; i < result.size(); i++) {
-                    if (const double dif = CalculateDistance(column_index, result[i]);
-                        dif > curr_constraint->upper_bound || dif < curr_constraint->lower_bound) {
-                        result.erase(result.begin() + i);
-                        i--;
-                        }
-                    ++curr_constraint;
-                }
             }
+            else {
+                for (std::size_t i = 0; i < result.size(); i++) {
+                        if (const double dif = CalculateDistance(column_index, result[i]);
+                            dif > curr_constraint->upper_bound || dif < curr_constraint->lower_bound) {
+                            LOG(INFO) << "Difference: " << dif;
+                            result.erase(result.begin() + i);
+                            --i;
+                            }
+                    }
+            }
+            ++curr_constraint;
         }
         return result;
     }
 
     void DDVerifier::LoadDataInternal() {
-        relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, false); // nulls are
-        // ignored
+        relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, false);
         input_table_->Reset();
-        typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
-                                                                           false); // nulls are ignored
+        typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, false);
     }
 
     void DDVerifier::MakeExecuteOptsAvailable() {
@@ -127,7 +129,9 @@ namespace algos::dd {
 
 
     bool DDVerifier::VerifyDD() const {
+        // LOG(INFO) << dd_.ToString();
         const std::vector<std::pair<int, int>> lhs = GetRowsHolds(dd_.left);
+         // LOG(INFO) << lhs.size();
         if (lhs.empty()) {
             return false;
         }
