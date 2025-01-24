@@ -14,6 +14,8 @@
 
 namespace algos::dc {
 
+enum class Tuple { kS, kT, kMixed };
+
 //  @brief Represents a column operand for Predicate.
 //
 //  A predicate (e.g., t.A == s.A) comprises three elements:
@@ -30,15 +32,15 @@ namespace algos::dc {
 class ColumnOperand {
 private:
     boost::optional<Column const*> column_;
-    boost::optional<bool> is_first_tuple_;
+    boost::optional<dc::Tuple> tuple_;
     model::Type const* type_;
-    std::byte const* val_;  
+    std::byte const* val_;
 
 public:
     ColumnOperand() noexcept : val_(nullptr) {};
 
-    ColumnOperand(Column const* column, bool is_first_tuple, model::Type const* type)
-        : column_(column), is_first_tuple_(is_first_tuple), type_(type), val_(nullptr) {}
+    ColumnOperand(Column const* column, dc::Tuple tuple, model::Type const* type)
+        : column_(column), tuple_(tuple), type_(type), val_(nullptr) {}
 
     ColumnOperand(std::string const& str_val, model::Type const* type) : type_(type) {
         std::byte* val = type->Allocate();
@@ -48,7 +50,7 @@ public:
 
     ColumnOperand(ColumnOperand const& rhs) : type_(rhs.type_) {
         if (rhs.IsVariable()) {
-            is_first_tuple_ = rhs.is_first_tuple_;
+            tuple_ = rhs.tuple_;
             column_ = rhs.column_;
             val_ = nullptr;
         } else {
@@ -69,7 +71,7 @@ public:
         std::swap(type_, rhs.type_);
         std::swap(val_, rhs.val_);
         std::swap(column_, rhs.column_);
-        std::swap(is_first_tuple_, rhs.is_first_tuple_);
+        std::swap(tuple_, rhs.tuple_);
     }
 
     bool operator==(ColumnOperand const& rhs) const {
@@ -80,7 +82,7 @@ public:
             return type_->Compare(GetVal(), rhs.GetVal()) == model::CompareResult::kEqual;
         }
 
-        return GetColumn() == rhs.GetColumn() && IsFirstTuple() == rhs.IsFirstTuple();
+        return column_ == rhs.column_ && tuple_ == rhs.tuple_;
     }
 
     bool operator!=(ColumnOperand const& rhs) const {
@@ -92,9 +94,9 @@ public:
         return column_.get();
     }
 
-    bool IsFirstTuple() const {
-        assert(is_first_tuple_.is_initialized());
-        return is_first_tuple_.get();
+    Tuple GetTuple() const {
+        assert(tuple_.is_initialized());
+        return tuple_.get();
     }
 
     model::Type const* GetType() const noexcept {
@@ -117,7 +119,7 @@ public:
     std::string ToString() const {
         std::string res;
         if (IsVariable()) {
-            res = (is_first_tuple_.get() ? "t." : "s.") + column_.get()->GetName();
+            res = (tuple_.get() == Tuple::kT ? "t." : "s.") + column_.get()->GetName();
         } else {
             res = type_->ValueToString(val_);
         }
