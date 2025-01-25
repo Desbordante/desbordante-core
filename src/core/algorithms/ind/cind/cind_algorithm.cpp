@@ -1,4 +1,5 @@
 #include "cind_algorithm.h"
+
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
@@ -10,18 +11,26 @@
 #include "util/timed_invoke.h"
 
 namespace algos::cind {
-Cind::Cind(std::vector<std::string_view> phase_names)
-    : Algorithm(std::move(phase_names)) {
+Cind::Cind(std::vector<std::string_view> phase_names) : Algorithm(std::move(phase_names)) {
+    CreateSpiderAlgo();
+
     RegisterOptions();
     MakeLoadOptsAvailable();
 }
 
+void Cind::CreateSpiderAlgo() {
+    spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::spider);
+
+    domains_ = spider_algo_->domains_;
+}
+
 void Cind::RegisterOptions() {
     // Spider options
-    // RegisterOption(config::kTablesOpt(&input_tables_));
-    // RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
-    // RegisterOption(config::kThreadNumberOpt(&spider_threads_num_));
-    // RegisterOption(config::kMemLimitMbOpt(&spider_mem_limit_mb_));
+    RegisterOption(config::kTablesOpt(&spider_algo_->input_tables_));
+    RegisterOption(config::kEqualNullsOpt(&spider_algo_->is_null_equal_null_));
+    RegisterOption(config::kThreadNumberOpt(&spider_algo_->threads_num_));
+    RegisterOption(config::kMemLimitMbOpt(&spider_algo_->mem_limit_mb_));
+    RegisterOption(config::kErrorOpt(&spider_algo_->max_ind_error_));
 }
 
 void Cind::MakeLoadOptsAvailable() {
@@ -34,32 +43,28 @@ void Cind::MakeLoadOptsAvailable() {
 // }
 
 void Cind::LoadDataInternal() {
-    // auto const create_domains = [&] {
-    //     domains_ = std::make_shared<std::vector<model::ColumnDomain>>(
-    //             model::ColumnDomain::CreateFrom(input_tables_, spider_mem_limit_mb_, spider_threads_num_));
-    // };
-    // time_ = util::TimedInvoke(create_domains);
-    // spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::spider, domains_, is_null_equal_null_);
-    // spider_algo_->ExecutePrepare();
+    time_ = util::TimedInvoke(&Algorithm::LoadData, spider_algo_);
 }
 
-// bool Cind::SetExternalOption(std::string_view option_name, boost::any const& value) {
-//     try {
-//         spider_algo_->SetOption(option_name, value);
-//         return true;
-//     } catch (config::ConfigurationError&) {
-//     }
-//     return false;
-// }
+bool Cind::SetExternalOption(std::string_view option_name, boost::any const& value) {
+    try {
+        spider_algo_->SetOption(option_name, value);
+        return true;
+    } catch (config::ConfigurationError&) {
+    }
+    return false;
+}
 
+void Cind::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
+    auto const& spider_options = spider_algo_->GetNeededOptions();
+    previous_options.insert(spider_options.begin(), spider_options.end());
+}
 
 unsigned long long Cind::ExecuteInternal() {
-    // auto time = spider_algo_->Execute();
-    // return time;
-    return ++time_;
+    auto time = spider_algo_->Execute();
+    ++time_;
+    return time;
 }
 
-void Cind::ResetState() {
-    
-}
+void Cind::ResetState() {}
 }  // namespace algos::cind
