@@ -13,7 +13,7 @@ algo.execute()
 print(algo.time_taken())
 algo.execute()
 print(algo.time_taken())
-# inds = algo.get_inds()
-# print('Found inclusion dependencies (-> means "is included in"):\n')
-# for ind in inds:
-#     print(ind)
+inds = algo.get_ainds()
+print('Found inclusion dependencies (-> means "is included in"):\n')
+for ind in inds:
+    print(ind)
