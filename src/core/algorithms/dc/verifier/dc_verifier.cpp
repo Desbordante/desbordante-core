@@ -8,6 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 
 #include <boost/algorithm/string.hpp>
@@ -71,7 +72,9 @@ unsigned long long int DCVerifier::ExecuteInternal() {
         return 0;
     }
 
-    bool has_header = !relation_->GetSchema()->GetColumns().front().get()->GetName().empty();
+    std::string col_name = relation_->GetSchema()->GetColumns().front().get()->GetName();
+    boost::regex re("[0-9]+");
+    bool has_header = !boost::regex_match(col_name, re);
     index_offset_ = 1 + static_cast<size_t>(has_header);
     result_ = Verify(dc);
 
@@ -81,13 +84,15 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     return elapsed_time.count();
 }
 
-bool DCVerifier::Verify(dc::DC const& dc) {
-    dc::DC temp_dc = ConvertEqualities(dc);
-    std::vector<dc::Predicate> no_diseq_preds, diseq_preds, predicates = temp_dc.GetPredicates();
+bool DCVerifier::Verify(dc::DC dc) {
+    dc.ConvertEqualities();
+    std::vector<dc::Predicate> no_diseq_preds, diseq_preds;
+    std::vector<dc::Predicate> predicates = dc.GetPredicates();
 
     for (auto& pred : predicates) {
         auto op = pred.GetOperator();
-        if (op.GetType() == dc::OperatorType::kUnequal and pred.IsCrossTuple()) {
+        if (pred.IsVariable() and pred.IsCrossTuple() and
+            op.GetType() == dc::OperatorType::kUnequal) {
             diseq_preds.emplace_back(pred);
         } else {
             no_diseq_preds.emplace_back(pred);
@@ -97,6 +102,11 @@ bool DCVerifier::Verify(dc::DC const& dc) {
     size_t diseq_preds_count = diseq_preds.size();
     size_t all_comb_count = std::pow(2, diseq_preds_count);
     dc::DCType dc_type = dc.GetType();
+
+    // Otherwise it is not possible to collect violations
+    if (dc_type == dc::DCType::kOneInequality and do_collect_violations_ == true)
+        dc_type = dc::DCType::kTwoTuples;
+
     auto check = kDCTypeToVerificationMethod.at(dc_type);
 
     // TODO: check the article for optimization 2^l -> 2^(l-1) dc's
@@ -106,10 +116,10 @@ bool DCVerifier::Verify(dc::DC const& dc) {
     // e.g. 21 = 10101 is ">, <, >, <, >"
     for (size_t cur_signs = 0; cur_signs < all_comb_count; ++cur_signs) {
         dc::DC cur_dc = GetDC(no_diseq_preds, diseq_preds, cur_signs);
-        if (!(this->*check)(cur_dc)) return false;
+        (this->*check)(cur_dc);
     }
 
-    return true;
+    return violations_.empty();
 }
 
 dc::DC DCVerifier::GetDC(std::vector<dc::Predicate> const& no_diseq_preds,
@@ -154,60 +164,69 @@ bool DCVerifier::VerifyMixed(dc::DC const& dc) {
         }
     }
 
-    dc::DC mixed_dc(mixed_predicates.begin(), mixed_predicates.end());
     util::KDTree<Point> s_tree, t_tree;
-    bool res = true;
     std::vector<mo::ColumnIndex> all_cols = dc.GetColumnIndices();
-    for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
-        if (ContainsNullOrEmpty(all_cols, i)) continue;
+    std::vector<dc::Predicate> var_preds =
+            dc.GetPredicates([](dc::Predicate const& pred) { return pred.IsVariable(); });
 
-        ProcessMixed(s_predicates, s_tree, t_tree, mixed_dc, i, all_cols, res);
-        ProcessMixed(t_predicates, t_tree, s_tree, mixed_dc, i, all_cols, res);
-        if (!res) return false;
+    for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
+        std::unordered_set<Point, Point::Hasher> res_points;
+        if (ContainsNullOrEmpty(all_cols, i)) continue;
+        auto process =
+                std::bind(&DCVerifier::ProcessMixed, this, std::placeholders::_1,
+                          std::placeholders::_2, var_preds, all_cols, i, std::ref(res_points));
+
+        std::optional<Point> t_point = process(s_tree, t_predicates);
+        std::optional<Point> s_point = process(t_tree, s_predicates);
+
+        if (do_collect_violations_ == true) {
+            AddHighlights(res_points.begin(), res_points.end(), i + index_offset_);
+        } else if (!res_points.empty()) {
+            return false;
+        }
+
+        if (t_point.has_value()) t_tree.Insert(t_point.value());
+        if (s_point.has_value()) s_tree.Insert(s_point.value());
     }
 
-    return true;
+    return violations_.empty();
 }
 
-void DCVerifier::ProcessMixed(std::vector<dc::Predicate> const& preds, Tree& insert_tree,
-                              Tree const& search_tree, dc::DC const& dc, size_t i,
-                              std::vector<mo::ColumnIndex> const& cols_indices, bool& res) {
+std::optional<Point> DCVerifier::ProcessMixed(
+        Tree const& search_tree, std::vector<dc::Predicate> const& const_preds,
+        dc::DC const& two_tuple_dc, std::vector<mo::ColumnIndex> const& all_cols, size_t i,
+        std::unordered_set<Point, Point::Hasher>& res_points) {
     std::vector<std::byte const*> row = GetRow(i);
-    auto const [t_box, t_inv_box] = SearchRanges(dc, row);
-    if (Eval(row, preds)) {
-        std::vector<Point> search_res = search_tree.QuerySearch(t_box);
-        std::vector<Point> inv_search_res = search_tree.QuerySearch(t_inv_box);
+    auto [box, inv_box] = SearchRanges(all_cols, two_tuple_dc, row);
 
-        if (!search_res.empty() or !inv_search_res.empty()) {
-            res = false;
-            return;
-        };
+    std::optional<Point> insert_point;
+    if (Eval(row, const_preds)) {
+        std::vector<Point> search_res = search_tree.QuerySearch(box);
+        res_points.insert(search_res.begin(), search_res.end());
 
         size_t cur_ind = i + index_offset_;
-        AddHighlights(search_res, cur_ind);
-        AddHighlights(inv_search_res, cur_ind);
-
-        insert_tree.Insert(MakePoint(row, cols_indices, cur_ind));
+        insert_point = MakePoint(row, all_cols, cur_ind);
     }
-
-    res = true;
-    return;
+    return insert_point;
 }
 
 bool DCVerifier::VerifyOneTuple(dc::DC const& dc) {
     std::vector<Column::IndexType> all_cols = dc.GetColumnIndices();
-    bool res = true;
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(all_cols, i)) continue;
         std::vector<std::byte const*> tuple = GetRow(i);
         if (Eval(tuple, dc.GetPredicates())) {
-            res = false;
             size_t cur_ind = i + index_offset_;
-            violations_.push_back({cur_ind, cur_ind});
+
+            if (do_collect_violations_) {
+                violations_.emplace(cur_ind, cur_ind);
+            } else {
+                return false;
+            }
         }
     }
 
-    return res;
+    return violations_.empty();
 }
 
 bool DCVerifier::VerifyTwoTuples(dc::DC const& dc) {
@@ -217,58 +236,64 @@ bool DCVerifier::VerifyTwoTuples(dc::DC const& dc) {
     std::vector<mo::ColumnIndex> ineq_cols = dc.GetColumnIndicesWithOperator(
             [](dc::Operator op) { return op.GetType() != dc::OperatorType::kEqual; });
 
-    bool res = true;
     std::vector<Point> points;
     std::unordered_map<Point, util::KDTree<Point>, Point::Hasher> hash;
+    std::vector<dc::Predicate> ineq_preds = dc.GetPredicates([](dc::Predicate pred) {
+        return pred.GetOperator().GetType() != dc::OperatorType::kEqual;
+    });
+
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(all_cols, i)) continue;
 
         std::vector<std::byte const*> row = GetRow(i);
         Point point = MakePoint(row, eq_cols);
         Tree& tree = hash[point];
+        auto [box, inv_box] = SearchRanges(ineq_cols, ineq_preds, row);
+
+        std::unordered_set<Point, Point::Hasher> res_points;
+        std::vector<Point> search_res = tree.QuerySearch(box);
+        std::vector<Point> inv_search_res = tree.QuerySearch(inv_box);
+
+        res_points.insert(search_res.begin(), search_res.end());
+        res_points.insert(inv_search_res.begin(), inv_search_res.end());
 
         size_t cur_ind = i + index_offset_;
-        auto [box, inv_box] = SearchRanges(dc, row);
-        std::vector<Point> search_res = hash[point].QuerySearch(box);
-        std::vector<Point> inv_search_res = hash[point].QuerySearch(inv_box);
-        if (!search_res.empty() or !inv_search_res.empty()) {
-            AddHighlights(search_res, cur_ind);
-            AddHighlights(inv_search_res, cur_ind);
-            res = false;
+        if (do_collect_violations_ == true) {
+            AddHighlights(res_points.begin(), res_points.end(), cur_ind);
+        } else if (!res_points.empty()) {
+            return false;
         }
 
         tree.Insert(MakePoint(row, ineq_cols, cur_ind));
     }
 
-    return res;
-}
-
-void DCVerifier::AddHighlights(std::vector<Point> const& points, size_t index) {
-    for (auto const& point : points) {
-        violations_.emplace_back(point.GetIndex(), index);
-    }
+    return violations_.empty();
 }
 
 bool DCVerifier::VerifyAllEquality(dc::DC const& dc) {
-    bool res = true;
     std::unordered_map<Point, std::vector<size_t>, Point::Hasher> res_tuples;
     std::vector<Column::IndexType> const eq_cols = dc.GetColumnIndices();
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(eq_cols, i)) continue;
+
         std::vector<std::byte const*> row = GetRow(i);
         size_t cur_ind = i + index_offset_;
         Point point = MakePoint(row, eq_cols);
+
         if (res_tuples.find(point) != res_tuples.end()) {
+            if (!do_collect_violations_) return false;
+
             std::vector<size_t> viol_indexes = res_tuples[point];
-            for (auto ind : viol_indexes) violations_.push_back({cur_ind, ind});
+            for (auto ind : viol_indexes) {
+                violations_.emplace(cur_ind, ind);
+            }
             res_tuples[point].push_back(cur_ind);
-            res = false;
         } else {
             res_tuples[point] = {cur_ind};
         }
     }
 
-    return res;
+    return violations_.empty();
 }
 
 bool DCVerifier::VerifyOneInequality(dc::DC const& dc) {
@@ -327,7 +352,7 @@ bool DCVerifier::VerifyOneInequality(dc::DC const& dc) {
     return true;
 }
 
-std::vector<std::byte const*> DCVerifier::GetRow(size_t row) {
+std::vector<std::byte const*> DCVerifier::GetRow(size_t row) const {
     auto res = std::vector<std::byte const*>(data_.size());
     auto get_val = [row](auto const& col) { return col.GetValue(row); };
     std::transform(data_.begin(), data_.end(), res.begin(), get_val);
@@ -336,33 +361,24 @@ std::vector<std::byte const*> DCVerifier::GetRow(size_t row) {
 }
 
 std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
-        dc::DC const& dc, std::vector<std::byte const*> const& row) {
-    std::vector<mo::ColumnIndex> ineq_cols = dc.GetColumnIndicesWithOperator([](dc::Operator op) {
-        return op.GetType() != dc::OperatorType::kEqual and
-               op.GetType() != dc::OperatorType::kUnequal;
-    });
+        std::vector<mo::ColumnIndex> const& cols_to_select, dc::DC const& ineq_dc,
+        std::vector<std::byte const*> const& row) const {
+    std::vector<mo::ColumnIndex> ineq_cols = ineq_dc.GetColumnIndices();
     std::sort(ineq_cols.begin(), ineq_cols.end());
 
-    // create n-dimensional vectors where each component has the
-    // same type as the corresponding column which is in a
-    // predicate with inequality operator
     std::vector<std::byte const*> empty_vec(row.size(), nullptr);
-    Point lower_bound = MakePoint(empty_vec, ineq_cols, 0, dc::ValType::kMinusInf);
-    Point upper_bound = MakePoint(empty_vec, ineq_cols, 0, dc::ValType::kPlusInf);
+    Point lower_bound = MakePoint(empty_vec, cols_to_select, 0, dc::ValType::kMinusInf);
+    Point upper_bound = MakePoint(empty_vec, cols_to_select, 0, dc::ValType::kPlusInf);
     Point lower_bound_inv = lower_bound, upper_bound_inv = upper_bound;
 
-    std::vector<dc::Predicate> ineq_preds = dc.GetPredicates([](dc::Predicate pred) {
-        return pred.GetOperator().GetType() != dc::OperatorType::kEqual and
-               pred.GetOperator().GetType() != dc::OperatorType::kUnequal and
-               pred.GetLeftOperand().IsFirstTuple() != pred.GetRightOperand().IsFirstTuple();
-    });
+    std::vector<dc::Predicate> ineq_preds = ineq_dc.GetPredicates();
 
     using bound_type = util::Rect<Point>::bound_type;
 
-    std::vector<bound_type> lower_bound_type(ineq_cols.size(), bound_type::kClosed);
-    std::vector<bound_type> upper_bound_type(ineq_cols.size(), bound_type::kClosed);
-    std::vector<bound_type> lower_bound_type_inv(ineq_cols.size(), bound_type::kClosed);
-    std::vector<bound_type> upper_bound_type_inv(ineq_cols.size(), bound_type::kClosed);
+    std::vector<bound_type> lower_bound_type(cols_to_select.size(), bound_type::kClosed);
+    std::vector<bound_type> upper_bound_type(cols_to_select.size(), bound_type::kClosed);
+    std::vector<bound_type> lower_bound_type_inv(cols_to_select.size(), bound_type::kClosed);
+    std::vector<bound_type> upper_bound_type_inv(cols_to_select.size(), bound_type::kClosed);
 
     for (dc::Predicate const& ineq_pred : ineq_preds) {
         dc::OperatorType op_type = ineq_pred.GetOperator().GetType();
@@ -370,8 +386,8 @@ std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
         mo::ColumnIndex right = ineq_pred.GetRightOperand().GetColumn()->GetIndex();
         mo::ColumnIndex left_ind = 0, right_ind = 0;
 
-        while (ineq_cols[left_ind] != left) left_ind++;
-        while (ineq_cols[right_ind] != right) right_ind++;
+        while (cols_to_select[left_ind] != left) left_ind++;
+        while (cols_to_select[right_ind] != right) right_ind++;
 
         auto right_comp = dc::Component(row[right], &data_[right].GetType());
         auto left_comp = dc::Component(row[left], &data_[left].GetType());
@@ -405,37 +421,24 @@ std::pair<util::Rect<Point>, util::Rect<Point>> DCVerifier::SearchRanges(
     return {box, inv_box};
 }
 
-dc::DC DCVerifier::ConvertEqualities(dc::DC const& dc) {
-    std::vector<dc::Predicate> res, preds = dc.GetPredicates();
+bool DCVerifier::Eval(std::vector<std::byte const*> row, std::vector<dc::Predicate> preds) const {
+    dc::Component left_comp, right_comp;
+    std::byte const* left_val;
+    std::byte const* right_val;
     for (auto const& pred : preds) {
-        auto left = pred.GetLeftOperand();
-        auto right = pred.GetRightOperand();
-        if (pred.IsCrossColumn() and pred.IsCrossTuple() and
-            pred.GetOperator().GetType() == dc::OperatorType::kEqual) {
-            auto left_op = dc::ColumnOperand(left.GetColumn(), left.IsFirstTuple(), left.GetType());
-            auto right_op =
-                    dc::ColumnOperand(right.GetColumn(), right.IsFirstTuple(), right.GetType());
+        dc::ColumnOperand left_op = pred.GetLeftOperand();
+        dc::ColumnOperand right_op = pred.GetRightOperand();
 
-            auto less_equal = dc::Operator(dc::OperatorType::kLessEqual);
-            auto greater_equal = dc::Operator(dc::OperatorType::kGreaterEqual);
+        if (left_op.IsConstant()) left_val = left_op.GetVal();
+        if (right_op.IsConstant()) right_val = right_op.GetVal();
 
-            res.emplace_back(less_equal, left_op, right_op);
-            res.emplace_back(greater_equal, left_op, right_op);
-        } else {
-            res.emplace_back(pred);
-        }
-    }
+        if (left_op.IsVariable()) left_val = row[left_op.GetColumn()->GetIndex()];
+        if (right_op.IsVariable()) right_val = row[right_op.GetColumn()->GetIndex()];
 
-    return res;
-}
+        left_comp = dc::Component(left_val, left_op.GetType());
+        right_comp = dc::Component(right_val, right_op.GetType());
 
-bool DCVerifier::Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predicate> preds) {
-    for (auto const& pred : preds) {
-        size_t left_ind = pred.GetLeftOperand().GetColumn()->GetIndex();
-        size_t right_ind = pred.GetRightOperand().GetColumn()->GetIndex();
-        auto left = dc::Component(tuple[left_ind], &data_[left_ind].GetType());
-        auto right = dc::Component(tuple[right_ind], &data_[right_ind].GetType());
-        if (!dc::Component::Eval(left, right, pred.GetOperator())) return false;
+        if (!dc::Component::Eval(left_comp, right_comp, pred.GetOperator())) return false;
     }
 
     return true;
@@ -443,7 +446,7 @@ bool DCVerifier::Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predi
 
 Point DCVerifier::MakePoint(std::vector<std::byte const*> const& vec,
                             std::vector<mo::ColumnIndex> const& indices, size_t point_ind /* = 0 */,
-                            dc::ValType val_type /* = kFinite */) {
+                            dc::ValType val_type /* = kFinite */) const {
     std::vector<dc::Component> pt;
     for (auto ind : indices) {
         mo::Type const& type = data_[ind].GetType();

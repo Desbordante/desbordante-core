@@ -23,10 +23,9 @@ namespace algos::dc {
 // encapsulates the column operand part of a predicate, such as "t.A" or "s.A".
 // 
 // A constant value also can be a column operand thus std::optional is utilized
-//
-// The class distinguishes between operands derived from the first tuple (t) and those
-// from the second tuple (s) using a boolean flag `is_first_tuple_`, where `true` indicates an
-// operand from the first tuple (t), and `false` indicates an operand from the second tuple (s).
+// ColumnOperand may have a tuple_ variable initialized or may not thus 
+// std::optional is utilized. If a ColumnOperand is a constant value,
+// then tuple_ is not initialized, in this case accessing tuple_ is not allowed.
 // 
 class ColumnOperand {
 private:
