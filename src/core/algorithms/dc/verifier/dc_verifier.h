@@ -19,6 +19,16 @@
 
 namespace algos {
 
+namespace dc {
+struct SetComparator {
+    bool operator()(std::pair<size_t, size_t> const& lhs,
+                    std::pair<size_t, size_t> const& rhs) const {
+        return (lhs.first != rhs.first) ? (lhs.first < rhs.first) : (lhs.second < rhs.second);
+    }
+};
+
+}  // namespace dc
+
 class DCVerifier final : public Algorithm {
 private:
     // @brief Represents violating tuples of a given table
@@ -29,7 +39,7 @@ private:
     // If a certain pair contains equal left and right record number
     // it means that that DC is a one-tuple one and it sufficient
     // for a single tuple to violate it. e.g. {{2, 2}}
-    std::vector<std::pair<size_t, size_t>> violations_;
+    std::set<std::pair<size_t, size_t>, dc::SetComparator> violations_;
     std::unique_ptr<ColumnLayoutRelationData> relation_;
     std::vector<model::TypedColumnData> data_;
     config::InputTable input_table_;
@@ -41,7 +51,7 @@ private:
 
     void MakeExecuteOptsAvailable();
 
-    bool Verify(dc::DC const& dc);
+    bool Verify(dc::DC dc);
 
     bool VerifyOneTuple(dc::DC const& dc);
 
@@ -53,31 +63,30 @@ private:
 
     bool VerifyAllEquality(dc::DC const& dc);
 
-    std::vector<dc::Predicate> SplitDC(std::string const& dc_string);
+    std::vector<std::byte const*> GetRow(size_t row) const;
 
-    // Convert all two-tuple equality predicates: s.A == t.B -> (s.A <= t.B and s.A >= t.B)
-    dc::DC ConvertEqualities(dc::DC const& dc);
-
-    std::vector<std::byte const*> GetRow(size_t row);
-
-    bool Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predicate> preds);
+    bool Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predicate> preds) const;
 
     bool ContainsNullOrEmpty(std::vector<Column::IndexType> const& indices, size_t tuple_ind) const;
 
     std::pair<util::Rect<dc::Point<dc::Component>>, util::Rect<dc::Point<dc::Component>>>
-    SearchRanges(dc::DC const& dc, std::vector<std::byte const*> const& tuple);
+    SearchRanges(std::vector<Column::IndexType> const& all_cols, dc::DC const& ineq_dc,
+                 std::vector<std::byte const*> const& tuple) const;
 
-    void ProcessMixed(std::vector<dc::Predicate> const& preds,
-                      util::KDTree<dc::Point<dc::Component>>& insert_tree,
-                      util::KDTree<dc::Point<dc::Component>> const& search_tree, dc::DC const& dc,
-                      size_t i, std::vector<Column::IndexType> const& cols_indices, bool& res);
+    util::Rect<dc::Point<dc::Component>> SearchMixedRange(dc::DC const& dc, dc::DC const& mixed_dc,
+                                                          std::vector<std::byte const*> row);
 
-    void AddHighlights(std::vector<dc::Point<dc::Component>> const& vec, size_t index);
+    std::optional<dc::Point<dc::Component>> ProcessMixed(
+            util::KDTree<dc::Point<dc::Component>> const& search_tree,
+            std::vector<dc::Predicate> const& const_preds, dc::DC const& two_tuple_dc,
+            std::vector<Column::IndexType> const& all_cols, size_t i,
+            std::unordered_set<dc::Point<dc::Component>, dc::Point<dc::Component>::Hasher>&
+                    res_points);
 
     dc::Point<dc::Component> MakePoint(std::vector<std::byte const*> const& vec,
                                        std::vector<Column::IndexType> const& indices,
                                        size_t point_ind = 0,
-                                       dc::ValType val_type = dc::ValType::kFinite);
+                                       dc::ValType val_type = dc::ValType::kFinite) const;
 
     dc::DC GetDC(std::vector<dc::Predicate> const& no_diseq_preds,
                  std::vector<dc::Predicate> const& diseq_preds, size_t cur_signs);
@@ -90,6 +99,13 @@ private:
                     {dc::DCType::kTwoTuples, &DCVerifier::VerifyTwoTuples},
                     {dc::DCType::kMixed, &DCVerifier::VerifyMixed}};
 
+    template <typename InputIt>
+    void AddHighlights(InputIt first, InputIt last, size_t cur_index) {
+        for (; first != last; ++first) {
+            violations_.emplace(first->GetIndex(), cur_index);
+        }
+    }
+
 public:
     DCVerifier();
 
@@ -97,11 +113,14 @@ public:
         return result_;
     }
 
-    auto const& GetViolations() {
-        return violations_;
+    std::vector<std::pair<size_t, size_t>> GetViolations() {
+        return {violations_.begin(), violations_.end()};
     }
 
-    void ResetState() final {};
+    void ResetState() final {
+        violations_.clear();
+    };
+
     void LoadDataInternal() final;
     unsigned long long int ExecuteInternal() final;
 };

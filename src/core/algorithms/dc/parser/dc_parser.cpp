@@ -17,10 +17,9 @@ namespace {
 
 using namespace algos::dc;
 
-std::unique_ptr<ColumnOperand> GetOperand(ColumnOperand const& operand,
-                                          std::string const& str_val) {
+ColumnOperand GetOperand(ColumnOperand const& operand, std::string const& str_val) {
     mo::Type const* type = operand.GetType();
-    return std::make_unique<ColumnOperand>(str_val, type);
+    return {str_val, type};
 }
 
 }  // namespace
@@ -112,27 +111,25 @@ Predicate DCParser::ConvertToPredicate(std::string const& pred) {
 
 std::pair<ColumnOperand, ColumnOperand> DCParser::GetOperands(std::string str_left_op,
                                                               std::string str_right_op) {
-    std::unique_ptr<ColumnOperand> left_op, right_op;
+    std::optional<ColumnOperand> left_op, right_op;
 
     if (IsVarOperand(str_left_op)) {
         RemoveEscaping(str_left_op);
-        ColumnOperand operand = ConvertToVariableOperand(str_left_op);
-        left_op = std::make_unique<dc::ColumnOperand>(operand);
+        left_op = ConvertToVariableOperand(str_left_op);
     }
 
     if (IsVarOperand(str_right_op)) {
         RemoveEscaping(str_right_op);
-        ColumnOperand operand = ConvertToVariableOperand(str_right_op);
-        right_op = std::make_unique<dc::ColumnOperand>(operand);
+        right_op = ConvertToVariableOperand(str_right_op);
     }
 
-    if (!left_op and !right_op)
+    if (!left_op.has_value() and !right_op.has_value())
         throw std::invalid_argument("Pure constant predicate is not allowed");
 
-    if (!left_op) {
-        left_op = GetOperand(*right_op.get(), str_left_op);
-    } else if (right_op == nullptr) {
-        right_op = GetOperand(*left_op.get(), str_right_op);
+    if (!left_op.has_value()) {
+        left_op = GetOperand(*right_op, str_left_op);
+    } else if (!right_op.has_value()) {
+        right_op = GetOperand(*left_op, str_right_op);
     }
 
     return {std::move(*left_op), std::move(*right_op)};
