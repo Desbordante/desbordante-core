@@ -8,7 +8,7 @@ if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif()
 
-project(Desbordante)
+project(Desbordante CXX)
 
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)

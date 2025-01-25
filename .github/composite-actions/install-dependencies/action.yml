@@ -60,16 +60,16 @@ runs:
       shell: bash
       if: env.OS == 'ubuntu'
     - name: Install build tools using brew
-      run: brew install make cmake
+      run: brew install make cmake --formula
       shell: bash
       if: env.OS == 'macos'
 
-    - name: Install GCC toolset
+    - name: Install GCC toolset (on Ubuntu)
       run: |
         sudo apt-get install gcc-10 g++-10 -y
       shell: bash
-      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc'
-    - name: Install Clang toolset (on Linux)
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+    - name: Install Clang toolset (on Ubuntu)
       # "all" option is needed to install libc++ and libc++abi
       # apt is hardcoded in llvm.sh, so we can't use it everywhere
       run: |
@@ -78,6 +78,11 @@ runs:
         sudo ./llvm.sh 17 all
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install GCC toolset (on macOS)
+      run: |
+        brew install gcc@14
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
     - name: Install LLVM Clang toolset (on macOS)
       run: brew install llvm@17
       shell: bash
@@ -139,19 +144,27 @@ runs:
         ./bootstrap.sh --with-libraries=container,thread,graph
         sudo ./b2 install --prefix=/usr
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc'
-    - name: Install Boost built with Clang (on Linux)
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+    - name: Install Boost built with Clang (on Ubuntu)
       run: |
         cd lib/boost
-        ./bootstrap.sh
+        ./bootstrap.sh --with-libraries=container,thread,graph
         sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
          linkflags="-stdlib=libc++"
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install Boost built with GCC (on macOS)
+      run: | 
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph 
+        echo "using darwin : : g++-14 ;" > user-config.jam
+        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
     - name: Install Boost built with LLVM Clang (on macOS)
       run: |
         cd lib/boost
-        ./bootstrap.sh
+        ./bootstrap.sh --with-libraries=container,thread,graph
         echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
          cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
