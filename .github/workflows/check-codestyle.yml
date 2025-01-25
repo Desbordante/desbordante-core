@@ -57,8 +57,7 @@ jobs:
           download-pybind: true
       - name: Generate compile_commands.json
         run: |
-          cmake -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10 \
+          cmake -DCMAKE_CXX_COMPILER=g++-10 \
             -DCMAKE_BUILD_TYPE=Debug \
             -Dgtest_disable_pthreads=OFF \
             -DASAN=OFF \
