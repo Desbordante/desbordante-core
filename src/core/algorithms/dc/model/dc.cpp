@@ -12,22 +12,30 @@
 namespace algos::dc {
 
 bool DC::CheckAllEquality() const {
-    for (Predicate const& pred : predicates_) {
-        Operator op = pred.GetOperator();
-        if (pred.IsCrossColumn() or !pred.IsCrossTuple() or op != OperatorType::kEqual)
-            return false;
-    }
+    auto check = [](auto const& pred) {
+        return pred.GetOperator() == dc::OperatorType::kEqual and pred.IsCrossTuple() and
+               pred.IsOneColumn();
+    };
 
-    return true;
+    return std::all_of(predicates_.begin(), predicates_.end(), check);
+
+    // for (Predicate const& pred : predicates_) {
+    //     Operator op = pred.GetOperator();
+    //     if (pred.IsConstant() or pred.IsCrossColumn() or pred.IsOneTuple() or
+    //         op != OperatorType::kEqual)
+    //         return false;
+    // }
+
+    // return true;
 }
 
 bool DC::CheckOneInequality() const {
     size_t count_eq = 0, count_ineq = 0;
-
     for (Predicate const& pred : predicates_) {
-        Operator op = pred.GetOperator();
+        if (pred.IsConstant()) return false;
 
-        if (op == OperatorType::kEqual and !pred.IsCrossColumn()) {
+        Operator op = pred.GetOperator();
+        if (op == OperatorType::kEqual and pred.IsOneColumn()) {
             count_eq++;
         } else if (op != OperatorType::kEqual and op != OperatorType::kUnequal and
                    pred.IsCrossTuple()) {
@@ -39,13 +47,21 @@ bool DC::CheckOneInequality() const {
 }
 
 bool DC::CheckOneTuple() const {
-    return std::none_of(predicates_.begin(), predicates_.end(),
-                        std::mem_fn(&Predicate::IsCrossTuple));
+    ColumnOperand operand = predicates_.front().GetVariableOperand();
+    bool is_first_tuple = operand.IsFirstTuple();
+
+    auto check = [is_first_tuple](Predicate const& pred) {
+        return (pred.IsConstant() or pred.IsOneTuple()) and
+               pred.GetVariableOperand().IsFirstTuple() == is_first_tuple;
+    };
+
+    return std::all_of(predicates_.begin(), predicates_.end(), check);
 }
 
 bool DC::CheckTwoTuples() const {
-    return std::all_of(predicates_.begin(), predicates_.end(),
-                       std::mem_fn(&Predicate::IsCrossTuple));
+    auto check = [](Predicate const& pred) { return pred.IsVariable() and pred.IsCrossTuple(); };
+
+    return std::all_of(predicates_.begin(), predicates_.end(), check);
 }
 
 DCType DC::GetType() const {
@@ -75,6 +91,23 @@ std::string DC::ToString() const {
     ss << ')';
 
     return ss.str();
+}
+
+void DC::ConvertEqualities() {
+    std::vector<dc::Predicate> res;
+    for (auto const& pred : predicates_) {
+        auto left = pred.GetLeftOperand();
+        auto right = pred.GetRightOperand();
+        if (pred.IsVariable() and pred.IsCrossColumn() and pred.IsCrossTuple() and
+            pred.GetOperator().GetType() == dc::OperatorType::kEqual) {
+            res.emplace_back(dc::OperatorType::kLessEqual, left, right);
+            res.emplace_back(dc::OperatorType::kGreaterEqual, left, right);
+        } else {
+            res.emplace_back(pred);
+        }
+    }
+
+    predicates_ = std::move(res);
 }
 
 }  // namespace algos::dc

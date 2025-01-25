@@ -14,10 +14,10 @@
 namespace algos::dc {
 
 enum class DCType {
-    kOneTuple = 0,  // Each predicate is of form s.A op s.B or t.A op t.B
+    kOneTuple = 0,  // Each predicate is of form t.A op t.B or t.A op const_value
     kTwoTuples,     // Each predicate is of form s.A op t.B
     kMixed,         // Both kTwoTuples and kOneTuple predicates are in DC
-    kAllEquality,   // All predicates are of form s.A == t.A
+    kAllEquality,   // Each predicate is of form s.A == t.A
     kOneInequality  // DC is kAllEquality except one predicate of form s.A op t.B, op is inequality
 };
 
@@ -25,7 +25,7 @@ enum class DCType {
 //
 //  DCs involve comparisons between pairs of rows within a dataset.
 //  A typical DC example, derived from a Functional Dependency such as A -> B,
-//  is expressed as: `forall t, s in R, not (t.A == s.A and t.B != s.B)`
+//  is expressed as: `forall t, s in R: t != s, not (t.A == s.A and t.B != s.B)`
 //  This denotes that for any pair of rows in the relation, it should not be the case
 //  that while the values in column "A" are equal, the values in column "B" are unequal.
 //
@@ -47,17 +47,16 @@ public:
     template <class Iter>
     DC(Iter first, Iter last) : predicates_(first, last){};
 
-    DCType GetType() const;
-
     // returns unique columns indices from each Predicate which satisfy the given predicate
     template <class Pred>
     std::vector<Column::IndexType> GetColumnIndicesWithOperator(Pred check) const {
         std::set<Column::IndexType> res;
         for (Predicate const& pred : predicates_) {
             if (check(pred.GetOperator())) {
-                Column::IndexType left_ind = pred.GetLeftOperand().GetColumn()->GetIndex();
-                Column::IndexType right_ind = pred.GetRightOperand().GetColumn()->GetIndex();
-                res.insert({left_ind, right_ind});
+                dc::ColumnOperand left_operand = pred.GetLeftOperand();
+                dc::ColumnOperand right_operand = pred.GetRightOperand();
+                if (left_operand.IsVariable()) res.insert(left_operand.GetColumn()->GetIndex());
+                if (right_operand.IsVariable()) res.insert(right_operand.GetColumn()->GetIndex());
             }
         }
 
@@ -76,11 +75,16 @@ public:
         return res;
     }
 
-    std::string ToString() const;
-
     std::vector<Predicate> const& GetPredicates() const {
         return predicates_;
     };
+
+    DCType GetType() const;
+
+    std::string ToString() const;
+
+    // Convert all two-tuple equality predicates: s.A == t.B -> (s.A <= t.B and s.A >= t.B)
+    void ConvertEqualities();
 };
 
 }  // namespace algos::dc
