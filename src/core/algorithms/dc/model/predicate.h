@@ -39,16 +39,33 @@ public:
         return r_;
     }
 
-    bool IsCrossColumn() const noexcept {
-        return l_.GetColumn() != r_.GetColumn();
+    // Is used to get a variable operand in a constant predicate
+    ColumnOperand const& GetVariableOperand() const {
+        return l_.IsVariable() ? l_ : r_;
     }
 
-    bool IsCrossTuple() const noexcept {
-        return l_.IsFirstTuple() != r_.IsFirstTuple();
+    bool IsCrossColumn() const {
+        return IsVariable() and l_.GetColumn() != r_.GetColumn();
     }
 
-    bool HasSameOperandsAs(Predicate const& rhs) const noexcept {
-        return l_ == rhs.GetLeftOperand() && r_ == rhs.GetRightOperand();
+    bool IsOneColumn() const {
+        return IsVariable() and l_.GetColumn() == r_.GetColumn();
+    }
+
+    bool IsCrossTuple() const {
+        return IsVariable() and l_.IsFirstTuple() != r_.IsFirstTuple();
+    }
+
+    bool IsOneTuple() const {
+        return IsConstant() or !IsCrossTuple();
+    }
+
+    bool IsConstant() const {
+        return l_.IsConstant() or r_.IsConstant();
+    }
+
+    bool IsVariable() const {
+        return !IsConstant();
     }
 
     std::string ToString() const {
