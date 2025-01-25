@@ -151,15 +151,15 @@ KDTree<PointType>::KDTree(KDTree<PointType>&& tree) {
 template <SubscriptableOrder PointType>
 std::vector<PointType> KDTree<PointType>::AsVector() const {
     std::vector<PointType> res;
-    AddSubtree(root_, res);
+    AddSubtree(root_.get(), res);
     return res;
 }
 
 template <SubscriptableOrder PointType>
 void KDTree<PointType>::AddSubtree(Node* start, std::vector<PointType>& res) const {
     if (start == nullptr) return;
-    AddSubtree(start->left_, res);
-    AddSubtree(start->right_, res);
+    AddSubtree(start->left_.get(), res);
+    AddSubtree(start->right_.get(), res);
     res.push_back(start->point_);
 }
 
