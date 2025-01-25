@@ -242,7 +242,7 @@ To install Desbordante type:
 $ pip install desbordante
 ```
 
-However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
+However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and macOS 11.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
 
 ## Build instructions
 
@@ -265,11 +265,10 @@ Instructions for other supported compilers can be found in [Desbordante wiki](ht
 
 Run the following commands:
 ```sh 
-sudo apt install gcc g++ cmake libboost-all-dev git-lfs python3
-export CC=gcc
+sudo apt install g++ cmake libboost-all-dev git-lfs python3
 export CXX=g++
 ```
-The last 2 lines set gcc as CMake compiler in your terminal session.
+The last line sets g++ as CMake compiler in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 #### macOS dependencies installation (Apple Clang)
@@ -292,11 +291,10 @@ After that, restart the terminal and check the version of CMake again, now it sh
 
 Run the following commands:
 ```sh
-export CC=clang
 export CXX=clang++
 export BOOST_ROOT=$(brew --prefix boost)
 ```
-These commands set Apple Clang as CMake compiler in your terminal session.
+These commands set Apple Clang and Homebrew Boost as default in CMake in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 ### Building the project
