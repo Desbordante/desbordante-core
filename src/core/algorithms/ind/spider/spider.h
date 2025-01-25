@@ -14,6 +14,9 @@
 #include "model/table/column_domain.h"
 
 namespace algos {
+namespace cind {
+class Cind;
+}  // namespace cind
 
 ///
 /// \brief disk-backed unary inclusion dependency mining algorithm
@@ -40,8 +43,8 @@ private:
     config::ErrorType max_ind_error_;
 
     /* execution stage fields */
-    std::vector<model::ColumnDomain> domains_; /*< loaded data */
-    StageTimings timings_;                     /*< timings info */
+    std::shared_ptr<std::vector<model::ColumnDomain>> domains_; /*< loaded data */
+    StageTimings timings_;                                      /*< timings info */
 
     void MakeLoadOptsAvailable();
     void LoadINDAlgorithmDataInternal() final;
@@ -61,6 +64,9 @@ public:
     StageTimings const& GetStageTimings() const noexcept {
         return timings_;
     }
+
+private:
+    friend class cind::Cind;
 };
 
 }  // namespace algos
