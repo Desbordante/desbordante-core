@@ -122,4 +122,8 @@ constexpr auto kUCCIndices = "ucc_indices";
 // MD verifier
 constexpr auto kMDLHS = "lhs";
 constexpr auto kMDRHS = "rhs";
+// CIND
+constexpr auto kValidity = "validity";
+constexpr auto kCompleteness = "completeness";
+constexpr auto kConditionType = "condition_type";
 }  // namespace config::names

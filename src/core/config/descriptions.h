@@ -216,4 +216,8 @@ constexpr auto kDUCCIndices = "column indices for UCC verification";
 // MD verifier
 constexpr auto kDMDLHS = "Left-hand side of Matching Dependancy";
 constexpr auto kDMDRHS = "Right-hand side of Matching Dependancy";
+// CIND
+constexpr auto kDValidity = "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
+constexpr auto kDCompleteness = "Percentage of rows/groups from IND that satisfies the pattern tuple";
+constexpr auto kDConditionType = "Type of condition units: can be either rows or groups";
 }  // namespace config::descriptions
