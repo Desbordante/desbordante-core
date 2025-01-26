@@ -3,11 +3,12 @@
 #include <memory>
 
 #include "algorithms/algorithm.h"
+#include "condition_miners/cind_miner.hpp"
 
 namespace algos::cind {
-class Cind final : public Algorithm {
+class CindAlgorithm final : public Algorithm {
 public:
-    explicit Cind(std::vector<std::string_view> phase_names = {});
+    explicit CindAlgorithm(std::vector<std::string_view> phase_names = {});
 
     unsigned long long TimeTaken() const {
         return time_;
@@ -23,9 +24,10 @@ private:
     void ResetState() final;
 
     void CreateSpiderAlgo();
-    void RegisterOptions();
-    void MakeLoadOptsAvailable();
-    // void MakeExecuteOptsAvailable() final;
+    void RegisterSpiderOptions();
+    void CreateCindMinerAlgo();
+    void RegisterCindMinerOptions();
+    void MakeExecuteOptsAvailable() final;
     bool SetExternalOption(std::string_view option_name, boost::any const& value) final;
     void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const final;
@@ -33,6 +35,7 @@ private:
 private:
     // algos
     std::unique_ptr<Spider> spider_algo_;
+    std::unique_ptr<CindMiner> cind_miner_;
 
     unsigned long long time_;
 
