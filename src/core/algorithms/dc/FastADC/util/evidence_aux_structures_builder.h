@@ -1,18 +1,17 @@
 #pragma once
-#include <bitset>
 #include <cstddef>
 #include <functional>
 #include <span>
 #include <stdexcept>
 #include <vector>
 
-#include "common_clue_set_builder.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
-#include "predicate_builder.h"
-#include "table/column.h"
+#include "dc/FastADC/util/common_clue_set_builder.h"
+#include "dc/FastADC/util/predicate_builder.h"
+#include "model/table/column.h"
 
 namespace algos::fastadc {
 
@@ -87,7 +86,7 @@ public:
     }
 
     /* For tests */
-    std::vector<PredicatePack> GetPredicatePacksAsOneVector() const {
+    std::vector<PredicatePack> GetPredicatePacksAsOneVector() const noexcept {
         std::vector<PredicatePack> ret;
         ret.insert(ret.end(), packs_.str_single.begin(), packs_.str_single.end());
         ret.insert(ret.end(), packs_.str_cross.begin(), packs_.str_cross.end());
@@ -96,15 +95,15 @@ public:
         return ret;
     }
 
-    std::vector<PredicateBitset> const& GetCorrectionMap() const {
+    std::vector<PredicateBitset> const& GetCorrectionMap() const noexcept {
         return correction_map_;
     }
 
-    PredicatePacks const& GetPredicatePacks() const {
+    PredicatePacks const& GetPredicatePacks() const noexcept {
         return packs_;
     }
 
-    PredicateBitset const& GetCardinalityMask() const {
+    PredicateBitset const& GetCardinalityMask() const noexcept {
         return cardinality_mask_;
     }
 
@@ -114,14 +113,29 @@ public:
     void BuildAll();
 
 private:
+    // Number of predicates (EQUAL, UNEQUAL, GREATER, LESS, GREATER_EQUAL, LESS_EQUAL)
+    // per numeric column group
+    static constexpr std::size_t kNumericPredicateGroupSize = 6;
+
+    // Number of predicates (EQUAL, UNEQUAL) per categorical column group
+    static constexpr std::size_t kCategoricalPredicateGroupSize = 2;
+
+    // Number of "bits" (slots in correction_map_) used per numeric group
+    // - We store 1 bit for EQ, 1 bit for GT -> 2 total
+    static constexpr std::size_t kNumBitsPerNumericGroup = 2;
+
+    // Number of "bits" used per categorical group
+    // - We store 1 bit for EQ
+    static constexpr std::size_t kNumBitsPerCategoricalGroup = 1;
+
     template <std::size_t N>
     PredicateBitset BuildMask(PredicatesSpan group, OperatorType const (&types)[N]) {
         PredicateBitset mask;
 
-        for (auto& p : group) {
-            if (std::any_of(std::begin(types), std::end(types),
-                            [p](OperatorType type) { return p->GetOperator() == type; })) {
-                auto index = provider_->GetIndex(p);
+        for (PredicatePtr p : group) {
+            auto pred = [p](OperatorType type) { return p->GetOperator() == type; };
+            if (std::ranges::any_of(types, pred)) {
+                size_t index = provider_->GetIndex(p);
 
                 if (index < mask.size()) {
                     mask.set(index);

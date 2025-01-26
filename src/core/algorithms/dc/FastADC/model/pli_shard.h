@@ -107,15 +107,15 @@ public:
         return *this;
     }
 
-    std::vector<Pli> const& Plis() const {
+    std::vector<Pli> const& Plis() const noexcept {
         return plis_;
     }
 
-    size_t Beg() const {
+    size_t Beg() const noexcept {
         return beg_;
     }
 
-    size_t Range() const {
+    size_t Range() const noexcept {
         return end_ - beg_;
     }
 

@@ -38,7 +38,7 @@ template <typename T>
      * }
      */
     if constexpr (std::is_same_v<T, std::string>) {
-        return "";
+        return {};
     } else if constexpr (std::is_same_v<T, int64_t>) {
         return std::numeric_limits<int64_t>::min();
     } else if constexpr (std::is_same_v<T, double>) {

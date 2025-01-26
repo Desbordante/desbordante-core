@@ -44,10 +44,10 @@ void EvidenceAuxStructuresBuilder::ProcessNumPredicates(PredicatesVector const& 
         cardinality_mask_ |= BuildMask(group_span, kCardinality);
 
         pack.emplace_back(eq, count, gt, count + 1);
-        count += 2;
+        count += kNumBitsPerNumericGroup;
     };
 
-    BuildAll(predicates, 6, action);
+    BuildAll(predicates, kNumericPredicateGroupSize, action);
 }
 
 void EvidenceAuxStructuresBuilder::ProcessCatPredicates(PredicatesVector const& predicates,
@@ -63,10 +63,10 @@ void EvidenceAuxStructuresBuilder::ProcessCatPredicates(PredicatesVector const& 
         cardinality_mask_ |= BuildMask(group_span, kCardinality);
 
         pack.emplace_back(eq, count);
-        count++;
+        count += kNumBitsPerCategoricalGroup;
     };
 
-    BuildAll(predicates, 2, action);
+    BuildAll(predicates, kCategoricalPredicateGroupSize, action);
 }
 
 void EvidenceAuxStructuresBuilder::BuildAll() {
@@ -80,8 +80,16 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
      * possible numerical predicates, so we divide by 6 and multiply by 2 to account for the extra
      * bits.
      */
-    correction_map_.resize(str_single_.size() / 2 + str_cross_.size() / 2 +
-                           2 * num_single_.size() / 6 + 2 * num_cross_.size() / 6);
+    size_t num_str_single_bits =
+            kNumBitsPerCategoricalGroup * (str_single_.size() / kCategoricalPredicateGroupSize);
+    size_t num_str_cross_bits =
+            kNumBitsPerCategoricalGroup * (str_cross_.size() / kCategoricalPredicateGroupSize);
+    size_t num_num_single_bits =
+            kNumBitsPerNumericGroup * (num_single_.size() / kNumericPredicateGroupSize);
+    size_t num_num_cross_bits =
+            kNumBitsPerNumericGroup * (num_cross_.size() / kNumericPredicateGroupSize);
+    correction_map_.resize(num_str_single_bits + num_str_cross_bits + num_num_single_bits +
+                           num_num_cross_bits);
 
     ProcessCatPredicates(str_single_, packs_.str_single, count);
     ProcessCatPredicates(str_cross_, packs_.str_cross, count);

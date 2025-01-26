@@ -11,8 +11,6 @@
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
-#include "descriptions.h"
-#include "names.h"
 
 namespace algos::dc {
 
@@ -82,12 +80,9 @@ void FastADC::CheckTypes() {
                     "\" is of unsupported type. Only numeric and string types are supported.");
         }
 
-        for (std::size_t row_index = 0; row_index < rows_num; row_index++) {
-            if (column.IsNull(row_index)) {
-                throw std::runtime_error("Some of the value coordinates are nulls.");
-            }
-            if (column.IsEmpty(row_index)) {
-                throw std::runtime_error("Some of the value coordinates are empty.");
+        for (std::size_t row_index = 0; row_index < rows_num; ++row_index) {
+            if (column.IsNullOrEmpty(row_index)) {
+                throw std::runtime_error("Some of the value coordinates are null or empty.");
             }
         }
     }

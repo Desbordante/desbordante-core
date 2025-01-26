@@ -13,13 +13,11 @@ struct Evidence {
         evidence = cardinalityMask;
 
         Clue tmp = satisfied;
-        size_t pos = 0;
-        while (tmp.any()) {
+        for (size_t pos = 0; tmp.any(); ++pos) {
             if (tmp.test(0)) {
                 evidence ^= correctionMap[pos];
             }
             tmp >>= 1;
-            pos++;
         }
     }
 

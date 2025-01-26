@@ -5,8 +5,8 @@
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/providers/predicate_provider.h"
-#include "table/column.h"
-#include "table/typed_column_data.h"
+#include "model/table/column.h"
+#include "model/table/typed_column_data.h"
 
 namespace algos::fastadc {
 
@@ -21,8 +21,11 @@ bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, size_t 
     model::TypedColumnData const& lhs = col_data[l_.GetColumn()->GetIndex()];
     model::TypedColumnData const& rhs = col_data[r_.GetColumn()->GetIndex()];
 
-    // Assumes that types in both columns are the same (and they should)
-    model::Type const& type = lhs.GetType();
+    model::Type const& lhs_type = lhs.GetType();
+    model::Type const& rhs_type = rhs.GetType();
+    assert(lhs_type == rhs_type && "Column types do not match.");
+
+    model::Type const& type = lhs_type;
 
     std::byte const* l_val = lhs.GetValue(l_.GetTuple() == +ColumnOperandTuple::t ? t : s);
     std::byte const* r_val = rhs.GetValue(r_.GetTuple() == +ColumnOperandTuple::t ? t : s);

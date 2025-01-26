@@ -69,7 +69,7 @@ void CrossClueSetBuilder::SetSingleEQ(std::vector<Clue>& clues1, std::vector<Clu
 void CrossClueSetBuilder::CorrectStrSingle(std::vector<Clue>& clues1, std::vector<Clue>& clues2,
                                            Pli const& pivotPli, Pli const& probePli,
                                            Clue const& mask) {
-    auto const& pivot_keys = pivotPli.GetKeys();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
         size_t j;
@@ -95,7 +95,7 @@ void CrossClueSetBuilder::SetCrossEQ(std::vector<Clue>& clues, Pli const& pli1, 
 
 void CrossClueSetBuilder::CorrectStrCross(std::vector<Clue>& clues, Pli const& pivotPli,
                                           Pli const& probePli, Clue const& mask) {
-    auto const& pivot_keys = pivotPli.GetKeys();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
         size_t j;
@@ -142,8 +142,8 @@ void CrossClueSetBuilder::CorrectNumSingle(std::vector<Clue>& forwardArray,
                                            std::vector<Clue>& reverseArray, Pli const& pivotPli,
                                            Pli const& probePli, Clue const& eqMask,
                                            Clue const& gtMask) {
-    auto const& pivot_keys = pivotPli.GetKeys();
-    auto const& probe_keys = probePli.GetKeys();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
+    std::vector<size_t> const& probe_keys = probePli.GetKeys();
 
     for (size_t i = 0, j = 0; i < pivot_keys.size(); ++i) {
         size_t pivot_key = pivot_keys[i];
@@ -168,8 +168,8 @@ void CrossClueSetBuilder::CorrectNumSingle(std::vector<Clue>& forwardArray,
 void CrossClueSetBuilder::CorrectNumCross(std::vector<Clue>& forwardArray, Pli const& pivotPli,
                                           Pli const& probePli, Clue const& eqMask,
                                           Clue const& gtMask) {
-    auto const& pivot_keys = pivotPli.GetKeys();
-    auto const& probe_keys = probePli.GetKeys();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
+    std::vector<size_t> const& probe_keys = probePli.GetKeys();
 
     for (size_t i = 0, j = 0; i < pivot_keys.size(); ++i) {
         size_t key = pivot_keys[i];
