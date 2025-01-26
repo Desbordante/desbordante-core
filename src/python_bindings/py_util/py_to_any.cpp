@@ -15,6 +15,7 @@
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
+#include "core/algorithms/ind/cind/condition_type.hpp"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -141,6 +142,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::od::Ordering>,
+        kEnumConvPair<algos::cind::CondType>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
