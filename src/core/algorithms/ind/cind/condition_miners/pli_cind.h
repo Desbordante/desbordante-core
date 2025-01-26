@@ -1,0 +1,34 @@
+#pragma once
+
+#include <memory>
+#include <unordered_set>
+#include <vector>
+
+// #include "algorithms/ind/cind/condition.h"
+#include "ind/cind/condition_miners/cind_miner.hpp"
+// #include "position_lists_set.h"
+
+namespace algos::cind {
+// using model::PLSet;
+// using PLSetShared = std::shared_ptr<model::PLSet>;
+
+class PliCind final : public CindMiner {
+// private:
+//     std::vector<PLSetShared> attr_idx_to_pls_;
+
+public:
+    PliCind(std::shared_ptr<std::vector<model::ColumnDomain>> domains);
+
+    // std::unordered_set<Condition> GetConditions(std::vector<int> cond_attrs,
+    //                                             std::vector<int> const& included_pos);
+
+private:
+    void ExecuteSingle(model::IND const& aind) final;
+    void MakePLs(std::vector<int> const& cond_attrs);
+
+    // std::unordered_set<Condition> Analyze(std::vector<int> const& cond_attrs, int attr_idx,
+    //                                       std::vector<int> const& curr_attrs, PLSetShared curr_pls,
+    //                                       std::vector<int> const& included_pos);
+};
+
+}  // namespace algos

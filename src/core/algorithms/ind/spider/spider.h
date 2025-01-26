@@ -15,7 +15,7 @@
 
 namespace algos {
 namespace cind {
-class Cind;
+class CindAlgorithm;
 }  // namespace cind
 
 ///
@@ -66,7 +66,7 @@ public:
     }
 
 private:
-    friend class cind::Cind;
+    friend class cind::CindAlgorithm;
 };
 
 }  // namespace algos

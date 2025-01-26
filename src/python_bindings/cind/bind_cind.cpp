@@ -17,8 +17,8 @@ void BindCind(py::module_& main_module) {
 
     auto cind_module = main_module.def_submodule("cind");
     
-    BindPrimitiveNoBase<Cind>(cind_module, "Cind")
-            .def("get_ainds", &Cind::AINDList)
-            .def("time_taken", &Cind::TimeTaken);
+    BindPrimitiveNoBase<CindAlgorithm>(cind_module, "Cind")
+            .def("get_ainds", &CindAlgorithm::AINDList)
+            .def("time_taken", &CindAlgorithm::TimeTaken);
 }
 }  // namespace python_bindings

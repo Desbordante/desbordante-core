@@ -3,29 +3,33 @@
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
+#include "conditions/completeness/option.h"
+#include "conditions/condition_type/option.h"
+#include "conditions/validity/option.h"
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
 #include "config/mem_limit/option.h"
 #include "config/tabular_data/input_tables/option.h"
 #include "config/thread_number/option.h"
+#include "ind/cind/condition_miners/cind_miner.hpp"
+#include "ind/cind/condition_miners/pli_cind.h"
 #include "util/timed_invoke.h"
 
 namespace algos::cind {
-Cind::Cind(std::vector<std::string_view> phase_names) : Algorithm(std::move(phase_names)) {
+CindAlgorithm::CindAlgorithm(std::vector<std::string_view> phase_names)
+    : Algorithm(std::move(phase_names)) {
     CreateSpiderAlgo();
 
-    RegisterOptions();
-    MakeLoadOptsAvailable();
+    RegisterSpiderOptions();
 }
 
-void Cind::CreateSpiderAlgo() {
+void CindAlgorithm::CreateSpiderAlgo() {
     spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::spider);
 
     domains_ = spider_algo_->domains_;
 }
 
-void Cind::RegisterOptions() {
-    // Spider options
+void CindAlgorithm::RegisterSpiderOptions() {
     RegisterOption(config::kTablesOpt(&spider_algo_->input_tables_));
     RegisterOption(config::kEqualNullsOpt(&spider_algo_->is_null_equal_null_));
     RegisterOption(config::kThreadNumberOpt(&spider_algo_->threads_num_));
@@ -33,20 +37,28 @@ void Cind::RegisterOptions() {
     RegisterOption(config::kErrorOpt(&spider_algo_->max_ind_error_));
 }
 
-void Cind::MakeLoadOptsAvailable() {
-    // MakeOptionsAvailable({config::kTablesOpt.GetName(), config::kEqualNullsOpt.GetName(),
-    //                       config::kThreadNumberOpt.GetName(), config::kMemLimitMbOpt.GetName()});
-}
-
-// void Cind::MakeExecuteOptsAvailable() {
-//     MakeOptionsAvailable({config::kErrorOpt.GetName()});
-// }
-
-void Cind::LoadDataInternal() {
+void CindAlgorithm::LoadDataInternal() {
     time_ = util::TimedInvoke(&Algorithm::LoadData, spider_algo_);
+    CreateCindMinerAlgo();
 }
 
-bool Cind::SetExternalOption(std::string_view option_name, boost::any const& value) {
+void CindAlgorithm::CreateCindMinerAlgo() {
+    cind_miner_ = std::make_unique<PliCind>(domains_);
+    RegisterCindMinerOptions();
+}
+
+void CindAlgorithm::RegisterCindMinerOptions() {
+    RegisterOption(config::kValidityOpt(&cind_miner_->precision_));
+    RegisterOption(config::kCompletenessOpt(&cind_miner_->recall_));
+    RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
+}
+
+void CindAlgorithm::MakeExecuteOptsAvailable() {
+    MakeOptionsAvailable({config::kValidityOpt.GetName(), config::kCompletenessOpt.GetName(),
+                          config::kConditionTypeOpt.GetName()});
+}
+
+bool CindAlgorithm::SetExternalOption(std::string_view option_name, boost::any const& value) {
     try {
         spider_algo_->SetOption(option_name, value);
         return true;
@@ -55,16 +67,18 @@ bool Cind::SetExternalOption(std::string_view option_name, boost::any const& val
     return false;
 }
 
-void Cind::AddSpecificNeededOptions(std::unordered_set<std::string_view>& previous_options) const {
+void CindAlgorithm::AddSpecificNeededOptions(
+        std::unordered_set<std::string_view>& previous_options) const {
     auto const& spider_options = spider_algo_->GetNeededOptions();
     previous_options.insert(spider_options.begin(), spider_options.end());
 }
 
-unsigned long long Cind::ExecuteInternal() {
+unsigned long long CindAlgorithm::ExecuteInternal() {
     auto time = spider_algo_->Execute();
+    cind_miner_->Execute(spider_algo_->INDList());
     ++time_;
     return time;
 }
 
-void Cind::ResetState() {}
+void CindAlgorithm::ResetState() {}
 }  // namespace algos::cind
