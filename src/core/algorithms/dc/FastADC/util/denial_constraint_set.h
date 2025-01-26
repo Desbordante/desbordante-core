@@ -92,9 +92,11 @@ public:
     }
 
     std::string ToString() const {
-        std::string out;
-        for (auto const& dc : result_) out += dc.ToString() + "\n";
-        return out;
+        std::stringstream ss;
+        for (DenialConstraint const& dc : result_) {
+            ss << dc.ToString() << "\n";
+        }
+        return ss.str();
     }
 
     std::vector<DenialConstraint>&& ObtainResult() {
@@ -102,7 +104,7 @@ public:
     }
 
     std::vector<DenialConstraint> const& GetResult() const {
-        return std::move(result_);
+        return result_;
     }
 
     void Clear() {

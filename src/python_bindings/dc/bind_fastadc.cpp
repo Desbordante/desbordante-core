@@ -6,9 +6,7 @@
 #include "algorithms/dc/FastADC/fastadc.h"
 #include "py_util/bind_primitive.h"
 
-namespace {
 namespace py = pybind11;
-}  // namespace
 
 namespace python_bindings {
 void BindFastADC(py::module_& main_module) {

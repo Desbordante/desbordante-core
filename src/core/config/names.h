@@ -1,6 +1,5 @@
 #pragma once
 
-#include "descriptions.h"
 namespace config::names {
 constexpr auto kTable = "table";
 constexpr auto kTables = "tables";

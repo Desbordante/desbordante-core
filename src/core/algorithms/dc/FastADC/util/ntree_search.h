@@ -8,9 +8,8 @@
 namespace algos::fastadc {
 class NTreeSearch {
 public:
-    bool Add(boost::dynamic_bitset<> const& bs) {
+    void Add(boost::dynamic_bitset<> const& bs) {
         Add(bs, bs.find_first());
-        return true;
     }
 
     bool ContainsSubset(boost::dynamic_bitset<> const& add) const {

@@ -1,4 +1,4 @@
-#include "typed_column_data_value_differences.h"
+#include "algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
 #include <stddef.h>
@@ -8,11 +8,11 @@
 
 #include <easylogging++.h>
 
-#include "builtin.h"
-#include "misc.h"
-#include "table/column.h"
-#include "table/typed_column_data.h"
-#include "type.h"
+#include "algorithms/dc/FastADC/misc/misc.h"
+#include "model/table/column.h"
+#include "model/table/typed_column_data.h"
+#include "model/types/builtin.h"
+#include "model/types/type.h"
 
 namespace algos::fastadc {
 
@@ -58,7 +58,7 @@ static double CalculateAverageTyped(model::TypedColumnData const& column) {
 }
 
 double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnData const& c2) {
-    if (c1.GetColumn() == c2.GetColumn()) return 1.;
+    if (c1.GetColumn() == c2.GetColumn()) return 1.0;
 
     switch (c1.GetTypeId()) {
         case model::TypeId::kInt:
@@ -71,12 +71,12 @@ double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnD
             LOG(DEBUG) << "Column " << c1.GetColumn()->ToString() << " with type "
                        << c1.GetType().ToString()
                        << " is not supported for shared percentage calculation";
-            return -1;
+            return -1.0;
     }
 }
 
 double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData const& c2) {
-    if (c1.GetColumn() == c2.GetColumn()) return 1.;
+    if (c1.GetColumn() == c2.GetColumn()) return 1.0;
 
     double avg1 = 0.0;
     double avg2 = 0.0;
@@ -92,7 +92,7 @@ double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData 
             break;
         default:
             LOG(DEBUG) << "Column type  " << c1.GetType().ToString() << " is not numeric";
-            return -1;
+            return -1.0;
     }
 
     if (avg1 == 0.0 && avg2 == 0.0) {

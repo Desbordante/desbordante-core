@@ -88,8 +88,8 @@ private:
         std::vector<int> indexes(coverages.size());
         std::iota(indexes.begin(), indexes.end(), 0);
 
-        std::stable_sort(indexes.begin(), indexes.end(),
-                         [&coverages](int i, int j) { return coverages[i] < coverages[j]; });
+        auto cmp = [&coverages](int i, int j) { return coverages[i] < coverages[j]; };
+        std::ranges::stable_sort(indexes, cmp);
 
         return indexes;
     }

@@ -47,12 +47,13 @@ PredicateSet::Iterator PredicateSet::end() const {
 }
 
 std::string PredicateSet::ToString() const {
-    std::string result = "{ ";
+    std::stringstream ss;
+    ss << "{ ";
     for (PredicatePtr predicate : *this) {
-        result += predicate->ToString() + " ";
+        ss << predicate->ToString() << ' ';
     }
-    result += "}";
-    return result;
+    ss << '}';
+    return ss.str();
 }
 
 }  // namespace algos::fastadc

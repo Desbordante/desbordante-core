@@ -1,6 +1,5 @@
 #include "single_clue_set_builder.h"
 
-#include <stdexcept>
 #include <stdint.h>
 
 #include "dc/FastADC/model/pli_shard.h"
@@ -82,9 +81,9 @@ void SingleClueSetBuilder::SetCrossEQ(std::vector<Clue>& clues, Pli::Cluster con
 
 void SingleClueSetBuilder::CorrectStrCross(std::vector<Clue>& clues, Pli const& pivotPli,
                                            Pli const& probePli, Clue const& mask) {
-    auto const& pivot_clusters = pivotPli.GetClusters();
-    auto const& probe_clusters = probePli.GetClusters();
-    auto const& pivot_keys = pivotPli.GetKeys();
+    std::vector<Pli::Cluster> const& pivot_clusters = pivotPli.GetClusters();
+    std::vector<Pli::Cluster> const& probe_clusters = probePli.GetClusters();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
         size_t j;
@@ -111,7 +110,7 @@ void SingleClueSetBuilder::SetGT(std::vector<Clue>& clues, Pli::Cluster const& p
 void SingleClueSetBuilder::CorrectNumSingle(std::vector<Clue>& clues, Pli const& pli,
                                             Clue const& eqMask, Clue const& gtMask) {
     for (size_t i = 0; i < pli.Size(); ++i) {
-        auto const& cluster = pli.Get(i);
+        Pli::Cluster const& cluster = pli.Get(i);
         if (cluster.size() > 1) {
             SetSingleEQ(clues, cluster, eqMask);
         }
@@ -124,8 +123,8 @@ void SingleClueSetBuilder::CorrectNumSingle(std::vector<Clue>& clues, Pli const&
 void SingleClueSetBuilder::CorrectNumCross(std::vector<Clue>& clues, Pli const& pivotPli,
                                            Pli const& probePli, Clue const& eqMask,
                                            Clue const& gtMask) {
-    auto const& pivot_keys = pivotPli.GetKeys();
-    auto const& probe_keys = probePli.GetKeys();
+    std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
+    std::vector<size_t> const& probe_keys = probePli.GetKeys();
 
     for (size_t i = 0, j = 0; i < pivot_keys.size(); ++i) {
         size_t key = pivot_keys[i];

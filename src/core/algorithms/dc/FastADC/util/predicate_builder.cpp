@@ -80,9 +80,9 @@ void PredicateBuilder::ProcessColumnPair(size_t i, size_t j,
     bool comparable = IsComparable(input[i], input[j]);
 
     if (joinable || comparable) {
-        AddAndCategorizePredicate(ColumnOperand(input[i].GetColumn(), ColumnOperandTuple::t),
-                                  ColumnOperand(input[j].GetColumn(), ColumnOperandTuple::s),
-                                  comparable);
+        ColumnOperand t_col_op(input[i].GetColumn(), ColumnOperandTuple::t);
+        ColumnOperand s_col_op(input[j].GetColumn(), ColumnOperandTuple::s);
+        AddAndCategorizePredicate(t_col_op, s_col_op, comparable);
     }
 }
 
@@ -90,15 +90,17 @@ void PredicateBuilder::CategorizeLastPredicate(bool comparable) {
     auto const& pred = predicates_.back();
 
     if (comparable) {
-        if (pred->IsCrossColumn())
+        if (pred->IsCrossColumn()) {
             num_cross_column_predicates_.push_back(pred);
-        else
+        } else {
             num_single_column_predicates_.push_back(pred);
+        }
     } else {
-        if (pred->IsCrossColumn())
+        if (pred->IsCrossColumn()) {
             str_cross_column_predicates_.push_back(pred);
-        else
+        } else {
             str_single_column_predicates_.push_back(pred);
+        }
     }
 }
 

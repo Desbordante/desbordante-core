@@ -164,8 +164,8 @@ void PliShardBuilder::BuildPliShards(std::vector<model::TypedColumnData> const& 
 
         for (size_t col = 0; col < cols_num; col++) {
             if (!hashed_input[col].empty()) {
-                plis.push_back(
-                        BuildPli(hashed_input[col], input[col].IsNumeric(), shard_beg, shard_end));
+                Pli pli = BuildPli(hashed_input[col], input[col].IsNumeric(), shard_beg, shard_end);
+                plis.push_back(std::move(pli));
             }
         }
 
@@ -194,7 +194,7 @@ Pli PliShardBuilder::BuildPli(std::vector<size_t> const& col_values, bool is_num
         clusters[cluster_id].push_back(row);
     }
 
-    return Pli(clusters, keys, key_to_cluster_id);
+    return {clusters, keys, key_to_cluster_id};
 }
 
 }  // namespace algos::fastadc
