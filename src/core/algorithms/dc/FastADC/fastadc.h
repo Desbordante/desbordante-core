@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 
-#include "algorithm.h"
+#include "algorithms/algorithm.h"
 #include "dc/FastADC/providers/predicate_provider.h"
 #include "dc/FastADC/util/denial_constraint_set.h"
 #include "model/denial_constraint.h"

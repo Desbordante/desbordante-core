@@ -3,7 +3,10 @@
 #include <sstream>
 #include <string>
 
-#include "predicate_set.h"
+#include <boost/dynamic_bitset.hpp>
+
+#include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/model/predicate_set.h"
 
 namespace algos::fastadc {
 
@@ -37,13 +40,10 @@ public:
         std::string const c_and = " ∧ ";
         std::ostringstream sb;
         sb << c_not << "{ ";
-        bool first = true;
+        std::string separator;
         for (PredicatePtr predicate : predicate_set_) {
-            if (!first) {
-                sb << c_and;
-            }
-            sb << predicate->ToString();
-            first = false;
+            sb << separator << predicate->ToString();
+            separator = c_and;
         }
         sb << " }";
         return sb.str();

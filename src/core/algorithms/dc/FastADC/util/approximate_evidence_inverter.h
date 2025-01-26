@@ -57,8 +57,8 @@ public:
     DenialConstraintSet BuildDenialConstraints() {
         if (target_ == 0) return {predicate_provider_};
 
-        std::sort(evidences_.begin(), evidences_.end(),
-                  [](Evidence const& o1, Evidence const& o2) { return o2.count < o1.count; });
+        auto cmp = [](Evidence const& o1, Evidence const& o2) { return o1.count > o2.count; };
+        std::ranges::sort(evidences_, cmp);
 
         InverseEvidenceSet();
 
@@ -231,10 +231,9 @@ private:
             return true;
         }
         for (; e < evidences_.size(); ++e) {
-            if (!(IsSubset(dc, evidences_[e].evidence))) {
-                target -= evidences_[e].count;
-                if (target <= 0) return true;
-            }
+            if (IsSubset(dc, evidences_[e].evidence)) continue;
+            target -= evidences_[e].count;
+            if (target <= 0) return true;
         }
         return false;
     }

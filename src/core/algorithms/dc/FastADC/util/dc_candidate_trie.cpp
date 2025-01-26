@@ -65,12 +65,7 @@ bool DCCandidateTrie::IsEmpty() const {
 }
 
 bool DCCandidateTrie::NoSubtree() const {
-    for (auto const& subtree : subtrees_) {
-        if (subtree) {
-            return false;
-        }
-    }
-    return true;
+    return std::ranges::none_of(subtrees_, [](auto const& ptr) { return !!ptr; });
 }
 
 bool DCCandidateTrie::ContainsSubset(DCCandidate const& add) {
