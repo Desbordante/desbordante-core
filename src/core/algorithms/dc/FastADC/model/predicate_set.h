@@ -10,7 +10,7 @@
 #include <boost/move/utility_core.hpp>
 
 #include "dc/FastADC/providers/index_provider.h"
-#include "predicate.h"
+#include "dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 

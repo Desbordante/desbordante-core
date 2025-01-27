@@ -1,4 +1,4 @@
-#include "operator.h"
+#include "dc/FastADC/model/operator.h"
 
 #include "model/types/builtin.h"
 #include "model/types/type.h"

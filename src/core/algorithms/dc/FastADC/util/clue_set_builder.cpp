@@ -1,4 +1,4 @@
-#include "clue_set_builder.h"
+#include "dc/FastADC/util/clue_set_builder.h"
 
 #include "dc/FastADC/util/cross_clue_set_builder.h"
 #include "dc/FastADC/util/single_clue_set_builder.h"

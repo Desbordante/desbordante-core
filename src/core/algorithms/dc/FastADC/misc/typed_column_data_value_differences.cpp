@@ -1,4 +1,4 @@
-#include "algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
+#include "dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
 #include <stddef.h>
@@ -8,7 +8,7 @@
 
 #include <easylogging++.h>
 
-#include "algorithms/dc/FastADC/misc/misc.h"
+#include "dc/FastADC/misc/misc.h"
 #include "model/table/column.h"
 #include "model/table/typed_column_data.h"
 #include "model/types/builtin.h"

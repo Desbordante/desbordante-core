@@ -5,11 +5,11 @@
 #include <stdexcept>
 #include <vector>
 
+#include "dc/FastADC/util/common_clue_set_builder.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
-#include "dc/FastADC/util/common_clue_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
 #include "model/table/column.h"
 
