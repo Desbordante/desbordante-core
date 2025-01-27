@@ -1,4 +1,4 @@
-#include "predicate.h"
+#include "dc/FastADC/model/predicate.h"
 
 #include <algorithm>
 
@@ -56,7 +56,7 @@ PredicatePtr Predicate::GetInverse(PredicateProvider* provider) const {
 
 std::vector<PredicatePtr> const& Predicate::GetImplications(PredicateProvider* provider) const {
     if (implications_.empty()) {
-        auto op_implications = op_.GetImplications();
+        OperatorSpan op_implications = op_.GetImplications();
         for (Operator op_implication : op_implications) {
             implications_.push_back(provider->GetPredicate(op_implication, l_, r_));
         }

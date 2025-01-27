@@ -9,8 +9,8 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "column_operand.h"
-#include "operator.h"
+#include "dc/FastADC/model/column_operand.h"
+#include "dc/FastADC/model/operator.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {

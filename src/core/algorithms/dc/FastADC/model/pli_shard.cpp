@@ -1,4 +1,4 @@
-#include "pli_shard.h"
+#include "dc/FastADC/model/pli_shard.h"
 
 #include <algorithm>
 #include <functional>
@@ -9,9 +9,9 @@
 
 #include <easylogging++.h>
 
-#include "builtin.h"
+#include "model/types/builtin.h"
 #include "dc/FastADC/providers/index_provider.h"
-#include "type.h"
+#include "model/types/type.h"
 
 namespace algos::fastadc {
 

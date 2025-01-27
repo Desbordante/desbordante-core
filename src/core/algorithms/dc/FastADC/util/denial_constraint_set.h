@@ -1,8 +1,8 @@
 #pragma once
 
-#include "closure.h"
+#include "dc/FastADC/util/closure.h"
 #include "dc/FastADC/model/denial_constraint.h"
-#include "ntree_search.h"
+#include "dc/FastADC/util/ntree_search.h"
 
 namespace algos::fastadc {
 
