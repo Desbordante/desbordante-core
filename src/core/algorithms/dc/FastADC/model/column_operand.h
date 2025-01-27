@@ -2,7 +2,7 @@
 
 #include <enum.h>
 
-#include "table/column.h"
+#include "model/table/column.h"
 
 namespace algos::fastadc {
 

@@ -1,4 +1,4 @@
-#include "predicate_builder.h"
+#include "dc/FastADC/util/predicate_builder.h"
 
 #include <array>
 #include <assert.h>
@@ -6,7 +6,7 @@
 
 #include <easylogging++.h>
 
-#include "builtin.h"
+#include "model/types/builtin.h"
 #include "dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"

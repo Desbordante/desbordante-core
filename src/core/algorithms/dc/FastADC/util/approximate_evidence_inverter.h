@@ -9,10 +9,10 @@
 #include <easylogging++.h>
 
 #include "dc/FastADC/model/evidence_set.h"
-#include "dc_candidate_trie.h"
-#include "denial_constraint_set.h"
-#include "predicate_builder.h"
-#include "predicate_organizer.h"
+#include "dc/FastADC/util/dc_candidate_trie.h"
+#include "dc/FastADC/util/denial_constraint_set.h"
+#include "dc/FastADC/util/predicate_builder.h"
+#include "dc/FastADC/util/predicate_organizer.h"
 
 namespace algos::fastadc {
 
