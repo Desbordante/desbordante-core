@@ -30,33 +30,44 @@ on:
   workflow_dispatch:
 jobs:
   test-python-bindings:
+    name: Run python-bindings tests on ${{ matrix.os }} with ${{ matrix.toolset }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
-            compiler: gcc
-            env: CC=gcc-10 CXX=g++-10
+            toolset: gcc
+            env: CXX=g++-10
+
           - os: ubuntu-latest
-            compiler: llvm-clang
-            env: CC=clang-17 CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
-          # Uncomment this to enable macOS-llvm-clang tests:
+            toolset: llvm-clang
+            env: CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+
+          # Uncomment this to enable macOS gcc tests:
           # - os: macos-latest
-          #   compiler: llvm-clang
-          #   env: CC=$(brew --prefix llvm@17)/bin/clang CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
+          #   toolset: gcc 
+          #   env: CXX=g++-14 BOOST_ROOT=/usr/local
           #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+
+          # Uncomment this to enable macOS llvm-clang tests:
+          # - os: macos-latest
+          #   toolset: llvm-clang
+          #   env: CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
+          #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+          
           - os: macos-latest
-            compiler: apple-clang
-            env: CC=clang CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+            toolset: apple-clang
+            env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+            
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
           os: ${{ matrix.os }}
-          toolset: ${{ matrix.compiler }}
-          download-pybind: true
+          toolset: ${{ matrix.toolset }}
           download-googletest: false
+          download-pybind: true
       - name: Build pip package
         shell: bash
         run: |

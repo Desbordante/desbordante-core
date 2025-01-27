@@ -1,18 +1,9 @@
 name: 'Install dependencies'
 description: 'Download and install build system and libraries'
 inputs:
-  download-pybind:
-    type: boolean
-    description: 'Download pybind11'
-    default: false
-
-  download-googletest:
-    type: boolean
-    description: 'Download googletest'
-    default: true
-
   os:
     type: string
+    description: 'Any default runner name in Github Actions'
     required: true
 
   toolset:
@@ -31,10 +22,20 @@ inputs:
     type: boolean
     default: true
 
+  download-googletest:
+    type: boolean
+    description: 'Download googletest'
+    default: true
+
+  download-pybind:
+    type: boolean
+    description: 'Download pybind11'
+    default: false
+
 runs:
   using: 'composite'
   steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Get short OS name
       shell: bash
@@ -88,18 +89,11 @@ runs:
         mkdir -p lib
       shell: bash
 
-    - name: Download googletest
+    - name: Download atomicbitvector
       uses: ./.github/composite-actions/download-library
       with:
-        directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
-      if: inputs.download-googletest != 'false'
-
-    - name: Download easyloggingpp
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: easyloggingpp
-        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+        directory: atomicbitvector
+        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
 
     - name: Download better-enums
       uses: ./.github/composite-actions/download-library
@@ -107,32 +101,42 @@ runs:
         directory: better-enums
         download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
 
-    - name: Download pybind11
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: pybind11
-        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
-      if: inputs.download-pybind != 'false'
-    - name: Download emhash
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: emhash
-        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
-    - name: Download atomicbitvector
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: atomicbitvector
-        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
     - name: Download boost
       uses: ./.github/composite-actions/download-library
       with:
         directory: boost
         download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
 
-    - name: Install Boost built with GCC
+    - name: Download easyloggingpp
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: easyloggingpp
+        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+
+    - name: Download emhash
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: emhash
+        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
+
+    - name: Download googletest
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: googletest
+        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
+      if: inputs.download-googletest != 'false'
+
+    - name: Download pybind11
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: pybind11
+        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
+      if: inputs.download-pybind != 'false'
+
+    - name: Install Boost built with GCC (on Ubuntu)
       run: |
         cd lib/boost
-        ./bootstrap.sh --prefix=/usr
+        ./bootstrap.sh --with-libraries=container,thread,graph
         sudo ./b2 install --prefix=/usr
       shell: bash
       if: inputs.install-boost == 'true' && inputs.toolset == 'gcc'
