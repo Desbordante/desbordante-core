@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <span>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
@@ -58,7 +57,7 @@ private:
     mutable PredicatePtr operator_symmetric_{};
     mutable PredicatePtr inv_TS_{};
     mutable PredicatePtr inverse_{};
-    mutable std::vector<PredicatePtr> implications_;
+    mutable PredicatesVector implications_;
 
 public:
     Predicate(Operator const& op, ColumnOperand const& l, ColumnOperand const& r)
@@ -73,7 +72,7 @@ public:
 
     PredicatePtr GetInverse(PredicateProvider* provider) const;
 
-    std::vector<PredicatePtr> const& GetImplications(PredicateProvider* provider) const;
+    PredicatesVector const& GetImplications(PredicateProvider* provider) const;
 
     Operator GetOperator() const {
         return op_;
