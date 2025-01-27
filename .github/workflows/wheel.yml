@@ -32,40 +32,92 @@ on:
     types:
       - published
 jobs:
-  generate-wheels-matrix:
-    # https://iscinumpy.dev/post/cibuildwheel-2-10-0/
-    name: Generate wheels matrix
+  generate-linux-wheels-matrix:
+    name: Generate Linux wheel matrix
     runs-on: ubuntu-latest
     outputs:
       include: ${{ steps.set-matrix.outputs.include }}
     steps:
       - uses: actions/checkout@v4
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==2.16.2
+        run: pipx install cibuildwheel==2.22.0
       - id: set-matrix
         run: |
           MATRIX=$(
             {
               cibuildwheel --print-build-identifiers --platform linux \
-              | jq -nRc '{"only": inputs, "os": "ubuntu-latest"}'
+              | jq -nRc '{"only": inputs, "os": "ubuntu-latest", "toolset": "gcc"}' 
             } | jq -sc
           )
           echo "include=$MATRIX" >> $GITHUB_OUTPUT
+
+      - name: Check matrix
+        run: echo "${{ steps.set-matrix.outputs.include }}"
     env:
       CIBW_ARCHS_LINUX: x86_64
-      # Builds wheels for PyPy & CPython on manylinux
       CIBW_BUILD: "*manylinux*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
+  generate-macos-wheels-matrix:
+    name: Generate macOS wheel matrix
+    runs-on: macos-latest
+    outputs:
+      include: ${{ steps.set-matrix.outputs.include }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cibuildwheel
+        run: pipx install cibuildwheel==2.22.0
+      - id: set-matrix
+        run: |
+          MATRIX=$(
+            cibuildwheel --print-build-identifiers --platform macos \
+            | jq -sR 'split("\n") | map(select(length > 0)) | map(
+              {
+                "only": ., 
+                "os": (if contains("x86_64") then "macos-13" else "macos-latest" end), 
+                "toolset": "apple-clang",
+              })' \
+            | jq -c
+          )
+          echo "include=$MATRIX" >> $GITHUB_OUTPUT
+
+      - name: Check matrix
+        run: echo "${{ steps.set-matrix.outputs.include }}"
+    env:
+      CIBW_ARCHS_MACOS: arm64 x86_64
+      CIBW_BUILD: "*macos*"
+      # https://github.com/pypa/cibuildwheel/issues/2126
+      CIBW_SKIP: "cp37-*"
+      CIBW_TEST_REQUIRES: pytest
+      CIBW_BUILD_VERBOSITY: 1
+
+  merge-matrices:
+    name: Merge wheel matrices
+    needs: [generate-linux-wheels-matrix, generate-macos-wheels-matrix]
+    runs-on: ubuntu-latest
+    outputs:
+      include: ${{ steps.merge.outputs.include }}
+    steps:
+        - name: Merge JSON matrices
+          id: merge
+          run: |
+            LINUX_MATRIX='${{ needs.generate-linux-wheels-matrix.outputs.include }}'
+            MACOS_MATRIX='${{ needs.generate-macos-wheels-matrix.outputs.include }}'
+            
+            MERGED_MATRIX=$(jq -c -n --argjson var1 "$LINUX_MATRIX" --argjson var2 "$MACOS_MATRIX" '$var1 + $var2')
+            echo "include=$MERGED_MATRIX" >> $GITHUB_OUTPUT
+        - name: Check merged matrix
+          run: echo "${{ steps.merge.outputs.include }}"
+
   build-wheels:
     name: Build ${{ matrix.only }}
-    needs: generate-wheels-matrix
+    needs: [merge-matrices]
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.generate-wheels-matrix.outputs.include) }}
+        include: ${{ fromJson(needs.merge-matrices.outputs.include) }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -73,21 +125,31 @@ jobs:
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
-          os: ubuntu
-          toolset: gcc
+          os: ${{ matrix.os }}
+          toolset: ${{ matrix.toolset }}
           install-boost: false
-          download-pybind: true
           download-googletest: false
+          download-pybind: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
+        uses: pypa/cibuildwheel@v2.22.0
         with:
           only: ${{ matrix.only }}
         env:
-          CIBW_BEFORE_ALL: >
+          MACOSX_DEPLOYMENT_TARGET: 11.0
+          CIBW_BEFORE_ALL_LINUX: >
             cd lib/boost &&
-            ./bootstrap.sh --prefix=/usr &&
-            ./b2 install -j4 --prefix=/usr
+            ./bootstrap.sh --with-libraries=container,thread,graph &&
+            ./b2 install -j4 --prefix=/usr &&
+            export BOOST_ROOT=/usr &&
+            export CXX=g++-10 
+          CIBW_BEFORE_ALL_MACOS: >
+            cd lib/boost &&
+            ./bootstrap.sh --with-libraries=container,thread,graph &&
+            sudo ./b2 install -j3 --prefix=/usr/local cxxflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET} -std=c++20" linkflags="-mmacosx-version-min=${MACOSX_DEPLOYMENT_TARGET}" &&
+            export BOOST_ROOT=/usr/local &&
+            export CXX=clang++ &&
+            export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} 
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
             cp {project}/test_input_data/transactional_data/rules-kaggle-rows.csv {project}/src/python_bindings &&
@@ -95,6 +157,8 @@ jobs:
             cp {project}/test_input_data/TestWide.csv {project}/src/python_bindings &&
             cd {project}/src/python_bindings &&
             python3 {project}/src/python_bindings/test_bindings.py
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
