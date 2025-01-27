@@ -1,60 +1,67 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <unordered_map>
 
 #include <boost/dynamic_bitset.hpp>
 
 namespace algos::fastadc {
+
+/**
+ * A trie-like structure (prefix tree) for storing bitsets and checking
+ * if any stored bitset is a subset of a given bitset.
+ */
 class NTreeSearch {
 public:
-    void Add(boost::dynamic_bitset<> const& bs) {
-        Add(bs, bs.find_first());
+    void Insert(boost::dynamic_bitset<> const& bs) {
+        InsertImpl(bs, bs.find_first());
     }
 
-    bool ContainsSubset(boost::dynamic_bitset<> const& add) const {
-        return GetSubset(add, add.find_first()) != nullptr;
+    [[nodiscard]]
+    bool ContainsSubset(boost::dynamic_bitset<> const& bs) const {
+        return FindSubset(bs, bs.find_first());
     }
 
 private:
-    std::unordered_map<size_t, std::unique_ptr<NTreeSearch>> subtrees_;
-    std::optional<boost::dynamic_bitset<>> bitset_;
+    // Maps a bit-position to a child node
+    std::unordered_map<size_t, std::unique_ptr<NTreeSearch>> children_;
 
-    void Add(boost::dynamic_bitset<> const& bs, size_t next_bit) {
-        if (next_bit == boost::dynamic_bitset<>::npos) {
-            bitset_ = bs;  // Store bitset at the current node
+    // Optional to hold a terminal bitset at this node.
+    // If present, it represents a complete bitset stored here.
+    std::optional<boost::dynamic_bitset<>> stored_bitset_;
+
+    void InsertImpl(boost::dynamic_bitset<> const& bs, size_t nextBit) {
+        if (nextBit == boost::dynamic_bitset<>::npos) {
+            stored_bitset_ = bs;
             return;
         }
 
-        // Create a new subtree at the position of the next set bit, if needed
-        auto& subtree = subtrees_[next_bit];
-        if (!subtree) {
-            subtree = std::make_unique<NTreeSearch>();
+        auto& child = children_[nextBit];
+        if (!child) {
+            child = std::make_unique<NTreeSearch>();
         }
 
-        // Add the bitset to the next subtree
-        subtree->Add(bs, bs.find_next(next_bit));
+        child->InsertImpl(bs, bs.find_next(nextBit));
     }
 
-    boost::dynamic_bitset<> const* GetSubset(boost::dynamic_bitset<> const& add,
-                                             size_t next_bit) const {
-        if (bitset_) {
-            return &bitset_.value();
+    bool FindSubset(boost::dynamic_bitset<> const& bs, size_t nextBit) const {
+        // If the current node stores a bitset, it is a subset by definition
+        if (stored_bitset_) {
+            return true;
         }
 
-        while (next_bit != boost::dynamic_bitset<>::npos) {
-            auto it = subtrees_.find(next_bit);
-            if (it != subtrees_.end()) {
-                boost::dynamic_bitset<> const* res =
-                        it->second->GetSubset(add, add.find_next(next_bit));
-                if (res != nullptr) {
-                    return res;
+        while (nextBit != boost::dynamic_bitset<>::npos) {
+            if (auto it = children_.find(nextBit); it != children_.end()) {
+                if (it->second->FindSubset(bs, bs.find_next(nextBit))) {
+                    return true;
                 }
             }
-            next_bit = add.find_next(next_bit);
+            nextBit = bs.find_next(nextBit);
         }
 
-        return nullptr;
+        return false;
     }
 };
+
 }  // namespace algos::fastadc
