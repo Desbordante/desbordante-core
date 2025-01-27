@@ -6,7 +6,6 @@
 
 #include "frozen/string.h"
 #include "frozen/unordered_map.h"
-
 #include "model/types/type.h"
 
 namespace algos::fastadc {
