@@ -82,6 +82,20 @@ class PliShard {
     /* The end row index of this shard (exclusive) */
     size_t end_;
 
+    void Swap(PliShard& other) noexcept {
+        std::swap(plis_, other.plis_);
+        std::swap(beg_, other.beg_);
+        std::swap(end_, other.end_);
+
+        for (auto& pli : plis_) {
+            pli.pli_shard_ = this;
+        }
+
+        for (auto& pli : other.plis_) {
+            pli.pli_shard_ = &other;
+        }
+    }
+
 public:
     PliShard(std::vector<Pli> plis, size_t beg, size_t end)
         : plis_(std::move(plis)), beg_(beg), end_(end) {
@@ -92,18 +106,12 @@ public:
     PliShard(PliShard const&) = delete;
     PliShard& operator=(PliShard const&) = delete;
 
-    PliShard(PliShard&& other) noexcept
-        : plis_(std::move(other.plis_)), beg_(other.beg_), end_(other.end_) {
-        for (auto& pli : plis_) pli.pli_shard_ = this;
+    PliShard(PliShard&& other) noexcept : plis_(), beg_(0), end_(0) {
+        Swap(other);
     }
 
-    PliShard& operator=(PliShard&& other) noexcept {
-        if (this != &other) {
-            plis_ = std::move(other.plis_);
-            beg_ = other.beg_;
-            end_ = other.end_;
-            for (auto& pli : plis_) pli.pli_shard_ = this;
-        }
+    PliShard& operator=(PliShard other) noexcept {
+        Swap(other);
         return *this;
     }
 
