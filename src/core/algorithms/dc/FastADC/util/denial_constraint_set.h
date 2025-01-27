@@ -159,9 +159,9 @@ public:
 
             // TODO: std::move?
             result_.push_back(std::move(*candidate.dc));
-            tree.Add(candidate.bitset);
+            tree.Insert(candidate.bitset);
             if (inv.GetPredicateSet().Size() > 0) {
-                tree.Add(inv.GetPredicateSet().GetBitset());
+                tree.Insert(inv.GetPredicateSet().GetBitset());
             }
         }
     }
