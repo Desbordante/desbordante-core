@@ -28,71 +28,60 @@ on:
   workflow_dispatch:
 jobs:
   run_tests:
+    name: Run core-tests on ${{ matrix.system.os }} with ${{ matrix.system.toolset }}, ${{matrix.cfg.BUILD_TYPE}} ${{ matrix.cfg.SANITIZER }}
     strategy:
       matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-        compiler:
-          - gcc
-          - llvm-clang
-          - apple-clang
+        system:
+          - { 
+              os: ubuntu-latest, 
+              toolset: gcc,
+              env: CXX=g++-10,
+            }
+          - { 
+              os: ubuntu-latest, 
+              toolset: llvm-clang,
+              env: CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+            }
+          # Uncomment this to enable macOS GCC tests:
+          # - { 
+          #     os: macos-latest, 
+          #     toolset: gcc,
+          #     env: CXX=g++-14 BOOST_ROOT=/usr/local,
+          #     runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+          #   }
+          # Uncomment this to enable macOS LLVM Clang tests:
+          # - { 
+          #     os: macos-latest, 
+          #     toolset: llvm-clang,
+          #     env: CXX=$(brew --prefix llvm@17)/bin/clang++ CXXFLAGS="-I$(brew --prefix llvm@17)/include" \
+          #       LDFLAGS="-L$(brew --prefix llvm@17)/lib/c++" BOOST_ROOT=/usr/local,
+          #     runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+          #   }
+          - { 
+              os: macos-latest, 
+              toolset: apple-clang,
+              env: CXX=clang++,
+            }
         cfg:
           - { BUILD_TYPE: Release }
           - { BUILD_TYPE: Debug }
           - { BUILD_TYPE: Debug, SANITIZER : ADDRESS }
           - { BUILD_TYPE: Debug, SANITIZER : UB }
-        exclude:
-          - os: ubuntu-latest
-            compiler: apple-clang
-          - os: macos-latest
-            compiler: gcc
-          # Comment this to enable macOS-llvm-clang tests:
-          - os: macos-latest
-            compiler: llvm-clang
-    runs-on: ${{ matrix.os }}
+
+    runs-on: ${{ matrix.system.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         uses: ./.github/composite-actions/install-dependencies
         with:
-          os: ${{ matrix.os }}
-          toolset: ${{ matrix.compiler }}
+          os: ${{ matrix.system.os }}
+          toolset: ${{ matrix.system.toolset }}
       - name: Download datasets
         uses: ./.github/composite-actions/download-datasets
       - name: Build
         shell: bash
-        # Maybe separate composite action will be more readable?
         run: |
-          if [[ ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.compiler }} == 'gcc' ]]; then
-            echo "Ubuntu, GCC"
-
-            export CC=gcc-10
-            export CXX=g++-10
-          elif [[ ${{ matrix.os }} == 'ubuntu-latest' && ${{ matrix.compiler }} == 'llvm-clang' ]]; then
-            echo "Ubuntu, LLVM Clang"
-
-            export CC=clang-17
-            export CXX=clang++-17
-            export CXXFLAGS="-stdlib=libc++"
-            export LDFLAGS="-lc++abi"
-          elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'llvm-clang' ]]; then
-            echo "macOS, LLVM Clang"
-
-            export CC=$(brew --prefix llvm@17)/bin/clang
-            export CXX=$(brew --prefix llvm@17)/bin/clang++
-            export CXXFLAGS="-I$(brew --prefix llvm@17)/include"
-            export LDFLAGS="-L$(brew --prefix llvm@17)/lib/c++"
-            export BOOST_ROOT=/usr/local
-          elif [[ ${{ matrix.os }} == 'macos-latest' && ${{ matrix.compiler }} == 'apple-clang' ]]; then
-            echo "macOS, Apple Clang"
-
-            export CC=clang
-            export CXX=clang++
-          else
-            echo 'Invalid matrix configuration'
-            exit 1
-          fi
+          export ${{ matrix.system.env }}
 
           if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
             ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }}
@@ -103,8 +92,6 @@ jobs:
         working-directory: ${{github.workspace}}/build/target
         shell: bash
         run: |
-          if [[ ${{ matrix.os }} == 'macos-latest' ]]; then
-            export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
-          fi
+          export ${{ matrix.system.runtime-env }}
 
           ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
