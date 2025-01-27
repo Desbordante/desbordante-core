@@ -9,8 +9,8 @@
 
 #include <easylogging++.h>
 
-#include "model/types/builtin.h"
 #include "dc/FastADC/providers/index_provider.h"
+#include "model/types/builtin.h"
 #include "model/types/type.h"
 
 namespace algos::fastadc {
