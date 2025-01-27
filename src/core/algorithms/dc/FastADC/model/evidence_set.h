@@ -4,7 +4,7 @@
 
 #include <easylogging++.h>
 
-#include "evidence.h"
+#include "dc/FastADC/model/evidence.h"
 
 namespace algos::fastadc {
 

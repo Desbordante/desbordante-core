@@ -3,9 +3,9 @@
 #include <array>
 #include <cstddef>
 #include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
+
+#include "frozen/string.h"
+#include "frozen/unordered_map.h"
 
 #include "type.h"
 
@@ -17,26 +17,96 @@ constexpr std::array<OperatorType, 6> kAllOperatorTypes = {
         OperatorType::kEqual, OperatorType::kUnequal,      OperatorType::kGreater,
         OperatorType::kLess,  OperatorType::kGreaterEqual, OperatorType::kLessEqual};
 
+/**
+ * A small struct to enable range-based for on Operators.
+ * It’s effectively a compile-time "view" into an array of OperatorType.
+ */
+class OperatorSpan {
+    OperatorType const* data_;
+    std::size_t size_;
+
+public:
+    constexpr OperatorSpan(OperatorType const* d, std::size_t n) : data_(d), size_(n) {}
+
+    constexpr OperatorType const* begin() const {
+        return data_;
+    }
+
+    constexpr OperatorType const* end() const {
+        return data_ + size_;
+    }
+};
+
 // TODO: remove code duplication cause we already have "dc/model/operator.h" that is used for
 // DC verification.
 class Operator {
-private:
     OperatorType op_;
 
-    template <typename V>
-    using OperatorMap = std::unordered_map<OperatorType, V>;
+    // Static arrays for all Implications and Transitives at compile time for each OperatorType:
+    static constexpr OperatorType kEqImplications[] = {
+            OperatorType::kEqual, OperatorType::kGreaterEqual, OperatorType::kLessEqual};
+    static constexpr OperatorType kUneqImplications[] = {OperatorType::kUnequal};
+    static constexpr OperatorType kGtImplications[] = {
+            OperatorType::kGreater, OperatorType::kGreaterEqual, OperatorType::kUnequal};
+    static constexpr OperatorType kLtImplications[] = {
+            OperatorType::kLess, OperatorType::kLessEqual, OperatorType::kUnequal};
+    static constexpr OperatorType kGeImplications[] = {OperatorType::kGreaterEqual};
+    static constexpr OperatorType kLeImplications[] = {OperatorType::kLessEqual};
+    static constexpr OperatorType kEqTransitives[] = {OperatorType::kEqual};
+    static constexpr OperatorType kUneqTransitives[] = {OperatorType::kEqual};
+    static constexpr OperatorType kGtTransitives[] = {
+            OperatorType::kGreater, OperatorType::kGreaterEqual, OperatorType::kEqual};
+    static constexpr OperatorType kLtTransitives[] = {OperatorType::kLess, OperatorType::kLessEqual,
+                                                      OperatorType::kEqual};
+    static constexpr OperatorType kGeTransitives[] = {
+            OperatorType::kGreater, OperatorType::kGreaterEqual, OperatorType::kEqual};
+    static constexpr OperatorType kLeTransitives[] = {OperatorType::kLess, OperatorType::kLessEqual,
+                                                      OperatorType::kEqual};
 
-    static OperatorMap<OperatorType> const kInverseMap;
-    static OperatorMap<OperatorType> const kSymmetricMap;
-    static OperatorMap<std::vector<OperatorType>> const kImplicationsMap;
-    static OperatorMap<std::vector<OperatorType>> const kTransitivesMap;
-    static OperatorMap<std::string> const kShortStringMap;
+    static constexpr auto kInverseMap =
+            ::frozen::make_unordered_map<OperatorType, OperatorType, 6>({
+                    {OperatorType::kEqual, OperatorType::kUnequal},
+                    {OperatorType::kUnequal, OperatorType::kEqual},
+                    {OperatorType::kGreater, OperatorType::kLessEqual},
+                    {OperatorType::kLess, OperatorType::kGreaterEqual},
+                    {OperatorType::kGreaterEqual, OperatorType::kLess},
+                    {OperatorType::kLessEqual, OperatorType::kGreater},
+            });
 
-    static OperatorMap<OperatorType> InitializeInverseMap();
-    static OperatorMap<OperatorType> InitializeSymmetricMap();
-    static OperatorMap<std::vector<OperatorType>> InitializeImplicationsMap();
-    static OperatorMap<std::vector<OperatorType>> InitializeTransitivesMap();
-    static OperatorMap<std::string> InitializeShortStringMap();
+    static constexpr auto kSymmetricMap =
+            ::frozen::make_unordered_map<OperatorType, OperatorType, 6>({
+                    {OperatorType::kEqual, OperatorType::kEqual},
+                    {OperatorType::kUnequal, OperatorType::kUnequal},
+                    {OperatorType::kGreater, OperatorType::kLess},
+                    {OperatorType::kLess, OperatorType::kGreater},
+                    {OperatorType::kGreaterEqual, OperatorType::kLessEqual},
+                    {OperatorType::kLessEqual, OperatorType::kGreaterEqual},
+            });
+
+    static constexpr auto kImplicationsMap =
+            ::frozen::make_unordered_map<OperatorType, OperatorSpan, 6>({
+                    {OperatorType::kEqual, OperatorSpan(kEqImplications, 3)},
+                    {OperatorType::kUnequal, OperatorSpan(kUneqImplications, 1)},
+                    {OperatorType::kGreater, OperatorSpan(kGtImplications, 3)},
+                    {OperatorType::kLess, OperatorSpan(kLtImplications, 3)},
+                    {OperatorType::kGreaterEqual, OperatorSpan(kGeImplications, 1)},
+                    {OperatorType::kLessEqual, OperatorSpan(kLeImplications, 1)},
+            });
+
+    static constexpr auto kTransitivesMap =
+            ::frozen::make_unordered_map<OperatorType, OperatorSpan, 6>({
+                    {OperatorType::kEqual, OperatorSpan(kEqTransitives, 1)},
+                    {OperatorType::kUnequal, OperatorSpan(kUneqTransitives, 1)},
+                    {OperatorType::kGreater, OperatorSpan(kGtTransitives, 3)},
+                    {OperatorType::kLess, OperatorSpan(kLtTransitives, 3)},
+                    {OperatorType::kGreaterEqual, OperatorSpan(kGeTransitives, 3)},
+                    {OperatorType::kLessEqual, OperatorSpan(kLeTransitives, 3)},
+            });
+
+    static constexpr frozen::unordered_map<OperatorType, frozen::string, 6> kOperatorTypeToString{
+            {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
+            {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
+            {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
 
 public:
     Operator(OperatorType type) : op_(type) {}
@@ -57,25 +127,18 @@ public:
     }
 
     // If 'a op b', then 'a op.implications[i] b'
-    std::vector<Operator> GetImplications() const {
-        std::vector<Operator> implications;
-        for (auto type : kImplicationsMap.at(op_)) {
-            implications.emplace_back(type);
-        }
-        return implications;
+    OperatorSpan GetImplications() const {
+        return kImplicationsMap.at(op_);
     }
 
     // If 'a op b' and 'b op.transitives[i] c', then 'a op c'
-    std::vector<Operator> GetTransitives() const {
-        std::vector<Operator> transitives;
-        for (auto type : kTransitivesMap.at(op_)) {
-            transitives.emplace_back(type);
-        }
-        return transitives;
+    OperatorSpan GetTransitives() const {
+        return kTransitivesMap.at(op_);
     }
 
     std::string ToString() const {
-        return kShortStringMap.at(op_);
+        frozen::string str = kOperatorTypeToString.at(op_);
+        return {str.begin(), str.end()};
     }
 
     OperatorType GetType() const {
