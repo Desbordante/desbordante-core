@@ -89,8 +89,8 @@ void FastADC::CheckTypes() {
 }
 
 void FastADC::PrintResults() {
-    LOG(INFO) << "Total denial constraints: " << dcs_.TotalDCSize();
-    LOG(INFO) << "Minimal denial constraints: " << dcs_.MinDCSize();
+    LOG(DEBUG) << "Total denial constraints: " << dcs_.TotalDCSize();
+    LOG(DEBUG) << "Minimal denial constraints: " << dcs_.MinDCSize();
     LOG(DEBUG) << dcs_.ToString();
 }
 
@@ -116,7 +116,7 @@ unsigned long long FastADC::ExecuteInternal() {
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
-    LOG(INFO) << "Built evidence set";
+    LOG(DEBUG) << "Built evidence set";
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
@@ -130,7 +130,7 @@ unsigned long long FastADC::ExecuteInternal() {
 
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "Algorithm time: " << elapsed_milliseconds.count();
+    LOG(DEBUG) << "Algorithm time: " << elapsed_milliseconds.count();
     return elapsed_milliseconds.count();
 }
 

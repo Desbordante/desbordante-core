@@ -6,13 +6,13 @@
 
 #include <easylogging++.h>
 
-#include "model/types/builtin.h"
 #include "dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
 #include "dc/FastADC/providers/predicate_provider.h"
+#include "model/types/builtin.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {
