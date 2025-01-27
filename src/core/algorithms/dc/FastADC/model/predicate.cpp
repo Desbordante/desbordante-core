@@ -57,7 +57,7 @@ PredicatePtr Predicate::GetInverse(PredicateProvider* provider) const {
 std::vector<PredicatePtr> const& Predicate::GetImplications(PredicateProvider* provider) const {
     if (implications_.empty()) {
         auto op_implications = op_.GetImplications();
-        for (auto const& op_implication : op_implications) {
+        for (Operator op_implication : op_implications) {
             implications_.push_back(provider->GetPredicate(op_implication, l_, r_));
         }
     }

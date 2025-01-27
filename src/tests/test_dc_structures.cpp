@@ -88,7 +88,7 @@ TEST_F(TestOperatorInt, Implication) {
             auto implications = op.GetImplications();
             bool op_result = op.Eval(this->left_ptr_, this->right_ptr_, *(this->type_));
 
-            for (auto& imp_op : implications) {
+            for (Operator imp_op : implications) {
                 if (op_result) {
                     EXPECT_TRUE(imp_op.Eval(this->left_ptr_, this->right_ptr_, *(this->type_)));
                 }
@@ -157,7 +157,7 @@ TEST_F(TestOperatorInt, Transitives) {
             bool ab_result = op.Eval(this->left_ptr_, this->right_ptr_, *(this->type_));
 
             auto transitives = op.GetTransitives();
-            for (auto& trans_op : transitives) {
+            for (Operator trans_op : transitives) {
                 this->SetVals(b, c);
                 bool bc_trans_result =
                         trans_op.Eval(this->left_ptr_, this->right_ptr_, *(this->type_));
