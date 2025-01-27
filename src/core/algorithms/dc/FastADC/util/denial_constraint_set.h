@@ -1,7 +1,7 @@
 #pragma once
 
-#include "dc/FastADC/util/closure.h"
 #include "dc/FastADC/model/denial_constraint.h"
+#include "dc/FastADC/util/closure.h"
 #include "dc/FastADC/util/ntree_search.h"
 
 namespace algos::fastadc {
@@ -12,20 +12,23 @@ private:
     std::vector<DenialConstraint> result_;
     PredicateProvider* predicate_provider_;
 
+    using CompareResult = model::CompareResult;
+
     // Java way of comparing bitsets
-    static int CompareBitsets(boost::dynamic_bitset<> const& lhs,
-                              boost::dynamic_bitset<> const& rhs) {
+    static CompareResult CompareBitsets(boost::dynamic_bitset<> const& lhs,
+                                        boost::dynamic_bitset<> const& rhs) {
         size_t max_size = std::max(lhs.size(), rhs.size());
 
         for (size_t i = 0; i < max_size; ++i) {
-            bool lhs_bit = i < lhs.size() ? lhs[i] : false;
-            bool rhs_bit = i < rhs.size() ? rhs[i] : false;
+            bool lhs_bit = (i < lhs.size()) ? lhs[i] : false;
+            bool rhs_bit = (i < rhs.size()) ? rhs[i] : false;
 
             if (lhs_bit != rhs_bit) {
-                return lhs_bit ? 1 : -1;  // lhs_bit is true and rhs_bit is false => lhs > rhs
+                return lhs_bit ? CompareResult::kGreater : CompareResult::kLess;
             }
         }
-        return 0;  // bitsets are equal
+
+        return CompareResult::kEqual;
     }
 
     struct MinimalDCCandidate {
@@ -37,28 +40,40 @@ private:
         MinimalDCCandidate(DenialConstraint const& dc)
             : dc(&dc), bitset(dc.GetPredicateSet().GetBitset()) {}
 
-        int Compare(MinimalDCCandidate const& other) const {
-            if (dc->GetPredicateCount() < other.dc->GetPredicateCount()) return -1;
-            if (dc->GetPredicateCount() > other.dc->GetPredicateCount()) return 1;
+        CompareResult Compare(MinimalDCCandidate const& other) const {
+            if (dc->GetPredicateCount() < other.dc->GetPredicateCount()) {
+                return CompareResult::kLess;
+            }
+            if (dc->GetPredicateCount() > other.dc->GetPredicateCount()) {
+                return CompareResult::kGreater;
+            }
 
-            int bitset_cmp = CompareBitsets(bitset, other.bitset);
-            return bitset_cmp;
+            return CompareBitsets(bitset, other.bitset);
         }
 
         bool ShouldReplace(MinimalDCCandidate const& prior) const {
-            return Compare(prior) <= 0;
+            CompareResult cmp = Compare(prior);
+            return (cmp == CompareResult::kLess) || (cmp == CompareResult::kEqual);
         }
     };
 
     struct Comparator {
         bool operator()(std::pair<PredicateSet, MinimalDCCandidate> const& a,
                         std::pair<PredicateSet, MinimalDCCandidate> const& b) const {
-            if (a.first.Size() != b.first.Size()) return a.first.Size() < b.first.Size();
-            int cmp = a.second.Compare(b.second);
-            if (cmp != 0) return cmp < 0;
+            if (a.first.Size() != b.first.Size()) {
+                return a.first.Size() < b.first.Size();
+            }
 
-            cmp = CompareBitsets(a.first.GetBitset(), b.first.GetBitset());
-            return cmp < 0;
+            model::CompareResult cmp = a.second.Compare(b.second);
+            if (cmp == model::CompareResult::kLess) {
+                return true;
+            }
+            if (cmp == model::CompareResult::kGreater) {
+                return false;
+            }
+
+            CompareResult bitset_cmp = CompareBitsets(a.first.GetBitset(), b.first.GetBitset());
+            return bitset_cmp == CompareResult::kLess;
         }
     };
 
