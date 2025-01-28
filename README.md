@@ -44,7 +44,9 @@ The currently supported data patterns are:
 * Association rules (discovery)
 * Numerical association rules (discovery)
 * Matching dependencies (discovery)
-* Variable heterogeneous denial constraints (validation)
+* Denial constraints
+   - Exact denial constraints (discovery and validation)
+   - Approximate denial constraints, with $g_1$ metric (discovery)
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
