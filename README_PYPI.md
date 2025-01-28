@@ -62,7 +62,9 @@ The currently supported data patterns are:
 * Association rules (discovery)
 * Numerical association rules (discovery)
 * Matching dependencies (discovery)
-* Variable heterogeneous denial constraints (validation)
+* Denial constraints
+   - Exact denial constraints (discovery and validation)
+   - Approximate denial constraints, with $g_1$ metric (discovery)
 
 This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
 
