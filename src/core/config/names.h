@@ -87,4 +87,5 @@ constexpr auto kColumnMatches = "column_matches";
 constexpr auto kMaxCardinality = "max_cardinality";
 constexpr auto kLevelDefinition = "level_definition";
 constexpr auto kDenialConstraint = "denial_constraint";
+constexpr auto kDoCollectViolations = "do_collect_violations";
 }  // namespace config::names
