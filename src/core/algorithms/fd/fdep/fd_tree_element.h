@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bitset>
 #include <list>
 #include <memory>
 #include <vector>
@@ -11,11 +10,13 @@
 
 #include "algorithms/fd/fd.h"
 #include "model/table/relational_schema.h"
+#include "model/types/bitset.h"
 
 class FDTreeElement {
 public:
     // The maximum number of columns in the dataset. Using in std::bitset template.
     static constexpr int kMaxAttrNum = 256;
+
     explicit FDTreeElement(size_t max_attribute_number);
 
     FDTreeElement(FDTreeElement const&) = delete;
@@ -31,14 +32,14 @@ public:
 
     [[nodiscard]] FDTreeElement* GetChild(size_t index) const;
 
-    void AddFunctionalDependency(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num);
+    void AddFunctionalDependency(model::Bitset<kMaxAttrNum> const& lhs, size_t attr_num);
 
     // Searching for generalization of functional dependency in cover-trees.
-    bool GetGeneralizationAndDelete(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                                    size_t current_attr, std::bitset<kMaxAttrNum>& spec_lhs);
+    bool GetGeneralizationAndDelete(model::Bitset<kMaxAttrNum> const& lhs, size_t attr_num,
+                                    size_t current_attr, model::Bitset<kMaxAttrNum>& spec_lhs);
 
-    [[nodiscard]] bool ContainsGeneralization(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                                              size_t current_attr) const;
+    [[nodiscard]] bool ContainsGeneralization(model::Bitset<kMaxAttrNum> const& lhs,
+                                              size_t attr_num, size_t current_attr) const;
 
     // Printing found dependencies in output file.
     void PrintDep(std::string const& file, std::vector<std::string>& column_names) const;
@@ -49,13 +50,13 @@ public:
 
 private:
     std::vector<std::unique_ptr<FDTreeElement>> children_;
-    std::bitset<kMaxAttrNum> rhs_attributes_;
+    model::Bitset<kMaxAttrNum> rhs_attributes_;
     size_t max_attribute_number_;
-    std::bitset<kMaxAttrNum> is_fd_;
+    model::Bitset<kMaxAttrNum> is_fd_;
 
     void AddRhsAttribute(size_t index);
 
-    [[nodiscard]] std::bitset<kMaxAttrNum> const& GetRhsAttributes() const;
+    [[nodiscard]] model::Bitset<kMaxAttrNum> const& GetRhsAttributes() const;
 
     void MarkAsLast(size_t index);
 
@@ -63,18 +64,18 @@ private:
     [[nodiscard]] bool IsFinalNode(size_t attr_num) const;
 
     // Searching for specialization of functional dependency in cover-trees.
-    bool GetSpecialization(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                           size_t current_attr, std::bitset<kMaxAttrNum>& spec_lhs_out) const;
+    bool GetSpecialization(model::Bitset<kMaxAttrNum> const& lhs, size_t attr_num,
+                           size_t current_attr, model::Bitset<kMaxAttrNum>& spec_lhs_out) const;
 
     void FilterSpecializationsHelper(FDTreeElement& filtered_tree,
-                                     std::bitset<kMaxAttrNum>& active_path);
+                                     model::Bitset<kMaxAttrNum>& active_path);
 
     // Helper function for PrintDep.
-    void PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std::ofstream& file,
+    void PrintDependencies(model::Bitset<kMaxAttrNum>& active_path, std::ofstream& file,
                            std::vector<std::string>& column_names) const;
 
     void TransformTreeFdCollection(
-            std::bitset<kMaxAttrNum>& active_path, std::list<FD>& fd_collection,
+            model::Bitset<kMaxAttrNum>& active_path, std::list<FD>& fd_collection,
             std::shared_ptr<RelationalSchema> const& scheme,
             unsigned int max_lhs = std::numeric_limits<unsigned int>::max()) const;
 };

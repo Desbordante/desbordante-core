@@ -9,6 +9,7 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/relation_data.h"
 #include "model/table/relational_schema.h"
+#include "model/types/bitset.h"
 
 namespace algos {
 
@@ -47,11 +48,11 @@ private:
 
     // Converting negative cover tree into positive cover tree
     void CalculatePositiveCover(FDTreeElement const& neg_cover_subtree,
-                                std::bitset<FDTreeElement::kMaxAttrNum>& active_path);
+                                model::Bitset<FDTreeElement::kMaxAttrNum>& active_path);
 
     // Specializing general dependencies for not to be followed from violated dependencies of
     // negative cover tree.
-    void SpecializePositiveCover(std::bitset<FDTreeElement::kMaxAttrNum> const& lhs,
+    void SpecializePositiveCover(model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs,
                                  size_t const& a);
 };
 

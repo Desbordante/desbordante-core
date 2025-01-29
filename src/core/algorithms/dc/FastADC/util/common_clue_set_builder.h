@@ -5,11 +5,12 @@
 #include <vector>
 
 #include "dc/FastADC/model/predicate.h"
+#include "model/types/bitset.h"
 
 namespace algos::fastadc {
 
 /* Maximum supported number of bits in clue is kPredicateBits */
-using Clue = std::bitset<kPredicateBits>;
+using Clue = model::Bitset<kPredicateBits>;
 
 struct ClueHash {
     std::size_t operator()(Clue const& clue) const noexcept {

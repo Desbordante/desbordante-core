@@ -1,7 +1,6 @@
 #pragma once
 
 #include "dc/FastADC/model/evidence_set.h"
-#include "util/bitset_extensions.h"
 
 namespace algos::fastadc {
 
@@ -77,8 +76,7 @@ private:
 
         for (auto const& evidence : evidence_set_) {
             PredicateBitset bitset = evidence.evidence;
-            util::BitsetIterator<kPredicateBits> iter{bitset};
-            for (size_t i = iter.Pos(); i != bitset.size(); iter.Next(), i = iter.Pos()) {
+            for (size_t i = bitset._Find_first(); i != bitset.size(); i = bitset._Find_next(i)) {
                 counts[i]++;
             }
         }

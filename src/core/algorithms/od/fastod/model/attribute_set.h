@@ -8,7 +8,7 @@
 #include <boost/functional/hash.hpp>
 
 #include "model/table/column_index.h"
-#include "util/bitset_extensions.h"
+#include "model/types/bitset.h"
 
 namespace algos::fastod {
 
@@ -16,9 +16,9 @@ class AttributeSet {
 private:
     static constexpr model::ColumnIndex kBitsNum = 64;
 
-    std::bitset<kBitsNum> bitset_;
+    model::Bitset<kBitsNum> bitset_;
 
-    explicit AttributeSet(std::bitset<kBitsNum> bitset) noexcept : bitset_(std::move(bitset)) {}
+    explicit AttributeSet(model::Bitset<kBitsNum> bitset) noexcept : bitset_(std::move(bitset)) {}
 
 public:
     AttributeSet() noexcept = default;
@@ -94,11 +94,11 @@ public:
     }
 
     model::ColumnIndex FindFirst() const noexcept {
-        return util::FindFirst(bitset_);
+        return bitset_._Find_first();
     }
 
     model::ColumnIndex FindNext(model::ColumnIndex pos) const noexcept {
-        return util::FindNext(bitset_, pos);
+        return bitset_._Find_next(pos);
     }
 
     std::string ToString() const;
