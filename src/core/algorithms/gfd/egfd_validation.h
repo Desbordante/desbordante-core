@@ -1,10 +1,11 @@
 #pragma once
+#include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_handler.h"
 #include "config/names_and_descriptions.h"
-#include "gfd.h"
 
 namespace algos {
 
+using namespace details;
 using CPI = std::map<std::pair<vertex_t, vertex_t>, std::map<vertex_t, std::set<vertex_t>>>;
 
 class EGfdValidation : public GfdHandler {
