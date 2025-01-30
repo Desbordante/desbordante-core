@@ -40,7 +40,9 @@ jobs:
 
           - os: ubuntu-latest
             toolset: llvm-clang
-            env: CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+            # CMake cannot locate clang-scan-deps without `CC=clang`
+            # https://github.com/emscripten-core/emscripten/issues/22305
+            env: CC=clang CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
 
           # Uncomment this to enable macOS gcc tests:
           # - os: macos-latest
