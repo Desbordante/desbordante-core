@@ -18,11 +18,8 @@ namespace algos::fastadc {
 
 inline boost::dynamic_bitset<>& operator&=(boost::dynamic_bitset<>& lhs,
                                            PredicateBitset const& rhs) {
-    size_t rhs_size = rhs.size();
-    for (size_t i = 0; i < rhs_size && i < lhs.size(); ++i) {
-        if (!rhs.test(i)) {
-            lhs.reset(i);
-        }
+    for (size_t i = 0; i < std::min(rhs.size(), lhs.size()); ++i) {
+        lhs[i] &= rhs[i];
     }
     return lhs;
 }
