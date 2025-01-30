@@ -514,10 +514,21 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
         expected.insert(VectorToBitset(expected_vec));
     }
 
+    std::hash<PredicateBitset> hash{};
+
+    std::ostringstream ss;
+    ss << "Expected:\n";
+    for (auto const& bs : expected) {
+        ss << '\t' << bs << " (" << bs.to_ulong() << ", " << hash(bs) << ")\n";
+    }
+    LOG(INFO) << ss.str();
+
     for (auto const& evidence : transfromed_evidence_set) {
         auto const& actual_evidence = evidence.evidence;
-        EXPECT_TRUE(expected.find(actual_evidence) != expected.end())
-                << "Unexpected evidence: " << actual_evidence;
+        LOG(INFO) << "Act: " << actual_evidence << " (" << actual_evidence.to_ulong() << ")";
+        EXPECT_TRUE(expected.contains(actual_evidence))
+                << "Unexpected evidence: " << actual_evidence << "(" << actual_evidence.to_ullong()
+                << ", " << hash(actual_evidence) << ")";
     }
 
     std::vector<PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
