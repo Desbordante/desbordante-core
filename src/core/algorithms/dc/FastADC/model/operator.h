@@ -62,47 +62,47 @@ class Operator {
     static constexpr OperatorType kLeTransitives[] = {OperatorType::kLess, OperatorType::kLessEqual,
                                                       OperatorType::kEqual};
 
-    static constexpr auto kInverseMap =
-            ::frozen::make_unordered_map<OperatorType, OperatorType, 6>({
-                    {OperatorType::kEqual, OperatorType::kUnequal},
-                    {OperatorType::kUnequal, OperatorType::kEqual},
-                    {OperatorType::kGreater, OperatorType::kLessEqual},
-                    {OperatorType::kLess, OperatorType::kGreaterEqual},
-                    {OperatorType::kGreaterEqual, OperatorType::kLess},
-                    {OperatorType::kLessEqual, OperatorType::kGreater},
-            });
+    using OperatorMapType = frozen::unordered_map<OperatorType, OperatorType, 6>;
+    using OperatorMapSpan = frozen::unordered_map<OperatorType, OperatorSpan, 6>;
+    using OperatorMapString = frozen::unordered_map<OperatorType, frozen::string, 6>;
 
-    static constexpr auto kSymmetricMap =
-            ::frozen::make_unordered_map<OperatorType, OperatorType, 6>({
-                    {OperatorType::kEqual, OperatorType::kEqual},
-                    {OperatorType::kUnequal, OperatorType::kUnequal},
-                    {OperatorType::kGreater, OperatorType::kLess},
-                    {OperatorType::kLess, OperatorType::kGreater},
-                    {OperatorType::kGreaterEqual, OperatorType::kLessEqual},
-                    {OperatorType::kLessEqual, OperatorType::kGreaterEqual},
-            });
+    static constexpr OperatorMapType kInverseMap{
+            {OperatorType::kEqual, OperatorType::kUnequal},
+            {OperatorType::kUnequal, OperatorType::kEqual},
+            {OperatorType::kGreater, OperatorType::kLessEqual},
+            {OperatorType::kLess, OperatorType::kGreaterEqual},
+            {OperatorType::kGreaterEqual, OperatorType::kLess},
+            {OperatorType::kLessEqual, OperatorType::kGreater},
+    };
 
-    static constexpr auto kImplicationsMap =
-            ::frozen::make_unordered_map<OperatorType, OperatorSpan, 6>({
-                    {OperatorType::kEqual, OperatorSpan(kEqImplications, 3)},
-                    {OperatorType::kUnequal, OperatorSpan(kUneqImplications, 1)},
-                    {OperatorType::kGreater, OperatorSpan(kGtImplications, 3)},
-                    {OperatorType::kLess, OperatorSpan(kLtImplications, 3)},
-                    {OperatorType::kGreaterEqual, OperatorSpan(kGeImplications, 1)},
-                    {OperatorType::kLessEqual, OperatorSpan(kLeImplications, 1)},
-            });
+    static constexpr OperatorMapType kSymmetricMap{
+            {OperatorType::kEqual, OperatorType::kEqual},
+            {OperatorType::kUnequal, OperatorType::kUnequal},
+            {OperatorType::kGreater, OperatorType::kLess},
+            {OperatorType::kLess, OperatorType::kGreater},
+            {OperatorType::kGreaterEqual, OperatorType::kLessEqual},
+            {OperatorType::kLessEqual, OperatorType::kGreaterEqual},
+    };
 
-    static constexpr auto kTransitivesMap =
-            ::frozen::make_unordered_map<OperatorType, OperatorSpan, 6>({
-                    {OperatorType::kEqual, OperatorSpan(kEqTransitives, 1)},
-                    {OperatorType::kUnequal, OperatorSpan(kUneqTransitives, 1)},
-                    {OperatorType::kGreater, OperatorSpan(kGtTransitives, 3)},
-                    {OperatorType::kLess, OperatorSpan(kLtTransitives, 3)},
-                    {OperatorType::kGreaterEqual, OperatorSpan(kGeTransitives, 3)},
-                    {OperatorType::kLessEqual, OperatorSpan(kLeTransitives, 3)},
-            });
+    static constexpr OperatorMapSpan kImplicationsMap{
+            {OperatorType::kEqual, OperatorSpan(kEqImplications, 3)},
+            {OperatorType::kUnequal, OperatorSpan(kUneqImplications, 1)},
+            {OperatorType::kGreater, OperatorSpan(kGtImplications, 3)},
+            {OperatorType::kLess, OperatorSpan(kLtImplications, 3)},
+            {OperatorType::kGreaterEqual, OperatorSpan(kGeImplications, 1)},
+            {OperatorType::kLessEqual, OperatorSpan(kLeImplications, 1)},
+    };
 
-    static constexpr frozen::unordered_map<OperatorType, frozen::string, 6> kOperatorTypeToString{
+    static constexpr OperatorMapSpan kTransitivesMap{
+            {OperatorType::kEqual, OperatorSpan(kEqTransitives, 1)},
+            {OperatorType::kUnequal, OperatorSpan(kUneqTransitives, 1)},
+            {OperatorType::kGreater, OperatorSpan(kGtTransitives, 3)},
+            {OperatorType::kLess, OperatorSpan(kLtTransitives, 3)},
+            {OperatorType::kGreaterEqual, OperatorSpan(kGeTransitives, 3)},
+            {OperatorType::kLessEqual, OperatorSpan(kLeTransitives, 3)},
+    };
+
+    static constexpr OperatorMapString kOperatorTypeToString{
             {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
             {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
             {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};

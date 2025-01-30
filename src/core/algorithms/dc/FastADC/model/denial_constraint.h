@@ -27,23 +27,23 @@ public:
         return DenialConstraint(predicate_set_.GetInvTS(predicate_provider));
     }
 
-    PredicateSet const& GetPredicateSet() const {
+    PredicateSet const& GetPredicateSet() const noexcept {
         return predicate_set_;
     }
 
-    size_t GetPredicateCount() const {
+    size_t GetPredicateCount() const noexcept {
         return predicate_set_.Size();
     }
 
-    std::string ToString() const {
-        std::string const c_not = "\u00AC";
-        std::string const c_and = " ∧ ";
+    std::string ToString() const noexcept {
+        static std::string const kCNot = "\u00AC";
+        static std::string const kCAnd = " ∧ ";
         std::ostringstream sb;
-        sb << c_not << "{ ";
+        sb << kCNot << "{ ";
         std::string separator;
         for (PredicatePtr predicate : predicate_set_) {
             sb << separator << predicate->ToString();
-            separator = c_and;
+            separator = kCAnd;
         }
         sb << " }";
         return sb.str();

@@ -1,5 +1,8 @@
 #include "algorithms/dc/FastADC/fastadc.h"
 
+#include <stdexcept>
+#include <vector>
+
 #include <easylogging++.h>
 
 #include "config/names_and_descriptions.h"
@@ -11,6 +14,7 @@
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 namespace algos::dc {
 
@@ -41,8 +45,8 @@ void FastADC::MakeExecuteOptsAvailable() {
 }
 
 void FastADC::LoadDataInternal() {
-    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(
-            *input_table_, true, true);  // kMixed type will be treated as a string type
+    // kMixed type will be treated as a string type
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, true, true);
 
     if (typed_relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: DC mining is meaningless.");
