@@ -7,11 +7,11 @@
 #include <future>
 #include <memory>
 #include <mutex>
-#include <thread>
 #include <variant>
 #include <vector>
 
 #include "model/index.h"
+#include "util/auto_join_thread.h"
 #include "util/barrier.h"
 #include "util/desbordante_assume.h"
 
@@ -44,7 +44,7 @@ private:
     };
 
     Worker work_;
-    std::vector<std::jthread> worker_threads_;
+    std::vector<JThread> worker_threads_;
     std::vector<std::packaged_task<void(WorkerThreadPool&)>> tasks_;
     util::Barrier<Completion> barrier_;
     std::condition_variable working_var_;

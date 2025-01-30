@@ -1,0 +1,6 @@
+# Disable UB sanitizer, "Indirect call of function through a pointer of the wrong type" check:
+[function]
+# in all files:
+src:*
+# enable again only in our code:
+src:src/*=sanitize
