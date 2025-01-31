@@ -15,6 +15,9 @@ namespace tests {
 struct KeysTestParams {
     std::vector<unsigned int> const expected;
     CSVConfig const& csv_config;
+
+    KeysTestParams(std::vector<unsigned int>&& expected, CSVConfig const& csv_config)
+        : expected(expected), csv_config(csv_config) {}
 };
 
 class KeysTest : public ::testing::TestWithParam<KeysTestParams> {};

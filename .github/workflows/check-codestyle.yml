@@ -17,7 +17,7 @@ jobs:
   clang-format-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Pull clang-format
@@ -49,14 +49,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Download libraries
-        uses: ./.github/composite-actions/download-libraries
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
         with:
+          os: ubuntu
+          toolset: gcc
           download-pybind: true
       - name: Generate compile_commands.json
         run: |
-          cmake -DCMAKE_C_COMPILER=gcc-10 \
-            -DCMAKE_CXX_COMPILER=g++-10 \
+          cmake -DCMAKE_CXX_COMPILER=g++-10 \
             -DCMAKE_BUILD_TYPE=Debug \
             -Dgtest_disable_pthreads=OFF \
             -DASAN=OFF \
