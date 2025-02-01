@@ -235,7 +235,7 @@ Here is a list of papers about patterns, organized in the recommended reading or
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
 
-* Python >=3.7 
+* Python >=3.8
 
 To install Desbordante type:
 
