@@ -1,13 +1,10 @@
 #include "pli_cind.h"
 
-#include <algorithm>
-
 #include "ind/cind/condition_miners/cind_miner.hpp"
-#include "ind/cind/condition_miners/position_lists_set.h"
 
 namespace algos::cind {
-PliCind::PliCind(std::shared_ptr<std::vector<model::ColumnDomain>> domains)
-    : CindMiner(std::move(domains)) {}
+PliCind::PliCind(config::InputTables &input_tables)
+    : CindMiner(input_tables) {}
 
 void PliCind::ExecuteSingle(model::IND const& /*aind*/) {
 }

@@ -1,24 +1,25 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "ind/cind/condition_type.hpp"
 #include "ind/ind.h"
-#include "table/column_domain.h"
+#include "table/column_encoded_relation_data.h"
+#include "tabular_data/input_tables_type.h"
 
 namespace algos::cind {
 class CindAlgorithm;
+using model::ColumnEncodedRelationData;
 
 class CindMiner {
 protected:
-    std::shared_ptr<std::vector<model::ColumnDomain>> domains_;
+    std::vector<std::unique_ptr<ColumnEncodedRelationData>> tables_;
     double precision_;
     double recall_;
     CondType condition_type_;
 
 public:
-    CindMiner(std::shared_ptr<std::vector<model::ColumnDomain>> domains);
+    CindMiner(config::InputTables &input_tables);
     virtual ~CindMiner() = default;
 
     void Execute(std::list<model::IND> const& aind_list);

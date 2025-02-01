@@ -25,8 +25,6 @@ CindAlgorithm::CindAlgorithm(std::vector<std::string_view> phase_names)
 
 void CindAlgorithm::CreateSpiderAlgo() {
     spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::spider);
-
-    domains_ = spider_algo_->domains_;
 }
 
 void CindAlgorithm::RegisterSpiderOptions() {
@@ -43,7 +41,7 @@ void CindAlgorithm::LoadDataInternal() {
 }
 
 void CindAlgorithm::CreateCindMinerAlgo() {
-    cind_miner_ = std::make_unique<PliCind>(domains_);
+    cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
     RegisterCindMinerOptions();
 }
 

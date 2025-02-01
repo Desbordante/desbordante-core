@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <unordered_set>
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
@@ -17,7 +15,7 @@ class PliCind final : public CindMiner {
 //     std::vector<PLSetShared> attr_idx_to_pls_;
 
 public:
-    PliCind(std::shared_ptr<std::vector<model::ColumnDomain>> domains);
+    PliCind(config::InputTables &input_tables);
 
     // std::unordered_set<Condition> GetConditions(std::vector<int> cond_attrs,
     //                                             std::vector<int> const& included_pos);
