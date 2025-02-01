@@ -31,6 +31,12 @@ on:
   release:
     types:
       - published
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
+
 jobs:
   generate-linux-wheels-matrix:
     name: Generate Linux wheel matrix
@@ -150,6 +156,8 @@ jobs:
             export BOOST_ROOT=/usr/local &&
             export CXX=clang++ &&
             export DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} 
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
           CIBW_TEST_COMMAND: >
             cp {project}/test_input_data/WDC_satellites.csv {project}/src/python_bindings &&
             cp {project}/test_input_data/transactional_data/rules-kaggle-rows.csv {project}/src/python_bindings &&
@@ -157,8 +165,6 @@ jobs:
             cp {project}/test_input_data/TestWide.csv {project}/src/python_bindings &&
             cd {project}/src/python_bindings &&
             python3 {project}/src/python_bindings/test_bindings.py
-          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
-            DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH} delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
