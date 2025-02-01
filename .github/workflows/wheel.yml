@@ -62,6 +62,7 @@ jobs:
     env:
       CIBW_ARCHS_LINUX: x86_64
       CIBW_BUILD: "*manylinux*"
+      CIBW_SKIP: "cp37-*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014

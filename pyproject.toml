@@ -4,16 +4,16 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "desbordante"
-version = "2.3.0"
+version = "2.3.1"
 description = "Science-intensive high-performance data profiler"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 readme = "README_PYPI.md"
 license = { text = "AGPL-3.0-only" }
 
 classifiers = [
     "License :: OSI Approved :: GNU Affero General Public License v3",
     "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.7",
+    "Operating System :: MacOS :: MacOS X",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
