@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "desbordante"
-version = "2.2.1"
+version = "2.3.0"
 description = "Science-intensive high-performance data profiler"
 requires-python = ">=3.7"
 readme = "README_PYPI.md"
