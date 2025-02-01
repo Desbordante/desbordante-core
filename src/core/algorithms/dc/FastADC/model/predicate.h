@@ -10,6 +10,7 @@
 
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
+#include "model/types/bitset.h"
 #include "table/typed_column_data.h"
 
 namespace algos::fastadc {
@@ -29,7 +30,7 @@ class PredicateProvider;
  * But for now we use kPredicateBits as maxumum amount of predicates
  */
 constexpr auto kPredicateBits = 128;
-using PredicateBitset = std::bitset<kPredicateBits>;
+using PredicateBitset = model::Bitset<kPredicateBits>;
 
 /**
  * @brief Represents a predicate for FastADC.
@@ -54,7 +55,6 @@ private:
     ColumnOperand r_;
 
     mutable PredicatePtr symmetric_{};
-    mutable PredicatePtr operator_symmetric_{};
     mutable PredicatePtr inv_TS_{};
     mutable PredicatePtr inverse_{};
     mutable PredicatesVector implications_;

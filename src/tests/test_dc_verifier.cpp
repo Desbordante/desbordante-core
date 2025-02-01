@@ -25,6 +25,9 @@ struct DCTestParams {
     std::string dc_string;
     CSVConfig csv_config;
     bool expected;
+
+    DCTestParams(std::string&& dc_string, CSVConfig const& csv_config, bool expected)
+        : dc_string(dc_string), csv_config(csv_config), expected(expected) {}
 };
 
 class TestDCVerifier : public ::testing::TestWithParam<DCTestParams> {};

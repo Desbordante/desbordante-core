@@ -74,6 +74,19 @@ else()
     if (ASAN)
         # Set DEBUG build options specific for build with ASAN
         set(ASAN_OPTS "-fsanitize=address")
+
+        execute_process(COMMAND grep -q "Ubuntu" /etc/ose-release RESULT_VARIABLE IS_UBUNTU)
+        if (IS_UBUNTU AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+            # alloc-dealloc-mismatch generates false positives on boost exceptions
+            # This applies only to Ubuntu package:
+            # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
+            # Disable this check on files listed in address_sanitizer_ignore_list.txt if compiler
+            # is Clang and host distro is Ubuntu:
+            message(WARNING "Running on Ubuntu. ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch check will be supressed.
+            Consider using another distro for full ASAN coverage")
+            string(JOIN ";" ASAN_OPTS "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/address_sanitizer_ignore_list.txt")
+        endif()
+
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
             "-Wno-error" # Use of -Werror is discouraged with sanitizers
@@ -89,6 +102,12 @@ else()
             "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
             "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
             "-fno-sanitize-recover=all") # For tests to fail if UBSan finds an error
+        if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
+            # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
+            # because libraries (STL, googletest, boost, etc.) are somehow broken
+            string(JOIN ";" UBSAN_OPTS
+                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt")
+        endif()
         string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}"
             "-O1"
             "${UBSAN_OPTS}")
@@ -101,6 +120,16 @@ else()
 
     if (GDB_DEBUG)
         add_compile_options(-ggdb3)
+    endif()
+
+    # Workaround clang-18 bug:
+    # https://github.com/llvm/llvm-project/issues/76515?ysclid=m406q4it5k674680045
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        string(FIND "${CMAKE_CXX_COMPILER_VERSION}" "18" IDX)
+        if (IDX EQUAL 0)  # clang major version is 18
+            message(WARNING "C++ compiler is Clang++-18. Supressing deprecated declaration warnings. Consider using another version of Clang")
+            string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-Wno-deprecated-declarations")
+        endif()
     endif()
 
     add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
@@ -137,7 +166,7 @@ include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emha
 
 # adding submodules
 if (COMPILE_TESTS)
-    add_subdirectory("lib/googletest")
+    add_subdirectory("lib/googletest" SYSTEM)
 endif()
 
 set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )
@@ -147,9 +176,9 @@ if (PYTHON STREQUAL INSTALL)
     # Relies on undocumented behaviour. EXCLUDE_FROM_ALL is used to prevent install commands
     # inside the easyloggingpp CMakeLists from executing and subsequently failing with a permission error,
     # making it impossible to install the Python package as a normal user.
-    add_subdirectory("lib/easyloggingpp" EXCLUDE_FROM_ALL)
+    add_subdirectory("lib/easyloggingpp" EXCLUDE_FROM_ALL SYSTEM)
 else ()
-    add_subdirectory("lib/easyloggingpp")
+    add_subdirectory("lib/easyloggingpp" SYSTEM)
 endif ()
 set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
 
@@ -170,7 +199,7 @@ endif()
 add_subdirectory("cfg")
 
 if (PYTHON)
-    add_subdirectory("lib/pybind11")
+    add_subdirectory("lib/pybind11" SYSTEM)
     add_subdirectory("src/python_bindings")
 endif()
 

@@ -97,8 +97,8 @@ TYPED_TEST(TestNumeric, Negate) {
     };
 
     test(0);
-    test(-123.5);
-    test(321.4);
+    test(typename TypeParam::UnderlyingType(-123.5));
+    test(typename TypeParam::UnderlyingType(321.4));
 }
 
 TYPED_TEST(TestNumeric, Abs) {
@@ -108,8 +108,8 @@ TYPED_TEST(TestNumeric, Abs) {
     };
 
     test(0);
-    test(-123.5);
-    test(321.4);
+    test(typename TypeParam::UnderlyingType(-123.5));
+    test(typename TypeParam::UnderlyingType(321.4));
 }
 
 TYPED_TEST(TestNumeric, Add) {
@@ -135,7 +135,7 @@ TYPED_TEST(TestNumeric, Div) {
     test(0, 100);
     test(22, 1);
     test(123, 321);
-    test(11.4, 3.14);
+    test(Type(11.4), Type(3.14));
     test(-102, 11);
     test(-123, 123);
     test(-21, -7);
@@ -150,7 +150,7 @@ TYPED_TEST(TestNumeric, Sub) {
     test(0, 100);
     test(22, 12);
     test(123, 321);
-    test(2.72, 1.3123141);
+    test(Type(2.72), Type(1.3123141));
     test(-102, 11);
     test(-123, 123);
     test(-21, -7);
@@ -166,7 +166,7 @@ TYPED_TEST(TestNumeric, Mul) {
     test(100, 0);
     test(22, 12);
     test(123, 321);
-    test(2.72, 1.3123141);
+    test(Type(2.72), Type(1.3123141));
     test(-102, 11);
     test(-123, 123);
     test(-21, -7);
@@ -182,10 +182,13 @@ TYPED_TEST(TestNumeric, Pow) {
 
     test(0, 100);
     test(22, 12);
-    test(123, 321);
-    test(2.72, 1.3123141);
-    test(-102, 11);
-    test(-123, 123);
+    test(Type(2.72), 1.3123141);
+    // 123^321, -102^11 and -123^123 won't fit into long (i. e. IntType) -- it's UB
+    if constexpr (!std::is_base_of_v<typename TypeParam::NumericType, mo::IntType>) {
+        test(123, 321);
+        test(-102, 11);
+        test(-123, 123);
+    }
     test(-21, -7);
 }
 
@@ -200,7 +203,7 @@ TYPED_TEST(TestNumeric, Dist) {
     test(0, 100);
     test(22, 12);
     test(123, 321);
-    test(2.72, 1.3123141);
+    test(Type(2.72), Type(1.3123141));
     test(-102, 11);
     test(-123, 123);
     test(-21, -7);
@@ -214,8 +217,8 @@ TYPED_TEST(TestNumeric, ValueToString) {
 
     test(0);
     test(123);
-    test(3.14123123182387);
-    test(-1231.123456678987654321);
+    test(typename TypeParam::UnderlyingType(3.14123123182387));
+    test(typename TypeParam::UnderlyingType(-1231.123456678987654321));
 }
 
 struct TestStringParam {

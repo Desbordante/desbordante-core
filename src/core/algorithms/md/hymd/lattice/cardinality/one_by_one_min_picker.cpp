@@ -107,7 +107,7 @@ void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& mess
         }
     }
     assert(!considered_indices.none());
-    currently_picked_.emplace_back(&messenger, std::move(considered_indices));
+    currently_picked_.push_back({&messenger, std::move(considered_indices)});
 }
 
 std::vector<ValidationInfo> OneByOnePicker::GetAll() noexcept {

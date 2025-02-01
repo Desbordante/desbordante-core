@@ -57,7 +57,7 @@ std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& 
     auto compare_by_fitness = [](EncodedNAR const& a, EncodedNAR const& b) {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
-    std::ranges::sort(population, compare_by_fitness);
+    std::ranges::stable_sort(population, compare_by_fitness);
     return population;
 }
 

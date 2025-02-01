@@ -10,7 +10,7 @@
 namespace algos::hymd {
 struct LhsNode {
     model::Index offset;
-    ColumnClassifierValueId ccv_id;
+    ColumnClassifierValueId ccv_id = 0;
 
     friend bool operator==(LhsNode const& l, LhsNode const& r) {
         return l.offset == r.offset && l.ccv_id == r.ccv_id;
@@ -34,7 +34,8 @@ public:
     }
 
     ColumnClassifierValueId& AddNext(model::Index offset) {
-        return values_.emplace_back(offset).ccv_id;
+        values_.push_back({offset});
+        return values_.back().ccv_id;
     }
 
     void RemoveLast() {

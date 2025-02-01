@@ -65,7 +65,7 @@ void BindOd(py::module_& main_module) {
                 std::vector<ListOD> res;
                 for (auto const& [lhs, rhs_list] : map_res) {
                     for (AttributeList const& rhs : rhs_list) {
-                        res.emplace_back(lhs, rhs);
+                        res.push_back({lhs, rhs});
                     }
                 }
                 return res;

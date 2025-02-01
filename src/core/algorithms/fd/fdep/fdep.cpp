@@ -5,6 +5,7 @@
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 #include "model/table/column_layout_relation_data.h"
+#include "model/types/bitset.h"
 
 // #ifndef PRINT_FDS
 // #define PRINT_FDS
@@ -62,7 +63,7 @@ unsigned long long FDep::ExecuteInternal() {
     this->pos_cover_tree_ = std::make_unique<FDTreeElement>(this->number_attributes_);
     this->pos_cover_tree_->AddMostGeneralDependencies();
 
-    std::bitset<FDTreeElement::kMaxAttrNum> active_path;
+    model::Bitset<FDTreeElement::kMaxAttrNum> active_path;
     CalculatePositiveCover(*this->neg_cover_tree_, active_path);
 
     pos_cover_tree_->FillFdCollection(this->schema_, FdList(), max_lhs_);
@@ -87,9 +88,9 @@ void FDep::BuildNegativeCover() {
 }
 
 void FDep::AddViolatedFDs(std::vector<size_t> const& t1, std::vector<size_t> const& t2) {
-    std::bitset<FDTreeElement::kMaxAttrNum> equal_attr((2 << this->number_attributes_) - 1);
+    model::Bitset<FDTreeElement::kMaxAttrNum> equal_attr((2 << this->number_attributes_) - 1);
     equal_attr.reset(0);
-    std::bitset<FDTreeElement::kMaxAttrNum> diff_attr;
+    model::Bitset<FDTreeElement::kMaxAttrNum> diff_attr;
 
     for (size_t attr = 0; attr < this->number_attributes_; ++attr) {
         diff_attr[attr + 1] = (t1[attr] != t2[attr]);
@@ -103,7 +104,7 @@ void FDep::AddViolatedFDs(std::vector<size_t> const& t1, std::vector<size_t> con
 }
 
 void FDep::CalculatePositiveCover(FDTreeElement const& neg_cover_subtree,
-                                  std::bitset<FDTreeElement::kMaxAttrNum>& active_path) {
+                                  model::Bitset<FDTreeElement::kMaxAttrNum>& active_path) {
     for (size_t attr = 1; attr <= this->number_attributes_; ++attr) {
         if (neg_cover_subtree.CheckFd(attr - 1)) {
             this->SpecializePositiveCover(active_path, attr);
@@ -119,9 +120,9 @@ void FDep::CalculatePositiveCover(FDTreeElement const& neg_cover_subtree,
     }
 }
 
-void FDep::SpecializePositiveCover(std::bitset<FDTreeElement::kMaxAttrNum> const& lhs,
+void FDep::SpecializePositiveCover(model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs,
                                    size_t const& a) {
-    std::bitset<FDTreeElement::kMaxAttrNum> spec_lhs;
+    model::Bitset<FDTreeElement::kMaxAttrNum> spec_lhs;
 
     while (this->pos_cover_tree_->GetGeneralizationAndDelete(lhs, a, 0, spec_lhs)) {
         for (size_t attr = this->number_attributes_; attr > 0; --attr) {

@@ -92,8 +92,8 @@ void MinPickerLattice::AddGeneralizations(MdLattice::MdVerificationMessenger& me
         if (considered_indices.none()) return;
     }
     RemoveSpecializations(root_, messenger, lhs.begin(), considered_indices);
-    ValidationInfo& added_ref = info_.emplace_back(&messenger, std::move(considered_indices));
-    Add(&added_ref);
+    info_.push_back({&messenger, std::move(considered_indices)});
+    Add(&info_.back());
 }
 
 std::vector<ValidationInfo> MinPickerLattice::GetAll() noexcept(kNeedsEmptyRemoval) {
