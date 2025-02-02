@@ -3,16 +3,13 @@
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
-#include "ind/cind/condition_miners/cind_miner.hpp"
-#include "table/encoded_column_data.h"
-
-// #include "position_lists_set.h"
+#include "cind/cind.h"
+#include "cind_miner.h"
+#include "position_lists_set.h"
 
 namespace algos::cind {
-using model::EncodedColumnData;
 // using model::PLSet;
 // using PLSetShared = std::shared_ptr<model::PLSet>;
-using AttrsType = std::vector<EncodedColumnData const*>;
 
 class PliCind final : public CindMiner {
     // private:
@@ -25,10 +22,12 @@ public:
     //                                             std::vector<int> const& included_pos);
 
 private:
-    void ExecuteSingle(model::IND const& aind) final;
+    CIND ExecuteSingle(model::IND const& aind) final;
     void MakePLs(std::vector<int> const& cond_attrs);
 
-    std::pair<std::vector<int>, AttrsType> ScanDomains(model::IND const& aind) const;
+    std::vector<int> GetIncludedPositions(const Attributes & attrs) const;
+
+    std::pair<std::vector<int>, AttrsType> ScanTables(model::IND const& aind) const;
 
     // std::unordered_set<Condition> Analyze(std::vector<int> const& cond_attrs, int attr_idx,
     //                                       std::vector<int> const& curr_attrs, PLSetShared

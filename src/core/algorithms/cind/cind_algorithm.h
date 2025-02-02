@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "algorithms/algorithm.h"
-#include "condition_miners/cind_miner.hpp"
+#include "condition_miners/cind_miner.h"
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {
@@ -16,6 +16,10 @@ public:
 
     std::list<model::IND> const& AINDList() const noexcept {
         return spider_algo_->INDList();
+    }
+
+    std::list<CIND> const& CINDList() const noexcept {
+        return cind_miner_->CINDList();
     }
 
 private:
@@ -38,8 +42,6 @@ private:
     std::unique_ptr<CindMiner> cind_miner_;
 
     unsigned long long time_;
-
-    std::shared_ptr<std::vector<model::ColumnDomain>> domains_;
 };
 
 }  // namespace algos::cind

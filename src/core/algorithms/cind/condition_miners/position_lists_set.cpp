@@ -1,6 +1,5 @@
 #include "position_lists_set.h"
 
-#include <cmath>
 #include <memory>
 #include <utility>
 
