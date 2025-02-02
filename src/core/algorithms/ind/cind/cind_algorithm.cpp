@@ -12,6 +12,7 @@
 #include "config/tabular_data/input_tables/option.h"
 #include "config/thread_number/option.h"
 #include "ind/cind/condition_miners/cind_miner.hpp"
+#include "ind/cind/condition_miners/cinderella.h"
 #include "ind/cind/condition_miners/pli_cind.h"
 #include "util/timed_invoke.h"
 
@@ -41,7 +42,7 @@ void CindAlgorithm::LoadDataInternal() {
 }
 
 void CindAlgorithm::CreateCindMinerAlgo() {
-    cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
+    cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
     RegisterCindMinerOptions();
 }
 

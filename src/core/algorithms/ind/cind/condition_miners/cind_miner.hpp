@@ -10,14 +10,10 @@
 namespace algos::cind {
 class CindAlgorithm;
 using model::ColumnEncodedRelationData;
+using model::EncodedColumnData;
+using AttrsType = std::vector<EncodedColumnData const*>;
 
 class CindMiner {
-protected:
-    std::vector<std::unique_ptr<ColumnEncodedRelationData>> tables_;
-    double precision_;
-    double recall_;
-    CondType condition_type_;
-
 public:
     CindMiner(config::InputTables &input_tables);
     virtual ~CindMiner() = default;
@@ -25,7 +21,18 @@ public:
     void Execute(std::list<model::IND> const& aind_list);
 
 protected:
+    struct Attributes {
+        AttrsType lhs_inclusion, rhs_inclusion, conditional;
+    };
+
     virtual void ExecuteSingle(model::IND const& aind) = 0;
+    Attributes ClassifyAttributes(model::IND const& aind) const;
+
+protected:
+    std::vector<std::unique_ptr<ColumnEncodedRelationData>> tables_;
+    double precision_;
+    double recall_;
+    CondType condition_type_;
 
 private:
     friend class CindAlgorithm;

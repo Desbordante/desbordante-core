@@ -1,26 +1,42 @@
 #include "pli_cind.h"
 
-#include <algorithm>
 #include <set>
 #include <utility>
 
 #include "ind/cind/condition_miners/cind_miner.hpp"
-#include "table/column_combination.h"
 #include "table/encoded_column_data.h"
 #include "table/table_index.h"
 
 namespace algos::cind {
 using model::TableIndex;
 
-namespace {
-std::vector<int> GetIncludedPositions(AttrsType const& lhs_inclusion_attrs,
-                                      AttrsType const& rhs_inclusion_attrs) {
+PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
+
+void PliCind::ExecuteSingle(model::IND const& aind) {
+    auto const [included_pos, cond_attrs] = ScanTables(aind);
+    fprintf(stderr, "included positions: [");
+    for (auto const pos : included_pos) {
+        fprintf(stderr, "%d, ", pos);
+    }
+    fprintf(stderr, "]\ncondition attributes: [");
+    for (auto const attr : cond_attrs) {
+        fprintf(stderr, "%s::%s, ", attr->GetColumn()->GetSchema()->GetName().c_str(),
+                attr->GetColumn()->GetName().c_str());
+    }
+    fprintf(stderr, "]\n");
+}
+
+void PliCind::MakePLs(std::vector<int> const& /*cond_attrs*/) {
+    return;
+}
+
+std::vector<int> PliCind::GetIncludedPositions(Attributes const& attrs) const {
     std::set<std::vector<std::string>> rhs_values;
     fprintf(stderr, "rhs values: [");
-    for (size_t index = 0; index < rhs_inclusion_attrs.front()->GetNumRows(); ++index) {
+    for (size_t index = 0; index < attrs.rhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<std::string> row;
         fprintf(stderr, "{");
-        for (auto& attr : rhs_inclusion_attrs) {
+        for (auto& attr : attrs.rhs_inclusion) {
             row.push_back(attr->GetStringValue(index));
             fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
@@ -31,10 +47,10 @@ std::vector<int> GetIncludedPositions(AttrsType const& lhs_inclusion_attrs,
 
     std::vector<int> result;
     fprintf(stderr, "lhs values: [");
-    for (size_t index = 0; index < lhs_inclusion_attrs.front()->GetNumRows(); ++index) {
+    for (size_t index = 0; index < attrs.lhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<std::string> row;
         fprintf(stderr, "{");
-        for (auto& attr : lhs_inclusion_attrs) {
+        for (auto& attr : attrs.lhs_inclusion) {
             row.push_back(attr->GetStringValue(index));
             fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
@@ -48,51 +64,10 @@ std::vector<int> GetIncludedPositions(AttrsType const& lhs_inclusion_attrs,
     fprintf(stderr, "]\n");
     return result;
 }
-}  // namespace
 
-PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
-
-void PliCind::ExecuteSingle(model::IND const& aind) {
-    auto const [included_pos, cond_attrs] = ScanDomains(aind);
-    fprintf(stderr, "included positions: [");
-    for (auto const pos : included_pos) {
-        fprintf(stderr, "%d, ", pos);
-    }
-    fprintf(stderr, "]\ncondition attributes: [");
-    for (auto const attr : cond_attrs) {
-        fprintf(stderr, "%s::%s, ", attr->GetColumn()->GetSchema()->GetName().c_str(), attr->GetColumn()->GetName().c_str());
-    }
-    fprintf(stderr, "]\n");
-}
-
-void PliCind::MakePLs(std::vector<int> const& /*cond_attrs*/) {
-    return;
-}
-
-std::pair<std::vector<int>, AttrsType> PliCind::ScanDomains(model::IND const& aind) const {
-    AttrsType lhs_inclusion_attrs, rhs_inclusion_attrs;
-    AttrsType condition_attrs;
-    auto process_column = [&](EncodedColumnData const& column, model::ColumnCombination const& cc,
-                              AttrsType& inclusion_attrs_dst) {
-        auto const& ind_columns = cc.GetColumnIndices();
-        if (std::find(ind_columns.cbegin(), ind_columns.cend(), column.GetColumn()->GetIndex()) !=
-            ind_columns.cend()) {
-            inclusion_attrs_dst.push_back(&column);
-        } else {
-            condition_attrs.push_back(&column);
-        }
-    };
-
-    for (auto const& column : tables_.at(aind.GetLhs().GetTableIndex())->GetColumnData()) {
-        process_column(column, aind.GetLhs(), lhs_inclusion_attrs);
-    }
-    for (auto const& column : tables_.at(aind.GetRhs().GetTableIndex())->GetColumnData()) {
-        process_column(column, aind.GetRhs(), rhs_inclusion_attrs);
-    }
-
-    std::vector<int> included_pos = GetIncludedPositions(lhs_inclusion_attrs, rhs_inclusion_attrs);
-
-    return std::make_pair(included_pos, condition_attrs);
+std::pair<std::vector<int>, AttrsType> PliCind::ScanTables(model::IND const& aind) const {
+    auto attributes = ClassifyAttributes(aind);
+    return std::make_pair(GetIncludedPositions(attributes), std::move(attributes.conditional));
 }
 
 // std::unordered_set<Condition> PliCind::GetConditions(std::vector<int> cond_attrs,

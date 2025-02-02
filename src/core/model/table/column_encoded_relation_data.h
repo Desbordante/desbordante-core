@@ -7,8 +7,8 @@
 #include <vector>
 
 #include "encoded_column_data.h"
-#include "idataset_stream.h"
 #include "relation_data.h"
+#include "tabular_data/input_table_type.h"
 
 namespace model {
 class ColumnEncodedRelationData final : public AbstractRelationData<EncodedColumnData> {
@@ -28,7 +28,7 @@ public:
         return column_data_[0].GetNumRows();
     }
 
-    static std::unique_ptr<ColumnEncodedRelationData> CreateFrom(model::IDatasetStream& data_stream,
+    static std::unique_ptr<ColumnEncodedRelationData> CreateFrom(config::InputTable& data_stream,
                                                                  TableIndex table_id);
 
 private:
