@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
+#include "condition_miners/cinderella.h"
+#include "condition_miners/pli_cind.h"
 #include "conditions/completeness/option.h"
 #include "conditions/condition_type/option.h"
 #include "conditions/validity/option.h"
@@ -11,8 +13,6 @@
 #include "config/mem_limit/option.h"
 #include "config/tabular_data/input_tables/option.h"
 #include "config/thread_number/option.h"
-#include "ind/cind/condition_miners/cind_miner.hpp"
-#include "ind/cind/condition_miners/pli_cind.h"
 #include "util/timed_invoke.h"
 
 namespace algos::cind {
@@ -41,13 +41,13 @@ void CindAlgorithm::LoadDataInternal() {
 }
 
 void CindAlgorithm::CreateCindMinerAlgo() {
-    cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
+    cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
     RegisterCindMinerOptions();
 }
 
 void CindAlgorithm::RegisterCindMinerOptions() {
-    RegisterOption(config::kValidityOpt(&cind_miner_->precision_));
-    RegisterOption(config::kCompletenessOpt(&cind_miner_->recall_));
+    RegisterOption(config::kValidityOpt(&cind_miner_->min_validity_));
+    RegisterOption(config::kCompletenessOpt(&cind_miner_->min_completeness_));
     RegisterOption(config::kConditionTypeOpt(&cind_miner_->condition_type_));
 }
 
