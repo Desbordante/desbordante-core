@@ -1,6 +1,7 @@
 #include "des.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -69,6 +70,8 @@ EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, siz
 }
 
 unsigned long long DES::ExecuteInternal() {
+    auto const start_time = std::chrono::system_clock::now();
+
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
     std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains, rng_);
 
@@ -90,7 +93,10 @@ unsigned long long DES::ExecuteInternal() {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
     std::ranges::sort(nar_collection_, compare_by_fitness);
-    return 0;
+
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos::des
