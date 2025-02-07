@@ -7,7 +7,7 @@
 #include <easylogging++.h>
 
 namespace algos {
-double ARStatsCalculator::JaccardSimilarity(std::vector<unsigned> const& transaction_indices,
+double ARStatsCalculator::CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
                                             std::vector<unsigned> const& rule_part) {
     if (transaction_indices.empty()) {
         return 0.0;
@@ -26,24 +26,24 @@ double ARStatsCalculator::JaccardSimilarity(std::vector<unsigned> const& transac
     return intersection.size() / rule_set.size();
 }
 
-size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> const& jaccard) {
-    return static_cast<int>(std::floor(3 * jaccard.first)) +
-           static_cast<int>(std::floor(2 * jaccard.second));
+size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> const& coverage) {
+    return static_cast<int>(std::floor(3 * coverage.first)) +
+           static_cast<int>(std::floor(2 * coverage.second));
 }
 
-void ARStatsCalculator::CalculateJaccardCoefficients() {
+void ARStatsCalculator::CalculateRuleCoverageCoefficients() {
     for (auto const& [id, itemset] : data_->GetTransactions()) {
-        double jaccard_left = JaccardSimilarity(itemset.GetItemsIDs(), rule_.left);
-        double jaccard_right = JaccardSimilarity(itemset.GetItemsIDs(), rule_.right);
+        double jaccard_left = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.left);
+        double jaccard_right = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.right);
         if (jaccard_left != 0.0) {
-            jaccard_coefficients_[id] = std::make_pair(jaccard_left, jaccard_right);
+            rule_coverage_coefficients_[id] = std::make_pair(jaccard_left, jaccard_right);
         }
     }
 }
 
 void ARStatsCalculator::CalculateSupport() {
     support_ =
-            std::ranges::count_if(jaccard_coefficients_,
+            std::ranges::count_if(rule_coverage_coefficients_,
                                   [&](auto const& pair) {
                                       return pair.second.first == 1.0 && pair.second.second == 1.0;
                                   }) /
@@ -52,14 +52,14 @@ void ARStatsCalculator::CalculateSupport() {
 
 void ARStatsCalculator::CalculateConfidence() {
     double lhs_support =
-            std::ranges::count_if(jaccard_coefficients_,
+            std::ranges::count_if(rule_coverage_coefficients_,
                                   [&](auto const& pair) { return pair.second.first == 1.0; }) /
             static_cast<double>(data_->GetTransactions().size());
     confidence_ = lhs_support != 0.0 ? support_ / lhs_support : 0.0;
 }
 
 void ARStatsCalculator::ResetState() {
-    jaccard_coefficients_.clear();
+    rule_coverage_coefficients_.clear();
     support_ = 0.0;
     confidence_ = 0.0;
     clusters_violating_ar_.clear();
@@ -67,10 +67,10 @@ void ARStatsCalculator::ResetState() {
 }
 
 void ARStatsCalculator::CalculateStatistics() {
-    CalculateJaccardCoefficients();
+    CalculateRuleCoverageCoefficients();
     CalculateSupport();
     CalculateConfidence();
-    for (auto const& [transaction_id, coefficients] : jaccard_coefficients_) {
+    for (auto const& [transaction_id, coefficients] : rule_coverage_coefficients_) {
         clusters_violating_ar_[CalculateClusterPriority(coefficients)].push_back(transaction_id);
     }
 
