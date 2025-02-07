@@ -15,12 +15,12 @@ void BindArVerification(py::module_& main_module) {
     auto ar_verification_module = main_module.def_submodule("ar_verification");
 
     BindPrimitiveNoBase<ARVerifier>(ar_verification_module, "ARVerifier")
-        .def("ar_holds", &ARVerifier::ARHolds)
-        .def("get_num_clusters_violating_ar", &ARVerifier::GetNumClustersViolatingAR)
-        .def("get_num_transactions_violating_ar", &ARVerifier::GetNumTransactionsViolatingAR)
-        .def("get_clusters_violating_ar", &ARVerifier::GetClustersViolatingAR)
-        .def("get_real_support", &ARVerifier::GetRealSupport)
-        .def("get_real_confidence", &ARVerifier::GetRealConfidence);
+            .def("ar_holds", &ARVerifier::ARHolds)
+            .def("get_num_clusters_violating_ar", &ARVerifier::GetNumClustersViolatingAR)
+            .def("get_num_transactions_violating_ar", &ARVerifier::GetNumTransactionsViolatingAR)
+            .def("get_clusters_violating_ar", &ARVerifier::GetClustersViolatingAR)
+            .def("get_real_support", &ARVerifier::GetRealSupport)
+            .def("get_real_confidence", &ARVerifier::GetRealConfidence);
 
     main_module.attr("ar_verification") = ar_verification_module;
 }
