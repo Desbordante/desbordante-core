@@ -16,13 +16,13 @@ private:
     double support_ = 0.0;
     double confidence_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
-    std::unordered_map<size_t, std::pair<double, double>> jaccard_coefficients_;
+    std::unordered_map<size_t, std::pair<double, double>> rule_coverage_coefficients_;
     std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
 
-    static double JaccardSimilarity(std::vector<unsigned> const& transaction_indices,
+    static double CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
                                     std::vector<unsigned> const& rule_part);
-    static size_t CalculateClusterPriority(std::pair<double, double> const& jaccard);
-    void CalculateJaccardCoefficients();
+    static size_t CalculateClusterPriority(std::pair<double, double> const& coverage);
+    void CalculateRuleCoverageCoefficients();
     void CalculateSupport();
     void CalculateConfidence();
 
