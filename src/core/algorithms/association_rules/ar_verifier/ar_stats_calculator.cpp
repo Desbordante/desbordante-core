@@ -1,14 +1,13 @@
 #include "ar_stats_calculator.h"
 
-#include <iostream>
 #include <queue>
 #include <set>
 
 #include <easylogging++.h>
 
-namespace algos {
-double ARStatsCalculator::CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
-                                            std::vector<unsigned> const& rule_part) {
+namespace algos::ar_verifier {
+double ARStatsCalculator::CalculateTransactionCoverage(
+        std::vector<unsigned> const& transaction_indices, std::vector<unsigned> const& rule_part) {
     if (transaction_indices.empty()) {
         return 0.0;
     }
@@ -23,20 +22,35 @@ double ARStatsCalculator::CalculateTransactionCoverage(std::vector<unsigned> con
     std::vector<unsigned> intersection;
     std::ranges::set_intersection(rule_set, transaction_set, std::back_inserter(intersection));
 
-    return intersection.size() / rule_set.size();
+    return intersection.size() / static_cast<double>(rule_set.size());
 }
 
-size_t ARStatsCalculator::CalculateClusterPriority(std::pair<double, double> const& coverage) {
-    return static_cast<int>(std::floor(3 * coverage.first)) +
-           static_cast<int>(std::floor(2 * coverage.second));
+util::ClusterPriority ARStatsCalculator::CalculateClusterPriority(
+        std::pair<double, double> const& coverage) {
+    bool const is_left_full = coverage.first == 1.0;
+    bool const is_right_full = coverage.second == 1.0;
+    bool const is_right_present = coverage.second > 0.0;
+
+    if (is_left_full) {
+        if (is_right_present) {
+            if (is_right_full) return util::ClusterPriority::kFullLeftFullRight;
+            return util::ClusterPriority::kFullLeftPartialRight;
+        }
+        return util::ClusterPriority::kFullLeftNoRight;
+    }
+    if (is_right_present) {
+        if (is_right_full) return util::ClusterPriority::kPartialLeftFullRight;
+        return util::ClusterPriority::kPartialLeftPartialRight;
+    }
+    return util::ClusterPriority::kPartialLeftNoRight;
 }
 
 void ARStatsCalculator::CalculateRuleCoverageCoefficients() {
     for (auto const& [id, itemset] : data_->GetTransactions()) {
-        double jaccard_left = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.left);
-        double jaccard_right = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.right);
-        if (jaccard_left != 0.0) {
-            rule_coverage_coefficients_[id] = std::make_pair(jaccard_left, jaccard_right);
+        double coverage_left = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.left);
+        double coverage_right = CalculateTransactionCoverage(itemset.GetItemsIDs(), rule_.right);
+        if (coverage_left != 0.0) {
+            rule_coverage_coefficients_[id] = std::make_pair(coverage_left, coverage_right);
         }
     }
 }
@@ -71,11 +85,14 @@ void ARStatsCalculator::CalculateStatistics() {
     CalculateSupport();
     CalculateConfidence();
     for (auto const& [transaction_id, coefficients] : rule_coverage_coefficients_) {
-        clusters_violating_ar_[CalculateClusterPriority(coefficients)].push_back(transaction_id);
+        util::ClusterPriority priority = CalculateClusterPriority(coefficients);
+        if (priority != util::ClusterPriority::kFullLeftFullRight) {
+            clusters_violating_ar_[priority].push_back(transaction_id);
+        }
     }
 
-    for (auto const& [order, cluster] : clusters_violating_ar_) {
+    for (auto const& [priority, cluster] : clusters_violating_ar_) {
         num_transactions_violating_ar_ += cluster.size();
     }
 }
-}  // namespace algos
+}  // namespace algos::ar_verifier
