@@ -32,7 +32,7 @@ class TestARVerifying : public ::testing::TestWithParam<ARVerifyingParams> {};
 TEST_P(TestARVerifying, DefaultTest) {
     auto const& p = GetParam();
     auto mp = algos::StdParamsMap(p.params);
-    auto verifier = algos::CreateAndLoadAlgorithm<algos::ARVerifier>(mp);
+    auto verifier = algos::CreateAndLoadAlgorithm<algos::ar_verifier::ARVerifier>(mp);
     verifier->Execute();
     EXPECT_TRUE(verifier->ARHolds());
 }

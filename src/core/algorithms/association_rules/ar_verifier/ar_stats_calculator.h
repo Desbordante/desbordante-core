@@ -1,13 +1,15 @@
 #pragma once
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <vector>
 
 #include "algorithms/association_rules/ar.h"
+#include "algorithms/association_rules/ar_verifier/util/cluster_priority.h"
 #include "model/table/column_layout_relation_data.h"
 
-namespace algos {
+namespace algos::ar_verifier {
 class ARStatsCalculator {
 private:
     std::shared_ptr<model::TransactionalData> data_;
@@ -17,11 +19,12 @@ private:
     double confidence_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
     std::unordered_map<size_t, std::pair<double, double>> rule_coverage_coefficients_;
-    std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
+    std::map<util::ClusterPriority, model::PLI::Cluster> clusters_violating_ar_;
 
     static double CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
-                                    std::vector<unsigned> const& rule_part);
-    static size_t CalculateClusterPriority(std::pair<double, double> const& coverage);
+                                               std::vector<unsigned> const& rule_part);
+    static util::ClusterPriority CalculateClusterPriority(
+            std::pair<double, double> const& coverage);
     void CalculateRuleCoverageCoefficients();
     void CalculateSupport();
     void CalculateConfidence();
@@ -46,7 +49,7 @@ public:
     }
 
     /* Returns clusters where the AR is violated */
-    std::unordered_map<size_t, model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::map<util::ClusterPriority, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return clusters_violating_ar_;
     }
 
@@ -59,4 +62,4 @@ public:
     }
 };
 
-}  // namespace algos
+}  // namespace algos::ar_verifier

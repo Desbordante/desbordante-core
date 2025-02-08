@@ -4,11 +4,12 @@
 #include "algorithms/association_rules/ar.h"
 #include "algorithms/association_rules/ar_algorithm_enums.h"
 #include "algorithms/association_rules/ar_verifier/ar_stats_calculator.h"
+#include "algorithms/association_rules/ar_verifier/util/cluster_priority.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_relation_data.h"
 
-namespace algos {
-class ARVerifier : public Algorithm {
+namespace algos::ar_verifier {
+class ARVerifier final : public Algorithm {
 private:
     /* input options */
     config::InputTable input_table_;
@@ -23,9 +24,6 @@ private:
     model::ArIDs ar_ids_;
 
     ARStatsCalculator stats_calculator_;
-    /* results of work */
-    size_t num_transactions_violating_ar_ = 0;
-    std::unordered_map<size_t, model::PLI::Cluster> clusters_violating_ar_;
 
     double minsup_ = 0.0;
     double minconf_ = 0.0;
@@ -63,7 +61,7 @@ public:
 
     /* Returns clusters where the AR is violated, that is, sets of rows where each set consists of
      * rows equal to each other in the specified columns */
-    std::unordered_map<size_t, model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::map<util::ClusterPriority, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return stats_calculator_.GetClustersViolatingAR();
     }
 
@@ -77,4 +75,4 @@ public:
 
     ARVerifier();
 };
-}  // namespace algos
+}  // namespace algos::ar_verifier

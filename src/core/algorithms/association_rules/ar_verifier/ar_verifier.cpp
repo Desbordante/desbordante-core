@@ -12,7 +12,7 @@
 #include "config/tabular_data/input_table/option.h"
 #include "util/timed_invoke.h"
 
-namespace algos {
+namespace algos::ar_verifier {
 ARVerifier::ARVerifier() : Algorithm({}) {
     RegisterOptions();
     using namespace config::names;
@@ -109,4 +109,4 @@ unsigned long long ARVerifier::ExecuteInternal() {
 void ARVerifier::VerifyAR() {
     stats_calculator_ = ARStatsCalculator(std::move(transactional_data_), std::move(ar_ids_));
 }
-}  // namespace algos
+}  // namespace algos::ar_verifier
