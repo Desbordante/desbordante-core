@@ -43,7 +43,7 @@ private:
     config::ErrorType max_ind_error_;
 
     /* execution stage fields */
-    std::shared_ptr<std::vector<model::ColumnDomain>> domains_; /*< loaded data */
+    std::vector<model::ColumnDomain> domains_; /*< loaded data */
     StageTimings timings_;                                      /*< timings info */
 
     void MakeLoadOptsAvailable();

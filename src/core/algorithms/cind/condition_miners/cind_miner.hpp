@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "ind/cind/condition_type.hpp"
+#include "cind/condition_type.hpp"
 #include "ind/ind.h"
 #include "table/column_encoded_relation_data.h"
 #include "tabular_data/input_tables_type.h"
@@ -30,8 +30,8 @@ protected:
 
 protected:
     std::vector<std::unique_ptr<ColumnEncodedRelationData>> tables_;
-    double precision_;
-    double recall_;
+    double min_validity_;
+    double min_completeness_;
     CondType condition_type_;
 
 private:

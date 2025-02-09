@@ -1,6 +1,6 @@
 #include "cind_miner.hpp"
 
-#include "ind/cind/condition_type.hpp"
+#include "cind/condition_type.hpp"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables) : condition_type_(CondType::row) {
@@ -33,7 +33,7 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
 }
 
 void CindMiner::Execute(std::list<model::IND> const& aind_list) {
-    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", precision_, recall_,
+    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_, min_completeness_,
             condition_type_._to_string());
     for (auto const& table : tables_) {
         for (auto const& column : table->GetColumnData()) {

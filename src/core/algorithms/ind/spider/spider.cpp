@@ -40,8 +40,7 @@ void Spider::MakeExecuteOptsAvailable() {
 
 void Spider::LoadINDAlgorithmDataInternal() {
     auto const create_domains = [&] {
-        domains_ = std::make_shared<std::vector<model::ColumnDomain>>(
-                model::ColumnDomain::CreateFrom(input_tables_, mem_limit_mb_, threads_num_));
+        domains_ = model::ColumnDomain::CreateFrom(input_tables_, mem_limit_mb_, threads_num_);
     };
     timings_.load = util::TimedInvoke(create_domains);
 }
@@ -100,7 +99,7 @@ std::vector<Attribute> GetProcessedAttributes(std::vector<model::ColumnDomain> c
 
 void Spider::MineINDs() {
     using spider::INDAttribute;
-    std::vector const attrs = GetProcessedAttributes<INDAttribute>(*domains_, is_null_equal_null_);
+    std::vector const attrs = GetProcessedAttributes<INDAttribute>(domains_, is_null_equal_null_);
     for (auto const& dep : attrs) {
         for (AttributeIndex ref_id : dep.GetRefIds()) {
             RegisterIND(dep.ToCC(), attrs[ref_id].ToCC());
@@ -110,7 +109,7 @@ void Spider::MineINDs() {
 
 void Spider::MineAINDs() {
     using spider::AINDAttribute;
-    std::vector const attrs = GetProcessedAttributes<AINDAttribute>(*domains_, is_null_equal_null_);
+    std::vector const attrs = GetProcessedAttributes<AINDAttribute>(domains_, is_null_equal_null_);
     for (auto const& dep : attrs) {
         for (AttributeIndex ref_id : dep.GetRefIds(max_ind_error_)) {
             RegisterIND(dep.ToCC(), attrs[ref_id].ToCC(), dep.GetError(ref_id));

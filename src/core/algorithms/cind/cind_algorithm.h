@@ -38,8 +38,6 @@ private:
     std::unique_ptr<CindMiner> cind_miner_;
 
     unsigned long long time_;
-
-    std::shared_ptr<std::vector<model::ColumnDomain>> domains_;
 };
 
 }  // namespace algos::cind

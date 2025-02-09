@@ -3,7 +3,7 @@
 #include <set>
 #include <utility>
 
-#include "ind/cind/condition_miners/cind_miner.hpp"
+#include "cind/condition_miners/cind_miner.hpp"
 #include "table/encoded_column_data.h"
 #include "table/table_index.h"
 
@@ -104,10 +104,10 @@ std::pair<std::vector<int>, AttrsType> PliCind::ScanTables(model::IND const& ain
 //         std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
 //                               cluster.end(), std::back_inserter(included_cluster));
 //         if (double recall = (double)included_cluster.size() / included_pos.size();
-//             recall > recall_) {
+//             recall > min_completeness_) {
 //             good_clusters.emplace_back(cluster_value, cluster);
 //             if (double prec = (double)included_cluster.size() / cluster.size(); prec >
-//             precision_) {
+//             min_validity_) {
 //                 result.emplace(new_curr_attrs, cluster_value, recall, prec);
 //             }
 //         }
