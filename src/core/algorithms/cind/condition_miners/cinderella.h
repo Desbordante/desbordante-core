@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "basket.h"
+#include "cind/cind.hpp"
 #include "cind/condition_miners/cind_miner.hpp"
 #include "itemset.h"
 
@@ -12,15 +13,16 @@ public:
     Cinderella(config::InputTables& input_tables);
 
 private:
-    void ExecuteSingle(model::IND const& aind) final;
+    Cind ExecuteSingle(model::IND const& aind) final;
 
-    std::vector<Basket> GetBaskets(model::IND const& aind);
+    std::vector<Basket> GetBaskets(Attributes const& attributes);
 
-    std::vector<Itemset> GetFrequentItemsets(std::vector<Basket> const& baskets) const;
+    std::vector<Condition> GetConditions(std::vector<Basket> const& baskets,
+                                         AttrsType const& condition_attrs) const;
     std::set<Itemset> CreateNewItemsets(std::set<Itemset> candidates,
                                         std::vector<Basket> const& baskets,
-                                        int included_baskets_cnt,
-                                        std::vector<Itemset>& result) const;
+                                        int included_baskets_cnt, AttrsType const& condition_attrs,
+                                        std::vector<Condition>& result) const;
 
     std::set<Itemset> GetCandidates(std::set<Itemset> const& curr_itemsets) const;
 };

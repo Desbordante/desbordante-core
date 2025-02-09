@@ -1,14 +1,11 @@
 #include "cind_miner.hpp"
 
 #include "cind/condition_type.hpp"
+#include "table/encoded_tables.hpp"
 
 namespace algos::cind {
-CindMiner::CindMiner(config::InputTables& input_tables) : condition_type_(CondType::row) {
-    for (size_t table_id = 0; table_id < input_tables.size(); ++table_id) {
-        input_tables[table_id]->Reset();
-        tables_.push_back(ColumnEncodedRelationData::CreateFrom(input_tables[table_id], table_id));
-    }
-}
+CindMiner::CindMiner(config::InputTables& input_tables)
+    : tables_(input_tables), condition_type_(CondType::group) {}
 
 CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) const {
     Attributes result;
@@ -23,19 +20,19 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
         }
     };
 
-    for (auto const& column : tables_.at(aind.GetLhs().GetTableIndex())->GetColumnData()) {
+    for (auto const& column : tables_.GetTable(aind.GetLhs().GetTableIndex()).GetColumnData()) {
         process_column(column, aind.GetLhs(), result.lhs_inclusion);
     }
-    for (auto const& column : tables_.at(aind.GetRhs().GetTableIndex())->GetColumnData()) {
+    for (auto const& column : tables_.GetTable(aind.GetRhs().GetTableIndex()).GetColumnData()) {
         process_column(column, aind.GetRhs(), result.rhs_inclusion);
     }
     return result;
 }
 
 void CindMiner::Execute(std::list<model::IND> const& aind_list) {
-    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_, min_completeness_,
-            condition_type_._to_string());
-    for (auto const& table : tables_) {
+    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_,
+            min_completeness_, condition_type_._to_string());
+    for (auto const& table : tables_.GetTables()) {
         for (auto const& column : table->GetColumnData()) {
             fprintf(stderr, "table = %s, column = %s, column size: %zu\n",
                     table->GetSchema()->GetName().c_str(), column.GetColumn()->GetName().c_str(),

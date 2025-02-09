@@ -2,19 +2,19 @@
 
 #include <cassert>
 #include <set>
-#include <unordered_map>
 #include <vector>
 
 #include "abstract_column_data.h"
 #include "column.h"
 #include "table/table_index.h"
+#include "table/value_dictionary.hpp"
 
 namespace model {
 class EncodedColumnData final : public model::AbstractColumnData {
 public:
     EncodedColumnData(TableIndex table_id, Column const* column, std::vector<int> column_data,
                       std::set<std::string> unique_values,
-                      std::shared_ptr<std::unordered_map<int, std::string>> value_dictionary)
+                      std::shared_ptr<ValueDictionary> value_dictionary)
         : AbstractColumnData(column),
           table_id_(table_id),
           column_data_(std::move(column_data)),
@@ -27,7 +27,7 @@ public:
 
     std::string const& GetStringValue(size_t index) const {
         assert(index < column_data_.size());
-        return value_dictionary_->at(column_data_.at(index));
+        return value_dictionary_->ToString(column_data_.at(index));
     }
 
     int GetValue(size_t index) const {
@@ -52,13 +52,13 @@ public:
     }
 
     std::string DecodeValue(int value) const {
-        return value_dictionary_->at(value);
+        return value_dictionary_->ToString(value);
     }
 
 private:
     TableIndex table_id_;
     std::vector<int> column_data_;
     std::set<std::string> unique_values_;
-    std::shared_ptr<std::unordered_map<int, std::string>> value_dictionary_;
+    std::shared_ptr<ValueDictionary> value_dictionary_;
 };
 }  // namespace model

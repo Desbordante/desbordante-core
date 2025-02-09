@@ -7,7 +7,7 @@ TABLES = [(f'../datasets/ind_datasets/{table_name}.csv', ',', True) for table_na
 
 algo.load_data(tables=TABLES)
 
-algo.execute(error=0.5, validity=1, completeness=1, condition_type="group")
+algo.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
 inds = algo.get_ainds()
 print('Found inclusion dependencies (-> means "is included in"):\n')
 for ind in inds:

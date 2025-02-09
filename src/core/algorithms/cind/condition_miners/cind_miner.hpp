@@ -1,15 +1,14 @@
 #pragma once
 
-#include <memory>
-
+#include "cind/cind.hpp"
 #include "cind/condition_type.hpp"
 #include "ind/ind.h"
-#include "table/column_encoded_relation_data.h"
+#include "table/encoded_tables.hpp"
 #include "tabular_data/input_tables_type.h"
 
 namespace algos::cind {
 class CindAlgorithm;
-using model::ColumnEncodedRelationData;
+using model::EncodedTables;
 using model::EncodedColumnData;
 using AttrsType = std::vector<EncodedColumnData const*>;
 
@@ -25,11 +24,11 @@ protected:
         AttrsType lhs_inclusion, rhs_inclusion, conditional;
     };
 
-    virtual void ExecuteSingle(model::IND const& aind) = 0;
+    virtual Cind ExecuteSingle(model::IND const& aind) = 0;
     Attributes ClassifyAttributes(model::IND const& aind) const;
 
 protected:
-    std::vector<std::unique_ptr<ColumnEncodedRelationData>> tables_;
+    model::EncodedTables tables_;
     double min_validity_;
     double min_completeness_;
     CondType condition_type_;

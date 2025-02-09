@@ -10,7 +10,7 @@
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"
 #include "algorithms/dd/dd.h"
-#include "algorithms/ind/cind/condition_type.hpp"
+#include "algorithms/cind/condition_type.hpp"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/md/md_verifier/column_similarity_classifier.h"

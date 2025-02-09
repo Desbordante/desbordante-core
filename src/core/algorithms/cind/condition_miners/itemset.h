@@ -5,25 +5,20 @@
 #include <string>
 #include <vector>
 
+#include <boost/container_hash/hash.hpp>
+
 #include "table/column_index.h"
-#include "table/table_index.h"
 
 namespace algos::cind {
 struct Item {
-    using ColumnValue = int;
-    model::TableIndex table_id;
     model::ColumnIndex column_id;
-    ColumnValue value;
+    int value;
 
     bool operator==(Item const& that) const {
-        return this->table_id == that.table_id && this->column_id == that.column_id &&
-               this->value == that.value;
+        return this->column_id == that.column_id && this->value == that.value;
     }
 
     bool operator<(Item const& that) const {
-        if (this->table_id != that.table_id) {
-            return this->table_id < that.table_id;
-        }
         if (this->column_id != that.column_id) {
             return this->column_id < that.column_id;
         }
@@ -31,8 +26,7 @@ struct Item {
     }
 
     std::string ToString() const noexcept {
-        return "{" + std::to_string(table_id) + ", " + std::to_string(column_id) + ", " +
-               std::to_string(value) + "}";
+        return "{" + std::to_string(column_id) + ", " + std::to_string(value) + "}";
     }
 };
 
@@ -41,16 +35,16 @@ public:
     Itemset(std::vector<Item> data, bool is_included)
         : data_(std::move(data)), is_included_(is_included) {}
 
-    Itemset(const std::vector<Item> &data, size_t excluded_id, bool is_included)
+    Itemset(std::vector<Item> const& data, size_t excluded_id, bool is_included)
         : is_included_(is_included) {
-            assert(excluded_id < data.size());
-            data_.reserve(data.size() - 1);
-            for (size_t index = 0; index < data.size(); ++index) {
-                if (index != excluded_id) {
-                    data_.emplace_back(data[index]);
-                }
+        assert(excluded_id < data.size());
+        data_.reserve(data.size() - 1);
+        for (size_t index = 0; index < data.size(); ++index) {
+            if (index != excluded_id) {
+                data_.emplace_back(data[index]);
             }
         }
+    }
 
     Itemset() = default;
 
@@ -69,7 +63,7 @@ public:
 
     Itemset Intersect(Itemset const& that) const {
         if (IsIncluded() == that.IsIncluded() && GetSize() == that.GetSize() &&
-            GetItem(GetSize() - 1) < that.GetItem(GetSize() - 1)) {
+            GetItem(GetSize() - 1).column_id < that.GetItem(GetSize() - 1).column_id) {
             for (size_t index = 0; index < GetSize() - 1; ++index) {
                 if (GetItem(index) != that.GetItem(index)) {
                     return {};
@@ -97,7 +91,7 @@ public:
     std::string ToString() const noexcept {
         std::string result = "[";
         result.append(is_included_ ? "Included, " : "Not included, ");
-        for (const auto &item : data_) {
+        for (auto const& item : data_) {
             result.append(item.ToString());
             result.append(", ");
         }
@@ -117,9 +111,8 @@ template <>
 struct std::hash<algos::cind::Item> {
     size_t operator()(algos::cind::Item const& item) const {
         size_t hash = 0;
-        hash = (hash << 1) ^ item.table_id;
-        hash = (hash << 1) ^ item.column_id;
-        hash = (hash << 1) ^ item.value;
+        boost::hash_combine(hash, boost::hash_value(item.column_id));
+        boost::hash_combine(hash, boost::hash_value(item.value));
         return hash;
     }
 };

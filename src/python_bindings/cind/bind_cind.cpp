@@ -3,9 +3,9 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/ind/cind/cind_algorithm.h"
+#include "algorithms/cind/cind_algorithm.h"
 #include "algorithms/ind/mining_algorithms.h"
-#include "ind/cind/cind_algorithm.h"
+#include "cind/cind_algorithm.h"
 #include "py_util/bind_primitive.h"
 
 namespace py = pybind11;

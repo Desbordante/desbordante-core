@@ -3,6 +3,7 @@
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
+#include "cind/cind.hpp"
 #include "cind/condition_miners/cind_miner.hpp"
 
 // #include "position_lists_set.h"
@@ -22,7 +23,7 @@ public:
     //                                             std::vector<int> const& included_pos);
 
 private:
-    void ExecuteSingle(model::IND const& aind) final;
+    Cind ExecuteSingle(model::IND const& aind) final;
     void MakePLs(std::vector<int> const& cond_attrs);
 
     std::vector<int> GetIncludedPositions(const Attributes & attrs) const;

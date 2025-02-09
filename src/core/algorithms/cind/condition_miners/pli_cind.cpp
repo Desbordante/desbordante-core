@@ -2,7 +2,9 @@
 
 #include <set>
 #include <utility>
+#include <vector>
 
+#include "cind/condition.h"
 #include "cind/condition_miners/cind_miner.hpp"
 #include "table/encoded_column_data.h"
 #include "table/table_index.h"
@@ -12,7 +14,7 @@ using model::TableIndex;
 
 PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
-void PliCind::ExecuteSingle(model::IND const& aind) {
+Cind PliCind::ExecuteSingle(model::IND const& aind) {
     auto const [included_pos, cond_attrs] = ScanTables(aind);
     fprintf(stderr, "included positions: [");
     for (auto const pos : included_pos) {
@@ -24,6 +26,7 @@ void PliCind::ExecuteSingle(model::IND const& aind) {
                 attr->GetColumn()->GetName().c_str());
     }
     fprintf(stderr, "]\n");
+    return {.ind = aind, .conditions = std::vector<Condition>{}};
 }
 
 void PliCind::MakePLs(std::vector<int> const& /*cond_attrs*/) {
