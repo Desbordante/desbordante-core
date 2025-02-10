@@ -18,6 +18,9 @@ namespace python_bindings {
 void BindSFD(py::module_& main_module) {
     using namespace algos;
     auto sfd_module = main_module.def_submodule("sfd");
+
+    // NOTE: technically `Correlation` will contain an invalid pointer to the schema if the
+    // algorithm object is destroyed, but we do not use the schema anywhere.
     py::class_<Correlation>(sfd_module, "Correlation")
             .def("__str__", &Correlation::ToString)
             .def("to_string", &Correlation::ToString)
@@ -30,7 +33,7 @@ void BindSFD(py::module_& main_module) {
     auto cls = py::class_<Cords, FDAlgorithm>(sfd_algorithms_module, "SFDAlgorithm")
                        .def(py::init<>())
                        .def("get_correlations", &Cords::GetCorrelations,
-                            py::return_value_policy::reference_internal);
+                            py::return_value_policy::copy);
     sfd_algorithms_module.attr("Default") = cls;
 }
 }  // namespace python_bindings
