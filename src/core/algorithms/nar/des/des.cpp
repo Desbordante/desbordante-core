@@ -23,6 +23,7 @@ void DES::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     DifferentialStrategy default_strategy = DifferentialStrategy::rand1Bin;
+    RegisterOption(Option{&seed_, kSeed, kDSeed, 2ul});
     RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize, 100u});
     RegisterOption(
             Option{&num_evaluations_, kMaxFitnessEvaluations, kDMaxFitnessEvaluations, 1000u});
@@ -37,7 +38,7 @@ void DES::RegisterOptions() {
 void DES::MakeExecuteOptsAvailable() {
     NARAlgorithm::MakeExecuteOptsAvailable();
     using namespace config::names;
-    MakeOptionsAvailable({kPopulationSize, kMaxFitnessEvaluations, kDifferentialScale,
+    MakeOptionsAvailable({kSeed, kPopulationSize, kMaxFitnessEvaluations, kDifferentialScale,
                           kCrossoverProbability, kDifferentialStrategy});
 }
 
@@ -70,6 +71,7 @@ EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, siz
 }
 
 unsigned long long DES::ExecuteInternal() {
+    rng_.SetSeed(seed_);
     auto const start_time = std::chrono::system_clock::now();
 
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
