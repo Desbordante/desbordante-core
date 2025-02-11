@@ -25,7 +25,7 @@ double ARStatsCalculator::CalculateTransactionCoverage(
     return intersection.size() / static_cast<double>(rule_set.size());
 }
 
-util::ClusterPriority ARStatsCalculator::CalculateClusterPriority(
+ClusterPriority ARStatsCalculator::CalculateClusterPriority(
         std::pair<double, double> const& coverage) {
     bool const is_left_full = coverage.first == 1.0;
     bool const is_right_full = coverage.second == 1.0;
@@ -33,16 +33,16 @@ util::ClusterPriority ARStatsCalculator::CalculateClusterPriority(
 
     if (is_left_full) {
         if (is_right_present) {
-            if (is_right_full) return util::ClusterPriority::kFullLeftFullRight;
-            return util::ClusterPriority::kFullLeftPartialRight;
+            if (is_right_full) return ClusterPriority::full_left_full_right;
+            return ClusterPriority::full_left_partial_right;
         }
-        return util::ClusterPriority::kFullLeftNoRight;
+        return ClusterPriority::full_left_no_right;
     }
     if (is_right_present) {
-        if (is_right_full) return util::ClusterPriority::kPartialLeftFullRight;
-        return util::ClusterPriority::kPartialLeftPartialRight;
+        if (is_right_full) return ClusterPriority::partial_left_full_right;
+        return ClusterPriority::partial_left_partial_right;
     }
-    return util::ClusterPriority::kPartialLeftNoRight;
+    return ClusterPriority::partial_left_no_right;
 }
 
 void ARStatsCalculator::CalculateRuleCoverageCoefficients() {
@@ -85,9 +85,9 @@ void ARStatsCalculator::CalculateStatistics() {
     CalculateSupport();
     CalculateConfidence();
     for (auto const& [transaction_id, coefficients] : rule_coverage_coefficients_) {
-        util::ClusterPriority priority = CalculateClusterPriority(coefficients);
-        if (priority != util::ClusterPriority::kFullLeftFullRight) {
-            clusters_violating_ar_[priority].push_back(transaction_id);
+        ClusterPriority priority = CalculateClusterPriority(coefficients);
+         if (priority != static_cast<ClusterPriority>(ClusterPriority::full_left_full_right)) {
+            clusters_violating_ar_[priority._to_string()].push_back(transaction_id);
         }
     }
 

@@ -16,3 +16,4 @@
 #include "algorithms/statistics/algorithms.h"
 #include "algorithms/ucc/mining_algorithms.h"
 #include "algorithms/ucc/verification_algorithms.h"
+#include "algorithms/association_rules/verification_algorithms.h"

@@ -4,7 +4,6 @@
 #include "algorithms/association_rules/ar.h"
 #include "algorithms/association_rules/ar_algorithm_enums.h"
 #include "algorithms/association_rules/ar_verifier/ar_stats_calculator.h"
-#include "algorithms/association_rules/ar_verifier/util/cluster_priority.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_relation_data.h"
 
@@ -61,14 +60,16 @@ public:
 
     /* Returns clusters where the AR is violated, that is, sets of rows where each set consists of
      * rows equal to each other in the specified columns */
-    std::map<util::ClusterPriority, model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::unordered_map<std::string, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return stats_calculator_.GetClustersViolatingAR();
     }
 
+    /* Returns an actual value of support */
     double GetRealSupport() const {
         return stats_calculator_.GetSupport();
     }
 
+    /* Returns an actual value of confidence */
     double GetRealConfidence() const {
         return stats_calculator_.GetConfidence();
     }
