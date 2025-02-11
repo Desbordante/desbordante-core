@@ -76,8 +76,10 @@ def aind_verify(lhs, rhs):
     print_table(lhs_table, f"Dataset '{lhs_table_name}':")
     print_table(rhs_table, f"Dataset '{rhs_table_name}':")
 
-    print(f"Checking the IND {aind_str((lhs_table_name, lhs_table, lhs_indices),
-                                       (rhs_table_name, rhs_table, rhs_indices))}")
+    ind_str = aind_str((lhs_table_name, lhs_table, lhs_indices),
+                       (rhs_table_name, rhs_table, rhs_indices))
+
+    print(f"Checking the IND {ind_str}")
 
     algo = desbordante.aind_verification.algorithms.Default()
     algo.load_data(tables=[lhs_table, rhs_table])
