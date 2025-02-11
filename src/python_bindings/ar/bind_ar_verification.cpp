@@ -12,7 +12,6 @@ namespace python_bindings {
 void BindArVerification(py::module_& main_module) {
     using namespace algos;
     using namespace algos::ar_verifier;
-    using namespace algos::ar_verifier::util;
 
     auto ar_verification_module = main_module.def_submodule("ar_verification");
 

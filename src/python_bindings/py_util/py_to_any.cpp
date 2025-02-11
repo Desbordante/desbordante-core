@@ -1,3 +1,4 @@
+#include <association_rules/ar_verifier/ar_verifier.h>
 #include <functional>
 #include <unordered_map>
 
@@ -137,6 +138,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
         kNormalConvPair<std::string>,
+        kNormalConvPair<std::list<std::string>>,
+        kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>
 };
 
 }  // namespace
