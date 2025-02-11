@@ -1,12 +1,11 @@
 #pragma once
 
 #include <algorithm>
-#include <map>
 #include <memory>
 #include <vector>
 
 #include "algorithms/association_rules/ar.h"
-#include "algorithms/association_rules/ar_verifier/util/cluster_priority.h"
+#include "algorithms/association_rules/ar_verifier/enums.h"
 #include "model/table/column_layout_relation_data.h"
 
 namespace algos::ar_verifier {
@@ -19,11 +18,11 @@ private:
     double confidence_ = 0.0;
     size_t num_transactions_violating_ar_ = 0;
     std::unordered_map<size_t, std::pair<double, double>> rule_coverage_coefficients_;
-    std::map<util::ClusterPriority, model::PLI::Cluster> clusters_violating_ar_;
+    std::unordered_map<std::string, model::PLI::Cluster> clusters_violating_ar_;
 
     static double CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
                                                std::vector<unsigned> const& rule_part);
-    static util::ClusterPriority CalculateClusterPriority(
+    static ClusterPriority CalculateClusterPriority(
             std::pair<double, double> const& coverage);
     void CalculateRuleCoverageCoefficients();
     void CalculateSupport();
@@ -31,7 +30,7 @@ private:
 
 public:
     ARStatsCalculator(std::shared_ptr<model::TransactionalData>&& data, model::ArIDs&& rule)
-        : data_(std::move(data)), rule_(std::move(rule)) {};
+        : data_(std::move(data)), rule_(std::move(rule)){};
 
     ARStatsCalculator() = default;
 
@@ -49,7 +48,7 @@ public:
     }
 
     /* Returns clusters where the AR is violated */
-    std::map<util::ClusterPriority, model::PLI::Cluster> const& GetClustersViolatingAR() const {
+    std::unordered_map<std::string, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return clusters_violating_ar_;
     }
 
