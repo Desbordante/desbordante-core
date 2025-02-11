@@ -52,12 +52,12 @@ print(f"First, consider the results with a seed of {SEED_76_FD}, where EulerFD i
 
 diff_76 = result_exact - result76
 print(f"Compared to the exact method, EulerFD failed to identify the following {len(diff_76)} FDs:")
-for fd in diff_76:
+for fd in sorted(diff_76, key=str):
     print(fd)
 
 diff_76 = result76 - result_exact
 print(f"Additionally, it incorrectly identified these {len(diff_76)} false FDs:")
-for fd in diff_76:
+for fd in sorted(diff_76, key=str):
     print(fd)
 
 print("Thus, a single run of EulerFD can both miss valid FDs and generate false FDs.")
