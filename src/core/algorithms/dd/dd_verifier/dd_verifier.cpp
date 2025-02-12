@@ -53,7 +53,7 @@ namespace algos::dd {
         return dif;
     }
 
-    std::vector<std::pair<int, int> > DDVerifier::GetRowsHolds(
+    std::vector<std::pair<int, int> > DDVerifier::GetRowsWhereLhsHolds(
         const std::list<model::DFStringConstraint> &constraints) const {
         LOG(INFO) << "DDVerifier::GetRowsHolds -- begin\n";
         std::vector<std::pair<int, int> > result;
@@ -106,31 +106,30 @@ namespace algos::dd {
         return 0;
     }
 
-    std::vector<std::pair<int, int> > DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) const {
+    void DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) const {
         std::vector<model::ColumnIndex> columns;
         for (const auto &dd: dd_.right) {
             model::ColumnIndex column_index = relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
             columns.push_back(column_index);
         }
-        std::vector<std::pair<int, int> > pairs_not_holds;
-        for (auto pair: lhs) {
+        for (std::pair pair: lhs) {
             auto curr_constraint = dd_.right.cbegin();
             for (const auto column_index: columns) {
                 if (const double dif = CalculateDistance(column_index, pair); !(
                     dif >= curr_constraint->lower_bound && dif <= curr_constraint->upper_bound)) {
-                    pairs_not_holds.emplace_back(pair);
-                }
+                    std::pair<std::size_t, std::pair<int, int >> paie1 = {column_index, pair};
+                    highlights_.emplace_back(paie1);
+                    }
                 ++curr_constraint;
             }
         }
-        return pairs_not_holds;
     }
 
 
     bool DDVerifier::VerifyDD() {
         num_rows_ = typed_relation_->GetNumRows();
         num_columns_ = typed_relation_->GetNumColumns();
-        const std::vector<std::pair<int, int> > lhs = GetRowsHolds(dd_.left);
+        const std::vector<std::pair<int, int> > lhs = GetRowsWhereLhsHolds(dd_.left);
         if (lhs.empty()) {
             return false;
         }

@@ -17,15 +17,17 @@ namespace algos::dd {
         std::size_t num_columns_;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+        std::vector<std::pair<std::size_t, std::pair<int, int> >> highlights_;
+        //That field mean "vector of number of pairs, that not holds the dd"
 
         void RegisterOptions();
 
-        std::vector<std::pair<int, int> > GetRowsHolds(const std::list<model::DFStringConstraint> &constraints) const;
+        std::vector<std::pair<int, int> > GetRowsWhereLhsHolds(const std::list<model::DFStringConstraint> &constraints) const;
 
-        double CalculateDistance(model::ColumnIndex column_index,
+        double CalculateDistance(std::size_t columnIndex,
                                  const std::pair<std::size_t, std::size_t> &tuple_pair) const;
 
-        std::vector<std::pair<int, int> > CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) const;
+        void CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) const;
 
         void ResetState() final {
             dd_.left.clear();
