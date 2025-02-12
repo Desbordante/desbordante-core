@@ -66,45 +66,56 @@ if __name__ == '__main__':
           "tend to return larger rules encompassing more attributes. The population size "
           "parameter affects the number of NARs being generated and mutated. Larger values "
           "are slower but output more NARs.\n")
-    algo.execute(minconf=0.7, minsup=0.1, population_size=500,
+    print("Finally, as the DES algorithm is a randomized one, we need to set the "
+          "seed parameter to the specially-selected value in order: \n"
+          "1) to present you an interesting and illustrative example of NAR and, \n"
+          "2) to ensure the repeatability of this example (i.e., that NAR found "
+          "stays the same over different runs) \n"
+          "Note that if you do not set the seed parameter, the default value would be used.")
+    algo.execute(minconf=0.7, minsup=0.1, population_size=500, seed=2189,
                  max_fitness_evaluations=700)
-    if len(algo.get_nars()) != 1:
-        raise ValueError("example requires that a single NAR was mined")
-    discovered_nar = algo.get_nars()[0]
-    print_10_nars([discovered_nar], df.columns)
-    
-    print("\nThe above NAR is the only one discovered with these settings. The NAR "
-          "states that about 92% of all dog breeds of type "
-          "'Hound' have an intelligence rating between 6 and 8 out of 10 and are between "
-          "sizes 0 and 4 out of 5 (0 being 'Toy' and 5 being 'Giant'). This suggests "
-          "that, in general, hounds are intelligent dogs and no more than "
-          "8% of all hounds are of 'Giant' size. Let's see if that is true.\n")
+    example_nar = algo.get_nars()[2]
+    discovered_nar_count = len(algo.get_nars())
+    print_10_nars([example_nar], df.columns)
+    print(f"\nThe above NAR is one of the {discovered_nar_count} rules discovered"
+          " with these settings. The NAR states that about 74% of all dog breeds of type "
+          "'Hound' have an intelligence rating between 6 and 7 out of 10 and have a "
+          "friendliness rating between 5 and 8 out of 10. This suggests "
+          "that, in general, hounds are intelligent dogs and are mostly friendly. Let's see "
+          "if that is true.\n")
 
     hound_rows = df[df['Type'] == 'Hound']
     
     violating_row_indices = []
-    min_intelligence = discovered_nar.cons[9].lower_bound
-    max_intelligence = discovered_nar.cons[9].upper_bound
+    min_intelligence = example_nar.cons[9].lower_bound
+    max_intelligence = example_nar.cons[9].upper_bound
+    min_friendliness = example_nar.cons[3].lower_bound
+    max_friendliness = example_nar.cons[3].upper_bound
     for i, (_, row) in enumerate(hound_rows.iterrows()):
         intelligence = row['Intelligence']
-        if intelligence < min_intelligence or intelligence > max_intelligence:
+        friendliness = row['Friendliness']
+        if (intelligence < min_intelligence or intelligence > max_intelligence or
+            friendliness < min_friendliness or friendliness > max_friendliness):
             violating_row_indices.append(i)
         
-    header, *hound_row_strings = hound_rows[['Name', 'Type', 'Intelligence', 'Size']].to_string().splitlines()
+    header, *hound_row_strings = hound_rows[['Name', 'Type', 'Intelligence', 'Friendliness']].to_string().splitlines()
+    print(header)
     for i, hound_row_string in enumerate(hound_row_strings):
         if i in violating_row_indices:
             print(f"{Back.RED}{hound_row_string}{Back.RESET}")
         else:
             print(hound_row_string)
     
-    print("\nAs observed, only 2 rows with 'Type' equal to 'Hound' fall outside "
-          "the intelligence rating range of 6 to 8. These two records account for "
-          "the (27-2)/27 ~= 92% confidence level of this rule.\n")
+    print("\nAs observed, only 7 rows with 'Type' equal to 'Hound' fall outside "
+          "either the intelligence or friendliness bounds. These seven records account for "
+          "the (27-7)/27 ~= 74% confidence level of this rule.\n")
     print("Let's try again, but this time with different settings. This time, minimum support "
           "will have a more lenient value of 0.05 and the population size will be 700. "
           "This will help discover more NARs. The value of max_fitness_evaluations "
           "will also need to be increased to 1500 in accordance with the population "
           "size to produce a non-empty result.\n")
     algo.execute(minconf=0.7, minsup=0.05, population_size=700,
-                 max_fitness_evaluations=1500)
+                 max_fitness_evaluations=1500, seed=10)
     print_10_nars(algo.get_nars(), df.columns)
+    print("These found NARs are less striking, but nevertheless they represent "
+          "some thought-provoking facts.")
