@@ -106,7 +106,7 @@ namespace algos::dd {
         return 0;
     }
 
-    void DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) const {
+    void DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) {
         std::vector<model::ColumnIndex> columns;
         for (const auto &dd: dd_.right) {
             model::ColumnIndex column_index = relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
@@ -133,11 +133,12 @@ namespace algos::dd {
         if (lhs.empty()) {
             return false;
         }
-        const std::vector<std::pair<int, int> > pairs_not_holds = CheckDFOnRhs(lhs);
-        LOG(INFO) << "pairs_not_holds: " << pairs_not_holds.size() << ' ';
-        for (auto pair: pairs_not_holds) {
+        CheckDFOnRhs(lhs);
+        LOG(INFO) << "pairs_not_holds: " << highlights_.size() << ' ';
+        for (auto pair: highlights_) {
             LOG(INFO) << "pair: " << pair.first << ' ' << pair.second << ' ';
         }
-        return pairs_not_holds.empty();
+        return highlights_.empty();
+        //TODO: this return and "LOGS" must be in function PrintStatistics and LOGS is a primitive realization of vizualization highlights
     }
 }
