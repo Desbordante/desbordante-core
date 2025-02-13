@@ -1,0 +1,133 @@
+name: Performance regression testing
+on:
+  # This workflow runs performance regression tests:
+  # - Automatically every Saturday at 3:30 AM (using `schedule` trigger).
+  # - Manually on demand using `workflow_dispatch` trigger.
+  # Note: `schedule` trigger only activates on `main` branch.
+  schedule:
+    - cron: 30 3 * * 6
+  workflow_dispatch:
+
+concurrency:
+  # ref will be always the same (`main`) for schedule, and can be set manually for workflow-dispatch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
+
+# NOTE: all results JSONs (including baseline) are very format-dependent,
+# so don't forget to update version tags each time format is changed
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    env:
+      # Number of run IDs to select
+      num-runs: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
+        with:
+          os: ubuntu-latest
+          toolset: gcc
+          boost-libraries: 'container,thread,graph,program_options'
+      - name: Download datasets
+        uses: ./.github/composite-actions/download-datasets
+      - name: Build
+        run: |
+          export CXX=g++-10
+          ./build.sh --benchmark --no-tests
+
+      - name: Get previous results
+        run: |
+          echo ${{ secrets.PERFORMANCEREGRESSIONTESTING }} | gh auth login --with-token
+
+          gh run list --repo "${{ github.repository }}" --limit ${{ env.num-runs }} \
+            --workflow "${{ github.workflow }}" --json 'databaseId' --jq '[.[].databaseId]' \
+            >ids.json
+
+          mkdir -p old-results
+          for (( i = 0; i < ${{ env.num-runs }}; i = $i + 1 )); do
+            ID=$(jq ".[$i]" ids.json)
+            # Don't fail on error
+            echo "$ID"
+            gh run download "$ID" --name 'results-v1.json' --repo "${{ github.repository }}" && \
+              cat curr-results.json && \
+              mv curr-results.json old-results/$i.json || /bin/true
+
+            rm -rf results-v1.json
+          done
+
+      - name: Get latest log
+        run: |
+          if [[ -a old-results/* ]]; then
+            FILENAME=old-results/$(ls old-results | head -n 1)
+            cp $FILENAME latest.json
+          else
+            echo "No artifacts found!"
+            echo '[]' > latest.json
+          fi
+
+      - name: Get latest successful job ID
+        run: |
+          echo ${{ secrets.PERFORMANCEREGRESSIONTESTING }} | gh auth login --with-token
+
+          {
+            echo 'LastSuccID<<EOF'
+            gh run list --repo "${{ github.repository }}" --limit 1 \
+              --status success --workflow "${{ github.workflow }}" --json 'databaseId' \
+              --jq '.[].databaseId'
+            echo 'EOF'
+          } >>"$GITHUB_ENV"
+      - name: Get baseline results
+        uses: actions/download-artifact@v4
+        with:
+          # For some reason there's no "when not found" parameter,
+          # but job don't fail if `name` is replaced with `pattern`
+          pattern: baseline-v1.json
+          run-id: ${{ env.LastSuccID }}
+          github-token: ${{ secrets.PERFORMANCEREGRESSIONTESTING }}
+      - name: Check baseline results
+        # Each successful run must have a "baseline" attached.
+        # If not, there's no baseline at all; use latest instead.
+        # Note: such behaviour can be used to manually update baseline in case of some problems
+        run: cp baseline-v1.json/baseline.json baseline.json || cp latest.json baseline.json
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build/target
+        run: |
+          ./Desbordante_benchmark --baseline ${{ github.workspace }}/baseline.json \
+            --output ${{ github.workspace }}/curr-results.json
+
+      # All next steps should be ran even if this one has failed
+      # Some of them may fail in that case, but it's not a problem
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-v1.json
+          path: curr-results.json
+        if: ${{ !cancelled() }}
+
+      - name: Build plots
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python3 -m pip install matplotlib
+          .venv/bin/python3 src/tests/benchmark/display_benchmarks.py old-results baseline.json \
+            curr-results.json plots.pdf
+        if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plots.pdf
+          path: ${{ github.workspace }}/plots.pdf
+          if-no-files-found: error
+        if: ${{ !cancelled() }}
+
+      # If tests are successful, current result becomes baseline.
+      # Otherwise, baseline is simply being duplicated.
+      - name: Update baseline
+        run: cp curr-results.json baseline.json
+        if: success()
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline-v1.json
+          path: baseline.json
