@@ -7,7 +7,7 @@ from json import load as j_load
 # Read serialized results from JSON file
 def read_results(filename: str) -> dict[str: int]:
     with open(filename, 'r') as file:
-        return j_load(file)
+        return {algo['name'] : algo['time'] for algo in j_load(file)}
 
 def read_all_results(dir: str) -> list[dict[str, int]]:
     all_results = []
