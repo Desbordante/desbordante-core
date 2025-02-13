@@ -134,7 +134,7 @@ jobs:
         with:
           os: ${{ matrix.os }}
           toolset: ${{ matrix.toolset }}
-          install-boost: false
+          boost-libraries: ''
           download-googletest: false
           download-pybind: true
 

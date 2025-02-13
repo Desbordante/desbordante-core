@@ -18,9 +18,9 @@ inputs:
     type: boolean
     default: true
 
-  install-boost:
-    type: boolean
-    default: true
+  boost-libraries:
+    type: string
+    default: 'container,thread,graph'
 
   download-googletest:
     type: boolean
@@ -124,40 +124,40 @@ runs:
     - name: Install Boost built with GCC (on Ubuntu)
       run: |
         cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
+        ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
         sudo ./b2 install --prefix=/usr
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+      if: inputs.boost-libraries != '' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
     - name: Install Boost built with Clang (on Ubuntu)
       run: |
         cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
+        ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
         sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
          linkflags="-stdlib=libc++"
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+      if: inputs.boost-libraries != '' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install Boost built with GCC (on macOS)
       run: | 
         cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph 
+        ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
         echo "using darwin : : g++-14 ;" > user-config.jam
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
+      if: inputs.boost-libraries != '' && inputs.toolset == 'gcc' && env.OS == 'macos'
     - name: Install Boost built with LLVM Clang (on macOS)
       run: |
         cd lib/boost
-        ./bootstrap.sh --with-libraries=container,thread,graph
+        ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
         echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
          cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
          linkflags="-L$(brew --prefix llvm@17)/lib/c++"
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+      if: inputs.boost-libraries != '' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     - name: Install Boost built with Apple Clang
       run: brew install boost
       shell: bash
-      if: inputs.install-boost == 'true' && inputs.toolset == 'apple-clang'
+      if: inputs.boost-libraries != '' && inputs.toolset == 'apple-clang'
 
 #    Uncomment this if we set up our own git lfs server
 #    - name: Install git-lfs
