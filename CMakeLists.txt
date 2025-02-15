@@ -53,6 +53,7 @@ endif()
 # --- Build Configuration Options ---
 
 option(COMPILE_TESTS "Build tests" ON)
+option(COMPILE_BENCHMARKS "Build benchmarks" OFF)
 option(UNPACK_DATASETS "Unpack datasets" ON)
 option(BUILD_NATIVE "Build for host machine" ON)
 option(USE_LTO "Build using interprocedural optimization" OFF)
@@ -277,7 +278,12 @@ endif()
 # Configure boost
 set(Boost_USE_STATIC_LIBS OFF)
 
-find_package(Boost 1.81.0 REQUIRED COMPONENTS container thread graph)
+set(boost_libraries container thread graph)
+if (COMPILE_BENCHMARKS)
+	list(APPEND boost_libraries program_options)
+endif()
+
+find_package(Boost 1.81.0 REQUIRED COMPONENTS ${boost_libraries})
 if(Boost_FOUND)
     message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
     include_directories(${Boost_INCLUDE_DIRS})
@@ -310,6 +316,9 @@ add_subdirectory("cfg")
 # Configure tests
 if(COMPILE_TESTS)
     enable_testing()
+endif()
+
+if (COMPILE_TESTS OR COMPILE_BENCHMARKS)
     add_subdirectory("src/tests")
 endif()
 
