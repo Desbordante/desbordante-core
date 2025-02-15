@@ -13,6 +13,7 @@ Possible options:
   -h,         --help                  Display help
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
+  -b          --benchmark             Build benchmarks
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
@@ -22,6 +23,8 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
+  -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
 EOF
 }
 
@@ -35,6 +38,10 @@ for i in "$@"; do
         # Don't build tests
         -n | --no-tests)
             NO_TESTS=true
+            ;;
+		# Build benchmarks
+        -b|--benchmark)
+            BENCHMARK=true
             ;;
         # Don't unpack datasets
         -u | --no-unpack)
@@ -64,6 +71,22 @@ for i in "$@"; do
         -g)
             GDB_DEBUG=true
             ;;
+        # Forward option to CMake, long option
+        --cmake-opt=*)
+            PREFIX="$PREFIX ${i#*=}"
+            ;;
+        # Forward option to CMake, short option
+        -C*)
+            PREFIX="$PREFIX ${i#*C}"
+            ;;
+        # Forward option to build system, long option
+        --build-opt=*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*=}"
+            ;;
+        # Forward option to build system, short option
+        -B*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*B}"
+            ;;
         # Display help
         -h | --help | *)
             print_help
@@ -74,6 +97,10 @@ done
 
 if [[ $NO_TESTS == true ]]; then
     PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
+fi
+
+if [[ $BENCHMARK == true ]]; then
+    PREFIX="$PREFIX -D COMPILE_BENCHMARKS=ON"
 fi
 
 if [[ $NO_UNPACK == true ]]; then
@@ -101,4 +128,4 @@ if [[ -n $SANITIZER ]]; then
 fi
 
 rm -f build/CMakeCache.txt
-cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION
+cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION $BUILD_OPTS
