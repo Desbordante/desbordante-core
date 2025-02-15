@@ -1,18 +1,36 @@
-set(BINARY ${CMAKE_PROJECT_NAME}_test)
+set(UNIT_TEST_BINARY ${CMAKE_PROJECT_NAME}_test)
+set(PERF_TEST_BINARY ${CMAKE_PROJECT_NAME}_perf_test)
 
-# getting GTest
-include(GoogleTest)
+file(GLOB common_sources "common/*.h" "common/*.cpp")
+file(GLOB unit_test_sources "unit_tests/*.h" "unit_tests/*.cpp")
+file(GLOB perf_test_sources "performance_tests/*.h" "performance_tests/*.cpp")
 
-# building tests
-file(GLOB_RECURSE test_sources "*.h*" "*.cpp*")
-add_executable(${BINARY} ${test_sources})
+if (COMPILE_TESTS)
+    enable_testing()
+    include(GoogleTest)
 
-# linking with gtest and implemented classes
-target_link_libraries(${BINARY} PRIVATE ${CMAKE_PROJECT_NAME} gtest gmock Boost::graph)
+    # building tests
+    add_executable(${UNIT_TEST_BINARY} ${common_sources} ${unit_test_sources})
 
-gtest_discover_tests(${BINARY} WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+    # include "tests/common" directory for header inclusion
+    target_include_directories(${UNIT_TEST_BINARY} PRIVATE "common")
 
-# copying sample csv's for testing
+    # linking with gtest and implemented classes
+    target_link_libraries(${UNIT_TEST_BINARY} PRIVATE ${CMAKE_PROJECT_NAME} gtest gmock Boost::graph)
+
+    gtest_discover_tests(${UNIT_TEST_BINARY} WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+endif()
+
+if (COMPILE_PERFORMANCE_TESTS)
+    add_executable(${PERF_TEST_BINARY} ${common_sources} ${perf_test_sources})
+
+    # include "tests/common" directory for header inclusion
+    target_include_directories(${PERF_TEST_BINARY} PRIVATE "common")
+
+    # linking with implemented classes
+    target_link_libraries(${PERF_TEST_BINARY} PRIVATE ${CMAKE_PROJECT_NAME})
+endif()
+
 add_custom_target(copy-files ALL
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_SOURCE_DIR}/test_input_data

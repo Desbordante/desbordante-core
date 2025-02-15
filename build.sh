@@ -14,6 +14,7 @@ Possible options:
               --deps-only             Install dependencies only (don't build)
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
+  -T          --perf-tests            Build performance tests
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
@@ -23,6 +24,8 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
+  -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
 EOF
 }
 
@@ -40,6 +43,9 @@ for i in "$@"; do
         # Don't build tests
         -n | --no-tests)
             NO_TESTS=true
+            ;;
+        -T|--perf-tests) # Build performance tests
+            PERF_TESTS=true
             ;;
         # Don't unpack datasets
         -u | --no-unpack)
@@ -68,6 +74,22 @@ for i in "$@"; do
         # Use GDB's debug information format
         -g)
             GDB_DEBUG=true
+            ;;
+        # Forward option to CMake, long option
+        --cmake-opt=*)
+            PREFIX="$PREFIX ${i#*=}"
+            ;;
+        # Forward option to CMake, short option
+        -C*)
+            PREFIX="$PREFIX ${i#*C}"
+            ;;
+        # Forward option to build system, long option
+        --build-opt=*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*=}"
+            ;;
+        # Forward option to build system, short option
+        -B*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*B}"
             ;;
         # Display help
         -h | --help | *)
@@ -107,6 +129,10 @@ else
     fi
 fi
 
+if [[ $PERF_TESTS == true ]]; then
+    PREFIX="$PREFIX -D COMPILE_PERFORMANCE_TESTS=ON"
+fi
+
 if [[ $DEPS_ONLY == true ]]; then
     exit 0
 fi
@@ -137,4 +163,4 @@ fi
 
 cd ..
 rm -f build/CMakeCache.txt
-cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION
+cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION $BUILD_OPTS
