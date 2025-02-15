@@ -24,6 +24,26 @@ namespace algos::dd {
         RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
     }
 
+    double DDVerifier::GetError() const {
+        return error_;
+    }
+
+    void DDVerifier::VisualizeHighlights() {
+        for (const auto &highlight: highlights_) {
+            auto col = std::move(typed_relation_->GetColumnData(highlight.first));
+            auto temp = typed_relation_->GetSchema();
+            LOG(INFO) << "DD not Holds in " << temp->GetColumn(highlight.first)->GetName() << " in " << highlight.second
+                    .first << " and " << highlight.second.second << " rows with values " << col.
+                    GetDataAsString(highlight.second.first) << ", " << col.GetDataAsString(highlight.second.second) <<
+                    '\n';
+        }
+    }
+
+
+    std::size_t DDVerifier::GetNumErrorPairs() const {
+        return num_error_pairs_;
+    }
+
     double DDVerifier::CalculateDistance(const model::ColumnIndex column_index,
                                          const std::pair<std::size_t, std::size_t> &tuple_pair) const {
         model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
@@ -55,7 +75,6 @@ namespace algos::dd {
 
     std::vector<std::pair<int, int> > DDVerifier::GetRowsWhereLhsHolds(
         const std::list<model::DFStringConstraint> &constraints) const {
-        LOG(INFO) << "DDVerifier::GetRowsHolds -- begin\n";
         std::vector<std::pair<int, int> > result;
         std::vector<model::ColumnIndex> columns;
         for (auto const &constraint: constraints) {
@@ -65,11 +84,9 @@ namespace algos::dd {
         auto curr_constraint = constraints.begin();
         for (const auto column_index: columns) {
             if (result.empty()) {
-                LOG(INFO) << "DDVerifier::GetRowsHolds -- columns.empty()\n ";
                 for (size_t i = 0; i < num_rows_; i++) {
                     for (size_t j = i; j < num_rows_; j++) {
-                        auto dif = CalculateDistance(column_index, {i, j});
-                        LOG(INFO) << "Difference: " << dif;
+                        const auto dif = CalculateDistance(column_index, {i, j});
                         if (dif <= curr_constraint->upper_bound && dif >= curr_constraint->lower_bound) {
                             result.emplace_back(i, j);
                         }
@@ -77,10 +94,8 @@ namespace algos::dd {
                 }
             } else {
                 for (std::size_t i = 0; i < result.size(); i++) {
-                    LOG(INFO) << "DDVerifier::GetRowsHolds -- columns.else\n ";
                     if (const double dif = CalculateDistance(column_index, result[i]);
                         dif > curr_constraint->upper_bound || dif < curr_constraint->lower_bound) {
-                        LOG(INFO) << "Difference: " << dif;
                         result.erase(result.begin() + i);
                         --i;
                     }
@@ -103,7 +118,18 @@ namespace algos::dd {
     }
 
     unsigned long long DDVerifier::ExecuteInternal() {
-        return 0;
+        auto start_time = std::chrono::system_clock::now();
+
+        num_rows_ = typed_relation_->GetNumRows();
+        num_columns_ = typed_relation_->GetNumColumns();
+
+        PrintStatistics();
+
+        auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+
+        return elapsed_milliseconds.count();
+
     }
 
     void DDVerifier::CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs) {
@@ -114,31 +140,41 @@ namespace algos::dd {
         }
         for (std::pair pair: lhs) {
             auto curr_constraint = dd_.right.cbegin();
+            bool is_error = false;
             for (const auto column_index: columns) {
                 if (const double dif = CalculateDistance(column_index, pair); !(
                     dif >= curr_constraint->lower_bound && dif <= curr_constraint->upper_bound)) {
-                    std::pair<std::size_t, std::pair<int, int >> paie1 = {column_index, pair};
-                    highlights_.emplace_back(paie1);
-                    }
+                    std::pair<std::size_t, std::pair<int, int> > incorrect_pair = {column_index, pair};
+                    highlights_.emplace_back(incorrect_pair);
+                    is_error = true;
+                }
                 ++curr_constraint;
+            }
+            if (is_error) {
+                ++num_error_pairs_;
             }
         }
     }
 
 
-    bool DDVerifier::VerifyDD() {
-        num_rows_ = typed_relation_->GetNumRows();
-        num_columns_ = typed_relation_->GetNumColumns();
+    void DDVerifier::VerifyDD() {
         const std::vector<std::pair<int, int> > lhs = GetRowsWhereLhsHolds(dd_.left);
-        if (lhs.empty()) {
-            return false;
-        }
         CheckDFOnRhs(lhs);
-        LOG(INFO) << "pairs_not_holds: " << highlights_.size() << ' ';
-        for (auto pair: highlights_) {
-            LOG(INFO) << "pair: " << pair.first << ' ' << pair.second << ' ';
-        }
+        error_ = num_error_pairs_ / lhs.size();
+    }
+
+    bool DDVerifier::DDHolds() const {
         return highlights_.empty();
-        //TODO: this return and "LOGS" must be in function PrintStatistics and LOGS is a primitive realization of vizualization highlights
+    }
+
+    void DDVerifier::PrintStatistics() {
+        if (DDHolds()) {
+            LOG(DEBUG) << "DD holds.";
+        } else {
+            LOG(DEBUG) << "DD does not hold.";
+            LOG(DEBUG) << "Number of pairs rows with errors: " << GetNumErrorPairs();
+            LOG(DEBUG) << "DD error threshold: " << GetError();
+            VisualizeHighlights();
+        }
     }
 }

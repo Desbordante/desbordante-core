@@ -15,6 +15,8 @@ namespace algos::dd {
         config::InputTable input_table_;
         std::size_t num_rows_;
         std::size_t num_columns_;
+        std::size_t num_error_pairs_;
+        double error_;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
         std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
@@ -23,11 +25,23 @@ namespace algos::dd {
 
         void RegisterOptions();
 
+        double GetError() const;
+
+        std::size_t GetNumErrorPairs() const;
+
+        void CalculateStatistics(const std::vector<std::pair<int, int> >& lhs);
+
+        bool DDHolds() const;
+
+        void VisualizeHighlights();
+
+        void PrintStatistics();
+
         std::vector<std::pair<int, int> > GetRowsWhereLhsHolds(
             const std::list<model::DFStringConstraint> &constraints) const;
 
-        double DDVerifier::CalculateDistance(model::ColumnIndex column_index,
-                                             const std::pair<std::size_t, std::size_t> &tuple_pair) const;
+        double CalculateDistance(model::ColumnIndex column_index,
+                                 const std::pair<std::size_t, std::size_t> &tuple_pair) const;
 
         void CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs);
 
@@ -48,6 +62,6 @@ namespace algos::dd {
     public:
         DDVerifier();
 
-        bool VerifyDD();
+        void VerifyDD();
     };
 }
