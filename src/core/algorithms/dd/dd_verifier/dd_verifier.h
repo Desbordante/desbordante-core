@@ -13,9 +13,9 @@ namespace algos::dd {
     private:
         DDs dd_;
         config::InputTable input_table_;
-        std::size_t num_rows_;
-        std::size_t num_columns_;
-        std::size_t num_error_pairs_;
+        std::size_t num_rows_{};
+        std::size_t num_columns_{};
+        std::size_t num_error_rhs_{};
         double error_ = 0.;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
@@ -52,7 +52,7 @@ namespace algos::dd {
     public:
         DDVerifier();
         double GetError() const;
-        std::size_t GetNumErrorPairs() const;
+        std::size_t GetNumErrorRhs() const;
         bool DDHolds() const;
         void VerifyDD();
     };
