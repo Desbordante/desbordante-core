@@ -16,8 +16,7 @@ namespace algos::ar_verifier {
 ARVerifier::ARVerifier() : Algorithm({}) {
     RegisterOptions();
     using namespace config::names;
-    MakeOptionsAvailable(
-            {kTable, kInputFormat});
+    MakeOptionsAvailable({kTable, kInputFormat});
 }
 
 void ARVerifier::RegisterOptions() {

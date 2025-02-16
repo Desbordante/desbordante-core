@@ -109,8 +109,8 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
             PyTypePair<std::list<std::string>, kPyList, kPyStr>,
-            PyTypePair<std::unordered_set<std::string, std::vector<unsigned int>>, kPyDict, kPyStr, kPyList, kPyInt>
-    };
+            PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
+                       kPyList, kPyInt>};
     return type_map.at(type_index)();
 }
 
