@@ -16,7 +16,7 @@ namespace algos::dd {
         std::size_t num_rows_;
         std::size_t num_columns_;
         std::size_t num_error_pairs_;
-        double error_;
+        double error_ = 0.;
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
         std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
@@ -38,8 +38,8 @@ namespace algos::dd {
         void CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs);
 
         void ResetState() final {
-            dd_.left.clear();
-            dd_.right.clear();
+            num_columns_ = 0;
+            num_rows_ = 0;
         }
 
     protected:
