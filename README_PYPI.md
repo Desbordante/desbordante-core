@@ -60,8 +60,11 @@ The currently supported data patterns are:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with $g_1$ metric (discovery and validation)
 * Association rules (discovery)
+* Numerical association rules (discovery)
 * Matching dependencies (discovery)
-* Variable heterogeneous denial constraints (validation)
+* Denial constraints
+   - Exact denial constraints (discovery and validation)
+   - Approximate denial constraints, with $g_1$ metric (discovery)
 
 This package uses the library of the Desbordante platform, which is written in C++. This means that depending on the algorithm and dataset, the runtimes may be cut by 2-10 times compared to the alternatives.
 
@@ -220,19 +223,21 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
+* Numerical association rules
+   - [Minakshi Kaushik, Rahul Sharma, Iztok Fister Jr., and Dirk Draheim. 2023. Numerical Association Rule Mining: A Systematic Literature Review. 1, 1 (July 2023), 50 pages.](https://arxiv.org/abs/2307.00662)
+   - [Fister, Iztok & Fister jr, Iztok. 2020. uARMSolver: A framework for Association Rule Mining. 10.48550/arXiv.2010.10884.](https://doi.org/10.48550/arXiv.2010.10884)
 * Matching dependencies
    - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
 * Denial constraints
    - [X. Chu, I. F. Ilyas and P. Papotti. Holistic data cleaning: Putting violations into context. 2013. IEEE 29th International Conference on Data Engineering (ICDE), Brisbane, QLD, Australia, 2013, pp. 458-469,](https://cs.uwaterloo.ca/~ilyas/papers/XuICDE2013.pdf)
    - [Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia Floratou. 2024. Rapidash: Efficient Detection of Constraint Violations. Proc. VLDB Endow. 17, 8 (April 2024), 2009–2021.](https://arxiv.org/pdf/2309.12436)
+   - [Renjie Xiao, Zijing Tan, Haojin Wang, and Shuai Ma. 2022. Fast approximate denial constraint discovery. Proc. VLDB Endow. 16, 2 (October 2022), 269–281.](https://doi.org/10.14778/3565816.3565828)
 
 ## Installation
 
 The source code is currently hosted on GitHub at https://github.com/Desbordante/desbordante-core
 
-Wheels for the latest released version are available at the Python Package Index (PyPI).
-
-**Currently only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported**.
+Wheels for all released version are available at the Python Package Index (PyPI) for  **manylinux2014** (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and **macOS 11.0+**.
 
 ```bash
 $ pip install desbordante

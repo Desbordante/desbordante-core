@@ -4,17 +4,21 @@
 #include <cassert>
 #include <chrono>
 #include <cstddef>
-#include <deque>
 #include <limits>
 #include <list>
+#include <numeric>
+#include <ranges>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/regex.hpp>
 #include <easylogging++.h>
 
+#include "algorithms/dd/split/model/distance_position_list_index.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
@@ -47,9 +51,6 @@ void Split::MakeExecuteOptsAvailable() {
 }
 
 void Split::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, false);  // nulls are
-                                                                             // ignored
-    input_table_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_,
                                                                        false);  // nulls are ignored
     if (typed_relation_->GetColumnData().empty()) {
@@ -76,6 +77,34 @@ void Split::SetLimits() {
     if (num_columns_ == 0) num_columns_ = all_columns_num;
 }
 
+void Split::CheckTypes() {
+    type_ids_.resize(num_columns_, model::TypeId::kUndefined);
+    for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
+        model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
+        model::TypeId type_id = column.GetTypeId();
+
+        if (type_id == +model::TypeId::kUndefined) {
+            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
+                                        "\" type undefined.");
+        }
+        if (type_id == +model::TypeId::kMixed) {
+            throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
+                                        "\" contains values of different types.");
+        }
+
+        type_ids_[column_index] = type_id;
+
+        for (std::size_t row_index = 0; row_index < num_rows_; row_index++) {
+            if (column.IsNull(row_index)) {
+                throw std::runtime_error("Some of the value coordinates are nulls.");
+            }
+            if (column.IsEmpty(row_index)) {
+                throw std::runtime_error("Some of the value coordinates are empty.");
+            }
+        }
+    }
+}
+
 void Split::ParseDifferenceTable() {
     if (difference_table_) {
         difference_typed_relation_ =
@@ -90,21 +119,27 @@ void Split::ParseDifferenceTable() {
 }
 
 unsigned long long Split::ExecuteInternal() {
-    SetLimits();
-    ParseDifferenceTable();
-
     auto const start_time = std::chrono::system_clock::now();
     LOG(DEBUG) << "Start";
 
+    SetLimits();
+    CheckTypes();
+    ParseDifferenceTable();
+
     CalculateAllDistances();
     CalculateIndexSearchSpaces();
+
+    LOG(INFO) << "Calculated distances";
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+    LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
 
     if (reduce_method_ == +Reduce::IEHybrid) {
         CalculateTuplePairs();
     }
 
-    LOG(INFO) << "Calculated distances";
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+    LOG(INFO) << "Calculated tuple pairs";
+    elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
     LOG(INFO) << "Minimum and maximum distances for each column with non-empty search space:";
@@ -141,6 +176,12 @@ unsigned Split::ReduceDDs(auto const& start_time) {
     std::vector<DF> search, dfs_y;
     std::list<DD> reduced;
 
+    std::vector<std::size_t> tuple_pair_indices;
+    if (reduce_method_ == +Reduce::IEHybrid) {
+        tuple_pair_indices.resize(tuple_pair_num_);
+        std::iota(tuple_pair_indices.begin(), tuple_pair_indices.end(), 0);
+    }
+
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         std::vector<model::ColumnIndex> indices;
         for (model::ColumnIndex j = 0; j < num_columns_; j++) {
@@ -169,7 +210,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
                         reduced = HybridPruningReduce(df_y, search, cnt);
                         break;
                     case +Reduce::IEHybrid:
-                        reduced = InstanceExclusionReduce(tuple_pairs_, search, df_y, cnt);
+                        reduced = InstanceExclusionReduce(tuple_pair_indices, search, df_y, cnt);
                         break;
                     default:
                         break;
@@ -249,8 +290,10 @@ unsigned Split::RemoveTransitiveDDs() {
 void Split::CalculateIndexSearchSpaces() {
     std::vector<DFConstraint> new_min_max_dif;
     std::vector<std::vector<std::vector<double>>> new_distances;
+    std::vector<DistancePositionListIndex> new_plis;
     new_min_max_dif.reserve(num_columns_);
     new_distances.reserve(num_columns_);
+    new_plis.reserve(num_columns_);
     for (model::ColumnIndex index = 0; index < num_columns_; index++) {
         std::vector<DFConstraint> cur_index_search_space = IndexSearchSpace(index);
         if (!cur_index_search_space.empty()) {
@@ -258,36 +301,46 @@ void Split::CalculateIndexSearchSpaces() {
             non_empty_cols_.push_back(index);
             new_min_max_dif.push_back(min_max_dif_[index]);
             new_distances.push_back(std::move(distances_[index]));
+            new_plis.push_back(std::move(plis_[index]));
         }
     }
     num_columns_ = non_empty_cols_.size();
     min_max_dif_ = std::move(new_min_max_dif);
     distances_ = std::move(new_distances);
+    plis_ = std::move(new_plis);
+}
+
+void Split::CalculateTuplePairs() {
+    std::size_t const df_search_space_num = std::accumulate(
+            index_search_spaces_.begin(), index_search_spaces_.end(), 0,
+            [](std::size_t acc, auto const& search_space) { return acc + search_space.size(); });
+
+    std::unordered_set<boost::dynamic_bitset<>> tuple_pair_set;
+    for (std::size_t first_index = 0; first_index < num_rows_; first_index++) {
+        for (std::size_t second_index = first_index + 1; second_index < num_rows_; second_index++) {
+            boost::dynamic_bitset<> pair_bitset(df_search_space_num);
+            std::size_t df_index = 0;
+
+            for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
+                for (auto const& df_constraint : index_search_spaces_[column_index]) {
+                    pair_bitset.set(df_index, CheckDFConstraint(df_constraint, column_index,
+                                                                {first_index, second_index}));
+                    df_index++;
+                }
+            }
+            auto const [it, is_new] = tuple_pair_set.insert(std::move(pair_bitset));
+            if (is_new) {
+                tuple_pairs_.emplace_back(first_index, second_index);
+            }
+        }
+    }
+    tuple_pair_num_ = tuple_pairs_.size();
 }
 
 double Split::CalculateDistance(model::ColumnIndex column_index,
                                 std::pair<std::size_t, std::size_t> tuple_pair) {
     model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
-    model::TypeId type_id = column.GetTypeId();
 
-    if (type_ids_[column_index] == +model::TypeId::kUndefined) {
-        type_ids_[column_index] = type_id;
-    }
-
-    if (type_id == +model::TypeId::kUndefined) {
-        throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                    "\" type undefined.");
-    }
-    if (type_id == +model::TypeId::kMixed) {
-        throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
-                                    "\" contains values of different types.");
-    }
-    if (column.IsNull(tuple_pair.first) || column.IsNull(tuple_pair.second)) {
-        throw std::runtime_error("Some of the value coordinates are nulls.");
-    }
-    if (column.IsEmpty(tuple_pair.first) || column.IsEmpty(tuple_pair.second)) {
-        throw std::runtime_error("Some of the value coordinates are empty.");
-    }
     double dif = 0;
     if (column.GetType().IsMetrizable()) {
         std::byte const* first_value = column.GetValue(tuple_pair.first);
@@ -299,96 +352,73 @@ double Split::CalculateDistance(model::ColumnIndex column_index,
 }
 
 // must be inline for optimization (gcc 11.4.0)
-inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
-    for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
-        double const dif = distances_[column_index][tuple_pair.first][tuple_pair.second];
+inline bool Split::CheckDFConstraint(DFConstraint const& dif_constraint,
+                                     model::ColumnIndex column_index,
+                                     std::pair<std::size_t, std::size_t> tuple_pair) {
+    std::vector<ClusterIndex> const& cur_index = plis_[column_index].GetInvertedIndex();
+    ClusterIndex const first_cluster = cur_index[tuple_pair.first];
+    ClusterIndex const second_cluster = cur_index[tuple_pair.second];
+    ClusterIndex const min_cluster = std::min(first_cluster, second_cluster);
+    ClusterIndex const max_cluster = std::max(first_cluster, second_cluster);
+    double const dif = distances_[column_index][min_cluster][max_cluster - min_cluster];
 
-        if (type_ids_[column_index] == +model::TypeId::kDouble) {
-            if (!dif_func[column_index].Contains(dif)) {
-                return false;
-            }
-        } else {
-            if (dif < dif_func[column_index].lower_bound ||
-                dif > dif_func[column_index].upper_bound) {
-                return false;
-            }
-        }
+    if (type_ids_[column_index] == +model::TypeId::kDouble) {
+        return dif_constraint.Contains(dif);
     }
-    return true;
+
+    return dif >= dif_constraint.lower_bound && dif <= dif_constraint.upper_bound;
+}
+
+// must be inline for optimization (gcc 11.4.0)
+inline bool Split::CheckDF(DF const& dif_func, std::pair<std::size_t, std::size_t> tuple_pair) {
+    return std::ranges::all_of(
+            std::views::iota(0U, num_columns_), [&](model::ColumnIndex column_index) {
+                return CheckDFConstraint(dif_func[column_index], column_index, tuple_pair);
+            });
 }
 
 bool Split::VerifyDD(DF const& lhs, DF const& rhs) {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(lhs, {i, j}) && !CheckDF(rhs, {i, j})) return false;
-        }
-    }
-    return true;
-}
-
-void Split::InsertDistance(model::ColumnIndex column_index, std::size_t first_index,
-                           std::size_t second_index, double& min_dif, double& max_dif) {
-    if (first_index < second_index) {
-        double const dif = CalculateDistance(column_index, {first_index, second_index});
-        max_dif = std::max(max_dif, dif);
-        min_dif = std::min(min_dif, dif);
-        distances_[column_index][first_index][second_index] = dif;
-    } else if (first_index == second_index) {
-        distances_[column_index][first_index][second_index] = 0;
-    } else {
-        distances_[column_index][first_index][second_index] =
-                distances_[column_index][second_index][first_index];
-    }
+    return std::ranges::all_of(tuple_pairs_, [this, &lhs, &rhs](auto const& pair) {
+        return !CheckDF(lhs, pair) || CheckDF(rhs, pair);
+    });
 }
 
 void Split::CalculateAllDistances() {
-    distances_ = std::vector<std::vector<std::vector<double>>>(
-            num_columns_,
-            std::vector<std::vector<double>>(num_rows_, std::vector<double>(num_rows_, 0)));
-    min_max_dif_ = std::vector<model::DFConstraint>(num_columns_, {0, 0});
-    type_ids_ = std::vector<model::TypeId>(num_columns_, model::TypeId::kUndefined);
+    plis_.resize(num_columns_);
+    distances_.reserve(num_columns_);
+    min_max_dif_.resize(num_columns_, {0, 0});
 
     for (model::ColumnIndex column_index = 0; column_index < num_columns_; column_index++) {
-        std::shared_ptr<model::PLI const> pli =
-                relation_->GetColumnData(column_index).GetPliOwnership();
-        std::deque<model::PLI::Cluster> const& index = pli->GetIndex();
-        std::shared_ptr<std::vector<int> const> probing_table = pli->CalculateAndGetProbingTable();
-        model::PLI::Cluster const& pt = *probing_table.get();
+        DistancePositionListIndex pli(typed_relation_->GetColumnData(column_index), num_rows_);
+        std::vector<ClusterInfo> const& clusters = pli.GetClusters();
+        std::size_t const num_clusters = clusters.size();
+        std::vector<std::vector<double>> cur_column_distances;
+        cur_column_distances.reserve(num_clusters);
 
         double max_dif = 0, min_dif = std::numeric_limits<double>::max();
-        for (std::size_t i = 0; i < index.size(); i++) {
-            for (std::size_t j = 0; j < index.size(); j++) {
-                std::size_t const first_index = index[i][0];
-                std::size_t const second_index = index[j][0];
-                if (first_index < num_rows_ && second_index < num_rows_) {
-                    InsertDistance(column_index, first_index, second_index, min_dif, max_dif);
-                }
+        for (ClusterIndex i = 0; i < num_clusters; i++) {
+            cur_column_distances.emplace_back();
+            cur_column_distances[i].reserve(num_clusters - i);
+            cur_column_distances[i].push_back(0);
+            for (ClusterIndex j = i + 1; j < num_clusters; j++) {
+                std::size_t const first_index = clusters[i].first_tuple_index;
+                std::size_t const second_index = clusters[j].first_tuple_index;
+                double const dif = CalculateDistance(column_index, {first_index, second_index});
+                max_dif = std::max(max_dif, dif);
+                min_dif = std::min(min_dif, dif);
+                cur_column_distances[i].push_back(dif);
             }
-        }
-        for (std::size_t i = 0; i < num_rows_; i++) {
-            for (std::size_t j = 0; j < num_rows_; j++) {
-                if (pt[i] != 0 && pt[j] != 0) {
-                    distances_[column_index][i][j] =
-                            distances_[column_index][index[pt[i] - 1][0]][index[pt[j] - 1][0]];
-                    if (i != j && pt[i] == pt[j]) {
-                        min_dif = 0;
-                    }
-                } else {
-                    InsertDistance(column_index, i, j, min_dif, max_dif);
-                }
-            }
+            if (clusters[i].size > 1) min_dif = 0;
         }
         min_max_dif_[column_index] = {min_dif, max_dif};
+        distances_.emplace_back(std::move(cur_column_distances));
+        plis_[column_index] = std::move(pli);
     }
 }
 
 bool Split::IsFeasible(DF const& d) {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            if (CheckDF(d, {i, j})) return true;
-        }
-    }
-    return false;
+    return std::ranges::any_of(tuple_pairs_,
+                               [this, &d](auto const& pair) { return CheckDF(d, pair); });
 }
 
 std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
@@ -398,7 +428,7 @@ std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
         // differential functions should be put in this exact order for further reducing
         for (int i = num_dfs_per_column_ - 1; i >= 0; i--) {
             if (min_max_dif_[index].IsWithinExclusive(i)) {
-                dfs.emplace_back(min_max_dif_[index].lower_bound, i);
+                dfs.push_back({min_max_dif_[index].lower_bound, static_cast<double>(i)});
             }
         }
         return dfs;
@@ -573,7 +603,7 @@ inline std::list<DD> Split::MergeReducedResults(std::list<DD> const& base_dds,
 
 std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const& search,
                                            unsigned& cnt) {
-    if (!search.size()) return {};
+    if (search.empty()) return {};
 
     DF const last_df = search.back();
 
@@ -586,7 +616,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
     auto const [prune, remainder] = NegativeSplit(search, last_df);
 
     std::list<DD> dds = NegativePruningReduce(rhs, prune, cnt);
-    if (!dds.size() && IsFeasible(last_df)) dds.emplace_back(last_df, rhs);
+    if (dds.empty() && IsFeasible(last_df)) dds.push_back({last_df, rhs});
     std::list<DD> const remaining_dds = NegativePruningReduce(rhs, remainder, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, remaining_dds);
@@ -597,7 +627,7 @@ std::list<DD> Split::NegativePruningReduce(DF const& rhs, std::vector<DF> const&
 
 std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& search,
                                          unsigned& cnt) {
-    if (!search.size()) return {};
+    if (search.empty()) return {};
 
     std::list<DD> dds;
     DF const first_df = search.front();
@@ -605,7 +635,7 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
 
     cnt++;
     if (VerifyDD(first_df, rhs)) {
-        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.push_back({first_df, rhs});
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
         std::list<DD> remaining_dds = HybridPruningReduce(rhs, remainder, cnt);
         dds.splice(dds.end(), remaining_dds);
@@ -629,23 +659,24 @@ std::list<DD> Split::HybridPruningReduce(DF const& rhs, std::vector<DF> const& s
     return dds;
 }
 
-std::list<DD> Split::InstanceExclusionReduce(
-        std::vector<std::pair<std::size_t, std::size_t>> const& tuple_pairs,
-        std::vector<DF> const& search, DF const& rhs, unsigned& cnt) {
-    if (!search.size()) return {};
+std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tuple_pair_indices,
+                                             std::vector<DF> const& search, DF const& rhs,
+                                             unsigned& cnt) {
+    if (search.empty()) return {};
 
     std::list<DD> dds;
     DF const first_df = search.front();
     DF const last_df = search.back();
-    std::vector<std::pair<std::size_t, std::size_t>> remaining_tuple_pairs;
+    std::vector<std::size_t> remaining_tuple_pair_indices;
 
     cnt++;
     bool last_dd_holds = true;
     bool no_pairs_left = true;
-    for (auto pair : tuple_pairs) {
+    for (auto index : tuple_pair_indices) {
+        auto const& pair = tuple_pairs_[index];
         if (!CheckDF(rhs, pair)) {
             if (CheckDF(first_df, pair)) {
-                remaining_tuple_pairs.push_back(pair);
+                remaining_tuple_pair_indices.push_back(index);
                 no_pairs_left = false;
             }
             if (last_dd_holds && CheckDF(last_df, pair)) last_dd_holds = false;
@@ -654,10 +685,11 @@ std::list<DD> Split::InstanceExclusionReduce(
     }
 
     if (no_pairs_left) {
-        if (IsFeasible(first_df)) dds.emplace_back(first_df, rhs);
+        if (IsFeasible(first_df)) dds.push_back({first_df, rhs});
         std::vector<DF> remainder = DoPositivePruning(search, first_df);
-        std::list<DD> remaining_dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
-        dds.splice(dds.end(), remaining_dds);
+        std::list<DD> remaining_dds =
+                InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
+        dds.splice(dds.end(), std::move(remaining_dds));
         return dds;
     }
 
@@ -665,27 +697,19 @@ std::list<DD> Split::InstanceExclusionReduce(
 
     if (!last_dd_holds) {
         std::vector<DF> remainder = DoNegativePruning(search, last_df);
-        return InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
+        return InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
     }
 
     auto const [prune, remainder] = PositiveSplit(search, first_df);
 
-    dds = InstanceExclusionReduce(tuple_pairs, remainder, rhs, cnt);
+    dds = InstanceExclusionReduce(tuple_pair_indices, remainder, rhs, cnt);
     std::list<DD> const pruning_dds =
-            InstanceExclusionReduce(remaining_tuple_pairs, prune, rhs, cnt);
+            InstanceExclusionReduce(remaining_tuple_pair_indices, prune, rhs, cnt);
 
     std::list<DD> merged_dds = MergeReducedResults(dds, pruning_dds);
-    dds.splice(dds.end(), merged_dds);
+    dds.splice(dds.end(), std::move(merged_dds));
 
     return dds;
-}
-
-void Split::CalculateTuplePairs() {
-    for (std::size_t i = 0; i < num_rows_; i++) {
-        for (std::size_t j = i + 1; j < num_rows_; j++) {
-            tuple_pairs_.push_back({i, j});
-        }
-    }
 }
 
 void Split::PrintResults() {
@@ -725,7 +749,7 @@ model::DDString Split::DDToDDString(DD const& dd) const {
 std::list<model::DDString> Split::GetDDStringList() const {
     std::list<model::DDString> dd_strings;
     for (auto const& result_dd : dd_collection_) {
-        dd_strings.emplace_back(DDToDDString(result_dd));
+        dd_strings.push_back(DDToDDString(result_dd));
     }
     return dd_strings;
 }

@@ -7,6 +7,7 @@
 #include "algorithms/fd/tane/enums.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
+#include "algorithms/nar/des/enums.h"
 #include "util/enum_to_available_values.h"
 
 namespace config::descriptions {
@@ -25,6 +26,9 @@ std::string const kDAfdErrorMeasureString =
 std::string const kDLevelDefinitionString =
         "MD lattice level definition to use\n" +
         util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
+std::string const kDDifferentialStrategyString =
+        "DES mutation strategy to use\n" +
+        util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
 }  // namespace details
 
 constexpr auto kDTable = "table processed by the algorithm";
@@ -37,6 +41,8 @@ constexpr auto kDEqualNulls = "specify whether two NULLs should be considered eq
 constexpr auto kDThreads =
         "number of threads to use. If 0, then as many threads are used as the "
         "hardware can handle concurrently.";
+constexpr auto kDCustomRandom =
+        "seed for the custom random generator. Used for consistency of results across platforms.";
 constexpr auto kDError = "error threshold value for Approximate FD algorithms";
 auto const kDPfdErrorMeasure = details::kDPfdErrorMeasureString.c_str();
 auto const kDAfdErrorMeasure = details::kDAfdErrorMeasureString.c_str();
@@ -51,6 +57,13 @@ constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[sing
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
+constexpr auto kDPopulationSize = "the number of individuals in the population at any given time";
+constexpr auto kDMaxFitnessEvaluations =
+        "the algorithm will be stopped after calculating the fitness "
+        "function this many times";
+constexpr auto kDDifferentialScale = "the magnitude of mutations";
+constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
+auto const kDDifferentialStrategy = details::kDDifferentialStrategyString.c_str();
 auto const kDMetric = details::kDMetricString.c_str();
 constexpr auto kDLhsIndices = "LHS column indices";
 constexpr auto kDRhsIndices = "RHS column indices";
@@ -162,4 +175,17 @@ constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
+constexpr auto kDShardLength =
+        "Number of rows each shard will cover when building PLI shards. Determines the "
+        "segmentation of rows for parallel processing in the FastADC algorithm";
+constexpr auto kDAllowCrossColumns =
+        "Specifies whether to allow the construction of Denial Constraints between different "
+        "attributes";
+constexpr auto kDMinimumSharedValue =
+        "Minimum threshold for the shared percentage of values between two columns";
+constexpr auto kDComparableThreshold =
+        "Threshold for the ratio of smaller to larger average values between two numeric columns";
+constexpr auto kDEvidenceThreshold =
+        "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
+        "considered approximate.";
 }  // namespace config::descriptions

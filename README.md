@@ -42,8 +42,11 @@ The currently supported data patterns are:
    - Exact unique column combination (discovery and validation)
    - Approximate unique column combination, with $g_1$ metric (discovery and validation)
 * Association rules (discovery)
+* Numerical association rules (discovery)
 * Matching dependencies (discovery)
-* Variable heterogeneous denial constraints (validation)
+* Denial constraints
+   - Exact denial constraints (discovery and validation)
+   - Approximate denial constraints, with $g_1$ metric (discovery)
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
@@ -219,16 +222,20 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Sebastian Kruse and Felix Naumann. 2018. Efficient discovery of approximate dependencies. Proc. VLDB Endow. 11, 7 (March 2018), 759–772.](https://www.vldb.org/pvldb/vol11/p759-kruse.pdf)
 * Association rules
    - [Charu C. Aggarwal, Jiawei Han. 2014. Frequent Pattern Mining. Springer Cham. pp 471.](https://link.springer.com/book/10.1007/978-3-319-07821-2)
+* Numerical association rules
+   - [Minakshi Kaushik, Rahul Sharma, Iztok Fister Jr., and Dirk Draheim. 2023. Numerical Association Rule Mining: A Systematic Literature Review. 1, 1 (July 2023), 50 pages.](https://arxiv.org/abs/2307.00662)
+   - [Fister, Iztok & Fister jr, Iztok. 2020. uARMSolver: A framework for Association Rule Mining. 10.48550/arXiv.2010.10884.](https://doi.org/10.48550/arXiv.2010.10884)
 * Matching dependencies
    - [Philipp Schirmer, Thorsten Papenbrock, Ioannis Koumarelas, and Felix Naumann. 2020. Efficient Discovery of Matching Dependencies. ACM Trans. Database Syst. 45, 3, Article 13 (September 2020), 33 pages. https://doi.org/10.1145/3392778](https://dl.acm.org/doi/10.1145/3392778)
 * Denial constraints
    - [X. Chu, I. F. Ilyas and P. Papotti. Holistic data cleaning: Putting violations into context. 2013. IEEE 29th International Conference on Data Engineering (ICDE), Brisbane, QLD, Australia, 2013, pp. 458-469,](https://cs.uwaterloo.ca/~ilyas/papers/XuICDE2013.pdf)
    - [Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia Floratou. 2024. Rapidash: Efficient Detection of Constraint Violations. Proc. VLDB Endow. 17, 8 (April 2024), 2009–2021.](https://arxiv.org/pdf/2309.12436)
+   - [Renjie Xiao, Zijing Tan, Haojin Wang, and Shuai Ma. 2022. Fast approximate denial constraint discovery. Proc. VLDB Endow. 16, 2 (October 2022), 269–281.](https://doi.org/10.14778/3565816.3565828)
 
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
 
-* Python >=3.7 
+* Python >=3.8
 
 To install Desbordante type:
 
@@ -236,34 +243,36 @@ To install Desbordante type:
 $ pip install desbordante
 ```
 
-However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) is supported. If the above does not work for you consider building from sources.
+However, as Desbordante core uses C++, additional requirements on the machine are imposed. Therefore this installation option may not work for everyone. Currently, only manylinux2014 (Ubuntu 20.04+, or any other linux distribution with gcc 10+) and macOS 11.0+ (arm64, x86_64) is supported. If the above does not work for you consider building from sources.
 
 ## Build instructions
 
 ### Ubuntu and macOS
-The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.7 (Apple Silicon).
+The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.7+ (Apple Silicon).
 ### Dependencies
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
-- GNU GCC, version 10+
-- CMake, version 3.13+
-- Boost library built with GCC, version 1.81.0+
+- GNU GCC, version 10+, LLVM Clang, version 16+, or Apple Clang, version 15+
+- CMake, version 3.15+
+- Boost library built with compiler you're going to use (GCC or Clang), version 1.85.0+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
 
-#### Ubuntu dependencies installation
+Instructions below are given for GCC (on Linux) and Apple Clang (on macOS).
+Instructions for other supported compilers can be found in [Desbordante wiki](https://github.com/Desbordante/desbordante-core/wiki/Building).
+
+#### Ubuntu dependencies installation (GCC)
 
 Run the following commands:
 ```sh 
-sudo apt install gcc g++ cmake libboost-all-dev git-lfs
-export CC=gcc
+sudo apt install g++ cmake libboost-all-dev git-lfs python3
 export CXX=g++
 ```
-The last 2 lines set gcc as CMake compiler in your terminal session.
+The last line sets g++ as CMake compiler in your terminal session.
 You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
-#### MacOS dependencies installation
+#### macOS dependencies installation (Apple Clang)
 
 Install Xcode Command Line Tools if you don't have them. Run:
 ```sh
@@ -271,43 +280,23 @@ xcode-select --install
 ```
 Follow the prompts to continue.
 
-To install GCC and CMake on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
+To install CMake and Boost on macOS we recommend to use [Homebrew](https://brew.sh/) package manager. With Homebrew
 installed, run the following commands:
 ```sh
-brew install gcc@14 cmake
+brew install cmake boost
 ```
 After installation, check `cmake --version`. If command is not found, then you need to add to environment path to
 homebrew installed packages. To do this open `~/.zprofile` (for Zsh) or
 `~/.bash_profile` (for Bash) and add to the end of the file the output of `brew shellenv`.
 After that, restart the terminal and check the version of CMake again, now it should be displayed.
 
-Then you need to install Boost library built with GCC. Please avoid using Homebrew for this, as the Boost version provided by Homebrew
-is built with Clang, which has a different ABI. Instead, download the latest version of Boost from the [official website](https://www.boost.org/users/download/) and unpack the archive to the `/usr/local/` directory or another directory of your choice:
+Run the following commands:
 ```sh
-cd /usr/local/
-curl https://archives.boost.io/release/1.86.0/source/boost_1_86_0.tar.bz2 --output "boost_1_86_0.tar.bz2"
-tar xvjf boost_1_86_0.tar.bz2
-rm boost_1_86_0.tar.bz2
-cd boost_1_86_0
+export CXX=clang++
+export BOOST_ROOT=$(brew --prefix boost)
 ```
-Navigate to the unpacked Boost directory in the terminal and run the following commands:
-```sh
-./bootstrap.sh 
-echo "using darwin : : g++-14 ;" > user-config.jam
-./b2 install --user-config=user-config.jam --layout=versioned
-export BOOST_ROOT=$(pwd) # export Boost_ROOT=$(pwd) for CMake 3.26 and below.
-``` 
-You can also add the last export with current path to `~/.zprofile` or `~/.bash_profile` to set this boost path by default.
-
-Before building the project you must set locally or in the above-mentioned dotfiles the following CMake environment variables:
-```sh
-export CC=gcc-14
-export CXX=g++-14
-export SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX14.sdk/
-```
-The first two lines set GCC as the default compiler in CMake. The last export is also necessary due to issues with GCC 14 and
-the last MacOSX15.0.sdk used by CMake by default, you can read more about this [here](https://gist.github.com/scivision/d69faebbc56da9714798087b56de925a)
-and [here](https://github.com/iains/gcc-14-branch/issues/11).
+These commands set Apple Clang and Homebrew Boost as default in CMake in your terminal session.
+You can also add them to the end of `~/.profile` to set this by default in all sessions.
 
 ### Building the project
 #### Building the Python module using pip

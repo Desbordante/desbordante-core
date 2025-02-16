@@ -171,6 +171,7 @@ private:
     Column const* column_;
     std::vector<std::string> unparsed_;
     bool is_null_equal_null_;
+    bool treat_mixed_as_string_;
 
     inline static std::vector<TypeId> const kAllCandidateTypes = {
             +TypeId::kDate, +TypeId::kInt, +TypeId::kBigInt, +TypeId::kDouble, +TypeId::kString};
@@ -251,13 +252,17 @@ private:
     TypedColumnData CreateFrom();
 
     TypedColumnDataFactory(Column const* col, std::vector<std::string> unparsed,
-                           bool is_null_equal_null)
-        : column_(col), unparsed_(std::move(unparsed)), is_null_equal_null_(is_null_equal_null) {}
+                           bool is_null_equal_null, bool treat_mixed_as_string)
+        : column_(col),
+          unparsed_(std::move(unparsed)),
+          is_null_equal_null_(is_null_equal_null),
+          treat_mixed_as_string_(treat_mixed_as_string) {}
 
 public:
     static TypedColumnData CreateFrom(Column const* col, std::vector<std::string> unparsed,
-                                      bool is_null_equal_null) {
-        TypedColumnDataFactory f(col, std::move(unparsed), is_null_equal_null);
+                                      bool is_null_equal_null, bool treat_mixed_as_string) {
+        TypedColumnDataFactory f(col, std::move(unparsed), is_null_equal_null,
+                                 treat_mixed_as_string);
         return f.CreateFrom();
     }
 };

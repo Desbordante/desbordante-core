@@ -14,6 +14,7 @@
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
+#include "config/custom_random_seed/type.h"
 #include "config/error_measure/type.h"
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
@@ -122,6 +123,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<int>,
         kNormalConvPair<size_t>,
         kNormalConvPair<algos::hymd::HyMD::ColumnMatches>,
+        kNormalConvPair<std::optional<int>>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
