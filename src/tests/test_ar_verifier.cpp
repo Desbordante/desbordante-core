@@ -57,7 +57,7 @@ INSTANTIATE_TEST_SUITE_P(
      ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"MILK"}, 0.05, 0.2, algos::InputFormat::tabular, 0, 0, 1),
      ARVerifyingParams(kRulesKaggleRows, {"BREAD"}, {"TEA"}, 0.2, 0.1, algos::InputFormat::tabular, 0, 0, 1),
      ARVerifyingParams(kRulesKaggleRows, {"MAGGI"}, {"BISCUIT"}, 0.1, 0.05, algos::InputFormat::tabular, 0, 0, 1),
-     ARVerifyingParams(kRulesKaggleRows, {"COFFEE"}, {"BISCUIT"}, 0.1, 0.3, algos::InputFormat::tabular, 0, 0, 1),
+     ARVerifyingParams(kRulesKaggleRows, {"COFFEE"}, {"BISCUIT"}, 0.1, 0.25, algos::InputFormat::tabular, 0, 0, 1),
      ARVerifyingParams(kRulesKaggleRows, {"SUGER"}, {"CORNFLAKES"}, 0.05, 0.1, algos::InputFormat::tabular, 0, 0, 1)
   ));
 // clang-format on
