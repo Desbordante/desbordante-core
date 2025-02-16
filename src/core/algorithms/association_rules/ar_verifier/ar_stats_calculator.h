@@ -22,15 +22,14 @@ private:
 
     static double CalculateTransactionCoverage(std::vector<unsigned> const& transaction_indices,
                                                std::vector<unsigned> const& rule_part);
-    static ClusterPriority CalculateClusterPriority(
-            std::pair<double, double> const& coverage);
+    static ClusterPriority CalculateClusterPriority(std::pair<double, double> const& coverage);
     void CalculateRuleCoverageCoefficients();
     void CalculateSupport();
     void CalculateConfidence();
 
 public:
     ARStatsCalculator(std::shared_ptr<model::TransactionalData>&& data, model::ArIDs&& rule)
-        : data_(std::move(data)), rule_(std::move(rule)){};
+        : data_(std::move(data)), rule_(std::move(rule)) {};
 
     ARStatsCalculator() = default;
 
@@ -57,7 +56,7 @@ public:
     }
 
     double GetConfidence() const {
-        return rule_.confidence;
+        return confidence_;
     }
 };
 
