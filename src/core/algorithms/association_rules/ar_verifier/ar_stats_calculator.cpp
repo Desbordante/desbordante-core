@@ -65,7 +65,7 @@ void ARStatsCalculator::CalculateSupport() {
 }
 
 void ARStatsCalculator::CalculateConfidence() {
-    double lhs_support =
+    double const lhs_support =
             std::ranges::count_if(rule_coverage_coefficients_,
                                   [&](auto const& pair) { return pair.second.first == 1.0; }) /
             static_cast<double>(data_->GetTransactions().size());
@@ -86,7 +86,7 @@ void ARStatsCalculator::CalculateStatistics() {
     CalculateConfidence();
     for (auto const& [transaction_id, coefficients] : rule_coverage_coefficients_) {
         ClusterPriority priority = CalculateClusterPriority(coefficients);
-         if (priority != static_cast<ClusterPriority>(ClusterPriority::full_left_full_right)) {
+        if (priority != static_cast<ClusterPriority>(ClusterPriority::full_left_full_right)) {
             clusters_violating_ar_[priority._to_string()].push_back(transaction_id);
         }
     }

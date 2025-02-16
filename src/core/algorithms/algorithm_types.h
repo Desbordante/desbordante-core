@@ -11,7 +11,8 @@ using AlgorithmTypes =
                    Apriori, metric::MetricVerifier, DataStats, fd_verifier::FDVerifier, HyUCC,
                    PyroUCC, HPIValid, cfd::FDFirstAlgorithm, ACAlgorithm, UCCVerifier, Faida,
                    Spider, Mind, INDVerifier, Fastod, GfdValidation, EGfdValidation,
-                   NaiveGfdValidation, order::Order, dd::Split, Cords, hymd::HyMD, PFDVerifier, ar_verifier::ARVerifier>;
+                   NaiveGfdValidation, order::Order, dd::Split, Cords, hymd::HyMD, PFDVerifier,
+                   ar_verifier::ARVerifier>;
 
 // clang-format off
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
