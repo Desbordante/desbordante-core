@@ -25,14 +25,6 @@ namespace algos::dd {
 
         void RegisterOptions();
 
-        double GetError() const;
-
-        std::size_t GetNumErrorPairs() const;
-
-        void CalculateStatistics(const std::vector<std::pair<int, int> >& lhs);
-
-        bool DDHolds() const;
-
         void VisualizeHighlights();
 
         void PrintStatistics();
@@ -50,8 +42,6 @@ namespace algos::dd {
             dd_.right.clear();
         }
 
-        void SetLimits();
-
     protected:
         void LoadDataInternal() override;
 
@@ -61,7 +51,9 @@ namespace algos::dd {
 
     public:
         DDVerifier();
-
+        double GetError() const;
+        std::size_t GetNumErrorPairs() const;
+        bool DDHolds() const;
         void VerifyDD();
     };
 }
