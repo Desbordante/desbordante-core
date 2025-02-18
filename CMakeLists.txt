@@ -8,6 +8,11 @@ if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif()
 
+if (POLICY CMP0175)
+    # Don't allow invalid arguments of `add_custom_command()`
+    cmake_policy(SET CMP0175 NEW)
+endif()
+
 project(Desbordante CXX)
 
 option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
