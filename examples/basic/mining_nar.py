@@ -59,7 +59,7 @@ if __name__ == '__main__':
     print("Fragment of the dog_breeds.csv table:")
     print(df)
     print("\nA fragment of the table is presented above. In total, each dog breed has"
-          " 13 attributes.")
+          " 14 attributes.")
     print("Now, let's mine some NARs. We will use a minimum support of 0.1 and a minimum "
           "confidence of 0.7. We will also use a population size of 500 and "
           "max_fitness_evaluations of 700. Larger values for max_fitness_evaluations "
@@ -72,15 +72,18 @@ if __name__ == '__main__':
           "2) to ensure the repeatability of this example (i.e., that NAR found "
           "stays the same over different runs) \n"
           "Note that if you do not set the seed parameter, the default value would be used.")
-    algo.execute(minconf=0.7, minsup=0.1, population_size=500, seed=2189,
+    algo.execute(minconf=0.7, minsup=0.1, population_size=500, seed=5854,
                  max_fitness_evaluations=700)
-    example_nar = algo.get_nars()[2]
+    example_nar = algo.get_nars()[1]
     discovered_nar_count = len(algo.get_nars())
+    confidence_percent = round(example_nar.confidence * 100)
+    support_percent = round(example_nar.support * 100)
     print_10_nars([example_nar], df.columns)
+    
     print(f"\nThe above NAR is one of the {discovered_nar_count} rules discovered"
-          " with these settings. The NAR states that about 74% of all dog breeds of type "
-          "'Hound' have an intelligence rating between 6 and 7 out of 10 and have a "
-          "friendliness rating between 5 and 8 out of 10. This suggests "
+          " with these settings. The NAR states that about {confidence_percent}%"
+          " of all dog breeds of type 'Hound' have an intelligence rating between"
+          " 5 and 8 out of 10 and have a friendliness rating between 5 and 9 out of 10. This suggests "
           "that, in general, hounds are intelligent dogs and are mostly friendly. Let's see "
           "if that is true.\n")
 
@@ -106,9 +109,9 @@ if __name__ == '__main__':
         else:
             print(hound_row_string)
     
-    print("\nAs observed, only 7 rows with 'Type' equal to 'Hound' fall outside "
-          "either the intelligence or friendliness bounds. These seven records account for "
-          "the (27-7)/27 ~= 74% confidence level of this rule.\n")
+    print("\nAs observed, only 1 row with 'Type' equal to 'Hound' falls outside "
+          "either the intelligence or friendliness bounds. This record accounts for "
+          "the (27-1)/27 ~= {confidence_percent}% confidence level of this rule.\n")
     print("Let's try again, but this time with different settings. This time, minimum support "
           "will have a more lenient value of 0.05 and the population size will be 700. "
           "This will help discover more NARs. The value of max_fitness_evaluations "
