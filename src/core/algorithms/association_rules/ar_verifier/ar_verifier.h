@@ -53,6 +53,10 @@ public:
         return stats_calculator_.GetNumClustersViolatingAR();
     }
 
+    size_t GetNumTransactionsSatisfyingAR() const {
+        return stats_calculator_.GetNumTransactionsSatisfyingAR();
+    }
+
     /* Returns the total number of transactions that violate the AR */
     size_t GetNumTransactionsViolatingAR() const {
         return stats_calculator_.GetNumTransactionsViolatingAR();

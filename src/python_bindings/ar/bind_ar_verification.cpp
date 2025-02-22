@@ -19,6 +19,7 @@ void BindArVerification(py::module_& main_module) {
             .def("ar_holds", &ARVerifier::ARHolds)
             .def("get_num_clusters_violating_ar", &ARVerifier::GetNumClustersViolatingAR)
             .def("get_num_transactions_violating_ar", &ARVerifier::GetNumTransactionsViolatingAR)
+            .def("get_num_transactions_satisfying_ar", &ARVerifier::GetNumTransactionsSatisfyingAR)
             .def("get_clusters_violating_ar", &ARVerifier::GetClustersViolatingAR)
             .def("get_real_support", &ARVerifier::GetRealSupport)
             .def("get_real_confidence", &ARVerifier::GetRealConfidence);
