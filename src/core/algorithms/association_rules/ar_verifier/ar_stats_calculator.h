@@ -46,6 +46,10 @@ public:
         return num_transactions_violating_ar_;
     }
 
+    size_t GetNumTransactionsSatisfyingAR() const {
+        return data_->GetNumTransactions() - num_transactions_violating_ar_;
+    }
+
     /* Returns clusters where the AR is violated */
     std::unordered_map<std::string, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return clusters_violating_ar_;
