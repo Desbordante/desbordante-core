@@ -81,7 +81,7 @@ if __name__ == '__main__':
     print_10_nars([example_nar], df.columns)
     
     print(f"\nThe above NAR is one of the {discovered_nar_count} rules discovered"
-          " with these settings. The NAR states that about {confidence_percent}%"
+          f" with these settings. The NAR states that about {confidence_percent}%"
           " of all dog breeds of type 'Hound' have an intelligence rating between"
           " 5 and 8 out of 10 and have a friendliness rating between 5 and 9 out of 10. This suggests "
           "that, in general, hounds are intelligent dogs and are mostly friendly. Let's see "
@@ -111,7 +111,7 @@ if __name__ == '__main__':
     
     print("\nAs observed, only 1 row with 'Type' equal to 'Hound' falls outside "
           "either the intelligence or friendliness bounds. This record accounts for "
-          "the (27-1)/27 ~= {confidence_percent}% confidence level of this rule.\n")
+          f"the (27-1)/27 ~= {confidence_percent}% confidence level of this rule.\n")
     print("Let's try again, but this time with different settings. This time, minimum support "
           "will have a more lenient value of 0.05 and the population size will be 700. "
           "This will help discover more NARs. The value of max_fitness_evaluations "
