@@ -1,17 +1,23 @@
 #pragma once
 
-#include <list>
-#include <memory>
-#include <set>
-#include <utility>
+#include <functional>     // for function
+#include <list>           // for list
+#include <memory>         // for unique_ptr, make_unique, enabl...
+#include <optional>       // for optional
+#include <set>            // for set
+#include <string>         // for string
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include "dependency_candidate.h"
-#include "dependency_strategy.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
-#include "model/table/vertical_map.h"
-#include "profiling_context.h"
-#include "vertical_info.h"
+#include "dependency_candidate.h"      // for DependencyCandidate
+#include "dependency_strategy.h"       // for DependencyStrategy
+#include "model/table/vertical.h"      // for Vertical
+#include "model/table/vertical_map.h"  // for VerticalMap
+
+class ProfilingContext;
+class RelationalSchema;
+class VerticalInfo;
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
 private:

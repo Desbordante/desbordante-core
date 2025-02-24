@@ -1,9 +1,12 @@
 #include "algorithms/md/hymd/indexes/dictionary_compressor.h"
 
-#include <cstddef>
+#include <cstddef>  // for size_t
+#include <utility>  // for move
 
-#include "model/index.h"
-#include "util/desbordante_assume.h"
+#include "md/hymd/compressed_record.h"                  // for CompressedRecord
+#include "md/hymd/indexes/keyed_position_list_index.h"  // for KeyedPosition...
+#include "model/index.h"                                // for Index
+#include "util/desbordante_assume.h"                    // for DESBORDANTE_A...
 
 namespace algos::hymd::indexes {
 

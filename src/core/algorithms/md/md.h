@@ -1,13 +1,23 @@
 #pragma once
 
-#include <memory>
+#include <memory>    // for shared_ptr
+#include <optional>  // for optional
+#include <string>    // for string
+#include <utility>   // for pair
+#include <vector>    // for vector
 
-#include "algorithms/md/column_match.h"
-#include "algorithms/md/column_similarity_classifier.h"
-#include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/lhs_column_similarity_classifier.h"
-#include "model/index.h"
-#include "model/table/relational_schema.h"
+#include "algorithms/md/column_similarity_classifier.h"      // for ColumnSi...
+#include "algorithms/md/decision_boundary.h"                 // for Decision...
+#include "algorithms/md/lhs_column_similarity_classifier.h"  // for LhsColum...
+#include "model/index.h"                                     // for Index
+
+class RelationalSchema;
+
+namespace model {
+namespace md {
+struct ColumnMatch;
+}
+}  // namespace model
 
 namespace model {
 

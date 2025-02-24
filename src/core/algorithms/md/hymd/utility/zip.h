@@ -62,7 +62,7 @@ public:
 };
 
 template <typename Range1, typename Range2, typename... Ranges>
-Zip(Range1&& r1, Range2&& r2,
-    Ranges&&... rs) -> Zip<decltype(r1.begin()), decltype(r2.begin()), decltype(rs.begin())...>;
+Zip(Range1&& r1, Range2&& r2, Ranges&&... rs)
+        -> Zip<decltype(r1.begin()), decltype(r2.begin()), decltype(rs.begin())...>;
 
 }  // namespace algos::hymd::utility

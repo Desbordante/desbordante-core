@@ -1,6 +1,10 @@
 #include "partition_util.h"
 
+#include <algorithm>  // for max_element
 #include <numeric>
+#include <utility>  // for pair
+
+#include "cfd/model/cfd_types.h"  // for SimpleTIdList, PartitionList, Rhses...
 
 // see algorithms/cfd/LICENSE
 

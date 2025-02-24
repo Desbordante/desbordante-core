@@ -1,9 +1,13 @@
 #pragma once
 
-#include "algorithms/algorithm.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "nar.h"
+#include <memory>       // for unique_ptr
+#include <string_view>  // for string_view
+#include <vector>       // for vector
+
+#include "algorithms/algorithm.h"                           // for Algorithm
+#include "config/tabular_data/input_table_type.h"           // for InputTable
+#include "model/table/column_layout_typed_relation_data.h"  // for ColumnLay...
+#include "nar.h"                                            // for NAR
 
 namespace algos {
 

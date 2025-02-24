@@ -1,18 +1,28 @@
-#include <string>
-#include <vector>
+#include <list>      // for list, _Li...
+#include <memory>    // for unique_ptr
+#include <stddef.h>  // for size_t
+#include <string>    // for hash, string
+#include <utility>   // for pair
+#include <vector>    // for vector
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for ASSERT_EQ
 
-#include "algo_factory.h"
-#include "algorithms/fd/sfd/cords.h"
-#include "algorithms/fd/sfd/frequency_handler.h"
-#include "algorithms/fd/sfd/sample.h"
-#include "all_csv_configs.h"
-#include "config/equal_nulls/option.h"
-#include "config/max_lhs/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "algo_factory.h"                                   // for CreateAnd...
+#include "algorithms/fd/sfd/cords.h"                        // for Cords
+#include "algorithms/fd/sfd/frequency_handler.h"            // for Frequency...
+#include "algorithms/fd/sfd/sample.h"                       // for Sample
+#include "all_csv_configs.h"                                // for kIris
+#include "config/max_lhs/type.h"                            // for MaxLhsType
+#include "config/names.h"                                   // for kCsvConfig
+#include "csv_config_util.h"                                // for MakeInput...
+#include "fd/fd.h"                                          // for FD
+#include "fd/sfd/correlation.h"                             // for Correlation
+#include "model/table/column_layout_typed_relation_data.h"  // for ColumnLay...
+#include "table/column.h"                                   // for Column
+#include "table/column_index.h"                             // for ColumnIndex
+#include "table/typed_column_data.h"                        // for TypedColu...
+
+struct CSVConfig;
 
 namespace {
 void AssertVectors(std::vector<Column> const& expected,

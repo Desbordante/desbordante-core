@@ -1,11 +1,22 @@
 #pragma once
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "algorithms/fd/tane/model/lattice_level.h"
-#include "config/error/type.h"
-#include "model/table/column_data.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
+#include <optional>  // for optional, nullopt
+
+#include "algorithms/fd/pli_based_fd_algorithm.h"  // for PliBasedFDAlgorithm
+#include "config/error/type.h"                     // for ErrorType
+
+class Column;
+class ColumnData;
+class ColumnLayoutRelationData;
+class Vertical;
+
+namespace model {
+class LatticeLevel;
+}
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace algos::tane {
 

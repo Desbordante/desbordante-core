@@ -1,10 +1,17 @@
 #include "config/indices/option.h"
 
-#include <algorithm>
+#include <algorithm>    // for max_element, sort, unique
+#include <assert.h>     // for assert
+#include <type_traits>  // for remove_reference, is_unsi...
+#include <utility>      // for move
+#include <variant>      // for variant
+#include <vector>       // for vector
 
-#include "config/exceptions.h"
-#include "config/indices/validate_index.h"
+#include "common_option.h"                  // for CommonOption
+#include "config/exceptions.h"              // for ConfigurationError
+#include "config/indices/validate_index.h"  // for ValidateIndex
 #include "config/names_and_descriptions.h"
+#include "indices/type.h"  // for IndicesType, IndexType
 
 namespace config {
 

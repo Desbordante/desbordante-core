@@ -1,9 +1,12 @@
 #pragma once
 
-#include <map>
-#include <vector>
+#include <map>     // for map
+#include <memory>  // for unique_ptr
+#include <vector>  // for vector
 
-#include "lattice_vertex.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "lattice_vertex.h"  // for LatticeVertex
 
 namespace model {
 

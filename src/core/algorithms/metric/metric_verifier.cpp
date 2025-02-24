@@ -1,21 +1,48 @@
 #include "algorithms/metric/metric_verifier.h"
 
-#include <algorithm>
-#include <cassert>
-#include <chrono>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <utility>
+#include <algorithm>    // for all_of
+#include <cassert>      // for assert
+#include <deque>        // for _Deque_iterator
+#include <format>       // for vector
+#include <functional>   // for function
+#include <iterator>     // for next
+#include <memory>       // for shared_ptr, all...
+#include <stdexcept>    // for runtime_error
+#include <string>       // for operator+, char...
+#include <string_view>  // for basic_string_view
+#include <utility>      // for move, pair
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CDEBUG
 
-#include "config/equal_nulls/option.h"
-#include "config/exceptions.h"
-#include "config/indices/option.h"
+#include "algorithm.h"                  // for Algorithm
+#include "builtin.h"                    // for TypeId, operator+
+#include "common_option.h"              // for CommonOption
+#include "config/equal_nulls/option.h"  // for kEqualNullsOpt
+#include "config/exceptions.h"          // for ConfigurationError
+#include "config/indices/option.h"      // for IndicesOption
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include "config/option_using.h"                      // for DESBORDANTE_OPT...
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "convex_hull.h"                              // for CalculateConvex...
+#include "indices/type.h"                             // for IndicesType
+#include "metric/aliases.h"                           // for DistanceFunction
+#include "metric/enums.h"                             // for Metric, MetricAlgo
+#include "metric/highlight.h"                         // for Highlight
+#include "metric/highlight_calculator.h"              // for HighlightCalcul...
+#include "metric/points.h"                            // for IndexedPoint
+#include "metric/points_calculator.h"                 // for PointsCalculator
+#include "numeric_type.h"                             // for INumericType
+#include "option.h"                                   // for Option
+#include "qgram_vector.h"                             // for QGramVector
+#include "string_type.h"                              // for StringType
+#include "table/column_data.h"                        // for ColumnData
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/idataset_stream.h"                    // for IDatasetStream
+#include "table/position_list_index.h"                // for PLI, PositionLi...
+#include "table/relational_schema.h"                  // for RelationalSchema
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
 
 namespace algos::metric {
 

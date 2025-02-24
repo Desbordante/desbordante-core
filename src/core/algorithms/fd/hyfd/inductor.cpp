@@ -1,6 +1,9 @@
 #include "inductor.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include <vector>  // for vector
+
+#include "fd/hyfd/model/fd_tree.h"      // for FDTree
+#include "fd/hyfd/model/non_fd_list.h"  // for NonFDList
 
 namespace algos::hyfd {
 

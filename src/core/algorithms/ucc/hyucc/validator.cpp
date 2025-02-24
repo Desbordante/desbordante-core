@@ -1,13 +1,24 @@
 #include "validator.h"
 
-#include <future>
+#include <cassert>   // for assert
+#include <deque>     // for _Deque_iterator
+#include <future>    // for future, packaged_...
+#include <memory>    // for __shared_ptr_access
+#include <new>       // for operator new
+#include <stddef.h>  // for size_t
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
+#include <boost/asio/post.hpp>                      // for post
+#include <boost/asio/thread_pool.hpp>               // for thread_pool
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/unordered/detail/foa/table.hpp>     // for table_iterator
 
-#include "fd/hycommon/efficiency_threshold.h"
-#include "fd/hycommon/validator_helpers.h"
-#include "ucc/hyucc/model/ucc_tree_vertex.h"
+#include "bitset_utils.h"                      // for BitsetToIndices
+#include "fd/hycommon/efficiency_threshold.h"  // for kEfficiencyThreshold
+#include "fd/hycommon/validator_helpers.h"     // for BuildClustersIden...
+#include "table/position_list_index.h"         // for PLI, PositionList...
+#include "ucc/hyucc/model/ucc_tree.h"          // for UCCTree
+#include "ucc/hyucc/model/ucc_tree_vertex.h"   // for LhsPair, UCCTreeV...
+#include "ucc/raw_ucc.h"                       // for RawUCC
 
 namespace {
 

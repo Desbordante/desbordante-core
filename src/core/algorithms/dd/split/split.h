@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <filesystem>
 #include <list>
 #include <memory>
 #include <utility>
@@ -13,7 +12,6 @@
 #include "config/tabular_data/input_table_type.h"
 #include "enums.h"
 #include "model/table/column_index.h"
-#include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/builtin.h"
 

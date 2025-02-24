@@ -1,20 +1,28 @@
 #include "algorithms/ucc/hpivalid/tree_search.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <deque>
-#include <limits>
-#include <random>
-#include <stack>
-#include <tuple>
-#include <utility>
-#include <vector>
+#include <algorithm>         // for sort
+#include <cmath>             // for pow, round
+#include <cstddef>           // for size_t
+#include <deque>             // for deque, _Deque_...
+#include <initializer_list>  // for initializer_list
+#include <limits>            // for numeric_limits
+#include <random>            // for uniform_int_di...
+#include <stack>             // for stack
+#include <tuple>             // for tuple, get
+#include <utility>           // for pair, move
+#include <vector>            // for vector, allocator
 
-#include <easylogging++.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
+#include <easylogging++.h>                          // for Writer, CDEBUG
 
-#include "algorithms/ucc/hpivalid/config.h"
-#include "algorithms/ucc/hpivalid/pli_table.h"
-#include "algorithms/ucc/hpivalid/result_collector.h"
+#include "algorithms/ucc/hpivalid/config.h"            // for Config
+#include "algorithms/ucc/hpivalid/pli_table.h"         // for PLITable, kSiz...
+#include "algorithms/ucc/hpivalid/result_collector.h"  // for ResultCollector
+#include "table/column_index.h"                        // for ColumnIndex
+#include "table/position_list_index.h"                 // for PLI
+#include "ucc/hpivalid/enums.h"                        // for TimerName
+#include "ucc/hpivalid/hypergraph.h"                   // for Hypergraph, Edge
 
 // see algorithms/ucc/hpivalid/LICENSE
 

@@ -1,14 +1,32 @@
 #include "algorithms/statistics/data_stats.h"
 
-#include <set>
+#include <algorithm>      // for sort, nth_element
+#include <cctype>         // for isalpha, islower
+#include <iterator>       // for istream_iterator
+#include <limits>         // for numeric_limits
+#include <memory>         // for shared_ptr, __sh...
+#include <new>            // for operator new
+#include <set>            // for allocator, set
+#include <sstream>        // for basic_ostream
+#include <string_view>    // for basic_string_view
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <boost/thread.hpp>
+#include <boost/asio/post.hpp>                     // for post
+#include <boost/asio/thread_pool.hpp>              // for thread_pool
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
+#include "common_option.h"                           // for CommonOption
+#include "config/equal_nulls/option.h"               // for kEqualNullsOpt
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
+#include "config/thread_number/option.h"             // for kThreadNumberOpt
+#include "double_type.h"                             // for DoubleType
+#include "int_type.h"                                // for IntType
+#include "mixed_type.h"                              // for MixedType
+#include "numeric_type.h"                            // for INumericType
+#include "statistics/statistic.h"                    // for ColumnStats, Sta...
+#include "string_type.h"                             // for StringType
+#include "type.h"                                    // for Type
 
 namespace algos {
 

@@ -1,11 +1,13 @@
 #include "algorithms/ucc/hpivalid/result_collector.h"
 
-#include <chrono>
-#include <sstream>
-#include <string>
-#include <vector>
+#include <sstream>  // for basic_stringstream, basic_ostream
+#include <string>   // for char_traits, allocator, basic_s...
+#include <vector>   // for vector
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CDEBUG, LOG
+
+#include "ucc/hpivalid/enums.h"       // for TimerName
+#include "ucc/hpivalid/hypergraph.h"  // for Edge, Hypergraph
 
 // see algorithms/ucc/hpivalid/LICENSE
 

@@ -1,6 +1,19 @@
 #include "aid.h"
 
+#include <algorithm>  // for sort
+#include <stdexcept>  // for runtime_error
+#include <string>     // for string, hash
+
+#include <boost/move/utility_core.hpp>             // for move
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"  // for CommonOption
 #include "config/tabular_data/input_table/option.h"
+#include "fd/aidfd/search_tree.h"     // for SearchTree
+#include "table/column.h"             // for Column
+#include "table/idataset_stream.h"    // for IDatasetStream
+#include "table/relational_schema.h"  // for RelationalSchema
+#include "table/vertical.h"           // for Vertical
 
 namespace algos {
 
