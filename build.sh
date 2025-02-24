@@ -121,7 +121,5 @@ if [[ -n $SANITIZER ]]; then
 fi
 
 cd ..
-mkdir -p build
-cd build
 rm -f CMakeCache.txt
-cmake $PREFIX .. && make $JOBS_OPTION
+cmake -S . -B build $PREFIX -G Ninja && cmake --build build
