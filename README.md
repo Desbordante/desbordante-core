@@ -2,7 +2,7 @@
 [![Downloads](https://static.pepy.tech/badge/desbordante/month)](https://pepy.tech/project/desbordante)
 
 <p>
-   <img src="https://github.com/Mstrutov/Desbordante/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
+   <img src="https://github.com/Desbordante/desbordante-core/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
 </p>
 
 # General
@@ -304,9 +304,9 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 Clone the repository, change the current directory to the project directory and run the following commands:
 
 ```bash
-./build.sh
-python3 -m venv venv
-source venv/bin/activate
+./build.sh --deps-only
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install .
 ```
 
@@ -329,7 +329,7 @@ The Python module can be built by providing the `--pybind` switch:
 
 See `./build.sh --help` for more available options.
 
-The `./build.sh` script generates the following file structure in `/path/to/Desbordante/build/target`:
+The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
@@ -370,7 +370,7 @@ Error downloading object: datasets/datasets.zip (2085458): Smudge error: Error d
 ```
 delete the already cloned version, set `GIT_LFS_SKIP_SMUDGE=1` environment variable and clone the repo again:
 ```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone git@github.com:Mstrutov/Desbordante.git
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Desbordante/desbordante-core.git
 ```
 
 ### No type hints in IDE

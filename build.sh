@@ -9,10 +9,10 @@ Usage: ./build.sh [options]
 
 Possible options:
   -h,         --help                  Display help
+              --deps-only             Install dependencies only (don't build)
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
   -u,         --no-unpack             Don't unpack datasets
-  -j[N],      --jobs[=N]              Allow N jobs at once (default [=1])
   -d,         --debug                 Set debug build type
   -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
                                       Possible values of S: ADDRESS, UB.
@@ -26,6 +26,9 @@ EOF
 for i in "$@"
     do
     case $i in
+        --deps-only) # Install dependencies only (don't build)
+            DEPS_ONLY=true
+            ;;
         -p|--pybind) # Compile python bindings
             PYBIND=true
             ;;
@@ -35,13 +38,10 @@ for i in "$@"
         -u|--no-unpack) # Don't unpack datasets
             NO_UNPACK=true
             ;;
-        -j*|--jobs=*) # Allow N jobs at once
-            JOBS_OPTION=$i
-            ;;
         -d|--debug) # Set debug build type
             DEBUG_MODE=true
             ;;
-        # It's a nightmare, we should use getopts for args parsing or even use something else
+        # It is a nightmare, we should use getopts for args parsing or even use something else
         # instead of bash
         --sanitizer=*) # Build with sanitizer S, long option
             SANITIZER="${i#*=}"
@@ -90,6 +90,10 @@ else
   if [[ ! -d "googletest" ]] ; then
     git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
   fi
+fi
+
+if [[ $DEPS_ONLY == true ]]; then
+  exit 0
 fi
 
 if [[ $NO_UNPACK == true ]]; then

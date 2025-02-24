@@ -1,5 +1,5 @@
 <p>
-   <img src="https://github.com/Mstrutov/Desbordante/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
+   <img src="https://github.com/Desbordante/desbordante-core/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
 </p>
 
 ---
@@ -250,9 +250,9 @@ Install all dependencies listed in [README.md](https://github.com/Desbordante/de
 Then, in the Desbordante directory (the same one that contains this file), execute:
 
 ```bash
-./build.sh
-python3 -m venv venv
-source venv/bin/activate
+./build.sh --deps-only
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install .
 ```
 
