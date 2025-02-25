@@ -208,7 +208,12 @@ int CFDRelationData::GetAttr(std::string const& s) const {
 }
 
 int CFDRelationData::GetItem(int attr, std::string const& str_value) const {
-    return item_dictionary_.at(std::make_pair(attr, str_value));
+    auto it = item_dictionary_.find(std::make_pair(attr, str_value));
+    if (it != item_dictionary_.end()) {
+        return it->second;
+    } else {
+        return -1;
+    }
 }
 
 void CFDRelationData::Sort() {
