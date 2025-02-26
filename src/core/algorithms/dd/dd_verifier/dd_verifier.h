@@ -20,8 +20,6 @@ namespace algos::dd {
         std::shared_ptr<ColumnLayoutRelationData> relation_;
         std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
         std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
-        //TODO: I need function PrintStats like in fd_verifier
-        //That field mean "vector of number of pairs, that not holds the dd"
 
         void RegisterOptions();
 
@@ -55,5 +53,6 @@ namespace algos::dd {
         std::size_t GetNumErrorRhs() const;
         bool DDHolds() const;
         void VerifyDD();
+        std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
     };
 }
