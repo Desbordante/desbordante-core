@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <memory>
 #include <stack>
 #include <vector>
 
@@ -33,14 +34,16 @@ inline boost::dynamic_bitset<> operator&(boost::dynamic_bitset<> const& lhs,
 
 class ApproxEvidenceInverter {
 public:
-    ApproxEvidenceInverter(PredicateBuilder& pbuilder, double threshold, EvidenceSet&& evidence_set)
+    ApproxEvidenceInverter(PredicateBuilder& pbuilder, double threshold, EvidenceSet&& evidence_set,
+                           std::shared_ptr<RelationalSchema const> schema)
         : n_predicates_(pbuilder.PredicateCount()),
           evi_count_(evidence_set.GetTotalCount()),
           target_(static_cast<int64_t>(std::ceil((1 - threshold) * evi_count_))),
           organizer_(n_predicates_, std::move(evidence_set), std::move(pbuilder.TakeMutexMap())),
           approx_covers_(n_predicates_),
           predicate_provider_(pbuilder.predicate_provider),
-          predicate_index_provider_(pbuilder.predicate_index_provider) {
+          predicate_index_provider_(pbuilder.predicate_index_provider),
+          schema_(schema) {
         LOG(DEBUG) << " [AEI] Violate at most " << evi_count_ - target_ << " tuple pairs";
         evidences_ = organizer_.TransformEvidenceSet();
         mutex_map_ = organizer_.TransformMutexMap();
@@ -68,7 +71,7 @@ public:
 
         DenialConstraintSet constraints(predicate_provider_);
         for (auto const& raw_dc : raw_dcs)
-            constraints.Add(DenialConstraint(raw_dc, predicate_index_provider_));
+            constraints.Add(DenialConstraint(raw_dc, predicate_index_provider_, schema_));
 
         LOG(DEBUG) << "  [AEI] Total DC size: " << constraints.TotalDCSize();
 
@@ -88,7 +91,9 @@ private:
     PredicateOrganizer organizer_;
     DCCandidateTrie approx_covers_;
     PredicateProvider* predicate_provider_;
-    PredicateIndexProvider* predicate_index_provider_;
+    std::shared_ptr<PredicateIndexProvider> predicate_index_provider_;
+
+    std::shared_ptr<RelationalSchema const> schema_;
 
     struct SearchNode {
         size_t e;

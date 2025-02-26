@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <stddef.h>
 #include <utility>
 #include <vector>
@@ -56,7 +57,7 @@ private:
     std::vector<size_t> inverse_map_;
 
 public:
-    PredicateIndexProvider* predicate_index_provider;
+    std::shared_ptr<PredicateIndexProvider> predicate_index_provider;
     PredicateProvider* predicate_provider;
 
     PredicateBuilder(PredicateBuilder const& other) = delete;
@@ -84,8 +85,9 @@ public:
      * It's expressed as a fraction between 0 and 1.
      */
     PredicateBuilder(PredicateProvider* predicate_provider,
-                     PredicateIndexProvider* predicate_index_provider, bool allow_cross_columns,
-                     double minimum_shared_value = 0.3, double comparable_threshold = 0.1);
+                     std::shared_ptr<PredicateIndexProvider> predicate_index_provider,
+                     bool allow_cross_columns, double minimum_shared_value = 0.3,
+                     double comparable_threshold = 0.1);
 
     // TODO: can we pass just a vector of TypedColumnData, or there should be another table
     // representation?

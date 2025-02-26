@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -15,16 +16,20 @@ namespace algos::fastadc {
 class DenialConstraint {
 private:
     PredicateSet predicate_set_;
+    std::shared_ptr<RelationalSchema const> schema_;
 
 public:
-    explicit DenialConstraint(PredicateSet const& predicateSet) : predicate_set_(predicateSet) {}
+    explicit DenialConstraint(PredicateSet const& predicateSet,
+                              std::shared_ptr<RelationalSchema const> schema)
+        : predicate_set_(predicateSet), schema_(schema) {}
 
     DenialConstraint(boost::dynamic_bitset<> const& predicates,
-                     PredicateIndexProvider* predicate_index_provider)
-        : predicate_set_(predicates, predicate_index_provider) {}
+                     std::shared_ptr<PredicateIndexProvider> predicate_index_provider,
+                     std::shared_ptr<RelationalSchema const> schema)
+        : predicate_set_(predicates, predicate_index_provider), schema_(schema) {}
 
     DenialConstraint GetInvT1T2DC(PredicateProvider* predicate_provider) const {
-        return DenialConstraint(predicate_set_.GetInvTS(predicate_provider));
+        return DenialConstraint(predicate_set_.GetInvTS(predicate_provider), schema_);
     }
 
     PredicateSet const& GetPredicateSet() const noexcept {

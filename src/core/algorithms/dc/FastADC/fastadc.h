@@ -25,7 +25,7 @@ private:
     config::InputTable input_table_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
 
-    PredicateIndexProvider pred_index_provider_;
+    std::shared_ptr<PredicateIndexProvider> pred_index_provider_;
     PredicateProvider pred_provider_;
     IntIndexProvider int_prov_;
     DoubleIndexProvider double_prov_;
@@ -40,7 +40,7 @@ private:
     void PrintResults();
 
     void ResetState() final {
-        pred_index_provider_.Clear();
+        pred_index_provider_->Clear();
         pred_provider_.Clear();
         int_prov_.Clear();
         double_prov_.Clear();
