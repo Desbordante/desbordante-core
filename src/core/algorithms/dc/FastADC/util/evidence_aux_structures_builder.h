@@ -1,6 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <functional>
+#include <memory>
 #include <span>
 #include <stdexcept>
 #include <vector>
@@ -185,7 +186,7 @@ private:
     PredicatesVector const& num_cross_;
     PredicatesVector const& str_single_;
     PredicatesVector const& str_cross_;
-    PredicateIndexProvider* provider_;
+    std::shared_ptr<PredicateIndexProvider> provider_;
 };
 
 }  // namespace algos::fastadc

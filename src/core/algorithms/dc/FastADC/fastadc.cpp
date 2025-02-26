@@ -19,6 +19,7 @@
 namespace algos::dc {
 
 FastADC::FastADC() : Algorithm({}) {
+    pred_index_provider_ = std::make_shared<PredicateIndexProvider>();
     RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
@@ -105,7 +106,7 @@ unsigned long long FastADC::ExecuteInternal() {
     SetLimits();
     CheckTypes();
 
-    PredicateBuilder predicate_builder(&pred_provider_, &pred_index_provider_, allow_cross_columns_,
+    PredicateBuilder predicate_builder(&pred_provider_, pred_index_provider_, allow_cross_columns_,
                                        minimum_shared_value_, comparable_threshold_);
     predicate_builder.BuildPredicateSpace(typed_relation_->GetColumnData());
 
@@ -126,7 +127,8 @@ unsigned long long FastADC::ExecuteInternal() {
     LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
 
     ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
-                                     std::move(evidence_set_builder.evidence_set));
+                                     std::move(evidence_set_builder.evidence_set),
+                                     typed_relation_->GetSharedPtrSchema());
 
     dcs_ = dcbuilder.BuildDenialConstraints();
 

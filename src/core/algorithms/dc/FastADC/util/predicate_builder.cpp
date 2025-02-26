@@ -18,7 +18,7 @@
 namespace algos::fastadc {
 
 PredicateBuilder::PredicateBuilder(PredicateProvider* predicate_provider,
-                                   PredicateIndexProvider* predicate_index_provider,
+                                   std::shared_ptr<PredicateIndexProvider> predicate_index_provider,
                                    bool allow_cross_columns, double minimum_shared_value,
                                    double comparable_threshold)
     : allow_cross_columns_(allow_cross_columns),
