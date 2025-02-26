@@ -26,7 +26,7 @@ public:
 
     std::string ToString() const {
         frozen::string str = kOperatorTypeToString.at(op_);
-        return {str.begin(), str.end()};
+        return str.data();
     }
 
     bool operator==(Operator const& rhs) const noexcept {
