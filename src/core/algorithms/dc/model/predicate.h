@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <variant>
 
 #include "algorithms/dc/model/column_operand.h"
 #include "algorithms/dc/model/operator.h"
@@ -9,11 +10,14 @@
 namespace algos::dc {
 
 // @brief Represents a predicate for Denial Constraint (DC).
-//
+// 
 // A predicate (e.g., t.A == s.A) comprises three elements: the column
 // operand from the first tuple ("t.A"), the comparison operator ("=="),
 // and the column operand from the second tuple ("s.A").
 //
+// In case of constant DC, predicate may contain constant
+// values instead of column operands thus variant is utilized
+// 
 class Predicate {
 private:
     Operator op_;
