@@ -66,5 +66,4 @@ INSTANTIATE_TEST_SUITE_P(
         DDVerifyingParams({{{"Col1", 2,16}},{{"Col3", 112, 333}}}, 5, 5./10.),
         DDVerifyingParams({{{"Col0", 1, 1},{"Col1", 4, 6}},{{"Col3", 228, 333},{"Col4",  111, 550}}}, 1, 1./2.)
             ));
-//TODO: add test with vectors of cols in lhs and rhs
 }  // namespace tests
