@@ -165,6 +165,10 @@ namespace algos::dd {
         error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
     }
 
+    std::vector<std::pair<std::size_t, std::pair<int, int>>> DDVerifier::GetHighlights() const {
+        return highlights_;
+    }
+
     bool DDVerifier::DDHolds() const {
         return !num_error_rhs_;
     }
