@@ -61,7 +61,7 @@ INSTANTIATE_TEST_SUITE_P(
     DCTestParams{"!(t.Salary == t.FedTaxRate and s.Salary == s.FedTaxRate and s.Salary == t.FedTaxRate)", kTestDC1, {}},
     DCTestParams{"!(t.Salary == s.FedTaxRate and s.Salary == t.FedTaxRate)", kTestDC1, {}},
     DCTestParams{"!(t.Salary == s.FedTaxRate and s.Salary != t.FedTaxRate)", kTestDC1, {}},
-    DCTestParams{"!(s.1 == s.2)", kTestDC5, {{4, 4}, {7, 7}, {14, 14}}},
+    DCTestParams{"!(s.1 == s.2)", kTestDC5, {{5, 5}, {8, 8}, {15, 15}}},
     DCTestParams{"!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)", kTestDC4, {{5, 8}, {6, 8}, {9, 10}, {9, 11}, {9, 12}}},
     DCTestParams{"!(s.0 != t.0 and s.1 != t.1)", kTestDC2, {{2, 4}, {2, 5}, {2, 6}, {3, 4}, {3, 5}, {3, 6}, {4, 6}, {5, 6}}}
     )

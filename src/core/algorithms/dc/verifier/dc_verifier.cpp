@@ -19,6 +19,7 @@
 #include "algorithms/dc/model/component.h"
 #include "algorithms/dc/model/point.h"
 #include "algorithms/dc/model/predicate.h"
+#include "algorithms/dc/parser/dc_parser.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
@@ -63,7 +64,8 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
     dc::DC dc;
     try {
-        dc = SplitDC(dc_string_);
+        dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
+        dc = parser.Parse();
     } catch (std::exception const& e) {
         LOG(INFO) << e.what();
         return 0;
@@ -199,7 +201,7 @@ bool DCVerifier::VerifyOneTuple(dc::DC const& dc) {
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(all_cols, i)) continue;
         std::vector<std::byte const*> tuple = GetRow(i);
-        if (Eval(tuple, dc.GetPredicates())){
+        if (Eval(tuple, dc.GetPredicates())) {
             res = false;
             size_t cur_ind = i + index_offset_;
             violations_.push_back({cur_ind, cur_ind});
@@ -255,7 +257,7 @@ bool DCVerifier::VerifyAllEquality(dc::DC const& dc) {
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         if (ContainsNullOrEmpty(eq_cols, i)) continue;
         std::vector<std::byte const*> row = GetRow(i);
-        size_t cur_ind =  i + index_offset_;
+        size_t cur_ind = i + index_offset_;
         Point point = MakePoint(row, eq_cols);
         if (res_tuples.find(point) != res_tuples.end()) {
             std::vector<size_t> viol_indexes = res_tuples[point];
@@ -453,8 +455,9 @@ dc::DC DCVerifier::ConvertEqualities(dc::DC const& dc) {
         auto right = pred.GetRightOperand();
         if (pred.IsCrossColumn() and pred.IsCrossTuple() and
             pred.GetOperator().GetType() == dc::OperatorType::kEqual) {
-            auto left_op = dc::ColumnOperand(left.GetColumn(), left.IsFirstTuple());
-            auto right_op = dc::ColumnOperand(right.GetColumn(), right.IsFirstTuple());
+            auto left_op = dc::ColumnOperand(left.GetColumn(), left.IsFirstTuple(), left.GetType());
+            auto right_op =
+                    dc::ColumnOperand(right.GetColumn(), right.IsFirstTuple(), right.GetType());
 
             auto less_equal = dc::Operator(dc::OperatorType::kLessEqual);
             auto greater_equal = dc::Operator(dc::OperatorType::kGreaterEqual);
@@ -467,35 +470,6 @@ dc::DC DCVerifier::ConvertEqualities(dc::DC const& dc) {
     }
 
     return res;
-}
-
-// FIX: DC may contain braces, numbers or spaces, naive separation doesn't belong here.
-std::vector<dc::Predicate> DCVerifier::SplitDC(std::string const& dc_string) {
-    size_t ind, start = 0;
-    std::string token;
-    static constexpr char const* kSep = " and ";
-    std::vector<dc::Predicate> predicates;
-    while (true) {
-        ind = dc_string.find(kSep, start);
-        token = dc_string.substr(start, ind - start);
-        std::vector<std::string> predicate_parts;
-        boost::split(predicate_parts, token, boost::is_any_of(" "));
-        for (size_t i = 0; i < 3; i += 2) {
-            std::replace_if(predicate_parts[i].begin(), predicate_parts[i].end(),
-                            boost::is_any_of("!()"), ' ');
-            boost::trim(predicate_parts[i]);
-        }
-
-        auto left_op = dc::ColumnOperand(predicate_parts.front(), *relation_->GetSchema());
-        auto right_op = dc::ColumnOperand(predicate_parts[2], *relation_->GetSchema());
-        auto oper = dc::Operator(predicate_parts[1]);
-        predicates.emplace_back(oper, left_op, right_op);
-
-        if (ind == std::string::npos) break;
-        start = ind + std::strlen(kSep);
-    }
-
-    return predicates;
 }
 
 bool DCVerifier::Eval(std::vector<std::byte const*> tuple, std::vector<dc::Predicate> preds) {
