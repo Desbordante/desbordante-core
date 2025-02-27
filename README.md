@@ -2,7 +2,7 @@
 [![Downloads](https://static.pepy.tech/badge/desbordante/month)](https://pepy.tech/project/desbordante)
 
 <p>
-   <img src="https://github.com/Mstrutov/Desbordante/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
+   <img src="https://github.com/Desbordante/desbordante-core/assets/88928096/d687809b-5a3b-420e-a192-a1a2b6697b2a"/>
 </p>
 
 # General
@@ -253,7 +253,7 @@ The following instructions were tested on Ubuntu 20.04+ LTS and macOS Sonoma 14.
 Prior to cloning the repository and attempting to build the project, ensure that you have the following software:
 
 - GNU GCC, version 10+, LLVM Clang, version 16+, or Apple Clang, version 15+
-- CMake, version 3.15+
+- CMake, version 3.25+
 - Boost library built with compiler you're going to use (GCC or Clang), version 1.85.0+
 
 To use test datasets you will need:
@@ -264,13 +264,26 @@ Instructions for other supported compilers can be found in [Desbordante wiki](ht
 
 #### Ubuntu dependencies installation (GCC)
 
-Run the following commands:
+For Ubuntu versions earlier than 24.04, you need to add the Kitware APT repository to your system 
+by following their [official guide](https://apt.kitware.com) to install the latest version of CMake.
+
+Then run the following commands:
 ```sh 
-sudo apt install g++ cmake libboost-all-dev git-lfs python3
+sudo apt update && sudo apt upgrade
+sudo apt install g++ cmake ninja-build libboost-all-dev git-lfs python3 python3-venv
 export CXX=g++
 ```
 The last line sets g++ as CMake compiler in your terminal session.
-You can also add them to the end of `~/.profile` to set this by default in all sessions.
+You can also set it by default in all sessions: `echo 'export CXX=g++' >> ~/.profile`
+
+For Ubuntu 24.04 and above, you can skip to the build steps. For older versions the Ubuntu APT repository
+might not have a compatible version of Boost, so you'll need to install it manually:
+```sh
+wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
+tar xzvf boost_1_87_0.tar.gz
+cd boost_1_87_0 && ./bootstrap.sh
+sudo ./b2 install --prefix=/usr/
+```
 
 #### macOS dependencies installation (Apple Clang)
 
@@ -304,9 +317,9 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 Clone the repository, change the current directory to the project directory and run the following commands:
 
 ```bash
-./build.sh
-python3 -m venv venv
-source venv/bin/activate
+./build.sh --deps-only
+python3 -m venv .venv
+source .venv/bin/activate
 python3 -m pip install .
 ```
 
@@ -319,17 +332,17 @@ In order to build tests, pull the test datasets using the following command:
 ```
 then build the tests themselves:
 ```sh
-./build.sh -j$(nproc)
+./build.sh
 ```
 
 The Python module can be built by providing the `--pybind` switch:
 ```sh
-./build.sh --pybind -j$(nproc)
+./build.sh --pybind 
 ```
 
 See `./build.sh --help` for more available options.
 
-The `./build.sh` script generates the following file structure in `/path/to/Desbordante/build/target`:
+The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
@@ -370,7 +383,7 @@ Error downloading object: datasets/datasets.zip (2085458): Smudge error: Error d
 ```
 delete the already cloned version, set `GIT_LFS_SKIP_SMUDGE=1` environment variable and clone the repo again:
 ```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone git@github.com:Mstrutov/Desbordante.git
+GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Desbordante/desbordante-core.git
 ```
 
 ### No type hints in IDE
