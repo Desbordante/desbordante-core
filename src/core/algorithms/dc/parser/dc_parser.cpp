@@ -139,7 +139,7 @@ bool DCParser::IsVarOperand(std::string op) const {
 
 ColumnOperand DCParser::ConvertToVariableOperand(std::string operand) const {
     Column* column = nullptr;
-    bool is_first_tuple = operand.front() == 't';
+    dc::Tuple tuple = operand.front() == 't' ? dc::Tuple::kT : dc::Tuple::kS;
     std::string name(operand.begin() + 2, operand.end());
     std::vector<std::unique_ptr<Column>> const& cols = relation_->GetSchema()->GetColumns();
     if (!cols.front()->GetName().empty()) {  // Has header
@@ -162,7 +162,7 @@ ColumnOperand DCParser::ConvertToVariableOperand(std::string operand) const {
     }
 
     size_t col_ind = column->GetIndex();
-    return {column, is_first_tuple, &data_[col_ind].GetType()};
+    return {column, tuple, &data_[col_ind].GetType()};
 }
 
 }  // namespace algos::dc

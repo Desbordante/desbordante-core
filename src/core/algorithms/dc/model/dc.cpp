@@ -39,11 +39,11 @@ bool DC::CheckOneInequality() const {
 
 bool DC::CheckOneTuple() const {
     ColumnOperand operand = predicates_.front().GetVariableOperand();
-    bool is_first_tuple = operand.IsFirstTuple();
+    dc::Tuple tuple = operand.GetTuple();
 
-    auto check = [is_first_tuple](Predicate const& pred) {
+    auto check = [tuple](Predicate const& pred) {
         return (pred.IsConstant() or pred.IsOneTuple()) and
-               pred.GetVariableOperand().IsFirstTuple() == is_first_tuple;
+               pred.GetVariableOperand().GetTuple() == tuple;
     };
 
     return std::all_of(predicates_.begin(), predicates_.end(), check);

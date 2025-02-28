@@ -5,6 +5,7 @@
 
 #include "algorithms/dc/model/column_operand.h"
 #include "algorithms/dc/model/operator.h"
+#include "algorithms/dc/model/tuple.h"
 #include "model/table/typed_column_data.h"
 
 namespace algos::dc {
@@ -15,8 +16,6 @@ namespace algos::dc {
 //  operand from the first tuple ("t.A"), the comparison operator ("=="),
 //  and the column operand from the second tuple ("s.A").
 //
-// In case of constant DC, predicate may contain constant
-// values instead of column operands thus variant is utilized
 class Predicate {
 private:
     Operator op_;
@@ -53,7 +52,7 @@ public:
     }
 
     bool IsCrossTuple() const {
-        return IsVariable() and l_.IsFirstTuple() != r_.IsFirstTuple();
+        return IsVariable() and l_.GetTuple() != r_.GetTuple();
     }
 
     bool IsOneTuple() const {
@@ -70,6 +69,12 @@ public:
 
     std::string ToString() const {
         return l_.ToString() + " " + op_.ToString() + " " + r_.ToString();
+    }
+
+    Tuple GetTuple() const {
+        if (IsConstant()) return GetVariableOperand().GetTuple();
+        if (IsCrossTuple()) return Tuple::kMixed;
+        return l_.GetTuple();
     }
 };
 
