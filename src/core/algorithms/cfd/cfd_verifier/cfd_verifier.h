@@ -19,6 +19,9 @@ private:
     std::pair<std::string, std::string> string_rule_right_;
     cfd::ItemsetCFD cfd_;
 
+    int minsup_ = 0;
+    double minconf_ = 0.0;
+
     std::shared_ptr<cfd::CFDRelationData> relation_;
     CFDStatsCalculator stats_calculator_;
 
@@ -42,16 +45,17 @@ protected:
 public:
     CFDVerifier();
 
-    int GetSupport() const {
+    int GetRealSupport() const {
         return stats_calculator_.GetSupport();
     };
 
-    double GetConfidence() const {
+    double GetRealConfidence() const {
         return stats_calculator_.GetConfidence();
     };
 
-    bool CFDHolds(double threshold = 0.9) const {
-        return GetConfidence() >= threshold;
+    bool CFDHolds() const {
+        return (stats_calculator_.GetSupport() >= minsup_) &&
+               (stats_calculator_.GetConfidence() >= minconf_);
     };
 
     std::vector<size_t> GetRowsSatisfyingCFD() const {

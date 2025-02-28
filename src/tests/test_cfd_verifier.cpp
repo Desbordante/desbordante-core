@@ -13,17 +13,17 @@ namespace tests {
 
 struct CFDVerifierParams {
     algos::StdParamsMap params;
-    double confidence;
     bool expect_holds;
 
     CFDVerifierParams(std::vector<std::pair<std::string, std::string>> left,
                       std::pair<std::string, std::string> right,
                       CSVConfig const& csv_config = kTennis, double confidence = 1.0,
-                      bool expect_holds = true)
+                      int support = 0, bool expect_holds = true)
         : params({{config::names::kCFDRuleLeft, std::move(left)},
                   {config::names::kCFDRuleRight, std::move(right)},
+                  {config::names::kMinimumConfidence, confidence},
+                  {config::names::kMinimumSupport, support},
                   {config::names::kCsvConfig, csv_config}}),
-          confidence(confidence),
           expect_holds(expect_holds) {}
 };
 
@@ -35,7 +35,7 @@ TEST_P(CFDVerifierTest, Test) {
     auto verifier = algos::CreateAndLoadAlgorithm<algos::cfd_verifier::CFDVerifier>(mp);
     verifier->Execute();
 
-    EXPECT_EQ(verifier->CFDHolds(p.confidence), p.expect_holds);
+    EXPECT_EQ(verifier->CFDHolds(), p.expect_holds);
 }
 
 INSTANTIATE_TEST_SUITE_P(
@@ -44,34 +44,34 @@ INSTANTIATE_TEST_SUITE_P(
                 // 1. Positive tests (CFD is being performed)
                 CFDVerifierParams({{"outlook", "overcast"}},  // LHS
                                   {"play", "yes"},            // RHS
-                                  kTennis, 1.0, true),
+                                  kTennis, 1.0, 0, true),
                 CFDVerifierParams({{"temp", "_"}, {"outlook", "_"}, {"play", "yes"}},  // LHS
                                   {"windy", "_"},  // RHS (wildcard)
-                                  kTennis, 1.0, true),
+                                  kTennis, 1.0, 0, true),
 
                 // 2. Negative tests (CFD is violated)
                 CFDVerifierParams({{"temp", "mild"}},  // LHS
                                   {"play", "yes"},     // RHS
-                                  kTennis, 1.0, false),
+                                  kTennis, 1.0, 0, false),
                 CFDVerifierParams({{"outlook", "rainy"}},  // LHS
                                   {"play", "yes"},         // RHS
-                                  kTennis, 1.0, false),
+                                  kTennis, 1.0, 0, false),
                 CFDVerifierParams({{"temp", "cool"}},  // LHS
                                   {"play", "yes"},     // RHS
-                                  kTennis, 1.0, false),
+                                  kTennis, 1.0, 0, false),
 
                 // 3. Tests with confidence
                 CFDVerifierParams({{"humidity", "normal"}},  // LHS
                                   {"play", "yes"},           // RHS
-                                  kTennis, 0.8, true),
+                                  kTennis, 0.8, 0, true),
                 CFDVerifierParams({{"humidity", "normal"}},  // LHS
                                   {"play", "yes"},           // RHS
-                                  kTennis, 1.0,              // At 1.0 it is violated
+                                  kTennis, 1.0, 0,           // At 1.0 it is violated
                                   false),
 
                 // 4. Boundary cases
                 CFDVerifierParams({},               // Empty LHS (should work as `true` by default)
                                   {"play", "yes"},  // RHS
-                                  kTennis, 1.0, false)));
+                                  kTennis, 1.0, 0, false)));
 
 }  // namespace tests
