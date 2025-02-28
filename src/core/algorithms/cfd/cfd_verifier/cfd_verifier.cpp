@@ -1,15 +1,12 @@
-#include "cfd/cfd_verifier/cfd_verifier.h"
-
-#include <iostream>
+#include "cfd_verifier.h"
 
 #include <easylogging++.h>
 
 #include "cfd/model/cfd_relation_data.h"
 #include "cfd/util/cfd_output_util.h"
-#include "cfd_verifier.h"
 #include "config/names_and_descriptions.h"
-#include "option_using.h"
-#include "tabular_data/input_table/option.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
 #include "util/timed_invoke.h"
 
 namespace algos::cfd_verifier {
@@ -45,7 +42,7 @@ unsigned long long CFDVerifier::ExecuteInternal() {
     auto get_attr_id = [this](std::string const& attr_name) -> int {
         int attr_id = relation_->GetAttr(attr_name);
         if (attr_id == -1) {
-            throw std::runtime_error("Attribute not found: " + attr_name);
+            throw config::ConfigurationError("Attribute not found: " + attr_name);
         }
         return attr_id;
     };
@@ -60,7 +57,8 @@ unsigned long long CFDVerifier::ExecuteInternal() {
             if (item_name != "_") {
                 int item_id = relation_->GetItem(attr_id, item_name);
                 if (item_id == -1) {
-                    throw std::runtime_error("Item not found in item universe: " + item_name);
+                    throw config::ConfigurationError("Item not found in item universe: " +
+                                                     item_name);
                 }
                 item_ids.push_back(item_id);
             } else {
@@ -75,8 +73,8 @@ unsigned long long CFDVerifier::ExecuteInternal() {
 
     cfd_ = std::make_pair(std::move(cfd_left_id), cfd_right_id.back());
 
-    LOG(INFO) << "Starting CFD verification...";
-    LOG(INFO) << "\tRule to verify: " << cfd::Output::CFDToString(cfd_, relation_);
+    LOG(DEBUG) << "Starting CFD verification...";
+    LOG(DEBUG) << "\tRule to verify: " << cfd::Output::CFDToString(cfd_, relation_);
 
     auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerefyCFD, this);
     LOG(DEBUG) << "CFD verification took " << std::to_string(verification_time) << "ms";
