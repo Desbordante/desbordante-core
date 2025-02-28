@@ -23,6 +23,8 @@ void CFDVerifier::RegisterOptions() {
                           std::vector<std::pair<std::string, std::string>>{}});
     RegisterOption(Option{&string_rule_right_, kCFDRuleRight, kDCFDRuleRight,
                           std::pair<std::string, std::string>{}});
+    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
+    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0});
 }
 
 void CFDVerifier::LoadDataInternal() {
@@ -35,7 +37,7 @@ void CFDVerifier::LoadDataInternal() {
 
 void CFDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight});
+    MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kMinimumSupport, kMinimumConfidence});
 }
 
 unsigned long long CFDVerifier::ExecuteInternal() {
