@@ -75,8 +75,11 @@ void CFDStatsCalculator::CalculateSupportAndConfidence() {
         cfd::Item most_frequent_rhs = it->second;
 
         for (size_t row_index : row_indices) {
-            auto row = relation_->GetRow(row_index);
-            if (row[rhs_attr_index_] == most_frequent_rhs) {
+            auto const& row = relation_->GetRow(row_index);
+            bool satisfies = (rule_.second < 0 && row[rhs_attr_index_] == most_frequent_rhs) ||
+                             (rule_.second > 0 && row[rhs_attr_index_] == rule_.second);
+
+            if (satisfies) {
                 satisfying_rows_.push_back(row_index);
                 valid_tuples++;
             } else {
@@ -88,6 +91,7 @@ void CFDStatsCalculator::CalculateSupportAndConfidence() {
 
     std::sort(satisfying_rows_.begin(), satisfying_rows_.end());
     std::sort(violating_rows_.begin(), violating_rows_.end());
+
     support_ = total_supported;
     confidence_ = total_supported > 0 ? static_cast<double>(valid_tuples) / total_supported : 0.0;
 }
