@@ -17,8 +17,8 @@ void BindCFDVerification(py::module_& main_module) {
 
     BindPrimitiveNoBase<CFDVerifier>(cfd_verification_module, "CFDVerifier")
             .def("cfd_holds", &CFDVerifier::CFDHolds)
-            .def("get_support", &CFDVerifier::GetSupport)
-            .def("get_confidence", &CFDVerifier::GetConfidence)
+            .def("get_real_support", &CFDVerifier::GetRealSupport)
+            .def("get_real_confidence", &CFDVerifier::GetRealConfidence)
             .def("get_rows_satisfying_cfd", &CFDVerifier::GetRowsSatisfyingCFD)
             .def("get_rows_violating_cfd", &CFDVerifier::GetRowsViolatingCFD);
 
