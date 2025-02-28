@@ -150,17 +150,17 @@ dc::DC DCVerifier::GetDC(std::vector<dc::Predicate> const& no_diseq_preds,
 bool DCVerifier::VerifyMixed(dc::DC const& dc) {
     std::vector<dc::Predicate> predicates = dc.GetPredicates();
     std::vector<dc::Predicate> s_predicates, t_predicates, mixed_predicates;
+
     for (auto pred : predicates) {
-        bool left_op_from_first_tuple = pred.GetLeftOperand().IsFirstTuple();
-        bool right_op_from_first_tuple = pred.GetRightOperand().IsFirstTuple();
-        switch (left_op_from_first_tuple + right_op_from_first_tuple) {
-            case 0:  // s.A op s.B
+        dc::Tuple tuple = pred.GetTuple();
+        switch (tuple) {
+            case dc::Tuple::kS:  // s.A op s.B
                 s_predicates.emplace_back(pred);
                 break;
-            case 1:  // s.A op t.B or t.A op s.B
+            case dc::Tuple::kMixed:  // s.A op t.B or t.A op s.B
                 mixed_predicates.emplace_back(pred);
                 break;
-            case 2:  // t.A op t.B
+            case dc::Tuple::kT:  // t.A op t.B
                 t_predicates.emplace_back(pred);
                 break;
             default:
