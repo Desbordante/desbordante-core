@@ -17,9 +17,10 @@ private:
     std::vector<bool> support_mask_;
     std::unordered_map<cfd::Itemset, std::vector<int>, boost::hash<cfd::Itemset>> lhs_to_row_nums_;
     std::unordered_map<cfd::Itemset, cfd::Item, boost::hash<cfd::Itemset>> most_frequent_rhs_;
-    int support_ = 0.0;
+    int support_ = 0;
     double confidence_ = 0.0;
     std::vector<size_t> violating_rows_;
+    std::vector<size_t> satisfying_rows_;
 
     void CreateSupportMask();
     void MakeLhsToRowNums();
@@ -46,6 +47,10 @@ public:
     std::vector<size_t> GetRowsViolatingCFD() const {
         return violating_rows_;
     };
+
+    std::vector<size_t> GetRowsSatisfyingCFD() const {
+        return satisfying_rows_;
+    }
 
     int GetSupport() const {
         return support_;
