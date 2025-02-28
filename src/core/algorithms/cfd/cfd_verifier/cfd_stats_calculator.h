@@ -1,5 +1,11 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include <boost/functional/hash.hpp>
 
 #include "cfd/model/cfd_relation_data.h"

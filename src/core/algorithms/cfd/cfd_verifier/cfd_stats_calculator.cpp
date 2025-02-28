@@ -1,7 +1,5 @@
 #include "cfd_stats_calculator.h"
 
-#include <iostream>
-
 #include "cfd/util/cfd_output_util.h"
 
 namespace algos::cfd_verifier {

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "algorithms/algorithm.h"
 #include "cfd_stats_calculator.h"
 #include "config/tabular_data/input_table_type.h"
