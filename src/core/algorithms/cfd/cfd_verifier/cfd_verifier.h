@@ -49,6 +49,10 @@ public:
         return GetConfidence() >= threshold;
     };
 
+    std::vector<size_t> GetRowsSatisfyingCFD() const {
+        return stats_calculator_.GetRowsSatisfyingCFD();
+    }
+
     std::vector<size_t> GetRowsViolatingCFD() const {
         return stats_calculator_.GetRowsViolatingCFD();
     }
