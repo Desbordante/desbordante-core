@@ -41,8 +41,8 @@ void CFDVerifier::MakeExecuteOptsAvailable() {
 }
 
 unsigned long long CFDVerifier::ExecuteInternal() {
-    auto get_attr_id = [this](std::string const& attr_name) -> int {
-        int attr_id = relation_->GetAttr(attr_name);
+    auto get_attr_id = [this](std::string const& attr_name) -> cfd::AttributeIndex {
+        cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
         if (attr_id == -1) {
             throw config::ConfigurationError("Attribute not found: " + attr_name);
         }
@@ -51,13 +51,13 @@ unsigned long long CFDVerifier::ExecuteInternal() {
 
     auto extract_item_ids =
             [this, &get_attr_id](std::vector<std::pair<std::string, std::string>> const& rule_part)
-            -> std::vector<int> {
-        std::vector<int> item_ids;
+            -> cfd::Itemset {
+        cfd::Itemset item_ids;
         for (auto const& [attr_name, item_name] : rule_part) {
-            int attr_id = get_attr_id(attr_name);
+            cfd::AttributeIndex attr_id = get_attr_id(attr_name);
 
             if (item_name != "_") {
-                int item_id = relation_->GetItem(attr_id, item_name);
+                cfd::Item item_id = relation_->GetItem(attr_id, item_name);
                 if (item_id == -1) {
                     throw config::ConfigurationError("Item not found in item universe: " +
                                                      item_name);
@@ -70,8 +70,8 @@ unsigned long long CFDVerifier::ExecuteInternal() {
         return item_ids;
     };
 
-    std::vector<int> cfd_left_id = extract_item_ids(string_rule_left_);
-    std::vector<int> cfd_right_id = extract_item_ids({string_rule_right_});
+    cfd::Itemset cfd_left_id = extract_item_ids(string_rule_left_);
+    cfd::Itemset cfd_right_id = extract_item_ids({string_rule_right_});
 
     cfd_ = std::make_pair(std::move(cfd_left_id), cfd_right_id.back());
 
