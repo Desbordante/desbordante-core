@@ -34,7 +34,7 @@ def print_results(verifier):
         print(
             f"Rows {highlight.rows[0]} and {highlight.rows[1]} violate MD in column {highlight.column}: "
             f'"{highlight.first_value}" and "{highlight.second_value}" have similarity {highlight.similarity} '
-            f"with decision boundary {highlight.decision_boundary}\n"
+            f"with decision boundary {highlight.decision_boundary}"
         )
     print(
         f"Desbordante suggests to use following right-hand side decision boundaries: {verifier.get_rhs_suggestions()}\n"
@@ -49,7 +49,7 @@ def check_md(table_path: str, params: MDParams):
     print_results(algo)
 
 
-def drunk_animals():
+def drunk_animals_example():
     print("As first example, let's look at the dataset drunk_animals.csv")
 
     table_path = "test_input_data/drunk_animals.csv"
@@ -93,6 +93,96 @@ def drunk_animals():
         "This is how MD can be helpful in avoiding typos in table and searching them\n\n"
     )
 
+    print(
+        "Now let's take a look that happen if we increase decision boundary of left-hand side and right-hand side\n"
+        "For example, we will take 0.76 instead of 0.75"
+    )
+    print("Left-hand side:\n")
+
+    params = {
+        "lhs_indices": [2],
+        "rhs_indices": [3],
+        "lhs_decision_boundaries": [0.76],
+        "rhs_decision_boundaries": [0.75],
+        "lhs_similarity_measures": [LevenshteinSimilarity()],
+        "rhs_similarity_measures": [LevenshteinSimilarity()],
+    }
+
+    check_md(table_path, params)
+
+    print("As we can see, nothing changed. Now let's lower right-hand side:\n")
+
+    params = {
+        "lhs_indices": [2],
+        "rhs_indices": [3],
+        "lhs_decision_boundaries": [0.75],
+        "rhs_decision_boundaries": [0.76],
+        "lhs_similarity_measures": [LevenshteinSimilarity()],
+        "rhs_similarity_measures": [LevenshteinSimilarity()],
+    }
+
+    check_md(table_path, params)
+
+    print(
+        'Values "meat" and "mead" have Levenshtein similarity measure equal to 0.75, but we accept similarity measure at least 0.76, so MD doesn\'t holds.\n'
+    )
+
+
+def theatre_example():
+    print(
+        "Let's look at the example with numeric columns.\nWe will use theatre.csv dataset for such purpose:\n"
+    )
+
+    table_path = "examples/datasets/theatres_typos.csv"
+    table = pd.read_csv(table_path)
+    print(table)
+
+    print(
+        "\nAs we see, there are some typos in this dataset.\n"
+        "We will try to discover MD {Title -> Duration}\nFirstly, let's check if FD holds:\n"
+    )
+
+    params = {
+        "lhs_indices": [0],
+        "rhs_indices": [2],
+        "lhs_decision_boundaries": [1],
+        "rhs_decision_boundaries": [1],
+        "lhs_similarity_measures": [LevenshteinSimilarity()],
+        "rhs_similarity_measures": [EuclideanSimilarity()],
+    }
+
+    check_md(table_path, params)
+
+    print("To avoid typos, let's set left-hand side decision boundary to 0.75:\n")
+
+    params = {
+        "lhs_indices": [0],
+        "rhs_indices": [2],
+        "lhs_decision_boundaries": [0.75],
+        "rhs_decision_boundaries": [1],
+        "lhs_similarity_measures": [LevenshteinSimilarity()],
+        "rhs_similarity_measures": [EuclideanSimilarity()],
+    }
+
+    check_md(table_path, params)
+
+    print(
+        "As we see, more invalid pairs appeared. Desbordante suggest to use right-hand side decision boundary lower than 0.1(6).\n"
+    )
+
+    params = {
+        "lhs_indices": [0],
+        "rhs_indices": [2],
+        "lhs_decision_boundaries": [0.75],
+        "rhs_decision_boundaries": [0.165],
+        "lhs_similarity_measures": [LevenshteinSimilarity()],
+        "rhs_similarity_measures": [EuclideanSimilarity()],
+    }
+
+    check_md(table_path, params)
+
+    print("As we see, now everything holds.")
+
 
 if __name__ == "__main__":
     print(DEFAULT_COLOR_CODE)
@@ -107,4 +197,6 @@ if __name__ == "__main__":
         "You can read more about Matching Dependancies in article below\n"
         "https://arxiv.org/pdf/0903.3317\n"
     )
-    drunk_animals()
+    drunk_animals_example()
+    print("-" * 50)
+    theatre_example()
