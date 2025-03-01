@@ -1,16 +1,21 @@
 #pragma once
 
-#include <assert.h>
-#include <cstddef>
-#include <iterator>
-#include <memory>
-#include <string>
+#include <cstddef>   // for size_t, ptrdiff_t
+#include <iterator>  // for input_iterator_tag
+#include <memory>    // for unique_ptr
+#include <string>    // for string
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <boost/move/utility_core.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset, hash
+#include <boost/move/utility_core.hpp>              // for move
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/providers/index_provider.h"
+#include "dc/FastADC/model/predicate.h"           // for PredicatePtr, kPr...
+#include "dc/FastADC/providers/index_provider.h"  // for PredicateIndexPro...
+
+namespace algos {
+namespace fastadc {
+class PredicateProvider;
+}
+}  // namespace algos
 
 namespace algos::fastadc {
 

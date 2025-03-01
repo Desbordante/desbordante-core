@@ -1,11 +1,36 @@
 #include "typo_miner.h"
 
-#include "config/equal_nulls/option.h"
-#include "config/error/option.h"
-#include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include <algorithm>         // for sort, stable_sort
+#include <bits/chrono.h>     // for duration, durat...
+#include <deque>             // for _Deque_iterator
+#include <initializer_list>  // for initializer_list
+#include <iterator>          // for back_insert_ite...
+#include <list>              // for list, operator==
+#include <numeric>           // for iota
+#include <unordered_map>     // for unordered_map
+
+#include <boost/type_index.hpp>                    // for type_id
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"                                // for Algorithm
+#include "common_option.h"                            // for CommonOption
+#include "config/equal_nulls/option.h"                // for kEqualNullsOpt
+#include "config/error/option.h"                      // for kErrorOpt
+#include "config/exceptions.h"                        // for ConfigurationError
+#include "config/names_and_descriptions.h"            // lines 6-6
+#include "config/option_using.h"                      // for DESBORDANTE_OPT...
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "create_algorithm.h"                         // for CreateAlgorithm...
+#include "error/type.h"                               // for ErrorType
+#include "option.h"                                   // for Option
+#include "table/column.h"                             // for Column
+#include "table/column_data.h"                        // for ColumnData
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/idataset_stream.h"                    // for IDatasetStream
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "table/vertical.h"                           // for Vertical
+#include "type.h"                                     // for Type
 
 namespace {
 using namespace algos;

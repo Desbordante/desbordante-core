@@ -1,14 +1,23 @@
 #pragma once
-#include <list>
-#include <set>
-#include <string>
-#include <utility>
-#include <vector>
+#include <list>      // for list
+#include <memory>    // for unique_ptr
+#include <set>       // for set
+#include <stddef.h>  // for size_t
+#include <string>    // for string
+#include <utility>   // for pair
+#include <vector>    // for vector
 
-#include "algorithms/ind/ind.h"
-#include "algorithms/ind/ind_algorithm.h"
-#include "csv_config_util.h"
-#include "model/table/table_index.h"
+#include "csv_config_util.h"          // for CSVConfigs
+#include "model/table/table_index.h"  // for TableIndex
+#include "table/column_index.h"       // for ColumnIndex
+
+namespace algos {
+class INDAlgorithm;
+}
+
+namespace model {
+class IND;
+}
 
 namespace tests {
 

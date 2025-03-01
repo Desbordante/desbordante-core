@@ -1,8 +1,30 @@
 #include "search_space.h"
 
-#include <queue>
+#include <algorithm>      // for all_of, remove_if
+#include <assert.h>       // for assert
+#include <bits/chrono.h>  // for duration_cast
+#include <iterator>       // for insert_iterator
+#include <queue>          // for priority_queue
+#include <stdexcept>      // for runtime_error
 
-#include <easylogging++.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/format.hpp>
+#include <boost/optional/detail/optional_relops.hpp>  // for operator<=
+#include <boost/optional/optional.hpp>                // for get_pointer
+#include <easylogging++.h>                            // for Writer, LOG
+
+#include "custom_hashes.h"                            // for hash
+#include "fd/pyrocommon/core/dependency_candidate.h"  // for DependencyCandi...
+#include "fd/pyrocommon/core/dependency_strategy.h"   // for DependencyStrategy
+#include "fd/pyrocommon/core/parameters.h"            // for Parameters
+#include "fd/pyrocommon/core/profiling_context.h"     // for ProfilingContext
+#include "fd/pyrocommon/core/vertical_info.h"         // for VerticalInfo
+#include "fd/pyrocommon/model/confidence_interval.h"  // for ConfidenceInterval
+#include "table/column.h"                             // for Column
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/relational_schema.h"                  // for RelationalSchema
+#include "table/vertical.h"                           // for Vertical
+#include "table/vertical_map.h"                       // for VerticalMap
 
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
 // delete the object - pass empty deleter [](*) {}

@@ -1,7 +1,14 @@
 #pragma once
 
-#include "model/transaction/transactional_data.h"
+#include <list>           // for list
+#include <unordered_map>  // for unordered_map
+#include <vector>         // for vector
+
 #include "node.h"
+
+namespace model {
+class TransactionalData;
+}
 
 namespace algos {
 

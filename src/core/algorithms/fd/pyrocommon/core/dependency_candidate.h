@@ -1,9 +1,11 @@
 #pragma once
-#include <functional>
-#include <utility>
 
-#include "../model/confidence_interval.h"
-#include "model/table/vertical.h"
+#include <iosfwd>   // for ostream
+#include <string>   // for allocator, char_traits
+#include <utility>  // for move
+
+#include "../model/confidence_interval.h"  // for ConfidenceInterval
+#include "model/table/vertical.h"          // for Vertical
 
 class DependencyCandidate {
 private:

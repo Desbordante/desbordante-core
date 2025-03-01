@@ -1,14 +1,19 @@
 #pragma once
 
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include <cstddef>        // for byte
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair
+#include <vector>         // for vector
 
-#include <boost/container_hash/hash.hpp>
+#include <boost/container_hash/hash.hpp>  // for hash
 
-#include "model/table/column_index.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
+#include "model/table/column_index.h"  // for ColumnIndex
+#include "model/table/tuple_index.h"   // for TupleIndex
+
+namespace model {
+class TypedColumnData;
+}
 
 namespace algos::order {
 using Node = std::vector<model::ColumnIndex>;

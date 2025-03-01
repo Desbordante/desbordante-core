@@ -1,9 +1,27 @@
 #include "pli_cache.h"
 
-#include <boost/optional.hpp>
-#include <easylogging++.h>
+#include <algorithm>  // for remove_if, sort
+#include <assert.h>   // for assert
+#include <stdexcept>  // for logic_error, runt...
+#include <utility>    // for move
+#include <vector>     // for vector
 
-#include "model/table/vertical_map.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/format.hpp>
+#include <boost/move/utility_core.hpp>  // for move
+#include <boost/optional/optional.hpp>  // for optional, get_poi...
+#include <easylogging++.h>              // for Writer, CDEBUG, LOG
+
+#include "caching_method.h"                        // for CachingMethod
+#include "fd/pyrocommon/core/parameters.h"         // for Parameters
+#include "fd/pyrocommon/core/profiling_context.h"  // for ProfilingContext
+#include "model/table/vertical_map.h"              // for VerticalMap, Bloc...
+#include "table/column.h"                          // for Column
+#include "table/column_layout_relation_data.h"     // for ColumnLayoutRelat...
+#include "table/relational_schema.h"               // for RelationalSchema
+#include "table/vertical.h"                        // for Vertical
+
+enum class CacheEvictionMethod;
 
 namespace model {
 

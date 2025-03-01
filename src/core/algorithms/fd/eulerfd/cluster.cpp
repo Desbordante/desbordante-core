@@ -1,6 +1,8 @@
 #include "cluster.h"
 
-#include <cstdint>
+#include <cstdint>  // for int64_t
+#include <numeric>  // for accumulate
+#include <utility>  // for move, swap
 
 namespace algos {
 

@@ -1,15 +1,21 @@
 #pragma once
 
-#include <filesystem>
-#include <list>
-#include <mutex>
+#include <algorithm>    // for sort
+#include <list>         // for list
+#include <memory>       // for shared_ptr
+#include <string>       // for string, operator<=>, operator+
+#include <string_view>  // for string_view
+#include <utility>      // for move
+#include <vector>       // for vector
 
-#include <boost/any.hpp>
+#include "algorithms/algorithm.h"       // for Algorithm
+#include "algorithms/fd/fd.h"           // for FD
+#include "config/max_lhs/type.h"        // for MaxLhsType
+#include "table/column.h"               // for Column
+#include "table/vertical.h"             // for Vertical
+#include "util/primitive_collection.h"  // for PrimitiveCollection
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/fd.h"
-#include "config/max_lhs/type.h"
-#include "util/primitive_collection.h"
+class RelationalSchema;
 
 namespace model {
 class AgreeSetFactory;

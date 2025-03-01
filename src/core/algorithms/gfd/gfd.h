@@ -1,8 +1,10 @@
 #pragma once
-#include <string>
-#include <vector>
 
-#include "graph_descriptor.h"
+#include <string>   // for string
+#include <utility>  // for pair
+#include <vector>   // for vector
+
+#include "graph_descriptor.h"  // for graph_t
 
 using Token = std::pair<int, std::string>;
 using Literal = std::pair<Token, Token>;

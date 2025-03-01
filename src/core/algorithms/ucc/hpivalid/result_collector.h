@@ -1,14 +1,12 @@
 #pragma once
 
-#include <chrono>
-#include <string>
-#include <vector>
+#include <bits/chrono.h>  // for high_resolution_clock
+#include <string>         // for string
+#include <vector>         // for vector
 
-#include "algorithms/ucc/hpivalid/enums.h"
-#include "algorithms/ucc/hpivalid/hypergraph.h"
-#include "algorithms/ucc/raw_ucc.h"
-#include "algorithms/ucc/ucc_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
+#include "algorithms/ucc/hpivalid/enums.h"       // for TimerName
+#include "algorithms/ucc/hpivalid/hypergraph.h"  // for Edge
+#include "algorithms/ucc/raw_ucc.h"              // for RawUCC
 
 // see algorithms/ucc/hpivalid/LICENSE
 

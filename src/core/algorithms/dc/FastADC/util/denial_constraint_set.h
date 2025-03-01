@@ -3,6 +3,7 @@
 #include "dc/FastADC/model/denial_constraint.h"
 #include "dc/FastADC/util/closure.h"
 #include "dc/FastADC/util/ntree_search.h"
+#include "model/types/type.h"
 
 namespace algos::fastadc {
 

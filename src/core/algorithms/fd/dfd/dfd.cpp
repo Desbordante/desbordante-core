@@ -1,14 +1,28 @@
 #include "dfd.h"
 
-#include <boost/asio.hpp>
-#include <easylogging++.h>
+#include <bits/chrono.h>  // for duration_cast
+#include <memory>         // for shared_ptr
+#include <utility>        // for pair
 
-#include "config/max_lhs/option.h"
-#include "config/thread_number/option.h"
-#include "lattice_traversal/lattice_traversal.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
-#include "model/table/relational_schema.h"
+#include <boost/asio/post.hpp>                     // for post
+#include <boost/asio/thread_pool.hpp>              // for thread_pool
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer, CINFO
+
+#include "cache_eviction_method.h"                       // for CacheEvictio...
+#include "caching_method.h"                              // for CachingMethod
+#include "common_option.h"                               // for CommonOption
+#include "config/thread_number/option.h"                 // for kThreadNumbe...
+#include "fd/dfd/partition_storage/partition_storage.h"  // for PartitionSto...
+#include "fd/pli_based_fd_algorithm.h"                   // for PliBasedFDAl...
+#include "lattice_traversal/lattice_traversal.h"         // for LatticeTrave...
+#include "model/table/position_list_index.h"             // for PositionList...
+#include "model/table/relational_schema.h"               // for RelationalSc...
+#include "primitive_collection.h"                        // for PrimitiveCol...
+#include "table/column.h"                                // for Column
+#include "table/column_data.h"                           // for ColumnData
+#include "table/column_layout_relation_data.h"           // for ColumnLayout...
+#include "table/vertical.h"                              // for Vertical
 
 namespace algos {
 

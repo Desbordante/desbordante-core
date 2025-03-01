@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "table/column_index.h"  // for ColumnIndex
+
 namespace algos::fastod {
 
 std::string AttributeSet::ToString() const {

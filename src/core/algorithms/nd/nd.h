@@ -1,7 +1,11 @@
 #pragma once
 
-#include "model/table/column.h"
-#include "model/table/vertical.h"
+#include <string>  // for string
+#include <tuple>   // for tuple
+#include <vector>  // for vector
+
+#include "model/table/vertical.h"  // for Vertical
+#include "table/column_index.h"    // for ColumnIndex
 
 namespace model {
 

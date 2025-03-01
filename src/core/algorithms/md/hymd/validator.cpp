@@ -1,25 +1,28 @@
 #include "algorithms/md/hymd/validator.h"
 
-#include <cassert>
-#include <functional>
-#include <vector>
+#include <optional>  // for optional
+#include <span>      // for span
+#include <tuple>     // for tuple
+#include <vector>    // for vector
 
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "algorithms/md/hymd/utility/java_hash.h"
-#include "algorithms/md/hymd/utility/reserve_more.h"
-#include "algorithms/md/hymd/utility/size_t_vector_hash.h"
-#include "algorithms/md/hymd/utility/trivial_array.h"
-#include "algorithms/md/hymd/utility/zip.h"
-#include "model/index.h"
-#include "util/bitset_utils.h"
-#include "util/erase_if_replace.h"
-#include "util/get_preallocated_vector.h"
-#include "util/py_tuple_hash.h"
+#include "algorithms/md/hymd/lattice/rhs.h"               // for Rhs
+#include "algorithms/md/hymd/lowest_cc_value_id.h"        // for kLowestCCVa...
+#include "algorithms/md/hymd/table_identifiers.h"         // for ValueIdenti...
+#include "algorithms/md/hymd/utility/invalidated_rhss.h"  // for Invalidated...
+#include "algorithms/md/hymd/utility/reserve_more.h"      // for ReserveMore
+#include "algorithms/md/hymd/utility/trivial_array.h"     // for PointerArra...
+#include "algorithms/md/hymd/utility/zip.h"               // for Zip
+#include "md/hymd/column_match_info.h"                    // for ColumnMatch...
+#include "md/hymd/indexes/column_similarity_info.h"       // for ColumnMatch...
+#include "md/hymd/indexes/pli_cluster.h"                  // for PliCluster
+#include "md/hymd/lattice/md_lattice.h"                   // for MdLattice
+#include "md/hymd/lattice/validation_info.h"              // for ValidationInfo
+#include "md/hymd/md_lhs.h"                               // for MdLhs, LhsNode
+#include "model/index.h"                                  // for Index
+#include "util/bitset_utils.h"                            // for BitsetToInd...
+#include "util/erase_if_replace.h"                        // for EraseIfReplace
+#include "util/get_preallocated_vector.h"                 // for GetPrealloc...
+#include "worker_thread_pool.h"                           // for WorkerThrea...
 
 namespace algos::hymd {
 using indexes::CompressedRecords;
@@ -177,8 +180,8 @@ public:
 
 template <typename Collection>
 auto BatchValidator::RhsValidator::LowerCCVIDAndCollectRecommendations(
-        RecordCluster const& lhs_records,
-        Collection const& matched_rhs_records) -> MdValidationStatus {
+        RecordCluster const& lhs_records, Collection const& matched_rhs_records)
+        -> MdValidationStatus {
     // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
     // 3), non-minimal are considered invalidated (4).
     DESBORDANTE_ASSUME(current_ccv_id_ != kLowestCCValueId);        // 1

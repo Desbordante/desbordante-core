@@ -1,6 +1,16 @@
 #pragma once
 
-#include "hashed_column_store.h"
+#include <memory>    // for unique_ptr
+#include <stddef.h>  // for size_t
+#include <string>    // for string
+#include <utility>   // for move
+#include <vector>    // for vector
+
+#include "ind/faida/preprocessing/abstract_column_store.h"  // for AbstractC...
+
+namespace model {
+class IDatasetStream;
+}
 
 namespace algos::faida {
 

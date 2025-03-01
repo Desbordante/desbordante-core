@@ -1,9 +1,11 @@
 #include "balancer.h"
 
-#include <algorithm>
-#include <map>
-#include <numeric>
-#include <vector>
+#include <algorithm>         // for sort, min
+#include <functional>        // for plus
+#include <initializer_list>  // for initializer_list
+#include <map>               // for map
+#include <numeric>           // for accumulate
+#include <vector>            // for vector, swap
 
 std::vector<std::vector<int>> Balancer::Balance(std::vector<int> const& weights,
                                                 int const& processors_num) {

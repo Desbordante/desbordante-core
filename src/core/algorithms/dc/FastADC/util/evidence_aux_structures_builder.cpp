@@ -1,11 +1,10 @@
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 
-#include <assert.h>
-#include <stddef.h>
+#include <assert.h>  // for assert
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CDEBUG, LOG
 
-#include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/model/predicate.h"  // for GetPredicateByType, Predicat...
 
 namespace algos::fastadc {
 

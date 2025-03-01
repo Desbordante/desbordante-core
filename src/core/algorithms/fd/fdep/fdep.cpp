@@ -1,11 +1,18 @@
 #include "algorithms/fd/fdep/fdep.h"
 
-#include <chrono>
+#include <bits/chrono.h>  // for duration_cast
+#include <bitset>         // for bitset
+#include <stdexcept>      // for runtime_error
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/types/bitset.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"                           // for CommonOption
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
+#include "fd/fd_algorithm.h"                         // for FDAlgorithm
+#include "fd/fdep/fd_tree_element.h"                 // for FDTreeElement
+#include "model/types/bitset.h"                      // for Bitset
+#include "table/idataset_stream.h"                   // for IDatasetStream
+#include "table/relational_schema.h"                 // for RelationalSchema
 
 // #ifndef PRINT_FDS
 // #define PRINT_FDS

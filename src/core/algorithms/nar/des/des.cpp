@@ -1,16 +1,26 @@
 #include "des.h"
 
-#include <algorithm>
-#include <chrono>
-#include <cstddef>
-#include <memory>
-#include <vector>
+#include <algorithm>      // for generate_n, __sort_fn
+#include <bits/chrono.h>  // for duration_cast, ope...
+#include <cstddef>        // for size_t
+#include <iterator>       // for back_insert_iterator
+#include <memory>         // for shared_ptr, unique...
+#include <string_view>    // for basic_string_view
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include "algorithms/nar/value_range.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/types/types.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithms/nar/value_range.h"      // for CreateValueRange
+#include "config/names_and_descriptions.h"   // for DESBORDANTE_OPTION...
+#include "config/option_using.h"             // for DESBORDANTE_OPTION...
+#include "nar/des/differential_functions.h"  // for DifferentialOptions
+#include "nar/des/encoded_nar.h"             // for EncodedNAR, NAR
+#include "nar/des/enums.h"                   // for DifferentialStrategy
+#include "nar/des/rng.h"                     // for RNG
+#include "nar/nar.h"                         // for NAR, NARQualities
+#include "nar/nar_algorithm.h"               // for NARAlgorithm
+#include "option.h"                          // for Option
 
 namespace algos::des {
 using model::ValueRange;

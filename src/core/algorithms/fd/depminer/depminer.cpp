@@ -1,13 +1,27 @@
 #include "algorithms/fd/depminer/depminer.h"
 
-#include <chrono>
+#include <bits/chrono.h>  // for duration, duratio...
+#include <format>         // for vector
+#include <iomanip>        // for setw
 #include <list>
 #include <memory>
+#include <stddef.h>     // for size_t
+#include <string_view>  // for basic_string_view
+#include <utility>      // for move
 
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 #include <easylogging++.h>
 
-#include "model/table/agree_set_factory.h"
-#include "model/table/relational_schema.h"
+#include "custom_hashes.h"                      // for hash
+#include "fd/depminer/cmax_set.h"               // for CMAXSet
+#include "fd/pli_based_fd_algorithm.h"          // for PliBasedFDAlgorithm
+#include "model/table/agree_set_factory.h"      // for AgreeSetFactory
+#include "model/table/relational_schema.h"      // for RelationalSchema
+#include "primitive_collection.h"               // for PrimitiveCollection
+#include "table/column.h"                       // for Column
+#include "table/column_data.h"                  // for ColumnData
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelat...
+#include "table/position_list_index.h"          // for PositionListIndex
 
 namespace algos {
 

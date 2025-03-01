@@ -1,14 +1,26 @@
-#include <iostream>
-#include <vector>
+#include <algorithm>  // for sort, transform
+#include <exception>  // for exception
+#include <iostream>   // for char_traits, basic_ostream
+#include <iterator>   // for back_inserter
+#include <memory>     // for unique_ptr
+#include <string>     // for hash
+#include <utility>    // for pair
+#include <vector>     // for vector
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>  // for ContainerEq, ASSERT_THAT
+#include <gtest/gtest.h>  // for Message, Values, Paramete...
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "all_csv_configs.h"
-#include "config/error/type.h"
-#include "config/names.h"
+#include "algorithms/algo_factory.h"        // for CreateAndLoadAlgorithm
+#include "algorithms/fd/pyro/pyro.h"        // for Pyro
+#include "all_csv_configs.h"                // for kAbalone, kAdult, kCIPubl...
+#include "config/error/type.h"              // for ErrorType
+#include "config/names.h"                   // for kCsvConfig, kError, kSeed
+#include "fd/fd_algorithm.h"                // for FDAlgorithm
+#include "fd/pli_based_fd_algorithm.h"      // for PliBasedFDAlgorithm
+#include "fd/pyrocommon/core/parameters.h"  // for Parameters
+#include "table/column.h"                   // for Column
+
+struct CSVConfig;
 
 namespace tests {
 

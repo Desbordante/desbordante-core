@@ -1,4 +1,6 @@
-#include "model/table/typed_column_data.h"
+namespace model {
+class TypedColumnData;
+}
 
 namespace algos::fastadc {
 

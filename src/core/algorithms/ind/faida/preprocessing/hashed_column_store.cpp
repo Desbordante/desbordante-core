@@ -1,6 +1,12 @@
 #include "hashed_column_store.h"
 
-#include "model/table/column.h"
+#include <fstream>    // for basic_ifs...
+#include <stdexcept>  // for runtime_e...
+
+#include "ind/faida/preprocessing/abstract_column_store.h"  // for ColumnIndex
+#include "model/table/column.h"                             // for Column
+#include "table/idataset_stream.h"                          // for IDatasetS...
+#include "table/relational_schema.h"                        // for Relationa...
 
 namespace algos::faida {
 

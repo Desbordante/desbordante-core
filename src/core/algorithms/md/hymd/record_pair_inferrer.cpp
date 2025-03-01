@@ -1,15 +1,36 @@
 #include "algorithms/md/hymd/record_pair_inferrer.h"
 
-#include <algorithm>
-#include <atomic>
-#include <cstddef>
-#include <ranges>
-#include <vector>
+#include <algorithm>         // for for_each, min
+#include <atomic>            // for atomic, memor...
+#include <cassert>           // for assert
+#include <compare>           // for strong_ordering
+#include <cstddef>           // for size_t
+#include <functional>        // for _Mem_fn, mem_fn
+#include <initializer_list>  // for initializer_list
+#include <ranges>            // for iota_view
+#include <vector>            // for vector
 
-#include <easylogging++.h>
+#include <boost/unordered/detail/foa/table.hpp>  // for operator==
+#include <easylogging++.h>                       // for Writer, CWARNING
 
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "util/get_preallocated_vector.h"
+#include "algorithms/md/hymd/utility/index_range.h"     // for IndexRange
+#include "desbordante_assume.h"                         // for DESBORDANTE_A...
+#include "md/hymd/column_classifier_value_id.h"         // for ColumnClassif...
+#include "md/hymd/indexes/column_similarity_info.h"     // for ColumnMatchSi...
+#include "md/hymd/indexes/compressed_records.h"         // for CompressedRec...
+#include "md/hymd/indexes/dictionary_compressor.h"      // for DictionaryCom...
+#include "md/hymd/indexes/keyed_position_list_index.h"  // for KeyedPosition...
+#include "md/hymd/indexes/pli_cluster.h"                // for PliCluster
+#include "md/hymd/indexes/similarity_index.h"           // for FlatUpperSetI...
+#include "md/hymd/indexes/similarity_matrix.h"          // for SimilarityMat...
+#include "md/hymd/lattice/md_lattice.h"                 // for MdLattice
+#include "md/hymd/lhs_ccv_ids_info.h"                   // for LhsCCVIdsInfo
+#include "md/hymd/lowest_cc_value_id.h"                 // for kLowestCCValueId
+#include "md/hymd/pair_comparison_result.h"             // for PairCompariso...
+#include "md/hymd/recommendation.h"                     // for Recommendation
+#include "md/hymd/utility/zip.h"                        // for Zip
+#include "util/get_preallocated_vector.h"               // for GetPreallocat...
+#include "worker_thread_pool.h"                         // for WorkerThreadPool
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,

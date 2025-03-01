@@ -1,14 +1,23 @@
 #include "algorithms/fd/pfd_verifier/pfd_verifier.h"
 
-#include <chrono>
-#include <memory>
+#include <bits/chrono.h>  // for duration_cast
+#include <functional>     // for function
+#include <memory>         // for shared_ptr, __sh...
+#include <stdexcept>      // for runtime_error
 
-#include "algorithms/algorithm.h"
-#include "config/equal_nulls/option.h"
-#include "config/error_measure/option.h"
-#include "config/indices/option.h"
-#include "config/names.h"
-#include "config/tabular_data/input_table/option.h"
+#include "algorithms/algorithm.h"                    // for Algorithm
+#include "common_option.h"                           // for CommonOption
+#include "config/equal_nulls/option.h"               // for kEqualNullsOpt
+#include "config/error_measure/option.h"             // for kPfdErrorMeasureOpt
+#include "config/indices/option.h"                   // for IndicesOption
+#include "config/names.h"                            // for kEqualNulls, kLh...
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
+#include "fd/pfd_verifier/pfd_stats_calculator.h"    // for PFDStatsCalculator
+#include "fd/tane/enums.h"                           // for PfdErrorMeasure
+#include "indices/type.h"                            // for IndicesType
+#include "table/column_data.h"                       // for ColumnData
+#include "table/column_layout_relation_data.h"       // for ColumnLayoutRela...
+#include "table/relational_schema.h"                 // for RelationalSchema
 
 namespace algos {
 

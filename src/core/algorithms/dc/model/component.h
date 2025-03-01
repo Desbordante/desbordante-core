@@ -2,10 +2,14 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>  // for swap
 
 #include "algorithms/dc/model/operator.h"
-#include "model/types/builtin.h"
-#include "model/types/types.h"
+#include "type.h"  // for Type
+
+namespace model {
+enum class CompareResult;
+}
 
 namespace algos::dc {
 
@@ -43,7 +47,7 @@ public:
     }
 
     bool operator<=(Component const& rhs) const {
-        return *this < rhs or *this == rhs;
+        return *this < rhs or * this == rhs;
     }
 
     bool operator>(Component const& rhs) const {

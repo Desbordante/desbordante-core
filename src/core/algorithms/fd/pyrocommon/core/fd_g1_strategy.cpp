@@ -1,11 +1,25 @@
 #include "fd_g1_strategy.h"
 
-#include <unordered_map>
+#include <deque>          // for _Deque_iterator
+#include <stdexcept>      // for runtime_error
+#include <unordered_map>  // for unordered_map
+#include <variant>        // for get, holds_alter...
+#include <vector>         // for vector
 
-#include <easylogging++.h>
+#include <boost/format/free_funcs.hpp>  // for operator<<
+#include <easylogging++.h>              // for Writer, CDEBUG, LOG
 
-#include "../model/pli_cache.h"
-#include "search_space.h"
+#include "../model/pli_cache.h"                      // for PLICache
+#include "fd/pyrocommon/core/dependency_consumer.h"  // for DependencyConsumer
+#include "fd/pyrocommon/core/dependency_strategy.h"  // for DependencyStrategy
+#include "fd/pyrocommon/core/parameters.h"           // for Parameters
+#include "fd/pyrocommon/core/profiling_context.h"    // for ProfilingContext
+#include "fd/pyrocommon/model/agree_set_sample.h"    // for AgreeSetSample
+#include "search_space.h"                            // for SearchSpace
+#include "table/column_data.h"                       // for ColumnData
+#include "table/column_layout_relation_data.h"       // for ColumnLayoutRela...
+#include "table/position_list_index.h"               // for PositionListIndex
+#include "table/relational_schema.h"                 // for RelationalSchema
 
 unsigned long long FdG1Strategy::nanos_ = 0;
 

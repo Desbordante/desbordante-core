@@ -1,6 +1,7 @@
 #include "algorithms/nd/nd_verifier/util/highlight.h"
 
 #include <algorithm>
+#include <iterator>  // for back_i...
 #include <memory>
 #include <ostream>
 #include <string>

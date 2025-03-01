@@ -1,21 +1,19 @@
 #include "gfd_handler.h"
 
-#include <iostream>
-#include <set>
-#include <thread>
+#include <bits/chrono.h>  // for duration_cast, ope...
+#include <fstream>        // for basic_ifstream
+#include <string_view>    // for basic_string_view
 
-#include <boost/graph/eccentricity.hpp>
-#include <boost/graph/exterior_property.hpp>
-#include <boost/graph/floyd_warshall_shortest.hpp>
-#include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer, CDEBUG, LOG
 
-#include "balancer.h"
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
+#include "algorithm.h"                  // for Algorithm
+#include "config/option_using.h"        // for DESBORDANTE_OPTION...
+#include "descriptions.h"               // for kDGfdData, kDGraph...
+#include "gfd/gfd.h"                    // for Gfd
+#include "graph_parser/graph_parser.h"  // for ReadGfd, ReadGraph
+#include "names.h"                      // for kGfdData, kGraphData
+#include "option.h"                     // for Option
 
 namespace algos {
 

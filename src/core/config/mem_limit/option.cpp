@@ -1,6 +1,12 @@
 #include "config/mem_limit/option.h"
 
+#include <string>   // for to_string
+#include <variant>  // for variant
+
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
+#include "exceptions.h"      // for ConfigurationError
+#include "mem_limit/type.h"  // for MemLimitMBType
 
 namespace config {
 using names::kMemLimitMB, descriptions::kDMemLimitMB;

@@ -1,8 +1,15 @@
 #include "dc/FastADC/model/predicate_set.h"
 
-#include <algorithm>
+#include <algorithm>  // for max
+#include <sstream>    // for basic_ostream, basic_strings...
 
-#include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/model/predicate.h"  // for PredicatePtr
+
+namespace algos {
+namespace fastadc {
+class PredicateProvider;
+}
+}  // namespace algos
 
 namespace algos::fastadc {
 

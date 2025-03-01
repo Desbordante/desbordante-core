@@ -1,14 +1,25 @@
 #pragma once
 
-#include <bitset>
-#include <functional>
-#include <stdexcept>
-#include <string>
-
-#include <boost/functional/hash.hpp>
+#include <bitset>            // for bitset, operator&, operator^
+#include <cstddef>           // for size_t
+#include <functional>        // for function
+#include <initializer_list>  // for initializer_list
+#include <stdexcept>         // for invalid_argument
+#include <string>            // for operator+, to_string, string
+#include <utility>           // for move
 
 #include "model/table/column_index.h"
 #include "model/types/bitset.h"
+
+namespace boost {
+template <class T>
+struct hash;
+}
+
+namespace std {
+template <typename>
+struct hash;
+}
 
 namespace algos::fastod {
 

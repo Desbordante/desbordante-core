@@ -1,6 +1,18 @@
 #include "fun.h"
 
-#include <easylogging++.h>
+#include <algorithm>      // for find, max
+#include <bits/chrono.h>  // for duration_cast
+#include <stddef.h>       // for size_t
+#include <vector>         // for vector
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <easylogging++.h>                          // for Writer, CINFO, LOG
+
+#include "custom_hashes.h"                      // for hash
+#include "fd/pli_based_fd_algorithm.h"          // for PliBasedFDAlgorithm
+#include "table/column_data.h"                  // for ColumnData
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelat...
+#include "table/position_list_index.h"          // for PositionListIndex
 
 namespace algos {
 

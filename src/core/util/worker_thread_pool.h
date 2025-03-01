@@ -1,19 +1,20 @@
 #pragma once
 
-#include <atomic>
-#include <condition_variable>
-#include <cstddef>
-#include <functional>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <variant>
-#include <vector>
+#include <atomic>              // for atomic, memory_order
+#include <condition_variable>  // for condition_variable
+#include <cstddef>             // for size_t
+#include <functional>          // for function
+#include <future>              // for packaged_task, future
+#include <memory>              // for _NonArray, shared_ptr, make_shared
+#include <mutex>               // for mutex, unique_lock, once_flag
+#include <utility>             // for move
+#include <variant>             // for monostate
+#include <vector>              // for vector
 
-#include "model/index.h"
-#include "util/auto_join_thread.h"
-#include "util/barrier.h"
-#include "util/desbordante_assume.h"
+#include "model/index.h"              // for Index
+#include "util/auto_join_thread.h"    // for JThread
+#include "util/barrier.h"             // for Barrier
+#include "util/desbordante_assume.h"  // for DESBORDANTE_ASSUME
 
 namespace util {
 class WorkerThreadPool {

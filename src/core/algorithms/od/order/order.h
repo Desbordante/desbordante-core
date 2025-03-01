@@ -1,16 +1,16 @@
 #pragma once
 
-#include <memory>
-#include <unordered_map>
-#include <unordered_set>
+#include <memory>         // for unique_ptr
+#include <unordered_map>  // for unordered...
+#include <vector>         // for vector
 
-#include "algorithms/algorithm.h"
-#include "config/tabular_data/input_table_type.h"
-#include "dependency_checker.h"
-#include "list_lattice.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "order_utility.h"
-#include "sorted_partitions.h"
+#include "algorithms/algorithm.h"                           // for Algorithm
+#include "config/tabular_data/input_table_type.h"           // for InputTable
+#include "dependency_checker.h"                             // for ValidityType
+#include "list_lattice.h"                                   // for ListLattice
+#include "model/table/column_layout_typed_relation_data.h"  // for ColumnLay...
+#include "order_utility.h"                                  // for Attribute...
+#include "sorted_partitions.h"                              // for SortedPar...
 
 namespace algos::order {
 

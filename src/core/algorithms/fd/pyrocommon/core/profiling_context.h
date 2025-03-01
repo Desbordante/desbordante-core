@@ -1,16 +1,27 @@
 #pragma once
 
-#include <random>
-#include <string>
+#include <functional>  // for function
+#include <memory>      // for unique_ptr, operator==
+#include <random>      // for mt19937
+#include <string>      // for string
+#include <vector>      // for vector
 
-#include "../model/agree_set_sample.h"
-#include "../model/partial_fd.h"
-#include "../model/partial_key.h"
-#include "cache_eviction_method.h"
-#include "caching_method.h"
-#include "dependency_consumer.h"
-#include "parameters.h"
-#include "util/custom_random.h"
+#include "../model/agree_set_sample.h"          // for AgreeSetSample
+#include "dependency_consumer.h"                // for DependencyConsumer
+#include "parameters.h"                         // for Parameters
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelationData
+#include "util/custom_random.h"                 // for CustomRandom
+
+class PartialFD;
+class PartialKey;
+class RelationalSchema;
+class Vertical;
+enum class CacheEvictionMethod;
+enum class CachingMethod;
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace model {
 

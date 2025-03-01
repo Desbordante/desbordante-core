@@ -1,14 +1,20 @@
 #pragma once
-#include <functional>
-#include <memory>
-#include <shared_mutex>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
-#include <boost/dynamic_bitset.hpp>
+#include <functional>     // for function
+#include <iterator>       // for pair
+#include <memory>         // for shared_ptr, uniqu...
+#include <shared_mutex>   // for shared_mutex
+#include <stddef.h>       // for size_t
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair
+#include <vector>         // for vector
 
-#include "util/custom_hashes.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
+
+#include "table/relational_schema.h"  // for RelationalSchema
+#include "table/vertical.h"           // for Vertical
 
 namespace model {
 

@@ -1,19 +1,31 @@
 #include "fastfds.h"
 
-#include <algorithm>
-#include <mutex>
-#include <thread>
+#include <algorithm>      // for sort
+#include <assert.h>       // for assert
+#include <bits/chrono.h>  // for duration_cast, ope...
+#include <memory>         // for unique_ptr, shared...
+#include <mutex>          // for mutex, lock_guard
+#include <new>            // for operator new
+#include <string_view>    // for basic_string_view
+#include <unordered_set>  // for operator==, unorde...
+#include <utility>        // for move
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/thread.hpp>
-#include <easylogging++.h>
+#include <boost/asio/post.hpp>                     // for post
+#include <boost/asio/thread_pool.hpp>              // for thread_pool
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer, LOG, CDEBUG
 
-#include "config/max_lhs/option.h"
-#include "config/thread_number/option.h"
-#include "model/table/agree_set_factory.h"
-#include "util/parallel_for.h"
+#include "common_option.h"                      // for CommonOption
+#include "config/thread_number/option.h"        // for kThreadNumberOpt
+#include "custom_hashes.h"                      // for hash
+#include "fd/pli_based_fd_algorithm.h"          // for PliBasedFDAlgorithm
+#include "model/table/agree_set_factory.h"      // for AgreeSetFactory
+#include "table/column_data.h"                  // for ColumnData
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelati...
+#include "table/position_list_index.h"          // for PositionListIndex
+#include "table/relational_schema.h"            // for RelationalSchema
+#include "table/vertical.h"                     // for Vertical
+#include "util/parallel_for.h"                  // for ParallelForeach
 
 namespace algos {
 

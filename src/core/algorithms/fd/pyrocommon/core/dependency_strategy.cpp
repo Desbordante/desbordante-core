@@ -1,6 +1,12 @@
 #include "dependency_strategy.h"
 
-#include "../model/pli_cache.h"
+#include "../model/pli_cache.h"                    // for PLICache
+#include "fd/pyrocommon/core/parameters.h"         // for Parameters
+#include "fd/pyrocommon/core/profiling_context.h"  // for ProfilingContext
+#include "fd/pyrocommon/model/agree_set_sample.h"  // for AgreeSetSample
+#include "table/column_layout_relation_data.h"     // for ColumnLayoutRelati...
+#include "table/position_list_index.h"             // for PositionListIndex
+#include "table/vertical.h"                        // for Vertical
 
 bool DependencyStrategy::ShouldResample(Vertical const& vertical, double boost_factor) const {
     if (context_->GetParameters().sample_size <= 0 || vertical.GetArity() < 1) return false;

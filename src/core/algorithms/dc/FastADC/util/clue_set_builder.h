@@ -1,10 +1,20 @@
 #pragma once
 
-#include <easylogging++.h>
+#include <vector>  // for vector
 
-#include "dc/FastADC/model/pli_shard.h"
-#include "dc/FastADC/util/common_clue_set_builder.h"
-#include "dc/FastADC/util/evidence_aux_structures_builder.h"
+#include "dc/FastADC/util/common_clue_set_builder.h"  // for ClueSet
+
+namespace algos {
+namespace fastadc {
+class PliShard;
+}
+}  // namespace algos
+
+namespace algos {
+namespace fastadc {
+struct PredicatePacks;
+}
+}  // namespace algos
 
 namespace algos::fastadc {
 

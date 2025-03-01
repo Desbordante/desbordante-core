@@ -1,17 +1,19 @@
 #pragma once
 
-#include <bitset>
-#include <cstddef>
-#include <span>
-#include <string>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <span>     // for span
+#include <string>   // for allocator, char_traits
+#include <vector>   // for vector
 
-#include <boost/container_hash/hash.hpp>
+#include <boost/container_hash/hash.hpp>  // for hash_combine
 
-#include "dc/FastADC/model/column_operand.h"
-#include "dc/FastADC/model/operator.h"
-#include "model/types/bitset.h"
-#include "table/typed_column_data.h"
+#include "dc/FastADC/model/column_operand.h"  // for ColumnOperand, hash_value
+#include "dc/FastADC/model/operator.h"        // for Operator, OperatorType ...
+#include "model/types/bitset.h"               // for Bitset
+
+namespace model {
+class TypedColumnData;
+}
 
 namespace algos::fastadc {
 

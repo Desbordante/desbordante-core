@@ -5,8 +5,6 @@
 #include <utility>
 
 #include "algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
-#include "config/exceptions.h"
-#include "model/types/string_type.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 namespace similarity_measures {

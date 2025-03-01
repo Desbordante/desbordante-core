@@ -1,17 +1,43 @@
 #include "pyro.h"
 
-#include <chrono>
-#include <mutex>
-#include <thread>
+#include <bits/chrono.h>  // for duration_cast
+#include <functional>     // for function, ref
+#include <mutex>          // for mutex, sco...
+#include <ostream>        // for basic_ios:...
+#include <stdexcept>      // for runtime_error
+#include <string>         // for char_traits
+#include <string_view>    // for basic_stri...
+#include <thread>         // for thread
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include <easylogging++.h>
+#include <boost/format/alt_sstream_impl.hpp>       // for basic_alts...
+#include <boost/format/format_class.hpp>           // for basic_format
+#include <boost/format/format_fwd.hpp>             // for format
+#include <boost/format/format_implementation.hpp>  // for basic_form...
+#include <boost/format/free_funcs.hpp>             // for operator<<
+#include <boost/move/utility_core.hpp>             // for move
+#include <boost/optional/optional.hpp>             // for get_pointer
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer, LOG
 
-#include "algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
-#include "config/error/option.h"
-#include "config/max_lhs/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/thread_number/option.h"
+#include "algorithms/fd/pyrocommon/core/fd_g1_strategy.h"  // for FdG1Strategy
+#include "common_option.h"                                 // for CommonOption
+#include "config/error/option.h"                           // for kErrorOpt
+#include "config/option_using.h"                           // for DESBORDANT...
+#include "config/thread_number/option.h"                   // for kThreadNum...
+#include "descriptions.h"                                  // for kDSeed
+#include "fd/fd_algorithm.h"                               // for FDAlgorithm
+#include "fd/pli_based_fd_algorithm.h"                     // for PliBasedFD...
+#include "fd/pyrocommon/core/dependency_candidate.h"       // for Dependency...
+#include "fd/pyrocommon/core/dependency_strategy.h"        // for Dependency...
+#include "fd/pyrocommon/core/profiling_context.h"          // for ProfilingC...
+#include "fd/pyrocommon/core/search_space.h"               // for SearchSpace
+#include "names.h"                                         // for kSeed
+#include "option.h"                                        // for Option
+#include "table/column_layout_relation_data.h"             // for ColumnLayo...
+#include "table/position_list_index.h"                     // for PositionLi...
+#include "table/relational_schema.h"                       // for Relational...
 
 namespace algos {
 

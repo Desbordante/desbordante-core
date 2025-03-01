@@ -1,6 +1,6 @@
 #pragma once
 
-#include <chrono>
+#include <bits/chrono.h>  // for high_resolution_clock
 
 namespace algos::fastod {
 
