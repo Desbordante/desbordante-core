@@ -52,7 +52,7 @@ unsigned long long CFDVerifier::ExecuteInternal() {
     auto extract_item_ids =
             [this, &get_attr_id](std::vector<std::pair<std::string, std::string>> const& rule_part)
             -> std::vector<int> {
-        std::vector<int> item_ids(relation_->GetAttrsNumber());
+        std::vector<int> item_ids;
         for (auto const& [attr_name, item_name] : rule_part) {
             int attr_id = get_attr_id(attr_name);
 
