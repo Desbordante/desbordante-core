@@ -1,4 +1,4 @@
-#include "egfd_validation.h"
+#include "algorithms/gfd/egfd_validation.h"
 
 #include <iostream>
 
@@ -13,6 +13,8 @@
 namespace {
 
 using namespace algos;
+using namespace gfd;
+
 using Match = std::vector<std::pair<std::set<vertex_t>::iterator, std::set<vertex_t>::iterator>>;
 
 void FstStepForest(graph_t const& graph, std::map<vertex_t, std::set<vertex_t>>& rooted_subtree,
@@ -1034,6 +1036,8 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
 }  // namespace
 
 namespace algos {
+
+using namespace gfd;
 
 std::vector<Gfd> EGfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
                                                        std::vector<Gfd> const& gfds) {
