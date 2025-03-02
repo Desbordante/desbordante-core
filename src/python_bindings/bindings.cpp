@@ -6,6 +6,7 @@
 
 #include "ac/bind_ac.h"
 #include "ar/bind_ar.h"
+#include "ar/bind_ar_verification.h"
 #include "bind_main_classes.h"
 #include "cfd/bind_cfd.h"
 #include "data/bind_data_types.h"
@@ -69,6 +70,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindMd,
                            BindDCVerification,
                            BindPfdVerification,
+                           BindArVerification,
                            BindFastADC}) {
         bind_func(module);
     }
