@@ -7,14 +7,15 @@ TABLES = [(f'../datasets/ind_datasets/{table_name}.csv', ',', True) for table_na
 
 algo.load_data(tables=TABLES)
 
-algo.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
-inds = algo.get_ainds()
+algo.execute(error=0.5, validity=1, completeness=0.33, condition_type="row")
+inds = algo.get_cinds()
 print('Found inclusion dependencies (-> means "is included in"):\n')
 for ind in inds:
     print(ind)
 
-
-
+ind = inds[0].to_pattern_tableau()
+print(ind)
+print(inds[0].get_pattern_columns())
 
 
 

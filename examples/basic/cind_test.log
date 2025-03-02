@@ -1,4 +1,4 @@
-validity: 1.000000, completeness: 0.330000, type: group
+validity: 1.000000, completeness: 0.330000, type: row
 table = cind_test_de.csv, column = pid, column size: 10
 column data: ['1::Cecil Kellaway', '1::Cecil Kellaway', '1::Cecil Kellaway', '1::Cecil Kellaway', '1::Cecil Kellaway', '1::Cecil Kellaway', '9::Sam Sheppard', '13::Mel Sheppard', '17::Isobel Elsom', '17::Isobel Elsom', ]
 table = cind_test_de.csv, column = cent, column size: 10
@@ -24,49 +24,805 @@ column data: ['21::Actor', '22::Athlette', '25::Stunt', '27::Olympic', ]
 
 lhs inclusion attributes: [(0, 0)]
 rhs inclusion attributes: [(1, 0)]
-conditional attributes: [(0, 1)(0, 2)(0, 3)(0, 4)(1, 1)(1, 2)(1, 3)(1, 4)]
+conditional attributes: [(0, 1)(0, 2)(0, 3)(0, 4)]
 rhs values: [{Cecil Kellaway, }{Mel Sheppard, }{Buddy Roosevelt, }{Sante Gaiardoni, }]
-lhs values: [{Cecil Kellaway, }<>::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Sam Sheppard, }<>, {Mel Sheppard, }<>::included, {Isobel Elsom, }<>, {Isobel Elsom, }, ]
-basket: [included, ({birthplace, Sud}, {deathplace, USA}, {deathplace, Cal}, {deathplace, LA}, {desc, Schauspieler}, {birthplace, Kap}, {cent, 18}, )]
+lhs values: [{Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Cecil Kellaway, }::included, {Sam Sheppard, }, {Mel Sheppard, }::included, {Isobel Elsom, }, {Isobel Elsom, }, ]
+basket: [included, ({deathplace, LA}, {desc, Schauspieler}, {birthplace, Kap}, {cent, 18}, )]
+basket: [included, ({deathplace, Cal}, {desc, Schauspieler}, {birthplace, Kap}, {cent, 18}, )]
+basket: [included, ({deathplace, USA}, {desc, Schauspieler}, {birthplace, Kap}, {cent, 18}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, LA}, {birthplace, Sud}, {cent, 18}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, Cal}, {birthplace, Sud}, {cent, 18}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, USA}, {birthplace, Sud}, {cent, 18}, )]
 basket: [null, ({desc, Mediziner}, {deathplace, -}, {birthplace, -}, {cent, 19}, )]
 basket: [included, ({desc, Leichtathlet}, {deathplace, Queens}, {birthplace, Almonesson Lake}, {cent, 18}, )]
-basket: [null, ({deathplace, Cal}, {desc, Schauspielerin}, {deathplace, LA}, {birthplace, Cambridge}, {cent, 18}, )]
+basket: [null, ({desc, Schauspielerin}, {deathplace, LA}, {birthplace, Cambridge}, {cent, 18}, )]
+basket: [null, ({desc, Schauspielerin}, {deathplace, Cal}, {birthplace, Cambridge}, {cent, 18}, )]
 
 candidates:
-[Included, {1, 2}], , validity: 0.666667, completeness: 1.000000, is frequent itemset
-[Included, {2, 3}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {2, 8}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {2, 14}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {3, 4}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
-[Included, {3, 6}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
-[Included, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {3, 15}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {4, 5}], , validity: 1.000000, completeness: 0.500000, is in result
-[Included, {4, 16}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}], , validity: 0.777778, completeness: 1.000000, is frequent itemset
+[Included, {2, 3}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {2, 8}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {2, 14}], , validity: 1.000000, completeness: 0.142857
+[Included, {3, 4}], , validity: 0.666667, completeness: 0.285714
+[Included, {3, 6}], , validity: 0.666667, completeness: 0.285714
+[Included, {3, 7}], , validity: 1.000000, completeness: 0.285714
+[Included, {3, 15}], , validity: 1.000000, completeness: 0.142857
+[Included, {4, 5}], , validity: 1.000000, completeness: 0.857143, is in result
+[Included, {4, 16}], , validity: 1.000000, completeness: 0.142857
 
 candidates:
-[Included, {1, 2}, {3, 4}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
-[Included, {1, 2}, {3, 6}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
+[Included, {1, 2}, {2, 3}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {1, 2}, {2, 8}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {1, 2}, {4, 5}], , validity: 1.000000, completeness: 0.857143, is in result
+[Included, {2, 3}, {4, 5}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {2, 8}, {4, 5}], , validity: 1.000000, completeness: 0.428571, is in result
+
+candidates:
+[Included, {1, 2}, {2, 3}, {4, 5}], , validity: 1.000000, completeness: 0.428571, is in result
+[Included, {1, 2}, {2, 8}, {4, 5}], , validity: 1.000000, completeness: 0.428571, is in result
 
 candidates:
 
 Result:
 (cind_test_de.csv, [pid]) -> (cind_test_en.csv, [pid]) with error threshold = 0.5
 Possible conditions:
-	("-", "Kap", "-", "-", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "Sud", "-", "-", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "Almonesson Lake", "-", "-", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "-", "USA", "-", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "-", "Queens", "-", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "-", "-", "Schauspieler", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
-	("-", "-", "-", "Leichtathlet", "-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	(cind_test_de.csv.cent, cind_test_de.csv.birthplace, cind_test_de.csv.deathplace, cind_test_de.csv.desc);
+	("-", "Kap", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("-", "Sud", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("-", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.857143);
+	("18", "Kap", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("18", "Sud", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("18", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.857143);
+	("-", "Kap", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("-", "Sud", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("18", "Kap", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("18", "Sud", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+lhs inclusion attributes: [(0, 1)]
+rhs inclusion attributes: [(1, 1)]
+conditional attributes: [(0, 0)(0, 2)(0, 3)(0, 4)]
+rhs values: [{18, }{18, }{18, }{19, }]
+lhs values: [{18, }::included, {18, }::included, {18, }::included, {18, }::included, {18, }::included, {18, }::included, {19, }::included, {18, }::included, {18, }::included, {18, }::included, ]
+basket: [included, ({deathplace, LA}, {desc, Schauspieler}, {birthplace, Kap}, {pid, Cecil Kellaway}, )]
+basket: [included, ({deathplace, Cal}, {desc, Schauspieler}, {birthplace, Kap}, {pid, Cecil Kellaway}, )]
+basket: [included, ({deathplace, USA}, {desc, Schauspieler}, {birthplace, Kap}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, LA}, {birthplace, Sud}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, Cal}, {birthplace, Sud}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Schauspieler}, {deathplace, USA}, {birthplace, Sud}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Mediziner}, {deathplace, -}, {birthplace, -}, {pid, Sam Sheppard}, )]
+basket: [included, ({desc, Leichtathlet}, {deathplace, Queens}, {birthplace, Almonesson Lake}, {pid, Mel Sheppard}, )]
+basket: [included, ({desc, Schauspielerin}, {deathplace, LA}, {birthplace, Cambridge}, {pid, Isobel Elsom}, )]
+basket: [included, ({desc, Schauspielerin}, {deathplace, Cal}, {birthplace, Cambridge}, {pid, Isobel Elsom}, )]
+
+candidates:
+[Included, {0, 1}], , validity: 1.000000, completeness: 0.600000, is in result
+[Included, {0, 9}], , validity: 1.000000, completeness: 0.100000
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.100000
+[Included, {0, 17}], , validity: 1.000000, completeness: 0.200000
+[Included, {2, 3}], , validity: 1.000000, completeness: 0.300000
+[Included, {2, 8}], , validity: 1.000000, completeness: 0.300000
+[Included, {2, 11}], , validity: 1.000000, completeness: 0.100000
+[Included, {2, 14}], , validity: 1.000000, completeness: 0.100000
+[Included, {2, 18}], , validity: 1.000000, completeness: 0.200000
+[Included, {3, 4}], , validity: 1.000000, completeness: 0.300000
+[Included, {3, 6}], , validity: 1.000000, completeness: 0.300000
+[Included, {3, 7}], , validity: 1.000000, completeness: 0.200000
+[Included, {3, 11}], , validity: 1.000000, completeness: 0.100000
+[Included, {3, 15}], , validity: 1.000000, completeness: 0.100000
+[Included, {4, 5}], , validity: 1.000000, completeness: 0.600000, is in result
+[Included, {4, 12}], , validity: 1.000000, completeness: 0.100000
+[Included, {4, 16}], , validity: 1.000000, completeness: 0.100000
+[Included, {4, 19}], , validity: 1.000000, completeness: 0.200000
+
+candidates:
+[Included, {0, 1}, {4, 5}], , validity: 1.000000, completeness: 0.600000, is in result
+
+candidates:
+
+Result:
+(cind_test_de.csv, [cent]) -> (cind_test_en.csv, [cent])
+Possible conditions:
+	(cind_test_de.csv.pid, cind_test_de.csv.birthplace, cind_test_de.csv.deathplace, cind_test_de.csv.desc);
+	("Cecil Kellaway", "-", "-", "-", validity = 1.000000, completeness = 0.600000);
+	("-", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.600000);
+	("Cecil Kellaway", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.600000);
+lhs inclusion attributes: [(1, 0)]
+rhs inclusion attributes: [(0, 0)]
+conditional attributes: [(1, 1)(1, 2)(1, 3)(1, 4)]
+rhs values: [{Cecil Kellaway, }{Cecil Kellaway, }{Cecil Kellaway, }{Cecil Kellaway, }{Cecil Kellaway, }{Cecil Kellaway, }{Sam Sheppard, }{Mel Sheppard, }{Isobel Elsom, }{Isobel Elsom, }]
+lhs values: [{Cecil Kellaway, }::included, {Mel Sheppard, }::included, {Buddy Roosevelt, }, {Sante Gaiardoni, }, ]
+basket: [included, ({desc, Actor}, {deathplace, USA}, {birthplace, SA}, {cent, 18}, )]
+basket: [included, ({desc, Athlette}, {deathplace, USA}, {birthplace, USA}, {cent, 18}, )]
+basket: [null, ({birthplace, CO}, {desc, Stunt}, {deathplace, CO}, {cent, 18}, )]
+basket: [null, ({desc, Olympic}, {deathplace, -}, {birthplace, -}, {cent, 19}, )]
+
+candidates:
+[Included, {1, 2}], , validity: 0.666667, completeness: 1.000000, is frequent itemset
+[Included, {2, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 20}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 7}], , validity: 1.000000, completeness: 1.000000, is in result
+[Included, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {1, 2}, {2, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {2, 20}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {3, 7}], , validity: 1.000000, completeness: 1.000000, is in result
+[Included, {1, 2}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 7}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 7}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 20}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 20}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 7}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {1, 2}, {2, 7}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {2, 20}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {3, 7}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 7}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {2, 20}, {3, 7}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {1, 2}, {2, 7}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {2, 20}, {3, 7}, {4, 21}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+
+Result:
+(cind_test_en.csv, [pid]) -> (cind_test_de.csv, [pid]) with error threshold = 0.5
+Possible conditions:
+	(cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("-", "USA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 1.000000);
+	("-", "-", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "-", validity = 1.000000, completeness = 1.000000);
+	("18", "-", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+lhs inclusion attributes: [(1, 1)]
+rhs inclusion attributes: [(0, 1)]
+conditional attributes: [(1, 0)(1, 2)(1, 3)(1, 4)]
+rhs values: [{18, }{18, }{18, }{18, }{18, }{18, }{19, }{18, }{18, }{18, }]
+lhs values: [{18, }::included, {18, }::included, {18, }::included, {19, }::included, ]
+basket: [included, ({desc, Actor}, {deathplace, USA}, {birthplace, SA}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Athlette}, {deathplace, USA}, {birthplace, USA}, {pid, Mel Sheppard}, )]
+basket: [included, ({desc, Stunt}, {deathplace, CO}, {birthplace, CO}, {pid, Buddy Roosevelt}, )]
+basket: [included, ({desc, Olympic}, {deathplace, -}, {birthplace, -}, {pid, Sante Gaiardoni}, )]
+
+candidates:
+[Included, {0, 1}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 23}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 26}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 7}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 11}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 20}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 24}], , validity: 1.000000, completeness: 0.250000
+[Included, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 11}], , validity: 1.000000, completeness: 0.250000
+[Included, {3, 24}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 21}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 25}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 27}], , validity: 1.000000, completeness: 0.250000
+
+candidates:
+
+Result:
+(cind_test_en.csv, [cent]) -> (cind_test_de.csv, [cent])
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.birthplace, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 0.500000);
+lhs inclusion attributes: [(1, 2)]
+rhs inclusion attributes: [(0, 3)]
+conditional attributes: [(1, 0)(1, 1)(1, 3)(1, 4)]
+rhs values: [{LA, }{Cal, }{USA, }{LA, }{Cal, }{USA, }{-, }{Queens, }{LA, }{Cal, }]
+lhs values: [{SA, }, {USA, }::included, {CO, }, {-, }::included, ]
+basket: [null, ({desc, Actor}, {deathplace, USA}, {cent, 18}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Athlette}, {deathplace, USA}, {cent, 18}, {pid, Mel Sheppard}, )]
+basket: [null, ({desc, Stunt}, {deathplace, CO}, {cent, 18}, {pid, Buddy Roosevelt}, )]
+basket: [included, ({desc, Olympic}, {deathplace, -}, {cent, 19}, {pid, Sante Gaiardoni}, )]
+
+candidates:
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}], , validity: 0.333333, completeness: 0.500000, is frequent itemset
+[Included, {1, 10}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 7}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
+[Included, {3, 11}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {0, 13}, {1, 2}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 13}, {1, 10}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 13}, {3, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 13}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 2}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 10}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {3, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {3, 11}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {3, 7}], , validity: 0.500000, completeness: 0.500000, is frequent itemset
+[Included, {1, 2}, {3, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {3, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {3, 11}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 10}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {3, 7}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 11}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {0, 13}, {1, 2}, {3, 7}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 13}, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 13}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {1, 10}, {3, 11}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 2}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {1, 10}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+[Included, {0, 13}, {1, 2}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.500000, is in result
+[Included, {0, 26}, {1, 10}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.500000, is in result
+
+candidates:
+
+Result:
+(cind_test_en.csv, [birthplace]) -> (cind_test_de.csv, [deathplace]) with error threshold = 0.5
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+lhs inclusion attributes: [(1, 2)]
+rhs inclusion attributes: [(1, 3)]
+conditional attributes: [(1, 0)(1, 1)(1, 3)(1, 4)]
+rhs values: [{USA, }{USA, }{CO, }{-, }]
+lhs values: [{SA, }, {USA, }::included, {CO, }::included, {-, }::included, ]
+basket: [null, ({desc, Actor}, {deathplace, USA}, {cent, 18}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Athlette}, {deathplace, USA}, {cent, 18}, {pid, Mel Sheppard}, )]
+basket: [included, ({desc, Stunt}, {deathplace, CO}, {cent, 18}, {pid, Buddy Roosevelt}, )]
+basket: [included, ({desc, Olympic}, {deathplace, -}, {cent, 19}, {pid, Sante Gaiardoni}, )]
+
+candidates:
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}], , validity: 0.666667, completeness: 0.666667, is frequent itemset
+[Included, {1, 10}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 7}], , validity: 0.500000, completeness: 0.333333, is frequent itemset
+[Included, {3, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 24}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+[Included, {0, 13}, {1, 2}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 10}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {3, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {3, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {3, 24}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {4, 25}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 23}, {1, 2}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {1, 10}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 23}, {3, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 23}, {3, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 23}, {3, 24}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 23}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 2}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 10}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {3, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {3, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {3, 24}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 25}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {3, 7}], , validity: 0.500000, completeness: 0.333333, is frequent itemset
+[Included, {1, 2}, {3, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 2}, {3, 24}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {3, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {3, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 10}, {3, 24}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 25}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 7}, {4, 25}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 7}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 11}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 11}, {4, 25}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 24}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {3, 24}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {3, 24}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+
+candidates:
+[Included, {0, 13}, {1, 2}, {3, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {1, 2}, {3, 24}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {1, 2}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {3, 24}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {3, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {3, 24}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 10}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+[Included, {0, 13}, {1, 2}, {3, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 23}, {1, 2}, {3, 24}, {4, 25}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {3, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+
+Result:
+(cind_test_en.csv, [birthplace]) -> (cind_test_en.csv, [deathplace]) with error threshold = 0.25
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+lhs inclusion attributes: [(1, 3)]
+rhs inclusion attributes: [(0, 3)]
+conditional attributes: [(1, 0)(1, 1)(1, 2)(1, 4)]
+rhs values: [{LA, }{Cal, }{USA, }{LA, }{Cal, }{USA, }{-, }{Queens, }{LA, }{Cal, }]
+lhs values: [{USA, }::included, {USA, }::included, {CO, }, {-, }::included, ]
+basket: [included, ({desc, Actor}, {birthplace, SA}, {cent, 18}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Athlette}, {cent, 18}, {birthplace, USA}, {pid, Mel Sheppard}, )]
+basket: [null, ({birthplace, CO}, {desc, Stunt}, {cent, 18}, {pid, Buddy Roosevelt}, )]
+basket: [included, ({desc, Olympic}, {birthplace, -}, {cent, 19}, {pid, Sante Gaiardoni}, )]
+
+candidates:
+[Included, {0, 1}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}], , validity: 0.666667, completeness: 0.666667, is frequent itemset
+[Included, {1, 10}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 20}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+[Included, {0, 1}, {1, 2}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 1}, {1, 10}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 1}, {2, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 1}, {2, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 1}, {2, 20}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 1}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 1}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 1}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {1, 2}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 10}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {2, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {2, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {2, 20}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 13}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 2}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {1, 10}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {2, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {2, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {2, 20}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {0, 26}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {2, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {2, 11}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 2}, {2, 20}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {2, 7}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {2, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 10}, {2, 20}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 7}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 7}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 11}, {4, 21}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 11}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {2, 20}, {4, 22}], , validity: -1.000000, completeness: 0.000000
+[Included, {2, 20}, {4, 27}], , validity: -1.000000, completeness: 0.000000
+
+candidates:
+[Included, {0, 1}, {1, 2}, {2, 20}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 1}, {1, 2}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 1}, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 2}, {2, 7}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 2}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {2, 11}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {2, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 2}, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {1, 10}, {2, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+[Included, {0, 1}, {1, 2}, {2, 20}, {4, 21}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 13}, {1, 2}, {2, 7}, {4, 22}], , validity: 1.000000, completeness: 0.333333, is in result
+[Included, {0, 26}, {1, 10}, {2, 11}, {4, 27}], , validity: 1.000000, completeness: 0.333333, is in result
+
+candidates:
+
+Result:
+(cind_test_en.csv, [deathplace]) -> (cind_test_de.csv, [deathplace]) with error threshold = 0.333333
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.desc);
+	("Cecil Kellaway", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+lhs inclusion attributes: [(1, 3)]
+rhs inclusion attributes: [(1, 2)]
+conditional attributes: [(1, 0)(1, 1)(1, 2)(1, 4)]
+rhs values: [{SA, }{USA, }{CO, }{-, }]
+lhs values: [{USA, }::included, {USA, }::included, {CO, }::included, {-, }::included, ]
+basket: [included, ({desc, Actor}, {birthplace, SA}, {cent, 18}, {pid, Cecil Kellaway}, )]
+basket: [included, ({desc, Athlette}, {cent, 18}, {birthplace, USA}, {pid, Mel Sheppard}, )]
+basket: [included, ({birthplace, CO}, {desc, Stunt}, {cent, 18}, {pid, Buddy Roosevelt}, )]
+basket: [included, ({desc, Olympic}, {birthplace, -}, {cent, 19}, {pid, Sante Gaiardoni}, )]
+
+candidates:
+[Included, {0, 1}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 13}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 23}], , validity: 1.000000, completeness: 0.250000
+[Included, {0, 26}], , validity: 1.000000, completeness: 0.250000
+[Included, {1, 2}], , validity: 1.000000, completeness: 0.750000, is in result
+[Included, {1, 10}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 7}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 11}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 20}], , validity: 1.000000, completeness: 0.250000
+[Included, {2, 24}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 21}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 22}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 25}], , validity: 1.000000, completeness: 0.250000
+[Included, {4, 27}], , validity: 1.000000, completeness: 0.250000
+
+candidates:
+
+Result:
+(cind_test_en.csv, [deathplace]) -> (cind_test_en.csv, [birthplace])
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.desc);
+	("-", "18", "-", "-", validity = 1.000000, completeness = 0.750000);
 Found inclusion dependencies (-> means "is included in"):
 
 (cind_test_de.csv, [pid]) -> (cind_test_en.csv, [pid]) with error threshold = 0.5
+Possible conditions:
+	(cind_test_de.csv.cent, cind_test_de.csv.birthplace, cind_test_de.csv.deathplace, cind_test_de.csv.desc);
+	("-", "Kap", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("-", "Sud", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("-", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.857143);
+	("18", "Kap", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("18", "Sud", "-", "-", validity = 1.000000, completeness = 0.428571);
+	("18", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.857143);
+	("-", "Kap", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("-", "Sud", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("18", "Kap", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+	("18", "Sud", "-", "Schauspieler", validity = 1.000000, completeness = 0.428571);
+
 (cind_test_de.csv, [cent]) -> (cind_test_en.csv, [cent])
+Possible conditions:
+	(cind_test_de.csv.pid, cind_test_de.csv.birthplace, cind_test_de.csv.deathplace, cind_test_de.csv.desc);
+	("Cecil Kellaway", "-", "-", "-", validity = 1.000000, completeness = 0.600000);
+	("-", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.600000);
+	("Cecil Kellaway", "-", "-", "Schauspieler", validity = 1.000000, completeness = 0.600000);
+
 (cind_test_en.csv, [pid]) -> (cind_test_de.csv, [pid]) with error threshold = 0.5
+Possible conditions:
+	(cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("-", "USA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 1.000000);
+	("-", "-", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "-", validity = 1.000000, completeness = 1.000000);
+	("18", "-", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "-", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "USA", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "SA", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+	("18", "USA", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("18", "SA", "USA", "Actor", validity = 1.000000, completeness = 0.500000);
+
 (cind_test_en.csv, [cent]) -> (cind_test_de.csv, [cent])
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.birthplace, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 0.500000);
+
 (cind_test_en.csv, [birthplace]) -> (cind_test_de.csv, [deathplace]) with error threshold = 0.5
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.500000);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.500000);
+
 (cind_test_en.csv, [birthplace]) -> (cind_test_en.csv, [deathplace]) with error threshold = 0.25
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.deathplace, cind_test_en.csv.desc);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "CO", "-", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "-", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "-", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Buddy Roosevelt", "18", "CO", "Stunt", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+
 (cind_test_en.csv, [deathplace]) -> (cind_test_de.csv, [deathplace]) with error threshold = 0.333333
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.desc);
+	("Cecil Kellaway", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "-", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "SA", "-", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "-", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "-", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "-", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "-", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "-", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "-", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "-", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("-", "18", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("-", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+	("Cecil Kellaway", "18", "SA", "Actor", validity = 1.000000, completeness = 0.333333);
+	("Mel Sheppard", "18", "USA", "Athlette", validity = 1.000000, completeness = 0.333333);
+	("Sante Gaiardoni", "19", "-", "Olympic", validity = 1.000000, completeness = 0.333333);
+
 (cind_test_en.csv, [deathplace]) -> (cind_test_en.csv, [birthplace])
+Possible conditions:
+	(cind_test_en.csv.pid, cind_test_en.csv.cent, cind_test_en.csv.birthplace, cind_test_en.csv.desc);
+	("-", "18", "-", "-", validity = 1.000000, completeness = 0.750000);
+
+[('-', 'Kap', '-', '-'), ('-', 'Sud', '-', '-'), ('-', '-', '-', 'Schauspieler'), ('18', 'Kap', '-', '-'), ('18', 'Sud', '-', '-'), ('18', '-', '-', 'Schauspieler'), ('-', 'Kap', '-', 'Schauspieler'), ('-', 'Sud', '-', 'Schauspieler'), ('18', 'Kap', '-', 'Schauspieler'), ('18', 'Sud', '-', 'Schauspieler')]
+('cind_test_de.csv.cent', 'cind_test_de.csv.birthplace', 'cind_test_de.csv.deathplace', 'cind_test_de.csv.desc')

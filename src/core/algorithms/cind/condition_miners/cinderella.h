@@ -13,7 +13,7 @@ public:
     Cinderella(config::InputTables& input_tables);
 
 private:
-    Cind ExecuteSingle(model::IND const& aind) final;
+    CIND ExecuteSingle(model::IND const& aind) final;
 
     std::vector<Basket> GetBaskets(Attributes const& attributes);
 

@@ -23,7 +23,7 @@ public:
     //                                             std::vector<int> const& included_pos);
 
 private:
-    Cind ExecuteSingle(model::IND const& aind) final;
+    CIND ExecuteSingle(model::IND const& aind) final;
     void MakePLs(std::vector<int> const& cond_attrs);
 
     std::vector<int> GetIncludedPositions(const Attributes & attrs) const;

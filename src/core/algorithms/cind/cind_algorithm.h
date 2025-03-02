@@ -18,6 +18,10 @@ public:
         return spider_algo_->INDList();
     }
 
+    std::list<CIND> const& CINDList() const noexcept {
+        return cind_miner_->CINDList();
+    }
+
 private:
     void LoadDataInternal() final;
     unsigned long long ExecuteInternal() final;

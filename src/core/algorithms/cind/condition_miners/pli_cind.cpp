@@ -14,7 +14,7 @@ using model::TableIndex;
 
 PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
-Cind PliCind::ExecuteSingle(model::IND const& aind) {
+CIND PliCind::ExecuteSingle(model::IND const& aind) {
     auto const [included_pos, cond_attrs] = ScanTables(aind);
     fprintf(stderr, "included positions: [");
     for (auto const pos : included_pos) {
