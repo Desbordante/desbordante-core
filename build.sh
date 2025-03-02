@@ -13,6 +13,7 @@ Possible options:
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
   -u,         --no-unpack             Don't unpack datasets
+  -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
   -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
                                       Possible values of S: ADDRESS, UB.
@@ -121,5 +122,5 @@ if [[ -n $SANITIZER ]]; then
 fi
 
 cd ..
-rm -f CMakeCache.txt
-cmake -S . -B build $PREFIX -G Ninja && cmake --build build
+rm -f build/CMakeCache.txt
+cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION
