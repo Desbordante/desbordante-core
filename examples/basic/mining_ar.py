@@ -85,11 +85,11 @@ def scenario_tabular():
           f'{COLOR_CODES["yellow"]}minconf=0.6{COLOR_CODES["default"]}.')
     algo.execute(minconf=0.6)
     print_ars(algo.get_ars())
-    print("\n['Yogurt'] -> ['Eggs'] with confidence 0.67 means that when milk "
+    print("\n['Yogurt'] -> ['Eggs'] with confidence 0.67 means that when yogurt "
           'is found in the receipt, the chance of eggs being '
           'present amounts to 67%. So, customers are '
           f'{COLOR_CODES["bold_yellow"]}likely{COLOR_CODES["default"]} '
-          'to buy eggs with milk.')
+          'to buy eggs with yogurt.')
 
     print('\nLet us turn to the next issue. You can observe that '
           'there are a lot of association rules found in this '
@@ -108,7 +108,7 @@ def scenario_tabular():
     algo.execute(minsup=0.4, minconf=0.6)
     print_ars(algo.get_ars())
     print('\nNow you can see that the number of association rules have decreased '
-          'significantly. This happened due to minsup being set to 0.5. \n'
+          'significantly. This happened due to minsup being set to 0.4. \n'
           '\nA typical approach to controlling the algorithm is to employ '
           f'{COLOR_CODES["bold_yellow"]}"usefulness"{COLOR_CODES["default"]}, '
           'which is defined as confidence * support. '
