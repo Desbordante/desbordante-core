@@ -14,7 +14,7 @@
 namespace algos::dd {
     DDVerifier::DDVerifier() : Algorithm({}) {
         RegisterOptions();
-        MakeOptionsAvailable({config::kTableOpt.GetName(), config::names::kDDString});
+        MakeOptionsAvailable({config::kTableOpt.GetName()});
     }
 
     void DDVerifier::RegisterOptions() {
@@ -119,6 +119,7 @@ namespace algos::dd {
     }
 
     unsigned long long DDVerifier::ExecuteInternal() {
+        LOG(INFO) << dd_.ToString();
         num_rows_ = typed_relation_->GetNumRows();
         num_columns_ = typed_relation_->GetNumColumns();
 
