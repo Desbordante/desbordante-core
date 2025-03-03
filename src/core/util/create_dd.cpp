@@ -4,8 +4,8 @@ namespace util {
     model::DFStringConstraint dd::createDF(const std::string &col_name, const double lower_bound, const double upper_bound) {
         model::DFStringConstraint dd;
         dd.column_name = col_name;
-        dd.lower_bound = lower_bound;
-        dd.upper_bound = upper_bound;
+        dd.constraint.lower_bound = lower_bound;
+        dd.constraint.upper_bound = upper_bound;
         return dd;
     }
 
