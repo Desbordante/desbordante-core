@@ -3,16 +3,22 @@
 #include <cstdlib>
 #include <exception>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
 #include <easylogging++.h>
 
 #include "model/table/column.h"
 #include "model/table/relation_data.h"
+#include "model/types/type.h"
 
 namespace algos::dc {
+
+// kS and kT are used to tell which tuple is used in ColumnOperand.
+// To describe Predicate tuple also can be used kMixed since
+// ColumnOperand's may have different tuples.
+enum class Tuple { kS, kT, kMixed };
 
 //  @brief Represents a column operand for Predicate.
 //
@@ -21,61 +27,110 @@ namespace algos::dc {
 //  ("=="), and the column operand from the second tuple ("s.A"). The `ColumnOperand` class
 //  encapsulates the column operand part of a predicate, such as "t.A" or "s.A".
 //
-//  The class distinguishes between operands derived from the first tuple (t) and those
-//  from the second tuple (s) using a boolean flag `is_first_tuple_`, where `true` indicates an
-//  operand from the first tuple (t), and `false` indicates an operand from the second
-//  tuple (s).
+//  ColumnOperand may have a tuple_ variable initialized or may not thus
+//  std::optional is utilized. If a ColumnOperand is a constant value,
+//  then tuple_ is not initialized, in this case accessing tuple_ is not allowed.
 class ColumnOperand {
 private:
     Column const* column_;
-    bool is_first_tuple_;
+    std::optional<dc::Tuple> tuple_;
+    model::Type const* type_;
+    std::byte const* val_;
 
 public:
-    ColumnOperand(Column const* column, bool is_first_tuple) noexcept
-        : column_(column), is_first_tuple_(is_first_tuple) {}
+    ColumnOperand() noexcept : column_(nullptr), val_(nullptr) {};
 
-    ColumnOperand() noexcept = default;
+    ColumnOperand(Column const* column, dc::Tuple tuple, model::Type const* type)
+        : column_(column), tuple_(tuple), type_(type), val_(nullptr) {}
 
-    // For conversion from "t.ColumnPosition" or "t.ColumnName"
-    ColumnOperand(std::string operand, RelationalSchema const& schema) {
-        if (operand.front() != 't' and operand.front() != 's')
-            throw std::logic_error("Unknown tuple name");
+    ColumnOperand(std::string const& str_val, model::Type const* type)
+        : column_(nullptr), type_(type) {
+        std::byte* val = type_->Allocate();
+        type_->ValueFromStr(val, str_val);
+        val_ = val;
+    }
 
-        is_first_tuple_ = operand.front() == 't';
-        std::string name(operand.begin() + 2, operand.end());
-        std::vector<std::unique_ptr<Column>> const& cols = schema.GetColumns();
-        if (!cols.front()->GetName().empty()) {  // Has header
-            for (std::unique_ptr<Column> const& col : cols) {
-                if (name == col->GetName()) {
-                    column_ = col.get();
-                    return;
-                }
-            }
+    ColumnOperand(ColumnOperand const& rhs) : type_(rhs.type_) {
+        if (rhs.IsVariable()) {
+            tuple_ = rhs.tuple_;
+            column_ = rhs.column_;
+            val_ = nullptr;
+        } else {
+            val_ = rhs.type_->Clone(rhs.val_);
+        }
+    }
+
+    ColumnOperand(ColumnOperand&& rhs) : ColumnOperand() {
+        Swap(rhs);
+    }
+
+    ColumnOperand& operator=(ColumnOperand rhs) {
+        Swap(rhs);
+        return *this;
+    }
+
+    void Swap(ColumnOperand& rhs) {
+        std::swap(type_, rhs.type_);
+        std::swap(val_, rhs.val_);
+        std::swap(column_, rhs.column_);
+        std::swap(tuple_, rhs.tuple_);
+    }
+
+    bool operator==(ColumnOperand const& rhs) const {
+        if (IsConstant() != rhs.IsConstant()) return false;
+
+        if (IsConstant()) {
+            assert(type_ == rhs.type_);
+            return type_->Compare(GetVal(), rhs.GetVal()) == model::CompareResult::kEqual;
         }
 
-        std::string str_ind(operand.begin() + 2, operand.end());
-        model::ColumnIndex ind = std::stoi(str_ind);
-        column_ = cols[ind].get();
+        return column_ == rhs.column_ && tuple_ == rhs.tuple_;
     }
 
-    bool operator==(ColumnOperand const& rhs) const noexcept {
-        return column_ == rhs.column_ && is_first_tuple_ == rhs.is_first_tuple_;
-    }
+    bool operator!=(ColumnOperand const& rhs) const = default;
 
-    bool operator!=(ColumnOperand const& rhs) const noexcept {
-        return !(*this == rhs);
-    }
-
-    Column const* GetColumn() const noexcept {
+    Column const* GetColumn() const {
+        assert(column_ != nullptr);
         return column_;
     }
 
-    bool IsFirstTuple() const noexcept {
-        return is_first_tuple_;
+    Tuple GetTuple() const {
+        assert(tuple_.has_value());
+        return tuple_.value();
     }
 
-    std::string ToString() const noexcept {
-        return (is_first_tuple_ ? "t." : "s.") + column_->GetName();
+    model::Type const* GetType() const noexcept {
+        return type_;
+    }
+
+    std::byte const* GetVal() const {
+        assert(val_ != nullptr);
+        return val_;
+    }
+
+    bool IsConstant() const {
+        return val_ != nullptr;
+    }
+
+    bool IsVariable() const {
+        return val_ == nullptr;
+    }
+
+    std::string ToString() const {
+        std::string res;
+        if (IsVariable()) {
+            res = (tuple_.value() == Tuple::kT ? "t." : "s.") + column_->GetName();
+        } else {
+            res = type_->ValueToString(val_);
+        }
+
+        return res;
+    }
+
+    ~ColumnOperand() {
+        if (val_ != nullptr) {
+            type_->Free(val_);
+        }
     }
 };
 
