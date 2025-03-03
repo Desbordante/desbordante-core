@@ -194,7 +194,8 @@ if __name__ == "__main__":
         "Matching Dependancy {X1, X2, ... -> Y1, Y2, ...} holds if for every row i and j from table "
         "if SimX1(X1_i, X1_j) < Xb1 && SimX2(X2_i, X2_j) < Xb2 && ... is true then "
         "SimY1(Y1_i, Y1_j) < Yb1 && SimY2(Y2_i, Y2_j) < Yb2 && ... is also true "
-        "You can read more about Matching Dependancies in article below\n"
+        "You can read more about Matching Dependancies in articles below\n"
+        "https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2020_schirmer_efficient.pdf\n"
         "https://arxiv.org/pdf/0903.3317\n"
     )
     drunk_animals_example()
