@@ -186,12 +186,8 @@ constexpr auto kDComparableThreshold =
 constexpr auto kDEvidenceThreshold =
         "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
         "considered approximate.";
-constexpr auto KDMDRhsThresholds = "MD left-hand side thresholds";
-constexpr auto KDMDLhsThresholds = "MD right-hand side thresholds";
 constexpr auto KDMDLhsMetrics = "MD left-hand side metrics";
 constexpr auto KDMDRhsMetrics = "MD right-hand side metrics";
-constexpr auto kDMDRhsThresholds = "MD left-hand side thresholds";
-constexpr auto kDMDLhsThresholds = "MD right-hand side thresholds";
 constexpr auto kDMDRhsDecisionBoundaries = "MD left-hand side decision boundaries";
 constexpr auto kDMDLhsDecisionBoundaries = "MD right-hand side decision boundaries";
 constexpr auto kDMDLhsSimilarityMeasures = "MD left-hand side similarity measures";

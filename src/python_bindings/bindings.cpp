@@ -68,11 +68,10 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindNdVerification,
                            BindSFD,
                            BindMd,
+                           BindMDVerifier,
                            BindDCVerification,
                            BindPfdVerification,
-                           BindFastADC,
-                           BindMd,
-                           BindMDVerifier}) {
+                           BindFastADC}) {
         bind_func(module);
     }
 }
