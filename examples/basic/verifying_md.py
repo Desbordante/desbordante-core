@@ -50,9 +50,9 @@ def check_md(table_path: str, params: MDParams):
 
 
 def drunk_animals_example():
-    print("As first example, let's look at the dataset drunk_animals.csv")
+    print("As first example, let's look at the dataset animals_beverages.csv")
 
-    table_path = "test_input_data/drunk_animals.csv"
+    table_path = "examples/datasets/animals_beverages.csv"
     table = pd.read_csv(table_path)
     print(table)
 
