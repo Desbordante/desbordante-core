@@ -3,7 +3,11 @@
 #include <memory>
 #include <vector>
 
+#include <enum.h>
+
 namespace algos::md {
+
+BETTER_ENUM(SimilarityMeasureType, char, kStringSimilarity = 0, kNumericSimilarity);
 
 class SimilarityMeasure {
 private:
@@ -16,6 +20,8 @@ public:
         return name_;
     }
 
+    virtual SimilarityMeasureType GetType() const = 0;
+
     virtual ~SimilarityMeasure() = default;
 };
 
@@ -23,12 +29,20 @@ class NumericSimilarityMeasure : public SimilarityMeasure {
 public:
     NumericSimilarityMeasure(std::string const& name) : SimilarityMeasure(name) {}
 
+    SimilarityMeasureType GetType() const {
+        return SimilarityMeasureType::kNumericSimilarity;
+    }
+
     virtual long double operator()(long double left, long double right) const = 0;
 };
 
 class StringSimilarityMeasure : public SimilarityMeasure {
 public:
     StringSimilarityMeasure(std::string const& name) : SimilarityMeasure(name) {}
+
+    SimilarityMeasureType GetType() const {
+        return SimilarityMeasureType::kStringSimilarity;
+    }
 
     virtual long double operator()(std::string_view left, std::string_view right) const = 0;
 };

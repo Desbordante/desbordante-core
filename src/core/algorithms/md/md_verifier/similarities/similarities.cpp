@@ -9,7 +9,7 @@ std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(
     auto ptr_ = std::dynamic_pointer_cast<NumericSimilarityMeasure>(ptr);
     if (!ptr_.get()) {
         throw std::runtime_error("Failed to cast" + ptr->GetName() +
-                                 "similarity measure to numeric similarity measure");
+                                 " similarity measure to numeric similarity measure");
     }
     return ptr_;
 }
@@ -18,7 +18,7 @@ std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(std::shared_ptr<Similar
     auto ptr_ = std::dynamic_pointer_cast<StringSimilarityMeasure>(ptr);
     if (!ptr_.get()) {
         throw std::runtime_error("Failed to cast" + ptr->GetName() +
-                                 "similarity measure to string similarity measure");
+                                 " similarity measure to string similarity measure");
     }
     return ptr_;
 }
