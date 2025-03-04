@@ -144,7 +144,7 @@ namespace algos::dd {
             auto curr_constraint = dd_.right.cbegin();
             bool is_error = false;
             for (const auto column_index: columns) {
-                if (const double dif = CalculateDistance(column_index, pair); !(
+                if (const double dif = CalculateDistance(column_index, pair); !(ж
                     dif >= curr_constraint->constraint.lower_bound && dif <= curr_constraint->constraint.upper_bound)) {
                     std::pair<std::size_t, std::pair<int, int> > incorrect_pair = {column_index, pair};
                     highlights_.push_back(incorrect_pair);
