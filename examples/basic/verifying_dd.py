@@ -29,12 +29,14 @@ def print_second_dd_verified(algorithm):
     print(f"Next dd, which we are going to check: {COLOR_CODES["yellow"]}{dd2.__str__()}{COLOR_CODES["nocolor"]}\n")
     print_holds(algorithm.dd_holds())
     print(
-    "It means, that for any pair rows with equal value from columns \"store_name\" and \"category\", defined distance from 0 to 25 on column \"stock_quantity\"\n")
+        "It means, that for any pair rows with equal value from columns \"store_name\" and \"category\", defined distance from 0 to 25 on column \"stock_quantity\"\n")
+
 
 def print_third_dd_verified(algorithm):
     print(
         f"Now, let`s check the dd: {COLOR_CODES["yellow"]}{dd3.__str__()}{COLOR_CODES["nocolor"]}, that means, what in one store stock quantity of goods has difference in range from 0 to 25\n")
     print_holds(algorithm.dd_holds())
+
 
 def print_about_third_dd(algorithm):
     print(
@@ -87,15 +89,15 @@ algo.execute(dds=dd1)
 with open(TABLE, newline='') as csvtable:
     table = list(csv.reader(csvtable))
 print_intro(TABLE)
-print("-"* 100)
+print("-" * 100)
 print("Example №1\n")
 print_first_dd_verified(algo)
-print("-"* 100)
+print("-" * 100)
 print("Example №2\n")
 algo.execute(dds=dd2)
 print_second_dd_verified(algo)
 algo.execute(dds=dd3)
-print("-"* 100)
+print("-" * 100)
 print("Example №3\n")
 print_third_dd_verified(algo)
 print_about_third_dd(algo)
