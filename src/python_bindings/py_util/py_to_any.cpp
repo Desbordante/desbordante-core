@@ -124,7 +124,6 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<size_t>,
         kNormalConvPair<algos::hymd::HyMD::ColumnMatches>,
         kNormalConvPair<std::optional<int>>,
-        kNormalConvPair<algos::hymd::HyMD::Measures>,
         kNormalConvPair<std::vector<model::md::DecisionBoundary>>,
         kNormalConvPair<std::vector<std::shared_ptr<algos::md::SimilarityMeasure>>>,
         kEnumConvPair<algos::metric::Metric>,
