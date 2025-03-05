@@ -35,7 +35,7 @@ private:
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> relation_;
 
-    MDHighlights highlights;
+    MDHighlights highlights_;
     std::vector<DecisionBoundary> rhs_suggestion_boundaries_;
 
     bool md_holds_ = false;
@@ -61,11 +61,11 @@ public:
     }
 
     std::vector<std::string> GetHighlightsAsStrings() const {
-        return highlights.GetHighlightsAsStrings();
+        return highlights_.GetHighlightsAsStrings();
     }
 
     auto GetHighlights() const {
-        return highlights.GetHighlights();
+        return highlights_.GetHighlights();
     }
 
     std::vector<DecisionBoundary> const& GetRhsSuggestions() const {
