@@ -6,20 +6,20 @@ namespace algos::md {
 
 std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(
         std::shared_ptr<SimilarityMeasure>& ptr) {
-    auto ptr_ = std::dynamic_pointer_cast<NumericSimilarityMeasure>(ptr);
-    if (!ptr_.get()) {
+    auto casted_ptr = std::dynamic_pointer_cast<NumericSimilarityMeasure>(ptr);
+    if (!casted_ptr.get()) {
         throw std::runtime_error("Failed to cast" + ptr->GetName() +
                                  " similarity measure to numeric similarity measure");
     }
-    return ptr_;
+    return casted_ptr;
 }
 
 std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(std::shared_ptr<SimilarityMeasure>& ptr) {
-    auto ptr_ = std::dynamic_pointer_cast<StringSimilarityMeasure>(ptr);
-    if (!ptr_.get()) {
+    auto casted_ptr = std::dynamic_pointer_cast<StringSimilarityMeasure>(ptr);
+    if (!casted_ptr.get()) {
         throw std::runtime_error("Failed to cast" + ptr->GetName() +
                                  " similarity measure to string similarity measure");
     }
-    return ptr_;
+    return casted_ptr;
 }
 }  // namespace algos::md

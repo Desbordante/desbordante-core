@@ -103,7 +103,7 @@ TEST_P(TestMDVerifierHighlights, DefaultCase) {
     ASSERT_EQ(GetParam().highlights, verifier->GetHighlightsAsStrings());
 }
 
-auto const eps = std::numeric_limits<DecisionBoundary>::epsilon();
+auto const kEps = std::numeric_limits<DecisionBoundary>::epsilon();
 
 INSTANTIATE_TEST_SUITE_P(
         TestMDVerifierSuite, TestMDVerifier,
@@ -121,11 +121,11 @@ INSTANTIATE_TEST_SUITE_P(
                                             std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            false, {1. / 5.}),
-                          MDVerifierParams(kAnimalsBeverages, {2}, {3}, {0.75 + eps}, {0.75},
+                          MDVerifierParams(kAnimalsBeverages, {2}, {3}, {0.75 + kEps}, {0.75},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            true, {0.75}),
-                          MDVerifierParams(kAnimalsBeverages, {2}, {3}, {0.75}, {0.75 + eps},
+                          MDVerifierParams(kAnimalsBeverages, {2}, {3}, {0.75}, {0.75 + kEps},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            false, {0.75}),
@@ -137,12 +137,12 @@ INSTANTIATE_TEST_SUITE_P(
                                             std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            true, {0.75, 0.75}),
                           MDVerifierParams(kAnimalsBeverages, {2, 3}, {2, 3}, {0.75, 0.75},
-                                           {0.75 - eps, 0.75 - eps},
+                                           {0.75 - kEps, 0.75 - kEps},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>(),
                                             std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>(),
                                             std::make_shared<algos::md::LevenshteinSimilarity>()},
-                                           true, {0.75 - eps, 0.75 - eps}),
+                                           true, {0.75 - kEps, 0.75 - kEps}),
                           MDVerifierParams(kAnimalsBeverages, {2}, {2, 3}, {0.75}, {1, 1},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                            {std::make_shared<algos::md::LevenshteinSimilarity>(),
@@ -165,7 +165,7 @@ INSTANTIATE_TEST_SUITE_P(
                                    "\" have similarity 0.200000 with decision boundary 0.500000"}),
 
                           MDVerifierHighlightsParams(
-                                  kAnimalsBeverages, {2}, {3}, {0.75}, {0.75 + eps},
+                                  kAnimalsBeverages, {2}, {3}, {0.75}, {0.75 + kEps},
                                   {std::make_shared<algos::md::LevenshteinSimilarity>()},
                                   {std::make_shared<algos::md::LevenshteinSimilarity>()}, false,
                                   {"Rows 0 and 1 violate MD in column 3: \"meat\" and \"mead\" "

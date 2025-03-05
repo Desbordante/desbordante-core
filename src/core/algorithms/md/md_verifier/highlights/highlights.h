@@ -20,7 +20,7 @@ public:
     };
 
 private:
-    std::vector<HighlightRecord> highlights;
+    std::vector<HighlightRecord> highlights_;
 
     static std::string HighlightRecordAsString(HighlightRecord highlight);
 
@@ -29,7 +29,7 @@ public:
     std::vector<std::string> GetHighlightsAsStrings() const;
 
     std::vector<HighlightRecord> const& GetHighlights() const {
-        return highlights;
+        return highlights_;
     }
 
     void AddHighlight(HighlightRecord record);
