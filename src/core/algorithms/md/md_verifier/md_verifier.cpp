@@ -19,7 +19,7 @@ MDVerifier::MDVerifier() : Algorithm({}) {
 }
 
 void MDVerifier::ResetState() {
-    highlights.Reset();
+    highlights_.Reset();
     md_holds_ = false;
 }
 
@@ -134,10 +134,10 @@ bool MDVerifier::CheckRows(size_t first_row, size_t second_row) {
                                     column.GetTypeId(), similarity_measure);
         if (similarity < decision_boundary) {
             holds_for_rhs = false;
-            highlights.AddHighlight({std::make_pair(first_row, second_row), index,
-                                     column.GetDataAsString(first_row),
-                                     column.GetDataAsString(second_row), similarity,
-                                     decision_boundary});
+            highlights_.AddHighlight({std::make_pair(first_row, second_row), index,
+                                      column.GetDataAsString(first_row),
+                                      column.GetDataAsString(second_row), similarity,
+                                      decision_boundary});
             rhs_suggestion_boundaries_[i] = std::min(rhs_suggestion_boundaries_[i], similarity);
         }
     }
