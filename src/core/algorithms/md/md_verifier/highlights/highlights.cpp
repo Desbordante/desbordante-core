@@ -15,9 +15,9 @@ std::string MDHighlights::HighlightRecordAsString(HighlightRecord highlight) {
 
 std::vector<std::string> MDHighlights::GetHighlightsAsStrings() const {
     std::vector<std::string> highlights_strings;
-    highlights_strings.reserve(highlights.size());
+    highlights_strings.reserve(highlights_.size());
 
-    for (auto const& highlight : highlights) {
+    for (auto const& highlight : highlights_) {
         highlights_strings.push_back(HighlightRecordAsString(highlight));
     }
 
@@ -25,10 +25,10 @@ std::vector<std::string> MDHighlights::GetHighlightsAsStrings() const {
 }
 
 void MDHighlights::AddHighlight(HighlightRecord record) {
-    highlights.push_back(record);
+    highlights_.push_back(record);
 }
 
 void MDHighlights::Reset() {
-    highlights.clear();
+    highlights_.clear();
 }
 }  // namespace algos::md
