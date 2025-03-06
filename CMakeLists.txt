@@ -78,8 +78,8 @@ else()
         # Set DEBUG build options specific for build with ASAN
         set(ASAN_OPTS "-fsanitize=address")
 
-        execute_process(COMMAND grep -q "Ubuntu" /etc/ose-release RESULT_VARIABLE IS_UBUNTU)
-        if (IS_UBUNTU AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
+        if (IS_UBUNTU EQUAL 0 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             # alloc-dealloc-mismatch generates false positives on boost exceptions
             # This applies only to Ubuntu package:
             # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
