@@ -96,4 +96,8 @@ jobs:
         run: |
           export ${{ matrix.system.runtime-env }}
 
-          ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
+          if [[ "${{ inputs.noParallelTests }}" != "true" ]]; then
+            export CTEST_ARGS="-j ${nproc}"
+          fi
+
+          ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
