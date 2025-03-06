@@ -192,6 +192,7 @@ endif()
 add_subdirectory("src/core")
 
 if (COMPILE_TESTS)
+    enable_testing()
     add_subdirectory("src/tests")
 endif()
 
