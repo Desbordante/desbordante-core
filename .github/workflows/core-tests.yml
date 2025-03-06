@@ -26,6 +26,11 @@ on:
       #- pyproject.toml
       #- examples/**
   workflow_dispatch:
+    inputs:
+      noParallelTests:
+        type: boolean
+        default: false
+        description: "Don't run tests in parallel"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -91,7 +96,7 @@ jobs:
             ./build.sh
           fi
       - name: Test
-        working-directory: ${{github.workspace}}/build/target
+        working-directory: ${{github.workspace}}/build
         shell: bash
         run: |
           export ${{ matrix.system.runtime-env }}
