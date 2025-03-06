@@ -26,6 +26,11 @@ on:
       #- pyproject.toml
       #- examples/**
   workflow_dispatch:
+    inputs:
+      parallel-tests:
+        type: boolean
+        default: true
+        description: "Run tests in parallel"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -91,9 +96,13 @@ jobs:
             ./build.sh
           fi
       - name: Test
-        working-directory: ${{github.workspace}}/build/target
+        working-directory: ${{github.workspace}}/build
         shell: bash
         run: |
           export ${{ matrix.system.runtime-env }}
 
-          ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
+          if [[ "${{ inputs.parallel-tests }}" != "false" ]]; then
+            export CTEST_ARGS="-j ${nproc}"
+          fi
+
+          ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
