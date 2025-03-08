@@ -103,12 +103,36 @@ DecisionBoundary MDVerifier::CalculateNumericSimilarity(
 }
 
 DecisionBoundary MDVerifier::CalculateStringSimilarity(
-        std::byte const* first_val, std::byte const* second_val,
+        std::byte const* first_val, std::byte const* second_val, model::TypeId type_id,
         std::shared_ptr<StringSimilarityMeasure> measure) {
-    auto string_type = model::StringType();
-    auto first = string_type.ValueToString(first_val);
-    auto second = string_type.ValueToString(second_val);
-    return (*measure)(first, second);
+    using namespace model;
+    switch (type_id) {
+        case TypeId::kInt: {
+            IntType type;
+            auto first = type.ValueToString(first_val);
+            auto second = type.ValueToString(second_val);
+            return (*measure)(first, second);
+        }
+
+        case TypeId::kDouble: {
+            DoubleType type;
+            auto first = type.ValueToString(first_val);
+            auto second = type.ValueToString(second_val);
+            return (*measure)(first, second);
+        }
+
+        case TypeId::kString: {
+            auto string_type = model::StringType();
+            auto first = string_type.ValueToString(first_val);
+            auto second = string_type.ValueToString(second_val);
+            return (*measure)(first, second);
+        }
+
+        default:
+            throw std::runtime_error(
+                    "Failed to calcutate similarity measure: unsupported column type for numeric "
+                    "similarity provided.");
+    }
 }
 
 DecisionBoundary MDVerifier::CalculateSimilarity(std::byte const* first_val,
@@ -120,7 +144,8 @@ DecisionBoundary MDVerifier::CalculateSimilarity(std::byte const* first_val,
                                               AsNumericMeasure(measure));
 
         case SimilarityMeasureType::kStringSimilarity:
-            return CalculateStringSimilarity(first_val, second_val, AsStringMeasure(measure));
+            return CalculateStringSimilarity(first_val, second_val, type_id,
+                                             AsStringMeasure(measure));
 
         default:
             throw std::runtime_error(
