@@ -5,7 +5,9 @@
 #include "algorithms/md/md_verifier/highlights/highlights.h"
 #include "algorithms/md/md_verifier/md_verifier.h"
 #include "algorithms/md/md_verifier/similarities/euclidean/euclidean.h"
+#include "algorithms/md/md_verifier/similarities/jaccard/jaccard.h"
 #include "algorithms/md/md_verifier/similarities/levenshtein/levenshtein.h"
+#include "algorithms/md/md_verifier/similarities/monge_elkan/monge_elkan.h"
 #include "py_util/bind_primitive.h"
 
 namespace {
@@ -50,6 +52,8 @@ void BindMDVerifier(py::module_& main_module) {
                                                                       "SimilarityMeasure");
     BindMeasure<EuclideanSimilarity>(measures_module, "EuclideanSimilarity");
     BindMeasure<LevenshteinSimilarity>(measures_module, "LevenshteinSimilarity");
+    BindMeasure<MongeElkanSimilarity>(measures_module, "MongeElkanSimilarity");
+    BindMeasure<JaccardSimilarity>(measures_module, "JaccardSimilarity");
     BindPrimitiveNoBase<MDVerifier>(md_module, "MDVerifier")
             .def("get_highlights", &MDVerifier::GetHighlights)
             .def("get_rhs_suggestions", &MDVerifier::GetRhsSuggestions)
