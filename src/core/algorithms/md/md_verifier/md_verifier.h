@@ -42,6 +42,12 @@ private:
 
     void ResetState() final;
     void RegisterOptions();
+    static DecisionBoundary CalculateNumericSimilarity(
+            std::byte const* first_val, std::byte const* second_val, model::TypeId type_id,
+            std::shared_ptr<NumericSimilarityMeasure> measure);
+    static DecisionBoundary CalculateStringSimilarity(
+            std::byte const* first_val, std::byte const* second_val,
+            std::shared_ptr<StringSimilarityMeasure> measure);
     static DecisionBoundary CalculateSimilarity(std::byte const* first_val,
                                                 std::byte const* second_val, model::TypeId type_id,
                                                 std::shared_ptr<SimilarityMeasure> measure);
@@ -60,7 +66,7 @@ public:
         return md_holds_;
     }
 
-     auto GetHighlights() const {
+    auto GetHighlights() const {
         return highlights_.GetHighlights();
     }
 
