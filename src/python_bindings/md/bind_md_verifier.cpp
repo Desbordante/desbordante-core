@@ -52,7 +52,6 @@ void BindMDVerifier(py::module_& main_module) {
     BindMeasure<LevenshteinSimilarity>(measures_module, "LevenshteinSimilarity");
     BindPrimitiveNoBase<MDVerifier>(md_module, "MDVerifier")
             .def("get_highlights", &MDVerifier::GetHighlights)
-            .def("get_highlights_as_strings", &MDVerifier::GetHighlightsAsStrings)
             .def("get_rhs_suggestions", &MDVerifier::GetRhsSuggestions)
             .def("md_holds", &MDVerifier::GetResult);
 }
