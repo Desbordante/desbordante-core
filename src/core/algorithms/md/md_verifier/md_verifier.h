@@ -60,11 +60,7 @@ public:
         return md_holds_;
     }
 
-    std::vector<std::string> GetHighlightsAsStrings() const {
-        return highlights_.GetHighlightsAsStrings();
-    }
-
-    auto GetHighlights() const {
+     auto GetHighlights() const {
         return highlights_.GetHighlights();
     }
 

@@ -17,16 +17,15 @@ public:
         std::string second_value;
         DecisionBoundary similarity;
         DecisionBoundary decision_boundary;
+
+        bool operator==(HighlightRecord const& other) const = default;
     };
 
 private:
     std::vector<HighlightRecord> highlights_;
 
-    static std::string HighlightRecordAsString(HighlightRecord highlight);
-
 public:
     MDHighlights() = default;
-    std::vector<std::string> GetHighlightsAsStrings() const;
 
     std::vector<HighlightRecord> const& GetHighlights() const {
         return highlights_;
