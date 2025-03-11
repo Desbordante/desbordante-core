@@ -58,12 +58,16 @@ public:
                (stats_calculator_.GetConfidence() >= minconf_);
     };
 
-    std::vector<size_t> GetRowsSatisfyingCFD() const {
-        return stats_calculator_.GetRowsSatisfyingCFD();
+    size_t GetNumRowsViolatingCFD() const {
+        return stats_calculator_.GetNumRowsViolatingCFD();
     }
 
-    std::vector<size_t> GetRowsViolatingCFD() const {
-        return stats_calculator_.GetRowsViolatingCFD();
+    std::vector<Highlight> const& GetHighlights() const {
+        return stats_calculator_.GetHighlights();
+    };
+
+    size_t GetNumClustersViolatingCFD() const {
+        return stats_calculator_.GetNumClustersViolatingCFD();
     }
 };
 
