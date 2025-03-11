@@ -62,7 +62,7 @@ void CFDStatsCalculator::DetermineMostFrequentRHS() {
 
 void CFDStatsCalculator::CalculateSupportAndConfidence() {
     size_t total_supported = 0;
-    size_t valid_tuples = 0;
+    size_t total_violations = 0;
 
     for (auto const& [lhs_values, row_indices] : lhs_to_row_nums_) {
         auto it = most_frequent_rhs_.find(lhs_values);
@@ -71,27 +71,31 @@ void CFDStatsCalculator::CalculateSupportAndConfidence() {
         }
 
         cfd::Item most_frequent_rhs = it->second;
+        size_t num_violations = 0;
+        std::vector<size_t> violating_rows;
 
         for (size_t row_index : row_indices) {
             auto const& row = relation_->GetRow(row_index);
             bool satisfies = (rule_.second < 0 && row[rhs_attr_index_] == most_frequent_rhs) ||
                              (rule_.second > 0 && row[rhs_attr_index_] == rule_.second);
 
-            if (satisfies) {
-                satisfying_rows_.push_back(row_index);
-                valid_tuples++;
-            } else {
-                violating_rows_.push_back(row_index);
+            if (!satisfies) {
+                num_violations++;
+                violating_rows.push_back(row_index);
             }
         }
         total_supported += row_indices.size();
+        total_violations += num_violations;
+
+        if (num_violations > 0) {
+            highlights_.emplace_back(std::move(row_indices), std::move(violating_rows));
+        }
     }
-
-    std::sort(satisfying_rows_.begin(), satisfying_rows_.end());
-    std::sort(violating_rows_.begin(), violating_rows_.end());
-
+    num_rows_violating_cfd_ = total_violations;
     support_ = total_supported;
-    confidence_ = total_supported > 0 ? static_cast<double>(valid_tuples) / total_supported : 0.0;
+    confidence_ = total_supported > 0 ? static_cast<double>(total_supported - total_violations) /
+                                                total_supported
+                                      : 0.0;
 }
 
 void CFDStatsCalculator::ResetState() {
@@ -100,7 +104,8 @@ void CFDStatsCalculator::ResetState() {
     most_frequent_rhs_.clear();
     support_ = 0;
     confidence_ = 0.0;
-    violating_rows_.clear();
+    num_rows_violating_cfd_ = 0;
+    highlights_.clear();
 }
 
 void CFDStatsCalculator::CalculateStatistics() {
