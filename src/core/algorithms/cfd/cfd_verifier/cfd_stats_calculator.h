@@ -10,6 +10,7 @@
 
 #include "cfd/model/cfd_relation_data.h"
 #include "cfd/model/cfd_types.h"
+#include "highlight.h"
 
 namespace algos::cfd_verifier {
 class CFDStatsCalculator {
@@ -25,8 +26,8 @@ private:
     std::unordered_map<cfd::Itemset, cfd::Item, boost::hash<cfd::Itemset>> most_frequent_rhs_;
     int support_ = 0;
     double confidence_ = 0.0;
-    std::vector<size_t> violating_rows_;
-    std::vector<size_t> satisfying_rows_;
+    std::vector<cfd_verifier::Highlight> highlights_;
+    size_t num_rows_violating_cfd_ = 0;
 
     void CreateSupportMask();
     void MakeLhsToRowNums();
@@ -46,16 +47,16 @@ public:
 
     void ResetState();
 
-    size_t GetNumRowsViolatingCFD() const {
-        return violating_rows_.size();
+    size_t GetNumClustersViolatingCFD() const {
+        return highlights_.size();
     }
 
-    std::vector<size_t> GetRowsViolatingCFD() const {
-        return violating_rows_;
-    };
+    std::vector<Highlight> const& GetHighlights() const {
+        return highlights_;
+    }
 
-    std::vector<size_t> GetRowsSatisfyingCFD() const {
-        return satisfying_rows_;
+    size_t GetNumRowsViolatingCFD() const {
+        return num_rows_violating_cfd_;
     }
 
     int GetSupport() const {
