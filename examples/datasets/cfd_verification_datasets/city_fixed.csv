@@ -1,0 +1,16 @@
+City,Street,PostalCode,BuildingType,BuildingCost
+Los Angeles,Hollywood Blvd,90029,Apartment,high
+Chicago,State Street,60601,Apartment,medium
+New York,Broadway,10002,Apartment,high
+Los Angeles,Sunset Blvd,90001,House,high
+Chicago,Michigan Ave,60611,Office,high
+New York,Wall Street,10005,Office,high
+Los Angeles,Hollywood Blvd,90028,Apartment,high
+Chicago,State Street,60602,Apartment,low
+New York,Broadway,10001,Apartment,high
+Los Angeles,Hollywood Blvd,90028,Apartment,high
+Chicago,State Street,60601,Apartment,medium
+New York,Broadway,10001,Apartment,high
+Los Angeles,Sunset Blvd,90001,House,high
+Chicago,Michigan Ave,60611,Office,medium
+New York,Wall Street,10005,Office,high
