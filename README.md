@@ -356,6 +356,12 @@ cd build/target
 ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
 ```
 
+Alternatively, you can run tests with CTest from any directory in `Desbordante` tree:
+```sh
+ctest --test-dir build --exclude-regex ".*HeavyDatasets.*" -j $JOBS
+```
+where `$JOBS` is the desired number of concurrent jobs.
+
 `desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
 ```sh
 cd build/target
