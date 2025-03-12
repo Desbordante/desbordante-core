@@ -49,7 +49,48 @@ void BindFd(py::module_& main_module) {
                               FD const& fd2) { return fd1.ToNameTuple() == fd2.ToNameTuple(); })
             .def("__hash__", [](FD const& fd) { return py::hash(MakeFdNameTuple(fd)); })
             .def_property_readonly("lhs_indices", &FD::GetLhsIndices)
-            .def_property_readonly("rhs_index", &FD::GetRhsIndex);
+            .def_property_readonly("rhs_index", &FD::GetRhsIndex)
+            .def(py::pickle(
+    [](const FD &fd) {  // __getstate__
+        auto schema = fd.GetSchema();
+        std::string schema_name = schema->GetName();
+        std::vector<std::string> col_names;
+        for (const auto &col_ptr : schema->GetColumns()) {
+            col_names.push_back(col_ptr->GetName());
+        }
+        auto lhs_indices = fd.GetLhsIndices(); 
+        int rhs_index = fd.GetRhsIndex();
+        return py::make_tuple(py::make_tuple(schema_name, col_names),
+                              lhs_indices,
+                              rhs_index);
+    },
+    [](py::tuple t) {  // __setstate__
+        if (t.size() != 3)
+            throw std::runtime_error("Invalid state for FD pickle!");
+
+        py::tuple schema_state = t[0].cast<py::tuple>();
+        std::string schema_name = schema_state[0].cast<std::string>();
+        std::vector<std::string> col_names = schema_state[1].cast<std::vector<std::string>>();
+
+        auto schema_ptr = std::make_shared<RelationalSchema>(schema_name);
+        for (const auto &name : col_names) {
+            schema_ptr->AppendColumn(name);
+        }
+
+        std::vector<int> lhs_indices = t[1].cast<std::vector<int>>();
+        boost::dynamic_bitset<> lhs_bitset(schema_ptr->GetNumColumns());
+        for (int idx : lhs_indices) {
+            lhs_bitset.set(idx);
+        }
+        Vertical lhs = schema_ptr->GetVertical(lhs_bitset);
+
+        int rhs_index = t[2].cast<int>();
+        Column rhs = *schema_ptr->GetColumn(rhs_index);
+
+        return FD(lhs, rhs, schema_ptr);
+    }
+));
+        
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
