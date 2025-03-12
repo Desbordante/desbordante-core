@@ -47,7 +47,7 @@ a_algo.execute(error=0.013)
 
 auccs = a_algo.get_uccs()
 print('Found AUCCs:')
-for aucc in auccs:
+for aucc in sorted(auccs, key=lambda x: x.to_long_string()):
     print(f'\t{CYAN}{aucc.to_long_string()}{ENDC}')
 print()
 
@@ -58,14 +58,14 @@ e_algo.execute()
 
 uccs = e_algo.get_uccs()
 print('Found UCCs:')
-for ucc in uccs:
+for ucc in sorted(uccs, key=lambda x: x.to_long_string()):
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
 print()
 
 print('Now let\'s find AUCCs that are not UCCs -- these columns may contain errors:')
 only_approximate = set(auccs) - set(uccs)
 print('ACCs - UCCs =')
-for ucc in only_approximate:
+for ucc in sorted(only_approximate, key=lambda x: x.to_long_string()):
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
 print()
 
@@ -92,7 +92,7 @@ e_algo.execute()
 
 uccs = e_algo.get_uccs()
 print('Found UCCs:')
-for ucc in uccs:
+for ucc in sorted(uccs, key=lambda x: x.to_long_string()):
     print(f'\t{CYAN}{ucc.to_long_string()}{ENDC}')
 print()
 print(f'''UCC {CYAN}[First_name Last_name]{ENDC} holds, and we have found and resolved two
