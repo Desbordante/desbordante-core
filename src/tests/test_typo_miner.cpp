@@ -21,7 +21,6 @@
 #include "create_algorithm.h"                            // for GetAllDerived
 #include "csv_config_util.h"                             // for MakeInputTable
 #include "fd/fd.h"                                       // for FD
-#include "gtest/gtest.h"                                 // for Message, Ass...
 #include "table/column.h"                                // for Column
 #include "table/column_data.h"                           // for ColumnData
 #include "table/column_layout_relation_data.h"           // for ColumnLayout...

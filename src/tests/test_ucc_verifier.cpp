@@ -12,7 +12,6 @@
 #include "all_csv_configs.h"                           // for kTestFD, kTest...
 #include "config/indices/type.h"                       // for IndicesType
 #include "config/names.h"                              // for kCsvConfig
-#include "gtest/gtest.h"                               // for Message, Asser...
 #include "table/position_list_index.h"                 // for PLI
 #include "thread_number/type.h"                        // for ThreadNumType
 #include "ucc/hyucc/hyucc.h"                           // for HyUCC

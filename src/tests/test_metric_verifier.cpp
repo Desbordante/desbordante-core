@@ -15,7 +15,6 @@
 #include "algorithms/metric/metric_verifier.h"  // for MetricVerifier
 #include "all_csv_configs.h"                    // for kTestMetric, kTest...
 #include "config/names.h"                       // for kParameter, kCsvCo...
-#include "gtest/gtest.h"                        // for AssertionResult
 #include "metric/highlight.h"                   // for Highlight
 
 struct CSVConfig;
