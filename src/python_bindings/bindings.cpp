@@ -11,6 +11,7 @@
 #include "data/bind_data_types.h"
 #include "dc/bind_dc_verification.h"
 #include "dc/bind_fastadc.h"
+#include "dd/bind_dd_verification.h"
 #include "dd/bind_split.h"
 #include "dynamic/bind_dynamic_fd_verification.h"
 #include "fd/bind_fd.h"
@@ -29,7 +30,6 @@
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
-#include "dd/bind_dd_verification.h"
 
 INITIALIZE_EASYLOGGINGPP
 
