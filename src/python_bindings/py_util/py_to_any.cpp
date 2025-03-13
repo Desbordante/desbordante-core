@@ -9,6 +9,7 @@
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"
+#include "algorithms/dd/dd.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
@@ -21,9 +22,6 @@
 #include "parser/csv_parser/csv_parser.h"
 #include "py_util/create_dataframe_reader.h"
 #include "util/enum_to_available_values.h"
-#include "algorithms/dd/dd.h"
-
-
 
 namespace {
 
