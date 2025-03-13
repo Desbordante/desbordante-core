@@ -180,8 +180,8 @@ public:
 
 template <typename Collection>
 auto BatchValidator::RhsValidator::LowerCCVIDAndCollectRecommendations(
-        RecordCluster const& lhs_records, Collection const& matched_rhs_records)
-        -> MdValidationStatus {
+        RecordCluster const& lhs_records,
+        Collection const& matched_rhs_records) -> MdValidationStatus {
     // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
     // 3), non-minimal are considered invalidated (4).
     DESBORDANTE_ASSUME(current_ccv_id_ != kLowestCCValueId);        // 1

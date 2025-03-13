@@ -44,7 +44,7 @@ public:
     }
 
     bool operator<=(Component const& rhs) const {
-        return *this < rhs or * this == rhs;
+        return *this < rhs or *this == rhs;
     }
 
     bool operator>(Component const& rhs) const {
