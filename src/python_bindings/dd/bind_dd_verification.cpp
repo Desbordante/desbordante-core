@@ -3,18 +3,18 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "util/create_dd.h"
-#include "algorithms/dd/dd_verifier/dd_verifier.h"
 #include "algorithms/dd/dd.h"
+#include "algorithms/dd/dd_verifier/dd_verifier.h"
 #include "py_util/bind_primitive.h"
+#include "util/create_dd.h"
 
 namespace python_bindings {
 namespace py = pybind11;
     void BindDDVerification(py::module_& main_module) {
         using namespace algos;
         auto dd_verification_module = main_module.def_submodule("dd_verification");
-        dd_verification_module.def("create_df", &util::dd::СreateDf);
-        dd_verification_module.def("create_dd", &util::dd::СreateDd);
+        dd_verification_module.def("create_df", &util::dd::CreateDf);
+        dd_verification_module.def("create_dd", &util::dd::CreateDd);
         py::class_<model::DFStringConstraint>(dd_verification_module, "DF");
 
 
