@@ -6,58 +6,58 @@
 #include "tabular_data/input_table_type.h"
 
 namespace algos::dd {
-    using DFs = model::DFStringConstraint;
-    using DDs = model::DDString;
+using DFs = model::DFStringConstraint;
+using DDs = model::DDString;
 
-    class DDVerifier : public Algorithm {
-    private:
-        DDs dd_;
-        config::InputTable input_table_;
-        std::size_t num_rows_{};
-        std::size_t num_columns_{};
-        std::size_t num_error_rhs_{};
-        double error_ = 0.;
-        std::shared_ptr<ColumnLayoutRelationData> relation_;
-        std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-        std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
+class DDVerifier : public Algorithm {
+private:
+    DDs dd_;
+    config::InputTable input_table_;
+    std::size_t num_rows_{};
+    std::size_t num_columns_{};
+    std::size_t num_error_rhs_{};
+    double error_ = 0.;
+    std::shared_ptr<ColumnLayoutRelationData> relation_;
+    std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
+    std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
 
-        void RegisterOptions();
+    void RegisterOptions();
 
-        void VisualizeHighlights();
+    void VisualizeHighlights();
 
-        void PrintStatistics();
+    void PrintStatistics();
 
-        std::vector<std::pair<int, int> > GetRowsWhereLhsHolds(
-            const std::list<model::DFStringConstraint> &constraints) const;
+    std::vector<std::pair<int, int> > GetRowsWhereLhsHolds(
+            std::list<model::DFStringConstraint> const &constraints) const;
 
-        double CalculateDistance(model::ColumnIndex column_index,
-                                 const std::pair<std::size_t, std::size_t> &tuple_pair) const;
+    double CalculateDistance(model::ColumnIndex column_index,
+                             std::pair<std::size_t, std::size_t> const &tuple_pair) const;
 
-        void CheckDFOnRhs(const std::vector<std::pair<int, int> > &lhs);
+    void CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs);
 
-        void ResetState() final {
-            num_columns_ = 0;
-            num_rows_ = 0;
-        }
+    void ResetState() final {
+        num_columns_ = 0;
+        num_rows_ = 0;
+    }
 
-    protected:
-        void LoadDataInternal() override;
+protected:
+    void LoadDataInternal() override;
 
-        void MakeExecuteOptsAvailable() override;
+    void MakeExecuteOptsAvailable() override;
 
-        unsigned long long ExecuteInternal() override;
+    unsigned long long ExecuteInternal() override;
 
-    public:
-        DDVerifier();
+public:
+    DDVerifier();
 
-        double GetError() const;
+    double GetError() const;
 
-        std::size_t GetNumErrorRhs() const;
+    std::size_t GetNumErrorRhs() const;
 
-        bool DDHolds() const;
+    bool DDHolds() const;
 
-        void VerifyDD();
+    void VerifyDD();
 
-        std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
-    };
-}
+    std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
+};
+}  // namespace algos::dd
