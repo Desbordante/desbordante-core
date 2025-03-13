@@ -1,9 +1,8 @@
 #include "lattice_level.h"
 
-#include <algorithm>                   // for min, sort
-#include <assert.h>                    // for assert
-#include <pstl/glue_algorithm_defs.h>  // for move, sort
-#include <utility>                     // for move, pair
+#include <algorithm>  // for min, sort
+#include <assert.h>   // for assert
+#include <utility>    // for move, pair
 
 #include <boost/move/utility_core.hpp>  // for move
 #include <easylogging++.h>              // for Writer, CTRACE, LOG

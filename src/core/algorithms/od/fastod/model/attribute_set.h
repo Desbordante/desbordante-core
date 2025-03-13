@@ -8,18 +8,10 @@
 #include <string>            // for operator+, to_string, string
 #include <utility>           // for move
 
+#include <boost/functional/hash.hpp>
+
 #include "model/table/column_index.h"
 #include "model/types/bitset.h"
-
-namespace boost {
-template <class T>
-struct hash;
-}
-
-namespace std {
-template <typename>
-struct hash;
-}
 
 namespace algos::fastod {
 

@@ -1,10 +1,9 @@
-#include <algorithm>       // for equal
-#include <bits/std_abs.h>  // for abs
-#include <limits>          // for numeric_limits
-#include <memory>          // for unique_ptr
-#include <stddef.h>        // for size_t
-#include <utility>         // for move, pair
-#include <vector>          // for vector
+#include <algorithm>  // for equal
+#include <limits>     // for numeric_limits
+#include <memory>     // for unique_ptr
+#include <stddef.h>   // for size_t
+#include <utility>    // for move, pair
+#include <vector>     // for vector
 
 #include <boost/any.hpp>                           // for any_cast
 #include <boost/type_index/type_index_facade.hpp>  // for operator==
