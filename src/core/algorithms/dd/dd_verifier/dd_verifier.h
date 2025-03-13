@@ -49,10 +49,15 @@ namespace algos::dd {
 
     public:
         DDVerifier();
+
         double GetError() const;
+
         std::size_t GetNumErrorRhs() const;
+
         bool DDHolds() const;
+
         void VerifyDD();
+
         std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
     };
 }
