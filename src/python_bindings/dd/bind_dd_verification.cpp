@@ -13,8 +13,8 @@ namespace py = pybind11;
     void BindDDVerification(py::module_& main_module) {
         using namespace algos;
         auto dd_verification_module = main_module.def_submodule("dd_verification");
-        dd_verification_module.def("create_df", &util::dd::createDF);
-        dd_verification_module.def("create_dd", &util::dd::createDD);
+        dd_verification_module.def("create_df", &util::dd::createDf);
+        dd_verification_module.def("create_dd", &util::dd::createDd);
         py::class_<model::DFStringConstraint>(dd_verification_module, "DF");
 
 
