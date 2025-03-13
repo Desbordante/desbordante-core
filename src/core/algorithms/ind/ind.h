@@ -36,6 +36,10 @@ public:
     ColumnCombination const& GetRhs() const {
         return *rhs_;
     }
+    
+    const std::shared_ptr<std::vector<RelationalSchema>>& GetSchemas() const {
+        return schemas_;
+    }
 
     ///
     /// Get the error threshold at which AIND holds.
