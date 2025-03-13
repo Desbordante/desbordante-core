@@ -1,10 +1,24 @@
 #include "fd_mine.h"
 
-#include <queue>
-#include <vector>
+#include <assert.h>       // for assert
+#include <queue>          // for queue
+#include <stddef.h>       // for size_t
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include <boost/unordered_map.hpp>
-#include <easylogging++.h>
+#include <boost/container_hash/hash.hpp>              // for hash
+#include <boost/move/utility_core.hpp>                // for move
+#include <boost/unordered/detail/implementation.hpp>  // for iterator
+#include <easylogging++.h>                            // for Writer, CDEBUG
+
+#include "fd/pli_based_fd_algorithm.h"          // for PliBasedFDAlgor...
+#include "table/column.h"                       // for Column
+#include "table/column_data.h"                  // for ColumnData
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "table/position_list_index.h"          // for PositionListIndex
+#include "table/relational_schema.h"            // for RelationalSchema
+#include "table/vertical.h"                     // for Vertical
 
 namespace algos {
 

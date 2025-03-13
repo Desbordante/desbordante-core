@@ -1,10 +1,16 @@
 #include "combined_inclusion_tester.h"
 
+#include <bit>            // for rotl
+#include <unordered_set>  // for unor...
+#include <utility>        // for pair
+
 #ifdef __AVX2__
 #include "immintrin.h"
 #endif
-#include "algorithms/ind/faida/hashing/hashing.h"
-#include "util/parallel_for.h"
+#include "ind/faida/inclusion_testing/hll_data.h"                // for HLLData
+#include "ind/faida/inclusion_testing/iinclusion_tester.h"       // for IInc...
+#include "ind/faida/inclusion_testing/sampled_inverted_index.h"  // for Samp...
+#include "util/parallel_for.h"                                   // for Para...
 
 namespace algos::faida {
 

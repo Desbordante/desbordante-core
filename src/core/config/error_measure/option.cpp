@@ -1,7 +1,13 @@
 #include "config/error_measure/option.h"
 
+#include <variant>  // for variant
+
+#include <enum.h>  // for _iterable
+
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
-#include "fd/tane/enums.h"
+#include "error_measure/type.h"  // for AfdErrorMeasureType, PfdErrorMeasure...
+#include "fd/tane/enums.h"       // for AfdErrorMeasure, PfdErrorMeasure
 
 namespace config {
 using names::kPfdErrorMeasure, names::kAfdErrorMeasure, descriptions::kDPfdErrorMeasure,

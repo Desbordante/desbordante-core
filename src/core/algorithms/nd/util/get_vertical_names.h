@@ -1,9 +1,9 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include "model/table/vertical.h"
+class Vertical;
 
 namespace algos::nd::util {
 

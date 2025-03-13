@@ -1,5 +1,15 @@
 #include "algorithms/metric/points_calculator.h"
 
+#include <stdexcept>  // for runtime_error
+
+#include "builtin.h"                                  // for TypeId, operator+
+#include "convex_hull.h"                              // for Point
+#include "metric/highlight.h"                         // for Highlight
+#include "metric/points.h"                            // for IndexedPoint
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
+
 namespace {
 
 void AssignToVector(long double coord, std::vector<long double>& point, [[maybe_unused]] size_t j) {

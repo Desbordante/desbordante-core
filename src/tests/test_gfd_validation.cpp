@@ -1,10 +1,21 @@
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <filesystem>  // for path, operator/
+#include <memory>      // for unique_ptr
+#include <vector>      // for vector
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/gfd/gfd_validation.h"
-#include "config/names.h"
-#include "csv_config_util.h"
+#include <gtest/gtest.h>  // for TypedTestSuitePState, ASS...
+
+#include "algorithms/algo_factory.h"        // for CreateAndLoadAlgorithm
+#include "algorithms/gfd/gfd_validation.h"  // for GfdValidation
+#include "config/names.h"                   // for kGfdData, kGraphData
+#include "csv_config_util.h"                // for kTestDataDir
+#include "gfd/egfd_validation.h"            // for EGfdValidation
+#include "gfd/naivegfd_validation.h"        // for NaiveGfdValidation
+
+class Gfd;
+
+namespace algos {
+class GfdHandler;
+}
 
 using namespace algos;
 using algos::StdParamsMap;

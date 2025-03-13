@@ -1,4 +1,7 @@
 #pragma once
+
+#include <algorithm>  // for any_of
+#include <bitset>     // for bitset
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -6,13 +9,13 @@
 #include <stdexcept>
 #include <vector>
 
-#include "dc/FastADC/model/column_operand.h"
-#include "dc/FastADC/model/operator.h"
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/providers/index_provider.h"
-#include "dc/FastADC/util/common_clue_set_builder.h"
-#include "dc/FastADC/util/predicate_builder.h"
-#include "model/table/column.h"
+#include "dc/FastADC/model/column_operand.h"          // for ColumnOperand
+#include "dc/FastADC/model/operator.h"                // for OperatorType (p...
+#include "dc/FastADC/model/predicate.h"               // for PredicatePtr
+#include "dc/FastADC/providers/index_provider.h"      // for PredicateIndexP...
+#include "dc/FastADC/util/common_clue_set_builder.h"  // for Clue
+#include "dc/FastADC/util/predicate_builder.h"        // for PredicateBuilder
+#include "model/table/column.h"                       // for Column
 
 namespace algos::fastadc {
 

@@ -5,8 +5,9 @@
  */
 #pragma once
 
-#include <utility>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <utility>  // for pair
+#include <vector>   // for vector
 
 namespace tests {
 

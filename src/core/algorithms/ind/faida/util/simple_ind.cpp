@@ -1,6 +1,9 @@
 #include "simple_ind.h"
 
-#include "cassert"
+#include <assert.h>  // for assert
+#include <vector>    // for vector
+
+#include "ind/faida/util/simple_cc.h"  // for SimpleCC, ColumnIndex
 
 namespace algos::faida {
 

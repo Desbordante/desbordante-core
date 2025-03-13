@@ -1,7 +1,8 @@
 #pragma once
 
-#include <string>
-#include <unordered_map>
+#include <string>         // for hash, string
+#include <string_view>    // for string_view
+#include <unordered_map>  // for unordered_map
 
 namespace util {
 

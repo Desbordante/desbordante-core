@@ -1,15 +1,22 @@
-#include <limits>
-#include <memory>
-#include <utility>
-#include <vector>
+#include <algorithm>  // for equal
+#include <limits>     // for numeric_limits
+#include <memory>     // for unique_ptr
+#include <stddef.h>   // for size_t
+#include <utility>    // for move, pair
+#include <vector>     // for vector
 
-#include <gtest/gtest.h>
+#include <boost/any.hpp>                           // for any_cast
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <gtest/gtest.h>                           // for UnitTest, ASSERT_TRUE
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/metric/enums.h"
-#include "algorithms/metric/metric_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include "algorithms/algo_factory.h"            // for StdParamsMap, Conf...
+#include "algorithms/metric/enums.h"            // for Metric, MetricAlgo
+#include "algorithms/metric/metric_verifier.h"  // for MetricVerifier
+#include "all_csv_configs.h"                    // for kTestMetric, kTest...
+#include "config/names.h"                       // for kParameter, kCsvCo...
+#include "metric/highlight.h"                   // for Highlight
+
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;

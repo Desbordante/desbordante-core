@@ -1,12 +1,21 @@
 #include "pfdtane.h"
 
-#include <algorithm>
+#include <algorithm>  // for max, stable_sort
+#include <cstddef>    // for size_t
+#include <deque>      // for operator-, operator+
+#include <memory>     // for shared_ptr, __shar...
+#include <vector>     // for vector, swap
 
-#include "config/error/option.h"
-#include "config/error_measure/option.h"
-#include "enums.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "model/table/column_data.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"                // for CommonOption
+#include "config/error/option.h"          // for kErrorOpt
+#include "config/error_measure/option.h"  // for kPfdErrorMeasureOpt
+#include "enums.h"                        // for PfdErrorMeasure
+#include "error/type.h"                   // for ErrorType
+#include "fd/tane/tane_common.h"          // for TaneCommon
+#include "model/table/column_data.h"      // for ColumnData
+#include "table/position_list_index.h"    // for PositionListIndex
 
 namespace algos {
 using Cluster = model::PositionListIndex::Cluster;

@@ -5,9 +5,11 @@
  */
 #include "block_data.h"
 
-#include <algorithm>
-#include <cassert>
+#include <algorithm>  // for copy
+#include <cassert>    // for assert
+#include <iterator>   // for back_insert_iterator, next, advance, back_inserter
 #include <limits>
+#include <stddef.h>  // for size_t
 
 namespace model {
 

@@ -1,11 +1,24 @@
 #include "tane.h"
 
-#include "afd_measures.h"
-#include "config/error/option.h"
-#include "config/error_measure/option.h"
-#include "enums.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "model/table/column_data.h"
+#include <memory>  // for shared_ptr
+#include <vector>  // for vector
+
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "afd_measures.h"                       // for CalculateG1Error
+#include "common_option.h"                      // for CommonOption
+#include "config/error/option.h"                // for kErrorOpt
+#include "config/error_measure/option.h"        // for kAfdErrorMeasureOpt
+#include "enums.h"                              // for AfdErrorMeasure
+#include "error/type.h"                         // for ErrorType
+#include "fd/tane/tane_common.h"                // for TaneCommon
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelati...
+
+class ColumnData;
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace algos {
 

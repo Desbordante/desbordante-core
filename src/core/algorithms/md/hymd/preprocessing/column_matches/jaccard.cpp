@@ -1,10 +1,9 @@
 #include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
 
-#include <algorithm>
-#include <iterator>
-#include <sstream>
-#include <string>
-#include <unordered_set>
+#include <iterator>       // for istream_iterator, operator==
+#include <sstream>        // for basic_istringstream, istringstream
+#include <string>         // for hash, string, operator==
+#include <unordered_set>  // for unordered_set
 
 namespace algos::hymd::preprocessing::column_matches::similarity_measures {
 double StringJaccardIndex(std::string const& s1, std::string const& s2) {

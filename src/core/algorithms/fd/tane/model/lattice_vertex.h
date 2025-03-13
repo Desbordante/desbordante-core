@@ -1,15 +1,19 @@
 #pragma once
 
-#include <list>
-#include <utility>
-#include <variant>
-#include <vector>
+#include <iosfwd>   // for ostream
+#include <memory>   // for unique_ptr
+#include <string>   // for string
+#include <utility>  // for move
+#include <variant>  // for variant
+#include <vector>   // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 
-#include "model/table/position_list_index.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
+#include "model/table/position_list_index.h"  // for PositionListIndex
+#include "model/table/relational_schema.h"    // for RelationalSchema
+#include "model/table/vertical.h"             // for Vertical
+
+class Column;
 
 namespace model {
 

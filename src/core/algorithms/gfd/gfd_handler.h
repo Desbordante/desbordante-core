@@ -1,10 +1,13 @@
 #pragma once
-#include <vector>
 
-#include "algorithms/algorithm.h"
-#include "config/names_and_descriptions.h"
-#include "gfd.h"
-#include "parser/graph_parser/graph_parser.h"
+#include <filesystem>  // for path
+#include <vector>      // for vector
+
+#include <boost/iterator/iterator_facade.hpp>  // for operator!=
+
+#include "algorithms/algorithm.h"  // for Algorithm
+#include "gfd.h"                   // for Gfd
+#include "gfd/graph_descriptor.h"  // for graph_t
 
 namespace algos {
 

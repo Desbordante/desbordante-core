@@ -1,14 +1,23 @@
 #include "egfd_validation.h"
 
-#include <iostream>
+#include <algorithm>  // for find
+#include <cstddef>    // for size_t
+#include <iterator>   // for back_i...
+#include <list>       // for operat...
+#include <string>     // for operat...
 
-#include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
+#include <boost/graph/adjacency_list.hpp>                      // for source
+#include <boost/graph/detail/adjacency_list.hpp>               // for degree
+#include <boost/graph/detail/edge.hpp>                         // for edge_d...
+#include <boost/graph/graph_traits.hpp>                        // for graph_...
+#include <boost/iterator/detail/facade_iterator_category.hpp>  // for iterat...
+#include <boost/iterator/iterator_categories.hpp>              // for random...
+#include <boost/range/irange.hpp>                              // for intege...
+#include <boost/tuple/detail/tuple_basic.hpp>                  // for tie
+#include <boost/tuple/tuple.hpp>                               // for tie
+#include <easylogging++.h>                                     // for Writer
 
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include "gfd/gfd.h"  // for Gfd
 
 namespace {
 
@@ -167,7 +176,7 @@ void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t 
     auto cmp_complexity = [&graph, &query, &label_classes](vertex_t const& a, vertex_t const& b) {
         std::size_t a_degree = boost::degree(a, query);
         int an = 0;
-        for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
+        for (vertex_t const& e : label_classes.at(query[a].attributes.at("label"))) {
             if (boost::degree(e, graph) >= a_degree) {
                 an++;
             }
@@ -175,7 +184,7 @@ void SortComplexity(std::vector<vertex_t>& order, graph_t const& graph, graph_t 
 
         std::size_t b_degree = boost::degree(b, query);
         int bn = 0;
-        for (const vertex_t& e : label_classes.at(query[b].attributes.at("label"))) {
+        for (vertex_t const& e : label_classes.at(query[b].attributes.at("label"))) {
             if (boost::degree(e, graph) >= b_degree) {
                 bn++;
             }
@@ -193,7 +202,7 @@ void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
                                                                     vertex_t const& b) {
         int a_degree = boost::degree(a, query);
         int an = 0;
-        for (const vertex_t& e : label_classes.at(query[a].attributes.at("label"))) {
+        for (vertex_t const& e : label_classes.at(query[a].attributes.at("label"))) {
             if (CandVerify(graph, e, query, a)) {
                 an++;
             }
@@ -201,7 +210,7 @@ void SortAccurateComplexity(std::vector<vertex_t>& order, graph_t const& graph,
 
         int b_degree = boost::degree(b, query);
         int bn = 0;
-        for (const vertex_t& e : label_classes.at(query[b].attributes.at("label"))) {
+        for (vertex_t const& e : label_classes.at(query[b].attributes.at("label"))) {
             if (CandVerify(graph, e, query, b)) {
                 bn++;
             }

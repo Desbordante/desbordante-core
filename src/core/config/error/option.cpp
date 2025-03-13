@@ -1,7 +1,11 @@
 #include "config/error/option.h"
 
-#include "config/exceptions.h"
+#include <variant>  // for variant
+
+#include "common_option.h"      // for CommonOption
+#include "config/exceptions.h"  // for ConfigurationError
 #include "config/names_and_descriptions.h"
+#include "error/type.h"  // for ErrorType
 
 namespace config {
 using names::kError, descriptions::kDError;

@@ -1,5 +1,12 @@
 #include "ucc_tree.h"
 
+#include <assert.h>  // for assert
+#include <utility>   // for move
+
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "ucc/hyucc/model/ucc_tree_vertex.h"  // for UCCTreeVertex
+
 namespace algos::hyucc {
 
 UCCTreeVertex* UCCTree::AddUCC(boost::dynamic_bitset<> const& ucc, bool* is_new_out) {

@@ -1,12 +1,13 @@
 #include "dc/FastADC/model/predicate.h"
 
-#include <algorithm>
+#include <algorithm>  // for find_if
+#include <assert.h>   // for assert
 
-#include "dc/FastADC/model/column_operand.h"
-#include "dc/FastADC/model/operator.h"
-#include "dc/FastADC/providers/predicate_provider.h"
-#include "model/table/column.h"
-#include "model/table/typed_column_data.h"
+#include "dc/FastADC/model/column_operand.h"          // for ColumnOperand
+#include "dc/FastADC/model/operator.h"                // for Operator, Opera...
+#include "dc/FastADC/providers/predicate_provider.h"  // for PredicateProvider
+#include "model/table/column.h"                       // for Column
+#include "model/table/typed_column_data.h"            // for TypedColumnData
 
 namespace algos::fastadc {
 

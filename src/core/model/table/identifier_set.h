@@ -1,11 +1,14 @@
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include "model/table/column_data.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "model/table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "model/table/vertical.h"                     // for Vertical
+#include "table/column.h"                             // for Column
+#include "table/relational_schema.h"                  // for RelationalSchema
 
 namespace model {
 
