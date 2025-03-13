@@ -67,7 +67,7 @@ namespace algos::dd {
         if (column.GetType().IsMetrizable()) {
             std::byte const *first_value = column.GetValue(tuple_pair.first);
             std::byte const *second_value = column.GetValue(tuple_pair.second);
-            auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+            auto const &type = dynamic_cast<model::IMetrizableType const &>(column.GetType());
             dif = type.Dist(first_value, second_value);
         }
         return dif;
@@ -87,7 +87,8 @@ namespace algos::dd {
                 for (size_t i = 0; i < num_rows_; i++) {
                     for (size_t j = i; j < num_rows_; j++) {
                         if (const auto dif = CalculateDistance(column_index, {i, j});
-                            dif <= curr_constraint->constraint.upper_bound && dif >= curr_constraint->constraint.lower_bound) {
+                            dif <= curr_constraint->constraint.upper_bound && dif >= curr_constraint->constraint.
+                            lower_bound) {
                             result.emplace_back(i, j);
                         }
                     }
@@ -95,7 +96,8 @@ namespace algos::dd {
             } else {
                 for (std::size_t i = 0; i < result.size(); i++) {
                     if (const double dif = CalculateDistance(column_index, result[i]);
-                        dif > curr_constraint->constraint.upper_bound || dif < curr_constraint->constraint.lower_bound) {
+                        dif > curr_constraint->constraint.upper_bound || dif < curr_constraint->constraint.
+                        lower_bound) {
                         result.erase(result.cbegin() + static_cast<int>(i));
                         --i;
                     }
@@ -165,7 +167,7 @@ namespace algos::dd {
         error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
     }
 
-    std::vector<std::pair<std::size_t, std::pair<int, int>>> DDVerifier::GetHighlights() const {
+    std::vector<std::pair<std::size_t, std::pair<int, int> > > DDVerifier::GetHighlights() const {
         return highlights_;
     }
 
