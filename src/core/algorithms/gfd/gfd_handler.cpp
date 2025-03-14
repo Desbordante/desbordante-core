@@ -1,4 +1,4 @@
-#include "gfd_handler.h"
+#include "algorithms/gfd/gfd_handler.h"
 
 #include <iostream>
 #include <set>
@@ -10,7 +10,7 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "balancer.h"
+#include "algorithms/gfd/balancer.h"
 #include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
