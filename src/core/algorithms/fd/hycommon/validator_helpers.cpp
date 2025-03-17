@@ -1,8 +1,13 @@
 #include "validator_helpers.h"
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "algorithms/fd/hyfd/model/fd_tree_vertex.h"
-#include "ucc/hyucc/model/ucc_tree_vertex.h"
+#include <utility>  // for move
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "algorithms/fd/hycommon/util/pli_util.h"     // for PLIUtil
+#include "algorithms/fd/hyfd/model/fd_tree_vertex.h"  // for LhsPair
+#include "fd/hycommon/types.h"                        // for ClusterId, Row
+#include "ucc/hyucc/model/ucc_tree_vertex.h"          // for LhsPair
 
 namespace algos::hy {
 

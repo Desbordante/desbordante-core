@@ -1,18 +1,51 @@
 #pragma once
 
-#include <cstddef>
-#include <unordered_set>
-#include <vector>
+#include <algorithm>      // for min
+#include <cstddef>        // for size_t
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair
+#include <vector>         // for vector
 
-#include "algorithms/md/hymd/column_match_info.h"
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
-#include "algorithms/md/hymd/recommendation.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "model/index.h"
-#include "util/worker_thread_pool.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/unordered/detail/foa/table.hpp>     // for operator==
+
+#include "algorithms/md/hymd/column_match_info.h"         // for ColumnMatch...
+#include "algorithms/md/hymd/indexes/records_info.h"      // for RecordsInfo
+#include "algorithms/md/hymd/recommendation.h"            // for Recommendation
+#include "algorithms/md/hymd/table_identifiers.h"         // for ValueIdenti...
+#include "algorithms/md/hymd/utility/invalidated_rhss.h"  // for Invalidated...
+#include "desbordante_assume.h"                           // for DESBORDANTE...
+#include "md/hymd/column_classifier_value_id.h"           // for ColumnClass...
+#include "md/hymd/compressed_record.h"                    // for CompressedR...
+#include "md/hymd/indexes/compressed_records.h"           // for CompressedR...
+#include "md/hymd/indexes/dictionary_compressor.h"        // for DictionaryC...
+#include "md/hymd/indexes/keyed_position_list_index.h"    // for KeyedPositi...
+#include "md/hymd/indexes/similarity_index.h"             // for RecSet
+#include "md/hymd/indexes/similarity_matrix.h"            // for SimilarityM...
+#include "md/hymd/lattice/rhs.h"                          // for Rhs
+#include "md/hymd/lowest_cc_value_id.h"                   // for kLowestCCVa...
+#include "md/hymd/md_element.h"                           // for MdElement
+#include "model/index.h"                                  // for Index
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+class MdLattice;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct ValidationInfo;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}
 
 namespace algos::hymd {
 

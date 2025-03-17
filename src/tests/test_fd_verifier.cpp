@@ -1,16 +1,21 @@
-#include <algorithm>
-#include <memory>
+#include <algorithm>  // for is_sorted
+#include <memory>     // for unique_ptr
+#include <stddef.h>   // for size_t
+#include <string>     // for hash
+#include <utility>    // for move, pair
+#include <vector>     // for vector
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for AssertionResult, Message
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "builtin.h"
-#include "config/indices/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "fd/fd_verifier/fd_verifier.h"
-#include "fd/fd_verifier/stats_calculator.h"
+#include "algo_factory.h"                     // for CreateAndLoadAlgorithm
+#include "all_csv_configs.h"                  // for kTestFD
+#include "config/indices/type.h"              // for IndicesType
+#include "config/names.h"                     // for kCsvConfig, kEqualNulls
+#include "fd/fd_verifier/fd_verifier.h"       // for FDVerifier
+#include "fd/fd_verifier/highlight.h"         // for Highlight
+#include "fd/fd_verifier/stats_calculator.h"  // for StatsCalculator
+
+struct CSVConfig;
 
 namespace {
 using namespace algos::fd_verifier;

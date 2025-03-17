@@ -1,9 +1,16 @@
 #pragma once
 
-#include <enum.h>
+#include <algorithm>  // for minmax
+#include <cstddef>    // for byte
+#include <memory>     // for shared_ptr
+#include <stdexcept>  // for logic_error
+#include <string>     // for string, to_string, basic_string
+#include <utility>    // for move
+#include <vector>     // for vector
 
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/types/type.h"
+#include "builtin.h"                  // for TypeId, String, Double, Int
+#include "model/types/type.h"         // for Type
+#include "table/typed_column_data.h"  // for TypedColumnData
 
 namespace model {
 

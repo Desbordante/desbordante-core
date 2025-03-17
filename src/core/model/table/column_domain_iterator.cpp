@@ -5,7 +5,10 @@
  */
 #include "column_domain_iterator.h"
 
-#include <cassert>
+#include <cassert>  // for assert
+#include <list>     // for _List_const_iterator
+
+#include "table/column_domain.h"  // for ColumnDomain, DomainPartition
 
 namespace model {
 

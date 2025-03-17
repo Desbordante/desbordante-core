@@ -1,10 +1,11 @@
 #pragma once
 
-#include <cassert>
-#include <cmath>
-#include <numeric>
-#include <utility>
-#include <vector>
+#include <cassert>     // for assert
+#include <cmath>       // for sqrt, pow
+#include <functional>  // for plus
+#include <numeric>     // for inner_product
+#include <utility>     // for pair
+#include <vector>      // for vector
 
 namespace util {
 

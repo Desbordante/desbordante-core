@@ -1,7 +1,9 @@
 #pragma once
 
-#include "model/table/column_data.h"
-#include "model/table/vertical.h"
+#include <vector>  // for vector
+
+class ColumnLayoutRelationData;
+class Vertical;
 
 class ColumnOrder {
 private:

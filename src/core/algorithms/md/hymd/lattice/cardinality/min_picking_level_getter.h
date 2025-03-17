@@ -1,10 +1,16 @@
 #pragma once
 
-#include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
+#include <cstddef>
+#include <unordered_map>
+#include <vector>
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+
 #include "algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
 #include "algorithms/md/hymd/lattice/level_getter.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
 #include "algorithms/md/hymd/md_lhs.h"
+#include "md/hymd/lattice/validation_info.h"
 
 namespace algos::hymd::lattice::cardinality {
 

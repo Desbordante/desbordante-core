@@ -1,10 +1,18 @@
 #include "fd_algorithm.h"
 
-#include <map>
-#include <thread>
-#include <vector>
+#include <assert.h>  // for assert
+#include <map>       // for map, _Rb_tree_iter...
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include "config/max_lhs/option.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"                // for Algorithm
+#include "common_option.h"            // for CommonOption
+#include "config/max_lhs/option.h"    // for kMaxLhsOpt
+#include "fd/fd.h"                    // for FD
+#include "primitive_collection.h"     // for PrimitiveCollection
+#include "table/relational_schema.h"  // for RelationalSchema
 
 namespace algos {
 

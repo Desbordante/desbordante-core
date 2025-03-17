@@ -1,10 +1,16 @@
 #pragma once
 
-#include "config/error/type.h"
-#include "enums.h"
-#include "model/table/column_data.h"
-#include "model/table/position_list_index.h"
-#include "tane_common.h"
+#include <optional>  // for optional, nullopt, nullopt_t
+
+#include "config/error/type.h"  // for ErrorType
+#include "enums.h"              // for PfdErrorMeasure, operator+
+#include "tane_common.h"        // for TaneCommon
+
+class ColumnData;
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace algos {
 

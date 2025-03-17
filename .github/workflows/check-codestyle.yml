@@ -72,16 +72,38 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -S . -B ${{github.workspace}}/build
 
-      - uses: ZedThree/clang-tidy-review@v0.19.0
-        id: review
+      - name: Count changed files
+        id: count_files
+        run: |
+          changed_files=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+          file_count=$(echo "$changed_files" | wc -l)
+          echo "Changed files count: $file_count"
+          echo "file_count=$file_count" >> $GITHUB_OUTPUT
+        
+        # Run if PR has <= 300 changed files
+      - name: Run clang-tidy-review with split_workflow
+        id: review_split
+        if: steps.count_files.outputs.file_count <= 300
+        uses: ZedThree/clang-tidy-review@v0.19.0
         with:
           apt_packages: libboost-dev
           build_dir: build
           config_file: '.clang-tidy'
-          split_workflow: true
+          split_workflow: true  # Analyse only changed files
+
+        # Run if PR has > 300 changed files
+      - name: Run clang-tidy-review without split_workflow
+        id: review_no_split
+        if: steps.count_files.outputs.file_count > 300
+        uses: ZedThree/clang-tidy-review@v0.19.0
+        with:
+          apt_packages: libboost-dev
+          build_dir: build
+          config_file: '.clang-tidy'
+          split_workflow: false  # Analyse all code
 
       - uses: ZedThree/clang-tidy-review/upload@v0.19.0
 
       - name: Fail the check if clang-tidy reported issues
-        if: steps.review.outputs.total_comments > 0
+        if: steps.review_split.outputs.total_comments > 0 || steps.review_no_split.outputs.total_comments > 0
         run: exit 1

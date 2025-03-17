@@ -2,12 +2,24 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>  // for function
+#include <iterator>    // for back_insert_iter...
+#include <stdexcept>   // for runtime_error
+#include <utility>     // for move, pair
 
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
 #include <easylogging++.h>
 
-#include "config/names_and_descriptions.h"
+#include "algorithm.h"                             // for Algorithm
+#include "association_rules/ar.h"                  // for ARStrings, ArIDs
+#include "association_rules/ar_algorithm_enums.h"  // for InputFormat, ope...
+#include "common_option.h"                         // for CommonOption
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "descriptions.h"                    // for kDFirstColumnTId
+#include "names.h"                           // for kFirstColumnTId
+#include "option.h"                          // for Option
+#include "transaction/transactional_data.h"  // for TransactionalData
 
 namespace algos {
 

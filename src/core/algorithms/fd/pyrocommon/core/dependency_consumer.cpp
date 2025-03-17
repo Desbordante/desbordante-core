@@ -1,5 +1,9 @@
-
 #include "dependency_consumer.h"
+
+#include "fd/pyrocommon/model/partial_fd.h"   // for PartialFD
+#include "fd/pyrocommon/model/partial_key.h"  // for PartialKey
+#include "table/column.h"                     // for Column
+#include "table/vertical.h"                   // for Vertical
 
 PartialFD DependencyConsumer::RegisterFd(Vertical const& lhs, Column const& rhs, double error,
                                          double score) const {

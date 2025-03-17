@@ -1,21 +1,40 @@
 #pragma once
 
-#include <cassert>
-#include <cstdint>
-#include <list>
-#include <queue>
-#include <span>
-#include <unordered_set>
-#include <utility>
-#include <vector>
+#include <cstddef>        // for size_t
+#include <queue>          // for priority_queue
+#include <tuple>          // for forward_as_tuple
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move, pair
+#include <vector>         // for vector
 
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "algorithms/md/hymd/pair_comparison_result.h"
-#include "algorithms/md/hymd/recommendation.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "util/desbordante_assume.h"
-#include "util/worker_thread_pool.h"
+#include <boost/container/detail/std_fwd.hpp>  // for pair
+
+#include "algorithms/md/hymd/pair_comparison_result.h"  // for PairCompariso...
+#include "algorithms/md/hymd/recommendation.h"          // for Recommendations
+#include "index.h"                                      // for Index
+#include "md/hymd/column_match_info.h"                  // for ColumnMatchInfo
+#include "md/hymd/compressed_record.h"                  // for CompressedRecord
+#include "md/hymd/indexes/records_info.h"               // for RecordsInfo
+#include "md/hymd/table_identifiers.h"                  // for RecordIdentifier
+#include "util/desbordante_assume.h"                    // for DESBORDANTE_A...
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+class MdLattice;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+struct LhsCCVIdsInfo;
+}
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}
 
 namespace algos::hymd {
 

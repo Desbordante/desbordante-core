@@ -1,9 +1,19 @@
-#include <gtest/gtest.h>
+#include <memory>   // for unique_ptr
+#include <string>   // for basic_string, string, hash, to_...
+#include <utility>  // for pair, forward
+#include <vector>   // for vector
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/nar/des/des.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include <gtest/gtest.h>  // for TestInfo (ptr only), ASSERT_EQ
+
+#include "algorithms/algo_factory.h"  // for CreateAndLoadAlgorithm, StdPara...
+#include "algorithms/nar/des/des.h"   // for DES
+#include "all_csv_configs.h"          // for kAbalone
+#include "config/names.h"             // for kCrossoverProbability, kCsvConfig
+#include "nar/des/encoded_nar.h"      // for NAR
+#include "nar/des/enums.h"            // for DifferentialStrategy
+#include "nar/nar.h"                  // for NAR, NARQualities
+
+struct CSVConfig;
 
 namespace tests {
 

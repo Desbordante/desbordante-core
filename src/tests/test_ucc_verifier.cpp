@@ -1,10 +1,23 @@
-#include <gtest/gtest.h>
+#include <list>      // for list, _List_co...
+#include <memory>    // for unique_ptr
+#include <stddef.h>  // for size_t
+#include <utility>   // for move, pair
+#include <vector>    // for vector
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/ucc/ucc_verifier/ucc_verifier.h"
-#include "all_csv_configs.h"
-#include "config/indices/type.h"
-#include "config/names.h"
+#include <boost/any.hpp>  // for any
+#include <gtest/gtest.h>  // for EXPECT_EQ, Uni...
+
+#include "algorithms/algo_factory.h"                   // for StdParamsMap
+#include "algorithms/ucc/ucc_verifier/ucc_verifier.h"  // for UCCVerifier
+#include "all_csv_configs.h"                           // for kTestFD, kTest...
+#include "config/indices/type.h"                       // for IndicesType
+#include "config/names.h"                              // for kCsvConfig
+#include "table/position_list_index.h"                 // for PLI
+#include "thread_number/type.h"                        // for ThreadNumType
+#include "ucc/hyucc/hyucc.h"                           // for HyUCC
+#include "ucc/ucc.h"                                   // for UCC
+
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;
@@ -52,6 +65,7 @@ public:
     double GetExpectedError() const {
         return expected_error_;
     }
+
     std::vector<model::PLI::Cluster> const& GetExpectedClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }

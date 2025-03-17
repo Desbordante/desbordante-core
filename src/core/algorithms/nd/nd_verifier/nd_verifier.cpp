@@ -1,29 +1,43 @@
 #include "algorithms/nd/nd_verifier/nd_verifier.h"
 
-#include <chrono>
-#include <cstddef>
-#include <sstream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <cstddef>        // for size_t
+#include <functional>     // for function
+#include <stdexcept>      // for runtim...
+#include <string>         // for to_string
+#include <string_view>    // for basic_...
+#include <unordered_set>  // for unorde...
+#include <vector>         // for vector
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer
 
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "algorithms/nd/nd_verifier/util/vector_to_string.h"
-#include "config/descriptions.h"
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/names.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/table/typed_column_data.h"
-#include "model/types/builtin.h"
-#include "model/types/type.h"
-#include "util/timed_invoke.h"
+#include "algorithm.h"                                         // for Algorithm
+#include "algorithms/nd/nd_verifier/util/stats_calculator.h"   // for StatsC...
+#include "algorithms/nd/nd_verifier/util/value_combination.h"  // for ValueC...
+#include "algorithms/nd/nd_verifier/util/vector_to_string.h"   // for Vector...
+#include "common_option.h"                                     // for Common...
+#include "config/descriptions.h"                               // for kDNDWe...
+#include "config/equal_nulls/option.h"                         // for kEqual...
+#include "config/indices/option.h"                             // for Indice...
+#include "config/names.h"                                      // for kWeight
+#include "config/option.h"                                     // for Option
+#include "config/option_using.h"                               // for DESBOR...
+#include "config/tabular_data/input_table/option.h"            // for kTableOpt
+#include "indices/type.h"                                      // for Indice...
+#include "model/table/column_layout_typed_relation_data.h"     // for Column...
+#include "model/table/typed_column_data.h"                     // for TypedC...
+#include "model/types/builtin.h"                               // for TypeId
+#include "nd/nd.h"                                             // for Weight...
+#include "table/idataset_stream.h"                             // for IDatas...
+#include "table/relational_schema.h"                           // for Relati...
+#include "util/timed_invoke.h"                                 // for TimedI...
+
+namespace algos {
+namespace nd_verifier {
+namespace util {
+class Highlight;
+}
+}  // namespace nd_verifier
+}  // namespace algos
 
 namespace algos::nd_verifier {
 
