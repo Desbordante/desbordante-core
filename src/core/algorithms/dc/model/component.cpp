@@ -12,14 +12,6 @@ namespace algos::dc {
 
 namespace mo = model;
 
-bool Component::CompareNumeric(std::byte const* l_val, mo::Type const* lhs_type,
-                               std::byte const* r_val, mo::Type const* rhs_type,
-                               mo::CompareResult res) const {
-    auto l_type = dynamic_cast<mo::INumericType const*>(lhs_type);
-    auto r_type = dynamic_cast<mo::INumericType const*>(rhs_type);
-    return l_type->CompareNumeric(l_val, l_type, r_val, r_type) == res;
-}
-
 std::string Component::ToString() const {
     if (val_type_ == ValType::kPlusInf) return "+Inf";
     if (val_type_ == ValType::kMinusInf) return "-Inf";
@@ -49,8 +41,11 @@ bool Component::operator<(Component const& rhs) const {
     if (val_type_ > rhs.val_type_) return false;
     if (val_type_ != ValType::kFinite) return true;
 
-    if (type_->IsNumeric())
-        return CompareNumeric(val_, type_, rhs.val_, rhs.type_, mo::CompareResult::kLess);
+    if (type_->IsNumeric()) {
+        auto l_type = dynamic_cast<mo::INumericType const*>(type_);
+        auto r_type = dynamic_cast<mo::INumericType const*>(rhs.type_);
+        return l_type->EvalComparison(val_, l_type, rhs.val_, r_type, mo::CompareResult::kLess);
+    }
 
     return type_->Compare(val_, rhs.val_) == mo::CompareResult::kLess;
 }
@@ -63,8 +58,11 @@ bool Component::operator==(Component const& rhs) const {
     if (val_type_ != rhs.val_type_) return false;
     if (val_type_ != ValType::kFinite) return true;
 
-    if (type_->IsNumeric())
-        return CompareNumeric(val_, type_, rhs.val_, rhs.type_, mo::CompareResult::kEqual);
+    if (type_->IsNumeric()) {
+        auto l_type = dynamic_cast<mo::INumericType const*>(type_);
+        auto r_type = dynamic_cast<mo::INumericType const*>(rhs.type_);
+        return l_type->EvalComparison(val_, l_type, rhs.val_, r_type, mo::CompareResult::kEqual);
+    }
 
     return type_->Compare(val_, rhs.val_) == mo::CompareResult::kEqual;
 }
