@@ -29,6 +29,10 @@ public:
     virtual CompareResult CompareNumeric(std::byte const* l, INumericType const* l_type,
                                          std::byte const* r, INumericType const* r_type) const = 0;
 
+    virtual bool EvalComparison(std::byte const* l_val, INumericType const* lhs_type,
+                                std::byte const* r_val, INumericType const* rhs_type,
+                                CompareResult res) const = 0;
+
     virtual std::byte* Negate(std::byte const* value, std::byte* res) const = 0;
     virtual std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
     virtual std::byte* Sub(std::byte const* l, std::byte const* r, std::byte* res) const = 0;
@@ -86,6 +90,9 @@ public:
     CompareResult Compare(std::byte const* l, std::byte const* r) const override;
     CompareResult CompareNumeric(std::byte const* l, INumericType const* l_type, std::byte const* r,
                                  INumericType const* r_type) const override;
+    bool EvalComparison(std::byte const* l_val, INumericType const* lhs_type,
+                        std::byte const* r_val, INumericType const* rhs_type,
+                        CompareResult res) const override;
 
     std::byte* Negate(std::byte const* value, std::byte* res) const override;
     std::byte* Add(std::byte const* l, std::byte const* r, std::byte* res) const override;
@@ -152,6 +159,13 @@ void NumericType<T>::CastTo(std::byte* value, TypeId to_type) const {
             break;
         }
     }
+}
+
+template <typename T>
+bool NumericType<T>::EvalComparison(std::byte const* l_val, INumericType const* l_type,
+                                    std::byte const* r_val, INumericType const* r_type,
+                                    CompareResult res) const {
+    return l_type->CompareNumeric(l_val, l_type, r_val, r_type) == res;
 }
 
 template <typename T>
