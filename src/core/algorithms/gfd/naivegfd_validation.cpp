@@ -1,4 +1,4 @@
-#include "naivegfd_validation.h"
+#include "algorithms/gfd/naivegfd_validation.h"
 
 #include <iostream>
 #include <set>
@@ -6,9 +6,11 @@
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "gfd.h"
+#include "algorithms/gfd/gfd.h"
 
 namespace {
+
+using namespace gfd;
 
 class CheckCallback {
 private:
@@ -119,6 +121,8 @@ bool Validate(graph_t const& graph, Gfd const& gfd) {
 }  // namespace
 
 namespace algos {
+
+using namespace gfd;
 
 std::vector<Gfd> NaiveGfdValidation::GenerateSatisfiedGfds(graph_t const& graph,
                                                            std::vector<Gfd> const& gfds) {
