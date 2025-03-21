@@ -51,7 +51,9 @@ public:
                                              std::string const& right) const = 0;
 };
 
-std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(std::shared_ptr<SimilarityMeasure>& ptr);
+std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(
+        std::shared_ptr<SimilarityMeasure> const& ptr);
 
-std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(std::shared_ptr<SimilarityMeasure>& ptr);
+std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(
+        std::shared_ptr<SimilarityMeasure> const& ptr);
 }  // namespace algos::md
