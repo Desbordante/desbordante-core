@@ -4,8 +4,9 @@
 
 namespace algos::md {
 
-long double MongeElkanSimilarity::operator()(std::string_view left, std::string_view right) const {
+model::md::Similarity MongeElkanSimilarity::operator()(std::string const& left,
+                                                       std::string const& right) const {
     using namespace algos::hymd::preprocessing::column_matches::similarity_measures;
-    return MongeElkanString(std::string(left), std::string(right));
+    return MongeElkanString(left, right);
 }
 }  // namespace algos::md
