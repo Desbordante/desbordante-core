@@ -32,7 +32,7 @@ void BindHighlights(py::module& md_module) {
 }
 
 template <typename MeasureType>
-auto BindMeasure(py::module_& measures_module, auto name) {
+auto BindSimilarityMeasure(py::module_& measures_module, auto name) {
     auto cls = py::class_<MeasureType, SimilarityMeasure, std::shared_ptr<MeasureType>>(
                        measures_module, name)
                        .def(py::init<>())
@@ -68,17 +68,17 @@ auto BindColumnSimilarityClassifier(py::module_& column_similarity_classifier_mo
 }
 
 void BindMDVerification(py::module_& main_module) {
-    auto md_module = main_module.def_submodule("md_verifier");
+    auto md_module = main_module.def_submodule("md_verification");
 
     BindHighlights(md_module);
 
-    auto measures_module = md_module.def_submodule("similarity_measures");
+    auto measures_module = md_module.def_submodule("similarity_measure");
     py::class_<SimilarityMeasure, std::shared_ptr<SimilarityMeasure>>(measures_module,
                                                                       "SimilarityMeasure");
-    BindMeasure<EuclideanSimilarity>(measures_module, "EuclideanSimilarity");
-    BindMeasure<LevenshteinSimilarity>(measures_module, "LevenshteinSimilarity");
-    BindMeasure<MongeElkanSimilarity>(measures_module, "MongeElkanSimilarity");
-    BindMeasure<JaccardSimilarity>(measures_module, "JaccardSimilarity");
+    BindSimilarityMeasure<EuclideanSimilarity>(measures_module, "EuclideanSimilarity");
+    BindSimilarityMeasure<LevenshteinSimilarity>(measures_module, "LevenshteinSimilarity");
+    BindSimilarityMeasure<MongeElkanSimilarity>(measures_module, "MongeElkanSimilarity");
+    BindSimilarityMeasure<JaccardSimilarity>(measures_module, "JaccardSimilarity");
 
     BindColumnMatch(md_module);
     BindColumnSimilarityClassifier(md_module);
