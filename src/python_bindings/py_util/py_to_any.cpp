@@ -11,6 +11,8 @@
 #include "algorithms/cfd/enums.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
+#include "algorithms/md/md_verifier/md_verifier.h"
+#include "algorithms/md/md_verifier/md_verifier_column_match.h"
 #include "algorithms/md/md_verifier/similarities/similarities.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
@@ -124,8 +126,10 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<size_t>,
         kNormalConvPair<algos::hymd::HyMD::ColumnMatches>,
         kNormalConvPair<std::optional<int>>,
-        kNormalConvPair<std::vector<model::md::DecisionBoundary>>,
-        kNormalConvPair<std::vector<std::shared_ptr<algos::md::SimilarityMeasure>>>,
+        kNormalConvPair<std::shared_ptr<algos::md::SimilarityMeasure>>,
+        kNormalConvPair<algos::md::MDVerifierColumnMatch>,
+        kNormalConvPair<algos::md::MDVerifierColumnSimilarityClassifier>,
+        kNormalConvPair<std::vector<algos::md::MDVerifierColumnSimilarityClassifier>>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,

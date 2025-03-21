@@ -1,57 +1,57 @@
 #pragma once
 
-#include <set>
-
 #include "algorithms/algorithm.h"
+#include "algorithms/md/column_match.h"
 #include "algorithms/md/decision_boundary.h"
 #include "algorithms/md/md_verifier/highlights/highlights.h"
-#include "algorithms/md/md_verifier/similarities/euclidean/euclidean.h"
-#include "algorithms/md/md_verifier/similarities/levenshtein/levenshtein.h"
-#include "algorithms/md/md_verifier/similarities/similarities.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
+#include "algorithms/md/md_verifier/md_verifier_column_match.h"
+#include "algorithms/md/md_verifier/validation/validation.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 
 namespace algos::md {
 
+class MDVerifierColumnSimilarityClassifier {
+private:
+    algos::md::MDVerifierColumnMatch column_match_;
+    model::md::DecisionBoundary decision_boundary_;
+
+public:
+    MDVerifierColumnSimilarityClassifier() = default;
+
+    MDVerifierColumnSimilarityClassifier(algos::md::MDVerifierColumnMatch column_match,
+                                         model::md::DecisionBoundary decision_boundary)
+        : column_match_(column_match), decision_boundary_(decision_boundary) {}
+
+    MDVerifierColumnSimilarityClassifier(model::Index left_col_index, model::Index right_col_index,
+                                         std::shared_ptr<algos::md::SimilarityMeasure> measure,
+                                         model::md::DecisionBoundary decision_boundary)
+        : column_match_(left_col_index, right_col_index, measure),
+          decision_boundary_(decision_boundary) {}
+
+    algos::md::MDVerifierColumnMatch const& GetColumnMatch() const {
+        return column_match_;
+    }
+
+    model::md::DecisionBoundary GetDecisionBoundary() const {
+        return decision_boundary_;
+    }
+};
+
 class MDVerifier : public Algorithm {
 private:
-    using DecisionBoundary = model::md::DecisionBoundary;
+    config::InputTable left_table_;
+    config::InputTable right_table_;
 
-    config::InputTable input_table_;
-
-    config::IndicesType lhs_indices_;
-    config::IndicesType rhs_indices_;
-
-    std::vector<DecisionBoundary> lhs_desicion_bondaries_;
-    std::vector<DecisionBoundary> rhs_desicion_bondaries_;
-
-    std::vector<std::shared_ptr<SimilarityMeasure>> lhs_similarity_measures_;
-    std::vector<std::shared_ptr<SimilarityMeasure>> rhs_similarity_measures_;
-
-    config::EqNullsType is_null_equal_null_;
-    bool dist_from_null_is_infinity_;
-
-    std::shared_ptr<model::ColumnLayoutTypedRelationData> relation_;
-
-    MDHighlights highlights_;
-    std::vector<DecisionBoundary> rhs_suggestion_boundaries_;
+    std::vector<MDVerifierColumnSimilarityClassifier> lhs_;
+    MDVerifierColumnSimilarityClassifier rhs_;
 
     bool md_holds_ = false;
+    model::md::DecisionBoundary true_rhs_decision_boundary;
+    MDHighlights highlights_;
 
     void ResetState() final;
     void RegisterOptions();
-    static DecisionBoundary CalculateNumericSimilarity(
-            std::byte const* first_val, std::byte const* second_val, model::TypeId type_id,
-            std::shared_ptr<NumericSimilarityMeasure> measure);
-    static DecisionBoundary CalculateStringSimilarity(
-            std::byte const* first_val, std::byte const* second_val, model::TypeId type_id,
-            std::shared_ptr<StringSimilarityMeasure> measure);
-    static DecisionBoundary CalculateSimilarity(std::byte const* first_val,
-                                                std::byte const* second_val, model::TypeId type_id,
-                                                std::shared_ptr<SimilarityMeasure> measure);
-    bool CheckRows(size_t first_row, size_t second_row);
     void VerifyMD();
 
 protected:
@@ -66,12 +66,12 @@ public:
         return md_holds_;
     }
 
-    auto GetHighlights() const {
-        return highlights_.GetHighlights();
+    model::md::DecisionBoundary GetRHSSuggestion() const {
+        return true_rhs_decision_boundary;
     }
 
-    std::vector<DecisionBoundary> const& GetRhsSuggestions() const {
-        return rhs_suggestion_boundaries_;
+    std::vector<MDHighlights::Highlight> GetHighlights() const {
+        return highlights_.GetHighlights();
     }
 };
 
