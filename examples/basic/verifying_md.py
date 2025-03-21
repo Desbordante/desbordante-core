@@ -3,7 +3,7 @@ import pandas as pd
 
 from typing import TypedDict
 from desbordante.md_verification import ColumnSimilarityClassifier
-from desbordante.md_verification.similarity_measures import (
+from desbordante.md_verification.similarity_measure import (
     EuclideanSimilarity,
     LevenshteinSimilarity,
 )
@@ -29,12 +29,12 @@ def print_results(verifier):
     for highlight in highlights:
         print(highlight.ToString())
     print(
-        f"Desbordante suggests to use following right-hand side decision boundaries: {verifier.get_rhs_suggestions()}\n"
+        f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_rhs_suggestions()}\n"
     )
 
 
 def check_md(table_path: str, params: MDParams):
-    algo = desbordante.md_verifier.algorithms.Default()
+    algo = desbordante.md_verification.algorithms.Default()
     algo.load_data(left_table=(table_path, ",", True))
 
     algo.execute(**params)
@@ -49,7 +49,7 @@ def animals_beverages_example():
     print(table)
 
     print(
-        "\nLet's try to check if MD {animal -> diet} with decision boundaries {1.0} and {1.0} and Levenshtein similarity measure holds.\n"
+        "\nLet's try to check if MD {Levenshtein(animal, animal) -> Levenshtein(diet, diet)} with decision boundaries {1.0} and {1.0} respectively.\n"
         "Levenshtein similarity with decision boundary equal to 1.0 means that values must be equal.\n"
     )
 
@@ -73,7 +73,7 @@ def animals_beverages_example():
     check_md(table_path, params)
 
     print(
-        "As a result, MD holds.\n"
+        "As a result, MD {[Levenshtein(animal, animal) >= 0.75] -> [Levenshtein(diet, diet) >= 0.75]} holds.\n"
         "This is how MD can be helpful in avoiding typos in table and searching them\n\n"
     )
 
@@ -90,7 +90,9 @@ def animals_beverages_example():
 
     check_md(table_path, params)
 
-    print("As we can see, nothing changed. Now let's lower right-hand side:\n")
+    print(
+        "As we can see, nothing changed. Now let's increase right-hand side decision boundary:\n"
+    )
 
     params = {
         "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.75)],
@@ -115,7 +117,7 @@ def theatre_example():
 
     print(
         "\nAs we see, there are some typos in this dataset.\n"
-        "We will try to discover MD {Title -> Duration}\nFirstly, let's check if MD with all decision boundaries equal to 1.0 holds:\n"
+        "We will try to discover MD {Levenshtein(Title, Title) -> Levenshtein(Duration, Duration)}\nFirstly, let's check if MD with all decision boundaries equal to 1.0 holds:\n"
     )
 
     params = {
@@ -125,9 +127,7 @@ def theatre_example():
 
     check_md(table_path, params)
 
-    print(
-        "More pairs violationg MD appeared. To avoid typos, let's set left-hand side decision boundary to 0.75:\n"
-    )
+    print("To avoid typos, let's set left-hand side decision boundary to 0.75:\n")
 
     params = {
         "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 0.75)],
@@ -136,8 +136,11 @@ def theatre_example():
 
     check_md(table_path, params)
 
+    print("More pairs violationg MD appeared.\n")
+
     print(
         "Desbordante suggest to use right-hand side decision boundary lower than 0.1(6).\n"
+        "Let's try to verify MD {[Levenshtein(Title, Title) >= 0.75] -> [Levenshtein(Duration, Duration) >= 0.165]}\n"
     )
 
     params = {
@@ -154,15 +157,15 @@ if __name__ == "__main__":
     print(DEFAULT_COLOR_CODE)
     print(
         "This example demonstrates how to validate Matching Dependancies (MD) using the Desbordante library. "
-        "Let's assume we have left-hand side columns X1, X2 ..., right-hand side columns Y1, Y2, ..., "
-        "left-hand side decision boundaries Xb1, Xb2 ..., right-hand side decision boundaries Xb1, Xb2 ... "
-        "and some similarity measures SimX1, SimX2, SimY1, SimY2, ... for each of columns above. "
-        "Matching Dependancy {X1, X2, ... -> Y1, Y2, ...} holds if for every row i and j from table "
-        "if SimX1(X1_i, X1_j) < Xb1 && SimX2(X2_i, X2_j) < Xb2 && ... is true then "
-        "SimY1(Y1_i, Y1_j) < Yb1 && SimY2(Y2_i, Y2_j) < Yb2 && ... is also true "
-        "You can read more about Matching Dependancies in articles below\n"
+        "You can read about Matching Dependancies and their formal definition in article below\n"
         "https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2020_schirmer_efficient.pdf\n"
-        "https://arxiv.org/pdf/0903.3317\n"
+    )
+    print(
+        "To verify Matching Dependancy, firstly we must define Column Similarity Classifiers for tables.\n"
+        "Column Similarity Classifier consists of Column Match and decision boundary. "
+        "Column Match consists of two indices: columns in left and right table and similarity measure (Levevnshtein Similarity, for example).\n"
+        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary lambda."
+        "To clarify, in this example we'll write column names instead of column indices.\n"
     )
     animals_beverages_example()
     print("-" * 50)
