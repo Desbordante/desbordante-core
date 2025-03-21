@@ -2,8 +2,8 @@ import desbordante
 import pandas as pd
 
 from typing import TypedDict
-from desbordante.md_verifier.similarity_measures import (
-    SimilarityMeasure,
+from desbordante.md_verification import ColumnSimilarityClassifier
+from desbordante.md_verification.similarity_measures import (
     EuclideanSimilarity,
     LevenshteinSimilarity,
 )
@@ -15,12 +15,8 @@ DEFAULT_COLOR_CODE = "\033[1;49m"
 
 
 class MDParams(TypedDict):
-    lhs_indices: list[int]
-    rhs_indices: list[int]
-    lhs_decision_boundaries: list[float]
-    rhs_decision_boundaries: list[float]
-    lhs_similarity_measures: list[SimilarityMeasure]
-    rhs_similarity_measures: list[SimilarityMeasure]
+    lhs: list[ColumnSimilarityClassifier]
+    rhs: ColumnSimilarityClassifier
 
 
 def print_results(verifier):
@@ -29,13 +25,9 @@ def print_results(verifier):
         return
 
     highlights = verifier.get_highlights()
-    print(RED_CODE, "MFD does not hold due to the following items:", DEFAULT_COLOR_CODE)
+    print(RED_CODE, "MD does not hold due to the following items:", DEFAULT_COLOR_CODE)
     for highlight in highlights:
-        print(
-            f"Rows {highlight.rows[0]} and {highlight.rows[1]} violate MD in column {highlight.column}: "
-            f'"{highlight.first_value}" and "{highlight.second_value}" have similarity {highlight.similarity} '
-            f"with decision boundary {highlight.decision_boundary}"
-        )
+        print(highlight.ToString())
     print(
         f"Desbordante suggests to use following right-hand side decision boundaries: {verifier.get_rhs_suggestions()}\n"
     )
@@ -43,13 +35,13 @@ def print_results(verifier):
 
 def check_md(table_path: str, params: MDParams):
     algo = desbordante.md_verifier.algorithms.Default()
-    algo.load_data(table=(table_path, ",", True))
+    algo.load_data(left_table=(table_path, ",", True))
 
     algo.execute(**params)
     print_results(algo)
 
 
-def drunk_animals_example():
+def animals_beverages_example():
     print("As first example, let's look at the dataset animals_beverages.csv")
 
     table_path = "examples/datasets/animals_beverages.csv"
@@ -58,32 +50,24 @@ def drunk_animals_example():
 
     print(
         "\nLet's try to check if MD {animal -> diet} with decision boundaries {1.0} and {1.0} and Levenshtein similarity measure holds.\n"
-        "Matching Dependancy with all decision boundaries equal to 1.0 is the same as Functional Dependancy.\n"
+        "Levenshtein similarity with decision boundary equal to 1.0 means that values must be equal.\n"
     )
 
     params = {
-        "lhs_indices": [2],
-        "rhs_indices": [3],
-        "lhs_decision_boundaries": [1],
-        "rhs_decision_boundaries": [1],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [LevenshteinSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 1)],
+        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 1),
     }
 
     check_md(table_path, params)
 
     print(
-        "As we see, Functional Dependancy doesn't holds due to some sort of typo in table.\n"
-        "Let's ease our constraints and say that if column's similarity measure is at least 0.75, they are similar enough to be equal:\n"
+        "As we see, such MD doesn't holds due to some sort of typo in table.\n"
+        "Let's ease our constraints and say that if column's similarity measure is at least 0.75, they are similar enough:\n"
     )
 
     params = {
-        "lhs_indices": [2],
-        "rhs_indices": [3],
-        "lhs_decision_boundaries": [0.75],
-        "rhs_decision_boundaries": [0.75],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [LevenshteinSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.75)],
+        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.75),
     }
 
     check_md(table_path, params)
@@ -100,12 +84,8 @@ def drunk_animals_example():
     print("Left-hand side:\n")
 
     params = {
-        "lhs_indices": [2],
-        "rhs_indices": [3],
-        "lhs_decision_boundaries": [0.76],
-        "rhs_decision_boundaries": [0.75],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [LevenshteinSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.76)],
+        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.75),
     }
 
     check_md(table_path, params)
@@ -113,12 +93,8 @@ def drunk_animals_example():
     print("As we can see, nothing changed. Now let's lower right-hand side:\n")
 
     params = {
-        "lhs_indices": [2],
-        "rhs_indices": [3],
-        "lhs_decision_boundaries": [0.75],
-        "rhs_decision_boundaries": [0.76],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [LevenshteinSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.75)],
+        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.76),
     }
 
     check_md(table_path, params)
@@ -139,44 +115,34 @@ def theatre_example():
 
     print(
         "\nAs we see, there are some typos in this dataset.\n"
-        "We will try to discover MD {Title -> Duration}\nFirstly, let's check if FD holds:\n"
+        "We will try to discover MD {Title -> Duration}\nFirstly, let's check if MD with all decision boundaries equal to 1.0 holds:\n"
     )
 
     params = {
-        "lhs_indices": [0],
-        "rhs_indices": [2],
-        "lhs_decision_boundaries": [1],
-        "rhs_decision_boundaries": [1],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [EuclideanSimilarity()],
-    }
-
-    check_md(table_path, params)
-
-    print("To avoid typos, let's set left-hand side decision boundary to 0.75:\n")
-
-    params = {
-        "lhs_indices": [0],
-        "rhs_indices": [2],
-        "lhs_decision_boundaries": [0.75],
-        "rhs_decision_boundaries": [1],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [EuclideanSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 1)],
+        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 1),
     }
 
     check_md(table_path, params)
 
     print(
-        "As we see, more invalid pairs appeared. Desbordante suggest to use right-hand side decision boundary lower than 0.1(6).\n"
+        "More pairs violationg MD appeared. To avoid typos, let's set left-hand side decision boundary to 0.75:\n"
     )
 
     params = {
-        "lhs_indices": [0],
-        "rhs_indices": [2],
-        "lhs_decision_boundaries": [0.75],
-        "rhs_decision_boundaries": [0.165],
-        "lhs_similarity_measures": [LevenshteinSimilarity()],
-        "rhs_similarity_measures": [EuclideanSimilarity()],
+        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 0.75)],
+        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 1),
+    }
+
+    check_md(table_path, params)
+
+    print(
+        "Desbordante suggest to use right-hand side decision boundary lower than 0.1(6).\n"
+    )
+
+    params = {
+        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 0.75)],
+        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 0.165),
     }
 
     check_md(table_path, params)
@@ -198,6 +164,6 @@ if __name__ == "__main__":
         "https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2020_schirmer_efficient.pdf\n"
         "https://arxiv.org/pdf/0903.3317\n"
     )
-    drunk_animals_example()
+    animals_beverages_example()
     print("-" * 50)
     theatre_example()

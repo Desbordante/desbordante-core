@@ -95,4 +95,6 @@ constexpr auto kEvidenceThreshold = "evidence_threshold";
 constexpr auto kDoCollectViolations = "do_collect_violations";
 constexpr auto kGfdK = "gfd_k";
 constexpr auto kGfdSigma = "gfd_sigma";
+constexpr auto kMDLHS = "lhs";
+constexpr auto kMDRHS = "rhs";
 }  // namespace config::names

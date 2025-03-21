@@ -2,10 +2,11 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <enum.h>
+
+#include "algorithms/md/similarity.h"
 
 namespace algos::md {
 
@@ -35,7 +36,7 @@ public:
         return SimilarityMeasureType::kNumericSimilarity;
     }
 
-    virtual long double operator()(long double left, long double right) const = 0;
+    virtual model::md::Similarity operator()(long double left, long double right) const = 0;
 };
 
 class StringSimilarityMeasure : public SimilarityMeasure {
@@ -46,7 +47,8 @@ public:
         return SimilarityMeasureType::kStringSimilarity;
     }
 
-    virtual long double operator()(std::string_view left, std::string_view right) const = 0;
+    virtual model::md::Similarity operator()(std::string const& left,
+                                             std::string const& right) const = 0;
 };
 
 std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(std::shared_ptr<SimilarityMeasure>& ptr);
