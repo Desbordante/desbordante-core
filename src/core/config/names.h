@@ -93,4 +93,6 @@ constexpr auto kMinimumSharedValue = "minimum_shared_value";
 constexpr auto kComparableThreshold = "comparable_threshold";
 constexpr auto kEvidenceThreshold = "evidence_threshold";
 constexpr auto kDoCollectViolations = "do_collect_violations";
+constexpr auto kMDLHS = "lhs";
+constexpr auto kMDRHS = "rhs";
 }  // namespace config::names

@@ -4,8 +4,9 @@
 
 namespace algos::md {
 
-long double JaccardSimilarity::operator()(std::string_view left, std::string_view right) const {
+model::md::Similarity JaccardSimilarity::operator()(std::string const& left,
+                                                    std::string const& right) const {
     using namespace algos::hymd::preprocessing::column_matches::similarity_measures;
-    return StringJaccardIndex(std::string(left), std::string(right));
+    return StringJaccardIndex(left, right);
 }
 }  // namespace algos::md
