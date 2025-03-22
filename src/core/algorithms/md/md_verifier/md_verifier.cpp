@@ -75,7 +75,7 @@ void MDVerifier::VerifyMD() {
 
     validator.Validate();
     md_holds_ = validator.Holds();
-    true_rhs_decision_boundary = validator.GetTrueDecisionBoundary();
+    true_rhs_decision_boundary_ = validator.GetTrueDecisionBoundary();
     highlights_ = validator.GetHighlights();
 }
 
