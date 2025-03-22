@@ -21,7 +21,7 @@ private:
     std::vector<model::md::ColumnSimilarityClassifier> lhs_column_similarity_classifiers_;
     model::md::ColumnSimilarityClassifier rhs_column_similarity_classifier_;
 
-    model::md::DecisionBoundary true_rhs_decision_boundary;
+    model::md::DecisionBoundary true_rhs_decision_boundary_;
     MDHighlights highlights_;
 
     bool holds_;
@@ -29,10 +29,6 @@ private:
     bool ProbeColumnSimilarityClassifier(model::md::ColumnSimilarityClassifier const& classifier,
                                          model::Index left_row, model::Index right_row,
                                          bool is_rhs = false);
-
-    void UpdateTrueRHSDecisionBoundary(model::md::DecisionBoundary new_decision_boundary) {
-        true_rhs_decision_boundary = new_decision_boundary;
-    }
 
 public:
     MDValidationCalculator(
@@ -47,7 +43,7 @@ public:
     }
 
     model::md::DecisionBoundary GetTrueDecisionBoundary() const {
-        return true_rhs_decision_boundary;
+        return true_rhs_decision_boundary_;
     }
 
     MDHighlights GetHighlights() const {
