@@ -24,7 +24,7 @@ bool MDValidationCalculator::ProbeColumnSimilarityClassifier(
             left_typed_data_->GetColumnData(left_col_index).GetTypeId(), measure);
 
     if (is_rhs && similarity < decision_boundary) {
-        true_rhs_decision_boundary = std::min(similarity, true_rhs_decision_boundary);
+        true_rhs_decision_boundary_ = std::min(similarity, true_rhs_decision_boundary_);
         highlights_.RegisterHighlight(left_row_index, right_row_index, column_match, similarity,
                                       decision_boundary);
     }
@@ -41,7 +41,7 @@ MDValidationCalculator::MDValidationCalculator(
       column_matches_(column_matches),
       lhs_column_similarity_classifiers_(lhs_column_similarity_classifiers),
       rhs_column_similarity_classifier_(rhs_column_similarity_classifier),
-      true_rhs_decision_boundary(rhs_column_similarity_classifier.GetDecisionBoundary()),
+      true_rhs_decision_boundary_(rhs_column_similarity_classifier.GetDecisionBoundary()),
       holds_(true) {
     if (right_table != nullptr) {
         right_typed_data_ = model::ColumnLayoutTypedRelationData::CreateFrom(*right_table, true);
