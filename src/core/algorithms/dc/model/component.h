@@ -11,15 +11,12 @@ namespace algos::dc {
 
 enum class ValType { kMinusInf, kFinite, kPlusInf };
 
-//  @brief Component of a k-dimensional point
+// @brief Component of a k-dimensional point
 class Component {
 private:
     std::byte const* val_;
     model::Type const* type_;
     ValType val_type_;
-
-    bool CompareNumeric(std::byte const* l_val, model::Type const* lhs_type, std::byte const* r_val,
-                        model::Type const* rhs_type, model::CompareResult res) const;
 
 public:
     Component() noexcept : val_(nullptr), type_(nullptr), val_type_(ValType::kFinite) {};
