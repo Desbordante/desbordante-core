@@ -41,7 +41,7 @@ void Split::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&difference_table_, kDifferenceTable, kDDifferenceTable, default_table});
     RegisterOption(Option{&num_rows_, kNumRows, kDNumRows, 0U});
-    RegisterOption(Option{&num_columns_, kNumColumns, kDNUmColumns, 0U});
+    RegisterOption(Option{&num_columns_, kNumColumns, kDNumColumns, 0U});
 }
 
 void Split::MakeExecuteOptsAvailable() {
