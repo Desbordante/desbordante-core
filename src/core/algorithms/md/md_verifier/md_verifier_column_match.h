@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <sstream>
 
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/md_verifier/similarities/similarities.h"
