@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sstream>
+
 #include "algorithms/md/md_verifier/md_verifier_column_match.h"
 
 namespace algos::md {
