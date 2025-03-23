@@ -15,7 +15,8 @@ std::shared_ptr<NumericSimilarityMeasure> AsNumericMeasure(
     return casted_ptr;
 }
 
-std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(std::shared_ptr<SimilarityMeasure> const& ptr) {
+std::shared_ptr<StringSimilarityMeasure> AsStringMeasure(
+        std::shared_ptr<SimilarityMeasure> const& ptr) {
     std::shared_ptr<StringSimilarityMeasure> casted_ptr =
             std::dynamic_pointer_cast<StringSimilarityMeasure>(ptr);
     if (!casted_ptr.get()) {
