@@ -11,19 +11,15 @@
 #include "ar.h"
 #include "ar_algorithm_enums.h"
 #include "config/tabular_data/input_table_type.h"
+#include "config/ar_data/transactional_data_config.h"
 #include "model/transaction/transactional_data.h"
 
 namespace algos {
 
 class ARAlgorithm : public Algorithm {
 private:
-    config::InputTable input_table_;
-
+    config::TransactionalDataParams transactional_data_params_;
     double minconf_;
-    InputFormat input_format_ = InputFormat::singular;
-    unsigned int tid_column_index_;
-    unsigned int item_column_index_;
-    bool first_column_tid_;
     std::list<model::ArIDs> ar_collection_;
 
     struct RuleNode {

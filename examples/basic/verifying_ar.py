@@ -123,8 +123,6 @@ def scenario_tabular():
           "the rule [Milk] -> [Eggs]. This represents a scenario where we weaken the "
           "rule to see if it better fits the data.\n")
 
-    algo = desbordante.ar_verification.algorithms.Default()
-    algo.load_data(table=(TABLE_TABULAR, ',', False), input_format='tabular')
     algo.execute(arule_left=["Milk"], arule_right=["Eggs"], minsup=supp, minconf=conf)
     print_results(algo, supp, conf)
     print("This highlights that our initial AR, with these parameters, might not be suitable "

@@ -1,21 +1,22 @@
 #pragma once
 
+#include <list>
+#include <memory>
+#include <string>
+
 #include "algorithms/algorithm.h"
 #include "algorithms/association_rules/ar.h"
-#include "algorithms/association_rules/ar_algorithm_enums.h"
 #include "algorithms/association_rules/ar_verifier/ar_stats_calculator.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_relation_data.h"
+#include "config/ar_data/transactional_data_config.h"
 
 namespace algos::ar_verifier {
+
+/* Algorithm used to verify that AR holds on dataset and retrieving useful information in
+ * case it is not. */
 class ARVerifier final : public Algorithm {
 private:
     /* input options */
-    config::InputTable input_table_;
-    InputFormat input_format_ = InputFormat::singular;
-    unsigned int tid_column_index_;
-    unsigned int item_column_index_;
-    bool first_column_tid_;
+    config::TransactionalDataParams transactional_data_params_;
 
     std::shared_ptr<model::TransactionalData> transactional_data_;
     std::list<std::string> string_rule_left_;
@@ -35,6 +36,7 @@ private:
 
     void ResetState() override {
         stats_calculator_.ResetState();
+        ar_ids_ = model::ArIDs();
     };
 
     void CalculateStatistics() {
@@ -42,38 +44,38 @@ private:
     }
 
 public:
-    /* Returns true if AR holds and false otherwise */
+    /* Returns true if AR holds and false otherwise. */
     bool ARHolds() const {
         return (stats_calculator_.GetSupport() >= minsup_) &&
                (stats_calculator_.GetConfidence() >= minconf_);
     }
 
-    /* Returns the number of clusters where the AR is violated */
+    /* Returns the number of clusters where the AR is violated. */
     size_t GetNumClustersViolatingAR() const {
         return stats_calculator_.GetNumClustersViolatingAR();
     }
 
+    /* Returns the total number of table rows that satisfy the AR. */
     size_t GetNumTransactionsSatisfyingAR() const {
         return stats_calculator_.GetNumTransactionsSatisfyingAR();
     }
 
-    /* Returns the total number of transactions that violate the AR */
+    /* Returns the total number of transactions that violate the AR. */
     size_t GetNumTransactionsViolatingAR() const {
         return stats_calculator_.GetNumTransactionsViolatingAR();
     }
 
-    /* Returns clusters where the AR is violated, that is, sets of rows where each set consists of
-     * rows equal to each other in the specified columns */
+    /* Returns clusters where the AR is violated. */
     std::unordered_map<std::string, model::PLI::Cluster> const& GetClustersViolatingAR() const {
         return stats_calculator_.GetClustersViolatingAR();
     }
 
-    /* Returns an actual value of support */
+    /* Returns an actual value of support. */
     double GetRealSupport() const {
         return stats_calculator_.GetSupport();
     }
 
-    /* Returns an actual value of confidence */
+    /* Returns an actual value of confidence. */
     double GetRealConfidence() const {
         return stats_calculator_.GetConfidence();
     }
