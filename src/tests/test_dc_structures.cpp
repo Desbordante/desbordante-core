@@ -251,7 +251,8 @@ protected:
     std::unique_ptr<model::ColumnLayoutTypedRelationData> table_;
     std::vector<model::TypedColumnData> col_data_;
 
-    PredicateIndexProvider pred_index_provider_;
+    std::shared_ptr<PredicateIndexProvider> pred_index_provider_ =
+            std::make_shared<PredicateIndexProvider>();
     PredicateProvider pred_provider_;
     IntIndexProvider int_prov_;
     DoubleIndexProvider double_prov_;
@@ -281,7 +282,7 @@ protected:
 
     void CreatePredicateBuilder() {
         predicate_builder_ =
-                new PredicateBuilder(&pred_provider_, &pred_index_provider_, allow_cross_columns_);
+                new PredicateBuilder(&pred_provider_, pred_index_provider_, allow_cross_columns_);
     }
 
     void CreatePliShardBuilder() {
@@ -545,7 +546,8 @@ TEST_F(FastADC, DenialConstraints) {
 
     auto&& evidence_set = std::move(evidence_set_builder_->evidence_set);
 
-    ApproxEvidenceInverter dcbuilder(*predicate_builder_, 0.01, std::move(evidence_set));
+    ApproxEvidenceInverter dcbuilder(*predicate_builder_, 0.01, std::move(evidence_set),
+                                     table_->GetSharedPtrSchema());
     auto dcs = dcbuilder.BuildDenialConstraints();
 
     std::vector<DenialConstraint> result = std::move(dcs.ObtainResult());

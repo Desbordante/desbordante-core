@@ -20,13 +20,13 @@ private:
     mutable std::unique_ptr<PredicateSet> inv_set_TS_;  // Cached inverse set
 
 public:
-    PredicateIndexProvider* provider = nullptr;
+    std::shared_ptr<PredicateIndexProvider> provider;
 
-    explicit PredicateSet(PredicateIndexProvider* predicate_index_provider)
+    explicit PredicateSet(std::shared_ptr<PredicateIndexProvider> predicate_index_provider)
         : bitset_(0), provider(predicate_index_provider) {}
 
     explicit PredicateSet(boost::dynamic_bitset<> const& bitset,
-                          PredicateIndexProvider* predicate_index_provider)
+                          std::shared_ptr<PredicateIndexProvider> predicate_index_provider)
         : bitset_(bitset), provider(predicate_index_provider) {}
 
     PredicateSet(PredicateSet const& other) : bitset_(other.bitset_), provider(other.provider) {

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <concepts>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -70,6 +71,18 @@ struct Rect {
         }
 
         return true;
+    }
+
+    std::string ToString() const {
+        std::ostringstream ss;
+        static char constexpr const kOpen[]{'(', '['};
+        static char constexpr const kClosed[]{')', ']'};
+        for (size_t i = 0; i < lower_bound_.GetDim(); i++) {
+            ss << kOpen[lower_bound_type_[i]] << lower_bound_[i].ToString() << ", ";
+            ss << upper_bound_[i].ToString() << kClosed[upper_bound_type_[i]] << '\n';
+        }
+
+        return ss.str();
     }
 };
 
@@ -151,15 +164,15 @@ KDTree<PointType>::KDTree(KDTree<PointType>&& tree) {
 template <SubscriptableOrder PointType>
 std::vector<PointType> KDTree<PointType>::AsVector() const {
     std::vector<PointType> res;
-    AddSubtree(root_, res);
+    AddSubtree(root_.get(), res);
     return res;
 }
 
 template <SubscriptableOrder PointType>
 void KDTree<PointType>::AddSubtree(Node* start, std::vector<PointType>& res) const {
     if (start == nullptr) return;
-    AddSubtree(start->left_, res);
-    AddSubtree(start->right_, res);
+    AddSubtree(start->left_.get(), res);
+    AddSubtree(start->right_.get(), res);
     res.push_back(start->point_);
 }
 

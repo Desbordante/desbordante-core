@@ -1,7 +1,6 @@
 #include "fd_tree_element.h"
 
-#include "boost/dynamic_bitset.hpp"
-#include "util/bitset_extensions.h"
+#include "model/types/bitset.h"
 
 FDTreeElement::FDTreeElement(size_t max_attribute_number)
     : max_attribute_number_(max_attribute_number) {
@@ -20,7 +19,7 @@ void FDTreeElement::AddRhsAttribute(size_t index) {
     this->rhs_attributes_.set(index);
 }
 
-std::bitset<FDTreeElement::kMaxAttrNum> const& FDTreeElement::GetRhsAttributes() const {
+model::Bitset<FDTreeElement::kMaxAttrNum> const& FDTreeElement::GetRhsAttributes() const {
     return this->rhs_attributes_;
 }
 
@@ -40,13 +39,13 @@ bool FDTreeElement::IsFinalNode(size_t attr_num) const {
     return true;
 }
 
-bool FDTreeElement::ContainsGeneralization(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                                           size_t current_attr) const {
+bool FDTreeElement::ContainsGeneralization(model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs,
+                                           size_t attr_num, size_t current_attr) const {
     if (this->is_fd_[attr_num - 1]) {
         return true;
     }
 
-    size_t next_set_attr = util::FindNext(lhs, current_attr);
+    size_t next_set_attr = lhs._Find_next(current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -63,16 +62,16 @@ bool FDTreeElement::ContainsGeneralization(std::bitset<kMaxAttrNum> const& lhs, 
     return this->ContainsGeneralization(lhs, attr_num, next_set_attr);
 }
 
-bool FDTreeElement::GetGeneralizationAndDelete(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                                               size_t current_attr,
-                                               std::bitset<kMaxAttrNum>& spec_lhs) {
+bool FDTreeElement::GetGeneralizationAndDelete(
+        model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs, size_t attr_num, size_t current_attr,
+        model::Bitset<FDTreeElement::kMaxAttrNum>& spec_lhs) {
     if (this->is_fd_[attr_num - 1]) {
         this->is_fd_.reset(attr_num - 1);
         this->rhs_attributes_.reset(attr_num);
         return true;
     }
 
-    size_t next_set_attr = util::FindNext(lhs, current_attr);
+    size_t next_set_attr = lhs._Find_next(current_attr);
     if (next_set_attr == kMaxAttrNum) {
         return false;
     }
@@ -96,16 +95,16 @@ bool FDTreeElement::GetGeneralizationAndDelete(std::bitset<kMaxAttrNum> const& l
     return found;
 }
 
-bool FDTreeElement::GetSpecialization(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num,
-                                      size_t current_attr,
-                                      std::bitset<kMaxAttrNum>& spec_lhs_out) const {
+bool FDTreeElement::GetSpecialization(
+        model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs, size_t attr_num, size_t current_attr,
+        model::Bitset<FDTreeElement::kMaxAttrNum>& spec_lhs_out) const {
     if (!this->rhs_attributes_[attr_num]) {
         return false;
     }
 
     bool found = false;
     size_t attr = (current_attr > 1 ? current_attr : 1);
-    size_t next_set_attr = util::FindNext(lhs, current_attr);
+    size_t next_set_attr = lhs._Find_next(current_attr);
 
     if (next_set_attr == kMaxAttrNum) {
         while (!found && attr <= this->max_attribute_number_) {
@@ -150,12 +149,12 @@ void FDTreeElement::AddMostGeneralDependencies() {
     }
 }
 
-void FDTreeElement::AddFunctionalDependency(std::bitset<kMaxAttrNum> const& lhs, size_t attr_num) {
+void FDTreeElement::AddFunctionalDependency(model::Bitset<FDTreeElement::kMaxAttrNum> const& lhs,
+                                            size_t attr_num) {
     FDTreeElement* current_node = this;
     this->AddRhsAttribute(attr_num);
 
-    auto iter = util::BitsetIterator<kMaxAttrNum>(lhs);
-    for (size_t i = iter.Pos(); i != kMaxAttrNum; iter.Next(), i = iter.Pos()) {
+    for (size_t i = lhs._Find_first(); i != kMaxAttrNum; i = lhs._Find_next(i)) {
         if (current_node->children_[i - 1] == nullptr) {
             current_node->children_[i - 1] =
                     std::make_unique<FDTreeElement>(this->max_attribute_number_);
@@ -169,7 +168,7 @@ void FDTreeElement::AddFunctionalDependency(std::bitset<kMaxAttrNum> const& lhs,
 }
 
 void FDTreeElement::FilterSpecializations() {
-    std::bitset<kMaxAttrNum> active_path;
+    model::Bitset<kMaxAttrNum> active_path;
     auto filtered_tree = std::make_unique<FDTreeElement>(this->max_attribute_number_);
 
     this->FilterSpecializationsHelper(*filtered_tree, active_path);
@@ -178,8 +177,8 @@ void FDTreeElement::FilterSpecializations() {
     this->is_fd_ = filtered_tree->is_fd_;
 }
 
-void FDTreeElement::FilterSpecializationsHelper(FDTreeElement& filtered_tree,
-                                                std::bitset<kMaxAttrNum>& active_path) {
+void FDTreeElement::FilterSpecializationsHelper(
+        FDTreeElement& filtered_tree, model::Bitset<FDTreeElement::kMaxAttrNum>& active_path) {
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
         if (this->children_[attr - 1]) {
             active_path.set(attr);
@@ -189,7 +188,7 @@ void FDTreeElement::FilterSpecializationsHelper(FDTreeElement& filtered_tree,
     }
 
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
-        std::bitset<kMaxAttrNum> spec_lhs_out;
+        model::Bitset<kMaxAttrNum> spec_lhs_out;
         if (this->is_fd_[attr - 1] &&
             !filtered_tree.GetSpecialization(active_path, attr, 0, spec_lhs_out)) {
             filtered_tree.AddFunctionalDependency(active_path, attr);
@@ -201,12 +200,13 @@ void FDTreeElement::PrintDep(std::string const& file_name,
                              std::vector<std::string>& column_names) const {
     std::ofstream file;
     file.open(file_name);
-    std::bitset<kMaxAttrNum> active_path;
+    model::Bitset<kMaxAttrNum> active_path;
     PrintDependencies(active_path, file, column_names);
     file.close();
 }
 
-void FDTreeElement::PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std::ofstream& file,
+void FDTreeElement::PrintDependencies(model::Bitset<FDTreeElement::kMaxAttrNum>& active_path,
+                                      std::ofstream& file,
                                       std::vector<std::string>& column_names) const {
     std::string column_id;
     if (std::isdigit(column_names[0][0])) {
@@ -217,8 +217,8 @@ void FDTreeElement::PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std
         if (this->is_fd_[attr - 1]) {
             out = "{";
 
-            auto iter = util::BitsetIterator<kMaxAttrNum>(active_path);
-            for (size_t i = iter.Pos(); i != kMaxAttrNum; iter.Next(), i = iter.Pos()) {
+            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
+                 i = active_path._Find_next(i)) {
                 if (!column_id.empty())
                     out += column_id + std::to_string(std::stoi(column_names[i - 1]) + 1) + ",";
                 else
@@ -247,20 +247,24 @@ void FDTreeElement::PrintDependencies(std::bitset<kMaxAttrNum>& active_path, std
 
 void FDTreeElement::FillFdCollection(std::shared_ptr<RelationalSchema> const& scheme,
                                      std::list<FD>& fd_collection, unsigned int max_lhs) const {
-    std::bitset<kMaxAttrNum> active_path;
+    model::Bitset<kMaxAttrNum> active_path;
     this->TransformTreeFdCollection(active_path, fd_collection, scheme, max_lhs);
 }
 
-void FDTreeElement::TransformTreeFdCollection(std::bitset<kMaxAttrNum>& active_path,
-                                              std::list<FD>& fd_collection,
-                                              std::shared_ptr<RelationalSchema> const& scheme,
-                                              unsigned int max_lhs) const {
+void FDTreeElement::TransformTreeFdCollection(
+        model::Bitset<FDTreeElement::kMaxAttrNum>& active_path, std::list<FD>& fd_collection,
+        std::shared_ptr<RelationalSchema> const& scheme, unsigned int max_lhs) const {
     if (active_path.count() > max_lhs) return;
 
     for (size_t attr = 1; attr <= this->max_attribute_number_; ++attr) {
         if (this->is_fd_[attr - 1]) {
-            auto lhs_bitset =
-                    util::CreateShiftedDynamicBitset(active_path, this->max_attribute_number_);
+            boost::dynamic_bitset<> lhs_bitset(kMaxAttrNum);
+            for (size_t i = active_path._Find_first(); i != kMaxAttrNum;
+                 i = active_path._Find_next(i)) {
+                if (i > 0) {
+                    lhs_bitset.set(i - 1);
+                }
+            }
             Vertical lhs(scheme.get(), lhs_bitset);
             Column rhs(scheme.get(), scheme->GetColumn(attr - 1)->GetName(), attr - 1);
             fd_collection.emplace_back(FD{lhs, rhs, scheme});

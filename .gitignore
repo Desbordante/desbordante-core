@@ -1,5 +1,6 @@
 # Build directories, libraries and binary files
 **/myeasylog.log
+.venv/
 build/
 cmake-build-debug/
 dist/

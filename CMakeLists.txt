@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.25)
 if (POLICY CMP0167)
     # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
     # TODO: port project to "Modern CMake" https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
@@ -17,6 +17,9 @@ option(BUILD_NATIVE "Build for host machine" ON)
 option(USE_LTO "Build using interprocedural optimization" OFF)
 option(GDB_DEBUG "Include debug information for use by GDB" OFF)
 set(SANITIZER "" CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB")
+
+# Enable colored output for Ninja messages
+set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 set(PYTHON OFF CACHE STRING "Compile Python bindings")
 set_property(CACHE PYTHON PROPERTY STRINGS OFF COMPILE INSTALL)
@@ -75,8 +78,8 @@ else()
         # Set DEBUG build options specific for build with ASAN
         set(ASAN_OPTS "-fsanitize=address")
 
-        execute_process(COMMAND grep -q "Ubuntu" /etc/ose-release RESULT_VARIABLE IS_UBUNTU)
-        if (IS_UBUNTU AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
+        if (IS_UBUNTU EQUAL 0 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
             # alloc-dealloc-mismatch generates false positives on boost exceptions
             # This applies only to Ubuntu package:
             # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
@@ -189,6 +192,7 @@ endif()
 add_subdirectory("src/core")
 
 if (COMPILE_TESTS)
+    enable_testing()
     add_subdirectory("src/tests")
 endif()
 
