@@ -5,6 +5,7 @@
 #include "algorithms/md/md_verifier/highlights/highlights.h"
 #include "algorithms/md/md_verifier/md_verifier.h"
 #include "algorithms/md/md_verifier/md_verifier_column_match.h"
+#include "algorithms/md/md_verifier/similarities/equality/equality.h"
 #include "algorithms/md/md_verifier/similarities/euclidean/euclidean.h"
 #include "algorithms/md/md_verifier/similarities/jaccard/jaccard.h"
 #include "algorithms/md/md_verifier/similarities/levenshtein/levenshtein.h"
@@ -28,7 +29,7 @@ void BindHighlights(py::module& md_module) {
             .def_property_readonly(
                     "similarity_function",
                     [](MDHighlights::Highlight const& record) { return record.column_match.name; })
-            .def("ToString", &MDHighlights::Highlight::ToString);
+            .def("to_string", &MDHighlights::Highlight::ToString);
 }
 
 template <typename MeasureType>
@@ -79,6 +80,7 @@ void BindMDVerification(py::module_& main_module) {
     BindSimilarityMeasure<LevenshteinSimilarity>(measures_module, "LevenshteinSimilarity");
     BindSimilarityMeasure<MongeElkanSimilarity>(measures_module, "MongeElkanSimilarity");
     BindSimilarityMeasure<JaccardSimilarity>(measures_module, "JaccardSimilarity");
+    BindSimilarityMeasure<Equality>(measures_module, "Equality");
 
     BindColumnMatch(md_module);
     BindColumnSimilarityClassifier(md_module);
