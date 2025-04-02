@@ -89,6 +89,7 @@ jobs:
         shell: bash
         run: |
           export ${{ matrix.system.env }}
+          source .venv/bin/activate
 
           if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
             ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }}

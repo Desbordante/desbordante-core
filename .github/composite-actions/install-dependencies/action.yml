@@ -53,6 +53,18 @@ runs:
 
         echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
 
+    - name: Create python virtual environment
+      run: | 
+          python3 -m venv .venv
+      shell: bash
+
+    # Add-hoc for https://github.com/Desbordante/desbordante-core/issues/549
+    - name: Install cmake 3.31.6 in python venv
+      run: |
+        source .venv/bin/activate
+        python3 -m pip install cmake==3.31.6 # ad-hoc
+      shell: bash
+
     - name: Install build tools using apt
       run: |
         sudo apt-get update -y
