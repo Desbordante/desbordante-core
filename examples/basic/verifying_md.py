@@ -27,7 +27,7 @@ def print_results(verifier):
     highlights = verifier.get_highlights()
     print(RED_CODE, "MD does not hold due to the following items:", DEFAULT_COLOR_CODE)
     for highlight in highlights:
-        print(highlight.ToString())
+        print(highlight.to_string())
     print(
         f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_rhs_suggestions()}\n"
     )
@@ -164,7 +164,7 @@ if __name__ == "__main__":
         "To verify Matching Dependancy, firstly we must define Column Similarity Classifiers for tables.\n"
         "Column Similarity Classifier consists of Column Match and decision boundary. "
         "Column Match consists of two indices: columns in left and right table and similarity measure (Levevnshtein Similarity, for example).\n"
-        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary lambda."
+        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary 'lambda'."
         "To clarify, in this example we'll write column names instead of column indices.\n"
     )
     animals_beverages_example()
