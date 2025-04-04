@@ -2,6 +2,7 @@
 
 #include "algorithms/algebraic_constraints/mining_algorithms.h"
 #include "algorithms/association_rules/mining_algorithms.h"
+#include "algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "algorithms/cfd/mining_algorithms.h"
 #include "algorithms/dd/mining_algorithms.h"
 #include "algorithms/fd/mining_algorithms.h"
