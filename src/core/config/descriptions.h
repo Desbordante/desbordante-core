@@ -186,6 +186,5 @@ constexpr auto kDComparableThreshold =
 constexpr auto kDEvidenceThreshold =
         "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
         "considered approximate.";
-;
 constexpr auto kDDDString = "Differential Dependency that needs to be verified";
 }  // namespace config::descriptions

@@ -21,9 +21,8 @@ private:
     std::size_t num_columns_{};
     std::size_t num_error_rhs_{};
     double error_ = 0.;
-    std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::vector<std::pair<std::size_t, std::pair<int, int> > > highlights_;
+    std::vector<std::pair<std::size_t, std::pair<int, int>>> highlights_;
 
     void RegisterOptions();
 
@@ -31,18 +30,16 @@ private:
 
     void PrintStatistics();
 
-    std::vector<std::pair<int, int> > GetRowsWhereLhsHolds(
-            std::list<model::DFStringConstraint> const &constraints) const;
+    std::vector<std::pair<int, int> > GetRowsWhereLhsHolds() const;
 
     double CalculateDistance(model::ColumnIndex column_index,
                              std::pair<std::size_t, std::size_t> const &tuple_pair) const;
 
     void CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs);
 
-    void ResetState() final {
-        num_columns_ = 0;
-        num_rows_ = 0;
-    }
+    void VerifyDD();
+
+    void ResetState() final {}
 
 protected:
     void LoadDataInternal() override;
@@ -59,8 +56,6 @@ public:
     std::size_t GetNumErrorRhs() const;
 
     bool DDHolds() const;
-
-    void VerifyDD();
 
     std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
 };
