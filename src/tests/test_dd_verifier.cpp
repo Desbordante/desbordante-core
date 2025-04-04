@@ -1,9 +1,10 @@
-#include <boost/parameter/aux_/void.hpp>
+#include <cstddef>
+
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
+#include "algorithms/algo_factory.h"
+#include "algorithms/dd/dd_verifier/dd_verifier.h"
 #include "all_csv_configs.h"
-#include "dd/dd_verifier/dd_verifier.h"
 
 namespace tests {
 struct DDVerifyingParams {
