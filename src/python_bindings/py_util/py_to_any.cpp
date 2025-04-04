@@ -113,11 +113,6 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     return parsers;
 }
 
-boost::any DDStringToAny(std::string_view option_name, py::handle obj) {
-    auto dds = CastAndReplaceCastError<model::DDString>(option_name, obj);
-    return dds;
-}
-
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
@@ -142,7 +137,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
-        {typeid(model::DDString), DDStringToAny},
+        kNormalConvPair<model::DDString>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
         kNormalConvPair<std::pair<std::string, std::string>>};
