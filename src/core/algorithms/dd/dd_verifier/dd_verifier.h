@@ -1,9 +1,13 @@
 #pragma once
+
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "algorithm.h"
 #include "algorithms/dd/dd.h"
-#include "table/column_layout_relation_data.h"
-#include "table/column_layout_typed_relation_data.h"
-#include "tabular_data/input_table_type.h"
+#include "config/tabular_data/input_table_type.h"
+#include "model/table/column_layout_typed_relation_data.h"
 
 namespace algos::dd {
 using DFs = model::DFStringConstraint;

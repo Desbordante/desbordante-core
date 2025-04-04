@@ -1,14 +1,16 @@
-#include "dd_verifier.h"
+#include "algorithms/dd/dd_verifier/dd_verifier.h"
 
-#include <utility>
+#include <chrono>
+#include <cstddef>
+#include <vector>
 
 #include <easylogging++.h>
 
-#include "descriptions.h"
-#include "names.h"
-#include "option_using.h"
-#include "table/vertical.h"
-#include "tabular_data/input_table/option.h"
+#include "config/descriptions.h"
+#include "config/names.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
+#include "model/table/vertical.h"
 
 namespace algos::dd {
 DDVerifier::DDVerifier() : Algorithm({}) {
@@ -31,10 +33,10 @@ void DDVerifier::VisualizeHighlights() {
     for (auto const &[col_index, pair] : highlights_) {
         auto &col_data = typed_relation_->GetColumnData(col_index);
         auto const col_schema = typed_relation_->GetSchema();
-        LOG(INFO) << "DD not Holds in " << col_schema->GetColumn(col_index)->GetName() << " in "
-                  << pair.first << " and " << pair.second << " rows with values "
-                  << col_data.GetDataAsString(pair.first) << ", "
-                  << col_data.GetDataAsString(pair.second) << '\n';
+        LOG(DEBUG) << "DD not Holds in " << col_schema->GetColumn(col_index)->GetName() << " in "
+                   << pair.first << " and " << pair.second << " rows with values "
+                   << col_data.GetDataAsString(pair.first) << ", "
+                   << col_data.GetDataAsString(pair.second) << '\n';
     }
 }
 
@@ -77,7 +79,7 @@ std::vector<std::pair<int, int> > DDVerifier::GetRowsWhereLhsHolds(
     std::vector<model::ColumnIndex> columns;
     for (auto const &constraint : constraints) {
         model::ColumnIndex column_index =
-                relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
+                typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
         columns.push_back(column_index);
     }
     auto curr_constraint = constraints.cbegin();
@@ -108,7 +110,7 @@ std::vector<std::pair<int, int> > DDVerifier::GetRowsWhereLhsHolds(
 }
 
 void DDVerifier::LoadDataInternal() {
-    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, false);
+    typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, false);
     input_table_->Reset();
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, false);
 }
@@ -138,7 +140,7 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs) {
     std::vector<model::ColumnIndex> columns;
     for (auto const &dd : dd_.right) {
         model::ColumnIndex column_index =
-                relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
+                typed_relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
         columns.push_back(column_index);
     }
     for (std::pair pair : lhs) {
@@ -176,11 +178,11 @@ bool DDVerifier::DDHolds() const {
 
 void DDVerifier::PrintStatistics() {
     if (DDHolds()) {
-        LOG(INFO) << "DD holds.";
+        LOG(DEBUG) << "DD holds.";
     } else {
-        LOG(INFO) << "DD does not hold.";
-        LOG(INFO) << "Number of rhs rows with errors: " << GetNumErrorRhs();
-        LOG(INFO) << "DD error threshold: " << GetError();
+        LOG(DEBUG) << "DD does not hold.";
+        LOG(DEBUG) << "Number of rhs rows with errors: " << GetNumErrorRhs();
+        LOG(DEBUG) << "DD error threshold: " << GetError();
         VisualizeHighlights();
     }
 }
