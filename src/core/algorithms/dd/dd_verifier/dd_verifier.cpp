@@ -98,13 +98,14 @@ std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
     ++curr_constraint;
     for (std::size_t i = 1; i < columns.size(); i++) {
         if (IsColumnMetrizable(columns[i])) {
-            for (std::size_t j = 0; i < result.size(); j++) {
+            std::vector<std::pair<int, int>> new_result;
+            for (std::size_t j = 0; j < result.size(); j++) {
                 if (double const dif = CalculateDistance(columns[i], result[j]);
-                    !curr_constraint->constraint.Contains(dif)) {
-                    result.erase(result.cbegin() + static_cast<int>(j));
-                    --j;
+                    curr_constraint->constraint.Contains(dif)) {
+                    new_result.emplace_back(result[j]);
                 }
             }
+            result = std::move(new_result);
             ++curr_constraint;
         }
     }
