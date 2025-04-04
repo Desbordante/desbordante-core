@@ -31,7 +31,7 @@ double DDVerifier::GetError() const {
 
 void DDVerifier::VisualizeHighlights() {
     for (auto const &[col_index, pair] : highlights_) {
-        auto const& col_data = typed_relation_->GetColumnData(col_index);
+        auto const &col_data = typed_relation_->GetColumnData(col_index);
         auto const col_schema = typed_relation_->GetSchema();
         LOG(DEBUG) << "DD not Holds in " << col_schema->GetColumn(col_index)->GetName() << " in "
                    << pair.first << " and " << pair.second << " rows with values "
@@ -44,8 +44,7 @@ std::size_t DDVerifier::GetNumErrorRhs() const {
     return num_error_rhs_;
 }
 
-double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
-                                     std::pair<std::size_t, std::size_t> const &tuple_pair) const {
+bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const {
     model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
     model::TypeId const type_id = column.GetTypeId();
 
@@ -57,6 +56,12 @@ double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
         throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                     "\" contains values of different types.");
     }
+    return column.GetType().IsMetrizable();
+}
+
+double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
+                                     std::pair<std::size_t, std::size_t> const &tuple_pair) const {
+    model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
     if (column.IsNull(tuple_pair.first) || column.IsNull(tuple_pair.second)) {
         throw std::runtime_error("Some of the value coordinates are nulls.");
     }
@@ -64,17 +69,15 @@ double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
         throw std::runtime_error("Some of the value coordinates are empty.");
     }
     double dif = 0;
-    if (column.GetType().IsMetrizable()) {
-        std::byte const *first_value = column.GetValue(tuple_pair.first);
-        std::byte const *second_value = column.GetValue(tuple_pair.second);
-        auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
-        dif = type.Dist(first_value, second_value);
-    }
+    std::byte const *first_value = column.GetValue(tuple_pair.first);
+    std::byte const *second_value = column.GetValue(tuple_pair.second);
+    auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+    dif = type.Dist(first_value, second_value);
     return dif;
 }
 
 std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
-    std::vector<std::pair<int, int> > result;
+    std::vector<std::pair<int, int>> result;
     std::vector<model::ColumnIndex> columns;
     for (auto const &constraint : dd_.left) {
         model::ColumnIndex column_index =
@@ -82,26 +85,30 @@ std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
         columns.push_back(column_index);
     }
     auto curr_constraint = dd_.left.cbegin();
-    for (auto const column_index : columns) {
+    if (IsColumnMetrizable(columns[0])) {
         if (result.empty()) {
             for (std::size_t i = 0; i < num_rows_; i++) {
                 for (std::size_t j = i + 1; j < num_rows_; j++) {
-                    if (auto const dif = CalculateDistance(column_index, {i, j});
+                    if (auto const dif = CalculateDistance(columns[0], {i, j});
                         curr_constraint->constraint.Contains(dif)) {
                         result.emplace_back(i, j);
                     }
                 }
             }
-        } else {
-            for (std::size_t i = 0; i < result.size(); i++) {
-                if (double const dif = CalculateDistance(column_index, result[i]);
+        }
+    }
+    ++curr_constraint;
+    for (std::size_t i = 1; i < columns.size(); i++) {
+        if (IsColumnMetrizable(columns[i])) {
+            for (std::size_t j = 0; i < result.size(); j++) {
+                if (double const dif = CalculateDistance(columns[i], result[j]);
                     !curr_constraint->constraint.Contains(dif)) {
-                    result.erase(result.cbegin() + static_cast<int>(i));
-                    --i;
+                    result.erase(result.cbegin() + static_cast<int>(j));
+                    --j;
                 }
             }
+            ++curr_constraint;
         }
-        ++curr_constraint;
     }
     return result;
 }
@@ -131,14 +138,14 @@ unsigned long long DDVerifier::ExecuteInternal() {
     return elapsed_milliseconds.count();
 }
 
-void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs) {
+void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs) {
     std::vector<model::ColumnIndex> columns;
     for (auto const &dd : dd_.right) {
         model::ColumnIndex column_index =
                 typed_relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
         columns.push_back(column_index);
     }
-    for (auto const& pair : lhs) {
+    for (auto const &pair : lhs) {
         auto curr_constraint = dd_.right.cbegin();
         bool is_error = false;
         for (auto const column_index : columns) {
@@ -156,12 +163,12 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs) {
 }
 
 void DDVerifier::VerifyDD() {
-    std::vector<std::pair<int, int> > const lhs = GetRowsWhereLhsHolds();
+    std::vector<std::pair<int, int>> const lhs = GetRowsWhereLhsHolds();
     CheckDFOnRhs(lhs);
     error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
 }
 
-std::vector<std::pair<std::size_t, std::pair<int, int> > > DDVerifier::GetHighlights() const {
+std::vector<std::pair<std::size_t, std::pair<int, int>>> DDVerifier::GetHighlights() const {
     return highlights_;
 }
 

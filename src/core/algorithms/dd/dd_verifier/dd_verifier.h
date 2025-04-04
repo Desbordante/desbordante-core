@@ -30,14 +30,16 @@ private:
 
     void PrintStatistics();
 
-    std::vector<std::pair<int, int> > GetRowsWhereLhsHolds() const;
+    std::vector<std::pair<int, int>> GetRowsWhereLhsHolds() const;
 
     double CalculateDistance(model::ColumnIndex column_index,
                              std::pair<std::size_t, std::size_t> const &tuple_pair) const;
 
-    void CheckDFOnRhs(std::vector<std::pair<int, int> > const &lhs);
+    void CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs);
 
     void VerifyDD();
+
+    bool IsColumnMetrizable(model::ColumnIndex const column_index) const;
 
     void ResetState() final {}
 
@@ -57,6 +59,6 @@ public:
 
     bool DDHolds() const;
 
-    std::vector<std::pair<std::size_t, std::pair<int, int> > > GetHighlights() const;
+    std::vector<std::pair<std::size_t, std::pair<int, int>>> GetHighlights() const;
 };
 }  // namespace algos::dd
