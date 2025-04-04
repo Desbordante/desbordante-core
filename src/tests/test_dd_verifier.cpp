@@ -10,9 +10,9 @@ namespace tests {
 struct DDVerifyingParams {
     algos::StdParamsMap params;
     double const error = 0.;
-    size_t const num_error_pairs = 0;
+    std::size_t const num_error_pairs = 0;
 
-    explicit DDVerifyingParams(model::DDString const& dd, size_t const num_error_pairs = 0,
+    explicit DDVerifyingParams(model::DDString const& dd, std::size_t const num_error_pairs = 0,
                                double const error = 0., CSVConfig const& csv_config = kTestDD)
         : params({{config::names::kCsvConfig, csv_config}, {config::names::kDDString, dd}}),
           error(error),
