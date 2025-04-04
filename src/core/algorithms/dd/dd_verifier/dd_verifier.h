@@ -22,7 +22,7 @@ private:
     std::size_t num_error_rhs_{};
     double error_ = 0.;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::vector<std::pair<std::size_t, std::pair<int, int>>> highlights_;
+    std::vector<std::pair<model::ColumnIndex, std::pair<int, int>>> highlights_;
 
     void RegisterOptions();
 
@@ -40,6 +40,8 @@ private:
     void VerifyDD();
 
     bool IsColumnMetrizable(model::ColumnIndex const column_index) const;
+
+    void CheckCorrectnessDd() const;
 
     void ResetState() final {}
 
@@ -59,6 +61,6 @@ public:
 
     bool DDHolds() const;
 
-    std::vector<std::pair<std::size_t, std::pair<int, int>>> GetHighlights() const;
+    std::vector<std::pair<model::ColumnIndex, std::pair<int, int>>> GetHighlights() const;
 };
 }  // namespace algos::dd

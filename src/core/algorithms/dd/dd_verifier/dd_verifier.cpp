@@ -121,7 +121,21 @@ void DDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kDDString});
 }
 
+void DDVerifier::CheckCorrectnessDd() const {
+    for (auto const& constraint: dd_.left) {
+        assert(constraint.constraint.upper_bound >= constraint.constraint.lower_bound);
+        assert(constraint.constraint.lower_bound >= 0);
+        assert(constraint.constraint.upper_bound >= 0);
+    }
+    for (auto const& constraint: dd_.right) {
+        assert(constraint.constraint.upper_bound >= constraint.constraint.lower_bound);
+        assert(constraint.constraint.lower_bound >= 0);
+        assert(constraint.constraint.upper_bound >= 0);
+    }
+}
+
 unsigned long long DDVerifier::ExecuteInternal() {
+    CheckCorrectnessDd();
     num_rows_ = typed_relation_->GetNumRows();
     num_columns_ = typed_relation_->GetNumColumns();
 
@@ -171,7 +185,7 @@ void DDVerifier::VerifyDD() {
     }
 }
 
-std::vector<std::pair<std::size_t, std::pair<int, int>>> DDVerifier::GetHighlights() const {
+std::vector<std::pair<model::ColumnIndex, std::pair<int, int>>> DDVerifier::GetHighlights() const {
     return highlights_;
 }
 
