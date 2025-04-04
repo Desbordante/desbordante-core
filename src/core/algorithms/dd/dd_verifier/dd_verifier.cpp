@@ -86,7 +86,6 @@ std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
     }
     auto curr_constraint = dd_.left.cbegin();
     if (IsColumnMetrizable(columns[0])) {
-        if (result.empty()) {
             for (std::size_t i = 0; i < num_rows_; i++) {
                 for (std::size_t j = i + 1; j < num_rows_; j++) {
                     if (auto const dif = CalculateDistance(columns[0], {i, j});
@@ -95,7 +94,6 @@ std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
                     }
                 }
             }
-        }
     }
     ++curr_constraint;
     for (std::size_t i = 1; i < columns.size(); i++) {
@@ -165,7 +163,11 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs) {
 void DDVerifier::VerifyDD() {
     std::vector<std::pair<int, int>> const lhs = GetRowsWhereLhsHolds();
     CheckDFOnRhs(lhs);
-    error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
+    if (lhs.empty()) {
+        error_ = 0;
+    } else {
+        error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
+    }
 }
 
 std::vector<std::pair<std::size_t, std::pair<int, int>>> DDVerifier::GetHighlights() const {

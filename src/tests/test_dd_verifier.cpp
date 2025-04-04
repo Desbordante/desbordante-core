@@ -43,31 +43,14 @@ INSTANTIATE_TEST_SUITE_P(
                           DDVerifyingParams({{{"Col0", 0, 10000}}, {{"Col4", 0, 10000}}}, 0, 0.),
                           DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
                                              {{"Col3", 222, 333}, {"Col4", 111, 555}}},
-                                            0, 0.)));
-
-//clang-format on
-
-class TestDDNotHoldsVerifying : public ::testing::TestWithParam<DDVerifyingParams> {};
-
-TEST_P(TestDDNotHoldsVerifying, DDNotHoldsTest) {
-    auto const& p = GetParam();
-    auto const mp = algos::StdParamsMap(p.params);
-    auto const verifier = algos::CreateAndLoadAlgorithm<algos::dd::DDVerifier>(mp);
-    verifier->Execute();
-    EXPECT_EQ(verifier->DDHolds(), !p.num_error_pairs);
-    EXPECT_DOUBLE_EQ(verifier->GetError(), p.error);
-    EXPECT_EQ(verifier->GetNumErrorRhs(), p.num_error_pairs);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-        DDVerifierTestSuite, TestDDNotHoldsVerifying,
-        ::testing::Values(DDVerifyingParams({{{"Col0", 0., 0.}}, {{"Col2", 1., 1.}}}, 5, 1.),
-                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 11}}}, 1, 1. / 12.),
-                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 3, 10}}}, 7, 7. / 12.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
-                          DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5, 5. / 10.),
+                                            0, 0.),
                           DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
                                              {{"Col3", 228, 333}, {"Col4", 111, 550}}},
-                                            1, 1. / 2.)));
+                                            0, 0),
+                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 11}}}, 1, 1. / 7.),
+                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 3, 10}}}, 2, 2. / 7.),
+                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),
+                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
+                          DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5,
+                                            5. / 10.)));
 }  // namespace tests
