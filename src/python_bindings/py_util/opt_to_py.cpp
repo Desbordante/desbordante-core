@@ -6,6 +6,7 @@
 
 #include <pybind11/stl.h>
 
+#include "algorithms/dd/dd.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
@@ -40,6 +41,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<config::MaxLhsType>,
         normal_conv_pair<config::ErrorType>,
         normal_conv_pair<config::IndicesType>,
+        normal_conv_pair<model::DDString>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,

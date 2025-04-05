@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "algorithms/dd/dd_verifier/highlight.h"
 #include "algorithm.h"
 #include "algorithms/dd/dd.h"
 #include "config/tabular_data/input_table_type.h"
@@ -22,7 +23,7 @@ private:
     std::size_t num_error_rhs_{};
     double error_ = 0.;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
-    std::vector<std::pair<model::ColumnIndex, std::pair<int, int>>> highlights_;
+    std::vector<Highlight> highlights_;
 
     void RegisterOptions();
 
@@ -61,6 +62,6 @@ public:
 
     bool DDHolds() const;
 
-    std::vector<std::pair<model::ColumnIndex, std::pair<int, int>>> GetHighlights() const;
+    std::vector<Highlight> GetHighlights() const;
 };
 }  // namespace algos::dd
