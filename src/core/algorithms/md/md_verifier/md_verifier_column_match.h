@@ -22,5 +22,9 @@ struct MDVerifierColumnMatch : model::md::ColumnMatch {
         ss << name << "(" << left_col_index << ", " << right_col_index << ")";
         return ss.str();
     };
+
+    model::md::ColumnMatch ToStandardColumnMatch() const {
+        return ColumnMatch(left_col_index, right_col_index, name);
+    }
 };
 }  // namespace algos::md
