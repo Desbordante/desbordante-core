@@ -168,7 +168,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 }
 
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
-    auto algorithm = CreateAlgorithmInstance(kRulesSynthetic2, 0.13, 1.00001, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesSynthetic2, 0.13, 1, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
