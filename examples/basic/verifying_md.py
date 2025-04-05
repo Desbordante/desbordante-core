@@ -31,6 +31,11 @@ def print_results(verifier):
     print(
         f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_rhs_suggestions()}\n"
     )
+    print(f"Following MD was provided:\n  {verifier.get_input_md()}")
+    print("Following MDs are suggested:")
+    for md in verifier.get_md_suggestions():
+        print(f"  {md.to_string_active()}")
+    print()
 
 
 def check_md(table_path: str, params: MDParams):
