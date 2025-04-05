@@ -304,7 +304,7 @@ constexpr unsigned long BaseBitset<NumWords>::DoToULong() const {
 
 template <size_t NumWords>
 constexpr unsigned long long BaseBitset<NumWords>::DoToULLong() const {
-#if SIZEOF_LONGLONG == SIZEOF_LONG
+#if ULLONG_MAX == ULONG_MAX
     return DoToULong();
 #else
     for (size_t i{2}; i < NumWords; ++i) {
