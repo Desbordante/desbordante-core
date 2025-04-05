@@ -1,0 +1,21 @@
+graph G {
+0[label=Person name=Igor];
+1[label=Person name=Misha];
+2[label=Person name=Olya];
+3[label=Movie name="American Pie"];
+4[label=Movie name="Saw"];
+5[label=Movie name="Home Alone"];
+6[label=Genre name="Comedy"];
+7[label=Genre name="Horror"];
+0--1 [label=IsFriend];
+0--5 [label=Watched];
+1--2 [label=IsFriend];
+1--4 [label=Watched];
+1--5 [label=Watched];
+2--3 [label=Watched];
+2--4 [label=Watched];
+2--5 [label=Watched];
+3--6 [label=HasGenre];
+4--7 [label=HasGenre];
+5--6 [label=HasGenre];
+}

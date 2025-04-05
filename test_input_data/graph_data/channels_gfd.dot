@@ -1,0 +1,7 @@
+0.difficulty=hard 
+1.degree=master 1.year=2 
+graph G {
+0[label=task];
+1[label=student];
+0--1 [label=performs];
+}
