@@ -88,6 +88,8 @@ void BindMDVerification(py::module_& main_module) {
     BindPrimitiveNoBase<MDVerifier>(md_module, "MDVerifier")
             .def("get_highlights", &MDVerifier::GetHighlights)
             .def("get_rhs_suggestions", &MDVerifier::GetRHSSuggestion)
-            .def("md_holds", &MDVerifier::GetResult);
+            .def("md_holds", &MDVerifier::GetResult)
+            .def("get_md_suggestions", &MDVerifier::GetMDSuggestion)
+            .def("get_input_md", &MDVerifier::GetProvidedMD);
 }
 }  // namespace python_bindings
