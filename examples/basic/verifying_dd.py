@@ -44,18 +44,18 @@ def print_about_third_dd(algorithm):
     highlights = algo.get_highlights()
     table_copy = table.copy()
     for highlight in highlights:
-        first_error_row_index = highlight[1][0] + 1
-        second_error_row_index = highlight[1][1] + 1
+        first_error_row_index = highlight.pair_rows[0] + 1
+        second_error_row_index = highlight.pair_rows[0] + 1
         print(f"{first_error_row_index}) ", end="")
         for i in range(0, 5):
-            if i == highlight[0]:
+            if i == highlight.attribute_index:
                 print(f"{COLOR_CODES["red"]}{table_copy[first_error_row_index][i]}{COLOR_CODES["nocolor"]} ", end="")
             else:
                 print(table_copy[first_error_row_index][i] + " ", end="")
         print()
         print(f"{second_error_row_index}) ", end="")
         for i in range(0, 5):
-            if i == highlight[0]:
+            if i == highlight.attribute_index:
                 print(f"{COLOR_CODES["red"]}{table_copy[second_error_row_index][i]}{COLOR_CODES["nocolor"]} ", end="")
             else:
                 print(table_copy[second_error_row_index][i] + " ", end="")
