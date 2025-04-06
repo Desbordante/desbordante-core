@@ -123,9 +123,16 @@ constexpr auto kDEvidenceThreshold =
         "considered approximate.";
 constexpr auto kDMinimumSharedValue =
         "Minimum threshold for the shared percentage of values between two columns";
+// FastADC, FastDD
 constexpr auto kDShardLength =
         "Number of rows each shard will cover when building PLI shards. Determines the "
         "segmentation of rows for parallel processing in the FastADC algorithm";
+// FastDD
+constexpr auto kDOperatorDifferenceTable =
+        "CSV table containing distance constraints (with operators <=, >=) for each column";
+// FastDD, Split
+constexpr auto kDNumColumns = "Use only first N columns of the table";
+constexpr auto kDNumRows = "Use only first N rows of the table";
 // FastOD
 constexpr auto kDTimeLimitSeconds = "max running time of the algorithm. Pass 0 to remove limit";
 // GFD
@@ -198,8 +205,6 @@ constexpr auto kDCustomRandom =
 constexpr auto kDMemLimitMB = "memory limit im MBs";
 // Split
 constexpr auto kDDifferenceTable = "CSV table containing difference limits for each column";
-constexpr auto kDNumColumns = "Use only first N columns of the table";
-constexpr auto kDNumRows = "Use only first N rows of the table";
 // Tane
 extern std::string_view const kDAfdErrorMeasure;
 // Tane, Pfd verifier
