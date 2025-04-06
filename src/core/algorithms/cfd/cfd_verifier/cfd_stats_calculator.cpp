@@ -1,5 +1,8 @@
 #include "cfd_stats_calculator.h"
 
+#include <ranges>
+
+#include "cfd/model/cfd_types.h"
 #include "cfd/util/cfd_output_util.h"
 
 namespace algos::cfd_verifier {
@@ -7,20 +10,11 @@ void CFDStatsCalculator::CreateSupportMask() {
     support_mask_.resize(relation_->GetNumRows(), true);
 
     for (size_t i = 0; i < relation_->GetNumRows(); i++) {
-        bool supports_cfd = true;
+        cfd::Transaction const& row_values = relation_->GetRow(i);
 
-        std::vector<int> row_values = relation_->GetRow(i);
-
-        for (auto expected_value : rule_.first) {
-            if (std::find(row_values.begin(), row_values.end(), expected_value) ==
-                        row_values.end() &&
-                expected_value > 0) {
-                supports_cfd = false;
-                break;
-            }
-        }
-
-        support_mask_[i] = supports_cfd;
+        support_mask_[i] = std::ranges::all_of(rule_.first, [&row_values](int val) {
+            return val <= 0 || std::ranges::find(row_values, val) != row_values.end();
+        });
     }
 }
 
@@ -31,31 +25,31 @@ void CFDStatsCalculator::MakeLhsToRowNums() {
         }
 
         cfd::Itemset lhs_values;
+        lhs_values.reserve(lhs_attrs_.size());
         auto const& row_values = relation_->GetRow(row_idx);
         for (int attr_idx : lhs_attrs_) {
             lhs_values.push_back(row_values[attr_idx]);
         }
 
-        lhs_to_row_nums_[lhs_values].push_back(row_idx);
+        lhs_to_row_nums_[std::move(lhs_values)].push_back(row_idx);
     }
 }
 
 void CFDStatsCalculator::DetermineMostFrequentRHS() {
     for (auto const& [lhs_values, row_indices] : lhs_to_row_nums_) {
-        std::map<cfd::Item, size_t> rhs_count;
+        auto rhs_values = row_indices | std::views::transform([this](size_t row_index) {
+                              return relation_->GetRow(row_index)[rhs_attr_index_];
+                          });
 
-        for (size_t row_index : row_indices) {
-            auto row = relation_->GetRow(row_index);
-            cfd::Item rhs_value = row[rhs_attr_index_];
-            rhs_count[rhs_value]++;
+        std::unordered_map<cfd::Item, size_t> rhs_count;
+        for (cfd::Item val : rhs_values) {
+            rhs_count[val]++;
         }
 
         if (!rhs_count.empty()) {
-            most_frequent_rhs_[lhs_values] = std::max_element(rhs_count.begin(), rhs_count.end(),
-                                                              [](auto const& a, auto const& b) {
-                                                                  return a.second < b.second;
-                                                              })
-                                                     ->first;
+            auto max_it = std::ranges::max_element(rhs_count, std::less{},
+                                                   [](auto const& pair) { return pair.second; });
+            most_frequent_rhs_[lhs_values] = max_it->first;
         }
     }
 }
@@ -71,7 +65,6 @@ void CFDStatsCalculator::CalculateSupportAndConfidence() {
         }
 
         cfd::Item most_frequent_rhs = it->second;
-        size_t num_violations = 0;
         std::vector<size_t> violating_rows;
 
         for (size_t row_index : row_indices) {
@@ -80,14 +73,13 @@ void CFDStatsCalculator::CalculateSupportAndConfidence() {
                              (rule_.second > 0 && row[rhs_attr_index_] == rule_.second);
 
             if (!satisfies) {
-                num_violations++;
                 violating_rows.push_back(row_index);
             }
         }
         total_supported += row_indices.size();
-        total_violations += num_violations;
+        total_violations += violating_rows.size();
 
-        if (num_violations > 0) {
+        if (violating_rows.size() > 0) {
             highlights_.emplace_back(std::move(row_indices), std::move(violating_rows));
         }
     }
