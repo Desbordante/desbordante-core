@@ -12,7 +12,7 @@ using AlgorithmTypes =
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier,
                    Fastod, GfdValidator, EGfdValidator, NaiveGfdValidator, order::Order, dd::Split,
-                   Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier,
+                   dd::FastDD, Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier,
                    ar_verifier::ARVerifier, GSpan>;
 
 // clang-format off
@@ -91,6 +91,7 @@ enum class AlgorithmType : char {
 
 /* Differential dependencies mining algorithm */
     kSplit,
+    kFastDD,
 
 /* SFD mining algorithm */
     kCords,

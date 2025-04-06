@@ -51,7 +51,7 @@ TEST_F(SplitAlgorithmTest, Test0) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD, kTestDif);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
     std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
             expected_results = {{{{"Col4", 2, 4}}, {{"Col0", 3, 4}}},
                                 {{{"Col1", 2, 5}}, {{"Col0", 1, 1}}}};
@@ -62,7 +62,7 @@ TEST_F(SplitAlgorithmTest, Test1) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD1);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
     std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
             expected_results = {{{{"Col1", 2, 3}}, {{"Col0", 1, 1}}},
                                 {{{"Col0", 1, 1}}, {{"Col1", 2, 2}}}};
@@ -73,7 +73,7 @@ TEST_F(SplitAlgorithmTest, Test2) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD2, kTestDif1);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
     std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
             expected_results = {{{{"Col3", 5, 5}}, {{"Col2", 4, 4}}}};
     CompareDDStringLists(expected_results, actual_results);
@@ -83,7 +83,7 @@ TEST_F(SplitAlgorithmTest, Test3) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD2, kTestDif2);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
 
     // there are two possible minimal covers that differ in one deleted DD;
     // commented lines show which DD is deleted and which is present
@@ -122,7 +122,7 @@ TEST_F(SplitAlgorithmTest, Test4) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD3, kTestDif3);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
 
     // there are two possible minimal covers that differ in one deleted DD;
     // commented lines show which DD is deleted and which is present
@@ -144,7 +144,7 @@ TEST_F(SplitAlgorithmTest, Test5) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD4, kTestDif4);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
 
     std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
             expected_results = {{{{"Col2", 4, 8}}, {{"Col1", 1, 2}}},
@@ -168,7 +168,7 @@ TEST_F(SplitAlgorithmTest, TestDoubleCompare) {
     auto algo = CreateSplitAlgorithmInstance(kTestDD5, kTestDif5);
     algo->Execute();
 
-    auto actual_results = algo->GetDDStringList();
+    auto actual_results = algo->DDList();
     std::set<std::pair<std::set<model::DFStringConstraint>, std::set<model::DFStringConstraint>>>
             expected_results = {{{{"Col3", 5.1, 5.1}}, {{"Col2", 4, 4}}}};
     CompareDDStringLists(expected_results, actual_results);
