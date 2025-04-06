@@ -77,14 +77,14 @@ model::MD MDVerifier::BuildMD(std::vector<MDVerifierColumnSimilarityClassifier> 
                               MDVerifierColumnSimilarityClassifier const& rhs) {
     std::shared_ptr<std::vector<model::md::ColumnMatch>> column_matches =
             std::make_shared<std::vector<model::md::ColumnMatch>>();
-    std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(*column_matches),
+    std::transform(lhs.begin(), lhs.end(), std::back_inserter(*column_matches),
                    [](MDVerifierColumnSimilarityClassifier& classifier) {
                        return classifier.GetColumnMatch().ToStandardColumnMatch();
                    });
     column_matches->emplace_back(rhs_.GetColumnMatch().ToStandardColumnMatch());
     std::vector<model::md::LhsColumnSimilarityClassifier> lhs_transformed;
     model::Index column_match_current_index = 0;
-    std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(lhs_transformed),
+    std::transform(lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
                    [&column_match_current_index](MDVerifierColumnSimilarityClassifier& classifier) {
                        return model::md::LhsColumnSimilarityClassifier(
                                std::nullopt, column_match_current_index++,
