@@ -18,11 +18,39 @@ CFDVerifier::CFDVerifier() : Algorithm({}) {
 
 void CFDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
+
+    auto check_item_ids = [this](std::vector<CFDAttributeValuePair> const& rule_part) {
+        auto get_attr_id = [this](std::string const& attr_name) -> cfd::AttributeIndex {
+            cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
+            if (attr_id == -1) {
+                throw config::ConfigurationError("Attribute not found: " + attr_name);
+            }
+            return attr_id;
+        };
+
+        for (auto const& [attr_name, item_name] : rule_part) {
+            cfd::Item item_id = relation_->GetItem(get_attr_id(attr_name), item_name);
+            if (item_id == -1 && item_name != "_") {
+                throw config::ConfigurationError("Item not found in item universe: " + item_name);
+            }
+        }
+    };
+
+    auto validate_rule_part = [check_item_ids](std::vector<CFDAttributeValuePair> const& part) {
+        check_item_ids(part);
+    };
+
+    auto validate_single_pair = [check_item_ids](CFDAttributeValuePair const& pair) {
+        check_item_ids({pair});
+    };
+
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&string_rule_left_, kCFDRuleLeft, kDCFDRuleLeft,
-                          std::vector<std::pair<std::string, std::string>>{}});
-    RegisterOption(Option{&string_rule_right_, kCFDRuleRight, kDCFDRuleRight,
-                          std::pair<std::string, std::string>{}});
+                          std::vector<CFDAttributeValuePair>{}}
+                           .SetValueCheck(validate_rule_part));
+    RegisterOption(
+            Option{&string_rule_right_, kCFDRuleRight, kDCFDRuleRight, CFDAttributeValuePair{}}
+                    .SetValueCheck(validate_single_pair));
     RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
     RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0});
 }
@@ -41,44 +69,29 @@ void CFDVerifier::MakeExecuteOptsAvailable() {
 }
 
 unsigned long long CFDVerifier::ExecuteInternal() {
-    auto get_attr_id = [this](std::string const& attr_name) -> cfd::AttributeIndex {
-        cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
-        if (attr_id == -1) {
-            throw config::ConfigurationError("Attribute not found: " + attr_name);
-        }
-        return attr_id;
-    };
-
-    auto extract_item_ids =
-            [this, &get_attr_id](std::vector<std::pair<std::string, std::string>> const& rule_part)
-            -> cfd::Itemset {
+    auto build_item_ids =
+            [this](std::vector<CFDAttributeValuePair> const& rule_part) -> cfd::Itemset {
         cfd::Itemset item_ids;
-        for (auto const& [attr_name, item_name] : rule_part) {
-            cfd::AttributeIndex attr_id = get_attr_id(attr_name);
+        item_ids.reserve(rule_part.size());
 
+        for (auto const& [attr_name, item_name] : rule_part) {
+            cfd::AttributeIndex attr_id = relation_->GetAttr(attr_name);
             if (item_name != "_") {
-                cfd::Item item_id = relation_->GetItem(attr_id, item_name);
-                if (item_id == -1) {
-                    throw config::ConfigurationError("Item not found in item universe: " +
-                                                     item_name);
-                }
-                item_ids.push_back(item_id);
+                item_ids.push_back(relation_->GetItem(attr_id, item_name));
             } else {
                 item_ids.push_back(-1 - attr_id);
             }
         }
+
         return item_ids;
     };
 
-    cfd::Itemset cfd_left_id = extract_item_ids(string_rule_left_);
-    cfd::Itemset cfd_right_id = extract_item_ids({string_rule_right_});
-
-    cfd_ = std::make_pair(std::move(cfd_left_id), cfd_right_id.back());
+    cfd_ = {build_item_ids(string_rule_left_), build_item_ids({string_rule_right_}).front()};
 
     LOG(DEBUG) << "Starting CFD verification...";
     LOG(DEBUG) << "\tRule to verify: " << cfd::Output::CFDToString(cfd_, relation_);
 
-    auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerefyCFD, this);
+    auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerifyCFD, this);
     LOG(DEBUG) << "CFD verification took " << std::to_string(verification_time) << "ms";
 
     auto stats_calculation_time = ::util::TimedInvoke(&CFDVerifier::CalculateStatistics, this);
@@ -87,7 +100,7 @@ unsigned long long CFDVerifier::ExecuteInternal() {
     return verification_time + stats_calculation_time;
 }
 
-void CFDVerifier::VerefyCFD() {
+void CFDVerifier::VerifyCFD() {
     stats_calculator_ = CFDStatsCalculator(relation_, std::move(cfd_));
 }
 

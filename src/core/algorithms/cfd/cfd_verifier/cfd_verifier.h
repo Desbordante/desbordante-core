@@ -11,12 +11,13 @@
 
 namespace algos::cfd_verifier {
 
+using CFDAttributeValuePair = std::pair<std::string, std::string>;
+
 class CFDVerifier : public Algorithm {
 private:
     config::InputTable input_table_;
-
-    std::vector<std::pair<std::string, std::string>> string_rule_left_;
-    std::pair<std::string, std::string> string_rule_right_;
+    std::vector<CFDAttributeValuePair> string_rule_left_;
+    CFDAttributeValuePair string_rule_right_;
     cfd::ItemsetCFD cfd_;
 
     int minsup_ = 0;
@@ -25,7 +26,7 @@ private:
     std::shared_ptr<cfd::CFDRelationData> relation_;
     CFDStatsCalculator stats_calculator_;
 
-    void VerefyCFD();
+    void VerifyCFD();
 
     void RegisterOptions();
 
