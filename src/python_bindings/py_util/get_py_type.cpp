@@ -96,7 +96,7 @@ py::tuple GetPyType(std::type_index type_index) {
              }},
             {typeid(model::DDString), [](){
                  return MakeTypeTuple(kPyList, py::type::of<model::DFStringConstraint>());
-            }}
+            }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
             {typeid(config::InputTables),
