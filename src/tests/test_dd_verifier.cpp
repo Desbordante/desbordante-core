@@ -46,7 +46,7 @@ INSTANTIATE_TEST_SUITE_P(
                                             0, 0.),
                           DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
                                              {{"Col3", 222, 333}, {"Col4", 111, 550}}},
-                                            1, 1./2.),
+                                            1, 1. / 2.),
                           DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 11}}}, 1, 1. / 7.),
                           DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 3, 10}}}, 2, 2. / 7.),
                           DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),

@@ -34,8 +34,8 @@ void DDVerifier::VisualizeHighlights() {
         auto const &col_data = typed_relation_->GetColumnData(hl.GetAttributeIndex());
         auto const col_schema = typed_relation_->GetSchema();
         auto const &pair = hl.GetPairRows();
-        LOG(DEBUG) << "DD not Holds in " << col_schema->GetColumn(hl.GetAttributeIndex())->GetName() << " in "
-                   << pair.first << " and " << pair.second << " rows with values "
+        LOG(DEBUG) << "DD not Holds in " << col_schema->GetColumn(hl.GetAttributeIndex())->GetName()
+                   << " in " << pair.first << " and " << pair.second << " rows with values "
                    << col_data.GetDataAsString(pair.first) << ", "
                    << col_data.GetDataAsString(pair.second) << '\n';
     }
