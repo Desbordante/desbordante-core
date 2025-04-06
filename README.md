@@ -67,106 +67,31 @@ For information about the console interface check the [repository](https://githu
 
 ## Python bindings
 
-Desbordante features can be accessed from within Python programs by employing the Desbordante Python library. The library is implemented in the form of Python bindings to the interface of the Desbordante C++ core library, using pybind11. Apart from discovery and validation of patterns, this interface is capable of providing valuable additional information which can, for example, describe why a given pattern does not hold. All this allows end users to solve various data quality problems by constructing ad-hoc Python programs. To show the power of this interface, we have implemented several demo scenarios:
-1) [Typo detection](https://colab.research.google.com/drive/1h5mQAIIxSb6Sgc_Ep8AYZlgt4BGXN6A9)
-2) [Data deduplication](https://colab.research.google.com/drive/1hgF8idXi1-U4ZOR0fAmdbfbhltgEJecR?usp=sharing)
-3) [Anomaly detection](https://colab.research.google.com/drive/1hgF8idXi1-U4ZOR0fAmdbfbhltgEJecR?usp=sharing)
+Desbordante features can be accessed from within Python programs by employing the Desbordante Python library. The library is implemented in the form of Python bindings to the interface of the Desbordante C++ core library, using pybind11. Apart from discovery and validation of patterns, this interface is capable of providing valuable additional information which can, for example, describe why a given pattern does not hold. 
 
-[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3). 
+We want to demonstrate the power of Desbordante through examples where some patterns are extracted from tabular data, providing non-trivial insights. The patterns are quite complex and require detailed explanations, as well as a significant amount of code. This takes up quite a bit of space. Therefore, we do not include the actual code here; instead, we provide a clear (albeit simplified) definition and a link to a Colab notebook with interactive examples. The examples themselves are very detailed and allow users to understand the pattern and how to extract it using Desbordante.
 
-Simple usage examples:
-1) Discover all exact functional dependencies in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default FD discovery algorithm (HyFD) is used.
+1) Differential Dependencies (DD). DD is a statement of the form X -> Y, where X and Y are sets of attributes. It indicates that for any two rows, $t$ and $s$, if the attributes in $X$ are similar, then the attributes in $Y$ will also be similar. The similarity for each attribute is defined as: $diff(t[X_i], s[X_i]) \in [val_1, val_2]$,
+where $t[X_i]$ is the value of attribute $X_i$ in row $t$, $val$ is a constant, and $diff$ is a function that typically calculates the difference, often through simple subtraction.
+A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Differential_Dependencies.ipynb).
+2) Numeric Association Rules (NAR). NAR is a statement of the form X -> Y, where X and Y are conditions, specified on disjoint sets of attributes. Each condition takes a form of $A_1 \wedge A_2 \wedge \ldots \wedge A_n$, where $A_i$ is either $Attribute_i \in$ $[constant_{i}^{1}; constant_{i}^{2}]$ or $Attribute_i$ = $constant_i^3$. Furthermore, the statement includes the support (sup) and confidence (conf) values, which lie in $[0; 1]$. 
+The rule can be interpreted as follows: 1) the supp share of rows in the dataset satisfies both the X and Y conditions, and 2) the conf share of rows that satisfy the X also satisfies Y.
+A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Numerical_Association_Rules.ipynb).
+3) Matching Dependencies (MD). MD is a statement of the form X -> Y, where X and Y are sets of so-called column matches. Each column match includes: 1) a metric (e.g., Levenshtein distance, Jaccard similarity, etc.), 2) a left column, and 3) a right column. Note that this pattern may involve two tables in its column matches. Finally, each match has its own threshold, which is applied to the corresponding metric and lies in the $[0; 1]$ range. The dependency can be interpreted as follows: any two records that satisfy X will also satisfy Y.
+A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Matching_Dependencies.ipynb).
+4) Denial Constraints (DC). A denial constraint is a statement that says: "For all pairs of rows in a table, it should never happen that some condition is true". Formally, DC $\varphi$ is a conjunction of predicates of the following form: $\forall s,t \in R, s \neq t: \textlnot (p_1 \wedge \ldots \wedge p_m)$. Each $p_k$ has the form $column_i$ $op$ $column_j$, where $op \in {>, <, \leq, \geq, =, \neq}$.
+A live Python example that provides insight into the definition and demonstrates how to use this pattern in Desbordante is available [here](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb)
 
-```python
-import desbordante
+Desbordante offers examples for each supported pattern, sometimes several if the pattern is complex or needs to highlight its unique characteristics compared to others in the same family. We have mentioned only a small portion here, which is available in Colab. The rest can be found in our example [folder](https://github.com/Desbordante/desbordante-core/tree/main/examples).
 
-TABLE = 'examples/datasets/university_fd.csv'
+Finally, Desbordante allows end users to solve various data quality problems by constructing ad-hoc Python programs, incorporating different Python libraries, and utilizing the search and validation of various patterns. To demonstrate the power of this approach, we have implemented several demo scenarios:
 
-algo = desbordante.fd.algorithms.Default()
-algo.load_data(table=(TABLE, ',', True))
-algo.execute()
-result = algo.get_fds()
-print('FDs:')
-for fd in result:
-    print(fd)
-```
-```text
-FDs:
-[Course Classroom] -> Professor
-[Classroom Semester] -> Professor
-[Classroom Semester] -> Course
-[Professor] -> Course
-[Professor Semester] -> Classroom
-[Course Semester] -> Classroom
-[Course Semester] -> Professor
-```
+1) [Typo detection](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Desbordante_demo_scenario_1_typo_miner.ipynb)
+2) [Data deduplication](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Desbordante_demo_scenario_2_deduplication.ipynb)
+3) [Anomaly detection](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Desbordante_demo_scenario_3_anomaly_detection.ipynb)
 
-2) Discover all approximate functional dependencies with error less than or equal to 0.1 in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the AFD discovery algorithm Pyro is used.
+[There is](https://desbordante.streamlit.app/) also an interactive demo for all of them, and all of these python scripts are [here](https://github.com/Desbordante/desbordante-core/tree/main/examples/expert). The ideas behind them are briefly discussed in this [preprint](https://arxiv.org/abs/2307.14935) (Section 3).
 
-```python
-import desbordante
-
-TABLE = 'examples/datasets/inventory_afd.csv'
-ERROR = 0.1
-
-algo = desbordante.afd.algorithms.Default()
-algo.load_data(table=(TABLE, ',', True))
-algo.execute(error=ERROR)
-result = algo.get_fds()
-print('AFDs:')
-for fd in result:
-    print(fd)
-```
-```text
-AFDs:
-[Id] -> Price
-[Id] -> ProductName
-[ProductName] -> Price
-```
-
-3) Check whether metric functional dependency “Title -> Duration” with radius 5 (using the Euclidean metric) holds in a table represented by a .csv file that uses a comma as the separator and has a header row. In this example the default MFD validation algorithm (BRUTE) is used.
-
-```python
-import desbordante
-
-TABLE = 'examples/datasets/theatres_mfd.csv'
-METRIC = 'euclidean'
-LHS_INDICES = [0]
-RHS_INDICES = [2]
-PARAMETER = 5
-
-algo = desbordante.mfd_verification.algorithms.Default()
-algo.load_data(table=(TABLE, ',', True))
-algo.execute(lhs_indices=LHS_INDICES, metric=METRIC,
-             parameter=PARAMETER, rhs_indices=RHS_INDICES)
-if algo.mfd_holds():
-    print('MFD holds')
-else:
-    print('MFD does not hold')
-```
-```text
-MFD holds
-```
-4) Discover approximate functional dependencies with various error thresholds. Here, we are using a pandas DataFrame to load data from a CSV file.
-```python-repl
->>> import desbordante
->>> import pandas as pd
->>> pyro = desbordante.afd.algorithms.Pyro()  # same as desbordante.afd.algorithms.Default()
->>> df = pd.read_csv('examples/datasets/iris.csv', sep=',', header=None)
->>> pyro.load_data(table=df)
->>> pyro.execute(error=0.0)
->>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
-[[0 1 2] -> 4, [0 2 3] -> 4, [0 1 3] -> 4, [1 2 3] -> 4]
->>> pyro.execute(error=0.1)
->>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
-[[2] -> 0, [2] -> 3, [2] -> 1, [0] -> 2, [3] -> 0, [0] -> 3, [0] -> 1, [1] -> 3, [1] -> 0, [3] -> 2, [3] -> 1, [1] -> 2, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4]
->>> pyro.execute(error=0.2)
->>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
-[[2] -> 0, [0] -> 2, [3] -> 2, [1] -> 2, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4, [3] -> 0, [1] -> 0, [2] -> 3, [2] -> 1, [0] -> 3, [0] -> 1, [1] -> 3, [3] -> 1]
->>> pyro.execute(error=0.3)
->>> print(f'[{", ".join(map(str, pyro.get_fds()))}]')
-[[2] -> 1, [0] -> 2, [2] -> 0, [2] -> 3, [0] -> 1, [3] -> 2, [3] -> 1, [1] -> 2, [3] -> 0, [0] -> 3, [4] -> 1, [1] -> 0, [1] -> 3, [4] -> 2, [4] -> 3, [2] -> 4, [3] -> 4, [0] -> 4, [1] -> 4]
-```
 
 ## Web interface
 
