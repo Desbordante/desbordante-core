@@ -188,4 +188,7 @@ constexpr auto kDComparableThreshold =
 constexpr auto kDEvidenceThreshold =
         "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
         "considered approximate.";
+constexpr auto kDDoCollectViolations = "Flag which tells whether to collect violations or not";
+constexpr auto kDGfdK = "Max size of mined gfds";
+constexpr auto kDGfdSigma = "Min frequency of mined gfds";
 }  // namespace config::descriptions

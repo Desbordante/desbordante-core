@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11"]
+requires = ["scikit-build-core", "pybind11", "cmake>=3.25,<4.0"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -45,5 +45,5 @@ exclude = [
     "build.bat",
     "test_input_data/",
     "src/tests/*",
-    "examples/*"
+    "examples/*",
 ]

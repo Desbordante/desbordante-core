@@ -16,6 +16,7 @@ void BindFastADC(py::module_& main_module) {
     auto dc_module = main_module.def_submodule("dc");
     py::class_<DC>(dc_module, "DC").def("__str__", &DC::ToString).def("__repr__", &DC::ToString);
 
-    BindPrimitiveNoBase<dc::FastADC>(dc_module, "FastADC").def("get_dcs", &dc::FastADC::GetDCs);
+    BindPrimitiveNoBase<dc::FastADC>(dc_module, "FastADC")
+            .def("get_dcs", &dc::FastADC::GetDCs, py::return_value_policy::copy);
 }
 }  // namespace python_bindings
