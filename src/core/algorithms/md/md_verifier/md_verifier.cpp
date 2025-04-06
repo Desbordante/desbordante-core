@@ -78,18 +78,19 @@ model::MD MDVerifier::BuildMD(std::vector<MDVerifierColumnSimilarityClassifier> 
     std::shared_ptr<std::vector<model::md::ColumnMatch>> column_matches =
             std::make_shared<std::vector<model::md::ColumnMatch>>();
     std::transform(lhs.begin(), lhs.end(), std::back_inserter(*column_matches),
-                   [](MDVerifierColumnSimilarityClassifier& classifier) {
+                   [](MDVerifierColumnSimilarityClassifier const& classifier) {
                        return classifier.GetColumnMatch().ToStandardColumnMatch();
                    });
     column_matches->emplace_back(rhs_.GetColumnMatch().ToStandardColumnMatch());
     std::vector<model::md::LhsColumnSimilarityClassifier> lhs_transformed;
     model::Index column_match_current_index = 0;
-    std::transform(lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
-                   [&column_match_current_index](MDVerifierColumnSimilarityClassifier& classifier) {
-                       return model::md::LhsColumnSimilarityClassifier(
-                               std::nullopt, column_match_current_index++,
-                               classifier.GetDecisionBoundary());
-                   });
+    std::transform(
+            lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
+            [&column_match_current_index](MDVerifierColumnSimilarityClassifier const& classifier) {
+                return model::md::LhsColumnSimilarityClassifier(std::nullopt,
+                                                                column_match_current_index++,
+                                                                classifier.GetDecisionBoundary());
+            });
     model::md::ColumnSimilarityClassifier rhs_transformed = model::md::ColumnSimilarityClassifier(
             column_match_current_index, rhs.GetDecisionBoundary());
 
@@ -100,17 +101,18 @@ void MDVerifier::VerifyMD() {
     input_md_ = std::make_shared<model::MD>(BuildMD(lhs_, rhs_));
     std::vector<MDVerifierColumnMatch> column_matches;
     std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(column_matches),
-                   [](MDVerifierColumnSimilarityClassifier& classifier) {
+                   [](MDVerifierColumnSimilarityClassifier const& classifier) {
                        return classifier.GetColumnMatch();
                    });
     column_matches.push_back(rhs_.GetColumnMatch());
     std::vector<model::md::ColumnSimilarityClassifier> lhs_column_similarity_classifiers;
     model::Index column_match_current_index = 0;
-    std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(lhs_column_similarity_classifiers),
-                   [&column_match_current_index](MDVerifierColumnSimilarityClassifier& classifier) {
-                       return model::md::ColumnSimilarityClassifier(
-                               column_match_current_index++, classifier.GetDecisionBoundary());
-                   });
+    std::transform(
+            lhs_.begin(), lhs_.end(), std::back_inserter(lhs_column_similarity_classifiers),
+            [&column_match_current_index](MDVerifierColumnSimilarityClassifier const& classifier) {
+                return model::md::ColumnSimilarityClassifier(column_match_current_index++,
+                                                             classifier.GetDecisionBoundary());
+            });
     MDValidationCalculator validator(
             left_table_, right_table_, column_matches, lhs_column_similarity_classifiers,
             model::md::ColumnSimilarityClassifier(column_match_current_index,
