@@ -73,7 +73,7 @@ def main():
     "that while the values in column A are equal, the values in column B are unequal.\n\n"
     "Consider the following dataset:\n")
 
-    TABLE_1 = 'datasets/taxes_3.csv'
+    TABLE_1 = 'examples/datasets/taxes_3.csv'
     SEPARATOR = ','
     HAS_HEADER = True
     DC = "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)"
@@ -142,7 +142,7 @@ def main():
     "9   Wisconsin   3000        0.9  -->  Wisconsin   3000        0.09\n"
     "13      Texas   5000       0.05  -->      Texas   5000         0.5\n\n")
 
-    TABLE_2 = 'datasets/taxes_4.csv'
+    TABLE_2 = 'examples/datasets/taxes_4.csv'
     SEPARATOR = ','
     HAS_HEADER = True
 
