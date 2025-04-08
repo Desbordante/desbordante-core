@@ -1,0 +1,69 @@
+name: Examples
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
+  workflow_dispatch:
+  
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
+
+jobs:
+  test-examples:
+    name: Run examples tests on ubuntu-latest with gcc
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
+        with:
+          os: ubuntu-latest
+          toolset: gcc
+          download-googletest: false
+          download-pybind: true
+
+      - name: Build pip package
+        shell: bash
+        run: |
+          source .venv/bin/activate
+          python3 -m pip install .
+
+      - name: Install requirements
+        run: |
+          python3 -m venv .venv
+          source .venv/bin/activate
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r examples/test_examples/test_examples_requirements.txt
+
+      - name: Test examples
+        run: |
+          source .venv/bin/activate
+          python3 -m pytest examples/test_examples/test_examples_pytest.py
