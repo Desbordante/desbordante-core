@@ -23,8 +23,8 @@ def print_table(table: str) -> None:
 # same state, the one earning a lower salary must have a lower tax rate
 DC = "!(s.State == t.State and s.Salary < t.Salary and s.FedTaxRate > t.FedTaxRate)"
 
-TABLE_1 = "datasets/taxes_1.csv"
-TABLE_2 = "datasets/taxes_2.csv"
+TABLE_1 = "examples/datasets/taxes_1.csv"
+TABLE_2 = "examples/datasets/taxes_2.csv"
 
 # If there is no need to collect violations, turn this
 # option off for increased verification speed
