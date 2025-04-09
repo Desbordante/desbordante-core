@@ -2,11 +2,8 @@ import desbordante
 import pandas as pd
 
 from typing import TypedDict
-from desbordante.md_verification import ColumnSimilarityClassifier
-from desbordante.md_verification.similarity_measure import (
-    EuclideanSimilarity,
-    LevenshteinSimilarity,
-)
+from desbordante.md import ColumnSimilarityClassifier
+from desbordante.md.column_matches import Levenshtein, Custom
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -29,7 +26,7 @@ def print_results(verifier):
     for highlight in highlights:
         print(highlight.to_string())
     print(
-        f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_rhs_suggestions()}\n"
+        f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_true_rhs_decision_boundary()}\n"
     )
     print(f"Following MD was provided:\n  {verifier.get_input_md()}")
     print("Following MDs are suggested:")
@@ -59,8 +56,8 @@ def animals_beverages_example():
     )
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 1)],
-        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 1),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein(2, 2, 0.0), 1)],
+        "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 1),
     }
 
     check_md(table_path, params)
@@ -71,8 +68,8 @@ def animals_beverages_example():
     )
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.75)],
-        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.75),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein(2, 2, 0.0), 0.75)],
+        "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.75),
     }
 
     check_md(table_path, params)
@@ -89,8 +86,8 @@ def animals_beverages_example():
     print("Left-hand side:\n")
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.76)],
-        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.75),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein(2, 2, 0.0), 0.76)],
+        "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.75),
     }
 
     check_md(table_path, params)
@@ -100,8 +97,8 @@ def animals_beverages_example():
     )
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(2, 2, LevenshteinSimilarity(), 0.75)],
-        "rhs": ColumnSimilarityClassifier(3, 3, LevenshteinSimilarity(), 0.76),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein(2, 2, 0.0), 0.75)],
+        "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.76),
     }
 
     check_md(table_path, params)
@@ -122,12 +119,25 @@ def theatre_example():
 
     print(
         "\nAs we see, there are some typos in this dataset.\n"
-        "We will try to discover MD {Levenshtein(Title, Title) -> Levenshtein(Duration, Duration)}\nFirstly, let's check if MD with all decision boundaries equal to 1.0 holds:\n"
+        "We will try to discover MD {Levenshtein(Title, Title) -> NormalizedDistance(Duration, Duration)}\nFirstly, let's check if MD with all decision boundaries equal to 1.0 holds:\n"
     )
 
+    max_duration = max(table["Duration"])
+
     params = {
-        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 1)],
-        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 1),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein("Title", "Title", 0.0), 1)],
+        "rhs": ColumnSimilarityClassifier(
+            Custom(
+                lambda d1, d2: 1 - abs(int(d1) - int(d2)) / max_duration,
+                "Duration",
+                "Duration",
+                symmetrical=True,
+                equality_is_max=True,
+                measure_name="normalized_distance",
+                min_sim=0.0,
+            ),
+            1,
+        ),
     }
 
     check_md(table_path, params)
@@ -135,8 +145,19 @@ def theatre_example():
     print("To avoid typos, let's set left-hand side decision boundary to 0.75:\n")
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 0.75)],
-        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 1),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein("Title", "Title", 0.0), 0.75)],
+        "rhs": ColumnSimilarityClassifier(
+            Custom(
+                lambda d1, d2: 1 - abs(int(d1) - int(d2)) / max_duration,
+                "Duration",
+                "Duration",
+                symmetrical=True,
+                equality_is_max=True,
+                measure_name="normalized_distance",
+                min_sim=0.0,
+            ),
+            1,
+        ),
     }
 
     check_md(table_path, params)
@@ -144,13 +165,24 @@ def theatre_example():
     print("More pairs violationg MD appeared.\n")
 
     print(
-        "Desbordante suggest to use right-hand side decision boundary lower than 0.1(6).\n"
-        "Let's try to verify MD {[Levenshtein(Title, Title) >= 0.75] -> [Levenshtein(Duration, Duration) >= 0.165]}\n"
+        "Desbordante suggest to use right-hand side decision boundary lower than 0.(96).\n"
+        "Let's try to verify MD {[Levenshtein(Title, Title) >= 0.75] -> [Levenshtein(Duration, Duration) >= 0.96]}\n"
     )
 
     params = {
-        "lhs": [ColumnSimilarityClassifier(0, 0, LevenshteinSimilarity(), 0.75)],
-        "rhs": ColumnSimilarityClassifier(2, 2, EuclideanSimilarity(), 0.165),
+        "lhs": [ColumnSimilarityClassifier(Levenshtein("Title", "Title", 0.0), 0.75)],
+        "rhs": ColumnSimilarityClassifier(
+            Custom(
+                lambda d1, d2: 1 - abs(int(d1) - int(d2)) / max_duration,
+                "Duration",
+                "Duration",
+                symmetrical=True,
+                equality_is_max=True,
+                measure_name="normalized_distance",
+                min_sim=0.0,
+            ),
+            0.96,
+        ),
     }
 
     check_md(table_path, params)
@@ -169,8 +201,8 @@ if __name__ == "__main__":
         "To verify Matching Dependancy, firstly we must define Column Similarity Classifiers for tables.\n"
         "Column Similarity Classifier consists of Column Match and decision boundary. "
         "Column Match consists of two indices: columns in left and right table and similarity measure (Levevnshtein Similarity, for example).\n"
-        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary 'lambda'."
-        "To clarify, in this example we'll write column names instead of column indices.\n"
+        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary 'lambda'. "
+        'Also, notation like [measure("left_col_name", "right_col_name") >= lambda] is valid for ColumnMatch between column with "left_col_name" and "left_col_name" of left and right tables respectively.\n'
     )
     animals_beverages_example()
     print("-" * 50)

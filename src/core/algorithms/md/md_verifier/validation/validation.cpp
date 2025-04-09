@@ -1,81 +1,166 @@
 #include "algorithms/md/md_verifier/validation/validation.h"
 
-#include "algorithms/md/md_verifier/similarities/similarity_calculator.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include <iostream>
+
+#include "algorithms/md/hymd/indexes/records_info.h"
+#include "algorithms/md/hymd/similarity_data.h"
+#include "algorithms/md/hymd/utility/index_range.h"
+#include "algorithms/md/md_verifier/validation/rows_pairs.h"
+#include "util/worker_thread_pool.h"
 
 namespace algos::md {
-bool MDValidationCalculator::ProbeColumnSimilarityClassifier(
-        model::md::ColumnSimilarityClassifier const& classifier, model::Index left_row_index,
-        model::Index right_row_index, bool is_rhs) {
-    algos::md::MDVerifierColumnMatch const& column_match =
-            column_matches_[classifier.GetColumnMatchIndex()];
-    model::md::DecisionBoundary decision_boundary = classifier.GetDecisionBoundary();
-    model::Index left_col_index = column_match.left_col_index;
-    model::Index right_col_index = column_match.right_col_index;
-    std::shared_ptr<SimilarityMeasure> measure = column_match.measure;
-    if (left_typed_data_->GetColumnData(left_col_index).GetTypeId() !=
-        right_typed_data_->GetColumnData(right_col_index).GetTypeId()) {
-        throw std::runtime_error("Unable to calculate similarity of columns with different types");
-    }
-
-    model::md::Similarity similarity = SimilarityCalculator::Calculate(
-            left_typed_data_->GetColumnData(left_col_index).GetValue(left_row_index),
-            right_typed_data_->GetColumnData(right_col_index).GetValue(right_row_index),
-            left_typed_data_->GetColumnData(left_col_index).GetTypeId(), measure);
-
-    if (is_rhs && similarity < decision_boundary) {
-        true_rhs_decision_boundary_ = std::min(similarity, true_rhs_decision_boundary_);
-        highlights_.RegisterHighlight(left_row_index, right_row_index, column_match, similarity,
-                                      decision_boundary);
-    }
-
-    return similarity >= decision_boundary;
+ColumnInfoView MDValidationCalculator::GetColumnInfo(
+        hymd::ColumnMatchInfo const& column_match_info) {
+    return {records_info_->GetLeftCompressor()
+                    .GetPli(column_match_info.left_column_index)
+                    .GetClusters(),
+            records_info_->GetLeftCompressor()
+                    .GetPli(column_match_info.left_column_index)
+                    .GetClusters(),
+            column_match_info.similarity_info.similarity_matrix};
 }
 
-MDValidationCalculator::MDValidationCalculator(
-        config::InputTable left_table, config::InputTable right_table,
-        std::vector<MDVerifierColumnMatch> column_matches,
-        std::vector<model::md::ColumnSimilarityClassifier> lhs_column_similarity_classifiers,
-        model::md::ColumnSimilarityClassifier rhs_column_similarity_classifier)
-    : left_typed_data_(model::ColumnLayoutTypedRelationData::CreateFrom(*left_table, true)),
-      column_matches_(column_matches),
-      lhs_column_similarity_classifiers_(lhs_column_similarity_classifiers),
-      rhs_column_similarity_classifier_(rhs_column_similarity_classifier),
-      true_rhs_decision_boundary_(rhs_column_similarity_classifier.GetDecisionBoundary()),
-      holds_(true) {
-    if (right_table != nullptr) {
-        right_typed_data_ = model::ColumnLayoutTypedRelationData::CreateFrom(*right_table, true);
-    } else {
-        right_typed_data_ = left_typed_data_;
-    }
-}
-
-void MDValidationCalculator::Validate() {
-    if (!holds_) {
-        return;
-    }
-
-    size_t left_num_rows = left_typed_data_->GetNumRows();
-    size_t right_num_rows = right_typed_data_->GetNumRows();
-
-    for (model::Index left_row_index = 0; left_row_index < left_num_rows; ++left_row_index) {
-        for (model::Index right_row_index = 0; right_row_index < right_num_rows;
-             ++right_row_index) {
-            bool holds_for_lhs = std::all_of(
-                    lhs_column_similarity_classifiers_.begin(),
-                    lhs_column_similarity_classifiers_.end(),
-                    [this, left_row_index,
-                     right_row_index](model::md::ColumnSimilarityClassifier const& lhs_classifier) {
-                        return ProbeColumnSimilarityClassifier(lhs_classifier, left_row_index,
-                                                               right_row_index);
-                    });
-            if (!holds_for_lhs) {
-                continue;
-            }
-            bool holds_for_rhs = ProbeColumnSimilarityClassifier(
-                    rhs_column_similarity_classifier_, left_row_index, right_row_index, true);
-            holds_ = holds_ && holds_for_rhs;
+void MDValidationCalculator::InsertClustersInRowsPairsSet(
+        hymd::indexes::PliCluster const& left_cluster,
+        hymd::indexes::PliCluster const& right_cluster) {
+    for (hymd::RecordIdentifier left_row : left_cluster) {
+        for (hymd::RecordIdentifier right_row : right_cluster) {
+            rows_pairs_[left_row].emplace(right_row);
         }
     }
+}
+
+void MDValidationCalculator::DeleteClustersFromRowsPairsSet(
+        hymd::indexes::PliCluster const& left_cluster,
+        hymd::indexes::PliCluster const& right_cluster) {
+    for (hymd::RecordIdentifier left_row : left_cluster) {
+        for (hymd::RecordIdentifier right_row : right_cluster) {
+            auto it = rows_pairs_.find(left_row);
+            if (it != rows_pairs_.end()) {
+                it->second.erase(right_row);
+                if (it->second.size() == 0) {
+                    rows_pairs_.erase(left_row);
+                }
+            }
+        }
+    }
+}
+
+void MDValidationCalculator::UpdateNewRowsPairsSet(hymd::indexes::PliCluster const& left_cluster,
+                                                   hymd::indexes::PliCluster const& right_cluster,
+                                                   RowsPairSet& new_rows_pairs) {
+    for (hymd::RecordIdentifier left_row : left_cluster) {
+        for (hymd::RecordIdentifier right_row : right_cluster) {
+            auto it = rows_pairs_.find(left_row);
+            if (it != rows_pairs_.end() && it->second.find(right_row) != it->second.end()) {
+                new_rows_pairs[left_row].emplace(right_row);
+            }
+        }
+    }
+}
+
+void MDValidationCalculator::InitRowsPairsSet(hymd::ColumnMatchInfo const& column_match_info,
+                                              model::md::DecisionBoundary decision_boundary) {
+    auto const& [left_clusters, right_clusters, similarity_matrix] =
+            GetColumnInfo(column_match_info);
+    for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
+        for (auto const [right_cluster_index, similarity_index] :
+             similarity_matrix[left_cluster_index]) {
+            model::md::Similarity similarity =
+                    column_match_info.similarity_info.classifier_values[similarity_index];
+            if (similarity >= decision_boundary) {
+                InsertClustersInRowsPairsSet(left_clusters[left_cluster_index],
+                                             right_clusters[right_cluster_index]);
+            }
+        }
+    }
+}
+
+void MDValidationCalculator::UpdateRowsPairsWithLhs(hymd::ColumnMatchInfo const& column_match_info,
+                                                    model::md::DecisionBoundary decision_boundary) {
+    RowsPairSet new_rows_pairs;
+    auto const& [left_clusters, right_clusters, similarity_matrix] =
+            GetColumnInfo(column_match_info);
+    for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
+        for (auto const [right_cluster_index, similarity_index] :
+             similarity_matrix[left_cluster_index]) {
+            model::md::Similarity similarity =
+                    column_match_info.similarity_info.classifier_values[similarity_index];
+            if (similarity >= decision_boundary) {
+                UpdateNewRowsPairsSet(left_clusters[left_cluster_index],
+                                      right_clusters[right_cluster_index], new_rows_pairs);
+            }
+        }
+    }
+    rows_pairs_ = std::move(new_rows_pairs);
+}
+
+void MDValidationCalculator::UpdateRowsPairsWithRhs(hymd::ColumnMatchInfo const& column_match_info,
+                                                    model::md::DecisionBoundary decision_boundary) {
+    auto const& [left_clusters, right_clusters, similarity_matrix] =
+            GetColumnInfo(column_match_info);
+    for (model::Index left_cluster_index : hymd::utility::IndexRange(left_clusters.size())) {
+        for (model::Index right_cluster_index : hymd::utility::IndexRange(right_clusters.size())) {
+            model::md::Similarity similarity;
+            if (similarity_matrix[left_cluster_index].find(right_cluster_index) ==
+                similarity_matrix[left_cluster_index].end()) {
+                similarity = 0.0;
+            } else {
+                model::Index similarity_index =
+                        similarity_matrix[left_cluster_index].at(right_cluster_index);
+                similarity = column_match_info.similarity_info.classifier_values[similarity_index];
+            }
+
+            if (similarity >= decision_boundary) {
+                DeleteClustersFromRowsPairsSet(left_clusters[left_cluster_index],
+                                               right_clusters[right_cluster_index]);
+            } else {
+                UpdateRhsSimilarities(left_clusters[left_cluster_index],
+                                      right_clusters[right_cluster_index], similarity);
+            }
+        }
+    }
+}
+
+void MDValidationCalculator::UpdateRhsSimilarities(hymd::indexes::PliCluster const& left_cluster,
+                                                   hymd::indexes::PliCluster const& right_cluster,
+                                                   model::md::Similarity rhs_similarity) {
+    for (hymd::RecordIdentifier left_row : left_cluster) {
+        for (hymd::RecordIdentifier right_row : right_cluster) {
+            auto it = rows_pairs_.find(left_row);
+            if (it != rows_pairs_.end() && it->second.find(right_row) != it->second.end()) {
+                true_rhs_decision_boundary_ = std::min(true_rhs_decision_boundary_, rhs_similarity);
+                rhs_pair_to_similarity_[{left_row, right_row}] = rhs_similarity;
+            }
+        }
+    }
+}
+
+void MDValidationCalculator::Validate(util::WorkerThreadPool* thread_pool) {
+    auto similarity_data =
+            hymd::SimilarityData::CreateFrom(records_info_.get(), column_matches_, thread_pool)
+                    .first;
+    std::vector<hymd::ColumnMatchInfo> column_matches_info = similarity_data.GetColumnMatchesInfo();
+
+    std::vector<model::Index> const& sorted_to_original = similarity_data.GetIndexMapping();
+    std::vector<model::Index> original_to_sorted(sorted_to_original.size());
+    for (model::Index i : hymd::utility::IndexRange(sorted_to_original.size())) {
+        original_to_sorted[sorted_to_original[i]] = i;
+    }
+
+    InitRowsPairsSet(column_matches_info[original_to_sorted.front()],
+                     lhs_column_similarity_classifiers_.front().GetDecisionBoundary());
+
+    for (std::size_t lhs_index = 1; lhs_index < lhs_column_similarity_classifiers_.size();
+         ++lhs_index) {
+        model::Index column_match_info_index = original_to_sorted[lhs_index];
+        UpdateRowsPairsWithLhs(column_matches_info[column_match_info_index],
+                               lhs_column_similarity_classifiers_[lhs_index].GetDecisionBoundary());
+    }
+
+    UpdateRowsPairsWithRhs(column_matches_info[original_to_sorted.back()],
+                           rhs_column_similarity_classifier_.GetDecisionBoundary());
+
+    holds_ = rows_pairs_.empty();
 }
 }  // namespace algos::md
