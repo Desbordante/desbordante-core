@@ -7,7 +7,7 @@ GREEN = '\033[32m'
 CYAN = '\033[1m\033[36m'
 ENDC = '\033[0m'
 
-TABLE_1 = "examples/datasets/taxes.csv"
+TABLE_1 = "examples/datasets/taxes_1.csv"
 TABLE_2 = "examples/datasets/taxes_2.csv"
 
 def print_table(filename: str, title: str = "") -> None:
@@ -53,7 +53,7 @@ We have two parameters in Desbordante's DC mining algorithm:
 
 {YELLOW}Let's begin by looking at TABLE_1:{ENDC}""")
 
-    print_table(TABLE_1, "TABLE_1 (examples/datasets/taxes.csv):")
+    print_table(TABLE_1, "TABLE_1 (examples/datasets/taxes_1.csv):")
 
     print(f"""{YELLOW}Mining exact DCs (evidence_threshold=0) on TABLE_1{ENDC}""")
 
