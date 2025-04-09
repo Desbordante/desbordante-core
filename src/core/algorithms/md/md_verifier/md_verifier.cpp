@@ -2,9 +2,11 @@
 
 #include <algorithm>
 #include <numeric>
-#include <ranges>
 
+#include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/lhs_column_similarity_classifier.h"
+#include "algorithms/md/md_verifier/cmptr.h"
+#include "algorithms/md/md_verifier/validation/validation.h"
 #include "config/equal_nulls/option.h"
 #include "config/exceptions.h"
 #include "config/indices/option.h"
@@ -12,6 +14,25 @@
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "config/thread_number/option.h"
+#include "util/worker_thread_pool.h"
+
+namespace {
+struct PoolHolder {
+private:
+    std::optional<util::WorkerThreadPool> pool_holder_;
+    util::WorkerThreadPool* pool_ptr_;
+
+public:
+    PoolHolder() : pool_holder_(), pool_ptr_(nullptr) {}
+
+    PoolHolder(config::ThreadNumType threads) : pool_holder_(threads), pool_ptr_(&*pool_holder_) {}
+
+    util::WorkerThreadPool* GetPtr() noexcept {
+        return pool_ptr_;
+    }
+};
+}  // namespace
 
 namespace algos::md {
 MDVerifier::MDVerifier() : MdAlgorithm({}) {
@@ -27,7 +48,7 @@ void MDVerifier::ResetStateMd() {
 void MDVerifier::LoadDataInternal() {
     left_schema_ = std::make_shared<RelationalSchema>(left_table_->GetRelationName());
     std::size_t const left_table_cols = left_table_->GetNumberOfColumns();
-    for (model::Index i : std::views::iota(model::Index(0), left_table_cols)) {
+    for (model::Index i : hymd::utility::IndexRange(left_table_cols)) {
         left_schema_->AppendColumn(left_table_->GetColumnName(i));
     }
 
@@ -35,9 +56,9 @@ void MDVerifier::LoadDataInternal() {
         right_schema_ = left_schema_;
 
     } else {
-        right_schema_ = std::make_unique<RelationalSchema>(right_table_->GetRelationName());
+        right_schema_ = std::make_shared<RelationalSchema>(right_table_->GetRelationName());
         std::size_t const right_table_cols = right_table_->GetNumberOfColumns();
-        for (model::Index i : std::views::iota(model::Index(0), right_table_cols)) {
+        for (model::Index i : hymd::utility::IndexRange(right_table_cols)) {
             right_schema_->AppendColumn(right_table_->GetColumnName(i));
         }
     }
@@ -50,17 +71,38 @@ void MDVerifier::RegisterOptions() {
         if (table == nullptr) throw config::ConfigurationError("Left table may not be null.");
     };
 
+    auto lhs_check = [this](std::vector<ColumnSimilarityClassifier> const& classifiers) {
+        for (ColumnSimilarityClassifier const& classifier : classifiers) {
+            if (classifier.GetDecisionBoundary() < 0 || classifier.GetDecisionBoundary() > 1) {
+                throw config::ConfigurationError(
+                        "Decision boundary " + std::to_string(classifier.GetDecisionBoundary()) +
+                        "provided, but only decision boundaries in [0, 1] are correct.");
+            }
+            classifier.GetColumnMatch()->SetColumns(*left_schema_, *right_schema_);
+        }
+    };
+
+    auto rhs_check = [this](ColumnSimilarityClassifier const& classifier) {
+        if (classifier.GetDecisionBoundary() < 0 || classifier.GetDecisionBoundary() > 1) {
+            throw config::ConfigurationError(
+                    "Decision boundary " + std::to_string(classifier.GetDecisionBoundary()) +
+                    "provided, but only decision boundaries in [0, 1] are correct.");
+        }
+        classifier.GetColumnMatch()->SetColumns(*left_schema_, *right_schema_);
+    };
+
     RegisterOption(Option{&right_table_, kRightTable, kDRightTable, config::InputTable{nullptr}});
     RegisterOption(Option{&left_table_, kLeftTable, kDLeftTable}
                            .SetValueCheck(std::move(not_null))
                            .SetConditionalOpts({{{}, {kRightTable}}}));
-    RegisterOption(Option{&lhs_, kMDLHS, kDMDLHS});
-    RegisterOption(Option{&rhs_, kMDRHS, kDMDRHS});
+    RegisterOption(Option{&lhs_, kMDLHS, kDMDLHS}.SetValueCheck(std::move(lhs_check)));
+    RegisterOption(Option{&rhs_, kMDRHS, kDMDRHS}.SetValueCheck(std::move(rhs_check)));
+    RegisterOption(config::kThreadNumberOpt(&threads_));
 }
 
 void MDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kRightTable, kLeftTable, kMDLHS, kMDRHS});
+    MakeOptionsAvailable({kRightTable, kLeftTable, kMDLHS, kMDRHS, kThreads});
 }
 
 unsigned long long MDVerifier::ExecuteInternal() {
@@ -73,24 +115,25 @@ unsigned long long MDVerifier::ExecuteInternal() {
     return duration_cast<milliseconds>(system_clock::now() - start_time).count();
 }
 
-model::MD MDVerifier::BuildMD(std::vector<MDVerifierColumnSimilarityClassifier> const& lhs,
-                              MDVerifierColumnSimilarityClassifier const& rhs) {
+model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
+                              ColumnSimilarityClassifier const& rhs) {
     std::shared_ptr<std::vector<model::md::ColumnMatch>> column_matches =
             std::make_shared<std::vector<model::md::ColumnMatch>>();
-    std::transform(lhs.begin(), lhs.end(), std::back_inserter(*column_matches),
-                   [](MDVerifierColumnSimilarityClassifier const& classifier) {
-                       return classifier.GetColumnMatch().ToStandardColumnMatch();
-                   });
-    column_matches->emplace_back(rhs_.GetColumnMatch().ToStandardColumnMatch());
+    auto get_column_match = [](ColumnSimilarityClassifier const& classifier) {
+        auto [left_col_index, right_col_index] = classifier.GetColumnMatch()->GetIndices();
+        std::string name = classifier.GetColumnMatch()->GetName();
+        return model::md::ColumnMatch(left_col_index, right_col_index, name);
+    };
+    std::transform(lhs.begin(), lhs.end(), std::back_inserter(*column_matches), get_column_match);
+    column_matches->emplace_back(get_column_match(rhs));
     std::vector<model::md::LhsColumnSimilarityClassifier> lhs_transformed;
     model::Index column_match_current_index = 0;
-    std::transform(
-            lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
-            [&column_match_current_index](MDVerifierColumnSimilarityClassifier const& classifier) {
-                return model::md::LhsColumnSimilarityClassifier(std::nullopt,
-                                                                column_match_current_index++,
-                                                                classifier.GetDecisionBoundary());
-            });
+    std::transform(lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
+                   [&column_match_current_index](ColumnSimilarityClassifier const& classifier) {
+                       return model::md::LhsColumnSimilarityClassifier(
+                               std::nullopt, column_match_current_index++,
+                               classifier.GetDecisionBoundary());
+                   });
     model::md::ColumnSimilarityClassifier rhs_transformed = model::md::ColumnSimilarityClassifier(
             column_match_current_index, rhs.GetDecisionBoundary());
 
@@ -98,33 +141,38 @@ model::MD MDVerifier::BuildMD(std::vector<MDVerifierColumnSimilarityClassifier> 
 }
 
 void MDVerifier::VerifyMD() {
-    input_md_ = std::make_shared<model::MD>(BuildMD(lhs_, rhs_));
-    std::vector<MDVerifierColumnMatch> column_matches;
+    input_md_ = std::make_unique<model::MD>(BuildMD(lhs_, rhs_));
+    std::vector<CMPtr> column_matches;
     std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(column_matches),
-                   [](MDVerifierColumnSimilarityClassifier const& classifier) {
+                   [](ColumnSimilarityClassifier const& classifier) {
                        return classifier.GetColumnMatch();
                    });
-    column_matches.push_back(rhs_.GetColumnMatch());
+    column_matches.emplace_back(rhs_.GetColumnMatch());
     std::vector<model::md::ColumnSimilarityClassifier> lhs_column_similarity_classifiers;
     model::Index column_match_current_index = 0;
-    std::transform(
-            lhs_.begin(), lhs_.end(), std::back_inserter(lhs_column_similarity_classifiers),
-            [&column_match_current_index](MDVerifierColumnSimilarityClassifier const& classifier) {
-                return model::md::ColumnSimilarityClassifier(column_match_current_index++,
-                                                             classifier.GetDecisionBoundary());
-            });
+    std::transform(lhs_.begin(), lhs_.end(), std::back_inserter(lhs_column_similarity_classifiers),
+                   [&column_match_current_index](ColumnSimilarityClassifier const& classifier) {
+                       return model::md::ColumnSimilarityClassifier(
+                               column_match_current_index++, classifier.GetDecisionBoundary());
+                   });
     MDValidationCalculator validator(
             left_table_, right_table_, column_matches, lhs_column_similarity_classifiers,
             model::md::ColumnSimilarityClassifier(column_match_current_index,
                                                   rhs_.GetDecisionBoundary()));
 
-    validator.Validate();
+    auto pool_holder = threads_ > 1 ? PoolHolder(threads_) : PoolHolder();
+
+    validator.Validate(pool_holder.GetPtr());
     md_holds_ = validator.Holds();
-    true_rhs_decision_boundary_ = validator.GetTrueDecisionBoundary();
-    highlights_ = validator.GetHighlights();
-    MDVerifierColumnSimilarityClassifier suggested_rhs = MDVerifierColumnSimilarityClassifier(
-            rhs_.GetColumnMatch(), true_rhs_decision_boundary_);
-    RegisterMd(BuildMD(lhs_, suggested_rhs));
+    true_rhs_decision_boundary_ = validator.GetTrueRhsDecisionBoundary();
+
+    true_rhs_decision_boundary_md_ = std::make_unique<model::MD>(BuildMD(
+            lhs_, ColumnSimilarityClassifier(rhs_.GetColumnMatch(), true_rhs_decision_boundary_)));
+
+    highlights_ =
+            MDHighlights::CreateFrom(input_md_->GetDescription().rhs, validator.GetRowsPairs(),
+                                     validator.GetRhsPairToSimilarityMapping());
+    RegisterMd(*true_rhs_decision_boundary_md_);
 }
 
 }  // namespace algos::md

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/md/decision_boundary.h"
+#include "algorithms/md/hymd/preprocessing/similarity.h"
 
 namespace model::md {
-using Similarity = model::md::DecisionBoundary;
+using Similarity = algos::hymd::preprocessing::Similarity;
 }  // namespace model::md
