@@ -20,25 +20,21 @@ using model::TableIndex;
 PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
 CIND PliCind::ExecuteSingle(model::IND const& aind) {
-    auto const [included_pos, cond_attrs] = ScanTables(aind);
-    fprintf(stderr, "included positions: [");
-    for (auto const pos : included_pos) {
-        fprintf(stderr, "%d, ", pos);
-    }
-    fprintf(stderr, "]\ncondition attributes: [");
-    for (auto const attr : cond_attrs) {
+    auto attributes = ClassifyAttributes(aind);
+    fprintf(stderr, "condition attributes: [");
+    for (auto const attr : attributes.conditional) {
         fprintf(stderr, "%s::%s, ", attr->GetColumn()->GetSchema()->GetName().c_str(),
                 attr->GetColumn()->GetName().c_str());
     }
     fprintf(stderr, "]\n");
-    return {.ind = aind, .conditions = std::vector<Condition>{}};
+    CIND result{.ind = aind,
+                .conditions = GetConditions(attributes),
+                .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
+    Reset();
+    return result;
 }
 
-void PliCind::MakePLs(std::vector<int> const& /*cond_attrs*/) {
-    return;
-}
-
-std::vector<int> PliCind::GetIncludedPositions(Attributes const& attrs) const {
+std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes const& attrs) {
     std::set<std::vector<std::string>> rhs_values;
     fprintf(stderr, "rhs values: [");
     for (size_t index = 0; index < attrs.rhs_inclusion.front()->GetNumRows(); ++index) {
@@ -53,84 +49,137 @@ std::vector<int> PliCind::GetIncludedPositions(Attributes const& attrs) const {
     }
     fprintf(stderr, "]\n");
 
-    std::vector<int> result;
+    std::vector<int> included_pos;
+    std::map<std::vector<std::string>, int> group_idx;
+    std::vector<int> row_to_group;
     fprintf(stderr, "lhs values: [");
     for (size_t index = 0; index < attrs.lhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<std::string> row;
-        fprintf(stderr, "{");
         for (auto& attr : attrs.lhs_inclusion) {
             row.push_back(attr->GetStringValue(index));
+        }
+        int row_id = index;
+        if (condition_type_._value == CondType::group) {
+            if (auto const& it = group_idx.find(row); it == group_idx.end()) {
+                row_id = group_idx.size();
+                group_idx[row] = row_id;
+                row_to_group.push_back(row_id);
+            } else {
+                row_to_group.push_back(it->second);
+                continue;
+            }
+        }
+        fprintf(stderr, "{");
+        for (auto& attr : attrs.lhs_inclusion) {
             fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
         fprintf(stderr, "}");
         if (rhs_values.contains(row)) {
-            result.push_back(index);
+            included_pos.push_back(row_id);
             fprintf(stderr, "::included");
         }
         fprintf(stderr, ", ");
     }
     fprintf(stderr, "]\n");
+    if (condition_type_._value == CondType::group) {
+        relation_size_ = group_idx.size();
+    } else {
+        relation_size_ = attrs.lhs_inclusion.front()->GetNumRows();
+    }
+    return {included_pos, row_to_group};
+}
+
+void PliCind::MakePLs(Attributes const& attrs, std::vector<int> const& row_to_group) {
+    attr_idx_to_pls_.reserve(attrs.conditional.size());
+    for (auto const& attr : attrs.conditional) {
+        attr_idx_to_pls_.push_back(
+                model::PLSet::CreateFor(attr->GetValues(), row_to_group, relation_size_));
+    }
+}
+
+std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
+    auto const& [included_pos, row_to_group] = ClassifyRows(attrs);
+
+    fprintf(stderr, "included positions: [");
+    for (auto const pos : included_pos) {
+        fprintf(stderr, "%d, ", pos);
+    }
+    fprintf(stderr, "]\n");
+
+    MakePLs(attrs, row_to_group);
+
+    std::vector<Condition> result;
+    for (size_t attr_idx = 0; attr_idx < attrs.conditional.size(); ++attr_idx) {
+        auto conditions = Analyze(attr_idx, {}, nullptr, attrs.conditional, included_pos);
+        for (auto& cond : conditions) {
+            result.push_back(std::move(cond));
+        }
+    }
+
     return result;
 }
 
-std::pair<std::vector<int>, AttrsType> PliCind::ScanTables(model::IND const& aind) const {
-    auto attributes = ClassifyAttributes(aind);
-    return std::make_pair(GetIncludedPositions(attributes), std::move(attributes.conditional));
+std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_attrs,
+                                        PLSetShared const& curr_pls, AttrsType const& cond_attrs,
+                                        std::vector<int> const& included_pos) {
+    std::vector<int> new_curr_attrs = curr_attrs;
+    new_curr_attrs.push_back(attr_idx);
+    PLSetShared curr_comb_pls = attr_idx_to_pls_.at(attr_idx);
+    if (!curr_attrs.empty()) {
+        curr_comb_pls = curr_pls->Intersect(attr_idx_to_pls_.at(attr_idx).get());
+    }
+
+    std::vector<Condition> result;
+    std::vector<PLSet::ClusterCollection::value_type> good_clusters;
+    for (auto& [cluster_value, cluster] : curr_comb_pls->GetClusters()) {
+        std::vector<int> included_cluster;
+        // both included_pos and cluster are sorted
+        std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
+                              cluster.end(), std::back_inserter(included_cluster));
+        if (double completeness = (double)included_cluster.size() / included_pos.size();
+            completeness >= min_completeness_) {
+            // LOG("included_pos: [");
+            // for (const auto & elem : included_pos) {
+            //     LOG("%d, ", elem);
+            // }
+            // LOG("]\n");
+            // LOG("cluster: [");
+            // for (const auto & elem : cluster) {
+            //     LOG("%d, ", elem);
+            // }
+            // LOG("]\n");
+            // LOG("included_cluster: [");
+            // for (const auto & elem : included_cluster) {
+            //     LOG("%d, ", elem);
+            // }
+            // LOG("], completeness: %f, validity: %f\n", (double)included_cluster.size() / included_pos.size(), (double)included_cluster.size() / cluster.size());
+            good_clusters.emplace_back(cluster_value, cluster);
+            if (double validity = (double)included_cluster.size() / cluster.size();
+                validity >= min_validity_) {
+                result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, completeness,
+                                    validity);
+                // LOG("Result emplaced: %s\n", result.back().ToString().c_str());
+            }
+            // LOG("\n");
+        }
+    }
+    if (!good_clusters.empty()) {
+        PLSetShared new_curr_pls = PLSet::CreateFor(std::move(good_clusters), relation_size_);
+        for (size_t next_attr_idx = attr_idx + 1; next_attr_idx < cond_attrs.size();
+             ++next_attr_idx) {
+            auto conditions =
+                    Analyze(next_attr_idx, new_curr_attrs, new_curr_pls, cond_attrs, included_pos);
+
+            for (auto& cond : conditions) {
+                result.push_back(std::move(cond));
+            }
+        }
+    }
+    return result;
 }
 
-// std::unordered_set<Condition> PliCind::GetConditions(std::vector<int> cond_attrs,
-//                                                      std::vector<int> const& included_pos) {
-//     MakePLs(cond_attrs);
-
-//     std::unordered_set<Condition> result;
-//     for (auto attr : cond_attrs) {
-//         std::vector<int> empty_vector;
-//         for (auto& cond : Analyze(cond_attrs, attr, empty_vector, nullptr, included_pos)) {
-//             result.insert(cond);
-//         }
-//     }
-//     return result;
-// }
-
-// std::unordered_set<Condition> PliCind::Analyze(std::vector<int> const& cond_attrs, int attr_idx,
-//                                                std::vector<int> const& curr_attrs,
-//                                                PLSetShared curr_pls,
-//                                                std::vector<int> const& included_pos) {
-//     std::vector<int> new_curr_attrs = curr_attrs;
-//     new_curr_attrs.push_back(cond_attrs[attr_idx]);
-//     PLSetShared curr_comb_pls;
-//     if (!curr_attrs.empty()) {
-//         curr_comb_pls = curr_pls->Intersect(attr_idx_to_pls_[attr_idx].get());
-//     } else {
-//         curr_comb_pls = PLSetShared(attr_idx_to_pls_[attr_idx].get());
-//     }
-
-//     std::unordered_set<Condition> result;
-//     std::vector<PLSet::ClusterCollection::value_type> good_clusters;
-//     for (auto& [cluster_value, cluster] : curr_comb_pls->GetClusters()) {
-//         std::vector<int> included_cluster;
-//         std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
-//                               cluster.end(), std::back_inserter(included_cluster));
-//         if (double recall = (double)included_cluster.size() / included_pos.size();
-//             recall > min_completeness_) {
-//             good_clusters.emplace_back(cluster_value, cluster);
-//             if (double prec = (double)included_cluster.size() / cluster.size(); prec >
-//             min_validity_) {
-//                 result.emplace(new_curr_attrs, cluster_value, recall, prec);
-//             }
-//         }
-//     }
-//     if (!good_clusters.empty()) {
-//         PLSetShared new_curr_pls = PLSet::CreateFor(std::move(good_clusters));
-//         for (size_t next_attr_idx = attr_idx + 1; next_attr_idx < included_pos.size();
-//              ++next_attr_idx) {
-//             for (auto& cond :
-//                  Analyze(cond_attrs, next_attr_idx, new_curr_attrs, new_curr_pls, included_pos))
-//                  {
-//                 result.insert(cond);
-//             }
-//         }
-//     }
-//     return result;
-// }
+void PliCind::Reset() {
+    attr_idx_to_pls_.clear();
+    relation_size_ = 0;
+}
 }  // namespace algos::cind

@@ -8,40 +8,35 @@
 
 namespace model {
 
-PositionListsSet::PositionListsSet(ClusterCollection clusters, size_t size)
-    : clusters_(std::move(clusters)), rows_number_(size), probing_table_cache_() {
+PositionListsSet::PositionListsSet(ClusterCollection clusters, size_t size, size_t relation_size)
+    : clusters_(std::move(clusters)), rows_number_(size), relation_size_(relation_size) {
     ForceCacheProbingTable();
 }
 
-std::unique_ptr<PositionListsSet> PositionListsSet::CreateFor(std::vector<ClusterValue> const& records) {
+std::shared_ptr<PositionListsSet> PositionListsSet::CreateFor(std::vector<int> const& records,
+                                                              std::vector<int> const& group_ids,
+                                                              size_t relation_size) {
     ClusterCollection clusters;
     for (size_t record_id = 0; record_id < records.size(); ++record_id) {
-        ClusterValue const& value = records[record_id];
-        clusters[value].push_back(record_id);
+        clusters[{records[record_id]}].push_back(group_ids.empty() ? record_id
+                                                                   : group_ids[record_id]);
     }
-    return std::make_unique<PositionListsSet>(std::move(clusters), records.size());
+    return std::make_shared<PositionListsSet>(std::move(clusters), records.size(), relation_size);
 }
 
-std::unique_ptr<PositionListsSet> PositionListsSet::CreateFor(std::vector<ClusterValue> records) {
-    ClusterCollection clusters;
-    for (size_t record_id = 0; record_id < records.size(); ++record_id) {
-        ClusterValue const& value = records[record_id];
-        clusters[value].push_back(record_id);
+std::shared_ptr<PositionListsSet> PositionListsSet::CreateFor(
+        std::vector<ClusterCollection::value_type> clusters, size_t relation_size) {
+    ClusterCollection cluster_collection;
+    for (auto& cluster : clusters) {
+        cluster_collection.insert(std::move(cluster));
     }
-    return std::make_unique<PositionListsSet>(std::move(clusters), records.size());
-}
-
-std::unique_ptr<PositionListsSet> PositionListsSet::CreateFor(std::vector<ClusterCollection::value_type> &&records) {
-    ClusterCollection clusters;
-    for (auto &record : records) {
-        clusters.emplace(record);
-    }
-    return std::make_unique<PositionListsSet>(std::move(clusters), records.size());
+    return std::make_shared<PositionListsSet>(std::move(cluster_collection), clusters.size(),
+                                              relation_size);
 }
 
 std::shared_ptr<std::vector<int> const> PositionListsSet::CalculateAndGetProbingTable() {
     cluster_values_cache_.clear();
-    std::vector<int> probing_table = std::vector<int>(GetSize());
+    std::vector<int> probing_table = std::vector<int>(relation_size_);
     int next_cluster_id = 0;
     for (auto& [value, cluster] : clusters_) {
         int value_id = next_cluster_id++;
@@ -54,7 +49,7 @@ std::shared_ptr<std::vector<int> const> PositionListsSet::CalculateAndGetProbing
     return std::make_shared<std::vector<int>>(probing_table);
 }
 
-std::unique_ptr<PositionListsSet> PositionListsSet::Intersect(PositionListsSet const* that) const {
+std::shared_ptr<PositionListsSet> PositionListsSet::Intersect(PositionListsSet const* that) const {
     if (this->rows_number_ > that->rows_number_) {
         return that->Probe(this);
     } else {
@@ -62,7 +57,7 @@ std::unique_ptr<PositionListsSet> PositionListsSet::Intersect(PositionListsSet c
     }
 }
 
-std::unique_ptr<PositionListsSet> PositionListsSet::Probe(PositionListsSet const* that) const {
+std::shared_ptr<PositionListsSet> PositionListsSet::Probe(PositionListsSet const* that) const {
     std::shared_ptr<std::vector<int> const> probing_table = that->GetCachedProbingTable();
     std::vector<ClusterValue> const& cluster_values = that->GetClusterValuesCache();
     ClusterCollection new_clusters;
@@ -72,10 +67,10 @@ std::unique_ptr<PositionListsSet> PositionListsSet::Probe(PositionListsSet const
 
     for (auto const& [value, cluster] : clusters_) {
         for (int position : cluster) {
-            int probing_table_value_id = (*probing_table)[position];
+            int probing_table_value_id = (*probing_table).at(position);
             auto partial_cluster = partial_clusters.find(probing_table_value_id);
             if (partial_cluster != partial_clusters.end()) {
-                auto& [key, positions] = partial_cluster->second;
+                auto& [_, positions] = partial_cluster->second;
                 positions.emplace_back(position);
             } else {
                 ClusterValue key = value;
@@ -92,6 +87,6 @@ std::unique_ptr<PositionListsSet> PositionListsSet::Probe(PositionListsSet const
         partial_clusters.clear();
     }
 
-    return std::make_unique<PositionListsSet>(std::move(new_clusters), new_size);
+    return std::make_shared<PositionListsSet>(std::move(new_clusters), new_size, relation_size_);
 }
 }  // namespace model

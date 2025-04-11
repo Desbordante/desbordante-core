@@ -7,20 +7,6 @@
 #include "cind/condition_type.h"
 
 namespace algos::cind {
-namespace {
-std::vector<std::string> GetConditionalAttributesNames(AttrsType const& condition_attrs) {
-    if (condition_attrs.empty()) {
-        return {};
-    }
-    std::vector<std::string> result(condition_attrs.size(),
-                                    condition_attrs.back()->GetColumn()->GetSchema()->GetName());
-    for (size_t i = 0; i < result.size(); ++i) {
-        result[i].append(".").append(condition_attrs[i]->GetColumn()->GetName());
-    }
-    return result;
-}
-}  // namespace
-
 Cinderella::Cinderella(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
 CIND Cinderella::ExecuteSingle(model::IND const& aind) {
