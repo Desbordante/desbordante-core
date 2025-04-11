@@ -42,6 +42,7 @@ void CindAlgorithm::LoadDataInternal() {
 
 void CindAlgorithm::CreateCindMinerAlgo() {
     cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
+    // cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
     RegisterCindMinerOptions();
 }
 

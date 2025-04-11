@@ -31,6 +31,7 @@ protected:
 
     virtual CIND ExecuteSingle(model::IND const& aind) = 0;
     Attributes ClassifyAttributes(model::IND const& aind) const;
+    static std::vector<std::string> GetConditionalAttributesNames(AttrsType const& condition_attrs);
 
 protected:
     model::EncodedTables tables_;

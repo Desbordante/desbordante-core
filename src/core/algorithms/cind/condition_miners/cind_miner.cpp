@@ -50,4 +50,16 @@ void CindMiner::Execute(std::list<model::IND> const& aind_list) {
         cind_collection_.Register(ExecuteSingle(aind));
     }
 }
+
+std::vector<std::string> CindMiner::GetConditionalAttributesNames(AttrsType const& condition_attrs) {
+    if (condition_attrs.empty()) {
+        return {};
+    }
+    std::vector<std::string> result(condition_attrs.size(),
+                                    condition_attrs.back()->GetColumn()->GetSchema()->GetName());
+    for (size_t i = 0; i < result.size(); ++i) {
+        result[i].append(".").append(condition_attrs[i]->GetColumn()->GetName());
+    }
+    return result;
+}
 }  // namespace algos::cind
