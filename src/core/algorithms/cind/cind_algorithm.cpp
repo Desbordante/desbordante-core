@@ -3,6 +3,8 @@
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
+#include "condition_miners/cinderella.h"
+#include "condition_miners/pli_cind.h"
 #include "conditions/completeness/option.h"
 #include "conditions/condition_type/option.h"
 #include "conditions/validity/option.h"
@@ -11,9 +13,6 @@
 #include "config/mem_limit/option.h"
 #include "config/tabular_data/input_tables/option.h"
 #include "config/thread_number/option.h"
-#include "cind/condition_miners/cind_miner.hpp"
-#include "cind/condition_miners/cinderella.h"
-#include "cind/condition_miners/pli_cind.h"
 #include "util/timed_invoke.h"
 
 namespace algos::cind {

@@ -2,7 +2,7 @@ import desbordante
 
 algo = desbordante.cind.algorithms.Default()
 
-TABLES = [(f'../datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
+TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
           ['cind_test_de', 'cind_test_en']]
 
 algo.load_data(tables=TABLES)
@@ -15,7 +15,7 @@ for ind in inds:
 
 ind = inds[0].to_pattern_tableau()
 print(ind)
-print(inds[0].get_pattern_columns())
+print(inds[0].get_condition_attributes())
 
 
 

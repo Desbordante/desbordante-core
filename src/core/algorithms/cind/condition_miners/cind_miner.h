@@ -1,21 +1,21 @@
 #pragma once
 
-#include "cind/cind.hpp"
-#include "cind/condition_type.hpp"
+#include "cind/cind.h"
+#include "cind/condition_type.h"
 #include "ind/ind.h"
 #include "primitive_collection.h"
-#include "table/encoded_tables.hpp"
+#include "table/encoded_tables.h"
 #include "tabular_data/input_tables_type.h"
 
 namespace algos::cind {
 class CindAlgorithm;
-using model::EncodedTables;
 using model::EncodedColumnData;
+using model::EncodedTables;
 using AttrsType = std::vector<EncodedColumnData const*>;
 
 class CindMiner {
 public:
-    CindMiner(config::InputTables &input_tables);
+    CindMiner(config::InputTables& input_tables);
     virtual ~CindMiner() = default;
 
     void Execute(std::list<model::IND> const& aind_list);
@@ -43,4 +43,4 @@ protected:
 private:
     friend class CindAlgorithm;
 };
-}
+}  // namespace algos::cind

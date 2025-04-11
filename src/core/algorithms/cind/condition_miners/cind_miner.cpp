@@ -1,7 +1,7 @@
-#include "cind_miner.hpp"
+#include "cind_miner.h"
 
-#include "cind/condition_type.hpp"
-#include "table/encoded_tables.hpp"
+#include "cind/condition_type.h"
+#include "table/encoded_tables.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)

@@ -6,8 +6,8 @@
 
 #include "abstract_column_data.h"
 #include "column.h"
-#include "table/table_index.h"
-#include "table/value_dictionary.hpp"
+#include "table_index.h"
+#include "value_dictionary.h"
 
 namespace model {
 class EncodedColumnData final : public model::AbstractColumnData {
@@ -33,6 +33,10 @@ public:
     int GetValue(size_t index) const {
         assert(index < column_data_.size());
         return column_data_.at(index);
+    }
+
+    std::vector<int> const& GetValues() const noexcept {
+        return column_data_;
     }
 
     [[nodiscard]] size_t GetNumRows() const noexcept {

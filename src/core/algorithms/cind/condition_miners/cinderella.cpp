@@ -4,7 +4,7 @@
 #include <map>
 
 #include "cind/condition_miners/basket.h"
-#include "cind/condition_type.hpp"
+#include "cind/condition_type.h"
 
 namespace algos::cind {
 namespace {

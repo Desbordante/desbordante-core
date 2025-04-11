@@ -3,7 +3,7 @@
 #include <memory>
 
 #include "algorithms/algorithm.h"
-#include "condition_miners/cind_miner.hpp"
+#include "condition_miners/cind_miner.h"
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {

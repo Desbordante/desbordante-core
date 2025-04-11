@@ -6,7 +6,7 @@
 
 #include "encoded_column_data.h"
 #include "relation_data.h"
-#include "table/value_dictionary.hpp"
+#include "value_dictionary.h"
 #include "tabular_data/input_table_type.h"
 
 namespace model {

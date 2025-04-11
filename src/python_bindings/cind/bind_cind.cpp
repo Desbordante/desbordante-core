@@ -8,7 +8,7 @@
 
 #include "algorithms/cind/cind_algorithm.h"
 #include "algorithms/ind/mining_algorithms.h"
-#include "cind/cind.hpp"
+#include "cind/cind.h"
 #include "cind/cind_algorithm.h"
 #include "py_util/bind_primitive.h"
 

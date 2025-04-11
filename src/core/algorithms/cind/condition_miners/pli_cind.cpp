@@ -1,11 +1,16 @@
 #include "pli_cind.h"
 
+#include <map>
 #include <set>
+#include <unistd.h>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include "cind/condition.h"
-#include "cind/condition_miners/cind_miner.hpp"
+#include "cind/condition_miners/position_lists_set.h"
+#include "cind/condition_type.h"
+#include "table/column.h"
 #include "table/encoded_column_data.h"
 #include "table/table_index.h"
 

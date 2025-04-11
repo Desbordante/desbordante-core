@@ -3,10 +3,9 @@
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
-#include "cind/cind.hpp"
-#include "cind/condition_miners/cind_miner.hpp"
-
-// #include "position_lists_set.h"
+#include "cind/cind.h"
+#include "cind_miner.h"
+#include "position_lists_set.h"
 
 namespace algos::cind {
 // using model::PLSet;
