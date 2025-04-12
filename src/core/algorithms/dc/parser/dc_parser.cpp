@@ -44,8 +44,18 @@ DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relati
 DC DCParser::Parse() {
     boost::trim(dc_string_);
 
-    if (dc_string_.front() != '!') throw std::invalid_argument("Missing logic negation sign");
-    dc_string_.erase(dc_string_.begin());
+    bool has_negation = false;
+    static char const* kNegationSigns[] = {"!", "¬"};
+    for (auto const& sign : kNegationSigns) {
+        if (dc_string_.starts_with(sign)) {
+            dc_string_.erase(0, std::strlen(sign));
+            has_negation = true;
+            break;
+        }
+    }
+
+    if (!has_negation) throw std::invalid_argument("Missing logic negation sign");
+
     boost::trim_left(dc_string_);
 
     if (dc_string_.front() != '(' or dc_string_.back() != ')')
@@ -65,11 +75,21 @@ DC DCParser::Parse() {
 }
 
 Predicate DCParser::GetNextPredicate() {
-    size_t ind = dc_string_.find(kSep, cur_);
+    size_t ind;
+    std::string cur_sep;
+    static constexpr char const* kSeparators[] = {" and ", " ∧ "};
+    for (auto const& sep : kSeparators) {
+        ind = dc_string_.find(sep, cur_);
+        if (ind != std::string::npos) {
+            cur_sep = sep;
+            break;
+        }
+    }
+
     if (ind == std::string::npos) has_next_predicate_ = false;
 
     std::string str_pred = dc_string_.substr(cur_, ind - cur_);
-    cur_ = ind + kSep.size();
+    cur_ = ind + cur_sep.size();
 
     return ConvertToPredicate(std::move(str_pred));
 }

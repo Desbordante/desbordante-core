@@ -6,4 +6,4 @@ target_sources(
             worker_thread_pool.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS "${PROJECT_SOURCE_DIR}/src"
 )
-target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only better-enums Boost::headers)
+target_link_libraries(${NAME} PUBLIC spdlog::spdlog_header_only better-enums Boost::headers)
