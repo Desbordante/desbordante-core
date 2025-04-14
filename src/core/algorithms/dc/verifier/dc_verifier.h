@@ -52,8 +52,6 @@ private:
 
     void MakeExecuteOptsAvailable();
 
-    bool Verify(dc::DC dc);
-
     bool VerifyOneTuple(dc::DC const& dc);
 
     bool VerifyTwoTuples(dc::DC const& dc);
@@ -109,6 +107,8 @@ private:
 
 public:
     DCVerifier();
+
+    bool Verify(std::string dc_string);
 
     bool DCHolds() const noexcept {
         return result_;

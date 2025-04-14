@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/dc/FastADC/fastadc.h"
 #include "algorithms/dc/verifier/dc_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
@@ -86,5 +87,24 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 // clang-format on
+
+TEST(TestDCVerifier, VerifyMining) {
+    using namespace config::names;
+    CSVConfig const dataset = kWdcAstrology;
+    algos::StdParamsMap miner_params = {{kCsvConfig, dataset},
+                                        {kAllowCrossColumns, true},
+                                        {kShardLength, 7u},
+                                        {kEvidenceThreshold, 0.0}};
+    auto miner = algos::CreateAndLoadAlgorithm<FastADC>(miner_params);
+    miner->Execute();
+
+    algos::StdParamsMap verifier_params = {{kCsvConfig, dataset}, {kDoCollectViolations, true}};
+    auto verifier = algos::CreateAndLoadAlgorithm<DCVerifier>(verifier_params);
+
+    for (auto const& dc : miner->GetDCs()) {
+        bool res = verifier->Verify(dc.ToString());
+        ASSERT_TRUE(res);
+    }
+}
 
 }  // namespace tests

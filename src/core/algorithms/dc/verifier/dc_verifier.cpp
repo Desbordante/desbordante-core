@@ -66,9 +66,19 @@ void DCVerifier::LoadDataInternal() {
 
 unsigned long long int DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
+
+    result_ = Verify(dc_string_);
+
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start);
+
+    return elapsed_time.count();
+}
+
+bool DCVerifier::Verify(std::string dc_string) {
     dc::DC dc;
     try {
-        dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
+        dc::DCParser parser = dc::DCParser(dc_string, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
         LOG(INFO) << e.what();
@@ -79,15 +89,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     boost::regex re("[0-9]+");
     bool has_header = !boost::regex_match(col_name, re);
     index_offset_ = 1 + static_cast<size_t>(has_header);
-    result_ = Verify(dc);
 
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start);
-
-    return elapsed_time.count();
-}
-
-bool DCVerifier::Verify(dc::DC dc) {
     dc.ConvertEqualities();
     std::vector<dc::Predicate> no_diseq_preds, diseq_preds;
     std::vector<dc::Predicate> predicates = dc.GetPredicates();
