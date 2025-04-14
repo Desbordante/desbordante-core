@@ -213,6 +213,68 @@ endif()
 
 # --- Dependencies installation ---
 
+# Set CPM cache location
+if(NOT DEFINED CPM_SOURCE_CACHE)
+    if(DEFINED ENV{CPM_SOURCE_CACHE})
+        set(CPM_SOURCE_CACHE "$ENV{CPM_SOURCE_CACHE}")
+    else()
+        set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache")
+    endif()
+endif()
+
+include(cmake/CPM.cmake)
+
+CPMAddPackage(
+    NAME easyloggingpp
+    GITHUB_REPOSITORY abumq/easyloggingpp
+    VERSION 9.96.7
+    OPTIONS "build_static_lib ON"
+    SYSTEM YES
+    EXCLUDE_FROM_ALL YES
+)
+include_directories(SYSTEM "${easyloggingpp_SOURCE_DIR}/src")
+set_target_properties(easyloggingpp PROPERTIES COMPILE_FLAGS "-w")
+
+CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
+include_directories(SYSTEM "${emhash_SOURCE_DIR}")
+
+CPMAddPackage(
+    NAME frozen
+    GITHUB_REPOSITORY serge-sans-paille/frozen
+    GIT_TAG 1.2.0
+    DOWNLOAD_ONLY True
+)
+include_directories(SYSTEM "${frozen_SOURCE_DIR}/include")
+
+CPMAddPackage(
+    NAME better-enums
+    GITHUB_REPOSITORY aantron/better-enums
+    GIT_TAG 0.11.3
+    DOWNLOAD_ONLY True
+)
+include_directories(SYSTEM "${better-enums_SOURCE_DIR}")
+
+CPMAddPackage(
+    NAME atomicbitvector
+    GITHUB_REPOSITORY ekg/atomicbitvector
+    GIT_TAG e295358fea9532fa4c37197630d037a4a53ddede
+    DOWNLOAD_ONLY True
+)
+include_directories(SYSTEM "${atomicbitvector_SOURCE_DIR}/include")
+
+if(COMPILE_TESTS)
+    CPMAddPackage(
+        NAME googletest
+        GITHUB_REPOSITORY google/googletest
+        VERSION 1.14.0
+        OPTIONS "INSTALL_GTEST OFF" "gtest_force_shared_crt"
+    )
+endif()
+
+if(PYTHON)
+    CPMAddPackage("gh:pybind/pybind11@2.13.4")
+endif()
+
 # Configure boost
 set(Boost_USE_STATIC_LIBS OFF)
 
@@ -226,41 +288,6 @@ else()
                         "variables like \"BOOST_ROOT\" for hint to CMake where to search"
     )
 endif()
-
-# Provide subdirectories for header inclusion
-include_directories(
-    "src/core"
-    "src/core/algorithms"
-    "src/core/model"
-    "src/core/model/types"
-    "src/core/parser"
-    "src/core/util"
-    "src/core/config"
-)
-
-include_directories(
-    SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include"
-    "lib/frozen/include"
-)
-
-# Add submodules
-if(COMPILE_TESTS)
-    add_subdirectory("lib/googletest" SYSTEM)
-endif()
-
-# Configure easyloggingpp
-set(CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}")
-set(CMAKE_BUILD_TYPE "Release")
-option(build_static_lib "Build easyloggingpp as a static library" ON)
-if(PYTHON STREQUAL INSTALL)
-    # Relies on undocumented behaviour. EXCLUDE_FROM_ALL is used to prevent install commands
-    # inside the easyloggingpp CMakeLists from executing and subsequently failing with a permission error,
-    # making it impossible to install the Python package as a normal user.
-    add_subdirectory("lib/easyloggingpp" EXCLUDE_FROM_ALL SYSTEM)
-else()
-    add_subdirectory("lib/easyloggingpp" SYSTEM)
-endif()
-set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY})
 
 # --- Core Project Structure and Module Setup ---
 
@@ -294,7 +321,6 @@ endif()
 
 # Configure Python bindings
 if(PYTHON)
-    add_subdirectory("lib/pybind11" SYSTEM)
     add_subdirectory("src/python_bindings")
 endif()
 
