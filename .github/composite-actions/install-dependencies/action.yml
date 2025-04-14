@@ -53,6 +53,15 @@ runs:
 
         echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
 
+    - name: Set up CPM.cmake cache
+      id: cache-cpm
+      uses: actions/cache@v4
+      with:
+        path: ./cmake/cpm-cache
+        key: ${{ runner.os }}-cpm-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/cmake/CPM.cmake') }}
+        restore-keys: |
+          ${{ runner.os }}-cpm-
+
     - name: Create python virtual environment
       run: | 
           python3 -m venv .venv
@@ -106,49 +115,11 @@ runs:
         mkdir -p lib
       shell: bash
 
-    - name: Download atomicbitvector
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: atomicbitvector
-        download-command: git clone https://github.com/ekg/atomicbitvector.git --depth 1
-
-    - name: Download better-enums
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: better-enums
-        download-command: git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
-
     - name: Download boost
       uses: ./.github/composite-actions/download-library
       with:
         directory: boost
         download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
-
-    - name: Download easyloggingpp
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: easyloggingpp
-        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
-
-    - name: Download emhash
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: emhash
-        download-command: git clone https://github.com/ktprime/emhash.git --depth 1
-
-    - name: Download googletest
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: googletest
-        download-command: git clone https://github.com/google/googletest/ --branch v1.14.0 --depth 1
-      if: inputs.download-googletest != 'false'
-
-    - name: Download pybind11
-      uses: ./.github/composite-actions/download-library
-      with:
-        directory: pybind11
-        download-command: git clone https://github.com/pybind/pybind11.git --branch v2.13.4 --depth 1
-      if: inputs.download-pybind != 'false'
 
     - name: Install Boost built with GCC (on Ubuntu)
       run: |
