@@ -33,6 +33,7 @@ COMPILE_TESTS = "OFF"
 BUILD_NATIVE = "OFF"
 ASAN = "OFF"
 CMAKE_BUILD_TYPE = "Release"
+CPM_SOURCE_CACHE = {env="CPM_SOURCE_CACHE", default = "./cmake/cpm-cache"}
 
 [tool.scikit-build.sdist]
 include = ["lib/*"]
