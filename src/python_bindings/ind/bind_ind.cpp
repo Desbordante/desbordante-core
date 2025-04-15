@@ -22,7 +22,56 @@ void BindInd(py::module_& main_module) {
             .def("to_long_string", &IND::ToLongString)
             .def("get_lhs", &IND::GetLhs)
             .def("get_rhs", &IND::GetRhs)
-            .def("get_error", &IND::GetError);
+            .def("get_error", &IND::GetError)
+            .def(py::pickle(
+                    // __getstate__
+                    [](IND const& ind) {
+                        py::object lhs_state = py::cast(ind.GetLhs());
+                        py::object rhs_state = py::cast(ind.GetRhs());
+
+                        std::vector<RelationalSchema> const& schemas_vec = *(ind.GetSchemas());
+                        std::vector<py::tuple> schemas_state;
+                        for (auto const& schema : schemas_vec) {
+                            std::string s_name = schema.GetName();
+                            std::vector<std::string> s_col_names;
+                            for (std::unique_ptr<Column> const& col_ptr : schema.GetColumns()) {
+                                s_col_names.push_back(col_ptr->GetName());
+                            }
+                            schemas_state.push_back(
+                                    py::make_tuple(std::move(s_name), std::move(s_col_names)));
+                        }
+                        double error = ind.GetError();
+                        return py::make_tuple(std::move(lhs_state), std::move(rhs_state),
+                                              std::move(schemas_state), error);
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 4) {
+                            throw std::runtime_error("Invalid state for IND pickle!");
+                        }
+                        ColumnCombination lhs_cc = t[0].cast<ColumnCombination>();
+                        ColumnCombination rhs_cc = t[1].cast<ColumnCombination>();
+                        auto lhs_ptr = std::make_shared<ColumnCombination>(lhs_cc);
+                        auto rhs_ptr = std::make_shared<ColumnCombination>(rhs_cc);
+
+                        auto schemas_state = t[2].cast<std::vector<py::tuple>>();
+                        std::vector<RelationalSchema> schemas;
+                        for (py::tuple const& s_state : schemas_state) {
+                            std::string s_name = s_state[0].cast<std::string>();
+                            std::vector<std::string> s_col_names =
+                                    s_state[1].cast<std::vector<std::string>>();
+                            RelationalSchema schema(std::move(s_name));
+                            for (std::string const& col_name : s_col_names) {
+                                schema.AppendColumn(col_name);
+                            }
+                            schemas.push_back(std::move(schema));
+                        }
+                        auto schemas_ptr =
+                                std::make_shared<std::vector<RelationalSchema>>(std::move(schemas));
+                        double error = t[3].cast<double>();
+                        return IND(std::move(lhs_ptr), std::move(rhs_ptr), std::move(schemas_ptr),
+                                   error);
+                    }));
 
     static constexpr auto kSpiderName = "Spider";
     static constexpr auto kMindName = "Mind";

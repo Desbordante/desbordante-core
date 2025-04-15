@@ -22,6 +22,10 @@ public:
         : Vertical(std::move(ucc_val)), schema_(std::move(schema)) {}
 
     UCC() = default;
+
+    std::shared_ptr<RelationalSchema const> GetSchema() const {
+        return schema_;
+    }
 };
 
 }  // namespace model
