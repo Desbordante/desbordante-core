@@ -8,6 +8,7 @@
 #include "algorithms/fd/mining_algorithms.h"
 #include "config/indices/type.h"
 #include "py_util/bind_primitive.h"
+#include "py_util/table_serialization.h"
 #include "util/bitset_utils.h"
 
 namespace {
@@ -49,7 +50,31 @@ void BindFd(py::module_& main_module) {
                               FD const& fd2) { return fd1.ToNameTuple() == fd2.ToNameTuple(); })
             .def("__hash__", [](FD const& fd) { return py::hash(MakeFdNameTuple(fd)); })
             .def_property_readonly("lhs_indices", &FD::GetLhsIndices)
-            .def_property_readonly("rhs_index", &FD::GetRhsIndex);
+            .def_property_readonly("rhs_index", &FD::GetRhsIndex)
+            .def(py::pickle(
+                    // __getstate__
+                    [](FD const& fd) {
+                        py::tuple schema_state = table_serialization::SerializeRelationalSchema(
+                                fd.GetSchema().get());
+                        py::tuple lhs_state = table_serialization::SerializeVertical(fd.GetLhs());
+                        py::tuple rhs_state = table_serialization::SerializeColumn(fd.GetRhs());
+                        return py::make_tuple(std::move(schema_state), std::move(lhs_state),
+                                              std::move(rhs_state));
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 3) {
+                            throw std::runtime_error("Invalid state for FD pickle!");
+                        }
+                        std::shared_ptr<RelationalSchema const> schema =
+                                table_serialization::DeserializeRelationalSchema(
+                                        t[0].cast<py::tuple>());
+                        Vertical lhs = table_serialization::DeserializeVertical(
+                                t[1].cast<py::tuple>(), schema.get());
+                        Column rhs = table_serialization::DeserializeColumn(t[2].cast<py::tuple>(),
+                                                                            schema.get());
+                        return FD(lhs, rhs, std::move(schema));
+                    }));
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";

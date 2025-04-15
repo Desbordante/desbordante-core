@@ -38,6 +38,10 @@ public:
 
     T GetObject(size_t index) const;
 
+    std::vector<T> const& GetObjects() const noexcept {
+        return objects_;
+    }
+
     size_t Size() const;
 
     void Sort();
