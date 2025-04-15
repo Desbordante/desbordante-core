@@ -30,7 +30,26 @@ void BindOd(py::module_& main_module) {
                      return od1.ToString() == od2.ToString();
                  })
             .def("__hash__",
-                 [](AscCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+                 [](AscCanonicalOD const& od) { return py::hash(py::str(od.ToString())); })
+            .def(py::pickle(
+                    // __getstate__
+                    [](AscCanonicalOD const& od) {
+                        std::vector<int> context_state = od.GetContext().GetColumnIndices();
+                        int left = static_cast<int>(od.GetAttributePair().left);
+                        int right = static_cast<int>(od.GetAttributePair().right);
+                        return py::make_tuple(std::move(context_state), left, right);
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 3) {
+                            throw std::runtime_error("Invalid state for AscCanonicalOD pickle!");
+                        }
+                        std::vector<int> context_state = t[0].cast<std::vector<int>>();
+                        int left = t[1].cast<int>();
+                        int right = t[2].cast<int>();
+                        AttributeSet context = AttributeSet::FromVector(context_state);
+                        return AscCanonicalOD(std::move(context), left, right);
+                    }));
 
     py::class_<DescCanonicalOD>(od_module, "DescCanonicalOD")
             .def("__str__", &DescCanonicalOD::ToString)
@@ -39,7 +58,26 @@ void BindOd(py::module_& main_module) {
                      return od1.ToString() == od2.ToString();
                  })
             .def("__hash__",
-                 [](DescCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+                 [](DescCanonicalOD const& od) { return py::hash(py::str(od.ToString())); })
+            .def(py::pickle(
+                    // __getstate__
+                    [](DescCanonicalOD const& od) {
+                        std::vector<int> context_state = od.GetContext().GetColumnIndices();
+                        int left = static_cast<int>(od.GetAttributePair().left);
+                        int right = static_cast<int>(od.GetAttributePair().right);
+                        return py::make_tuple(std::move(context_state), left, right);
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 3) {
+                            throw std::runtime_error("Invalid state for DescCanonicalOD pickle!");
+                        }
+                        std::vector<int> context_state = t[0].cast<std::vector<int>>();
+                        int left = t[1].cast<int>();
+                        int right = t[2].cast<int>();
+                        AttributeSet context = AttributeSet::FromVector(context_state);
+                        return DescCanonicalOD(std::move(context), left, right);
+                    }));
 
     py::class_<SimpleCanonicalOD>(od_module, "SimpleCanonicalOD")
             .def("__str__", &SimpleCanonicalOD::ToString)
@@ -48,11 +86,41 @@ void BindOd(py::module_& main_module) {
                      return od1.ToString() == od2.ToString();
                  })
             .def("__hash__",
-                 [](SimpleCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+                 [](SimpleCanonicalOD const& od) { return py::hash(py::str(od.ToString())); })
+            .def(py::pickle(
+                    // __getstate__
+                    [](SimpleCanonicalOD const& od) {
+                        std::vector<int> context_state = od.GetContext().GetColumnIndices();
+                        int right = static_cast<int>(od.GetRight());
+                        return py::make_tuple(std::move(context_state), right);
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error("Invalid state for SimpleCanonicalOD pickle!");
+                        }
+                        std::vector<int> context_state = t[0].cast<std::vector<int>>();
+                        int right = t[1].cast<int>();
+                        AttributeSet context = AttributeSet::FromVector(context_state);
+                        return SimpleCanonicalOD(std::move(context), right);
+                    }));
 
     py::class_<ListOD>(od_module, "ListOD")
             .def_readonly("lhs", &ListOD::lhs)
-            .def_readonly("rhs", &ListOD::rhs);
+            .def_readonly("rhs", &ListOD::rhs)
+            .def(py::pickle(
+                    // __getstate__
+                    [](ListOD const& od) { return py::make_tuple(od.lhs, od.rhs); },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error("Invalid state for ListOD pickle!");
+                        }
+                        ListOD od;
+                        od.lhs = t[0].cast<std::vector<model::ColumnIndex>>();
+                        od.rhs = t[1].cast<std::vector<model::ColumnIndex>>();
+                        return od;
+                    }));
 
     auto fastod_algos_module =
             BindPrimitiveNoBase<algos::Fastod>(od_module, "Fastod")
