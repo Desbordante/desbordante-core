@@ -30,8 +30,7 @@ void DFD::ResetStateFd() {
 }
 
 unsigned long long DFD::ExecuteInternal() {
-    auto partition_storage = std::make_unique<PartitionStorage>(
-            relation_.get(), CachingMethod::kAllCaching, CacheEvictionMethod::kMedainUsage);
+    auto partition_storage = std::make_unique<PartitionStorage>(relation_.get());
     RelationalSchema const* const schema = relation_->GetSchema();
 
     auto start_time = std::chrono::system_clock::now();
