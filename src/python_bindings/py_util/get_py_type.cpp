@@ -28,7 +28,6 @@ constexpr PyTypeObject* const kPyBool = &PyBool_Type;
 constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
 constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
-constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
 
 py::handle MakeType(py::type type) {
