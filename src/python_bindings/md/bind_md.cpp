@@ -17,6 +17,7 @@
 #include "algorithms/md/mining_algorithms.h"
 #include "md/object_similarity_measure.h"
 #include "py_util/bind_primitive.h"
+#include "py_util/table_serialization.h"
 
 namespace {
 namespace py = pybind11;
@@ -115,7 +116,91 @@ void BindMd(py::module_& main_module) {
             .def("to_string_active", &MD::ToStringActiveLhsOnly)
             .def("__str__", &MD::ToStringActiveLhsOnly)
             .def_property_readonly("single_table", &MD::SingleTable)
-            .def("get_description", &MD::GetDescription);
+            .def("get_description", &MD::GetDescription)
+            .def(py::pickle(
+                    // __getstate__
+                    [](MD const& md_obj) {
+                        py::tuple left_schema_state =
+                                table_serialization::SerializeRelationalSchema(
+                                        md_obj.GetLeftSchema().get());
+                        py::tuple right_schema_state =
+                                table_serialization::SerializeRelationalSchema(
+                                        md_obj.GetRightSchema().get());
+                        py::list match_list;
+                        std::shared_ptr<std::vector<md::ColumnMatch> const> matches_ptr =
+                                md_obj.GetColumnMatches();
+                        if (matches_ptr) {
+                            for (model::md::ColumnMatch const& cm : *matches_ptr) {
+                                match_list.append(py::make_tuple(cm.left_col_index,
+                                                                 cm.right_col_index, cm.name));
+                            }
+                        }
+                        py::list lhs_list;
+                        for (model::md::LhsColumnSimilarityClassifier const& csc :
+                             md_obj.GetLhs()) {
+                            std::size_t match_idx = csc.GetColumnMatchIndex();
+                            model::md::DecisionBoundary db = csc.GetDecisionBoundary();
+                            std::optional<model::md::DecisionBoundary> maybe_max =
+                                    csc.GetMaxDisprovedBound();
+                            lhs_list.append(py::make_tuple(match_idx, db, maybe_max));
+                        }
+                        auto [rhs_idx, rhs_bound] = md_obj.GetRhs();
+                        auto rhs_tuple = py::make_tuple(rhs_idx, rhs_bound);
+                        return py::make_tuple(std::move(left_schema_state),
+                                              std::move(right_schema_state), std::move(match_list),
+                                              std::move(lhs_list), std::move(rhs_tuple));
+                    },
+                    // __setstate__
+                    [](py::tuple st) {
+                        if (st.size() != 5) {
+                            throw std::runtime_error("Invalid state for MD pickle!");
+                        }
+                        std::shared_ptr<RelationalSchema const> left_schema =
+                                table_serialization::DeserializeRelationalSchema(
+                                        st[0].cast<py::tuple>());
+                        std::shared_ptr<RelationalSchema const> right_schema =
+                                table_serialization::DeserializeRelationalSchema(
+                                        st[1].cast<py::tuple>());
+                        auto match_list = st[2].cast<py::list>();
+                        auto matches_ptr = std::make_shared<std::vector<model::md::ColumnMatch>>();
+                        matches_ptr->reserve(match_list.size());
+                        for (auto item : match_list) {
+                            auto tpl = item.cast<py::tuple>();
+                            if (tpl.size() != 3) {
+                                throw std::runtime_error("Invalid state for MD pickle!");
+                            }
+                            auto l_idx = tpl[0].cast<std::size_t>();
+                            auto r_idx = tpl[1].cast<std::size_t>();
+                            auto name = tpl[2].cast<std::string>();
+                            matches_ptr->emplace_back(l_idx, r_idx, std::move(name));
+                        }
+                        auto lhs_list = st[3].cast<py::list>();
+                        std::vector<model::md::LhsColumnSimilarityClassifier> lhs_vec;
+                        lhs_vec.reserve(lhs_list.size());
+                        for (auto item : lhs_list) {
+                            auto tpl = item.cast<py::tuple>();
+                            if (tpl.size() != 3) {
+                                throw std::runtime_error("Invalid state for MD pickle!");
+                            }
+                            auto match_idx = tpl[0].cast<std::size_t>();
+                            auto dec_bound = tpl[1].cast<double>();
+                            std::optional<model::md::DecisionBoundary> restored_maybe_max =
+                                    tpl[2].cast<std::optional<model::md::DecisionBoundary>>();
+                            lhs_vec.emplace_back(restored_maybe_max, match_idx, dec_bound);
+                        }
+                        auto rhs_tpl = st[4].cast<py::tuple>();
+                        if (rhs_tpl.size() != 2) {
+                            throw std::runtime_error("Invalid state for MD pickle!");
+                        }
+                        auto rhs_idx = rhs_tpl[0].cast<std::size_t>();
+                        auto rhs_dec = rhs_tpl[1].cast<double>();
+                        model::md::ColumnSimilarityClassifier rhs_classifier(rhs_idx, rhs_dec);
+                        model::MD md_restored(std::move(left_schema), std::move(right_schema),
+                                              std::move(matches_ptr), std::move(lhs_vec),
+                                              std::move(rhs_classifier));
+                        return md_restored;
+                    }));
+
     auto column_matches_module = md_module.def_submodule("column_matches");
     py::class_<ColumnMatch, std::shared_ptr<ColumnMatch>>(column_matches_module, "ColumnMatch");
     BindColumnMatchWithConstructor<Levenshtein>("Levenshtein", column_matches_module);

@@ -37,6 +37,10 @@ public:
         return *rhs_;
     }
 
+    std::shared_ptr<std::vector<RelationalSchema>> const& GetSchemas() const {
+        return schemas_;
+    }
+
     ///
     /// Get the error threshold at which AIND holds.
     ///

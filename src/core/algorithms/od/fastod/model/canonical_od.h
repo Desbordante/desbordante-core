@@ -21,6 +21,14 @@ public:
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
 
+    AttributeSet const& GetContext() const {
+        return context_;
+    }
+
+    AttributePair const& GetAttributePair() const {
+        return ap_;
+    }
+
     friend bool operator==(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
     friend bool operator!=(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
     friend bool operator<(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
@@ -45,6 +53,14 @@ public:
 
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
+
+    AttributeSet const& GetContext() const {
+        return context_;
+    }
+
+    model::ColumnIndex GetRight() const {
+        return right_;
+    }
 
     friend bool operator==(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);
     friend bool operator!=(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);

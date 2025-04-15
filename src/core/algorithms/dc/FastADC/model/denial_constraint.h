@@ -40,6 +40,10 @@ public:
         return predicate_set_.Size();
     }
 
+    std::shared_ptr<RelationalSchema const> GetSchema() const {
+        return schema_;
+    }
+
     std::string ToString() const noexcept {
         static std::string const kCNot = "\u00AC";
         static std::string const kCAnd = " ∧ ";

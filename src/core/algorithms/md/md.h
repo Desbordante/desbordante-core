@@ -67,6 +67,23 @@ public:
     [[nodiscard]] std::vector<md::DecisionBoundary> GetLhsDecisionBounds() const;
     [[nodiscard]] std::pair<Index, md::DecisionBoundary> GetRhs() const noexcept;
 
+    [[nodiscard]] std::shared_ptr<RelationalSchema const> const& GetLeftSchema() const {
+        return left_schema_;
+    }
+
+    [[nodiscard]] std::shared_ptr<RelationalSchema const> const& GetRightSchema() const {
+        return right_schema_;
+    }
+
+    [[nodiscard]] std::shared_ptr<std::vector<md::ColumnMatch> const> const& GetColumnMatches()
+            const {
+        return column_matches_;
+    }
+
+    [[nodiscard]] std::vector<md::LhsColumnSimilarityClassifier> const& GetLhs() const {
+        return lhs_;
+    }
+
     [[nodiscard]] bool SingleTable() const noexcept {
         return left_schema_ == right_schema_;
     }

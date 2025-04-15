@@ -53,6 +53,20 @@ public:
         return cons_;
     }
 
+    bool IsQualitiesConsistent() const {
+        return qualities_consistent_;
+    }
+
+    void SetQualitiesDirect(double fitness, double support, double confidence) {
+        qualities_.fitness = fitness;
+        qualities_.support = support;
+        qualities_.confidence = confidence;
+    }
+
+    void SetQualitiesConsistent(bool qc) {
+        qualities_consistent_ = qc;
+    }
+
     void InsertInAnte(size_t feature_index, std::shared_ptr<ValueRange> range);
     void InsertInCons(size_t feature_index, std::shared_ptr<ValueRange> range);
 };
