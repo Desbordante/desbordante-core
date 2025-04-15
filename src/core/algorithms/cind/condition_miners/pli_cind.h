@@ -8,30 +8,30 @@
 #include "position_lists_set.h"
 
 namespace algos::cind {
-// using model::PLSet;
-// using PLSetShared = std::shared_ptr<model::PLSet>;
+using model::PLSet;
+using PLSetShared = std::shared_ptr<model::PLSet>;
 
 class PliCind final : public CindMiner {
-    // private:
-    //     std::vector<PLSetShared> attr_idx_to_pls_;
+private:
+    std::vector<PLSetShared> attr_idx_to_pls_;
+    size_t relation_size_;  // num of groups/rows
 
 public:
     PliCind(config::InputTables& input_tables);
 
-    // std::unordered_set<Condition> GetConditions(std::vector<int> cond_attrs,
-    //                                             std::vector<int> const& included_pos);
+    std::vector<Condition> GetConditions(Attributes const& attrs);
 
 private:
     CIND ExecuteSingle(model::IND const& aind) final;
-    void MakePLs(std::vector<int> const& cond_attrs);
+    void MakePLs(Attributes const& attrs, std::vector<int> const& row_to_group);
 
-    std::vector<int> GetIncludedPositions(const Attributes & attrs) const;
+    std::pair<std::vector<int>, std::vector<int>> ClassifyRows(Attributes const& attrs);
 
-    std::pair<std::vector<int>, AttrsType> ScanTables(model::IND const& aind) const;
+    std::vector<Condition> Analyze(size_t attr_idx, std::vector<int> curr_attrs,
+                                   PLSetShared const& curr_pls, AttrsType const& cond_attrs,
+                                   std::vector<int> const& included_pos);
 
-    // std::unordered_set<Condition> Analyze(std::vector<int> const& cond_attrs, int attr_idx,
-    //                                       std::vector<int> const& curr_attrs, PLSetShared
-    //                                       curr_pls, std::vector<int> const& included_pos);
+    void Reset();
 };
 
 }  // namespace algos::cind

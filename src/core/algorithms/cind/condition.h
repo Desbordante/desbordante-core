@@ -8,6 +8,8 @@
 #include "cind/condition_miners/itemset.h"
 #include "table/encoded_column_data.h"
 
+#define LOG(...) fprintf(stderr, __VA_ARGS__)
+
 namespace algos::cind {
 char const* const kAnyValue = "-";
 
@@ -34,6 +36,24 @@ struct Condition {
             } else {
                 condition_attrs_values.push_back(kAnyValue);
             }
+        }
+    }
+
+    Condition(std::vector<int> const& condition_attrs_ids, std::vector<int> const& cluster_value,
+              std::vector<model::EncodedColumnData const*> const& condition_attrs, double _validity,
+              double _completeness)
+        : validity(_validity), completeness(_completeness) {
+        condition_attrs_values.reserve(condition_attrs.size());
+        for (size_t attr_idx : condition_attrs_ids) {
+            while (condition_attrs_values.size() < attr_idx) {
+                condition_attrs_values.push_back(kAnyValue);
+            }
+            condition_attrs_values.push_back(
+                    condition_attrs[condition_attrs_values.size()]->DecodeValue(
+                            cluster_value[attr_idx]));
+        }
+        while (condition_attrs_values.size() < condition_attrs.size()) {
+            condition_attrs_values.push_back(kAnyValue);
         }
     }
 

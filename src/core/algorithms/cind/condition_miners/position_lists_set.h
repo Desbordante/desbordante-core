@@ -24,18 +24,20 @@ public:
 private:
     ClusterCollection clusters_;
     size_t rows_number_;
+    size_t relation_size_;
 
     std::shared_ptr<std::vector<int> const> probing_table_cache_;
     std::vector<ClusterValue> cluster_values_cache_;
 
 public:
-    PositionListsSet(ClusterCollection clusters, size_t size);
+    PositionListsSet(ClusterCollection clusters, size_t size, size_t relation_size);
 
-    static std::unique_ptr<PositionListsSet> CreateFor(std::vector<ClusterValue> const& records);
-    static std::unique_ptr<PositionListsSet> CreateFor(std::vector<ClusterValue> records);
+    static std::shared_ptr<PositionListsSet> CreateFor(std::vector<int> const& records,
+                                                       std::vector<int> const& group_ids,
+                                                       size_t relation_size);
 
-    static std::unique_ptr<PositionListsSet> CreateFor(
-            std::vector<ClusterCollection::value_type>&& records);
+    static std::shared_ptr<PositionListsSet> CreateFor(
+            std::vector<ClusterCollection::value_type> clusters, size_t relation_size);
 
     // Calculates PT -- heavy operation
     std::shared_ptr<std::vector<int> const> CalculateAndGetProbingTable();
@@ -71,8 +73,8 @@ public:
         return cluster_values_cache_;
     }
 
-    std::unique_ptr<PositionListsSet> Intersect(PositionListsSet const* that) const;
-    std::unique_ptr<PositionListsSet> Probe(PositionListsSet const* that) const;
+    std::shared_ptr<PositionListsSet> Intersect(PositionListsSet const* that) const;
+    std::shared_ptr<PositionListsSet> Probe(PositionListsSet const* that) const;
 };
 
 using PLSet = PositionListsSet;
