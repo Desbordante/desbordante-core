@@ -10,14 +10,10 @@ model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
 }
 
-PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data,
-                                   CachingMethod caching_method,
-                                   CacheEvictionMethod eviction_method)
+PartitionStorage::PartitionStorage(ColumnLayoutRelationData* relation_data)
     : relation_data_(relation_data),
       index_(std::make_unique<model::BlockingVerticalMap<model::PositionListIndex>>(
-              relation_data->GetSchema())),
-      caching_method_(caching_method),
-      eviction_method_(eviction_method) {
+              relation_data->GetSchema())) {
     for (auto& column_ptr : relation_data->GetSchema()->GetColumns()) {
         index_->Put(static_cast<Vertical>(*column_ptr),
                     relation_data->GetColumnData(column_ptr->GetIndex()).GetPliOwnership());
