@@ -148,10 +148,9 @@ unsigned long long DDVerifier::ExecuteInternal() {
 
     VerifyDD();
 
-    PrintStatistics();
-
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
+    PrintStatistics();
 
     return elapsed_milliseconds.count();
 }
@@ -169,7 +168,7 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs) {
         for (auto const column_index : columns) {
             if (double const dif = CalculateDistance(column_index, pair);
                 !curr_constraint->constraint.Contains(dif)) {
-                highlights_.emplace_back(column_index, pair);
+                highlights_.emplace_back(column_index, pair, dif);
                 is_error = true;
             }
             ++curr_constraint;

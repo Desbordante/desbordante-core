@@ -44,7 +44,11 @@ private:
 
     void CheckCorrectnessDd() const;
 
-    void ResetState() final {}
+    void ResetState() final {
+        error_ = 0.;
+        num_error_rhs_ = 0;
+        highlights_.clear();
+    }
 
 protected:
     void LoadDataInternal() override;
