@@ -21,6 +21,7 @@ void BindDDVerification(py::module_& main_module) {
 
     py::class_<Highlight>(dd_verification_module, "Highlight")
             .def_property_readonly("attribute_index", &Highlight::GetAttributeIndex)
+            .def_property_readonly("distance", &Highlight::GetDistance)
             .def_property_readonly("pair_rows", &Highlight::GetPairRows);
 
     BindPrimitiveNoBase<dd::DDVerifier>(dd_verification_module, "DDVerifier")
