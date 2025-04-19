@@ -15,6 +15,7 @@
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
+#include "util/timed_invoke.h"
 #include "util/worker_thread_pool.h"
 
 namespace {
@@ -32,6 +33,15 @@ public:
         return pool_ptr_;
     }
 };
+
+auto CreateSchema(config::InputTable const& table) {
+    auto schema = std::make_shared<RelationalSchema>(table->GetRelationName());
+    std::size_t const cols = table->GetNumberOfColumns();
+    for (model::Index i : std::views::iota(model::Index(0), cols)) {
+        schema->AppendColumn(table->GetColumnName(i));
+    }
+    return schema;
+}
 }  // namespace
 
 namespace algos::md {
@@ -46,22 +56,8 @@ void MDVerifier::ResetStateMd() {
 }
 
 void MDVerifier::LoadDataInternal() {
-    left_schema_ = std::make_shared<RelationalSchema>(left_table_->GetRelationName());
-    std::size_t const left_table_cols = left_table_->GetNumberOfColumns();
-    for (model::Index i : hymd::utility::IndexRange(left_table_cols)) {
-        left_schema_->AppendColumn(left_table_->GetColumnName(i));
-    }
-
-    if (right_table_ == nullptr) {
-        right_schema_ = left_schema_;
-
-    } else {
-        right_schema_ = std::make_shared<RelationalSchema>(right_table_->GetRelationName());
-        std::size_t const right_table_cols = right_table_->GetNumberOfColumns();
-        for (model::Index i : hymd::utility::IndexRange(right_table_cols)) {
-            right_schema_->AppendColumn(right_table_->GetColumnName(i));
-        }
-    }
+    left_schema_ = CreateSchema(left_table_);
+    right_schema_ = right_table_ ? CreateSchema(right_table_) : left_schema_;
 }
 
 void MDVerifier::RegisterOptions() {
@@ -106,19 +102,12 @@ void MDVerifier::MakeExecuteOptsAvailable() {
 }
 
 unsigned long long MDVerifier::ExecuteInternal() {
-    using namespace std::chrono;
-
-    auto start_time = system_clock::now();
-
-    VerifyMD();
-
-    return duration_cast<milliseconds>(system_clock::now() - start_time).count();
+    return util::TimedInvoke(&MDVerifier::VerifyMD, this);
 }
 
 model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
                               ColumnSimilarityClassifier const& rhs) {
-    std::shared_ptr<std::vector<model::md::ColumnMatch>> column_matches =
-            std::make_shared<std::vector<model::md::ColumnMatch>>();
+    auto column_matches = std::make_shared<std::vector<model::md::ColumnMatch>>();
     auto get_column_match = [](ColumnSimilarityClassifier const& classifier) {
         auto [left_col_index, right_col_index] = classifier.GetColumnMatch()->GetIndices();
         std::string name = classifier.GetColumnMatch()->GetName();
