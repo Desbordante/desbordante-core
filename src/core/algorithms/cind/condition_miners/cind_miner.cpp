@@ -29,6 +29,7 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
 }
 
 void CindMiner::Execute(std::list<model::IND> const& aind_list) {
+    cind_collection_.Clear();
     fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_,
             min_completeness_, condition_type_._to_string());
     for (auto const& table : tables_.GetTables()) {

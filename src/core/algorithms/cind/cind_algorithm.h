@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "algorithms/algorithm.h"
+#include "cind/condition_type.h"
 #include "condition_miners/cind_miner.h"
 
 namespace algos::cind {
@@ -40,6 +41,7 @@ private:
     // algos
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
+    AlgoType algo_type_{AlgoType::cinderella};
 
     unsigned long long time_;
 };

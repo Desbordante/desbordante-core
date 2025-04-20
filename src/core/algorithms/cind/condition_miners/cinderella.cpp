@@ -1,6 +1,7 @@
 #include "cinderella.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 
 #include "cind/condition_miners/basket.h"
@@ -70,7 +71,7 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
     fprintf(stderr, "]\n");
 
     std::vector<Basket> result;
-    std::map<std::vector<int>, Basket*> baskets_by_value;
+    std::map<std::vector<int>, int> basket_id_by_value;
     fprintf(stderr, "lhs values: [");
     for (size_t index = 0; index < attributes.lhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<int> row;
@@ -81,22 +82,21 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
         }
         fprintf(stderr, "}");
         if (condition_type_._value == CondType::group) {
-            if (auto const& it = baskets_by_value.find(row); it == baskets_by_value.cend()) {
-                result.push_back({.is_included = rhs_values.contains(row), .items = {}});
-                baskets_by_value[row] = &result[result.size() - 1];
+            if (auto const& it = basket_id_by_value.find(row); it == basket_id_by_value.cend()) {
+                result.emplace_back(rhs_values.contains(row), std::unordered_set<Item>{});
+                basket_id_by_value[row] = result.size() - 1;
             }
+            auto basket_id = basket_id_by_value[row];
             for (auto const& cond_attr : attributes.conditional) {
-                baskets_by_value[row]->items.insert({.column_id = cond_attr->GetColumnId(),
-                                                     .value = cond_attr->GetValue(index)});
+                result[basket_id].items.emplace(cond_attr->GetColumnId(),
+                                                cond_attr->GetValue(index));
             }
         } else {
             std::unordered_set<Item> basket_items;
             for (auto const& cond_attr : attributes.conditional) {
-                basket_items.insert({.column_id = cond_attr->GetColumnId(),
-                                     .value = cond_attr->GetValue(index)});
+                basket_items.emplace(cond_attr->GetColumnId(), cond_attr->GetValue(index));
             }
-            result.push_back(
-                    {.is_included = rhs_values.contains(row), .items = std::move(basket_items)});
+            result.emplace_back(rhs_values.contains(row), std::move(basket_items));
         }
         if (rhs_values.contains(row)) {
             fprintf(stderr, "::included");

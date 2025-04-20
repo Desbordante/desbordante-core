@@ -126,4 +126,5 @@ constexpr auto kMDRHS = "rhs";
 constexpr auto kValidity = "validity";
 constexpr auto kCompleteness = "completeness";
 constexpr auto kConditionType = "condition_type";
+constexpr auto kAlgoType = "algo_type";
 }  // namespace config::names

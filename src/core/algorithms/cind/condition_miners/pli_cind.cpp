@@ -156,8 +156,8 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
             good_clusters.emplace_back(cluster_value, cluster);
             if (double validity = (double)included_cluster.size() / cluster.size();
                 validity >= min_validity_) {
-                result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, completeness,
-                                    validity);
+                result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, validity,
+                                    completeness);
                 // LOG("Result emplaced: %s\n", result.back().ToString().c_str());
             }
             // LOG("\n");

@@ -3,8 +3,10 @@
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
+#include "cind/condition_type.h"
 #include "condition_miners/cinderella.h"
 #include "condition_miners/pli_cind.h"
+#include "conditions/algo_type/option.h"
 #include "conditions/completeness/option.h"
 #include "conditions/condition_type/option.h"
 #include "conditions/validity/option.h"
@@ -20,6 +22,8 @@ CindAlgorithm::CindAlgorithm(std::vector<std::string_view> phase_names)
     : Algorithm(std::move(phase_names)) {
     CreateSpiderAlgo();
 
+    RegisterOption(config::kAlgoTypeOpt(&algo_type_));
+    MakeOptionsAvailable({config::kAlgoTypeOpt.GetName()});
     RegisterSpiderOptions();
 }
 
@@ -41,8 +45,11 @@ void CindAlgorithm::LoadDataInternal() {
 }
 
 void CindAlgorithm::CreateCindMinerAlgo() {
-    // cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
-    cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
+    if (algo_type_._value == AlgoType::cinderella) {
+        cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
+    } else {
+        cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);
+    }
     RegisterCindMinerOptions();
 }
 

@@ -39,21 +39,20 @@ struct Condition {
         }
     }
 
-    Condition(std::vector<int> const& condition_attrs_ids, std::vector<int> const& cluster_value,
+    Condition(std::vector<int> const& cluster_attrs_ids, std::vector<int> const& cluster_value,
               std::vector<model::EncodedColumnData const*> const& condition_attrs, double _validity,
               double _completeness)
         : validity(_validity), completeness(_completeness) {
         condition_attrs_values.reserve(condition_attrs.size());
-        for (size_t attr_idx : condition_attrs_ids) {
-            while (condition_attrs_values.size() < attr_idx) {
+        size_t item_id = 0;
+        for (size_t column_id = 0; column_id < condition_attrs.size(); ++column_id) {
+            if (item_id < cluster_attrs_ids.size() &&
+                column_id == (size_t)cluster_attrs_ids[item_id]) {
+                condition_attrs_values.push_back(
+                        condition_attrs[column_id]->DecodeValue(cluster_value[item_id++]));
+            } else {
                 condition_attrs_values.push_back(kAnyValue);
             }
-            condition_attrs_values.push_back(
-                    condition_attrs[condition_attrs_values.size()]->DecodeValue(
-                            cluster_value[attr_idx]));
-        }
-        while (condition_attrs_values.size() < condition_attrs.size()) {
-            condition_attrs_values.push_back(kAnyValue);
         }
     }
 
