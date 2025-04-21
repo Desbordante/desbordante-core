@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/model/predicate.h"
 
@@ -96,7 +96,7 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
     ProcessNumPredicates(num_single_, packs_.num_single, count);
     ProcessNumPredicates(num_cross_, packs_.num_cross, count);
 
-    LOG(DEBUG) << "  [CLUE] # of bits in clue: " << count;
+    spdlog::debug("  [CLUE] # of bits in clue: {}", count);
     assert(count <= kPredicateBits);
 }
 

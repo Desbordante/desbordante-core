@@ -3,7 +3,7 @@
 #include <iterator>
 
 #include <boost/unordered_map.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/cfd/util/partition_tidlist_util.h"
 #include "algorithms/cfd/util/partition_util.h"
@@ -49,7 +49,7 @@ unsigned long long FDFirstAlgorithm::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     unsigned long long apriori_millis = elapsed_milliseconds.count();
-    LOG(INFO) << "> CFD COUNT: " << cfd_list_.size();
+    spdlog::info("> CFD COUNT: {}", cfd_list_.size());
 
     return apriori_millis;
 }
@@ -496,7 +496,7 @@ void FDFirstAlgorithm::MinePatternsDFS(Itemset const& prefix, TIdListMiners& ite
     for (int ix = static_cast<int>(items.size()) - 1; ix >= 0; ix--) {
         auto const& inode = items[ix];
         if (inode.tids.empty() && items[ix].tids.empty()) {
-            LOG(INFO) << ix;
+            spdlog::info("{}", ix);
         }
         Itemset const iset = Join(prefix, inode.item);
         auto const node_attrs = relation_->GetAttrVectorItems(iset);

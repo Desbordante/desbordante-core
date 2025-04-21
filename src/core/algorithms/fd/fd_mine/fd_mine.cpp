@@ -4,7 +4,7 @@
 #include <vector>
 
 #include <boost/unordered_map.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 namespace algos {
 
@@ -275,14 +275,14 @@ void FdMine::Display() {
                 continue;
             }
             Vertical lhs_vertical(schema_, lhs);
-            LOG(DEBUG) << "Discovered FD: " << lhs_vertical.ToString() << " -> "
-                       << schema_->GetColumn(j)->GetName();
+            spdlog::debug("Discovered FD: {} -> {}", lhs_vertical.ToString(),
+                          schema_->GetColumn(j)->GetName());
             RegisterFd(std::move(lhs_vertical), *schema_->GetColumn(j),
                        relation_->GetSharedPtrSchema());
             fd_counter++;
         }
     }
-    LOG(DEBUG) << "TOTAL FDs " << fd_counter;
+    spdlog::debug("TOTAL FDs: {}", fd_counter);
 }
 
 }  // namespace algos

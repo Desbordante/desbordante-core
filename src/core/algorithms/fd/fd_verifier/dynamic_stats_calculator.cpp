@@ -5,7 +5,7 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 namespace algos::fd_verifier {
 

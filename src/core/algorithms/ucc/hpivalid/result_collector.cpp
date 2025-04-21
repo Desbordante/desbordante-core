@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -49,7 +49,7 @@ void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
         }
         out << "\n";
     }
-    LOG(DEBUG) << out.str();
+    spdlog::debug(out.str());
 
     diff_sets_final_ = hg.NumEdges();
 }

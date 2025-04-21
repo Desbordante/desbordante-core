@@ -5,7 +5,7 @@
 #include <iostream>
 #include <random>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/cfd/util/set_util.h"
 

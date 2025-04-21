@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "../model/pli_cache.h"
 #include "search_space.h"
@@ -16,8 +16,9 @@ double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
                                                     ->GetColumnData(rhs_->GetIndex())
                                                     .GetProbingTable();
 
-    LOG(DEBUG) << boost::format{"Probing table size for %1%: %2%"} % rhs_->ToString() %
-                          std::to_string(probing_table.size());
+    spdlog::debug((boost::format{"Probing table size for %1%: %2%"} % rhs_->ToString() %
+                   std::to_string(probing_table.size()))
+                          .str());
 
     // Perform probing
     int probing_table_value_id;

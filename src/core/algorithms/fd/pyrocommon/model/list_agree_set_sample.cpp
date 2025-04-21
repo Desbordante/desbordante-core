@@ -1,6 +1,6 @@
 #include "list_agree_set_sample.h"
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 namespace model {
 
@@ -93,8 +93,9 @@ unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agre
     Entries:
         continue;
     }
-    LOG(DEBUG) << boost::format{"AgreeSetSample for %1% against %2% returned %3% "} %
-                          agreement.ToString() % disagreement.ToString() % count;
+    spdlog::debug((boost::format{"AgreeSetSample for %1% against %2% returned %3% "} %
+                   agreement.ToString() % disagreement.ToString() % count)
+                          .str());
     // std::cout << '\n';
     //_numQueries
     //_nanoQueries

@@ -1,6 +1,6 @@
 #include "order_utility.h"
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "list_lattice.h"
 #include "model/table/column_index.h"
@@ -10,11 +10,12 @@ namespace algos::order {
 
 void PrintOD(AttributeList const& lhs, AttributeList const& rhs) {
     for (model::ColumnIndex attr : lhs) {
-        LOG(DEBUG) << attr << " ";
+        spdlog::debug("{} ", attr);
     }
-    LOG(DEBUG) << "-> ";
+    spdlog::debug("-> ");
     for (model::ColumnIndex attr : rhs) {
-        LOG(DEBUG) << attr << " ";
+        spdlog::debug("{} ", attr);
+        ;
     }
 }
 

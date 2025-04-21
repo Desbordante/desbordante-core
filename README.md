@@ -369,7 +369,14 @@ python3
 >>> import desbordante
 ```
 
-We use [easyloggingpp](https://github.com/abumq/easyloggingpp) in order to log (mostly debug) information in the core library. Python bindings search for a configuration file in the working directory, so to configure logging, create `logging.conf` in the directory from which desbordante will be imported. In particular, when running the CLI with `python3 ./relative/path/to/cli.py`, `logging.conf` should be located in `.`.
+The core library uses [spdlog](https://github.com/gabime/spdlog) for logging (primarily debug information).
+
+**Log level control**:
+```python
+import desbordante.logging
+# Set log level (available options: 'trace', 'debug', 'info', 'warn', 'error', 'off' -- default)
+desbordante.logging.set_level('info')
+```
 
 ## Troubleshooting
 

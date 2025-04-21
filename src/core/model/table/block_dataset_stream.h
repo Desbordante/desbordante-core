@@ -10,7 +10,7 @@
 #include <numeric>
 #include <string>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "block_data.h"
 #include "dataset_stream_wrapper.h"
