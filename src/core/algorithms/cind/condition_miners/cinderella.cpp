@@ -1,9 +1,9 @@
 #include "cinderella.h"
 
 #include <algorithm>
-#include <iterator>
 #include <map>
 
+#include "cind/condition.h"
 #include "cind/condition_miners/basket.h"
 #include "cind/condition_type.h"
 
@@ -133,6 +133,26 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
         curr_itemsets = CreateNewItemsets(GetCandidates(curr_itemsets), baskets,
                                           included_baskets_cnt, condition_attrs, result);
     }
+
+    if (condition_type_._value == CondType::group) {
+        std::vector<Condition> filtered_result;
+        for (const auto& condition : result) {
+            for (size_t row_id = 0; row_id < condition_attrs.back()->GetNumRows(); ++row_id) {
+                bool is_matches = true;
+                for (size_t attr_id = 0; attr_id < condition_attrs.size(); ++attr_id) {
+                    if (condition.condition_attrs_values[attr_id] != kAnyValue && condition.condition_attrs_values[attr_id] != condition_attrs[attr_id]->GetStringValue(row_id)) {
+                        is_matches = false;
+                        break;
+                    }
+                }
+                if (is_matches) {
+                    filtered_result.emplace_back(condition);
+                    break;
+                }
+            }
+        }
+        return filtered_result;
+    }
     return result;
 }
 
@@ -168,9 +188,9 @@ std::set<Itemset> Cinderella::CreateNewItemsets(std::set<Itemset> candidates,
         double completeness = (double)included_contained_buskets_cnt / included_baskets_cnt;
         fprintf(stderr, ", validity: %f, completeness: %f", validity, completeness);
         // check completeness of candidate and add if it's frequent
-        if (completeness >= min_completeness_ - 1e-6) {
+        if (completeness >= min_completeness_) {
             // if candidate is valid - insert it into result itemsets.
-            if (validity >= min_validity_ - 1e-6) {
+            if (validity >= min_validity_) {
                 result.emplace_back(candidate, condition_attrs, validity, completeness);
                 fprintf(stderr, ", is in result");
             } else {
