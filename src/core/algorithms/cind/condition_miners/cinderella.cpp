@@ -12,105 +12,56 @@ Cinderella::Cinderella(config::InputTables& input_tables) : CindMiner(input_tabl
 
 CIND Cinderella::ExecuteSingle(model::IND const& aind) {
     auto attributes = ClassifyAttributes(aind);
-    auto baskets = GetBaskets(attributes);
-
-    for (auto const& basket : baskets) {
-        fprintf(stderr, "basket: [%s, (", basket.is_included ? "included" : "null");
-        for (auto const& item : basket.items) {
-            fprintf(stderr, "{%s, %s}, ",
-                    tables_.GetTable(aind.GetLhs().GetTableIndex())
-                            .GetColumnData(item.column_id)
-                            .GetColumn()
-                            ->GetName()
-                            .c_str(),
-                    tables_.GetTable(aind.GetLhs().GetTableIndex())
-                            .GetColumnData(item.column_id)
-                            .DecodeValue(item.value)
-                            .c_str());
-        }
-        fprintf(stderr, ")]\n");
-    }
-    fprintf(stderr, "\n");
     CIND cind{.ind = aind,
-              .conditions = GetConditions(baskets, attributes.conditional),
+              .conditions = GetConditions(GetBaskets(attributes), attributes.conditional),
               .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
-    fprintf(stderr, "Result:\n%s", cind.ToString().c_str());
+    fprintf(stderr, "cinderella ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return cind;
 }
 
 std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
     // algorithm uses modified left-outer join representation to build the baskets
-    fprintf(stderr, "lhs inclusion attributes: [");
-    for (auto const attr : attributes.lhs_inclusion) {
-        fprintf(stderr, "(%u, %u)", attr->GetTableId(), attr->GetColumnId());
-    }
-    fprintf(stderr, "]\n");
-    fprintf(stderr, "rhs inclusion attributes: [");
-    for (auto const attr : attributes.rhs_inclusion) {
-        fprintf(stderr, "(%u, %u)", attr->GetTableId(), attr->GetColumnId());
-    }
-    fprintf(stderr, "]\n");
-    fprintf(stderr, "conditional attributes: [");
-    for (auto const attr : attributes.conditional) {
-        fprintf(stderr, "(%u, %u)", attr->GetTableId(), attr->GetColumnId());
-    }
-    fprintf(stderr, "]\n");
     std::set<std::vector<int>> rhs_values;
 
-    fprintf(stderr, "rhs values: [");
     for (size_t index = 0; index < attributes.rhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<int> row;
-        fprintf(stderr, "{");
         for (auto& attr : attributes.rhs_inclusion) {
             row.push_back(attr->GetValue(index));
-            fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
-        fprintf(stderr, "}");
         rhs_values.insert(std::move(row));
     }
-    fprintf(stderr, "]\n");
 
     std::vector<Basket> result;
-    std::map<std::vector<int>, Basket*> baskets_by_value;
-    fprintf(stderr, "lhs values: [");
+    std::map<std::vector<int>, int> basket_id_by_value;
     for (size_t index = 0; index < attributes.lhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<int> row;
-        fprintf(stderr, "{");
         for (auto& attr : attributes.lhs_inclusion) {
             row.push_back(attr->GetValue(index));
-            fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
-        fprintf(stderr, "}");
         if (condition_type_._value == CondType::group) {
-            if (auto const& it = baskets_by_value.find(row); it == baskets_by_value.cend()) {
-                result.push_back({.is_included = rhs_values.contains(row), .items = {}});
-                baskets_by_value[row] = &result[result.size() - 1];
+            if (auto const& it = basket_id_by_value.find(row); it == basket_id_by_value.cend()) {
+                result.emplace_back(rhs_values.contains(row), std::unordered_set<Item>{});
+                basket_id_by_value[row] = result.size() - 1;
             }
+            auto basket_id = basket_id_by_value[row];
             for (auto const& cond_attr : attributes.conditional) {
-                baskets_by_value[row]->items.insert({.column_id = cond_attr->GetColumnId(),
-                                                     .value = cond_attr->GetValue(index)});
+                result[basket_id].items.emplace(cond_attr->GetColumnId(),
+                                                cond_attr->GetValue(index));
             }
         } else {
             std::unordered_set<Item> basket_items;
             for (auto const& cond_attr : attributes.conditional) {
-                basket_items.insert({.column_id = cond_attr->GetColumnId(),
-                                     .value = cond_attr->GetValue(index)});
+                basket_items.emplace(cond_attr->GetColumnId(), cond_attr->GetValue(index));
             }
-            result.push_back(
-                    {.is_included = rhs_values.contains(row), .items = std::move(basket_items)});
+            result.emplace_back(rhs_values.contains(row), std::move(basket_items));
         }
-        if (rhs_values.contains(row)) {
-            fprintf(stderr, "::included");
-        }
-        fprintf(stderr, ", ");
     }
-    fprintf(stderr, "]\n");
     return result;
 }
 
 std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& baskets,
                                                  AttrsType const& condition_attrs) const {
-    std::set<Itemset> curr_itemsets;
+    std::unordered_set<Itemset> curr_itemsets;
     // scan all included baskets to extract 2-item itemsets
     // first item is Included indicator
     // second - is a condition attribute value from included basket
@@ -137,11 +88,13 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
 
     if (condition_type_._value == CondType::group) {
         std::vector<Condition> filtered_result;
-        for (const auto& condition : result) {
+        for (auto const& condition : result) {
             for (size_t row_id = 0; row_id < condition_attrs.back()->GetNumRows(); ++row_id) {
                 bool is_matches = true;
                 for (size_t attr_id = 0; attr_id < condition_attrs.size(); ++attr_id) {
-                    if (condition.condition_attrs_values[attr_id] != kAnyValue && condition.condition_attrs_values[attr_id] != condition_attrs[attr_id]->GetStringValue(row_id)) {
+                    if (condition.condition_attrs_values[attr_id] != kAnyValue &&
+                        condition.condition_attrs_values[attr_id] !=
+                                condition_attrs[attr_id]->GetStringValue(row_id)) {
                         is_matches = false;
                         break;
                     }
@@ -157,15 +110,13 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
     return result;
 }
 
-std::set<Itemset> Cinderella::CreateNewItemsets(std::set<Itemset> candidates,
-                                                std::vector<Basket> const& baskets,
-                                                int included_baskets_cnt,
-                                                AttrsType const& condition_attrs,
-                                                std::vector<Condition>& result) const {
-    fprintf(stderr, "candidates:\n");
-    std::set<Itemset> new_itemsets;
+std::unordered_set<Itemset> Cinderella::CreateNewItemsets(std::unordered_set<Itemset> candidates,
+                                                          std::vector<Basket> const& baskets,
+                                                          int included_baskets_cnt,
+                                                          AttrsType const& condition_attrs,
+                                                          std::vector<Condition>& result) const {
+    std::unordered_set<Itemset> new_itemsets;
     for (auto& candidate : candidates) {
-        fprintf(stderr, "%s, ", candidate.ToString().c_str());
         // number of included baskets our candidate contains in
         int included_contained_buskets_cnt = 0;
         // number of all baskets our candidate contains in
@@ -187,36 +138,36 @@ std::set<Itemset> Cinderella::CreateNewItemsets(std::set<Itemset> candidates,
             validity = -1;
         }
         double completeness = (double)included_contained_buskets_cnt / included_baskets_cnt;
-        fprintf(stderr, ", validity: %f, completeness: %f", validity, completeness);
         // check completeness of candidate and add if it's frequent
         if (completeness >= min_completeness_) {
             // if candidate is valid - insert it into result itemsets.
             if (validity >= min_validity_) {
                 result.emplace_back(candidate, condition_attrs, validity, completeness);
-                fprintf(stderr, ", is in result");
-            } else {
-                fprintf(stderr, ", is frequent itemset");
             }
             new_itemsets.insert(std::move(candidate));
         }
-        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n");
     return new_itemsets;
 }
 
-std::set<Itemset> Cinderella::GetCandidates(std::set<Itemset> const& curr_itemsets) const {
-    std::set<Itemset> candidates;
+std::unordered_set<Itemset> Cinderella::GetCandidates(
+        std::unordered_set<Itemset> const& curr_itemsets) const {
+    std::unordered_set<Itemset> candidates;
     for (auto const& lhs : curr_itemsets) {
         for (auto const& rhs : curr_itemsets) {
             // Intersect method returns empty Itemset, if that operation is not valid for those two
             // itemsets
             if (auto candidate = lhs.Intersect(rhs); candidate.GetSize() != 0) {
-                std::set<Itemset> candidate_subsets = candidate.GetSubsets();
+                bool is_good_itemset = true;
+                for (auto const& subset : candidate.GetSubsets()) {
+                    if (!curr_itemsets.contains(subset)) {
+                        is_good_itemset = false;
+                        break;
+                    }
+                }
                 // if any (k-1)-subset of candidate is not presented in (k-1)-itemsets from answer -
                 // than our k-candidate is invalid. that's simple
-                if (std::includes(curr_itemsets.begin(), curr_itemsets.end(),
-                                  candidate_subsets.begin(), candidate_subsets.end())) {
+                if (is_good_itemset) {
                     candidates.insert(std::move(candidate));
                 }
             }

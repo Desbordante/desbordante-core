@@ -2,6 +2,7 @@
 
 #include "cind/condition_type.h"
 #include "table/encoded_tables.h"
+#include "timed_invoke.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)
@@ -28,30 +29,18 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
     return result;
 }
 
-void CindMiner::Execute(std::list<model::IND> const& aind_list) {
-    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_,
-            min_completeness_, condition_type_._to_string());
-    for (auto const& table : tables_.GetTables()) {
-        for (auto const& column : table->GetColumnData()) {
-            fprintf(stderr, "table = %s, column = %s, column size: %zu\n",
-                    table->GetSchema()->GetName().c_str(), column.GetColumn()->GetName().c_str(),
-                    column.GetNumRows());
-            fprintf(stderr, "column data: [");
-            for (size_t i = 0; i < column.GetNumRows(); ++i) {
-                fprintf(stderr, "'%d::%s', ", column.GetValue(i), column.GetStringValue(i).c_str());
-            }
-            fprintf(stderr, "]\n");
+unsigned long long CindMiner::Execute(std::list<model::IND> const& aind_list) {
+    auto const execute = [&] {
+        cind_collection_.Clear();
+        for (auto const& aind : aind_list) {
+            cind_collection_.Register(ExecuteSingle(aind));
         }
-        fprintf(stderr, "\n");
-    }
-    fprintf(stderr, "\n");
-
-    for (auto const& aind : aind_list) {
-        cind_collection_.Register(ExecuteSingle(aind));
-    }
+    };
+    return util::TimedInvoke(execute);
 }
 
-std::vector<std::string> CindMiner::GetConditionalAttributesNames(AttrsType const& condition_attrs) {
+std::vector<std::string> CindMiner::GetConditionalAttributesNames(
+        AttrsType const& condition_attrs) {
     if (condition_attrs.empty()) {
         return {};
     }

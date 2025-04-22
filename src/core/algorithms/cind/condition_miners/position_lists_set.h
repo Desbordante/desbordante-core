@@ -33,7 +33,6 @@ public:
     PositionListsSet(ClusterCollection clusters, size_t size, size_t relation_size);
 
     static std::shared_ptr<PositionListsSet> CreateFor(std::vector<int> const& records,
-                                                       std::vector<int> const& group_ids,
                                                        size_t relation_size);
 
     static std::shared_ptr<PositionListsSet> CreateFor(
