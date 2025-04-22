@@ -1,6 +1,6 @@
 import desbordante
 
-def check(algo1, algo2):
+def check(algo1, algo2, cond_type):
     inds1 = algo1.get_cinds()
     inds2 = algo2.get_cinds()
     assert len(inds1) == len(inds2)
@@ -12,13 +12,12 @@ def check(algo1, algo2):
         conds1 = inds1[i].to_pattern_tableau()
         conds2 = inds2[i].to_pattern_tableau()
         if (set(conds1) != set(conds2)):
-            print(i)
-            print(inds1[i])
-            print()
-            print(inds2[i])
-            print()
+            print(i, "\n")
+            print(inds1[i], "\n")
+            print(inds2[i], "\n")
         assert set(conds1) == set(conds2)
-        print("ind", i, "completed")
+        print(cond_type + ":", "ind", i, "completed")
+    print()
     
 
 algo1 = desbordante.cind.algorithms.Default()
@@ -30,15 +29,11 @@ TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for ta
 algo1.load_data(tables=TABLES,algo_type="cinderella")
 algo2.load_data(tables=TABLES,algo_type="pli_cind")
 
-algo1.execute(error=0.5, validity=1, completeness=0.33, condition_type="row")
-algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type="row")
+for cond_type in ["row", "group"]:
+    algo1.execute(error=0.5, validity=1, completeness=0.33, condition_type=cond_type)
+    algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type=cond_type)
 
-check(algo1, algo2)
-
-algo1.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
-algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
-
-check(algo1, algo2)
+    check(algo1, algo2, cond_type)
 
 
 # print(algo.time_taken())

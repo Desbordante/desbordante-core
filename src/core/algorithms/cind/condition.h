@@ -8,8 +8,6 @@
 #include "cind/condition_miners/itemset.h"
 #include "table/encoded_column_data.h"
 
-#define LOG(...) fprintf(stderr, __VA_ARGS__)
-
 namespace algos::cind {
 char const* const kAnyValue = "-";
 

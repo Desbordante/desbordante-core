@@ -30,23 +30,6 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
 
 void CindMiner::Execute(std::list<model::IND> const& aind_list) {
     cind_collection_.Clear();
-    fprintf(stderr, "validity: %lf, completeness: %lf, type: %s\n", min_validity_,
-            min_completeness_, condition_type_._to_string());
-    for (auto const& table : tables_.GetTables()) {
-        for (auto const& column : table->GetColumnData()) {
-            fprintf(stderr, "table = %s, column = %s, column size: %zu\n",
-                    table->GetSchema()->GetName().c_str(), column.GetColumn()->GetName().c_str(),
-                    column.GetNumRows());
-            fprintf(stderr, "column data: [");
-            for (size_t i = 0; i < column.GetNumRows(); ++i) {
-                fprintf(stderr, "'%d::%s', ", column.GetValue(i), column.GetStringValue(i).c_str());
-            }
-            fprintf(stderr, "]\n");
-        }
-        fprintf(stderr, "\n");
-    }
-    fprintf(stderr, "\n");
-
     for (auto const& aind : aind_list) {
         cind_collection_.Register(ExecuteSingle(aind));
     }

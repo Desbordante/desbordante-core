@@ -10,7 +10,6 @@
 #include "cind/condition.h"
 #include "cind/condition_miners/position_lists_set.h"
 #include "cind/condition_type.h"
-#include "table/column.h"
 #include "table/encoded_column_data.h"
 #include "table/table_index.h"
 
@@ -21,12 +20,6 @@ PliCind::PliCind(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
 CIND PliCind::ExecuteSingle(model::IND const& aind) {
     auto attributes = ClassifyAttributes(aind);
-    fprintf(stderr, "condition attributes: [");
-    for (auto const attr : attributes.conditional) {
-        fprintf(stderr, "%s::%s, ", attr->GetColumn()->GetSchema()->GetName().c_str(),
-                attr->GetColumn()->GetName().c_str());
-    }
-    fprintf(stderr, "]\n");
     CIND result{.ind = aind,
                 .conditions = GetConditions(attributes),
                 .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
@@ -36,23 +29,17 @@ CIND PliCind::ExecuteSingle(model::IND const& aind) {
 
 std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes const& attrs) {
     std::set<std::vector<std::string>> rhs_values;
-    fprintf(stderr, "rhs values: [");
     for (size_t index = 0; index < attrs.rhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<std::string> row;
-        fprintf(stderr, "{");
         for (auto& attr : attrs.rhs_inclusion) {
             row.push_back(attr->GetStringValue(index));
-            fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
         }
-        fprintf(stderr, "}, ");
         rhs_values.insert(std::move(row));
     }
-    fprintf(stderr, "]\n");
 
     std::vector<int> included_pos;
     std::map<std::vector<std::string>, int> group_idx;
     std::vector<int> row_to_group;
-    fprintf(stderr, "lhs values: [");
     for (size_t index = 0; index < attrs.lhs_inclusion.front()->GetNumRows(); ++index) {
         std::vector<std::string> row;
         for (auto& attr : attrs.lhs_inclusion) {
@@ -69,18 +56,10 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
                 continue;
             }
         }
-        fprintf(stderr, "{");
-        for (auto& attr : attrs.lhs_inclusion) {
-            fprintf(stderr, "%s, ", attr->GetStringValue(index).c_str());
-        }
-        fprintf(stderr, "}");
         if (rhs_values.contains(row)) {
             included_pos.push_back(row_id);
-            fprintf(stderr, "::included");
         }
-        fprintf(stderr, ", ");
     }
-    fprintf(stderr, "]\n");
     return {included_pos, row_to_group};
 }
 
@@ -97,12 +76,6 @@ std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
     if (included_pos.empty()) {
         return {};
     }
-
-    fprintf(stderr, "included positions: [");
-    for (auto const pos : included_pos) {
-        fprintf(stderr, "%d, ", pos);
-    }
-    fprintf(stderr, "]\n");
 
     MakePLs(attrs);
 
@@ -147,19 +120,6 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
             std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
                                   cluster.end(), std::back_inserter(included_cluster));
         }
-
-        // LOG("cluster: [");
-        // for (auto const& elem : cluster) {
-        //     LOG("%d, ", elem);
-        // }
-        // LOG("]\n");
-        // LOG("included_cluster: [");
-        // for (auto const& elem : included_cluster) {
-        //     LOG("%d, ", elem);
-        // }
-        // LOG("], completeness: %f, validity: %f\n",
-        // (double)included_cluster.size() / included_pos.size(),
-        // (double)included_cluster.size() / cluster_size);
         if (double completeness = (double)included_cluster.size() / included_pos.size();
             completeness >= min_completeness_) {
             good_clusters.emplace_back(cluster_value, cluster);
@@ -167,7 +127,6 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
                 validity >= min_validity_) {
                 result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, validity,
                                     completeness);
-                // LOG("Result emplaced: %s\n", result.back().ToString().c_str());
             }
         }
     }
