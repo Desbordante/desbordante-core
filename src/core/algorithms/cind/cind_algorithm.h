@@ -7,11 +7,18 @@
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {
+    /// timing information for algorithm stages
+    struct StageTimings {
+        size_t load;    /**< time taken for the data loading */
+        size_t compute; /**< time taken for the inds computing */
+        size_t total;   /**< total time taken for all stages */
+    };
+
 public:
     explicit CindAlgorithm(std::vector<std::string_view> phase_names = {});
 
     unsigned long long TimeTaken() const {
-        return time_;
+        return timings_.total;
     }
 
     std::list<model::IND> const& AINDList() const noexcept {
@@ -41,7 +48,7 @@ private:
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
 
-    unsigned long long time_;
+    StageTimings timings_;
 };
 
 }  // namespace algos::cind
