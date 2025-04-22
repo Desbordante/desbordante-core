@@ -14,12 +14,10 @@ PositionListsSet::PositionListsSet(ClusterCollection clusters, size_t size, size
 }
 
 std::shared_ptr<PositionListsSet> PositionListsSet::CreateFor(std::vector<int> const& records,
-                                                              std::vector<int> const& group_ids,
                                                               size_t relation_size) {
     ClusterCollection clusters;
     for (size_t record_id = 0; record_id < records.size(); ++record_id) {
-        clusters[{records[record_id]}].push_back(group_ids.empty() ? record_id
-                                                                   : group_ids[record_id]);
+        clusters[{records[record_id]}].push_back(record_id);
     }
     return std::make_shared<PositionListsSet>(std::move(clusters), records.size(), relation_size);
 }

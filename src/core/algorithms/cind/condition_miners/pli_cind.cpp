@@ -81,24 +81,22 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
         fprintf(stderr, ", ");
     }
     fprintf(stderr, "]\n");
-    if (condition_type_._value == CondType::group) {
-        relation_size_ = group_idx.size();
-    } else {
-        relation_size_ = attrs.lhs_inclusion.front()->GetNumRows();
-    }
     return {included_pos, row_to_group};
 }
 
-void PliCind::MakePLs(Attributes const& attrs, std::vector<int> const& row_to_group) {
+void PliCind::MakePLs(Attributes const& attrs) {
+    relation_size_ = attrs.lhs_inclusion.front()->GetNumRows();
     attr_idx_to_pls_.reserve(attrs.conditional.size());
     for (auto const& attr : attrs.conditional) {
-        attr_idx_to_pls_.push_back(
-                model::PLSet::CreateFor(attr->GetValues(), row_to_group, relation_size_));
+        attr_idx_to_pls_.push_back(model::PLSet::CreateFor(attr->GetValues(), relation_size_));
     }
 }
 
 std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
     auto const& [included_pos, row_to_group] = ClassifyRows(attrs);
+    if (included_pos.empty()) {
+        return {};
+    }
 
     fprintf(stderr, "included positions: [");
     for (auto const pos : included_pos) {
@@ -106,11 +104,12 @@ std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
     }
     fprintf(stderr, "]\n");
 
-    MakePLs(attrs, row_to_group);
+    MakePLs(attrs);
 
     std::vector<Condition> result;
     for (size_t attr_idx = 0; attr_idx < attrs.conditional.size(); ++attr_idx) {
-        auto conditions = Analyze(attr_idx, {}, nullptr, attrs.conditional, included_pos);
+        auto conditions =
+                Analyze(attr_idx, {}, nullptr, attrs.conditional, row_to_group, included_pos);
         for (auto& cond : conditions) {
             result.push_back(std::move(cond));
         }
@@ -121,6 +120,7 @@ std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
 
 std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_attrs,
                                         PLSetShared const& curr_pls, AttrsType const& cond_attrs,
+                                        std::vector<int> const& row_to_group,
                                         std::vector<int> const& included_pos) {
     std::vector<int> new_curr_attrs = curr_attrs;
     new_curr_attrs.push_back(attr_idx);
@@ -133,42 +133,50 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
     std::vector<PLSet::ClusterCollection::value_type> good_clusters;
     for (auto& [cluster_value, cluster] : curr_comb_pls->GetClusters()) {
         std::vector<int> included_cluster;
-        // both included_pos and cluster are sorted
-        std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
-                              cluster.end(), std::back_inserter(included_cluster));
+        size_t cluster_size = cluster.size();
+        if (condition_type_._value == CondType::group) {
+            std::set<int> group_cluster;
+            for (int row_id : cluster) {
+                group_cluster.insert(row_to_group[row_id]);
+            }
+            std::set_intersection(included_pos.begin(), included_pos.end(), group_cluster.begin(),
+                                  group_cluster.end(), std::back_inserter(included_cluster));
+            cluster_size = group_cluster.size();
+        } else {
+            // both included_pos and cluster are sorted
+            std::set_intersection(included_pos.begin(), included_pos.end(), cluster.begin(),
+                                  cluster.end(), std::back_inserter(included_cluster));
+        }
+
+        // LOG("cluster: [");
+        // for (auto const& elem : cluster) {
+        //     LOG("%d, ", elem);
+        // }
+        // LOG("]\n");
+        // LOG("included_cluster: [");
+        // for (auto const& elem : included_cluster) {
+        //     LOG("%d, ", elem);
+        // }
+        // LOG("], completeness: %f, validity: %f\n",
+        // (double)included_cluster.size() / included_pos.size(),
+        // (double)included_cluster.size() / cluster_size);
         if (double completeness = (double)included_cluster.size() / included_pos.size();
             completeness >= min_completeness_) {
-            // LOG("included_pos: [");
-            // for (const auto & elem : included_pos) {
-            //     LOG("%d, ", elem);
-            // }
-            // LOG("]\n");
-            // LOG("cluster: [");
-            // for (const auto & elem : cluster) {
-            //     LOG("%d, ", elem);
-            // }
-            // LOG("]\n");
-            // LOG("included_cluster: [");
-            // for (const auto & elem : included_cluster) {
-            //     LOG("%d, ", elem);
-            // }
-            // LOG("], completeness: %f, validity: %f\n", (double)included_cluster.size() / included_pos.size(), (double)included_cluster.size() / cluster.size());
             good_clusters.emplace_back(cluster_value, cluster);
-            if (double validity = (double)included_cluster.size() / cluster.size();
+            if (double validity = (double)included_cluster.size() / cluster_size;
                 validity >= min_validity_) {
                 result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, validity,
                                     completeness);
                 // LOG("Result emplaced: %s\n", result.back().ToString().c_str());
             }
-            // LOG("\n");
         }
     }
     if (!good_clusters.empty()) {
         PLSetShared new_curr_pls = PLSet::CreateFor(std::move(good_clusters), relation_size_);
         for (size_t next_attr_idx = attr_idx + 1; next_attr_idx < cond_attrs.size();
              ++next_attr_idx) {
-            auto conditions =
-                    Analyze(next_attr_idx, new_curr_attrs, new_curr_pls, cond_attrs, included_pos);
+            auto conditions = Analyze(next_attr_idx, new_curr_attrs, new_curr_pls, cond_attrs,
+                                      row_to_group, included_pos);
 
             for (auto& cond : conditions) {
                 result.push_back(std::move(cond));

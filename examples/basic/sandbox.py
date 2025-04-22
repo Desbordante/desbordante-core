@@ -35,7 +35,6 @@ algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type="row")
 
 check(algo1, algo2)
 
-
 algo1.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
 algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type="group")
 

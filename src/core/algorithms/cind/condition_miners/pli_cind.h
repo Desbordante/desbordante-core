@@ -23,12 +23,13 @@ public:
 
 private:
     CIND ExecuteSingle(model::IND const& aind) final;
-    void MakePLs(Attributes const& attrs, std::vector<int> const& row_to_group);
+    void MakePLs(Attributes const& attrs);
 
     std::pair<std::vector<int>, std::vector<int>> ClassifyRows(Attributes const& attrs);
 
     std::vector<Condition> Analyze(size_t attr_idx, std::vector<int> curr_attrs,
                                    PLSetShared const& curr_pls, AttrsType const& cond_attrs,
+                                   std::vector<int> const& row_to_group,
                                    std::vector<int> const& included_pos);
 
     void Reset();
