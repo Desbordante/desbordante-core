@@ -36,7 +36,7 @@ std::shared_ptr<PositionListsSet> PositionListsSet::CreateFor(
 
 std::shared_ptr<std::vector<int> const> PositionListsSet::CalculateAndGetProbingTable() {
     cluster_values_cache_.clear();
-    std::vector<int> probing_table = std::vector<int>(relation_size_);
+    std::vector<int> probing_table(relation_size_);
     int next_cluster_id = 0;
     for (auto& [value, cluster] : clusters_) {
         int value_id = next_cluster_id++;
