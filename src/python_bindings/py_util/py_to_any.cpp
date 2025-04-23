@@ -1,3 +1,4 @@
+#include <association_rules/ar_verifier/ar_verifier.h>
 #include <functional>
 #include <unordered_map>
 
