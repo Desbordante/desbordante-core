@@ -49,10 +49,10 @@ struct ARVerifyingParams {
                   {onam::kFirstColumnTId, dataset.first_col_tid}}) {}
 };
 
-const SingularDataset kRulesBookSingular{kRulesBook, 0, 1};
-const SingularDataset kRulesPresentationSingular{kRulesPresentation, 0, 1};
-const SingularDataset kRulesPresentationExtSingular{kRulesPresentationExtended, 0, 1};
-const TabularDataset kRulesKaggleRowsTabular{kRulesKaggleRows, true};
+SingularDataset const kRulesBookSingular{kRulesBook, 0, 1};
+SingularDataset const kRulesPresentationSingular{kRulesPresentation, 0, 1};
+SingularDataset const kRulesPresentationExtSingular{kRulesPresentationExtended, 0, 1};
+TabularDataset const kRulesKaggleRowsTabular{kRulesKaggleRows, true};
 
 class TestARVerifying : public ::testing::TestWithParam<ARVerifyingParams> {};
 
@@ -62,7 +62,7 @@ TEST_P(TestARVerifying, DefaultTest) {
     verifier->Execute();
     EXPECT_TRUE(verifier->ARHolds());
 }
-
+// clang-format off
 INSTANTIATE_TEST_SUITE_P(
     ARVerifyingTestSingular, TestARVerifying,
     ::testing::Values(
@@ -96,11 +96,12 @@ INSTANTIATE_TEST_SUITE_P(
         ARVerifyingParams(kRulesKaggleRowsTabular,
                          {.left={"SUGER"}, .right={"CORNFLAKES"}, .min_sup=0.05, .min_conf=0.1})
     ));
-
+// clang-format on
 class TestARVerifierError : public ::testing::Test {
 protected:
     static void CreateAndExecute(ARVerifyingParams const& params) {
-        auto verifier = algos::CreateAndLoadAlgorithm<algos::ar_verifier::ARVerifier>(params.params);
+        auto verifier =
+                algos::CreateAndLoadAlgorithm<algos::ar_verifier::ARVerifier>(params.params);
         verifier->Execute();
     }
 };

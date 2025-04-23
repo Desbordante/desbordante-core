@@ -7,6 +7,7 @@
 #include "config/tabular_data/input_table/option.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_index.h"
+#include "model/transaction/transactional_data.h"
 
 namespace config {
 
