@@ -1,0 +1,8 @@
+format:
+  tab_size: 4
+  line_width: 100
+  # If a statement is wrapped to more than one line, then dangle
+  # the closing parenthesis on its own line.
+  dangle_parens: true
+markup:
+  enable_markup: false
