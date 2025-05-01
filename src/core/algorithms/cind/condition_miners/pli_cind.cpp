@@ -1,5 +1,6 @@
 #include "pli_cind.h"
 
+#include <algorithm>
 #include <map>
 #include <set>
 #include <unistd.h>
@@ -24,6 +25,7 @@ CIND PliCind::ExecuteSingle(model::IND const& aind) {
                 .conditions = GetConditions(attributes),
                 .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
     Reset();
+    fprintf(stderr, "pli_cind ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return result;
 }
 
@@ -36,7 +38,7 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
         }
         rhs_values.insert(std::move(row));
     }
-
+    //  included row_id for rows, group_id for groups
     std::vector<int> included_pos;
     std::map<std::vector<std::string>, int> group_idx;
     std::vector<int> row_to_group;
@@ -45,19 +47,19 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
         for (auto& attr : attrs.lhs_inclusion) {
             row.push_back(attr->GetStringValue(index));
         }
-        int row_id = index;
+        int included_pos_id = index;
         if (condition_type_._value == CondType::group) {
             if (auto const& it = group_idx.find(row); it == group_idx.end()) {
-                row_id = group_idx.size();
-                group_idx[row] = row_id;
-                row_to_group.push_back(row_id);
+                included_pos_id = group_idx.size();
+                group_idx[row] = included_pos_id;
+                row_to_group.push_back(included_pos_id);
             } else {
                 row_to_group.push_back(it->second);
                 continue;
             }
         }
         if (rhs_values.contains(row)) {
-            included_pos.push_back(row_id);
+            included_pos.push_back(included_pos_id);
         }
     }
     return {included_pos, row_to_group};
@@ -80,9 +82,10 @@ std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
     MakePLs(attrs);
 
     std::vector<Condition> result;
+    std::vector<int> empty_attrs;
     for (size_t attr_idx = 0; attr_idx < attrs.conditional.size(); ++attr_idx) {
-        auto conditions =
-                Analyze(attr_idx, {}, nullptr, attrs.conditional, row_to_group, included_pos);
+        auto conditions = Analyze(attr_idx, empty_attrs, nullptr, attrs.conditional, row_to_group,
+                                  included_pos);
         for (auto& cond : conditions) {
             result.push_back(std::move(cond));
         }
@@ -91,7 +94,7 @@ std::vector<Condition> PliCind::GetConditions(Attributes const& attrs) {
     return result;
 }
 
-std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_attrs,
+std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> const& curr_attrs,
                                         PLSetShared const& curr_pls, AttrsType const& cond_attrs,
                                         std::vector<int> const& row_to_group,
                                         std::vector<int> const& included_pos) {
@@ -110,7 +113,7 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
         if (condition_type_._value == CondType::group) {
             std::set<int> group_cluster;
             for (int row_id : cluster) {
-                group_cluster.insert(row_to_group[row_id]);
+                group_cluster.insert(row_to_group.at(row_id));
             }
             std::set_intersection(included_pos.begin(), included_pos.end(), group_cluster.begin(),
                                   group_cluster.end(), std::back_inserter(included_cluster));
@@ -136,7 +139,6 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> curr_a
              ++next_attr_idx) {
             auto conditions = Analyze(next_attr_idx, new_curr_attrs, new_curr_pls, cond_attrs,
                                       row_to_group, included_pos);
-
             for (auto& cond : conditions) {
                 result.push_back(std::move(cond));
             }

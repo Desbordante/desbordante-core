@@ -22,28 +22,37 @@ def check(algo1, algo2, cond_type):
 
 algo1 = desbordante.cind.algorithms.Default()
 algo2 = desbordante.cind.algorithms.Default()
+algo3 = desbordante.cind.algorithms.Default()
+algo4 = desbordante.cind.algorithms.Default()
 
+# TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
+#           ['anime_prep', 'manga_prep']]
 TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
-          ['cind_test_de', 'cind_test_en']]
+          ['names_prep', 'states_prep']]
+# TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
+#           ['cind_test_de', 'cind_test_en']]
 
-algo1.load_data(tables=TABLES,algo_type="cinderella")
-algo2.load_data(tables=TABLES,algo_type="pli_cind")
+# algo1.load_data(tables=TABLES,algo_type="cinderella")
+# algo2.load_data(tables=TABLES,algo_type="cinderella")
+algo3.load_data(tables=TABLES,algo_type="pli_cind")
+algo4.load_data(tables=TABLES,algo_type="pli_cind")
+# VALIDITY = 0.8
+VALIDITY = 0.95
+# COMPLETENESS = 0.005
+COMPLETENESS = 0.05
 
-for cond_type in ["row", "group"]:
-    algo1.execute(error=0.5, validity=1, completeness=0.33, condition_type=cond_type)
-    algo2.execute(error=0.5, validity=1, completeness=0.33, condition_type=cond_type)
 
-    check(algo1, algo2, cond_type)
+# algo1.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="row")
+# algo2.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="group")
+algo3.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="row")
+algo4.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="group")
+
+# for cond_type in [
+#     "row",
+#     # "group"
+#     ]:
+#     algo1.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type=cond_type)
+#     algo2.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type=cond_type)
+#     check(algo1, algo2, cond_type)
 
 
-# print(algo.time_taken())
-# algo.execute()
-# print(algo.time_taken())
-# algo.execute(error=0.5, validity=0.111, completeness=0.222, condition_type="group")
-# print(algo.time_taken())
-# algo.execute(error=0.5)
-# print(algo.time_taken())
-# inds = algo.get_ainds()
-# print('Found inclusion dependencies (-> means "is included in"):\n')
-# for ind in inds:
-#     print(ind)

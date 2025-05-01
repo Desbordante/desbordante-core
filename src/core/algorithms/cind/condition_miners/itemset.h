@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <set>
 #include <string>
 #include <vector>
@@ -101,9 +102,15 @@ public:
         return result;
     }
 
+    bool operator==(Itemset const& other) const {
+        return is_included_ == other.is_included_ && data_ == other.data_;
+    }
+
 private:
     std::vector<Item> data_;
     bool is_included_ = false;
+
+    friend std::hash<algos::cind::Itemset>;
 };
 }  // namespace algos::cind
 
@@ -113,6 +120,18 @@ struct std::hash<algos::cind::Item> {
         size_t hash = 0;
         boost::hash_combine(hash, boost::hash_value(item.column_id));
         boost::hash_combine(hash, boost::hash_value(item.value));
+        return hash;
+    }
+};
+
+template <>
+struct std::hash<algos::cind::Itemset> {
+    size_t operator()(algos::cind::Itemset const& itemset) const {
+        std::hash<algos::cind::Item> item_hasher;
+        size_t hash = 0;
+        for (auto const& item : itemset.data_) {
+            boost::hash_combine(hash, item_hasher(item));
+        }
         return hash;
     }
 };

@@ -15,6 +15,7 @@ CIND Cinderella::ExecuteSingle(model::IND const& aind) {
     CIND cind{.ind = aind,
               .conditions = GetConditions(GetBaskets(attributes), attributes.conditional),
               .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
+    fprintf(stderr, "cinderella ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return cind;
 }
 
@@ -60,7 +61,7 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
 
 std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& baskets,
                                                  AttrsType const& condition_attrs) const {
-    std::set<Itemset> curr_itemsets;
+    std::unordered_set<Itemset> curr_itemsets;
     // scan all included baskets to extract 2-item itemsets
     // first item is Included indicator
     // second - is a condition attribute value from included basket
@@ -87,11 +88,13 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
 
     if (condition_type_._value == CondType::group) {
         std::vector<Condition> filtered_result;
-        for (const auto& condition : result) {
+        for (auto const& condition : result) {
             for (size_t row_id = 0; row_id < condition_attrs.back()->GetNumRows(); ++row_id) {
                 bool is_matches = true;
                 for (size_t attr_id = 0; attr_id < condition_attrs.size(); ++attr_id) {
-                    if (condition.condition_attrs_values[attr_id] != kAnyValue && condition.condition_attrs_values[attr_id] != condition_attrs[attr_id]->GetStringValue(row_id)) {
+                    if (condition.condition_attrs_values[attr_id] != kAnyValue &&
+                        condition.condition_attrs_values[attr_id] !=
+                                condition_attrs[attr_id]->GetStringValue(row_id)) {
                         is_matches = false;
                         break;
                     }
@@ -107,12 +110,12 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
     return result;
 }
 
-std::set<Itemset> Cinderella::CreateNewItemsets(std::set<Itemset> candidates,
-                                                std::vector<Basket> const& baskets,
-                                                int included_baskets_cnt,
-                                                AttrsType const& condition_attrs,
-                                                std::vector<Condition>& result) const {
-    std::set<Itemset> new_itemsets;
+std::unordered_set<Itemset> Cinderella::CreateNewItemsets(std::unordered_set<Itemset> candidates,
+                                                          std::vector<Basket> const& baskets,
+                                                          int included_baskets_cnt,
+                                                          AttrsType const& condition_attrs,
+                                                          std::vector<Condition>& result) const {
+    std::unordered_set<Itemset> new_itemsets;
     for (auto& candidate : candidates) {
         // number of included baskets our candidate contains in
         int included_contained_buskets_cnt = 0;
@@ -147,18 +150,24 @@ std::set<Itemset> Cinderella::CreateNewItemsets(std::set<Itemset> candidates,
     return new_itemsets;
 }
 
-std::set<Itemset> Cinderella::GetCandidates(std::set<Itemset> const& curr_itemsets) const {
-    std::set<Itemset> candidates;
+std::unordered_set<Itemset> Cinderella::GetCandidates(
+        std::unordered_set<Itemset> const& curr_itemsets) const {
+    std::unordered_set<Itemset> candidates;
     for (auto const& lhs : curr_itemsets) {
         for (auto const& rhs : curr_itemsets) {
             // Intersect method returns empty Itemset, if that operation is not valid for those two
             // itemsets
             if (auto candidate = lhs.Intersect(rhs); candidate.GetSize() != 0) {
-                std::set<Itemset> candidate_subsets = candidate.GetSubsets();
+                bool is_good_itemset = true;
+                for (auto const& subset : candidate.GetSubsets()) {
+                    if (!curr_itemsets.contains(subset)) {
+                        is_good_itemset = false;
+                        break;
+                    }
+                }
                 // if any (k-1)-subset of candidate is not presented in (k-1)-itemsets from answer -
                 // than our k-candidate is invalid. that's simple
-                if (std::includes(curr_itemsets.begin(), curr_itemsets.end(),
-                                  candidate_subsets.begin(), candidate_subsets.end())) {
+                if (is_good_itemset) {
                     candidates.insert(std::move(candidate));
                 }
             }

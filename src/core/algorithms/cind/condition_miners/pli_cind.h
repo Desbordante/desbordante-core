@@ -27,7 +27,7 @@ private:
 
     std::pair<std::vector<int>, std::vector<int>> ClassifyRows(Attributes const& attrs);
 
-    std::vector<Condition> Analyze(size_t attr_idx, std::vector<int> curr_attrs,
+    std::vector<Condition> Analyze(size_t attr_idx, std::vector<int> const& curr_attrs,
                                    PLSetShared const& curr_pls, AttrsType const& cond_attrs,
                                    std::vector<int> const& row_to_group,
                                    std::vector<int> const& included_pos);
