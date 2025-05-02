@@ -1,15 +1,16 @@
 #include "create_type.h"
 
-#include "big_int_type.h"
-#include "date_type.h"
-#include "double_type.h"
-#include "empty_type.h"
-#include "int_type.h"
-#include "mixed_type.h"
-#include "null_type.h"
-#include "numeric_type.h"
-#include "string_type.h"
-#include "undefined_type.h"
+#include <string>  // for operator+, string
+
+#include "big_int_type.h"    // for BigIntType
+#include "date_type.h"       // for DateType
+#include "double_type.h"     // for DoubleType
+#include "empty_type.h"      // for EmptyType
+#include "int_type.h"        // for IntType
+#include "mixed_type.h"      // for MixedType
+#include "null_type.h"       // for NullType
+#include "string_type.h"     // for StringType
+#include "undefined_type.h"  // for UndefinedType
 
 namespace model {
 

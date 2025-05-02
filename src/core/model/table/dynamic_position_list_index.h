@@ -1,11 +1,14 @@
 #pragma once
-#include <memory>
-#include <unordered_map>
-#include <vector>
 
-#include "model/table/column.h"
-
-class ColumnLayoutRelationData;
+#include <cstddef>        // for size_t
+#include <memory>         // for shared_ptr, unique_ptr
+#include <optional>       // for optional
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair
+#include <variant>        // for hash
+#include <vector>         // for vector
 
 template <>
 struct std::hash<std::vector<int>> {

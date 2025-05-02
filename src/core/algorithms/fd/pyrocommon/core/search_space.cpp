@@ -1,5 +1,7 @@
 #include "search_space.h"
 
+#include "custom_hashes.h"
+
 #include <queue>
 
 #include <easylogging++.h>

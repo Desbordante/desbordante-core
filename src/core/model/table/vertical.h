@@ -5,13 +5,16 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <memory>  // for unique_ptr
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
 
-#include "column.h"
+#include "column.h"  // for Column
+
+class RelationalSchema;
 
 class Vertical {
 private:
