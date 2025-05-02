@@ -15,7 +15,7 @@
 #include "item.h"
 
 namespace algos::cind {
-using BasketInfo = std::pair<size_t, bool>;
+using BasketInfo = std::tuple<size_t, size_t, bool>;
 
 class ItemsetNode : public std::enable_shared_from_this<ItemsetNode> {
 public:
@@ -33,15 +33,22 @@ public:
 
     std::shared_ptr<ItemsetNode> CreateChild(Item value, std::list<BasketInfo> baskets_info,
                                              size_t included_baskets_cnt, double min_completeness) {
-        double included_contained_baskets_cnt = 0;
-        for (auto const& [_, is_included] : baskets_info) {
-            included_contained_baskets_cnt += is_included;
+        std::unordered_set<size_t> included_baskets_ids;
+        std::unordered_set<size_t> baskets_ids;
+        for (auto const& [_, real_id, is_included] : baskets_info) {
+            if (is_included) {
+                // logg("%zu : %zu\n", _, real_id);
+                included_baskets_ids.insert(real_id);
+            }
+            baskets_ids.insert(real_id);
         }
+        // logg("%zu\n\n\n", included_baskets_ids.size());
+        double included_contained_baskets_cnt = included_baskets_ids.size();
         double completeness = included_contained_baskets_cnt / included_baskets_cnt;
         if (completeness >= min_completeness) {
             double validity = -1;
             if (baskets_info.size()) {
-                validity = included_contained_baskets_cnt / baskets_info.size();
+                validity = included_contained_baskets_cnt / baskets_ids.size();
             }
             std::shared_ptr<ItemsetNode> new_element =
                     std::make_shared<ItemsetNode>(shared_from_this(), std::move(value),

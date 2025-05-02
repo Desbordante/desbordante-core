@@ -7,6 +7,7 @@
 namespace algos::cind {
 struct Basket {
     bool is_included;
+    size_t real_id;
     std::unordered_set<Item> items{};
 
     bool IsContains(const Item& item) const {
