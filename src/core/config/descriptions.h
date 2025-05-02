@@ -81,8 +81,7 @@ constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0
 constexpr auto kDCfdMinimumSupport =
         "minimum support value (integer number "
         "between 1 and number of tuples in dataset)";
-constexpr auto kDCFDRuleLeft = "CFD left rule";
-constexpr auto kDCFDRuleRight = "CFD right rule";
+constexpr auto kDCFDRule = "CFD rule";
 auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 // CORDS
 constexpr auto kDDelta =
