@@ -1,11 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
 
-#include "cind/condition_miners/itemset.h"
+#include "cind/condition_miners/itemset_node.h"
 #include "table/encoded_column_data.h"
 
 namespace algos::cind {
@@ -16,23 +17,20 @@ struct Condition {
     double validity;
     double completeness;
 
-    Condition(Itemset itemset, std::vector<model::EncodedColumnData const*> const& condition_attrs,
-              double _validity, double _completeness)
-        : validity(_validity), completeness(_completeness) {
-        condition_attrs_values.reserve(condition_attrs.size());
-        size_t item_id = 0;
-        for (size_t column_id = 0; column_id < condition_attrs.size(); ++column_id) {
+    Condition(std::shared_ptr<ItemsetNode> itemset,
+              std::vector<model::EncodedColumnData const*> const& condition_attrs)
+        : validity(itemset->GetValidity()), completeness(itemset->GetCompleteness()) {
+        condition_attrs_values.resize(condition_attrs.size(), kAnyValue);
+        ItemsetNode const* item_ptr = itemset.get();
+        for (size_t column_id = condition_attrs.size() - 1; column_id >= 0; --column_id) {
             auto const& attribute = condition_attrs[column_id];
-            while (item_id < itemset.GetSize() &&
-                   attribute->GetColumnId() > itemset.GetItem(item_id).column_id) {
-                ++item_id;
-            }
-            if (item_id < itemset.GetSize() &&
-                attribute->GetColumnId() == itemset.GetItem(item_id).column_id) {
-                condition_attrs_values.push_back(
-                        attribute->DecodeValue(itemset.GetItem(item_id++).value));
-            } else {
-                condition_attrs_values.push_back(kAnyValue);
+            if (auto const& item = item_ptr->GetValue();
+                attribute->GetColumnId() == item.column_id) {
+                condition_attrs_values[column_id] = attribute->DecodeValue(item.value);
+                item_ptr = item_ptr->GetParent().get();
+                if (item_ptr->GetParent() == nullptr) {
+                    break;
+                }
             }
         }
     }

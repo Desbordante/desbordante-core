@@ -1,21 +1,19 @@
 #pragma once
 
-#include <unordered_set>
+#include <list>
+#include <unordered_map>
 
-#include "itemset.h"
+#include "item.h"
 
 namespace algos::cind {
+using ItemsInfo = std::unordered_map<Item, std::list<size_t>>;
+
 struct Basket {
     bool is_included;
-    std::unordered_set<Item> items{};
+    ItemsInfo items{};
 
-    bool IsContains(const Itemset& itemset) const {
-        for (size_t index = 0; index < itemset.GetSize(); ++index) {
-            if (const auto &item = itemset.GetItem(index); !items.contains(item)) {
-                return false;
-            }
-        }
-        return true;
+    bool IsContains(const Item& item) const {
+        return items.contains(item);
     }
 };
 }  // namespace algos::cind

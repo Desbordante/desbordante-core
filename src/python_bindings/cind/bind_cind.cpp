@@ -36,13 +36,15 @@ void BindCind(py::module_& main_module) {
             .def("__str__", &CIND::ToString)
             .def("__eq__", [](CIND const& cind1, CIND const& cind2) { return cind1 == cind2; })
             .def("__hash__", [](CIND const& cind) { return py::hash(py::int_(cind.Hash())); })
-            .def("to_pattern_tableau", [](CIND const& cind) {
+            .def("conditions_number", &CIND::ConditionsNumber)
+            .def("get_conditions", [](CIND const& cind) {
                 py::set result;
                 for (auto const& cond : cind.conditions) {
                     result.add(VectorToTuple(cond.condition_attrs_values));
                 }
                 return result;
-            }).def("get_condition_attributes", [](CIND const& cind) {
+            })
+            .def("get_condition_attributes", [](CIND const& cind) {
                 return VectorToTuple(cind.conditional_attributes);
             });
 
