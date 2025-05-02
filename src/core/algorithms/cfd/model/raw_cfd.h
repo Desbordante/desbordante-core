@@ -20,8 +20,14 @@ public:
             return value;
         }
 
+        std::string ToString() const;
+
         AttributeIndex attribute;         /* attribute column index */
         std::optional<std::string> value; /* pattern value is optional */
+
+        bool operator==(RawItem const& other) const {
+            return attribute == other.attribute && value == other.value;
+        }
     };
 
     using RawItems = std::vector<RawItem>;
@@ -33,6 +39,8 @@ private:
 public:
     explicit RawCFD(RawItems lhs, RawItem rhs) : lhs_(std::move(lhs)), rhs_(std::move(rhs)) {}
 
+    RawCFD() = default;
+
     std::string ToJSON() const;
 
     std::string ToString() const;
@@ -43,6 +51,10 @@ public:
 
     RawItem const& GetRhs() const {
         return rhs_;
+    }
+
+    bool operator==(RawCFD const& other) const {
+        return lhs_ == other.lhs_ && rhs_ == other.rhs_;
     }
 };
 
