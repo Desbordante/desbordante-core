@@ -12,7 +12,9 @@ struct CIND {
 
     std::string ToString() const {
         std::string result = ind.ToLongString();
-        result.append("\nPossible conditions:\n\t(");
+        result.append("\nPossible conditions number: ");
+        result.append(std::to_string(conditions.size()));
+        result.append("Possible conditions:\n\t(");
         for (auto const& attr : conditional_attributes) {
             result.append(attr).append(", ");
         }
@@ -22,6 +24,10 @@ struct CIND {
             result.append("\t").append(condition.ToString()).append(";\n");
         }
         return result;
+    }
+
+    size_t ConditionsNumber() const noexcept {
+        return conditions.size();
     }
 
     bool operator==(const CIND& that) const {

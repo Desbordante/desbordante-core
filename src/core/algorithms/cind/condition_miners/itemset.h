@@ -1,16 +1,8 @@
 #pragma once
 
-#include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <functional>
 #include <list>
 #include <memory>
-#include <unordered_set>
-#include <utility>
 #include <vector>
-
-#include <boost/container_hash/hash.hpp>
 
 #include "itemset_node.h"
 
@@ -78,7 +70,5 @@ private:
     double min_completeness_;
     std::vector<std::shared_ptr<ItemsetNode>> prev_layer_data_;
     std::vector<std::shared_ptr<ItemsetNode>> last_layer_data_;
-
-    friend std::hash<algos::cind::Itemset>;
 };
 }  // namespace algos::cind

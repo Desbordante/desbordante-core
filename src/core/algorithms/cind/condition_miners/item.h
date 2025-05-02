@@ -1,15 +1,8 @@
 #pragma once
 
-#include <cassert>
-#include <cstddef>
-#include <functional>
-#include <string>
-
 #include <boost/container_hash/hash.hpp>
 
 #include "table/column_index.h"
-
-#define logg(...) fprintf(stderr, __VA_ARGS__)
 
 namespace algos::cind {
 struct Item {
@@ -25,10 +18,6 @@ struct Item {
             return this->column_id < that.column_id;
         }
         return this->value < that.value;
-    }
-
-    std::string ToString() const noexcept {
-        return "{" + std::to_string(column_id) + ", " + std::to_string(value) + "}";
     }
 };
 }  // namespace algos::cind

@@ -1,13 +1,9 @@
 #pragma once
 
 #include <algorithm>
-#include <cassert>
-#include <cstddef>
-#include <functional>
 #include <list>
 #include <memory>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
@@ -15,7 +11,7 @@
 #include "item.h"
 
 namespace algos::cind {
-using BasketInfo = std::tuple<size_t, std::vector<size_t>, bool>;
+using BasketInfo = std::tuple<size_t, std::list<size_t>, bool>;
 
 class ItemsetNode : public std::enable_shared_from_this<ItemsetNode> {
 public:
@@ -27,17 +23,12 @@ public:
           completeness_(completeness),
           parent_node_(std::move(parent)) {}
 
-    ~ItemsetNode() {
-        // fprintf(stderr, "deleted instance: %s\n", value_.ToString().c_str());
-    }
-
     std::shared_ptr<ItemsetNode> CreateChild(Item value, std::list<BasketInfo> baskets_info,
                                              size_t included_baskets_cnt, double min_completeness) {
         double included_contained_baskets_cnt = 0;
         for (auto const& [_, real_id, is_included] : baskets_info) {
             included_contained_baskets_cnt += is_included;
         }
-        // logg("%zu\n\n\n", included_baskets_ids.size());
         double completeness = included_contained_baskets_cnt / included_baskets_cnt;
         if (completeness >= min_completeness) {
             double validity = -1;
