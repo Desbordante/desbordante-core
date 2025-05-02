@@ -1,13 +1,36 @@
 #include "cinderella.h"
 
-#include <algorithm>
 #include <map>
+#include <tuple>
 
 #include "cind/condition.h"
 #include "cind/condition_miners/basket.h"
 #include "cind/condition_type.h"
 
 namespace algos::cind {
+namespace {
+std::list<BasketInfo> MergeBaskets(std::list<BasketInfo> const& baskets1,
+                                   std::list<BasketInfo> const& baskets2) {
+    // logg("MergeBaskets begin\n");
+    auto it1 = baskets1.begin();
+    auto it2 = baskets2.begin();
+    std::list<BasketInfo> result;
+    while (it1 != baskets1.end() && it2 != baskets2.end()) {
+        if (it1->first < it2->first) {
+            ++it1;
+        } else if (it1->first > it2->first) {
+            ++it2;
+        } else {
+            result.push_back(*it1);
+            ++it1;
+            ++it2;
+        }
+    }
+    // logg("MergeBaskets end\n");
+    return result;
+}
+}  // namespace
+
 Cinderella::Cinderella(config::InputTables& input_tables) : CindMiner(input_tables) {}
 
 CIND Cinderella::ExecuteSingle(model::IND const& aind) {
@@ -61,30 +84,48 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
 
 std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& baskets,
                                                  AttrsType const& condition_attrs) const {
-    std::unordered_set<Itemset> curr_itemsets;
-    // scan all included baskets to extract 2-item itemsets
-    // first item is Included indicator
-    // second - is a condition attribute value from included basket
-
+    // logg("GetConditions begin\n");
+    std::unordered_map<Item, std::list<BasketInfo>> first_level_items;
+    // scan all included baskets to extract all included items
     // number of all included baskets - needed for computing completeness of conditions
     int included_baskets_cnt = 0;
     for (auto const& basket : baskets) {
         if (!basket.is_included) continue;
         ++included_baskets_cnt;
         for (auto const& item : basket.items) {
-            curr_itemsets.emplace(std::vector<Item>{item}, true);
+            first_level_items.try_emplace(item, std::list<BasketInfo>{});
         }
     }
+    // logg("GetConditions 1\n");
+
+    for (size_t basket_id = 0; basket_id < baskets.size(); ++basket_id) {
+        auto const& basket = baskets.at(basket_id);
+        for (auto const& item : basket.items) {
+            if (const auto &it = first_level_items.find(item); it != first_level_items.end()) {
+                it->second.emplace_back(basket_id, basket.is_included);
+            }
+        }
+    }
+    // logg("GetConditions 2\n");
+
     // result stores all frequent and valid itemsets
     std::vector<Condition> result;
-    // we need to keep only frequent 2-itemsets
-    curr_itemsets = CreateNewItemsets(curr_itemsets, baskets, included_baskets_cnt, condition_attrs,
-                                      result);
-    while (!curr_itemsets.empty()) {
-        // create k-sized candidates and keep only frequent of them
-        curr_itemsets = CreateNewItemsets(GetCandidates(curr_itemsets), baskets,
-                                          included_baskets_cnt, condition_attrs, result);
+
+    Itemset itemset(std::move(first_level_items), included_baskets_cnt, min_completeness_);
+    // logg("GetConditions 3\n");
+    while (!itemset.GetItems().empty()) {
+        // logg("GetConditions 4.1\n");
+        for (auto candidate : itemset.GetItems()) {
+            if (candidate->GetValidity() >= min_validity_) {
+                result.emplace_back(candidate, condition_attrs);
+            }
+        }
+        // logg("GetConditions 4.2\n");
+
+        CreateNewItemsets(itemset);
+        // logg("GetConditions 4.3\n");
     }
+    // logg("GetConditions 5\n");
 
     if (condition_type_._value == CondType::group) {
         std::vector<Condition> filtered_result;
@@ -107,72 +148,42 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
         }
         return filtered_result;
     }
+    // logg("GetConditions end\n");
     return result;
 }
 
-std::unordered_set<Itemset> Cinderella::CreateNewItemsets(std::unordered_set<Itemset> candidates,
-                                                          std::vector<Basket> const& baskets,
-                                                          int included_baskets_cnt,
-                                                          AttrsType const& condition_attrs,
-                                                          std::vector<Condition>& result) const {
-    std::unordered_set<Itemset> new_itemsets;
-    for (auto& candidate : candidates) {
-        // number of included baskets our candidate contains in
-        int included_contained_buskets_cnt = 0;
-        // number of all baskets our candidate contains in
-        int contained_buskets_cnt = 0;
-        // count number of baskets candidate presented in
-        for (auto const& basket : baskets) {
-            if (basket.IsContains(candidate)) {
-                ++contained_buskets_cnt;
-                if (basket.is_included) {
-                    ++included_contained_buskets_cnt;
-                }
-            }
-        }
-        double validity;
-        if (contained_buskets_cnt) {
-            validity = (double)included_contained_buskets_cnt / contained_buskets_cnt;
-        } else {
-            // negative value guarantees, that itemset will not be presented in answer
-            validity = -1;
-        }
-        double completeness = (double)included_contained_buskets_cnt / included_baskets_cnt;
-        // check completeness of candidate and add if it's frequent
-        if (completeness >= min_completeness_) {
-            // if candidate is valid - insert it into result itemsets.
-            if (validity >= min_validity_) {
-                result.emplace_back(candidate, condition_attrs, validity, completeness);
-            }
-            new_itemsets.insert(std::move(candidate));
-        }
-    }
-    return new_itemsets;
-}
-
-std::unordered_set<Itemset> Cinderella::GetCandidates(
-        std::unordered_set<Itemset> const& curr_itemsets) const {
-    std::unordered_set<Itemset> candidates;
-    for (auto const& lhs : curr_itemsets) {
-        for (auto const& rhs : curr_itemsets) {
-            // Intersect method returns empty Itemset, if that operation is not valid for those two
-            // itemsets
-            if (auto candidate = lhs.Intersect(rhs); candidate.GetSize() != 0) {
-                bool is_good_itemset = true;
-                for (auto const& subset : candidate.GetSubsets()) {
-                    if (!curr_itemsets.contains(subset)) {
-                        is_good_itemset = false;
-                        break;
+void Cinderella::CreateNewItemsets(Itemset& itemset) const {
+    std::vector<std::tuple<std::shared_ptr<ItemsetNode>, Item, std::list<BasketInfo>>>
+            new_items_info;
+    // logg("CreateNewItemsets begin\n");
+    for (auto const& itemset_prefix : itemset.GetPrevItems()) {
+        std::vector<Item> candidate = itemset_prefix->GetContents();
+        // logg("CreateNewItemsets 1.1\n");
+        for (std::shared_ptr<ItemsetNode> parent : itemset_prefix->GetChildNodes()) {
+            candidate.push_back(parent->GetValue());
+            // logg("CreateNewItemsets 1.1.1\n");
+            for (auto const& elem : itemset_prefix->GetChildNodes()) {
+                if (parent->GetValue().column_id < elem->GetValue().column_id) {
+                    // logg("CreateNewItemsets 1.1.1.1\n");
+                    candidate.push_back(elem->GetValue());
+                    if (itemset.CheckSubsets(candidate)) {
+                        // logg("CreateNewItemsets 1.1.1.1.1\n");
+                        new_items_info.emplace_back(
+                                parent, elem->GetValue(),
+                                MergeBaskets(parent->GetBaskets(), elem->GetBaskets()));
                     }
-                }
-                // if any (k-1)-subset of candidate is not presented in (k-1)-itemsets from answer -
-                // than our k-candidate is invalid. that's simple
-                if (is_good_itemset) {
-                    candidates.insert(std::move(candidate));
+                    candidate.pop_back();
+                    // logg("CreateNewItemsets 1.1.1.2\n");
                 }
             }
+            candidate.pop_back();
+            // logg("CreateNewItemsets 1.1.2\n");
         }
+        // logg("CreateNewItemsets 1.2\n");
     }
-    return candidates;
+    // logg("CreateNewItemsets 2\n");
+
+    itemset.CreateNewLayer(new_items_info);
+    // logg("CreateNewItemsets end\n");
 }
 }  // namespace algos::cind

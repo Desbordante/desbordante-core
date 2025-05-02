@@ -1,137 +1,84 @@
 #pragma once
 
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <functional>
-#include <set>
-#include <string>
+#include <list>
+#include <memory>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
 
-#include "table/column_index.h"
+#include "itemset_node.h"
 
 namespace algos::cind {
-struct Item {
-    model::ColumnIndex column_id;
-    int value;
-
-    bool operator==(Item const& that) const {
-        return this->column_id == that.column_id && this->value == that.value;
-    }
-
-    bool operator<(Item const& that) const {
-        if (this->column_id != that.column_id) {
-            return this->column_id < that.column_id;
-        }
-        return this->value < that.value;
-    }
-
-    std::string ToString() const noexcept {
-        return "{" + std::to_string(column_id) + ", " + std::to_string(value) + "}";
-    }
-};
-
 class Itemset {
 public:
-    Itemset(std::vector<Item> data, bool is_included)
-        : data_(std::move(data)), is_included_(is_included) {}
+    Itemset(std::unordered_map<Item, std::list<BasketInfo>> items, size_t included_baskets_cnt,
+            double min_completeness)
+        : root_(std::make_shared<ItemsetNode>(ItemsetNode{nullptr, {}, {}, 0, 0})),
+          included_baskets_cnt_(included_baskets_cnt),
+          min_completeness_(min_completeness) {
+        prev_layer_data_.push_back(root_);
+        for (auto& [item, baskets_info] : items) {
+            TryEmplace(root_, std::move(item), std::move(baskets_info));
+        }
+    }
 
-    Itemset(std::vector<Item> const& data, size_t excluded_id, bool is_included)
-        : is_included_(is_included) {
-        assert(excluded_id < data.size());
-        data_.reserve(data.size() - 1);
-        for (size_t index = 0; index < data.size(); ++index) {
-            if (index != excluded_id) {
-                data_.emplace_back(data[index]);
+    void CreateNewLayer(
+            std::vector<std::tuple<std::shared_ptr<ItemsetNode>, Item, std::list<BasketInfo>>>
+                    new_items_info) {
+        std::swap(prev_layer_data_, last_layer_data_);
+        last_layer_data_.clear();
+        for (auto [parent, value, baskets] : new_items_info) {
+            TryEmplace(parent, std::move(value), std::move(baskets));
+        }
+
+        Cleanup();
+    }
+
+    void Cleanup() {
+        for (auto parent_node : prev_layer_data_) {
+            if (parent_node->GetChildNodes().empty()) {
+                parent_node->Cleanup();
             }
         }
     }
 
-    Itemset() = default;
-
-    bool IsIncluded() const noexcept {
-        return is_included_;
-    }
-
-    size_t GetSize() const noexcept {
-        return data_.size();
-    }
-
-    Item const& GetItem(size_t index) const {
-        assert(index < GetSize());
-        return data_.at(index);
-    }
-
-    Itemset Intersect(Itemset const& that) const {
-        if (IsIncluded() == that.IsIncluded() && GetSize() == that.GetSize() &&
-            GetItem(GetSize() - 1).column_id < that.GetItem(GetSize() - 1).column_id) {
-            for (size_t index = 0; index < GetSize() - 1; ++index) {
-                if (GetItem(index) != that.GetItem(index)) {
-                    return {};
-                }
-            }
-            std::vector<Item> data = data_;
-            data.emplace_back(that.GetItem(GetSize() - 1));
-            return Itemset(std::move(data), IsIncluded());
+    void TryEmplace(std::shared_ptr<ItemsetNode> parent, Item value,
+                    std::list<BasketInfo> baskets_info) {
+        if (auto child_ptr = parent->CreateChild(std::move(value), std::move(baskets_info),
+                                                 included_baskets_cnt_, min_completeness_);
+            child_ptr != nullptr) {
+            last_layer_data_.push_back(child_ptr);
         }
-        return {};
     }
 
-    std::set<Itemset> GetSubsets() const {
-        std::set<Itemset> result;
-        for (size_t index = 0; index < GetSize(); ++index) {
-            result.emplace(data_, index, is_included_);
+    bool CheckSubsets(std::vector<Item> const& candidate) {
+        if (!root_->CheckSubsetItem(candidate, 0, 1, false)) {
+            return false;
         }
-        return result;
+        return root_->CheckSubsetItem(candidate, 0, 0, true);
     }
 
-    bool operator<(Itemset const& that) const {
-        return this->data_ < that.data_;
+    std::vector<std::shared_ptr<ItemsetNode>> const& GetPrevItems() const noexcept {
+        return prev_layer_data_;
     }
 
-    std::string ToString() const noexcept {
-        std::string result = "[";
-        result.append(is_included_ ? "Included, " : "Not included, ");
-        for (auto const& item : data_) {
-            result.append(item.ToString());
-            result.append(", ");
-        }
-        result.pop_back();
-        result.pop_back();
-        result.append("]");
-        return result;
-    }
-
-    bool operator==(Itemset const& other) const {
-        return is_included_ == other.is_included_ && data_ == other.data_;
+    std::vector<std::shared_ptr<ItemsetNode>> const& GetItems() const noexcept {
+        return last_layer_data_;
     }
 
 private:
-    std::vector<Item> data_;
-    bool is_included_ = false;
+    std::shared_ptr<ItemsetNode> root_;
+    size_t included_baskets_cnt_;
+    double min_completeness_;
+    std::vector<std::shared_ptr<ItemsetNode>> prev_layer_data_;
+    std::vector<std::shared_ptr<ItemsetNode>> last_layer_data_;
 
     friend std::hash<algos::cind::Itemset>;
 };
 }  // namespace algos::cind
-
-template <>
-struct std::hash<algos::cind::Item> {
-    size_t operator()(algos::cind::Item const& item) const {
-        size_t hash = 0;
-        boost::hash_combine(hash, boost::hash_value(item.column_id));
-        boost::hash_combine(hash, boost::hash_value(item.value));
-        return hash;
-    }
-};
-
-template <>
-struct std::hash<algos::cind::Itemset> {
-    size_t operator()(algos::cind::Itemset const& itemset) const {
-        std::hash<algos::cind::Item> item_hasher;
-        size_t hash = 0;
-        for (auto const& item : itemset.data_) {
-            boost::hash_combine(hash, item_hasher(item));
-        }
-        return hash;
-    }
-};
