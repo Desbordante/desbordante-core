@@ -1,8 +1,11 @@
+#include "cfd/bind_cfd_verification.h"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "core/algorithms/cfd/cfd_verifier/highlight.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
@@ -12,9 +15,11 @@ namespace py = pybind11;
 namespace python_bindings {
 void BindCFDVerification(py::module_& main_module) {
     using namespace algos;
+    using namespace algos::cfd;
     using namespace algos::cfd_verifier;
 
     auto cfd_verification_module = main_module.def_submodule("cfd_verification");
+
     py::class_<Highlight>(cfd_verification_module, "Highlight")
             .def_property_readonly("cluster", &Highlight::GetCluster)
             .def_property_readonly("get_violating_rows", &Highlight::GetViolatingRows);
