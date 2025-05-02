@@ -31,7 +31,7 @@ void CFDVerifier::RegisterOptions() {
         }
     };
 
-    auto validate_rule = [this, check_items](cfd::RawCFD const& rule) {
+    auto validate_rule = [check_items](cfd::RawCFD const& rule) {
         check_items(rule.GetLhs());
         check_items({rule.GetRhs()});
     };
