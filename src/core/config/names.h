@@ -32,8 +32,7 @@ constexpr auto kCfdColumnsNumber = "columns_number";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdMinimumSupport = "cfd_minsup";
-constexpr auto kCFDRuleLeft = "cfd_rule_left";
-constexpr auto kCFDRuleRight = "cfd_rule_right";
+constexpr auto kCFDRule = "cfd_rule";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
 constexpr auto kCfdTuplesNumber = "tuples_number";
 // CORDS
