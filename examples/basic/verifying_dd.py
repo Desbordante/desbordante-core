@@ -14,51 +14,52 @@ COLOR_CODES = {
 
 def print_intro(table: str) -> None:
     print(
-        'This is an example of validation of differential dependencies.'
-        '\n\nDefinitions of this dependency are provided in the article of Song, Shaoxu and Chen, Lei, '
-        '\n"Differential dependencies: Reasoning and discovery", 2011, ACM Transactions on Database Systems Vol. 36, No. 3\n')
-    print('There is also an example of mining differential dependencies in Desbordante.\n')
+        'This is an example of validating differential dependencies. The definition of differential dependencies is provided in the article by Song, Shaoxu, and Chen, Lei, "Differential Dependencies: Reasoning and Discovery," published in 2011 in the ACM Transactions on Database Systems (Vol. 36, No. 3).')
+    print('An additional example of differential dependency mining is available in the Desbordante project.')
     print(
-        'Differential dependency is a dependency, that define constraints on the differences of attributes in tables. '
-        '\nDifferential Dependencies is defined by differential functions, that determine constraints on the distance between specific attributes.\n')
+        'A differential dependency defines constraints on the differences between attribute values in tables.'
+        'These dependencies are formalized through differential functions, which specify allowable distance ranges between attribute values.')
     print(
-        'For example, a differential dependency of the form date[0, 7] -> price[0, 250] consists of two differential functions: date[0, 7] and price[0, 100]. '
-        '\nSuppose this dependency is checked in a flight schedule. If such a differential dependency holds in the table, then for any two pairs of tuples where the distance between the values of the date attribute does not exceed 7 days, the difference in the price attribute does not exceed 100 units. '
-        '\nInformally, this means that the price difference between two flights within the same week does not exceed 250 units.\n')
-    print("Let's take the table stores_dd.csv and try to verify the dd in it.\n")
+        '''For instance, consider a differential dependency expressed as date[0, 7] -> price[0, 250], consisting of two differential functions: date[0, 7] and price[0, 250].
+Suppose this dependency is verified against a flight schedule table. If the dependency holds, it implies that for any two tuples where the difference in the date attribute does not exceed 7 days, the corresponding difference in the price attribute does not exceed 250 units.
+Informally, this indicates that the price difference between any two flights scheduled within the same week remains within a 250-unit margin.'''
+    )
+    print("To further illustrate, we examine the dataset stores_dd.csv and attempt to validate a specified differential dependency.")
     data = pd.read_csv(table)
     print(f"{data}\n")
 
 
 def print_first_dd_verified(algorithm):
     print(
-        f"In order to finally understand the definition of difference dependence, let's look at the first example of differential dependency")
+        f"In order to finally understand the definition of difference dependency, let's look at the first example of differential dependency")
     print(f"It is dd: {COLOR_CODES["yellow"]}{dd1.__str__()}{COLOR_CODES["nocolor"]}\n")
     print_holds(algorithm.dd_holds())
     print(
-        "It means, that for any pair rows with equal value from column \"product_name\", defined distance from 0 to 20 on column \"stock_quantity\" and from 0 to 60 on column \"price_per_unit\"\n")
-    print("Informally, this means that in stores the difference in the quantity of goods available does not exceed 20 and the price of the same goods in stores does not exceed 60 units.")
+        "It asserts that for any pair of rows with identical values in the product_name column, the difference in the stock_quantity attribute must be within the range [0, 20], and the difference in the price_per_unit attribute must be within [0, 60].")
+    print(
+        "Informally, this implies that for identical products across various stores, the stock quantity should not differ by more than 20 units, and the unit price should not differ by more than 60 units.")
 
 
 def print_second_dd_verified(algorithm):
-    print(
+    print(#!!!
         f"Now, let`s check the dd: {COLOR_CODES["yellow"]}{dd2.__str__()}{COLOR_CODES["nocolor"]}, that means, what in one store stock quantity of goods has difference in range from 0 to 25\n")
     print_holds(algorithm.dd_holds())
 
+
 def print_third_dd_verified(algorithm):
-    print("The fact that the previous differential dependency was not holds in table is quite logical,\n"
-          "since the stock quantity of goods depends not only on the specific store, but also on the selected product\n")
-    print("Let's add a restriction to the product category and see if anything changes.\n")
+    print("The failure of the initial differential dependency is understandable, considering that stock quantities depend not only on the specific store but also on various operational factors, including product demand and store size.")
+    print("To refine the dependency, an additional constraint on the product category is introduced.")
     print(f"Next dd, which we are going to check: {COLOR_CODES["yellow"]}{dd3.__str__()}{COLOR_CODES["nocolor"]}\n")
     print_holds(algorithm.dd_holds())
     print(
-        "It means, that for any pair rows with equal value from columns \"store_name\" and \"category\", defined distance from 0 to 25 on column \"stock_quantity\"\n")
+        '''The next differential dependency under examination states:
 
+For any pair of rows with identical values in both the store_name and category columns, the difference in stock_quantity must not exceed 25 units.''')
 
 
 def print_about_second_dd(algorithm):
     print(
-        f"We have {algo.get_num_error_pairs()} pairs of rows, where distance in column \"stock_quantity\" is not holds.\n")
+        f'''Upon evaluation, it was observed that there are {algo.get_num_error_pairs()} pairs of rows where the difference in stock_quantity exceeds the specified threshold.''')
     highlights = algo.get_highlights()
     table_copy = table.copy()
     for highlight in highlights:
@@ -86,10 +87,10 @@ def print_holds(result: bool) -> None:
     if result:
         print(f"This {COLOR_CODES["green"]}DD holds{COLOR_CODES["nocolor"]}\n")
     else:
-        print(f"This {COLOR_CODES["red"]}DD Not holds{COLOR_CODES["nocolor"]}\n")
+        print(f"This {COLOR_CODES["red"]}DD doesn`t hold{COLOR_CODES["nocolor"]}\n")
 
 
-TABLE = 'examples/datasets/stores_dd.csv'
+TABLE = '/home/yrii/spbu/desbordante-core-my/examples/datasets/stores_dd.csv'  # 'examples/datasets/stores_dd.csv'
 lhs1 = [desbordante.dd_verification.create_df("product_name", 0, 0)]
 rhs1 = [desbordante.dd_verification.create_df("stock_quantity", 0, 20),
         desbordante.dd_verification.create_df("price_per_unit", 0, 60)]
