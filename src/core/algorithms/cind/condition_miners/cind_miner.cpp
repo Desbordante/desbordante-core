@@ -12,9 +12,15 @@ CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) cons
     Attributes result;
     for (auto const& column : tables_.GetTable(aind.GetLhs().GetTableIndex()).GetColumnData()) {
         auto const& ind_columns = aind.GetLhs().GetColumnIndices();
+        auto const& ind_columns_rhs = aind.GetRhs().GetColumnIndices();
         if (std::find(ind_columns.cbegin(), ind_columns.cend(), column.GetColumn()->GetIndex()) !=
             ind_columns.cend()) {
             result.lhs_inclusion.push_back(&column);
+        } else if (aind.GetLhs().GetTableIndex() == aind.GetRhs().GetTableIndex()) {
+            if (std::find(ind_columns_rhs.cbegin(), ind_columns_rhs.cend(),
+                          column.GetColumn()->GetIndex()) == ind_columns_rhs.cend()) {
+                result.conditional.push_back(&column);
+            }
         } else {
             result.conditional.push_back(&column);
         }
