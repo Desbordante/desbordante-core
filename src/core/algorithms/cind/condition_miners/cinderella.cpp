@@ -1,5 +1,7 @@
 #include "cinderella.h"
 
+#include <algorithm>
+#include <iterator>
 #include <map>
 #include <tuple>
 
@@ -16,14 +18,19 @@ std::list<BasketInfo> MergeBaskets(std::list<BasketInfo> const& baskets1,
     auto it2 = baskets2.begin();
     std::list<BasketInfo> result;
     while (it1 != baskets1.end() && it2 != baskets2.end()) {
-        size_t index_1 = std::get<0>(*it1);
-        size_t index_2 = std::get<0>(*it2);
-        if (index_1 < index_2) {
+        auto const& [index1, positions1, is_included1] = *it1;
+        auto const& [index2, positions2, is_included2] = *it2;
+        if (index1 < index2) {
             ++it1;
-        } else if (index_1 > index_2) {
+        } else if (index1 > index2) {
             ++it2;
         } else {
-            result.push_back(*it1);
+            std::vector<size_t> positions_intersection;
+            std::set_intersection(positions1.begin(), positions1.end(), positions2.begin(),
+                                  positions2.end(), std::back_inserter(positions_intersection));
+            if (!positions_intersection.empty()) {
+                result.emplace_back(index1, positions_intersection, is_included1);
+            }
             ++it1;
             ++it2;
         }
@@ -63,22 +70,25 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
         for (auto& attr : attributes.lhs_inclusion) {
             row.push_back(attr->GetValue(index));
         }
-        size_t real_id = index;
         if (condition_type_._value == CondType::group) {
             if (auto const& it = basket_id_by_value.find(row); it == basket_id_by_value.cend()) {
-                real_id = basket_id_by_value.size();
-                basket_id_by_value[row] = real_id;
-                // logg("!! real_id: %zu\n", real_id);
-            } else {
-                real_id = it->second;
-                // logg("~~ real_id: %zu\n", real_id);
+                result.emplace_back(rhs_values.contains(row),
+                                    std::unordered_map<Item, std::vector<size_t>>{});
+                basket_id_by_value[row] = basket_id_by_value.size();
             }
+            auto basket_id = basket_id_by_value[row];
+            for (auto const& cond_attr : attributes.conditional) {
+                Item item{cond_attr->GetColumnId(), cond_attr->GetValue(index)};
+                result[basket_id].items[item].push_back(index);
+            }
+        } else {
+            std::unordered_map<Item, std::vector<size_t>> basket_items;
+            for (auto const& cond_attr : attributes.conditional) {
+                Item item{cond_attr->GetColumnId(), cond_attr->GetValue(index)};
+                basket_items[item].push_back(index);
+            }
+            result.emplace_back(rhs_values.contains(row), std::move(basket_items));
         }
-        std::unordered_set<Item> basket_items;
-        for (auto const& cond_attr : attributes.conditional) {
-            basket_items.emplace(cond_attr->GetColumnId(), cond_attr->GetValue(index));
-        }
-        result.emplace_back(rhs_values.contains(row), real_id, std::move(basket_items));
     }
     return result;
 }
@@ -89,22 +99,21 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
     std::unordered_map<Item, std::list<BasketInfo>> first_level_items;
     // scan all included baskets to extract all included items
     // number of all included baskets - needed for computing completeness of conditions
-    std::unordered_set<size_t> included_baskets_ids;
+    int included_baskets_cnt = 0;
     for (auto const& basket : baskets) {
         if (!basket.is_included) continue;
-        included_baskets_ids.insert(basket.real_id);
-        for (auto const& item : basket.items) {
+        ++included_baskets_cnt;
+        for (auto const& [item, _] : basket.items) {
             first_level_items.try_emplace(item, std::list<BasketInfo>{});
         }
     }
     // logg("GetConditions 1\n");
 
     for (size_t basket_id = 0; basket_id < baskets.size(); ++basket_id) {
-        // logg("%zu : %zu\n", basket_id, baskets[basket_id].real_id);
         auto const& basket = baskets.at(basket_id);
-        for (auto const& item : basket.items) {
+        for (auto const& [item, positions] : basket.items) {
             if (const auto &it = first_level_items.find(item); it != first_level_items.end()) {
-                it->second.emplace_back(basket_id, basket.real_id, basket.is_included);
+                it->second.emplace_back(basket_id, positions, basket.is_included);
             }
         }
     }
@@ -113,7 +122,7 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
     // result stores all frequent and valid itemsets
     std::vector<Condition> result;
 
-    Itemset itemset(std::move(first_level_items), included_baskets_ids.size(), min_completeness_);
+    Itemset itemset(std::move(first_level_items), included_baskets_cnt, min_completeness_);
     // logg("GetConditions 3\n");
     while (!itemset.GetItems().empty()) {
         // logg("GetConditions 4.1\n");
