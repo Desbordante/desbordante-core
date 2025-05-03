@@ -1,12 +1,17 @@
 #include "algorithms/md/hymd/indexes/records_info.h"
 
-#include <string>
-#include <vector>
+#include <string>  // for string
+#include <vector>  // for vector
 
-#include <boost/unordered/unordered_flat_map.hpp>
-#include <easylogging++.h>
+#include <boost/container_hash/hash.hpp>           // for hash
+#include <boost/unordered/detail/foa/table.hpp>    // for tabl...
+#include <boost/unordered/unordered_flat_map.hpp>  // for unor...
+#include <easylogging++.h>                         // for Writer
 
-#include "algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "algorithms/md/hymd/indexes/global_value_identifier.h"  // for Glob...
+#include "index.h"                                               // for Index
+#include "md/hymd/indexes/dictionary_compressor.h"               // for Dict...
+#include "table/idataset_stream.h"                               // for IDat...
 
 namespace {
 using namespace algos::hymd::indexes;

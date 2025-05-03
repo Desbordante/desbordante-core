@@ -1,18 +1,25 @@
 #pragma once
 
-#include <cstddef>
-#include <memory>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <memory>   // for shared_ptr, uni...
+#include <vector>   // for vector
 
-#include "algorithms/md/hymd/enums.h"
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/md_algorithm.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/thread_number/type.h"
-#include "model/table/relational_schema.h"
+#include "algorithms/md/hymd/enums.h"                 // for operator+, Leve...
+#include "algorithms/md/hymd/indexes/records_info.h"  // for RecordsInfo
+#include "algorithms/md/hymd/similarity_data.h"       // for SimilarityData
+#include "algorithms/md/md_algorithm.h"               // for MdAlgorithm
+#include "config/tabular_data/input_table_type.h"     // for InputTable
+#include "config/thread_number/type.h"                // for ThreadNumType
+
+class RelationalSchema;
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct MdLatticeNodeInfo;
+}
+}  // namespace hymd
+}  // namespace algos
 
 namespace algos::hymd {
 

@@ -5,20 +5,44 @@
  */
 #include "mind.h"
 
-#include <algorithm>
-#include <unordered_set>
+#include <algorithm>      // for for_each
+#include <assert.h>       // for assert
+#include <cmath>          // for floor
+#include <functional>     // for invoke
+#include <iterator>       // for next, prev
+#include <list>           // for _List_const_iterator
+#include <string>         // for operator+, operat...
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include "algorithms/create_algorithm.h"
-#include "config/error/option.h"
-#include "config/names_and_descriptions.h"
-#include "error/type.h"
-#include "ind/ind_algorithm.h"
-#include "max_arity/option.h"
-#include "model/table/dataset_stream_projection.h"
-#include "table/column_combination.h"
-#include "table/dataset_stream_fixed.h"
-#include "tabular_data/input_table_type.h"
-#include "util/timed_invoke.h"
+#include <boost/container_hash/hash.hpp>           // for hash
+#include <boost/type_index.hpp>                    // for type_id
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"                              // for Algorithm
+#include "algorithm_types.h"                        // for AlgorithmType
+#include "algorithms/create_algorithm.h"            // for CreateAlgorithmIn...
+#include "common_option.h"                          // for CommonOption
+#include "config/error/option.h"                    // for kErrorOpt
+#include "error/type.h"                             // for ErrorType
+#include "exceptions.h"                             // for ConfigurationError
+#include "ind/ind.h"                                // for IND
+#include "ind/ind_algorithm.h"                      // for INDAlgorithm
+#include "ind/mind/raw_ind.h"                       // for RawIND, hash
+#include "max_arity/option.h"                       // for kMaxArityOpt
+#include "model/table/dataset_stream_projection.h"  // for DatasetStreamProj...
+#include "table/arity_index.h"                      // for ArityIndex
+#include "table/column_combination.h"               // for ColumnCombination
+#include "table/dataset_stream_fixed.h"             // for DatasetStreamFixed
+#include "table/idataset_stream.h"                  // for IDatasetStream
+#include "table/tuple_index.h"                      // for TupleIndex
+#include "tabular_data/input_table_type.h"          // for InputTable
+#include "util/timed_invoke.h"                      // for TimedInvoke
+
+namespace boost {
+class any;
+}
 
 namespace algos {
 

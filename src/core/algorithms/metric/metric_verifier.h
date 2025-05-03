@@ -1,27 +1,52 @@
 #pragma once
 
-#include <algorithm>
-#include <cstddef>
-#include <filesystem>
-#include <functional>
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <cstddef>        // for byte
+#include <memory>         // for unique_ptr, shar...
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
+#include <vector>         // for vector
 
-#include "algorithms/algorithm.h"
-#include "algorithms/metric/aliases.h"
-#include "algorithms/metric/enums.h"
-#include "algorithms/metric/highlight_calculator.h"
-#include "algorithms/metric/points.h"
-#include "algorithms/metric/points_calculator.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "util/convex_hull.h"
-#include "util/qgram_vector.h"
+#include <enum.h>  // for _iterable
+
+#include "algorithms/algorithm.h"                    // for Algorithm
+#include "algorithms/metric/aliases.h"               // for DistanceFunction
+#include "algorithms/metric/enums.h"                 // for Metric, MetricAlgo
+#include "algorithms/metric/highlight_calculator.h"  // for HighlightCalculator
+#include "algorithms/metric/points_calculator.h"     // for PointsCalculator
+#include "config/equal_nulls/type.h"                 // for EqNullsType
+#include "config/indices/type.h"                     // for IndicesType
+#include "config/tabular_data/input_table_type.h"    // for InputTable
+
+class ColumnLayoutRelationData;
+
+namespace algos {
+namespace metric {
+struct Highlight;
+}
+}  // namespace algos
+
+namespace algos {
+namespace metric {
+template <typename T>
+struct IndexedPoint;
+}
+}  // namespace algos
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+}
+
+namespace model {
+class StringType;
+}
+
+namespace util {
+class QGramVector;
+}
+
+namespace util {
+struct Point;
+}
 
 namespace algos::metric {
 

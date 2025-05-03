@@ -1,14 +1,16 @@
 #pragma once
 
-#include <cstddef>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <vector>   // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lattice/node_base.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
-#include "model/index.h"
+#include "algorithms/md/hymd/lattice/md_lattice.h"       // for MdLattice
+#include "algorithms/md/hymd/lattice/node_base.h"        // for NodeBase
+#include "algorithms/md/hymd/lattice/validation_info.h"  // for ValidationInfo
+#include "md/hymd/column_classifier_value_id.h"          // for ColumnClassi...
+#include "md/hymd/md_lhs.h"                              // for MdLhs
+#include "model/index.h"                                 // for Index
 
 namespace algos::hymd::lattice::cardinality {
 

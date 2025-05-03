@@ -1,6 +1,10 @@
 #include "list_lattice.h"
 
-#include "order_utility.h"
+#include <initializer_list>  // for initializer_list
+#include <stddef.h>          // for size_t
+#include <utility>           // for pair, move
+
+#include "order_utility.h"  // for Node, AttributeList, CandidateSets, Cand...
 
 namespace algos::order {
 

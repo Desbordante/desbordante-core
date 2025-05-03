@@ -1,14 +1,22 @@
 #include "algo_factory.h"
 
 #include <algorithm>
+#include <iterator>  // for back_insert_...
 #include <stdexcept>
 #include <type_traits>
+#include <utility>  // for pair
 #include <vector>
 
-#include "algorithms/algorithms.h"
+#include <boost/type_index.hpp>                    // for type_id
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"        // for Algorithm
+#include "algorithm_types.h"  // for AlgorithmType
 #include "algorithms/create_algorithm.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
+#include "csv_parser/csv_parser.h"          // for CSVConfig
+#include "tabular_data/input_table_type.h"  // for InputTable
 #include "tabular_data/input_tables_type.h"
 
 namespace algos {

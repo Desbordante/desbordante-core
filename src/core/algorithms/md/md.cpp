@@ -1,9 +1,17 @@
 #include "algorithms/md/md.h"
 
-#include <ranges>
+#include <algorithm>  // for __transform_fn, tra...
+#include <iterator>   // for back_insert_iterator
+#include <sstream>    // for basic_ostream, oper...
 
-#include "model/table/column.h"
-#include "util/get_preallocated_vector.h"
+#include "index.h"                                // for Index
+#include "md/column_match.h"                      // for ColumnMatch
+#include "md/column_similarity_classifier.h"      // for ColumnSimilarityCla...
+#include "md/decision_boundary.h"                 // for DecisionBoundary
+#include "md/lhs_column_similarity_classifier.h"  // for LhsColumnSimilarity...
+#include "model/table/column.h"                   // for Column
+#include "table/relational_schema.h"              // for RelationalSchema
+#include "util/get_preallocated_vector.h"         // for GetPreallocatedVector
 
 namespace model {
 
