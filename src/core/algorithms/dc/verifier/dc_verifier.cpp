@@ -22,12 +22,12 @@
 #include <boost/type_index/type_index_facade.hpp>  // for operator==
 #include <easylogging++.h>
 
-#include "algorithms/dc/parser/dc_parser.h"
 #include "algorithm.h"                      // for Algorithm
 #include "algorithms/dc/model/component.h"  // for Component
 #include "algorithms/dc/model/point.h"      // for Point
 #include "algorithms/dc/model/predicate.h"  // for Predicate
-#include "common_option.h"                  // for CommonOp...
+#include "algorithms/dc/parser/dc_parser.h"
+#include "common_option.h"  // for CommonOp...
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"                      // for DESBORDA...
 #include "config/tabular_data/input_table/option.h"   // for kTableOpt

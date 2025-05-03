@@ -5,8 +5,8 @@
 
 #include <boost/type_index/type_index_facade.hpp>  // for operator==
 
-#include "algorithm.h"                                // for Algorithm
-#include "common_option.h"                            // for CommonOption
+#include "algorithm.h"      // for Algorithm
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"                      // for DESBORDANTE_OPT...
 #include "config/tabular_data/input_table/option.h"   // for kTableOpt
