@@ -2,6 +2,12 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>  // for next
+#include <utility>   // for move, pair
+
+#include "association_rules/node.h"          // for Node
+#include "transaction/itemset.h"             // for Itemset
+#include "transaction/transactional_data.h"  // for TransactionalData
 
 namespace algos {
 

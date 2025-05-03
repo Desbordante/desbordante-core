@@ -1,6 +1,13 @@
 #include "differential_functions.h"
 
-#include <algorithm>
+#include <algorithm>  // for clamp
+#include <assert.h>   // for assert
+#include <set>        // for set, operator==
+#include <stdexcept>  // for logic_error
+
+#include "nar/des/encoded_nar.h"  // for EncodedNAR
+#include "nar/des/enums.h"        // for DifferentialStrategy
+#include "nar/des/rng.h"          // for RNG
 
 namespace algos::des {
 

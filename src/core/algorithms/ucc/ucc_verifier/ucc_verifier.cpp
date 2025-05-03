@@ -1,14 +1,23 @@
 #include "ucc_verifier.h"
 
-#include <chrono>
-#include <numeric>
-#include <stdexcept>
+#include <functional>   // for function
+#include <numeric>      // for iota
+#include <stdexcept>    // for runtime_error
+#include <string_view>  // for basic_string_view
+#include <utility>      // for move
 
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
+#include "algorithm.h"                  // for Algorithm
+#include "common_option.h"              // for CommonOption
+#include "config/equal_nulls/option.h"  // for kEqualNullsOpt
+#include "config/indices/option.h"      // for IndicesOption
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include "config/option_using.h"                     // for DESBORDANTE_OPTI...
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
+#include "indices/type.h"                            // for IndicesType
+#include "table/column_data.h"                       // for ColumnData
+#include "table/column_layout_relation_data.h"       // for ColumnLayoutRela...
+#include "table/relational_schema.h"                 // for RelationalSchema
+#include "ucc/ucc_verifier/ucc_stats_calculator.h"   // for UCCStatsCalculator
 
 namespace algos {
 

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>  // for swap
 
 #include "algorithms/dc/model/operator.h"
 #include "model/types/builtin.h"

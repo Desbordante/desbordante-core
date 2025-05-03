@@ -1,6 +1,9 @@
 #include "mlfq.h"
 
-#include <cmath>
+#include <algorithm>  // for max
+#include <cmath>      // for floor, log10
+
+#include "fd/eulerfd/cluster.h"  // for Cluster
 
 namespace algos {
 

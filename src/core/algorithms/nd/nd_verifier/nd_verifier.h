@@ -1,20 +1,35 @@
 #pragma once
 
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <vector>
+#include <cstddef>        // for size_t
+#include <memory>         // for shared...
+#include <string>         // for string
+#include <unordered_map>  // for unorde...
+#include <utility>        // for pair
+#include <vector>         // for vector
 
-#include "algorithms/algorithm.h"
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/highlight.h"
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/types/builtin.h"
+#include "algorithms/algorithm.h"                              // for Algorithm
+#include "algorithms/nd/nd.h"                                  // for Weight...
+#include "algorithms/nd/nd_verifier/util/stats_calculator.h"   // for StatsC...
+#include "algorithms/nd/nd_verifier/util/value_combination.h"  // for ValueC...
+#include "config/equal_nulls/type.h"                           // for EqNull...
+#include "config/indices/type.h"                               // for Indice...
+#include "config/tabular_data/input_table_type.h"              // for InputT...
+
+namespace algos {
+namespace nd_verifier {
+namespace util {
+class Highlight;
+}
+}  // namespace nd_verifier
+}  // namespace algos
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+}
+
+namespace model {
+class TypeId;
+}
 
 namespace algos::nd_verifier {
 

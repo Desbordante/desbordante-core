@@ -1,8 +1,15 @@
 #pragma once
-#include "dependency_candidate.h"
-#include "dependency_consumer.h"
-#include "model/table/vertical.h"
-#include "profiling_context.h"
+
+#include <cmath>   // for ceil
+#include <memory>  // for unique_ptr
+#include <string>  // for string
+
+#include "dependency_candidate.h"  // for DependencyCandidate
+#include "model/table/vertical.h"  // for Vertical
+#include "table/column.h"          // for Column
+
+class DependencyConsumer;
+class ProfilingContext;
 
 class SearchSpace;
 

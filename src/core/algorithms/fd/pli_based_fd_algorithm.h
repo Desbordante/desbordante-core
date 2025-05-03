@@ -1,11 +1,16 @@
 #pragma once
 
-#include <optional>
+#include <assert.h>     // for assert
+#include <memory>       // for shared_ptr, __s...
+#include <optional>     // for optional
+#include <string_view>  // for string_view
+#include <vector>       // for vector
 
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "fd_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
+#include "config/equal_nulls/type.h"                  // for EqNullsType
+#include "config/tabular_data/input_table_type.h"     // for InputTable
+#include "fd_algorithm.h"                             // for FDAlgorithm
+#include "model/table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "table/column.h"                             // for Column
 
 namespace algos {
 

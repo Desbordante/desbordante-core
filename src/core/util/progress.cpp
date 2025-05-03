@@ -1,5 +1,7 @@
 #include "progress.h"
 
+#include <cassert>  // for assert
+
 namespace util {
 
 void Progress::AddProgress(double val) noexcept {

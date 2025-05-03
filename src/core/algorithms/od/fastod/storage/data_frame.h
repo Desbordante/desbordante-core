@@ -1,13 +1,19 @@
 #pragma once
 
-#include <filesystem>
-#include <optional>
-#include <vector>
+#include <cstddef>     // for size_t, byte
+#include <filesystem>  // for path
+#include <optional>    // for optional
+#include <utility>     // for pair
+#include <vector>      // for vector
 
-#include "algorithms/od/fastod/model/attribute_set.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "table/column_layout_typed_relation_data.h"
+#include "algorithms/od/fastod/model/attribute_set.h"  // for AttributeSet
+#include "config/equal_nulls/type.h"                   // for EqNullsType
+#include "config/tabular_data/input_table_type.h"      // for InputTable
+#include "table/column_index.h"                        // for ColumnIndex
+
+namespace model {
+class TypedColumnData;
+}
 
 namespace algos::fastod {
 

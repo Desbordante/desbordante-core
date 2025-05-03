@@ -1,6 +1,10 @@
 #include "algorithms/fd/fd.h"
 
-#include "util/bitset_utils.h"
+#include <sstream>  // for basic_ostream, basic_stringstream
+
+#include "table/column.h"       // for Column
+#include "table/vertical.h"     // for Vertical
+#include "util/bitset_utils.h"  // for BitsetToIndices
 
 std::vector<model::ColumnIndex> FD::GetLhsIndices() const {
     return util::BitsetToIndices<model::ColumnIndex>(lhs_.GetColumnIndices());

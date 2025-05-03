@@ -1,7 +1,15 @@
 #pragma once
 
-#include "algorithms/nar/value_range.h"
-#include "rng.h"
+#include <memory>    // for shared_ptr
+#include <stddef.h>  // for size_t
+
+#include "algorithms/nar/value_range.h"  // for ValueRange
+
+namespace algos {
+namespace des {
+class RNG;
+}
+}  // namespace algos
 
 namespace algos::des {
 

@@ -1,15 +1,35 @@
 #include "ac_algorithm.h"
 
+#include <algorithm>  // for find_if, sort
+#include <assert.h>   // for assert
 #include <cmath>
-#include <functional>
 #include <iostream>
 #include <random>
+#include <stdexcept>    // for invalid_argument
+#include <string_view>  // for basic_string_...
+#include <utility>      // for move, pair
 
+#include <boost/any.hpp>                           // for any
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
 #include <easylogging++.h>
 
+#include "algebraic_constraints/ac.h"                   // for ACPair
+#include "algebraic_constraints/ac_exception_finder.h"  // for ACExceptionFi...
+#include "algebraic_constraints/ac_pairs_collection.h"  // for ACPairsCollec...
+#include "algebraic_constraints/bin_operation_enum.h"   // for Binop, operator+
+#include "algebraic_constraints/ranges_collection.h"    // for RangesCollection
+#include "algebraic_constraints/typed_column_pair.h"    // for TypedColumnPair
+#include "algorithm.h"                                  // for Algorithm
+#include "builtin.h"                                    // for TypeId, Compa...
+#include "common_option.h"                              // for CommonOption
 #include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
+#include "descriptions.h"                             // for kDACSeed, kDB...
+#include "names.h"                                    // for kWeight, kACSeed
+#include "option.h"                                   // for Option
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutT...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
 #include "types/create_type.h"
 
 namespace algos {

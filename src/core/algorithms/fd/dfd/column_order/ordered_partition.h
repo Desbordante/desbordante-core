@@ -1,6 +1,8 @@
 #pragma once
 
-#include "model/table/position_list_index.h"
+namespace model {
+class PositionListIndex;
+}
 
 class OrderedPartition {
 private:

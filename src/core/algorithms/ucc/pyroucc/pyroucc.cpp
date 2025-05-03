@@ -1,16 +1,30 @@
 #include "algorithms/ucc/pyroucc/pyroucc.h"
 
-#include <chrono>
-#include <mutex>
-#include <thread>
+#include <functional>   // for function
+#include <stdexcept>    // for runtime_e...
+#include <string>       // for char_traits
+#include <string_view>  // for basic_str...
+#include <utility>      // for move
+#include <vector>       // for vector
 
-#include <easylogging++.h>
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer
 
-#include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"
-#include "config/error/option.h"
-#include "config/max_lhs/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
+#include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"  // for KeyG1Stra...
+#include "common_option.h"                                  // for CommonOption
+#include "config/error/option.h"                            // for kErrorOpt
+#include "config/max_lhs/option.h"                          // for kMaxLhsOpt
+#include "config/option_using.h"                            // for DESBORDAN...
+#include "descriptions.h"                                   // for kDSeed
+#include "fd/pyrocommon/core/dependency_candidate.h"        // for Dependenc...
+#include "fd/pyrocommon/core/dependency_strategy.h"         // for Dependenc...
+#include "fd/pyrocommon/core/profiling_context.h"           // for Profiling...
+#include "fd/pyrocommon/core/search_space.h"                // for SearchSpace
+#include "names.h"                                          // for kSeed
+#include "option.h"                                         // for Option
+#include "primitive_collection.h"                           // for Primitive...
+#include "table/position_list_index.h"                      // for PositionL...
+#include "ucc/ucc.h"                                        // for UCC
 
 namespace algos {
 
