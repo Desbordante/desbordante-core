@@ -1,10 +1,16 @@
 #include "column_order.h"
 
+#include <assert.h>  // for assert
 #include <set>
 
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/relational_schema.h"
-#include "ordered_partition.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "model/table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "model/table/relational_schema.h"            // for RelationalSchema
+#include "ordered_partition.h"                        // for OrderedPartition
+#include "table/column.h"                             // for Column
+#include "table/column_data.h"                        // for ColumnData
+#include "table/vertical.h"                           // for Vertical
 
 ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     : order_(relation_data->GetSchema()->GetNumColumns()) {
