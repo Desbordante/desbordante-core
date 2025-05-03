@@ -124,7 +124,7 @@ private:
                 auto const& candidates = CSGet<Ascending>(deleted_attrs[attr]);
 
                 for (AttributePair const& attribute_pair : candidates) {
-                    const AttributeSet context_delete_ab = fastod::DeleteAttribute(
+                    AttributeSet const context_delete_ab = fastod::DeleteAttribute(
                             deleted_attrs[attribute_pair.left], attribute_pair.right);
 
                     bool add_context = true;
