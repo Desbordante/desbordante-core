@@ -1,9 +1,12 @@
 #pragma once
 
-#include <bitset>
-#include <functional>
-#include <stdexcept>
-#include <string>
+#include <bitset>            // for bitset, operator&, operator^
+#include <cstddef>           // for size_t
+#include <functional>        // for function
+#include <initializer_list>  // for initializer_list
+#include <stdexcept>         // for invalid_argument
+#include <string>            // for operator+, to_string, string
+#include <utility>           // for move
 
 #include <boost/functional/hash.hpp>
 

@@ -3,12 +3,13 @@
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>  // for unordered_map
 #include <unordered_set>
 
 #include <boost/any.hpp>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/algorithm_types.h"
+#include "algorithm.h"
+#include "algorithm_types.h"
 
 namespace algos {
 

@@ -1,10 +1,11 @@
 #include "order_utility.h"
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CDEBUG, LOG
 
-#include "list_lattice.h"
-#include "model/table/column_index.h"
-#include "model/table/typed_column_data.h"
+#include "model/table/column_index.h"       // for ColumnIndex
+#include "model/table/typed_column_data.h"  // for TypedColumnData
+#include "table/tuple_index.h"              // for TupleIndex
+#include "type.h"                           // for Type
 
 namespace algos::order {
 

@@ -1,11 +1,14 @@
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
 
-#include <ostream>
-#include <sstream>
-#include <string>
+#include <memory>   // for allocator, unique_ptr
+#include <ostream>  // for basic_ostream, operator<<, ostream
+#include <sstream>  // for basic_stringstream
+#include <string>   // for char_traits, operator<<, string
 
-#include "model/types/create_type.h"
-#include "model/types/mixed_type.h"
+#include "builtin.h"                  // for TypeId, operator!=, operator+
+#include "model/types/create_type.h"  // for CreateType
+#include "model/types/mixed_type.h"   // for MixedType
+#include "type.h"                     // for Type
 
 namespace algos::nd_verifier::util {
 

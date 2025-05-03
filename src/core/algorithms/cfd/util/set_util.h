@@ -1,15 +1,10 @@
 #pragma once
 
 #include <algorithm>
-#include <bitset>
-#include <cmath>
-#include <concepts>
 #include <ctime>
-#include <functional>
-#include <iostream>
-#include <map>
+#include <iterator>  // for pair, distance, inserter
 #include <random>
-#include <ranges>
+#include <utility>  // for pair
 #include <vector>
 
 // see algorithms/cfd/LICENSE

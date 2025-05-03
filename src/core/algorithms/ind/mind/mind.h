@@ -5,13 +5,21 @@
  */
 #pragma once
 
-#include <memory>
-#include <optional>
+#include <memory>         // for unique_ptr
+#include <optional>       // for optional
+#include <stddef.h>       // for size_t
+#include <string_view>    // for string_view
+#include <typeindex>      // for type_index
+#include <unordered_set>  // for unordered_set
 
-#include "algorithms/ind/ind_algorithm.h"
-#include "config/error/type.h"
-#include "config/max_arity/type.h"
-#include "raw_ind.h"
+#include "algorithms/ind/ind_algorithm.h"  // for INDAlgorithm
+#include "config/error/type.h"             // for ErrorType
+#include "config/max_arity/type.h"         // for MaxArityType
+#include "raw_ind.h"                       // for RawIND
+
+namespace boost {
+class any;
+}
 
 namespace algos {
 
