@@ -120,6 +120,7 @@ public:
 
     void ResetState() final {
         violations_.clear();
+        result_ = false;
     };
 
     void LoadDataInternal() final;
