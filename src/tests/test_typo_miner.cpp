@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/create_algorithm.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "all_csv_configs.h"
 #include "config/names.h"

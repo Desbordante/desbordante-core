@@ -15,6 +15,7 @@ public:
     void SetSeed(long unsigned seed) {
         rng_ = std::mt19937(static_cast<std::mt19937::result_type>(seed));
     }
+
     double Next() {
         return uni_(rng_);
     }

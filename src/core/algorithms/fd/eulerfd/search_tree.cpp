@@ -1,5 +1,7 @@
 #include "search_tree.h"
 
+#include <assert.h>  // for assert
+
 namespace algos {
 
 SearchTreeEulerFD::Node::Node(size_t bit, SearchTreeEulerFD::Bitset set,

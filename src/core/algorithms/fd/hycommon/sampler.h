@@ -1,16 +1,26 @@
 #pragma once
 
-#include <memory>
-#include <queue>
-#include <vector>
+#include <memory>    // for unique_ptr
+#include <queue>     // for priority_queue
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 
-#include "all_column_combinations.h"
-#include "config/thread_number/type.h"
-#include "efficiency_threshold.h"
-#include "model/table/position_list_index.h"
-#include "types.h"
+#include "config/thread_number/type.h"            // for ThreadNumType
+#include "efficiency_threshold.h"                 // for kEfficiencyThreshold
+#include "fd/hycommon/column_combination_list.h"  // for ColumnCombination...
+#include "types.h"                                // for IdPairs, PLIsPtr
+
+namespace algos {
+namespace hy {
+class AllColumnCombinations;
+}
+}  // namespace algos
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace boost::asio {
 // Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since

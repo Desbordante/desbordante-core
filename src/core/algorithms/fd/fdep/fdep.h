@@ -1,15 +1,16 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include <memory>    // for unique_ptr, shared...
+#include <stddef.h>  // for size_t
+#include <string>    // for string
+#include <vector>    // for vector
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/fd/fdep/fd_tree_element.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/relation_data.h"
-#include "model/table/relational_schema.h"
-#include "model/types/bitset.h"
+#include "algorithms/fd/fd_algorithm.h"            // for FDAlgorithm
+#include "algorithms/fd/fdep/fd_tree_element.h"    // for FDTreeElement
+#include "config/tabular_data/input_table_type.h"  // for InputTable
+#include "model/types/bitset.h"                    // for Bitset
+
+class RelationalSchema;
 
 namespace algos {
 

@@ -1,8 +1,9 @@
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <numeric>
-#include <vector>
+#pragma once
+
+#include <array>       // for array
+#include <functional>  // for function
+#include <stddef.h>    // for size_t
+#include <vector>      // for vector
 
 namespace algos {
 
