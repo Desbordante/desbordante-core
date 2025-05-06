@@ -35,7 +35,7 @@ def print_results(table, cfd_verifier, lhs, rhs):
     holds = cfd_verifier.cfd_holds()
     support = cfd_verifier.get_real_support()
     confidence = cfd_verifier.get_real_confidence()
-    print(f"{COLOR_CODES["default_bg"]}CFD: {lhs} -> {rhs}")
+    print(f"{COLOR_CODES['default_bg']}CFD: {lhs} -> {rhs}")
     if holds:
         print(f"CFD holds: {COLOR_CODES['bold_green']}{holds}{COLOR_CODES['default']}")
     else:
@@ -45,23 +45,41 @@ def print_results(table, cfd_verifier, lhs, rhs):
     print(f"Confidence: {confidence:.2f}")
     print_clusters(cfd_verifier, table, lhs, rhs)
 
+def print_table_with_highlight(table, indices_to_highlight):
+    if table.empty:
+        print(table.to_string())
+    else:
+        df_as_string_lines = table.to_string().splitlines()
+        print(df_as_string_lines[0])
+        data_lines = df_as_string_lines[1:]
+
+        for i, line_text in enumerate(data_lines):
+            if table.index[i] in indices_to_highlight:
+                print(f"{COLOR_CODES['green_bg']}{line_text}{COLOR_CODES['default']}")
+            else:
+                print(line_text)
+
 def scenario_incorrect_data():
     table = pandas.read_csv(TABLE_PATH)
+    print("\nIn the first example, let's look at a dataset containing real estate properties in different cities.\n")
     print(table)
-    print("\nIn the first example, let's look at a dataset containing real estate properties in different cities.\n"
-          "Let's say we want to check whether the price of a building depends on the street in Los Angeles.")
+    print("\nLet's say we want to check whether highly priced buildings in Los Angeles are determined by (depend on) a specific building type.\n")
     algo = desbordante.cfd_verification.algorithms.Default()
     algo.load_data(table=table)
 
     lhs, rhs = [("City", "Los Angeles"), ("BuildingType", "_")], ("BuildingCost", "high")
-    print(f'This condition will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
+    print(f'This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
     algo.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, minconf = 1)
 
     print_results(table, algo, lhs, rhs)
-    print("\nWe can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.\n")
-    table.loc[(table["City"] == "Los Angeles") & (table["BuildingCost"] != "high"), "BuildingCost"] = "high"
+    print("\nWe can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.\n") #
+
+    fix_condition = (table["City"] == "Los Angeles") & (table["BuildingCost"] != "high")
+    indices_to_highlight = table[fix_condition].index.tolist()
+    table.loc[fix_condition, "BuildingCost"] = "high"
     table.to_csv(TABLE_PATH_FIXED, index=False)
 
+    print_table_with_highlight(table, indices_to_highlight)
 
     table = pandas.read_csv(TABLE_PATH_FIXED)
     algo = desbordante.cfd_verification.algorithms.Default()
@@ -80,10 +98,12 @@ if __name__ == '__main__':
       "written as (X -> Y, t), where t is a certain template tuple.\n"
       "A template tuple t is a tuple where each attribute can either have a fixed constant value or a wildcard symbol ('_'), "
       "allowing for generalization across different data records.\n"
-      "Validation checks whether the CFD of certain dataset holds the user-specified values of support and confidence thresholds."
+      "Validation checks whether a user-specified CFD holds for a given dataset, based on the specified values for support and confidence thresholds. "
       "Support is the quantity of records satisfying the condition, "
       "and confidence is the fraction of records where Y occurs given X.\n"
       "Desbordante detects CFD violations and classifies records based on rule compliance.\n")
 
 
     scenario_incorrect_data()
+
+    print('\nThats all for CFD validation. Desbordante is also capable of CFD discovery, which is discussed in "mining_cfd.py".')
