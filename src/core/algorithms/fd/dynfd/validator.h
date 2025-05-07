@@ -8,7 +8,7 @@
 #include "model/non_fd_tree.h"
 
 namespace algos::dynfd {
-class Validator {
+class Validator : public std::enable_shared_from_this<Validator> {
     std::shared_ptr<model::FDTree> positive_cover_tree_;
     std::shared_ptr<NonFDTree> negative_cover_tree_;
     std::shared_ptr<DynamicRelationData> relation_;
@@ -39,5 +39,7 @@ public:
     void ValidateFds(size_t first_insert_batch_id);
 
     void ValidateNonFds();
+
+    bool IsNonFdValidated(RawFD const &non_fd);
 };
 }  // namespace algos::dynfd

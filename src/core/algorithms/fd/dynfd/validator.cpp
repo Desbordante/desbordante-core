@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "fd/hycommon/preprocessor.h"
+#include "non_fd_inductor.h"
 
 namespace algos::dynfd {
 
@@ -17,18 +18,21 @@ ViolatingRecordPair Validator::FindClusterViolating(const DPLI::Cluster& cluster
         auto pli = sorted_plis[sortedPlisIndex];
         auto hash_index = pli->GetHashIndex();
         std::vector<DPLI::Cluster> intersection;
-        std::unordered_map<int, DPLI::Cluster*> inverted_index;  // value -> cluster
+        std::unordered_map<int, int> inverted_index;  // value -> intersection index
         for (size_t record_id : cluster) {
             int value = hash_index[record_id];
             if (auto it = inverted_index.find(value); it == inverted_index.end()) {
                 intersection.emplace_back(std::vector({record_id}));
-                inverted_index[value] = &intersection.back();
+                inverted_index[value] = intersection.size() - 1;
             } else {
-                it->second->PushBack(record_id);
+                intersection[it->second].PushBack(record_id);
             }
         }
         for (auto const& next_cluster : intersection) {
-            return FindClusterViolating(next_cluster, sortedPlisIndex, sorted_plis, rhs);
+            auto violation = FindClusterViolating(next_cluster, sortedPlisIndex, sorted_plis, rhs);
+            if (violation) {
+                return violation;
+            }
         }
     } else {
         auto rhs_pli = relation_->GetColumnData(rhs).GetPositionListIndex();
@@ -158,6 +162,8 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
 }
 
 void Validator::ValidateNonFds() {
+    NonFDInductor fdFinder(positive_cover_tree_, negative_cover_tree_, shared_from_this());
+
     for (int level = static_cast<int>(relation_->GetNumColumns()); level >= 0; --level) {
         std::vector<RawFD> valid_fds;
         auto level_non_fds = negative_cover_tree_->GetLevel(level);
@@ -192,9 +198,22 @@ void Validator::ValidateNonFds() {
 
         if (static_cast<double>(valid_fds.size()) >
             0.1 * static_cast<double>(level_non_fds.size())) {
-            // TODO: depth first search
+            std::cout << "DFS" << std::endl;
+            // fdFinder.FindFds(valid_fds);
         }
     }
+}
+
+bool Validator::IsNonFdValidated(RawFD const &non_fd) {
+    if (NeedsValidation(non_fd)) {
+        if (/*auto violation = */FindNewViolation(non_fd)) {
+            // vertex->SetViolation(non_fd.rhs_, violation);
+            return false;
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace algos::dynfd
