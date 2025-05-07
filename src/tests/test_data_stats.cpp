@@ -1,10 +1,23 @@
-#include <easylogging++.h>
-#include <gmock/gmock.h>
+#include <memory>    // for unique_ptr, allocator
+#include <set>       // for set
+#include <sstream>   // for basic_ostream, basic_s...
+#include <stddef.h>  // for size_t
+#include <string>    // for basic_string, char_traits
+#include <utility>   // for pair
+#include <vector>    // for vector
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/statistics/data_stats.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include <easylogging++.h>  // for Writer, CINFO, LOG
+#include <gtest/gtest.h>    // for Test, TestInfo (ptr only)
+
+#include "algorithms/algo_factory.h"           // for ConfigureFromMap, Crea...
+#include "algorithms/statistics/data_stats.h"  // for DataStats
+#include "all_csv_configs.h"                   // for kTestDataStats, kBerno...
+#include "builtin.h"                           // for Double, Int, String
+#include "config/names.h"                      // for kCsvConfig, kEqualNulls
+#include "statistics/statistic.h"              // for Statistic, ColumnStats
+#include "type.h"                              // for Type
+
+struct CSVConfig;
 
 namespace tests {
 namespace mo = model;

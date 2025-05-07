@@ -1,10 +1,17 @@
 #include "relational_schema.h"
 
-#include <memory>
-#include <utility>
+#include <algorithm>  // for find_if, sort
+#include <memory>     // for unique_ptr, allocator, make_u...
+#include <stdexcept>  // for invalid_argument
+#include <utility>    // for move
 
-#include "vertical.h"
-#include "vertical_map.h"
+#include <boost/move/utility_core.hpp>  // for move
+#include <boost/optional/optional.hpp>  // for optional
+
+#include "custom_hashes.h"  // for hash
+#include "table/column.h"   // for Column
+#include "vertical.h"       // for Vertical
+#include "vertical_map.h"   // for VerticalMap
 
 RelationalSchema::RelationalSchema(std::string name)
     : columns_(), name_(std::move(name)), empty_vertical_() {
