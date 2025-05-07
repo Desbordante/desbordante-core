@@ -11,9 +11,7 @@ namespace algos::dynfd {
 class DynamicPositionListIndex {
 public:
     class Cluster {
-        std::list<size_t> records_;  // contains record ids in sorted order
-        std::unordered_map<size_t, std::list<size_t>::iterator>
-                position_by_record_id_;  // record_id -> iterator
+        std::vector<size_t> records_;  // contains record ids in sorted order
 
     public:
         Cluster() = default;
