@@ -1,5 +1,7 @@
 #include "ucc_tree_vertex.h"
 
+#include <boost/move/utility_core.hpp>  // for move
+
 namespace algos::hyucc {
 
 void UCCTreeVertex::InitChildren(bool is_ucc) {

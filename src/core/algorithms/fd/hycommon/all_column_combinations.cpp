@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
+#include "fd/hycommon/column_combination_list.h"  // for ColumnCombinationList
 
 namespace algos::hy {
 

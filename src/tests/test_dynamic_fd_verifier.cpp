@@ -1,17 +1,25 @@
-#include <algorithm>
-#include <memory>
+#include <algorithm>      // for is_sorted
+#include <filesystem>     // for path, operator==
+#include <memory>         // for unique_ptr
+#include <stddef.h>       // for size_t
+#include <string>         // for hash, basic_string
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move, pair
+#include <vector>         // for vector
 
-#include <gtest/gtest.h>
+#include <boost/any.hpp>  // for any
+#include <gtest/gtest.h>  // for ASSERT_TRUE, EXPECT_EQ
 
-#include "algorithms/algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/exceptions.h"
-#include "config/indices/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "fd/fd_verifier/dynamic_fd_verifier.h"
-#include "fd/fd_verifier/dynamic_stats_calculator.h"
-#include "model/types/builtin.h"
+#include "algorithms/algo_factory.h"             // for CreateAndLoadAlgorithm
+#include "all_csv_configs.h"                     // for kTestDynamicFDInsert
+#include "config/exceptions.h"                   // for ConfigurationError
+#include "config/indices/type.h"                 // for IndicesType
+#include "config/names.h"                        // for kCsvConfig, kLhsIndices
+#include "csv_config_util.h"                     // for MakeInputTable
+#include "csv_parser/csv_parser.h"               // for CSVConfig
+#include "fd/fd_verifier/dynamic_fd_verifier.h"  // for DynamicFDVerifier
+#include "fd/fd_verifier/highlight.h"            // for Highlight
+#include "fd/fd_verifier/stats_calculator.h"     // for StatsCalculator
 
 namespace {
 using namespace algos::fd_verifier;

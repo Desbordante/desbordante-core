@@ -1,19 +1,37 @@
-#include <algorithm>
+#include <algorithm>  // for sort
+#include <list>       // for list, _List_const...
+#include <memory>     // for unique_ptr
+#include <set>        // for set, operator==
+#include <stddef.h>   // for size_t
+#include <stdexcept>  // for runtime_error
+#include <string>     // for hash, string
+#include <utility>    // for pair, make_pair
+#include <vector>     // for vector
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <gmock/gmock.h>                            // for ContainerEq, Eq
+#include <gtest/gtest.h>                            // for TypedTestSuitePState
 
-#include "algorithms/fd/depminer/depminer.h"
-#include "algorithms/fd/dfd/dfd.h"
-#include "algorithms/fd/fastfds/fastfds.h"
-#include "algorithms/fd/fdep/fdep.h"
-#include "algorithms/fd/fun/fun.h"
-#include "algorithms/fd/hyfd/hyfd.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/pfdtane.h"
-#include "algorithms/fd/tane/tane.h"
-#include "model/table/relational_schema.h"
-#include "test_fd_util.h"
+#include "algo_factory.h"                     // for ConfigureFromMap
+#include "algorithms/fd/depminer/depminer.h"  // for Depminer
+#include "algorithms/fd/dfd/dfd.h"            // for DFD
+#include "algorithms/fd/fastfds/fastfds.h"    // for FastFDs
+#include "algorithms/fd/fdep/fdep.h"          // for FDep
+#include "algorithms/fd/fun/fun.h"            // for FUN
+#include "algorithms/fd/hyfd/hyfd.h"          // for HyFD
+#include "algorithms/fd/pyro/pyro.h"          // for Pyro
+#include "algorithms/fd/tane/pfdtane.h"       // for PFDTane
+#include "algorithms/fd/tane/tane.h"          // for Tane
+#include "all_csv_configs.h"                  // for kCIPublicHighway700
+#include "csv_parser/csv_parser.h"            // for CSVConfig
+#include "error/type.h"                       // for ErrorType
+#include "fd/fd.h"                            // for FD
+#include "fd/raw_fd.h"                        // for RawFD
+#include "max_lhs/type.h"                     // for MaxLhsType
+#include "names.h"                            // for kCsvConfig, kError
+#include "table/column.h"                     // for Column
+#include "table/vertical.h"                   // for Vertical
+#include "test_fd_util.h"                     // for AlgorithmTest
 
 using std::string, std::vector;
 using ::testing::ContainerEq, ::testing::Eq;

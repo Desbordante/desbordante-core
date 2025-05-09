@@ -1,7 +1,5 @@
 #include "algorithms/nd/nd.h"
 
-#include <algorithm>
-
 #include "algorithms/nd/nd_verifier/util/vector_to_string.h"
 #include "algorithms/nd/util/get_vertical_names.h"
 

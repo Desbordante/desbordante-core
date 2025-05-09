@@ -1,27 +1,49 @@
 #pragma once
 
-#include <cstddef>
-#include <functional>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <utility>  // for move
+#include <vector>   // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic...
 
-#include "algorithms/md/hymd/lattice/md.h"
-#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/lattice/md_node.h"
-#include "algorithms/md/hymd/lattice/node_base.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lattice/single_level_func.h"
-#include "algorithms/md/hymd/lattice/support_node.h"
-#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "algorithms/md/hymd/pair_comparison_result.h"
-#include "algorithms/md/hymd/rhss.h"
-#include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "model/index.h"
+#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"  // for MdLatti...
+#include "algorithms/md/hymd/lattice/md_node.h"               // for MdNode
+#include "algorithms/md/hymd/lattice/rhs.h"                   // for Rhs
+#include "algorithms/md/hymd/lattice/single_level_func.h"     // for SingleL...
+#include "algorithms/md/hymd/lattice/support_node.h"          // for Support...
+#include "algorithms/md/hymd/md_lhs.h"                        // for MdLhs
+#include "algorithms/md/hymd/rhss.h"                          // for Rhss
+#include "algorithms/md/hymd/utility/invalidated_rhss.h"      // for Invalid...
+#include "md/hymd/column_classifier_value_id.h"               // for ColumnC...
+#include "model/index.h"                                      // for Index
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct Md;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct MultiMd;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+struct LhsCCVIdsInfo;
+}
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+struct PairComparisonResult;
+}
+}  // namespace algos
 
 namespace algos::hymd::lattice {
 

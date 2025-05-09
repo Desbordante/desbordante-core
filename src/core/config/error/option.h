@@ -1,7 +1,11 @@
 #pragma once
 
-#include "config/common_option.h"
-#include "config/error/type.h"
+#include "config/error/type.h"  // for ErrorType
+
+namespace config {
+template <typename T>
+class CommonOption;
+}
 
 namespace config {
 

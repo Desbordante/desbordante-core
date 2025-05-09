@@ -1,34 +1,47 @@
 #include "algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
-#include <chrono>
+#include <assert.h>  // for assert
+#include <cmath>
 #include <cstddef>
 #include <cstring>
-#include <ctime>
+#include <exception>  // for exception
 #include <functional>
-#include <iostream>
+#include <string_view>  // for basic_st...
 #include <unordered_map>
-#include <unordered_set>
+#include <unordered_set>  // for unordere...
 #include <utility>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/detail/classification.hpp>  // for is_any_ofF
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/container_hash/hash.hpp>           // for hash_value
+#include <boost/iterator/iterator_facade.hpp>      // for operator!=
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
 #include <easylogging++.h>
 
-#include "algorithms/dc/model/component.h"
-#include "algorithms/dc/model/point.h"
-#include "algorithms/dc/model/predicate.h"
+#include "algorithm.h"                      // for Algorithm
+#include "algorithms/dc/model/component.h"  // for Component
+#include "algorithms/dc/model/point.h"      // for Point
+#include "algorithms/dc/model/predicate.h"  // for Predicate
 #include "algorithms/dc/parser/dc_parser.h"
+#include "common_option.h"  // for CommonOp...
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_index.h"
-#include "model/table/column_layout_relation_data.h"
-#include "table/typed_column_data.h"
-#include "util/get_preallocated_vector.h"
-#include "util/kdtree.h"
+#include "config/option_using.h"                      // for DESBORDA...
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "dc/model/column_operand.h"                  // for ColumnOp...
+#include "dc/model/dc.h"                              // for DC, DCType
+#include "dc/model/operator.h"                        // for Operator
+#include "model/table/column_index.h"                 // for ColumnIndex
+#include "model/table/column_layout_relation_data.h"  // for ColumnLa...
+#include "option.h"                                   // for Option
+#include "table/idataset_stream.h"                    // for IDataset...
+#include "table/relational_schema.h"                  // for Relation...
+#include "table/typed_column_data.h"                  // for TypedCol...
+#include "util/get_preallocated_vector.h"             // for GetPreal...
+#include "util/kdtree.h"                              // for Rect
 
 namespace algos {
 

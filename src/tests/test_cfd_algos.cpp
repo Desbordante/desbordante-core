@@ -1,13 +1,21 @@
 
 // see input_data/cfd_data/LICENSE
 
-#include <gtest/gtest.h>
+#include <memory>   // for unique_ptr
+#include <set>      // for set, operator==, _Rb_...
+#include <string>   // for basic_string, string
+#include <utility>  // for pair
+#include <vector>   // for vector
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/cfd/enums.h"
-#include "algorithms/cfd/fd_first_algorithm.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include <gtest/gtest.h>  // for Message, TestPartResult
+
+#include "algorithms/algo_factory.h"            // for CreateAndLoadAlgorithm
+#include "algorithms/cfd/enums.h"               // for Substrategy
+#include "algorithms/cfd/fd_first_algorithm.h"  // for FDFirstAlgorithm
+#include "all_csv_configs.h"                    // for kTennis, kMushroom
+#include "config/names.h"                       // for kCfdColumnsNumber
+
+struct CSVConfig;
 
 namespace tests {
 

@@ -1,14 +1,23 @@
 #include "hyucc.h"
 
-#include <chrono>
+#include <list>       // for _List_iterator, list
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for move
 
-#include <easylogging++.h>
+#include <boost/move/utility_core.hpp>  // for move
+#include <easylogging++.h>              // for Writer, CDEBUG, LOG
 
-#include "fd/hycommon/types.h"
-#include "inductor.h"
-#include "preprocessor.h"
-#include "sampler.h"
-#include "validator.h"
+#include "fd/hycommon/preprocessor.h"           // for Preprocess, RestoreAg...
+#include "fd/hycommon/types.h"                  // for ClusterId, IdPairs, PLIs
+#include "inductor.h"                           // for Inductor
+#include "primitive_collection.h"               // for PrimitiveCollection
+#include "sampler.h"                            // for Sampler
+#include "table/column_layout_relation_data.h"  // for ColumnLayoutRelationData
+#include "table/relational_schema.h"            // for RelationalSchema
+#include "ucc/hyucc/model/non_ucc_list.h"       // for NonUCCList
+#include "ucc/hyucc/model/ucc_tree.h"           // for UCCTree
+#include "ucc/ucc.h"                            // for UCC
+#include "validator.h"                          // for Validator
 
 namespace algos {
 

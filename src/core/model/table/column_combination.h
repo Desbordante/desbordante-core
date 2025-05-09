@@ -1,12 +1,15 @@
 #pragma once
 
-#include <numeric>
-#include <string>
-#include <vector>
+#include <algorithm>  // for equal
+#include <cstddef>    // for size_t
+#include <numeric>    // for accumulate
+#include <string>     // for string
+#include <utility>    // for move
+#include <vector>     // for vector, operator==
 
-#include "arity_index.h"
-#include "column_index.h"
-#include "table_index.h"
+#include "arity_index.h"   // for ArityIndex
+#include "column_index.h"  // for ColumnIndex
+#include "table_index.h"   // for TableIndex
 
 namespace model {
 

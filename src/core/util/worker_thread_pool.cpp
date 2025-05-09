@@ -1,6 +1,9 @@
 #include "util/worker_thread_pool.h"
 
-#include <cassert>
+#include <cassert>       // for assert
+#include <system_error>  // for system_error
+
+#include "barrier.h"  // for Barrier
 
 namespace util {
 WorkerThreadPool::WorkerThreadPool(std::size_t thread_num)

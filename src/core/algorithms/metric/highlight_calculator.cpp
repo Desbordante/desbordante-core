@@ -1,8 +1,15 @@
 #include "algorithms/metric/highlight_calculator.h"
 
-#include <algorithm>
+#include <algorithm>      // for sort, minmax_el...
+#include <unordered_map>  // for _Node_iterator
 
-#include "util/convex_hull.h"
+#include "builtin.h"                                  // for CompareResult
+#include "metric/highlight.h"                         // for Highlight
+#include "metric/points.h"                            // for IndexedPoint
+#include "numeric_type.h"                             // for INumericType
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "util/convex_hull.h"                         // for EuclideanDistance
 
 namespace {
 
