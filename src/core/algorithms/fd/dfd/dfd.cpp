@@ -1,7 +1,7 @@
 #include "dfd.h"
 
 #include <boost/asio.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
@@ -75,7 +75,7 @@ unsigned long long DFD::ExecuteInternal() {
                 RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
             }
             AddProgress(progress_step);
-            LOG(INFO) << static_cast<int>(GetProgress().second);
+            spdlog::info(static_cast<int>(GetProgress().second));
         });
     }
 
@@ -86,8 +86,8 @@ unsigned long long DFD::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     long long apriori_millis = elapsed_milliseconds.count();
 
-    LOG(INFO) << "> FD COUNT: " << fd_collection_.Size();
-    LOG(INFO) << "> HASH: " << PliBasedFDAlgorithm::Fletcher16();
+    spdlog::info("> FD COUNT: {}", fd_collection_.Size());
+    spdlog::info("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
 
     return apriori_millis;
 }

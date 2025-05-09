@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/model/evidence_set.h"
 #include "dc/FastADC/util/dc_candidate_trie.h"
@@ -44,7 +44,7 @@ public:
           predicate_provider_(pbuilder.predicate_provider),
           predicate_index_provider_(pbuilder.predicate_index_provider),
           schema_(schema) {
-        LOG(DEBUG) << " [AEI] Violate at most " << evi_count_ - target_ << " tuple pairs";
+        spdlog::debug(" [AEI] Violate at most {} tuple pairs", evi_count_ - target_);
         evidences_ = organizer_.TransformEvidenceSet();
         mutex_map_ = organizer_.TransformMutexMap();
     }
@@ -67,17 +67,17 @@ public:
             raw_dcs.push_back(organizer_.Retransform(transDC.bitset));
         });
 
-        LOG(DEBUG) << "  [AEI] Min cover size: " << raw_dcs.size();
+        spdlog::debug("  [AEI] Min cover size: {}", raw_dcs.size());
 
         DenialConstraintSet constraints(predicate_provider_);
         for (auto const& raw_dc : raw_dcs)
             constraints.Add(DenialConstraint(raw_dc, predicate_index_provider_, schema_));
 
-        LOG(DEBUG) << "  [AEI] Total DC size: " << constraints.TotalDCSize();
+        spdlog::debug("  [AEI] Total DC size: {}", constraints.TotalDCSize());
 
         constraints.Minimize();
 
-        LOG(DEBUG) << "  [AEI] Min DC size : " << constraints.MinDCSize();
+        spdlog::debug("  [AEI] Min DC size : {}", constraints.MinDCSize());
 
         return constraints;
     }
@@ -113,7 +113,7 @@ private:
     };
 
     void InverseEvidenceSet() {
-        LOG(DEBUG) << "  [AEI] Inverting evidences...";
+        spdlog::debug("  [AEI] Inverting evidences...");
 
         approx_covers_ = DCCandidateTrie(n_predicates_);
         boost::dynamic_bitset<> full_mask(n_predicates_);

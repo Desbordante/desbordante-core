@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dataset_stream_wrapper.h"
 #include "idataset_stream.h"
@@ -31,8 +31,8 @@ private:
             next_row_ = this->stream_->GetNextRow();
             size_t const cols_num = this->stream_->GetNumberOfColumns();
             if (next_row_.size() != cols_num) {
-                LOG(WARNING) << "Received row with size " << next_row_.size() << ", but expected "
-                             << cols_num;
+                spdlog::warn("Received row with size {}, but expected ", next_row_.size(),
+                             cols_num);
                 return TryStoreNextRow();
             }
         } else {

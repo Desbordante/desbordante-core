@@ -7,7 +7,7 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/providers/index_provider.h"
 #include "model/types/builtin.h"
@@ -103,8 +103,8 @@ std::vector<size_t> PliShardBuilder::ColumnToHash(model::TypedColumnData const& 
             ColumnToHashTyped<std::string>(hashed_column, column);
             break;
         default:
-            LOG(DEBUG) << "Column type " << column.GetType().ToString()
-                       << " is not supported for FastADC's PLI sharding";
+            spdlog::debug("Column type " + column.GetType().ToString() +
+                          " is not supported for FastADC's PLI sharding");
             return {};
     }
 

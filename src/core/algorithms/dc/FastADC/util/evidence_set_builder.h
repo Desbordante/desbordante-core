@@ -1,6 +1,6 @@
 #pragma once
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/model/evidence_set.h"
 #include "dc/FastADC/util/clue_set_builder.h"
@@ -31,8 +31,8 @@ public:
             evidence_set.EmplaceBack(clue, count, cardinality_mask, correction_map);
         }
 
-        LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set.Size();
-        LOG(DEBUG) << " [Evidence] Accumulated evidence count: " << evidence_set.GetTotalCount();
+        spdlog::debug(" [Evidence] # of evidences: {}", evidence_set.Size());
+        spdlog::debug(" [Evidence] Accumulated evidence count: {}", evidence_set.GetTotalCount());
     }
 
 private:

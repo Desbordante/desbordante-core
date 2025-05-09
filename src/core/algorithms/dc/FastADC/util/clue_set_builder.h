@@ -1,6 +1,6 @@
 #pragma once
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/common_clue_set_builder.h"

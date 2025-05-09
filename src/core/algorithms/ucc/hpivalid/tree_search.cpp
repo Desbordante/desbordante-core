@@ -10,7 +10,7 @@
 #include <utility>
 #include <vector>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"
@@ -104,11 +104,11 @@ void TreeSearch::Run() {
             cand.set(v);
         }
         // report final hypergraph
-        LOG(DEBUG) << "Final hypergraph:";
+        spdlog::debug("Final hypergraph:");
         rc_.FinalHypergraph(partial_hg_);
     } catch (unsigned timeout) {
         // report current partial hypergraph
-        LOG(DEBUG) << "Current partial hypergraph:";
+        spdlog::debug("Current partial hypergraph:");
         rc_.FinalHypergraph(partial_hg_);
     }
 }

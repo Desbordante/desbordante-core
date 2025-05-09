@@ -80,8 +80,8 @@ done
 mkdir -p lib
 cd lib
 
-if [[ ! -d "easyloggingpp" ]]; then
-    git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+if [[ ! -d "spdlog" ]]; then
+    git clone https://github.com/gabime/spdlog.git --branch v1.15.2 --depth 1
 fi
 if [[ ! -d "better-enums" ]]; then
     git clone https://github.com/aantron/better-enums.git --branch 0.11.3 --depth 1
