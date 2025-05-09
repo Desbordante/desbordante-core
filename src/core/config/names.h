@@ -95,4 +95,8 @@ constexpr auto kEvidenceThreshold = "evidence_threshold";
 constexpr auto kDoCollectViolations = "do_collect_violations";
 constexpr auto kGfdK = "gfd_k";
 constexpr auto kGfdSigma = "gfd_sigma";
+constexpr auto kValidity = "validity";
+constexpr auto kCompleteness = "completeness";
+constexpr auto kConditionType = "condition_type";
+constexpr auto kAlgoType = "algo_type";
 }  // namespace config::names

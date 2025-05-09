@@ -10,7 +10,6 @@
 
 #include "algorithms/create_algorithm.h"
 #include "config/error/option.h"
-#include "config/names_and_descriptions.h"
 #include "error/type.h"
 #include "ind/ind_algorithm.h"
 #include "max_arity/option.h"
