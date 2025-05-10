@@ -12,7 +12,9 @@ namespace algos::hymd::indexes {
 
 class DictionaryCompressor {
 private:
+    // should be specific to record match in MDE, oops
     std::vector<KeyedPositionListIndex> plis_;
+    // intact in MDE
     CompressedRecords records_;
     std::size_t records_processed_ = 0;
 

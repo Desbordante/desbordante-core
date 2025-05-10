@@ -27,3 +27,4 @@ public:
     SupportNode(std::size_t children_number) : NodeBase<SupportNode>(children_number) {}
 };
 }  // namespace algos::hymd::lattice
+

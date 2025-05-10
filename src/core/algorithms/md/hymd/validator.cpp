@@ -177,8 +177,8 @@ public:
 
 template <typename Collection>
 auto BatchValidator::RhsValidator::LowerCCVIDAndCollectRecommendations(
-        RecordCluster const& lhs_records,
-        Collection const& matched_rhs_records) -> MdValidationStatus {
+        RecordCluster const& lhs_records, Collection const& matched_rhs_records)
+        -> MdValidationStatus {
     // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
     // 3), non-minimal are considered invalidated (4).
     DESBORDANTE_ASSUME(current_ccv_id_ != kLowestCCValueId);        // 1
@@ -227,8 +227,9 @@ auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
     return rhs_validator.LowerCCVIDAndCollectRecommendations(cluster_records, matched_rhs_records);
 }
 
-// Each left table column's PLI already stores the desired partition of the left table. The sets of
-// records that are matched by each partition key's value are already stored in similarity indexes.
+// Each left table record match's PLI already stores the desired partition of the left table. The
+// sets of records that are matched by each partition key's value are already stored in similarity
+// indexes.
 class BatchValidator::OneCardPartitionElementProvider {
     BatchValidator const* const validator_;
     ValueIdentifier current_value_id_ = ValueIdentifier(-1);

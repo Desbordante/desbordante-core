@@ -40,6 +40,7 @@ inline indexes::SimilarityMatrix CreateValueMatrix(EnumeratedValidTableResults c
     for (auto const& [row_results, _] : transformed) {
         indexes::SimilarityMatrixRow& row = value_matrix.emplace_back(row_results.size());
         for (auto const& [ccv_id, value_id] : row_results) {
+            // This should have been excluded during enumeration, right?
             if (ccv_id == kLowestCCValueId) break;
             row.try_emplace(value_id, ccv_id);
         }
@@ -80,7 +81,8 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
         valid_records.reserve(valid_records_number);
         for (auto const& [ccv_id, value_id] : row_results) {
             if (ccv_id < current_ccv_id) {
-                end_id_map.try_emplace(end_id_map.end(), current_ccv_id, valid_records.size());
+                end_id_map.try_emplace(end_id_map.end(), std::distance(current, end),
+                                       valid_records.size());
                 ++current;
                 dec_until_le(ccv_id);
                 if (current == end) goto end_loop;
@@ -88,7 +90,7 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
             indexes::PliCluster const& cluster = clusters_right[value_id];
             valid_records.insert(valid_records.end(), cluster.begin(), cluster.end());
         }
-        end_id_map.try_emplace(end_id_map.end(), current_ccv_id, valid_records.size());
+        end_id_map.try_emplace(end_id_map.end(), std::distance(current, end), valid_records.size());
     end_loop:
         upper_set_records.emplace_back(
                 indexes::FlatUpperSetIndex{std::move(valid_records), std::move(end_id_map)});
@@ -103,13 +105,14 @@ inline indexes::SimilarityIndex CreateUpperSetRecords(
 inline void SymmetricClosure(EnumeratedValidTableResults& enumerated,
                              std::vector<indexes::PliCluster> const& clusters_right) {
     std::size_t const enumerated_size = enumerated.size();
-    for (ColumnClassifierValueId left_value_id = 0; left_value_id < enumerated_size;
-         ++left_value_id) {
+    for (ValueIdentifier left_value_id = 0; left_value_id < enumerated_size; ++left_value_id) {
         ValidRowResults<ColumnClassifierValueId> const& row_results =
                 enumerated[left_value_id].first;
         if (row_results.empty()) continue;
         for (auto const& [ccv_id, right_value_id] :
              std::ranges::drop_view{row_results, row_results.front().second == left_value_id}) {
+            // could be <=, but the == check is done above, see CalcForSame for !EqMax case
+            // <= and < are the same here
             if (right_value_id < left_value_id) break;
             auto& [next_val_row_results, valid_records_number] = enumerated[right_value_id];
             next_val_row_results.emplace_back(ccv_id, left_value_id);
