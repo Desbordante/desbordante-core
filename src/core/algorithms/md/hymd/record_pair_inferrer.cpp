@@ -385,6 +385,15 @@ auto RecordPairInferrer::CreateSamplingQueue() -> std::priority_queue<ColumnMatc
             continue;
         }
 
+        // NOTE: If all column matches match columns to themselves and have a similarity measure
+        // that is symmetrical and outputs 1.0 for equal values, then comparing a record to itself
+        // is useless because it does not refine the initial assumption, the comparison will just
+        // yield 1.0s for all column matches. Thus, the initial sampling will also be completely
+        // useless. Initial parameter being 1 is meant to mitigate that. However, in doing so, if it
+        // happens that no other column match sampling process compares a record to itself, then the
+        // record pair with both elements being the same record will be left out, making the
+        // sampling process technically incomplete. No big deal: lattice traversal will still make
+        // the result correct. And a pair like that is likely to end up among recommendations too.
         std::size_t const initial_parameter = ShortSamplingEnabled(column_match_index) ? 1 : 0;
         ColumnMatchSamplingInfo& column_match_sampling_info =
                 sampling_info.emplace_back(column_match_index, initial_parameter);
@@ -468,6 +477,9 @@ class RecordPairInferrer::Sampler {
         auto const partner = pivot + window_size;
         auto const end = pivot + cluster_size;
 
+        // Sliding window logic for MDE: table partition elements are exactly the same and values
+        // from the same partition element yield the highest possible comparison result when
+        // compared with each other.
         for (auto const [left_record_id, right_record_id] : utility::Zip(end, pivot, partner)) {
             CompressedRecord const& right_record = right_records_[right_record_id];
             CompressedRecord const& left_record = left_records_[left_record_id];

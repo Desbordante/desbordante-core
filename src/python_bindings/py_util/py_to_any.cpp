@@ -11,6 +11,7 @@
 #include "algorithms/cfd/enums.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
+#include "algorithms/mde/hymde/hymde.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
@@ -122,6 +123,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<int>,
         kNormalConvPair<size_t>,
         kNormalConvPair<algos::hymd::HyMD::ColumnMatches>,
+        kNormalConvPair<algos::hymde::HyMDE::ComponentCalculationSpecification>,
         kNormalConvPair<std::optional<int>>,
         kEnumConvPair<algos::metric::Metric>,
         kEnumConvPair<algos::metric::MetricAlgo>,

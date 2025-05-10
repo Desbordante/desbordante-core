@@ -11,6 +11,7 @@
 #include "algorithms/cfd/enums.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
+#include "algorithms/mde/hymde/hymde.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
@@ -92,6 +93,12 @@ py::tuple GetPyType(std::type_index type_index) {
                  return MakeTypeTuple(
                          kPyList,
                          py::type::of<algos::hymd::preprocessing::column_matches::ColumnMatch>());
+             }},
+            {typeid(algos::hymde::HyMDE::ComponentCalculationSpecification),
+             []() {
+                 return MakeTypeTuple(kPyList,
+                                      py::type::of<algos::hymde::record_match_indexes::calculators::
+                                                           Calculator::Creator>());
              }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},

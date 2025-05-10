@@ -20,6 +20,7 @@
 #include "ind/bind_ind.h"
 #include "ind/bind_ind_verification.h"
 #include "md/bind_md.h"
+#include "mde/bind_mde.h"
 #include "mfd/bind_mfd_verification.h"
 #include "nar/bind_nar.h"
 #include "nd/bind_nd.h"
@@ -71,7 +72,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindDCVerification,
                            BindPfdVerification,
                            BindFastADC,
-                           BindGfd}) {
+                           BindGfd,
+                           BindMde}) {
         bind_func(module);
     }
 }
