@@ -8,7 +8,7 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
@@ -48,7 +48,7 @@ unsigned long long FastFDs::ExecuteInternal() {
 
     auto elapsed_mills_to_gen_diff_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "TIME TO DIFF SETS GENERATION: " << elapsed_mills_to_gen_diff_sets.count();
+    spdlog::info("TIME TO DIFF SETS GENERATION: {}", elapsed_mills_to_gen_diff_sets.count());
 
     if (diff_sets_.size() == 1 && diff_sets_.back() == *schema_->empty_vertical_) {
         auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -58,8 +58,8 @@ unsigned long long FastFDs::ExecuteInternal() {
 
     auto task = [this](std::unique_ptr<Column> const& column) {
         if (ColumnContainsOnlyEqualValues(*column)) {
-            LOG(DEBUG) << "Registered FD: " << schema_->empty_vertical_->ToString() << "->"
-                       << column->ToString();
+            spdlog::debug("Registered FD: {} -> {}", schema_->empty_vertical_->ToString(),
+                          column->ToString());
             RegisterFd(Vertical(), *column, relation_->GetSharedPtrSchema());
             return;
         }
@@ -117,7 +117,7 @@ void FastFDs::FindCovers(Column const& attribute, vector<DiffSet> const& diff_se
 
     if (cur_diff_sets.empty()) {
         if (CoverMinimal(path, diff_sets_mod)) {
-            LOG(DEBUG) << "Registered FD: " << path.ToString() << "->" << attribute.ToString();
+            spdlog::debug("Registered FD: {} -> {}", path.ToString(), attribute.ToString());
             RegisterFd(path, attribute, relation_->GetSharedPtrSchema());
             return;
         }
@@ -257,9 +257,9 @@ vector<FastFDs::DiffSet> FastFDs::GetDiffSetsMod(Column const& col) const {
         }
     }
 
-    LOG(DEBUG) << "Compute minimal difference sets modulo " << col.ToString() << ":";
+    spdlog::debug("Compute minimal difference sets modulo {}:", col.ToString());
     for (auto& item : diff_sets_mod) {
-        LOG(DEBUG) << item.ToString();
+        spdlog::debug(item.ToString());
     }
 
     return diff_sets_mod;
@@ -275,9 +275,9 @@ void FastFDs::GenDiffSets() {
     model::AgreeSetFactory factory(relation_.get(), c, this);
     model::AgreeSetFactory::SetOfAgreeSets agree_sets = factory.GenAgreeSets();
 
-    LOG(DEBUG) << "Agree sets:";
+    spdlog::debug("Agree sets:");
     for (auto const& agree_set : agree_sets) {
-        LOG(DEBUG) << agree_set.ToString();
+        spdlog::debug("{}", agree_set.ToString());
     }
 
     // Complement agree sets to get difference sets
@@ -300,9 +300,9 @@ void FastFDs::GenDiffSets() {
     // sort diff_sets_, it will be used further to find minimal difference sets modulo column
     std::sort(diff_sets_.begin(), diff_sets_.end());
 
-    LOG(DEBUG) << "Compute difference sets:";
+    spdlog::debug("Compute difference sets:");
     for (auto const& diff_set : diff_sets_) {
-        LOG(DEBUG) << diff_set.ToString();
+        spdlog::debug("{}", diff_set.ToString());
     }
 }
 

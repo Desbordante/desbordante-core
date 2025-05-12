@@ -64,8 +64,6 @@ if (MSVC)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  "${CMAKE_BINARY_DIR}/target")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE  "${CMAKE_BINARY_DIR}/target")
 else()
-    # -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-    set(BUILD_OPTS "-DELPP_THREAD_SAFE")
     if (BUILD_NATIVE)
         string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
     endif()
@@ -176,25 +174,16 @@ include_directories(
         "src/core/config"
 )
 
-include_directories(SYSTEM "lib/easyloggingpp/src" "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include" "lib/frozen/include")
+include_directories(SYSTEM "lib/better-enums/" "lib/emhash" "lib/atomicbitvector/include" "lib/frozen/include")
+
+set(SPDLOG_BUILD_SHARED OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory("lib/spdlog")
 
 # adding submodules
 if (COMPILE_TESTS)
     add_subdirectory("lib/googletest" SYSTEM)
 endif()
-
-set( CMAKE_BUILD_TYPE_COPY "${CMAKE_BUILD_TYPE}" )
-set( CMAKE_BUILD_TYPE "Release" )
-option(build_static_lib "Build easyloggingpp as a static library" ON)
-if (PYTHON STREQUAL INSTALL)
-    # Relies on undocumented behaviour. EXCLUDE_FROM_ALL is used to prevent install commands
-    # inside the easyloggingpp CMakeLists from executing and subsequently failing with a permission error,
-    # making it impossible to install the Python package as a normal user.
-    add_subdirectory("lib/easyloggingpp" EXCLUDE_FROM_ALL SYSTEM)
-else ()
-    add_subdirectory("lib/easyloggingpp" SYSTEM)
-endif ()
-set( CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE_COPY} )
 
 if (USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -210,8 +199,6 @@ endif()
 if (UNPACK_DATASETS)
     add_subdirectory("datasets")
 endif()
-
-add_subdirectory("cfg")
 
 if (PYTHON)
     add_subdirectory("lib/pybind11" SYSTEM)

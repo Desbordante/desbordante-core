@@ -1,7 +1,7 @@
 #include "pli_cache.h"
 
 #include <boost/optional.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "model/table/vertical_map.h"
 
@@ -47,13 +47,13 @@ PLICache::~PLICache() {
 std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::GetOrCreateFor(
         Vertical const& vertical, ProfilingContext* profiling_context) {
     std::scoped_lock lock(getting_pli_mutex_);
-    LOG(DEBUG) << boost::format{"PLI for %1% requested: "} % vertical.ToString();
+    spdlog::debug((boost::format{"PLI for %1% requested: "} % vertical.ToString()).str());
 
     // is PLI already cached?
     PositionListIndex* pli = Get(vertical);
     if (pli != nullptr) {
         pli->IncFreq();
-        LOG(DEBUG) << boost::format{"Served from PLI cache."};
+        spdlog::debug((boost::format{"Served from PLI cache."}).str());
         // addToUsageCounter
         return pli;
     }
@@ -129,7 +129,7 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
               [](auto& el1, auto& el2) { return el1.pli_->GetSize() < el2.pli_->GetSize(); });
     // TODO: Profiling context stuff
 
-    LOG(DEBUG) << boost::format{"Intersecting %1%."} % "[UNIMPLEMENTED]";
+    spdlog::debug((boost::format{"Intersecting %1%."} % "[UNIMPLEMENTED]").str());
 
     if (operands.empty()) {
         throw std::logic_error("Current implementation assumes operands.size() > 0");
@@ -165,8 +165,9 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
         }
     }
 
-    LOG(DEBUG) << boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-                          operands.size() % (vertical.GetArity() - operands.size());
+    spdlog::debug((boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
+                   operands.size() % (vertical.GetArity() - operands.size()))
+                          .str());
 
     return variant_intersection_pli;
 }

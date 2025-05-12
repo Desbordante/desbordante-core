@@ -80,7 +80,7 @@
 #include <type_traits>
 
 #include <boost/container_hash/hash.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 namespace model {
 
@@ -536,7 +536,7 @@ public:
     [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) noexcept {
         // Originally, here is `throw` statement, but it violates `noexcept` specification
         // throw std::out_of_range("BaseBitset::GetWord");
-        LOG(INFO) << "Out of range in BaseBitset::GetWord (zero-lenght bitset).";
+        spdlog::info("Out of range in BaseBitset::GetWord (zero-lenght bitset).");
         __builtin_unreachable();
     }
 

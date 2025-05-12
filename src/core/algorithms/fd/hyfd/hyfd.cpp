@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/fd/hycommon/preprocessor.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
@@ -31,7 +31,7 @@ void HyFD::MakeExecuteOptsAvailableFDInternal() {
 
 unsigned long long HyFD::ExecuteInternal() {
     using namespace hy;
-    LOG(TRACE) << "Executing";
+    spdlog::trace("Executing");
     auto const start_time = std::chrono::system_clock::now();
 
     auto [plis, pli_records, og_mapping] = Preprocess(relation_.get());
@@ -58,7 +58,7 @@ unsigned long long HyFD::ExecuteInternal() {
             break;
         }
 
-        LOG(TRACE) << "Cycle done";
+        spdlog::trace("Cycle done");
     }
 
     auto fds = positive_cover_tree->FillFDs();

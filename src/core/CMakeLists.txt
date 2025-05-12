@@ -8,7 +8,7 @@ find_package(Threads REQUIRED)
 add_library(${BINARY} STATIC ${lib_sources})
 set_property(TARGET ${BINARY} PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(${BINARY} PRIVATE ${Boost_LIBRARIES} Threads::Threads)
-target_link_libraries(${BINARY} PUBLIC easyloggingpp)
+target_link_libraries(${BINARY} PUBLIC spdlog::spdlog_header_only)
 
 option(SAFE_VERTICAL_HASHING
         "Enable safe vertical hashing. This feature allows to process\

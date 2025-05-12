@@ -2,7 +2,7 @@
 
 #include <numeric>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/model/evidence.h"
 
