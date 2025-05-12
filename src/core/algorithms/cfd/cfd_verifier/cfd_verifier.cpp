@@ -79,6 +79,8 @@ unsigned long long CFDVerifier::ExecuteInternal() {
             if (item_name != "_") {
                 item_ids.push_back(relation_->GetItem(attr_id, item_name));
             } else {
+                // Negative values (-1 - attr_id) are used to represent wildcards,
+                // indicating that the rule applies to any value in this column
                 item_ids.push_back(-1 - attr_id);
             }
         }
