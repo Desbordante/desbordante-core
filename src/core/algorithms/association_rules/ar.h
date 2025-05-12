@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <list>
 
 #include "model/transaction/itemset.h"
@@ -22,6 +23,23 @@ struct ArIDs {
           confidence(confidence),
           support(support) {}
 
+    ArIDs(std::list<std::string> const& string_left, std::list<std::string> const& string_right,
+          TransactionalData const* transactional_data, double const confidence,
+          double const support)
+        : confidence(confidence), support(support) {
+        std::vector<std::string> const& item_names_map = transactional_data->GetItemUniverse();
+
+        for (auto const& item_name : string_left) {
+            auto const it = std::ranges::find(item_names_map, item_name);
+            left.push_back(std::distance(item_names_map.begin(), it));
+        }
+
+        for (auto const& item_name : string_right) {
+            auto const it = std::ranges::find(item_names_map, item_name);
+            right.push_back(std::distance(item_names_map.begin(), it));
+        }
+    }
+
     ArIDs(ArIDs const& other) = default;
     ArIDs& operator=(ArIDs const& other) = default;
     ArIDs(ArIDs&& other) = default;
@@ -36,8 +54,8 @@ struct ARStrings {
 
     ARStrings() = default;
 
-    ARStrings(std::list<std::string> left, std::list<std::string> right, double confidence,
-              double support)
+    ARStrings(std::list<std::string> left, std::list<std::string> right, double const confidence,
+              double const support)
         : left(std::move(left)),
           right(std::move(right)),
           confidence(confidence),
@@ -47,10 +65,10 @@ struct ARStrings {
         : confidence(id_format_rule.confidence), support(id_format_rule.support) {
         std::vector<std::string> const& item_names_map = transactional_data->GetItemUniverse();
 
-        for (auto item_id : id_format_rule.left) {
+        for (auto const item_id : id_format_rule.left) {
             this->left.push_back(item_names_map[item_id]);
         }
-        for (auto item_id : id_format_rule.right) {
+        for (auto const item_id : id_format_rule.right) {
             this->right.push_back(item_names_map[item_id]);
         }
     }
