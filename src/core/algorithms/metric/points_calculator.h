@@ -1,9 +1,20 @@
 #pragma once
 
-#include "algorithms/metric/points.h"
-#include "config/indices/type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "util/convex_hull.h"
+#include <cstddef>  // for byte
+#include <limits>   // for numeric_limits
+#include <memory>   // for shared_ptr
+#include <utility>  // for move
+#include <vector>   // for vector
+
+#include "algorithms/metric/points.h"   // for PointsCalculationResult, Inde...
+#include "config/indices/type.h"        // for IndicesType
+#include "metric/aliases.h"             // for AssignmentFunction, ClusterIndex
+#include "table/position_list_index.h"  // for PLI
+#include "util/convex_hull.h"           // for Point
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+}
 
 namespace algos::metric {
 
@@ -48,7 +59,7 @@ public:
                               config::IndicesType rhs_indices)
         : dist_from_null_is_infinity_(dist_from_null_is_infinity),
           typed_relation_(std::move(typed_relation)),
-          rhs_indices_(std::move(rhs_indices)){};
+          rhs_indices_(std::move(rhs_indices)) {};
 };
 
 }  // namespace algos::metric

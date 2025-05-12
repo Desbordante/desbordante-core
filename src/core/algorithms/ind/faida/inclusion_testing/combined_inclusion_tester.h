@@ -1,11 +1,19 @@
 #pragma once
 
-#include <hash_table8.hpp>
+#include <cmath>            // for log
+#include <hash_table8.hpp>  // for HashMap
+#include <memory>           // for shared_ptr, __s...
+#include <optional>         // for optional
+#include <stddef.h>         // for size_t
+#include <unordered_map>    // for unordered_map
+#include <vector>           // for vector
 
-#include "algorithms/ind/faida/preprocessing/preprocessor.h"
-#include "hll_data.h"
-#include "iinclusion_tester.h"
-#include "sampled_inverted_index.h"
+#include "hll_data.h"                                 // for HLLData
+#include "iinclusion_tester.h"                        // for IInclusionTester
+#include "ind/faida/inclusion_testing/hyperloglog.h"  // for HyperLogLog
+#include "ind/faida/preprocessing/irow_iterator.h"    // for IRowIterator
+#include "ind/faida/util/simple_cc.h"                 // for SimpleCC, Table...
+#include "sampled_inverted_index.h"                   // for SampledInverted...
 
 namespace algos::faida {
 

@@ -5,19 +5,28 @@
  */
 #include "spider.h"
 
-#include <functional>
-#include <queue>
-#include <string>
-#include <type_traits>
+#include <format>      // for vector
+#include <functional>  // for reference_wrapper
+#include <queue>       // for priority_queue
+#include <string>      // for operator==, string
 
-#include "attribute.h"
-#include "config/equal_nulls/option.h"
-#include "config/error/option.h"
-#include "config/mem_limit/option.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
+#include <boost/type_index/type_index_facade.hpp>   // for operator==
+
+#include "attribute.h"                  // for INDAttribute, AIN...
+#include "bitset_utils.h"               // for BitsetToIndices
+#include "common_option.h"              // for CommonOption
+#include "config/equal_nulls/option.h"  // for kEqualNullsOpt
+#include "config/error/option.h"        // for kErrorOpt
+#include "config/mem_limit/option.h"    // for kMemLimitMbOpt
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/thread_number/option.h"
-#include "util/timed_invoke.h"
+#include "config/option_using.h"          // for DESBORDANTE_OPTIO...
+#include "config/thread_number/option.h"  // for kThreadNumberOpt
+#include "equal_nulls/type.h"             // for EqNullsType
+#include "ind/ind_algorithm.h"            // for INDAlgorithm
+#include "table/column_domain.h"          // for ColumnDomain
+#include "util/timed_invoke.h"            // for TimedInvoke
 
 namespace algos {
 

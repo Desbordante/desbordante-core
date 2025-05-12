@@ -1,7 +1,12 @@
 #pragma once
 
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "model/types/builtin.h"
+#include <cstddef>  // for byte
+
+#include "algorithms/od/fastod/storage/data_frame.h"  // for DataFrame
+#include "mixed_type.h"                               // for MixedType
+#include "model/types/builtin.h"                      // for TypeId, Compare...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
 
 namespace algos::fastod {
 
@@ -14,8 +19,8 @@ template <bool IsColumnMixed>
 model::CompareResult CompareData(DataFrame::DataAndIndex const& left,
                                  DataFrame::DataAndIndex const& right,
                                  model::TypedColumnData const& column) {
-    const model::TypeId left_type_id = column.GetValueTypeId(left.second);
-    const model::TypeId right_type_id = column.GetValueTypeId(right.second);
+    model::TypeId const left_type_id = column.GetValueTypeId(left.second);
+    model::TypeId const right_type_id = column.GetValueTypeId(right.second);
 
     bool const is_both_types_unordered =
             IsUnorderedType(left_type_id) && IsUnorderedType(right_type_id);

@@ -1,5 +1,11 @@
 #include "sampled_inverted_index.h"
 
+#include <algorithm>  // for remove_if
+
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "ind/faida/util/simple_ind.h"  // for SimpleIND, hash
+
 namespace algos::faida {
 
 void SampledInvertedIndex::Init(std::vector<size_t> const& sampled_hashes, int max_id) {

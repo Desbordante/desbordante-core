@@ -1,11 +1,15 @@
 #pragma once
 
-#include "algorithms/nar/nar_algorithm.h"
-#include "config/names.h"
-#include "differential_functions.h"
-#include "encoded_nar.h"
-#include "enums.h"
-#include "rng.h"
+#include <memory>    // for shared_ptr
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
+
+#include "algorithms/nar/nar_algorithm.h"             // for NARAlgorithm
+#include "differential_functions.h"                   // for DifferentialOpt...
+#include "encoded_nar.h"                              // for EncodedNAR
+#include "nar/value_range.h"                          // for ValueRange
+#include "rng.h"                                      // for RNG
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
 
 namespace algos::des {
 using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;

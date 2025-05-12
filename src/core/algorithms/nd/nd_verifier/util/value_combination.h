@@ -1,13 +1,12 @@
 #pragma once
 
-#include <cstddef>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <cstddef>  // for byte, size_t
+#include <ostream>  // for ostream
+#include <string>   // for string
+#include <utility>  // for pair
+#include <vector>   // for vector
 
-#include "model/types/builtin.h"
+#include "model/types/builtin.h"  // for TypeId
 
 namespace algos::nd_verifier::util {
 

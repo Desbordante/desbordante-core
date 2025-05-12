@@ -1,8 +1,16 @@
 #include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "util/erase_if_replace.h"
+#include <assert.h>  // for assert
+#include <utility>   // for move, pair
+
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "algorithms/md/hymd/lattice/rhs.h"         // for Rhs
+#include "algorithms/md/hymd/lowest_cc_value_id.h"  // for kLowestCCValueId
+#include "index.h"                                  // for Index
+#include "md/hymd/lattice/md_lattice.h"             // for MdLattice
+#include "md/hymd/md_lhs.h"                         // for MdLhs, hash, oper...
+#include "util/erase_if_replace.h"                  // for EraseIfReplace
 
 namespace algos::hymd::lattice::cardinality {
 

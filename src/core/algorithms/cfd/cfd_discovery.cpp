@@ -1,14 +1,22 @@
 #include "cfd_discovery.h"
 
-#include <iterator>
-#include <thread>
+#include <optional>   // for optional
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for move
 
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"  // for Algorithm
 #include "algorithms/cfd/util/cfd_output_util.h"
-#include "algorithms/cfd/util/set_util.h"
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
+#include "cfd/model/cfd_relation_data.h"  // for CFDRelationData
+#include "cfd/model/cfd_types.h"          // for ItemsetCFD, CFDList
+#include "cfd/model/raw_cfd.h"            // for RawCFD, Attribut...
+#include "common_option.h"                // for CommonOption
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "descriptions.h"  // for kDCfdColumnsNumber
+#include "names.h"         // for kCfdColumnsNumber
+#include "option.h"        // for Option
 
 // see algorithms/cfd/LICENSE
 

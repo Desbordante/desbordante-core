@@ -3,23 +3,33 @@
  *
  * Algorithm for veryfing AIND implementation.
  */
+
 #include "ind_verifier.h"
 
-#include <set>
-#include <sstream>
-#include <unordered_set>
+#include <functional>     // for function
+#include <memory>         // for __shared_ptr_ac...
+#include <set>            // for allocator, set
+#include <sstream>        // for char_traits
+#include <stdexcept>      // for runtime_error
+#include <string>         // for operator==, ope...
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>  // for hash
 
-#include "config/indices/option.h"
-#include "config/tabular_data/input_tables/option.h"
-#include "indices/option.h"
-#include "model/table/dataset_stream_projection.h"
-#include "model/table/table_index.h"
-#include "table/dataset_stream_fixed.h"
-#include "table/tuple_index.h"
-#include "tabular_data/input_table_type.h"
-#include "timed_invoke.h"
+#include "algorithm.h"                                // for Algorithm
+#include "config/tabular_data/input_tables/option.h"  // for InputTablesOption
+#include "exceptions.h"                               // for ConfigurationError
+#include "indices/option.h"                           // for IndicesOption
+#include "indices/type.h"                             // for IndicesType
+#include "model/table/dataset_stream_projection.h"    // for DatasetStreamPr...
+#include "model/table/table_index.h"                  // for TableIndex
+#include "table/dataset_stream_fixed.h"               // for DatasetStreamFixed
+#include "table/idataset_stream.h"                    // for IDatasetStream
+#include "table/tuple_index.h"                        // for TupleIndex
+#include "tabular_data/input_table_type.h"            // for InputTable
+#include "timed_invoke.h"                             // for TimedInvoke
 
 namespace algos {
 
