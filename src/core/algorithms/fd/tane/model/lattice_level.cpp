@@ -1,8 +1,15 @@
 #include "lattice_level.h"
 
-#include <algorithm>
+#include <algorithm>  // for min, sort
+#include <assert.h>   // for assert
+#include <utility>    // for move, pair
 
-#include <easylogging++.h>
+#include <boost/move/utility_core.hpp>  // for move
+#include <easylogging++.h>              // for Writer, CTRACE, LOG
+
+#include "fd/tane/model/lattice_vertex.h"  // for LatticeVertex
+#include "table/relational_schema.h"       // for RelationalSchema
+#include "table/vertical.h"                // for Vertical
 
 namespace model {
 

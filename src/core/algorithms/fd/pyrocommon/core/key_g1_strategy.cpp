@@ -1,9 +1,16 @@
 #include "key_g1_strategy.h"
 
-#include <unordered_map>
+#include <variant>  // for get, holds_alter...
+#include <vector>   // for vector
 
-#include "../model/pli_cache.h"
-#include "search_space.h"
+#include "fd/pyrocommon/core/dependency_consumer.h"  // for DependencyConsumer
+#include "fd/pyrocommon/core/dependency_strategy.h"  // for DependencyStrategy
+#include "fd/pyrocommon/core/parameters.h"           // for Parameters
+#include "fd/pyrocommon/model/agree_set_sample.h"    // for AgreeSetSample
+#include "fd/pyrocommon/model/pli_cache.h"           // for PLICache
+#include "search_space.h"                            // for SearchSpace
+#include "table/column.h"                            // for Column
+#include "table/position_list_index.h"               // for PositionListIndex
 
 double KeyG1Strategy::CalculateKeyError(model::PositionListIndex* pli) const {
     return CalculateKeyError(pli->GetNepAsLong());

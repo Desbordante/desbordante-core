@@ -1,5 +1,12 @@
 #include "lattice_vertex.h"
 
+#include <ostream>   // for basic_ostream, operator<<, endl
+#include <stddef.h>  // for size_t
+
+#include "table/column.h"               // for Column
+#include "table/position_list_index.h"  // for PositionListIndex
+#include "table/vertical.h"             // for Vertical
+
 namespace model {
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;

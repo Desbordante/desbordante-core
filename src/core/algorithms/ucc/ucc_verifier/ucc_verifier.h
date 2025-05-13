@@ -1,13 +1,19 @@
 #pragma once
 
-#include <vector>
+#include <assert.h>  // for assert
+#include <deque>     // for deque
+#include <memory>    // for unique...
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include "algorithms/algorithm.h"
-#include "algorithms/ucc/ucc_verifier/ucc_stats_calculator.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_relation_data.h"
+#include "algorithms/algorithm.h"                              // for Algorithm
+#include "algorithms/ucc/ucc_verifier/ucc_stats_calculator.h"  // for UCCSta...
+#include "config/equal_nulls/type.h"                           // for EqNull...
+#include "config/indices/type.h"                               // for Indice...
+#include "config/tabular_data/input_table_type.h"              // for InputT...
+#include "table/position_list_index.h"                         // for PLI
+
+class ColumnLayoutRelationData;
 
 namespace algos {
 

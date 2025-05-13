@@ -1,18 +1,26 @@
 #include "validator.h"
 
-#include <algorithm>
-#include <future>
-#include <utility>
-#include <vector>
+#include <algorithm>      // for any_of
+#include <assert.h>       // for assert
+#include <future>         // for future, packag...
+#include <stddef.h>       // for size_t
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for pair, move
+#include <vector>         // for vector
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
+#include <boost/asio/post.hpp>                      // for post
+#include <boost/asio/thread_pool.hpp>               // for thread_pool
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/unordered/detail/foa/table.hpp>     // for operator!=
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "algorithms/fd/hycommon/validator_helpers.h"
-#include "hyfd_config.h"
+#include "algorithms/fd/hycommon/util/pli_util.h"      // for PLIUtil
+#include "algorithms/fd/hycommon/validator_helpers.h"  // for BuildClustersI...
+#include "bitset_utils.h"                              // for BitsetToIndices
+#include "fd/hycommon/primitive_validations.h"         // for PrimitiveValid...
+#include "fd/hyfd/model/fd_tree.h"                     // for FDTree
+#include "fd/raw_fd.h"                                 // for RawFD
+#include "hyfd_config.h"                               // for HyFDConfig
+#include "table/position_list_index.h"                 // for PositionListIndex
 
 namespace {
 

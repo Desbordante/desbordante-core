@@ -1,17 +1,22 @@
 #pragma once
 
-#include <algorithm>
-#include <cmath>
-#include <numbers>
-#include <vector>
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include "frequency_handler.h"
-#include "model/table/column.h"
-#include "model/table/column_index.h"
-#include "model/table/relational_schema.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
-#include "model/table/vertical.h"
+#include "model/table/column.h"        // for Column
+#include "model/table/column_index.h"  // for ColumnIndex
+#include "model/table/tuple_index.h"   // for TupleIndex
+#include "model/table/vertical.h"      // for Vertical
+
+class RelationalSchema;
+
+namespace algos {
+class FrequencyHandler;
+}
+
+namespace model {
+class TypedColumnData;
+}
 
 namespace algos {
 
