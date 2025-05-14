@@ -66,7 +66,6 @@ PreprocessingResult PreprocessingResult::Create(
         assertions.push_back(rm_assertions);
     }
 
-    /*
     std::size_t const non_trivial_number = useful_record_matches.size();
     auto arrangement_ptr = utility::MakeUniqueForOverwrite<model::Index[]>(non_trivial_number);
     auto start = arrangement_ptr.get(), end = start + non_trivial_number;
@@ -94,7 +93,7 @@ PreprocessingResult PreprocessingResult::Create(
     indexes = std::move(sorted_indexes);
     rcv_id_lr_maps = std::move(sorted_rcv_id_lr_maps);
     useful_record_matches = std::move(sorted_useful_record_matches);
-    assertions = std::move(sorted_assertions);*/
+    assertions = std::move(sorted_assertions);
 
     DataPartitionIndex data_partition_index{
             PartitionIndex::GetPermuted(std::move(partition_index_left), useful_record_matches),

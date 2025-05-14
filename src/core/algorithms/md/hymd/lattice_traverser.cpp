@@ -6,13 +6,12 @@
 #include "model/index.h"
 
 namespace algos::hymd {
-auto LatticeTraverser::AdjustLattice(std::vector<lattice::ValidationInfo>& validations,
-                                     std::vector<BatchValidator::Result> const& results)
-        -> LatticeStatistics {
+void LatticeTraverser::AdjustLattice(LatticeStatistics& statistics,
+                                     std::vector<lattice::ValidationInfo>& validations,
+                                     std::vector<BatchValidator::Result> const& results) {
     assert(validations.size() == results.size());
-    LatticeStatistics lattice_statistics;
     for (auto [validation, result] : utility::Zip(validations, results)) {
-        lattice_statistics.CountOne(validation, result);
+        statistics.CountOne(result);
         lattice::MdLattice::MdVerificationMessenger& messenger = *validation.messenger;
         if (result.lhs_is_unsupported) {
             messenger.MarkUnsupported();
@@ -20,7 +19,6 @@ auto LatticeTraverser::AdjustLattice(std::vector<lattice::ValidationInfo>& valid
             messenger.LowerAndSpecialize(result.invalidated_rhss);
         }
     }
-    return lattice_statistics;
 }
 
 void LatticeTraverser::AddRecommendations(std::vector<BatchValidator::Result> const& results) {
@@ -36,28 +34,29 @@ void LatticeTraverser::AddRecommendations(std::vector<BatchValidator::Result> co
     }
 }
 
-auto LatticeTraverser::ProcessResults(std::vector<lattice::ValidationInfo>& validations,
-                                      std::vector<BatchValidator::Result> const& results)
-        -> LatticeStatistics {
+void LatticeTraverser::ProcessResults(LatticeStatistics& statistics,
+                                      std::vector<lattice::ValidationInfo>& validations,
+                                      std::vector<BatchValidator::Result> const& results) {
     if (pool_ == nullptr) {
         AddRecommendations(results);
-        return AdjustLattice(validations, results);
+        AdjustLattice(statistics, validations, results);
     } else {
-        LatticeStatistics lattice_statistics;
-        util::WorkerThreadPool::Waiter waiter = pool_->SubmitSingleTask(
-                [&]() { lattice_statistics = AdjustLattice(validations, results); });
+        util::WorkerThreadPool::Waiter waiter =
+                pool_->SubmitSingleTask([&]() { AdjustLattice(statistics, validations, results); });
         AddRecommendations(results);
         waiter.Wait();
-        return lattice_statistics;
     }
 }
 
 bool LatticeTraverser::TraverseLattice(bool const traverse_all) {
     std::vector<lattice::ValidationInfo> validations;
     while (!(validations = level_getter_.GetPendingGroupedMinimalLhsMds()).empty()) {
+        LatticeStatistics lattice_statistics;
+        lattice_statistics.AddExaminedMds(validations);
+
         std::vector<BatchValidator::Result> const& results = validator_.ValidateBatch(validations);
 
-        LatticeStatistics lattice_statistics = ProcessResults(validations, results);
+        ProcessResults(lattice_statistics, validations, results);
 
         if (!traverse_all && lattice_statistics.TraversalInefficient()) return false;
         recommendations_.clear();

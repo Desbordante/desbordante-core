@@ -23,9 +23,14 @@ private:
             return invalidated_mds_num_ > kRatioBound * (all_mds_num_ - invalidated_mds_num_);
         }
 
-        void CountOne(lattice::ValidationInfo& validation, BatchValidator::Result const& result) {
+        void CountOne(BatchValidator::Result const& result) {
             invalidated_mds_num_ += result.invalidated_rhss.Size();
-            all_mds_num_ += validation.rhs_indices_to_validate.count();
+        }
+
+        void AddExaminedMds(std::vector<lattice::ValidationInfo> const& validations) {
+            for (lattice::ValidationInfo const& validation : validations) {
+                all_mds_num_ += validation.rhs_indices_to_validate.count();
+            }
         }
     };
 
@@ -53,10 +58,12 @@ private:
     util::WorkerThreadPool* pool_;
 
     void AddRecommendations(std::vector<BatchValidator::Result> const& results);
-    static LatticeStatistics AdjustLattice(std::vector<lattice::ValidationInfo>& validations,
-                                           std::vector<BatchValidator::Result> const& results);
-    LatticeStatistics ProcessResults(std::vector<lattice::ValidationInfo>& validations,
-                                     std::vector<BatchValidator::Result> const& results);
+    static void AdjustLattice(LatticeStatistics& statistics,
+                              std::vector<lattice::ValidationInfo>& validations,
+                              std::vector<BatchValidator::Result> const& results);
+    void ProcessResults(LatticeStatistics& statistics,
+                        std::vector<lattice::ValidationInfo>& validations,
+                        std::vector<BatchValidator::Result> const& results);
 
 public:
     LatticeTraverser(lattice::LevelGetter& level_getter, BatchValidator validator,
