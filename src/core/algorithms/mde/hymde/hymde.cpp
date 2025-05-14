@@ -122,8 +122,6 @@ unsigned long long HyMDE::ExecuteInternal() {
     std::unique_ptr<util::WorkerThreadPool> pool_holder =
             threads_ > 1 ? std::make_unique<util::WorkerThreadPool>(threads_) : nullptr;
 
-    // TODO: fill search space specification
-
     auto [record_matches, classifier_values, useful_record_matches, data_partition_index, indexes,
           rcv_id_lr_maps, assertions] =
             record_match_indexes::PreprocessingResult::Create(
