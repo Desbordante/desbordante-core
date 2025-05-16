@@ -26,7 +26,25 @@ class Validator : public std::enable_shared_from_this<Validator> {
     [[nodiscard]] std::vector<std::shared_ptr<DPLI>> GetSortedPlisForLhs(
             boost::dynamic_bitset<> const &lhs) const;
 
+    [[nodiscard]] std::shared_ptr<DPLI> GetFirstPliForLhs(
+            boost::dynamic_bitset<> const &lhs) const;
+
     [[nodiscard]] bool NeedsValidation(RawFD const &non_fd) const;
+
+    [[nodiscard]] boost::dynamic_bitset<> NeedsValidation(NonFDTreeVertex &vertex) const;
+
+    [[nodiscard]] boost::dynamic_bitset<> Validate(NonFDTreeVertex &vertex,
+                                                   boost::dynamic_bitset<> lhs,
+                                                   boost::dynamic_bitset<> rhss);
+    
+    [[nodiscard]] bool Refines(NonFDTreeVertex &vertex,
+                               algos::dynfd::DPLI const& pli,
+                               size_t rhs_attr) const;
+    
+    [[nodiscard]] boost::dynamic_bitset<> Refines(NonFDTreeVertex &vertex,
+                                                  algos::dynfd::DPLI const& pli,
+                                                  boost::dynamic_bitset<> lhs,
+                                                  boost::dynamic_bitset<> rhss) const;
 
 public:
     Validator(std::shared_ptr<model::FDTree> positive_cover_tree,
