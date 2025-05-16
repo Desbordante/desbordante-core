@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include "compressed_column_data.h"
 #include "fd/hycommon/preprocessor.h"
@@ -13,11 +14,14 @@
 
 namespace algos::dynfd {
 
+using CompressedRecord = std::vector<int>;
+
 class DynamicRelationData : public AbstractRelationData<CompressedColumnData> {
     std::unordered_set<size_t> stored_row_ids_;
     std::unordered_map<std::string, int> value_dictionary_;
     int next_value_id_;
     size_t next_record_id_;
+    std::vector<std::vector<int>> compressed_records_;
 
 private:
     [[nodiscard]] size_t GetNumRows() const final;
@@ -27,7 +31,8 @@ public:
                                  std::vector<ColumnType> column_data,
                                  std::unordered_set<size_t> stored_row_ids,
                                  std::unordered_map<std::string, int> value_dictionary,
-                                 int next_value_id, int next_record_id);
+                                 int next_value_id, int next_record_id,
+                                 std::vector<CompressedRecord> compressed_records);
 
     size_t GetNextRecordId() const;
 
@@ -44,6 +49,8 @@ public:
     [[nodiscard]] bool IsRowIndexValid(size_t row_id) const;
 
     bool Empty() const;
+
+    std::vector<CompressedRecord> const& GetCompressedRecords() const;
 };
 
 }  // namespace algos::dynfd
