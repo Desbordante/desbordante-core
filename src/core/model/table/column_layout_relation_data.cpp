@@ -4,11 +4,18 @@
 //
 #include "column_layout_relation_data.h"
 
-#include <map>
-#include <memory>
-#include <utility>
+#include <memory>         // for make_unique, unique_ptr, __sh...
+#include <string>         // for hash, string, operator==
+#include <unordered_map>  // for unordered_map, operator==
+#include <utility>        // for move, pair
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CWARNING, LOG
+
+#include "table/column.h"               // for Column
+#include "table/column_data.h"          // for ColumnData
+#include "table/idataset_stream.h"      // for IDatasetStream
+#include "table/position_list_index.h"  // for PositionListIndex
+#include "table/relational_schema.h"    // for RelationalSchema
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
     int num_columns = schema_->GetNumColumns();

@@ -1,12 +1,22 @@
-#include <algorithm>
+#include <algorithm>  // for sort
+#include <list>       // for list, _List_const_iterator
+#include <set>        // for set, operator==
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for pair, make_pair
+#include <vector>     // for vector
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <gmock/gmock.h>  // for ContainerEq, Eq
+#include <gtest/gtest.h>  // for TypedTestSuitePState, ASS...
 
-#include "algorithms/fd/eulerfd/eulerfd.h"
-#include "all_csv_configs.h"
-#include "test_fd_util.h"
-#include "util/bitset_utils.h"
+#include "algo_factory.h"                   // for ConfigureFromMap
+#include "algorithms/fd/eulerfd/eulerfd.h"  // for EulerFD
+#include "all_csv_configs.h"                // for kNeighbors10k, kTestEmpty
+#include "fd/fd.h"                          // for FD
+#include "fd/raw_fd.h"                      // for RawFD
+#include "table/column.h"                   // for Column
+#include "table/vertical.h"                 // for Vertical
+#include "test_fd_util.h"                   // for ApproximateFDTest, Approx...
+#include "util/bitset_utils.h"              // for BitsetToIndices
 
 using ::testing::ContainerEq, ::testing::Eq;
 

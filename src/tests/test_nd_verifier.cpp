@@ -1,10 +1,17 @@
-#include <gtest/gtest.h>
+#include <limits.h>  // for UINT_MAX
+#include <memory>    // for unique_ptr
+#include <utility>   // for move, pair
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/nd_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include <gtest/gtest.h>  // for UnitTest, EXPECT_...
+
+#include "algorithms/algo_factory.h"                // for CreateAndLoadAlgo...
+#include "algorithms/nd/nd.h"                       // for WeightType
+#include "algorithms/nd/nd_verifier/nd_verifier.h"  // for NDVerifier
+#include "all_csv_configs.h"                        // for kTestND, kIowa1kk
+#include "config/names.h"                           // for kCsvConfig, kEqua...
+#include "indices/type.h"                           // for IndicesType
+
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;
