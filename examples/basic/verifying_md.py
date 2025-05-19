@@ -35,9 +35,9 @@ def print_results(verifier):
     print()
 
 
-def check_md(table_path: str, params: MDParams):
+def check_md(table: str, params: MDParams):
     algo = desbordante.md_verification.algorithms.Default()
-    algo.load_data(left_table=(table_path, ",", True))
+    algo.load_data(left_table=table)
 
     algo.execute(**params)
     print_results(algo)
@@ -60,7 +60,7 @@ def animals_beverages_example():
         "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 1),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print(
         "As we see, such MD doesn't holds due to some sort of typo in table.\n"
@@ -72,7 +72,7 @@ def animals_beverages_example():
         "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.75),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print(
         "As a result, MD {[Levenshtein(animal, animal) >= 0.75] -> [Levenshtein(diet, diet) >= 0.75]} holds.\n"
@@ -90,7 +90,7 @@ def animals_beverages_example():
         "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.75),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print(
         "As we can see, nothing changed. Now let's increase right-hand side decision boundary:\n"
@@ -101,11 +101,26 @@ def animals_beverages_example():
         "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 0.76),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print(
         'Values "meat" and "mead" have Levenshtein similarity measure equal to 0.75, but we accept similarity measure at least 0.76, so MD doesn\'t holds.\n'
     )
+
+    print("Let's check that changes if we corrent typos in dataset")
+
+    table["animal"] = table["animal"].replace({"beer": "bear"})
+    table["diet"] = table["diet"].replace({"mead": "meat"})
+
+    print(f"Corrected dataset:\n\n{table}\n")
+    print("Now let's check MD with 1.0 decision boundaries again")
+
+    params = {
+        "lhs": [ColumnSimilarityClassifier(Levenshtein(2, 2, 0.0), 1.0)],
+        "rhs": ColumnSimilarityClassifier(Levenshtein(3, 3, 0.0), 1.0),
+    }
+
+    check_md(table, params)
 
 
 def theatre_example():
@@ -140,7 +155,7 @@ def theatre_example():
         ),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print("To avoid typos, let's set left-hand side decision boundary to 0.75:\n")
 
@@ -160,7 +175,7 @@ def theatre_example():
         ),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print("More pairs violationg MD appeared.\n")
 
@@ -185,7 +200,7 @@ def theatre_example():
         ),
     }
 
-    check_md(table_path, params)
+    check_md(table, params)
 
     print("As we see, now everything holds.")
 
@@ -193,10 +208,19 @@ def theatre_example():
 if __name__ == "__main__":
     print(DEFAULT_COLOR_CODE)
     print(
-        "This example demonstrates how to validate Matching Dependancies (MD) using the Desbordante library. "
+        "This example demonstrates how to validate Matching Dependancies (MD) from 'Efficient Discovery of Matching Dependencies' "
+        "by Schirmer et al. using the Desbordante library. "
         "You can read about Matching Dependancies and their formal definition in article below\n"
         "https://hpi.de/fileadmin/user_upload/fachgebiete/naumann/publications/PDFs/2020_schirmer_efficient.pdf\n"
     )
+    print(
+        "Matching dependancies verification algorithm accepts left-hand side and right-hand side and returns if such dependancy holds. "
+        "Also in case if dependancy doesn't hold, algorithm also returns list of highlights and suggests how to adjust dependancy."
+    )
+    print(
+        "You can also read about mining Matching Dependancies in examples/basic/mining_md.py"
+    )
+
     print(
         "To verify Matching Dependancy, firstly we must define Column Similarity Classifiers for tables.\n"
         "Column Similarity Classifier consists of Column Match and decision boundary. "
