@@ -69,8 +69,6 @@ struct Condition {
         return this->completeness == that.completeness && this->validity == that.validity &&
                this->condition_attrs_values == that.condition_attrs_values;
     }
-
-    ~Condition() = default;
 };
 }  // namespace algos::cind
 
