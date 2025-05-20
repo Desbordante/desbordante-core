@@ -182,7 +182,7 @@ boost::dynamic_bitset<> Validator::NeedsValidation(NonFDTreeVertex &vertex) cons
 bool Validator::Refines(NonFDTreeVertex &vertex, algos::dynfd::DPLI const& pli, size_t rhs_attr) const {
     std::vector<CompressedRecord> const& compressed_records = relation_->GetCompressedRecords();
 
-    for (auto const& cluster : pli) {
+    for (auto const& cluster : pli.GetClustersToCheck()) {
         auto const rhs_value = compressed_records[*cluster.begin()][rhs_attr];
 
         for (auto record_id : cluster) {
@@ -215,7 +215,7 @@ boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
         rhs_attr_ind_to_id[index] = rhs;
     }
 
-    for (auto const& cluster : pli) {
+    for (auto const& cluster : pli.GetClustersToCheck()) {
         std::unordered_map<ClusterIdsArray, ClusterIdsArrayWithRecord> cluster_ids_map;
 
         for (auto record_id : cluster) {

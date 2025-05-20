@@ -34,6 +34,10 @@ bool DynamicPositionListIndex::Cluster::Empty() const {
     return records_.empty();
 }
 
+size_t DynamicPositionListIndex::Cluster::Size() const {
+    return records_.size();
+}
+
 DynamicPositionListIndex::DynamicPositionListIndex(
         std::list<Cluster> clusters,
         std::unordered_map<int, std::list<Cluster>::iterator> inverted_index,
