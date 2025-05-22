@@ -40,7 +40,7 @@ public:
         };
         auto add_new = [&](PartitionValueId value_id) {
             left_adder_.AddToNewCluster(value_id);
-            right_adder_.AddToCluster(value_id);
+            right_adder_.AddToNewCluster(value_id);
             inspector_.InspectNew(v, value_id);
         };
 

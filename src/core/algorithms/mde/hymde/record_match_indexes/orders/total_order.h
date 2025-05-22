@@ -17,6 +17,7 @@ public:
     virtual std::string ToString() const = 0;
 
     virtual bool AreInOrder(CompType const& res1, CompType const& res2) const = 0;
+    // Least and greatest elements must be distinct.
     virtual CompType LeastElement() const = 0;
     virtual CompType GreatestElement() const = 0;
 

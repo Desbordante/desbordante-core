@@ -10,6 +10,7 @@
 #include "algorithms/mde/hymde/partition_value_identifier.h"
 #include "algorithms/mde/hymde/record_classifier_value_id.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/meaningful_table_results.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/to_decision_boundaries.h"
 #include "algorithms/mde/hymde/record_match_indexes/indexes.h"
 #include "algorithms/mde/hymde/record_match_indexes/partition_index.h"
 #include "algorithms/mde/hymde/record_match_indexes/rcv_id_selectors/selector.h"
@@ -128,19 +129,6 @@ inline void SymmetricClosure(EnumeratedMeaningfulDataResults& enumerated,
             meaningful_records_count += right_pli[left_pvalue_id].size();
         }
     }
-}
-
-template <typename DecisionBoundaryType, typename ResultType>
-std::vector<std::shared_ptr<model::mde::decision_boundaries::DecisionBoundary>>
-ToDecisionBoundaries(std::vector<ResultType> comparison_results) {
-    std::vector<std::shared_ptr<model::mde::decision_boundaries::DecisionBoundary>>
-            decision_boundaries = util::GetPreallocatedVector<
-                    std::shared_ptr<model::mde::decision_boundaries::DecisionBoundary>>(
-                    comparison_results.size());
-    for (ResultType const& result : comparison_results) {
-        decision_boundaries.push_back(std::make_shared<DecisionBoundaryType>(result));
-    }
-    return decision_boundaries;
 }
 
 template <typename DecisionBoundaryType, typename ResultType>

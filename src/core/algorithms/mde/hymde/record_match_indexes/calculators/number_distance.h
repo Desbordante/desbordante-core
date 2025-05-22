@@ -48,15 +48,20 @@ struct Traits {
 }  // namespace number_distance
 
 template <typename OrderT, typename DistValueType, typename DecBoundType>
-class NumberDistance : public NormalPairwise<number_distance::Traits<OrderT>,
-                                             number_distance::Distance<DistValueType>, DecBoundType,
-                                             utility::CompileTimeOptionalLike<DistValueType(0)>> {
+class NumberDistance
+    : public NormalPairwise<number_distance::Traits<OrderT>,
+                            number_distance::Distance<DistValueType>, DecBoundType,
+                            utility::CompileTimeOptionalLike<std::invoke_result_t<
+                                    decltype(number_distance::Distance<DistValueType>),
+                                    DistValueType, DistValueType>(0)>> {
 public:
     using Creator = StandardCalculatorCreator<NumberDistance<OrderT, DistValueType, DecBoundType>>;
 
-    using NormalPairwise<number_distance::Traits<OrderT>, number_distance::Distance<DistValueType>,
-                         DecBoundType,
-                         utility::CompileTimeOptionalLike<DistValueType(0)>>::NormalPairwise;
+    using NormalPairwise<
+            number_distance::Traits<OrderT>, number_distance::Distance<DistValueType>, DecBoundType,
+            utility::CompileTimeOptionalLike<
+                    std::invoke_result_t<decltype(number_distance::Distance<DistValueType>),
+                                         DistValueType, DistValueType>(0)>>::NormalPairwise;
 };
 
 using FloatDistance =

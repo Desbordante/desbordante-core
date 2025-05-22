@@ -16,6 +16,7 @@
 #include "algorithms/mde/hymde/compact_mde_storage.h"
 #include "algorithms/mde/hymde/hymde.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/calculator.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/equality.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/levenshtein_similarity.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/number_difference.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/number_distance.h"
@@ -115,6 +116,19 @@ auto BindCalculatorCreator(auto&& calculator_specifiers, auto&& name) {
                                   typename CreatorType::OrderPtr,
                                   std::shared_ptr<SizeBasedSelector const>,
                                   typename CreatorType::ComparisonResult>());
+    return cls;
+}
+
+template <typename CalculatorType>
+auto BindPredicateCalculatorCreator(auto&& calculator_specifiers, auto&& name) {
+    using namespace algos::hymde::record_match_indexes::rcv_id_selectors;
+    using namespace algos::hymde::record_match_indexes::calculators;
+
+    using CreatorType = CalculatorType::Creator;
+    auto cls = BindChildSharedPtr<CreatorType, Calculator::Creator>(calculator_specifiers, name)
+                       .def(py::init<typename CreatorType::PartitioningFunctionCreatorsOption,
+                                     typename CreatorType::OrderPtr,
+                                     typename CreatorType::SelectorPtr>());
     return cls;
 }
 
@@ -322,6 +336,7 @@ void BindCalculatorSpecifiers(py::module_& mde_module) {
     BindCalculatorCreator<IntDistance>(calculator_specifiers, "IntDistance");
     BindCalculatorCreator<FloatDifference>(calculator_specifiers, "FloatDifference");
     BindCalculatorCreator<IntDifference>(calculator_specifiers, "IntDifference");
+    BindPredicateCalculatorCreator<Equality<std::string>>(calculator_specifiers, "Equality");
     // TODO: custom
 }
 
