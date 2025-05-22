@@ -13,6 +13,6 @@ class IndexUniform final : public SizeBasedSelector {
 public:
     std::vector<RecordClassifierValueId> GetSubsetIndices(std::size_t size) const final;
 
-    IndexUniform(std::size_t size_limit) : size_limit_(size_limit) {}
+    IndexUniform(std::size_t size_limit = 0) : size_limit_(size_limit) {}
 };
 }  // namespace algos::hymde::record_match_indexes::rcv_id_pickers

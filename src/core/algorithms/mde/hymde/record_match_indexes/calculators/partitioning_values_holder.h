@@ -1,8 +1,11 @@
 #pragma once
 
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
+
+#include "algorithms/mde/hymde/partition_value_identifier.h"
 
 namespace algos::hymde::record_match_indexes::calculators {
 template <typename L, typename R>

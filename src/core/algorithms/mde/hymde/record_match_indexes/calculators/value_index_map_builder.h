@@ -25,5 +25,9 @@ public:
     std::vector<ValueType> TakeValues() noexcept {
         return std::move(values_);
     }
+
+    std::unordered_map<ValueType, PartitionValueId> TakeMap() noexcept {
+        return std::move(value_partition_id_map_);
+    }
 };
 }  // namespace algos::hymde::record_match_indexes::calculators

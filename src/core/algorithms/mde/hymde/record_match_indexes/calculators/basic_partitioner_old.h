@@ -90,6 +90,7 @@ public:
         }
     }
 
+    // TODO: template here. holds values, value maps, supplemental.
     ParitioningValuesHolder<Ret1, Ret2> Partition(Adder& left_adder, Adder& right_adder) const {
         if (auto* pair_ptr = std::get_if<PartitioningFunctionPair>(&funcs_)) {
             auto&& [l_func_ptr, r_func_ptr] = *pair_ptr;

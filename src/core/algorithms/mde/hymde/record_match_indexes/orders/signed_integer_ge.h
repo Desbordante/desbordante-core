@@ -1,17 +1,19 @@
 #pragma once
 
+#include <limits>
+
 #include "algorithms/mde/hymde/record_match_indexes/orders/greater_eq.h"
-#include "algorithms/mde/hymde/record_match_indexes/orders/similarity.h"
+#include "algorithms/mde/hymde/record_match_indexes/orders/signed_integer.h"
 
 namespace algos::hymde::record_match_indexes::orders {
-class SimilarityGe final : public GreaterEq<Similarity> {
+class SignedIntegerGe : public GreaterEq<SignedInteger> {
 public:
     Type LeastElement() const final {
-        return 1.0;
+        return std::numeric_limits<Type>::max();
     }
 
     Type GreatestElement() const final {
-        return 0.0;
+        return std::numeric_limits<Type>::min();
     }
 };
 }  // namespace algos::hymde::record_match_indexes::orders

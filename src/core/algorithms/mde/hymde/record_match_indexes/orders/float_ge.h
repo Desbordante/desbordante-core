@@ -1,17 +1,19 @@
 #pragma once
 
+#include <limits>
+
 #include "algorithms/mde/hymde/record_match_indexes/orders/greater_eq.h"
-#include "algorithms/mde/hymde/record_match_indexes/orders/similarity.h"
+#include "algorithms/mde/hymde/record_match_indexes/orders/valid_float.h"
 
 namespace algos::hymde::record_match_indexes::orders {
-class SimilarityGe final : public GreaterEq<Similarity> {
+class FloatGe : public GreaterEq<ValidFloat> {
 public:
     Type LeastElement() const final {
-        return 1.0;
+        return std::numeric_limits<Type>::infinity();
     }
 
     Type GreatestElement() const final {
-        return 0.0;
+        return -std::numeric_limits<Type>::infinity();
     }
 };
 }  // namespace algos::hymde::record_match_indexes::orders

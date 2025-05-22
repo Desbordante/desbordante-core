@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 #include "algorithms/mde/hymde/record_match_indexes/calculators/calculator.h"
 #include "algorithms/mde/hymde/record_match_indexes/orders/total_order.h"
@@ -9,7 +10,7 @@
 #include "algorithms/mde/hymde/record_match_indexes/rcv_id_selectors/size_based_selector_adapter.h"
 
 namespace algos::hymde::record_match_indexes::calculators {
-template <typename CalculatorType>
+template <typename CalculatorType, typename... Params>
 class StandardCalculatorCreator final : public Calculator::Creator {
     using PartitioningValueLeft = CalculatorType::PartitioningValueLeft;
     using PartitioningValueRight = CalculatorType::PartitioningValueRight;
@@ -29,11 +30,12 @@ public:
             std::conditional_t<kPartValuesAreSame, std::variant<PFCreatorPtrL, PFCreatorPtrPair>,
                                PFCreatorPtrPair>;
     using ComparisonResult = CalculatorType::ComparisonResult;
-    using OrderPtr = std::shared_ptr<orders::TotalOrder<ComparisonResult>>;
+    using OrderPtr = CalculatorType::OrderPtr;
     using SelectorPtr = std::shared_ptr<rcv_id_selectors::Selector<ComparisonResult> const>;
 
 private:
     PartitioningFunctionCreatorsOption pf_creators_;
+    [[no_unique_address]] std::tuple<Params...> additional_params_;
     OrderPtr order_ptr_;
     SelectorPtr selector_ptr_;
     ComparisonResult cutoff_;
@@ -83,8 +85,10 @@ private:
 
 public:
     StandardCalculatorCreator(PartitioningFunctionCreatorsOption pf_creators, OrderPtr order_ptr,
-                              SelectorPtr selector_ptr, ComparisonResult cutoff)
+                              SelectorPtr selector_ptr, ComparisonResult cutoff,
+                              Params... additional_params)
         : pf_creators_(std::move(pf_creators)),
+          additional_params_(std::move(additional_params)...),
           order_ptr_(std::move(order_ptr)),
           selector_ptr_(std::move(selector_ptr)),
           cutoff_(std::move(cutoff)) {}
@@ -103,9 +107,15 @@ public:
     std::unique_ptr<Calculator> Create(RelationalSchema const& left_schema,
                                        RelationalSchema const& right_schema,
                                        records::DictionaryCompressed const& records) const final {
-        return std::make_unique<CalculatorType>(records,
-                                                MakePartFuncs(left_schema, right_schema, records),
-                                                order_ptr_, selector_ptr_, cutoff_);
+        return std::unique_ptr<Calculator>(static_cast<Calculator*>(
+                std::apply(
+                        [&](auto&&... additional_params) {
+                            return std::make_unique<CalculatorType>(
+                                    records, MakePartFuncs(left_schema, right_schema, records),
+                                    order_ptr_, selector_ptr_, cutoff_, additional_params...);
+                        },
+                        additional_params_)
+                        .release()));
     }
 
     void CheckSchemas(RelationalSchema const& left_schema,

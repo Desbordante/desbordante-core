@@ -80,13 +80,13 @@ struct ComponentStructureAssertions {
     // 3) \forall i \in range(n) left_pli[i] \subset upper_set_index[i][m]
     // This corresponds to column matches matching columns to themselves and equal values being
     // considered to have similarity of 1.0
-    bool assume_overlap_lpli_cluster_max_;
+    bool assume_overlap_lpli_cluster_max_ = false;
 
     // TODO: figure this out!
     // In case of 1 table, we are going to compare records (6, 7) and (7, 6), which will give the
     // same results, right? So we can skip records with index greater than... There is some
     // interplay with equality and how records are partitioned here, figure it out.
-    bool assume_record_symmetric_;
+    bool assume_record_symmetric_ = false;
 };
 
 struct ComponentHandlingInfo {

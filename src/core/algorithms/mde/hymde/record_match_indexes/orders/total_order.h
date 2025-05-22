@@ -4,9 +4,16 @@
 #include <string>
 
 namespace algos::hymde::record_match_indexes::orders {
+// A bounded non-strict total order.
 template <typename CompType>
 class TotalOrder {
 public:
+    using Type = CompType;
+
+    static bool IsValid(CompType const&) {
+        return true;
+    }
+
     virtual std::string ToString() const = 0;
 
     virtual bool AreInOrder(CompType const& res1, CompType const& res2) const = 0;
@@ -16,6 +23,7 @@ public:
     virtual ~TotalOrder() = default;
 };
 
+// A non-owning wrapper to use TotalOrder in C++ STL collections.
 template <typename CompType>
 class OrderCompareWrapper {
     TotalOrder<CompType> const* order_ptr_;

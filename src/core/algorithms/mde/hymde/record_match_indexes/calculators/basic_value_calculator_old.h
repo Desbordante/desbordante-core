@@ -166,7 +166,6 @@ class BasicValueCalculatorCalc {
         }
     };
 
-    // May store the comparison function.
     ComparerCreatorSupplier const* creator_supplier_;
     orders::TotalOrder<ComparisonResult> const* order_;
     rcv_id_selectors::Selector<ComparisonResult> const* selector_;
@@ -221,15 +220,17 @@ class BasicValueCalculator {
     using Comparer = std::invoke_result_t<ComparerCreator>;
     using ComparisonResult = std::invoke_result_t<Comparer, LeftElementType, RightElementType>;
 
+    using OrderPtr = std::shared_ptr<orders::TotalOrder<ComparisonResult> const>;
+
+    // May store the comparison function.
     ComparerCreatorSupplier creator_supplier_;
-    std::shared_ptr<orders::TotalOrder<ComparisonResult> const> order_;
+    OrderPtr order_;
     std::shared_ptr<rcv_id_selectors::Selector<ComparisonResult> const> selector_;
     bool eq_max_;
 
 public:
     BasicValueCalculator(
-            ComparerCreatorSupplier creator_supplier,
-            std::shared_ptr<orders::TotalOrder<ComparisonResult> const> order,
+            ComparerCreatorSupplier creator_supplier, OrderPtr order,
             std::shared_ptr<rcv_id_selectors::Selector<ComparisonResult> const> selector,
             std::optional<ComparisonResult> eq_value)
         : creator_supplier_(std::move(creator_supplier)),

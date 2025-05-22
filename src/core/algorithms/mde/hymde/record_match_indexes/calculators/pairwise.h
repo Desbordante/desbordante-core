@@ -1,14 +1,16 @@
 #pragma once
 
-#include "algorithms/mde/hymde/record_match_indexes/calculators/basic_partitioner.h"
-#include "algorithms/mde/hymde/record_match_indexes/calculators/basic_value_calculator.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/calculator_impl.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/partition_builder_supplier.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/value_calculator.h"
 #include "algorithms/mde/hymde/record_match_indexes/orders/total_order.h"
+#include "algorithms/mde/hymde/utility/compile_time_value.h"
 
 namespace algos::hymde::record_match_indexes::calculators {
 namespace pairwise {
 template <auto Function>
 class BasicComparerCreator {
+public:
     using FuncType = decltype(Function);
     using PartitioningValueLeft = std::remove_cvref_t<util::ArgumentType<FuncType, 0>>;
     using PartitioningValueRight = std::remove_cvref_t<util::ArgumentType<FuncType, 1>>;
@@ -17,12 +19,12 @@ class BasicComparerCreator {
     using Order = orders::TotalOrder<ComparisonResult>;
 
     class Comparer {
-        ComparisonResult* cutoff_;
+        ComparisonResult const* cutoff_;
         Order* order_;
         ComparisonResult least_element_ = order_->LeastElement();
 
     public:
-        Comparer(ComparisonResult* cutoff, Order* order) : cutoff_(cutoff), order_(order) {}
+        Comparer(ComparisonResult const* cutoff, Order* order) : cutoff_(cutoff), order_(order) {}
 
         ComparisonResult operator()(PartitioningValueLeft const& l,
                                     PartitioningValueRight const& r) {
@@ -31,11 +33,12 @@ class BasicComparerCreator {
         }
     };
 
-    ComparisonResult* cutoff_;
+private:
+    ComparisonResult const* cutoff_;
     Order* order_;
 
 public:
-    explicit BasicComparerCreator(ComparisonResult* cutoff, Order* order)
+    explicit BasicComparerCreator(ComparisonResult const* cutoff, Order* order)
         : cutoff_(cutoff), order_(order) {}
 
     Comparer operator()() const {
@@ -61,52 +64,66 @@ public:
     BasicComparerCreatorSupplier(ComparisonResult cutoff, std::shared_ptr<Order> order)
         : cutoff_(cutoff), order_(std::move(order)) {}
 
-    auto operator()(std::vector<PartitioningValueLeft> const*,
-                    std::vector<PartitioningValueRight> const*) const {
-        return BasicComparerCreator<Function>{cutoff_, order_.get()};
+    auto operator()(auto&&) const {
+        return BasicComparerCreator<Function>{&cutoff_, order_.get()};
     }
 };
 
 template <auto Function>
-using Partitioner =
-        BasicPartitionCalculator<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
-                                 std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>>;
+using BuilderSupplier = std::conditional_t<
+        std::is_same_v<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
+                       std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>>,
+        SameValueTypeBuilderSupplier<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
+                                     NullInspector, NullInspector>,
+        PairOnlyBuilderSupplier<std::remove_cvref_t<util::ArgumentType<decltype(Function), 0>>,
+                                std::remove_cvref_t<util::ArgumentType<decltype(Function), 1>>,
+                                NullInspector>>;
 
-template <auto Function, typename DecisionBoundaryType, bool... Params>
-using PairwiseBase = CalculatorImpl<Partitioner<Function>,
-                                    BasicValueCalculator<BasicComparerCreatorSupplier<Function>,
-                                                         DecisionBoundaryType, Params...>>;
+template <auto Function, typename DecisionBoundaryType, typename... Params>
+using PairwiseBase = CalculatorImpl<
+        BuilderSupplier<Function>,
+        ValueCalculator<BasicComparerCreatorSupplier<Function>, DecisionBoundaryType, Params...>>;
 
 template <auto Function>
 using ComparisonResult =
         typename pairwise::BasicComparerCreatorSupplier<Function>::ComparisonResult;
 }  // namespace pairwise
 
-template <typename CalcClass, auto Function, typename DecisionBoundaryType, bool Symmetric,
-          bool... Params>
-class Pairwise
-    : public pairwise::PairwiseBase<Function, DecisionBoundaryType, Symmetric, Params...> {
-    using Base = pairwise::PairwiseBase<Function, DecisionBoundaryType, Symmetric, Params...>;
+template <typename Traits, auto Function, typename DecisionBoundaryType, typename... Params>
+class Pairwise : public pairwise::PairwiseBase<Function, DecisionBoundaryType, Params...> {
+    using Base = pairwise::PairwiseBase<Function, DecisionBoundaryType, Params...>;
     using ComparerCreatorSupplier = pairwise::BasicComparerCreatorSupplier<Function>;
-    using Partitioner = pairwise::Partitioner<Function>;
 
 public:
     using PartitioningValueLeft = ComparerCreatorSupplier::PartitioningValueLeft;
     using PartitioningValueRight = ComparerCreatorSupplier::PartitioningValueRight;
     using ComparisonResult = ComparerCreatorSupplier::ComparisonResult;
 
-    using OrderPtr = std::shared_ptr<typename ComparerCreatorSupplier::Order>;
+    using OrderPtr = std::shared_ptr<typename Traits::Order>;
     using SelectorPtr = std::shared_ptr<rcv_id_selectors::Selector<ComparisonResult> const>;
-    using PartitioningFunctionsOption = Partitioner::PartitioningFunctionsOption;
+    using PartitioningFunctionsOption = Base::PartitioningFunctionsOption;
 
     Pairwise(records::DictionaryCompressed const& records,
              PartitioningFunctionsOption partitioning_functions, OrderPtr order,
-             SelectorPtr selector, ComparisonResult cutoff)
-        : Base(CalcClass::kName, Partitioner{std::move(partitioning_functions), records},
-               {ComparerCreatorSupplier{cutoff, order}, order, std::move(selector),
-                CalcClass::kEqValue}) {};
+             SelectorPtr selector, ComparisonResult cutoff, Params... params)
+        : Base(Traits::kName, std::move(partitioning_functions), records, {},
+               {std::move(params)..., ComparerCreatorSupplier{cutoff, order}, order,
+                std::move(selector)}) {};
 };
 
-template <typename CalcClass, auto Function, typename DecisionBoundaryType>
-using NormalPairwise = Pairwise<CalcClass, Function, DecisionBoundaryType, true, true>;
+template <typename Traits, auto Function, typename DecisionBoundaryType, typename... Params>
+class PairwiseCompileTime : public Pairwise<Traits, Function, DecisionBoundaryType, Params...> {
+    static_assert((Params::kCompileTime && ...), "Params must be compile-time");
+
+public:
+    template <typename... PairwiseConstructorParams>
+    PairwiseCompileTime(PairwiseConstructorParams&&... cparams)
+        : Pairwise<Traits, Function, DecisionBoundaryType, Params...>(
+                  std::forward<PairwiseConstructorParams>(cparams)..., Params{}...) {}
+};
+
+template <typename Traits, auto Function, typename DecisionBoundaryType, typename EqValue>
+using NormalPairwise =
+        PairwiseCompileTime<Traits, Function, DecisionBoundaryType, EqValue,
+                            utility::CompileTimeValue<true>, utility::CompileTimeValue<true>>;
 }  // namespace algos::hymde::record_match_indexes::calculators

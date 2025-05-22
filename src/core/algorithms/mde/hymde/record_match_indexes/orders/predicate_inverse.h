@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/mde/hymde/record_match_indexes/orders/total_order.h"
+#include "algorithms/mde/hymde/record_match_indexes/orders/bool.h"
 
 namespace algos::hymde::record_match_indexes::orders {
-class PredicateInverse final : public TotalOrder<bool> {
+class PredicateInverse final : public Bool {
 public:
     using Type = bool;
 

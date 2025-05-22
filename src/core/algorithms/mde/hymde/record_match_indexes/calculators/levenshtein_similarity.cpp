@@ -144,15 +144,8 @@ std::size_t LevenshteinDistance(std::string const* l_ptr, std::string const* r_p
 }  // namespace
 
 namespace algos::hymde::record_match_indexes::calculators::levenshtein_similarity {
-std::size_t LevenshteinComparerCreator::GetLargestStringSize(
-        std::vector<PartitioningValue> const& elements) {
-    DESBORDANTE_ASSUME(!elements.empty());
-    return std::ranges::max(elements |
-                            std::views::transform(std::mem_fn(&PartitioningValue::size)));
-}
-
 ComparisonResult LevenshteinComparerCreator::Comparer::operator()(PartitioningValue const& l,
-                                                                 PartitioningValue const& r) {
+                                                                  PartitioningValue const& r) {
     std::size_t const max_dist = std::max(l.size(), r.size());
     ComparisonResult similarity = orders::SimilarityLe{}.GreatestElement();
     if (max_dist != 0) {
