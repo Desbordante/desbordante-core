@@ -195,7 +195,6 @@ unsigned long long HyMD::ExecuteInternal() {
                 .count();
     }
 
-
     lattice::MdLattice lattice{GetLevelDefinitionFunc(level_definition_),
                                similarity_data.GetLhsIdsInfo(), prune_nondisjoint_,
                                max_cardinality_, similarity_data.CreateMaxRhs()};

@@ -8,14 +8,6 @@
 #include "algorithms/mde/hymde/utility/zip.h"
 #include "util/get_preallocated_vector.h"
 
-namespace {
-using namespace algos::hymde::record_match_indexes;
-
-class ResultCreator {
-    std::vector<ClassifierValues> classifier_values;
-};
-}  // namespace
-
 namespace algos::hymde::record_match_indexes {
 PreprocessingResult PreprocessingResult::Create(
         RelationalSchema const& left_schema, RelationalSchema const& right_schema,
