@@ -14,7 +14,7 @@ struct CIND {
         std::string result = ind.ToLongString();
         result.append("\nPossible conditions number: ");
         result.append(std::to_string(conditions.size()));
-        result.append("Possible conditions:\n\t(");
+        result.append("\nPossible conditions:\n\t(");
         for (auto const& attr : conditional_attributes) {
             result.append(attr).append(", ");
         }
