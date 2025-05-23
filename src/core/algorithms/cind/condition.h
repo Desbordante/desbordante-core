@@ -6,7 +6,8 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "cind/condition_miners/itemset_node.h"
+#include "condition_miners/itemset_node.h"
+#include "condition_miners/position_lists_set.h"
 #include "table/encoded_column_data.h"
 
 namespace algos::cind {
@@ -35,7 +36,8 @@ struct Condition {
         }
     }
 
-    Condition(std::vector<int> const& cluster_attrs_ids, std::vector<int> const& cluster_value,
+    Condition(std::vector<int> const& cluster_attrs_ids,
+              model::PLSet::ClusterValue const& cluster_value,
               std::vector<model::EncodedColumnData const*> const& condition_attrs, double _validity,
               double _completeness)
         : validity(_validity), completeness(_completeness) {
@@ -69,8 +71,6 @@ struct Condition {
         return this->completeness == that.completeness && this->validity == that.validity &&
                this->condition_attrs_values == that.condition_attrs_values;
     }
-
-    ~Condition() = default;
 };
 }  // namespace algos::cind
 

@@ -47,7 +47,7 @@ CIND Cinderella::ExecuteSingle(model::IND const& aind) {
     CIND cind{.ind = aind,
               .conditions = GetConditions(GetBaskets(attributes), attributes.conditional),
               .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
-    fprintf(stderr, "cinderella ExecuteSingle %s complete\n", aind.ToShortString().c_str());
+    // fprintf(stderr, "cinderella ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return cind;
 }
 
@@ -125,7 +125,6 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
                 result.emplace_back(candidate, condition_attrs);
             }
         }
-
         CreateNewItemsets(itemset);
     }
     return result;
