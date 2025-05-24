@@ -3,12 +3,12 @@
 #include <utility>
 
 namespace algos::hymde::utility {
-template <auto v>
+template <auto V>
 struct CompileTimeValue {
-    using Type = decltype(v);
+    using Type = decltype(V);
 
     constexpr static bool kCompileTime = true;
-    constexpr static Type value = v;
+    constexpr static Type value = V;
 };
 
 template <typename Value>
@@ -21,9 +21,9 @@ struct NonCompileTimeValue {
     NonCompileTimeValue(Value value) : value(std::move(value)) {}
 };
 
-template <auto v>
+template <auto V>
 struct CompileTimeOptionalLike {
-    using Type = decltype(v);
+    using Type = decltype(V);
 
     struct OptionalLike {
         static constexpr bool has_value() noexcept {
@@ -31,7 +31,7 @@ struct CompileTimeOptionalLike {
         }
 
         constexpr Type operator*() const noexcept {
-            return v;
+            return V;
         }
     };
 
