@@ -69,16 +69,22 @@ class ValueCalculator {
             meaningful_records_number += right_pli_[pvalue_id_right].size();
         }
 
-        void CalcOnePair(auto& comparer, LeftValueComparisonInfoOrigType& lv_comp_info,
-                         LeftElementType const& left_element, PartitionValueId pvalue_id_right,
-                         bool& least_element_found) {
-            RightElementType const& right_element = right_elements_[pvalue_id_right];
-            ComparisonResult comp_res = comparer(left_element, right_element);
+        void CheckedCompResAdd(LeftValueComparisonInfoOrigType& lv_comp_info,
+                               PartitionValueId pvalue_id_right, ComparisonResult comp_res,
+                               bool& least_element_found) {
             if (comp_res == least_element_) {
                 least_element_found = true;
                 return;
             }
             AddRightPartValIdCompResPair(lv_comp_info, pvalue_id_right, std::move(comp_res));
+        }
+
+        void CalcOnePair(auto& comparer, LeftValueComparisonInfoOrigType& lv_comp_info,
+                         LeftElementType const& left_element, PartitionValueId pvalue_id_right,
+                         bool& least_element_found) {
+            RightElementType const& right_element = right_elements_[pvalue_id_right];
+            ComparisonResult comp_res = comparer(left_element, right_element);
+            CheckedCompResAdd(lv_comp_info, pvalue_id_right, comp_res, least_element_found);
         }
 
         void CalcLoop(auto& comparer, LeftValueComparisonInfoOrigType& lv_comp_info,
@@ -107,7 +113,7 @@ class ValueCalculator {
                          pvalue_id_left);
             }
             if (EqHasKnownValue()) {
-                AddRightPartValIdCompResPair(lv_comp_info, pvalue_id_left, GetEqValue());
+                CheckedCompResAdd(lv_comp_info, pvalue_id_left, GetEqValue(), least_element_found);
             } else {
                 CalcOnePair(comparer, lv_comp_info, left_element, pvalue_id_left,
                             least_element_found);

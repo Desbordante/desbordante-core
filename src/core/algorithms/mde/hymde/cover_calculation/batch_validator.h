@@ -92,7 +92,7 @@ public:
     };
 
 private:
-    using RemovedAndInterestingnessCCVIds =
+    using RemovedAndInterestingnessRCVIds =
             std::pair<std::vector<RecordClassifierValueId>, std::vector<RecordClassifierValueId>>;
     using RecPtr = record_match_indexes::PartitionIndex::Clusters const*;
     using RecordCluster = std::vector<RecPtr>;
@@ -109,7 +109,7 @@ private:
 
         OneRhsRecommendations* recommendations_;
         MdeElement old_rhs_;
-        RecordClassifierValueId current_ccv_id_;
+        RecordClassifierValueId current_rcv_id_;
 
         // Optimize creation of LHS records groups.
         std::size_t rhs_col_match_values_;
@@ -118,7 +118,7 @@ private:
         // greatest RHS CCV ID among generalizations, whichever is greater. If `current_ccv_id`
         // reaches this value, the MD should be removed from the lattice as either trivial or
         // non-minimal.
-        RecordClassifierValueId interestingness_ccv_id_;
+        RecordClassifierValueId interestingness_rcv_id_;
 
         record_match_indexes::PartitionIndex::RecordClustersMapping const* right_clusters_;
         record_match_indexes::ValueMatrix const* similarity_matrix_;
@@ -135,7 +135,7 @@ private:
 
         void RhsIsInvalid(RecordCluster const& same_left_value_records,
                           record_match_indexes::PartitionIndex::Clusters const& right_record) {
-            current_ccv_id_ = kLowestRCValueId;
+            current_rcv_id_ = kLowestRCValueId;
             AddRecommendations(same_left_value_records, right_record);
         }
 
@@ -153,7 +153,7 @@ private:
         // the RHS.
         // TODO: test performance when records that lower the CCV ID are added as recommendations as
         // well.
-        bool LowerCCVID(PartitionValueId left_column_value_id,
+        bool LowerRCVID(PartitionValueId left_column_value_id,
                         record_match_indexes::PartitionIndex::Clusters const& right_record) {
             record_match_indexes::ValueMatrixRow const& left_value_value_mapping =
                     (*similarity_matrix_)[left_column_value_id];
@@ -166,13 +166,13 @@ private:
             }
 
             RecordClassifierValueId const pair_ccv_id = value_mapping_iter->second;
-            if (pair_ccv_id < current_ccv_id_) {
-                current_ccv_id_ = pair_ccv_id;
-                if (pair_ccv_id == interestingness_ccv_id_) {
+            if (pair_ccv_id < current_rcv_id_) {
+                current_rcv_id_ = pair_ccv_id;
+                if (pair_ccv_id == interestingness_rcv_id_) {
                     return true;
                 }
             }
-            DESBORDANTE_ASSUME(interestingness_ccv_id_ < current_ccv_id_);
+            DESBORDANTE_ASSUME(interestingness_rcv_id_ < current_rcv_id_);
             return false;
         }
 
@@ -186,9 +186,9 @@ private:
                 model::Index const record_match_index) noexcept
             : recommendations_(&recommendations),
               old_rhs_(old_rhs),
-              current_ccv_id_(old_rhs.rcv_id),
+              current_rcv_id_(old_rhs.rcv_id),
               rhs_col_match_values_(col_match_values),
-              interestingness_ccv_id_(interestingness_id),
+              interestingness_rcv_id_(interestingness_id),
               right_clusters_(&right_clusters),
               similarity_matrix_(&similarity_matrix),
               record_match_index_(record_match_index) {}
@@ -198,8 +198,8 @@ private:
                 RecordCluster const& lhs_records, Collection const& matched_rhs_records);
 
         void AddIfInvalid(InvalidatedRhss& invalidated) const {
-            DESBORDANTE_ASSUME(current_ccv_id_ <= old_rhs_.rcv_id);
-            if (current_ccv_id_ != old_rhs_.rcv_id) invalidated.PushBack(old_rhs_, current_ccv_id_);
+            DESBORDANTE_ASSUME(current_rcv_id_ <= old_rhs_.rcv_id);
+            if (current_rcv_id_ != old_rhs_.rcv_id) invalidated.PushBack(old_rhs_, current_rcv_id_);
         }
 
         MdeElement GetOldRhs() const noexcept {
@@ -242,8 +242,8 @@ private:
     void FillValidators(SameLhsValidators& same_lhs_validators,
                         AllRhsRecommendations& recommendations,
                         std::vector<model::Index> const& pending_rhs_indices,
-                        RemovedAndInterestingnessCCVIds const& removed_and_interestingness) const;
-    RemovedAndInterestingnessCCVIds GetRemovedAndInterestingness(
+                        RemovedAndInterestingnessRCVIds const& removed_and_interestingness) const;
+    RemovedAndInterestingnessRCVIds GetRemovedAndInterestingness(
             ValidationSelection const& info, std::vector<model::Index> const& indices);
     void CreateValidators(ValidationSelection const& info, SameLhsValidators& working,
                           AllRhsRecommendations& recommendations);

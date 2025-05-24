@@ -17,7 +17,9 @@
 #include "algorithms/mde/hymde/hymde.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/calculator.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/equality.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/levenshtein_distance.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/levenshtein_similarity.h"
+#include "algorithms/mde/hymde/record_match_indexes/calculators/monge_elkan_swg_word.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/number_difference.h"
 #include "algorithms/mde/hymde/record_match_indexes/calculators/number_distance.h"
 #include "algorithms/mde/hymde/record_match_indexes/orders/custom.h"
@@ -188,11 +190,31 @@ void BindObjectPartFuncs(py::module_& partitioning_functions) {
     // TODO: py::object
 }
 
+void BindIntegerPartFuncs(py::module_& partitioning_functions) {
+    using namespace algos::hymde::record_match_indexes::partitioning_functions;
+
+    auto integer_pf = partitioning_functions.def_submodule("integer");
+    BindSharedPtr<PartitioningFunction<std::intmax_t>::Creator>(integer_pf, "PartitioningFunction");
+    BindPartFunc<AttributeValue<std::intmax_t>>(integer_pf, "AttributeValue")
+            .def(py::init<AttributeValue<std::intmax_t>::Creator::ColumnIdentifier>());
+}
+
+void BindFloatPartFuncs(py::module_& partitioning_functions) {
+    using namespace algos::hymde::record_match_indexes::partitioning_functions;
+
+    auto float_pf = partitioning_functions.def_submodule("float_");
+    BindSharedPtr<PartitioningFunction<double>::Creator>(float_pf, "PartitioningFunction");
+    BindPartFunc<AttributeValue<double>>(float_pf, "AttributeValue")
+            .def(py::init<AttributeValue<double>::Creator::ColumnIdentifier>());
+}
+
 void BindPartitioningFunctions(py::module_& mde_module) {
     auto partitioning_functions = mde_module.def_submodule("partitioning_functions");
 
     BindStringPartFuncs(partitioning_functions);
     BindObjectPartFuncs(partitioning_functions);
+    BindIntegerPartFuncs(partitioning_functions);
+    BindFloatPartFuncs(partitioning_functions);
 }
 
 template <typename BaseOrder>
@@ -332,10 +354,12 @@ void BindCalculatorSpecifiers(py::module_& mde_module) {
 
     BindSharedPtr<Calculator::Creator>(calculator_specifiers, "CalculatorSpecifier");
     BindCalculatorCreator<LevenshteinSimilarity>(calculator_specifiers, "LevenshteinSimilarity");
+    BindCalculatorCreator<LevenshteinDistance>(calculator_specifiers, "LevenshteinDistance");
     BindCalculatorCreator<FloatDistance>(calculator_specifiers, "FloatDistance");
     BindCalculatorCreator<IntDistance>(calculator_specifiers, "IntDistance");
     BindCalculatorCreator<FloatDifference>(calculator_specifiers, "FloatDifference");
     BindCalculatorCreator<IntDifference>(calculator_specifiers, "IntDifference");
+    BindCalculatorCreator<MongeElkan>(calculator_specifiers, "MongeElkan");
     BindPredicateCalculatorCreator<Equality<std::string>>(calculator_specifiers, "Equality");
     // TODO: custom
 }

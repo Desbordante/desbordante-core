@@ -52,16 +52,16 @@ struct LHSMRPartitionElement {
     }
 };
 
-UpperSet const* BatchValidator::GetSimilarRecords(Index const column_match_index,
+UpperSet const* BatchValidator::GetSimilarRecords(Index const record_match_index,
                                                   PartitionValueId const value_id,
-                                                  model::Index const lhs_ccv_id) const {
+                                                  model::Index const lhs_rcv_id) const {
     record_match_indexes::UpperSetIndex const& similarity_index =
-            (*record_match_indexes_)[column_match_index].upper_set_index;
+            (*record_match_indexes_)[record_match_index].upper_set_index;
     record_match_indexes::ValueUpperSetMapping const& mapping = similarity_index[value_id];
-    // Upper sets for zero CCV IDs are the entire right table and should be neither stored nor
+    // Upper sets for zero RCV IDs are the entire right table and should be neither stored nor
     // requested.
-    DESBORDANTE_ASSUME(lhs_ccv_id != kLowestRCValueId);
-    return mapping.GetUpperSet(lhs_ccv_id);
+    DESBORDANTE_ASSUME(lhs_rcv_id != kLowestRCValueId);
+    return mapping.GetUpperSet(lhs_rcv_id);
 }
 
 template <typename LHSMRPartitionElementProvider>
@@ -122,7 +122,7 @@ class BatchValidator::LHSMRPartitionInspector {
         ForEachPartitionElement(check_support, []() {});
     }
 
-    // Lower CCV IDs, collect prospective pairs, remove invalidated (i.e. with CCV ID 0) RHSs.
+    // Lower RCV IDs, collect prospective pairs, remove invalidated (i.e. with RCV ID 0) RHSs.
     bool InspectPartitionElement(PartitionElement element) {
         util::EraseIfReplace(rhs_validators_, [&](RhsValidator& rhs_validator) {
             auto const& [lhs_records, matched_rhs_records] = element;
@@ -166,10 +166,10 @@ auto BatchValidator::RhsValidator::LowerRCVIDAndCollectRecommendations(
         -> MdValidationStatus {
     // Invalidated are removed (1), empty LHSMR partition "elements" should have been skipped (2,
     // 3), non-minimal are considered invalidated (4).
-    DESBORDANTE_ASSUME(current_ccv_id_ != kLowestRCValueId);        // 1
+    DESBORDANTE_ASSUME(current_rcv_id_ != kLowestRCValueId);        // 1
     DESBORDANTE_ASSUME(!matched_rhs_records.empty());               // 2
     DESBORDANTE_ASSUME(!lhs_records.empty());                       // 3
-    DESBORDANTE_ASSUME(interestingness_ccv_id_ < current_ccv_id_);  // 4
+    DESBORDANTE_ASSUME(interestingness_rcv_id_ < current_rcv_id_);  // 4
 
     LeftValueGroupedLhsRecords grouped_lhs_records = GroupLhsRecords(lhs_records);
 
@@ -178,7 +178,7 @@ auto BatchValidator::RhsValidator::LowerRCVIDAndCollectRecommendations(
         for (RecordIdentifier rhs_record_id : matched_rhs_records) {
             CompressedRecord const& right_record = (*right_clusters_)[rhs_record_id];
 
-            bool const md_invalidated = LowerCCVID(left_column_value_id, right_record);
+            bool const md_invalidated = LowerRCVID(left_column_value_id, right_record);
             if (md_invalidated) {
                 RhsIsInvalid(same_left_value_records, right_record);
                 return MdValidationStatus::kInvalidated;
@@ -218,10 +218,10 @@ auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
 class BatchValidator::OneCardPartitionElementProvider {
     BatchValidator const* const validator_;
     PartitionValueId current_value_id_ = PartitionValueId(-1);
-    Index const lhs_column_match_index_;
-    RecordClassifierValueId const lhs_ccv_id_;
-    std::vector<PliCluster> const& clusters_ =
-            validator_->GetLeftPartitionIndex().GetPli(lhs_column_match_index_);
+    Index const lhs_record_match_index_;
+    RecordClassifierValueId const lhs_rcv_id_;
+    record_match_indexes::PartitionIndex::PositionListIndex const& clusters_ =
+            validator_->GetLeftPartitionIndex().GetPli(lhs_record_match_index_);
     std::size_t const clusters_size_ = clusters_.size();
 
 public:
@@ -229,13 +229,13 @@ public:
 
     OneCardPartitionElementProvider(BatchValidator const* validator, MdeLhs const& lhs)
         : validator_(validator),
-          lhs_column_match_index_(lhs.begin()->offset),
-          lhs_ccv_id_(lhs.begin()->rcv_id) {}
+          lhs_record_match_index_(lhs.begin()->offset),
+          lhs_rcv_id_(lhs.begin()->rcv_id) {}
 
     std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
         while (++current_value_id_ != clusters_size_) {
             UpperSet const* const similar_records_ptr = validator_->GetSimilarRecords(
-                    lhs_column_match_index_, current_value_id_, lhs_ccv_id_);
+                    lhs_record_match_index_, current_value_id_, lhs_rcv_id_);
             if (similar_records_ptr != nullptr)
                 return {{clusters_[current_value_id_], *similar_records_ptr}};
         }
@@ -492,24 +492,24 @@ void BatchValidator::Validate(ValidationSelection& info, Result& result,
 
 auto BatchValidator::GetRemovedAndInterestingness(ValidationSelection const& info,
                                                   std::vector<model::Index> const& indices)
-        -> RemovedAndInterestingnessCCVIds {
+        -> RemovedAndInterestingnessRCVIds {
     MdeLhs const& lhs = info.updater->GetLhs();
 
-    std::vector<RecordClassifierValueId> interestingness_ccv_ids;
-    auto set_interestingness_ccv_ids = [&](std::vector<RecordClassifierValueId>& removed_ccv_ids) {
-        std::ranges::for_each(removed_ccv_ids, [](RecordClassifierValueId& ccv_id) { --ccv_id; });
-        interestingness_ccv_ids = lattice_->GetInterestingnessRCVIds(lhs, indices, removed_ccv_ids);
-        std::ranges::for_each(removed_ccv_ids, [](RecordClassifierValueId& ccv_id) { ++ccv_id; });
+    std::vector<RecordClassifierValueId> interestingness_rcv_ids;
+    auto set_interestingness_rcv_ids = [&](std::vector<RecordClassifierValueId>& removed_rcv_ids) {
+        std::ranges::for_each(removed_rcv_ids, [](RecordClassifierValueId& rcv_id) { --rcv_id; });
+        interestingness_rcv_ids = lattice_->GetInterestingnessRCVIds(lhs, indices, removed_rcv_ids);
+        std::ranges::for_each(removed_rcv_ids, [](RecordClassifierValueId& rcv_id) { ++rcv_id; });
     };
-    std::vector<RecordClassifierValueId> removed_ccv_ids =
-            info.updater->GetRhs().DisableAndDo(indices, set_interestingness_ccv_ids);
-    return {std::move(removed_ccv_ids), std::move(interestingness_ccv_ids)};
+    std::vector<RecordClassifierValueId> removed_rcv_ids =
+            info.updater->GetRhs().DisableAndDo(indices, set_interestingness_rcv_ids);
+    return {std::move(removed_rcv_ids), std::move(interestingness_rcv_ids)};
 }
 
 void BatchValidator::FillValidators(
         SameLhsValidators& same_lhs_validators, AllRhsRecommendations& recommendations,
         std::vector<Index> const& pending_rhs_indices,
-        RemovedAndInterestingnessCCVIds const& removed_and_interestingness) const {
+        RemovedAndInterestingnessRCVIds const& removed_and_interestingness) const {
     {
         std::size_t const rhss_number = pending_rhs_indices.size();
         same_lhs_validators.reserve(rhss_number);
@@ -517,14 +517,14 @@ void BatchValidator::FillValidators(
     }
 
     CompressedRecords const& right_records = GetRightPartitionIndex().GetClustersMapping();
-    for (auto const& [removed_ccv_ids, interestingness_ccv_ids] = removed_and_interestingness;
-         auto [record_match_index, old_ccv_id, interestingness_ccv_id] :
-         utility::Zip(pending_rhs_indices, removed_ccv_ids, interestingness_ccv_ids)) {
+    for (auto const& [removed_rcv_ids, interestingness_rcv_ids] = removed_and_interestingness;
+         auto [record_match_index, old_rcv_id, interestingness_rcv_id] :
+         utility::Zip(pending_rhs_indices, removed_rcv_ids, interestingness_rcv_ids)) {
         OneRhsRecommendations& last_recs = recommendations.emplace_back();
         auto const& [value_matrix, upper_set_index] = (*record_match_indexes_)[record_match_index];
-        MdeElement rhs{record_match_index, old_ccv_id};
+        MdeElement rhs{record_match_index, old_rcv_id};
         same_lhs_validators.emplace_back(
-                rhs, last_recs, GetLeftTablePliValueNum(record_match_index), interestingness_ccv_id,
+                rhs, last_recs, GetLeftTablePliValueNum(record_match_index), interestingness_rcv_id,
                 right_records, value_matrix, record_match_index);
     }
 }
@@ -536,12 +536,12 @@ void BatchValidator::CreateValidators(ValidationSelection const& info,
     if (pending_rhs_indices_bitset.none()) return;
 
     // NOTE: converting to indices because the index list is iterated through many times in
-    // MdLattice::GetInterestingnessCCVIds, and it is faster to allocate and iterate through a
+    // MdLattice::GetInterestingnessRCVIds, and it is faster to allocate and iterate through a
     // vector than a bitset.
     std::vector<Index> const pending_rhs_indices =
             util::BitsetToIndices<Index>(pending_rhs_indices_bitset);
 
-    RemovedAndInterestingnessCCVIds removed_and_interestingness =
+    RemovedAndInterestingnessRCVIds removed_and_interestingness =
             GetRemovedAndInterestingness(info, pending_rhs_indices);
 
     FillValidators(same_lhs_validators, recommendations, pending_rhs_indices,
@@ -568,7 +568,7 @@ void BatchValidator::RemoveTrivialForCardinality1Lhs(
     // trivial dependency, no need to go through the full validation process for it.
     // NOTE: Never true when disjointedness pruning is on.
     if (rhs_indices_to_validate.test_set(lhs_index, false)) {
-        // Zero CCV ID RHSs are treated as removed and their validation should not be requested.
+        // Zero RCV ID RHSs are treated as removed and their validation should not be requested.
         DESBORDANTE_ASSUME(lattice_rhs[lhs_index] != kLowestRCValueId);
         result.invalidated_rhss.PushBack({lhs_index, lattice_rhs[lhs_index]}, kLowestRCValueId);
     }
