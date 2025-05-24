@@ -13,6 +13,7 @@ namespace algos::hymd::indexes {
 class KeyedPositionListIndex {
 private:
     std::unordered_map<GlobalValueIdentifier, ValueIdentifier> value_id_mapping_;
+    // Can't get away with it in MDE
     std::vector<GlobalValueIdentifier> value_ids_;
     std::vector<PliCluster> clusters_;
     RecordIdentifier cur_record_id_ = 0;
