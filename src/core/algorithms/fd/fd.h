@@ -20,6 +20,10 @@ public:
         return "{\"lhs\": " + lhs_.ToIndicesString() + ", \"rhs\": " + rhs_.ToIndicesString() + "}";
     }
 
+    std::shared_ptr<RelationalSchema const> GetSchema() const {
+        return schema_;
+    }
+
     Vertical const& GetLhs() const {
         return lhs_;
     }
