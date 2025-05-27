@@ -1,6 +1,9 @@
 #pragma once
+
 #include <memory>
 #include <utility>
+
+#include <boost/asio/thread_pool.hpp>
 
 #include "model/FDTrees/fd_tree.h"
 #include "model/dynamic_position_list_index.h"
@@ -12,6 +15,7 @@ class Validator : public std::enable_shared_from_this<Validator> {
     std::shared_ptr<model::FDTree> positive_cover_tree_;
     std::shared_ptr<NonFDTree> negative_cover_tree_;
     std::shared_ptr<DynamicRelationData> relation_;
+    boost::asio::thread_pool pool_;
 
     ViolatingRecordPair FindClusterViolating(const DPLI::Cluster &cluster, size_t sortedPlisIndex,
                                              std::vector<std::shared_ptr<DPLI>> &sorted_plis,
@@ -31,20 +35,34 @@ class Validator : public std::enable_shared_from_this<Validator> {
 
     [[nodiscard]] bool NeedsValidation(RawFD const &non_fd) const;
 
-    [[nodiscard]] boost::dynamic_bitset<> NeedsValidation(NonFDTreeVertex &vertex) const;
+    [[nodiscard]] bool NeedsValidation(NonFDTreeVertex &vertex, size_t rhs) const;
 
-    [[nodiscard]] boost::dynamic_bitset<> Validate(NonFDTreeVertex &vertex,
-                                                   boost::dynamic_bitset<> lhs,
-                                                   boost::dynamic_bitset<> rhss);
+    [[nodiscard]] boost::dynamic_bitset<> NeedsValidation(NonFDTreeVertex &vertex, 
+                                                          boost::dynamic_bitset<> rhss) const;
     
-    [[nodiscard]] bool Refines(NonFDTreeVertex &vertex,
-                               algos::dynfd::DPLI const& pli,
-                               size_t rhs_attr) const;
-    
-    [[nodiscard]] boost::dynamic_bitset<> Refines(NonFDTreeVertex &vertex,
-                                                  algos::dynfd::DPLI const& pli,
+    std::vector<RawFD> ValidateParallel(std::vector<LhsPair> const& non_fds);
+
+    struct NonFd {
+        RawFD rawFd;
+        ViolatingRecordPair violation;
+    };
+
+    std::vector<NonFd> ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds);
+
+    using OnValidateResult = std::optional<std::function<void(size_t, ViolatingRecordPair)>>;
+
+    [[nodiscard]] bool Refines(algos::dynfd::DPLI const& pli,
+                               size_t rhs_attr,
+                               OnValidateResult const& on_invalid = std::nullopt) const;
+
+    [[nodiscard]] boost::dynamic_bitset<> Refines(algos::dynfd::DPLI const& pli,
                                                   boost::dynamic_bitset<> lhs,
-                                                  boost::dynamic_bitset<> rhss) const;
+                                                  boost::dynamic_bitset<> rhss,
+                                                  OnValidateResult const& on_invalid = std::nullopt) const;
+
+    boost::dynamic_bitset<> Validate(boost::dynamic_bitset<> lhs,
+                                     boost::dynamic_bitset<> rhss,
+                                     OnValidateResult const& on_invalid = std::nullopt);
 
 public:
     Validator(std::shared_ptr<model::FDTree> positive_cover_tree,
@@ -52,12 +70,14 @@ public:
               std::shared_ptr<DynamicRelationData> relation) noexcept
         : positive_cover_tree_(std::move(positive_cover_tree)),
           negative_cover_tree_(std::move(negative_cover_tree)),
-          relation_(std::move(relation)) {}
+          relation_(std::move(relation)) {
+    }
 
     void ValidateFds(size_t first_insert_batch_id);
 
     void ValidateNonFds();
 
-    bool IsNonFdValidated(RawFD const &non_fd);
+    [[nodiscard]] bool IsNonFdValidated(RawFD non_fd);
+
 };
 }  // namespace algos::dynfd
