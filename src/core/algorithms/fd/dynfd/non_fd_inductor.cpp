@@ -8,17 +8,20 @@ void NonFDInductor::FindFds(std::vector<RawFD> const& valid_fds) {
     }
 }
 
-void NonFDInductor::Dfs(RawFD fd) {
-    for (size_t removed_lhs_attribute = fd.lhs_.find_first();
-         removed_lhs_attribute != boost::dynamic_bitset<>::npos;
-         removed_lhs_attribute = fd.lhs_.find_next(removed_lhs_attribute)) {
+void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
+    auto removed_lhs_attr = next_lhs_attr == -1
+        ? fd.lhs_.find_first()
+        : fd.lhs_.find_next(next_lhs_attr);
+    for (; removed_lhs_attr != boost::dynamic_bitset<>::npos;
+         removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
         boost::dynamic_bitset<> new_lhs = fd.lhs_;
-        new_lhs.reset(removed_lhs_attribute);
+        new_lhs.reset(removed_lhs_attr);
         RawFD newFd{new_lhs, fd.rhs_};
 
         if (positive_cover_tree_->ContainsFdOrGeneral(new_lhs, fd.rhs_) || 
             validator_->IsNonFdValidated(newFd)) {
-            Dfs(newFd);
+            Dfs(newFd, removed_lhs_attr + 1);
+            return;
         }
     }
 

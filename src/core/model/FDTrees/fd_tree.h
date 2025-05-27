@@ -22,9 +22,9 @@ class FDTree {
 private:
     std::shared_ptr<FDTreeVertex> root_;
 
+public:
     using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>>;
 
-public:
     explicit FDTree(size_t num_attributes) : root_(std::make_shared<FDTreeVertex>(num_attributes)) {
         for (size_t id = 0; id < num_attributes; id++) {
             root_->SetFd(id);

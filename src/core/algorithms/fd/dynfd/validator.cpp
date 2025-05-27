@@ -3,6 +3,11 @@
 #include <iostream>
 #include <unordered_set>
 #include <vector>
+#include <future>
+
+#include <boost/asio/post.hpp>
+#include <boost/thread/future.hpp>
+#include <boost/bind/bind.hpp>
 
 #include "fd/hycommon/preprocessor.h"
 #include "non_fd_inductor.h"
@@ -130,27 +135,37 @@ bool Validator::NeedsValidation([[maybe_unused]] RawFD const& non_fd) const {
     return !vertex->IsNonFdViolatingPairHolds(non_fd.rhs_, relation_);
 }
 
-boost::dynamic_bitset<> Validator::NeedsValidation(NonFDTreeVertex &vertex) const {
-    auto possible_fds = vertex.GetNonFDs();
-    for (size_t rhs = possible_fds.find_first(); rhs != boost::dynamic_bitset<>::npos;
-         rhs = possible_fds.find_next(rhs)) {
-        if (vertex.IsNonFdViolatingPairHolds(rhs, relation_)) {
-            possible_fds.reset(rhs);
-        }
-    }
-    return possible_fds;
+bool Validator::NeedsValidation(NonFDTreeVertex& vertex, size_t rhs) const {
+    return !vertex.IsNonFdViolatingPairHolds(rhs, relation_);
 }
 
-[[nodiscard]] boost::dynamic_bitset<> Validator::Validate(NonFDTreeVertex &vertex,
-                                                          boost::dynamic_bitset<> lhs,
-                                                          boost::dynamic_bitset<> rhss) {
+boost::dynamic_bitset<> Validator::NeedsValidation(NonFDTreeVertex& vertex,
+                                                   boost::dynamic_bitset<> rhss) const {
+    for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+         rhs = rhss.find_next(rhs)) {
+        if (vertex.IsNonFdViolatingPairHolds(rhs, relation_)) {
+            rhss.reset(rhs);
+        }
+    }
+    return rhss;
+}
+
+boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
+                                            boost::dynamic_bitset<> rhss,
+                                            OnValidateResult const& on_invalid) {
+    if (rhss.size() == 0) {
+        return rhss;
+    }
+
     auto const lhs_count = lhs.count();
     if (lhs_count == 0) {
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
             auto const &violation = FindEmptyLhsViolation(rhs);
             if (violation) {
-                vertex.SetViolation(rhs, FindEmptyLhsViolation(rhs));
+                if (on_invalid) {
+                    (*on_invalid)(rhs, FindEmptyLhsViolation(rhs));
+                }
                 rhss.reset(rhs);
             }
         }
@@ -162,24 +177,81 @@ boost::dynamic_bitset<> Validator::NeedsValidation(NonFDTreeVertex &vertex) cons
         auto const pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
-            if (!Refines(vertex, *pli, rhs)) {
+            if (!Refines(*pli, rhs, on_invalid)) {
                 rhss.reset(rhs);
             }
         }
         return rhss;
     }
 
-    // std::vector<std::shared_ptr<DPLI>> sorted_plis = GetSortedPlisForLhs(lhs);
-    // DPLI const& first_pli = *sorted_plis[0];
     auto first_pli = GetFirstPliForLhs(lhs);
     // DPLI const& first_pli = *relation_->GetColumnData(lhs.find_first()).GetPositionListIndex();
     auto const first_lhs_attr = first_pli->GetColumnIndex();
 
     lhs.reset(first_lhs_attr);
-    return Refines(vertex, *first_pli, lhs, rhss);
+    return Refines(*first_pli, lhs, rhss, on_invalid);
 }
 
-bool Validator::Refines(NonFDTreeVertex &vertex, algos::dynfd::DPLI const& pli, size_t rhs_attr) const {
+std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_fds) {
+    std::vector<RawFD> result;
+    std::vector<boost::unique_future<boost::dynamic_bitset<>>> futures;
+    futures.reserve(non_fds.size());
+
+    for (auto const& [vertex, lhs] : non_fds) {
+        boost::packaged_task<boost::dynamic_bitset<>> task(
+            [this, vertex, lhs]() {
+                OnValidateResult on_invalid = [vertex](size_t rhs, ViolatingRecordPair violation) {
+                    vertex->SetViolation(rhs, violation);
+                };
+                return this->Validate(lhs, NeedsValidation(*vertex, vertex->GetNonFDs()), on_invalid);
+            }
+        );
+        futures.push_back(task.get_future());
+        boost::asio::post(pool_, std::move(task));
+    }
+
+    boost::wait_for_all(futures.begin(), futures.end());
+
+    for (std::size_t index = 0; index < non_fds.size(); ++index) {
+        auto const& lhs = non_fds[index].second;
+        auto const& rhss = futures[index].get();
+
+        for (auto rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+             rhs = rhss.find_next(rhs)) {
+            result.push_back({lhs, rhs});
+        }
+    }
+
+    return result;
+}
+
+std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds) {
+    std::vector<NonFd> result;
+    std::mutex result_mutex;
+    std::vector<boost::unique_future<void>> futures;
+    futures.reserve(fds.size());
+
+    for (auto const& [vertex, lhs] : fds) {
+        boost::packaged_task<void> task(
+            [this, vertex, lhs, &result_mutex, &result]() {
+                OnValidateResult on_invalid = [lhs, &result_mutex, &result](size_t rhs, ViolatingRecordPair violation) {
+                    std::lock_guard lock(result_mutex);
+                    result.push_back({{lhs, rhs}, violation});
+                };
+                Validate(lhs, vertex->GetFDs(), on_invalid);
+            }
+        );
+        futures.push_back(task.get_future());
+        boost::asio::post(pool_, std::move(task));
+    }
+
+    boost::wait_for_all(futures.begin(), futures.end());
+    return result;
+}
+
+bool Validator::Refines(algos::dynfd::DPLI const& pli,
+                        size_t rhs_attr,
+                        OnValidateResult const& on_invalid) const {
     std::vector<CompressedRecord> const& compressed_records = relation_->GetCompressedRecords();
 
     for (auto const& cluster : pli.GetClustersToCheck()) {
@@ -188,7 +260,9 @@ bool Validator::Refines(NonFDTreeVertex &vertex, algos::dynfd::DPLI const& pli, 
         for (auto record_id : cluster) {
             auto const value = compressed_records[record_id][rhs_attr];
             if (value != rhs_value) {
-                vertex.SetViolation(rhs_attr, std::pair{value, rhs_value});
+                if (on_invalid) {
+                    (*on_invalid)(rhs_attr, std::pair{value, rhs_value});
+                }
                 return false;
             }
         }
@@ -197,10 +271,10 @@ bool Validator::Refines(NonFDTreeVertex &vertex, algos::dynfd::DPLI const& pli, 
     return true;
 }
 
-boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
-                                           algos::dynfd::DPLI const& pli,
+boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
                                            boost::dynamic_bitset<> lhs,
-                                           boost::dynamic_bitset<> rhss) const {
+                                           boost::dynamic_bitset<> rhss,
+                                           OnValidateResult const& on_invalid) const {
     auto const lhs_size = lhs.size();
     auto const rhs_size = rhss.size();
 
@@ -209,7 +283,7 @@ boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
     std::vector<int> rhs_attr_id_to_ind(relation_->GetNumColumns());
     std::vector<int> rhs_attr_ind_to_id(rhs_size);
     int index = 0;
-    for (int rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+    for (auto rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
          rhs = rhss.find_next(rhs)) {
         rhs_attr_id_to_ind[rhs] = index;
         rhs_attr_ind_to_id[index] = rhs;
@@ -232,7 +306,9 @@ boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
                     int rhs_cluster = compressed_records[record_id][rhs];
                     if (rhs_cluster == -1 ||
                         rhs_cluster != rhs_clusters.getCluster()[rhs_attr_id_to_ind[rhs]]) {
-                        vertex.SetViolation(rhs, std::pair{record_id, rhs_clusters.getRecordId()});
+                        if (on_invalid) {
+                            (*on_invalid)(rhs, std::pair{record_id, rhs_clusters.getRecordId()});
+                        }
                         rhss.reset(rhs);
                         if (rhss.empty()) {
                             return rhss;
@@ -241,7 +317,7 @@ boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
                 }
             } else {
                 std::vector<int> rhs_clusters(rhs_size);
-                for (int rhs_ind = 0; rhs_ind < rhs_size; ++rhs_ind) {
+                for (size_t rhs_ind = 0; rhs_ind < rhs_size; ++rhs_ind) {
                     rhs_clusters[rhs_ind] = compressed_records[record_id][rhs_attr_ind_to_id[rhs_ind]];
                 }
 
@@ -258,23 +334,8 @@ boost::dynamic_bitset<> Validator::Refines(NonFDTreeVertex &vertex,
 
 void Validator::ValidateFds(size_t first_insert_batch_id) {
     for (size_t level = 0; level <= relation_->GetNumColumns(); ++level) {
-        struct NonFd {
-            RawFD rawFd;
-            ViolatingRecordPair violation;
-        };
-
-        std::vector<NonFd> invalid_fds;
         auto level_fds = positive_cover_tree_->GetLevel(level);
-        for (auto& [vertex, lhs] : level_fds) {
-            boost::dynamic_bitset<> fds = vertex->GetFDs();
-            for (size_t rhs = fds.find_first(); rhs != boost::dynamic_bitset<>::npos;
-                 rhs = fds.find_next(rhs)) {
-                RawFD fd(lhs, rhs);
-                if (auto violation = IsFdInvalidated(fd, first_insert_batch_id)) {
-                    invalid_fds.push_back({std::move(fd), std::move(violation)});
-                }
-            }
-        }
+        std::vector<NonFd> invalid_fds = ValidateParallel(level_fds);
 
         for (auto const& non_fd : invalid_fds) {
             positive_cover_tree_->Remove(non_fd.rawFd.lhs_, non_fd.rawFd.rhs_);
@@ -298,6 +359,7 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
         }
 
         if (static_cast<double>(invalid_fds.size()) > 0.1 * static_cast<double>(level_fds.size())) {
+            std::cout << "PVS" << std::endl;
             // TODO: progressive violation search
         }
     }
@@ -307,19 +369,9 @@ void Validator::ValidateNonFds() {
     NonFDInductor fdFinder(positive_cover_tree_, negative_cover_tree_, shared_from_this());
 
     for (int level = static_cast<int>(relation_->GetNumColumns()); level >= 0; --level) {
-        std::vector<RawFD> valid_fds;
+
         auto level_non_fds = negative_cover_tree_->GetLevel(level);
-        for (auto& [vertex, lhs] : level_non_fds) {
-            boost::dynamic_bitset<> possible_fds = NeedsValidation(*vertex);
-            if (possible_fds.size() == 0) {
-                continue;
-            }
-            possible_fds = Validate(*vertex, lhs, possible_fds);
-            for (size_t rhs = possible_fds.find_first(); rhs != boost::dynamic_bitset<>::npos;
-                 rhs = possible_fds.find_next(rhs)) {
-                valid_fds.push_back({lhs, rhs});
-            }
-        }
+        std::vector<RawFD> valid_fds = ValidateParallel(level_non_fds);
 
         for (auto const& fd : valid_fds) {
             negative_cover_tree_->Remove(fd.lhs_, fd.rhs_);
@@ -344,16 +396,10 @@ void Validator::ValidateNonFds() {
     }
 }
 
-bool Validator::IsNonFdValidated(RawFD const &non_fd) {
-    if (NeedsValidation(non_fd)) {
-        if (/*auto violation = */FindNewViolation(non_fd)) {
-            // vertex->SetViolation(non_fd.rhs_, violation);
-            return false;
-        } else {
-            return true;
-        }
-    }
-    return false;
+bool Validator::IsNonFdValidated(RawFD non_fd) {
+    boost::dynamic_bitset<> rhss(non_fd.lhs_.size());
+    rhss.set(non_fd.rhs_);
+    return Validate(non_fd.lhs_, rhss)[non_fd.rhs_];
 }
 
 }  // namespace algos::dynfd
