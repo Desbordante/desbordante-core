@@ -23,6 +23,12 @@ bool ContainsLiteral(std::vector<model::Gfd::Literal> const& literals,
     return std::ranges::any_of(literals, check);
 }
 
+bool ContainsLiterals(std::vector<model::Gfd::Literal> const& superset,
+                      std::vector<model::Gfd::Literal> const& subset) {
+    auto check = [&superset](auto const& cur_lit) { return ContainsLiteral(superset, cur_lit); };
+    return std::ranges::all_of(subset, check);
+}
+
 bool CompareLiteralSets(std::vector<model::Gfd::Literal> const& lhs,
                         std::vector<model::Gfd::Literal> const& rhs) {
     if (lhs.size() != rhs.size()) {

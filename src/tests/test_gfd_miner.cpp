@@ -59,14 +59,11 @@ INSTANTIATE_TEST_SUITE_P(
                 GfdMinerTestParams(kGfdTestBlogsGraph, {.k = 2, .sigma = 3}, {kGfdTestBlogsGfd}),
                 GfdMinerTestParams(kGfdTestBlogsGraph, {.k = 3, .sigma = 3}, {kGfdTestBlogsGfd}),
                 GfdMinerTestParams(kGfdTestChannelsGraph, {.k = 2, .sigma = 3},
-                                   {kGfdTestChannelsGfd})));
-
-INSTANTIATE_TEST_SUITE_P(
-        GfdMinerHeavyDatasets, GfdMinerTest,
-        ::testing::Values(GfdMinerTestParams(kGfdTestMoviesGraph, {.k = 4, .sigma = 2}, {}),
-                          GfdMinerTestParams(kGfdTestSymbolsGraph, {.k = 2, .sigma = 5},
-                                             {kGfdTestSymbolsGfd1, kGfdTestSymbolsGfd2}),
-                          GfdMinerTestParams(kGfdTestShapesGraph, {.k = 3, .sigma = 10},
-                                             {kGfdTestShapesGfd1, kGfdTestShapesGfd2})));
+                                   {kGfdTestChannelsGfd}),
+                GfdMinerTestParams(kGfdTestMoviesGraph, {.k = 4, .sigma = 2}, {}),
+                GfdMinerTestParams(kGfdTestSymbolsGraph, {.k = 2, .sigma = 5},
+                                   {kGfdTestSymbolsGfd1, kGfdTestSymbolsGfd2}),
+                GfdMinerTestParams(kGfdTestShapesGraph, {.k = 3, .sigma = 10},
+                                   {kGfdTestShapesGfd1, kGfdTestShapesGfd2})));
 
 }  // namespace tests

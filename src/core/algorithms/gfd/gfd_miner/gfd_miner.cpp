@@ -26,7 +26,7 @@ namespace algos {
 namespace {
 
 // A mapping from a query to a subgraph of a larger graph
-using Embedding = std::map<model::vertex_t, model::vertex_t>;
+using Embedding = std::unordered_map<model::vertex_t, model::vertex_t>;
 // A set of mappings
 using Embeddings = std::vector<Embedding>;
 
@@ -49,6 +49,10 @@ using Info = std::unordered_map<std::string, std::set<std::string>>;
 // and as its value a set of graph vertices
 // to which the vertex can be mapped
 using VertexImage = std::unordered_map<model::vertex_t, std::set<model::vertex_t>>;
+
+// A data structure that returns by literal a set of
+// indices of the embeddings on which the literal is satisfied
+using SatisfiedEmbeddings = std::map<model::Gfd::Literal, std::set<std::size_t>>;
 
 void NextSubset(std::vector<std::size_t>& indices, std::size_t const border) {
     if (indices.empty() || indices[0] == border - indices.size()) {
@@ -105,41 +109,6 @@ void PopulateVertexMap(MapType& vertex_map, model::graph_t const& pattern,
             it->second.insert(embedding.at(v));
         }
     }
-}
-
-std::vector<model::Gfd::Literal> GenerateLiterals(model::graph_t const& pattern,
-                                                  std::map<std::string, Info> const& attrs_info) {
-    std::vector<std::size_t> indices(boost::num_vertices(pattern));
-    std::iota(indices.begin(), indices.end(), 0);
-    std::vector<std::vector<std::size_t>> pairs = GetSubsets<std::size_t>(indices, 2);
-
-    std::vector<model::Gfd::Literal> result;
-    result.reserve(pairs.size());
-    for (auto const& index_pair : pairs) {
-        std::size_t fst = index_pair.at(0);
-        std::size_t snd = index_pair.at(1);
-        std::string const& fst_label = pattern[boost::vertex(fst, pattern)].attributes.at("label");
-        std::string const& snd_label = pattern[boost::vertex(snd, pattern)].attributes.at("label");
-
-        for (auto const& fst_name : attrs_info.at(fst_label)) {
-            model::Gfd::Token fst_token{fst, fst_name.first};
-            for (auto const& snd_name : attrs_info.at(snd_label)) {
-                model::Gfd::Token snd_token{snd, snd_name.first};
-                result.emplace_back(fst_token, std::move(snd_token));
-            }
-        }
-    }
-    for (std::size_t i = 0; i < boost::num_vertices(pattern); ++i) {
-        std::string const& label = pattern[boost::vertex(i, pattern)].attributes.at("label");
-        for (auto& [name, info] : attrs_info.at(label)) {
-            model::Gfd::Token name_token{i, name};
-            for (auto& value : info) {
-                model::Gfd::Token value_token{-1, value};
-                result.emplace_back(name_token, std::move(value_token));
-            }
-        }
-    }
-    return result;
 }
 
 std::size_t Support(model::graph_t const& graph, Embeddings const& embeddings,
@@ -351,7 +320,8 @@ void AddVertex(std::set<std::string> const& vertex_labels, std::set<std::string>
 
                 auto modify_pattern = [&u, &num_pat_vertices, &vertex_label, &edge_label,
                                        &curr_vertex](model::graph_t& new_pattern) {
-                    std::map<std::string, std::string> attributes = {{"label", vertex_label}};
+                    std::unordered_map<std::string, std::string> attributes = {
+                            {"label", vertex_label}};
                     model::Vertex new_v =
                             model::Vertex{static_cast<int>(num_pat_vertices), attributes};
                     curr_vertex = boost::add_vertex(new_v, new_pattern);
@@ -364,6 +334,49 @@ void AddVertex(std::set<std::string> const& vertex_labels, std::set<std::string>
             }
         }
     }
+}
+
+std::vector<model::Gfd::Literal> index_to_literal(std::vector<model::Gfd::Literal> const& literals,
+                                                  std::vector<std::size_t> const& indices) {
+    std::vector<model::Gfd::Literal> result = {};
+    result.reserve(indices.size());
+    for (auto const& index : indices) {
+        result.push_back(literals[index]);
+    }
+    return result;
+}
+
+bool check_rules(std::vector<model::Gfd::Literal> const& literals,
+                 std::unordered_map<std::size_t, std::vector<std::vector<std::size_t>>> const&
+                         reversed_rules,
+                 std::vector<std::size_t> const& lhs_indices, std::size_t rhs_index) {
+    if (reversed_rules.find(rhs_index) == reversed_rules.end()) return true;
+    std::vector<model::Gfd::Literal> lhs = index_to_literal(literals, lhs_indices);
+    for (auto const& premises_indices : reversed_rules.at(rhs_index)) {
+        std::vector<model::Gfd::Literal> premises = index_to_literal(literals, premises_indices);
+        if (gfd::comparator::ContainsLiterals(lhs, premises)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool check_deadlocks(std::vector<std::size_t> const& indices,
+                     std::set<std::vector<std::size_t>> const& deadlocks) {
+    auto check = [&indices](auto const& deadlock) {
+        return !std::ranges::includes(indices, deadlock);
+    };
+    return std::ranges::all_of(deadlocks, check);
+}
+
+std::vector<std::size_t> get_rhs(std::size_t n, std::vector<std::size_t> const& lhs) {
+    std::vector<std::size_t> result(n);
+    std::iota(result.begin(), result.end(), 0);
+    auto cond = [&lhs](auto index) {
+        return std::find(lhs.begin(), lhs.end(), index) != lhs.end();
+    };
+    std::erase_if(result, cond);
+    return result;
 }
 
 }  // namespace
@@ -403,7 +416,7 @@ bool GfdMiner::CheckToken(model::Gfd::Token const& token, std::string& tok,
     } else {
         model::vertex_t u = boost::vertex(token.first, pattern);
         model::vertex_t v = embedding.at(u);
-        std::map<std::string, std::string> const& attrs = graph_[v].attributes;
+        std::unordered_map<std::string, std::string> const& attrs = graph_[v].attributes;
         auto it = attrs.find(token.second);
         if (it != attrs.end()) {
             tok = it->second;
@@ -411,18 +424,6 @@ bool GfdMiner::CheckToken(model::Gfd::Token const& token, std::string& tok,
         }
         return false;
     }
-}
-
-bool GfdMiner::Satisfied(std::vector<model::Gfd::Literal> const& literals,
-                         model::graph_t const& pattern, Embedding const& embedding) {
-    auto check_literal = [&](auto const& l) {
-        auto const& [fst_token, snd_token] = l;
-        std::string fst, snd;
-        bool first_res = CheckToken(fst_token, fst, pattern, embedding);
-        bool second_res = CheckToken(snd_token, snd, pattern, embedding);
-        return first_res && second_res && (fst == snd);
-    };
-    return std::ranges::all_of(literals, check_literal);
 }
 
 void GfdMiner::AddCompacted(std::vector<SingleRule>& rules, model::graph_t& pattern,
@@ -445,87 +446,208 @@ void GfdMiner::AddCompacted(std::vector<SingleRule>& rules, model::graph_t& patt
     forbidden_rules.emplace_back(std::move(prev), std::move(conclusion));
 }
 
-bool GfdMiner::Validate(model::Gfd const& gfd, Embeddings const& embeddings) {
-    bool result = false;
+bool GfdMiner::CheckFrequency(std::set<std::size_t> const& indices, Embeddings const& embeddings,
+                              model::graph_t const& pattern) {
     VertexImage vertex_map;
-
-    for (Embedding const& embedding : embeddings) {
-        if (!Satisfied(gfd.GetPremises(), gfd.GetPattern(), embedding)) {
-            continue;
-        }
-        result = true;
-
-        if (!Satisfied(gfd.GetConclusion(), gfd.GetPattern(), embedding)) {
-            return false;
-        }
-
-        PopulateVertexMap(vertex_map, gfd.GetPattern(), embedding);
+    for (std::size_t index : indices) {
+        PopulateVertexMap(vertex_map, pattern, embeddings[index]);
     }
-
     std::size_t min_size = GetMinSize(vertex_map, boost::num_vertices(graph_));
-    return result && (min_size >= sigma_);
+    return min_size >= sigma_;
 }
 
-void GfdMiner::HGenerate(std::vector<model::Gfd::Literal>& notsatisfied,
-                         model::Gfd::Literal const& l, std::vector<SingleRule>& rules,
-                         model::graph_t& pattern, Embeddings const& embeddings,
-                         Rules const& forbidden_rules) {
-    std::vector<model::Gfd::Literal> conclusion{l};
-    for (std::size_t k = 1; k <= 3; ++k) {
-        for (std::vector<model::Gfd::Literal>& subset : GetSubsets(notsatisfied, k)) {
-            if (IsForbidden(forbidden_rules, subset, l)) {
-                continue;
-            }
-
-            model::Gfd gfd = {pattern, subset, conclusion};
-            if (Validate(gfd, embeddings)) {
-                rules.emplace_back(subset, l);
-                auto cond = [&subset](model::Gfd::Literal const& lit) {
-                    return std::ranges::find(subset, lit) != subset.end();
-                };
-                std::erase_if(notsatisfied, cond);
-            }
+bool GfdMiner::Validate(std::vector<model::Gfd::Literal> const& lhs, model::Gfd::Literal const& rhs,
+                        model::graph_t& pattern, Embeddings const& embeddings,
+                        SatisfiedEmbeddings const& satisfied_embeddings) {
+    std::set<std::size_t> lhs_embeddings;
+    if (lhs.empty()) {
+        for (std::size_t i = 0; i < embeddings.size(); ++i) {
+            lhs_embeddings.insert(i);
+        }
+    } else {
+        lhs_embeddings = satisfied_embeddings.at(lhs.at(0));
+        for (std::size_t i = 1; i < lhs.size(); i++) {
+            std::set<std::size_t> intersect;
+            std::set<std::size_t> current = satisfied_embeddings.at(lhs.at(i));
+            std::ranges::set_intersection(current, lhs_embeddings,
+                                          std::inserter(intersect, intersect.begin()));
+            lhs_embeddings = intersect;
         }
     }
+    std::set<std::size_t> rhs_embeddings = satisfied_embeddings.at(rhs);
+    return std::ranges::includes(rhs_embeddings, lhs_embeddings) &&
+           CheckFrequency(lhs_embeddings, embeddings, pattern);
+}
+
+bool GfdMiner::CheckFrequency(std::vector<model::Gfd::Literal> const& subset,
+                              SatisfiedEmbeddings const& satisfied_embeddings) {
+    if (subset.empty()) return true;
+    std::set<std::size_t> lhs = satisfied_embeddings.at(subset.at(0));
+    for (std::size_t i = 1; i < subset.size(); i++) {
+        std::set<std::size_t> intersect;
+        std::set<std::size_t> current = satisfied_embeddings.at(subset.at(i));
+        std::ranges::set_intersection(current, lhs, std::inserter(intersect, intersect.begin()));
+        lhs = intersect;
+    }
+    return lhs.size() >= sigma_;
 }
 
 std::vector<SingleRule> GfdMiner::GenerateRules(std::vector<model::Gfd::Literal> const& literals,
                                                 model::graph_t& pattern,
                                                 Embeddings const& embeddings,
-                                                Rules const& forbidden_rules) {
+                                                Rules const& forbidden_rules,
+                                                SatisfiedEmbeddings const& satisfied_embeddings) {
     std::vector<SingleRule> rules;
-    for (std::size_t j = 0; j < literals.size(); ++j) {
-        std::vector<model::Gfd::Literal> current = literals;
-        model::Gfd::Literal l = current.at(j);
-        current.erase(std::next(current.begin(), j));
+    std::unordered_map<std::size_t, std::vector<std::vector<std::size_t>>> reversed_rules;
+    std::set<std::vector<std::size_t>> deadlocks;
+    std::set<std::vector<std::size_t>> lhs_indices_set = {{}};
 
-        if (IsForbidden(forbidden_rules, {}, l)) {
-            continue;
+    while (!lhs_indices_set.empty()) {
+        std::set<std::vector<std::size_t>> new_lhs_indices_set = {};
+        for (auto const& lhs_indices : lhs_indices_set) {
+            std::vector<model::Gfd::Literal> lhs = index_to_literal(literals, lhs_indices);
+            for (auto const& rhs_index : get_rhs(literals.size(), lhs_indices)) {
+                model::Gfd::Literal rhs = literals.at(rhs_index);
+                if (IsForbidden(forbidden_rules, lhs, rhs) ||
+                    !check_rules(literals, reversed_rules, lhs_indices, rhs_index)) {
+                    continue;
+                }
+
+                if (Validate(lhs, rhs, pattern, embeddings, satisfied_embeddings)) {
+                    std::vector<std::size_t> deadlock(lhs_indices.begin(), lhs_indices.end());
+                    deadlock.push_back(rhs_index);
+                    std::sort(deadlock.begin(), deadlock.end());
+                    deadlocks.emplace(std::move(deadlock));
+                    std::vector<std::vector<std::size_t>> value = {lhs_indices};
+                    auto [reversed_rule, rule_emplaced] =
+                            reversed_rules.try_emplace(rhs_index, std::move(value));
+                    if (!rule_emplaced) {
+                        reversed_rule->second.push_back(lhs_indices);
+                    }
+                    rules.emplace_back(lhs, rhs);
+                }
+            }
         }
 
-        model::Gfd gfd = {pattern, std::vector<model::Gfd::Literal>{},
-                          std::vector<model::Gfd::Literal>{l}};
-        if (Validate(gfd, embeddings)) {
-            rules.emplace_back(std::vector<model::Gfd::Literal>{}, l);
-            continue;
+        for (auto const& lhs_indices : lhs_indices_set) {
+            for (std::size_t i = lhs_indices.empty() ? 0 : std::ranges::max(lhs_indices) + 1;
+                 i < literals.size(); ++i) {
+                std::vector<std::size_t> new_lhs_indices(lhs_indices.begin(), lhs_indices.end());
+                new_lhs_indices.emplace_back(i);
+
+                if (!check_deadlocks(new_lhs_indices, deadlocks)) {
+                    continue;
+                }
+                if (CheckFrequency(index_to_literal(literals, new_lhs_indices),
+                                   satisfied_embeddings)) {
+                    new_lhs_indices_set.emplace(std::move(new_lhs_indices));
+                } else {
+                    deadlocks.emplace(std::move(new_lhs_indices));
+                }
+            }
         }
-        HGenerate(current, l, rules, pattern, embeddings, forbidden_rules);
+        lhs_indices_set = std::move(new_lhs_indices_set);
     }
     return rules;
+}
+
+bool GfdMiner::LiteralSatisfied(model::Gfd::Literal const& l, Embedding const& embedding,
+                                model::graph_t const& pattern) {
+    auto const& [fst_token, snd_token] = l;
+    std::string fst, snd;
+    bool first_res = CheckToken(fst_token, fst, pattern, embedding);
+    bool second_res = CheckToken(snd_token, snd, pattern, embedding);
+    return first_res && second_res && (fst == snd);
+}
+
+std::vector<model::Gfd::Literal> GfdMiner::GenerateLiterals(
+        model::graph_t const& pattern, std::unordered_map<std::string, Info> const& attrs_info,
+        Embeddings const& embeddings, SatisfiedEmbeddings& satisfied_embeddings_set) {
+    std::vector<std::size_t> indices(boost::num_vertices(pattern));
+    std::iota(indices.begin(), indices.end(), 0);
+    std::vector<std::vector<std::size_t>> pairs = GetSubsets<std::size_t>(indices, 2);
+
+    std::vector<model::Gfd::Literal> result;
+    result.reserve(pairs.size());
+
+    auto try_add_literal = [&embeddings, &pattern, this, &satisfied_embeddings_set, &result](
+                                   model::Gfd::Token const& fst_token,
+                                   model::Gfd::Token const& snd_token) {
+        model::Gfd::Literal l = {fst_token, snd_token};
+        std::set<std::size_t> satisfied_embeddings;
+        std::size_t i = 0;
+        for (Embedding const& embedding : embeddings) {
+            if (LiteralSatisfied(l, embedding, pattern)) {
+                satisfied_embeddings.insert(i);
+            }
+            i++;
+        }
+        if (satisfied_embeddings.size() >= sigma_) {
+            satisfied_embeddings_set.try_emplace(l, std::move(satisfied_embeddings));
+            result.emplace_back(fst_token, std::move(snd_token));
+        }
+    };
+
+    for (auto const& index_pair : pairs) {
+        std::size_t fst = index_pair.at(0);
+        std::size_t snd = index_pair.at(1);
+        std::string const& fst_label = pattern[boost::vertex(fst, pattern)].attributes.at("label");
+        std::string const& snd_label = pattern[boost::vertex(snd, pattern)].attributes.at("label");
+
+        if (attrs_info.find(fst_label) == attrs_info.end() ||
+            attrs_info.find(snd_label) == attrs_info.end()) {
+            continue;
+        }
+        for (auto const& fst_name : attrs_info.at(fst_label)) {
+            model::Gfd::Token fst_token{fst, fst_name.first};
+            for (auto const& snd_name : attrs_info.at(snd_label)) {
+                std::set<std::string> intersect;
+                std::ranges::set_intersection(fst_name.second, snd_name.second,
+                                              std::inserter(intersect, intersect.begin()));
+                if (intersect.empty()) {
+                    continue;
+                }
+
+                model::Gfd::Token snd_token{snd, snd_name.first};
+
+                try_add_literal(fst_token, snd_token);
+            }
+        }
+    }
+
+    for (std::size_t i = 0; i < boost::num_vertices(pattern); ++i) {
+        std::string const& label = pattern[boost::vertex(i, pattern)].attributes.at("label");
+        if (attrs_info.find(label) == attrs_info.end()) {
+            continue;
+        }
+        for (auto& [name, info] : attrs_info.at(label)) {
+            model::Gfd::Token name_token{i, name};
+            for (auto& value : info) {
+                model::Gfd::Token value_token{-1, value};
+
+                try_add_literal(name_token, value_token);
+            }
+        }
+    }
+    return result;
 }
 
 void GfdMiner::HorizontalSpawn(std::vector<model::graph_t> const& patterns,
                                std::vector<Embeddings> const& embeddings_set,
                                std::vector<Rules>& forbidden_rules_set,
-                               std::map<std::string, Info> const& attrs_info) {
+                               std::unordered_map<std::string, Info> const& attrs_info) {
     for (std::size_t i = 0; i < patterns.size(); ++i) {
         auto pattern = patterns[i];
         auto const& embeddings = embeddings_set[i];
         auto& forbidden_rules = forbidden_rules_set[i];
 
-        std::vector<model::Gfd::Literal> literals = GenerateLiterals(pattern, attrs_info);
+        SatisfiedEmbeddings satisfied_embeddings;
+        std::vector<model::Gfd::Literal> literals =
+                GenerateLiterals(pattern, attrs_info, embeddings, satisfied_embeddings);
+
         std::vector<SingleRule> rules =
-                GenerateRules(literals, pattern, embeddings, forbidden_rules);
+                GenerateRules(literals, pattern, embeddings, forbidden_rules, satisfied_embeddings);
+
         AddCompacted(rules, pattern, forbidden_rules);
     }
 }
@@ -539,7 +661,7 @@ void GfdMiner::FilterSupp(std::vector<model::graph_t>& patterns,
         }
     }
     std::reverse(del_indices.begin(), del_indices.end());
-    for (auto& index : del_indices) {
+    for (std::size_t index : del_indices) {
         patterns[index] = patterns.back();
         patterns.pop_back();
 
@@ -552,10 +674,10 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
                           std::vector<model::graph_t>& patterns,
                           std::vector<Embeddings>& embeddings_set,
                           std::vector<Rules>& forbidden_rules_set,
-                          std::map<std::string, Info>& attrs_info) {
+                          std::unordered_map<std::string, Info>& attrs_info) {
     std::unordered_map<std::string, std::size_t> label_to_index;
     BGL_FORALL_VERTICES_T(v, graph_, model::graph_t) {
-        std::map<std::string, std::string> graph_attributes = graph_[v].attributes;
+        std::unordered_map<std::string, std::string> graph_attributes = graph_[v].attributes;
         std::string const& label = graph_attributes.at("label");
         vertex_labels.insert(label);
 
@@ -568,7 +690,7 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
             embeddings_set.at(index).push_back(std::move(embedding));
         } else {
             model::graph_t pattern = {};
-            std::map<std::string, std::string> attributes = {{"label", label}};
+            std::unordered_map<std::string, std::string> attributes = {{"label", label}};
 
             boost::add_vertex(model::Vertex{0, attributes}, pattern);
             patterns.push_back(pattern);
@@ -609,7 +731,7 @@ void GfdMiner::MineGfds() {
     std::vector<model::graph_t> patterns;
     std::vector<Embeddings> embeddings_set;
     std::vector<Rules> forbidden_rules_set;
-    std::map<std::string, Info> attrs_info;
+    std::unordered_map<std::string, Info> attrs_info;
 
     Initialize(vertex_labels, edge_labels, patterns, embeddings_set, forbidden_rules_set,
                attrs_info);
