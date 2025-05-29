@@ -9,7 +9,7 @@ namespace model {
 
 struct Vertex {
     int node_id;
-    std::map<std::string, std::string> attributes;
+    std::unordered_map<std::string, std::string> attributes;
 };
 
 struct Edge {
