@@ -1,5 +1,5 @@
-#include <easylogging++.h>
 #include <gmock/gmock.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
@@ -392,7 +392,7 @@ TEST(TestDataStats, TestShowSample) {
         for (auto const &str : row) {
             result << str << " \t";
         }
-        LOG(INFO) << result.str();
+        spdlog::info(result.str());
     }
 }
 
@@ -401,7 +401,7 @@ TEST(TestDataStats, TestShowAllStats) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
-    LOG(INFO) << stats.ToString();
+    spdlog::info(stats.ToString());
 }
 
 TEST(TestDataStats, TestGetSTD) {
@@ -442,17 +442,17 @@ TEST(TestDataStats, CorrectExecutionEmpty) {
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
-        LOG(INFO) << "thread num = " << thread_num;
+        spdlog::info("thread num = {}", thread_num);
         auto start_time = std::chrono::system_clock::now();
         algos::CsvStats stats(MakeConfig(kEpicMeds, true, thread_num));
         auto elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time
             );
-        LOG(INFO) << "Reading time = " << elapsed_milliseconds.count();
+        spdlog::info("Reading time = {}", elapsed_milliseconds.count());
         unsigned time = stats.Execute();
-        LOG(INFO) << "Executing time = " << time;
-        //LOG(INFO) << stats.toString();
+        spdlog::info("Executing time = {}", time);
+        //spdlog::info() stats.toString();
     }
 }
 #endif

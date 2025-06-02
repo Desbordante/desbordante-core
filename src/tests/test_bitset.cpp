@@ -65,9 +65,9 @@ TYPED_TEST_P(BitsetTest, ULLongConstructor) {
     typename TypeParam::STL s{kVal1};
 
     // Check that bitsets are created properly:
-    LOG(INFO) << "Bitsets with value " << kVal1 << ':';
-    LOG(INFO) << "\tCustom bitset: " << c;
-    LOG(INFO) << "\tSTL bitset: " << s;
+    spdlog::info("Bitsets with value {}:", kVal1);
+    spdlog::info("\tCustom bitset: {}", c.to_string());
+    spdlog::info("\tSTL bitset: {}", s.to_string());
 
     this->IsEq(c, s);
 }

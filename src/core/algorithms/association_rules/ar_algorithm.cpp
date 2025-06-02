@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
@@ -66,7 +66,7 @@ unsigned long long ARAlgorithm::ExecuteInternal() {
     auto time = FindFrequent();
     time += GenerateAllRules();
 
-    LOG(INFO) << "> Count of association rules: " << ar_collection_.size();
+    spdlog::info("> Count of association rules: {}", ar_collection_.size());
     return time;
 }
 

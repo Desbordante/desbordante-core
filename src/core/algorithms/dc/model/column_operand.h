@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/dc/model/tuple.h"
 #include "model/table/column.h"

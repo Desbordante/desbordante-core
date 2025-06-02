@@ -4,7 +4,7 @@
 #include <mutex>
 #include <thread>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"
 #include "config/error/option.h"
@@ -88,9 +88,9 @@ unsigned long long PyroUCC::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG(INFO) << "Init time: " << init_time_millis << "ms";
-    LOG(INFO) << "Time: " << elapsed_milliseconds.count() << " milliseconds";
-    LOG(INFO) << "Total intersection time: " << model::PositionListIndex::micros_ / 1000 << "ms";
+    spdlog::info("Init time: {} ms", init_time_millis);
+    spdlog::info("Time: {}  milliseconds", elapsed_milliseconds.count());
+    spdlog::info("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     return elapsed_milliseconds.count();
 }
 

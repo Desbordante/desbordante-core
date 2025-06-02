@@ -5,7 +5,7 @@
 #include <memory>
 #include <utility>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
@@ -298,63 +298,63 @@ void Order::MergePrune() {
 }
 
 void Order::PrintValidOD() {
-    LOG(DEBUG) << "***PREVIOUS CANDIDATE SETS***" << '\n';
+    spdlog::debug("***PREVIOUS CANDIDATE SETS***\n");
     for (auto const& [lhs, rhs_list] : previous_candidate_sets_) {
         if (rhs_list.empty()) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << "-> empty";
-            LOG(DEBUG) << '\n';
+            spdlog::debug("-> empty");
+            spdlog::debug('\n');
         }
         for (AttributeList const& rhs : rhs_list) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            spdlog::debug("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            spdlog::debug('\n');
         }
     }
-    LOG(DEBUG) << "***CANDIDATE SETS***" << '\n';
+    spdlog::debug("***CANDIDATE SETS***\n");
     for (auto const& [lhs, rhs_list] : candidate_sets_) {
         if (rhs_list.empty()) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << "-> empty";
-            LOG(DEBUG) << '\n';
+            spdlog::debug("-> empty");
+            spdlog::debug('\n');
         }
         for (AttributeList const& rhs : rhs_list) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            spdlog::debug("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            spdlog::debug('\n');
         }
     }
-    LOG(DEBUG) << "***VALID ORDER DEPENDENCIES***" << '\n';
+    spdlog::debug("***VALID ORDER DEPENDENCIES***\n");
     unsigned int cnt = 0;
     for (auto const& [lhs, rhs_list] : valid_) {
         for (AttributeList const& rhs : rhs_list) {
             ++cnt;
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            spdlog::debug("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                spdlog::debug("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            spdlog::debug('\n');
         }
     }
-    LOG(DEBUG) << "OD amount: " << cnt;
-    LOG(DEBUG) << '\n' << '\n';
+    spdlog::debug("OD amount: {}", cnt);
+    spdlog::debug("\n\n");
 }
 
 unsigned long long Order::ExecuteInternal() {
@@ -369,7 +369,7 @@ unsigned long long Order::ExecuteInternal() {
     PrintValidOD();
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "ms: " << elapsed_milliseconds.count() << '\n';
+    spdlog::debug("ms: {}\n", elapsed_milliseconds.count());
     return elapsed_milliseconds.count();
 }
 

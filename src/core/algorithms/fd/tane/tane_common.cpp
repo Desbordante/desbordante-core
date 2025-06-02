@@ -5,7 +5,7 @@
 #include <list>
 #include <memory>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/error/option.h"
 #include "fd/pli_based_fd_algorithm.h"
@@ -135,17 +135,16 @@ unsigned long long TaneCommon::ExecuteInternal() {
     max_fd_error_ = max_ucc_error_;
     RelationalSchema const* schema = relation_->GetSchema();
 
-    LOG(DEBUG) << schema->GetName() << " has " << relation_->GetNumColumns() << " columns, "
-               << relation_->GetNumRows() << " rows, and a maximum NIP of " << std::setw(2)
-               << relation_->GetMaximumNip() << ".";
+    spdlog::debug("{} has {} columns, {} rows, and a maximum NIP of {:2}.", schema->GetName(),
+                  relation_->GetNumColumns(), relation_->GetNumRows(), relation_->GetMaximumNip());
 
     for (auto& column : schema->GetColumns()) {
         double avg_partners = relation_->GetColumnData(column->GetIndex())
                                       .GetPositionListIndex()
                                       ->GetNepAsLong() *
                               2.0 / relation_->GetNumRows();
-        LOG(DEBUG) << "* " << column->ToString() << ": every tuple has " << std::setw(2)
-                   << avg_partners << " partners on average.";
+        spdlog::debug("*{}: every tuple has {:2} partners on average.", column->ToString(),
+                      avg_partners);
     }
     auto start_time = std::chrono::system_clock::now();
     double progress_step = 100.0 / (schema->GetNumColumns() + 1);
@@ -224,8 +223,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
         model::LatticeLevel::GenerateNextLevel(levels);
 
         model::LatticeLevel* level = levels[arity].get();
-        LOG(TRACE) << "Checking " << level->GetVertices().size() << " " << arity
-                   << "-ary lattice vertices.";
+        spdlog::trace("Checking {} {}-ary lattice vertices.", level->GetVertices().size(), arity);
         if (level->GetVertices().empty()) {
             break;
         }
@@ -247,12 +245,11 @@ unsigned long long TaneCommon::ExecuteInternal() {
                                                                   start_time);
     apriori_millis += elapsed_milliseconds.count();
 
-    LOG(DEBUG) << "Time: " << apriori_millis << " milliseconds";
-    LOG(DEBUG) << "Intersection time: " << model::PositionListIndex::micros_ / 1000 << "ms";
-    LOG(DEBUG) << "Total intersections: " << model::PositionListIndex::intersection_count_
-               << std::endl;
-    LOG(DEBUG) << "Total FD count: " << fd_collection_.Size();
-    LOG(DEBUG) << "HASH: " << Fletcher16();
+    spdlog::debug("Time: {} milliseconds", apriori_millis);
+    spdlog::debug("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
+    spdlog::debug("Total intersections: {}", model::PositionListIndex::intersection_count_);
+    spdlog::debug("Total FD count: {}", fd_collection_.Size());
+    spdlog::debug("HASH: {}", Fletcher16());
     return apriori_millis;
 }
 

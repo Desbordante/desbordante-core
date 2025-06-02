@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <bitset>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "dc/FastADC/model/column_operand.h"
@@ -37,7 +37,7 @@ void PredicateBuilder::BuildPredicateSpace(std::vector<model::TypedColumnData> c
     BuildMutexMap();
     BuildInverseMap();
 
-    LOG(DEBUG) << " [Predicate] Predicate space size: " << predicates_.size();
+    spdlog::debug(" [Predicate] Predicate space size: {}", predicates_.size());
 }
 
 size_t PredicateBuilder::PredIdx(PredicatePtr const& p) {

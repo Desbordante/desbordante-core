@@ -15,7 +15,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/dc/model/component.h"
 #include "algorithms/dc/model/point.h"
@@ -71,7 +71,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
-        LOG(INFO) << e.what();
+        spdlog::info(e.what());
         return 0;
     }
 

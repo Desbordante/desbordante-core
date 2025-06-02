@@ -4,7 +4,7 @@
 #include <list>
 #include <memory>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "model/table/agree_set_factory.h"
 #include "model/table/relational_schema.h"
@@ -45,8 +45,8 @@ unsigned long long Depminer::ExecuteInternal() {
 
     auto const lhs_elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - lhs_time);
-    LOG(INFO) << "> LHS FIND TIME: " << lhs_elapsed_milliseconds.count();
-    LOG(INFO) << "> FD COUNT: " << this->fd_collection_.Size();
+    spdlog::info("> LHS FIND TIME: {}", lhs_elapsed_milliseconds.count());
+    spdlog::info("> FD COUNT: {}", this->fd_collection_.Size());
     auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
@@ -104,8 +104,8 @@ std::vector<CMAXSet> Depminer::GenerateCmaxSets(std::unordered_set<Vertical> con
 
     auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "> CMAX GENERATION TIME: " << elapsed_milliseconds.count();
-    LOG(INFO) << "> CMAX SETS COUNT: " << c_max_cets.size();
+    spdlog::info("> CMAX GENERATION TIME: {}", elapsed_milliseconds.count());
+    spdlog::info("> CMAX SETS COUNT: {}", c_max_cets.size());
 
     return c_max_cets;
 }

@@ -124,11 +124,11 @@ runs:
         directory: boost
         download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
 
-    - name: Download easyloggingpp
+    - name: Download spdlog
       uses: ./.github/composite-actions/download-library
       with:
-        directory: easyloggingpp
-        download-command: git clone https://github.com/amrayn/easyloggingpp/ --branch v9.97.0 --depth 1
+        directory: spdlog
+        download-command: git clone https://github.com/gabime/spdlog.git --branch v1.15.2 --depth 1
 
     - name: Download emhash
       uses: ./.github/composite-actions/download-library

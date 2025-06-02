@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <vector>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "config/names_and_descriptions.h"
 #include "config/option.h"
@@ -76,9 +76,9 @@ void FastADC::CheckTypes() {
         model::TypeId type_id = column.GetTypeId();
 
         if (type_id == +model::TypeId::kMixed) {
-            LOG(WARNING) << "Column with index \"" + std::to_string(column_index) +
-                                    "\" contains values of different types. Those values will be "
-                                    "treated as strings.";
+            spdlog::warn("Column with index \"" + std::to_string(column_index) +
+                         "\" contains values of different types. Those values will be "
+                         "treated as strings.");
         } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +
@@ -94,14 +94,14 @@ void FastADC::CheckTypes() {
 }
 
 void FastADC::PrintResults() {
-    LOG(DEBUG) << "Total denial constraints: " << dcs_.TotalDCSize();
-    LOG(DEBUG) << "Minimal denial constraints: " << dcs_.MinDCSize();
-    LOG(DEBUG) << dcs_.ToString();
+    spdlog::debug("Total denial constraints: {}", dcs_.TotalDCSize());
+    spdlog::debug("Minimal denial constraints: {}", dcs_.MinDCSize());
+    spdlog::debug(dcs_.ToString());
 }
 
 unsigned long long FastADC::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
-    LOG(DEBUG) << "Start";
+    spdlog::debug("Start");
 
     SetLimits();
     CheckTypes();
@@ -121,10 +121,10 @@ unsigned long long FastADC::ExecuteInternal() {
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
-    LOG(DEBUG) << "Built evidence set";
+    spdlog::debug("Built evidence set");
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
+    spdlog::debug("Current time: {}", elapsed_milliseconds.count());
 
     ApproxEvidenceInverter dcbuilder(predicate_builder, evidence_threshold_,
                                      std::move(evidence_set_builder.evidence_set),
@@ -136,7 +136,7 @@ unsigned long long FastADC::ExecuteInternal() {
 
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "Algorithm time: " << elapsed_milliseconds.count();
+    spdlog::debug("Algorithm time: {}", elapsed_milliseconds.count());
     return elapsed_milliseconds.count();
 }
 
