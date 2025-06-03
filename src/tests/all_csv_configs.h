@@ -113,4 +113,6 @@ extern CSVConfig const kTestDC2;
 extern CSVConfig const kTestDC3;
 extern CSVConfig const kTestDC4;
 extern CSVConfig const kTestDC5;
+extern CSVConfig const kTestCINDEn;
+extern CSVConfig const kTestCINDDe;
 }  // namespace tests
