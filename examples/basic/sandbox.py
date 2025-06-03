@@ -27,10 +27,10 @@ algo4 = desbordante.cind.algorithms.Default()
 
 # TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
 #           ['anime_prep', 'manga_prep']]
-TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
-          ['names_prep', 'states_prep']]
 # TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
-#           ['cind_test_de', 'cind_test_en']]
+#           ['names_prep', 'states_prep']]
+TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
+          ['cind_test_de', 'cind_test_en']]
 
 # algo1.load_data(tables=TABLES,algo_type="cinderella")
 # algo2.load_data(tables=TABLES,algo_type="cinderella")
