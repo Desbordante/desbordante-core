@@ -47,7 +47,6 @@ CIND Cinderella::ExecuteSingle(model::IND const& aind) {
     CIND cind{.ind = aind,
               .conditions = GetConditions(GetBaskets(attributes), attributes.conditional),
               .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
-    // fprintf(stderr, "cinderella ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return cind;
 }
 
