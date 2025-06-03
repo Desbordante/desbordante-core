@@ -35,7 +35,7 @@ jobs:
           ./build.sh --benchmark --no-tests
       - name: Get previous results
         run: |
-          echo ${{ secrets.TEST_READONLY_TOKEN }} | gh auth login --with-token
+          echo ${{ secrets.PERFORMANCEREGRESSIONTESTING }} | gh auth login --with-token
 
           gh run list --repo "${{ github.repository }}" --limit ${{ env.num-runs }} \
             --workflow "${{ github.workflow }}" --json 'databaseId' --jq '[.[].databaseId]' >ids.json
