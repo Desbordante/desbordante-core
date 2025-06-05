@@ -74,8 +74,9 @@ void WriteLiterals(std::ostream& stream, std::vector<model::Gfd::Literal> const&
 
 namespace graph_parser {
 
-using AMap = boost::property_map<model::graph_t,
-                                 std::map<std::string, std::string> model::Vertex::*>::type;
+using AMap =
+        boost::property_map<model::graph_t,
+                            std::unordered_map<std::string, std::string> model::Vertex::*>::type;
 using RMap = boost::property_map<model::graph_t, std::string model::Edge::*>::type;
 
 namespace {
