@@ -152,7 +152,8 @@ boost::dynamic_bitset<> Validator::NeedsValidation(NonFDTreeVertex& vertex,
 
 boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
                                             boost::dynamic_bitset<> rhss,
-                                            OnValidateResult const& on_invalid) {
+                                            OnValidateResult const& on_invalid,
+                                            size_t first_insert_batch_id) {
     if (rhss.size() == 0) {
         return rhss;
     }
@@ -177,7 +178,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
         auto const pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
-            if (!Refines(*pli, rhs, on_invalid)) {
+            if (!Refines(*pli, rhs, on_invalid, first_insert_batch_id)) {
                 rhss.reset(rhs);
             }
         }
@@ -189,7 +190,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
     auto const first_lhs_attr = first_pli->GetColumnIndex();
 
     lhs.reset(first_lhs_attr);
-    return Refines(*first_pli, lhs, rhss, on_invalid);
+    return Refines(*first_pli, lhs, rhss, on_invalid, first_insert_batch_id);
 }
 
 std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_fds) {
@@ -225,7 +226,8 @@ std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_f
     return result;
 }
 
-std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds) {
+std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds,
+                                                          size_t first_insert_batch_id) {
     std::vector<NonFd> result;
     std::mutex result_mutex;
     std::vector<boost::unique_future<void>> futures;
@@ -233,12 +235,12 @@ std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDT
 
     for (auto const& [vertex, lhs] : fds) {
         boost::packaged_task<void> task(
-            [this, vertex, lhs, &result_mutex, &result]() {
+            [this, vertex, lhs, &result_mutex, &result, first_insert_batch_id]() {
                 OnValidateResult on_invalid = [lhs, &result_mutex, &result](size_t rhs, ViolatingRecordPair violation) {
                     std::lock_guard lock(result_mutex);
                     result.push_back({{lhs, rhs}, violation});
                 };
-                Validate(lhs, vertex->GetFDs(), on_invalid);
+                Validate(lhs, vertex->GetFDs(), on_invalid, first_insert_batch_id);
             }
         );
         futures.push_back(task.get_future());
@@ -251,10 +253,11 @@ std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDT
 
 bool Validator::Refines(algos::dynfd::DPLI const& pli,
                         size_t rhs_attr,
-                        OnValidateResult const& on_invalid) const {
+                        OnValidateResult const& on_invalid,
+                        size_t first_insert_batch_id) const {
     std::vector<CompressedRecord> const& compressed_records = relation_->GetCompressedRecords();
 
-    for (auto const& cluster : pli.GetClustersToCheck()) {
+    for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
         auto const rhs_value = compressed_records[*cluster.begin()][rhs_attr];
 
         for (auto record_id : cluster) {
@@ -274,7 +277,8 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli,
 boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
                                            boost::dynamic_bitset<> lhs,
                                            boost::dynamic_bitset<> rhss,
-                                           OnValidateResult const& on_invalid) const {
+                                           OnValidateResult const& on_invalid,
+                                           size_t first_insert_batch_id) const {
     auto const lhs_size = lhs.size();
     auto const rhs_size = rhss.size();
 
@@ -289,7 +293,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
         rhs_attr_ind_to_id[index] = rhs;
     }
 
-    for (auto const& cluster : pli.GetClustersToCheck()) {
+    for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
         std::unordered_map<ClusterIdsArray, ClusterIdsArrayWithRecord> cluster_ids_map;
 
         for (auto record_id : cluster) {
@@ -335,7 +339,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
 void Validator::ValidateFds(size_t first_insert_batch_id) {
     for (size_t level = 0; level <= relation_->GetNumColumns(); ++level) {
         auto level_fds = positive_cover_tree_->GetLevel(level);
-        std::vector<NonFd> invalid_fds = ValidateParallel(level_fds);
+        std::vector<NonFd> invalid_fds = ValidateParallel(level_fds, first_insert_batch_id);
 
         for (auto const& non_fd : invalid_fds) {
             positive_cover_tree_->Remove(non_fd.rawFd.lhs_, non_fd.rawFd.rhs_);
