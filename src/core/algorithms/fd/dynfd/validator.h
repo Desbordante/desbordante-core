@@ -47,22 +47,26 @@ class Validator : public std::enable_shared_from_this<Validator> {
         ViolatingRecordPair violation;
     };
 
-    std::vector<NonFd> ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds);
+    std::vector<NonFd> ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds,
+                                        size_t first_insert_batch_id);
 
     using OnValidateResult = std::optional<std::function<void(size_t, ViolatingRecordPair)>>;
 
     [[nodiscard]] bool Refines(algos::dynfd::DPLI const& pli,
                                size_t rhs_attr,
-                               OnValidateResult const& on_invalid = std::nullopt) const;
+                               OnValidateResult const& on_invalid = std::nullopt,
+                               size_t first_insert_batch_id = 0) const;
 
     [[nodiscard]] boost::dynamic_bitset<> Refines(algos::dynfd::DPLI const& pli,
                                                   boost::dynamic_bitset<> lhs,
                                                   boost::dynamic_bitset<> rhss,
-                                                  OnValidateResult const& on_invalid = std::nullopt) const;
+                                                  OnValidateResult const& on_invalid = std::nullopt,
+                                                  size_t first_insert_batch_id = 0) const;
 
     boost::dynamic_bitset<> Validate(boost::dynamic_bitset<> lhs,
                                      boost::dynamic_bitset<> rhss,
-                                     OnValidateResult const& on_invalid = std::nullopt);
+                                     OnValidateResult const& on_invalid = std::nullopt,
+                                     size_t first_insert_batch_id = 0);
 
 public:
     Validator(std::shared_ptr<model::FDTree> positive_cover_tree,
