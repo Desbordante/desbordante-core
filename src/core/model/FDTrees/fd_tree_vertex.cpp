@@ -10,7 +10,9 @@ namespace model {
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
                                      boost::dynamic_bitset<> lhs, std::vector<LhsPair>& vertices) {
     if (cur_level == target_level) {
-        vertices.emplace_back(shared_from_this(), lhs);
+        if (fds_.any()) {
+            vertices.emplace_back(shared_from_this(), lhs);
+        }
         return;
     }
 
@@ -18,7 +20,7 @@ void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
         return;
     }
 
-    for (size_t i = 0; i < num_attributes_; ++i) {
+    for (size_t i = cur_level; i < num_attributes_; ++i) {
         if (ContainsChildAt(i)) {
             lhs.set(i);
 
@@ -29,35 +31,14 @@ void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
     }
 }
 
-void FDTreeVertex::GetGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
-                                        boost::dynamic_bitset<>& cur_lhs, size_t rhs,
-                                        size_t cur_bit,
-                                        std::vector<boost::dynamic_bitset<>>& result) const {
-    // TODO: optimize checking via counting bits
-    if (IsFd(rhs) && lhs != cur_lhs) {
-        result.push_back(cur_lhs);
-    }
-
-    if (!HasChildren()) {
-        return;
-    }
-
-    for (; cur_bit != boost::dynamic_bitset<>::npos; cur_bit = lhs.find_next(cur_bit)) {
-        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-            cur_lhs.set(cur_bit);
-            children_[cur_bit]->GetGeneralsRecursive(lhs, cur_lhs, rhs, lhs.find_next(cur_bit),
-                                                     result);
-            cur_lhs.reset(cur_bit);
-        }
-    }
-}
-
 void FDTreeVertex::GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
                                              boost::dynamic_bitset<> cur_lhs, size_t rhs,
                                              size_t cur_bit,
                                              std::vector<boost::dynamic_bitset<>>& result) const {
     if (IsFd(rhs)) {
         result.push_back(cur_lhs);
+        return;  // If this vertex has the RHS bit set, then none of its children will have
+                 // this bit set.
     }
 
     if (!HasChildren()) {
@@ -74,98 +55,24 @@ void FDTreeVertex::GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
     }
 }
 
-void FDTreeVertex::GetSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                        boost::dynamic_bitset<>& cur_lhs, size_t rhs,
-                                        size_t cur_bit,
-                                        std::vector<boost::dynamic_bitset<>>& result) const {
-    // TODO: optimize checking via counting bits
-    if (IsFd(rhs) && lhs.is_proper_subset_of(cur_lhs)) {
-        result.push_back(cur_lhs);
-    }
-
-    if (!HasChildren()) {
-        return;
-    }
-
-    size_t next_lhs_bit = lhs.test(cur_bit) ? cur_bit : lhs.find_next(cur_bit);
-
-    for (; cur_bit != num_attributes_ &&
-           (next_lhs_bit == boost::dynamic_bitset<>::npos || cur_bit != next_lhs_bit + 1);
-         ++cur_bit) {
-        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-            cur_lhs.set(cur_bit);
-            children_[cur_bit]->GetSpecialsRecursive(lhs, cur_lhs, rhs, cur_bit + 1, result);
-            cur_lhs.reset(cur_bit);
-        }
-    }
-}
-
-void FDTreeVertex::GetFdAndSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                             boost::dynamic_bitset<>& cur_lhs, size_t rhs,
-                                             size_t cur_bit,
-                                             std::vector<boost::dynamic_bitset<>>& result) const {
-    // TODO: optimize checking via counting bits
-    if (IsFd(rhs) && lhs.is_subset_of(cur_lhs)) {
-        result.push_back(cur_lhs);
-    }
-
-    if (!HasChildren()) {
-        return;
-    }
-
-    size_t next_lhs_bit = lhs.test(cur_bit) ? cur_bit : lhs.find_next(cur_bit);
-
-    for (; cur_bit != num_attributes_ &&
-           (next_lhs_bit == boost::dynamic_bitset<>::npos || cur_bit != next_lhs_bit + 1);
-         ++cur_bit) {
-        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-            cur_lhs.set(cur_bit);
-            children_[cur_bit]->GetSpecialsRecursive(lhs, cur_lhs, rhs, cur_bit + 1, result);
-            cur_lhs.reset(cur_bit);
-        }
-    }
-}
-
 bool FDTreeVertex::ContainsFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
                                                 size_t cur_bit) const {
     if (IsFd(rhs)) {
         return true;
     }
 
-    if (cur_bit == boost::dynamic_bitset<>::npos) {
+    if (!HasChildren()) {
         return false;
     }
 
-    if (HasChildren() && ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs) &&
-        children_[cur_bit]->ContainsFdOrGeneralRecursive(lhs, rhs, lhs.find_next(cur_bit))) {
-        return true;
+    for (; cur_bit != boost::dynamic_bitset<>::npos; cur_bit = lhs.find_next(cur_bit)) {
+        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs) &&
+            children_[cur_bit]->ContainsFdOrGeneralRecursive(lhs, rhs, lhs.find_next(cur_bit))) {
+            return true;
+        }
     }
 
-    return ContainsFdOrGeneralRecursive(lhs, rhs, lhs.find_next(cur_bit));
-}
-
-bool FDTreeVertex::ContainsFdOrSpecialRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
-                                                size_t next_after_last_lhs_set_bit,
-                                                size_t cur_bit) const {
-    if (IsFd(rhs) && cur_bit >= next_after_last_lhs_set_bit) {
-        return true;
-    }
-
-    if (cur_bit == num_attributes_) {
-        return false;
-    }
-
-    if (HasChildren() && ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs) &&
-        children_[cur_bit]->ContainsFdOrSpecialRecursive(lhs, rhs, next_after_last_lhs_set_bit,
-                                                         cur_bit + 1)) {
-        return true;
-    }
-
-    if (lhs.test(cur_bit)) {
-        return false;
-    }
-
-    return ContainsFdOrSpecialRecursive(lhs, rhs, next_after_last_lhs_set_bit, cur_bit + 1);
+    return false;
 }
 
 bool FDTreeVertex::RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
@@ -182,84 +89,55 @@ bool FDTreeVertex::RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rh
             return false;
         }
 
-        if (!children_[current_lhs_attr]->GetAttributes().any()) {
-            children_[current_lhs_attr].reset();
+        if (children_[current_lhs_attr]->GetAttributes().none()) {
             children_[current_lhs_attr] = nullptr;
+            children_count_--;
         }
     }
 
     if (IsLastNodeOf(rhs)) {
-        contains_children_ = false;
         RemoveAttribute(rhs);
         return true;
     }
     return false;
 }
 
-void FDTreeVertex::RemoveGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
-                                           boost::dynamic_bitset<> cur_lhs, size_t rhs,
-                                           size_t cur_bit) {
-    // TODO: optimize checking via counting bits
-    if (IsFd(rhs) && lhs != cur_lhs) {
-        RemoveFd(rhs);
-        RemoveAttribute(rhs);
-    }
-
-    if (!HasChildren()) {
-        return;
-    }
-
-    for (; cur_bit != boost::dynamic_bitset<>::npos; cur_bit = lhs.find_next(cur_bit)) {
-        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-            cur_lhs.set(cur_bit);
-            children_[cur_bit]->RemoveGeneralsRecursive(lhs, cur_lhs, rhs, lhs.find_next(cur_bit));
-            cur_lhs.reset(cur_bit);
-
-            if (!children_[cur_bit]->GetAttributes().any()) {
-                children_[cur_bit].reset();
-                children_[cur_bit] = nullptr;
-            }
-        }
-    }
-
-    if (IsLastNodeOf(rhs)) {
-        contains_children_ = false;
-        RemoveAttribute(rhs);
-    }
-}
-
 void FDTreeVertex::RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                           boost::dynamic_bitset<> cur_lhs, size_t rhs,
-                                           size_t cur_bit) {
+                                           size_t rhs, size_t cur_bit,
+                                           bool is_specialized) {
     // TODO: optimize checking via counting bits
-    if (IsFd(rhs) && lhs.is_subset_of(cur_lhs)) {
-        RemoveFd(rhs);
-        RemoveAttribute(rhs);
+    size_t next_lhs_bit;
+    if (cur_bit < lhs.size()) {
+        next_lhs_bit = lhs.test(cur_bit) ? cur_bit : lhs.find_next(cur_bit);
+    } else {
+        next_lhs_bit = boost::dynamic_bitset<>::npos;
     }
 
-    if (!HasChildren()) {
+    if (is_specialized && next_lhs_bit == boost::dynamic_bitset<>::npos && IsFd(rhs)) {
+        RemoveFd(rhs);
+        RemoveAttribute(rhs);
         return;
     }
 
-    size_t next_lhs_bit = lhs.test(cur_bit) ? cur_bit : lhs.find_next(cur_bit);
+    if (HasChildren()) {
+        auto limit = next_lhs_bit == boost::dynamic_bitset<>::npos
+                ? num_attributes_ - 1
+                : next_lhs_bit;
 
-    for (; cur_bit != num_attributes_ &&
-           (next_lhs_bit == boost::dynamic_bitset<>::npos || cur_bit != next_lhs_bit + 1);
-         ++cur_bit) {
-        if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-            cur_lhs.set(cur_bit);
-            children_[cur_bit]->RemoveSpecialsRecursive(lhs, cur_lhs, rhs, cur_bit + 1);
-            cur_lhs.reset(cur_bit);
+        for (; cur_bit <= limit; ++cur_bit) {
+            if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
+                children_[cur_bit]->RemoveSpecialsRecursive(lhs, rhs, cur_bit + 1, 
+                                                            is_specialized || cur_bit != next_lhs_bit);
 
-            if (!children_[cur_bit]->GetAttributes().any()) {
-                children_[cur_bit].reset();
-                children_[cur_bit] = nullptr;
+                if (children_[cur_bit]->GetAttributes().none()) {
+                    children_[cur_bit] = nullptr;
+                    children_count_--;
+                }
             }
         }
     }
 
-    if (IsLastNodeOf(rhs)) {
-        contains_children_ = false;
+    if (!IsFd(rhs) && IsLastNodeOf(rhs)) {
         RemoveAttribute(rhs);
     }
 }
@@ -268,7 +146,7 @@ bool FDTreeVertex::IsLastNodeOf(size_t rhs) const noexcept {
     if (!HasChildren()) {
         return true;
     }
-    return std::all_of(children_.cbegin(), children_.cend(), [rhs](auto const& child) {
+    return std::none_of(children_.cbegin(), children_.cend(), [rhs](auto const& child) {
         return (child != nullptr) && child->IsAttribute(rhs);
     });
 }
@@ -288,7 +166,7 @@ void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs
         fds.emplace_back(lhs, rhs);
     }
 
-    if (!contains_children_) {
+    if (!HasChildren()) {
         return;
     }
 

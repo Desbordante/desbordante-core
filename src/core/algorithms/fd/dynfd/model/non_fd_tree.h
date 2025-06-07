@@ -53,37 +53,10 @@ public:
         root_->RemoveRecursive(lhs, rhs, lhs.find_first());
     }
 
-    /**
-     * Gets LHSs of all NonFDs having at least given lhs and rhs.
-
-     */
-    [[nodiscard]] std::vector<boost::dynamic_bitset<>> GetNonFdAndGenerals(
-            boost::dynamic_bitset<>& lhs, size_t rhs) const;
-
-    /**
-     * Gets LHSs of all NonFDs having a proper subset of giving lhs and rhs.
-     */
-    std::vector<boost::dynamic_bitset<>> GetGenerals(boost::dynamic_bitset<>& lhs, size_t rhs);
-
     void RemoveGenerals(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
     std::vector<boost::dynamic_bitset<>> GetNonFdAndSpecials(boost::dynamic_bitset<>& lhs,
                                                              size_t rhs);
-
-    /**
-     * Gets LHSs of all NonFDs having given lhs as a proper subset and rhs.
-     */
-    std::vector<boost::dynamic_bitset<>> GetSpecials(boost::dynamic_bitset<>& lhs, size_t rhs);
-
-    void RemoveSpecials(boost::dynamic_bitset<>& lhs, size_t rhs);
-
-    /**
-     * Checks if any NonFD has at least given lhs and rhs.
-     */
-    [[nodiscard]] bool ContainsNonFdOrGeneral(boost::dynamic_bitset<> const& lhs,
-                                              size_t rhs) const {
-        return root_->ContainsNonFdOrGeneralRecursive(lhs, rhs, lhs.find_first());
-    }
 
     [[nodiscard]] bool ContainsNonFdOrSpecial(boost::dynamic_bitset<>& lhs, size_t rhs) const;
 

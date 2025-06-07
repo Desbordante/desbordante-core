@@ -96,36 +96,18 @@ private:
     void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
-    void GetGeneralsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
-                              size_t rhs, size_t cur_bit,
-                              std::vector<boost::dynamic_bitset<>>& result) const;
-
     void GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
                                    boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit,
-                                   std::vector<boost::dynamic_bitset<>>& result) const;
-
-    void GetSpecialsRecursive(boost::dynamic_bitset<> const& lhs, boost::dynamic_bitset<>& cur_lhs,
-                              size_t rhs, size_t cur_bit,
-                              std::vector<boost::dynamic_bitset<>>& result) const;
-
-    void GetFdAndSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                   boost::dynamic_bitset<>& cur_lhs, size_t rhs, size_t cur_bit,
                                    std::vector<boost::dynamic_bitset<>>& result) const;
 
     bool ContainsFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
                                       size_t cur_bit) const;
 
-    // TODO: make shorter the name of the 3rd parameter
-    bool ContainsFdOrSpecialRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
-                                      size_t next_after_last_lhs_set_bit, size_t cur_bit) const;
-
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
 
-    void RemoveGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
-                                 boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit);
-
     void RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                 boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit);
+                                 size_t rhs, size_t cur_bit,
+                                 bool is_specialized);
 
     bool IsLastNodeOf(size_t rhs) const noexcept;
 
@@ -176,6 +158,8 @@ public:
     bool HasChildren() const noexcept {
         return children_count_ > 0;
     }
+
+    bool CheckChildren();
 };
 
 }  // namespace model

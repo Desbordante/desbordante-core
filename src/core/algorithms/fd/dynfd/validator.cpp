@@ -15,46 +15,6 @@
 
 namespace algos::dynfd {
 
-ViolatingRecordPair Validator::FindClusterViolating(const DPLI::Cluster& cluster,
-                                                    size_t sortedPlisIndex,
-                                                    std::vector<std::shared_ptr<DPLI>>& sorted_plis,
-                                                    size_t const rhs) {
-    sortedPlisIndex++;
-    if (sortedPlisIndex < sorted_plis.size()) {
-        auto pli = sorted_plis[sortedPlisIndex];
-        auto hash_index = pli->GetHashIndex();
-        std::vector<DPLI::Cluster> intersection;
-        std::unordered_map<int, int> inverted_index;  // value -> intersection index
-        for (size_t record_id : cluster) {
-            int value = hash_index[record_id];
-            if (auto it = inverted_index.find(value); it == inverted_index.end()) {
-                intersection.emplace_back(std::vector({record_id}));
-                inverted_index[value] = intersection.size() - 1;
-            } else {
-                intersection[it->second].PushBack(record_id);
-            }
-        }
-        for (auto const& next_cluster : intersection) {
-            auto violation = FindClusterViolating(next_cluster, sortedPlisIndex, sorted_plis, rhs);
-            if (violation) {
-                return violation;
-            }
-        }
-    } else {
-        auto rhs_pli = relation_->GetColumnData(rhs).GetPositionListIndex();
-        auto it = cluster.begin();
-        int value = rhs_pli->GetRecordValue(*it);
-        size_t first_record = *it;
-        ++it;
-        for (; it != cluster.end(); ++it) {
-            if (value != rhs_pli->GetRecordValue(*it)) {
-                return {{first_record, *it}};
-            }
-        }
-    }
-    return std::nullopt;
-}
-
 ViolatingRecordPair Validator::FindEmptyLhsViolation(size_t const rhs) const {
     auto const rhs_pli = relation_->GetColumnData(rhs).GetPositionListIndex();
     if (rhs_pli->GetClustersNum() <= 1) {
@@ -62,21 +22,6 @@ ViolatingRecordPair Validator::FindEmptyLhsViolation(size_t const rhs) const {
     }
 
     return {{rhs_pli->GetCluster(0).Back(), rhs_pli->GetCluster(1).Back()}};
-}
-
-ViolatingRecordPair Validator::FindNewViolation(RawFD const& nonFd) {
-    if (nonFd.lhs_.count() == 0) {
-        return FindEmptyLhsViolation(nonFd.rhs_);
-    }
-
-    std::vector<std::shared_ptr<DPLI>> sorted_plis = GetSortedPlisForLhs(nonFd.lhs_);
-
-    for (auto const& cluster : *sorted_plis[0]) {
-        if (auto violation = FindClusterViolating(cluster, 0, sorted_plis, nonFd.rhs_)) {
-            return violation;
-        }
-    }
-    return std::nullopt;
 }
 
 std::vector<std::shared_ptr<DPLI>> Validator::GetSortedPlisForLhs(
@@ -108,22 +53,6 @@ std::shared_ptr<DPLI> Validator::GetFirstPliForLhs(
     }
 
     return max_clusters_pli;
-}
-
-ViolatingRecordPair Validator::IsFdInvalidated(RawFD const& fd, size_t first_insert_batch_id) {
-    if (fd.lhs_.count() == 0) {
-        return FindEmptyLhsViolation(fd.rhs_);
-    }
-
-    for (std::vector<std::shared_ptr<DPLI>> sorted_plis = GetSortedPlisForLhs(fd.lhs_);
-         auto const& cluster : *sorted_plis[0]) {
-        if (cluster.Back() >= first_insert_batch_id) {
-            if (auto violation = FindClusterViolating(cluster, 0, sorted_plis, fd.rhs_)) {
-                return violation;
-            }
-        }
-    }
-    return std::nullopt;
 }
 
 bool Validator::NeedsValidation([[maybe_unused]] RawFD const& non_fd) const {
