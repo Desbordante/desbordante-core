@@ -1,5 +1,6 @@
 name: Performance regression testing
 on:
+  push:
   # This workflow runs performance regression tests:
   # - Automatically every Saturday at 3:30 AM (using `schedule` trigger).
   # - Manually on demand using `workflow_dispatch` trigger.
