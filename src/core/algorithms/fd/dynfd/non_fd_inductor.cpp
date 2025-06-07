@@ -29,7 +29,7 @@ void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
 }
 
 void NonFDInductor::DeduceNonFds(RawFD fd) {
-    auto valid_lhs = negative_cover_tree_->GetSpecials(fd.lhs_, fd.rhs_);
+    auto valid_lhs = negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_);
     for (const auto &non_fd_lhs : valid_lhs) {
         negative_cover_tree_->Remove(non_fd_lhs, fd.rhs_);
 

@@ -17,15 +17,7 @@ class Validator : public std::enable_shared_from_this<Validator> {
     std::shared_ptr<DynamicRelationData> relation_;
     boost::asio::thread_pool pool_;
 
-    ViolatingRecordPair FindClusterViolating(const DPLI::Cluster &cluster, size_t sortedPlisIndex,
-                                             std::vector<std::shared_ptr<DPLI>> &sorted_plis,
-                                             size_t rhs);
-
     [[nodiscard]] ViolatingRecordPair FindEmptyLhsViolation(size_t rhs) const;
-
-    ViolatingRecordPair FindNewViolation(RawFD const &nonFd);
-
-    ViolatingRecordPair IsFdInvalidated(RawFD const &fd, size_t first_insert_batch_id);
 
     [[nodiscard]] std::vector<std::shared_ptr<DPLI>> GetSortedPlisForLhs(
             boost::dynamic_bitset<> const &lhs) const;

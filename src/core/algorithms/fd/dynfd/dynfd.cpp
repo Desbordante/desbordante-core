@@ -121,7 +121,7 @@ void DynFD::LoadDataInternal() {
     }
 
     for (auto&& [lhs, rhs] : positive_cover_tree_->FillFDs()) {
-        std::vector<boost::dynamic_bitset<>> violated = negative_cover_tree_->GetSpecials(lhs, rhs);
+        std::vector<boost::dynamic_bitset<>> violated = negative_cover_tree_->GetNonFdAndSpecials(lhs, rhs);
         for (auto&& non_fd : violated) {
             negative_cover_tree_->Remove(non_fd, rhs);
             for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;

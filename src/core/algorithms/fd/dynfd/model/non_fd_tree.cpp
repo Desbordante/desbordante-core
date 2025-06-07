@@ -61,32 +61,6 @@ std::shared_ptr<NonFDTreeVertex> NonFDTree::FindNonFdVertex(boost::dynamic_bitse
     return cur_node;
 }
 
-std::vector<boost::dynamic_bitset<>> NonFDTree::GetNonFdAndGenerals(boost::dynamic_bitset<>& lhs,
-                                                                    size_t rhs) const {
-    assert(lhs.count() != 0);
-
-    std::vector<boost::dynamic_bitset<>> result;
-    boost::dynamic_bitset const empty_lhs(GetNumAttributes());
-    size_t const starting_bit = lhs.find_first();
-
-    root_->GetNonFdAndGeneralsRecursive(lhs, empty_lhs, rhs, starting_bit, result);
-
-    return result;
-}
-
-std::vector<boost::dynamic_bitset<>> NonFDTree::GetGenerals(boost::dynamic_bitset<>& lhs,
-                                                            size_t rhs) {
-    assert(lhs.count() != 0);
-
-    std::vector<boost::dynamic_bitset<>> result;
-    boost::dynamic_bitset empty_lhs(GetNumAttributes());
-    size_t const starting_bit = lhs.find_first();
-
-    root_->GetGeneralsRecursive(lhs, empty_lhs, rhs, starting_bit, result);
-
-    return result;
-}
-
 std::vector<boost::dynamic_bitset<>> NonFDTree::GetNonFdAndSpecials(boost::dynamic_bitset<>& lhs,
                                                                     size_t rhs) {
     std::vector<boost::dynamic_bitset<>> result;
@@ -98,38 +72,11 @@ std::vector<boost::dynamic_bitset<>> NonFDTree::GetNonFdAndSpecials(boost::dynam
 }
 
 void NonFDTree::RemoveGenerals(boost::dynamic_bitset<> const& lhs, size_t rhs) {
-    assert(lhs.count() != 0);
-
-    boost::dynamic_bitset<> empty_lhs(GetNumAttributes());
-    root_->RemoveGeneralsRecursive(lhs, empty_lhs, rhs, lhs.find_first());
-}
-
-std::vector<boost::dynamic_bitset<>> NonFDTree::GetSpecials(boost::dynamic_bitset<>& lhs,
-                                                            size_t rhs) {
-    std::vector<boost::dynamic_bitset<>> result;
-    boost::dynamic_bitset empty_lhs(GetNumAttributes());
-
-    root_->GetSpecialsRecursive(lhs, empty_lhs, rhs, 0, result);
-
-    return result;
-}
-
-void NonFDTree::RemoveSpecials(boost::dynamic_bitset<>& lhs, size_t rhs) {
-    boost::dynamic_bitset empty_lhs(GetNumAttributes());
-    root_->RemoveSpecialsRecursive(lhs, empty_lhs, rhs, 0);
+    root_->RemoveGeneralsRecursive(lhs, rhs, lhs.find_first(), false);
 }
 
 bool NonFDTree::ContainsNonFdOrSpecial(boost::dynamic_bitset<>& lhs, size_t rhs) const {
-    size_t next_after_last_lhs_set_bit = 0;
-    if (lhs.find_first() != boost::dynamic_bitset<>::npos) {
-        next_after_last_lhs_set_bit = lhs.find_first();
-        while (lhs.find_next(next_after_last_lhs_set_bit) != boost::dynamic_bitset<>::npos) {
-            next_after_last_lhs_set_bit = lhs.find_next(next_after_last_lhs_set_bit);
-        }
-        ++next_after_last_lhs_set_bit;
-    }
-
-    return root_->ContainsNonFdOrSpecialRecursive(lhs, rhs, next_after_last_lhs_set_bit, 0);
+    return root_->ContainsNonFdOrSpecialRecursive(lhs, rhs, 0);
 }
 
 std::vector<LhsPair> NonFDTree::GetLevel(unsigned int target_level) {
