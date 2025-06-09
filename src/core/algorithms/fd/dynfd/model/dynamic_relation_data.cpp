@@ -17,8 +17,8 @@ size_t DynamicRelationData::GetNumRows() const {
 DynamicRelationData::DynamicRelationData(std::unique_ptr<RelationalSchema> schema,
                                          std::vector<ColumnType> column_data,
                                          std::unordered_set<size_t> stored_row_ids,
-                                         std::unordered_map<std::string, int> value_dictionary,
-                                         int const next_value_id, int const next_record_id,
+                                         ValueDictionary value_dictionary,
+                                         int next_value_id, size_t next_record_id,
                                          std::vector<CompressedRecord> compressed_records)
     : AbstractRelationData(std::move(schema), std::move(column_data)),
       stored_row_ids_(std::move(stored_row_ids)),
@@ -35,8 +35,8 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         config::InputTable const& input_table) {
     auto schema = std::make_unique<RelationalSchema>(input_table->GetRelationName());
     int next_value_id = 1;
-    std::unordered_map<std::string, int> value_dictionary;
     size_t const num_columns = input_table->GetNumberOfColumns();
+    ValueDictionary value_dictionary(num_columns);
     std::vector<std::vector<int>> column_dictionary_encoded_data =
             std::vector<std::vector<int>>(num_columns);
     std::vector<std::vector<int>> compressed_records;
@@ -55,17 +55,26 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         for (size_t index = 0; index < row.size(); ++index) {
             std::string const& field = row[index];
 
-            auto location = value_dictionary.find(field);
+            auto location = value_dictionary[index].find(field);
             int value_id;
-            if (location == value_dictionary.end()) {
-                value_id = next_value_id;
-                value_dictionary[field] = value_id;
-                next_value_id++;
+            if (location == value_dictionary[index].end()) {
+                value_id = next_value_id++;
+                value_dictionary[index][field] = -static_cast<int>(compressed_records.size());
+
+                compressed_records.back()[index] = -value_id - 1;
             } else {
                 value_id = location->second;
+
+                if (value_id < 0) {
+                    int column_ind = -value_id - 1;
+                    value_id = -compressed_records[column_ind][index] - 1;
+                    location->second = value_id;
+                    compressed_records[column_ind][index] = value_id;
+                }
+
+                compressed_records.back()[index] = value_id;
             }
 
-            compressed_records.back()[index] = value_id;
             column_dictionary_encoded_data[index].push_back(value_id);
         }
     }
@@ -114,15 +123,25 @@ void DynamicRelationData::InsertBatch(config::InputTable& insert_statements_tabl
             std::string const& field = row[index];
 
             int value_id;
-            if (auto location = value_dictionary_.find(field);
-                location == value_dictionary_.end()) {
+            int record_value_id;
+            if (auto location = value_dictionary_[index].find(field);
+                location == value_dictionary_[index].end()) {
                 value_id = next_value_id_++;
-                value_dictionary_[field] = value_id;
+                value_dictionary_[index][field] = -static_cast<int>(compressed_records_.size());
+
+                compressed_records_.back()[index] = -value_id - 1;
             } else {
                 value_id = location->second;
-            }
 
-            compressed_records_.back()[index] = value_id;
+                if (value_id < 0) {
+                    int column_ind = -value_id - 1;
+                    value_id = -compressed_records_[column_ind][index] - 1;
+                    location->second = value_id;
+                    compressed_records_[column_ind][index] = value_id;
+                }
+
+                compressed_records_.back()[index] = value_id;
+            }
 
             size_t const new_record_id =
                     column_data_[index].GetPositionListIndex()->Insert(value_id);
@@ -195,16 +214,30 @@ void DynamicRelationData::InsertRecordsFromUpdateBatch(
             continue;
         }
 
+        compressed_records_.emplace_back(row.size());
+
         for (size_t index = 0; index < GetNumColumns(); ++index) {
             std::string const& field = row[index + 1];
 
             int value_id;
-            if (auto location = value_dictionary_.find(field);
-                location == value_dictionary_.end()) {
+            int record_value_id;
+            if (auto location = value_dictionary_[index].find(field);
+                location == value_dictionary_[index].end()) {
                 value_id = next_value_id_++;
-                value_dictionary_[field] = value_id;
+                value_dictionary_[index][field] = -static_cast<int>(compressed_records_.size());
+
+                compressed_records_.back()[index] = -value_id - 1;
             } else {
                 value_id = location->second;
+
+                if (value_id < 0) {
+                    int column_ind = -value_id - 1;
+                    value_id = -compressed_records_[column_ind][index] - 1;
+                    location->second = value_id;
+                    compressed_records_[column_ind][index] = value_id;
+                }
+
+                compressed_records_.back()[index] = value_id;
             }
 
             size_t const new_record_id =
