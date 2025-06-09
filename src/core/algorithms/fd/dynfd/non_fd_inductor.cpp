@@ -14,7 +14,7 @@ void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
         : fd.lhs_.find_next(next_lhs_attr);
     for (; removed_lhs_attr != boost::dynamic_bitset<>::npos;
          removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
-        boost::dynamic_bitset<> new_lhs = fd.lhs_;
+        auto new_lhs = fd.lhs_;
         new_lhs.reset(removed_lhs_attr);
         RawFD newFd{new_lhs, fd.rhs_};
 
@@ -29,8 +29,7 @@ void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
 }
 
 void NonFDInductor::DeduceNonFds(RawFD fd) {
-    auto valid_lhs = negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_);
-    for (const auto &non_fd_lhs : valid_lhs) {
+    for (auto const& non_fd_lhs : negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_)) {
         negative_cover_tree_->Remove(non_fd_lhs, fd.rhs_);
 
         for (size_t removed_lhs_attribute = fd.lhs_.find_first();
