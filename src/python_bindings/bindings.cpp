@@ -25,6 +25,7 @@
 #include "nar/bind_nar.h"
 #include "nd/bind_nd.h"
 #include "nd/bind_nd_verification.h"
+#include "near/bind_near.h"
 #include "od/bind_od.h"
 #include "pfd/bind_pfd_verification.h"
 #include "sfd/bind_sfd.h"
@@ -59,6 +60,7 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindFdVerification,
                            BindMfdVerification,
                            BindNar,
+                           BindNear,
                            BindUccVerification,
                            BindStatistics,
                            BindInd,
