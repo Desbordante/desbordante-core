@@ -34,14 +34,16 @@ private:
     double min_occurences_;
     std::shared_ptr<model::TransactionalData> transactional_data_;
 
-    std::optional<Node> MakeNodeFromParents(
-            NodeAdress adress_of_node_to_make) const;
+    // For debug and testing
+    bool save_tree_history_ = false;
+    std::string tree_history_;
+
+    std::optional<Node> MakeNodeFromParents(NodeAdress adress_of_node_to_make) const;
     std::optional<Node* const> GetNode(NodeAdress adress);
     std::optional<Node const* const> GetNode(NodeAdress adress) const;
 
     void AddChildrenToQueue(NodeAdress parent);
-    void ConsiderRule(model::NeARIDs rule, Node& in_node,
-        double parents_best);
+    void ConsiderRule(model::NeARIDs rule, Node& in_node, double parents_best);
     bool ConsPossible(NodeAdress node_addr, OConsequence cons, double best_measure) const;
     bool CheckNode(NodeAdress node);
     void CheckDepth1();
@@ -52,8 +54,12 @@ private:
 public:
     std::vector<model::NeARIDs> GetNeARIDs() const;
 
+    // For debug and testing
+    std::string GetTreeHistory();
+
+    void Explore();
     CandidatePrefixTree(double max_p, unsigned max_rules,
-                        std::shared_ptr<model::TransactionalData> transactional_data);
+                        std::shared_ptr<model::TransactionalData> transactional_data, bool save_tree_history = false);
     ~CandidatePrefixTree() = default;
 };
 

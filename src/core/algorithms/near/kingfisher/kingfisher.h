@@ -19,6 +19,8 @@ private:
 
 public:
     Kingfisher();
+    // For debug and testing, returned possible features are in default order
+    std::string GetTreeHistory();
 };
 
 }  // namespace algos

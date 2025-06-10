@@ -90,15 +90,15 @@ bool CandidatePrefixTree::ConsPossible(NodeAdress node_addr, OConsequence cons,
     if (!node_addr.Contains(cons.feature) &&
         GetItemsetFrequency(node_addr.ToFeatures(feature_frequency_order_),
                             transactional_data_.get()) < min_occurences_) {
-                                std::cout << "min_occurences used" << std::endl;
+        std::cout << "min_occurences used" << std::endl;
         return false;
     }
     model::NeARIDs corresponding_near{node_addr.GetExceptFeat(cons.feature), cons,
                                       feature_frequency_order_};
     if (node_addr.Contains(cons.feature) &&
         GetRuleFrequency(corresponding_near, transactional_data_.get()) < min_occurences_) {
-            std::cout << "min_occurences used" << std::endl;
-            return false;
+        std::cout << "min_occurences used" << std::endl;
+        return false;
     }
     double lower_bound;
 
@@ -113,7 +113,7 @@ bool CandidatePrefixTree::ConsPossible(NodeAdress node_addr, OConsequence cons,
         } else {
             lower_bound = GetLowerBound1(feature_frequency_order_[cons.feature],
                                          transactional_data_.get());
-                                         kind_of_bound = 1;
+            kind_of_bound = 1;
         }
     } else {
         lower_bound = GetLowerBound3(corresponding_near, transactional_data_.get());
@@ -292,10 +292,24 @@ void CandidatePrefixTree::FinalizeTopK() {
               [](auto const& A, auto const& B) { return A.p_value < B.p_value; });
 }
 
+std::string CandidatePrefixTree::GetTreeHistory() {
+    return tree_history_;
+}
+
+void CandidatePrefixTree::Explore() {
+    CheckDepth1();
+    PerformBFS();
+    FinalizeTopK();
+}
+
 CandidatePrefixTree::CandidatePrefixTree(
         double max_p, unsigned max_rules,
-        std::shared_ptr<model::TransactionalData> transactional_data)
-    : max_p_(max_p), max_rules_(max_rules), transactional_data_(transactional_data) {
+        std::shared_ptr<model::TransactionalData> transactional_data,
+        bool save_tree_history)
+    : max_p_(max_p),
+      max_rules_(max_rules),
+      transactional_data_(transactional_data),
+      save_tree_history_(save_tree_history) {
     min_occurences_ = GetMinOccurences(max_p_, transactional_data_.get());
     feature_frequency_order_ = GetFeatureFrequencyOrder(min_occurences_, transactional_data_.get());
     ofeat_count_ = feature_frequency_order_.size();
@@ -303,9 +317,6 @@ CandidatePrefixTree::CandidatePrefixTree(
         auto node = Node(ofeat_count_, OFeatureIndex(feat));
         root_.AddChild(OFeatureIndex(feat), std::make_shared<Node>(std::move(node)));
     }
-    CheckDepth1();
-    PerformBFS();
-    FinalizeTopK();
 }
 
 }  // namespace kingfisher

@@ -33,8 +33,15 @@ void Kingfisher::MakeExecuteOptsAvailable() {
 
 unsigned long long Kingfisher::ExecuteInternal() {
     auto tree = kingfisher::CandidatePrefixTree{max_p_, max_rules_, transactional_data_};
+    tree.Explore();
     near_collection_ = tree.GetNeARIDs();
     return 0;
+}
+
+std::string Kingfisher::GetTreeHistory() {
+    auto tree = kingfisher::CandidatePrefixTree{max_p_, max_rules_, transactional_data_};
+    tree.Explore();
+    return tree.GetTreeHistory();
 }
 
 }  // namespace algos
