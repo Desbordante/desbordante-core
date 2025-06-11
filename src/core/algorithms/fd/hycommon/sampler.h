@@ -8,6 +8,7 @@
 
 #include "all_column_combinations.h"
 #include "config/thread_number/type.h"
+#include "efficiency.h"
 #include "efficiency_threshold.h"
 #include "model/table/position_list_index.h"
 #include "types.h"
@@ -22,7 +23,6 @@ namespace algos::hy {
 
 class Sampler {
 private:
-    class Efficiency;
     double efficiency_threshold_ = kEfficiencyThreshold;
 
     PLIsPtr plis_;

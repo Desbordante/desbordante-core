@@ -15,6 +15,8 @@
 namespace algos::dynfd {
 
 using CompressedRecord = std::vector<int>;
+using CompressedRecords = std::vector<CompressedRecord>;
+using CompressedRecordsPtr = std::shared_ptr<CompressedRecords>;
 
 class DynamicRelationData : public AbstractRelationData<CompressedColumnData> {
     using ValueDictionary = std::vector<std::unordered_map<std::string, int>>;
@@ -23,7 +25,7 @@ class DynamicRelationData : public AbstractRelationData<CompressedColumnData> {
     ValueDictionary value_dictionary_;
     int next_value_id_;
     size_t next_record_id_;
-    std::vector<CompressedRecord> compressed_records_;
+    CompressedRecordsPtr compressed_records_;
 
 private:
     [[nodiscard]] size_t GetNumRows() const final;
@@ -34,7 +36,7 @@ public:
                                  std::unordered_set<size_t> stored_row_ids,
                                  ValueDictionary value_dictionary,
                                  int next_value_id, size_t next_record_id,
-                                 std::vector<CompressedRecord> compressed_records);
+                                 CompressedRecords compressed_records);
 
     size_t GetNextRecordId() const;
 
@@ -52,7 +54,9 @@ public:
 
     bool Empty() const;
 
-    std::vector<CompressedRecord> const& GetCompressedRecords() const;
+    CompressedRecords const& GetCompressedRecords() const;
+
+    CompressedRecordsPtr GetCompressedRecordsPtr() const;
 };
 
 }  // namespace algos::dynfd
