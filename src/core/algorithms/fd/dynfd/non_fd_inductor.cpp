@@ -32,11 +32,11 @@ void NonFDInductor::DeduceNonFds(RawFD fd) {
     for (auto const& non_fd_lhs : negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_)) {
         negative_cover_tree_->Remove(non_fd_lhs, fd.rhs_);
 
-        for (size_t removed_lhs_attribute = fd.lhs_.find_first();
-             removed_lhs_attribute != boost::dynamic_bitset<>::npos;
-             removed_lhs_attribute = fd.lhs_.find_next(removed_lhs_attribute)) {
+        for (size_t removed_lhs_attr = fd.lhs_.find_first();
+             removed_lhs_attr != boost::dynamic_bitset<>::npos;
+             removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
             boost::dynamic_bitset<> new_lhs = fd.lhs_;
-            new_lhs.reset(removed_lhs_attribute);
+            new_lhs.reset(removed_lhs_attr);
 
             if (!negative_cover_tree_->ContainsNonFdOrSpecial(new_lhs, fd.rhs_)) {
                 negative_cover_tree_->AddNonFD(new_lhs, fd.rhs_, std::nullopt);

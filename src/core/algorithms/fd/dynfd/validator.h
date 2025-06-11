@@ -15,7 +15,7 @@ class Validator : public std::enable_shared_from_this<Validator> {
     std::shared_ptr<model::FDTree> positive_cover_tree_;
     std::shared_ptr<NonFDTree> negative_cover_tree_;
     std::shared_ptr<DynamicRelationData> relation_;
-    boost::asio::thread_pool pool_;
+    std::unique_ptr<boost::asio::thread_pool> pool_;
 
     [[nodiscard]] ViolatingRecordPair FindEmptyLhsViolation(size_t rhs) const;
 
@@ -66,7 +66,8 @@ public:
               std::shared_ptr<DynamicRelationData> relation) noexcept
         : positive_cover_tree_(std::move(positive_cover_tree)),
           negative_cover_tree_(std::move(negative_cover_tree)),
-          relation_(std::move(relation)) {
+          relation_(std::move(relation)),
+          pool_(std::make_unique<boost::asio::thread_pool>()) {
     }
 
     void ValidateFds(size_t first_insert_batch_id);

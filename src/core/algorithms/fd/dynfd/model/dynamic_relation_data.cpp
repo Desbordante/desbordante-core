@@ -19,13 +19,13 @@ DynamicRelationData::DynamicRelationData(std::unique_ptr<RelationalSchema> schem
                                          std::unordered_set<size_t> stored_row_ids,
                                          ValueDictionary value_dictionary,
                                          int next_value_id, size_t next_record_id,
-                                         std::vector<CompressedRecord> compressed_records)
+                                         CompressedRecords compressed_records)
     : AbstractRelationData(std::move(schema), std::move(column_data)),
       stored_row_ids_(std::move(stored_row_ids)),
       value_dictionary_(std::move(value_dictionary)),
       next_value_id_(next_value_id),
       next_record_id_(next_record_id),
-      compressed_records_(std::move(compressed_records)) {}
+      compressed_records_(std::make_shared<CompressedRecords>(std::move(compressed_records))) {}
 
 size_t DynamicRelationData::GetNextRecordId() const {
     return next_record_id_;
@@ -117,30 +117,29 @@ void DynamicRelationData::InsertBatch(config::InputTable& insert_statements_tabl
             continue;
         }
 
-        compressed_records_.emplace_back(row.size());
+        compressed_records_->emplace_back(row.size());
 
         for (size_t index = 0; index < row.size(); ++index) {
             std::string const& field = row[index];
 
             int value_id;
-            int record_value_id;
             if (auto location = value_dictionary_[index].find(field);
                 location == value_dictionary_[index].end()) {
                 value_id = next_value_id_++;
-                value_dictionary_[index][field] = -static_cast<int>(compressed_records_.size());
+                value_dictionary_[index][field] = -static_cast<int>(compressed_records_->size());
 
-                compressed_records_.back()[index] = -value_id - 1;
+                compressed_records_->back()[index] = -value_id - 1;
             } else {
                 value_id = location->second;
 
                 if (value_id < 0) {
                     int column_ind = -value_id - 1;
-                    value_id = -compressed_records_[column_ind][index] - 1;
+                    value_id = -(*compressed_records_)[column_ind][index] - 1;
                     location->second = value_id;
-                    compressed_records_[column_ind][index] = value_id;
+                    (*compressed_records_)[column_ind][index] = value_id;
                 }
 
-                compressed_records_.back()[index] = value_id;
+                compressed_records_->back()[index] = value_id;
             }
 
             size_t const new_record_id =
@@ -214,30 +213,29 @@ void DynamicRelationData::InsertRecordsFromUpdateBatch(
             continue;
         }
 
-        compressed_records_.emplace_back(row.size());
+        compressed_records_->emplace_back(row.size());
 
         for (size_t index = 0; index < GetNumColumns(); ++index) {
             std::string const& field = row[index + 1];
 
             int value_id;
-            int record_value_id;
             if (auto location = value_dictionary_[index].find(field);
                 location == value_dictionary_[index].end()) {
                 value_id = next_value_id_++;
-                value_dictionary_[index][field] = -static_cast<int>(compressed_records_.size());
+                value_dictionary_[index][field] = -static_cast<int>(compressed_records_->size());
 
-                compressed_records_.back()[index] = -value_id - 1;
+                compressed_records_->back()[index] = -value_id - 1;
             } else {
                 value_id = location->second;
 
                 if (value_id < 0) {
                     int column_ind = -value_id - 1;
-                    value_id = -compressed_records_[column_ind][index] - 1;
+                    value_id = -(*compressed_records_)[column_ind][index] - 1;
                     location->second = value_id;
-                    compressed_records_[column_ind][index] = value_id;
+                    (*compressed_records_)[column_ind][index] = value_id;
                 }
 
-                compressed_records_.back()[index] = value_id;
+                compressed_records_->back()[index] = value_id;
             }
 
             size_t const new_record_id =
@@ -258,7 +256,11 @@ bool DynamicRelationData::Empty() const {
     return stored_row_ids_.empty();
 }
 
-std::vector<CompressedRecord> const& DynamicRelationData::GetCompressedRecords() const {
+CompressedRecords const& DynamicRelationData::GetCompressedRecords() const {
+    return *compressed_records_;
+}
+
+CompressedRecordsPtr DynamicRelationData::GetCompressedRecordsPtr() const {
     return compressed_records_;
 }
 

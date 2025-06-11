@@ -11,7 +11,9 @@
 
 #include "fd/hycommon/preprocessor.h"
 #include "non_fd_inductor.h"
+#include "fd_inductor.h"
 #include "model/cluster_ids_array.h"
+#include "sampler.h"
 
 namespace algos::dynfd {
 
@@ -137,7 +139,7 @@ std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_f
             }
         );
         futures.push_back(task.get_future());
-        boost::asio::post(pool_, std::move(task));
+        boost::asio::post(*pool_, std::move(task));
     }
 
     boost::wait_for_all(futures.begin(), futures.end());
@@ -173,7 +175,7 @@ std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDT
             }
         );
         futures.push_back(task.get_future());
-        boost::asio::post(pool_, std::move(task));
+        boost::asio::post(*pool_, std::move(task));
     }
 
     boost::wait_for_all(futures.begin(), futures.end());
@@ -269,6 +271,9 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
 }
 
 void Validator::ValidateFds(size_t first_insert_batch_id) {
+    Sampler sampler(relation_, first_insert_batch_id, nullptr);
+    FDInductor inductor(positive_cover_tree_, negative_cover_tree_);
+
     for (size_t level = 0; level <= relation_->GetNumColumns(); ++level) {
         auto level_fds = positive_cover_tree_->GetLevel(level);
         std::vector<NonFd> invalid_fds = ValidateParallel(level_fds, first_insert_batch_id);
@@ -296,7 +301,7 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
 
         if (static_cast<double>(invalid_fds.size()) > 0.1 * static_cast<double>(level_fds.size())) {
             std::cout << "PVS" << std::endl;
-            // TODO: progressive violation search
+            inductor.UpdateCovers(sampler.GetAgreeSets({}));
         }
     }
 }
