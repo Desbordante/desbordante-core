@@ -9,7 +9,7 @@
 #include "stats/get_fishers_p.h"
 #include "stats/get_frequency.h"
 #include "stats/get_lower_bounds.h"
-#include "util/print_ascii_tree.h"
+#include "util/tree_to_string.h"
 #include "util/vector_to_string.h"
 
 namespace kingfisher {
@@ -222,6 +222,11 @@ bool CandidatePrefixTree::CheckNode(NodeAdress node_addr) {
             }
         }
     }
+
+    if (node.Pruned()) {
+        return false;
+    }
+    
     // Node wasn't pruned: add it to tree
     auto node_ptr = std::make_shared<Node>(std::move(node));
     parent_ptr->AddChild(adds_feature, node_ptr);
@@ -229,12 +234,19 @@ bool CandidatePrefixTree::CheckNode(NodeAdress node_addr) {
 }
 
 void CandidatePrefixTree::CheckDepth1() {
+    for (size_t feat = 0; feat < ofeat_count_; ++feat) {
+        auto node = Node(ofeat_count_, OFeatureIndex(feat));
+        root_.AddChild(OFeatureIndex(feat), std::make_shared<Node>(std::move(node)));
+    }
+
     for (auto& [node_feat, node_ptr] : root_.children) {
         for (OFeatureIndex i = 0; i < ofeat_count_; i++) {
             node_ptr->p_possible[i] = ConsPossible({node_feat}, {i, true}, node_ptr->p_best[i]);
             node_ptr->n_possible[i] = ConsPossible({node_feat}, {i, false}, node_ptr->n_best[i]);
         }
     }
+
+    SaveTreeToHistory();
 }
 
 // Called Lapis Philosophorum in the paper
@@ -254,7 +266,6 @@ void CandidatePrefixTree::PerformBFS() {
     for (auto& [depth1_node_feat, depth1_node_ptr] : root_.children) {
         NodeAdress depth1_node_addr{depth1_node_feat};
         AddChildrenToQueue(std::move(depth1_node_addr));  // Initialize queue with depth 2 nodes
-        deletion_queue_.emplace(std::move(depth1_node_addr));
     }
     unsigned current_depth_ = 2;
     while (bfs_queue_.size() != 0) {
@@ -275,9 +286,8 @@ void CandidatePrefixTree::PerformBFS() {
         }
         AddChildrenToQueue(bfs_queue_.front());
         std::cout << "\n_____checked " + bfs_queue_.front().ToString() + "________\n";
-        deletion_queue_.emplace(std::move(bfs_queue_.front()));
         bfs_queue_.pop();
-        PrintAsciiTree(root_, ofeat_count_);  // DEBUG
+        SaveTreeToHistory();
     }
 }
 
@@ -292,7 +302,15 @@ void CandidatePrefixTree::FinalizeTopK() {
               [](auto const& A, auto const& B) { return A.p_value < B.p_value; });
 }
 
-std::string CandidatePrefixTree::GetTreeHistory() {
+void CandidatePrefixTree::SaveTreeToHistory() {
+    if (!save_tree_history_) {
+        return;
+    }
+    std::string tree_str = TreeToString(root_, ofeat_count_);
+    tree_history_.push_back(tree_str);
+}
+
+std::vector<std::string> CandidatePrefixTree::GetTreeHistory() {
     return tree_history_;
 }
 
@@ -313,10 +331,6 @@ CandidatePrefixTree::CandidatePrefixTree(
     min_occurences_ = GetMinOccurences(max_p_, transactional_data_.get());
     feature_frequency_order_ = GetFeatureFrequencyOrder(min_occurences_, transactional_data_.get());
     ofeat_count_ = feature_frequency_order_.size();
-    for (size_t feat = 0; feat < ofeat_count_; ++feat) {
-        auto node = Node(ofeat_count_, OFeatureIndex(feat));
-        root_.AddChild(OFeatureIndex(feat), std::make_shared<Node>(std::move(node)));
-    }
 }
 
 }  // namespace kingfisher

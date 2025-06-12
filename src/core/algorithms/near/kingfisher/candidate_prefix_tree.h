@@ -18,7 +18,6 @@ private:
     size_t ofeat_count_;
     std::vector<OFeatureIndex> feature_frequency_order_;
     std::queue<NodeAdress> bfs_queue_;
-    std::queue<NodeAdress> deletion_queue_;
     std::vector<model::NeARIDs> k_best_;
 
     struct MinCmp {
@@ -36,7 +35,7 @@ private:
 
     // For debug and testing
     bool save_tree_history_ = false;
-    std::string tree_history_;
+    std::vector<std::string> tree_history_;
 
     std::optional<Node> MakeNodeFromParents(NodeAdress adress_of_node_to_make) const;
     std::optional<Node* const> GetNode(NodeAdress adress);
@@ -51,11 +50,13 @@ private:
     void PerformBFS();
     void FinalizeTopK();
 
+    // For debug and testing
+    void SaveTreeToHistory();
 public:
     std::vector<model::NeARIDs> GetNeARIDs() const;
 
     // For debug and testing
-    std::string GetTreeHistory();
+    std::vector<std::string> GetTreeHistory();
 
     void Explore();
     CandidatePrefixTree(double max_p, unsigned max_rules,

@@ -38,8 +38,8 @@ unsigned long long Kingfisher::ExecuteInternal() {
     return 0;
 }
 
-std::string Kingfisher::GetTreeHistory() {
-    auto tree = kingfisher::CandidatePrefixTree{max_p_, max_rules_, transactional_data_};
+std::vector<std::string> Kingfisher::GetTreeHistory() {
+    auto tree = kingfisher::CandidatePrefixTree{max_p_, max_rules_, transactional_data_, true};
     tree.Explore();
     return tree.GetTreeHistory();
 }

@@ -1,3 +1,8 @@
+#include <regex>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -8,10 +13,10 @@
 #include "csv_config_util.h"
 
 namespace tests {
+
 template <typename T>
 std::string VectorToString(std::vector<T> const& vec) {
     std::ostringstream oss;
-    oss << "\n";
     for (size_t i = 0; i < vec.size(); ++i) {
         oss << vec[i].ToString();  // Convert FeatureIndex to string
         if (i < vec.size() - 1) {
@@ -19,6 +24,43 @@ std::string VectorToString(std::vector<T> const& vec) {
         }
     }
     return oss.str();
+}
+
+std::vector<std::string> ReorderTreeHistory(std::vector<FeatureIndex> const& feature_order,
+                                            std::vector<std::string> const& tree_history) {
+    std::vector<std::string> result;
+
+    // Regular expression to match [p:xxxx n:xxxx]
+    std::regex node_pattern(R"(\[p:([01]{4}) n:([01]{4})\])");
+
+    for (std::string const& line : tree_history) {
+        std::string updated_line = line;
+        std::sregex_iterator begin(updated_line.begin(), updated_line.end(), node_pattern);
+        std::sregex_iterator end;
+
+        // Offset to keep track of insertion point as string length may change
+        size_t offset = 0;
+
+        for (std::sregex_iterator i = begin; i != end; ++i) {
+            std::smatch match = *i;
+            std::string p = match[1];
+            std::string n = match[2];
+
+            std::string new_p, new_n;
+            for (int idx : feature_order) {
+                new_p += p[idx];
+                new_n += n[idx];
+            }
+
+            std::string new_node = "[p:" + new_p + " n:" + new_n + "]";
+            updated_line.replace(match.position(0) + offset, match.length(0), new_node);
+            offset += new_node.size() - match.length(0);
+        }
+
+        result.push_back(updated_line);
+    }
+
+    return result;
 }
 
 class NeARAlgorithmTest : public ::testing::Test {
@@ -46,101 +88,142 @@ protected:
     }
 
     template <typename... Args>
-    static std::unique_ptr<algos::NeARDiscovery> CreateAlgorithmInstance(Args&&... args) {
+    static std::unique_ptr<algos::Kingfisher> CreateAlgorithmInstance(Args&&... args) {
         return algos::CreateAndLoadAlgorithm<algos::Kingfisher>(
                 GetParamMap(std::forward<Args>(args)...));
     }
 
-    void TryKingfisherWithDataset(CSVConfig csv_config, double max_p, unsigned max_rules) {
-        auto start = std::chrono::high_resolution_clock::now();
-        
+    void CompareResults(CSVConfig csv_config, double max_p, unsigned max_rules) {
         auto algorithm = CreateAlgorithmInstance(csv_config, max_p, max_rules, false);
         algorithm->Execute();
-        auto const rules = algorithm->GetNeARIDsVector();
-        SUCCEED();
-        
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = end - start;
-        
-        // Create unique filename based on test name
-        const testing::TestInfo* const test_info = testing::UnitTest::GetInstance()->current_test_info();
-        std::string output_filename = std::string("results/") + test_info->name() + "_output.txt";
-        std::string time_filename = "results/runtimes.csv";
-        
-        // Save rules to file
-        std::ofstream outfile(output_filename);
-        outfile << "Rules:\n" << VectorToString(rules);
-        outfile << "\n\nRuntime: " << elapsed.count() << " seconds";
-        outfile.close();
-        
-        // Append runtime to CSV file
-        std::ofstream timefile(time_filename, std::ios_base::app);
-        timefile << test_info->name() << "," << std::setprecision(6) << elapsed.count() << "\n";
-        timefile.close();
-        
-        std::cout << "Test " << test_info->name() << " completed in " << elapsed.count() << " seconds\n";
+        auto rules = algorithm->GetNeARIDsVector();
+        std::string rules_string = VectorToString(rules);
+        // These are the results from the paper the algorithm is based on
+        std::string expected_rules_string =
+                "3.947e-18  {3, 0} -> not 1\n"
+                "5.777e-14  {3} -> not 2\n"
+                "5.777e-14  {1, 0} -> 2\n"
+                "5.777e-14  {1, 0} -> not 3\n"
+                "1.735e-10  {1} -> 2\n"
+                "1.735e-10  {3} -> not 1\n"
+                "1.735e-10  {1} -> not 3\n"
+                "1.735e-10  {2} -> 1";
+        ASSERT_EQ(rules_string, expected_rules_string);
     }
 
-    std::string GetTimestamp() {
-        std::time_t now = std::time(nullptr);
-        char buf[20];
-        std::strftime(buf, sizeof(buf), "%Y%m%d_%H%M%S", std::localtime(&now));
-        return std::string(buf);
+    void CompareTreeHistory(CSVConfig csv_config, double max_p, unsigned max_rules) {
+        auto algorithm = CreateAlgorithmInstance(csv_config, max_p, max_rules, false);
+        std::vector<std::string> tree_history = algorithm->GetTreeHistory();
+        // Expected tree history from the paper the algorithm is based on
+        auto expected_tree_history = std::vector<std::string>();
+        // step 1
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0110 n:0011]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0111 n:0111]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 3
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0011]\n"
+                "│   └── [1] Node [p:0010 n:0000]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0111 n:0111]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 4
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0010]\n"
+                "│   └── [1] Node [p:0010 n:0000]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0101 n:0101]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 5
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0010]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0101 n:0101]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 6
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0010]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   ├── [2] Node [p:0000 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "|   └── [2] Node [p:0000 n:0101]\n"
+                "├── [2] Node [p:0001 n:0101]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+
+        // step between 6 and 7
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0010]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   ├── [2] Node [p:0000 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "|   ├── [2] Node [p:0000 n:0101]\n"
+                "|   └── [3] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0001 n:0101]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 7
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p:0010 n:0010]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   ├── [2] Node [p:0000 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p:0110 n:0101]\n"
+                "|   ├── [2] Node [p:0000 n:0101]\n"
+                "|   └── [3] Node [p:0110 n:0101]\n"
+                "├── [2] Node [p:0001 n:0101]\n"
+                "|   └── [3] Node [p:0001 n:0101]\n"
+                "└── [3] Node [p:0111 n:0111]\n");
+        // step 8
+        expected_tree_history.push_back(
+                "Node [p: n:]"
+                "├── [0] Node [p: n:]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   ├── [2] Node [p:0000 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p: n:]\n"
+                "|   ├── [2] Node [p:0000 n:0101]\n"
+                "|   └── [3] Node [p:0100 n:0101]\n"
+                "├── [2] Node [p: n:]\n"
+                "|   └── [3] Node [p:0001 n:0101]\n"
+                "└── [3] Node [p: n:]\n");
+        // step 9
+        expected_tree_history.push_back(
+                "Node [p: n:]\n"
+                "├── [0] Node [p: n:]\n"
+                "│   ├── [1] Node [p:0010 n:0000]\n"
+                "│   ├── [2] Node [p:0000 n:0000]\n"
+                "│   └── [3] Node [p:0010 n:0010]\n"
+                "├── [1] Node [p: n:]\n"
+                "|   ├── [2] Node [p:0000 n:0101]\n"
+                "|   └── [3] Node [p:0100 n:0100]\n"
+                "├── [2] Node [p: n:]\n"
+                "|   └── [3] Node [p:0001 n:0001]\n"
+                "└── [3] Node [p: n:]\n");
+        std::vector<FeatureIndex> feature_frequency_order_{2, 1, 3, 0};
+        std::vector<std::string> expected_ordered_tree_history =
+                ReorderTreeHistory(feature_frequency_order_, expected_tree_history);
+        ASSERT_EQ(tree_history, expected_ordered_tree_history);
     }
 };
 
-//TEST_F(NeARAlgorithmTest, PaperExampleDataset) {
-//    TryKingfisherWithDataset(kTestNeAR1, 1.2e-8, 1000);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARChess) {
-//    TryKingfisherWithDataset(kTestNeARChess, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARkosarak) {
-//    TryKingfisherWithDataset(kTestNeARkosarak, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARretail) {
-//    TryKingfisherWithDataset(kTestNeARretail, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARaccidents) {
-//    TryKingfisherWithDataset(kTestNeARaccidents, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARMushroom) {
-//    TryKingfisherWithDataset(kTestNeARMushroom, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeART10I4D100K) {
-//    TryKingfisherWithDataset(kTestNeART10I4D100K, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARpumsb) {
-//    TryKingfisherWithDataset(kTestNeARpumsb, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeART40I10D100K) {
-//    TryKingfisherWithDataset(kTestNeART40I10D100K, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARconnect) {
-//    TryKingfisherWithDataset(kTestNeARconnect, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARpumsb_star) {
-//    TryKingfisherWithDataset(kTestNeARpumsb_star, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, KTestNeARKaggleRows) {
-//    TryKingfisherWithDataset(kRulesKaggleRows, 1.0, 100);
-//}
-//TEST_F(NeARAlgorithmTest, kTestNeARRealMarketData1) {
-//    TryKingfisherWithDataset(kTestNeARMarketItems, 1.0, 100);
-//}
-TEST_F(NeARAlgorithmTest, kMushroom50) {
-    TryKingfisherWithDataset(kMushroom50, 1.0, 100);
+TEST_F(NeARAlgorithmTest, PaperExampleResultComparison) {
+    CompareResults(kTestNeAR1, 1.2e-8, 1000);
 }
-TEST_F(NeARAlgorithmTest, kMushroom40) {
-    TryKingfisherWithDataset(kMushroom40, 1.0, 100);
+
+TEST_F(NeARAlgorithmTest, PaperExampleTreeComparison) {
+    CompareTreeHistory(kTestNeAR1, 1.2e-8, 1000);
 }
-TEST_F(NeARAlgorithmTest, kMushroom30) {
-    TryKingfisherWithDataset(kMushroom30, 1.0, 100);
-}
-TEST_F(NeARAlgorithmTest, kMushroom20) {
-    TryKingfisherWithDataset(kMushroom20, 1.0, 100);
-}
-TEST_F(NeARAlgorithmTest, kMushroom10) {
-    TryKingfisherWithDataset(kMushroom10, 1.0, 100);
-}
+
 }  // namespace tests
