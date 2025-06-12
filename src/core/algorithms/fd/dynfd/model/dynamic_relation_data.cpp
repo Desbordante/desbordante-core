@@ -143,7 +143,7 @@ void DynamicRelationData::InsertBatch(config::InputTable& insert_statements_tabl
             }
 
             size_t const new_record_id =
-                    column_data_[index].GetPositionListIndex()->Insert(value_id);
+                    column_data_[index].GetPositionListIndexPtr()->Insert(value_id);
             assert(new_record_id == next_record_id_);
         }
 
@@ -161,7 +161,7 @@ void DynamicRelationData::DeleteBatch(std::unordered_set<size_t> const& delete_s
         }
 
         for (size_t i = 0; i < GetNumColumns(); ++i) {
-            column_data_[i].GetPositionListIndex()->Erase(row_id);
+            column_data_[i].GetPositionListIndexPtr()->Erase(row_id);
         }
         stored_row_ids_.erase(row_id);
     }
@@ -190,7 +190,7 @@ void DynamicRelationData::DeleteRecordsFromUpdateBatch(
         }
 
         for (size_t i = 0; i < GetNumColumns(); ++i) {
-            column_data_[i].GetPositionListIndex()->Erase(row_id);
+            column_data_[i].GetPositionListIndexPtr()->Erase(row_id);
         }
     }
 
@@ -239,7 +239,7 @@ void DynamicRelationData::InsertRecordsFromUpdateBatch(
             }
 
             size_t const new_record_id =
-                    column_data_[index].GetPositionListIndex()->Insert(value_id);
+                    column_data_[index].GetPositionListIndexPtr()->Insert(value_id);
             assert(new_record_id == next_record_id_);
         }
         stored_row_ids_.insert(next_record_id_++);

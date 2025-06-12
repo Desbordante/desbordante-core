@@ -11,7 +11,7 @@ class NonFDInductor {
     std::shared_ptr<NonFDTree> negative_cover_tree_;
     std::shared_ptr<Validator> validator_;
 
-    void Dfs(RawFD fd, int next_lhs_attr = -1);
+    void Dfs(RawFD fd, int next_lhs_attr);
 
     void DeduceNonFds(RawFD fd);
 

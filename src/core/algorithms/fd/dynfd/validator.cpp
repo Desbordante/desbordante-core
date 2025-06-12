@@ -18,12 +18,12 @@
 namespace algos::dynfd {
 
 ViolatingRecordPair Validator::FindEmptyLhsViolation(size_t const rhs) const {
-    auto const rhs_pli = relation_->GetColumnData(rhs).GetPositionListIndex();
-    if (rhs_pli->GetClustersNum() <= 1) {
+    auto const& rhs_pli = relation_->GetColumnData(rhs).GetPositionListIndex();
+    if (rhs_pli.GetClustersNum() <= 1) {
         return std::nullopt;
     }
 
-    return {{rhs_pli->GetCluster(0).Back(), rhs_pli->GetCluster(1).Back()}};
+    return {{rhs_pli.GetCluster(0).Back(), rhs_pli.GetCluster(1).Back()}};
 }
 
 std::vector<std::shared_ptr<DPLI>> Validator::GetSortedPlisForLhs(
@@ -32,7 +32,7 @@ std::vector<std::shared_ptr<DPLI>> Validator::GetSortedPlisForLhs(
     sorted_plis.reserve(lhs.count());
     for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
          bit = lhs.find_next(bit)) {
-        sorted_plis.push_back(relation_->GetColumnData(bit).GetPositionListIndex());
+        sorted_plis.push_back(relation_->GetColumnData(bit).GetPositionListIndexPtr());
     }
 
     std::ranges::sort(sorted_plis, [](auto const& lhs, auto const& rhs) {
@@ -48,7 +48,7 @@ std::shared_ptr<DPLI> Validator::GetFirstPliForLhs(
 
     for (auto lhs_attr = lhs.find_first(); lhs_attr != boost::dynamic_bitset<>::npos;
          lhs_attr = lhs.find_next(lhs_attr)) {
-        auto pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
+        auto pli = relation_->GetColumnData(lhs_attr).GetPositionListIndexPtr();
         if (max_clusters_pli.get() == nullptr || max_clusters_pli->GetClustersNum() < pli->GetClustersNum()) {
             max_clusters_pli = pli;
         }
@@ -85,7 +85,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
                                             boost::dynamic_bitset<> rhss,
                                             OnValidateResult const& on_invalid,
                                             size_t first_insert_batch_id) {
-    if (rhss.size() == 0) {
+    if (rhss.none()) {
         return rhss;
     }
 
@@ -106,10 +106,10 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
 
     if (lhs_count == 1) {
         auto const lhs_attr = lhs.find_first();
-        auto const pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
+        auto const& pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
-            if (!Refines(*pli, rhs, on_invalid, first_insert_batch_id)) {
+            if (!Refines(pli, rhs, on_invalid, first_insert_batch_id)) {
                 rhss.reset(rhs);
             }
         }
@@ -191,6 +191,9 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli,
     for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
         auto const rhs_value = compressed_records[*cluster.begin()][rhs_attr];
         if (rhs_value < 0) {
+            if (on_invalid) {
+                (*on_invalid)(rhs_attr, std::nullopt);
+            }
             return false;
         }
 
@@ -213,8 +216,8 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
                                            boost::dynamic_bitset<> rhss,
                                            OnValidateResult const& on_invalid,
                                            size_t first_insert_batch_id) const {
-    auto const lhs_size = lhs.size();
-    auto const rhs_size = rhss.size();
+    auto const lhs_size = lhs.count();
+    auto const rhs_size = rhss.count();
 
     auto const& compressed_records = relation_->GetCompressedRecords();
 
@@ -225,6 +228,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
          rhs = rhss.find_next(rhs)) {
         rhs_attr_id_to_ind[rhs] = index;
         rhs_attr_ind_to_id[index] = rhs;
+        index++;
     }
 
     for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
@@ -248,7 +252,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
                             (*on_invalid)(rhs, std::pair{record_id, rhs_clusters.getRecordId()});
                         }
                         rhss.reset(rhs);
-                        if (rhss.empty()) {
+                        if (rhss.none()) {
                             return rhss;
                         }
                     }
@@ -271,7 +275,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
 }
 
 void Validator::ValidateFds(size_t first_insert_batch_id) {
-    Sampler sampler(relation_, first_insert_batch_id, nullptr);
+    Sampler sampler(relation_, first_insert_batch_id, pool_.get());
     FDInductor inductor(positive_cover_tree_, negative_cover_tree_);
 
     for (size_t level = 0; level <= relation_->GetNumColumns(); ++level) {
@@ -332,7 +336,7 @@ void Validator::ValidateNonFds() {
         if (static_cast<double>(valid_fds.size()) >
             0.1 * static_cast<double>(level_non_fds.size())) {
             std::cout << "DFS" << std::endl;
-            // fdFinder.FindFds(valid_fds);
+            fdFinder.FindFds(valid_fds);
         }
     }
 }

@@ -27,8 +27,10 @@ public:
           comparison_column_1_(comparison_column_1),
           comparison_column_2_(comparison_column_2) {
         assert(sort_keys_->front().size() >= 3);
-        if (relation.GetColumnData(comparison_column_1).GetPositionListIndex()->GetClustersNum()
-            < relation.GetColumnData(comparison_column_2_).GetPositionListIndex()->GetClustersNum()) {
+        assert(comparison_column_1_ < relation.GetNumColumns());
+        assert(comparison_column_2_ < relation.GetNumColumns());
+        if (relation.GetColumnData(comparison_column_1_).GetPositionListIndex().GetClustersNum()
+            < relation.GetColumnData(comparison_column_2_).GetPositionListIndex().GetClustersNum()) {
             std::swap(comparison_column_1_, comparison_column_2_);
         }
     }
@@ -125,7 +127,7 @@ void Sampler::RunWindow(algos::hy::Efficiency& efficiency, PLI const& pli) {
 }
 
 void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions) {
-    size_t const num_attributes = plis_.size();
+    size_t const num_attributes = relation_->GetNumColumns();
 
     for (auto [first_id, second_id] : comparison_suggestions) {
         boost::dynamic_bitset<> equal_attrs(num_attributes);
@@ -136,7 +138,7 @@ void Sampler::ProcessComparisonSuggestions(IdPairs const& comparison_suggestions
 }
 
 void Sampler::SortClustersParallel() {
-    ColumnSlider column_slider(plis_.size());
+    ColumnSlider column_slider(relation_->GetNumColumns());
     std::vector<boost::unique_future<void>> sort_futures;
     for (auto& pli : plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
@@ -157,7 +159,7 @@ void Sampler::SortClustersParallel() {
 }
 
 void Sampler::SortClustersSeq() {
-    ColumnSlider column_slider(plis_.size());
+    ColumnSlider column_slider(relation_->GetNumColumns());
     for (auto& pli : plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
@@ -181,7 +183,7 @@ void Sampler::SortClusters() {
 void Sampler::InitializeEfficiencyQueueParallel() {
     using EfficiencyAndMatches = std::pair<algos::hy::Efficiency, std::vector<boost::dynamic_bitset<>>>;
     std::vector<boost::unique_future<EfficiencyAndMatches>> futures;
-    for (size_t attr = 0; attr < plis_.size(); ++attr) {
+    for (size_t attr = 0; attr < relation_->GetNumColumns(); ++attr) {
         auto run_window = [attr, this]() {
             algos::hy::Efficiency efficiency(attr);
             return std::make_pair(efficiency, RunWindowRet(efficiency, plis_[attr]));
@@ -213,7 +215,7 @@ void Sampler::InitializeEfficiencyQueueParallel() {
 }
 
 void Sampler::InitializeEfficiencyQueueSeq() {
-    for (size_t attr = 0; attr < plis_.size(); ++attr) {
+    for (size_t attr = 0; attr < relation_->GetNumColumns(); ++attr) {
         algos::hy::Efficiency efficiency(attr);
         RunWindow(efficiency, plis_[attr]);
 
@@ -232,7 +234,7 @@ void Sampler::InitializeEfficiencyQueueImpl() {
 }
 
 void Sampler::InitializeEfficiencyQueue() {
-    size_t const num_attributes = plis_.size();
+    size_t const num_attributes = relation_->GetNumColumns();
 
     if (num_attributes >= 3) {
         SortClusters();
@@ -247,7 +249,7 @@ algos::hy::ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison
     if (efficiency_queue_.empty()) {
         for (size_t bit = 0; bit < relation_->GetNumColumns(); ++bit) {
             auto clusters_iterator = relation_->GetColumnData(bit)
-                .GetPositionListIndex()->GetClustersToCheck(first_insert_batch_id);
+                .GetPositionListIndex().GetClustersToCheck(first_insert_batch_id);
             plis_.emplace_back(clusters_iterator.begin(), clusters_iterator.end());
         }
 

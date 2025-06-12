@@ -2,17 +2,14 @@
 
 namespace algos::dynfd {
 void NonFDInductor::FindFds(std::vector<RawFD> const& valid_fds) {
-    int sample_size = std::ceil(static_cast<float>(valid_fds.size()) / 10);
-    for (int index = 0; index < sample_size; ++index) {
-        Dfs(valid_fds[index]);
+    for (int index = 0; index < valid_fds.size(); index += 10) {
+        Dfs(valid_fds[index], valid_fds[index].lhs_.find_first());
     }
 }
 
 void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
-    auto removed_lhs_attr = next_lhs_attr == -1
-        ? fd.lhs_.find_first()
-        : fd.lhs_.find_next(next_lhs_attr);
-    for (; removed_lhs_attr != boost::dynamic_bitset<>::npos;
+    for (auto removed_lhs_attr = next_lhs_attr;
+         removed_lhs_attr != boost::dynamic_bitset<>::npos;
          removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
         auto new_lhs = fd.lhs_;
         new_lhs.reset(removed_lhs_attr);
@@ -20,7 +17,7 @@ void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
 
         if (positive_cover_tree_->ContainsFdOrGeneral(new_lhs, fd.rhs_) || 
             validator_->IsNonFdValidated(newFd)) {
-            Dfs(newFd, removed_lhs_attr + 1);
+            Dfs(newFd, newFd.lhs_.find_next(removed_lhs_attr));
             return;
         }
     }
@@ -29,17 +26,18 @@ void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
 }
 
 void NonFDInductor::DeduceNonFds(RawFD fd) {
+    auto rhs = fd.rhs_;
     for (auto const& non_fd_lhs : negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_)) {
-        negative_cover_tree_->Remove(non_fd_lhs, fd.rhs_);
+        negative_cover_tree_->Remove(non_fd_lhs, rhs);
 
         for (size_t removed_lhs_attr = fd.lhs_.find_first();
              removed_lhs_attr != boost::dynamic_bitset<>::npos;
              removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
-            boost::dynamic_bitset<> new_lhs = fd.lhs_;
+            boost::dynamic_bitset<> new_lhs = non_fd_lhs;
             new_lhs.reset(removed_lhs_attr);
 
-            if (!negative_cover_tree_->ContainsNonFdOrSpecial(new_lhs, fd.rhs_)) {
-                negative_cover_tree_->AddNonFD(new_lhs, fd.rhs_, std::nullopt);
+            if (!negative_cover_tree_->ContainsNonFdOrSpecial(new_lhs, rhs)) {
+                negative_cover_tree_->AddNonFD(new_lhs, rhs, std::nullopt);
             }
         }
     }
