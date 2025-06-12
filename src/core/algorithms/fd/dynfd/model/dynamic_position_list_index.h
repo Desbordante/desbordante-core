@@ -69,7 +69,7 @@ public:
 
     unsigned int GetSize() const;
 
-    Cluster const& GetCluster(int cluster_id);
+    Cluster const& GetCluster(int cluster_id) const;
 
     unsigned int GetClustersNum() const;
 

@@ -23,8 +23,12 @@ public:
         return "Data for " + column_->ToString();
     }
 
-    [[nodiscard]] std::shared_ptr<DynamicPositionListIndex> GetPositionListIndex() const {
+    [[nodiscard]] std::shared_ptr<DynamicPositionListIndex> GetPositionListIndexPtr() const {
         return position_list_index_;
+    }
+
+    [[nodiscard]] DynamicPositionListIndex const& GetPositionListIndex() const {
+        return *position_list_index_;
     }
 };
 

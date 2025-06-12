@@ -101,7 +101,7 @@ unsigned int DynamicPositionListIndex::GetSize() const {
     return size_;
 }
 
-DynamicPositionListIndex::Cluster const &DynamicPositionListIndex::GetCluster(int cluster_id) {
+DynamicPositionListIndex::Cluster const &DynamicPositionListIndex::GetCluster(int cluster_id) const {
     auto it = clusters_.begin();
     std::advance(it, cluster_id);
     // ReSharper disable once CppDFALocalValueEscapesFunction
