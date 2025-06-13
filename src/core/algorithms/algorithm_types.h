@@ -13,7 +13,8 @@ using AlgorithmTypes =
                    ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier,
                    Fastod, GfdValidator, EGfdValidator, NaiveGfdValidator, order::Order, dd::Split,
                    Cords, hymd::HyMD, PFDVerifier, cfd_verifier::CFDVerifier,
-                   ar_verifier::ARVerifier, GSpan, sd_verifier::SDVerifier, maxfem::MaxFEM>;
+                   ar_verifier::ARVerifier, GSpan, sd_verifier::SDVerifier, maxfem::MaxFEM,
+                   pattern_fd::PatternFDVerifier>;
 
 /* Enumeration of all supported non-pipeline algorithms. If you implement a new
  * algorithm please add its corresponding value to this enum and to the type
@@ -112,7 +113,10 @@ enum class AlgorithmType : char {
     kSdVerifier,
 
     /* Frequent episode mining algorithms*/
-    kMaxfem
+    kMaxfem,
+
+    /* Pattern FD verifier algorithm */
+    kPatternFdVerifier
 };
 
 static_assert(std::tuple_size_v<AlgorithmTypes> == magic_enum::enum_count<AlgorithmType>(),

@@ -148,4 +148,5 @@ CSVConfig const kWdcSatellites = CreateCsvConfig("WDC_satellites.csv", ',', true
 CSVConfig const kWdcScience = CreateCsvConfig("WDC_science.csv", ',', true);
 CSVConfig const kWdcSymbols = CreateCsvConfig("WDC_symbols.csv", ',', true);
 CSVConfig const kMDTrivial = CreateCsvConfig("md_trivial.csv", ',', true);
+CSVConfig const kLicenses = CreateCsvConfig("licenses.csv", ',', true);
 }  // namespace tests
