@@ -254,10 +254,12 @@ algos::hy::ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison
         }
 
         InitializeEfficiencyQueue();
+    } else {
+        efficiency_threshold_ = efficiency_threshold_ / 2;
     }
 
     while (!efficiency_queue_.empty() &&
-           efficiency_queue_.top().CalcEfficiency() >= kEfficiencyThreshold) {
+           efficiency_queue_.top().CalcEfficiency() >= efficiency_threshold_) {
         algos::hy::Efficiency best_efficiency = efficiency_queue_.top();
         efficiency_queue_.pop();
 

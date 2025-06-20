@@ -13,7 +13,6 @@
 #include "non_fd_inductor.h"
 #include "fd_inductor.h"
 #include "model/cluster_ids_array.h"
-#include "sampler.h"
 
 namespace algos::dynfd {
 
@@ -158,6 +157,7 @@ std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_f
 }
 
 std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds,
+                                                          Sampler::IdPairs& comparison_suggestions,
                                                           size_t first_insert_batch_id) {
     std::vector<NonFd> result;
     std::mutex result_mutex;
@@ -166,10 +166,13 @@ std::vector<Validator::NonFd> Validator::ValidateParallel(std::vector<model::FDT
 
     for (auto const& [vertex, lhs] : fds) {
         boost::packaged_task<void> task(
-            [this, vertex, lhs, &result_mutex, &result, first_insert_batch_id]() {
-                OnValidateResult on_invalid = [lhs, &result_mutex, &result](size_t rhs, ViolatingRecordPair violation) {
+            [this, vertex, lhs, &result_mutex, &result, first_insert_batch_id, &comparison_suggestions]() {
+                OnValidateResult on_invalid = [lhs, &result_mutex, &result, &comparison_suggestions](size_t rhs, ViolatingRecordPair violation) {
                     std::lock_guard lock(result_mutex);
                     result.push_back({{lhs, rhs}, violation});
+                    if (violation) {
+                        comparison_suggestions.push_back(*violation);
+                    }
                 };
                 Validate(lhs, vertex->GetFDs(), on_invalid, first_insert_batch_id);
             }
@@ -280,7 +283,8 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
 
     for (size_t level = 0; level <= relation_->GetNumColumns(); ++level) {
         auto level_fds = positive_cover_tree_->GetLevel(level);
-        std::vector<NonFd> invalid_fds = ValidateParallel(level_fds, first_insert_batch_id);
+        Sampler::IdPairs comparison_suggestions;
+        std::vector<NonFd> invalid_fds = ValidateParallel(level_fds, comparison_suggestions, first_insert_batch_id);
 
         for (auto const& non_fd : invalid_fds) {
             positive_cover_tree_->Remove(non_fd.rawFd.lhs_, non_fd.rawFd.rhs_);
@@ -304,8 +308,8 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
         }
 
         if (static_cast<double>(invalid_fds.size()) > 0.1 * static_cast<double>(level_fds.size())) {
-            std::cout << "PVS" << std::endl;
-            inductor.UpdateCovers(sampler.GetAgreeSets({}));
+            // std::cout << "PVS" << std::endl;
+            // inductor.UpdateCovers(sampler.GetAgreeSets(comparison_suggestions));
         }
     }
 }
@@ -335,8 +339,8 @@ void Validator::ValidateNonFds() {
 
         if (static_cast<double>(valid_fds.size()) >
             0.1 * static_cast<double>(level_non_fds.size())) {
-            std::cout << "DFS" << std::endl;
-            fdFinder.FindFds(valid_fds);
+            // std::cout << "DFS" << std::endl;
+            // fdFinder.FindFds(valid_fds);
         }
     }
 }

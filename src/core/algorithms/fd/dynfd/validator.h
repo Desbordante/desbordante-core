@@ -9,6 +9,7 @@
 #include "model/dynamic_position_list_index.h"
 #include "model/dynamic_relation_data.h"
 #include "model/non_fd_tree.h"
+#include "sampler.h"
 
 namespace algos::dynfd {
 class Validator : public std::enable_shared_from_this<Validator> {
@@ -40,6 +41,7 @@ class Validator : public std::enable_shared_from_this<Validator> {
     };
 
     std::vector<NonFd> ValidateParallel(std::vector<model::FDTree::LhsPair> const& fds,
+                                        Sampler::IdPairs& comparison_suggestions,
                                         size_t first_insert_batch_id);
 
     using OnValidateResult = std::optional<std::function<void(size_t, ViolatingRecordPair)>>;

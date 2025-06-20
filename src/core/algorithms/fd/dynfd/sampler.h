@@ -22,12 +22,15 @@ class thread_pool;
 namespace algos::dynfd {
 
 class Sampler {
-private:
+public:
     using IdPairs = std::vector<std::pair<int, int>>;
+
+private:
     using PLI = std::vector<DPLI::Cluster>;
 
     static inline constexpr double kEfficiencyThreshold = 0.1;
 
+    double efficiency_threshold_ = kEfficiencyThreshold;
     std::vector<PLI> plis_;
     CompressedRecordsPtr compressed_records_;
     std::shared_ptr<DynamicRelationData> relation_;
