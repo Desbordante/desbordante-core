@@ -17,8 +17,8 @@ size_t DynamicRelationData::GetNumRows() const {
 DynamicRelationData::DynamicRelationData(std::unique_ptr<RelationalSchema> schema,
                                          std::vector<ColumnType> column_data,
                                          std::unordered_set<size_t> stored_row_ids,
-                                         ValueDictionary value_dictionary,
-                                         int next_value_id, size_t next_record_id,
+                                         ValueDictionary value_dictionary, int next_value_id,
+                                         size_t next_record_id,
                                          CompressedRecords compressed_records)
     : AbstractRelationData(std::move(schema), std::move(column_data)),
       stored_row_ids_(std::move(stored_row_ids)),

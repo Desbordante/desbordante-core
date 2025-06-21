@@ -2,22 +2,21 @@
 
 namespace algos::dynfd {
 void NonFDInductor::FindFds(std::vector<RawFD> const& valid_fds) {
-    for (int index = 0; index < valid_fds.size(); index += 10) {
+    for (size_t index = 0; index < valid_fds.size(); index += 10) {
         Dfs(valid_fds[index], valid_fds[index].lhs_.find_first());
     }
 }
 
-void NonFDInductor::Dfs(RawFD fd, int next_lhs_attr) {
-    for (auto removed_lhs_attr = next_lhs_attr;
-         removed_lhs_attr != boost::dynamic_bitset<>::npos;
+void NonFDInductor::Dfs(RawFD fd, size_t next_lhs_attr) {
+    for (auto removed_lhs_attr = next_lhs_attr; removed_lhs_attr != boost::dynamic_bitset<>::npos;
          removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
         auto new_lhs = fd.lhs_;
         new_lhs.reset(removed_lhs_attr);
-        RawFD newFd{new_lhs, fd.rhs_};
+        RawFD new_fd{new_lhs, fd.rhs_};
 
-        if (positive_cover_tree_->ContainsFdOrGeneral(new_lhs, fd.rhs_) || 
-            validator_->IsNonFdValidated(newFd)) {
-            Dfs(newFd, newFd.lhs_.find_next(removed_lhs_attr));
+        if (positive_cover_tree_->ContainsFdOrGeneral(new_lhs, fd.rhs_) ||
+            validator_->IsNonFdValidated(new_fd)) {
+            Dfs(new_fd, new_fd.lhs_.find_next(removed_lhs_attr));
             return;
         }
     }
@@ -47,4 +46,4 @@ void NonFDInductor::DeduceNonFds(RawFD fd) {
         positive_cover_tree_->AddFD(fd.lhs_, fd.rhs_);
     }
 }
-} // namespace algos::dynfd
+}  // namespace algos::dynfd

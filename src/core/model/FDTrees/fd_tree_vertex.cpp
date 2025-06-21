@@ -102,9 +102,8 @@ bool FDTreeVertex::RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rh
     return false;
 }
 
-void FDTreeVertex::RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                           size_t rhs, size_t cur_bit,
-                                           bool is_specialized) {
+void FDTreeVertex::RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                                           size_t cur_bit, bool is_specialized) {
     // TODO: optimize checking via counting bits
     size_t next_lhs_bit;
     if (cur_bit < lhs.size()) {
@@ -120,14 +119,13 @@ void FDTreeVertex::RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
     }
 
     if (HasChildren()) {
-        auto limit = next_lhs_bit == boost::dynamic_bitset<>::npos
-                ? num_attributes_ - 1
-                : next_lhs_bit;
+        auto limit =
+                next_lhs_bit == boost::dynamic_bitset<>::npos ? num_attributes_ - 1 : next_lhs_bit;
 
         for (; cur_bit <= limit; ++cur_bit) {
             if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
-                children_[cur_bit]->RemoveSpecialsRecursive(lhs, rhs, cur_bit + 1, 
-                                                            is_specialized || cur_bit != next_lhs_bit);
+                children_[cur_bit]->RemoveSpecialsRecursive(
+                        lhs, rhs, cur_bit + 1, is_specialized || cur_bit != next_lhs_bit);
 
                 if (children_[cur_bit]->GetAttributes().none()) {
                     children_[cur_bit] = nullptr;

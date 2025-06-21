@@ -105,8 +105,7 @@ private:
 
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
 
-    void RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
-                                 size_t rhs, size_t cur_bit,
+    void RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t cur_bit,
                                  bool is_specialized);
 
     bool IsLastNodeOf(size_t rhs) const noexcept;

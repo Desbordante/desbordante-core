@@ -2,11 +2,11 @@
 
 #include <list>
 #include <memory>
+#include <ranges>
 #include <set>
 #include <table/position_list_index.h>
 #include <unordered_map>
 #include <vector>
-#include <ranges>
 
 namespace algos::dynfd {
 class DynamicPositionListIndex {
@@ -107,11 +107,9 @@ public:
     }
 
     [[nodiscard]] auto GetClustersToCheck(size_t first_insert_batch_id = 0) const {
-        return clusters_ | std::views::filter(
-            [first_insert_batch_id](Cluster const& cluster) {
-                return cluster.Size() > 1 && cluster.Back() >= first_insert_batch_id;
-            }
-        );
+        return clusters_ | std::views::filter([first_insert_batch_id](Cluster const& cluster) {
+                   return cluster.Size() > 1 && cluster.Back() >= first_insert_batch_id;
+               });
     }
 
     // NOLINTEND(*-identifier-naming)
