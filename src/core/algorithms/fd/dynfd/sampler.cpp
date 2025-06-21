@@ -9,7 +9,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread/future.hpp>
 
-
 namespace algos::dynfd {
 
 namespace {
@@ -29,8 +28,8 @@ public:
         assert(sort_keys_->front().size() >= 3);
         assert(comparison_column_1_ < relation.GetNumColumns());
         assert(comparison_column_2_ < relation.GetNumColumns());
-        if (relation.GetColumnData(comparison_column_1_).GetPositionListIndex().GetClustersNum()
-            < relation.GetColumnData(comparison_column_2_).GetPositionListIndex().GetClustersNum()) {
+        if (relation.GetColumnData(comparison_column_1_).GetPositionListIndex().GetClustersNum() <
+            relation.GetColumnData(comparison_column_2_).GetPositionListIndex().GetClustersNum()) {
             std::swap(comparison_column_1_, comparison_column_2_);
         }
     }
@@ -78,8 +77,7 @@ public:
 }  // namespace
 
 template <typename F>
-void Sampler::RunWindowImpl(algos::hy::Efficiency& efficiency, PLI const& pli,
-                            F store_match) {
+void Sampler::RunWindowImpl(algos::hy::Efficiency& efficiency, PLI const& pli, F store_match) {
     efficiency.IncrementWindow();
 
     size_t const num_attributes = relation_->GetNumColumns();
@@ -143,8 +141,7 @@ void Sampler::SortClustersParallel() {
     for (auto& pli : plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
-                                             column_slider.GetRightNeighbor(),
-                                             *relation_);
+                                             column_slider.GetRightNeighbor(), *relation_);
         auto sort = [pli, cluster_comparator]() mutable {
             for (DPLI::Cluster& cluster : pli) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
@@ -163,8 +160,7 @@ void Sampler::SortClustersSeq() {
     for (auto& pli : plis_) {
         ClusterComparator cluster_comparator(compressed_records_.get(),
                                              column_slider.GetLeftNeighbor(),
-                                             column_slider.GetRightNeighbor(),
-                                             *relation_);
+                                             column_slider.GetRightNeighbor(), *relation_);
         for (DPLI::Cluster& cluster : pli) {
             std::sort(cluster.begin(), cluster.end(), cluster_comparator);
         }
@@ -181,7 +177,8 @@ void Sampler::SortClusters() {
 }
 
 void Sampler::InitializeEfficiencyQueueParallel() {
-    using EfficiencyAndMatches = std::pair<algos::hy::Efficiency, std::vector<boost::dynamic_bitset<>>>;
+    using EfficiencyAndMatches =
+            std::pair<algos::hy::Efficiency, std::vector<boost::dynamic_bitset<>>>;
     std::vector<boost::unique_future<EfficiencyAndMatches>> futures;
     for (size_t attr = 0; attr < relation_->GetNumColumns(); ++attr) {
         auto run_window = [attr, this]() {
@@ -248,8 +245,9 @@ algos::hy::ColumnCombinationList Sampler::GetAgreeSets(IdPairs const& comparison
 
     if (efficiency_queue_.empty()) {
         for (size_t bit = 0; bit < relation_->GetNumColumns(); ++bit) {
-            auto clusters_iterator = relation_->GetColumnData(bit)
-                .GetPositionListIndex().GetClustersToCheck(first_insert_batch_id);
+            auto clusters_iterator =
+                    relation_->GetColumnData(bit).GetPositionListIndex().GetClustersToCheck(
+                            first_insert_batch_id_);
             plis_.emplace_back(clusters_iterator.begin(), clusters_iterator.end());
         }
 
@@ -287,14 +285,11 @@ void Sampler::Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
     }
 }
 
-Sampler::Sampler(std::shared_ptr<DynamicRelationData> relation,
-                 size_t first_insert_batch_id,
-                 boost::asio::thread_pool *pool)
-    : relation_(std::move(relation)),
-      pool_(pool),
-      first_insert_batch_id(first_insert_batch_id) {
+Sampler::Sampler(std::shared_ptr<DynamicRelationData> relation, size_t first_insert_batch_id,
+                 boost::asio::thread_pool* pool)
+    : relation_(std::move(relation)), pool_(pool), first_insert_batch_id_(first_insert_batch_id) {
     compressed_records_ = relation_->GetCompressedRecordsPtr();
     agree_sets_ = std::make_unique<algos::hy::AllColumnCombinations>(relation_->GetNumColumns());
 }
 
-}  // namespace algos::hy
+}  // namespace algos::dynfd

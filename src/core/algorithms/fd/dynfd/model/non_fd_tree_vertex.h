@@ -99,8 +99,8 @@ private:
 
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
 
-    void RemoveGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
-                                 size_t rhs, size_t cur_bit, bool is_generalized);
+    void RemoveGeneralsRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t cur_bit,
+                                 bool is_generalized);
 
     bool IsLastNodeOf(size_t rhs) const noexcept;
 

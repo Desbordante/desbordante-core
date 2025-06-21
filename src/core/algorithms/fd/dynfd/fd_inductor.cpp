@@ -22,8 +22,7 @@ void algos::dynfd::FDInductor::DeduceDependencies(RawFD non_fd) {
         boost::dynamic_bitset<> lhs = non_fd.lhs_;
         lhs.flip();
         lhs.reset(rhs);
-        for (size_t lhs_attr = lhs.find_first();
-             lhs_attr != boost::dynamic_bitset<>::npos;
+        for (size_t lhs_attr = lhs.find_first(); lhs_attr != boost::dynamic_bitset<>::npos;
              lhs_attr = lhs.find_next(lhs_attr)) {
             boost::dynamic_bitset<> new_lhs = fd_lhs;
             new_lhs.set(lhs_attr);
