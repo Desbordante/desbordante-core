@@ -125,7 +125,7 @@ class Specializer {
         if (child_map.empty()) [[unlikely]] {
             MdeNode& new_node =
                     child_map
-                            .try_emplace(next_lhs_rcv_id, column_matches_size_,
+                            .try_emplace(next_lhs_rcv_id, record_matches_size_,
                                          cur_node.GetNextNodeChildArraySize(next_node_offset))
                             .first->second;
             new_minimal_action(new_node);
@@ -158,7 +158,7 @@ class Specializer {
                         .emplace_hint(it, std::piecewise_construct,
                                       forward_as_tuple(next_lhs_rcv_id),
                                       forward_as_tuple(
-                                              column_matches_size_,
+                                              record_matches_size_,
                                               cur_node.GetNextNodeChildArraySize(next_node_offset)))
                         ->second;
         new_minimal_action(new_node);
@@ -249,7 +249,7 @@ class Specializer {
                 &cur_node, GetLhs(), cur_node_iter, set_rhs,
                 [&](MdeNode* node, Index next_node_offset, RecordClassifierValueId next_rcv_id) {
                     return node->AddOneUnchecked(next_node_offset, next_rcv_id,
-                                                 column_matches_size_);
+                                                 record_matches_size_);
                 });
         if (get_element_level_) (this->*UpdateMaxLevel)();
     }
@@ -325,7 +325,7 @@ class Specializer {
         auto add_old_nodes_with_correction = [&](MdeNode& node) {
             AddNewMinimal<&Specializer::UpdateMaxLevelAdd>(
                     *node.AddOneUnchecked(old_lhs_next_node_new_offset, old_lhs_next_node_rcv_id,
-                                          column_matches_size_),
+                                          record_matches_size_),
                     std::next(GetSpecLhsIter()));
         };
 
@@ -383,7 +383,7 @@ class Specializer {
                               &SpecGenCheckerType::HasGeneralizationInChildrenReplace,
                               &Specializer::AddIfMinimalReplace>();
         }
-        for (spec_child_index = 0; lhs_spec_index_ != column_matches_size_; ++spec_child_index) {
+        for (spec_child_index = 0; lhs_spec_index_ != record_matches_size_; ++spec_child_index) {
             SetNonLhsRCVID();
             SpecializeElement<&Specializer::IsUnsupportedNonReplace,
                               &SpecGenCheckerType::HasGeneralizationInChildrenNonReplace,
@@ -419,11 +419,11 @@ class Specializer {
     std::vector<std::size_t> GetElementLevels() {
         std::vector<std::size_t> element_levels =
                 util::GetPreallocatedVector<std::size_t>(GetLhs().Cardinality());
-        Index column_match_index = 0;
+        Index record_match_index = 0;
         for (auto const& [offset, rcv_id] : GetLhs()) {
-            column_match_index += offset;
-            element_levels.push_back(get_element_level_(rcv_id, column_match_index));
-            ++column_match_index;
+            record_match_index += offset;
+            element_levels.push_back(get_element_level_(rcv_id, record_match_index));
+            ++record_match_index;
         }
         return element_levels;
     }
@@ -441,7 +441,7 @@ class Specializer {
     SingleLevelFunc const& get_element_level_;
     std::size_t& max_level_;
     std::size_t const cardinality_limit_;
-    std::size_t const column_matches_size_;
+    std::size_t const record_matches_size_;
     std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps_;
     FGetLhsRCVId get_lhs_rcv_id_;
     FGetNonLhsRCVId get_nonlhs_rcv_id_;
@@ -459,7 +459,7 @@ class Specializer {
 public:
     Specializer(MdeNode& mde_root, SupportNode& support_root,
                 SingleLevelFunc const& get_element_level, std::size_t& max_level,
-                std::size_t const cardinality_limit, std::size_t const column_matches_size,
+                std::size_t const cardinality_limit, std::size_t const record_matches_size,
                 std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
                 MdeLhs const& lhs, FGetLhsRCVId get_lhs_rcv_id, FGetNonLhsRCVId get_nonlhs_rcv_id,
                 bool prune_nondisjoint, RhsType rhs)
@@ -468,7 +468,7 @@ public:
           get_element_level_(get_element_level),
           max_level_(max_level),
           cardinality_limit_(cardinality_limit),
-          column_matches_size_(column_matches_size),
+          record_matches_size_(record_matches_size),
           rcv_id_lr_maps_(rcv_id_lr_maps),
           get_lhs_rcv_id_(std::move(get_lhs_rcv_id)),
           get_nonlhs_rcv_id_(std::move(get_nonlhs_rcv_id)),
@@ -491,14 +491,14 @@ namespace algos::hymde::cover_calculation::lattice {
 MdeLattice::MdeLattice(SingleLevelFunc single_level_func,
                        std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
                        bool prune_nondisjoint, std::size_t max_cardinality, Rhs max_rhs)
-    : column_matches_size_(rcv_id_lr_maps.size()),
-      mde_root_(column_matches_size_, std::move(max_rhs)),
-      support_root_(column_matches_size_),
+    : record_matches_size_(rcv_id_lr_maps.size()),
+      mde_root_(record_matches_size_, std::move(max_rhs)),
+      support_root_(record_matches_size_),
       get_element_level_(std::move(single_level_func)),
       rcv_id_lr_maps_(&rcv_id_lr_maps),
       prune_nondisjoint_(prune_nondisjoint),
       cardinality_limit_(max_cardinality) {
-    enabled_rhs_indices_.resize(column_matches_size_, true);
+    enabled_rhs_indices_.resize(record_matches_size_, true);
 }
 
 inline void MdeLattice::Specialize(MdeLhs const& lhs,
@@ -521,7 +521,7 @@ auto MdeLattice::CreateSpecializer(MdeLhs const& lhs, auto&& rhs, auto get_lhs_r
                                    auto get_nonlhs_rcv_id) {
     return Specializer<MdeInfoType, decltype(get_lhs_rcv_id), decltype(get_nonlhs_rcv_id)>(
             mde_root_, support_root_, get_element_level_, max_level_, cardinality_limit_,
-            column_matches_size_, *rcv_id_lr_maps_, lhs, get_lhs_rcv_id, get_nonlhs_rcv_id,
+            record_matches_size_, *rcv_id_lr_maps_, lhs, get_lhs_rcv_id, get_nonlhs_rcv_id,
             prune_nondisjoint_, rhs);
 }
 
@@ -592,7 +592,7 @@ void MdeLattice::TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_nod
         for (; rhs_index != cur_lhs_index; ++rhs_index) {
             try_push_no_match_classifier();
         }
-        DESBORDANTE_ASSUME(rhs_index < column_matches_size_);
+        DESBORDANTE_ASSUME(rhs_index < record_matches_size_);
         RecordClassifierValueId const pair_rcv_id = pair_comparison_result.rhss[rhs_index];
         RecordClassifierValueId const rhs_rcv_id = rhs[rhs_index];
         if (pair_rcv_id < rhs_rcv_id) {
@@ -609,7 +609,7 @@ void MdeLattice::TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_nod
         ++rhs_index;
         ++cur_lhs_index;
     }
-    for (; rhs_index != column_matches_size_; ++rhs_index) {
+    for (; rhs_index != record_matches_size_; ++rhs_index) {
         try_push_no_match_classifier();
     }
     if (invalidated.IsEmpty()) return;
@@ -716,7 +716,7 @@ void MdeLattice::ValidationUpdater::LowerAndSpecialize(InvalidatedRhss const& in
 // a situation occurs for any one RHS, and the generalization with that RHS happens to be valid on
 // the data, it would make inference from record pairs give an incorrect result, meaning the
 // algorithm is incorrect. However, it is possible to stop traversing when the bound's index in the
-// list of natural decision boundaries (that being column classifier value ID) is exactly one less
+// list of natural decision boundaries (that being record classifier value ID) is exactly one less
 // than the RHS bound's index, which is done here.
 void MdeLattice::RaiseInterestingnessRCVIds(
         MdeNode const& cur_node, MdeLhs const& lhs,
@@ -808,7 +808,7 @@ bool MdeLattice::HasGeneralization(Mde const& mde) const {
 }
 
 void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& collected,
-                          MdeLhs& cur_node_lhs, Index const cur_node_column_match_index,
+                          MdeLhs& cur_node_lhs, Index const cur_node_record_match_index,
                           std::size_t const level_left) {
     if (level_left == 0) {
         if (!cur_node.rhs.IsEmpty())
@@ -816,14 +816,14 @@ void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& col
         return;
     }
     auto collect = [&](MdeRCVIdChildMap& child_map, Index next_node_offset) {
-        Index const next_node_column_match_index = cur_node_column_match_index + next_node_offset;
+        Index const next_node_record_match_index = cur_node_record_match_index + next_node_offset;
         RecordClassifierValueId& next_lhs_rcv_id = cur_node_lhs.AddNext(next_node_offset);
         for (auto& [rcv_id, node] : child_map) {
             std::size_t const element_level =
-                    get_element_level_(next_node_column_match_index, rcv_id);
+                    get_element_level_(next_node_record_match_index, rcv_id);
             if (element_level > level_left) break;
             next_lhs_rcv_id = rcv_id;
-            GetLevel(node, collected, cur_node_lhs, next_node_column_match_index + 1,
+            GetLevel(node, collected, cur_node_lhs, next_node_record_match_index + 1,
                      level_left - element_level);
         }
         cur_node_lhs.RemoveLast();
@@ -833,7 +833,7 @@ void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& col
 
 auto MdeLattice::GetLevel(std::size_t const level) -> std::vector<ValidationUpdater> {
     std::vector<ValidationUpdater> collected;
-    MdeLhs current_lhs(column_matches_size_);
+    MdeLhs current_lhs(record_matches_size_);
     if (!get_element_level_) {
         GetAll(mde_root_, current_lhs, [this, &collected](MdeLhs& cur_node_lhs, MdeNode& cur_node) {
             collected.emplace_back(this, MdeNodeLocation{cur_node_lhs, &cur_node});
@@ -866,7 +866,7 @@ void MdeLattice::GetAll(MdeNode& cur_node, MdeLhs& cur_node_lhs, auto&& add_node
 
 std::vector<MdeNodeLocation> MdeLattice::GetAll() {
     std::vector<MdeNodeLocation> collected;
-    MdeLhs current_lhs(column_matches_size_);
+    MdeLhs current_lhs(record_matches_size_);
     GetAll(mde_root_, current_lhs, [&collected](MdeLhs& cur_node_lhs, MdeNode& cur_node) {
         collected.push_back({cur_node_lhs, &cur_node});
     });

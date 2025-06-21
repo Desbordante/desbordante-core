@@ -15,7 +15,7 @@ namespace algos::hymde::cover_calculation {
 class MinimalSelectingLevelGetter final : public LevelGetter {
 private:
     using MinPickerType = PairwiseMinimalSelector;
-    std::size_t const column_matches_number_;
+    std::size_t const record_matches_number_;
     MinPickerType min_selector_;
     std::unordered_map<lattice::MdeLhs, boost::dynamic_bitset<>> next_selection_exclusion_;
 
@@ -29,7 +29,7 @@ private:
 public:
     MinimalSelectingLevelGetter(lattice::MdeLattice* lattice)
         : LevelGetter(lattice),
-          column_matches_number_(lattice->GetColMatchNumber()),
+          record_matches_number_(lattice->GetRecMatchNumber()),
           min_selector_() {}
 };
 }  // namespace algos::hymde::cover_calculation

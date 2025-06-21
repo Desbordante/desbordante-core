@@ -17,9 +17,9 @@ std::vector<ValidationSelection> MinimalSelectingLevelGetter::GetPendingGroupedM
     std::unordered_map<lattice::MdeLhs, boost::dynamic_bitset<>> new_selection_exclusion;
     for (lattice::MdeLattice::ValidationUpdater& messenger : validation_updaters) {
         auto node = next_selection_exclusion_.extract(messenger.GetLhs());
-        boost::dynamic_bitset<> indices(column_matches_number_);
+        boost::dynamic_bitset<> indices(record_matches_number_);
         lattice::Rhs const& rhs = messenger.GetRhs();
-        for (model::Index i = 0; i != column_matches_number_; ++i) {
+        for (model::Index i = 0; i != record_matches_number_; ++i) {
             if (rhs[i] != kLowestRCValueId) {
                 indices.set(i);
             }

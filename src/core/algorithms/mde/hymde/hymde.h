@@ -29,9 +29,9 @@ private:
     // Example: same table + equality max + same part. funcs means support is at least number of
     // records. Perhaps requiring support to be min guaranteed value of all record matches used in
     // LHS is the right move? But this way complicates the unsupported lattice.
-    // I want to avoid the situation where all columns are matched to themselves in some record
-    // matches but in others that is not the case. The requirement of support being at least number
-    // of records is too strict in that case.
+    // There is a situation where the partitioning functions are equivalent in some record matches,
+    // but not in others. The requirement of support being at least number of records is too strict
+    // in that case.
     std::size_t min_support_ = 0;
     bool prune_nondisjoint_ = true;
     std::size_t max_cardinality_ = -1;

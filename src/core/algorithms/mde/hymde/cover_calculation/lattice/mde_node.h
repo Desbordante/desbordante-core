@@ -53,14 +53,14 @@ public:
     }
 
     MdeNode* AddOneUnchecked(model::Index offset, RecordClassifierValueId rcv_id,
-                             std::size_t column_matches_number) {
-        return AddOneUncheckedBase(offset, rcv_id, column_matches_number);
+                             std::size_t record_matches_number) {
+        return AddOneUncheckedBase(offset, rcv_id, record_matches_number);
     }
 
-    MdeNode(std::size_t column_matches_number, std::size_t children_number)
-        : NodeBase<MdeNode>(children_number), rhs(column_matches_number) {}
+    MdeNode(std::size_t record_matches_number, std::size_t children_number)
+        : NodeBase<MdeNode>(children_number), rhs(record_matches_number) {}
 
-    explicit MdeNode(std::size_t column_matches_number, Rhs rhs)
-        : NodeBase<MdeNode>(column_matches_number), rhs(std::move(rhs)) {}
+    explicit MdeNode(std::size_t record_matches_number, Rhs rhs)
+        : NodeBase<MdeNode>(record_matches_number), rhs(std::move(rhs)) {}
 };
 }  // namespace algos::hymde::cover_calculation::lattice

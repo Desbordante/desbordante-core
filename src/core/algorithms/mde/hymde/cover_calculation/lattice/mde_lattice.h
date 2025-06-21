@@ -77,7 +77,7 @@ public:
 
 private:
     std::size_t max_level_ = 0;
-    std::size_t const column_matches_size_;
+    std::size_t const record_matches_size_;
     MdeNode mde_root_;
     SupportNode support_root_;
     // Is there a way to define a level in such a way that one cannot use each RCV ID independently
@@ -92,7 +92,7 @@ private:
     void ExcludeGeneralizations(MultiMde& mde) const;
 
     void GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& collected,
-                  MdeLhs& cur_node_lhs, model::Index cur_node_column_match_index,
+                  MdeLhs& cur_node_lhs, model::Index cur_node_record_match_index,
                   std::size_t level_left);
 
     void RaiseInterestingnessRCVIds(
@@ -138,8 +138,8 @@ public:
                         std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
                         bool prune_nondisjoint, std::size_t max_cardinality, Rhs max_rhs);
 
-    std::size_t GetColMatchNumber() const noexcept {
-        return column_matches_size_;
+    std::size_t GetRecMatchNumber() const noexcept {
+        return record_matches_size_;
     }
 
     [[nodiscard]] std::size_t GetMaxLevel() const noexcept {

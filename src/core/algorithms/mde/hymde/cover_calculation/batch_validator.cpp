@@ -27,9 +27,9 @@ using PliCluster = record_match_indexes::PartitionIndex::RecordCluster;
 // (`LTVsPartition` in code, from "left table values partition"). Note that we create a partition
 // for each partitioning function in the preprocessing stage (`SLTVPartition` here, from "single
 // left table value partition"). Thus, for any partition where the key has multiple partitioning
-// functions we can obtain the sets of the partition with multiple functions in its key by
-// partitioning each set of any attribute "properly" only on the other function results
-// (`SLTVPEPartition`, "single left table value partition element partition").
+// functions we can obtain the sets of the partition by partitioning each element of one of the
+// function's partition "properly" only on the other functions' results (`SLTVPEPartition`, "single
+// left table value partition element partition").
 
 // Finally, partition of the set of record pairs that are matched by an LHS (`LHSMRPartition`, "LHS
 // matched records partition"). Its sets can be obtained by inspecting each set of the first
@@ -173,12 +173,12 @@ auto BatchValidator::RhsValidator::LowerRCVIDAndCollectRecommendations(
 
     LeftValueGroupedLhsRecords grouped_lhs_records = GroupLhsRecords(lhs_records);
 
-    for (auto const& [left_column_value_id, same_left_value_records] : grouped_lhs_records) {
+    for (auto const& [left_pvalue_id, same_left_value_records] : grouped_lhs_records) {
         DESBORDANTE_ASSUME(matched_rhs_records.begin() != matched_rhs_records.end());
         for (RecordIdentifier rhs_record_id : matched_rhs_records) {
             CompressedRecord const& right_record = (*right_clusters_)[rhs_record_id];
 
-            bool const md_invalidated = LowerRCVID(left_column_value_id, right_record);
+            bool const md_invalidated = LowerRCVID(left_pvalue_id, right_record);
             if (md_invalidated) {
                 RhsIsInvalid(same_left_value_records, right_record);
                 return MdValidationStatus::kInvalidated;
@@ -204,7 +204,7 @@ auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
     // See LowerRCVIDAndCollectRecommendations comment
     DESBORDANTE_ASSUME(!matched_rhs_records.empty());
 
-    RecordCluster cluster_records = util::GetPreallocatedVector<RecPtr>(cluster.size());
+    RecordCluster cluster_records = util::GetPreallocatedVector<RecordClustersPtr>(cluster.size());
 
     DESBORDANTE_ASSUME(!cluster.empty());
     for (RecordIdentifier left_record_id : cluster) {
@@ -213,8 +213,6 @@ auto BatchValidator::LHSMRPartitionInspector<LHSMRPartitionElementProvider>::
     return rhs_validator.LowerRCVIDAndCollectRecommendations(cluster_records, matched_rhs_records);
 }
 
-// Each left table column's PLI already stores the desired partition of the left table. The sets of
-// records that are matched by each partition key's value are already stored in similarity indexes.
 class BatchValidator::OneCardPartitionElementProvider {
     BatchValidator const* const validator_;
     PartitionValueId current_value_id_ = PartitionValueId(-1);
@@ -244,13 +242,6 @@ public:
 };
 
 class BatchValidator::MultiCardPartitionElementProvider {
-    // Represented by left table's column indices.
-    using SLTVPEPartitionKey = std::vector<Index>;
-
-    // Used in place of a normal SLTVPEPartition key index to indicate that the SLTVPartition value
-    // should be used.
-    static constexpr Index kSLTVPartitionColumn = -1;
-
     // Find RHS records that have a value similar with respect to `rcv_id` to
     // `sltvpe_partition_value[i]` according to the measure of the record match at index
     // `record_match_index`.
@@ -270,13 +261,13 @@ class BatchValidator::MultiCardPartitionElementProvider {
         RhsRecordsMatchingCriterion first_criterion_;
         RhsRecordsMatchingCriteria rhs_records_matching_criteria_;
 
-        Index cur_col_match_index_ = lhs_iter_->offset;
+        Index cur_rec_match_index_ = lhs_iter_->offset;
 
         void AddFirstRhsRecordsMatchingCriterion() {
             // LHS has cardinality greater than 1, so is not empty.
             DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
-            first_criterion_ = {cur_col_match_index_, lhs_iter_->rcv_id};
-            ++cur_col_match_index_;
+            first_criterion_ = {cur_rec_match_index_, lhs_iter_->rcv_id};
+            ++cur_rec_match_index_;
             ++lhs_iter_;
         }
 
@@ -284,10 +275,10 @@ class BatchValidator::MultiCardPartitionElementProvider {
             // LHS has cardinality greater than 1, so it has at least one more element.
             DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
             for (auto const& [next_node_offset, rcv_id] : std::span{lhs_iter_, lhs_end_}) {
-                cur_col_match_index_ += next_node_offset;
+                cur_rec_match_index_ += next_node_offset;
 
-                rhs_records_matching_criteria_.push_back({cur_col_match_index_, rcv_id});
-                ++cur_col_match_index_;
+                rhs_records_matching_criteria_.push_back({cur_rec_match_index_, rcv_id});
+                ++cur_rec_match_index_;
             }
         }
 
@@ -629,10 +620,7 @@ void BatchValidator::CreateResults(std::vector<ValidationSelection>& selections)
 auto BatchValidator::ValidateBatch(std::vector<ValidationSelection>& selections)
         -> std::vector<Result> const& {
     if (pool_ == nullptr) {
-        CreateResults<true>(selections); /*lattice::MdeLhs const& lattice_lhs, lattice::Rhs const&
-                  rhs, ValidationSelection& selection, InvalidatedRhss const& invalidated,
-                  std::size_t support*/
-        ;
+        CreateResults<true>(selections);
     } else {
         CreateResults<false>(selections);
         auto validate_at_index = [&](Index i) {
@@ -648,4 +636,3 @@ auto BatchValidator::ValidateBatch(std::vector<ValidationSelection>& selections)
     return results_;
 }
 }  // namespace algos::hymde::cover_calculation
-

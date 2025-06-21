@@ -75,7 +75,7 @@ struct SearchSpaceComponentSpecification {
 struct ComponentStructureAssertions {
     // The following must be true:
     // 1) number of values for both tables is the same (n)
-    // 2) if m is the max comparison value index for the column match the following holds:
+    // 2) if m is the max comparison value index for the record match the following holds:
     //      \forall i \in range(n) value_matrix[i][i] == m
     // 3) \forall i \in range(n) left_pli[i] \subset upper_set_index[i][m]
     // This corresponds to column matches matching columns to themselves and equal values being

@@ -94,8 +94,8 @@ public:
 private:
     using RemovedAndInterestingnessRCVIds =
             std::pair<std::vector<RecordClassifierValueId>, std::vector<RecordClassifierValueId>>;
-    using RecPtr = record_match_indexes::PartitionIndex::Clusters const*;
-    using RecordCluster = std::vector<RecPtr>;
+    using RecordClustersPtr = record_match_indexes::PartitionIndex::Clusters const*;
+    using RecordCluster = std::vector<RecordClustersPtr>;
 
     template <typename PartitionElementProvider>
     class LHSMRPartitionInspector;
@@ -112,7 +112,7 @@ private:
         RecordClassifierValueId current_rcv_id_;
 
         // Optimize creation of LHS records groups.
-        std::size_t rhs_col_match_values_;
+        std::size_t rhs_rec_match_values_count_;
 
         // Either the RHS RCV ID corresponding to the LHS RCV ID of the record match, or the
         // greatest RHS RCV ID among generalizations, whichever is greater. If `current_rcv_id`
@@ -128,7 +128,7 @@ private:
         void AddRecommendations(
                 RecordCluster const& same_left_value_records,
                 record_match_indexes::PartitionIndex::Clusters const& right_record) {
-            for (RecPtr left_record_ptr : same_left_value_records) {
+            for (RecordClustersPtr left_record_ptr : same_left_value_records) {
                 recommendations_->push_back({left_record_ptr, &right_record});
             }
         }
@@ -141,8 +141,8 @@ private:
 
         LeftValueGroupedLhsRecords GroupLhsRecords(RecordCluster const& lhs_records) const {
             LeftValueGroupedLhsRecords left_value_grouped_lhs_records(
-                    std::min(lhs_records.size(), rhs_col_match_values_));
-            for (RecPtr left_record_ptr : lhs_records) {
+                    std::min(lhs_records.size(), rhs_rec_match_values_count_));
+            for (RecordClustersPtr left_record_ptr : lhs_records) {
                 left_value_grouped_lhs_records[(*left_record_ptr)[record_match_index_]].push_back(
                         left_record_ptr);
             }
@@ -179,7 +179,7 @@ private:
     public:
         RhsValidator(
                 MdeElement const old_rhs, OneRhsRecommendations& recommendations,
-                std::size_t const col_match_values,
+                std::size_t const rhs_rec_match_values_count,
                 RecordClassifierValueId const interestingness_id,
                 record_match_indexes::PartitionIndex::RecordClustersMapping const& right_clusters,
                 record_match_indexes::ValueMatrix const& similarity_matrix,
@@ -187,7 +187,7 @@ private:
             : recommendations_(&recommendations),
               old_rhs_(old_rhs),
               current_rcv_id_(old_rhs.rcv_id),
-              rhs_col_match_values_(col_match_values),
+              rhs_rec_match_values_count_(rhs_rec_match_values_count),
               interestingness_rcv_id_(interestingness_id),
               right_clusters_(&right_clusters),
               similarity_matrix_(&similarity_matrix),
