@@ -18,7 +18,7 @@ private:
     std::vector<ValidationInfo> GetPendingGroupedMinimalLhsMds(
             std::vector<MdLattice::MdVerificationMessenger>& level_lattice_info) final;
 
-    // true simulates Metanome, false makes the procedure faster, but the order changes may lead to
+    // false simulates Metanome, true is faster, but the order changes may lead to
     // unpredictable effects on runtime
     static constexpr bool kEraseEmptyKeepOrder = false;
 

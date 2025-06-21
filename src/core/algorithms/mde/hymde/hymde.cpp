@@ -44,14 +44,16 @@ void HyMDE::RegisterOptions() {
                         // itself and the similarity measure isn't unusual.
                         ? dictionary_compressed_records_->GetLeftTable().size()
                         : 0;
-        return assumed_guaranteed_support + 1;
+        return dictionary_compressed_records_->GetTotalPairsCount() == 1
+                       ? 1
+                       : assumed_guaranteed_support + 1;
     };
     auto min_support_check = [this](std::size_t const& min_sup_value) {
         std::size_t const total_pairs_count = dictionary_compressed_records_->GetTotalPairsCount();
         if (min_sup_value > total_pairs_count)
             throw config::ConfigurationError(
                     std::string("Support (") + std::to_string(min_sup_value) +
-                    ") is greater than the number of pairs ( " + std::to_string(total_pairs_count) +
+                    ") is greater than the number of pairs (" + std::to_string(total_pairs_count) +
                     ") , mining MDEs will be meaningless!");
     };
 

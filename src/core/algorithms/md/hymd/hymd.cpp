@@ -187,7 +187,6 @@ unsigned long long HyMD::ExecuteInternal() {
 
     auto [similarity_data, short_sampling_enable] = SimilarityData::CreateFrom(
             records_info_.get(), column_matches_option_, pool_holder.GetPtr());
-
     if (similarity_data.GetColumnMatchNumber() == 0) {
         RegisterResults(similarity_data, {});
         return std::chrono::duration_cast<std::chrono::milliseconds>(

@@ -30,17 +30,17 @@ class LevenshteinComparerCreator {
     };
 
     ComparisonResult cutoff_;
-    std::size_t const buf_len_;
+    std::size_t const buf_size_;
 
 public:
-    LevenshteinComparerCreator(ComparisonResult cutoff, std::size_t max_size)
-        : cutoff_(cutoff), buf_len_(max_size) {}
+    LevenshteinComparerCreator(ComparisonResult cutoff, std::size_t max_string_len)
+        : cutoff_(cutoff), buf_size_(max_string_len + 1) {}
 
     Comparer operator()() const {
         // TODO: replace with std::make_unique_for_overwrite when GCC in CI is upgraded
-        auto buf = utility::MakeUniqueForOverwrite<unsigned[]>(buf_len_ * 2);
+        auto buf = utility::MakeUniqueForOverwrite<unsigned[]>(buf_size_ * 2);
         auto* buf_ptr = buf.get();
-        return {std::move(buf), buf_ptr + buf_len_, cutoff_};
+        return {std::move(buf), buf_ptr + buf_size_, cutoff_};
     }
 };
 

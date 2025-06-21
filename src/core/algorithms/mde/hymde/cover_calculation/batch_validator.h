@@ -114,9 +114,9 @@ private:
         // Optimize creation of LHS records groups.
         std::size_t rhs_col_match_values_;
 
-        // Either the RHS CCV ID corresponding to the LHS CCV ID of the column match, or the
-        // greatest RHS CCV ID among generalizations, whichever is greater. If `current_ccv_id`
-        // reaches this value, the MD should be removed from the lattice as either trivial or
+        // Either the RHS RCV ID corresponding to the LHS RCV ID of the record match, or the
+        // greatest RHS RCV ID among generalizations, whichever is greater. If `current_rcv_id`
+        // reaches this value, the MDE should be removed from the lattice as either trivial or
         // non-minimal.
         RecordClassifierValueId interestingness_rcv_id_;
 
@@ -151,12 +151,12 @@ private:
 
         // NOTE: in this implementation, pairs are only added as recommendations if they invalidate
         // the RHS.
-        // TODO: test performance when records that lower the CCV ID are added as recommendations as
+        // TODO: test performance when records that lower the RCV ID are added as recommendations as
         // well.
-        bool LowerRCVID(PartitionValueId left_column_value_id,
+        bool LowerRCVID(PartitionValueId left_pvalue_id,
                         record_match_indexes::PartitionIndex::Clusters const& right_record) {
             record_match_indexes::ValueMatrixRow const& left_value_value_mapping =
-                    (*similarity_matrix_)[left_column_value_id];
+                    (*similarity_matrix_)[left_pvalue_id];
 
             PartitionValueId const right_value_id = right_record[record_match_index_];
 
@@ -165,10 +165,10 @@ private:
                 return true;
             }
 
-            RecordClassifierValueId const pair_ccv_id = value_mapping_iter->second;
-            if (pair_ccv_id < current_rcv_id_) {
-                current_rcv_id_ = pair_ccv_id;
-                if (pair_ccv_id == interestingness_rcv_id_) {
+            RecordClassifierValueId const pair_rcv_id = value_mapping_iter->second;
+            if (pair_rcv_id < current_rcv_id_) {
+                current_rcv_id_ = pair_rcv_id;
+                if (pair_rcv_id == interestingness_rcv_id_) {
                     return true;
                 }
             }

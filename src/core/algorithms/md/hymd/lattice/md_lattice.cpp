@@ -21,26 +21,26 @@ namespace {
 using model::Index;
 using namespace algos::hymd;
 using namespace algos::hymd::lattice;
-template <typename MdeInfoType>
-using MdeGenChecker = TotalGeneralizationChecker<MdNode, MdeInfoType>;
-template <typename MdeInfoType>
-using MdeSpecGenChecker = SpecGeneralizationChecker<MdNode, MdeInfoType>;
+template <typename MdInfoType>
+using MdGenChecker = TotalGeneralizationChecker<MdNode, MdInfoType>;
+template <typename MdInfoType>
+using MdSpecGenChecker = SpecGeneralizationChecker<MdNode, MdInfoType>;
 
-template <typename MdeInfoType, typename FGetLhsRCVId, typename FGetNonLhsRCVId>
+template <typename MdInfoType, typename FGetLhsCCVId, typename FGetNonLhsCCVId>
 class Specializer {
     using SupportCheckMethod = bool (Specializer::*)();
     using UpdateMaxLevelMethod = void (Specializer::*)();
-    using SpecGenCheckerType = MdeSpecGenChecker<MdeInfoType>;
+    using SpecGenCheckerType = MdSpecGenChecker<MdInfoType>;
     using GenCheckMethod = bool (SpecGenCheckerType::*)(MdNode const&, MdLhs::iterator, Index);
-    using MdeRCVIdChildMap = MdNode::OrderedCCVIdChildMap;
-    static constexpr bool kSpecializingSingle = std::is_same_v<MdeInfoType, MdSpecialization>;
+    using MdCCVIdChildMap = MdNode::OrderedCCVIdChildMap;
+    static constexpr bool kSpecializingSingle = std::is_same_v<MdInfoType, MdSpecialization>;
     using RhsType =
             std::conditional_t<kSpecializingSingle, MdElement, utility::ExclusionList<MdElement>&>;
 
     class GeneralizationHelper {
-        using Unspecialized = typename MdeInfoType::Unspecialized;
+        using Unspecialized = typename MdInfoType::Unspecialized;
         MdNode* node_;
-        MdeGenChecker<Unspecialized>& gen_checker_;
+        MdGenChecker<Unspecialized>& gen_checker_;
 
     public:
         MdNode& CurNode() noexcept {
@@ -65,7 +65,7 @@ class Specializer {
             node_->SetRhs(gen_checker_.GetUnspecialized().GetRhs());
         }
 
-        GeneralizationHelper(MdNode& node, MdeGenChecker<Unspecialized>& gen_checker) noexcept
+        GeneralizationHelper(MdNode& node, MdGenChecker<Unspecialized>& gen_checker) noexcept
             : node_(&node), gen_checker_(gen_checker) {}
     };
 
@@ -78,7 +78,7 @@ class Specializer {
             if (prune_nondisjoint_) return;
 
             ColumnClassifierValueId const ccv_id_triviality_bound =
-                    rcv_id_lr_maps_[lhs_spec_index_].lhs_to_rhs_map[GetNewCCVId()];
+                    lhs_ccv_id_info_[lhs_spec_index_].lhs_to_rhs_map[GetNewCCVId()];
             if (ccv_id <= ccv_id_triviality_bound) return;
         }
 
@@ -100,7 +100,7 @@ class Specializer {
                     GetRhs().GetEnabled().set(rhs_index, false);
                 } else {
                     ColumnClassifierValueId const ccv_id_triviality_bound =
-                            rcv_id_lr_maps_[lhs_spec_index_].lhs_to_rhs_map[GetNewCCVId()];
+                            lhs_ccv_id_info_[lhs_spec_index_].lhs_to_rhs_map[GetNewCCVId()];
                     if (ccv_id <= ccv_id_triviality_bound)
                         GetRhs().GetEnabled().set(rhs_index, false);
                 }
@@ -126,7 +126,7 @@ class Specializer {
                            auto new_minimal_action, ColumnClassifierValueId const next_lhs_ccv_id,
                            MdLhs::iterator next_node_iter, std::size_t gen_check_offset = 0) {
         MdNode& cur_node = helper.CurNode();
-        MdeRCVIdChildMap& child_map = cur_node.children[next_node_offset];
+        MdCCVIdChildMap& child_map = cur_node.children[next_node_offset];
         if (child_map.empty()) [[unlikely]] {
             MdNode& new_node =
                     child_map
@@ -138,11 +138,11 @@ class Specializer {
         }
         return TryGetNextNodeChildMap(
                 child_map, helper, next_node_offset, new_minimal_action, next_lhs_ccv_id,
-                next_node_iter, [](MdeRCVIdChildMap& child_map) { return child_map.begin(); },
+                next_node_iter, [](MdCCVIdChildMap& child_map) { return child_map.begin(); },
                 gen_check_offset);
     }
 
-    MdNode* TryGetNextNodeChildMap(MdeRCVIdChildMap& child_map, GeneralizationHelper& helper,
+    MdNode* TryGetNextNodeChildMap(MdCCVIdChildMap& child_map, GeneralizationHelper& helper,
                                    Index next_node_offset, auto new_minimal_action,
                                    ColumnClassifierValueId const next_lhs_ccv_id,
                                    MdLhs::iterator next_node_iter, auto get_child_map_iter,
@@ -172,9 +172,9 @@ class Specializer {
 
     template <GenCheckMethod CheckGeneralization, HandleTailMethod HandleTail>
     void AddIfMinimal() {
-        MdeSpecGenChecker<MdeInfoType> gen_checker{current_specialization_};
+        MdSpecGenChecker<MdInfoType> gen_checker{current_specialization_};
         auto& total_checker = gen_checker.GetTotalChecker();
-        auto helper = GeneralizationHelper(mde_root_, total_checker);
+        auto helper = GeneralizationHelper(md_root_, total_checker);
 
         MdLhs::iterator next_lhs_iter = GetLhs().begin();
         while (next_lhs_iter != GetSpecLhsIter()) {
@@ -184,7 +184,7 @@ class Specializer {
                     helper.CurNode(), next_lhs_iter, next_node_offset + 1);
             if (next_has_generalization) return;
 
-            MdeRCVIdChildMap& child_map = helper.Children()[next_node_offset];
+            MdCCVIdChildMap& child_map = helper.Children()[next_node_offset];
             DESBORDANTE_ASSUME(!child_map.empty());
             assert(child_map.find(next_lhs_ccv_id) != child_map.end());
             auto it = child_map.begin();
@@ -198,9 +198,9 @@ class Specializer {
         (this->*HandleTail)(helper);
     }
 
-    bool SpecRCVDoesNotExist() {
+    bool SpecCCVDoesNotExist() {
         std::vector<ColumnClassifierValueId> const& lhs_ccv_ids =
-                rcv_id_lr_maps_[lhs_spec_index_].lhs_to_rhs_map;
+                lhs_ccv_id_info_[lhs_spec_index_].lhs_to_rhs_map;
         // TODO: enforce this with a special class (basically a vector that guarantees this
         // condition).
         DESBORDANTE_ASSUME(!lhs_ccv_ids.empty());
@@ -212,7 +212,7 @@ class Specializer {
     template <SupportCheckMethod CheckSupport, GenCheckMethod CheckGeneralization,
               HandleTailMethod HandleTail>
     void SpecializeElement() {
-        if (SpecRCVDoesNotExist()) return;
+        if (SpecCCVDoesNotExist()) return;
         bool const is_unsupported = (this->*CheckSupport)();
         if (is_unsupported) return;
         AddSpecialization<CheckGeneralization, HandleTail>();
@@ -302,7 +302,7 @@ class Specializer {
 
         DESBORDANTE_ASSUME(!helper.Children()[old_node_offset].empty());
         // clang-tidy false positive bypass.
-        auto get_higher = [old_node_ccv_id = old_node_ccv_id](MdeRCVIdChildMap& child_map) {
+        auto get_higher = [old_node_ccv_id = old_node_ccv_id](MdCCVIdChildMap& child_map) {
             return child_map.upper_bound(old_node_ccv_id);
         };
         MdLhs::iterator spec_iter = std::next(GetSpecLhsIter());
@@ -352,12 +352,12 @@ class Specializer {
         WalkToTail<&Specializer::UpdateMaxLevelAdd>(helper, spec_iter);
     }
 
-    void SetLhsRCVID() {
-        GetNewChildNode().ccv_id = get_lhs_rcv_id_(lhs_spec_index_, GetSpecLhsIter()->ccv_id) + 1;
+    void SetLhsCCVID() {
+        GetNewChildNode().ccv_id = get_lhs_ccv_id_(lhs_spec_index_, GetSpecLhsIter()->ccv_id) + 1;
     }
 
-    void SetNonLhsRCVID() {
-        GetNewChildNode().ccv_id = get_nonlhs_rcv_id_(lhs_spec_index_) + 1;
+    void SetNonLhsCCVID() {
+        GetNewChildNode().ccv_id = get_nonlhs_ccv_id_(lhs_spec_index_) + 1;
     }
 
     void SpecializeReplaceOnly() {
@@ -365,7 +365,7 @@ class Specializer {
             Index const next_node_offset = GetSpecLhsIter()->offset;
             lhs_spec_index_ += next_node_offset;
             GetNewChildNode().offset = next_node_offset;
-            SetLhsRCVID();
+            SetLhsCCVID();
             SpecializeElement<&Specializer::IsUnsupportedReplace,
                               &SpecGenCheckerType::HasGeneralizationInChildrenReplace,
                               &Specializer::AddIfMinimalReplace>();
@@ -377,19 +377,19 @@ class Specializer {
         for (; GetSpecLhsIter() != GetEndLhsIter(); AdvanceLhsSpecIter(), ++lhs_spec_index_) {
             Index const next_node_offset = GetSpecLhsIter()->offset;
             for (spec_child_index = 0; spec_child_index != next_node_offset; ++spec_child_index) {
-                SetNonLhsRCVID();
+                SetNonLhsCCVID();
                 SpecializeElement<&Specializer::IsUnsupportedNonReplace,
                                   &SpecGenCheckerType::HasGeneralizationInChildrenNonReplace,
                                   &Specializer::AddIfMinimalInsert>();
                 ++lhs_spec_index_;
             }
-            SetLhsRCVID();
+            SetLhsCCVID();
             SpecializeElement<&Specializer::IsUnsupportedReplace,
                               &SpecGenCheckerType::HasGeneralizationInChildrenReplace,
                               &Specializer::AddIfMinimalReplace>();
         }
         for (spec_child_index = 0; lhs_spec_index_ != column_matches_size_; ++spec_child_index) {
-            SetNonLhsRCVID();
+            SetNonLhsCCVID();
             SpecializeElement<&Specializer::IsUnsupportedNonReplace,
                               &SpecGenCheckerType::HasGeneralizationInChildrenNonReplace,
                               &Specializer::AddIfMinimalAppend>();
@@ -441,18 +441,18 @@ class Specializer {
         return current_specialization_.GetLhsSpecialization().specialization_data.new_child;
     }
 
-    MdNode& mde_root_;
+    MdNode& md_root_;
     SupportNode& support_root_;
     SingleLevelFunc const& get_element_level_;
     std::size_t& max_level_;
     std::size_t const cardinality_limit_;
     std::size_t const column_matches_size_;
-    std::vector<LhsCCVIdsInfo> const& rcv_id_lr_maps_;
-    FGetLhsRCVId get_lhs_rcv_id_;
-    FGetNonLhsRCVId get_nonlhs_rcv_id_;
+    std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info_;
+    FGetLhsCCVId get_lhs_ccv_id_;
+    FGetNonLhsCCVId get_nonlhs_ccv_id_;
     bool const prune_nondisjoint_;
 
-    MdeInfoType current_specialization_;
+    MdInfoType current_specialization_;
 
     std::vector<std::size_t> const element_levels_ = GetElementLevels();
     std::size_t const base_level_ =
@@ -466,17 +466,17 @@ public:
                 SingleLevelFunc const& get_element_level, std::size_t& max_level,
                 std::size_t const cardinality_limit, std::size_t const column_matches_size,
                 std::vector<LhsCCVIdsInfo> const& lhs_ccv_id_info, MdLhs const& lhs,
-                FGetLhsRCVId get_lhs_ccv_id, FGetNonLhsRCVId get_nonlhs_ccv_id,
+                FGetLhsCCVId get_lhs_ccv_id, FGetNonLhsCCVId get_nonlhs_ccv_id,
                 bool prune_nondisjoint, RhsType rhs)
-        : mde_root_(md_root),
+        : md_root_(md_root),
           support_root_(support_root),
           get_element_level_(get_element_level),
           max_level_(max_level),
           cardinality_limit_(cardinality_limit),
           column_matches_size_(column_matches_size),
-          rcv_id_lr_maps_(lhs_ccv_id_info),
-          get_lhs_rcv_id_(std::move(get_lhs_ccv_id)),
-          get_nonlhs_rcv_id_(std::move(get_nonlhs_ccv_id)),
+          lhs_ccv_id_info_(lhs_ccv_id_info),
+          get_lhs_ccv_id_(std::move(get_lhs_ccv_id)),
+          get_nonlhs_ccv_id_(std::move(get_nonlhs_ccv_id)),
           prune_nondisjoint_(prune_nondisjoint),
           current_specialization_(
                   {LhsSpecialization{lhs, SpecializationData{lhs.begin(), LhsNode{}}}, rhs}) {}
@@ -713,7 +713,7 @@ void MdLattice::MdVerificationMessenger::LowerAndSpecialize(
         rhs.Set(rhs_index, new_ccv_id);
     }
     lattice_->Specialize(GetLhs(), invalidated.GetInvalidated());
-    if (rhs.IsEmpty() && GetNode().IsEmpty()) {
+    if (GetRhs().IsEmpty() && GetNode().IsEmpty()) {
         lattice_->TryDeleteEmptyNode<false>(GetLhs());
     }
 }
@@ -812,7 +812,7 @@ std::vector<ColumnClassifierValueId> MdLattice::GetInterestingnessCCVIds(
 }
 
 bool MdLattice::HasGeneralization(Md const& md) const {
-    return MdeGenChecker<Md>{md}.HasGeneralization(md_root_);
+    return MdGenChecker<Md>{md}.HasGeneralization(md_root_);
 }
 
 void MdLattice::GetLevel(MdNode& cur_node, std::vector<MdVerificationMessenger>& collected,

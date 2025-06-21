@@ -10,7 +10,6 @@
 namespace algos::hymd::indexes {
 
 class RecordsInfo {
-    // needs to be kept in mde
     std::vector<std::string> const values_;
     std::shared_ptr<DictionaryCompressor const> const left_compressor_;
     std::shared_ptr<DictionaryCompressor const> const right_compressor_;

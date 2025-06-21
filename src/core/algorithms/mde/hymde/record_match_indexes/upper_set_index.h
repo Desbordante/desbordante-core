@@ -39,8 +39,8 @@ public:
         return flat_;
     }
 
-    UpperSet const* GetUpperSet(RecordClassifierValueId lhs_ccv_id) const {
-        auto it = sets_.lower_bound(lhs_ccv_id);
+    UpperSet const* GetUpperSet(RecordClassifierValueId lhs_rcv_id) const {
+        auto it = sets_.lower_bound(lhs_rcv_id);
         if (it == sets_.end()) return nullptr;
         return &it->second;
     }

@@ -146,13 +146,7 @@ std::size_t LevenshteinDistanceCalc(std::string const* l_ptr, std::string const*
 namespace algos::hymde::record_match_indexes::calculators::levenshtein_distance {
 ComparisonResult LevenshteinComparerCreator::Comparer::operator()(PartitioningValue const& l,
                                                                   PartitioningValue const& r) {
-    std::size_t const max_dist = std::max(l.size(), r.size());
-    ComparisonResult distance = orders::UnsignedIntegerLe{}.LeastElement();
-    if (max_dist != 0) {
-        distance = LevenshteinDistanceCalc(&l, &r, buf.get(), r_buf, cutoff_, max_dist);
-        // std::size_t dist = LevenshteinDistanceCalc(&l, &r, buf.get(), r_buf, cutoff_, max_dist);
-        //if (dist > cutoff_) distance = orders::UnsignedIntegerLe{}.GreatestElement();
-    }
-    return distance;
+    return LevenshteinDistanceCalc(&l, &r, buf.get(), r_buf, cutoff_,
+                                   orders::UnsignedIntegerLe{}.GreatestElement());
 }
 }  // namespace algos::hymde::record_match_indexes::calculators::levenshtein_distance

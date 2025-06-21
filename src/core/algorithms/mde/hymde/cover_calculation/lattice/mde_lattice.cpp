@@ -17,15 +17,15 @@ using namespace algos::hymde;
 using namespace algos::hymde::cover_calculation;
 using namespace algos::hymde::cover_calculation::lattice;
 template <typename MdeInfoType>
-using MdeGenChecker = TotalGeneralizationChecker<MdeNode, MdeInfoType>;
+using MdGenChecker = TotalGeneralizationChecker<MdeNode, MdeInfoType>;
 template <typename MdeInfoType>
-using MdeSpecGenChecker = SpecGeneralizationChecker<MdeNode, MdeInfoType>;
+using MdSpecGenChecker = SpecGeneralizationChecker<MdeNode, MdeInfoType>;
 
 template <typename MdeInfoType, typename FGetLhsRCVId, typename FGetNonLhsRCVId>
 class Specializer {
     using SupportCheckMethod = bool (Specializer::*)();
     using UpdateMaxLevelMethod = void (Specializer::*)();
-    using SpecGenCheckerType = MdeSpecGenChecker<MdeInfoType>;
+    using SpecGenCheckerType = MdSpecGenChecker<MdeInfoType>;
     using GenCheckMethod = bool (SpecGenCheckerType::*)(MdeNode const&, MdeLhs::iterator, Index);
     using MdeRCVIdChildMap = MdeNode::OrderedRCVIdChildMap;
     static constexpr bool kSpecializingSingle = std::is_same_v<MdeInfoType, MdeSpecialization>;
@@ -35,7 +35,7 @@ class Specializer {
     class GeneralizationHelper {
         using Unspecialized = typename MdeInfoType::Unspecialized;
         MdeNode* node_;
-        MdeGenChecker<Unspecialized>& gen_checker_;
+        MdGenChecker<Unspecialized>& gen_checker_;
 
     public:
         MdeNode& CurNode() noexcept {
@@ -60,7 +60,7 @@ class Specializer {
             node_->SetRhs(gen_checker_.GetUnspecialized().GetRhs());
         }
 
-        GeneralizationHelper(MdeNode& node, MdeGenChecker<Unspecialized>& gen_checker) noexcept
+        GeneralizationHelper(MdeNode& node, MdGenChecker<Unspecialized>& gen_checker) noexcept
             : node_(&node), gen_checker_(gen_checker) {}
     };
 
@@ -167,7 +167,7 @@ class Specializer {
 
     template <GenCheckMethod CheckGeneralization, HandleTailMethod HandleTail>
     void AddIfMinimal() {
-        MdeSpecGenChecker<MdeInfoType> gen_checker{current_specialization_};
+        MdSpecGenChecker<MdeInfoType> gen_checker{current_specialization_};
         auto& total_checker = gen_checker.GetTotalChecker();
         auto helper = GeneralizationHelper(mde_root_, total_checker);
 
@@ -804,7 +804,7 @@ std::vector<RecordClassifierValueId> MdeLattice::GetInterestingnessRCVIds(
 }
 
 bool MdeLattice::HasGeneralization(Mde const& mde) const {
-    return MdeGenChecker<Mde>{mde}.HasGeneralization(mde_root_);
+    return MdGenChecker<Mde>{mde}.HasGeneralization(mde_root_);
 }
 
 void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& collected,

@@ -28,16 +28,12 @@ public:
 private:
     class Creator;
 
-    // needs heavy modification
     indexes::RecordsInfo const* const records_info_;
 
-    // indexes + bound values, the latter needs to be moved
     std::vector<ColumnMatchInfo> const column_matches_sim_info_;
     std::vector<LhsCCVIdsInfo> const column_matches_lhs_ids_info_;
 
-    // results only
     std::vector<model::Index> const sorted_to_original_;
-    // results only, needs to be different for mde
     std::vector<std::pair<model::md::DecisionBoundary, model::Index>> trivial_column_matches_info_;
 
     indexes::DictionaryCompressor const& GetLeftCompressor() const noexcept {

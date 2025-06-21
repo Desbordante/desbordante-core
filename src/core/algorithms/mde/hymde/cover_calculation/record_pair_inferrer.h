@@ -20,7 +20,7 @@ private:
     using Comparisons = std::vector<PairComparisonResult>;
 
     using RankedRecordsValue = std::vector<RecordIdentifier>;
-    using RankedRecordsColumnMatch = std::vector<RankedRecordsValue>;
+    using RankedRecordsRecordMatch = std::vector<RankedRecordsValue>;
 
     class RecordRanker;
 
@@ -34,9 +34,9 @@ private:
 
     // "RHS record" in the comments refers to a record from the right table present in a similarity
     // index.
-    class ColumnMatchSamplingInfo {
+    class RecordMatchSamplingInfo {
     private:
-        model::Index column_match_index_;
+        model::Index record_match_index_;
 
         // Window size for short sampling on cluster or RHS record index otherwise.
         std::size_t parameter_;
@@ -49,20 +49,20 @@ private:
         std::size_t num_sampled_ = 0;
 
     public:
-        ColumnMatchSamplingInfo(std::size_t column_match_index, std::size_t parameter) noexcept
-            : column_match_index_(column_match_index), parameter_(parameter) {}
+        RecordMatchSamplingInfo(std::size_t record_match_index, std::size_t parameter) noexcept
+            : record_match_index_(record_match_index), parameter_(parameter) {}
 
         // Only used in operator<.
         [[nodiscard]] double CalcEfficiency() const noexcept {
-            // Column matches where no record pairs are available for comparison are filtered during
+            // Record matches where no record pairs are available for comparison are filtered during
             // RecordPairInferrer construction, after which this number can only increase.
             DESBORDANTE_ASSUME(num_sampled_ != 0);
 
             return static_cast<double>(num_discovered_) / static_cast<double>(num_sampled_);
         }
 
-        // Used by the sampling queue to compare column matches.
-        [[nodiscard]] bool operator<(ColumnMatchSamplingInfo const& other) const noexcept {
+        // Used by the sampling queue to compare record matches.
+        [[nodiscard]] bool operator<(RecordMatchSamplingInfo const& other) const noexcept {
             return CalcEfficiency() < other.CalcEfficiency();
         }
 
@@ -70,8 +70,8 @@ private:
             return num_sampled_;
         }
 
-        [[nodiscard]] model::Index GetColumnMatchIndex() const noexcept {
-            return column_match_index_;
+        [[nodiscard]] model::Index GetRecordMatchIndex() const noexcept {
+            return record_match_index_;
         }
 
         [[nodiscard]] std::size_t GetParameter() const noexcept {
@@ -93,14 +93,14 @@ private:
 
     static constexpr double kInitialEfficiencyThreshold = 0.01;
     static constexpr double kNewRoundThresholdMultiplier = 0.5;
-    // In case sampling the best column match is still too inefficient.
+    // In case sampling the best record match is still too inefficient.
     static constexpr double kBestThresholdMultiplier = 0.9;
 
     template <bool SampleShort>
     std::pair<std::size_t, Sampler<SampleShort>> CreateSampler(
-            ColumnMatchSamplingInfo const& column_match_sampling_info);
+            RecordMatchSamplingInfo const& record_match_sampling_info);
 
-    std::priority_queue<ColumnMatchSamplingInfo> CreateSamplingQueue();
+    std::priority_queue<RecordMatchSamplingInfo> CreateSamplingQueue();
 
     bool MultiThreaded() const noexcept {
         return pool_ != nullptr;
@@ -125,52 +125,52 @@ private:
         return false;
     }
 
-    void CountAndInfer(ColumnMatchSamplingInfo& column_match_sampling_info,
+    void CountAndInfer(RecordMatchSamplingInfo& record_match_sampling_info,
                        PairComparisonResult&& comparison) {
-        column_match_sampling_info.CountComparedPair();
+        record_match_sampling_info.CountComparedPair();
         if (InferFromComparison(std::move(comparison)))
-            column_match_sampling_info.CountSuccessfulComparison();
+            record_match_sampling_info.CountSuccessfulComparison();
     }
 
-    bool ShortSamplingEnabled(model::Index column_match_index) const noexcept {
-        return assertions_[column_match_index].assume_overlap_lpli_cluster_max_;
+    bool ShortSamplingEnabled(model::Index record_match_index) const noexcept {
+        return assertions_[record_match_index].assume_overlap_lpli_cluster_max_;
     }
 
     template <bool IsShort>
-    void DoSamplingRoundSeq(ColumnMatchSamplingInfo& column_match_sampling_info);
+    void DoSamplingRoundSeq(RecordMatchSamplingInfo& record_match_sampling_info);
     template <bool IsShort>
-    void DoSamplingRoundParallel(ColumnMatchSamplingInfo& column_match_sampling_info);
+    void DoSamplingRoundParallel(RecordMatchSamplingInfo& record_match_sampling_info);
 
     // Short sampling: do nearest neighbor comparison similar to HyFD, parameter is window size,
-    // sort based on CCV ID in the column match, then on the CCV ID to the left, then to the right.
+    // sort based on RCV ID in the record match, then on the RCV ID to the left, then to the right.
     // Full sampling: compare RHS record at index parameter with every LHS record.
-    void DoSamplingRound(ColumnMatchSamplingInfo& column_match_sampling_info) {
-        if (ShortSamplingEnabled(column_match_sampling_info.GetColumnMatchIndex())) {
-            (this->*short_sampling_method_)(column_match_sampling_info);
+    void DoSamplingRound(RecordMatchSamplingInfo& record_match_sampling_info) {
+        if (ShortSamplingEnabled(record_match_sampling_info.GetRecordMatchIndex())) {
+            (this->*short_sampling_method_)(record_match_sampling_info);
         } else {
-            (this->*full_sampling_method_)(column_match_sampling_info);
+            (this->*full_sampling_method_)(record_match_sampling_info);
         }
-        column_match_sampling_info.IncrementParameter();
+        record_match_sampling_info.IncrementParameter();
     }
 
     std::vector<Comparisons> CollectParallelComparisonResults(auto compare_at,
                                                               std::size_t index_limit);
     void ParallelCompareAndInfer(auto compare, std::size_t index_limit, auto comparison_action);
 
-    void SampleAndRequeue(ColumnMatchSamplingInfo& column_match_sampling_info);
+    void SampleAndRequeue(RecordMatchSamplingInfo& record_match_sampling_info);
     bool SampleAndInfer();
 
     lattice::MdeLattice* const lattice_;
 
     record_match_indexes::DataPartitionIndex const* const records_info_;
-    std::vector<record_match_indexes::Indexes> const* const column_matches_sim_info_;
-    std::vector<record_match_indexes::RcvIdLRMap> const* const lhs_ccv_id_info_;
-    std::size_t const column_match_number_ = column_matches_sim_info_->size();
+    std::vector<record_match_indexes::Indexes> const* const record_match_indexes_;
+    std::vector<record_match_indexes::RcvIdLRMap> const* const rcv_id_lr_maps_;
+    std::size_t const record_match_number_ = record_match_indexes_->size();
     std::vector<record_match_indexes::ComponentStructureAssertions> const assertions_;
     std::unordered_set<PairComparisonResult> processed_comparisons_;
     util::WorkerThreadPool* const pool_;
 
-    using SamplingMethod = void (RecordPairInferrer::*)(ColumnMatchSamplingInfo&);
+    using SamplingMethod = void (RecordPairInferrer::*)(RecordMatchSamplingInfo&);
     SamplingMethod short_sampling_method_ =
             MultiThreaded() ? &RecordPairInferrer::DoSamplingRoundParallel<true>
                             : &RecordPairInferrer::DoSamplingRoundSeq<true>;
@@ -182,12 +182,12 @@ private:
     // Cluster records are sorted such that identical values are grouped together.
     // For full sampling: records from similarity indexes.
     // If full sorting is enabled, records are ranked lexicographically, where words are sorted
-    // CCV ID lists in comparisons with cluster records for the column match that is samples, with
-    // neighboring column matches being tie breakers.
-    // If sorting is disabled, the records with the highest CCV IDs of the sampled column match go
+    // RCV ID lists in comparisons with cluster records for the record match that is samples, with
+    // neighboring record matches being tie breakers.
+    // If sorting is disabled, the records with the highest RCV IDs of the sampled record match go
     // first, in whatever order they happen to land.
-    std::vector<RankedRecordsColumnMatch> const ranked_records_;
-    std::priority_queue<ColumnMatchSamplingInfo> sampling_queue_;
+    std::vector<RankedRecordsRecordMatch> const ranked_records_;
+    std::priority_queue<RecordMatchSamplingInfo> sampling_queue_;
 
     // The first sampling round multiplies by kNewRoundThresholdMultiplier, divide to counteract.
     double efficiency_threshold_ = kInitialEfficiencyThreshold / kNewRoundThresholdMultiplier;
@@ -215,8 +215,8 @@ public:
 
     RecordPairInferrer(InternalConstructToken, lattice::MdeLattice* lattice,
                        record_match_indexes::DataPartitionIndex const* records_info,
-                       std::vector<record_match_indexes::Indexes> const* column_matches_sim_info,
-                       std::vector<record_match_indexes::RcvIdLRMap> const& lhs_ccv_id_info,
+                       std::vector<record_match_indexes::Indexes> const* record_match_indexes,
+                       std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
                        std::vector<record_match_indexes::ComponentStructureAssertions> assertions,
                        util::WorkerThreadPool* pool);
 

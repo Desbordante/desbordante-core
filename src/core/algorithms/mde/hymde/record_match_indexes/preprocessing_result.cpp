@@ -63,9 +63,9 @@ PreprocessingResult PreprocessingResult::Create(
     auto start = arrangement_ptr.get(), end = start + non_trivial_number;
     std::iota(start, end, 0);
     std::sort(start, end, [&](model::Index i, model::Index j) {
-        std::size_t const lhs_ccv_ids1 = rcv_id_lr_maps[i].lhs_to_rhs_map.size();
-        std::size_t const lhs_ccv_ids2 = rcv_id_lr_maps[j].lhs_to_rhs_map.size();
-        return lhs_ccv_ids1 < lhs_ccv_ids2 || (lhs_ccv_ids1 == lhs_ccv_ids2 && i < j);
+        std::size_t const lhs_rcv_ids1 = rcv_id_lr_maps[i].lhs_to_rhs_map.size();
+        std::size_t const lhs_rcv_ids2 = rcv_id_lr_maps[j].lhs_to_rhs_map.size();
+        return lhs_rcv_ids1 < lhs_rcv_ids2 || (lhs_rcv_ids1 == lhs_rcv_ids2 && i < j);
     });
     std::vector<Indexes> sorted_indexes = util::GetPreallocatedVector<Indexes>(non_trivial_number);
     std::vector<RcvIdLRMap> sorted_rcv_id_lr_maps =

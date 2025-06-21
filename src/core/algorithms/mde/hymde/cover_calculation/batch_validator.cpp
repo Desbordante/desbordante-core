@@ -23,22 +23,22 @@ using CompressedRecord = record_match_indexes::PartitionIndex::Clusters;
 using PliCluster = record_match_indexes::PartitionIndex::RecordCluster;
 
 // There are several partitions that are going to be mentioned here.
-// Firstly, a partition of the left table based on equality of values of some set of attributes
-// (`LTVsPartition` in code, from "left table values partition"). Note that we already create a
-// partition for each attribute in the preprocessing stage (`SLTVPartition` here, from "single left
-// table value partition"), which is represented as a PLI for each column. Thus, for any partition
-// where the key contains multiple attributes we can obtain the sets of the partition with multiple
-// attributes in its key by partitioning each set of any attribute "properly" only on the other
-// attributes (`SLTVPEPartition`, "single left table value partition element partition").
+// Firstly, a partition of the left table based on equality of values of partitioning functions
+// (`LTVsPartition` in code, from "left table values partition"). Note that we create a partition
+// for each partitioning function in the preprocessing stage (`SLTVPartition` here, from "single
+// left table value partition"). Thus, for any partition where the key has multiple partitioning
+// functions we can obtain the sets of the partition with multiple functions in its key by
+// partitioning each set of any attribute "properly" only on the other function results
+// (`SLTVPEPartition`, "single left table value partition element partition").
 
 // Finally, partition of the set of record pairs that are matched by an LHS (`LHSMRPartition`, "LHS
 // matched records partition"). Its sets can be obtained by inspecting each set of the first
-// partition with the partition key being a set of the left table columns of the LHS's similarity
-// classifiers (if \psi is the set of column classifiers with non-zero decision boundaries of the
-// LHS, then the set is {l | \exists r,sim,value ((l, r, sim), value) \in \psi}). Along with the
-// partition values, each left table's record in this set also shares the set of right table's
-// records that are matched by the LHS to it with the others, if any. The Cartesian products of the
-// described sets are the elements of the second partition.
+// partition with the partition key being a set of the left table partitioning functions of the
+// LHS's record classifiers (if \psi is the set of record classifiers with non-total decision
+// boundaries of the LHS, then the set is {l | \exists r,sim,value ((l, r, sim), value) \in \psi}).
+// Along with the partition values, each left table's record in this set also shares the set of
+// right table's records that are matched by the LHS to it with the others, if any. The Cartesian
+// products of the described sets are the elements of the second partition.
 
 // This class represents an element of the LHSMRPartition, containing the factors for each
 // Cartesian product.
@@ -416,7 +416,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
         auto size_cmp = [](UpperSet const* p1, UpperSet const* p2) {
             return p1->size() < p2->size();
         };
-        // At least two column matches are considered, so this is impossible, use assumption to
+        // At least two record matches are considered, so this is impossible, use assumption to
         // avoid an extra check in std::sort.
         DESBORDANTE_ASSUME(!matched_rhs_rec_sets_scratch_.empty());
         std::ranges::sort(matched_rhs_rec_sets_scratch_, size_cmp);
@@ -438,7 +438,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
             auto contains_record = [rec](UpperSet const* set_ptr) {
                 return set_ptr->contains(rec);
             };
-            // At least two column matches are considered.
+            // At least two record matches are considered.
             DESBORDANTE_ASSUME(other_record_set_ptrs.begin() != other_record_set_ptrs.end());
             if (std::ranges::all_of(other_record_set_ptrs, contains_record)) {
                 rhs_set_intersection_.push_back(rec);
@@ -563,8 +563,8 @@ void BatchValidator::ValidateEmptyLhs(Result& result,
 void BatchValidator::RemoveTrivialForCardinality1Lhs(
         model::Index const lhs_index, Result& result,
         boost::dynamic_bitset<>& rhs_indices_to_validate, lattice::Rhs const& lattice_rhs) {
-    // If LHS has cardinality 1 and the column classifier uses a natural decision boundary, then it
-    // follows that the RHS column classifier decision boundary must be equal to it, giving us a
+    // If LHS has cardinality 1 and the record classifier uses a natural decision boundary, then it
+    // follows that the RHS record classifier decision boundary must be equal to it, giving us a
     // trivial dependency, no need to go through the full validation process for it.
     // NOTE: Never true when disjointedness pruning is on.
     if (rhs_indices_to_validate.test_set(lhs_index, false)) {
@@ -648,3 +648,4 @@ auto BatchValidator::ValidateBatch(std::vector<ValidationSelection>& selections)
     return results_;
 }
 }  // namespace algos::hymde::cover_calculation
+

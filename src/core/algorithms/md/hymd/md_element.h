@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "algorithms/md/hymd/column_classifier_value_id.h"
 #include "model/index.h"
 
