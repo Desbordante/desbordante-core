@@ -9,6 +9,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/cfd/enums.h"
+#include "algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
@@ -30,6 +31,7 @@ constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
+constexpr PyTypeObject* const kPyDict = &PyDict_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -87,6 +89,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
             PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
+            PyTypePair<algos::pattern_fd::PatternsTable, kPyList, kPyDict>,
             {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {
                  return MakeTypeTuple(
