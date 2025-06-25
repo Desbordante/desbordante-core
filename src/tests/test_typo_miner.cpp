@@ -1,14 +1,37 @@
-#include <functional>
-#include <utility>
+#include <assert.h>       // for assert
+#include <iostream>       // for basic_ostream
+#include <iterator>       // for prev, next
+#include <memory>         // for unique_ptr
+#include <stdexcept>      // for runtime_error
+#include <string>         // for hash, string
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for pair, move
+#include <vector>         // for vector
 
-#include <boost/functional/hash.hpp>
-#include <gtest/gtest.h>
+#include <boost/container_hash/hash.hpp>            // for hash
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
+#include <gtest/gtest.h>                            // for Test, UnitTest
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/pipelines/typo_miner/typo_miner.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
+#include "algorithm_types.h"                             // for AlgorithmType
+#include "algorithms/algo_factory.h"                     // for ConfigureFro...
+#include "algorithms/pipelines/typo_miner/typo_miner.h"  // for TypoMiner
+#include "all_csv_configs.h"                             // for kSimpleTypos
+#include "config/names.h"                                // for kCsvConfig
+#include "create_algorithm.h"                            // for GetAllDerived
+#include "csv_config_util.h"                             // for MakeInputTable
+#include "fd/fd.h"                                       // for FD
+#include "table/column.h"                                // for Column
+#include "table/column_data.h"                           // for ColumnData
+#include "table/column_layout_relation_data.h"           // for ColumnLayout...
+#include "table/position_list_index.h"                   // for PLI
+#include "table/relational_schema.h"                     // for RelationalSc...
+#include "table/vertical.h"                              // for Vertical
+
+namespace algos {
+class PliBasedFDAlgorithm;
+}
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;

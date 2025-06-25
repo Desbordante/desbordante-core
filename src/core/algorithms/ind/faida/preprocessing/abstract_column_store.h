@@ -35,7 +35,7 @@ protected:
     size_t const null_hash_;
 
     AbstractColumnStore(int sample_goal, size_t null_hash)
-        : sample_goal_(sample_goal), null_hash_(null_hash){};
+        : sample_goal_(sample_goal), null_hash_(null_hash) {};
 
     void LoadData(std::string const& dataset_name, TableIndex table_idx,
                   model::IDatasetStream& input_data);

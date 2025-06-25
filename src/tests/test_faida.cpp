@@ -1,10 +1,15 @@
-#include <gtest/gtest.h>
+#include <memory>  // for unique_ptr
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/ind/faida/faida.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "test_ind_util.h"
+#include <gtest/gtest.h>  // for TestInfo (ptr only), TEST_F
+
+#include "algorithms/algo_factory.h"     // for CreateAndLoadAlgorithm, StdP...
+#include "algorithms/ind/faida/faida.h"  // for Faida
+#include "all_csv_configs.h"             // for kIndTestTableFirst, kIndTest...
+#include "config/names.h"                // for kCsvConfigs, kHllAccuracy
+#include "csv_config_util.h"             // for CSVConfigs
+#include "csv_parser/csv_parser.h"       // for CSVConfig
+#include "ind/ind_algorithm.h"           // for INDAlgorithm
+#include "test_ind_util.h"               // for CheckINDsListsEqualityTest
 
 namespace tests {
 namespace {
