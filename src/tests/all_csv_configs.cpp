@@ -82,7 +82,7 @@ CSVConfig const kRulesPresentation =
 CSVConfig const kRulesSynthetic2 =
         CreateCsvConfig("transactional_data/rules-synthetic-2.csv", ',', false);
 CSVConfig const kRulesKaggleRows =
-        CreateCsvConfig("transactional_data/rules-kaggle-rows.csv", ',', true);
+        CreateCsvConfig("transactional_data/rules-kaggle-rows.csv", ',', false);
 CSVConfig const kTennis = CreateCsvConfig("cfd_data/tennis.csv", ',', true);
 CSVConfig const kMushroom = CreateCsvConfig("cfd_data/mushroom.csv", ',', true);
 CSVConfig const kTestDataStats = CreateCsvConfig("TestDataStats.csv", ',', false);
@@ -134,4 +134,22 @@ CSVConfig const kTestDC2 = CreateCsvConfig("TestDC2.csv", ',', true);
 CSVConfig const kTestDC3 = CreateCsvConfig("TestDC3.csv", ',', true);
 CSVConfig const kTestDC4 = CreateCsvConfig("TestDC4.csv", ',', true);
 CSVConfig const kTestDC5 = CreateCsvConfig("TestDC5.csv", ',', true);
+CSVConfig const kAccidents = CreateCsvConfig("transactional_data/accidents.csv", ' ', false);
+CSVConfig const kTestNeAR1 = CreateCsvConfig("transactional_data/TestNeAR1.csv", ',', false);
+CSVConfig const kTestNeARChess = CreateCsvConfig("transactional_data/TestNeAR_Chess.csv", ' ', false);
+CSVConfig const kTestNeARkosarak = CreateCsvConfig("transactional_data/TestNeAR_kosarak.csv", ' ', false);
+CSVConfig const kTestNeARretail = CreateCsvConfig("transactional_data/TestNeAR_retail.csv", ' ', false);
+CSVConfig const kTestNeARaccidents = CreateCsvConfig("transactional_data/TestNeAR_accidents.csv", ' ', false);
+CSVConfig const kTestNeARMushroom = CreateCsvConfig("transactional_data/TestNeAR_Mushroom.csv", ' ', false);
+CSVConfig const kTestNeART10I4D100K = CreateCsvConfig("transactional_data/TestNeAR_T10I4D100K.csv", ' ', false);
+CSVConfig const kTestNeARpumsb = CreateCsvConfig("transactional_data/TestNeAR_pumsb.csv", ' ', false);
+CSVConfig const kTestNeART40I10D100K = CreateCsvConfig("transactional_data/TestNeAR_T40I10D100K.csv", ' ', false);
+CSVConfig const kTestNeARconnect = CreateCsvConfig("transactional_data/TestNeAR_connect.csv", ' ', false);
+CSVConfig const kTestNeARpumsb_star = CreateCsvConfig("transactional_data/TestNeAR_pumsb_star.csv", ' ', false);
+CSVConfig const kTestNeARMarketItems = CreateCsvConfig("transactional_data/market_items.csv", ',', false);
+CSVConfig const kMushroom50 = CreateCsvConfig("transactional_data/mushroom/mushroom50.csv", ' ', false);
+CSVConfig const kMushroom40 = CreateCsvConfig("transactional_data/mushroom/mushroom40.csv", ' ', false);
+CSVConfig const kMushroom30 = CreateCsvConfig("transactional_data/mushroom/mushroom30.csv", ' ', false);
+CSVConfig const kMushroom20 = CreateCsvConfig("transactional_data/mushroom/mushroom20.csv", ' ', false);
+CSVConfig const kMushroom10 = CreateCsvConfig("transactional_data/mushroom/mushroom10.csv", ' ', false);
 }  // namespace tests
