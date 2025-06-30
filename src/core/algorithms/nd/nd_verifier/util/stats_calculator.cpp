@@ -1,14 +1,16 @@
 #include "algorithms/nd/nd_verifier/util/stats_calculator.h"
 
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <vector>
+#include <algorithm>  // for count
+#include <memory>     // for shared...
+#include <stdexcept>  // for runtim...
+#include <string>     // for hash
+#include <vector>     // for vector
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer
 
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
+#include "algorithms/nd/nd.h"                                  // for Weight...
+#include "algorithms/nd/nd_verifier/util/value_combination.h"  // for ValueC...
+#include "nd/nd_verifier/util/highlight.h"                     // for Highlight
 
 namespace algos::nd_verifier::util {
 

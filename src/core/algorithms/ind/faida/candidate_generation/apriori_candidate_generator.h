@@ -1,6 +1,8 @@
 #pragma once
 
-#include "algorithms/ind/faida/util/simple_ind.h"
+#include <vector>  // for vector
+
+#include "algorithms/ind/faida/util/simple_ind.h"  // for SimpleIND
 
 namespace algos::faida::apriori_candidate_generator {
 
