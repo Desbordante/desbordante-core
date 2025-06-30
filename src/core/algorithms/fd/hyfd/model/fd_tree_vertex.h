@@ -1,12 +1,14 @@
 #pragma once
 
-#include <memory>
-#include <utility>
-#include <vector>
+#include <memory>    // for shared_ptr, make_...
+#include <stddef.h>  // for size_t
+#include <utility>   // for move, pair
+#include <vector>    // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
 
-#include "algorithms/fd/raw_fd.h"
+struct RawFD;
 
 namespace algos::hyfd::fd_tree {
 

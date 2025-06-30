@@ -1,16 +1,29 @@
 #pragma once
 
-#include <cassert>
-#include <deque>
-#include <string>
-#include <vector>
+#include <cassert>        // for assert
+#include <memory>         // for shar...
+#include <stddef.h>       // for size_t
+#include <string>         // for hash
+#include <unordered_map>  // for unor...
+#include <unordered_set>  // for unor...
+#include <vector>         // for vector
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/dynamic_table_data.h"
+#include "algorithms/algorithm.h"                                // for Algo...
+#include "algorithms/fd/fd_verifier/dynamic_stats_calculator.h"  // for Dyna...
+#include "config/indices/type.h"                                 // for Indi...
+#include "config/tabular_data/input_table_type.h"                // for Inpu...
+#include "table/dynamic_position_list_index.h"                   // for DynPLI
+#include "table/idataset_stream.h"                               // for IDat...
+
+namespace algos {
+namespace fd_verifier {
+class Highlight;
+}
+}  // namespace algos
+
+namespace model {
+struct DynamicTableData;
+}
 
 namespace algos::fd_verifier {
 

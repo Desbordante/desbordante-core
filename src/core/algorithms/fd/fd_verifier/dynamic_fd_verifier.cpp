@@ -1,18 +1,27 @@
 #include "algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
 
-#include <chrono>
-#include <memory>
-#include <stdexcept>
+#include <functional>  // for function
+#include <memory>      // for shared_ptr
+#include <optional>    // for optional
+#include <utility>     // for pair, move
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer
 
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/indices/validate_index.h"
+#include "algorithm.h"              // for Algorithm
+#include "common_option.h"          // for CommonOp...
+#include "config/indices/option.h"  // for IndicesO...
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/crud_operations/operations.h"
-#include "config/tabular_data/input_table/option.h"
+#include "config/option_using.h"                             // for DESBORDA...
+#include "config/tabular_data/crud_operations/operations.h"  // for kCrudOpt...
+#include "config/tabular_data/input_table/option.h"          // for kTableOpt
+#include "exceptions.h"                                      // for Configur...
+#include "fd/fd_verifier/dynamic_stats_calculator.h"         // for DynamicS...
+#include "option.h"                                          // for Option
+#include "table/dynamic_table_data.h"                        // for DynamicT...
+#include "tabular_data/crud_operations/delete/option.h"      // for kDeleteS...
+#include "tabular_data/crud_operations/insert/option.h"      // for kInsertS...
+#include "tabular_data/crud_operations/update/option.h"      // for kUpdateS...
+#include "tabular_data/input_table_type.h"                   // for InputTable
 
 namespace algos::fd_verifier {
 

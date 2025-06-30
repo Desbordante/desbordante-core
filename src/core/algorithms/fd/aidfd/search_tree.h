@@ -1,9 +1,12 @@
 #pragma once
 
-#include <unordered_map>
+#include <functional>  // for function
+#include <memory>      // for shared_ptr, weak_ptr
+#include <stddef.h>    // for size_t
 #include <utility>
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/move/utility_core.hpp>              // for move
 
 class SearchTree {
 public:

@@ -1,13 +1,19 @@
 #include "sample.h"
 
-#include <chrono>
-#include <random>
-#include <string>
-#include <unordered_set>
-#include <vector>
+#include <algorithm>      // for min
+#include <cmath>          // for pow, sqrt, log
+#include <numbers>        // for pi
+#include <random>         // for uniform_int_distribution, mt19937
+#include <string>         // for hash, operator==, string, opera...
+#include <unordered_set>  // for unordered_set
+#include <vector>         // for vector, erase_if
 
-#include "frequency_handler.h"
-#include "model/table/tuple_index.h"
+#include "frequency_handler.h"        // for FrequencyHandler
+#include "model/table/tuple_index.h"  // for TupleIndex
+#include "table/column.h"             // for Column
+#include "table/column_index.h"       // for ColumnIndex
+#include "table/relational_schema.h"  // for RelationalSchema
+#include "table/typed_column_data.h"  // for TypedColumnData
 
 namespace algos {
 Sample::Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIndex rows,

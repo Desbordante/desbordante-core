@@ -1,16 +1,24 @@
 #include "sampler.h"
 
-#include <algorithm>
-#include <memory>
-#include <utility>
+#include <algorithm>  // for min, sort
+#include <assert.h>   // for assert
+#include <memory>     // for __shared_ptr_access
+#include <utility>    // for move, pair, make...
 
-#include <boost/asio/post.hpp>
-#include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/thread/future.hpp>
+#include <boost/asio/post.hpp>                       // for post
+#include <boost/asio/thread_pool.hpp>                // for thread_pool
+#include <boost/exception/detail/exception_ptr.hpp>  // for current_exception
+#include <boost/move/utility_core.hpp>               // for move
+#include <boost/thread/future.hpp>                   // for unique_future
+#include <boost/thread/futures/wait_for_all.hpp>     // for wait_for_all
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "efficiency.h"
+#include "algorithms/fd/hycommon/util/pli_util.h"  // for PLIUtil
+#include "efficiency.h"                            // for Sampler::Efficiency
+#include "fd/hycommon/all_column_combinations.h"   // for AllColumnCombina...
+#include "fd/hycommon/efficiency_threshold.h"      // for kEfficiencyThres...
+#include "fd/hycommon/types.h"                     // for IdPairs, Rows
+#include "table/position_list_index.h"             // for PLI, PositionLis...
+#include "thread_number/type.h"                    // for ThreadNumType
 
 namespace {
 

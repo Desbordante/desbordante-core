@@ -1,9 +1,17 @@
 #include "preprocessor.h"
 
-#include <algorithm>
-#include <vector>
+#include <algorithm>  // for transform, sort
+#include <deque>      // for _Deque_iterator
+#include <iterator>   // for back_insert_iterator
+#include <utility>    // for move, pair, make_pair
+#include <vector>     // for vector
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "algorithms/fd/hycommon/util/pli_util.h"  // for PLIUtil
+#include "fd/hycommon/types.h"                     // for ClusterId, PLIs
+#include "table/column_layout_relation_data.h"     // for ColumnLayoutRelati...
+#include "table/position_list_index.h"             // for PositionListIndex
 
 namespace algos::hy::util {
 
