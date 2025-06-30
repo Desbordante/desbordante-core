@@ -1,14 +1,17 @@
 #pragma once
 
 #include <list>
+#include <memory>  // for unique...
 #include <queue>
+#include <set>  // for set
 #include <stack>
+#include <string>         // for string
+#include <unordered_map>  // for unorde...
 #include <vector>
 
 #include "algorithms/association_rules/candidate_hash_tree.h"
 #include "algorithms/association_rules/node.h"
 #include "ar_algorithm.h"
-#include "model/transaction/itemset.h"
 
 namespace algos {
 

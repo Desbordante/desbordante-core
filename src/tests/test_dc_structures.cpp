@@ -1,7 +1,6 @@
 #include <memory>
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for Message
 
 #include "all_csv_configs.h"
 #include "create_type.h"

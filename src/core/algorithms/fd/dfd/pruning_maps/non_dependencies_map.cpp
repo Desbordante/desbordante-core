@@ -1,5 +1,13 @@
 #include "non_dependencies_map.h"
 
+#include <utility>  // for pair
+
+#include "custom_hashes.h"                    // for hash
+#include "fd/dfd/pruning_maps/pruning_map.h"  // for PruningMap
+#include "table/vertical.h"                   // for Vertical
+
+class RelationalSchema;
+
 NonDependenciesMap::NonDependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 
 std::unordered_set<Vertical> NonDependenciesMap::GetPrunedSupersets(

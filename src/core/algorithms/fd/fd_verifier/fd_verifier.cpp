@@ -1,15 +1,26 @@
 #include "algorithms/fd/fd_verifier/fd_verifier.h"
 
 #include <chrono>
-#include <memory>
-#include <stdexcept>
+#include <functional>  // for function
+#include <memory>      // for shared_ptr, uni...
+#include <stdexcept>   // for runtime_error
 
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/indices/validate_index.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"                  // for Algorithm
+#include "common_option.h"              // for CommonOption
+#include "config/equal_nulls/option.h"  // for kEqualNullsOpt
+#include "config/indices/option.h"      // for IndicesOption
 #include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include "config/option_using.h"                      // for DESBORDANTE_OPT...
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "fd/fd_verifier/stats_calculator.h"          // for StatsCalculator
+#include "indices/type.h"                             // for IndicesType
+#include "table/column_data.h"                        // for ColumnData
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/idataset_stream.h"                    // for IDatasetStream
+#include "table/relational_schema.h"                  // for RelationalSchema
 
 namespace algos::fd_verifier {
 

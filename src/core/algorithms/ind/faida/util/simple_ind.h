@@ -1,11 +1,15 @@
 #pragma once
 
-#include <bit>
-#include <memory>
-#include <utility>
+#include <bit>          // for rotl
+#include <cstddef>      // for size_t
+#include <functional>   // for equal_to
+#include <memory>       // for shared_ptr, __shared_ptr_access
+#include <string_view>  // for hash
+#include <utility>      // for move
 
-#include "algorithms/ind/faida/hashing/hashing.h"
-#include "simple_cc.h"
+#include "simple_cc.h"                 // for SimpleCC, hash
+#include "table/arity_index.h"         // for ArityIndex
+#include "table/column_combination.h"  // for ColumnCombination
 
 namespace algos::faida {
 

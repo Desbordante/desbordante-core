@@ -1,19 +1,35 @@
 #include "order.h"
 
-#include <algorithm>
-#include <iostream>
-#include <memory>
-#include <utility>
+#include <algorithm>         // for search, find
+#include <initializer_list>  // for initializer_list
+#include <memory>            // for shared_ptr, uni...
+#include <stddef.h>          // for size_t
+#include <unordered_set>     // for unordered_set
+#include <utility>           // for move
 
-#include <easylogging++.h>
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+#include <easylogging++.h>                         // for Writer, CDEBUG
 
+#include "algorithm.h"      // for Algorithm
+#include "builtin.h"        // for TypeId, Compare...
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
-#include "config/tabular_data/input_table/option.h"
-#include "dependency_checker.h"
-#include "list_lattice.h"
-#include "model/table/tuple_index.h"
-#include "model/types/types.h"
-#include "order_utility.h"
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "create_type.h"                              // for CreateSpecificType
+#include "dependency_checker.h"                       // for ValidityType
+#include "list_lattice.h"                             // for ListLattice
+#include "mixed_type.h"                               // for MixedType
+#include "model/table/tuple_index.h"                  // for TupleIndex
+#include "od/order/sorted_partitions.h"               // for SortedPartition
+#include "order_utility.h"                            // for AttributeList
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
+
+namespace config {
+template <typename T>
+class Option;
+}
 
 namespace algos::order {
 

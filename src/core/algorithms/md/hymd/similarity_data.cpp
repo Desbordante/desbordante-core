@@ -1,16 +1,33 @@
 #include "algorithms/md/hymd/similarity_data.h"
 
-#include <algorithm>
-#include <numeric>
+#include <algorithm>  // for sort
+#include <numeric>    // for iota
 #include <ranges>
-#include <span>
+#include <span>   // for span
+#include <tuple>  // for tuple
 
 #include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
-#include "model/index.h"
+#include "md/decision_boundary.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/column_match_info.h"
+#include "md/hymd/lhs_ccv_ids_info.h"
+#include "md/hymd/preprocessing/column_matches/column_match.h"
+#include "model/index.h"  // for Index
 #include "util/get_preallocated_vector.h"
+
+namespace algos {
+namespace hymd {
+namespace indexes {
+class RecordsInfo;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}
 
 namespace algos::hymd {
 

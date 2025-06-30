@@ -1,19 +1,34 @@
-#include <algorithm>
-#include <iostream>
+#include <algorithm>   // for sort
+#include <filesystem>  // for operator==, path
+#include <iostream>    // for char_traits, basi...
+#include <list>        // for list, _List_iterator
+#include <memory>      // for unique_ptr, make_...
+#include <set>         // for set, operator==
+#include <stddef.h>    // for size_t
+#include <stdexcept>   // for runtime_error
+#include <string>      // for hash, string, ope...
+#include <utility>     // for pair, make_pair
+#include <vector>      // for vector
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <gmock/gmock.h>                            // for ContainerEq, Eq
+#include <gtest/gtest.h>                            // for AssertionResult
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/fd_mine/fd_mine.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/pfdtane.h"
-#include "algorithms/fd/tane/tane.h"
-#include "config/error/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "model/table/relational_schema.h"
-#include "test_fd_util.h"
+#include "algorithms/algo_factory.h"        // for CreateAndLoadAlgo...
+#include "algorithms/fd/fd_mine/fd_mine.h"  // for FdMine
+#include "algorithms/fd/pyro/pyro.h"        // for Pyro
+#include "all_csv_configs.h"                // for kBreastCancer
+#include "config/error/type.h"              // for ErrorType
+#include "config/names.h"                   // for kCsvConfig, kError
+#include "csv_config_util.h"                // for MakeInputTable
+#include "csv_parser/csv_parser.h"          // for CSVConfig
+#include "fd/fd.h"                          // for FD
+#include "fd/fd_algorithm.h"                // for FDAlgorithm
+#include "fd/pyrocommon/core/parameters.h"  // for Parameters
+#include "fd/raw_fd.h"                      // for RawFD
+#include "table/column.h"                   // for Column
+#include "table/vertical.h"                 // for Vertical
+#include "test_fd_util.h"                   // for AlgorithmTest
 
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;

@@ -1,16 +1,20 @@
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <assert.h>  // for assert
+#include <memory>    // for unique_ptr
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/pfd_verifier/pfd_stats_calculator.h"
-#include "algorithms/fd/tane/enums.h"
-#include "config/equal_nulls/type.h"
-#include "config/error/type.h"
-#include "config/error_measure/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
+#include "algorithms/algorithm.h"                             // for Algorithm
+#include "algorithms/fd/pfd_verifier/pfd_stats_calculator.h"  // for PFDStat...
+#include "algorithms/fd/tane/enums.h"                         // for operator+
+#include "config/equal_nulls/type.h"                          // for EqNulls...
+#include "config/error_measure/type.h"                        // for PfdErro...
+#include "config/indices/type.h"                              // for Indices...
+#include "config/tabular_data/input_table_type.h"             // for InputTable
+#include "table/position_list_index.h"                        // for PLI
+
+class ColumnLayoutRelationData;
 
 namespace algos {
 

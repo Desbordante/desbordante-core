@@ -1,8 +1,12 @@
-#include <memory>
+#include <cstddef>  // for byte
+#include <memory>   // for unique_ptr
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for CmpHelperFloatingPointEQ, TestInfo (ptr only)
 
-#include "types.h"
+#include "builtin.h"       // for Double, Int
+#include "double_type.h"   // for DoubleType
+#include "int_type.h"      // for IntType
+#include "numeric_type.h"  // for INumericType
 
 namespace tests {
 class NumericCast : public ::testing::Test {

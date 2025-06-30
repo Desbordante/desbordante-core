@@ -1,11 +1,13 @@
 #include "algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
 
-#include <algorithm>
-#include <cassert>
-#include <numeric>
-#include <unordered_map>
+#include <algorithm>      // for max_element, sort
+#include <cassert>        // for assert
+#include <numeric>        // for accumulate
+#include <unordered_map>  // for _Node_const_iterator
 
-#include <easylogging++.h>
+#include "fd/fd_verifier/highlight.h"           // for Highlight
+#include "table/dynamic_position_list_index.h"  // for DynPLI, hash
+#include "table/dynamic_table_data.h"           // for DynamicTableData
 
 namespace algos::fd_verifier {
 

@@ -1,7 +1,26 @@
 #pragma once
-#include <boost/format.hpp>
 
-#include "dependency_strategy.h"
+#include <memory>   // for allocator, uniq...
+#include <ostream>  // for basic_ios::imbue
+#include <string>   // for string, char_tr...
+
+#include <boost/format.hpp>
+#include <boost/optional/optional.hpp>  // for get_pointer
+
+#include "dependency_strategy.h"                      // for DependencyStrategy
+#include "fd/pyrocommon/core/dependency_candidate.h"  // for DependencyCandi...
+#include "fd/pyrocommon/core/profiling_context.h"     // for ProfilingContext
+#include "fd/pyrocommon/model/confidence_interval.h"  // for ConfidenceInterval
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/relational_schema.h"                  // for RelationalSchema
+#include "table/vertical.h"                           // for Vertical
+
+class DependencyConsumer;
+class SearchSpace;
+
+namespace model {
+class PositionListIndex;
+}
 
 class KeyG1Strategy : public DependencyStrategy {
 private:

@@ -1,11 +1,21 @@
 #include "algorithms/fd/fd_verifier/stats_calculator.h"
 
-#include <algorithm>
-#include <cassert>
-#include <numeric>
-#include <unordered_map>
+#include <algorithm>      // for max_element, sort
+#include <cassert>        // for assert
+#include <cstddef>        // for size_t, byte
+#include <deque>          // for deque, _Deque_i...
+#include <numeric>        // for accumulate
+#include <unordered_map>  // for unordered_map
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CDEBUG
+
+#include "fd/fd_verifier/highlight.h"                 // for Highlight
+#include "mixed_type.h"                               // for MixedType
+#include "string_type.h"                              // for StringType
+#include "table/column_layout_relation_data.h"        // for ColumnLayoutRel...
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/typed_column_data.h"                  // for TypedColumnData
+#include "type.h"                                     // for Type
 
 namespace {
 

@@ -1,17 +1,20 @@
 #pragma once
 
-#include <deque>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include <deque>          // for deque
+#include <functional>     // for function
+#include <set>            // for set
+#include <stddef.h>       // for size_t
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <vector>         // for vector
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>  // for hash
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
-#include "util/custom_hashes.h"
+#include "algorithms/fd/fd_algorithm.h"  // for FDAlgorithm
+#include "model/table/vertical.h"        // for Vertical
+#include "util/custom_hashes.h"          // for hash
+
+class ColumnLayoutRelationData;
 
 namespace model {
 

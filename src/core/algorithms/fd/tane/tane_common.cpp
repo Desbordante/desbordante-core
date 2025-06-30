@@ -1,19 +1,32 @@
 #include "tane_common.h"
 
-#include <chrono>
-#include <iomanip>
-#include <list>
-#include <memory>
+#include <cstddef>  // for size_t
+#include <iomanip>  // for _Setw, setw
+#include <limits>   // for numeric_limits
+#include <list>     // for list, _List_ite...
+#include <map>      // for map, _Rb_tree_i...
+#include <memory>   // for unique_ptr, sha...
+#include <ostream>  // for endl
+#include <utility>  // for move, pair
+#include <vector>   // for vector
 
-#include <easylogging++.h>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+#include <boost/type_index/type_index_facade.hpp>   // for operator==
+#include <easylogging++.h>                          // for Writer, LOG
 
-#include "config/error/option.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "fd/tane/model/lattice_level.h"
-#include "fd/tane/model/lattice_vertex.h"
-#include "model/table/column_data.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/relational_schema.h"
+#include "common_option.h"                            // for CommonOption
+#include "config/error/option.h"                      // for kErrorOpt
+#include "error/type.h"                               // for ErrorType
+#include "fd/pli_based_fd_algorithm.h"                // for PliBasedFDAlgor...
+#include "fd/tane/model/lattice_level.h"              // for LatticeLevel
+#include "fd/tane/model/lattice_vertex.h"             // for LatticeVertex
+#include "model/table/column_data.h"                  // for ColumnData
+#include "model/table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "model/table/relational_schema.h"            // for RelationalSchema
+#include "primitive_collection.h"                     // for PrimitiveCollec...
+#include "table/column.h"                             // for Column
+#include "table/position_list_index.h"                // for PositionListIndex
+#include "table/vertical.h"                           // for Vertical
 
 namespace algos {
 using boost::dynamic_bitset;

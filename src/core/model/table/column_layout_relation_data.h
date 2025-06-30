@@ -5,13 +5,18 @@
 
 #pragma once
 
-#include <cmath>
-#include <vector>
+#include <memory>    // for unique_ptr
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
 
-#include "column_data.h"
-#include "idataset_stream.h"
-#include "relation_data.h"
-#include "relational_schema.h"
+#include "column_data.h"    // for ColumnData
+#include "relation_data.h"  // for RelationData
+
+class RelationalSchema;
+
+namespace model {
+class IDatasetStream;
+}
 
 class ColumnLayoutRelationData final : public RelationData {
 public:

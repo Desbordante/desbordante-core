@@ -1,9 +1,13 @@
 #include "algorithms/md/hymd/lattice_traverser.h"
 
-#include <ranges>
+#include <assert.h>  // for assert
+#include <tuple>     // for tuple
 
-#include "algorithms/md/hymd/utility/zip.h"
-#include "model/index.h"
+#include "algorithms/md/hymd/utility/zip.h"  // for Zip
+#include "md/hymd/lattice/level_getter.h"    // for LevelGetter
+#include "md/hymd/lattice/md_lattice.h"      // for MdLattice
+#include "md/hymd/validator.h"               // for BatchValidator
+#include "worker_thread_pool.h"              // for WorkerThreadPool
 
 namespace algos::hymd {
 auto LatticeTraverser::AdjustLattice(std::vector<lattice::ValidationInfo>& validations,

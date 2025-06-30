@@ -1,12 +1,31 @@
 #include "profiling_context.h"
 
-#include <utility>
+#include <algorithm>  // for max_element, min_e...
+#include <ostream>    // for basic_ios::imbue
+#include <utility>    // for move
+#include <variant>    // for get, holds_alterna...
 
-#include <easylogging++.h>
+#include <boost/format.hpp>
+#include <boost/move/utility_core.hpp>  // for move
+#include <boost/optional/optional.hpp>  // for get_pointer
+#include <easylogging++.h>              // for Writer, LOG, CTRACE
 
-#include "../model/list_agree_set_sample.h"
-#include "../model/pli_cache.h"
-#include "model/table/vertical_map.h"
+#include "caching_method.h"                             // for CachingMethod
+#include "custom_random.h"                              // for CustomRandom
+#include "fd/pyrocommon/core/parameters.h"              // for Parameters
+#include "fd/pyrocommon/model/agree_set_sample.h"       // for AgreeSetSample
+#include "fd/pyrocommon/model/list_agree_set_sample.h"  // for ListAgreeSetSample
+#include "fd/pyrocommon/model/pli_cache.h"              // for PLICache
+#include "model/table/vertical_map.h"                   // for VerticalMap, Block...
+#include "table/column.h"                               // for Column
+#include "table/column_data.h"                          // for ColumnData
+#include "table/position_list_index.h"                  // for PositionListIndex
+#include "table/relational_schema.h"                    // for RelationalSchema
+#include "table/vertical.h"                             // for Vertical
+
+class PartialFD;
+class PartialKey;
+enum class CacheEvictionMethod;
 
 using std::shared_ptr;
 

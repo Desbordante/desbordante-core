@@ -1,13 +1,21 @@
 #pragma once
 
-#include <set>
+#include <cstddef>  // for size_t, byte
+#include <set>      // for set
+#include <string>   // for string
+#include <vector>   // for vector
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/statistics/statistic.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/thread_number/type.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "algorithm.h"                             // for Algorithm
+#include "algorithms/statistics/statistic.h"       // for Statistic, ColumnS...
+#include "builtin.h"                               // for CompareResult
+#include "config/equal_nulls/type.h"               // for EqNullsType
+#include "config/tabular_data/input_table_type.h"  // for InputTable
+#include "config/thread_number/type.h"             // for ThreadNumType
+#include "table/typed_column_data.h"               // for TypedColumnData
+
+namespace model {
+class INumericType;
+}
 
 namespace algos {
 

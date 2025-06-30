@@ -1,8 +1,12 @@
 #include "config/max_arity/option.h"
 
-#include <limits>
+#include <limits>   // for numeric_limits
+#include <variant>  // for variant
 
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
+#include "exceptions.h"      // for ConfigurationError
+#include "max_arity/type.h"  // for MaxArityType
 
 namespace config {
 using names::kMaximumArity, descriptions::kDMaximumArity;

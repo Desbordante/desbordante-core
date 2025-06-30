@@ -1,9 +1,23 @@
-#include <gtest/gtest.h>
+#include <list>     // for list, operator==
+#include <memory>   // for unique_ptr
+#include <set>      // for set, operator==
+#include <string>   // for basic_string, oper...
+#include <utility>  // for pair, move, make_pair
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/association_rules/apriori.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include <gtest/gtest.h>  // for Message, TestPartR...
+
+#include "algorithms/algo_factory.h"               // for ConfigureFromMap
+#include "all_csv_configs.h"                       // for kRulesKaggleRows
+#include "association_rules/ar.h"                  // for ARStrings
+#include "association_rules/ar_algorithm.h"        // for ARAlgorithm
+#include "association_rules/ar_algorithm_enums.h"  // for InputFormat, opera...
+#include "config/names.h"                          // for kCsvConfig, kInput...
+
+namespace algos {
+class Apriori;
+}
+
+struct CSVConfig;
 
 namespace tests {
 

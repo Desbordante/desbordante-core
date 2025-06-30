@@ -1,6 +1,7 @@
 #include "config/indices/validate_index.h"
 
-#include "config/exceptions.h"
+#include "config/exceptions.h"  // for ConfigurationError
+#include "indices/type.h"       // for IndexType
 
 namespace config {
 

@@ -1,7 +1,9 @@
 #include "dc/FastADC/util/dc_candidate_trie.h"
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/util/dc_candidate.h"
+#include <algorithm>  // for __none_of_fn, none_of
+
+#include "dc/FastADC/model/predicate.h"    // for kPredicateBits, PredicateB...
+#include "dc/FastADC/util/dc_candidate.h"  // for DCCandidate
 
 namespace algos::fastadc {
 
