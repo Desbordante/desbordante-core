@@ -39,6 +39,24 @@ public:
         }
     }
 
+    std::vector<int> GetColumnIndices() const {
+        std::vector<int> indices;
+        for (std::size_t i = 0; i < kBitsNum; ++i) {
+            if (bitset_._Unchecked_test(i)) {
+                indices.push_back(static_cast<int>(i));
+            }
+        }
+        return indices;
+    }
+
+    static AttributeSet FromVector(std::vector<int> const& indices) {
+        model::Bitset<kBitsNum> bs;
+        for (int idx : indices) {
+            bs._Unchecked_set(static_cast<std::size_t>(idx), true);
+        }
+        return AttributeSet(bs);
+    }
+
     AttributeSet& operator&=(AttributeSet const& b) noexcept {
         bitset_ &= b.bitset_;
         return *this;
