@@ -52,7 +52,6 @@ endif()
 
 # --- Build Configuration Options ---
 
-option(COPY_PYTHON_EXAMPLES "Copy Python examples" OFF)
 option(COMPILE_TESTS "Build tests" ON)
 option(UNPACK_DATASETS "Unpack datasets" ON)
 option(BUILD_NATIVE "Build for host machine" ON)
@@ -322,9 +321,4 @@ endif()
 # Configure Python bindings
 if(PYTHON)
     add_subdirectory("src/python_bindings")
-endif()
-
-# Configure examples
-if(COPY_PYTHON_EXAMPLES)
-    add_subdirectory("examples")
 endif()

@@ -81,7 +81,7 @@ if [[ $NO_UNPACK == true ]]; then
 fi
 
 if [[ $PYBIND == true ]]; then
-    PREFIX="$PREFIX -D PYTHON=COMPILE -D COPY_PYTHON_EXAMPLES=ON"
+    PREFIX="$PREFIX -D PYTHON=COMPILE"
 fi
 
 if [[ $LTO == true ]]; then
