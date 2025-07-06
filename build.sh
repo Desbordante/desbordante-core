@@ -49,7 +49,7 @@ for i in "$@"; do
             ;;
         # The maximum number of concurrent processes for building
         -j* | --parallel*)
-            JOBS_OPTION=$i
+            BUILD_OPTS="$BUILD_OPTS $i"
             ;;
         # Set debug build type
         -d | --debug)
@@ -73,11 +73,11 @@ for i in "$@"; do
             ;;
         # Forward option to CMake, long option
         --cmake-opt=*)
-            PREFIX="$PREFIX ${i#*=}"
+            CMAKE_OPTS="$CMAKE_OPTS ${i#*=}"
             ;;
         # Forward option to CMake, short option
         -C*)
-            PREFIX="$PREFIX ${i#*C}"
+            CMAKE_OPTS="$CMAKE_OPTS ${i#*C}"
             ;;
         # Forward option to build system, long option
         --build-opt=*)
@@ -95,37 +95,39 @@ for i in "$@"; do
     esac
 done
 
+CMAKE_OPTS='-G Ninja'
+
 if [[ $NO_TESTS == true ]]; then
-    PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_TESTS=OFF"
 fi
 
 if [[ $BENCHMARK == true ]]; then
-    PREFIX="$PREFIX -D COMPILE_BENCHMARKS=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_BENCHMARKS=ON"
 fi
 
 if [[ $NO_UNPACK == true ]]; then
-    PREFIX="$PREFIX -D UNPACK_DATASETS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D UNPACK_DATASETS=OFF"
 fi
 
 if [[ $PYBIND == true ]]; then
-    PREFIX="$PREFIX -D PYTHON=COMPILE"
+    CMAKE_OPTS="$CMAKE_OPTS -D PYTHON=COMPILE"
 fi
 
 if [[ $LTO == true ]]; then
-    PREFIX="$PREFIX -D USE_LTO=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D USE_LTO=ON"
 fi
 
 if [[ $GDB_DEBUG == true ]]; then
-    PREFIX="$PREFIX -D GDB_DEBUG=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D GDB_DEBUG=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
-    PREFIX="$PREFIX -D CMAKE_BUILD_TYPE=Release"
+    CMAKE_OPTS="$CMAKE_OPTS -D CMAKE_BUILD_TYPE=Release"
 fi
 
 if [[ -n $SANITIZER ]]; then
-    PREFIX="$PREFIX -D SANITIZER=${SANITIZER}"
+    CMAKE_OPTS="$CMAKE_OPTS -D SANITIZER=${SANITIZER}"
 fi
 
 rm -f build/CMakeCache.txt
-cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION $BUILD_OPTS
+cmake -S . -B build $CMAKE_OPTS && cmake --build build $BUILD_OPTS
