@@ -9,13 +9,14 @@
 #include "algorithms/md/md_verifier/cmptr.h"
 #include "algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "algorithms/md/md_verifier/highlights/highlights.h"
+#include "algorithms/md/md_verifier/validation/validation.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/thread_number/type.h"
 #include "model/table/relational_schema.h"
 
 namespace algos::md {
 
-class MDVerifier : public MdAlgorithm {
+class MDVerifier : public Algorithm {
 private:
     config::InputTable left_table_;
     config::InputTable right_table_;
@@ -24,7 +25,7 @@ private:
     std::shared_ptr<RelationalSchema> right_schema_;
 
     std::unique_ptr<model::MD> input_md_;
-    std::unique_ptr<model::MD> true_rhs_decision_boundary_md_;
+    std::vector<model::MD> md_suggestions_;
 
     std::vector<ColumnSimilarityClassifier> lhs_;
     ColumnSimilarityClassifier rhs_;
@@ -36,10 +37,12 @@ private:
 
     config::ThreadNumType threads_;
 
-    void ResetStateMd() override;
+    void ResetState() override;
 
     void RegisterOptions();
     void VerifyMD();
+
+    MDValidationCalculator CreateValidator() const;
 
     model::MD BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs,
                       ColumnSimilarityClassifier const& rhs);
@@ -60,8 +63,8 @@ public:
         return true_rhs_decision_boundary_;
     }
 
-    std::list<model::MD> const& GetMDSuggestion() const {
-        return MdList();
+    std::vector<model::MD> const& GetMDSuggestion() const {
+        return md_suggestions_;
     }
 
     model::MD GetInputMD() const {

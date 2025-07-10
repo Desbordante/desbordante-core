@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "algorithms/md/md.h"
-#include "algorithms/md/md_verifier/validation/rows_pairs.h"
+#include "algorithms/md/md_verifier/validation/records_pairs.h"
 #include "algorithms/md/similarity.h"
 #include "config/indices/type.h"
 #include "model/index.h"
@@ -52,12 +52,16 @@ private:
     std::vector<Highlight> highlights_;
 
 public:
+    MDHighlights() {}
+
+    MDHighlights(std::vector<Highlight> highlights) : highlights_(std::move(highlights)) {}
+
     std::vector<Highlight> const& GetHighlights() const {
         return highlights_;
     }
 
     static MDHighlights CreateFrom(model::RhsSimilarityClassifierDesctription rhs_desc,
-                                   RowsPairSet const& rows_pairs,
-                                   RowsToSimilarityMap const& rows_to_similarity);
+                                   RecordsPairsSet const& rows_pairs,
+                                   RecordsPairToSimilarityMap const& rows_to_similarity);
 };
 }  // namespace algos::md

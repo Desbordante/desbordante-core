@@ -70,7 +70,7 @@ class TestMDVerifierHighlights : public ::testing::TestWithParam<MDVerifierHighl
 class TestMDVerifierSuggestions : public ::testing::TestWithParam<MDVerifierSuggestionsParams> {};
 
 static std::unique_ptr<algos::md::MDVerifier> CreateMDVerifier(algos::StdParamsMap const& map) {
-    auto mp = algos::StdParamsMap(map);
+    algos::StdParamsMap mp = algos::StdParamsMap(map);
     return algos::CreateAndLoadAlgorithm<algos::md::MDVerifier>(mp);
 }
 
@@ -80,10 +80,10 @@ static bool ExecuteAlgo(algos::md::MDVerifier& md_verifier) {
 }
 
 TEST_P(TestMDVerifier, DefaultCase) {
-    auto const& params = GetParam().params;
-    auto verifier = CreateMDVerifier(params);
+    algos::StdParamsMap const& params = GetParam().params;
+    std::unique_ptr<algos::md::MDVerifier> verifier = CreateMDVerifier(params);
 
-    auto md_result = ExecuteAlgo(*verifier);
+    bool md_result = ExecuteAlgo(*verifier);
 
     ASSERT_EQ(GetParam().expected, md_result);
     ASSERT_DOUBLE_EQ(verifier->GetTrueRhsDecisionBoundary(), GetParam().suggestions);
@@ -91,27 +91,28 @@ TEST_P(TestMDVerifier, DefaultCase) {
 
 TEST_P(TestMDVerifierHighlights, DefaultCase) {
     using Highlight = algos::md::MDHighlights::Highlight;
-    auto const& params = GetParam().params;
-    auto verifier = CreateMDVerifier(params);
+    algos::StdParamsMap const& params = GetParam().params;
+    std::unique_ptr<algos::md::MDVerifier> verifier = CreateMDVerifier(params);
 
-    auto md_result = ExecuteAlgo(*verifier);
+    bool md_result = ExecuteAlgo(*verifier);
 
     ASSERT_EQ(GetParam().expected, md_result);
     std::vector<Highlight> highlights = verifier->GetHighlights();
     ASSERT_EQ(highlights.size(), GetParam().highlights.size());
-    for (auto& highlight : highlights) {
+    for (Highlight const& highlight : highlights) {
+        std::cout << highlight.ToString() << std::endl;
         ASSERT_TRUE(GetParam().highlights.contains(highlight.ToString()));
     }
 }
 
 TEST_P(TestMDVerifierSuggestions, DefaultCase) {
-    auto const& params = GetParam().params;
-    auto verifier = CreateMDVerifier(params);
+    algos::StdParamsMap const& params = GetParam().params;
+    std::unique_ptr<algos::md::MDVerifier> verifier = CreateMDVerifier(params);
 
-    auto md_result = ExecuteAlgo(*verifier);
+    bool md_result = ExecuteAlgo(*verifier);
 
     ASSERT_EQ(GetParam().expected, md_result);
-    std::list<model::MD> suggested_mds = verifier->GetMDSuggestion();
+    std::vector<model::MD> suggested_mds = verifier->GetMDSuggestion();
     ASSERT_EQ(suggested_mds.size(), 1);
     std::string rhs_suggested_md_string = suggested_mds.front().ToStringActiveLhsOnly();
     ASSERT_EQ(rhs_suggested_md_string, GetParam().md_string);
@@ -120,7 +121,7 @@ TEST_P(TestMDVerifierSuggestions, DefaultCase) {
     }
 }
 
-auto const kEps = std::numeric_limits<DecisionBoundary>::epsilon();
+double const kEps = std::numeric_limits<DecisionBoundary>::epsilon();
 
 INSTANTIATE_TEST_SUITE_P(
         TestMDVerifierSuite, TestMDVerifier,
@@ -211,7 +212,37 @@ INSTANTIATE_TEST_SUITE_P(
                                         static_cast<model::Index>(3), static_cast<model::Index>(3),
                                         0.0),
                                 0.75 + kEps),
-                        false, 0.75)));
+                        false, 0.75),
+                MDVerifierParams(
+                        kMDTrivial,
+                        {algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(2),
+                                        0.0),
+                                1.0)},
+                        algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(3), static_cast<model::Index>(3),
+                                        0.0),
+                                1.0),
+                        true, 1.0),
+                MDVerifierParams(
+                        kMDTrivial,
+                        {algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(2),
+                                        0.0),
+                                1.0)},
+                        algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(3),
+                                        0.0),
+                                1.0),
+                        false, 0.0)));
 
 INSTANTIATE_TEST_SUITE_P(
         TestMDVerifierHighlightsSuite, TestMDVerifierHighlights,
@@ -314,7 +345,39 @@ INSTANTIATE_TEST_SUITE_P(
                          "table with similarity 0.75 and decision boundary 0.75",
                          "levenshtein(diet, diet) violates MD in 1 row of left table and 0 row of "
                          "right "
-                         "table with similarity 0.75 and decision boundary 0.75"})));
+                         "table with similarity 0.75 and decision boundary 0.75"}),
+                MDVerifierHighlightsParams(
+                        kMDTrivial,
+                        {algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(2),
+                                        0.0),
+                                1.0)},
+                        algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(3), static_cast<model::Index>(3),
+                                        0.0),
+                                1.0),
+                        true, {}),
+                MDVerifierHighlightsParams(
+                        kMDTrivial,
+                        {algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(2),
+                                        0.0),
+                                1.0)},
+                        algos::md::ColumnSimilarityClassifier(
+                                std::make_shared<
+                                        algos::hymd::preprocessing::column_matches::Levenshtein>(
+                                        static_cast<model::Index>(2), static_cast<model::Index>(3),
+                                        0.0),
+                                1.0),
+                        false,
+                        {"levenshtein(animal, diet) violates MD in 0 row of left table and 0 row "
+                         "of right table with similarity 0 and decision boundary 1"})));
 
 INSTANTIATE_TEST_SUITE_P(
         TestMDVerifierSuggestionsSuite, TestMDVerifierSuggestions,
@@ -334,7 +397,8 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.75),
                         true,
-                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75"),
+                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, "
+                        "diet)>=0.75"),
                 MDVerifierSuggestionsParams(
                         kAnimalsBeverages,
                         {algos::md::ColumnSimilarityClassifier(
@@ -379,7 +443,8 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.5),
                         false,
-                        "[ levenshtein(name, name)>=0.125 | levenshtein(animal, animal)>=0.75 ] -> "
+                        "[ levenshtein(name, name)>=0.125 | levenshtein(animal, animal)>=0.75 "
+                        "] -> "
                         "levenshtein(name, name)>=0.2"),
                 MDVerifierSuggestionsParams(
                         kAnimalsBeverages,
@@ -396,7 +461,8 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.75),
                         true,
-                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75"),
+                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, "
+                        "diet)>=0.75"),
                 MDVerifierSuggestionsParams(
                         kAnimalsBeverages,
                         {algos::md::ColumnSimilarityClassifier(
@@ -412,6 +478,7 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.75 + kEps),
                         false,
-                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75")));
+                        "[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, "
+                        "diet)>=0.75")));
 
 }  // namespace tests
