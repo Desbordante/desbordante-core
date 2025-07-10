@@ -15,9 +15,9 @@ public:
     ColumnSimilarityClassifier() = default;
 
     ColumnSimilarityClassifier(CMPtr column_match, model::md::DecisionBoundary decision_boundary)
-        : column_match_(column_match), decision_boundary_(decision_boundary) {}
+        : column_match_(std::move(column_match)), decision_boundary_(decision_boundary) {}
 
-    CMPtr GetColumnMatch() const {
+    CMPtr const& GetColumnMatch() const {
         return column_match_;
     }
 
