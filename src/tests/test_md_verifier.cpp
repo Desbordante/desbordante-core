@@ -99,8 +99,12 @@ TEST_P(TestMDVerifierHighlights, DefaultCase) {
     ASSERT_EQ(GetParam().expected, md_result);
     std::vector<Highlight> highlights = verifier->GetHighlights();
     ASSERT_EQ(highlights.size(), GetParam().highlights.size());
+    std::cout << "{";
     for (Highlight const& highlight : highlights) {
-        std::cout << highlight.ToString() << std::endl;
+        std::cout << "\"" << highlight.ToString() << "\"" << ", ";
+    }
+    std::cout << "}" << std::endl;
+    for (Highlight const& highlight : highlights) {
         ASSERT_TRUE(GetParam().highlights.contains(highlight.ToString()));
     }
 }
@@ -304,12 +308,12 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.5),
                         false,
-                        {"levenshtein(name, name) violates MD in 2 row of left table and 3 row of "
-                         "right "
-                         "table with similarity 0.2 and decision boundary 0.5",
-                         "levenshtein(name, name) violates MD in 3 row of left table and 2 row of "
-                         "right "
-                         "table with similarity 0.2 and decision boundary 0.5"}),
+                        {"Rows 2 of the left table and 3 of the right table have similarity 0.2 "
+                         "and violate right-hand side column similarity classifier "
+                         "levenshtein(name, name)>=0.5",
+                         "Rows 3 of the left table and 2 of the right table have similarity 0.2 "
+                         "and violate right-hand side column similarity classifier "
+                         "levenshtein(name, name)>=0.5"}),
                 MDVerifierHighlightsParams(
                         kAnimalsBeverages,
                         {algos::md::ColumnSimilarityClassifier(
@@ -340,12 +344,12 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 0.75 + kEps),
                         false,
-                        {"levenshtein(diet, diet) violates MD in 0 row of left table and 1 row of "
-                         "right "
-                         "table with similarity 0.75 and decision boundary 0.75",
-                         "levenshtein(diet, diet) violates MD in 1 row of left table and 0 row of "
-                         "right "
-                         "table with similarity 0.75 and decision boundary 0.75"}),
+                        {"Rows 0 of the left table and 1 of the right table have similarity 0.75 "
+                         "and violate right-hand side column similarity classifier "
+                         "levenshtein(diet, diet)>=0.75",
+                         "Rows 1 of the left table and 0 of the right table have similarity 0.75 "
+                         "and violate right-hand side column similarity classifier "
+                         "levenshtein(diet, diet)>=0.75"}),
                 MDVerifierHighlightsParams(
                         kMDTrivial,
                         {algos::md::ColumnSimilarityClassifier(
@@ -376,8 +380,9 @@ INSTANTIATE_TEST_SUITE_P(
                                         0.0),
                                 1.0),
                         false,
-                        {"levenshtein(animal, diet) violates MD in 0 row of left table and 0 row "
-                         "of right table with similarity 0 and decision boundary 1"})));
+                        {"Rows 0 of the left table and 0 of the right table have similarity 0 and "
+                         "violate right-hand side column similarity classifier levenshtein(animal, "
+                         "diet)>=1"})));
 
 INSTANTIATE_TEST_SUITE_P(
         TestMDVerifierSuggestionsSuite, TestMDVerifierSuggestions,

@@ -27,23 +27,25 @@ public:
 
         std::string ToString() const {
             std::stringstream ss;
-            ss << rhs_decs.column_match_description.column_match_name << '('
+            ss << "Rows " << left_table_row << " of the left table and " << right_table_row
+               << " of the right table have similarity " << similarity
+               << " and violate right-hand side column similarity classifier "
+               << rhs_decs.column_match_description.column_match_name << '('
                << rhs_decs.column_match_description.left_column_description.column_name << ", "
                << rhs_decs.column_match_description.right_column_description.column_name
-               << ") violates MD in " << left_table_row << " row of left table and "
-               << right_table_row << " row of right table with similarity " << similarity
-               << " and decision boundary " << rhs_decs.decision_boundary;
+               << ")>=" << rhs_decs.decision_boundary;
             return ss.str();
         };
 
         std::string ToStringIndexes() const {
             std::stringstream ss;
-            ss << rhs_decs.column_match_description.column_match_name << '('
+            ss << "Rows " << left_table_row << " of the left table and " << right_table_row
+               << " of the right table have similarity " << similarity
+               << " and violate right-hand side column similarity classifier "
+               << rhs_decs.column_match_description.column_match_name << '('
                << rhs_decs.column_match_description.left_column_description.column_index << ", "
                << rhs_decs.column_match_description.right_column_description.column_index
-               << ") violates MD in " << left_table_row << " row of left table and "
-               << right_table_row << " row of right table with similarity " << similarity
-               << " and decision boundary " << rhs_decs.decision_boundary;
+               << ")>=" << rhs_decs.decision_boundary;
             return ss.str();
         };
     };
