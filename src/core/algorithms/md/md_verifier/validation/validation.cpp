@@ -55,7 +55,7 @@ void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& c
         }
     }
 
-    violationg_records_ = std::move(intersection_builder.Build());
+    violationg_records_ = intersection_builder.Build();
 }
 
 void MDValidationCalculator::UpdateRecordsWithTrivialLhs(

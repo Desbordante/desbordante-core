@@ -56,7 +56,9 @@ private:
 public:
     MDHighlights() {}
 
-    MDHighlights(std::vector<Highlight> highlights) : highlights_(std::move(highlights)) {}
+    MDHighlights(std::vector<Highlight> const& highlights) : highlights_(highlights) {}
+
+    MDHighlights(std::vector<Highlight>&& highlights) : highlights_(std::move(highlights)) {}
 
     std::vector<Highlight> const& GetHighlights() const {
         return highlights_;
