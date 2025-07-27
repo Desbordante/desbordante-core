@@ -14,6 +14,6 @@ MDHighlights MDHighlights::CreateFrom(model::RhsSimilarityClassifierDesctription
         }
     }
 
-    return highlights;
+    return {std::move(highlights)};
 }
 }  // namespace algos::md
