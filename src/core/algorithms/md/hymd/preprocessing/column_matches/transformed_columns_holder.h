@@ -11,7 +11,7 @@ struct TransformedColumnsHolder {
     using RightVec = std::vector<R>;
     using VecPair = std::pair<LeftVec, RightVec>;
 
-    std::variant<LeftVec, std::pair<LeftVec, RightVec>> values;
+    std::variant<LeftVec, VecPair> values;
     LeftVec const* left_ptr;
     RightVec const* right_ptr;
 
