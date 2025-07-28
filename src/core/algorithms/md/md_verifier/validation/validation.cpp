@@ -121,8 +121,8 @@ void MDValidationCalculator::UpdateRhsSimilarities(hymd::indexes::PliCluster con
                                                    model::md::Similarity rhs_similarity) {
     for (hymd::RecordIdentifier left_record : left_cluster) {
         for (hymd::RecordIdentifier right_record : right_cluster) {
-            auto it = violationg_records_.RawPairs().find(left_record);
-            if (it != violationg_records_.RawPairs().end() &&
+            auto it = violationg_records_.GetPairs().find(left_record);
+            if (it != violationg_records_.GetPairs().end() &&
                 it->second.find(right_record) != it->second.end()) {
                 true_rhs_decision_boundary_ = std::min(true_rhs_decision_boundary_, rhs_similarity);
                 rhs_records_pair_to_similarity_[{left_record, right_record}] = rhs_similarity;
