@@ -26,7 +26,7 @@ def print_results(verifier):
     for highlight in highlights:
         print(highlight.to_string())
     print(
-        f"Desbordante suggests to use following right-hand side decision boundary: {verifier.get_true_rhs_decision_boundary()}\n"
+        f"Desbordante suggests to use the following right-hand side decision boundary: {verifier.get_true_rhs_decision_boundary()}\n"
     )
     print(f"Thus, the following MD was provided:\n  {verifier.get_input_md()}")
     print("and the following MDs are suggested:")
@@ -44,7 +44,7 @@ def check_md(table: pd.DataFrame, params: MDParams):
 
 
 def animals_beverages_example():
-    print("As first example, let's look at the dataset animals_beverages.csv")
+    print("As the first example, let's look at the animals_beverages.csv dataset")
 
     table_path = "examples/datasets/animals_beverages.csv"
     table = pd.read_csv(table_path)
@@ -227,7 +227,7 @@ def flights_example():
     check_md(table, params)
 
     print(
-        "As we see, duration doesn't differ a lot in terms of normalized_distance similarity."
+        "As a result, duration doesn't differ a lot in terms of normalized_distance similarity."
     )
 
 
@@ -247,9 +247,9 @@ if __name__ == "__main__":
 
     print(
         "To verify Matching dependency, firstly we must define Column Similarity Classifiers for tables. "
-        "Column Similarity Classifier consists of Column Match and decision boundary. "
+        "A Column Similarity Classifier consists of a Column Match and a decision boundary. "
         "Column Match consists of two indices: columns in left and right table and similarity measure (Levevnshtein Similarity, for example).\n\n"
-        "We will use notation [measure(i, j) >= lambda] for Column Similarity Classifier with i'th column of left table, j'th column of right table, similarity measure 'measure' and decision boundary 'lambda'. "
+        "We will use the notation [measure(i, j) >= lambda] for a Column Similarity Classifier that specifies the i'th column of the left table, the j'th column of the right table, the similarity measure 'measure' and the decision boundary 'lambda'. "
         'Also, notation like [measure("left_col_name", "right_col_name") >= lambda] is valid for Column Match between columns with names "left_col_name" and "right_col_name" of left and right tables respectively.\n'
     )
 
