@@ -4,16 +4,16 @@ namespace algos::md {
 MDHighlights MDHighlights::CreateFrom(model::RhsSimilarityClassifierDesctription rhs_desc,
                                       RecordsPairsSet const& records_pairs,
                                       RecordsPairToSimilarityMap const& records_to_similarity) {
-    MDHighlights highlights;
+    std::vector<MDHighlights::Highlight> highlights;
 
     for (auto [left_record_index, right_records_set] : records_pairs) {
         for (model::Index right_record_index : right_records_set) {
-            highlights.highlights_.emplace_back(
+            highlights.emplace_back(
                     left_record_index, right_record_index, rhs_desc,
                     records_to_similarity.at({left_record_index, right_record_index}));
         }
     }
 
-    return highlights;
+    return MDHighlights(std::move(highlights));
 }
 }  // namespace algos::md
