@@ -93,7 +93,7 @@ public:
     }
 
     RecordsPairsSet const& GetViolatingRecordsPairs() const {
-        return violationg_records_.RawPairs();
+        return violationg_records_.GetPairs();
     }
 
     RecordsPairToSimilarityMap const& GetRhsPairsToSimilarityMapping() const {

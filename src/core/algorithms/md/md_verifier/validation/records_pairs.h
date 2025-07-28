@@ -40,7 +40,7 @@ public:
         return records_pairs_.empty();
     }
 
-    RecordsPairsSet const& RawPairs() const {
+    RecordsPairsSet const& GetPairs() const {
         return records_pairs_;
     }
 };
@@ -51,7 +51,7 @@ private:
     RecordsPairsSet intersection_;
 
 public:
-    IntersectionBuilder(ViolatingRecordsSet const& records) : original_(records.RawPairs()) {}
+    IntersectionBuilder(ViolatingRecordsSet const& records) : original_(records.GetPairs()) {}
 
     void AddIntersection(hymd::indexes::PliCluster const& left_cluster,
                          hymd::indexes::PliCluster const& right_cluster);
