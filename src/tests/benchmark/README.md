@@ -85,3 +85,8 @@ Optionally you can specify file with previous results to compare to and filename
 ```bash
 ./Desbordante_benchmark old-results.json new-results.json
 ```
+
+## Running benchmarks in CI
+
+Benchmarks are being ran in CI every week on `main` branch.
+Time plots can be downloaded in workflow's artifacts on GitHub, in the bottom of "Actions" page.
