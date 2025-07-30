@@ -929,7 +929,90 @@ Num distinct rhs values: 2
 
 '''
 
-snapshots['test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output'] = '''Discovered ranges for (Delivery date - Dispatch date) are:
+snapshots['test_example[basic/mining_ac.py-None-mining_ac_output] mining_ac_output'] = '''This example is dedicated to Fuzzy Algebraic Constraints (AC). The definition and algorithm 
+are based on article "B-HUNT: Automatic Discovery of Fuzzy Algebraic Constraints in Relational 
+Data" by Paul G. Brown & Peter J. Haas presented at VLDB in 2003.
+
+First of all, let's figure out what AC is. However, to avoid going too deep, we will give you 
+a simple definition without formalization. AC represents the results of applying binary 
+operations between two table columns, with values grouped into meaningful intervals. 
+Let's illustrate this with an example.
+
+We have a table examples/datasets/player_stats.csv with the following data:
+|   id |   Strength |   Agility |
+|-----:|-----------:|----------:|
+|    0 |          3 |         1 |
+|    1 |          4 |         1 |
+|    2 |          1 |         3 |
+|    3 |          2 |         2 |
+|    4 |          1 |         4 |
+|    5 |         10 |        12 |
+|    6 |         14 |        10 |
+|    7 |          1 |        23 |
+|    8 |          6 |        16 |
+
+Let's apply binary operation "+" to the Strength and Agility columns and observe the results.
+
+Discovered ranges for (Strength + Agility) are:
+[(4.0, 5.0), (22.0, 24.0)]
+
+Rows in which the result of the chosen operation (+) is outside of discovered ranges:
+None
+
+As shown, the sum of Strength and Agility falls within either the (4, 5) or (22, 24) ranges. 
+This pattern may emerge because player characters with similar combined attribute values 
+likely belong to the same tier.
+
+
+To run the algorithm, you must configure the parameters below:
+For binary arithmetic operations, you can use four options:
+"+"
+"-"
+"*"
+"/"
+
+Furthermore, AC mining algorithm provides five parameters for setting up execution:
+weight
+fuzziness
+p_fuzz
+bumps_limit
+iterations_limit
+ac_seed
+
+Weight accepts values in the range (0, 1]. 
+Values closer to 1 force the algorithm to produce fewer larger intervals (up to a single 
+interval covering all values).
+Values closer to 0 force the algorithm to produce smaller intervals.
+
+Fuzziness belongs to (0,1) range while p_fuzz belongs to [0,1] range. These parameters 
+control precision and the number of considered rows.
+Fuzziness values closer to 0 and p_fuzz values closer to 1 force the algorithm to include 
+more rows (higher accuracy).
+Fuzziness values closer to 1 and p_fuzz values closer to 0 force the algorithm to include 
+fewer rows (higher chance of skipping rows, lower precision, but faster execution).
+
+Bumps_limit accepts only natural numbers from the range [1, inf) and limits the number of 
+intervals for all column pairs. To set bumps_limit to inf you should use the 0 value.
+
+Iterations_limit accepts only natural numbers. 
+Lower values (close to 1) reduce accuracy due to algorithm performing fewer iterations.
+
+AC_seed accepts only natural numbers. 
+B-HUNT is a randomized algorithm that accepts the seed parameter (AC_seed). Fixing this 
+parameter ensures reproducible results, which are necessary for verifying results during 
+testing of the algorithm. Furthermore, we need to fix it in this example for demonstration 
+purposes; otherwise, we may obtain a different number of intervals with different boundaries 
+that will not correspond to the text we wrote for our output.
+
+Let's proceed to a visual example. We will use dataset from this path: 
+examples/datasets/cargo_march.csv. 
+For default parameters we will use those values:
+binaty operation is "-", weight - 0.1, fuzziness - {FUZZINESS}, p_fuzz - {P_FUZZ}, bumps_limit - {BUMPS_LIMIT}, 
+iterations_limit - 4, AC_seed - 11.
+
+Let's see the result of the algorithm with these parameters.
+
+Discovered ranges for (Delivery date - Dispatch date) are:
 [(2.0, 7.0), (15.0, 22.0)]
 
 Rows in which the result of the chosen operation (-) is outside of discovered ranges:
@@ -948,6 +1031,44 @@ Dispatch date: 11
 Delivery date: 22
 Difference: 11
 
+You can see that the algorithm creates two intervals for the binary operation "-": (2-7) and 
+(15-22). This means that the difference between the dispatch date and delivery date always 
+falls within these intervals, except for three rows where the difference lies outside the 
+discovered ranges. From this, we can infer that:
+Packages for some addresses are typically delivered within 7 days.
+Packages for some addresses take up to 22 days.
+
+Why these two intervals? To answer this question, more context is needed; that is, we should 
+look into the underlying data. We can imagine several reasons for this result, such as: 1) 
+nearby addresses versus far addresses; 2) air shipping versus regular shipping.
+
+There are three parcels that fall outside of these delivery intervals. Why? This is a point 
+for further investigation, which requires additional context. There are many possible reasons 
+for this: 1) on these dates there was a workers' strike in some regions; or 2) an incorrect 
+address was specified, which increased the delivery time; or 3) it is just a typo in the table.
+
+Now we reduce the value of the parameter weight to 0.05.
+
+Discovered ranges for (Delivery date - Dispatch date) are:
+[(2.0, 7.0), (11.0, 11.0), (15.0, 22.0), (29.0, 29.0)]
+
+Rows in which the result of the chosen operation (-) is outside of discovered ranges:
+None
+
+You can see that the number of intervals increases, and there is no longer any data outside of 
+the discovered ranges.
+However, with this amount of intervals, it is difficult to draw immediate conclusions about the 
+delivery date. In this case, a detailed analysis of other attributes might enable more meaningful 
+predictions for delivery times. For example, it may be a good idea to partition data by the region 
+attribute (or by month/quarter) and consider each partition individually. 
+
+Another option is to try to find a parameter combination that will result in a fewer number of 
+intervals. Next, remember that the algorithm is randomized (unless you run it with the exact 
+settings) — it can skip some rows, so you can also try to alter the seed.
+
+Finally, cleaning up the data by removing duplicate and incomplete rows might also help.
+Thus, the quantity and quality of the intervals are the user's responsibility. It may take several 
+attempts to achieve something interesting. Experiment!
 '''
 
 snapshots['test_example[basic/mining_adc.py-None-mining_adc_output] mining_adc_output'] = '''\x1b[33mUnderstanding Denial Constraints (DCs)\x1b[0m
