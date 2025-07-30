@@ -1,14 +1,18 @@
-#include <memory>
-#include <vector>
+#include <algorithm>  // for sort
+#include <memory>     // for unique_ptr
+#include <stddef.h>   // for size_t
+#include <vector>     // for vector
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for UnitTest, EXPECT_EQ
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/od/fastod/fastod.h"
-#include "algorithms/od/fastod/hashing/hashing.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
+#include "algorithms/algo_factory.h"               // for CreateAndLoadAlgor...
+#include "algorithms/od/fastod/fastod.h"           // for Fastod
+#include "algorithms/od/fastod/hashing/hashing.h"  // for CombineHashes
+#include "all_csv_configs.h"                       // for kAbalone, kBernoul...
+#include "config/names.h"                          // for kCsvConfig
+#include "csv_config_util.h"                       // for CSVConfigHash
+#include "csv_parser/csv_parser.h"                 // for CSVConfig
+#include "od/fastod/model/canonical_od.h"          // for SimpleCanonicalOD
 
 namespace tests {
 

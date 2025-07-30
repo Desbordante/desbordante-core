@@ -1,13 +1,18 @@
-#include <memory>
+#include <memory>     // for unique_ptr
+#include <optional>   // for optional, nullopt, nullopt_t
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for pair, move
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for UnitTest, TestWithParam
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "error/type.h"
-#include "ind/ind_verifier/ind_verifier.h"
+#include "algo_factory.h"                   // for CreateAndLoadAlgorithm
+#include "all_csv_configs.h"                // for kIndTestTypos, kIndTest3a...
+#include "config/names.h"                   // for kCsvConfigs, kLhsIndices
+#include "csv_config_util.h"                // for CSVConfigs
+#include "csv_parser/csv_parser.h"          // for CSVConfig
+#include "error/type.h"                     // for ErrorType
+#include "exceptions.h"                     // for ConfigurationError
+#include "ind/ind_verifier/ind_verifier.h"  // for INDVerifier
 
 namespace tests {
 
