@@ -1,8 +1,16 @@
 #include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
-#include <cassert>
+#include <cassert>  // for assert
+#include <map>      // for _Rb_tree_iterator
+#include <utility>  // for move, forward
 
-#include "algorithms/md/hymd/utility/reserve_more.h"
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "algorithms/md/hymd/utility/reserve_more.h"  // for ReserveMore
+#include "index.h"                                    // for Index
+#include "md/hymd/lattice/md_lattice.h"               // for MdLattice
+#include "md/hymd/lattice/node_base.h"                // for AddUnchecked
+#include "md/hymd/lattice/validation_info.h"          // for ValidationInfo
 
 namespace algos::hymd::lattice::cardinality {
 using namespace algos::hymd;

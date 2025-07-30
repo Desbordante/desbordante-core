@@ -1,8 +1,14 @@
 #pragma once
 
-#include <enum.h>
+#include <enum.h>  // for _map_index, _or_throw, cont...
 
-#include "sorted_partitions.h"
+#include "od/order/dependency_checker.h"  // for _name_array, _raw_names
+
+namespace algos {
+namespace order {
+class SortedPartition;
+}
+}  // namespace algos
 
 namespace algos::order {
 

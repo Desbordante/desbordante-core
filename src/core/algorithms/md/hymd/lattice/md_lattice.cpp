@@ -1,9 +1,13 @@
 #include "algorithms/md/hymd/lattice/md_lattice.h"
 
-#include <algorithm>
 #include <cassert>
+#include <compare>
 #include <iterator>
+#include <map>
+#include <memory>
 #include <numeric>
+#include <ranges>
+#include <tuple>
 #include <type_traits>
 
 #include "algorithms/md/hymd/lattice/md_specialization.h"
@@ -14,8 +18,47 @@
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/zip.h"
+#include "get_preallocated_vector.h"
+#include "index.h"
+#include "md/hymd/lattice/md.h"  // for Md
+#include "md/hymd/lattice/md_lattice_node_info.h"
+#include "md/hymd/lattice/md_node.h"
+#include "md/hymd/lattice/node_base.h"
+#include "md/hymd/lattice/single_level_func.h"
+#include "md/hymd/lattice/support_node.h"
+#include "md/hymd/lhs_ccv_ids_info.h"
+#include "md/hymd/md_element.h"
+#include "md/hymd/md_lhs.h"
+#include "md/hymd/pair_comparison_result.h"
+#include "md/hymd/rhss.h"
+#include "md/hymd/utility/exclusion_list.h"
+#include "md/hymd/utility/invalidated_rhss.h"
 #include "util/desbordante_assume.h"
 #include "util/erase_if_replace.h"
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct LhsSpecialization;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct MdSpecialization;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct MultiMdSpecialization;
+}
+}  // namespace hymd
+}  // namespace algos
 
 namespace {
 using model::Index;

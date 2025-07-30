@@ -1,6 +1,9 @@
 #pragma once
-#include <map>
-#include <vector>
+
+#include <cstddef>  // for size_t
+#include <map>      // for map
+#include <tuple>    // for tuple
+#include <vector>   // for vector
 
 class Balancer {
 private:

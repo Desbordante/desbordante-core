@@ -1,5 +1,4 @@
 #pragma once
-#include <vector>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/gfd/gfd.h"

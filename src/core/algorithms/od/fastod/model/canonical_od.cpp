@@ -1,6 +1,16 @@
 #include "canonical_od.h"
 
-#include <sstream>
+#include <sstream>  // for char_tr...
+#include <utility>  // for move
+
+#include "od/fastod/model/attribute_pair.h"     // for Attribu...
+#include "od/fastod/storage/partition_cache.h"  // for Partiti...
+
+namespace algos {
+namespace fastod {
+class DataFrame;
+}
+}  // namespace algos
 
 #include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
 

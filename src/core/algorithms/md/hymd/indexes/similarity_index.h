@@ -1,16 +1,20 @@
 #pragma once
 
-#include <cassert>
-#include <map>
-#include <mutex>
-#include <vector>
+#include <cassert>     // for assert
+#include <functional>  // for less, gre...
+#include <memory>      // for shared_ptr
+#include <mutex>       // for lock_guard
+#include <utility>     // for pair
+#include <vector>      // for vector
 
-#include <boost/container/flat_map.hpp>
-#include <boost/unordered/unordered_flat_set.hpp>
+#include <boost/container/flat_map.hpp>            // for flat_map
+#include <boost/container/vector.hpp>              // for vec_iterator
+#include <boost/container_hash/hash.hpp>           // for hash
+#include <boost/unordered/unordered_flat_set.hpp>  // for unordered...
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "model/index.h"
+#include "algorithms/md/hymd/column_classifier_value_id.h"  // for ColumnCla...
+#include "algorithms/md/hymd/table_identifiers.h"           // for RecordIde...
+#include "model/index.h"                                    // for Index
 
 namespace algos::hymd::indexes {
 using EndIdMap = boost::container::flat_map<ColumnClassifierValueId, model::Index, std::greater<>>;

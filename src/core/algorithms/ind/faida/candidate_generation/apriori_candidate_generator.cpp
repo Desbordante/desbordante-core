@@ -1,7 +1,13 @@
 #include "apriori_candidate_generator.h"
 
-#include <algorithm>
-#include <unordered_set>
+#include <algorithm>      // for sort, transform
+#include <iterator>       // for next
+#include <memory>         // for shared_ptr, __shared_ptr_access
+#include <unordered_set>  // for unordered_set, operator==
+#include <utility>        // for move
+
+#include "ind/faida/util/simple_cc.h"   // for SimpleCC, ColumnIndex, equal_to
+#include "ind/faida/util/simple_ind.h"  // for SimpleIND, equal_to, hash
 
 namespace algos::faida::apriori_candidate_generator {
 

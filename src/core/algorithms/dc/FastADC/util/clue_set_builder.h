@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>  // for vector
+
 #include <easylogging++.h>
 
 #include "dc/FastADC/model/pli_shard.h"

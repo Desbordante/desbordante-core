@@ -1,7 +1,13 @@
 #include "encoded_nar.h"
 
-#include "algorithms/nar/value_range.h"
-#include "model/types/types.h"
+#include <algorithm>  // for generate_n, __sort_fn, sort
+#include <iterator>   // for back_insert_iterator, back_...
+#include <numeric>    // for iota
+#include <stdexcept>  // for logic_error
+
+#include "nar/des/encoded_value_range.h"  // for EncodedValueRange
+#include "nar/des/rng.h"                  // for RNG
+#include "nar/nar.h"                      // for NAR, NARQualities
 
 namespace algos::des {
 

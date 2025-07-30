@@ -2,8 +2,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <tuple>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -13,10 +11,21 @@
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "md/hymd/indexes/column_similarity_info.h"
 #include "model/index.h"
-#include "util/worker_thread_pool.h"
+
+namespace algos {
+namespace hymd {
+namespace indexes {
+class DictionaryCompressor;
+}
+}  // namespace hymd
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}
 
 namespace algos::hymd {
 
