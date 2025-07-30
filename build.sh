@@ -110,7 +110,7 @@ if [[ $NO_UNPACK == true ]]; then
 fi
 
 if [[ $PYBIND == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D PYTHON=COMPILE
+    CMAKE_OPTS="$CMAKE_OPTS -D PYTHON=COMPILE"
 fi
 
 if [[ $LTO == true ]]; then
