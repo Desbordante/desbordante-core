@@ -21,7 +21,7 @@ public:
 
 template <typename Value, typename AdditionalInspector, typename ValueInfo>
 class SinglePBuilder {
-    using Adder = PartitionIndex::Adder;
+    using Adder = PartitionIndex::PartitionBuilder;
 
     Adder& left_adder_;
     Adder& right_adder_;
@@ -60,7 +60,7 @@ public:
 template <typename LeftElementValue, typename RightElementValue, typename AdditionalInspector,
           typename ValueInfo>
 class PairPBuilder {
-    using Adder = PartitionIndex::Adder;
+    using Adder = PartitionIndex::PartitionBuilder;
 
     Adder& left_adder_;
     Adder& right_adder_;

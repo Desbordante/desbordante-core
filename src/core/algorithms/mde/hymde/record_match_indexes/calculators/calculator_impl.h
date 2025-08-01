@@ -31,7 +31,7 @@ public:
                                PartitioningFunctionPair>;
 
 private:
-    using Adder = PartitionIndex::Adder;
+    using Adder = PartitionIndex::PartitionBuilder;
 
     using CompressedRecord = records::DictionaryCompressed::CompressedRecord;
 
@@ -98,8 +98,8 @@ public:
           records_(records) {}
 
     ComponentHandlingInfo Calculate(util::WorkerThreadPool* pool_ptr,
-                                    PartitionIndex::Adder&& left_adder,
-                                    PartitionIndex::Adder&& right_adder) const final {
+                                    PartitionIndex::PartitionBuilder&& left_adder,
+                                    PartitionIndex::PartitionBuilder&& right_adder) const final {
         if constexpr (kPartValuesAreSame) {
             if (auto* func_ptr = std::get_if<PartitioningFunctionLeft>(&part_funcs_)) {
                 if (records_.HoldsOneTable()) {

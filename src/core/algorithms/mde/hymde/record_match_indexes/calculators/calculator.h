@@ -33,8 +33,8 @@ public:
     Calculator(model::mde::RecordMatch record_match) : record_match_(std::move(record_match)) {}
 
     virtual ComponentHandlingInfo Calculate(util::WorkerThreadPool* pool_ptr,
-                                            PartitionIndex::Adder&& left_adder,
-                                            PartitionIndex::Adder&& right_adder) const = 0;
+                                            PartitionIndex::PartitionBuilder&& left_adder,
+                                            PartitionIndex::PartitionBuilder&& right_adder) const = 0;
 
     model::mde::RecordMatch const& GetRecordMatch() const noexcept {
         return record_match_;

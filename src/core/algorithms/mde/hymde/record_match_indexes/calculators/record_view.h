@@ -9,9 +9,9 @@
 
 namespace algos::hymde::record_match_indexes::calculators {
 class RecordView {
-    using ClusterIter = PartitionIndex::Clusters::const_iterator;
+    using ClusterIter = PartitionIndex::PartitionValueIdMap::const_iterator;
 
-    PartitionIndex::Clusters const& clusters_;
+    PartitionIndex::PartitionValueIdMap const& clusters_;
     records::DictionaryCompressed::Values const& values_;
 
 public:
@@ -55,7 +55,7 @@ public:
         friend RecordView;
     };
 
-    RecordView(PartitionIndex::Clusters const& clusters,
+    RecordView(PartitionIndex::PartitionValueIdMap const& clusters,
                records::DictionaryCompressed::Values const& values)
         : clusters_(clusters), values_(values) {}
 

@@ -62,7 +62,7 @@ public:
             }
 
             value_type operator*() const noexcept {
-                return {invalidated_iter_->index, *new_rcv_ids_iter_};
+                return {invalidated_iter_->record_match_index, *new_rcv_ids_iter_};
             }
 
             friend UpdateView;

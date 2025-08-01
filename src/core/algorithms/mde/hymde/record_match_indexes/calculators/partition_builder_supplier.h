@@ -12,7 +12,7 @@ class PartitionBuilderBase {
     static_assert(std::is_default_constructible_v<PairInspector>,
                   "Value inspector must be default constructible for now.");
 
-    using Adder = PartitionIndex::Adder;
+    using Adder = PartitionIndex::PartitionBuilder;
     using PairInfo = PairPartValueInfo<LeftValue, RightValue, PairInspector>;
     using PairBuilder = PairPBuilder<LeftValue, RightValue, PairInspector, PairInfo>;
 
@@ -34,7 +34,7 @@ class SameValueTypeBuilderSupplier : public PartitionBuilderBase<Value, Value, P
 
     using SingleInfo = SinglePartValueInfo<Value, SingleInspector>;
     using SingleBuilder = SinglePBuilder<Value, SingleInspector, SingleInfo>;
-    using Adder = PartitionIndex::Adder;
+    using Adder = PartitionIndex::PartitionBuilder;
 
 public:
     SingleBuilder GetSingle(Adder& left, Adder& right) const {

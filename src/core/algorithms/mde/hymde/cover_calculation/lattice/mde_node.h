@@ -21,7 +21,7 @@ public:
     }
 
     bool ContainsGeneralizationOf(MdeElement mde_rhs) const noexcept {
-        return rhs[mde_rhs.index] >= mde_rhs.rcv_id;
+        return rhs[mde_rhs.record_match_index] >= mde_rhs.rcv_id;
     }
 
     bool ContainsGeneralizationOf(Specialization::Unspecialized const& mde) const noexcept {
@@ -49,7 +49,7 @@ public:
     }
 
     static void SetRhs(Rhs& node_rhs, MdeElement rhs) {
-        node_rhs.Set(rhs.index, rhs.rcv_id);
+        node_rhs.Set(rhs.record_match_index, rhs.rcv_id);
     }
 
     MdeNode* AddOneUnchecked(model::Index offset, RecordClassifierValueId rcv_id,

@@ -12,6 +12,14 @@
 
 namespace algos::hymde {
 class HyMDE final : public Algorithm {
+    // Naming conventions:
+    // - LT/RT = left/right table
+    // - LHS/RHS = left/right hand side of an MDE
+    // - PVID map = for a record, a map from partition ID (currently same as record match index) to
+    // ID of the element the record belongs to in said partition, as identified by a value of a
+    // partitioning function.
+    // - RM = record match
+    // - RCV (ID) = record classified value (identifier)
 public:
     using ComponentCalculationSpecification =
             record_match_indexes::ComponentCalculationSpecification;

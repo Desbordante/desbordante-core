@@ -14,34 +14,37 @@
 namespace algos::hymde::record_match_indexes {
 class PartitionIndex {
 public:
-    using RecordCluster = std::vector<RecordIdentifier>;
-    using PositionListIndex = std::vector<RecordCluster>;
+    using PliCluster = std::vector<RecordIdentifier>;
+    using PositionListIndex = std::vector<PliCluster>;
 
-    using Clusters = std::vector<PartitionValueId>;
-    using RecordClustersMapping = std::vector<Clusters>;
+    // For a record, map partition id to the partition value id of the record in that partition.
+    using PartitionValueIdMap = std::vector<PartitionValueId>;
+    // Partition id to value id maps for each record.
+    using TablePartitionValueIdMaps = std::vector<PartitionValueIdMap>;
 
 private:
     using PositionListIndexes = std::vector<PositionListIndex>;
 
     PositionListIndexes position_list_indexes_;
-    RecordClustersMapping record_clusters_mapping_;
+    TablePartitionValueIdMaps partition_value_id_maps_;
 
     PartitionIndex(PositionListIndexes position_list_indexes,
-                   RecordClustersMapping record_clusters_mapping)
+                   TablePartitionValueIdMaps partition_value_id_maps)
         : position_list_indexes_(std::move(position_list_indexes)),
-          record_clusters_mapping_(std::move(record_clusters_mapping)) {}
+          partition_value_id_maps_(std::move(partition_value_id_maps)) {}
 
 public:
-    class Adder {
+    class PartitionBuilder {
         RecordIdentifier cur_record_id_ = 0;
         PositionListIndex& cur_pli_;
-        RecordClustersMapping::iterator cur_record_iter_;
+        TablePartitionValueIdMaps::iterator cur_record_iter_;
 
-        Adder(PositionListIndex& cur_pli, RecordClustersMapping::iterator cur_record_iter)
+        PartitionBuilder(PositionListIndex& cur_pli, 
+                         TablePartitionValueIdMaps::iterator cur_record_iter)
             : cur_pli_(cur_pli), cur_record_iter_(cur_record_iter) {}
 
         // Must be called record_number times.
-        void AddToCluster(RecordCluster& cluster, PartitionValueId partition_value_id) {
+        void AddToCluster(PliCluster& cluster, PartitionValueId partition_value_id) {
             cluster.push_back(cur_record_id_);
             cur_record_iter_->push_back(partition_value_id);
             ++cur_record_iter_;
@@ -65,44 +68,38 @@ public:
             return cur_pli_;
         }
 
-        Adder(Adder const&) = delete;
-        Adder(Adder&&) = delete;
-        Adder& operator=(Adder const&) = delete;
-        Adder& operator=(Adder&&) = delete;
+        PartitionBuilder(PartitionBuilder const&) = delete;
+        PartitionBuilder(PartitionBuilder&&) = delete;
+        PartitionBuilder& operator=(PartitionBuilder const&) = delete;
+        PartitionBuilder& operator=(PartitionBuilder&&) = delete;
 
         friend class PartitionIndex;
     };
 
     PartitionIndex(std::size_t record_number, std::size_t partition_number) {
         position_list_indexes_.reserve(partition_number);
-        record_clusters_mapping_.assign(record_number, {});
-        auto res = [partition_number](Clusters& clusters) { clusters.reserve(partition_number); };
-        std::ranges::for_each(record_clusters_mapping_, res);
+        partition_value_id_maps_.assign(record_number, {});
+        auto reserve = [partition_number](PartitionValueIdMap& partition_value_id_map) {
+            partition_value_id_map.reserve(partition_number);
+        };
+        std::ranges::for_each(partition_value_id_maps_, reserve);
     }
 
     // Must be called exactly partition_number times.
-    Adder NewPartitionAdder() {
-        return {position_list_indexes_.emplace_back(), record_clusters_mapping_.begin()};
+    PartitionBuilder NewPartitionBuilder() {
+        return {position_list_indexes_.emplace_back(), partition_value_id_maps_.begin()};
     }
 
-    PositionListIndex const& GetPli(model::Index record_match_index) const noexcept {
-        return position_list_indexes_[record_match_index];
+    PositionListIndex const& GetPli(model::Index partition_id) const noexcept {
+        return position_list_indexes_[partition_id];
     }
 
-    Clusters const& GetRecordClusters(RecordIdentifier record_id) const noexcept {
-        return record_clusters_mapping_[record_id];
-    }
-
-    RecordClustersMapping const& GetClustersMapping() const noexcept {
-        return record_clusters_mapping_;
+    TablePartitionValueIdMaps const& GetPartitionValueIdMaps() const noexcept {
+        return partition_value_id_maps_;
     }
 
     std::size_t GetRecordsNumber() const noexcept {
-        return record_clusters_mapping_.size();
-    }
-
-    std::size_t GetRecordMatchNumber() const noexcept {
-        return position_list_indexes_.size();
+        return partition_value_id_maps_.size();
     }
 
     static PartitionIndex GetPermuted(PartitionIndex partition_index,
@@ -113,10 +110,11 @@ public:
         for (model::Index i : new_placements) {
             plis.push_back(std::move(partition_index.position_list_indexes_[i]));
         }
-        RecordClustersMapping mapping =
-                util::GetPreallocatedVector<Clusters>(partition_index.GetRecordsNumber());
-        for (Clusters const& record_clusters : partition_index.record_clusters_mapping_) {
-            Clusters& new_record_clusters = mapping.emplace_back();
+        TablePartitionValueIdMaps mapping = util::GetPreallocatedVector<PartitionValueIdMap>(
+                partition_index.GetRecordsNumber());
+        for (PartitionValueIdMap const& record_clusters :
+             partition_index.partition_value_id_maps_) {
+            PartitionValueIdMap& new_record_clusters = mapping.emplace_back();
             new_record_clusters.reserve(record_matches_new);
             for (model::Index i : new_placements) {
                 new_record_clusters.push_back(record_clusters[i]);

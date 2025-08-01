@@ -5,6 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "algorithms/mde/hymde/cover_calculation/batch_validator.h"
 #include "algorithms/mde/hymde/cover_calculation/lattice/mde_lattice.h"
 #include "algorithms/mde/hymde/cover_calculation/pair_comparison_result.h"
 #include "algorithms/mde/hymde/cover_calculation/recommendation.h"
@@ -106,18 +107,19 @@ private:
         return pool_ != nullptr;
     }
 
-    void InferFromRecommendationsParallel(Recommendations const& recommendations);
-    void InferFromRecommendationsSeq(Recommendations const& recommendations);
+    void ForEachRecommendation(BatchValidator::Result const& result, auto&& action);
+    void InferFromRecommendationsParallel(std::vector<BatchValidator::Result> const& results);
+    void InferFromRecommendationsSeq(std::vector<BatchValidator::Result> const& results);
 
-    void InferFromRecommendations(Recommendations const& recommendations) {
-        (this->*recommendations_inference_method_)(recommendations);
+    void InferFromRecommendations(std::vector<BatchValidator::Result> const& results) {
+        (this->*recommendations_inference_method_)(results);
     }
 
     bool InferFromNew(PairComparisonResult const& pair_comparison_result);
 
     [[nodiscard]] PairComparisonResult CompareRecords(
-            record_match_indexes::PartitionIndex::Clusters const& left_record,
-            record_match_indexes::PartitionIndex::Clusters const& right_record) const;
+            record_match_indexes::PartitionIndex::PartitionValueIdMap const& left_record,
+            record_match_indexes::PartitionIndex::PartitionValueIdMap const& right_record) const;
 
     bool InferFromComparison(PairComparisonResult&& comparison) {
         auto const& [it, not_seen_before] = processed_comparisons_.insert(std::move(comparison));
@@ -192,7 +194,8 @@ private:
     // The first sampling round multiplies by kNewRoundThresholdMultiplier, divide to counteract.
     double efficiency_threshold_ = kInitialEfficiencyThreshold / kNewRoundThresholdMultiplier;
 
-    using InferFromRecommendationsMethod = void (RecordPairInferrer::*)(Recommendations const&);
+    using InferFromRecommendationsMethod =
+            void (RecordPairInferrer::*)(std::vector<BatchValidator::Result> const&);
     InferFromRecommendationsMethod recommendations_inference_method_ =
             MultiThreaded() ? &RecordPairInferrer::InferFromRecommendationsParallel
                             : &RecordPairInferrer::InferFromRecommendationsSeq;
@@ -208,7 +211,7 @@ public:
         if (inferrer.sampling_queue_.empty()) {
             out_of_pairs = true;
         } else {
-            out_of_pairs = inferrer.InferFromRecordPairs({});
+            out_of_pairs = inferrer.SampleAndInfer();
         }
         return pair;
     }
@@ -220,6 +223,6 @@ public:
                        std::vector<record_match_indexes::ComponentStructureAssertions> assertions,
                        util::WorkerThreadPool* pool);
 
-    bool InferFromRecordPairs(Recommendations const& recommendations);
+    bool InferFromRecordPairs(std::vector<BatchValidator::Result> const& results);
 };
 }  // namespace algos::hymde::cover_calculation

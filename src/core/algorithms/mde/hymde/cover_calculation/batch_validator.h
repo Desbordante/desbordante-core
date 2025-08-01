@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -78,41 +79,60 @@ public:
 
 class BatchValidator {
 public:
-    using OneRhsRecommendations = std::vector<Recommendation>;
-    using AllRhsRecommendations = std::vector<OneRhsRecommendations>;
-
     // We're actually doing three distinct tasks here:
     struct Result {
         // Collecting RHSs that are invalid to refine our assumptions (i.e. actual validation);
         InvalidatedRhss invalidated_rhss;
         // Collecting prospective pairs;
-        AllRhsRecommendations all_rhs_recommendations;
+        LhsGroupedRecommendations lhs_grouped_recommendations;
         // Determining LHS support.
+        // NOTE: if all RHSs are invalid, then it only matters whether the support is below the
+        // threshold or not.
         std::size_t support = 0;
     };
 
 private:
     using RemovedAndInterestingnessRCVIds =
             std::pair<std::vector<RecordClassifierValueId>, std::vector<RecordClassifierValueId>>;
-    using RecordClustersPtr = record_match_indexes::PartitionIndex::Clusters const*;
-    using RecordCluster = std::vector<RecordClustersPtr>;
+
+    // TODO: use plain pointer?
+    using PValueIdMapPtr = record_match_indexes::PartitionIndex::PartitionValueIdMap const*;
+    // Represents a collection of PartitionValueIdMap for records in a partition element of the left
+    // table (either SLTVPE partition or SLTV partition).
+    using LTPVsPEPVIdMaps = std::vector<PValueIdMapPtr>;
 
     template <typename PartitionElementProvider>
     class LHSMRPartitionInspector;
+
     class OneCardPartitionElementProvider;
     class MultiCardPartitionElementProvider;
 
-    enum class MdValidationStatus { kInvalidated, kCheckedAll };
-
     class RhsValidator {
-        using LeftValueGroupedLhsRecords = std::unordered_map<PartitionValueId, RecordCluster>;
+        // Recommend if invalidated or below old threshold? Or recommend only if invalidated?
+        // Currently using the former.
+        // TODO: test performance for both these options.
+        enum class ValidationStatus {
+            kDepNotInteresting,    // Stop validation process for this RHS.
+            kDepStillInteresting,  // Keep going.
+        };
+        // Alternative:
+        // - kDepNotInteresting (RHS RCV ID below interestingness threshold, should add
+        // recommendation)
+        // - kBelowOldThreshold (RHS RCV ID below the old threshold, may add recommendation)
+        // - kOldDepHolds (RHS RCV ID not below the old threshold, not an interesting case)
+        // Validation for this RHS is stopped once some condition holds like if enough pairs are
+        // recommended, not right after it is not interesting anymore.
 
-        OneRhsRecommendations* recommendations_;
+        // Record match to partition value ID maps for records from an element of a partition of the
+        // left table grouped by the partitioning value returned by this object's RHS's left table
+        // partitioning function.
+        using RhsLTPVGroupedLTPVsPEPVIdMaps = std::unordered_map<PartitionValueId, LTPVsPEPVIdMaps>;
+
         MdeElement old_rhs_;
         RecordClassifierValueId current_rcv_id_;
 
-        // Optimize creation of LHS records groups.
-        std::size_t rhs_rec_match_values_count_;
+        // Optimize creation of left table record groups.
+        std::size_t rhs_lt_pvalues_count_;
 
         // Either the RHS RCV ID corresponding to the LHS RCV ID of the record match, or the
         // greatest RHS RCV ID among generalizations, whichever is greater. If `current_rcv_id`
@@ -120,82 +140,77 @@ private:
         // non-minimal.
         RecordClassifierValueId interestingness_rcv_id_;
 
-        record_match_indexes::PartitionIndex::RecordClustersMapping const* right_clusters_;
-        record_match_indexes::ValueMatrix const* similarity_matrix_;
+        record_match_indexes::ValueMatrix const* value_matrix_;
 
-        model::Index record_match_index_;
+        LhsGroupedRecommendations* recommendations_;
 
-        void AddRecommendations(
-                RecordCluster const& same_left_value_records,
-                record_match_indexes::PartitionIndex::Clusters const& right_record) {
-            for (RecordClustersPtr left_record_ptr : same_left_value_records) {
-                recommendations_->push_back({left_record_ptr, &right_record});
-            }
-        }
+        RhsLTPVGroupedLTPVsPEPVIdMaps grouped_ltvpvs_pvid_maps_;
 
-        void RhsIsInvalid(RecordCluster const& same_left_value_records,
-                          record_match_indexes::PartitionIndex::Clusters const& right_record) {
-            current_rcv_id_ = kLowestRCValueId;
-            AddRecommendations(same_left_value_records, right_record);
-        }
+        // NOTE: in this implementation, pairs are only added as recommendations if they
+        // invalidate the RHS.
+        // kBelowThreshold is only useful if recommendations are added when a pair does not
+        // invalidate it.
+        ValidationStatus LowerRCVID(
+                PartitionValueId lt_pvalue_id,
+                record_match_indexes::PartitionIndex::PartitionValueIdMap const& rt_pvid_map) {
+            record_match_indexes::ValueMatrixRow const& lt_pvalue_vm_row =
+                    (*value_matrix_)[lt_pvalue_id];
 
-        LeftValueGroupedLhsRecords GroupLhsRecords(RecordCluster const& lhs_records) const {
-            LeftValueGroupedLhsRecords left_value_grouped_lhs_records(
-                    std::min(lhs_records.size(), rhs_rec_match_values_count_));
-            for (RecordClustersPtr left_record_ptr : lhs_records) {
-                left_value_grouped_lhs_records[(*left_record_ptr)[record_match_index_]].push_back(
-                        left_record_ptr);
-            }
-            return left_value_grouped_lhs_records;
-        }
+            PartitionValueId const rt_pvalue_id = rt_pvid_map[old_rhs_.record_match_index];
 
-        // NOTE: in this implementation, pairs are only added as recommendations if they invalidate
-        // the RHS.
-        // TODO: test performance when records that lower the RCV ID are added as recommendations as
-        // well.
-        bool LowerRCVID(PartitionValueId left_pvalue_id,
-                        record_match_indexes::PartitionIndex::Clusters const& right_record) {
-            record_match_indexes::ValueMatrixRow const& left_value_value_mapping =
-                    (*similarity_matrix_)[left_pvalue_id];
-
-            PartitionValueId const right_value_id = right_record[record_match_index_];
-
-            auto value_mapping_iter = left_value_value_mapping.find(right_value_id);
-            if (value_mapping_iter == left_value_value_mapping.end()) {
-                return true;
+            auto rcv_id_iter = lt_pvalue_vm_row.find(rt_pvalue_id);
+            if (rcv_id_iter == lt_pvalue_vm_row.end()) {
+                current_rcv_id_ = kLowestRCValueId;
+                return ValidationStatus::kDepNotInteresting;
             }
 
-            RecordClassifierValueId const pair_rcv_id = value_mapping_iter->second;
-            if (pair_rcv_id < current_rcv_id_) {
-                current_rcv_id_ = pair_rcv_id;
-                if (pair_rcv_id == interestingness_rcv_id_) {
-                    return true;
+            RecordClassifierValueId const rcv_id = rcv_id_iter->second;
+            if (rcv_id < current_rcv_id_) {
+                if (rcv_id == interestingness_rcv_id_) {
+                    return ValidationStatus::kDepNotInteresting;
                 }
+                current_rcv_id_ = rcv_id;
             }
             DESBORDANTE_ASSUME(interestingness_rcv_id_ < current_rcv_id_);
-            return false;
+            return ValidationStatus::kDepStillInteresting;
         }
 
     public:
-        RhsValidator(
-                MdeElement const old_rhs, OneRhsRecommendations& recommendations,
-                std::size_t const rhs_rec_match_values_count,
-                RecordClassifierValueId const interestingness_id,
-                record_match_indexes::PartitionIndex::RecordClustersMapping const& right_clusters,
-                record_match_indexes::ValueMatrix const& similarity_matrix,
-                model::Index const record_match_index) noexcept
-            : recommendations_(&recommendations),
-              old_rhs_(old_rhs),
+        RhsValidator(MdeElement const old_rhs, LhsGroupedRecommendations& recommendations,
+                     std::size_t const rhs_lt_pvalues_count,
+                     RecordClassifierValueId const interestingness_id,
+                     record_match_indexes::ValueMatrix const& value_matrix) noexcept
+            : old_rhs_(old_rhs),
               current_rcv_id_(old_rhs.rcv_id),
-              rhs_rec_match_values_count_(rhs_rec_match_values_count),
+              rhs_lt_pvalues_count_(rhs_lt_pvalues_count),
               interestingness_rcv_id_(interestingness_id),
-              right_clusters_(&right_clusters),
-              similarity_matrix_(&similarity_matrix),
-              record_match_index_(record_match_index) {}
+              value_matrix_(&value_matrix),
+              recommendations_(&recommendations) {}
 
-        template <typename Collection>
-        MdValidationStatus LowerRCVIDAndCollectRecommendations(
-                RecordCluster const& lhs_records, Collection const& matched_rhs_records);
+        void SetCurrentLTPVsPElement(LTPVsPEPVIdMaps const& ltpvspe_pvid_maps) {
+            grouped_ltvpvs_pvid_maps_.clear();
+            grouped_ltvpvs_pvid_maps_.reserve(
+                    std::min(ltpvspe_pvid_maps.size(), rhs_lt_pvalues_count_));
+            for (PValueIdMapPtr left_table_pvid_map_ptr : ltpvspe_pvid_maps) {
+                grouped_ltvpvs_pvid_maps_[(*left_table_pvid_map_ptr)[old_rhs_.record_match_index]]
+                        .push_back(left_table_pvid_map_ptr);
+            }
+        }
+
+        // Returns whether validation must stop for this RHS. If `true` is returned, the RHS must
+        // have been invalidated.
+        bool CheckRecord(
+                record_match_indexes::PartitionIndex::PartitionValueIdMap const& rt_pvid_map) {
+            for (auto& [rhs_lt_pvid, rhs_lt_pvid_maps] : grouped_ltvpvs_pvid_maps_) {
+                ValidationStatus status = LowerRCVID(rhs_lt_pvid, rt_pvid_map);
+                if (status == ValidationStatus::kDepNotInteresting) {
+                    // Due to this move, this method must not be called once RHS is invalidated.
+                    recommendations_->emplace_back(std::move(rhs_lt_pvid_maps), &rt_pvid_map);
+                    return true;
+                }
+            }
+            return false;
+        }
 
         void AddIfInvalid(InvalidatedRhss& invalidated) const {
             DESBORDANTE_ASSUME(current_rcv_id_ <= old_rhs_.rcv_id);
@@ -217,36 +232,37 @@ private:
     std::vector<record_match_indexes::Indexes> const* const record_match_indexes_;
     std::size_t const min_support_;
     lattice::MdeLattice* const lattice_;
+    std::vector<record_match_indexes::RcvIdLRMap> const* rcv_id_lr_maps_;
     ValidatedAdder validated_adder_;
 
-    record_match_indexes::PartitionIndex const& GetLeftPartitionIndex() const {
+    record_match_indexes::PartitionIndex const& GetLeftTablePartitionIndex() const {
         return data_partition_index_->GetLeft();
     }
 
-    record_match_indexes::PartitionIndex const& GetRightPartitionIndex() const {
+    record_match_indexes::PartitionIndex const& GetRightTablePartitionIndex() const {
         return data_partition_index_->GetRight();
     }
 
-    std::size_t GetLeftTablePliValueNum(model::Index const record_match_index) const {
-        return GetLeftPartitionIndex().GetPli(record_match_index).size();
+    std::size_t GetLeftTablePartitioningValuesCount(model::Index const record_match_index) const {
+        return GetLeftTablePartitionIndex().GetPli(record_match_index).size();
     }
 
     std::size_t GetTotalPairsNum() const noexcept {
         return data_partition_index_->GetPairsNumber();
     }
 
-    [[nodiscard]] record_match_indexes::UpperSet const* GetSimilarRecords(
+    [[nodiscard]] record_match_indexes::PartValueSet GetMatchedValuesSet(
             model::Index record_match_index, PartitionValueId pvalue_id,
-            model::Index lhs_rcv_id) const;
+            RecordClassifierValueId lhs_rcv_id) const;
 
     void FillValidators(SameLhsValidators& same_lhs_validators,
-                        AllRhsRecommendations& recommendations,
+                        LhsGroupedRecommendations& recommendations,
                         std::vector<model::Index> const& pending_rhs_indices,
                         RemovedAndInterestingnessRCVIds const& removed_and_interestingness) const;
     RemovedAndInterestingnessRCVIds GetRemovedAndInterestingness(
-            ValidationSelection const& info, std::vector<model::Index> const& indices);
-    void CreateValidators(ValidationSelection const& info, SameLhsValidators& working,
-                          AllRhsRecommendations& recommendations);
+            ValidationSelection const& selection, std::vector<model::Index> const& indices);
+    void CreateValidators(ValidationSelection const& selection, SameLhsValidators& working,
+                          LhsGroupedRecommendations& recommendations);
 
     void ValidateEmptyLhs(Result& result, boost::dynamic_bitset<> const& indices_bitset,
                           lattice::Rhs const& lattice_rhs) const;
@@ -256,30 +272,28 @@ private:
     template <bool PerformValidation>
     decltype(auto) GetRhsValidatorsContainer();
     template <bool PerformValidation>
-    void CreateResult(ValidationSelection& validation_info);
+    void CreateResult(ValidationSelection& selection);
     template <bool PerformValidation>
     void CreateResults(std::vector<ValidationSelection>& all_validation_info);
-    void Validate(ValidationSelection& validation_info, Result& result,
-                  SameLhsValidators& working) const;
+    void Validate(ValidationSelection& selection, Result& result, SameLhsValidators& working) const;
 
 public:
     BatchValidator(util::WorkerThreadPool* pool,
                    record_match_indexes::DataPartitionIndex const* const data_partition_index,
                    std::vector<record_match_indexes::Indexes> const& record_match_indexes,
                    std::size_t min_support, lattice::MdeLattice* lattice,
-                   ValidatedAdder validated_adder)
-        : pool_(pool),
-          data_partition_index_(data_partition_index),
-          record_match_indexes_(&record_match_indexes),
-          min_support_(min_support),
-          lattice_(lattice),
-          validated_adder_(std::move(validated_adder)) {}
+                   std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
+                   ValidatedAdder validated_adder);
+
+    [[nodiscard]] bool Supported(std::size_t support) const noexcept {
+        return support >= min_support_;
+    }
 
     std::vector<Result> const& ValidateBatch(
             std::vector<ValidationSelection>& minimal_lhs_mds_batch);
 
-    [[nodiscard]] bool Supported(std::size_t support) const noexcept {
-        return support >= min_support_;
+    std::vector<Result> const& GetCurrentResults() const noexcept {
+        return results_;
     }
 };
 }  // namespace algos::hymde::cover_calculation

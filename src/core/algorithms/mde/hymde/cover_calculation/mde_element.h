@@ -5,7 +5,7 @@
 
 namespace algos::hymde::cover_calculation {
 struct MdeElement {
-    model::Index index;
+    model::Index record_match_index;
     RecordClassifierValueId rcv_id;
 };
 }  // namespace algos::hymde::cover_calculation

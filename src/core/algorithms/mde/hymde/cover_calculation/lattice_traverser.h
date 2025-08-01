@@ -51,7 +51,7 @@ private:
     Recommendations recommendations_;
 
     LevelGetter& level_getter_;
-    BatchValidator validator_;
+    BatchValidator& validator_;
 
     util::WorkerThreadPool* pool_;
 
@@ -63,9 +63,9 @@ private:
                         std::vector<BatchValidator::Result> const& results);
 
 public:
-    LatticeTraverser(LevelGetter& level_getter, BatchValidator validator,
+    LatticeTraverser(LevelGetter& level_getter, BatchValidator& validator,
                      util::WorkerThreadPool* pool) noexcept
-        : level_getter_(level_getter), validator_(std::move(validator)), pool_(pool) {}
+        : level_getter_(level_getter), validator_(validator), pool_(pool) {}
 
     bool TraverseLattice(bool traverse_all);
 

@@ -22,7 +22,8 @@ algos::hymde::RecordClassifierValueId GetRCVId(
 }  // namespace
 
 namespace algos::hymde::cover_calculation {
-using CompressedRecord = record_match_indexes::PartitionIndex::Clusters;
+using PartitionValueIdMap = record_match_indexes::PartitionIndex::PartitionValueIdMap;
+using PValueIdMapPtr = record_match_indexes::PartitionIndex::PartitionValueIdMap const*;
 
 // TODO: put record pairs that have the highest LHS RCV IDs first, but do not sort based on that
 // (takes too long, and realistically not all pairs are going to be sampled).
@@ -40,7 +41,7 @@ class RecordPairInferrer::RecordRanker {
             model::Index const next_record_match_index;
         };
 
-        std::vector<CompressedRecord> const& records;
+        std::vector<PartitionValueIdMap> const& records;
         Info prev_info;
         Info next_info;
 
@@ -66,8 +67,8 @@ class RecordPairInferrer::RecordRanker {
             model::Index const record_match_index) const noexcept {
         auto const [prev_record_match_index, next_record_match_index] =
                 GetPrevAndNext(record_match_index);
-        record_match_indexes::PartitionIndex::RecordClustersMapping const& records =
-                inferrer_.records_info_->GetLeft().GetClustersMapping();
+        record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& records =
+                inferrer_.records_info_->GetLeft().GetPartitionValueIdMaps();
 
         ShortSamplingClusterComparer::Info prev_info{prev_record_match_index,
                                                      next_record_match_index};
@@ -104,8 +105,8 @@ public:
 // the case for all built-in comparison functions.
 bool RecordPairInferrer::RecordRanker::ShortSamplingClusterComparer::operator()(
         RecordIdentifier record_id1, RecordIdentifier record_id2) const noexcept {
-    CompressedRecord const& record1 = records[record_id1];
-    CompressedRecord const& record2 = records[record_id2];
+    PartitionValueIdMap const& record1 = records[record_id1];
+    PartitionValueIdMap const& record2 = records[record_id2];
     for (model::Index record_match_index :
          {prev_info.prev_record_match_index, prev_info.next_record_match_index,
           next_info.prev_record_match_index, next_info.next_record_match_index}) {
@@ -148,7 +149,7 @@ struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<true, ObtainValueRe
         RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
         value_ranked_records.reserve(right_records.size());
 
-        record_match_indexes::PartitionIndex::RecordCluster const& cluster =
+        record_match_indexes::PartitionIndex::PliCluster const& cluster =
                 left_clusters[left_value_id];
         assert(std::ranges::all_of(cluster, [&](RecordIdentifier left_record_id) {
             return std::ranges::find(right_records, left_record_id) != right_records.end();
@@ -303,12 +304,11 @@ RecordPairInferrer::RecordPairInferrer(
       sampling_queue_(CreateSamplingQueue()) {}
 
 PairComparisonResult RecordPairInferrer::CompareRecords(
-        CompressedRecord const& left_record, CompressedRecord const& right_record) const {
+        PartitionValueIdMap const& left_record, PartitionValueIdMap const& right_record) const {
     std::vector<RecordClassifierValueId> rhss =
             util::GetPreallocatedVector<RecordClassifierValueId>(record_match_number_);
     for (model::Index record_match_index : utility::IndexRange(record_match_number_)) {
-        auto const& [value_matrix, upper_set_index] =
-                (*record_match_indexes_)[record_match_index];
+        auto const& [value_matrix, upper_set_index] = (*record_match_indexes_)[record_match_index];
         record_match_indexes::ValueMatrixRow const& row =
                 value_matrix[left_record[record_match_index]];
         rhss.push_back(GetRCVId(row, right_record[record_match_index]));
@@ -326,20 +326,20 @@ bool RecordPairInferrer::InferFromNew(PairComparisonResult const& pair_compariso
 // TODO: use comparison function symmetry.
 template <bool ShortSampling>
 class RecordPairInferrer::Sampler {
-    record_match_indexes::PartitionIndex::RecordClustersMapping const& left_records_;
-    record_match_indexes::PartitionIndex::RecordClustersMapping const& right_records_;
+    record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& left_records_;
+    record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& right_records_;
     record_match_indexes::PartitionIndex::PositionListIndex const& clusters_;
     RankedRecordsRecordMatch const& record_match_ranked_records_;
     model::Index const parameter_;
 
-    void SampleWholeCluster(record_match_indexes::PartitionIndex::RecordCluster const& cluster,
+    void SampleWholeCluster(record_match_indexes::PartitionIndex::PliCluster const& cluster,
                             RankedRecordsValue const& ranked_records_value,
                             auto&& record_pair_action) const {
         std::size_t const record_rank = parameter_;
 
-        CompressedRecord const& right_record = right_records_[ranked_records_value[record_rank]];
+        PartitionValueIdMap const& right_record = right_records_[ranked_records_value[record_rank]];
         for (RecordIdentifier left_record_id : cluster) {
-            CompressedRecord const& left_record = left_records_[left_record_id];
+            PartitionValueIdMap const& left_record = left_records_[left_record_id];
             record_pair_action(left_record, right_record);
         }
     }
@@ -366,13 +366,13 @@ class RecordPairInferrer::Sampler {
         // from the same partition element yield the highest possible comparison result when
         // compared with each other.
         for (auto const [left_record_id, right_record_id] : utility::Zip(end, pivot, partner)) {
-            CompressedRecord const& right_record = right_records_[right_record_id];
-            CompressedRecord const& left_record = left_records_[left_record_id];
+            PartitionValueIdMap const& right_record = right_records_[right_record_id];
+            PartitionValueIdMap const& left_record = left_records_[left_record_id];
             record_pair_action(left_record, right_record);
         }
     }
 
-    void SampleShort(record_match_indexes::PartitionIndex::RecordCluster const& cluster,
+    void SampleShort(record_match_indexes::PartitionIndex::PliCluster const& cluster,
                      RankedRecordsValue const& ranked_records_value,
                      auto&& record_pair_action) const {
         std::size_t const cluster_size = cluster.size();
@@ -384,8 +384,8 @@ class RecordPairInferrer::Sampler {
     }
 
 public:
-    Sampler(record_match_indexes::PartitionIndex::RecordClustersMapping const& left_records,
-            record_match_indexes::PartitionIndex::RecordClustersMapping const& right_records,
+    Sampler(record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& left_records,
+            record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& right_records,
             record_match_indexes::PartitionIndex::PositionListIndex const& clusters,
             RankedRecordsRecordMatch const& ranked_records_record_match, model::Index parameter)
         : left_records_(left_records),
@@ -411,11 +411,11 @@ template <bool SampleShort>
 auto RecordPairInferrer::CreateSampler(RecordMatchSamplingInfo const& record_match_sampling_info)
         -> std::pair<std::size_t, Sampler<SampleShort>> {
     record_match_indexes::PartitionIndex const& left_compressor = records_info_->GetLeft();
-    record_match_indexes::PartitionIndex::RecordClustersMapping const& left_records =
-            left_compressor.GetClustersMapping();
+    record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& left_records =
+            left_compressor.GetPartitionValueIdMaps();
 
-    record_match_indexes::PartitionIndex::RecordClustersMapping const& right_records =
-            records_info_->GetRight().GetClustersMapping();
+    record_match_indexes::PartitionIndex::TablePartitionValueIdMaps const& right_records =
+            records_info_->GetRight().GetPartitionValueIdMaps();
 
     model::Index const record_match_index = record_match_sampling_info.GetRecordMatchIndex();
 
@@ -463,8 +463,9 @@ void RecordPairInferrer::DoSamplingRoundParallel(
 
     auto compare_and_store_all_for_value = [this, &sampler](PartitionValueId left_value_id,
                                                             Comparisons* thread_comparisons) {
-        auto compare_and_store = [this, thread_comparisons](CompressedRecord const& left_record,
-                                                            CompressedRecord const& right_record) {
+        auto compare_and_store = [this, thread_comparisons](
+                                         PartitionValueIdMap const& left_record,
+                                         PartitionValueIdMap const& right_record) {
             thread_comparisons->push_back(CompareRecords(left_record, right_record));
         };
         sampler.Sample(left_value_id, compare_and_store);
@@ -481,8 +482,8 @@ template <bool IsShort>
 void RecordPairInferrer::DoSamplingRoundSeq(RecordMatchSamplingInfo& record_match_sampling_info) {
     auto const [left_values_number, sampler] = CreateSampler<IsShort>(record_match_sampling_info);
 
-    auto infer_immediately = [&](CompressedRecord const& left_record,
-                                 CompressedRecord const& right_record) {
+    auto infer_immediately = [&](PartitionValueIdMap const& left_record,
+                                 PartitionValueIdMap const& right_record) {
         CountAndInfer(record_match_sampling_info, CompareRecords(left_record, right_record));
     };
 
@@ -522,26 +523,41 @@ bool RecordPairInferrer::SampleAndInfer() {
     return true;
 }
 
-void RecordPairInferrer::InferFromRecommendationsParallel(Recommendations const& recommendations) {
-    auto compare_records_and_store = [this, &recommendations](model::Index index,
-                                                              Comparisons* thread_comparisons) {
-        auto const& [left_record_ptr, right_record_ptr] = recommendations[index];
-        thread_comparisons->push_back(CompareRecords(*left_record_ptr, *right_record_ptr));
+void RecordPairInferrer::ForEachRecommendation(BatchValidator::Result const& result,
+                                               auto&& action) {
+    for (auto const& [left_record_pvid_map_ptrs, right_record_pvid_map_ptr] :
+         result.lhs_grouped_recommendations) {
+        for (PValueIdMapPtr left_record_pvid_map_ptr : left_record_pvid_map_ptrs) {
+            action(CompareRecords(*left_record_pvid_map_ptr, *right_record_pvid_map_ptr));
+        }
+    }
+}
+
+void RecordPairInferrer::InferFromRecommendationsParallel(
+        std::vector<BatchValidator::Result> const& results) {
+    auto compare_records_and_store = [this, &results](model::Index index,
+                                                      Comparisons* thread_comparisons) {
+        ForEachRecommendation(results[index], [&](PairComparisonResult&& comp_res) {
+            thread_comparisons->push_back(std::move(comp_res));
+        });
     };
     auto infer = [this](PairComparisonResult&& comparison) {
         InferFromComparison(std::move(comparison));
     };
-    ParallelCompareAndInfer(compare_records_and_store, recommendations.size(), infer);
+    ParallelCompareAndInfer(compare_records_and_store, results.size(), infer);
 }
 
-void RecordPairInferrer::InferFromRecommendationsSeq(Recommendations const& recommendations) {
-    for (auto const& [left_record_ptr, right_record_ptr] : recommendations) {
-        InferFromComparison(CompareRecords(*left_record_ptr, *right_record_ptr));
+void RecordPairInferrer::InferFromRecommendationsSeq(
+        std::vector<BatchValidator::Result> const& results) {
+    for (BatchValidator::Result const& result : results) {
+        ForEachRecommendation(result, [&](PairComparisonResult&& comp_res) {
+            InferFromComparison(std::move(comp_res));
+        });
     }
 }
 
-bool RecordPairInferrer::InferFromRecordPairs(Recommendations const& recommendations) {
-    InferFromRecommendations(recommendations);
+bool RecordPairInferrer::InferFromRecordPairs(std::vector<BatchValidator::Result> const& results) {
+    InferFromRecommendations(results);
 
     bool const nothing_to_sample = SampleAndInfer();
     return nothing_to_sample;

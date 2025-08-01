@@ -179,20 +179,21 @@ unsigned long long HyMDE::ExecuteInternal() {
             pool_holder.get());
 
     cover_calculation::MinimalSelectingLevelGetter level_getter{&lattice};
-    cover_calculation::LatticeTraverser lattice_traverser{
-            level_getter,
-            {pool_holder.get(),
-             &data_partition_index,
-             indexes,
-             min_support_,
-             &lattice,
-             {mde_specifications_, useful_record_matches, rcv_id_lr_maps}},
-            pool_holder.get()};
+    cover_calculation::BatchValidator validator{
+            pool_holder.get(),
+            &data_partition_index,
+            indexes,
+            min_support_,
+            &lattice,
+            rcv_id_lr_maps,
+            {mde_specifications_, useful_record_matches, rcv_id_lr_maps}};
+    cover_calculation::LatticeTraverser lattice_traverser{level_getter, validator,
+                                                          pool_holder.get()};
     algorithm_finished = lattice_traverser.TraverseLattice(algorithm_finished);
 
     while (!algorithm_finished) {
         algorithm_finished =
-                record_pair_inferrer.InferFromRecordPairs(lattice_traverser.TakeRecommendations());
+                record_pair_inferrer.InferFromRecordPairs(validator.GetCurrentResults());
         algorithm_finished = lattice_traverser.TraverseLattice(algorithm_finished);
     }
 

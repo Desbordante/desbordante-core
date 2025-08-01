@@ -96,7 +96,7 @@ inline UpperSetIndex CreateUpperSetIndex(EnumeratedMeaningfulDataResults const& 
                 advance_until_leq(rcv_id);
                 if (current == end) goto end_loop;
             }
-            PartitionIndex::RecordCluster const& cluster = right_pli[partition_value_id];
+            PartitionIndex::PliCluster const& cluster = right_pli[partition_value_id];
             meaningful_records.insert(meaningful_records.end(), cluster.begin(), cluster.end());
         }
         end_id_map.try_emplace(end_id_map.end(), std::distance(current, end),

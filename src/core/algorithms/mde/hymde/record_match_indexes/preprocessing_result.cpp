@@ -47,8 +47,8 @@ PreprocessingResult PreprocessingResult::Create(
         calculators::Calculator const& calculator = *calculators[record_match_index];
         record_matches.push_back(calculator.GetRecordMatch());
         ComponentHandlingInfo info =
-                calculator.Calculate(pool_ptr, partition_index_left.NewPartitionAdder(),
-                                     partition_index_right.NewPartitionAdder());
+                calculator.Calculate(pool_ptr, partition_index_left.NewPartitionBuilder(),
+                                     partition_index_right.NewPartitionBuilder());
         auto& [search_space_component, rm_indexes, rm_assertions] = info;
         auto& [classifier_values, rcv_id_lr_map] = search_space_component;
         if (classifier_values_all.emplace_back(std::move(classifier_values)).MaxIsTotal()) continue;
@@ -60,9 +60,9 @@ PreprocessingResult PreprocessingResult::Create(
 
     std::size_t const non_trivial_number = useful_record_matches.size();
     auto arrangement_ptr = utility::MakeUniqueForOverwrite<model::Index[]>(non_trivial_number);
-    auto start = arrangement_ptr.get(), end = start + non_trivial_number;
-    std::iota(start, end, 0);
-    std::sort(start, end, [&](model::Index i, model::Index j) {
+    auto arrangement_span = std::span{arrangement_ptr.get(), non_trivial_number};
+    std::iota(arrangement_span.begin(), arrangement_span.end(), 0);
+    std::ranges::sort(arrangement_span, [&](model::Index i, model::Index j) {
         std::size_t const lhs_rcv_ids1 = rcv_id_lr_maps[i].lhs_to_rhs_map.size();
         std::size_t const lhs_rcv_ids2 = rcv_id_lr_maps[j].lhs_to_rhs_map.size();
         return lhs_rcv_ids1 < lhs_rcv_ids2 || (lhs_rcv_ids1 == lhs_rcv_ids2 && i < j);
@@ -75,7 +75,7 @@ PreprocessingResult PreprocessingResult::Create(
     std::vector<ComponentStructureAssertions> sorted_assertions =
             util::GetPreallocatedVector<ComponentStructureAssertions>(non_trivial_number);
 
-    for (model::Index non_trivial_index : std::span{arrangement_ptr.get(), non_trivial_number}) {
+    for (model::Index non_trivial_index : arrangement_span) {
         sorted_indexes.push_back(std::move(indexes[non_trivial_index]));
         sorted_rcv_id_lr_maps.push_back(std::move(rcv_id_lr_maps[non_trivial_index]));
         sorted_useful_record_matches.push_back(useful_record_matches[non_trivial_index]);
