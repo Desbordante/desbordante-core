@@ -13,6 +13,7 @@ Possible options:
   -h,         --help                  Display help
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
+  -b          --benchmark             Build benchmarks
   -u,         --no-unpack             Don't unpack datasets
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
@@ -22,6 +23,8 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
+  -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
 EOF
 }
 
@@ -36,13 +39,17 @@ for i in "$@"; do
         -n | --no-tests)
             NO_TESTS=true
             ;;
+		# Build benchmarks
+        -b|--benchmark)
+            BENCHMARK=true
+            ;;
         # Don't unpack datasets
         -u | --no-unpack)
             NO_UNPACK=true
             ;;
         # The maximum number of concurrent processes for building
         -j* | --parallel*)
-            JOBS_OPTION=$i
+            BUILD_OPTS="$BUILD_OPTS $i"
             ;;
         # Set debug build type
         -d | --debug)
@@ -64,6 +71,22 @@ for i in "$@"; do
         -g)
             GDB_DEBUG=true
             ;;
+        # Forward option to CMake, long option
+        --cmake-opt=*)
+            CMAKE_OPTS="$CMAKE_OPTS ${i#*=}"
+            ;;
+        # Forward option to CMake, short option
+        -C*)
+            CMAKE_OPTS="$CMAKE_OPTS ${i#*C}"
+            ;;
+        # Forward option to build system, long option
+        --build-opt=*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*=}"
+            ;;
+        # Forward option to build system, short option
+        -B*)
+            BUILD_OPTS="$BUILD_OPTS ${i#*B}"
+            ;;
         # Display help
         -h | --help | *)
             print_help
@@ -72,33 +95,39 @@ for i in "$@"; do
     esac
 done
 
+CMAKE_OPTS='-G Ninja'
+
 if [[ $NO_TESTS == true ]]; then
-    PREFIX="$PREFIX -D COMPILE_TESTS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_TESTS=OFF"
+fi
+
+if [[ $BENCHMARK == true ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_BENCHMARKS=ON"
 fi
 
 if [[ $NO_UNPACK == true ]]; then
-    PREFIX="$PREFIX -D UNPACK_DATASETS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D UNPACK_DATASETS=OFF"
 fi
 
 if [[ $PYBIND == true ]]; then
-    PREFIX="$PREFIX -D PYTHON=COMPILE"
+    CMAKE_OPTS="$CMAKE_OPTS -D PYTHON=COMPILE"
 fi
 
 if [[ $LTO == true ]]; then
-    PREFIX="$PREFIX -D USE_LTO=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D USE_LTO=ON"
 fi
 
 if [[ $GDB_DEBUG == true ]]; then
-    PREFIX="$PREFIX -D GDB_DEBUG=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D GDB_DEBUG=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
-    PREFIX="$PREFIX -D CMAKE_BUILD_TYPE=Release"
+    CMAKE_OPTS="$CMAKE_OPTS -D CMAKE_BUILD_TYPE=Release"
 fi
 
 if [[ -n $SANITIZER ]]; then
-    PREFIX="$PREFIX -D SANITIZER=${SANITIZER}"
+    CMAKE_OPTS="$CMAKE_OPTS -D SANITIZER=${SANITIZER}"
 fi
 
 rm -f build/CMakeCache.txt
-cmake -S . -B build $PREFIX -G Ninja && cmake --build build $JOBS_OPTION
+cmake -S . -B build $CMAKE_OPTS && cmake --build build $BUILD_OPTS
