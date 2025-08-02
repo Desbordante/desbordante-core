@@ -13,6 +13,7 @@
 #include "fd_inductor.h"
 #include "model/cluster_ids_array.h"
 #include "non_fd_inductor.h"
+#include "dynfd_config.h"
 
 namespace algos::dynfd {
 
@@ -303,8 +304,9 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
             }
         }
 
-        if (static_cast<double>(invalid_fds.size()) > 0.1 * static_cast<double>(level_fds.size())) {
-            // inductor.UpdateCovers(sampler.GetAgreeSets(comparison_suggestions));
+        if (static_cast<double>(invalid_fds.size()) > DynFDConfig::kInvalidatedFdsThreshold
+            * static_cast<double>(level_fds.size())) {
+            inductor.UpdateCovers(sampler.GetAgreeSets(comparison_suggestions));
         }
     }
 }
@@ -331,9 +333,9 @@ void Validator::ValidateNonFds() {
             }
         }
 
-        if (static_cast<double>(valid_fds.size()) >
-            0.1 * static_cast<double>(level_non_fds.size())) {
-            // fd_finder.FindFds(valid_fds);
+        if (static_cast<double>(valid_fds.size()) > DynFDConfig::kInvalidatedNonFdsThreshold
+            * static_cast<double>(level_non_fds.size())) {
+            fd_finder.FindFds(valid_fds);
         }
     }
 }
