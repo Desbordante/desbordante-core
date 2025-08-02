@@ -134,4 +134,5 @@ CSVConfig const kTestDC2 = CreateCsvConfig("TestDC2.csv", ',', true);
 CSVConfig const kTestDC3 = CreateCsvConfig("TestDC3.csv", ',', true);
 CSVConfig const kTestDC4 = CreateCsvConfig("TestDC4.csv", ',', true);
 CSVConfig const kTestDC5 = CreateCsvConfig("TestDC5.csv", ',', true);
+CSVConfig const kLicenses = CreateCsvConfig("licenses.csv", ',', true);
 }  // namespace tests
