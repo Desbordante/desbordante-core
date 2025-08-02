@@ -1,66 +1,54 @@
 #pragma once
 
-#include <memory>
-#include <queue>
-#include <thread>
-#include <vector>
-
-#include <boost/dynamic_bitset.hpp>
-
-#include "algorithms/fd/hycommon/all_column_combinations.h"
-#include "algorithms/fd/hycommon/efficiency.h"
+#include "algorithms/fd/hycommon/sampler.h"
 #include "config/thread_number/type.h"
 #include "model/dynamic_position_list_index.h"
 #include "model/dynamic_relation_data.h"
 
-namespace boost::asio {
-// Forward declare thread_pool to avoid including boost::asio::thread_pool implementation since
-// it's not needed here and to avoid transitevly pollute all other files with it
-class thread_pool;
-}  // namespace boost::asio
-
 namespace algos::dynfd {
 
 class Sampler {
-public:
-    using IdPairs = std::vector<std::pair<int, int>>;
-
 private:
-    using PLI = std::vector<DPLI::Cluster>;
+    struct Traits {
+        using PLI = std::vector<DPLI::Cluster>;
+        using PLIsPtr = std::unique_ptr<std::vector<std::shared_ptr<PLI>>>;
+        using PLIPtr = std::shared_ptr<PLI>;
+        using RowsPtr = CompressedRecordsPtr;
+        using IdPairs = std::vector<std::pair<int, int>>;
+        using Cluster = DPLI::Cluster;
+        using TablePos = int;
 
-    inline static constexpr double kEfficiencyThreshold = 0.1;
+        class ClusterComparator {
+        private:
+            CompressedRecords const* sort_keys_;
+            size_t comparison_column_1_;
+            size_t comparison_column_2_;
 
-    double efficiency_threshold_ = kEfficiencyThreshold;
-    std::vector<PLI> plis_;
-    CompressedRecordsPtr compressed_records_;
-    std::shared_ptr<DynamicRelationData> relation_;
-    std::priority_queue<algos::hy::Efficiency> efficiency_queue_;
-    std::unique_ptr<algos::hy::AllColumnCombinations> agree_sets_;
-    boost::asio::thread_pool* pool_;
-    size_t first_insert_batch_id_;
+        public:
+            ClusterComparator(CompressedRecords const* sort_keys, size_t comparison_column_1,
+                              size_t comparison_column_2, Traits const& traits) noexcept;
 
-    void ProcessComparisonSuggestions(IdPairs const& comparison_suggestions);
-    void SortClustersSeq();
-    void SortClustersParallel();
-    void SortClusters();
-    void InitializeEfficiencyQueueSeq();
-    void InitializeEfficiencyQueueParallel();
-    void InitializeEfficiencyQueueImpl();
-    void InitializeEfficiencyQueue();
+            bool operator()(size_t o1, size_t o2) noexcept;
+        };
 
-    void Match(boost::dynamic_bitset<>& attributes, size_t first_record_id,
-               size_t second_record_id);
-    template <typename F>
-    void RunWindowImpl(algos::hy::Efficiency& efficiency, PLI const& pli, F store_match);
-    std::vector<boost::dynamic_bitset<>> RunWindowRet(algos::hy::Efficiency& efficiency,
-                                                      PLI const& pli);
-    void RunWindow(algos::hy::Efficiency& efficiency, PLI const& pli);
+        Traits(size_t first_insert_batch_id, std::shared_ptr<DynamicRelationData> relation)
+            : first_insert_batch_id_(first_insert_batch_id), relation_(std::move(relation)) {}
+
+        size_t first_insert_batch_id_;
+        std::shared_ptr<DynamicRelationData> relation_;
+
+        void Initialize(hy::Sampler<Traits>& sampler);
+        bool IsSingletonCluster(TablePos cluster_id) const noexcept;
+    };
+
+    hy::Sampler<Traits> sampler_;
 
 public:
+    using IdPairs = Traits::IdPairs;
+
     Sampler(std::shared_ptr<DynamicRelationData> relation, size_t first_insert_batch_id,
             boost::asio::thread_pool* pool);
-
     algos::hy::ColumnCombinationList GetAgreeSets(IdPairs const& comparison_suggestions);
 };
 
-}  // namespace algos::dynfd
+}  // namespace algos::hyfd
