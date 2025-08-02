@@ -1,8 +1,9 @@
 #include "non_fd_inductor.h"
+#include "dynfd_config.h"
 
 namespace algos::dynfd {
 void NonFDInductor::FindFds(std::vector<RawFD> const& valid_fds) {
-    for (size_t index = 0; index < valid_fds.size(); index += 10) {
+    for (size_t index = 0; index < valid_fds.size(); index += static_cast<int>(1.0 / DynFDConfig::kDfsSeedSampleRatio)) {
         Dfs(valid_fds[index], valid_fds[index].lhs_.find_first());
     }
 }
