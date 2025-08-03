@@ -74,7 +74,7 @@ public:
           lhs_column_similarity_classifiers_(std::move(lhs_column_similarity_classifiers)),
           rhs_column_similarity_classifier_(std::move(rhs_column_similarity_classifier)),
           holds_(true),
-          true_rhs_decision_boundary_(rhs_column_similarity_classifier.GetDecisionBoundary()) {
+          true_rhs_decision_boundary_(rhs_column_similarity_classifier_.GetDecisionBoundary()) {
         if (right_table == nullptr) {
             records_info_ = hymd::indexes::RecordsInfo::CreateFrom(*left_table);
         } else {
