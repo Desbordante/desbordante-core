@@ -311,7 +311,7 @@ struct TestDateArithmeticsParam {
     std::string const date2;
     long const dist;
     TestDateArithmeticsParam(std::string l, std::string r, long dist)
-        : date1(std::move(l)), date2(std::move(r)), dist(dist){};
+        : date1(std::move(l)), date2(std::move(r)), dist(dist) {};
 };
 
 using DateTypeBinop = std::byte* (mo::DateType::*)(std::byte const* date,

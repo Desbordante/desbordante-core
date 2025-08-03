@@ -1,9 +1,10 @@
 #include "dependency_checker.h"
 
-#include <algorithm>
-#include <unordered_set>
+#include <stddef.h>       // for size_t
+#include <unordered_set>  // for operator==, _Node_const_iter...
 
-#include "model/table/tuple_index.h"
+#include "model/table/tuple_index.h"     // for TupleIndex
+#include "od/order/sorted_partitions.h"  // for SortedPartition
 
 namespace algos::order {
 

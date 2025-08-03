@@ -2,11 +2,12 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
+#include <stddef.h>  // for size_t
+#include <string>    // for string
+#include <vector>    // for vector
 
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "stripped_partition.h"
+#include "algorithms/od/fastod/storage/data_frame.h"  // for DataFrame
+#include "table/column_index.h"                       // for ColumnIndex
 
 namespace algos::fastod {
 

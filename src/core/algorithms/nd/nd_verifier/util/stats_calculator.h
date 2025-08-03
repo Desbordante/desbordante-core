@@ -1,14 +1,24 @@
 #pragma once
 
-#include <memory>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
+#include <limits.h>       // for UINT_MAX
+#include <memory>         // for shared_ptr
+#include <stddef.h>       // for size_t
+#include <string>         // for hash, string
+#include <unordered_map>  // for unordered_map
+#include <unordered_set>  // for unordered_set
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/highlight.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
+#include "algorithms/nd/nd.h"                          // for WeightType
+#include "algorithms/nd/nd_verifier/util/highlight.h"  // for Highlight
+
+namespace algos {
+namespace nd_verifier {
+namespace util {
+class ValueCombination;
+}
+}  // namespace nd_verifier
+}  // namespace algos
 
 namespace algos::nd_verifier::util {
 

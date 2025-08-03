@@ -1,11 +1,12 @@
 #pragma once
 
 #include <list>
+#include <memory>  // for shared_ptr, __shar...
 #include <set>
 #include <stack>
+#include <string>       // for string
+#include <string_view>  // for string_view
 #include <vector>
-
-#include <boost/any.hpp>
 
 #include "algorithms/algorithm.h"
 #include "ar.h"

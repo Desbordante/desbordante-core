@@ -1,7 +1,17 @@
 #include "ac_exception_finder.h"
 
+#include <algorithm>  // for find_if, sort
+#include <memory>     // for unique_ptr
+
 #include "ac_algorithm.h"
+#include "algebraic_constraints/ac_exception.h"       // for ACException
+#include "algebraic_constraints/ranges_collection.h"  // for RangesCollection
+#include "algebraic_constraints/typed_column_pair.h"  // for TypedColumnPair
 #include "bin_operation_enum.h"
+#include "builtin.h"                  // for CompareResult
+#include "create_type.h"              // for CreateSpecificType
+#include "numeric_type.h"             // for INumericType
+#include "table/typed_column_data.h"  // for TypedColumnData
 
 namespace algos::algebraic_constraints {
 

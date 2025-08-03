@@ -1,5 +1,10 @@
 #include "tidlist_util.h"
 
+#include <boost/container_hash/hash.hpp>  // for hash_range
+
+#include "cfd/model/cfd_types.h"          // for SimpleTIdList
+#include "cfd/model/partition_tidlist.h"  // for PartitionTIdList
+
 // see algorithms/cfd/LICENSE
 
 namespace algos::cfd {

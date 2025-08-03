@@ -1,10 +1,14 @@
 #include "algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
 
-#include <algorithm>
-#include <cassert>
+#include <cassert>  // for assert
+#include <utility>  // for move
 
-#include "algorithms/md/hymd/md_lhs.h"
-#include "util/desbordante_assume.h"
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "algorithms/md/hymd/md_lhs.h"        // for MdLhs, LhsNode
+#include "index.h"                            // for Index
+#include "md/hymd/lattice/validation_info.h"  // for ValidationInfo
+#include "util/desbordante_assume.h"          // for DESBORDANTE_ASSUME
 
 namespace algos::hymd::lattice::cardinality {
 

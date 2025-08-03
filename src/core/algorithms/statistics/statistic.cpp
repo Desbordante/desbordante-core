@@ -1,6 +1,8 @@
 #include "statistic.h"
 
-#include <memory>
+#include <memory>   // for unique_ptr, allocator
+#include <sstream>  // for basic_ostream, basic_stringstream, operator<<
+#include <utility>  // for move
 
 namespace algos {
 
