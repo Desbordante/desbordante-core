@@ -6,7 +6,7 @@ MDHighlights MDHighlights::CreateFrom(model::RhsSimilarityClassifierDesctription
                                       RecordsPairToSimilarityMap const& records_to_similarity) {
     std::vector<MDHighlights::Highlight> highlights;
 
-    for (auto [left_record_index, right_records_set] : records_pairs) {
+    for (auto const& [left_record_index, right_records_set] : records_pairs) {
         for (model::Index right_record_index : right_records_set) {
             highlights.emplace_back(
                     left_record_index, right_record_index, rhs_desc,
