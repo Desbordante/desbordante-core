@@ -42,9 +42,9 @@ private:
     size_t num_attributes_;
 
     /**
-     * Flag for optimizing child existence check. Is true iff any children_ is set
+     * Number of not null elements of children_
      */
-    bool contains_children_ = false;
+    size_t children_count_ = 0;
 
     friend class FDTree;
 
@@ -79,13 +79,13 @@ private:
      * @return whether a child was constructed
      */
     bool AddChild(size_t pos) {
-        contains_children_ = true;
         if (children_.empty()) {
             children_.resize(num_attributes_);
         }
 
         if (!ContainsChildAt(pos)) {
             children_[pos] = std::make_shared<FDTreeVertex>(num_attributes_);
+            children_count_++;
             return true;
         }
 
@@ -151,7 +151,7 @@ public:
     }
 
     bool HasChildren() const noexcept {
-        return contains_children_;
+        return children_count_ > 0;
     }
 };
 
