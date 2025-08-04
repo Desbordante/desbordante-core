@@ -10,7 +10,9 @@ namespace algos::hyfd::fd_tree {
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
                                      boost::dynamic_bitset<> lhs, std::vector<LhsPair>& vertices) {
     if (cur_level == target_level) {
-        vertices.emplace_back(shared_from_this(), lhs);
+        if (fds_.any()) {
+            vertices.emplace_back(shared_from_this(), lhs);
+        }
         return;
     }
 
@@ -18,7 +20,7 @@ void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
         return;
     }
 
-    for (size_t i = 0; i < num_attributes_; ++i) {
+    for (size_t i = cur_level; i < num_attributes_; ++i) {
         if (ContainsChildAt(i)) {
             lhs.set(i);
 
@@ -35,6 +37,8 @@ void FDTreeVertex::GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
                                              std::vector<boost::dynamic_bitset<>>& result) const {
     if (IsFd(rhs)) {
         result.push_back(cur_lhs);
+        return;  // If this vertex has the RHS bit set, then none of its children will have
+                 // this bit set.
     }
 
     if (!HasChildren()) {
@@ -84,13 +88,12 @@ bool FDTreeVertex::RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rh
         }
 
         if (!children_[current_lhs_attr]->GetAttributes().any()) {
-            children_[current_lhs_attr].reset();
             children_[current_lhs_attr] = nullptr;
+            children_count_--;
         }
     }
 
     if (IsLastNodeOf(rhs)) {
-        contains_children_ = false;
         RemoveAttribute(rhs);
         return true;
     }
@@ -101,7 +104,7 @@ bool FDTreeVertex::IsLastNodeOf(size_t rhs) const noexcept {
     if (!HasChildren()) {
         return true;
     }
-    return std::all_of(children_.cbegin(), children_.cend(), [rhs](auto const& child) {
+    return std::none_of(children_.cbegin(), children_.cend(), [rhs](auto const& child) {
         return (child != nullptr) && child->IsAttribute(rhs);
     });
 }
@@ -121,7 +124,7 @@ void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs
         fds.emplace_back(lhs, rhs);
     }
 
-    if (!contains_children_) {
+    if (!HasChildren()) {
         return;
     }
 
