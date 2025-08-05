@@ -1,0 +1,16 @@
+# Build directories, libraries and binary files
+**/myeasylog.log
+.venv/
+build/
+cmake-build-debug/
+dist/
+lib/
+venv/
+
+# IDE and related files
+.cache/
+.idea/
+.vscode/
+
+# OS Generated file
+**/.DS_Store

@@ -1,0 +1,7 @@
+0.sound=consonant 1.sound=consonant 
+0.sound=1.sound 
+graph G {
+0[label=vertex];
+1[label=vertex];
+0--1 [label=e];
+}

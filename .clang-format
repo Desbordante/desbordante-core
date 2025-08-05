@@ -1,0 +1,17 @@
+BasedOnStyle: Google
+AccessModifierOffset: -4
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 8
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: Empty
+IncludeCategories:
+  - Regex: '<(easylogging|boost|enum|gmock|gtest|pybind11|Python|frozen).+>'
+    Priority: 2
+  - Regex: '<.+>'
+    Priority: 1
+  - Regex: '.+'
+    Priority: 3
+QualifierAlignment: Custom
+QualifierOrder: ['inline', 'static', 'type', 'const', 'volatile' ]
+SeparateDefinitionBlocks: Always

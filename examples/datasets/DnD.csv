@@ -1,0 +1,8 @@
+Creature,Strength,HaveMagic
+Ogre,9,false
+Ogre,6,false
+Elf,6,true
+Elf,6,true
+Elf,1,true
+Dwarf,9,false
+Dwarf,6,false

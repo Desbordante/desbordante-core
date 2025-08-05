@@ -1,0 +1,7 @@
+
+0.style=1.style 1.style=filled 
+graph G {
+0[label=v];
+1[label=v];
+0--1 [label=e];
+}

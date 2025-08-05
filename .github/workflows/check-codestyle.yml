@@ -1,0 +1,89 @@
+name: Codestyle
+on:
+  pull_request:
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
+      - pyproject.toml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
+
+jobs:
+  clang-format-check:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pull clang-format
+        run: |
+          sudo add-apt-repository 'deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main'
+          wget https://apt.llvm.org/llvm-snapshot.gpg.key
+          sudo apt-key add llvm-snapshot.gpg.key
+          sudo apt-get update
+          sudo apt-get install -y clang-format-18
+      - name: Check formatting
+        run: |
+          set +e
+          formatterOutput=$( git diff -U0 origin/$GITHUB_BASE_REF...HEAD | clang-format-diff-18 -p 1)
+
+          if [ "$formatterOutput" != "" ]
+          then
+            echo ":x: :x: :x:" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`c++" >> $GITHUB_STEP_SUMMARY
+            echo "$formatterOutput" >> $GITHUB_STEP_SUMMARY
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            echo "$formatterOutput"
+            exit 1
+          fi
+
+          echo "$formatterOutput"
+          echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
+
+  clang-tidy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
+        with:
+          os: ubuntu
+          toolset: gcc
+          download-pybind: true
+      - name: Generate compile_commands.json
+        run: |
+          source .venv/bin/activate
+          cmake -DCMAKE_CXX_COMPILER=g++-10 \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -Dgtest_disable_pthreads=OFF \
+            -DASAN=OFF \
+            -DPYTHON=COMPILE \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCPM_SOURCE_CACHE=${{github.workspace}}/cmake/cpm-cache \
+            -S . -B ${{github.workspace}}/build
+
+      - uses: ZedThree/clang-tidy-review@v0.19.0
+        id: review
+        with:
+          apt_packages: libboost-dev
+          build_dir: build
+          config_file: '.clang-tidy'
+          split_workflow: true
+
+      - uses: ZedThree/clang-tidy-review/upload@v0.19.0
+
+      - name: Fail the check if clang-tidy reported issues
+        if: steps.review.outputs.total_comments > 0
+        run: exit 1

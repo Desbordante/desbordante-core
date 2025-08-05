@@ -1,0 +1,34 @@
+graph G {
+0[label=task difficulty=easy];
+1[label=task difficulty=normal];
+2[label=task difficulty=normal];
+3[label=task difficulty=hard];
+4[label=task difficulty=hard];
+5[label=task difficulty=hard];
+6[label=student name=James degree=bachelor year=2];
+7[label=student name=Michael degree=master year=1];
+8[label=student name=Robert degree=bachelor year=3];
+9[label=student name=John degree=master year=2];
+10[label=student name=David degree=bachelor year=4];
+11[label=student name=William degree=master year=2];
+12[label=student name=Richard degree=master year=2];
+13[label=student name=Joseph degree=master year=2];
+14[label=student name=Thomas degree=master year=2];
+15[label=student name=Christopher degree=master year=2];
+0--6 [label=performs];
+1--6 [label=performs];
+1--7 [label=performs];
+1--10 [label=performs];
+2--7 [label=performs];
+2--8 [label=performs];
+2--9 [label=performs];
+3--9 [label=performs];
+3--11 [label=performs];
+3--12 [label=performs];
+4--12 [label=performs];
+4--13 [label=performs];
+4--14 [label=performs];
+5--11 [label=performs];
+5--14 [label=performs];
+5--15 [label=performs];
+}

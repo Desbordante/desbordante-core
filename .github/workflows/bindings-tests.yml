@@ -1,0 +1,111 @@
+name: Python
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - docs/**
+      - README.md
+      - README_PYPI.md
+      - cli/**
+      - examples/**
+      - images/**
+      - .gitignore
+      - COPYING
+      - build.*
+      - pull_datasets.sh
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # Cancel in-progress runs when a new workflow with the same group name is triggered
+  cancel-in-progress: true
+
+jobs:
+  test-python-bindings:
+    name: Run python-bindings tests on ${{ matrix.os }} with ${{ matrix.toolset }}
+    continue-on-error: true
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            toolset: gcc
+            env: CXX=g++-10
+
+          - os: ubuntu-latest
+            toolset: llvm-clang
+            # CMake cannot locate clang-scan-deps without `CC=clang`
+            # https://github.com/emscripten-core/emscripten/issues/22305
+            env: CC=clang CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+
+          # Uncomment this to enable macOS gcc tests:
+          # - os: macos-latest
+          #   toolset: gcc 
+          #   env: CXX=g++-14 BOOST_ROOT=/usr/local
+          #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+
+          # Uncomment this to enable macOS llvm-clang tests:
+          # - os: macos-latest
+          #   toolset: llvm-clang
+          #   env: CXX=$(brew --prefix llvm@17)/bin/clang++ BOOST_ROOT=/usr/local
+          #   runtime-env: DYLD_LIBRARY_PATH=/usr/local/lib:${DYLD_LIBRARY_PATH}
+          
+          - os: macos-latest
+            toolset: apple-clang
+            env: CXX=clang++ BOOST_ROOT=$(brew --prefix boost)
+            
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        uses: ./.github/composite-actions/install-dependencies
+        with:
+          os: ${{ matrix.os }}
+          toolset: ${{ matrix.toolset }}
+          download-googletest: false
+          download-pybind: true
+      - name: Build pip package
+        shell: bash
+        run: |
+          export ${{ matrix.env }}
+
+          source .venv/bin/activate
+          python3 -m pip install .
+      - name: Test pip package
+        shell: bash
+        run: |
+          export ${{ matrix.runtime-env }}
+
+          source .venv/bin/activate
+
+          cp test_input_data/WDC_satellites.csv src/python_bindings/
+          cp test_input_data/TestLong.csv src/python_bindings/
+          cp test_input_data/TestWide.csv src/python_bindings/
+          cp test_input_data/transactional_data/rules-kaggle-rows.csv src/python_bindings/
+
+          cd src/python_bindings
+          python test_bindings.py
+      - name: Test data stats
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: |
+          export ${{ matrix.runtime-env }}
+
+          source .venv/bin/activate
+
+          cp test_input_data/TestDataStats.csv src/python_bindings
+          cd src/python_bindings
+          python test_pybind_data_stats.py

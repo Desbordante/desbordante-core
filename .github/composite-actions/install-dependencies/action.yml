@@ -1,0 +1,176 @@
+name: 'Install dependencies'
+description: 'Download and install build system and libraries'
+inputs:
+  os:
+    type: string
+    description: 'Any default runner name in Github Actions'
+    required: true
+
+  toolset:
+    type: choice
+    options:
+      gcc
+      llvm-clang
+      apple-clang
+    default: gcc
+
+  install-toolset:
+    type: boolean
+    default: true
+
+  install-boost:
+    type: boolean
+    default: true
+
+  download-googletest:
+    type: boolean
+    description: 'Download googletest'
+    default: true
+
+  download-pybind:
+    type: boolean
+    description: 'Download pybind11'
+    default: false
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Get short OS name
+      shell: bash
+      run: |
+        function get_short_os_name() {
+          if [[ $1 == *"ubuntu"* ]]; then
+            echo "ubuntu"
+          elif [[ $1 == *"macos"* ]]; then
+            echo "macos"
+          else
+            echo "ERROR: unknown OS"
+            exit 1
+          fi
+        }
+
+        echo "OS=$(get_short_os_name ${{ inputs.os }})" >> $GITHUB_ENV
+
+    - name: Set up CPM.cmake cache
+      id: cache-cpm
+      uses: actions/cache@v4
+      with:
+        path: ./cmake/cpm-cache
+        key: ${{ runner.os }}-cpm-${{ hashFiles('**/CMakeLists.txt') }}-${{ hashFiles('**/cmake/CPM.cmake') }}
+        restore-keys: |
+          ${{ runner.os }}-cpm-
+
+    - name: Create python virtual environment
+      run: | 
+          python3 -m venv .venv
+      shell: bash
+
+    # Add-hoc for https://github.com/Desbordante/desbordante-core/issues/549
+    - name: Install cmake 3.31.6 in python venv
+      run: |
+        source .venv/bin/activate
+        python3 -m pip install cmake==3.31.6 # ad-hoc
+      shell: bash
+
+    - name: Install build tools using apt
+      run: |
+        sudo apt-get update -y
+        sudo apt install cmake ninja-build python3 python3-venv -y
+      shell: bash
+      if: env.OS == 'ubuntu'
+    - name: Install build tools using brew
+      run: brew install cmake ninja python3 --formula
+      shell: bash
+      if: env.OS == 'macos'
+
+    - name: Install GCC toolset (on Ubuntu)
+      run: |
+        sudo apt-get install gcc-10 g++-10 -y
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+    - name: Install Clang toolset (on Ubuntu)
+      # "all" option is needed to install libc++ and libc++abi
+      # apt is hardcoded in llvm.sh, so we can't use it everywhere
+      run: |
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17 all
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install GCC toolset (on macOS)
+      run: |
+        brew install gcc@14
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
+    - name: Install LLVM Clang toolset (on macOS)
+      run: brew install llvm@17
+      shell: bash
+      if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+    # Apple Clang is installed by default on macOS runner
+
+    - name: Make lib directory
+      run: |
+        mkdir -p lib
+      shell: bash
+
+    - name: Download boost
+      uses: ./.github/composite-actions/download-library
+      with:
+        directory: boost
+        download-command: wget -O boost_1_85_0.tar.gz https://sourceforge.net/projects/boost/files/boost/1.85.0/boost_1_85_0.tar.gz/download && tar xzvf boost_1_85_0.tar.gz && mv boost_1_85_0 boost
+
+    - name: Install Boost built with GCC (on Ubuntu)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph
+        sudo ./b2 install --prefix=/usr
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'ubuntu'
+    - name: Install Boost built with Clang (on Ubuntu)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph
+        sudo ./b2 install -a --prefix=/usr toolset=clang cxxflags="-stdlib=libc++" \
+         linkflags="-stdlib=libc++"
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
+    - name: Install Boost built with GCC (on macOS)
+      run: | 
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph 
+        echo "using darwin : : g++-14 ;" > user-config.jam
+        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
+    - name: Install Boost built with LLVM Clang (on macOS)
+      run: |
+        cd lib/boost
+        ./bootstrap.sh --with-libraries=container,thread,graph
+        echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
+        sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
+         cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
+         linkflags="-L$(brew --prefix llvm@17)/lib/c++"
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
+    - name: Install Boost built with Apple Clang
+      run: brew install boost
+      shell: bash
+      if: inputs.install-boost == 'true' && inputs.toolset == 'apple-clang'
+
+#    Uncomment this if we set up our own git lfs server
+#    - name: Install git-lfs
+#      run: |
+#         curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
+#         git lfs install
+#      shell: bash
+#    - name: Generate lfs file list
+#      run: git lfs ls-files -l | cut -d' ' -f1 | sort > .lfs-assets-id
+#      shell: bash
+#    - name: Restore lfs cache
+#      uses: actions/cache@v3
+#      id: lfs-cache
+#      with:
+#        path: .git/lfs
+#        key: ${{ runner.os }}-lfs-${{ hashFiles('.lfs-assets-id') }}-v1
