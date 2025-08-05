@@ -115,7 +115,7 @@ model::MD MDVerifier::BuildMD(std::vector<ColumnSimilarityClassifier> const& lhs
     };
     std::transform(lhs.begin(), lhs.end(), std::back_inserter(*column_matches), get_column_match);
     column_matches->emplace_back(get_column_match(rhs));
-    
+
     std::vector<model::md::LhsColumnSimilarityClassifier> lhs_transformed;
     model::Index column_match_current_index = 0;
     std::transform(lhs.begin(), lhs.end(), std::back_inserter(lhs_transformed),
