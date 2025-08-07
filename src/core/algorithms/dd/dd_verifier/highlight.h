@@ -12,8 +12,11 @@ private:
     double distance_;
 
 public:
-    Highlight(const model::ColumnIndex& attribute_index, const std::pair<std::size_t, std::size_t>& rows_pair, const double& distance)
-        : attribute_index_(attribute_index), pair_rows_(std::move(rows_pair)), distance_(distance) {}
+    Highlight(model::ColumnIndex const& attribute_index,
+              std::pair<std::size_t, std::size_t> const& rows_pair, double const& distance)
+        : attribute_index_(attribute_index),
+          pair_rows_(std::move(rows_pair)),
+          distance_(distance) {}
 
     [[nodiscard]] model::ColumnIndex GetAttributeIndex() const {
         return attribute_index_;
@@ -22,5 +25,8 @@ public:
     [[nodiscard]] std::pair<std::size_t, std::size_t> GetPairRows() const {
         return pair_rows_;
     }
-    [[nodiscard]] double GetDistance() const {return distance_;}
+
+    [[nodiscard]] double GetDistance() const {
+        return distance_;
+    }
 };

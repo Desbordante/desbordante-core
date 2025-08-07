@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstddef>
+#include <timed_invoke.h>
 #include <vector>
 
 #include <easylogging++.h>
@@ -29,7 +30,7 @@ double DDVerifier::GetError() const {
     return error_;
 }
 
-void DDVerifier::VisualizeHighlights() {
+void DDVerifier::VisualizeHighlights() const {
     for (auto const &hl : highlights_) {
         auto const &col_data = typed_relation_->GetColumnData(hl.GetAttributeIndex());
         auto const col_schema = typed_relation_->GetSchema();
@@ -62,18 +63,17 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
 
 double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
                                      std::pair<std::size_t, std::size_t> const &tuple_pair) const {
-    double dif = 0;
     model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
     std::byte const *first_value = column.GetValue(tuple_pair.first);
     std::byte const *second_value = column.GetValue(tuple_pair.second);
     auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
-    dif = type.Dist(first_value, second_value);
-    return dif;
+    return type.Dist(first_value, second_value);
 }
 
 std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
     std::vector<std::pair<int, int>> result;
     std::vector<model::ColumnIndex> columns;
+    columns.reserve(dd_.left.size());
     for (auto const &constraint : dd_.left) {
         model::ColumnIndex column_index =
                 typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
@@ -91,10 +91,10 @@ std::vector<std::pair<int, int>> DDVerifier::GetRowsWhereLhsHolds() const {
     ++curr_constraint;
     for (std::size_t i = 1; i < columns.size(); i++) {
         std::vector<std::pair<int, int>> new_result;
-        for (std::size_t j = 0; j < result.size(); j++) {
-            if (double const dif = CalculateDistance(columns[i], result[j]);
+        for (auto const &pair : result) {
+            if (double const dif = CalculateDistance(columns[i], pair);
                 curr_constraint->constraint.Contains(dif)) {
-                new_result.emplace_back(result[j]);
+                new_result.emplace_back(pair);
             }
         }
         result = std::move(new_result);
@@ -113,50 +113,30 @@ void DDVerifier::MakeExecuteOptsAvailable() {
 }
 
 void DDVerifier::CheckCorrectnessDd() const {
-    for (auto const &constraint : dd_.left) {
-        assert(constraint.constraint.upper_bound >= constraint.constraint.lower_bound);
-        assert(constraint.constraint.lower_bound >= 0);
-        assert(constraint.constraint.upper_bound >= 0);
-    }
-    for (auto const &constraint : dd_.right) {
-        assert(constraint.constraint.upper_bound >= constraint.constraint.lower_bound);
-        assert(constraint.constraint.lower_bound >= 0);
-        assert(constraint.constraint.upper_bound >= 0);
-    }
+    auto check_constraint = [](auto const &constraint) {
+        if (constraint.constraint.upper_bound < constraint.constraint.lower_bound) {
+            throw std::invalid_argument("Invalid constraint bounds for column: " +
+                                        constraint.column_name);
+        }
+        if (constraint.constraint.lower_bound < 0 || constraint.constraint.upper_bound < 0) {
+            throw std::invalid_argument("Constraint bounds cannot be negative for column: " +
+                                        constraint.column_name);
+        }
+    };
+
+    std::ranges::for_each(dd_.left, check_constraint);
+    std::ranges::for_each(dd_.right, check_constraint);
 }
 
 unsigned long long DDVerifier::ExecuteInternal() {
-    std::vector<model::ColumnIndex> columns;
-    for (auto const &constraint : dd_.left) {
-        model::ColumnIndex column_index =
-                typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
-        columns.push_back(column_index);
-    }
-    for (auto const &constraint : dd_.right) {
-        model::ColumnIndex column_index =
-                typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
-        columns.push_back(column_index);
-    }
-    for (auto const col : columns) {
-        assert(IsColumnMetrizable(col));
-    }
-    CheckCorrectnessDd();
-    num_rows_ = typed_relation_->GetNumRows();
-    num_columns_ = typed_relation_->GetNumColumns();
-
-    auto start_time = std::chrono::system_clock::now();
-
-    VerifyDD();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
+    auto elapsed_milliseconds = util::TimedInvoke(&DDVerifier::VerifyDD, this);
     PrintStatistics();
-
-    return elapsed_milliseconds.count();
+    return elapsed_milliseconds;
 }
 
 void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs) {
     std::vector<model::ColumnIndex> columns;
+    columns.reserve(dd_.right.size());
     for (auto const &dd : dd_.right) {
         model::ColumnIndex column_index =
                 typed_relation_->GetSchema()->GetColumn(dd.column_name)->GetIndex();
@@ -180,13 +160,30 @@ void DDVerifier::CheckDFOnRhs(std::vector<std::pair<int, int>> const &lhs) {
 }
 
 void DDVerifier::VerifyDD() {
+    std::vector<model::ColumnIndex> columns;
+    columns.reserve(dd_.left.size() + dd_.right.size());
+    for (auto const &constraint : dd_.left) {
+        model::ColumnIndex column_index =
+                typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
+        columns.push_back(column_index);
+    }
+    for (auto const &constraint : dd_.right) {
+        model::ColumnIndex column_index =
+                typed_relation_->GetSchema()->GetColumn(constraint.column_name)->GetIndex();
+        columns.push_back(column_index);
+    }
+    for (auto const col : columns) {
+        if (!IsColumnMetrizable(col)) {
+            throw std::invalid_argument("One of the columns is not metrizable");
+        }
+    }
+    CheckCorrectnessDd();
+    num_rows_ = typed_relation_->GetNumRows();
+    num_columns_ = typed_relation_->GetNumColumns();
+
     std::vector<std::pair<int, int>> const lhs = GetRowsWhereLhsHolds();
     CheckDFOnRhs(lhs);
-    if (lhs.empty()) {
-        error_ = 0;
-    } else {
-        error_ = static_cast<double>(num_error_rhs_) / static_cast<double>(lhs.size());
-    }
+    error_ = lhs.empty() ? 0 : static_cast<double>(num_error_rhs_) / lhs.size();
 }
 
 std::vector<Highlight> DDVerifier::GetHighlights() const {
@@ -197,7 +194,7 @@ bool DDVerifier::DDHolds() const {
     return !num_error_rhs_;
 }
 
-void DDVerifier::PrintStatistics() {
+void DDVerifier::PrintStatistics() const {
     if (DDHolds()) {
         LOG(DEBUG) << "DD holds.";
     } else {

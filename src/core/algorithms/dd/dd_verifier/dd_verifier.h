@@ -27,9 +27,9 @@ private:
 
     void RegisterOptions();
 
-    void VisualizeHighlights();
+    void VisualizeHighlights() const;
 
-    void PrintStatistics();
+    void PrintStatistics() const;
 
     std::vector<std::pair<int, int>> GetRowsWhereLhsHolds() const;
 

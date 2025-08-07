@@ -54,14 +54,5 @@ INSTANTIATE_TEST_SUITE_P(
                           DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5,
                                             5. / 10.)));
 
-class PerformanceTest : public ::testing::TestWithParam<DDVerifyingParams> {};
-
-TEST_P(PerformanceTest, DDHoldsTest) {
-    auto const& p = GetParam();
-    auto const mp = algos::StdParamsMap(p.params);
-    auto const verifier = algos::CreateAndLoadAlgorithm<algos::dd::DDVerifier>(mp);
-    LOG(INFO) << verifier->Execute();
-}
-
 //clang-format off
 }  // namespace tests

@@ -1,0 +1,8 @@
+student_id,student_name,course,exam_date,grade_score
+1,Alice,Math,2025-06-15,95
+1,Alice,Math,2025-06-20,92
+1,Alice,Physics,2025-06-18,80
+1,Alice,Math,2025-06-21,42
+2,Bob,Math,2025-06-16,70
+2,Bob,Math,2025-06-21,68
+3,Charlie,Chemistry,2025-06-17,55
