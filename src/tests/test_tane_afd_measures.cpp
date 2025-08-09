@@ -347,6 +347,15 @@ INSTANTIATE_TEST_SUITE_P(
                 TaneMiningParams(11873, 0.1, +algos::AfdErrorMeasure::rho, kIris),
                 TaneMiningParams(47878, 0.01, +algos::AfdErrorMeasure::rho, kIris),
                 TaneMiningParams(52638, 0.1, +algos::AfdErrorMeasure::rho, kNeighbors10k),
-                TaneMiningParams(52638, 0.01, +algos::AfdErrorMeasure::rho, kNeighbors10k)));
+                TaneMiningParams(52638, 0.01, +algos::AfdErrorMeasure::rho, kNeighbors10k),
+                TaneMiningParams(45416, 0.3, +algos::AfdErrorMeasure::g1, kTestFD),
+                TaneMiningParams(60546, 0.174, +algos::AfdErrorMeasure::g1, kIris),
+                TaneMiningParams(60546, 0.1, +algos::AfdErrorMeasure::g1, kIris),
+                TaneMiningParams(29936, 0.15, +algos::AfdErrorMeasure::g1, kNeighbors10k),
+                TaneMiningParams(3010, 0.21, +algos::AfdErrorMeasure::g1, kNeighbors10k),
+                TaneMiningParams(35242, 0.05, +algos::AfdErrorMeasure::g1, kCIPublicHighway10k),
+                TaneMiningParams(39981, 0.11, +algos::AfdErrorMeasure::g1, kCIPublicHighway10k),
+                TaneMiningParams(21001, 0.21, +algos::AfdErrorMeasure::g1, kCIPublicHighway10k),
+                TaneMiningParams(44444, 0.31, +algos::AfdErrorMeasure::g1, kCIPublicHighway10k)));
 
 }  // namespace tests
