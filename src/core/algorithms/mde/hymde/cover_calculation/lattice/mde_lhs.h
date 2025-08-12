@@ -7,58 +7,54 @@
 #include "util/py_tuple_hash.h"
 
 namespace algos::hymde::cover_calculation::lattice {
-struct LhsNode {
-    model::Index offset;
+struct PathStep {
+    model::Index offset;  // index of node in child node array
     RecordClassifierValueId rcv_id = 0;
 
-    friend bool operator==(LhsNode const& l, LhsNode const& r) {
+    friend bool operator==(PathStep const& l, PathStep const& r) {
         return l.offset == r.offset && l.rcv_id == r.rcv_id;
     }
 };
 
-class MdeLhs {
-    using Nodes = std::vector<LhsNode>;
-    Nodes values_;
+class PathToNode {
+    using Steps = std::vector<PathStep>;
+    Steps steps_;
 
 public:
     using FasterType = void;
-    using iterator = Nodes::const_iterator;
+    using iterator = Steps::const_iterator;
 
     // Placeholder for empty LHS.
-    MdeLhs() = default;
+    PathToNode() = default;
 
     // Cardinality must not exceed this value.
-    MdeLhs(std::size_t max_values) {
-        values_.reserve(max_values);
+    PathToNode(std::size_t max_values) {
+        steps_.reserve(max_values);
     }
 
-    RecordClassifierValueId& AddNext(model::Index offset) {
-        values_.push_back({offset});
-        return values_.back().rcv_id;
+    RecordClassifierValueId& NextStep(model::Index offset) {
+        steps_.push_back({offset});
+        return steps_.back().rcv_id;
     }
 
-    void RemoveLast() {
-        values_.pop_back();
+    void RemoveLastStep() {
+        steps_.pop_back();
     }
 
     iterator begin() const noexcept {
-        return values_.begin();
+        return steps_.begin();
     }
 
     iterator end() const noexcept {
-        return values_.end();
+        return steps_.end();
     }
 
-    friend bool operator==(MdeLhs const& lhs1, MdeLhs const& lhs2) {
-        return lhs1.values_ == lhs2.values_;
+    friend bool operator==(PathToNode const& lhs1, PathToNode const& lhs2) {
+        return lhs1.steps_ == lhs2.steps_;
     }
 
-    std::size_t Cardinality() const noexcept {
-        return values_.size();
-    }
-
-    bool IsEmpty() const noexcept {
-        return values_.empty();
+    std::size_t PathLength() const noexcept {
+        return steps_.size();
     }
 };
 
@@ -66,11 +62,11 @@ public:
 
 namespace std {
 template <>
-struct hash<algos::hymde::cover_calculation::lattice::MdeLhs> {
+struct hash<algos::hymde::cover_calculation::lattice::PathToNode> {
     std::size_t operator()(
-            algos::hymde::cover_calculation::lattice::MdeLhs const& p) const noexcept {
+            algos::hymde::cover_calculation::lattice::PathToNode const& p) const noexcept {
         using model::Index, algos::hymde::RecordClassifierValueId;
-        util::PyTupleHash main_hasher(p.Cardinality());
+        util::PyTupleHash main_hasher(p.PathLength());
         for (auto const& [node_offset, rcv_id] : p) {
             util::PyTupleHash pair_hasher(2);
             pair_hasher.AppendHash(std::hash<Index>{}(node_offset));

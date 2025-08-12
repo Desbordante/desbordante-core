@@ -21,13 +21,12 @@ EnumeratedMeaningfulDataResults EnumerateMeaningfulResults(
         bool least_element_found) {
     EnumeratedMeaningfulDataResults enumerated;
     enumerated.reserve(results.size());
-    for (auto const& [row_results, meaningful_records_count /*, least_element_found*/] : results) {
+    for (auto const& row_results : results) {
         using EnumeratedRowType = MeaningfulLeftValueResults<RecordClassifierValueId>;
-        EnumeratedRowType& enumerated_row =
-                enumerated.emplace_back(EnumeratedRowType{}, meaningful_records_count).first;
+        EnumeratedRowType& enumerated_row = enumerated.emplace_back();
         // TODO: should store if least element was found for each row instead.
         if (least_element_found) enumerated_row.reserve(row_results.size());
-        for (auto const& [comparison_result, partition_value_id] : row_results) {
+        for (auto const& [comparison_result, rt_pvalue_id, cluster_size] : row_results) {
             auto it = rcv_id_map.find(comparison_result);
             // (Non-universal) Total decision boundary found, don't store.
             if (it == rcv_id_map.end()) {
@@ -37,7 +36,7 @@ EnumeratedMeaningfulDataResults EnumerateMeaningfulResults(
 
             RecordClassifierValueId const rcv_id = it->second;
             assert(rcv_id != kLowestRCValueId);
-            enumerated_row.emplace_back(rcv_id, partition_value_id);
+            enumerated_row.emplace_back(rcv_id, rt_pvalue_id);
         }
     }
     return enumerated;
@@ -54,8 +53,8 @@ GenerateResultRCVIDs(MeaningfulDataResults<ComparisonResultType> const& meaningf
 
     // Results with the least element are not supposed to be stored, store it here.
     if (least_element_found) comparison_results.insert(order_ptr->LeastElement());
-    for (auto const& [res_vec, _] : meaningful_table_results) {
-        for (auto const& [result, _] : res_vec) {
+    for (auto const& res_vec : meaningful_table_results) {
+        for (auto const& [result, rt_pvid, cluster_size] : res_vec) {
             comparison_results.insert(result);
         }
     }

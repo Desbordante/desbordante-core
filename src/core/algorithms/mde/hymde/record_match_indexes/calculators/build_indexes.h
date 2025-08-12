@@ -21,29 +21,13 @@
 #include "util/get_preallocated_vector.h"
 
 namespace algos::hymde::record_match_indexes::calculators {
-inline void SortForAllLeftValues(EnumeratedMeaningfulDataResults& meaningful_results) {
-    auto result_data_comparer = [](MeaningfulResult<RecordClassifierValueId> const& p1,
-                                   MeaningfulResult<RecordClassifierValueId> const& p2) {
-        auto const& [rcv_id1, pvid1] = p1;
-        auto const& [rcv_id2, pvid2] = p2;
-        return rcv_id1 > rcv_id2 || (rcv_id1 == rcv_id2 && pvid1 < pvid2);
-    };
-    auto sort_for_left_value =
-            [&result_data_comparer](
-                    std::pair<std::vector<std::pair<RecordClassifierValueId, PartitionValueId>>,
-                              std::size_t>& left_value_results) {
-                std::ranges::sort(left_value_results.first, result_data_comparer);
-            };
-    std::ranges::for_each(meaningful_results, sort_for_left_value);
-}
-
 inline ValueMatrix CreateValueMatrix(EnumeratedMeaningfulDataResults const& meaningful_results) {
     ValueMatrix value_matrix;
     std::size_t const left_value_number = meaningful_results.size();
     value_matrix.reserve(left_value_number);
-    for (auto const& [left_value_results, _] : meaningful_results) {
-        ValueMatrixRow& left_value_row = value_matrix.emplace_back(left_value_results.size());
-        for (auto const& [rcv_id, right_partition_value_id] : left_value_results) {
+    for (auto const& left_pvalue_results : meaningful_results) {
+        ValueMatrixRow& left_value_row = value_matrix.emplace_back(left_pvalue_results.size());
+        for (auto const& [rcv_id, right_partition_value_id, cluster_size] : left_pvalue_results) {
             // Should have been excluded during enumeration.
             assert(rcv_id != kLowestRCValueId);
             left_value_row.try_emplace(right_partition_value_id, rcv_id);
@@ -52,58 +36,85 @@ inline ValueMatrix CreateValueMatrix(EnumeratedMeaningfulDataResults const& mean
     return value_matrix;
 }
 
-inline UpperSetIndex CreateUpperSetIndex(EnumeratedMeaningfulDataResults const& meaningful_results,
-                                         std::vector<RecordClassifierValueId> const& lhs_rcv_ids,
-                                         PartitionIndex::PositionListIndex const& right_pli) {
+inline void SortForAllLeftValues(EnumeratedMeaningfulDataResults& meaningful_results) {
+    auto result_data_comparer = [](MeaningfulResult<RecordClassifierValueId> const& p1,
+                                   MeaningfulResult<RecordClassifierValueId> const& p2) {
+        auto const& [rcv_id1, pvalue_id1, cluster_size1] = p1;
+        auto const& [rcv_id2, pvalue_id2, cluster_size2] = p2;
+        return rcv_id1 > rcv_id2 || (rcv_id1 == rcv_id2 && pvalue_id1 < pvalue_id2);
+    };
+    auto sort_for_left_value =
+            [&result_data_comparer](
+                    MeaningfulLeftValueResults<RecordClassifierValueId>& left_value_results) {
+                std::ranges::sort(left_value_results, result_data_comparer);
+            };
+    std::ranges::for_each(meaningful_results, sort_for_left_value);
+}
+
+inline UpperSetIndex CreateUpperSetIndex(
+        EnumeratedMeaningfulDataResults meaningful_results,
+        std::vector<RecordClassifierValueId> const& rhs_rcv_ids_selection) {
+    DESBORDANTE_ASSUME(!rhs_rcv_ids_selection.empty());
+    // First value of rhs_rcv_ids_selection is intended to be the value ID of the total
+    // classifier.
+    assert(rhs_rcv_ids_selection.front() == kLowestRCValueId);
+    SortForAllLeftValues(meaningful_results);
     UpperSetIndex upper_set_index;
-    std::size_t const value_number = meaningful_results.size();
-    upper_set_index.reserve(value_number);
-    for (auto const& [meaningful_left_value_results, meaningful_records_count] :
-         meaningful_results) {
-        if (meaningful_left_value_results.empty()) [[unlikely]] {
+    std::size_t const lt_pvalue_number = meaningful_results.size();
+    upper_set_index.reserve(lt_pvalue_number);
+    for (auto const& meaningful_left_pvalue_results : meaningful_results) {
+        if (meaningful_left_pvalue_results.empty()) [[unlikely]] {
             // All comparisons yielded the total decision boundary.
             upper_set_index.emplace_back();
-            assert(meaningful_records_count == 0);
             continue;
         }
-        DESBORDANTE_ASSUME(!lhs_rcv_ids.empty());
-        // First value of lhs_rcv_ids is intended to be the value ID of the total classifier.
-        assert(lhs_rcv_ids.front() == kLowestRCValueId);
-        auto end = --lhs_rcv_ids.crend(), current = lhs_rcv_ids.crbegin();
+        auto end_lhs_rcv_iter = --rhs_rcv_ids_selection.crend(),
+             current_lhs_rcv_iter = rhs_rcv_ids_selection.crbegin();
         // clang-tidy can't tell that dec_until_le initializes this variable if left uninitialized
         // here but gcc optimizes this initialization away.
         RecordClassifierValueId current_rcv_id{};
-        auto advance_until_leq = [&current_rcv_id, &end, &current](RecordClassifierValueId value) {
-            for (; current != end; ++current) {
-                if ((current_rcv_id = *current) <= value) return;
+        auto advance_until_leq = [&current_rcv_id, &end_lhs_rcv_iter,
+                                  &current_lhs_rcv_iter](RecordClassifierValueId rcv_id) {
+            for (; current_lhs_rcv_iter != end_lhs_rcv_iter; ++current_lhs_rcv_iter) {
+                if ((current_rcv_id = *current_lhs_rcv_iter) <= rcv_id) return;
             }
         };
         // Relying on sort order here, first value is the greatest.
-        advance_until_leq(meaningful_left_value_results.front().first);
-        if (current == end) {
+        advance_until_leq(meaningful_left_pvalue_results.front().comparison_result);
+        if (current_lhs_rcv_iter == end_lhs_rcv_iter) {
             // If the first value is too small, then so are all the others.
             upper_set_index.emplace_back();
             continue;
         }
-        EndIdMap end_id_map;
-        std::vector<RecordIdentifier> meaningful_records;
-        meaningful_records.reserve(meaningful_records_count);
-        for (auto const& [rcv_id, partition_value_id] : meaningful_left_value_results) {
+        // TODO: subtract results that are not included.
+        LTPVComparisonOrderedRTPValueIDs rt_pvalue_ids =
+                util::GetPreallocatedVector<PartitionValueId>(
+                        meaningful_left_pvalue_results.size());
+        std::size_t record_set_cardinality = 0;
+        std::vector<std::pair<RecordClassifierValueId, UpperSetCardinalities>>
+                cardinality_map_entries;
+
+        for (auto const& [rcv_id, rt_pvalue_id, cluster_size] : meaningful_left_pvalue_results) {
             if (rcv_id < current_rcv_id) {
-                end_id_map.try_emplace(end_id_map.end(), std::distance(current, end),
-                                       meaningful_records.size());
-                ++current;
+                cardinality_map_entries.emplace_back(
+                        std::distance(current_lhs_rcv_iter, end_lhs_rcv_iter),
+                        UpperSetCardinalities{record_set_cardinality, rt_pvalue_ids.size()});
+                ++current_lhs_rcv_iter;
                 advance_until_leq(rcv_id);
-                if (current == end) goto end_loop;
+                if (current_lhs_rcv_iter == end_lhs_rcv_iter) goto end_loop;
             }
-            PartitionIndex::PliCluster const& cluster = right_pli[partition_value_id];
-            meaningful_records.insert(meaningful_records.end(), cluster.begin(), cluster.end());
+            rt_pvalue_ids.push_back(rt_pvalue_id);
+            record_set_cardinality += cluster_size;
         }
-        end_id_map.try_emplace(end_id_map.end(), std::distance(current, end),
-                               meaningful_records.size());
+        cardinality_map_entries.emplace_back(
+                std::distance(current_lhs_rcv_iter, end_lhs_rcv_iter),
+                UpperSetCardinalities{record_set_cardinality, rt_pvalue_ids.size()});
     end_loop:
-        upper_set_index.emplace_back(
-                FlatUpperSetIndex{std::move(meaningful_records), std::move(end_id_map)});
+        std::ranges::reverse(cardinality_map_entries);
+        LTPValueRCVIDUpperSetCardinalityMap cardinality_map{boost::container::ordered_unique_range,
+                                                            cardinality_map_entries.begin(),
+                                                            cardinality_map_entries.end()};
+        upper_set_index.emplace_back(std::move(rt_pvalue_ids), std::move(cardinality_map));
     }
     return upper_set_index;
 }
@@ -117,16 +128,16 @@ inline void SymmetricClosure(EnumeratedMeaningfulDataResults& enumerated,
     std::size_t const left_values = enumerated.size();
     for (PartitionValueId left_pvalue_id : utility::IndexRange(left_values)) {
         MeaningfulLeftValueResults<RecordClassifierValueId> const& left_pvalue_results =
-                enumerated[left_pvalue_id].first;
+                enumerated[left_pvalue_id];
         if (left_pvalue_results.empty()) continue;
-        for (auto const& [rcv_id, right_pvalue_id] : std::ranges::drop_view{
-                     left_pvalue_results, left_pvalue_results.front().second == left_pvalue_id}) {
+        for (auto const& [rcv_id, rt_pvalue_id, cluster_size] :
+             std::ranges::drop_view{left_pvalue_results,
+                                    left_pvalue_results.front().rt_pvalue_id == left_pvalue_id}) {
             // could be <=, but the == check is done above, see CalcForSame for !EqMax case
-            if (right_pvalue_id < left_pvalue_id) break;
-            auto& [left_pvalue_eq_to_right_pvalue_results, meaningful_records_count] =
-                    enumerated[right_pvalue_id];
-            left_pvalue_eq_to_right_pvalue_results.emplace_back(rcv_id, left_pvalue_id);
-            meaningful_records_count += right_pli[left_pvalue_id].size();
+            if (rt_pvalue_id < left_pvalue_id) break;
+            auto& left_pvalue_eq_to_right_pvalue_results = enumerated[rt_pvalue_id];
+            left_pvalue_eq_to_right_pvalue_results.emplace_back(rcv_id, left_pvalue_id,
+                                                                cluster_size);
         }
     }
 }
@@ -134,12 +145,9 @@ inline void SymmetricClosure(EnumeratedMeaningfulDataResults& enumerated,
 template <typename DecisionBoundaryType, typename ResultType>
 ComponentHandlingInfo BuildIndexes(EnumeratedMeaningfulDataResults enumerated,
                                    std::vector<ResultType> comparison_results,
-                                   PartitionIndex::PositionListIndex const& right_pli,
                                    rcv_id_selectors::Selector<ResultType> const& selector,
                                    bool total_decision_boundary_is_universal,
                                    ComponentStructureAssertions structure_assertions) {
-    SortForAllLeftValues(enumerated);
-
     auto lhs_indices = selector.GetSubsetIndices(comparison_results);
     SearchSpaceComponentSpecification ss_component{
             {ToDecisionBoundaries<DecisionBoundaryType>(std::move(comparison_results)),
@@ -154,7 +162,7 @@ ComponentHandlingInfo BuildIndexes(EnumeratedMeaningfulDataResults enumerated,
     if (lhs_rcv_ids.size() <= 1)
         return {std::move(ss_component), {std::move(value_matrix), {}}, structure_assertions};
 
-    UpperSetIndex upper_set_index = CreateUpperSetIndex(enumerated, lhs_rcv_ids, right_pli);
+    UpperSetIndex upper_set_index = CreateUpperSetIndex(std::move(enumerated), lhs_rcv_ids);
 
     return {std::move(ss_component),
             {std::move(value_matrix), std::move(upper_set_index)},

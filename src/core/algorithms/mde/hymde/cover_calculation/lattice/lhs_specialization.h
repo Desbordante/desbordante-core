@@ -4,12 +4,12 @@
 
 namespace algos::hymde::cover_calculation::lattice {
 struct SpecializationData {
-    MdeLhs::iterator spec_before;
-    LhsNode new_child;
+    PathToNode::iterator spec_before;
+    PathStep new_child;
 };
 
 struct LhsSpecialization {
-    using Unspecialized = MdeLhs const&;
+    using Unspecialized = PathToNode const&;
 
     Unspecialized old_lhs;
     SpecializationData specialization_data;

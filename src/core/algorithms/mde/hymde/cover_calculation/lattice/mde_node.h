@@ -16,7 +16,7 @@ public:
 
     Rhs rhs;
 
-    static MdeLhs const& GetLhs(auto const& mde) noexcept {
+    static PathToNode const& GetLhs(auto const& mde) noexcept {
         return mde.lhs;
     }
 

@@ -19,7 +19,7 @@ public:
     TotalGeneralizationChecker(Unspecialized unspecialized) noexcept
         : unspecialized_(unspecialized) {}
 
-    bool HasGeneralizationInRCVIdMap(MdeLhs::iterator next_iter, RecordClassifierValueId lhs_rcv_id,
+    bool HasGeneralizationInRCVIdMap(PathToNode::iterator next_iter, RecordClassifierValueId lhs_rcv_id,
                                      RCVIdChildMap const& map, RCVIdChildMapIterator map_iter) {
         for (RCVIdChildMapIterator map_end = map.end(); map_iter != map_end; ++map_iter) {
             auto const& [child_rcv_id, node] = *map_iter;
@@ -29,15 +29,15 @@ public:
         return false;
     }
 
-    bool HasGeneralizationInRCVIdMap(MdeLhs::iterator next_iter, RecordClassifierValueId lhs_rcv_id,
+    bool HasGeneralizationInRCVIdMap(PathToNode::iterator next_iter, RecordClassifierValueId lhs_rcv_id,
                                      RCVIdChildMap const& map) {
         return HasGeneralizationInRCVIdMap(next_iter, lhs_rcv_id, map, map.begin());
     }
 
-    bool HasGeneralizationInChildren(NodeType const& node, MdeLhs::iterator next_iter,
+    bool HasGeneralizationInChildren(NodeType const& node, PathToNode::iterator next_iter,
                                      model::Index total_offset = 0) {
-        MdeLhs const& lhs = NodeType::GetLhs(unspecialized_);
-        for (MdeLhs::iterator end_iter = lhs.end(); next_iter != end_iter; ++total_offset) {
+        PathToNode const& lhs = NodeType::GetLhs(unspecialized_);
+        for (PathToNode::iterator end_iter = lhs.end(); next_iter != end_iter; ++total_offset) {
             auto const& [next_node_offset, lhs_rcv_id] = *next_iter;
             total_offset += next_node_offset;
             ++next_iter;
@@ -47,7 +47,7 @@ public:
         return false;
     }
 
-    bool HasGeneralization(NodeType const& node, MdeLhs::iterator next_iter,
+    bool HasGeneralization(NodeType const& node, PathToNode::iterator next_iter,
                            model::Index starting_offset = 0) {
         if (CheckNode(node)) return true;
         // TODO: try switching from MultiMd to Md if only one RHS is left

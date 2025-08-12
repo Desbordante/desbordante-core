@@ -18,11 +18,11 @@
 namespace algos::hymde {
 // A bunch of MDEs in the search space have a ton of common elements, and minimal covers can grow
 // exponentially, so size of each dependency matters.
-struct RecordClassifierSpecification {
+struct RecordClassifierIdentifiers {
     model::Index record_match_index;
     RecordClassifierValueId rcv_id;
 
-    RecordClassifierSpecification(model::Index record_match_index, RecordClassifierValueId rcv_id)
+    RecordClassifierIdentifiers(model::Index record_match_index, RecordClassifierValueId rcv_id)
         : record_match_index(record_match_index), rcv_id(rcv_id) {}
 
     std::tuple<model::Index, RecordClassifierValueId> ToTuple() const noexcept {
@@ -31,20 +31,24 @@ struct RecordClassifierSpecification {
 };
 
 struct LhsSpecification {
-    std::vector<RecordClassifierSpecification> lhs;
+    // TODO: move to unique_ptr + size?
+    std::vector<RecordClassifierIdentifiers> lhs_rc_identifiers;
     std::size_t support;
 
-    LhsSpecification(std::vector<RecordClassifierSpecification> lhs, std::size_t support)
-        : lhs(std::move(lhs)), support(support) {}
+    LhsSpecification(std::vector<RecordClassifierIdentifiers> lhs_rc_identifiers,
+                     std::size_t support)
+        : lhs_rc_identifiers(std::move(lhs_rc_identifiers)), support(support) {}
 };
 
 struct SameLhsMDEsSpecification {
-    LhsSpecification lhs_spec;
-    std::vector<RecordClassifierSpecification> rhss;
+    LhsSpecification lhs_specification;
+    // TODO: move to unique_ptr + size?
+    std::vector<RecordClassifierIdentifiers> rhs_rc_identifiers;
 
-    SameLhsMDEsSpecification(LhsSpecification lhs_spec,
-                             std::vector<RecordClassifierSpecification> rhss)
-        : lhs_spec(std::move(lhs_spec)), rhss(std::move(rhss)) {}
+    SameLhsMDEsSpecification(LhsSpecification lhs_specification,
+                             std::vector<RecordClassifierIdentifiers> rhs_rc_identifiers)
+        : lhs_specification(std::move(lhs_specification)),
+          rhs_rc_identifiers(std::move(rhs_rc_identifiers)) {}
 };
 
 // If a record match is present in both LHS and RHS, LHS bounds may be selected further
@@ -80,17 +84,17 @@ class CompactMDEStorage {
     std::vector<SearchSpaceFactorSpecification> search_space_specification_;
     std::vector<SameLhsMDEsSpecification> mde_specifications_;
 
-    model::mde::RecordClassifier ToClassifier(RecordClassifierSpecification const& spec) const {
+    model::mde::RecordClassifier ToClassifier(RecordClassifierIdentifiers const& spec) const {
         SearchSpaceFactorSpecification const& factor_spec =
                 search_space_specification_[spec.record_match_index];
         return {factor_spec.record_match, factor_spec.decision_boundaries[spec.rcv_id]};
     }
 
     std::vector<model::mde::RecordClassifier> ToLhs(
-            std::vector<RecordClassifierSpecification> const& lhs_specification) const {
+            std::vector<RecordClassifierIdentifiers> const& lhs_specification) const {
         std::vector<model::mde::RecordClassifier> lhs =
                 util::GetPreallocatedVector<model::mde::RecordClassifier>(lhs_specification.size());
-        for (RecordClassifierSpecification const& cls_spec : lhs_specification) {
+        for (RecordClassifierIdentifiers const& cls_spec : lhs_specification) {
             lhs.push_back(ToClassifier(cls_spec));
         }
         return lhs;
@@ -131,7 +135,7 @@ public:
         std::vector<FullLhsSpec> lhs_specs =
                 util::GetPreallocatedVector<FullLhsSpec>(mde_specifications_.size());
         for (auto const& [lhs_spec, _] : mde_specifications_) {
-            lhs_specs.emplace_back(ToLhs(lhs_spec.lhs), lhs_spec.support);
+            lhs_specs.emplace_back(ToLhs(lhs_spec.lhs_rc_identifiers), lhs_spec.support);
         }
         return lhs_specs;
     }
@@ -142,8 +146,9 @@ public:
         std::vector<model::mde::MDE> mdes =
                 util::GetPreallocatedVector<model::mde::MDE>(mde_specifications_.size());
         for (SameLhsMDEsSpecification const& mdes_spec : mde_specifications_) {
-            std::vector<model::mde::RecordClassifier> lhs = ToLhs(mdes_spec.lhs_spec.lhs);
-            for (RecordClassifierSpecification const& rhs : mdes_spec.rhss) {
+            std::vector<model::mde::RecordClassifier> lhs =
+                    ToLhs(mdes_spec.lhs_specification.lhs_rc_identifiers);
+            for (RecordClassifierIdentifiers const& rhs : mdes_spec.rhs_rc_identifiers) {
                 mdes.emplace_back(left_table, right_table, lhs, ToClassifier(rhs));
             }
         }

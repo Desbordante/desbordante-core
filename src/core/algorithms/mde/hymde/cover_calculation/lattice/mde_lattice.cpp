@@ -26,7 +26,7 @@ class Specializer {
     using SupportCheckMethod = bool (Specializer::*)();
     using UpdateMaxLevelMethod = void (Specializer::*)();
     using SpecGenCheckerType = MdSpecGenChecker<MdeInfoType>;
-    using GenCheckMethod = bool (SpecGenCheckerType::*)(MdeNode const&, MdeLhs::iterator, Index);
+    using GenCheckMethod = bool (SpecGenCheckerType::*)(MdeNode const&, PathToNode::iterator, Index);
     using MdeRCVIdChildMap = MdeNode::OrderedRCVIdChildMap;
     static constexpr bool kSpecializingSingle = std::is_same_v<MdeInfoType, MdeSpecialization>;
     using RhsType = std::conditional_t<kSpecializingSingle, MdeElement,
@@ -119,7 +119,7 @@ class Specializer {
 
     MdeNode* TryGetNextNode(GeneralizationHelper& helper, Index const next_node_offset,
                             auto new_minimal_action, RecordClassifierValueId const next_lhs_rcv_id,
-                            MdeLhs::iterator next_node_iter, std::size_t gen_check_offset = 0) {
+                            PathToNode::iterator next_node_iter, std::size_t gen_check_offset = 0) {
         MdeNode& cur_node = helper.CurNode();
         MdeRCVIdChildMap& child_map = cur_node.children[next_node_offset];
         if (child_map.empty()) [[unlikely]] {
@@ -140,7 +140,7 @@ class Specializer {
     MdeNode* TryGetNextNodeChildMap(MdeRCVIdChildMap& child_map, GeneralizationHelper& helper,
                                     Index next_node_offset, auto new_minimal_action,
                                     RecordClassifierValueId const next_lhs_rcv_id,
-                                    MdeLhs::iterator next_node_iter, auto get_child_map_iter,
+                                    PathToNode::iterator next_node_iter, auto get_child_map_iter,
                                     std::size_t gen_check_offset = 0) {
         MdeNode& cur_node = helper.CurNode();
         auto it = get_child_map_iter(child_map);
@@ -171,7 +171,7 @@ class Specializer {
         auto& total_checker = gen_checker.GetTotalChecker();
         auto helper = GeneralizationHelper(mde_root_, total_checker);
 
-        MdeLhs::iterator next_lhs_iter = GetLhs().begin();
+        PathToNode::iterator next_lhs_iter = GetLhs().begin();
         while (next_lhs_iter != GetSpecLhsIter()) {
             auto const& [next_node_offset, next_lhs_rcv_id] = *next_lhs_iter;
             ++next_lhs_iter;
@@ -241,7 +241,7 @@ class Specializer {
     }
 
     template <UpdateMaxLevelMethod UpdateMaxLevel>
-    void AddNewMinimal(MdeNode& cur_node, MdeLhs::iterator cur_node_iter) {
+    void AddNewMinimal(MdeNode& cur_node, PathToNode::iterator cur_node_iter) {
         assert(cur_node.rhs.IsEmpty());
         DESBORDANTE_ASSUME(cur_node_iter >= GetSpecLhsIter());
         auto set_rhs = [&](MdeNode* node) { node->SetRhs(GetRhs()); };
@@ -255,7 +255,7 @@ class Specializer {
     }
 
     template <UpdateMaxLevelMethod UpdateMaxLevel>
-    void WalkToTail(GeneralizationHelper& helper, MdeLhs::iterator next_lhs_iter) {
+    void WalkToTail(GeneralizationHelper& helper, PathToNode::iterator next_lhs_iter) {
         auto& total_checker = helper.GetTotalChecker();
         while (next_lhs_iter != GetEndLhsIter()) {
             auto const& [next_node_offset, next_lhs_rcv_id] = *next_lhs_iter;
@@ -300,7 +300,7 @@ class Specializer {
         auto get_higher = [old_node_rcv_id = old_node_rcv_id](MdeRCVIdChildMap& child_map) {
             return child_map.upper_bound(old_node_rcv_id);
         };
-        MdeLhs::iterator spec_iter = std::next(GetSpecLhsIter());
+        PathToNode::iterator spec_iter = std::next(GetSpecLhsIter());
         auto add_normal = [&](MdeNode& node) {
             AddNewMinimal<&Specializer::UpdateMaxLevelReplace>(node, spec_iter);
         };
@@ -337,7 +337,7 @@ class Specializer {
         if (total_checker.HasGeneralizationInChildren(helper.CurNode(), GetSpecLhsIter(),
                                                       old_offset_addend))
             return;
-        MdeLhs::iterator spec_iter = std::next(GetSpecLhsIter());
+        PathToNode::iterator spec_iter = std::next(GetSpecLhsIter());
         auto add_normal = [&](MdeNode& node) {
             AddNewMinimal<&Specializer::UpdateMaxLevelAdd>(node, spec_iter);
         };
@@ -400,15 +400,15 @@ class Specializer {
         return current_specialization_.GetLhsSpecialization();
     }
 
-    MdeLhs const& GetLhs() noexcept {
+    PathToNode const& GetLhs() noexcept {
         return GetLhsSpecialization().old_lhs;
     }
 
-    MdeLhs::iterator GetSpecLhsIter() noexcept {
+    PathToNode::iterator GetSpecLhsIter() noexcept {
         return GetLhsSpecialization().specialization_data.spec_before;
     }
 
-    MdeLhs::iterator GetEndLhsIter() noexcept {
+    PathToNode::iterator GetEndLhsIter() noexcept {
         return GetLhs().end();
     }
 
@@ -418,7 +418,7 @@ class Specializer {
 
     std::vector<std::size_t> GetElementLevels() {
         std::vector<std::size_t> element_levels =
-                util::GetPreallocatedVector<std::size_t>(GetLhs().Cardinality());
+                util::GetPreallocatedVector<std::size_t>(GetLhs().PathLength());
         Index record_match_index = 0;
         for (auto const& [offset, rcv_id] : GetLhs()) {
             record_match_index += offset;
@@ -432,7 +432,7 @@ class Specializer {
         return GetNewChildNode().rcv_id;
     }
 
-    LhsNode& GetNewChildNode() {
+    PathStep& GetNewChildNode() {
         return current_specialization_.GetLhsSpecialization().specialization_data.new_child;
     }
 
@@ -454,14 +454,14 @@ class Specializer {
             std::accumulate(element_levels_.begin(), element_levels_.end(), 0);
 
     Index lhs_spec_index_ = 0;
-    MdeLhs::iterator const lhs_end_ = GetLhs().end();
+    PathToNode::iterator const lhs_end_ = GetLhs().end();
 
 public:
     Specializer(MdeNode& mde_root, SupportNode& support_root,
                 SingleLevelFunc const& get_element_level, std::size_t& max_level,
                 std::size_t const cardinality_limit, std::size_t const record_matches_size,
                 std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
-                MdeLhs const& lhs, FGetLhsRCVId get_lhs_rcv_id, FGetNonLhsRCVId get_nonlhs_rcv_id,
+                PathToNode const& lhs, FGetLhsRCVId get_lhs_rcv_id, FGetNonLhsRCVId get_nonlhs_rcv_id,
                 bool prune_nondisjoint, RhsType rhs)
         : mde_root_(mde_root),
           support_root_(support_root),
@@ -474,10 +474,10 @@ public:
           get_nonlhs_rcv_id_(std::move(get_nonlhs_rcv_id)),
           prune_nondisjoint_(prune_nondisjoint),
           current_specialization_(
-                  {LhsSpecialization{lhs, SpecializationData{lhs.begin(), LhsNode{}}}, rhs}) {}
+                  {LhsSpecialization{lhs, SpecializationData{lhs.begin(), PathStep{}}}, rhs}) {}
 
     void Specialize() {
-        if (GetLhs().Cardinality() == cardinality_limit_) {
+        if (GetLhs().PathLength() == cardinality_limit_) {
             SpecializeReplaceOnly();
             return;
         }
@@ -501,7 +501,7 @@ MdeLattice::MdeLattice(SingleLevelFunc single_level_func,
     enabled_rhs_indices_.resize(record_matches_size_, true);
 }
 
-inline void MdeLattice::Specialize(MdeLhs const& lhs,
+inline void MdeLattice::Specialize(PathToNode const& lhs,
                                    PairComparisonResult const& pair_comparison_result,
                                    Rhss const& rhss) {
     auto get_pair_lhs_rcv_id = [this, pair_comparison_result](Index index, ...) {
@@ -510,14 +510,14 @@ inline void MdeLattice::Specialize(MdeLhs const& lhs,
     Specialize(lhs, rhss, get_pair_lhs_rcv_id, get_pair_lhs_rcv_id);
 }
 
-inline void MdeLattice::Specialize(MdeLhs const& lhs, Rhss const& rhss) {
+inline void MdeLattice::Specialize(PathToNode const& lhs, Rhss const& rhss) {
     auto get_lowest = [](...) { return kLowestRCValueId; };
     auto get_lhs_rcv_id = [](Index, RecordClassifierValueId rcv_id) { return rcv_id; };
     Specialize(lhs, rhss, get_lhs_rcv_id, get_lowest);
 }
 
 template <typename MdeInfoType>
-auto MdeLattice::CreateSpecializer(MdeLhs const& lhs, auto&& rhs, auto get_lhs_rcv_id,
+auto MdeLattice::CreateSpecializer(PathToNode const& lhs, auto&& rhs, auto get_lhs_rcv_id,
                                    auto get_nonlhs_rcv_id) {
     return Specializer<MdeInfoType, decltype(get_lhs_rcv_id), decltype(get_nonlhs_rcv_id)>(
             mde_root_, support_root_, get_element_level_, max_level_, cardinality_limit_,
@@ -525,7 +525,7 @@ auto MdeLattice::CreateSpecializer(MdeLhs const& lhs, auto&& rhs, auto get_lhs_r
             prune_nondisjoint_, rhs);
 }
 
-void MdeLattice::Specialize(MdeLhs const& lhs, Rhss const& rhss, auto get_lhs_rcv_id,
+void MdeLattice::Specialize(PathToNode const& lhs, Rhss const& rhss, auto get_lhs_rcv_id,
                             auto get_nonlhs_rcv_id) {
     switch (rhss.size()) {
         case 0:
@@ -575,9 +575,9 @@ std::size_t MdeLattice::PairUpdater::Refine() {
 
 void MdeLattice::TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_node,
                                PairComparisonResult const& pair_comparison_result,
-                               MdeLhs const& cur_node_lhs) {
+                               PathToNode const& cur_node_lhs) {
     Rhs& rhs = cur_node.rhs;
-    InvalidatedRhss invalidated;
+    ValidationRhsUpdates invalidated;
     Index rhs_index = 0;
     Index cur_lhs_index = 0;
     auto try_push_no_match_classifier = [&]() {
@@ -618,34 +618,34 @@ void MdeLattice::TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_nod
 }
 
 void MdeLattice::CollectRefinersForViolated(MdeNode& cur_node, std::vector<PairUpdater>& found,
-                                            MdeLhs& cur_node_lhs, MdeLhs::iterator cur_lhs_iter,
+                                            PathToNode& cur_node_lhs, PathToNode::iterator cur_lhs_iter,
                                             PairComparisonResult const& pair_comparison_result) {
     if (!cur_node.rhs.IsEmpty()) {
         TryAddRefiner(found, cur_node, pair_comparison_result, cur_node_lhs);
     }
 
     Index total_offset = 0;
-    for (MdeLhs::iterator const end = pair_comparison_result.maximal_matching_lhs.end();
+    for (PathToNode::iterator const end = pair_comparison_result.maximal_matching_lhs.end();
          cur_lhs_iter != end; ++total_offset) {
         auto const& [next_node_offset, generalization_rcv_id_limit] = *cur_lhs_iter;
         ++cur_lhs_iter;
         total_offset += next_node_offset;
-        RecordClassifierValueId& cur_lhs_rcv_id = cur_node_lhs.AddNext(total_offset);
+        RecordClassifierValueId& cur_lhs_rcv_id = cur_node_lhs.NextStep(total_offset);
         for (auto& [generalization_rcv_id, node] : cur_node.children[total_offset]) {
             if (generalization_rcv_id > generalization_rcv_id_limit) break;
             cur_lhs_rcv_id = generalization_rcv_id;
             CollectRefinersForViolated(node, found, cur_node_lhs, cur_lhs_iter,
                                        pair_comparison_result);
         }
-        cur_node_lhs.RemoveLast();
+        cur_node_lhs.RemoveLastStep();
     }
 }
 
 auto MdeLattice::CollectRefinersForViolated(PairComparisonResult const& pair_comparison_result)
         -> std::vector<PairUpdater> {
     std::vector<PairUpdater> found;
-    MdeLhs current_lhs(pair_comparison_result.maximal_matching_lhs.Cardinality());
-    CollectRefinersForViolated(mde_root_, found, current_lhs,
+    PathToNode current_path(pair_comparison_result.maximal_matching_lhs.PathLength());
+    CollectRefinersForViolated(mde_root_, found, current_path,
                                pair_comparison_result.maximal_matching_lhs.begin(),
                                pair_comparison_result);
     // TODO: traverse support trie simultaneously.
@@ -658,9 +658,9 @@ auto MdeLattice::CollectRefinersForViolated(PairComparisonResult const& pair_com
 }
 
 template <bool MayNotExist>
-void MdeLattice::TryDeleteEmptyNode(MdeLhs const& lhs) {
+void MdeLattice::TryDeleteEmptyNode(PathToNode const& lhs) {
     std::vector<PathElement> path_to_node =
-            util::GetPreallocatedVector<PathElement>(lhs.Cardinality());
+            util::GetPreallocatedVector<PathElement>(lhs.PathLength());
     MdeNode* cur_node_ptr = &mde_root_;
     for (auto const& [node_offset, rcv_id] : lhs) {
         auto& map = cur_node_ptr->children[node_offset];
@@ -684,7 +684,7 @@ void MdeLattice::TryDeleteEmptyNode(MdeLhs const& lhs) {
     }
 }
 
-bool MdeLattice::IsUnsupported(MdeLhs const& lhs) const {
+bool MdeLattice::IsUnsupported(PathToNode const& lhs) const {
     return TotalGeneralizationChecker<SupportNode>{lhs}.HasGeneralization(support_root_);
 }
 
@@ -700,7 +700,7 @@ void MdeLattice::ValidationUpdater::MarkUnsupported() {
     lattice_->TryDeleteEmptyNode<true>(GetLhs());
 }
 
-void MdeLattice::ValidationUpdater::LowerAndSpecialize(InvalidatedRhss const& invalidated) {
+void MdeLattice::ValidationUpdater::LowerAndSpecialize(ValidationRhsUpdates const& invalidated) {
     Rhs& rhs = GetRhs();
     for (auto [rhs_index, new_rcv_id] : invalidated.GetUpdateView()) {
         DESBORDANTE_ASSUME(rhs[rhs_index] != kLowestRCValueId);
@@ -719,9 +719,9 @@ void MdeLattice::ValidationUpdater::LowerAndSpecialize(InvalidatedRhss const& in
 // list of natural decision boundaries (that being record classifier value ID) is exactly one less
 // than the RHS bound's index, which is done here.
 void MdeLattice::RaiseInterestingnessRCVIds(
-        MdeNode const& cur_node, MdeLhs const& lhs,
+        MdeNode const& cur_node, PathToNode const& lhs,
         std::vector<RecordClassifierValueId>& cur_interestingness_rcv_ids,
-        MdeLhs::iterator cur_lhs_iter, std::vector<Index> const& indices,
+        PathToNode::iterator cur_lhs_iter, std::vector<Index> const& indices,
         std::vector<RecordClassifierValueId> const& rcv_id_bounds, std::size_t& max_count) const {
     std::size_t const indices_size = indices.size();
     if (!cur_node.rhs.IsEmpty()) {
@@ -739,7 +739,7 @@ void MdeLattice::RaiseInterestingnessRCVIds(
     }
 
     Index total_offset = 0;
-    for (MdeLhs::iterator const end = lhs.end(); cur_lhs_iter != end; ++total_offset) {
+    for (PathToNode::iterator const end = lhs.end(); cur_lhs_iter != end; ++total_offset) {
         auto const& [next_node_offset, generalization_rcv_id_limit] = *cur_lhs_iter;
         ++cur_lhs_iter;
         total_offset += next_node_offset;
@@ -753,7 +753,7 @@ void MdeLattice::RaiseInterestingnessRCVIds(
 }
 
 std::vector<RecordClassifierValueId> MdeLattice::GetInterestingnessRCVIds(
-        MdeLhs const& lhs, std::vector<Index> const& indices,
+        PathToNode const& lhs, std::vector<Index> const& indices,
         std::vector<RecordClassifierValueId> const& rcv_id_bounds) const {
     std::vector<RecordClassifierValueId> interestingness_rcv_ids;
     std::size_t const indices_size = indices.size();
@@ -808,7 +808,7 @@ bool MdeLattice::HasGeneralization(Mde const& mde) const {
 }
 
 void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& collected,
-                          MdeLhs& cur_node_lhs, Index const cur_node_record_match_index,
+                          PathToNode& cur_node_lhs, Index const cur_node_record_match_index,
                           std::size_t const level_left) {
     if (level_left == 0) {
         if (!cur_node.rhs.IsEmpty())
@@ -817,7 +817,7 @@ void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& col
     }
     auto collect = [&](MdeRCVIdChildMap& child_map, Index next_node_offset) {
         Index const next_node_record_match_index = cur_node_record_match_index + next_node_offset;
-        RecordClassifierValueId& next_lhs_rcv_id = cur_node_lhs.AddNext(next_node_offset);
+        RecordClassifierValueId& next_lhs_rcv_id = cur_node_lhs.NextStep(next_node_offset);
         for (auto& [rcv_id, node] : child_map) {
             std::size_t const element_level =
                     get_element_level_(next_node_record_match_index, rcv_id);
@@ -826,16 +826,16 @@ void MdeLattice::GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& col
             GetLevel(node, collected, cur_node_lhs, next_node_record_match_index + 1,
                      level_left - element_level);
         }
-        cur_node_lhs.RemoveLast();
+        cur_node_lhs.RemoveLastStep();
     };
     cur_node.ForEachNonEmpty(collect);
 }
 
 auto MdeLattice::GetLevel(std::size_t const level) -> std::vector<ValidationUpdater> {
     std::vector<ValidationUpdater> collected;
-    MdeLhs current_lhs(record_matches_size_);
+    PathToNode current_lhs(record_matches_size_);
     if (!get_element_level_) {
-        GetAll(mde_root_, current_lhs, [this, &collected](MdeLhs& cur_node_lhs, MdeNode& cur_node) {
+        GetAll(mde_root_, current_lhs, [this, &collected](PathToNode& cur_node_lhs, MdeNode& cur_node) {
             collected.emplace_back(this, MdeNodeLocation{cur_node_lhs, &cur_node});
         });
     } else {
@@ -850,24 +850,24 @@ auto MdeLattice::GetLevel(std::size_t const level) -> std::vector<ValidationUpda
     return collected;
 }
 
-void MdeLattice::GetAll(MdeNode& cur_node, MdeLhs& cur_node_lhs, auto&& add_node) {
+void MdeLattice::GetAll(MdeNode& cur_node, PathToNode& cur_node_lhs, auto&& add_node) {
     if (!cur_node.rhs.IsEmpty()) add_node(cur_node_lhs, cur_node);
 
     auto collect = [&](MdeRCVIdChildMap& child_map, Index next_node_offset) {
-        RecordClassifierValueId& next_lhs_rcv_id = cur_node_lhs.AddNext(next_node_offset);
+        RecordClassifierValueId& next_lhs_rcv_id = cur_node_lhs.NextStep(next_node_offset);
         for (auto& [rcv_id, node] : child_map) {
             next_lhs_rcv_id = rcv_id;
             GetAll(node, cur_node_lhs, add_node);
         }
-        cur_node_lhs.RemoveLast();
+        cur_node_lhs.RemoveLastStep();
     };
     cur_node.ForEachNonEmpty(collect);
 }
 
 std::vector<MdeNodeLocation> MdeLattice::GetAll() {
     std::vector<MdeNodeLocation> collected;
-    MdeLhs current_lhs(record_matches_size_);
-    GetAll(mde_root_, current_lhs, [&collected](MdeLhs& cur_node_lhs, MdeNode& cur_node) {
+    PathToNode current_lhs(record_matches_size_);
+    GetAll(mde_root_, current_lhs, [&collected](PathToNode& cur_node_lhs, MdeNode& cur_node) {
         collected.push_back({cur_node_lhs, &cur_node});
     });
     assert(std::ranges::none_of(collected, [this](MdeNodeLocation const& node_info) {
@@ -876,12 +876,12 @@ std::vector<MdeNodeLocation> MdeLattice::GetAll() {
     return collected;
 }
 
-void MdeLattice::MarkNewLhs(SupportNode& cur_node, MdeLhs const& lhs,
-                            MdeLhs::iterator cur_lhs_iter) {
+void MdeLattice::MarkNewLhs(SupportNode& cur_node, PathToNode const& lhs,
+                            PathToNode::iterator cur_lhs_iter) {
     AddUnchecked(&cur_node, lhs, cur_lhs_iter, MarkUnsupportedAction());
 }
 
-void MdeLattice::MarkUnsupported(MdeLhs const& lhs) {
+void MdeLattice::MarkUnsupported(PathToNode const& lhs) {
     auto mark_new = [this](auto&&... args) { MarkNewLhs(std::forward<decltype(args)>(args)...); };
     CheckedAdd(&support_root_, lhs, lhs, mark_new, MarkUnsupportedAction());
 }

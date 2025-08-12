@@ -78,7 +78,9 @@ public:
                 for (PartitionValueId value_id : utility::IndexRange(elements_size)) {
                     auto const& cluster = right_pli[value_id];
                     value_matrix.push_back({{value_id, 1}});
-                    upper_set_index.push_back({{cluster, {{1, cluster.size()}}}});
+                    upper_set_index.push_back(LTPValueUpperSetMapping{
+                            LTPVComparisonOrderedRTPValueIDs{value_id},
+                            LTPValueRCVIDUpperSetCardinalityMap{{1, {1, cluster.size()}}}});
                 }
             } else {
                 structure_assertions.assume_overlap_lpli_cluster_max_ = false;

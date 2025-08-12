@@ -17,7 +17,7 @@ private:
     using MinPickerType = PairwiseMinimalSelector;
     std::size_t const record_matches_number_;
     MinPickerType min_selector_;
-    std::unordered_map<lattice::MdeLhs, boost::dynamic_bitset<>> next_selection_exclusion_;
+    std::unordered_map<lattice::PathToNode, boost::dynamic_bitset<>> next_selection_exclusion_;
 
     std::vector<ValidationSelection> GetPendingGroupedMinimalLhsMds(
             std::vector<lattice::MdeLattice::ValidationUpdater>& validation_updaters) final;

@@ -124,12 +124,14 @@ unsigned long long HyMDE::ExecuteInternal() {
     std::unique_ptr<util::WorkerThreadPool> pool_holder =
             threads_ > 1 ? std::make_unique<util::WorkerThreadPool>(threads_) : nullptr;
 
+    // Preprocess.
     auto [record_matches, classifier_values, useful_record_matches, data_partition_index, indexes,
           rcv_id_lr_maps, assertions] =
             record_match_indexes::PreprocessingResult::Create(
                     *left_schema_, *right_schema_, *dictionary_compressed_records_,
                     component_calculation_specification_, pool_holder.get());
 
+    // Create search space specification.
     std::size_t const record_matches_count = record_matches.size();
     std::vector<SearchSpaceFactorSpecification> search_space_specification =
             util::GetPreallocatedVector<SearchSpaceFactorSpecification>(record_matches_count);
@@ -139,7 +141,8 @@ unsigned long long HyMDE::ExecuteInternal() {
     }
     search_space_specification_ = std::move(search_space_specification);
 
-    std::vector<RecordClassifierSpecification> rhss;
+    // Add 0 cardinality LHS MDEs to the result.
+    std::vector<RecordClassifierIdentifiers> rhss;
     for (model::Index record_match_index : utility::IndexRange(classifier_values.size())) {
         bool total_is_universal =
                 classifier_values[record_match_index].total_decision_boundary_is_universal_;
@@ -159,6 +162,7 @@ unsigned long long HyMDE::ExecuteInternal() {
                 .count();
     }
 
+    // Create starting RHS array
     std::size_t const useful_count = useful_record_matches.size();
     cover_calculation::lattice::Rhs max_rhs{useful_count};
     max_rhs.non_zero_count = useful_count;
@@ -196,8 +200,6 @@ unsigned long long HyMDE::ExecuteInternal() {
                 record_pair_inferrer.InferFromRecordPairs(validator.GetCurrentResults());
         algorithm_finished = lattice_traverser.TraverseLattice(algorithm_finished);
     }
-
-    // RegisterResults(similarity_data, lattice.GetAll());
 
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
                                                                  start_time)

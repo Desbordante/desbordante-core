@@ -82,7 +82,7 @@ auto PairwiseMinimalSelector::CompareLhss(MdeLhs const& cur, MdeLhs const& prev)
 void PairwiseMinimalSelector::AddGeneralizations(lattice::MdeLattice::ValidationUpdater& updater,
                                                  boost::dynamic_bitset<>& considered_indices) {
     MdeLhs const& lhs_cur = updater.GetLhs();
-    assert(!lhs_cur.IsEmpty() || currently_picked_.empty());
+    assert(lhs_cur.PathLength() != 0 || currently_picked_.empty());
     for (ValidationSelection& prev_selection : currently_picked_) {
         MdeLhs const& lhs_prev = prev_selection.updater->GetLhs();
         boost::dynamic_bitset<>& indices_prev = prev_selection.rhs_indices_to_validate;

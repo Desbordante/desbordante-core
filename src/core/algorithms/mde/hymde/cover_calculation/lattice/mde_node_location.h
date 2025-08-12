@@ -5,7 +5,7 @@
 
 namespace algos::hymde::cover_calculation::lattice {
 struct MdeNodeLocation {
-    MdeLhs lhs;
+    PathToNode lhs;
     MdeNode* node;
 };
 }  // namespace algos::hymde::cover_calculation::lattice

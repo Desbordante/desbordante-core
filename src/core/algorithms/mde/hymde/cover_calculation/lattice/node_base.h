@@ -60,10 +60,10 @@ protected:
 };
 
 template <typename NodeType>
-void AddUnchecked(NodeType* cur_node_ptr, MdeLhs const& lhs, MdeLhs::iterator cur_lhs_iter,
+void AddUnchecked(NodeType* cur_node_ptr, PathToNode const& lhs, PathToNode::iterator cur_lhs_iter,
                   auto&& final_node_action, auto&& adder) {
     assert(cur_node_ptr->IsEmpty());
-    for (MdeLhs::iterator const lhs_end = lhs.end(); cur_lhs_iter != lhs_end; ++cur_lhs_iter) {
+    for (PathToNode::iterator const lhs_end = lhs.end(); cur_lhs_iter != lhs_end; ++cur_lhs_iter) {
         auto const& [next_node_offset, next_rcv_id] = *cur_lhs_iter;
         cur_node_ptr = adder(cur_node_ptr, next_node_offset, next_rcv_id);
     }
@@ -72,7 +72,7 @@ void AddUnchecked(NodeType* cur_node_ptr, MdeLhs const& lhs, MdeLhs::iterator cu
 
 // TODO: investigate switching to balancing prefix tree
 template <typename NodeType>
-void AddUnchecked(NodeType* cur_node_ptr, MdeLhs const& lhs, MdeLhs::iterator cur_lhs_iter,
+void AddUnchecked(NodeType* cur_node_ptr, PathToNode const& lhs, PathToNode::iterator cur_lhs_iter,
                   auto&& final_node_action) {
     AddUnchecked(
             cur_node_ptr, lhs, cur_lhs_iter, final_node_action,
@@ -82,7 +82,7 @@ void AddUnchecked(NodeType* cur_node_ptr, MdeLhs const& lhs, MdeLhs::iterator cu
 }
 
 template <typename NodeType>
-void CheckedAdd(NodeType* cur_node_ptr, MdeLhs const& lhs, auto const& info, auto&& unchecked_add,
+void CheckedAdd(NodeType* cur_node_ptr, PathToNode const& lhs, auto const& info, auto&& unchecked_add,
                 auto&& final_node_action) {
     for (auto lhs_iter = lhs.begin(), lhs_end = lhs.end(); lhs_iter != lhs_end;) {
         auto const& [next_node_offset, next_rcv_id] = *lhs_iter;

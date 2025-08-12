@@ -30,6 +30,7 @@ using PValueIdMapPtr = record_match_indexes::PartitionIndex::PartitionValueIdMap
 class RecordPairInferrer::RecordRanker {
     using RankingBodyVariables =
             std::tuple<record_match_indexes::UpperSetIndex const&,
+                       record_match_indexes::PartitionIndex::PositionListIndex const&,
                        record_match_indexes::PartitionIndex::PositionListIndex const&>;
     using RankingVariables = std::tuple<std::size_t, RankingBodyVariables>;
 
@@ -81,11 +82,13 @@ class RecordPairInferrer::RecordRanker {
         auto const& [value_matrix, upper_set_index] =
                 (*inferrer_.record_match_indexes_)[record_match_index];
 
-        record_match_indexes::PartitionIndex::PositionListIndex const& left_clusters =
+        record_match_indexes::PartitionIndex::PositionListIndex const& left_pli =
                 inferrer_.records_info_->GetLeft().GetPli(record_match_index);
+        record_match_indexes::PartitionIndex::PositionListIndex const& right_pli =
+                inferrer_.records_info_->GetRight().GetPli(record_match_index);
 
-        std::size_t const total_left_values = left_clusters.size();
-        return {total_left_values, {upper_set_index, left_clusters}};
+        std::size_t const total_left_values = left_pli.size();
+        return {total_left_values, {upper_set_index, left_pli, right_pli}};
     }
 
     template <bool IsShort>
@@ -142,25 +145,26 @@ struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<true, ObtainValueRe
         std::ranges::sort(cluster_records, comparer);
     }
 
-    void operator()(PartitionValueId left_value_id) {
-        auto const [upper_set_index, left_clusters] = variables;
-        auto const& [right_records, end_id_map] = upper_set_index[left_value_id].GetFlat();
+    void operator()(PartitionValueId left_pvalue_id) {
+        auto const [upper_set_index, left_pli, right_pli] = variables;
+        auto const& [rt_pvalue_ids, cardinality_map] = upper_set_index[left_pvalue_id];
 
-        RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
-        value_ranked_records.reserve(right_records.size());
+        RankedRecordsValue& value_ranked_records = obtain_value_records(left_pvalue_id);
+        assert(!cardinality_map.empty());
+        value_ranked_records.reserve(cardinality_map.cbegin()->second.record_set_cardinality);
 
-        record_match_indexes::PartitionIndex::PliCluster const& cluster =
-                left_clusters[left_value_id];
-        assert(std::ranges::all_of(cluster, [&](RecordIdentifier left_record_id) {
-            return std::ranges::find(right_records, left_record_id) != right_records.end();
-        }));
+        record_match_indexes::PartitionIndex::PliCluster const& cluster = left_pli[left_pvalue_id];
+        assert(left_pli[left_pvalue_id] == right_pli[left_pvalue_id]);
         value_ranked_records.insert(value_ranked_records.end(), cluster.begin(), cluster.end());
 
         OrderCluster(value_ranked_records);
 
-        std::unordered_set<RecordIdentifier> cluster_set(cluster.begin(), cluster.end());
-        for (RecordIdentifier record_id : right_records) {
-            if (!cluster_set.contains(record_id)) value_ranked_records.push_back(record_id);
+        for (PartitionValueId pvalue_id : rt_pvalue_ids) {
+            if (left_pvalue_id == pvalue_id) continue;
+            record_match_indexes::PartitionIndex::PliCluster const& rt_cluster =
+                    right_pli[pvalue_id];
+            value_ranked_records.insert(value_ranked_records.end(), rt_cluster.begin(),
+                                        rt_cluster.end());
         }
         // Full sampling sorting goes here.
     }
@@ -174,14 +178,19 @@ struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<false, ObtainValueR
     model::Index const record_match_index;
 
     void operator()(PartitionValueId left_value_id) {
-        auto const [upper_set_index, left_clusters] = variables;
-        auto const& [right_records, end_id_map] = upper_set_index[left_value_id].GetFlat();
+        auto const [upper_set_index, left_pli, right_pli] = variables;
+        auto const& [rt_pvalue_ids, cardinality_map] = upper_set_index[left_value_id];
 
         RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
-        value_ranked_records.reserve(right_records.size());
+        assert(!cardinality_map.empty());
+        value_ranked_records.reserve(cardinality_map.cbegin()->second.record_set_cardinality);
 
-        value_ranked_records.insert(value_ranked_records.end(), right_records.begin(),
-                                    right_records.end());
+        for (PartitionValueId rt_pvalue_id : rt_pvalue_ids) {
+            record_match_indexes::PartitionIndex::PliCluster const& rt_cluster =
+                    right_pli[rt_pvalue_id];
+            value_ranked_records.insert(value_ranked_records.end(), rt_cluster.begin(),
+                                        rt_cluster.end());
+        }
     }
 };
 

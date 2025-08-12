@@ -30,65 +30,67 @@
 namespace algos::hymde::cover_calculation {
 class ValidatedAdder {
     std::vector<SameLhsMDEsSpecification>& mde_specifications_;
-    std::vector<model::Index> const& rm_translation_;
+    std::vector<model::Index> const& reordered_to_original_rm_map_;
     std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps_;
+
+    std::vector<RecordClassifierIdentifiers> MakeLhsRCIdentifierArray(
+            lattice::PathToNode const& lattice_lhs) const;
+    void ResetBitsForRemoved(boost::dynamic_bitset<>& selected_rhs_indices,
+                             ValidationRhsUpdates const& invalidated) const;
+    std::vector<RecordClassifierIdentifiers> MakeRhsRCIdentifierArray(
+            ValidationRhsUpdates const& invalidated,
+            boost::dynamic_bitset<>& rhs_indices_to_validate,
+            std::size_t dependencies_number_for_lhs, lattice::Rhs const& rhs) const;
 
 public:
     ValidatedAdder(std::vector<SameLhsMDEsSpecification>& mde_specifications,
                    std::vector<model::Index> const& rm_translation,
                    std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps)
         : mde_specifications_(mde_specifications),
-          rm_translation_(rm_translation),
+          reordered_to_original_rm_map_(rm_translation),
           rcv_id_lr_maps_(rcv_id_lr_maps) {}
 
-    void AddMDEs(ValidationSelection& selection, InvalidatedRhss const& invalidated,
-                 std::size_t support) {
-        lattice::MdeLhs const& lattice_lhs = selection.updater->GetLhs();
-        lattice::Rhs const& rhs = selection.updater->GetRhs();
-        std::vector<RecordClassifierSpecification> lhs_rm_specification =
-                util::GetPreallocatedVector<RecordClassifierSpecification>(
-                        lattice_lhs.Cardinality());
-        model::Index total_offset = 0;
-        for (auto const& [offset, lhs_rcv_id] : lattice_lhs) {
-            total_offset += offset;
-            RecordClassifierValueId rcv_id =
-                    rcv_id_lr_maps_[total_offset].lhs_to_rhs_map[lhs_rcv_id];
-            model::Index const translated_rm_index = rm_translation_[total_offset];
-            lhs_rm_specification.emplace_back(translated_rm_index, rcv_id);
-            ++total_offset;
-        }
-
-        std::vector<RecordClassifierSpecification> rhs_rm_specification;
-        for (auto const& [index, rcv_id] : invalidated.GetUpdateView()) {
-            selection.rhs_indices_to_validate.set(index, false);
-            if (rcv_id == kLowestRCValueId) continue;
-            model::Index const translated_rm_index = rm_translation_[index];
-            rhs_rm_specification.emplace_back(translated_rm_index, rcv_id);
-        }
-        util::ForEachIndex(selection.rhs_indices_to_validate, [&](model::Index index) {
-            model::Index const translated_rm_index = rm_translation_[index];
-            RecordClassifierValueId const rcv_id = rhs[index];
-            assert(rcv_id != kLowestRCValueId);
-            rhs_rm_specification.emplace_back(translated_rm_index, rcv_id);
-        });
-        if (rhs_rm_specification.empty()) return;
-        mde_specifications_.emplace_back(LhsSpecification{std::move(lhs_rm_specification), support},
-                                         std::move(rhs_rm_specification));
-    }
+    void AddMDEs(ValidationSelection& selection, ValidationRhsUpdates const& invalidated,
+                 std::size_t support);
 };
 
 class BatchValidator {
 public:
-    // We're actually doing three distinct tasks here:
+    // We're actually doing three distinct tasks here ("validation" may be a misnomer):
     struct Result {
         // Collecting RHSs that are invalid to refine our assumptions (i.e. actual validation);
-        InvalidatedRhss invalidated_rhss;
-        // Collecting prospective pairs;
+        ValidationRhsUpdates invalidated_rhss;
+        // Collecting pairs that contradict our initial assumption;
         LhsGroupedRecommendations lhs_grouped_recommendations;
         // Determining LHS support.
         // NOTE: if all RHSs are invalid, then it only matters whether the support is below the
         // threshold or not.
         std::size_t support = 0;
+        // What's a better name? Too generic: we are traversing record pairs.
+        // In this traversal we are testing an assumption for several dependencies that share a LHS.
+        // We initially assume that they are part of the minimal cover of the set of dependencies
+        // that hold on the input data. This traversal can tell us that they are not a part of that
+        // set but also determine that there is another dependency that is but has a lower RCV in
+        // its RHS. "minimality assumption tester"? Minimality where? The assumption is not just
+        // minimality, but that it also holds. The assumption is that the dependency is in a set.
+        // The set is a cover of another set. "minimal holding assumption evaluator"
+
+        // Too generic: we are collecting evidence pairs.
+        // Each evidence pair can tell us that a weaker LHS exists that lets the RHS RCV be just as
+        // high (and so can be removed).
+        // But some evidence is not useful for the purpose that it is going to be used.
+
+        // A validator takes an assumption and presents the truth and some evidence towards the
+        // initial assumption's falsity. What is the meaning of support here, then?
+        // The evidence is used to refine all assumptions in a more efficient way.
+        // Validation checks an assumption, pair inference checks all assumptions against a pair.
+
+        // Support is a property of a LHS on the input data.
+        // The process that is happening here is about properties of a dependency's LHS? One
+        // property is "assumption holds+evidence to the contrary", the other is the value of
+        // support.
+
+        // What is something that can determine a property?
     };
 
 private:
@@ -212,7 +214,7 @@ private:
             return false;
         }
 
-        void AddIfInvalid(InvalidatedRhss& invalidated) const {
+        void AddIfInvalid(ValidationRhsUpdates& invalidated) const {
             DESBORDANTE_ASSUME(current_rcv_id_ <= old_rhs_.rcv_id);
             if (current_rcv_id_ != old_rhs_.rcv_id) invalidated.PushBack(old_rhs_, current_rcv_id_);
         }
@@ -251,9 +253,9 @@ private:
         return data_partition_index_->GetPairsNumber();
     }
 
-    [[nodiscard]] record_match_indexes::PartValueSet GetMatchedValuesSet(
-            model::Index record_match_index, PartitionValueId pvalue_id,
-            RecordClassifierValueId lhs_rcv_id) const;
+    bool SingleThreaded() const noexcept {
+        return pool_ == nullptr;
+    }
 
     void FillValidators(SameLhsValidators& same_lhs_validators,
                         LhsGroupedRecommendations& recommendations,

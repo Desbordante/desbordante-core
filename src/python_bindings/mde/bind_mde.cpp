@@ -367,18 +367,18 @@ void BindCalculatorSpecifiers(py::module_& mde_module) {
 void BindMdeStorage(py::module_& mde_module) {
     using namespace algos::hymde;
 
-    py::class_<RecordClassifierSpecification>(mde_module, "RecordClassifierSpecification")
-            .def_readonly("record_match_index", &RecordClassifierSpecification::record_match_index)
-            .def_readonly("rcv_id", &RecordClassifierSpecification::rcv_id)
-            .def("to_tuple", &RecordClassifierSpecification::ToTuple);
+    py::class_<RecordClassifierIdentifiers>(mde_module, "RecordClassifierSpecification")
+            .def_readonly("record_match_index", &RecordClassifierIdentifiers::record_match_index)
+            .def_readonly("rcv_id", &RecordClassifierIdentifiers::rcv_id)
+            .def("to_tuple", &RecordClassifierIdentifiers::ToTuple);
 
     py::class_<LhsSpecification>(mde_module, "LhsSpecification")
-            .def_readonly("lhs", &LhsSpecification::lhs)
+            .def_readonly("lhs_rc_identifiers", &LhsSpecification::lhs_rc_identifiers)
             .def_readonly("support", &LhsSpecification::support);
 
     py::class_<SameLhsMDEsSpecification>(mde_module, "SameLhsMDEsSpecification")
-            .def_readonly("lhs_spec", &SameLhsMDEsSpecification::lhs_spec)
-            .def_readonly("rhss", &SameLhsMDEsSpecification::rhss);
+            .def_readonly("lhs_specification", &SameLhsMDEsSpecification::lhs_specification)
+            .def_readonly("rhs_rc_identifiers", &SameLhsMDEsSpecification::rhs_rc_identifiers);
 
     py::class_<SearchSpaceFactorSpecification>(mde_module, "SearchSpaceFactorSpecification")
             .def_readonly("record_match", &SearchSpaceFactorSpecification::record_match)

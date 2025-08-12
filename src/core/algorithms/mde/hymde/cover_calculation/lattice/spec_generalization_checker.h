@@ -17,13 +17,13 @@ class SpecGeneralizationChecker {
     TotalGeneralizationChecker<NodeType, typename Specialization::Unspecialized> total_checker_{
             specialization_.ToUnspecialized()};
 
-    bool HasGeneralizationTotal(NodeType const& node, MdeLhs::iterator iter,
+    bool HasGeneralizationTotal(NodeType const& node, PathToNode::iterator iter,
                                 model::Index starting_offset) {
         return total_checker_.HasGeneralization(node, iter, starting_offset);
     }
 
     bool HasGeneralizationInChildMap(NodeType const& node, model::Index child_array_index,
-                                     MdeLhs::iterator next_node_iter,
+                                     PathToNode::iterator next_node_iter,
                                      RecordClassifierValueId rcv_id_limit,
                                      model::Index next_child_array_index, auto gen_method,
                                      auto get_child_map_iter) {
@@ -41,11 +41,11 @@ class SpecGeneralizationChecker {
         return [](RCVIdChildMap const& child_map) { return child_map.begin(); };
     }
 
-    bool HasGeneralizationInChildren(NodeType const& node, MdeLhs::iterator next_node_iter,
+    bool HasGeneralizationInChildren(NodeType const& node, PathToNode::iterator next_node_iter,
                                      model::Index total_offset, auto spec_method,
                                      auto final_method) {
         LhsSpecialization const& lhs_specialization = specialization_.GetLhsSpecialization();
-        MdeLhs::iterator spec_iter = lhs_specialization.specialization_data.spec_before;
+        PathToNode::iterator spec_iter = lhs_specialization.specialization_data.spec_before;
         while (next_node_iter != spec_iter) {
             auto const& [next_node_offset, next_rcv_id] = *next_node_iter;
             ++next_node_iter;
@@ -62,7 +62,7 @@ class SpecGeneralizationChecker {
     }
 
     bool ReplaceFinalCheck(NodeType const& node, model::Index replaced_node_offset,
-                           MdeLhs::iterator spec_iter, RecordClassifierValueId increased_rcv_id,
+                           PathToNode::iterator spec_iter, RecordClassifierValueId increased_rcv_id,
                            [[maybe_unused]] std::size_t new_node_offset) {
         assert(spec_iter != specialization_.GetLhsSpecialization().old_lhs.end() &&
                spec_iter->offset == new_node_offset);
@@ -77,7 +77,7 @@ class SpecGeneralizationChecker {
     }
 
     bool NonReplaceFinalCheck(NodeType const& node, model::Index inserted_or_appended_node_offset,
-                              MdeLhs::iterator spec_iter, RecordClassifierValueId rcv_id,
+                              PathToNode::iterator spec_iter, RecordClassifierValueId rcv_id,
                               std::size_t new_node_offset) {
         assert(spec_iter == specialization_.GetLhsSpecialization().old_lhs.end() ||
                spec_iter->offset > new_node_offset);
@@ -89,7 +89,8 @@ class SpecGeneralizationChecker {
 public:
     SpecGeneralizationChecker(Specialization& specialization) : specialization_(specialization) {}
 
-    bool HasGeneralizationInChildrenReplace(NodeType const& node, MdeLhs::iterator next_node_iter,
+    bool HasGeneralizationInChildrenReplace(NodeType const& node, 
+                                            PathToNode::iterator next_node_iter,
                                             model::Index starting_offset = 0) {
         return HasGeneralizationInChildren(
                 node, next_node_iter, starting_offset,
@@ -98,7 +99,7 @@ public:
     }
 
     bool HasGeneralizationInChildrenNonReplace(NodeType const& node,
-                                               MdeLhs::iterator next_node_iter,
+                                               PathToNode::iterator next_node_iter,
                                                model::Index starting_offset = 0) {
         return HasGeneralizationInChildren(
                 node, next_node_iter, starting_offset,
@@ -106,11 +107,11 @@ public:
                 &SpecGeneralizationChecker::NonReplaceFinalCheck);
     }
 
-    bool HasGeneralizationReplace(NodeType const& node, MdeLhs::iterator iter) {
+    bool HasGeneralizationReplace(NodeType const& node, PathToNode::iterator iter) {
         return HasGeneralizationInChildrenReplace(node, iter);
     }
 
-    bool HasGeneralizationNonReplace(NodeType const& node, MdeLhs::iterator iter) {
+    bool HasGeneralizationNonReplace(NodeType const& node, PathToNode::iterator iter) {
         return HasGeneralizationInChildrenNonReplace(node, iter);
     }
 

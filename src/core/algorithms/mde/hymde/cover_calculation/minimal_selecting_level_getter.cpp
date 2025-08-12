@@ -14,7 +14,7 @@ namespace algos::hymde::cover_calculation {
 std::vector<ValidationSelection> MinimalSelectingLevelGetter::GetPendingGroupedMinimalLhsMds(
         std::vector<lattice::MdeLattice::ValidationUpdater>& validation_updaters) {
     min_selector_.NewBatch(validation_updaters.size());
-    std::unordered_map<lattice::MdeLhs, boost::dynamic_bitset<>> new_selection_exclusion;
+    std::unordered_map<lattice::PathToNode, boost::dynamic_bitset<>> new_selection_exclusion;
     for (lattice::MdeLattice::ValidationUpdater& messenger : validation_updaters) {
         auto node = next_selection_exclusion_.extract(messenger.GetLhs());
         boost::dynamic_bitset<> indices(record_matches_number_);

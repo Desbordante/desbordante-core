@@ -8,7 +8,7 @@
 #include "algorithms/mde/hymde/record_classifier_value_id.h"
 
 namespace algos::hymde::cover_calculation {
-class InvalidatedRhss {
+class ValidationRhsUpdates {
     using NewRCVIds = std::vector<RecordClassifierValueId>;
 
     lattice::Rhss invalidated_;
@@ -18,9 +18,9 @@ public:
     class UpdateView {
         using InvalidatedIterator = lattice::Rhss::const_iterator;
 
-        InvalidatedRhss const& invalidated_info_;
+        ValidationRhsUpdates const& invalidated_info_;
 
-        UpdateView(InvalidatedRhss const& invalidated_info) noexcept
+        UpdateView(ValidationRhsUpdates const& invalidated_info) noexcept
             : invalidated_info_(invalidated_info) {}
 
     public:
@@ -76,7 +76,7 @@ public:
             return invalidated_info_.invalidated_.end();
         }
 
-        friend InvalidatedRhss;
+        friend ValidationRhsUpdates;
     };
 
     void PushBack(MdeElement old_rhs, RecordClassifierValueId new_rcv_id) {

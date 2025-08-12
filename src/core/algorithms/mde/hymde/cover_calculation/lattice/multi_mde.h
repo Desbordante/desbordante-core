@@ -9,7 +9,7 @@ namespace algos::hymde::cover_calculation::lattice {
 struct MultiMde {
     using FasterType = Mde;
 
-    MdeLhs const& lhs;
+    PathToNode const& lhs;
     utility::ExclusionList<MdeElement>& rhss;
 
     bool ShouldConvert() const noexcept {

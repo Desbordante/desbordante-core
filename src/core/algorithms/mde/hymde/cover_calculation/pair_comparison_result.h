@@ -14,21 +14,21 @@
 namespace algos::hymde::cover_calculation {
 struct PairComparisonResult {
     std::vector<RecordClassifierValueId> rhss;
-    lattice::MdeLhs maximal_matching_lhs;
+    lattice::PathToNode maximal_matching_lhs;
 
 private:
-    lattice::MdeLhs ToLhs(
+    lattice::PathToNode ToLhs(
             std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_map) const {
         std::size_t offset = 0;
         std::size_t const record_match_number = rhss.size();
-        lattice::MdeLhs lhs{record_match_number};
+        lattice::PathToNode lhs{record_match_number};
         DESBORDANTE_ASSUME(record_match_number == rcv_id_lr_map.size());
         for (auto [rhs_rcv_id, lhs_info] : utility::Zip(rhss, rcv_id_lr_map)) {
             RecordClassifierValueId const lhs_rcv_id = lhs_info.rhs_to_lhs_map[rhs_rcv_id];
             if (lhs_rcv_id == kLowestRCValueId) {
                 ++offset;
             } else {
-                lhs.AddNext(offset) = lhs_rcv_id;
+                lhs.NextStep(offset) = lhs_rcv_id;
                 offset = 0;
             }
         }

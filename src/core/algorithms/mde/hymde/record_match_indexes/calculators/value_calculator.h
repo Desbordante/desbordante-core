@@ -45,7 +45,7 @@ class ValueCalculator {
     template <bool UseSameMethod, typename ComparerCreator, typename LeftElementType,
               typename RightElementType>
     class Worker {
-        using LeftValueComparisonInfoOrigType = LeftValueComparisonInfo<ComparisonResult>;
+        using MeaningfulLeftValueResultsCompType = MeaningfulLeftValueResults<ComparisonResult>;
         std::vector<LeftElementType> const& left_elements_;
         std::vector<RightElementType> const& right_elements_;
         PartitionIndex::PositionListIndex const& right_pli_;
@@ -57,41 +57,40 @@ class ValueCalculator {
         std::size_t const num_values_left_ = left_elements_.size();
         std::size_t const num_values_right_ = right_elements_.size();
         MeaningfulDataResults<ComparisonResult> task_data_ =
-                util::GetPreallocatedVector<LeftValueComparisonInfoOrigType>(num_values_left_);
+                util::GetPreallocatedVector<MeaningfulLeftValueResultsCompType>(num_values_left_);
         ComparisonResult least_element_ = order_.LeastElement();
         ComparisonResult greatest_element_ = order_.GreatestElement();
 
-        void AddRightPartValIdCompResPair(LeftValueComparisonInfoOrigType& lv_comp_info,
+        void AddRightPartValIdCompResPair(MeaningfulLeftValueResultsCompType& lv_results,
                                           PartitionValueId pvalue_id_right,
                                           ComparisonResult comp_res) {
-            auto& [comp_part_value_id_pairs, meaningful_records_number] = lv_comp_info;
-            comp_part_value_id_pairs.emplace_back(std::move(comp_res), pvalue_id_right);
-            meaningful_records_number += right_pli_[pvalue_id_right].size();
+            lv_results.emplace_back(std::move(comp_res), pvalue_id_right,
+                                    right_pli_[pvalue_id_right].size());
         }
 
-        void CheckedCompResAdd(LeftValueComparisonInfoOrigType& lv_comp_info,
+        void CheckedCompResAdd(MeaningfulLeftValueResultsCompType& lv_results,
                                PartitionValueId pvalue_id_right, ComparisonResult comp_res,
                                bool& least_element_found) {
             if (comp_res == least_element_) {
                 least_element_found = true;
                 return;
             }
-            AddRightPartValIdCompResPair(lv_comp_info, pvalue_id_right, std::move(comp_res));
+            AddRightPartValIdCompResPair(lv_results, pvalue_id_right, std::move(comp_res));
         }
 
-        void CalcOnePair(auto& comparer, LeftValueComparisonInfoOrigType& lv_comp_info,
+        void CalcOnePair(auto& comparer, MeaningfulLeftValueResultsCompType& lv_results,
                          LeftElementType const& left_element, PartitionValueId pvalue_id_right,
                          bool& least_element_found) {
             RightElementType const& right_element = right_elements_[pvalue_id_right];
             ComparisonResult comp_res = comparer(left_element, right_element);
-            CheckedCompResAdd(lv_comp_info, pvalue_id_right, comp_res, least_element_found);
+            CheckedCompResAdd(lv_results, pvalue_id_right, comp_res, least_element_found);
         }
 
-        void CalcLoop(auto& comparer, LeftValueComparisonInfoOrigType& lv_comp_info,
+        void CalcLoop(auto& comparer, MeaningfulLeftValueResultsCompType& lv_results,
                       LeftElementType const& left_element, bool& least_element_found,
                       PartitionValueId from, PartitionValueId to) {
             for (PartitionValueId pvalue_id_right : std::views::iota(from, to)) {
-                CalcOnePair(comparer, lv_comp_info, left_element, pvalue_id_right,
+                CalcOnePair(comparer, lv_results, left_element, pvalue_id_right,
                             least_element_found);
             }
         }
@@ -99,26 +98,25 @@ class ValueCalculator {
         void CalcForFull(auto& comparer, PartitionValueId pvalue_id_left,
                          bool& least_element_found) {
             LeftElementType const& left_element = left_elements_[pvalue_id_left];
-            LeftValueComparisonInfoOrigType& lv_comp_info = task_data_[pvalue_id_left];
-            CalcLoop(comparer, lv_comp_info, left_element, least_element_found, 0,
-                     num_values_right_);
+            MeaningfulLeftValueResultsCompType& lv_results = task_data_[pvalue_id_left];
+            CalcLoop(comparer, lv_results, left_element, least_element_found, 0, num_values_right_);
         }
 
         void CalcForSame(auto& comparer, PartitionValueId pvalue_id_left,
                          bool& least_element_found) {
             LeftElementType const& left_element = left_elements_[pvalue_id_left];
-            LeftValueComparisonInfoOrigType& lv_comp_info = task_data_[pvalue_id_left];
+            MeaningfulLeftValueResultsCompType& lv_results = task_data_[pvalue_id_left];
             if (!FunctionIsSymmetric()) {
-                CalcLoop(comparer, lv_comp_info, left_element, least_element_found, 0,
+                CalcLoop(comparer, lv_results, left_element, least_element_found, 0,
                          pvalue_id_left);
             }
             if (EqHasKnownValue()) {
-                CheckedCompResAdd(lv_comp_info, pvalue_id_left, GetEqValue(), least_element_found);
+                CheckedCompResAdd(lv_results, pvalue_id_left, GetEqValue(), least_element_found);
             } else {
-                CalcOnePair(comparer, lv_comp_info, left_element, pvalue_id_left,
+                CalcOnePair(comparer, lv_results, left_element, pvalue_id_left,
                             least_element_found);
             }
-            CalcLoop(comparer, lv_comp_info, left_element, least_element_found, pvalue_id_left + 1,
+            CalcLoop(comparer, lv_results, left_element, least_element_found, pvalue_id_left + 1,
                      num_values_right_);
         }
 
@@ -137,11 +135,11 @@ class ValueCalculator {
     public:
         Worker(std::vector<LeftElementType> const* left_elements,
                std::vector<RightElementType> const* right_elements,
-               PartitionIndex::PositionListIndex const& right_clusters,
+               PartitionIndex::PositionListIndex const& right_pli,
                orders::TotalOrder<ComparisonResult> const& order, ComparerCreator create_comparer)
             : left_elements_(*left_elements),
               right_elements_(*right_elements),
-              right_pli_(right_clusters),
+              right_pli_(right_pli),
               order_(order),
               create_comparer_(std::move(create_comparer)) {}
 
@@ -276,8 +274,8 @@ public:
                 .assume_overlap_lpli_cluster_max_ = eq_is_greatest,
                 .assume_record_symmetric_ = worker.FunctionIsSymmetric()};
         return BuildIndexes<DecisionBoundaryType>(std::move(enumerated_results),
-                                                  std::move(classifier_values), right_pli,
-                                                  *selector_, least_element_found, assertions);
+                                                  std::move(classifier_values), *selector_,
+                                                  least_element_found, assertions);
     }
 
     auto CalculatePair(auto&& part, PartitionIndex::PositionListIndex const& right_pli,
@@ -295,8 +293,8 @@ public:
         ComponentStructureAssertions assertions{.assume_overlap_lpli_cluster_max_ = false,
                                                 .assume_record_symmetric_ = false};
         return BuildIndexes<DecisionBoundaryType>(std::move(enumerated_results),
-                                                  std::move(classifier_values), right_pli,
-                                                  *selector_, least_element_found, assertions);
+                                                  std::move(classifier_values), *selector_,
+                                                  least_element_found, assertions);
     }
 
     std::string GetOrderName() const {

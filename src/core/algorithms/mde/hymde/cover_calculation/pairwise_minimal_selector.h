@@ -8,7 +8,7 @@
 namespace algos::hymde::cover_calculation {
 class PairwiseMinimalSelector {
 private:
-    using MdeLhs = lattice::MdeLhs;
+    using MdeLhs = lattice::PathToNode;
 
     enum class ComparisonResult {
         kSpecialization,

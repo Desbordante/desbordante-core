@@ -19,25 +19,27 @@
 
 namespace algos::hymde::cover_calculation {
 using TablePartitionValueIdMaps = record_match_indexes::PartitionIndex::TablePartitionValueIdMaps;
-using lattice::MdeLhs;
+using lattice::PathToNode;
 using model::Index;
-using record_match_indexes::PartValueSet;
-using IndexVector = std::vector<Index>;
-using PartitionValueIdMap = record_match_indexes::PartitionIndex::PartitionValueIdMap;
-using PliCluster = record_match_indexes::PartitionIndex::PliCluster;
-using PositionListIndex = record_match_indexes::PartitionIndex::PositionListIndex;
+using record_match_indexes::MaterializedPValuesUpperSet;
+using record_match_indexes::PartitionIndex;
+using PartitionValueIdMap = PartitionIndex::PartitionValueIdMap;
+using PliCluster = PartitionIndex::PliCluster;
+using PositionListIndex = PartitionIndex::PositionListIndex;
+using record_match_indexes::RTPValueIDs;
+using record_match_indexes::UpperSetIndex;
 
 static constexpr RecordIdentifier kNoMoreRecords = -1;
 
 // There are several partitions that are going to be mentioned here.
 // Firstly, a partition of the left table based on equality of values of partitioning functions
 // (`LTPVsPartition` in code, from "left table partition values partition"). Note that we create a
-// partition for each partitioning function in the preprocessing stage (`SLTPVPartition` here, from
-// "single left table partition value partition"). Thus, for any partition where the key has
-// multiple partitioning functions we can obtain the sets of the partition by partitioning each
-// element of one of the function's partition (also referred to as "base partition") "properly" only
-// on the other functions' results (`BasePEPartition`, "base partition element partition"). Any
-// element of BasePEPartition is an element of the corresponding LTPVsPartition.
+// partition for each partitioning function in the preprocessing stage. Thus, for any partition
+// where the key has multiple partitioning functions we can obtain the sets of the partition by
+// partitioning each element of one of the function's partition (also referred to as "base
+// partition") "properly" only on the other functions' results (`BasePEPartition`, "base partition
+// element partition"). Any element of BasePEPartition is an element of the corresponding
+// LTPVsPartition.
 
 // Finally, partition of the set of record pairs that are matched by an LHS (`LHSMRPartition`, "LHS
 // matched records partition"). Its sets can be obtained by inspecting each set of the
@@ -45,29 +47,23 @@ static constexpr RecordIdentifier kNoMoreRecords = -1;
 // LHS's record classifiers (if \psi is the set of record classifiers of the LHS, then the set is
 // {T | \exists V,F,ord,value ((T, V, F, ord), value) \in \psi}). Along with the partition values,
 // each left table's record in this set also shares the set of right table's records that are
-// matched by the LHS to it with the others, if any. The Cartesian products of the described sets
-// are the elements of LHSMRPartition.
+// matched by the LHS to it with the others, if any. The Cartesian products of the sets in the
+// described set pairs are the elements of LHSMRPartition.
 
 template <typename Filter>
 class RightTableIterator {
     PliCluster::const_iterator cur_rt_record_iter_;
     PliCluster::const_iterator end_rt_record_iter_;
     [[no_unique_address]] Filter filter_;
-    std::span<PartitionValueId const>::iterator rt_pvalue_id_iter_;
-    std::span<PartitionValueId const>::iterator end_rt_pvalue_id_iter_;
+    RTPValueIDs::iterator rt_pvalue_id_iter_;
+    RTPValueIDs::iterator const end_rt_pvalue_id_iter_;
     PositionListIndex const& iterated_rt_pli_;
 
-    void SetClusterIters() {
+    void StartCurrentRTClusterIteration() {
         PliCluster const& current_rt_cluster =
                 utility::NotEmpty(iterated_rt_pli_[*rt_pvalue_id_iter_]);
         cur_rt_record_iter_ = current_rt_cluster.begin();
         end_rt_record_iter_ = current_rt_cluster.end();
-    }
-
-    bool NextCluster() {
-        if (++rt_pvalue_id_iter_ == end_rt_pvalue_id_iter_) return false;
-        SetClusterIters();
-        return true;
     }
 
     template <bool IterGuaranteedValid = false>
@@ -75,25 +71,27 @@ class RightTableIterator {
         if constexpr (IterGuaranteedValid) goto cur_is_valid;
         while (true) {
             if (cur_rt_record_iter_ == end_rt_record_iter_) {
-                if (!NextCluster()) return kNoMoreRecords;
+                if (++rt_pvalue_id_iter_ == end_rt_pvalue_id_iter_) return kNoMoreRecords;
+                StartCurrentRTClusterIteration();
             }
 
         cur_is_valid:
             RecordIdentifier potential_record_id = *cur_rt_record_iter_++;
-            DESBORDANTE_ASSUME(potential_record_id != kNoMoreRecords);
-            if (filter_(potential_record_id)) return potential_record_id;
+            if (filter_(potential_record_id)) {
+                DESBORDANTE_ASSUME(potential_record_id != kNoMoreRecords);
+                return potential_record_id;
+            }
         }
     }
 
 public:
     RightTableIterator(Filter filter, PositionListIndex const& iterated_rt_pli_,
-                       std::span<PartitionValueId const> rt_pvalue_ids,
-                       RecordIdentifier* first_rt_record_id)
+                       RTPValueIDs iterated_rt_pvalue_ids, RecordIdentifier* first_rt_record_id)
         : filter_(std::move(filter)),
-          rt_pvalue_id_iter_(rt_pvalue_ids.begin()),
-          end_rt_pvalue_id_iter_(rt_pvalue_ids.end()),
+          rt_pvalue_id_iter_(iterated_rt_pvalue_ids.begin()),
+          end_rt_pvalue_id_iter_(iterated_rt_pvalue_ids.end()),
           iterated_rt_pli_(iterated_rt_pli_) {
-        SetClusterIters();
+        StartCurrentRTClusterIteration();
         *first_rt_record_id = NextValidRecordInternal<true>();
     }
 
@@ -127,7 +125,7 @@ class BatchValidator::LHSMRPartitionInspector {
     }
 
     // Lower RCV IDs, add recommendation, remove invalidated RHSs.
-    bool InspectRhsRecord(PartitionValueIdMap const& rt_record_pvid_map) {
+    bool InspectRTRecord(PartitionValueIdMap const& rt_record_pvid_map) {
         util::EraseIfReplace(rhs_validators_, [&](RhsValidator& rhs_validator) {
             if (rhs_validator.CheckRecord(rt_record_pvid_map)) {
                 result_.invalidated_rhss.PushBack(rhs_validator.GetOldRhs(), kLowestRCValueId);
@@ -183,7 +181,7 @@ class BatchValidator::LHSMRPartitionInspector {
 
 public:
     LHSMRPartitionInspector(BatchValidator const* validator, Result& result,
-                            SameLhsValidators& rhs_validators, MdeLhs const& lhs)
+                            SameLhsValidators& rhs_validators, PathToNode const& lhs)
         : validator_(validator),
           result_(result),
           rhs_validators_(rhs_validators),
@@ -196,38 +194,31 @@ public:
                         rhs_validator.SetCurrentLTPVsPElement(ltpvspe_pvid_maps);
                     }
                 },
-                [this](PartitionValueIdMap const& rhs_record_pvid_map) {
-                    return InspectRhsRecord(rhs_record_pvid_map);
+                [this](PartitionValueIdMap const& rt_pvid_map) {
+                    return InspectRTRecord(rt_pvid_map);
                 },
                 [this]() { MakeOutOfClustersResult(); });
     }
 };
 
-PartValueSet BatchValidator::GetMatchedValuesSet(Index record_match_index,
-                                                 PartitionValueId lt_pvalue_id,
-                                                 RecordClassifierValueId lhs_rcv_id) const {
-    return (*record_match_indexes_)[record_match_index]
-            .upper_set_index[lt_pvalue_id]
-            .GetMatchedValues(lhs_rcv_id);
-}
-
 class BatchValidator::OneCardPartitionElementProvider {
-    BatchValidator const* const validator_;
-    PartitionValueId current_value_id_ = PartitionValueId(-1);
+    static constexpr auto kNoFilter = [](RecordIdentifier) { return true; };
+    using RTIterator = RightTableIterator<decltype(kNoFilter)>;
+
+    PartitionValueId current_lt_pvalue_id_ = PartitionValueId(-1);
     Index const lhs_record_match_index_;
     RecordClassifierValueId const lhs_rcv_id_;
-    PositionListIndex const& lt_pli_ =
-            validator_->GetLeftTablePartitionIndex().GetPli(lhs_record_match_index_);
-    std::size_t const lt_pli_size_ = lt_pli_.size();
-    PositionListIndex const& rt_pli_ =
-            validator_->GetRightTablePartitionIndex().GetPli(lhs_record_match_index_);
-    TablePartitionValueIdMaps const& lt_pvid_maps_ =
-            validator_->GetLeftTablePartitionIndex().GetPartitionValueIdMaps();
+    PositionListIndex const& lt_pli_;
+    std::size_t const lt_pvalues_ = lt_pli_.size();
+    PositionListIndex const& rt_pli_;
+    TablePartitionValueIdMaps const& lt_pvid_maps_;
+    UpperSetIndex const& upper_set_index_;
+    // TODO: remember largest cluster size for each PLI, move to std::unique_ptr.
     LTPVsPEPVIdMaps ltpvsp_element_pvid_maps_scratch_;
 
     void FillLTPVsPEScratch() {
         ltpvsp_element_pvid_maps_scratch_.clear();
-        PliCluster const& lt_records = lt_pli_[current_value_id_];
+        PliCluster const& lt_records = lt_pli_[current_lt_pvalue_id_];
         utility::ReserveMore(ltpvsp_element_pvid_maps_scratch_, lt_records.size());
         for (RecordIdentifier lt_record_id : utility::NotEmpty(lt_records)) {
             ltpvsp_element_pvid_maps_scratch_.push_back(&lt_pvid_maps_[lt_record_id]);
@@ -235,27 +226,30 @@ class BatchValidator::OneCardPartitionElementProvider {
     }
 
 public:
-    static constexpr auto kNoFilter = [](RecordIdentifier) { return true; };
-
-    using RTIterator = RightTableIterator<decltype(kNoFilter)>;
     using PartitionElement = LHSMRPartitionElementInfo<RTIterator>;
 
-    OneCardPartitionElementProvider(BatchValidator const* validator, MdeLhs const& lhs)
-        : validator_(validator),
-          lhs_record_match_index_(lhs.begin()->offset),
-          lhs_rcv_id_(lhs.begin()->rcv_id) {}
+    OneCardPartitionElementProvider(BatchValidator const* validator, PathToNode const& lhs)
+        : lhs_record_match_index_(lhs.begin()->offset),
+          lhs_rcv_id_(lhs.begin()->rcv_id),
+          lt_pli_(validator->GetLeftTablePartitionIndex().GetPli(lhs_record_match_index_)),
+          rt_pli_(validator->GetRightTablePartitionIndex().GetPli(lhs_record_match_index_)),
+          lt_pvid_maps_(validator->GetLeftTablePartitionIndex().GetPartitionValueIdMaps()),
+          upper_set_index_(
+                  (*validator->record_match_indexes_)[lhs_record_match_index_].upper_set_index) {
+        assert(lhs.PathLength() == 1);
+    }
 
     std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
-        while (++current_value_id_ != lt_pli_size_) {
-            PartValueSet similar_values = validator_->GetMatchedValuesSet(
-                    lhs_record_match_index_, current_value_id_, lhs_rcv_id_);
-            if (similar_values.IsEmpty()) continue;
+        while (++current_lt_pvalue_id_ != lt_pvalues_) {
+            MaterializedPValuesUpperSet upper_set =
+                    upper_set_index_[current_lt_pvalue_id_].GetUpperSet(lhs_rcv_id_);
+            if (upper_set.IsEmpty()) continue;
 
             FillLTPVsPEScratch();
 
-            RecordIdentifier first_rt_record;
-            RTIterator iter{kNoFilter, rt_pli_, similar_values.values, &first_rt_record};
-            return {{ltpvsp_element_pvid_maps_scratch_, first_rt_record, std::move(iter)}};
+            RecordIdentifier first_rt_record_id;
+            RTIterator iter{kNoFilter, rt_pli_, upper_set.value_set_elements, &first_rt_record_id};
+            return {{ltpvsp_element_pvid_maps_scratch_, first_rt_record_id, std::move(iter)}};
         }
         return std::nullopt;
     }
@@ -305,58 +299,61 @@ class BatchValidator::MultiCardPartitionElementProvider {
         std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps_ =
                 *validator_->rcv_id_lr_maps_;
 
-        MdeLhs::iterator lhs_iter_;
-        MdeLhs::iterator const lhs_end_;
+        PositionListIndex const* base_partition_;
 
-        Index cur_rec_match_index_ = lhs_iter_->offset;
+        PathToNode::iterator lhs_iter_;
+        PathToNode::iterator const lhs_end_;
+
+        Index cur_rm_index_ = lhs_iter_->offset;
 
         // TODO: permute record matches for validation so that this partition is the one with the
         // largest amount of clusters or with the smallest maximum cluster size.
-        Index base_partition_index_;
         std::vector<Index> basepe_partition_key_indices_;
 
         AtomicConstraintsInfo lhs_atomic_constraints_;
 
         void AddConstraint(RecordClassifierValueId const lhs_rcv_id) {
             lhs_atomic_constraints_.emplace_back(
-                    cur_rec_match_index_, lhs_rcv_id,
-                    rcv_id_lr_maps_[cur_rec_match_index_].lhs_to_rhs_map[lhs_rcv_id]);
+                    cur_rm_index_, lhs_rcv_id,
+                    rcv_id_lr_maps_[cur_rm_index_].lhs_to_rhs_map[lhs_rcv_id]);
         }
 
-        void AddFirstRhsRecordsMatchingCriterion() {
-            base_partition_index_ =
-                    cur_rec_match_index_; /*rm_indices[cur_rec_match_index_].lt_partition_id*/
+        void AddFirstMatchingCriterion() {
+            Index base_partition_index =
+                    cur_rm_index_;  // rm_indices[cur_rec_match_index_].lt_partition_id
+            base_partition_ =
+                    &validator_->GetLeftTablePartitionIndex().GetPli(base_partition_index);
 
             // LHS has cardinality greater than 1, so is not empty.
             DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
             AddConstraint(lhs_iter_->rcv_id);
-            ++cur_rec_match_index_;
+            ++cur_rm_index_;
             ++lhs_iter_;
         }
 
-        void AddOtherRhsRecordsMatchingCriteria() {
-            auto remaining_lhs = std::span{lhs_iter_, lhs_end_};
+        void AddOtherMatchingCriteria() {
+            auto lhs_tail = std::span{lhs_iter_, lhs_end_};
             // LHS has cardinality greater than 1, so it has at least one more element.
-            for (auto const& [next_node_offset, lhs_rcv_id] : utility::NotEmpty(remaining_lhs)) {
-                cur_rec_match_index_ += next_node_offset;
+            for (auto const& [next_node_offset, lhs_rcv_id] : utility::NotEmpty(lhs_tail)) {
+                cur_rm_index_ += next_node_offset;
                 basepe_partition_key_indices_.push_back(
-                        cur_rec_match_index_); /*rm_indices[cur_rec_match_index_].lt_partition_id*/
+                        cur_rm_index_);  // rm_indices[cur_rm_index_].lt_partition_id
                 AddConstraint(lhs_rcv_id);
-                ++cur_rec_match_index_;
+                ++cur_rm_index_;
             }
         }
 
     public:
-        Initializer(BatchValidator const* validator, MdeLhs const& lhs)
+        Initializer(BatchValidator const* validator, PathToNode const& lhs)
             : validator_(validator), lhs_iter_(lhs.begin()), lhs_end_(lhs.end()) {
-            std::size_t const cardinality = lhs.Cardinality();
+            std::size_t const cardinality = lhs.PathLength();
             // This class is adapted for this case and should only be created if this holds.
             DESBORDANTE_ASSUME(cardinality > 1);
             basepe_partition_key_indices_.reserve(cardinality - 1);
             lhs_atomic_constraints_.reserve(cardinality);
 
-            AddFirstRhsRecordsMatchingCriterion();
-            AddOtherRhsRecordsMatchingCriteria();
+            AddFirstMatchingCriterion();
+            AddOtherMatchingCriteria();
             // Sort (and apply std::unique) if not for better locality, currently should be sorted,
             // as these are just record match indices.
             assert(std::ranges::is_sorted(basepe_partition_key_indices_));
@@ -366,21 +363,21 @@ class BatchValidator::MultiCardPartitionElementProvider {
             return validator_;
         }
 
-        Index GetBasePartitionIndex() const noexcept {
-            return base_partition_index_;
-        }
-
-        std::vector<Index>&& GetKeyIndices() noexcept {
+        std::vector<Index>&& GetBasePEPartitionKeyIndices() noexcept {
             return std::move(basepe_partition_key_indices_);
         }
 
-        AtomicConstraintsInfo&& GetConstraints() noexcept {
+        AtomicConstraintsInfo&& TakeConstraints() noexcept {
             return std::move(lhs_atomic_constraints_);
+        }
+
+        PositionListIndex const& GetPositionListIndex() const noexcept {
+            return *base_partition_;
         }
     };
 
     class IndexHasher {
-        std::span<Index> indices_;
+        std::span<Index> const indices_;
 
     public:
         IndexHasher(std::span<Index> indices) : indices_(indices) {}
@@ -395,7 +392,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
     };
 
     class IndexComparer {
-        std::span<Index> indices_;
+        std::span<Index> const indices_;
 
     public:
         IndexComparer(std::span<Index> indices) : indices_(indices) {}
@@ -426,7 +423,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
     // R is `lt_pvalue_vm_row_ptr`, y is `rt_partition_id`.
     struct PartiallyAppliedAtomicConstraint {
         record_match_indexes::ValueMatrixRow const* lt_pvalue_vm_row_ptr;
-        // These fields are always copied, can this be avoided? Should it?
+        // These fields are always copied, can this be avoided? Should it be?
         RecordClassifierValueId vm_rcv_id_cutoff;
         // Happens to be the record match index in this implementation.
         Index rt_partition_id;
@@ -440,222 +437,16 @@ class BatchValidator::MultiCardPartitionElementProvider {
         }
     };
 
-    BatchValidator const* const validator_;
-
-    TablePartitionValueIdMaps const& rt_pvid_maps_ =
-            validator_->data_partition_index_->GetRight().GetPartitionValueIdMaps();
-
-    Index base_partition_id_;
-    std::vector<PliCluster> const& base_partition_ =
-            validator_->GetLeftTablePartitionIndex().GetPli(base_partition_id_);
-    std::size_t const base_partition_size_ = base_partition_.size();
-
-    std::vector<Index> basepe_partition_key_indices_;
-
-    std::size_t const basepe_partition_value_size_ = basepe_partition_key_indices_.size();
-
-    GroupMap basepe_partition_{0, IndexHasher(basepe_partition_key_indices_),
-                               IndexComparer(basepe_partition_key_indices_)};
-    GroupMap::iterator basepe_partition_iter_ = basepe_partition_.begin();
-
-    PartitionValueId base_partition_value_id_ = 0;
-
-    AtomicConstraintsInfo lhs_atomic_constraints_;
-    std::size_t lhs_atomic_constraints_size_ = lhs_atomic_constraints_.size();
-
-    std::vector<PartValueSet> matched_rt_value_sets_scratch_;
-    std::unique_ptr<Index[]> paac_arrangement_scratch_ =
-            std::make_unique<Index[]>(lhs_atomic_constraints_size_);
-    std::vector<PartiallyAppliedAtomicConstraint> other_paac_scratch_;
-
-    TablePartitionValueIdMaps const& lt_pvid_maps_ =
-            validator_->GetLeftTablePartitionIndex().GetPartitionValueIdMaps();
-
-    MultiCardPartitionElementProvider(Initializer init_info)
-        : validator_(init_info.GetValidator()),
-          base_partition_id_(init_info.GetBasePartitionIndex()),
-          basepe_partition_key_indices_(init_info.GetKeyIndices()),
-          lhs_atomic_constraints_(std::move(init_info.GetConstraints())) {
-        DESBORDANTE_ASSUME(lhs_atomic_constraints_size_ > 1);
-        matched_rt_value_sets_scratch_.reserve(lhs_atomic_constraints_size_);
-        other_paac_scratch_.reserve(lhs_atomic_constraints_size_ - 1);
-
-        // Tables are guaranteed to not be empty, so a partition can't be empty either.
-        DESBORDANTE_ASSUME(base_partition_size_ != 0);
-        CreateSLTVPEPartition();
-    }
-
-    void CreateSLTVPEPartition() {
-        PliCluster const& base_partition_element = base_partition_[base_partition_value_id_];
-        for (RecordIdentifier const record_id : utility::NotEmpty(base_partition_element)) {
-            PartitionValueIdMap const& lt_pvid_map = lt_pvid_maps_[record_id];
-            basepe_partition_[&lt_pvid_map].push_back(&lt_pvid_map);
-        }
-        basepe_partition_iter_ = basepe_partition_.begin();
-    }
-
-    bool NextSLTVPEPartition() {
-        if (++base_partition_value_id_ == base_partition_size_) return false;
-        // This method must not be called after false is returned.
-        DESBORDANTE_ASSUME(base_partition_value_id_ < base_partition_size_);
-        basepe_partition_.clear();
-        CreateSLTVPEPartition();
-        return true;
-    }
-
-    void AddConstraint(AtomicConstraintsInfo::const_iterator constraint_iter,
-                       PartitionValueIdMap const& representative_lt_pvid_map) {
-        AtomicConstraintInfo const& constraint = *constraint_iter;
-        Index const record_match_index = constraint.record_match_index;
-        PartitionValueId const lt_pvalue_id = representative_lt_pvid_map[record_match_index];
-        PartitionValueId const rt_pvalue_id = record_match_index;
-        other_paac_scratch_.emplace_back(&(*validator_->record_match_indexes_)[record_match_index]
-                                                  .value_matrix[lt_pvalue_id],
-                                         constraint.vm_rcv_id, rt_pvalue_id);
-    }
-
-    PartValueSet GetPartValueSet(AtomicConstraintInfo const& constraint,
-                                 PartitionValueIdMap const& representative_lt_pvid_map) {
-        Index const record_match_index = constraint.record_match_index;
-        Index const lt_partition_id = constraint.record_match_index;
-        RecordClassifierValueId usindex_rcv_id = constraint.usindex_rcv_id;
-        return validator_->GetMatchedValuesSet(
-                record_match_index, representative_lt_pvid_map[lt_partition_id], usindex_rcv_id);
-    }
-
-    void UpdateSmallestSetOrAddConstraint(AtomicConstraintsInfo::const_iterator constraint_iter,
-                                          PartValueSet& current_set,
-                                          PartValueSet& current_smallest_set,
-                                          PartitionValueIdMap const& representative_lt_pvid_map,
-                                          AtomicConstraintsInfo::const_iterator& smallest_iter) {
-        if (current_set.number_of_records < current_smallest_set.number_of_records) {
-            AddConstraint(smallest_iter, representative_lt_pvid_map);
-            current_smallest_set = std::move(current_set);
-            smallest_iter = constraint_iter;
-        } else {
-            AddConstraint(constraint_iter, representative_lt_pvid_map);
-        }
-    }
-
-    // 1) No sorting (current).
-    // 2) Save record numbers, sort as before with arrangement.
-    // 3) Same as 2, but use 2x size deque-like scratch, starting inserting in the middle, and on
-    // every new smallest shift starting pointer left and insert it there, sort as before with
-    // arrangement.
-    // 4) Add record numbers to other_paac_scratch_, sort directly.
-    // 5) Same as 4, with 3's modification.
-    // TODO: test performance
-    std::pair<std::span<PartitionValueId const>, Index> FillConstraints(
-            PartitionValueIdMap const& representative_lt_pvid_map) {
-        other_paac_scratch_.clear();
-
-        AtomicConstraintsInfo::const_iterator constraint_iter = lhs_atomic_constraints_.begin();
-        AtomicConstraintsInfo::const_iterator smallest_iter = lhs_atomic_constraints_.begin();
-        AtomicConstraintsInfo::const_iterator const second_to_last_iter =
-                lhs_atomic_constraints_.end() - 1;
-        PartValueSet current_smallest_set =
-                GetPartValueSet(*constraint_iter, representative_lt_pvid_map);
-        if (current_smallest_set.IsEmpty()) return {};
-
-        while (++constraint_iter != second_to_last_iter) {
-            PartValueSet current_set =
-                    GetPartValueSet(*constraint_iter, representative_lt_pvid_map);
-            if (current_set.IsEmpty()) return {};
-            UpdateSmallestSetOrAddConstraint(constraint_iter, current_set, current_smallest_set,
-                                             representative_lt_pvid_map, smallest_iter);
-        }
-
-        PartValueSet last_set = GetPartValueSet(*constraint_iter, representative_lt_pvid_map);
-        if (last_set.IsEmpty()) return {};
-        UpdateSmallestSetOrAddConstraint(constraint_iter, last_set, current_smallest_set,
-                                         representative_lt_pvid_map, smallest_iter);
-
-        return {current_smallest_set.values, smallest_iter->record_match_index};
-    }
-
-    bool AddUpperSet(AtomicConstraintInfo const& constraint_info,
-                     PartitionValueIdMap const& representative_lt_pvid_map) {
-        // atomic constraint, need record match index
-        RecordClassifierValueId const usindex_rcv_id = constraint_info.usindex_rcv_id;
-        Index const lt_partition_id = constraint_info.record_match_index;
-        Index const record_match_index = constraint_info.record_match_index;
-        PartValueSet matched_values_set = validator_->GetMatchedValuesSet(
-                record_match_index, representative_lt_pvid_map[lt_partition_id], usindex_rcv_id);
-        if (matched_values_set.IsEmpty()) return true;
-        matched_rt_value_sets_scratch_.push_back(matched_values_set);
-        return false;
-    }
-
-    // TODO: construct constraints on the fly here, keep track of the one with the lowest number of
-    // records, go up to second-to-last, then check if the last has the lowest number, keep
-    // other_paac_scratch_ capacity the same.
-    // Get rid of matched_rt_value_sets_scratch_? Then can't sort it based on the number of records.
-    bool FindMatchedRightTableValueSets(PartitionValueIdMap const& representative_lt_pvid_map) {
-        matched_rt_value_sets_scratch_.clear();
-
-        for (AtomicConstraintInfo const& constraint_info : lhs_atomic_constraints_) {
-            if (AddUpperSet(constraint_info, representative_lt_pvid_map)) return true;
-        }
-        return false;
-    }
-
-    void CreatePAACArrangement() {
-        std::span arr_span{paac_arrangement_scratch_.get(), lhs_atomic_constraints_size_};
-        std::iota(arr_span.begin(), arr_span.end(), 0);
-        std::ranges::sort(arr_span, [this](Index i, Index j) {
-            return matched_rt_value_sets_scratch_[i].number_of_records <
-                   matched_rt_value_sets_scratch_[j].number_of_records;
-        });
-    }
-
-    void AddConstraint(AtomicConstraintInfo const& constraint,
-                       PartitionValueIdMap const& representative_lt_pvid_map) {
-        Index const lt_partition_id = constraint.record_match_index;
-        Index const rt_partition_id = constraint.record_match_index;
-        Index const record_match_index = constraint.record_match_index;
-        RecordClassifierValueId const vm_rcv_id = constraint.vm_rcv_id;
-        PartitionValueId const lt_pvalue_id = representative_lt_pvid_map[lt_partition_id];
-        other_paac_scratch_.emplace_back(&(*validator_->record_match_indexes_)[record_match_index]
-                                                  .value_matrix[lt_pvalue_id],
-                                         vm_rcv_id, rt_partition_id);
-    }
-
-    void CreateConstraints(PartitionValueIdMap const& representative_lt_pvid_map) {
-        CreatePAACArrangement();
-
-        other_paac_scratch_.clear();
-        std::span other_arrangement{&paac_arrangement_scratch_[1],
-                                    lhs_atomic_constraints_size_ - 1};
-        for (Index constraint_index : utility::NotEmpty(other_arrangement)) {
-            AtomicConstraintInfo const& constraint = lhs_atomic_constraints_[constraint_index];
-            AddConstraint(constraint, representative_lt_pvid_map);
-        }
-    }
-
-    PositionListIndex const& GetIteratedRightTablePli() {
-        return validator_->GetRightTablePartitionIndex().GetPli(
-                lhs_atomic_constraints_[paac_arrangement_scratch_[0]].record_match_index);
-    }
-
-    auto CreateIterator() {
-        RecordIdentifier first_rt_record;
-        RightTableIterator iter{SatisfiesConstraintsFilter{rt_pvid_maps_, other_paac_scratch_},
-                                GetIteratedRightTablePli(),
-                                matched_rt_value_sets_scratch_[paac_arrangement_scratch_[0]].values,
-                                &first_rt_record};
-        return std::pair{std::move(iter), first_rt_record};
-    }
-
     class SatisfiesConstraintsFilter {
         TablePartitionValueIdMaps const& rt_pvid_maps_;
         std::span<PartiallyAppliedAtomicConstraint const> constraints_;
 
     public:
         bool operator()(RecordIdentifier record_id) const {
-            PartitionValueIdMap const& pvid_map = rt_pvid_maps_[record_id];
-            DESBORDANTE_ASSUME(!constraints_.empty());
-            for (PartiallyAppliedAtomicConstraint const& constraint : constraints_) {
-                if (!constraint.IsSatisified(pvid_map)) return false;
+            PartitionValueIdMap const& rt_pvid_map = rt_pvid_maps_[record_id];
+            for (PartiallyAppliedAtomicConstraint const& constraint :
+                 utility::NotEmpty(constraints_)) {
+                if (!constraint.IsSatisified(rt_pvid_map)) return false;
             }
             return true;
         }
@@ -665,44 +456,266 @@ class BatchValidator::MultiCardPartitionElementProvider {
             : rt_pvid_maps_(rt_pvid_maps), constraints_(constraints) {}
     };
 
-    using Iterator = RightTableIterator<SatisfiesConstraintsFilter>;
+    class LTPVsPartitionIterator {
+        PositionListIndex::const_iterator base_partition_iterator_;
+        PositionListIndex::const_iterator const base_partition_end_;
+
+        std::vector<Index> basepe_partition_key_indices_;
+
+        GroupMap basepe_partition_{0, IndexHasher(basepe_partition_key_indices_),
+                                   IndexComparer(basepe_partition_key_indices_)};
+        GroupMap::iterator basepe_partition_iter_ = basepe_partition_.begin();
+
+        TablePartitionValueIdMaps const& lt_pvid_maps_;
+
+        void CreateBasePEPartition() {
+            PliCluster const& base_partition_element = *base_partition_iterator_;
+            for (RecordIdentifier const record_id : utility::NotEmpty(base_partition_element)) {
+                PartitionValueIdMap const& lt_pvid_map = lt_pvid_maps_[record_id];
+                basepe_partition_[&lt_pvid_map].push_back(&lt_pvid_map);
+            }
+            basepe_partition_iter_ = basepe_partition_.begin();
+        }
+
+        bool NextBasePEPartition() {
+            if (++base_partition_iterator_ == base_partition_end_) return false;
+
+            basepe_partition_.clear();
+            CreateBasePEPartition();
+            return true;
+        }
+
+    public:
+        LTPVsPartitionIterator(PositionListIndex const& base_partition,
+                               std::vector<Index> basepe_partition_key_indices,
+                               TablePartitionValueIdMaps const& lt_pvid_maps)
+            : base_partition_iterator_(base_partition.begin()),
+              base_partition_end_(base_partition.end()),
+              basepe_partition_key_indices_(std::move(basepe_partition_key_indices)),
+              lt_pvid_maps_(lt_pvid_maps) {
+            // Tables are guaranteed to not be empty, so a partition can't be empty either.
+            DESBORDANTE_ASSUME(base_partition_iterator_ != base_partition_end_);
+            CreateBasePEPartition();
+        }
+
+        GroupMap::value_type* NextLTPVsPartitionElementPtr() {
+            if (basepe_partition_iter_ == basepe_partition_.end()) {
+                if (!NextBasePEPartition()) return nullptr;
+                assert(basepe_partition_iter_ != basepe_partition_.end());
+            }
+            return &*basepe_partition_iter_++;
+        }
+    };
+
+    class RightTableIteratorBuilder {
+        struct SortInfo {
+            std::size_t number_of_records;
+            PartiallyAppliedAtomicConstraint paac;
+
+            friend bool operator<(SortInfo const& first, SortInfo const& second) noexcept {
+                return first.number_of_records < second.number_of_records;
+            }
+        };
+
+        class PAACSortScratchBuilder {
+            AtomicConstraintsInfo::const_iterator cur_constraint_iter_;
+            AtomicConstraintsInfo::const_iterator const end_iter_;
+
+            AtomicConstraintsInfo::const_iterator least_records_upper_set_constraint_iter_ =
+                    cur_constraint_iter_;
+
+            std::vector<record_match_indexes::Indexes> const* const record_match_indexes_;
+
+            PartitionValueIdMap const& representative_lt_pvid_map_;
+
+            SortInfo* current_paac_;
+
+            MaterializedPValuesUpperSet least_records_upper_set_ = GetCurrentUpperSet();
+
+            void AddPAAC(AtomicConstraintsInfo::const_iterator constraint_iter,
+                         std::size_t record_num) {
+                AtomicConstraintInfo const& constraint = *constraint_iter;
+                Index const lt_partition_id = constraint.record_match_index;
+                Index const rt_partition_id = constraint.record_match_index;
+                Index const record_match_index = constraint.record_match_index;
+                PartitionValueId const lt_pvalue_id = representative_lt_pvid_map_[lt_partition_id];
+                record_match_indexes::ValueMatrix const& constraint_rm_value_matrix =
+                        (*record_match_indexes_)[record_match_index].value_matrix;
+                RecordClassifierValueId const vm_rcv_id = constraint.vm_rcv_id;
+                *current_paac_++ = {
+                        record_num,
+                        {&constraint_rm_value_matrix[lt_pvalue_id], vm_rcv_id, rt_partition_id}};
+            }
+
+        public:
+            PAACSortScratchBuilder(
+                    AtomicConstraintsInfo const& lhs_atomic_constraints,
+                    std::vector<record_match_indexes::Indexes> const* record_match_indexes,
+                    PartitionValueIdMap const& representative_lt_pvid_map,
+                    std::unique_ptr<SortInfo[]> const& paac_sort_scratch)
+                : cur_constraint_iter_(lhs_atomic_constraints.begin()),
+                  end_iter_(lhs_atomic_constraints.end()),
+                  record_match_indexes_(record_match_indexes),
+                  representative_lt_pvid_map_(representative_lt_pvid_map),
+                  current_paac_(paac_sort_scratch.get()) {}
+
+            bool MoveNext() {
+                return ++cur_constraint_iter_ != end_iter_;
+            }
+
+            MaterializedPValuesUpperSet const& GetLeastRecordsPVSet() const noexcept {
+                return least_records_upper_set_;
+            }
+
+            MaterializedPValuesUpperSet GetCurrentUpperSet() const {
+                AtomicConstraintInfo const& constraint = *cur_constraint_iter_;
+                Index const record_match_index = constraint.record_match_index;
+                Index const lt_partition_id = constraint.record_match_index;
+                PartitionValueId const lt_pvalue_id = representative_lt_pvid_map_[lt_partition_id];
+                RecordClassifierValueId const usindex_rcv_id = constraint.usindex_rcv_id;
+                return (*record_match_indexes_)[record_match_index]
+                        .upper_set_index[lt_pvalue_id]
+                        .GetUpperSet(usindex_rcv_id);
+            }
+
+            void Process(MaterializedPValuesUpperSet&& upper_set) {
+                if (upper_set.record_set_cardinality <
+                    least_records_upper_set_.record_set_cardinality) {
+                    AddPAAC(least_records_upper_set_constraint_iter_,
+                            least_records_upper_set_.record_set_cardinality);
+                    least_records_upper_set_ = std::move(upper_set);
+                    least_records_upper_set_constraint_iter_ = cur_constraint_iter_;
+                } else {
+                    AddPAAC(cur_constraint_iter_, upper_set.record_set_cardinality);
+                }
+            }
+
+            Index GetLeastRecordsUpperSetRecordMatchIndex() const noexcept {
+                return least_records_upper_set_constraint_iter_->record_match_index;
+            }
+        };
+
+        std::vector<record_match_indexes::Indexes> const* const record_match_indexes_;
+
+        PartitionIndex const& rt_partition_index_;
+
+        AtomicConstraintsInfo const lhs_atomic_constraints_;
+        std::size_t const paac_number_ = lhs_atomic_constraints_.size() - 1;
+
+        std::unique_ptr<SortInfo[]> paac_sort_scratch_ =
+                utility::MakeUniqueForOverwrite<SortInfo[]>(paac_number_);
+
+        std::unique_ptr<PartiallyAppliedAtomicConstraint[]> const sorted_paacs_scratch_ =
+                utility::MakeUniqueForOverwrite<PartiallyAppliedAtomicConstraint[]>(paac_number_);
+
+        void MakeSortedConstraints() {
+            auto paac_info_array = std::span{paac_sort_scratch_.get(), paac_number_};
+            std::ranges::sort(paac_info_array, std::less{});
+            PartiallyAppliedAtomicConstraint* cur_slot = sorted_paacs_scratch_.get();
+            for (auto const& [number_of_records, paac] : paac_info_array) {
+                *cur_slot++ = paac;
+            }
+        }
+
+    public:
+        RightTableIteratorBuilder(
+                std::vector<record_match_indexes::Indexes> const* record_match_indexes,
+                PartitionIndex const& rt_partition_index,
+                AtomicConstraintsInfo lhs_atomic_constraints)
+            : record_match_indexes_(record_match_indexes),
+              rt_partition_index_(rt_partition_index),
+              lhs_atomic_constraints_(std::move(lhs_atomic_constraints)) {
+            assert(lhs_atomic_constraints_.size() >= 2);
+        }
+
+        // TODO: test performance
+        // 1) No sorting.
+        // 2) Decorate PAAC payload, sort.
+        // 3) Same as 2, but use 2x size deque-like scratch, starting inserting in the middle, and
+        // on every new smallest shift starting pointer left and insert it there, sort.
+        // 4) Sort PAACs and keys together (no copy).
+        // 5) Same as 4, with 3's modification.
+        // The sorting cost is probably negligible.
+        std::pair<RTPValueIDs, Index> FindIteratedUpperSetAndBuildPAACs(
+                PartitionValueIdMap const& representative_lt_pvid_map) {
+            PAACSortScratchBuilder builder{lhs_atomic_constraints_, record_match_indexes_,
+                                           representative_lt_pvid_map, paac_sort_scratch_};
+            if (builder.GetLeastRecordsPVSet().IsEmpty()) return {};
+            builder.MoveNext();
+
+            do {
+                MaterializedPValuesUpperSet current_upper_set = builder.GetCurrentUpperSet();
+                if (current_upper_set.IsEmpty()) return {};
+                builder.Process(std::move(current_upper_set));
+            } while (builder.MoveNext());
+
+            MakeSortedConstraints();
+
+            MaterializedPValuesUpperSet const& least_records_pv_set =
+                    builder.GetLeastRecordsPVSet();
+            DESBORDANTE_ASSUME(!least_records_pv_set.value_set_elements.empty());
+            return {least_records_pv_set.value_set_elements,
+                    builder.GetLeastRecordsUpperSetRecordMatchIndex()};
+        }
+
+        auto BuildIterator(RTPValueIDs iterated_rt_pvalue_ids, Index rt_partition_id) {
+            RecordIdentifier first_rt_record_id;
+            RightTableIterator iter{
+                    SatisfiesConstraintsFilter{rt_partition_index_.GetPartitionValueIdMaps(),
+                                               {sorted_paacs_scratch_.get(), paac_number_}},
+                    rt_partition_index_.GetPli(rt_partition_id), iterated_rt_pvalue_ids,
+                    &first_rt_record_id};
+            return std::pair{std::move(iter), first_rt_record_id};
+        }
+    };
+
+    LTPVsPartitionIterator ltpvs_partition_iter_;
+    RightTableIteratorBuilder rt_iterator_builder_;
+
+    MultiCardPartitionElementProvider(Initializer init_info)
+        : ltpvs_partition_iter_(
+                  init_info.GetValidator()
+                          ->data_partition_index_->GetRight()
+                          .GetPartitionValueIdMaps(),
+                  init_info.GetBasePEPartitionKeyIndices(),
+                  init_info.GetValidator()->GetLeftTablePartitionIndex().GetPartitionValueIdMaps()),
+          rt_iterator_builder_(init_info.GetValidator()->record_match_indexes_,
+                               init_info.GetValidator()->GetRightTablePartitionIndex(),
+                               std::move(init_info.TakeConstraints())) {}
 
 public:
-    using PartitionElement = LHSMRPartitionElementInfo<Iterator>;
+    using PartitionElement =
+            LHSMRPartitionElementInfo<RightTableIterator<SatisfiesConstraintsFilter>>;
 
-    MultiCardPartitionElementProvider(BatchValidator const* validator, MdeLhs const& lhs)
+    MultiCardPartitionElementProvider(BatchValidator const* validator, PathToNode const& lhs)
         : MultiCardPartitionElementProvider(Initializer{validator, lhs}) {}
 
     std::optional<PartitionElement> TryGetNextLHSMRPartitionElement() {
-        do {
-            while (basepe_partition_iter_ != basepe_partition_.end()) {
-                auto const& [representative_lt_pvid_map, basepe_partition_element_pvid_maps] =
-                        *basepe_partition_iter_++;
+        while (GroupMap::value_type* basepe_partition_element_info =
+                       ltpvs_partition_iter_.NextLTPVsPartitionElementPtr()) {
+            auto const& [representative_lt_pvid_map, basepe_partition_element_pvid_maps] =
+                    *basepe_partition_element_info;
 
-                // auto [iterated_values, iterated_rm_index] =
-                //      FillConstraints(*representative_lt_pvid_map);
+            auto [iterated_values, iterated_rm_index] =
+                    rt_iterator_builder_.FindIteratedUpperSetAndBuildPAACs(
+                            *representative_lt_pvid_map);
 
-                // if (iterated_values.empty()) continue;
+            bool const empty_value_set_found = iterated_values.empty();
+            if (empty_value_set_found) continue;
 
-                bool const empty_set_found =
-                        FindMatchedRightTableValueSets(*representative_lt_pvid_map);
-                if (empty_set_found) continue;
+            auto [iter, first_rt_record_id] =
+                    rt_iterator_builder_.BuildIterator(iterated_values, iterated_rm_index);
+            if (first_rt_record_id == kNoMoreRecords) continue;
 
-                CreateConstraints(*representative_lt_pvid_map);
-
-                auto [iter, first_rt_record] = CreateIterator();
-                if (first_rt_record == kNoMoreRecords) continue;
-
-                return {{basepe_partition_element_pvid_maps, first_rt_record, std::move(iter)}};
-            }
-        } while (NextSLTVPEPartition());
+            return {{basepe_partition_element_pvid_maps, first_rt_record_id, std::move(iter)}};
+        }
         return std::nullopt;
     }
 };
 
 void BatchValidator::Validate(ValidationSelection& selection, Result& result,
                               SameLhsValidators& same_lhs_validators) const {
-    switch (MdeLhs const& lhs = selection.updater->GetLhs(); lhs.Cardinality()) {
+    switch (PathToNode const& lhs = selection.updater->GetLhs(); lhs.PathLength()) {
         [[unlikely]] case 0:
             // Already validated.
             break;
@@ -722,7 +735,7 @@ void BatchValidator::Validate(ValidationSelection& selection, Result& result,
 auto BatchValidator::GetRemovedAndInterestingness(ValidationSelection const& info,
                                                   std::vector<Index> const& indices)
         -> RemovedAndInterestingnessRCVIds {
-    MdeLhs const& lhs = info.updater->GetLhs();
+    PathToNode const& lhs = info.updater->GetLhs();
 
     std::vector<RecordClassifierValueId> interestingness_rcv_ids;
     auto set_interestingness_rcv_ids = [&](std::vector<RecordClassifierValueId>& removed_rcv_ids) {
@@ -820,7 +833,7 @@ void BatchValidator::CreateResult(ValidationSelection& selection) {
     boost::dynamic_bitset<>& rhs_indices_to_validate = selection.rhs_indices_to_validate;
     lattice::Rhs& lattice_rhs = selection.updater->GetRhs();
 
-    switch (MdeLhs const& lhs = selection.updater->GetLhs(); lhs.Cardinality()) {
+    switch (PathToNode const& lhs = selection.updater->GetLhs(); lhs.PathLength()) {
         [[unlikely]] case 0:
             // Very cheap, converting to indices is not needed, so might as well validate
             // immediately.
@@ -853,9 +866,83 @@ void BatchValidator::CreateResults(std::vector<ValidationSelection>& selections)
     }
 }
 
+std::vector<RecordClassifierIdentifiers> ValidatedAdder::MakeLhsRCIdentifierArray(
+        PathToNode const& lattice_lhs) const {
+    std::vector<RecordClassifierIdentifiers> lhs_rm_specification =
+            util::GetPreallocatedVector<RecordClassifierIdentifiers>(lattice_lhs.PathLength());
+    Index total_offset = 0;
+    for (auto const& [offset, lhs_rcv_id] : utility::NotEmpty(lattice_lhs)) {
+        total_offset += offset;
+        RecordClassifierValueId rcv_id = rcv_id_lr_maps_[total_offset].lhs_to_rhs_map[lhs_rcv_id];
+        Index const translated_rm_index = reordered_to_original_rm_map_[total_offset];
+        lhs_rm_specification.emplace_back(translated_rm_index, rcv_id);
+        ++total_offset;
+    }
+    return lhs_rm_specification;
+}
+
+void ValidatedAdder::ResetBitsForRemoved(boost::dynamic_bitset<>& selected_rhs_indices,
+                                         ValidationRhsUpdates const& invalidated) const {
+    for (auto const& [index, new_rcv_id] : invalidated.GetUpdateView()) {
+        if (new_rcv_id == kLowestRCValueId) selected_rhs_indices.reset(index);
+    }
+}
+
+std::vector<RecordClassifierIdentifiers> ValidatedAdder::MakeRhsRCIdentifierArray(
+        ValidationRhsUpdates const& invalidated, boost::dynamic_bitset<>& rhs_indices_to_validate,
+        std::size_t dependencies_number_for_lhs, lattice::Rhs const& rhs) const {
+    assert(dependencies_number_for_lhs == rhs_indices_to_validate.count());
+    // Reserve only as much as needed, as there can be many dependencies.
+    std::vector<RecordClassifierIdentifiers> rhs_rm_specification =
+            util::GetPreallocatedVector<RecordClassifierIdentifiers>(dependencies_number_for_lhs);
+    // Add lowered.
+    for (auto const& [reordered_index, new_rcv_id] : invalidated.GetUpdateView()) {
+        if (new_rcv_id == kLowestRCValueId) continue;
+        DESBORDANTE_ASSUME(rhs_indices_to_validate.test(reordered_index));
+        rhs_indices_to_validate.reset(reordered_index);
+        Index const translated_rm_index = reordered_to_original_rm_map_[reordered_index];
+        rhs_rm_specification.emplace_back(translated_rm_index, new_rcv_id);
+    }
+
+    // Add confirmed.
+    util::ForEachIndex(rhs_indices_to_validate, [&](Index reordered_index) {
+        Index const original_rm_index = reordered_to_original_rm_map_[reordered_index];
+        RecordClassifierValueId const rcv_id = rhs[reordered_index];
+        assert(rcv_id != kLowestRCValueId);
+        rhs_rm_specification.emplace_back(original_rm_index, rcv_id);
+    });
+    return rhs_rm_specification;
+}
+
+void ValidatedAdder::AddMDEs(ValidationSelection& selection,
+                             ValidationRhsUpdates const& invalidated, std::size_t support) {
+    PathToNode const& lhs = selection.updater->GetLhs();
+    // Already added.
+    if (lhs.PathLength() == 0) [[unlikely]]
+        return;
+
+    std::vector<RecordClassifierIdentifiers> lhs_rc_identifiers = MakeLhsRCIdentifierArray(lhs);
+
+    boost::dynamic_bitset<>& selected_rhs_indices = selection.rhs_indices_to_validate;
+    // The only bit corresponding to a removed dependency that was reset was the one in
+    // RemoveTrivialForCardinality1Lhs. Reset the other bits for other removed dependencies.
+    ResetBitsForRemoved(selected_rhs_indices, invalidated);
+
+    std::size_t const dependencies_number_for_lhs = selected_rhs_indices.count();
+    if (dependencies_number_for_lhs == 0) return;
+
+    std::vector<RecordClassifierIdentifiers> rhs_rc_identifiers =
+            MakeRhsRCIdentifierArray(invalidated, selected_rhs_indices, dependencies_number_for_lhs,
+                                     selection.updater->GetRhs());
+    assert(!rhs_rc_identifiers.empty());
+
+    mde_specifications_.emplace_back(LhsSpecification{std::move(lhs_rc_identifiers), support},
+                                     std::move(rhs_rc_identifiers));
+}
+
 auto BatchValidator::ValidateBatch(std::vector<ValidationSelection>& selections)
         -> std::vector<Result> const& {
-    if (pool_ == nullptr) {
+    if (SingleThreaded()) {
         CreateResults<true>(selections);
     } else {
         CreateResults<false>(selections);
@@ -864,6 +951,7 @@ auto BatchValidator::ValidateBatch(std::vector<ValidationSelection>& selections)
         };
         pool_->ExecIndex(validate_at_index, selections.size());
     }
+
     assert(selections.size() == results_.size());
     for (auto const& [selection, result] : utility::Zip(selections, results_)) {
         if (!Supported(result.support)) continue;
@@ -887,4 +975,3 @@ BatchValidator::BatchValidator(
       rcv_id_lr_maps_(&rcv_id_lr_maps),
       validated_adder_(std::move(validated_adder)) {}
 }  // namespace algos::hymde::cover_calculation
-

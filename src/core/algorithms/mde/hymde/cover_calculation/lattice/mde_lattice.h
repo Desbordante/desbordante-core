@@ -22,17 +22,17 @@ public:
         MdeLattice* lattice_;
         PairComparisonResult const* pair_comparison_result_;
         MdeNodeLocation node_location_;
-        InvalidatedRhss invalidated_;
+        ValidationRhsUpdates invalidated_;
 
     public:
         PairUpdater(MdeLattice* lattice, PairComparisonResult const* pair_comparison_result,
-                    MdeNodeLocation node_info, InvalidatedRhss invalidated)
+                    MdeNodeLocation node_info, ValidationRhsUpdates invalidated)
             : lattice_(lattice),
               pair_comparison_result_(pair_comparison_result),
               node_location_(std::move(node_info)),
               invalidated_(std::move(invalidated)) {}
 
-        MdeLhs const& GetLhs() const {
+        PathToNode const& GetLhs() const {
             return node_location_.lhs;
         }
 
@@ -52,7 +52,7 @@ public:
         ValidationUpdater(MdeLattice* lattice, MdeNodeLocation node_location)
             : lattice_(lattice), node_location_(std::move(node_location)) {}
 
-        MdeLhs const& GetLhs() const {
+        PathToNode const& GetLhs() const {
             return node_location_.lhs;
         }
 
@@ -66,7 +66,7 @@ public:
 
         void MarkUnsupported();
 
-        void LowerAndSpecialize(InvalidatedRhss const& invalidated);
+        void LowerAndSpecialize(ValidationRhsUpdates const& invalidated);
     };
 
     struct PathElement {
@@ -92,46 +92,46 @@ private:
     void ExcludeGeneralizations(MultiMde& mde) const;
 
     void GetLevel(MdeNode& cur_node, std::vector<ValidationUpdater>& collected,
-                  MdeLhs& cur_node_lhs, model::Index cur_node_record_match_index,
+                  PathToNode& cur_node_lhs, model::Index cur_node_record_match_index,
                   std::size_t level_left);
 
     void RaiseInterestingnessRCVIds(
-            MdeNode const& cur_node, MdeLhs const& lhs,
+            MdeNode const& cur_node, PathToNode const& lhs,
             std::vector<RecordClassifierValueId>& cur_interestingness_rcv_ids,
-            MdeLhs::iterator cur_lhs_iter, std::vector<model::Index> const& indices,
+            PathToNode::iterator cur_lhs_iter, std::vector<model::Index> const& indices,
             std::vector<RecordClassifierValueId> const& rcv_id_bounds,
             std::size_t& max_count) const;
 
     void TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_node,
                        PairComparisonResult const& pair_comparison_result,
-                       MdeLhs const& cur_node_lhs);
+                       PathToNode const& cur_node_lhs);
     void CollectRefinersForViolated(MdeNode& cur_node, std::vector<PairUpdater>& found,
-                                    MdeLhs& cur_node_lhs, MdeLhs::iterator cur_lhs_iter,
+                                    PathToNode& cur_node_lhs, PathToNode::iterator cur_lhs_iter,
                                     PairComparisonResult const& pair_comparison_result);
 
-    bool IsUnsupported(MdeLhs const& lhs) const;
+    bool IsUnsupported(PathToNode const& lhs) const;
 
     static auto MarkUnsupportedAction() noexcept {
         return [](SupportNode* node) { node->MarkUnsupported(); };
     }
 
     // Generalization check, specialization (add if minimal)
-    void MarkNewLhs(SupportNode& cur_node, MdeLhs const& lhs, MdeLhs::iterator cur_lhs_iter);
-    void MarkUnsupported(MdeLhs const& lhs);
+    void MarkNewLhs(SupportNode& cur_node, PathToNode const& lhs, PathToNode::iterator cur_lhs_iter);
+    void MarkUnsupported(PathToNode const& lhs);
 
     template <bool MayNotExist>
-    void TryDeleteEmptyNode(MdeLhs const& lhs);
+    void TryDeleteEmptyNode(PathToNode const& lhs);
 
     template <typename MdeInfoType>
-    auto CreateSpecializer(MdeLhs const& lhs, auto&& rhs, auto get_lhs_rcv_id,
+    auto CreateSpecializer(PathToNode const& lhs, auto&& rhs, auto get_lhs_rcv_id,
                            auto get_nonlhs_rcv_id);
-    void Specialize(MdeLhs const& lhs, Rhss const& rhss, auto get_lhs_rcv_id,
+    void Specialize(PathToNode const& lhs, Rhss const& rhss, auto get_lhs_rcv_id,
                     auto get_nonlhs_rcv_id);
-    void Specialize(MdeLhs const& lhs, PairComparisonResult const& pair_comparison_result,
+    void Specialize(PathToNode const& lhs, PairComparisonResult const& pair_comparison_result,
                     Rhss const& rhss);
-    void Specialize(MdeLhs const& lhs, Rhss const& rhss);
+    void Specialize(PathToNode const& lhs, Rhss const& rhss);
 
-    void GetAll(MdeNode& cur_node, MdeLhs& cur_node_lhs, auto&& add_node);
+    void GetAll(MdeNode& cur_node, PathToNode& cur_node_lhs, auto&& add_node);
 
 public:
     explicit MdeLattice(SingleLevelFunc single_level_func,
@@ -147,7 +147,7 @@ public:
     }
 
     std::vector<RecordClassifierValueId> GetInterestingnessRCVIds(
-            MdeLhs const& lhs, std::vector<model::Index> const& indices,
+            PathToNode const& lhs, std::vector<model::Index> const& indices,
             std::vector<RecordClassifierValueId> const& rcv_id_bounds) const;
     // TODO: collect validation selectors immediately.
     std::vector<ValidationUpdater> GetLevel(std::size_t level);

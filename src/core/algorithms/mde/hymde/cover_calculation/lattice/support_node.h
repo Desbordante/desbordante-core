@@ -15,7 +15,7 @@ public:
         is_unsupported_ = true;
     }
 
-    static MdeLhs const& GetLhs(Specialization::Unspecialized lhs) noexcept {
+    static PathToNode const& GetLhs(Specialization::Unspecialized lhs) noexcept {
         return lhs;
     }
 
