@@ -36,7 +36,7 @@ EnumeratedMeaningfulDataResults EnumerateMeaningfulResults(
 
             RecordClassifierValueId const rcv_id = it->second;
             assert(rcv_id != kLowestRCValueId);
-            enumerated_row.emplace_back(rcv_id, rt_pvalue_id);
+            enumerated_row.emplace_back(rcv_id, rt_pvalue_id, cluster_size);
         }
     }
     return enumerated;

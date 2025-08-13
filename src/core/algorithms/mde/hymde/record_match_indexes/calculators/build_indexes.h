@@ -104,6 +104,7 @@ inline UpperSetIndex CreateUpperSetIndex(
                 if (current_lhs_rcv_iter == end_lhs_rcv_iter) goto end_loop;
             }
             rt_pvalue_ids.push_back(rt_pvalue_id);
+            assert(cluster_size != 0);
             record_set_cardinality += cluster_size;
         }
         cardinality_map_entries.emplace_back(
@@ -123,8 +124,7 @@ inline UpperSetIndex CreateUpperSetIndex(
 // and only the values following the value on the left were compared. Assumes that if equal values
 // were compared, they are at the beginning of each row. Fills in the rest of value pair comparison
 // results.
-inline void SymmetricClosure(EnumeratedMeaningfulDataResults& enumerated,
-                             PartitionIndex::PositionListIndex const& right_pli) {
+inline void SymmetricClosure(EnumeratedMeaningfulDataResults& enumerated) {
     std::size_t const left_values = enumerated.size();
     for (PartitionValueId left_pvalue_id : utility::IndexRange(left_values)) {
         MeaningfulLeftValueResults<RecordClassifierValueId> const& left_pvalue_results =

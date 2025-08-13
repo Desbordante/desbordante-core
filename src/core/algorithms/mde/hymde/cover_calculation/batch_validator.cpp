@@ -75,7 +75,7 @@ class RightTableIterator {
                 StartCurrentRTClusterIteration();
             }
 
-        cur_is_valid:
+        [[maybe_unused]] cur_is_valid:
             RecordIdentifier potential_record_id = *cur_rt_record_iter_++;
             if (filter_(potential_record_id)) {
                 DESBORDANTE_ASSUME(potential_record_id != kNoMoreRecords);
@@ -371,7 +371,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
             return std::move(lhs_atomic_constraints_);
         }
 
-        PositionListIndex const& GetPositionListIndex() const noexcept {
+        PositionListIndex const& GetBasePartition() const noexcept {
             return *base_partition_;
         }
     };
@@ -674,9 +674,7 @@ class BatchValidator::MultiCardPartitionElementProvider {
 
     MultiCardPartitionElementProvider(Initializer init_info)
         : ltpvs_partition_iter_(
-                  init_info.GetValidator()
-                          ->data_partition_index_->GetRight()
-                          .GetPartitionValueIdMaps(),
+                  init_info.GetBasePartition(),
                   init_info.GetBasePEPartitionKeyIndices(),
                   init_info.GetValidator()->GetLeftTablePartitionIndex().GetPartitionValueIdMaps()),
           rt_iterator_builder_(init_info.GetValidator()->record_match_indexes_,

@@ -64,6 +64,7 @@ class ValueCalculator {
         void AddRightPartValIdCompResPair(MeaningfulLeftValueResultsCompType& lv_results,
                                           PartitionValueId pvalue_id_right,
                                           ComparisonResult comp_res) {
+            assert(right_pli_[pvalue_id_right].size() != 0);
             lv_results.emplace_back(std::move(comp_res), pvalue_id_right,
                                     right_pli_[pvalue_id_right].size());
         }
@@ -265,7 +266,7 @@ public:
                         ? worker.ExecMultiThreaded(*pool_ptr)
                         : worker.ExecSingleThreaded();
         if (worker.FunctionIsSymmetric()) {
-            SymmetricClosure(enumerated_results, right_pli);
+            SymmetricClosure(enumerated_results);
         }
 
         bool const eq_is_greatest =
