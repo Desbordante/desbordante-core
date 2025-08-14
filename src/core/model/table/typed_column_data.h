@@ -7,6 +7,7 @@
 #include <boost/regex.hpp>
 
 #include "abstract_column_data.h"
+#include "destruct.h"
 #include "idataset_stream.h"
 #include "model/types/types.h"
 #include "relation_data.h"
@@ -57,11 +58,7 @@ public:
             if (GetValueTypeId(i) == +TypeId::kString || GetValueTypeId(i) == +TypeId::kBigInt ||
                 GetValueTypeId(i) == +TypeId::kDate) {
                 std::byte const* value = (mixed) ? mixed->RetrieveValue(data_[i]) : data_[i];
-                if (GetValueTypeId(i) == +TypeId::kDate) {
-                    DateType::Destruct(value);
-                } else {
-                    StringType::Destruct(value);
-                }
+                Destruct(GetValueTypeId(i), value);
             }
         }
     }
