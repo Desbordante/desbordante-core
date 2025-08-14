@@ -182,7 +182,7 @@ struct RecordPairInferrer::RecordRanker::RankRecordsLoopBody<false, ObtainValueR
         auto const& [rt_pvalue_ids, cardinality_map] = upper_set_index[left_value_id];
 
         RankedRecordsValue& value_ranked_records = obtain_value_records(left_value_id);
-        assert(!cardinality_map.empty());
+        if (cardinality_map.empty()) return;
         value_ranked_records.reserve(cardinality_map.cbegin()->second.record_set_cardinality);
 
         for (PartitionValueId rt_pvalue_id : rt_pvalue_ids) {
