@@ -49,8 +49,8 @@ public:
         return steps_.end();
     }
 
-    friend bool operator==(PathToNode const& lhs1, PathToNode const& lhs2) {
-        return lhs1.steps_ == lhs2.steps_;
+    friend bool operator==(PathToNode const& path1, PathToNode const& path2) {
+        return path1.steps_ == path2.steps_;
     }
 
     std::size_t PathLength() const noexcept {

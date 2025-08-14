@@ -26,7 +26,8 @@ class Specializer {
     using SupportCheckMethod = bool (Specializer::*)();
     using UpdateMaxLevelMethod = void (Specializer::*)();
     using SpecGenCheckerType = MdSpecGenChecker<MdeInfoType>;
-    using GenCheckMethod = bool (SpecGenCheckerType::*)(MdeNode const&, PathToNode::iterator, Index);
+    using GenCheckMethod = bool (SpecGenCheckerType::*)(MdeNode const&, PathToNode::iterator,
+                                                        Index);
     using MdeRCVIdChildMap = MdeNode::OrderedRCVIdChildMap;
     static constexpr bool kSpecializingSingle = std::is_same_v<MdeInfoType, MdeSpecialization>;
     using RhsType = std::conditional_t<kSpecializingSingle, MdeElement,
@@ -461,8 +462,8 @@ public:
                 SingleLevelFunc const& get_element_level, std::size_t& max_level,
                 std::size_t const cardinality_limit, std::size_t const record_matches_size,
                 std::vector<record_match_indexes::RcvIdLRMap> const& rcv_id_lr_maps,
-                PathToNode const& lhs, FGetLhsRCVId get_lhs_rcv_id, FGetNonLhsRCVId get_nonlhs_rcv_id,
-                bool prune_nondisjoint, RhsType rhs)
+                PathToNode const& lhs, FGetLhsRCVId get_lhs_rcv_id,
+                FGetNonLhsRCVId get_nonlhs_rcv_id, bool prune_nondisjoint, RhsType rhs)
         : mde_root_(mde_root),
           support_root_(support_root),
           get_element_level_(get_element_level),
@@ -618,7 +619,8 @@ void MdeLattice::TryAddRefiner(std::vector<PairUpdater>& found, MdeNode& cur_nod
 }
 
 void MdeLattice::CollectRefinersForViolated(MdeNode& cur_node, std::vector<PairUpdater>& found,
-                                            PathToNode& cur_node_lhs, PathToNode::iterator cur_lhs_iter,
+                                            PathToNode& cur_node_lhs,
+                                            PathToNode::iterator cur_lhs_iter,
                                             PairComparisonResult const& pair_comparison_result) {
     if (!cur_node.rhs.IsEmpty()) {
         TryAddRefiner(found, cur_node, pair_comparison_result, cur_node_lhs);
@@ -743,6 +745,7 @@ void MdeLattice::RaiseInterestingnessRCVIds(
         auto const& [next_node_offset, generalization_rcv_id_limit] = *cur_lhs_iter;
         ++cur_lhs_iter;
         total_offset += next_node_offset;
+        // TODO: store iterator in node path, iterate from .begin() to it.
         for (auto const& [generalization_rcv_id, node] : cur_node.children[total_offset]) {
             if (generalization_rcv_id > generalization_rcv_id_limit) break;
             RaiseInterestingnessRCVIds(node, lhs, cur_interestingness_rcv_ids, cur_lhs_iter,
@@ -770,8 +773,8 @@ std::vector<RecordClassifierValueId> MdeLattice::GetInterestingnessRCVIds(
                 cur_index += child_index;
                 Index index;
                 while ((index = *index_it) < cur_index) {
-                    DESBORDANTE_ASSUME((*rcv_id_lr_maps_)[index].lhs_to_rhs_map[kLowestRCValueId] ==
-                                       kLowestRCValueId);
+                    assert((*rcv_id_lr_maps_)[index].lhs_to_rhs_map[kLowestRCValueId] ==
+                           kLowestRCValueId);
                     interestingness_rcv_ids.push_back(kLowestRCValueId);
                     if (++index_it == index_end) return;
                 }
@@ -783,8 +786,8 @@ std::vector<RecordClassifierValueId> MdeLattice::GetInterestingnessRCVIds(
                 ++cur_index;
             }
             while (index_it != index_end) {
-                DESBORDANTE_ASSUME((*rcv_id_lr_maps_)[*index_it].lhs_to_rhs_map[kLowestRCValueId] ==
-                                   kLowestRCValueId);
+                assert((*rcv_id_lr_maps_)[*index_it].lhs_to_rhs_map[kLowestRCValueId] ==
+                       kLowestRCValueId);
                 interestingness_rcv_ids.push_back(kLowestRCValueId);
                 ++index_it;
             }
@@ -835,9 +838,10 @@ auto MdeLattice::GetLevel(std::size_t const level) -> std::vector<ValidationUpda
     std::vector<ValidationUpdater> collected;
     PathToNode current_lhs(record_matches_size_);
     if (!get_element_level_) {
-        GetAll(mde_root_, current_lhs, [this, &collected](PathToNode& cur_node_lhs, MdeNode& cur_node) {
-            collected.emplace_back(this, MdeNodeLocation{cur_node_lhs, &cur_node});
-        });
+        GetAll(mde_root_, current_lhs,
+               [this, &collected](PathToNode& cur_node_lhs, MdeNode& cur_node) {
+                   collected.emplace_back(this, MdeNodeLocation{cur_node_lhs, &cur_node});
+               });
     } else {
         GetLevel(mde_root_, collected, current_lhs, 0, level);
     }
