@@ -1,6 +1,7 @@
 #include "vertical_map.h"
 
 #include <exception>
+#include <mutex>
 #include <queue>
 #include <unordered_set>
 

@@ -169,10 +169,11 @@ constexpr auto kDLeftTable = "first table processed by the algorithm";
 constexpr auto kDRightTable = "second table processed by the algorithm";
 constexpr auto kDPruneNonDisjoint =
         "don't search for dependencies where the LHS decision boundary at the same index as the "
-        "RHS decision boundary limits the number of records matched";
+        "RHS index limits the number of records matched";
 constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
-constexpr auto kDColumnMatches = "column matches to examine";
-constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
+constexpr auto kDColumnMatches = "column matches to construct the search space from";
+constexpr auto kDRecordMatches = "record matches to construct the search space from";
+constexpr auto kDMaxCardinality = "maximum number of classifiers in the dependency's LHS";
 auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 constexpr auto kDShardLength =
