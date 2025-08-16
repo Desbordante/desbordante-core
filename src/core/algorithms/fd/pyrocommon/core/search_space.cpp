@@ -4,6 +4,8 @@
 
 #include <easylogging++.h>
 
+#include "custom_hashes.h"
+
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
 // delete the object - pass empty deleter [](*) {}
 

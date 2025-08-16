@@ -1,16 +1,21 @@
-#include <iomanip>
-#include <iostream>
+#include <cstddef>   // for size_t
+#include <iostream>  // for endl
+#include <memory>    // for unique_ptr, mak...
+#include <vector>    // for vector
 
-#include <gtest/gtest.h>
+#include <gtest/gtest.h>  // for UnitTest, TestW...
 
-#include "algorithms/algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "fd/tane/afd_measures.h"
-#include "fd/tane/enums.h"
-#include "fd/tane/tane.h"
-#include "model/table/column_layout_relation_data.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "algorithms/algo_factory.h"                  // for CreateAndLoadAl...
+#include "all_csv_configs.h"                          // for kIris, kTestFD
+#include "config/names.h"                             // for kAfdErrorMeasure
+#include "error/type.h"                               // for ErrorType
+#include "fd/tane/afd_measures.h"                     // for CalculateMuPlus...
+#include "fd/tane/enums.h"                            // for operator+, AfdE...
+#include "fd/tane/tane.h"                             // for Tane
+#include "model/table/column_layout_relation_data.h"  // for ColumnLayoutRel...
+#include "parser/csv_parser/csv_parser.h"             // for CSVParser, CSVC...
+#include "table/column_data.h"                        // for ColumnData
+#include "table/position_list_index.h"                // for PositionListIndex
 
 namespace tests {
 namespace onam = config::names;

@@ -5,17 +5,23 @@
  */
 #include "column_domain.h"
 
-#include <algorithm>
-#include <cmath>
-#include <numeric>
-#include <string>
+#include <algorithm>  // for max, min
+#include <cmath>      // for log2, pow
+#include <fstream>    // for basic_ofstream, basic_...
+#include <iterator>   // for next
+#include <numeric>    // for accumulate
+#include <stdexcept>  // for runtime_error
+#include <string>     // for char_traits, operator+
 
-#include <easylogging++.h>
+#include <easylogging++.h>  // for Writer, CERROR, LOG
 
-#include "config/thread_number/type.h"
-#include "model/table/block_dataset_stream.h"
-#include "model/table/dataset_stream_fixed.h"
-#include "util/parallel_for.h"
+#include "config/thread_number/type.h"         // for ThreadNumType
+#include "mem_limit/type.h"                    // for MemLimitMBType
+#include "model/table/block_dataset_stream.h"  // for BlockDatasetStream
+#include "model/table/dataset_stream_fixed.h"  // for DatasetStreamFixed
+#include "table/block_data.h"                  // for BlockData
+#include "table/idataset_stream.h"             // for IDatasetStream
+#include "util/parallel_for.h"                 // for ParallelForeach
 
 namespace model {
 

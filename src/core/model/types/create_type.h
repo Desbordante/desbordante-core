@@ -1,10 +1,12 @@
 #pragma once
 
-#include <memory>
+#include <memory>     // for unique_ptr
+#include <stdexcept>  // for invalid_argument
 
-#include <boost/pointer_cast.hpp>
+#include <boost/pointer_cast.hpp>  // for dynamic_pointer_cast
 
-#include "type.h"
+#include "builtin.h"  // for TypeId
+#include "type.h"     // for Type
 
 namespace model {
 

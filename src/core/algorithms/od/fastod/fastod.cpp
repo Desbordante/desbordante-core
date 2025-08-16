@@ -84,9 +84,9 @@ unsigned long long Fastod::ExecuteInternal() {
 }
 
 void Fastod::PrintStatistics() const {
-    const size_t ocd_count = result_asc_.size() + result_desc_.size();
-    const size_t fd_count = result_simple_.size();
-    const size_t od_count = ocd_count + fd_count;
+    size_t const ocd_count = result_asc_.size() + result_desc_.size();
+    size_t const fd_count = result_simple_.size();
+    size_t const od_count = ocd_count + fd_count;
 
     LOG(DEBUG) << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
                << "OD=" << od_count << ", "
@@ -173,7 +173,7 @@ void Fastod::ComputeODs() {
                         AddToResult(std::move(od));
                         CCPut(context, fastod::DeleteAttribute(cc, attr));
 
-                        const AttributeSet diff = fastod::Difference(schema_, context);
+                        AttributeSet const diff = fastod::Difference(schema_, context);
 
                         if (diff.Any()) {
                             CCPut(context, cc & (~diff));
@@ -226,7 +226,7 @@ void Fastod::CalculateNextLevel() {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
 
-                const AttributeSet candidate = fastod::AddAttribute(
+                AttributeSet const candidate = fastod::AddAttribute(
                         fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([this, &candidate, &create_context](model::ColumnIndex attr) {
