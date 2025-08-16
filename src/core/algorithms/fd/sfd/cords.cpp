@@ -1,19 +1,30 @@
 #include "cords.h"
 
-#include <chrono>
-#include <utility>
-#include <vector>
+#include <algorithm>         // for min
+#include <initializer_list>  // for initializer_list
+#include <utility>           // for move, pair
+#include <vector>            // for vector
 
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "contingency_table.h"
-#include "frequency_handler.h"
-#include "model/table/column_index.h"
-#include "model/table/typed_column_data.h"
-#include "sample.h"
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"                            // for CommonOption
+#include "config/equal_nulls/option.h"                // for kEqualNullsOpt
+#include "config/option.h"                            // for Option
+#include "config/option_using.h"                      // for DESBORDANTE_OPT...
+#include "config/tabular_data/input_table/option.h"   // for kTableOpt
+#include "contingency_table.h"                        // for ContingencyTable
+#include "descriptions.h"                             // for kDDelta, kDFixe...
+#include "exceptions.h"                               // for ConfigurationError
+#include "fd/fd_algorithm.h"                          // for FDAlgorithm
+#include "fd/sfd/correlation.h"                       // for Correlation
+#include "frequency_handler.h"                        // for FrequencyHandler
+#include "model/table/column_index.h"                 // for ColumnIndex
+#include "model/table/typed_column_data.h"            // for TypedColumnData
+#include "names.h"                                    // for kDelta, kFixedS...
+#include "sample.h"                                   // for Sample
+#include "table/column.h"                             // for Column
+#include "table/column_layout_typed_relation_data.h"  // for ColumnLayoutTyp...
+#include "table/relational_schema.h"                  // for RelationalSchema
 
 namespace algos {
 Cords::Cords() : FDAlgorithm({kFirstPhaseName, kSecondPhaseName}) {

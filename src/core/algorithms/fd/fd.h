@@ -1,10 +1,17 @@
 #pragma once
 
-#include <string>
+#include <memory>   // for shared_ptr
+#include <string>   // for allocator, char_traits, operator+
+#include <tuple>    // for tuple
+#include <utility>  // for move
+#include <vector>   // for vector
 
-#include "model/table/column.h"
-#include "model/table/vertical.h"
-#include "raw_fd.h"
+#include "model/table/column.h"    // for Column
+#include "model/table/vertical.h"  // for Vertical
+#include "raw_fd.h"                // for RawFD
+#include "table/column_index.h"    // for ColumnIndex
+
+class RelationalSchema;
 
 class FD {
 private:

@@ -1,15 +1,14 @@
 #include "frequency_handler.h"
 
-#include <algorithm>
-#include <cstddef>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include <algorithm>      // for min, sort
+#include <tuple>          // for tie, operator<=>, tuple
+#include <unordered_map>  // for unordered_map, operator==
+#include <utility>        // for pair
+#include <vector>         // for vector
 
-#include "model/table/column_index.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
+#include "model/table/column_index.h"       // for ColumnIndex
+#include "model/table/tuple_index.h"        // for TupleIndex
+#include "model/table/typed_column_data.h"  // for TypedColumnData
 
 namespace algos {
 void FrequencyHandler::InitFrequencyHandler(std::vector<model::TypedColumnData> const &data,

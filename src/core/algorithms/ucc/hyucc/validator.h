@@ -1,15 +1,22 @@
 #pragma once
 
-#include <cassert>
-#include <utility>
-#include <vector>
+#include <utility>  // for move
+#include <vector>   // for vector
 
-#include "algorithms/ucc/hyucc/model/ucc_tree.h"
-#include "algorithms/ucc/raw_ucc.h"
-#include "config/thread_number/type.h"
-#include "fd/hycommon/primitive_validations.h"
-#include "fd/hycommon/types.h"
-#include "model/table/position_list_index.h"
+#include <boost/move/utility_core.hpp>  // for move
+
+#include "algorithms/ucc/raw_ucc.h"             // for RawUCC
+#include "config/thread_number/type.h"          // for ThreadNumType
+#include "fd/hycommon/primitive_validations.h"  // for PrimitiveValidations
+#include "fd/hycommon/types.h"                  // for IdPairs, PLIsPtr, Row...
+#include "model/table/position_list_index.h"    // for PLI
+#include "ucc/hyucc/model/ucc_tree_vertex.h"    // for LhsPair
+
+namespace algos {
+namespace hyucc {
+class UCCTree;
+}
+}  // namespace algos
 
 namespace algos::hyucc {
 

@@ -1,8 +1,11 @@
 #pragma once
 
-#include <unordered_map>
+#include <cstddef>        // for byte, size_t
+#include <memory>         // for unique_ptr
+#include <string>         // for string
+#include <unordered_map>  // for unordered_map
 
-#include "types.h"
+#include "type.h"  // for Type
 
 namespace algos {
 class Statistic {

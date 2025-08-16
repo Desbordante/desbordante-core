@@ -1,8 +1,12 @@
 #include "config/tabular_data/input_tables/option.h"
 
-#include <cassert>
+#include <cassert>  // for assert
+#include <string>   // for allocator, char_traits
 
+#include "common_option.h"  // for CommonOption
 #include "config/names_and_descriptions.h"
+#include "exceptions.h"                      // for ConfigurationError
+#include "tabular_data/input_tables_type.h"  // for InputTables
 
 namespace config {
 

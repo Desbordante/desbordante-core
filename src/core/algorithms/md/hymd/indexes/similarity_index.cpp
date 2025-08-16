@@ -1,6 +1,9 @@
 #include "algorithms/md/hymd/indexes/similarity_index.h"
 
-#include <ranges>
+#include <iterator>  // for reverse_iterator
+#include <ranges>    // for operator|, reverse
+
+#include "md/hymd/column_classifier_value_id.h"  // for ColumnClassifierValueId
 
 namespace {
 using namespace algos::hymd;

@@ -5,11 +5,14 @@
  */
 #pragma once
 
-#include "algorithms/algorithm.h"
-#include "config/indices/type.h"
-#include "error/type.h"
-#include "table/tuple_index.h"
-#include "tabular_data/input_tables_type.h"
+#include <stddef.h>  // for size_t
+#include <vector>    // for vector
+
+#include "algorithms/algorithm.h"            // for Algorithm
+#include "config/indices/type.h"             // for IndicesType
+#include "error/type.h"                      // for ErrorType
+#include "table/tuple_index.h"               // for TupleIndex
+#include "tabular_data/input_tables_type.h"  // for InputTables
 
 namespace algos {
 

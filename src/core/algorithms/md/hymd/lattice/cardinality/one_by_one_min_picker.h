@@ -1,14 +1,13 @@
 #pragma once
 
-#include <unordered_set>
-#include <vector>
+#include <cstddef>  // for size_t
+#include <vector>   // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 
-#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "model/index.h"
+#include "algorithms/md/hymd/lattice/validation_info.h"  // for ValidationInfo
+#include "algorithms/md/hymd/md_lhs.h"                   // for MdLhs
+#include "md/hymd/lattice/md_lattice.h"                  // for MdLattice
 
 namespace algos::hymd::lattice::cardinality {
 

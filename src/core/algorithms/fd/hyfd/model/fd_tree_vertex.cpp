@@ -1,9 +1,10 @@
 #include "fd_tree_vertex.h"
 
-#include <algorithm>
-#include <vector>
+#include <algorithm>  // for all_of
+#include <assert.h>   // for assert
+#include <vector>     // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include "fd/raw_fd.h"  // for RawFD
 
 namespace algos::hyfd::fd_tree {
 

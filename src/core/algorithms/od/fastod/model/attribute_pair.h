@@ -1,9 +1,11 @@
 #pragma once
 
-#include <string>
+#include <cstddef>      // for size_t
+#include <string>       // for string
+#include <string_view>  // for hash
 
-#include "algorithms/od/fastod/hashing/hashing.h"
-#include "model/table/column_index.h"
+#include "algorithms/od/fastod/hashing/hashing.h"  // for CombineHashes
+#include "model/table/column_index.h"              // for ColumnIndex
 
 namespace algos::fastod {
 

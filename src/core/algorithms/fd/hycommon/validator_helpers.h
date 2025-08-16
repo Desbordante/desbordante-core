@@ -1,20 +1,19 @@
 #pragma once
 
-#include <cstddef>
-#include <string_view>
-#include <vector>
+#include <cstddef>      // for size_t
+#include <string_view>  // for string_view
+#include <vector>       // for vector
 
-#include <boost/container_hash/hash.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/version.hpp>
-#include <easylogging++.h>
+#include <boost/unordered/unordered_flat_map_fwd.hpp>  // for unordered_flat...
+#include <boost/version.hpp>                           // for BOOST_VERSION
+#include <easylogging++.h>                             // for Writer, CINFO
 
-#include "types.h"
+#include "types.h"  // for ClusterId, Row
 
 #define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
 
 #if UNORDERED_FLAT_MAP_AVAILABLE
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unordered_flat_map.hpp>  // for unordered_flat...
 #endif
 
 namespace algos::hy {

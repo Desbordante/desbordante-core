@@ -1,9 +1,12 @@
 #pragma once
 
-#include <limits>
+#include <limits>       // for numeric_limits
+#include <string_view>  // for string_view
 
-#include "config/common_option.h"
-#include "config/tabular_data/input_tables_type.h"
+#include "config/common_option.h"                   // for CommonOption
+#include "config/tabular_data/input_tables_type.h"  // for InputTables
+#include "option.h"                                 // for Option
+#include "tabular_data/input_tables/option.h"
 
 namespace config {
 

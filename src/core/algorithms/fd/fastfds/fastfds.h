@@ -1,14 +1,16 @@
 #pragma once
 
-#include <functional>
-#include <set>
+#include <functional>  // for function
+#include <optional>    // for optional, nullopt
+#include <set>         // for set
+#include <vector>      // for vector
 
-#include <boost/thread/mutex.hpp>
+#include "algorithms/fd/pli_based_fd_algorithm.h"  // for PliBasedFDAlgorithm
+#include "config/thread_number/type.h"             // for ThreadNumType
+#include "model/table/vertical.h"                  // for Vertical
+#include "table/column.h"                          // for Column
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "config/thread_number/type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
+class RelationalSchema;
 
 namespace algos {
 
