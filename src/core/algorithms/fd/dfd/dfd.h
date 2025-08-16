@@ -1,12 +1,11 @@
 #pragma once
 
-#include <random>
-#include <stack>
+#include <optional>  // for optional, nullopt
+#include <vector>    // for vector
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "config/thread_number/type.h"
-#include "model/table/vertical.h"
-#include "partition_storage/partition_storage.h"
+#include "algorithms/fd/pli_based_fd_algorithm.h"  // for PliBasedFDAlgorithm
+#include "config/thread_number/type.h"             // for ThreadNumType
+#include "model/table/vertical.h"                  // for Vertical
 
 namespace algos {
 

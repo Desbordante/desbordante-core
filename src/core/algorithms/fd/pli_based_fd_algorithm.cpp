@@ -1,7 +1,17 @@
 #include "pli_based_fd_algorithm.h"
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for move
+
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"                           // for CommonOption
+#include "config/equal_nulls/option.h"               // for kEqualNullsOpt
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
+#include "fd/fd_algorithm.h"                         // for FDAlgorithm
+#include "table/column_data.h"                       // for ColumnData
+#include "table/column_layout_relation_data.h"       // for ColumnLayoutRela...
+#include "table/position_list_index.h"               // for PositionListIndex
 
 namespace algos {
 

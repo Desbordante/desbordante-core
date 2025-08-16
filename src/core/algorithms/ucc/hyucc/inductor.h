@@ -1,10 +1,13 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include "algorithms/ucc/hyucc/model/non_ucc_list.h"  // for NonUCCList
+#include "algorithms/ucc/raw_ucc.h"                   // for RawUCC
 
-#include "algorithms/ucc/hyucc/model/non_ucc_list.h"
-#include "algorithms/ucc/hyucc/model/ucc_tree.h"
-#include "algorithms/ucc/raw_ucc.h"
+namespace algos {
+namespace hyucc {
+class UCCTree;
+}
+}  // namespace algos
 
 namespace algos::hyucc {
 

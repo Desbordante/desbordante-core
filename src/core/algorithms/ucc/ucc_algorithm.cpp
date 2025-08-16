@@ -1,7 +1,14 @@
 #include "ucc_algorithm.h"
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
+#include <memory>   // for shared_ptr
+#include <utility>  // for move
+
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "algorithm.h"                               // for Algorithm
+#include "common_option.h"                           // for CommonOption
+#include "config/equal_nulls/option.h"               // for kEqualNullsOpt
+#include "config/tabular_data/input_table/option.h"  // for kTableOpt
 
 namespace algos {
 

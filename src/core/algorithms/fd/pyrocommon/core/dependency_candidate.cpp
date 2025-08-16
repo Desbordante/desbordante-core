@@ -1,6 +1,12 @@
 #include "dependency_candidate.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include <ostream>   // for ostream, basic_ios
+#include <stddef.h>  // for size_t
+
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "fd/pyrocommon/model/confidence_interval.h"  // for ConfidenceInterval
+#include "table/vertical.h"                           // for Vertical
 
 // TODO: these methods are used in priority_queues, where operator> is needed. (>) !<=> (>=) due to
 // strict weak ordering

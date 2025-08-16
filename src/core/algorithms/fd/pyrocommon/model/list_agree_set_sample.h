@@ -1,10 +1,21 @@
 #pragma once
 
-#include <map>
-#include <utility>
-#include <vector>
+#include <memory>         // for unique_ptr, share...
+#include <unordered_map>  // for unordered_map
+#include <utility>        // for move
+#include <vector>         // for vector
 
-#include "agree_set_sample.h"
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
+
+#include "agree_set_sample.h"  // for AgreeSetSample
+
+class ColumnLayoutRelationData;
+class CustomRandom;
+class Vertical;
+
+namespace model {
+class PositionListIndex;
+}
 
 namespace model {
 

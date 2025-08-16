@@ -1,5 +1,28 @@
 #include "eulerfd.h"
 
+#include <algorithm>      // for sort, min, fill
+#include <iostream>       // for operator<<, basic_...
+#include <limits>         // for numeric_limits
+#include <numeric>        // for accumulate, iota
+#include <stdexcept>      // for runtime_error
+#include <string>         // for string
+#include <time.h>         // for time
+#include <unordered_map>  // for unordered_map, ope...
+#include <utility>        // for move, pair
+
+#include <boost/type_index/type_index_facade.hpp>  // for operator==
+
+#include "common_option.h"                    // for CommonOption
+#include "custom_random.h"                    // for CustomRandom
+#include "custom_random_seed/option.h"        // for kCustomRandomFlagOpt
+#include "equal_nulls/option.h"               // for kEqualNullsOpt
+#include "fd/eulerfd/mlfq.h"                  // for MLFQ
+#include "fd/eulerfd/search_tree.h"           // for SearchTreeEulerFD
+#include "table/column.h"                     // for Column
+#include "table/relational_schema.h"          // for RelationalSchema
+#include "table/vertical.h"                   // for Vertical
+#include "tabular_data/input_table/option.h"  // for kTableOpt
+
 namespace algos {
 
 EulerFD::EulerFD() : FDAlgorithm({kDefaultPhaseName}), mlfq_(kQueuesNumber) {

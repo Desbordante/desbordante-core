@@ -1,16 +1,28 @@
 #include "algorithms/ucc/hpivalid/hpivalid.h"
 
-#include <deque>
-#include <utility>
-#include <vector>
+#include <deque>      // for deque
+#include <list>       // for _List_const_it...
+#include <stdexcept>  // for runtime_error
+#include <utility>    // for move
+#include <vector>     // for vector
 
-#include <easylogging++.h>
+#include <boost/move/utility_core.hpp>  // for move
+#include <easylogging++.h>              // for Writer, LOG
 
-#include "algorithms/fd/hycommon/preprocessor.h"
-#include "algorithms/fd/hycommon/types.h"
-#include "algorithms/ucc/hpivalid/config.h"
-#include "algorithms/ucc/hpivalid/result_collector.h"
-#include "algorithms/ucc/hpivalid/tree_search.h"
+#include "algorithms/fd/hycommon/preprocessor.h"       // for BuildInvertedPlis
+#include "algorithms/ucc/hpivalid/config.h"            // for Config
+#include "algorithms/ucc/hpivalid/result_collector.h"  // for ResultCollector
+#include "algorithms/ucc/hpivalid/tree_search.h"       // for TreeSearch
+#include "primitive_collection.h"                      // for PrimitiveColle...
+#include "table/column_index.h"                        // for ColumnIndex
+#include "table/column_layout_relation_data.h"         // for ColumnLayoutRe...
+#include "table/position_list_index.h"                 // for PLI, PositionL...
+#include "ucc/hpivalid/enums.h"                        // for TimerName
+#include "ucc/hpivalid/pli_table.h"                    // for PLITable
+#include "ucc/raw_ucc.h"                               // for RawUCC
+#include "ucc/ucc.h"                                   // for UCC
+
+class RelationalSchema;
 
 // see algorithms/ucc/hpivalid/LICENSE
 

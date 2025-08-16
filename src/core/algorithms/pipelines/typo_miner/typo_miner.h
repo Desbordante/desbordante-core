@@ -1,15 +1,35 @@
 #pragma once
 
-#include "algorithms/algorithm.h"
-#include "algorithms/create_algorithm.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "config/equal_nulls/type.h"
-#include "config/names.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/table/idataset_stream.h"
-#include "parser/csv_parser/csv_parser.h"
-#include "types.h"
+#include <assert.h>       // for assert
+#include <cstddef>        // for byte
+#include <map>            // for map
+#include <memory>         // for unique_ptr
+#include <string>         // for string
+#include <string_view>    // for string_view
+#include <unordered_set>  // for unordered...
+#include <utility>        // for pair
+#include <vector>         // for vector
+
+#include <boost/any.hpp>  // for any
+
+#include "algorithm_types.h"                                // for Algorithm...
+#include "algorithms/algorithm.h"                           // for Algorithm
+#include "config/equal_nulls/type.h"                        // for EqNullsType
+#include "config/names.h"                                   // for kRadius
+#include "config/tabular_data/input_table_type.h"           // for InputTable
+#include "fd/fd.h"                                          // for FD
+#include "fd/fd_algorithm.h"                                // for FDAlgorithm
+#include "fd/pli_based_fd_algorithm.h"                      // for PliBasedF...
+#include "imetrizable_type.h"                               // for IMetrizab...
+#include "model/table/column_layout_typed_relation_data.h"  // for ColumnLay...
+#include "table/position_list_index.h"                      // for PLI
+
+class Column;
+class ColumnLayoutRelationData;
+
+namespace model {
+class Type;
+}
 
 namespace algos {
 

@@ -1,11 +1,14 @@
 #pragma once
 
-#include <tuple>
+#include <stddef.h>  // for size_t
+#include <tuple>     // for tuple
+#include <vector>    // for vector
 
-#include <boost/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset/dynamic_bitset.hpp>  // for dynamic_bitset
 
-#include "model/table/column_layout_relation_data.h"
-#include "types.h"
+#include "types.h"  // for PLIs, ClusterId
+
+class ColumnLayoutRelationData;
 
 namespace algos::hy::util {
 
