@@ -128,6 +128,7 @@ CSVConfig const kTestDynamicFDUpdateBad4 =
         CreateCsvConfig("dynamic_fd/TestDynamicUpdateBad4.csv", ',', true);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
 CSVConfig const kAnimalsBeverages = CreateCsvConfig("animals_beverages.csv", ',', true);
+CSVConfig const kMDTrivial = CreateCsvConfig("md_trivial.csv", ',', true);
 CSVConfig const kTestDC = CreateCsvConfig("TestDC.csv", ',', true);
 CSVConfig const kTestDC1 = CreateCsvConfig("TestDC1.csv", ',', true);
 CSVConfig const kTestDC2 = CreateCsvConfig("TestDC2.csv", ',', true);
