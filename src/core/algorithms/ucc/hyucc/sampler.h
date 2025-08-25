@@ -1,11 +1,11 @@
 #pragma once
 
-#include "algorithms/fd/hycommon/sampler.h"
-#include "ucc/hyucc/model/non_ucc_list.h"
-#include "algorithms/fd/hycommon/types.h"
 #include "algorithms/fd/hycommon/efficiency_threshold.h"
+#include "algorithms/fd/hycommon/sampler.h"
+#include "algorithms/fd/hycommon/types.h"
 #include "config/thread_number/type.h"
 #include "model/table/position_list_index.h"
+#include "ucc/hyucc/model/non_ucc_list.h"
 
 namespace algos::hyucc {
 
@@ -28,10 +28,10 @@ private:
 
         public:
             ClusterComparator(algos::hy::Rows* sort_keys, size_t comparison_column_1,
-                            size_t comparison_column_2, Traits const&) noexcept
+                              size_t comparison_column_2, Traits const&) noexcept
                 : sort_keys_(sort_keys),
-                comparison_column_1_(comparison_column_1),
-                comparison_column_2_(comparison_column_2) {
+                  comparison_column_1_(comparison_column_1),
+                  comparison_column_2_(comparison_column_2) {
                 assert(sort_keys_->front().size() >= 3);
             }
 

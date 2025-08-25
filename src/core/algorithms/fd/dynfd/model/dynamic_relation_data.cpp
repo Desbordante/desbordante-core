@@ -213,7 +213,7 @@ void DynamicRelationData::InsertRecordsFromUpdateBatch(
             continue;
         }
 
-        compressed_records_->emplace_back(row.size());
+        compressed_records_->emplace_back(GetNumColumns());
 
         for (size_t index = 0; index < GetNumColumns(); ++index) {
             std::string const& field = row[index + 1];

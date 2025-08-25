@@ -1,7 +1,7 @@
 #include "fd_inductor.h"
 
 void algos::dynfd::FDInductor::UpdateCovers(algos::hy::ColumnCombinationList const& agree_sets) {
-    for (int level = agree_sets.GetDepth(); level >= 0; --level) {
+    for (int level = agree_sets.GetDepth(); level > 0; --level) {
         for (auto const& lhs : agree_sets.GetLevel(level)) {
             auto rhss = lhs;
             rhss.flip();

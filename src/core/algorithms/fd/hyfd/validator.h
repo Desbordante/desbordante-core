@@ -42,8 +42,8 @@ class Validator {
     config::ThreadNumType threads_num_ = 1;
 
 public:
-    Validator(std::shared_ptr<model::FDTree> fds, hy::PLIsPtr plis,
-              hy::RowsPtr compressed_records, config::ThreadNumType threads_num) noexcept
+    Validator(std::shared_ptr<model::FDTree> fds, hy::PLIsPtr plis, hy::RowsPtr compressed_records,
+              config::ThreadNumType threads_num) noexcept
         : fds_(std::move(fds)),
           plis_(std::move(plis)),
           compressed_records_(std::move(compressed_records)),

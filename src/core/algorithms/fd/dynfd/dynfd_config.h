@@ -10,4 +10,4 @@ public:
     static constexpr double kDfsSeedSampleRatio = 0.1;
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::dynfd
