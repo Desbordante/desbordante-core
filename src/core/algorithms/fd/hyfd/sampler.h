@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/algorithms/fd/hycommon/sampler.h"
-#include "core/algorithms/fd/hyfd/model/non_fd_list.h"
-#include "core/algorithms/fd/hycommon/types.h"
 #include "core/algorithms/fd/hycommon/efficiency_threshold.h"
+#include "core/algorithms/fd/hycommon/sampler.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/algorithms/fd/hyfd/model/non_fd_list.h"
 #include "core/config/thread_number/type.h"
 #include "core/model/table/position_list_index.h"
 
@@ -28,7 +28,7 @@ private:
 
         public:
             ClusterComparator(algos::hy::Rows* sort_keys, size_t comparison_column_1,
-                            size_t comparison_column_2, Traits const&) noexcept
+                              size_t comparison_column_2, Traits const&) noexcept
                 : sort_keys_(sort_keys),
                   comparison_column_1_(comparison_column_1),
                   comparison_column_2_(comparison_column_2) {

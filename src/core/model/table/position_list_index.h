@@ -162,6 +162,7 @@ public:
     auto end() const {
         return index_.end();
     }
+
     // NOLINTEND(*-identifier-naming)
 
     std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;

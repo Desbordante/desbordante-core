@@ -51,4 +51,4 @@ public:
     algos::hy::ColumnCombinationList GetAgreeSets(IdPairs const& comparison_suggestions);
 };
 
-}  // namespace algos::hyfd
+}  // namespace algos::dynfd

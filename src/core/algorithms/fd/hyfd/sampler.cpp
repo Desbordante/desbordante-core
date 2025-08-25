@@ -22,11 +22,7 @@ bool Sampler::Traits::IsSingletonCluster(TablePos cluster_id) const noexcept {
 
 Sampler::Sampler(hy::PLIsPtr plis, hy::RowsPtr pli_records, config::ThreadNumType threads_num)
     : pool_(threads_num > 1 ? std::make_unique<boost::asio::thread_pool>(threads_num) : nullptr),
-      sampler_(plis,
-               std::move(pli_records),
-               hy::kEfficiencyThreshold,
-               pool_.get(),
-               plis->size(),
+      sampler_(plis, std::move(pli_records), hy::kEfficiencyThreshold, pool_.get(), plis->size(),
                Traits{}) {}
 
 Sampler::~Sampler() {

@@ -1,11 +1,11 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
 #include <memory>
 #include <queue>
-#include <vector>
-#include <algorithm>
 #include <utility>
+#include <vector>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
@@ -65,7 +65,9 @@ private:
         for (auto [first_id, second_id] : comparison_suggestions) {
             boost::dynamic_bitset<> equal_attrs(num_attributes_);
             Match(equal_attrs, first_id, second_id);
-            agree_sets_->Add(std::move(equal_attrs));
+            if (equal_attrs.any()) {
+                agree_sets_->Add(std::move(equal_attrs));
+            }
         }
     }
 
@@ -73,11 +75,8 @@ private:
         ColumnSlider column_slider(num_attributes_);
         for (typename Policy::PLIPtr pli : *plis_) {
             typename Policy::ClusterComparator cluster_comparator(
-                compressed_records_.get(),
-                column_slider.GetLeftNeighbor(),
-                column_slider.GetRightNeighbor(),
-                policy_
-            );
+                    compressed_records_.get(), column_slider.GetLeftNeighbor(),
+                    column_slider.GetRightNeighbor(), policy_);
             for (typename Policy::Cluster& cluster : *pli) {
                 std::sort(cluster.begin(), cluster.end(), cluster_comparator);
             }
@@ -90,11 +89,8 @@ private:
         std::vector<boost::unique_future<void>> sort_futures;
         for (typename Policy::PLIPtr pli : *plis_) {
             typename Policy::ClusterComparator cluster_comparator(
-                compressed_records_.get(),
-                column_slider.GetLeftNeighbor(),
-                column_slider.GetRightNeighbor(),
-                policy_
-            );
+                    compressed_records_.get(), column_slider.GetLeftNeighbor(),
+                    column_slider.GetRightNeighbor(), policy_);
             auto sort = [pli, cluster_comparator]() {
                 for (typename Policy::Cluster& cluster : *pli) {
                     std::sort(cluster.begin(), cluster.end(), cluster_comparator);
@@ -187,9 +183,11 @@ private:
         assert(first_record_id < compressed_records_->size() &&
                second_record_id < compressed_records_->size());
 
+        auto const& record1 = (*compressed_records_)[first_record_id];
+        auto const& record2 = (*compressed_records_)[second_record_id];
         for (size_t i = 0; i < num_attributes_; ++i) {
-            typename Policy::TablePos const val1 = (*compressed_records_)[first_record_id][i];
-            typename Policy::TablePos const val2 = (*compressed_records_)[second_record_id][i];
+            auto const val1 = record1[i];
+            auto const val2 = record2[i];
             if (!policy_.IsSingletonCluster(val1) && !policy_.IsSingletonCluster(val2) &&
                 val1 == val2) {
                 attributes.set(i);
@@ -246,12 +244,8 @@ private:
     }
 
 public:
-    Sampler(Policy::PLIsPtr plis,
-            Policy::RowsPtr pli_records,
-            double efficiency_threshold,
-            boost::asio::thread_pool* pool,
-            size_t num_attributes,
-            Policy policy)
+    Sampler(Policy::PLIsPtr plis, Policy::RowsPtr pli_records, double efficiency_threshold,
+            boost::asio::thread_pool* pool, size_t num_attributes, Policy policy)
         : policy_(std::move(policy)),
           efficiency_threshold_(efficiency_threshold),
           plis_(std::move(plis)),

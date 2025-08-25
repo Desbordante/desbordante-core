@@ -9,11 +9,11 @@
 #include <boost/bind/bind.hpp>
 #include <boost/thread/future.hpp>
 
+#include "dynfd_config.h"
 #include "fd/hycommon/preprocessor.h"
 #include "fd_inductor.h"
 #include "model/cluster_ids_array.h"
 #include "non_fd_inductor.h"
-#include "dynfd_config.h"
 
 namespace algos::dynfd {
 
@@ -96,7 +96,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
             auto const& violation = FindEmptyLhsViolation(rhs);
             if (violation) {
                 if (on_invalid) {
-                    (*on_invalid)(rhs, FindEmptyLhsViolation(rhs));
+                    (*on_invalid)(rhs, violation);
                 }
                 rhss.reset(rhs);
             }
@@ -189,7 +189,8 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli, size_t rhs_attr,
     std::vector<CompressedRecord> const& compressed_records = relation_->GetCompressedRecords();
 
     for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
-        auto const rhs_value = compressed_records[*cluster.begin()][rhs_attr];
+        auto const first_record_id = *cluster.begin();
+        auto const rhs_value = compressed_records[first_record_id][rhs_attr];
         if (rhs_value < 0) {
             if (on_invalid) {
                 (*on_invalid)(rhs_attr, std::nullopt);
@@ -201,7 +202,7 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli, size_t rhs_attr,
             auto const value = compressed_records[record_id][rhs_attr];
             if (value != rhs_value) {
                 if (on_invalid) {
-                    (*on_invalid)(rhs_attr, std::pair{value, rhs_value});
+                    (*on_invalid)(rhs_attr, std::pair{first_record_id, record_id});
                 }
                 return false;
             }
@@ -304,8 +305,8 @@ void Validator::ValidateFds(size_t first_insert_batch_id) {
             }
         }
 
-        if (static_cast<double>(invalid_fds.size()) > DynFDConfig::kInvalidatedFdsThreshold
-            * static_cast<double>(level_fds.size())) {
+        if (static_cast<double>(invalid_fds.size()) >
+            DynFDConfig::kInvalidatedFdsThreshold * static_cast<double>(level_fds.size())) {
             inductor.UpdateCovers(sampler.GetAgreeSets(comparison_suggestions));
         }
     }
@@ -333,8 +334,8 @@ void Validator::ValidateNonFds() {
             }
         }
 
-        if (static_cast<double>(valid_fds.size()) > DynFDConfig::kInvalidatedNonFdsThreshold
-            * static_cast<double>(level_non_fds.size())) {
+        if (static_cast<double>(valid_fds.size()) >
+            DynFDConfig::kInvalidatedNonFdsThreshold * static_cast<double>(level_non_fds.size())) {
             fd_finder.FindFds(valid_fds);
         }
     }
