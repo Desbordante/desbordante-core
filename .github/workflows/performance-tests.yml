@@ -87,6 +87,7 @@ jobs:
           pattern: baseline-v1.json
           run-id: ${{ env.LastSuccID }}
           github-token: ${{ secrets.PERFORMANCEREGRESSIONTESTING }}
+        if: ${{ env.LastSuccID != '' }}
       - name: Check baseline results
         # Each successful run must have a "baseline" attached.
         # If not, there's no baseline at all; use latest instead.
