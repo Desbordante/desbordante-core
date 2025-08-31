@@ -77,11 +77,11 @@ runs:
     - name: Install build tools using apt
       run: |
         sudo apt-get update -y
-        sudo apt install cmake ninja-build python3 python3-venv -y
+        sudo apt install ninja-build python3 python3-venv -y
       shell: bash
       if: env.OS == 'ubuntu'
     - name: Install build tools using brew
-      run: brew install cmake ninja python3 --formula
+      run: brew install ninja python3 --formula
       shell: bash
       if: env.OS == 'macos'
 
