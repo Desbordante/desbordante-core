@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include "algorithms/algorithm.h"
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/decision_boundary.h"
@@ -71,7 +69,11 @@ public:
         return *input_md_;
     }
 
-    std::vector<MDHighlights::Highlight> GetHighlights() const {
+    std::vector<MDHighlights::Highlight> const& GetHighlights() const {
+        return highlights_.GetHighlights();
+    }
+
+    std::vector<MDHighlights::Highlight> GetHighlightsCopy() const {
         return highlights_.GetHighlights();
     }
 };

@@ -22,10 +22,7 @@ private:
 public:
     ViolatingRecordsSet() = default;
 
-    ViolatingRecordsSet(RecordsPairsSet const& records_pairs) : records_pairs_(records_pairs) {}
-
-    ViolatingRecordsSet(RecordsPairsSet&& records_pairs)
-        : records_pairs_(std::move(records_pairs)) {}
+    ViolatingRecordsSet(RecordsPairsSet records_pairs) : records_pairs_(std::move(records_pairs)) {}
 
     void InsertClusters(hymd::indexes::PliCluster const& left_cluster,
                         hymd::indexes::PliCluster const& right_cluster);

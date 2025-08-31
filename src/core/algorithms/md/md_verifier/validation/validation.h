@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <variant>
 #include <vector>
 
@@ -36,10 +37,15 @@ private:
 
     model::md::DecisionBoundary true_rhs_decision_boundary_;
 
-    ViolatingRecordsSet violationg_records_;
+    ViolatingRecordsSet violating_records_;
     RecordsPairToSimilarityMap rhs_records_pair_to_similarity_;
 
     ColumnInfoView GetColumnInfo(hymd::ColumnMatchInfo const& column_match_info);
+
+    void ProcessSimilarityMatrix(
+            hymd::ColumnMatchInfo const& column_match_info,
+            model::md::DecisionBoundary decision_boundary,
+            std::function<void(hymd::indexes::PliCluster, hymd::indexes::PliCluster)>&& lam);
 
     void InitRecords(hymd::ColumnMatchInfo const& column_match_info,
                      model::md::DecisionBoundary decision_boundary);
@@ -93,7 +99,7 @@ public:
     }
 
     RecordsPairsSet const& GetViolatingRecordsPairs() const {
-        return violationg_records_.GetPairs();
+        return violating_records_.GetPairs();
     }
 
     RecordsPairToSimilarityMap const& GetRhsPairsToSimilarityMapping() const {

@@ -1,9 +1,12 @@
 import desbordante
 import pandas as pd
 
+
 from typing import TypedDict
 from desbordante.md import ColumnSimilarityClassifier
 from desbordante.md.column_matches import Levenshtein, Custom, Equality
+
+# pd.set_option("display.max_columns", None)
 
 GREEN_CODE = "\033[1;42m"
 RED_CODE = "\033[1;41m"
@@ -18,18 +21,38 @@ class MDParams(TypedDict):
 
 def print_results(verifier):
     if verifier.md_holds():
-        print(GREEN_CODE, "MD holds", DEFAULT_COLOR_CODE, "\n")
+        print(f"{GREEN_CODE}MD holds{DEFAULT_COLOR_CODE}\n")
         return
 
     highlights = verifier.get_highlights()
-    print(RED_CODE, "MD does not hold due to the following items:", DEFAULT_COLOR_CODE)
-    for highlight in highlights:
-        print(highlight.to_string())
+    # Also verifier.get_highlights_copy() if you're planning to use highlights separately from verifier
+
+    print(f"{RED_CODE}MD does not hold due to the following items:{DEFAULT_COLOR_CODE}")
+    for i, highlight in enumerate(highlights, start=1):
+        rhs_desc = highlight.rhs_desc
+        column_match_name = rhs_desc.column_match_description.column_match_name
+        left_column_name = (
+            rhs_desc.column_match_description.left_column_description.column_name
+        )
+        right_column_name = (
+            rhs_desc.column_match_description.right_column_description.column_name
+        )
+        decision_boundary = rhs_desc.decision_boundary
+
+        print(
+            f"Rows {highlight.left_table_row} of the left table and "
+            f"{highlight.right_table_row} of the right table "
+            f"have similarity {highlight.similarity} and, therefore, "
+            f"violate right-hand side column similarity classifier "
+            f"{column_match_name}({left_column_name}, {right_column_name})>={decision_boundary}"
+        )
+        print(f"{i}.", highlight.to_string())  # fix
+        # Alternative way: print(highlight.to_string())
     print(
         f"Desbordante suggests to use the following right-hand side decision boundary: {verifier.get_true_rhs_decision_boundary()}\n"
     )
     print(f"Thus, the following MD was provided:\n  {verifier.get_input_md()}")
-    print("and the following MDs are suggested:")
+    print("and the following MD are suggested:")
     for md in verifier.get_md_suggestions():
         print(f"  {md.to_string_active()}")
     print()
@@ -44,7 +67,7 @@ def check_md(table: pd.DataFrame, params: MDParams):
 
 
 def animals_beverages_example():
-    print("As the first example, let's look at the animals_beverages.csv dataset")
+    print("As the first example, let's look at the animals_beverages.csv dataset\n")
 
     table_path = "examples/datasets/animals_beverages.csv"
     table = pd.read_csv(table_path)
@@ -63,9 +86,9 @@ def animals_beverages_example():
     check_md(table, params)
 
     print(
-        "We passed column similarity classifier with decision boundary equals to 1.0, but records with similarity equal to 0.75 were found. Similarity is less than decision boundary, so MD doesn't hold.\n"
-        "The MD may not hold due to some sort of typo in original dataset.\n"
-        "Let's relax both our constraints (i.e. say that if the similarity measure between the values in the column is at least 0.75, then values are similar enough) and check this dependency:\n[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75.\n"
+        "The checked MD had the column similarity classifier with a 1.0 decision boundary on the right side. However, records with a 0.75 similarity, which is less than the specified decision boundary, were found. Therefore checked MD doesn't hold.\n\n"
+        "The MD may not hold due to some sort of typo in the original dataset. "
+        "Let's relax both left and right constraints (i.e. say that if the similarity between the values in the column is at least 0.75, then values are similar enough) and check this dependency:\n\n[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75.\n"
     )
 
     params = {
@@ -82,7 +105,7 @@ def animals_beverages_example():
     print(
         "Now let's take a look at what happens if we increase the decision boundary in the left-hand side and the right-hand side. "
         "For example, we will set it to 0.76 instead of 0.75. "
-        "First, let's raise left-hand side decision boundary:\n"
+        "First, let's raise the left-hand side decision boundary:\n"
     )
 
     params = {
@@ -93,7 +116,7 @@ def animals_beverages_example():
     check_md(table, params)
 
     print(
-        "As we can see, nothing had changed. Now let's raise the right-hand side decision boundary:\n"
+        "As we can see, nothing changed. Now let's raise the right-hand side decision boundary:\n"
     )
 
     params = {
@@ -122,10 +145,14 @@ def animals_beverages_example():
 
     check_md(table, params)
 
+    print(
+        "This is how MDs can be helpful in avoiding typos in table and searching them.\n"
+    )
+
 
 def flights_example():
     print(
-        "Now let's examine an another example.\nWe will use flights_dd.csv dataset for this purpose:\n"
+        "Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:\n"
     )
 
     table_path = "examples/datasets/flights_dd.csv"
@@ -133,12 +160,12 @@ def flights_example():
     print(table)
 
     print(
-        "\nLet's imagine we want to check if the departure city and the arrival city are the same, flight's time doesn't differ a lot. "
-        "\nWe want to consider all Moscow's airports as similar. We need to find decision boundary for such purpose.\n"
+        "\nLet's imagine we want to check that if the departure city and the arrival city are the same, flight times don't differ a lot. "
+        "\nWe want to consider all Moscow's airports as similar. We need to find a decision boundary for this purpose.\n"
     )
 
     print(
-        "Let's create copy of our table and remove airport's literals from Departure and Arrival columns:\n"
+        "Let's create copy of our table and remove the airport's literals from the Departure and Arrival columns:\n"
     )
 
     cities_table = table.copy()
@@ -166,13 +193,13 @@ def flights_example():
     check_md(cities_table, params)
 
     print(
-        "As we see, Desbordante suggests to use the decision boundary of 0.75 for Departure column to count values similar enough if such airports represent the same city. For Arrival column everything is similar.\n"
+        "As we see, Desbordante suggests to use the decision boundary of 0.75 for the Departure column. For the Arrival column everything is similar.\n"
     )
 
     print(
-        "For duration similarity measure in our example we'll use normalized_distance. normalized_distance(Duration, Duration) is a custom similarity measure provided to algorithm by ourselves. It is equal to 1 - abs(duration_1 - duration_2) / max(Duration), where duration_1 and duration_2 are the values from Duration column. "
-        "More examples on custom similarity measures you can see in examples/basic/mining_md.py\n"
-        "We will try to discover the MD [ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0\n"
+        "For duration similarity measure in our example we'll use normalized_distance. normalized_distance(Duration, Duration) is a custom similarity measure we provided to the verification algorithm. It is equal to 1 - abs(duration_1 - duration_2) / max(Duration), where duration_1 and duration_2 are the values from the Duration column. "
+        "You can see more examples of custom similarity measures in examples/basic/mining_md.py.\n\n"
+        "We will try to verify the MD [ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0\n"
     )
     max_duration = max(table["Duration"])
 
@@ -200,7 +227,7 @@ def flights_example():
     check_md(table, params)
 
     print(
-        "Algorithm provided us with new decision boundary for a right-hand side. Let's relax it to 0.895:\n"
+        "The algorithm provided us with a new decision boundary for a right-hand side. Let's relax it to 0.895:\n"
     )
 
     params = {
@@ -227,30 +254,28 @@ def flights_example():
     check_md(table, params)
 
     print(
-        "As a result, duration doesn't differ a lot in terms of normalized_distance similarity."
+        "As a result, we can conclude that duration differs about 10 percent for flights with the same departure/arrival cities."
     )
 
 
 if __name__ == "__main__":
     print(DEFAULT_COLOR_CODE)
     print(
-        "This example demonstrates how to validate Matching dependencies (MD) as defined in 'Efficient Discovery of Matching Dependencies' "
-        "by Schirmer et al. published at ACM Transactions on Database Systems (TODS), Volume 45, Issue 3 Article No.: 13, Pages 1 - 33. using the Desbordante library.\n"
+        "This example demonstrates how to validate Matching dependencies (MD) which are defined in 'Efficient Discovery of Matching Dependencies' "
+        "by Schirmer et al. published in ACM Transactions on Database Systems (TODS), Volume 45, Issue 3 Article No.: 13, Pages 1 - 33 using the Desbordante library.\n"
     )
     print(
         "The Matching Dependency verification algorithm accepts the left-hand side and right-hand side and determines if the specified dependency holds. "
-        "Also, in case if dependency doesn't hold, the algorithm returns a list of highlights and suggests how to adjust the dependency.\n"
+        "Also, in case the dependency doesn't hold, the algorithm returns a list of exceptions (tuples that violate the given MD) and suggests how to adjust the dependency.\n"
     )
-    print(
-        "You can also read about mining Matching dependencies in examples/basic/mining_md.py\n"
-    )
+    print("You can also read about mining MDs in examples/basic/mining_md.py\n")
 
     print(
-        "To verify a Matching Dependency, we must first define Column Similarity Classifiers for the data.\n"
+        "To verify a Matching Dependency, we must first define Column Similarity Classifiers for the data. "
         "A Column Similarity Classifier consists of a Column Match and a decision boundary. "
-        "A Column Match consists of two indices -- the columns in left and right table and a similarity measure (Levenshtein Similarity, for example).\n\n"
+        "A Column Match consists of two column identifiers (index or name) for the columns in the left and right tables and a similarity measure (Levenshtein Similarity, for example).\n\n"
         "We will use the notation [measure(i, j) >= lambda] for a Column Similarity Classifier that specifies the i'th column of the left table, the j'th column of the right table, the similarity measure 'measure' and the decision boundary 'lambda'. "
-        'Also, notation like [measure("left_col_name", "right_col_name") >= lambda] is also valid for a ColumnMatch specifying the columns "left_col_name" and "right_col_name" of the left and right tables respectively.\n'
+        'Notation like [measure("left_col_name", "right_col_name") >= lambda] is also valid for a ColumnMatch specifying the columns "left_col_name" and "right_col_name" of the left and right tables respectively.\n'
     )
 
     animals_beverages_example()

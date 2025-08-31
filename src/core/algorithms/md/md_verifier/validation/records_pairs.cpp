@@ -8,10 +8,7 @@ namespace algos::md {
 void ViolatingRecordsSet::InsertClusters(hymd::indexes::PliCluster const& left_cluster,
                                          hymd::indexes::PliCluster const& right_cluster) {
     for (hymd::RecordIdentifier left_record : left_cluster) {
-        RecordsSet& records_set = records_pairs_[left_record];
-        for (hymd::RecordIdentifier right_record : right_cluster) {
-            records_set.emplace(right_record);
-        }
+        records_pairs_[left_record].insert(right_cluster.begin(), right_cluster.end());
     }
 }
 
@@ -27,7 +24,7 @@ void ViolatingRecordsSet::DeleteClusters(hymd::indexes::PliCluster const& left_c
         for (hymd::RecordIdentifier right_record : right_cluster) {
             valid_right_records.erase(right_record);
             if (valid_right_records.empty()) {
-                records_pairs_.erase(left_record);
+                records_pairs_.erase(it);
                 break;
             }
         }

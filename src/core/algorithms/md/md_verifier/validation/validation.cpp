@@ -1,11 +1,10 @@
 #include "algorithms/md/md_verifier/validation/validation.h"
 
-#include <iostream>
-
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/md_verifier/validation/records_pairs.h"
+#include "boost/hof/first_of.hpp"
 #include "util/worker_thread_pool.h"
 
 namespace algos::md {
@@ -20,8 +19,10 @@ ColumnInfoView MDValidationCalculator::GetColumnInfo(
             column_match_info.similarity_info.similarity_matrix};
 }
 
-void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_match_info,
-                                         model::md::DecisionBoundary decision_boundary) {
+void MDValidationCalculator::ProcessSimilarityMatrix(
+        hymd::ColumnMatchInfo const& column_match_info,
+        model::md::DecisionBoundary decision_boundary,
+        std::function<void(hymd::indexes::PliCluster, hymd::indexes::PliCluster)>&& lam) {
     auto const& [left_clusters, right_clusters, similarity_matrix] =
             GetColumnInfo(column_match_info);
     for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
@@ -30,33 +31,73 @@ void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_mat
             model::md::Similarity similarity =
                     column_match_info.similarity_info.classifier_values[similarity_index];
             if (similarity >= decision_boundary) {
-                violationg_records_.InsertClusters(left_clusters[left_cluster_index],
-                                                   right_clusters[right_cluster_index]);
+                lam(left_clusters[left_cluster_index], right_clusters[right_cluster_index]);
             }
         }
     }
+}
+
+void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_match_info,
+                                         model::md::DecisionBoundary decision_boundary) {
+    auto InsertClusters = [this](hymd::indexes::PliCluster left_cluster,
+                                 hymd::indexes::PliCluster right_cluster) {
+        violating_records_.InsertClusters(left_cluster, right_cluster);
+    };
+    ProcessSimilarityMatrix(column_match_info, decision_boundary, InsertClusters);
 }
 
 void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& column_match_info,
                                                   model::md::DecisionBoundary decision_boundary) {
-    IntersectionBuilder intersection_builder(violationg_records_);
+    IntersectionBuilder intersection_builder(violating_records_);
 
-    auto const& [left_clusters, right_clusters, similarity_matrix] =
-            GetColumnInfo(column_match_info);
-    for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
-        for (auto const [right_cluster_index, similarity_index] :
-             similarity_matrix[left_cluster_index]) {
-            model::md::Similarity similarity =
-                    column_match_info.similarity_info.classifier_values[similarity_index];
-            if (similarity >= decision_boundary) {
-                intersection_builder.AddIntersection(left_clusters[left_cluster_index],
-                                                     right_clusters[right_cluster_index]);
-            }
-        }
-    }
+    auto AddIntersection = [&intersection_builder](hymd::indexes::PliCluster left_cluster,
+                                                   hymd::indexes::PliCluster right_cluster) {
+        intersection_builder.AddIntersection(left_cluster, right_cluster);
+    };
 
-    violationg_records_ = intersection_builder.Build();
+    ProcessSimilarityMatrix(column_match_info, decision_boundary, AddIntersection);
+
+    violating_records_ = intersection_builder.Build();
 }
+
+// void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_match_info,
+//                                          model::md::DecisionBoundary decision_boundary) {
+//     auto const& [left_clusters, right_clusters, similarity_matrix] =
+//             GetColumnInfo(column_match_info);
+//     for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
+//         for (auto const [right_cluster_index, similarity_index] :
+//              similarity_matrix[left_cluster_index]) {
+//             model::md::Similarity similarity =
+//                     column_match_info.similarity_info.classifier_values[similarity_index];
+//             if (similarity >= decision_boundary) {
+//                 violating_records_.InsertClusters(left_clusters[left_cluster_index],
+//                                                    right_clusters[right_cluster_index]);
+//             }
+//         }
+//     }
+// }
+
+// void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& column_match_info,
+//                                                   model::md::DecisionBoundary decision_boundary)
+//                                                   {
+//     IntersectionBuilder intersection_builder(violating_records_);
+
+//     auto const& [left_clusters, right_clusters, similarity_matrix] =
+//             GetColumnInfo(column_match_info);
+//     for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
+//         for (auto const [right_cluster_index, similarity_index] :
+//              similarity_matrix[left_cluster_index]) {
+//             model::md::Similarity similarity =
+//                     column_match_info.similarity_info.classifier_values[similarity_index];
+//             if (similarity >= decision_boundary) {
+//                 intersection_builder.AddIntersection(left_clusters[left_cluster_index],
+//                                                      right_clusters[right_cluster_index]);
+//             }
+//         }
+//     }
+
+//     violating_records_ = intersection_builder.Build();
+// }
 
 void MDValidationCalculator::UpdateRecordsWithTrivialLhs(
         model::md::Similarity similarity, model::md::DecisionBoundary decision_boundary) {
@@ -64,7 +105,7 @@ void MDValidationCalculator::UpdateRecordsWithTrivialLhs(
         return;
     }
 
-    violationg_records_.Clear();
+    violating_records_.Clear();
 }
 
 void MDValidationCalculator::UpdateRecordsWithRhs(hymd::ColumnMatchInfo const& column_match_info,
@@ -73,19 +114,17 @@ void MDValidationCalculator::UpdateRecordsWithRhs(hymd::ColumnMatchInfo const& c
             GetColumnInfo(column_match_info);
     for (model::Index left_cluster_index : hymd::utility::IndexRange(left_clusters.size())) {
         for (model::Index right_cluster_index : hymd::utility::IndexRange(right_clusters.size())) {
-            model::md::Similarity similarity;
-            if (similarity_matrix[left_cluster_index].find(right_cluster_index) ==
-                similarity_matrix[left_cluster_index].end()) {
-                similarity = 0.0;
-            } else {
-                model::Index similarity_index =
-                        similarity_matrix[left_cluster_index].at(right_cluster_index);
+            model::md::Similarity similarity = 0.0;
+            hymd::indexes::SimilarityMatrixRow const& sim_map =
+                    similarity_matrix[left_cluster_index];
+            if (auto it = sim_map.find(right_cluster_index); it != sim_map.end()) {
+                model::Index similarity_index = it->second;
                 similarity = column_match_info.similarity_info.classifier_values[similarity_index];
             }
 
             if (similarity >= decision_boundary) {
-                violationg_records_.DeleteClusters(left_clusters[left_cluster_index],
-                                                   right_clusters[right_cluster_index]);
+                violating_records_.DeleteClusters(left_clusters[left_cluster_index],
+                                                  right_clusters[right_cluster_index]);
             } else {
                 UpdateRhsSimilarities(left_clusters[left_cluster_index],
                                       right_clusters[right_cluster_index], similarity);
@@ -97,7 +136,7 @@ void MDValidationCalculator::UpdateRecordsWithRhs(hymd::ColumnMatchInfo const& c
 void MDValidationCalculator::UpdateRecordsWithTrivialRhs(
         model::md::Similarity similarity, model::md::DecisionBoundary decision_boundary) {
     if (similarity >= decision_boundary) {
-        violationg_records_.Clear();
+        violating_records_.Clear();
         return;
     }
 
@@ -112,8 +151,8 @@ void MDValidationCalculator::UpdateRecordsWithTrivialRhs(
 
     true_rhs_decision_boundary_ = similarity;
 
-    violationg_records_.Fill(records_info_->GetLeftCompressor().GetNumberOfRecords(),
-                             records_info_->GetRightCompressor().GetNumberOfRecords());
+    violating_records_.Fill(records_info_->GetLeftCompressor().GetNumberOfRecords(),
+                            records_info_->GetRightCompressor().GetNumberOfRecords());
 }
 
 void MDValidationCalculator::UpdateRhsSimilarities(hymd::indexes::PliCluster const& left_cluster,
@@ -121,8 +160,8 @@ void MDValidationCalculator::UpdateRhsSimilarities(hymd::indexes::PliCluster con
                                                    model::md::Similarity rhs_similarity) {
     for (hymd::RecordIdentifier left_record : left_cluster) {
         for (hymd::RecordIdentifier right_record : right_cluster) {
-            auto it = violationg_records_.GetPairs().find(left_record);
-            if (it != violationg_records_.GetPairs().end() &&
+            auto it = violating_records_.GetPairs().find(left_record);
+            if (it != violating_records_.GetPairs().end() &&
                 it->second.find(right_record) != it->second.end()) {
                 true_rhs_decision_boundary_ = std::min(true_rhs_decision_boundary_, rhs_similarity);
                 rhs_records_pair_to_similarity_[{left_record, right_record}] = rhs_similarity;
@@ -133,8 +172,8 @@ void MDValidationCalculator::UpdateRhsSimilarities(hymd::indexes::PliCluster con
 
 bool MDValidationCalculator::TryValidateOrPrepare(
         std::vector<OneOfColumnMatchInfo> const& column_matches_similarity_infos) {
-    auto it = std::find_if(
-            lhs_column_similarity_classifiers_.begin(), lhs_column_similarity_classifiers_.end(),
+    auto it = std::ranges::find_if(
+            lhs_column_similarity_classifiers_,
             [&column_matches_similarity_infos](model::md::ColumnSimilarityClassifier const& clf) {
                 return std::holds_alternative<hymd::ColumnMatchInfo>(
                         column_matches_similarity_infos[clf.GetColumnMatchIndex()]);
@@ -147,50 +186,43 @@ bool MDValidationCalculator::TryValidateOrPrepare(
         return true;
     }
 
-    std::size_t non_trivial_lhs_pos = it - lhs_column_similarity_classifiers_.begin();
-
-    std::swap(lhs_column_similarity_classifiers_[0],
-              lhs_column_similarity_classifiers_[non_trivial_lhs_pos]);
+    std::iter_swap(lhs_column_similarity_classifiers_.begin(), it);
     return false;
 }
 
 void MDValidationCalculator::ValidateAllLhsTrivial(
         std::vector<OneOfColumnMatchInfo> const& column_matches_similarity_infos) {
-    auto it = std::find_if(
-            lhs_column_similarity_classifiers_.begin(), lhs_column_similarity_classifiers_.end(),
+    bool any_lhs_fails = std::ranges::any_of(
+            lhs_column_similarity_classifiers_,
             [&column_matches_similarity_infos](model::md::ColumnSimilarityClassifier const& clf) {
-                OneOfColumnMatchInfo column_match_info =
+                OneOfColumnMatchInfo const& column_match_info =
                         column_matches_similarity_infos[clf.GetColumnMatchIndex()];
                 assert(std::holds_alternative<TrivialColumnMatchInfo>(column_match_info));
                 model::md::Similarity similarity =
                         std::get<TrivialColumnMatchInfo>(column_match_info);
                 return similarity < clf.GetDecisionBoundary();
             });
-    if (it != lhs_column_similarity_classifiers_.end()) {
-        violationg_records_.Clear();
+    if (any_lhs_fails) {
+        violating_records_.Clear();
         return;
     }
 
-    bool is_rhs_trivial = std::holds_alternative<TrivialColumnMatchInfo>(
+    OneOfColumnMatchInfo const& rhs_column_match_info =
             column_matches_similarity_infos[rhs_column_similarity_classifier_
-                                                    .GetColumnMatchIndex()]);
-
-    if (is_rhs_trivial) {
-        model::md::Similarity rhs_similarity = std::get<TrivialColumnMatchInfo>(
-                column_matches_similarity_infos[rhs_column_similarity_classifier_
-                                                        .GetColumnMatchIndex()]);
-        UpdateRecordsWithTrivialRhs(rhs_similarity,
-                                    rhs_column_similarity_classifier_.GetDecisionBoundary());
-        return;
-    }
-
-    violationg_records_.Fill(records_info_->GetLeftCompressor().GetNumberOfRecords(),
-                             records_info_->GetRightCompressor().GetNumberOfRecords());
-
-    UpdateRecordsWithRhs(std::get<hymd::ColumnMatchInfo>(
-                                 column_matches_similarity_infos[rhs_column_similarity_classifier_
-                                                                         .GetColumnMatchIndex()]),
-                         rhs_column_similarity_classifier_.GetDecisionBoundary());
+                                                    .GetColumnMatchIndex()];
+    model::md::DecisionBoundary rhs_decision_boundary =
+            rhs_column_similarity_classifier_.GetDecisionBoundary();
+    std::visit(boost::hof::first_of(
+                       [&](hymd::ColumnMatchInfo const& column_match_info) {
+                           violating_records_.Fill(
+                                   records_info_->GetLeftCompressor().GetNumberOfRecords(),
+                                   records_info_->GetRightCompressor().GetNumberOfRecords());
+                           UpdateRecordsWithRhs(column_match_info, rhs_decision_boundary);
+                       },
+                       [&](TrivialColumnMatchInfo const& similarity) {
+                           UpdateRecordsWithTrivialRhs(similarity, rhs_decision_boundary);
+                       }),
+               rhs_column_match_info);
 }
 
 void MDValidationCalculator::Validate(util::WorkerThreadPool* thread_pool) {
@@ -215,7 +247,7 @@ void MDValidationCalculator::Validate(util::WorkerThreadPool* thread_pool) {
     }
 
     if (TryValidateOrPrepare(column_matches_similarity_infos)) {
-        holds_ = violationg_records_.Empty();
+        holds_ = violating_records_.Empty();
         return;
     }
 
@@ -226,29 +258,33 @@ void MDValidationCalculator::Validate(util::WorkerThreadPool* thread_pool) {
          ++lhs_index) {
         model::md::ColumnSimilarityClassifier const& clf =
                 lhs_column_similarity_classifiers_[lhs_index];
-        OneOfColumnMatchInfo column_match_info =
+        OneOfColumnMatchInfo const& column_match_info =
                 column_matches_similarity_infos[clf.GetColumnMatchIndex()];
-        if (std::holds_alternative<TrivialColumnMatchInfo>(column_match_info)) {
-            UpdateRecordsWithTrivialLhs(std::get<TrivialColumnMatchInfo>(column_match_info),
-                                        clf.GetDecisionBoundary());
-        } else {
-            UpdateRecordsWithLhs(std::get<hymd::ColumnMatchInfo>(column_match_info),
-                                 clf.GetDecisionBoundary());
-        }
+        std::visit(boost::hof::first_of(
+                           [&](hymd::ColumnMatchInfo const& column_match_info) {
+                               UpdateRecordsWithLhs(column_match_info, clf.GetDecisionBoundary());
+                           },
+                           [&](TrivialColumnMatchInfo similarity) {
+                               UpdateRecordsWithTrivialLhs(similarity, clf.GetDecisionBoundary());
+                           }),
+                   column_match_info);
     }
 
-    OneOfColumnMatchInfo rhs_column_match_info =
+    OneOfColumnMatchInfo const& rhs_column_match_info =
             column_matches_similarity_infos[rhs_column_similarity_classifier_
                                                     .GetColumnMatchIndex()];
 
-    if (std::holds_alternative<TrivialColumnMatchInfo>(rhs_column_match_info)) {
-        UpdateRecordsWithTrivialRhs(std::get<TrivialColumnMatchInfo>(rhs_column_match_info),
-                                    rhs_column_similarity_classifier_.GetDecisionBoundary());
-    } else {
-        UpdateRecordsWithRhs(std::get<hymd::ColumnMatchInfo>(rhs_column_match_info),
-                             rhs_column_similarity_classifier_.GetDecisionBoundary());
-    }
+    model::md::DecisionBoundary rhs_decision_boundary =
+            rhs_column_similarity_classifier_.GetDecisionBoundary();
+    std::visit(boost::hof::first_of(
+                       [&](hymd::ColumnMatchInfo const& column_match_info) {
+                           UpdateRecordsWithRhs(column_match_info, rhs_decision_boundary);
+                       },
+                       [&](TrivialColumnMatchInfo similarity) {
+                           UpdateRecordsWithTrivialRhs(similarity, rhs_decision_boundary);
+                       }),
+               rhs_column_match_info);
 
-    holds_ = violationg_records_.Empty();
+    holds_ = violating_records_.Empty();
 }
 }  // namespace algos::md

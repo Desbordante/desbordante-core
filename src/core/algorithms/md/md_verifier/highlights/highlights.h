@@ -15,25 +15,25 @@ public:
         model::Index left_table_row;
         model::Index right_table_row;
         model::md::Similarity similarity;
-        model::RhsSimilarityClassifierDesctription rhs_decs;
+        model::RhsSimilarityClassifierDesctription rhs_desc;
 
         Highlight(model::Index left_table_row, model::Index right_table_row,
-                  model::RhsSimilarityClassifierDesctription rhs_decs,
+                  model::RhsSimilarityClassifierDesctription rhs_desc,
                   model::md::Similarity similarity)
             : left_table_row(left_table_row),
               right_table_row(right_table_row),
               similarity(similarity),
-              rhs_decs(rhs_decs) {}
+              rhs_desc(rhs_desc) {}
 
         std::string ToString() const {
             std::stringstream ss;
             ss << "Rows " << left_table_row << " of the left table and " << right_table_row
                << " of the right table have similarity " << similarity
                << " and violate right-hand side column similarity classifier "
-               << rhs_decs.column_match_description.column_match_name << '('
-               << rhs_decs.column_match_description.left_column_description.column_name << ", "
-               << rhs_decs.column_match_description.right_column_description.column_name
-               << ")>=" << rhs_decs.decision_boundary;
+               << rhs_desc.column_match_description.column_match_name << '('
+               << rhs_desc.column_match_description.left_column_description.column_name << ", "
+               << rhs_desc.column_match_description.right_column_description.column_name
+               << ")>=" << rhs_desc.decision_boundary;
             return ss.str();
         };
 
@@ -42,10 +42,10 @@ public:
             ss << "Rows " << left_table_row << " of the left table and " << right_table_row
                << " of the right table have similarity " << similarity
                << " and violate right-hand side column similarity classifier "
-               << rhs_decs.column_match_description.column_match_name << '('
-               << rhs_decs.column_match_description.left_column_description.column_index << ", "
-               << rhs_decs.column_match_description.right_column_description.column_index
-               << ")>=" << rhs_decs.decision_boundary;
+               << rhs_desc.column_match_description.column_match_name << '('
+               << rhs_desc.column_match_description.left_column_description.column_index << ", "
+               << rhs_desc.column_match_description.right_column_description.column_index
+               << ")>=" << rhs_desc.decision_boundary;
             return ss.str();
         };
     };
@@ -56,9 +56,7 @@ private:
 public:
     MDHighlights() {}
 
-    MDHighlights(std::vector<Highlight> const& highlights) : highlights_(highlights) {}
-
-    MDHighlights(std::vector<Highlight>&& highlights) : highlights_(std::move(highlights)) {}
+    MDHighlights(std::vector<Highlight> highlights) : highlights_(std::move(highlights)) {}
 
     std::vector<Highlight> const& GetHighlights() const {
         return highlights_;

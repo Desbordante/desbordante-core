@@ -1,7 +1,5 @@
 #pragma once
 
-#include <sstream>
-
 #include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
 #include "algorithms/md/md_verifier/cmptr.h"
 

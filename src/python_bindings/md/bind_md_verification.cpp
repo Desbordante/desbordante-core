@@ -23,8 +23,8 @@ void BindHighlights(py::module& md_module) {
             .def_readonly("right_table_row", &MDHighlights::Highlight::right_table_row)
             .def_readonly("similarity", &MDHighlights::Highlight::similarity)
             .def_property_readonly(
-                    "rhs_decs",
-                    [](MDHighlights::Highlight const& record) { return record.rhs_decs; })
+                    "rhs_desc",
+                    [](MDHighlights::Highlight const& record) { return record.rhs_desc; })
             .def("to_string", &MDHighlights::Highlight::ToString)
             .def("to_string_indexed", &MDHighlights::Highlight::ToStringIndexes);
 }
@@ -47,6 +47,7 @@ void BindMDVerification(py::module_& main_module) {
 
     BindPrimitiveNoBase<MDVerifier>(md_verification_module, "MDVerifier")
             .def("get_highlights", &MDVerifier::GetHighlights)
+            .def("get_highlights_copy", &MDVerifier::GetHighlightsCopy)
             .def("get_true_rhs_decision_boundary", &MDVerifier::GetTrueRhsDecisionBoundary)
             .def("md_holds", &MDVerifier::GetResult)
             .def("get_md_suggestions", &MDVerifier::GetMDSuggestion)
