@@ -19,7 +19,7 @@ private:
     config::InputTable input_table_;  // input table for verification
     config::EqNullsType is_null_equal_null_;
     config::IndicesType lhs_indices_;  // indices for LHS attributes of FD
-    config::IndexType rhs_index_;      // index for RHS attribute of FD
+    config::IndicesType rhs_indices_;  // indices for RHS attributes of FD
     PatternsTable patterns_table_;     // table of patterns for attributes
     int min_pattern_fd_coverage_;
     int min_pattern_inclusion_;

@@ -34,6 +34,11 @@ void BindPatternFDVerification(py::module_ &main_module) {
             .def(py::init<std::string const &>(), py::arg("pattern"))
             .def("type", &RegexPatternInfo::Type);
 
+    py::class_<WildcardPatternInfo, PatternInfo, std::shared_ptr<WildcardPatternInfo>>(
+            pattern_fd_verification_module, "Wildcard")
+            .def(py::init<>())
+            .def("type", &WildcardPatternInfo::Type);
+
     py::class_<Highlight>(pattern_fd_verification_module, "Highlight")
             .def_property_readonly("cluster", &Highlight::GetCluster)
             .def_property_readonly("get_violating_rows", &Highlight::GetViolatingRows);
