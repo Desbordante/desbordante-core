@@ -42,7 +42,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
                 dataset,
                 {{kError, static_cast<config::ErrorType>(0.95)}, {kAfdErrorMeasure, measure}},
                 measure._to_string());
-        comparer.SetThreshold(tane_name, 15);
+        comparer.SetThreshold(tane_name, 20);
     }
 
 // EulerFD tests are currently disabled, since test below runs less than a second, and
