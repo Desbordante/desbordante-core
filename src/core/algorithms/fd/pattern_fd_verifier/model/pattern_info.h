@@ -14,8 +14,6 @@ using Pos = size_t;  // position of the token in the string
 
 using TokenNGram = std::string;  // a token is represented as a string (n-gram)
 
-using Pattern = std::string;
-
 class PatternInfo {
 public:
     virtual ~PatternInfo() = default;
@@ -53,11 +51,18 @@ public:
 class RegexPatternInfo : public PatternInfo {
 private:
     std::string regex_;
+    std::vector<std::pair<std::string, size_t>> literals_;
+    size_t num_constrained_groups_ = 0;
 
-    std::string ToRegex(std::string const& pattern_regex) const;
+    std::string ToRegex(std::string const& pattern_regex);
+    void ExtractLiterals(std::string const& p);
+    void CountConstrainedGroups(std::string const& pattern_regex);
 
 public:
-    RegexPatternInfo(std::string const& pattern) : regex_(ToRegex(pattern)) {}
+    RegexPatternInfo(std::string const& pattern) : regex_(ToRegex(pattern)) {
+        CountConstrainedGroups(pattern);
+        ExtractLiterals(pattern);
+    }
 
     std::string const& Regex() const {
         return regex_;
@@ -65,6 +70,25 @@ public:
 
     std::string Type() const override {
         return "RegexPatternInfo";
+    }
+
+    std::vector<std::pair<std::string, size_t>> GetLiterals() const {
+        return literals_;
+    }
+
+    std::vector<std::string> ExtractConstrainedParts(std::string const& value) const;
+
+    bool HasConstraints() const {
+        return num_constrained_groups_ > 0;
+    }
+};
+
+class WildcardPatternInfo : public PatternInfo {
+public:
+    WildcardPatternInfo() = default;
+
+    std::string Type() const override {
+        return "WildcardPatternInfo";
     }
 };
 

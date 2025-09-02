@@ -27,15 +27,7 @@ void PatternFDVerifier::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kLhsIndicesOpt(&lhs_indices_, get_schema_cols));
-    RegisterOption(config::Option<config::IndexType>(&rhs_index_, "rhs_index",
-                                                     "Index of the RHS attribute")
-                           .SetValueCheck([get_schema_cols](size_t index) {
-                               if (index >= get_schema_cols()) {
-                                   throw config::ConfigurationError("RHS index out of bounds: " +
-                                                                    std::to_string(index));
-                               }
-                               return true;
-                           }));
+    RegisterOption(config::kRhsIndicesOpt(&rhs_indices_, get_schema_cols));
     RegisterOption(config::Option<PatternsTable>{
             &patterns_table_, "patterns",
             "Table of patterns (regex or token & index where the token is located)"});
@@ -50,7 +42,7 @@ void PatternFDVerifier::RegisterOptions() {
 
 void PatternFDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kLhsIndices, kRhsIndex, "patterns", "min_pattern_fd_coverage",
+    MakeOptionsAvailable({kLhsIndices, kRhsIndices, "patterns", "min_pattern_fd_coverage",
                           "min_pattern_inclusion", "max_rhs_deviation"});
 }
 
@@ -60,13 +52,14 @@ void PatternFDVerifier::LoadDataInternal() {
     if (typed_relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: Pattern FD verifying is meaningless.");
     }
+    stats_calculator_ = std::make_unique<PatternFDStatsCalculator>(typed_relation_);
 }
 
 unsigned long long PatternFDVerifier::ExecuteInternal() {
     LOG(DEBUG) << "Starting Pattern FD verification...";
 
     auto verification_time = ::util::TimedInvoke(&PatternFDVerifier::VerifyPatternFD, this);
-    LOG(DEBUG) << "CFD verification took " << std::to_string(verification_time) << "ms";
+    LOG(DEBUG) << "Pattern FD verification took " << std::to_string(verification_time) << "ms";
 
     auto stats_calculation_time =
             ::util::TimedInvoke(&PatternFDVerifier::CalculateStatistics, this);
@@ -76,8 +69,7 @@ unsigned long long PatternFDVerifier::ExecuteInternal() {
 }
 
 void PatternFDVerifier::VerifyPatternFD() {
-    stats_calculator_ = std::make_unique<PatternFDStatsCalculator>(typed_relation_, patterns_table_,
-                                                                   lhs_indices_, rhs_index_);
+    stats_calculator_->SetParams(patterns_table_, lhs_indices_, rhs_indices_);
 }
 
 }  // namespace algos::pattern_fd
