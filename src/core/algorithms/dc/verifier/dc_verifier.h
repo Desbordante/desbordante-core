@@ -27,6 +27,8 @@ struct SetComparator {
     }
 };
 
+class Measure;
+
 }  // namespace dc
 
 class DCVerifier final : public Algorithm {
@@ -47,6 +49,7 @@ private:
     std::string dc_string_;
     size_t index_offset_;
     bool result_;
+    dc::DC dc_;
 
     void RegisterOptions();
 
@@ -104,6 +107,16 @@ private:
             violations_.emplace(first->GetIndex(), cur_index);
         }
     }
+
+    // Return frequency of each tuple (considering only attributes in DC)
+    std::unordered_map<dc::Point<dc::Component>, size_t, dc::Point<dc::Component>::Hasher>
+    GetFrequencies() const;
+
+    // Instead of indices of tuples return pairs of exact values in rows
+    std::vector<std::pair<dc::Point<dc::Component>, dc::Point<dc::Component>>> GetRawViolations()
+            const;
+
+    friend class algos::dc::Measure;
 
 public:
     DCVerifier();
