@@ -9,6 +9,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "algorithms/cfd/enums.h"
+#include "algorithms/dd/dd.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
@@ -28,6 +29,7 @@ constexpr PyTypeObject* const kPyBool = &PyBool_Type;
 constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
 constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
+constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
 
 py::handle MakeType(py::type type) {
@@ -91,6 +93,10 @@ py::tuple GetPyType(std::type_index type_index) {
                  return MakeTypeTuple(
                          kPyList,
                          py::type::of<algos::hymd::preprocessing::column_matches::ColumnMatch>());
+             }},
+            {typeid(model::DDString),
+             []() {
+                 return MakeTypeTuple(kPyTuple, kPyList, py::type::of<model::DFStringConstraint>());
              }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},

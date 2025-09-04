@@ -6,6 +6,7 @@
 #include "algorithms/dd/dd.h"
 #include "algorithms/dd/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
+#include "util/create_dd.h"
 
 namespace {
 namespace py = pybind11;
@@ -19,6 +20,7 @@ void BindSplit(py::module_& main_module) {
 
     auto dd_module = main_module.def_submodule("dd");
     py::class_<model::DDString>(dd_module, "DD")
+            .def(py::init(&util::dd::CreateDd))
             .def("__str__", &model::DDString::ToString)
             .def("__repr__", &model::DDString::ToString)
             .def(py::pickle(
