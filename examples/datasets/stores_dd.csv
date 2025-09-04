@@ -1,0 +1,13 @@
+store_name,product_name,category,stock_quantity,price_per_unit
+BestBuy NY,Apple iPhone 15,Smartphones,50,999
+BestBuy LA,Apple iPhone 15,Smartphones,30,1029
+Walmart TX,Apple iPhone 15,Smartphones,40,989
+BestBuy NY,Samsung Galaxy S23,Smartphones,25,899
+BestBuy LA,Samsung Galaxy S23,Smartphones,20,920
+Walmart TX,Samsung Galaxy S23,Smartphones,35,880
+BestBuy NY,Sony WH-1000XM5,Headphones,15,399
+BestBuy LA,Sony WH-1000XM5,Headphones,18,410
+Walmart TX,Sony WH-1000XM5,Headphones,10,395
+BestBuy NY,Apple MacBook Air,Laptops,10,1299
+BestBuy LA,Apple MacBook Air,Laptops,8,1349
+Walmart TX,Apple MacBook Air,Laptops,12,1289
