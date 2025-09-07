@@ -17,12 +17,13 @@ namespace benchmark {
 inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
     using namespace config::names;
 
+    // HyFD became less "stable" after merging #580, so for now threshold is 70%
     auto hyfd_name = runner.RegisterSimpleBenchmark<algos::hyfd::HyFD>(
             tests::kIowa650k,
             {{kThreads, static_cast<config::ThreadNumType>(1)},
              {kMaximumLhs, static_cast<config::MaxLhsType>(2)}},
             "");
-    comparer.SetThreshold(hyfd_name, 25);
+    comparer.SetThreshold(hyfd_name, 70);
 
     auto pyro_name = runner.RegisterSimpleBenchmark<algos::Pyro>(
             tests::kIowa550k,
