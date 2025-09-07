@@ -39,23 +39,23 @@ void MDValidationCalculator::ProcessSimilarityMatrix(
 
 void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_match_info,
                                          model::md::DecisionBoundary decision_boundary) {
-    auto InsertClusters = [this](hymd::indexes::PliCluster left_cluster,
-                                 hymd::indexes::PliCluster right_cluster) {
+    auto insert_clusters = [this](hymd::indexes::PliCluster left_cluster,
+                                  hymd::indexes::PliCluster right_cluster) {
         violating_records_.InsertClusters(left_cluster, right_cluster);
     };
-    ProcessSimilarityMatrix(column_match_info, decision_boundary, InsertClusters);
+    ProcessSimilarityMatrix(column_match_info, decision_boundary, insert_clusters);
 }
 
 void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& column_match_info,
                                                   model::md::DecisionBoundary decision_boundary) {
     IntersectionBuilder intersection_builder(violating_records_);
 
-    auto AddIntersection = [&intersection_builder](hymd::indexes::PliCluster left_cluster,
-                                                   hymd::indexes::PliCluster right_cluster) {
+    auto add_intersection = [&intersection_builder](hymd::indexes::PliCluster left_cluster,
+                                                    hymd::indexes::PliCluster right_cluster) {
         intersection_builder.AddIntersection(left_cluster, right_cluster);
     };
 
-    ProcessSimilarityMatrix(column_match_info, decision_boundary, AddIntersection);
+    ProcessSimilarityMatrix(column_match_info, decision_boundary, add_intersection);
 
     violating_records_ = intersection_builder.Build();
 }
