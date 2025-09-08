@@ -82,7 +82,7 @@ def approximate_scenario(table='examples/datasets/DnD.csv'):
     algo = desbordante.afd_verification.algorithms.Default()
     algo.load_data(table=data)
     algo.execute(lhs_indices=[0], rhs_indices=[1])
-    
+
     # Verifying approximate FD (error threshold sufficient)
     print("Checking whether [Creature] -> [Strength] AFD holds (error threshold = 0.5)")
     print_results_for_afd(algo, 0.5)

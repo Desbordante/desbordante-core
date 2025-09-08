@@ -118,6 +118,239 @@ A higher threshold will reveal more potential errors, but it might also include
 non-typo cases, such as customers who have not made any orders yet.
 '''
 
+snapshots['test_example[basic/verifying_dd.py-None-verifying_dd_output] verifying_dd_output'] = '''This is an example of validating differential dependencies.
+
+Differential dependencies were introduced by Song, Shaoxu,
+and Chen, Lei in their 2011 article, "Differential
+Dependencies: Reasoning and Discovery," published in ACM
+Transactions on Database Systems (Vol. 36, No. 3).
+
+A differential dependency (DD) defines constraints on the
+differences between attribute values within a table.
+These dependencies are formalized using differential
+functions, which specify permissible distance ranges
+between attribute values.
+
+For instance, consider the following differential
+dependency:
+
+flight_id[0,0]; date[0, 7] -> price[0, 250].
+
+This expression is composed of three differential functions:
+flight_id[0,0], date[0, 7], and price[0, 250]. If this
+dependency is applied to a flight schedule table, it
+implies that for any two tuples where the difference
+for identical flights (sharing the same id) in the date
+attribute is no more than 7 days, the corresponding
+difference in the price attribute must not exceed 250 units.
+In simpler terms, this means that the price difference
+between any two identical flights scheduled within the
+same week will be within a 250-unit margin.
+
+Flight schedule table:
+
+   flight_id        date  price
+0         25  2023-08-19    370
+1         25  2023-08-22    200
+2         11  2023-09-01    850
+3         25  2023-09-02    120
+4         11  2023-09-07    700
+5         11  2023-09-12    460
+6         25  2023-10-11    200
+
+It can be observed that this dependency holds true for the
+flights table.
+
+To illustrate this further, we will examine the
+stores_dd.csv dataset and validate a specified
+differential dependency.
+
+It is worth noting that this validator implements
+standard distance metrics for numerical data types
+and dates, as well as the Levenshtein distance for
+strings.
+
+Finally, an additional example of differential dependency
+mining, using the Split algorithm, is also available in
+the Desbordante project.
+
+    store_name        product_name     category  stock_quantity  price_per_unit
+0   BestBuy NY     Apple iPhone 15  Smartphones              50             999
+1   BestBuy LA     Apple iPhone 15  Smartphones              30            1029
+2   Walmart TX     Apple iPhone 15  Smartphones              40             989
+3   BestBuy NY  Samsung Galaxy S23  Smartphones              25             899
+4   BestBuy LA  Samsung Galaxy S23  Smartphones              20             920
+5   Walmart TX  Samsung Galaxy S23  Smartphones              35             880
+6   BestBuy NY     Sony WH-1000XM5   Headphones              15             399
+7   BestBuy LA     Sony WH-1000XM5   Headphones              18             410
+8   Walmart TX     Sony WH-1000XM5   Headphones              10             395
+9   BestBuy NY   Apple MacBook Air      Laptops              10            1299
+10  BestBuy LA   Apple MacBook Air      Laptops               8            1349
+11  Walmart TX   Apple MacBook Air      Laptops              12            1289
+
+----------------------------------------------------------------------------------------------------
+Example #1
+
+To better understand the differential dependency concept,
+let's examine a practical example.
+
+Consider the following DD:
+
+\x1b[1;33mproduct_name [0, 0] -> stock_quantity [0, 20] ; price_per_unit [0, 60]\x1b[0m
+
+This \x1b[1;32mDD holds.\x1b[0m
+
+This dependency requires that for any two records
+with the same product_name, the difference in
+their stock_quantity must not exceed 20, and
+the difference in price_per_unit must not
+exceed 60.
+
+In other words, for the same product sold
+across different stores, stock levels cannot
+vary by more than 20 units, and the price
+cannot vary by more than 60 units.
+----------------------------------------------------------------------------------------------------
+Example #2
+
+Now, let`s check the DD:
+
+\x1b[1;33mstore_name [0, 0] -> stock_quantity [0, 25]\x1b[0m
+
+This means that for a single product, the
+difference in stock quantity between any
+two stores cannot exceed 25 units.
+
+This \x1b[1;31mDD doesn`t hold.\x1b[0m
+
+Desbordante can automatically detect pairs of
+violating tuples. Let’s do it.
+
+Desbordante returned 4 pairs of records that
+violate the stock_quantity threshold.
+
+The error threshold of a differential
+dependency is the ratio of record pairs
+that satisfy the left-hand side (LHS) but
+violate the right-hand side (RHS), to the
+total number of record pairs that satisfy
+the LHS.
+
+In our example error threshold is: \x1b[1;31m0.2222222222222222\x1b[0m
+
+Now, let us look at the pairs of violating tuples:
+
+1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
+7) \x1b[1;32mBestBuy NY\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m15\x1b[0m 399
+
+1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
+10) \x1b[1;32mBestBuy NY\x1b[0m Apple MacBook Air Laptops \x1b[1;31m10\x1b[0m 1299
+
+3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
+9) \x1b[1;32mWalmart TX\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m10\x1b[0m 395
+
+3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
+12) \x1b[1;32mWalmart TX\x1b[0m Apple MacBook Air Laptops \x1b[1;31m12\x1b[0m 1289
+
+Clearly, this DD has no practical
+significance, however, it remains useful for
+demonstration purposes.
+----------------------------------------------------------------------------------------------------
+Example #3
+
+Our previous dependency failed because it
+didn't account for key operational factors.
+For instance, stock levels are influenced
+by product demand and store size, not just
+the store location.
+
+To address this, we refine the dependency
+by adding a constraint on the product_category.
+Next DD, which we are going to check: 
+
+\x1b[1;33mstore_name [0, 0] ; category [0, 0] -> stock_quantity [0, 25]\x1b[0m
+
+This \x1b[1;32mDD holds.\x1b[0m
+
+This differential dependency states:
+
+For tuples with the same store_name and category,
+the stock_quantity must not differ by more than
+25 units.
+----------------------------------------------------------------------------------------------------
+Example #4
+
+Validation of Differential Dependencies can
+also be utilized for mitigating data inaccuracies.
+
+Consider the grades_dd.py table.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Akice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           2        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+We will check the DD:
+
+\x1b[1;33mstudent_id [0, 0] -> student_name [0, 0]\x1b[0m
+
+This \x1b[1;31mDD doesn`t hold.\x1b[0m
+
+1) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-15 95
+2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
+
+2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
+3) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Physics 2025-06-18 80
+
+4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
+5) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-16 70
+
+4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
+6) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-21 68
+
+Error threshold: \x1b[1;31m0.6666666666666666\x1b[0m
+
+We have two pairs of rows that do not conform to
+the constraints imposed by the DD. Let's rectify
+this data error by changing "Akice" to "Alice"
+in the first row of the "student_name" column
+and then re-evaluate the DD's over this table.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Alice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           2        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+After correcting the error, the error threshold
+dropped to \x1b[1;31m0.3333333333333333\x1b[0m
+
+A potential error may also exist in the left-hand
+side of the DD. For instance, in rows 3, 4 and 5
+of the table, we have three entries with an identical
+student_id but a different student_name. Let's
+correct this error and observe the subsequent changes.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Alice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           1        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+After correcting the error, the error threshold
+dropped to \x1b[1;32m0.0\x1b[0m and the \x1b[1;32mDD holds.\x1b[0m
+'''
+
 snapshots['test_example[advanced/comparison_mining_fd_approximate.py-None-comparison_mining_fd_approximate_output] comparison_mining_fd_approximate_output'] = '''
 =======================================================
 This example demonstrates key characteristics of the
