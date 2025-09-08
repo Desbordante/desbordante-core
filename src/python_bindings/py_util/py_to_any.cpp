@@ -9,6 +9,7 @@
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"
+#include "algorithms/fd/pattern_fd_verifier/model/pattern_info.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/metric/enums.h"
@@ -138,7 +139,9 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::unordered_set<size_t>>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kNormalConvPair<algos::pattern_fd::PatternsTable>,
+};
 
 }  // namespace
 
