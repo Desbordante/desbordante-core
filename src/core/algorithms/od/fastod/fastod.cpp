@@ -3,11 +3,11 @@
 #include <memory>
 
 #include <boost/unordered/unordered_map.hpp>
-#include "util/logger.h"
 
 #include "config/tabular_data/input_table/option.h"
 #include "config/time_limit/option.h"
 #include "error/option.h"
+#include "util/logger.h"
 #include "util/timed_invoke.h"
 
 namespace algos {
@@ -91,7 +91,7 @@ void Fastod::PrintStatistics() const {
     size_t const od_count = ocd_count + fd_count;
 
     LOG_DEBUG("RESULT: Time={}, OD={}, FD={}, OCD={}", timer_.GetElapsedSeconds(), od_count,
-                  fd_count, ocd_count);
+              fd_count, ocd_count);
 }
 
 bool Fastod::IsComplete() const {

@@ -5,12 +5,11 @@
 #include <iostream>
 #include <random>
 
-#include "util/logger.h"
-
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
 #include "types/create_type.h"
+#include "util/logger.h"
 
 namespace algos {
 

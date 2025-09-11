@@ -3,12 +3,12 @@
 #include <iostream>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include "util/logger.h"
 
 #include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 
 namespace {
 

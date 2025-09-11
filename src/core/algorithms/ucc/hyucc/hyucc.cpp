@@ -2,12 +2,11 @@
 
 #include <chrono>
 
-#include "util/logger.h"
-
 #include "fd/hycommon/types.h"
 #include "inductor.h"
 #include "preprocessor.h"
 #include "sampler.h"
+#include "util/logger.h"
 #include "validator.h"
 
 namespace algos {

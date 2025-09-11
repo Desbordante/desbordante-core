@@ -8,11 +8,11 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
-#include "util/logger.h"
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
 #include "model/table/agree_set_factory.h"
+#include "util/logger.h"
 #include "util/parallel_for.h"
 
 namespace algos {

@@ -4,10 +4,9 @@
 #include <list>
 #include <memory>
 
-#include "util/logger.h"
-
 #include "model/table/agree_set_factory.h"
 #include "model/table/relational_schema.h"
+#include "util/logger.h"
 
 namespace algos {
 

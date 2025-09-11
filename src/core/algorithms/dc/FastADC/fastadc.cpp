@@ -3,8 +3,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "config/names_and_descriptions.h"
 #include "config/option.h"
 #include "config/option_using.h"
@@ -15,6 +13,7 @@
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "util/logger.h"
 
 namespace algos::dc {
 
@@ -77,8 +76,8 @@ void FastADC::CheckTypes() {
 
         if (type_id == +model::TypeId::kMixed) {
             LOG_WARN("Column with index \"" + std::to_string(column_index) +
-                         "\" contains values of different types. Those values will be "
-                         "treated as strings.");
+                     "\" contains values of different types. Those values will be "
+                     "treated as strings.");
         } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +

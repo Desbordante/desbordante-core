@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "algorithms/nd/nd_verifier/util/stats_calculator.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
 #include "config/descriptions.h"
@@ -23,6 +21,7 @@
 #include "model/types/builtin.h"
 #include "model/types/type.h"
 #include "util/range_to_string.h"
+#include "util/logger.h"
 #include "util/timed_invoke.h"
 
 namespace algos::nd_verifier {
@@ -126,8 +125,7 @@ NDVerifier::CombinedValuesType NDVerifier::CombineValues(
 
             std::byte const* bytes_ptr = byte_data[row_idx];
             if (bytes_ptr == nullptr) {
-                LOG_WARN("WARNING: Cell ({}, {}) is empty", static_cast<int>(*col_idx_pt),
-                             row_idx);
+                LOG_WARN("WARNING: Cell ({}, {}) is empty", static_cast<int>(*col_idx_pt), row_idx);
                 was_null = true;
             }
 
@@ -145,9 +143,9 @@ void NDVerifier::VerifyND() {
     auto [rhs_values, combined_rhs] = CombineValues(rhs_indices_);
 
     LOG_DEBUG("Values combination took {} ms",
-                  std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                         std::chrono::system_clock::now() - local_start_time)
-                                         .count()));
+              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                     std::chrono::system_clock::now() - local_start_time)
+                                     .count()));
 
     local_start_time = std::chrono::system_clock::now();
     std::unordered_map<size_t, std::unordered_set<size_t>> value_deps{};
@@ -163,9 +161,9 @@ void NDVerifier::VerifyND() {
         }
     }
     LOG_DEBUG("Value deps calculation took {} ms",
-                  std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                         std::chrono::system_clock::now() - local_start_time)
-                                         .count()));
+              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                     std::chrono::system_clock::now() - local_start_time)
+                                     .count()));
 
     stats_calculator_ = util::StatsCalculator(std::move(value_deps), std::move(lhs_values),
                                               std::move(rhs_values), std::move(combined_lhs),

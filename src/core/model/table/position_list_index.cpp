@@ -14,10 +14,10 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
-#include "util/logger.h"
 
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
+#include "util/logger.h"
 
 namespace model {
 
@@ -175,7 +175,7 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
             if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
                 LOG_DEBUG("position: " + std::to_string(position) +
-                              "size: " + std::to_string(probing_table->size()));
+                          "size: " + std::to_string(probing_table->size()));
                 for (size_t i = 0; i < positions.size(); ++i) {
                     LOG_DEBUG("Position " + std::to_string(positions[i]));
                 }

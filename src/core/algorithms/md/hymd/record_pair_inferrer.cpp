@@ -6,10 +6,9 @@
 #include <ranges>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "util/get_preallocated_vector.h"
+#include "util/logger.h"
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,

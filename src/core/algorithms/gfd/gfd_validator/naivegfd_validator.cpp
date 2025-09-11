@@ -4,9 +4,9 @@
 #include <set>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include "util/logger.h"
 
 #include "algorithms/gfd/gfd.h"
+#include "util/logger.h"
 
 namespace {
 

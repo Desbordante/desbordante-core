@@ -4,9 +4,9 @@
 #include <vector>
 
 #include <boost/unordered/unordered_flat_map.hpp>
-#include "util/logger.h"
 
 #include "algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "util/logger.h"
 
 namespace {
 using namespace algos::hymd::indexes;

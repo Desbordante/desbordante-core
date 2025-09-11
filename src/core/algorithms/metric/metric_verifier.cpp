@@ -8,14 +8,13 @@
 #include <string>
 #include <utility>
 
-#include "util/logger.h"
-
 #include "config/equal_nulls/option.h"
 #include "config/exceptions.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 
 namespace algos::metric {
 
@@ -196,7 +195,7 @@ void MetricVerifier::VisualizeHighlights() const {
     }
     for (auto const& cluster_highlight : highlight_calculator_->GetHighlights()) {
         LOG_DEBUG("----------------------------------------- LHS value: {}",
-                      GetStringValue(lhs_indices_, cluster_highlight[0].data_index));
+                  GetStringValue(lhs_indices_, cluster_highlight[0].data_index));
         for (auto const& highlight : cluster_highlight) {
             bool is_null =
                     typed_relation_->GetColumnData(rhs_indices_[0]).IsNull(highlight.data_index);
@@ -216,7 +215,7 @@ void MetricVerifier::VisualizeHighlights() const {
                            GetStringValue(rhs_indices_, highlight.furthest_data_index);
             }
             LOG_DEBUG("{}index: {}\t| value: {}{}", begin_desc, highlight.data_index, value,
-                          end_desc);
+                      end_desc);
         }
     }
 }

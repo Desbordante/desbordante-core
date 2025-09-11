@@ -7,9 +7,9 @@
 #include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/version.hpp>
-#include "util/logger.h"
 
 #include "types.h"
+#include "util/logger.h"
 
 #define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
 
