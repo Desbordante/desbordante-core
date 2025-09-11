@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 #include "algorithms/dc/model/tuple.h"
 #include "model/table/column.h"

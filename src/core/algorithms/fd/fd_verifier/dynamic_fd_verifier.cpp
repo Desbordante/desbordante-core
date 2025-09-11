@@ -4,7 +4,7 @@
 #include <memory>
 #include <stdexcept>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
@@ -120,8 +120,8 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
         while (insert_statements_table_->HasNextRow()) {
             std::vector<std::string> row = insert_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns()) {
-                LOG(WARNING) << "Received row with size " << row.size() << ", but expected "
-                             << input_table_->GetNumberOfColumns();
+                LOG_WARN("Received row with size {}, but expected {}", row.size(),
+                             input_table_->GetNumberOfColumns());
                 continue;
             }
             lhs_inserts.emplace_back(std::nullopt, ParseRowForPLI(row.begin(), lhs_indices_));
@@ -133,8 +133,8 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
         while (update_statements_table_->HasNextRow()) {
             std::vector<std::string> row = update_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns() + 1) {
-                LOG(WARNING) << "Received row with size " << row.size() << ", but expected "
-                             << input_table_->GetNumberOfColumns() + 1;
+                LOG_WARN("Received row with size {}, but expected {}", row.size(),
+                             input_table_->GetNumberOfColumns() + 1);
                 continue;
             }
             size_t row_id = std::stoull(row.front());
