@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "algorithms/algorithm.h"
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/decision_boundary.h"
@@ -22,8 +24,8 @@ private:
     std::shared_ptr<RelationalSchema> left_schema_;
     std::shared_ptr<RelationalSchema> right_schema_;
 
-    std::unique_ptr<model::MD> input_md_;
-    std::vector<model::MD> md_suggestions_;
+    std::optional<model::MD> input_md_;
+    std::optional<model::MD> md_suggestion_;
 
     std::vector<ColumnSimilarityClassifier> lhs_;
     ColumnSimilarityClassifier rhs_;
@@ -61,12 +63,20 @@ public:
         return true_rhs_decision_boundary_;
     }
 
-    std::vector<model::MD> const& GetMDSuggestion() const {
-        return md_suggestions_;
+    model::MD const& GetMDSuggestion() const {
+        if (md_suggestion_.has_value()) {
+            return *md_suggestion_;
+        }
+
+        throw std::runtime_error("MD suggestion is not initialized: execute algorithm first");
     }
 
     model::MD GetInputMD() const {
-        return *input_md_;
+        if (input_md_.has_value()) {
+            return *input_md_;
+        }
+
+        throw std::runtime_error("Input MD is not initialized: execute algorithm first");
     }
 
     std::vector<MDHighlights::Highlight> const& GetHighlights() const {

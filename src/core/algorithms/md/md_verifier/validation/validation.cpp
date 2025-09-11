@@ -60,45 +60,6 @@ void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& c
     violating_records_ = intersection_builder.Build();
 }
 
-// void MDValidationCalculator::InitRecords(hymd::ColumnMatchInfo const& column_match_info,
-//                                          model::md::DecisionBoundary decision_boundary) {
-//     auto const& [left_clusters, right_clusters, similarity_matrix] =
-//             GetColumnInfo(column_match_info);
-//     for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
-//         for (auto const [right_cluster_index, similarity_index] :
-//              similarity_matrix[left_cluster_index]) {
-//             model::md::Similarity similarity =
-//                     column_match_info.similarity_info.classifier_values[similarity_index];
-//             if (similarity >= decision_boundary) {
-//                 violating_records_.InsertClusters(left_clusters[left_cluster_index],
-//                                                    right_clusters[right_cluster_index]);
-//             }
-//         }
-//     }
-// }
-
-// void MDValidationCalculator::UpdateRecordsWithLhs(hymd::ColumnMatchInfo const& column_match_info,
-//                                                   model::md::DecisionBoundary decision_boundary)
-//                                                   {
-//     IntersectionBuilder intersection_builder(violating_records_);
-
-//     auto const& [left_clusters, right_clusters, similarity_matrix] =
-//             GetColumnInfo(column_match_info);
-//     for (model::Index left_cluster_index : hymd::utility::IndexRange(similarity_matrix.size())) {
-//         for (auto const [right_cluster_index, similarity_index] :
-//              similarity_matrix[left_cluster_index]) {
-//             model::md::Similarity similarity =
-//                     column_match_info.similarity_info.classifier_values[similarity_index];
-//             if (similarity >= decision_boundary) {
-//                 intersection_builder.AddIntersection(left_clusters[left_cluster_index],
-//                                                      right_clusters[right_cluster_index]);
-//             }
-//         }
-//     }
-
-//     violating_records_ = intersection_builder.Build();
-// }
-
 void MDValidationCalculator::UpdateRecordsWithTrivialLhs(
         model::md::Similarity similarity, model::md::DecisionBoundary decision_boundary) {
     if (similarity >= decision_boundary) {

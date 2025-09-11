@@ -169,7 +169,7 @@ void MDVerifier::VerifyMD() {
     md_holds_ = validator.Holds();
     true_rhs_decision_boundary_ = validator.GetTrueRhsDecisionBoundary();
 
-    md_suggestions_.emplace_back(BuildMD(
+    md_suggestion_ = std::make_unique<model::MD>(BuildMD(
             lhs_, ColumnSimilarityClassifier(rhs_.GetColumnMatch(), true_rhs_decision_boundary_)));
 
     highlights_ = MDHighlights::CreateFrom(input_md_->GetDescription().rhs,

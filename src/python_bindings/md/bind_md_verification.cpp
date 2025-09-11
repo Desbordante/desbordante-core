@@ -26,6 +26,7 @@ void BindHighlights(py::module& md_module) {
                     "rhs_desc",
                     [](MDHighlights::Highlight const& record) { return record.rhs_desc; })
             .def("to_string", &MDHighlights::Highlight::ToString)
+            .def("__str__", &MDHighlights::Highlight::ToString)
             .def("to_string_indexed", &MDHighlights::Highlight::ToStringIndexes);
 }
 
@@ -50,7 +51,7 @@ void BindMDVerification(py::module_& main_module) {
             .def("get_highlights_copy", &MDVerifier::GetHighlightsCopy)
             .def("get_true_rhs_decision_boundary", &MDVerifier::GetTrueRhsDecisionBoundary)
             .def("md_holds", &MDVerifier::GetResult)
-            .def("get_md_suggestions", &MDVerifier::GetMDSuggestion)
+            .def("get_md_suggestion", &MDVerifier::GetMDSuggestion)
             .def("get_input_md", &MDVerifier::GetInputMD);
 }
 }  // namespace python_bindings
