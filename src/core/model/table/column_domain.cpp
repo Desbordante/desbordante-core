@@ -11,11 +11,10 @@
 #include <numeric>
 #include <string>
 
-#include "util/logger.h"
-
 #include "config/thread_number/type.h"
 #include "model/table/block_dataset_stream.h"
 #include "model/table/dataset_stream_fixed.h"
+#include "util/logger.h"
 #include "util/parallel_for.h"
 
 namespace model {

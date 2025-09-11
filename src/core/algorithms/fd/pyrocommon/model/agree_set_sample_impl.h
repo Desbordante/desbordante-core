@@ -4,9 +4,8 @@
 #include <random>
 #include <unordered_map>
 
-#include "util/logger.h"
-
 #include "agree_set_sample.h"
+#include "util/logger.h"
 
 namespace model {
 

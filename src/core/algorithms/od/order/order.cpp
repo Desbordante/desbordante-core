@@ -5,8 +5,6 @@
 #include <memory>
 #include <utility>
 
-#include "util/logger.h"
-
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
 #include "dependency_checker.h"
@@ -14,6 +12,7 @@
 #include "model/table/tuple_index.h"
 #include "model/types/types.h"
 #include "order_utility.h"
+#include "util/logger.h"
 
 namespace algos::order {
 

@@ -8,11 +8,11 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
-#include "util/logger.h"
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
 #include "model/table/agree_set_factory.h"
+#include "util/logger.h"
 #include "util/parallel_for.h"
 
 namespace algos {
@@ -59,7 +59,7 @@ unsigned long long FastFDs::ExecuteInternal() {
     auto task = [this](std::unique_ptr<Column> const& column) {
         if (ColumnContainsOnlyEqualValues(*column)) {
             LOG_DEBUG("Registered FD: {} -> {}", schema_->empty_vertical_->ToString(),
-                          column->ToString());
+                      column->ToString());
             RegisterFd(Vertical(), *column, relation_->GetSharedPtrSchema());
             return;
         }

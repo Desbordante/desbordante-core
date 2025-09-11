@@ -1,9 +1,9 @@
 #include "pli_cache.h"
 
 #include <boost/optional.hpp>
-#include "util/logger.h"
 
 #include "model/table/vertical_map.h"
+#include "util/logger.h"
 
 namespace model {
 
@@ -166,8 +166,8 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
     }
 
     LOG_DEBUG((boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-                   operands.size() % (vertical.GetArity() - operands.size()))
-                          .str());
+               operands.size() % (vertical.GetArity() - operands.size()))
+                      .str());
 
     return variant_intersection_pli;
 }

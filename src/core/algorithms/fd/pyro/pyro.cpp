@@ -4,14 +4,13 @@
 #include <mutex>
 #include <thread>
 
-#include "util/logger.h"
-
 #include "algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
 #include "config/error/option.h"
 #include "config/max_lhs/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "util/logger.h"
 
 namespace algos {
 
@@ -119,9 +118,8 @@ unsigned long long Pyro::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG_INFO(
-            (boost::format{"FdG1 error calculation: %1% ms"} % (FdG1Strategy::nanos_ / 1000000))
-                    .str());
+    LOG_INFO((boost::format{"FdG1 error calculation: %1% ms"} % (FdG1Strategy::nanos_ / 1000000))
+                     .str());
     LOG_INFO("Init time: {} ms", init_time_millis);
     LOG_INFO("Time: {} milliseconds", elapsed_milliseconds.count());
     LOG_INFO("Error calculation count: {}", total_error_calc_count);

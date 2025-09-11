@@ -80,6 +80,7 @@
 #include <type_traits>
 
 #include <boost/container_hash/hash.hpp>
+
 #include "util/logger.h"
 
 namespace model {

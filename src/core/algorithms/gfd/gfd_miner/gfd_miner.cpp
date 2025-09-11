@@ -15,10 +15,10 @@
 #include <boost/graph/copy.hpp>
 #include <boost/graph/isomorphism.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include "util/logger.h"
 
 #include "algorithms/gfd/comparator.h"
 #include "config/option_using.h"
+#include "util/logger.h"
 #include "util/timed_invoke.h"
 
 namespace algos {

@@ -13,10 +13,10 @@
 #define BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
-#include "util/logger.h"
 
 #include "identifier_set.h"
 #include "parallel_for.h"
+#include "util/logger.h"
 
 namespace model {
 
@@ -56,7 +56,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
     auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG_INFO("TIME TO GENERATE AGREE SETS WITH METHOD {}: {}", method_str,
-                 elapsed_mills_to_gen_agree_sets.count());
+             elapsed_mills_to_gen_agree_sets.count());
 
     return agree_sets;
 }
@@ -293,7 +293,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
                                                                   start_time);
     LOG_INFO("TIME TO GENERATE MAX REPRESENTATION WITH METHOD {}: {}", method_str,
-                 elapsed_mills_to_gen_max_representation.count());
+             elapsed_mills_to_gen_max_representation.count());
 
     return max_representation;
 }

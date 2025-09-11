@@ -4,13 +4,12 @@
 #include <mutex>
 #include <thread>
 
-#include "util/logger.h"
-
 #include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"
 #include "config/error/option.h"
 #include "config/max_lhs/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
+#include "util/logger.h"
 
 namespace algos {
 

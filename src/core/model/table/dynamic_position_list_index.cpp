@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
+
 #include "util/logger.h"
 
 namespace {

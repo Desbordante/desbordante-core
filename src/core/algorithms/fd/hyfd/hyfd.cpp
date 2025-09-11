@@ -8,7 +8,6 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include "util/logger.h"
 
 #include "algorithms/fd/hycommon/preprocessor.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
@@ -16,6 +15,7 @@
 #include "config/thread_number/option.h"
 #include "inductor.h"
 #include "sampler.h"
+#include "util/logger.h"
 #include "validator.h"
 
 namespace algos::hyfd {

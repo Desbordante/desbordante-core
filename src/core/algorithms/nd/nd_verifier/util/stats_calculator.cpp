@@ -5,10 +5,9 @@
 #include <string>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "algorithms/nd/nd.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
+#include "util/logger.h"
 
 namespace algos::nd_verifier::util {
 

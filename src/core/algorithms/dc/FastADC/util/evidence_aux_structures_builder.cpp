@@ -3,9 +3,8 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include "util/logger.h"
-
 #include "dc/FastADC/model/predicate.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 

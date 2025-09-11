@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 namespace util::logging {
 
@@ -24,7 +24,7 @@ inline std::shared_ptr<spdlog::logger> GetLogger(std::string const& logger_name 
     return spdlog::get(logger_name);
 }
 
-} // namespace util::logging
+}  // namespace util::logging
 
 #define LOG_TRACE(...) SPDLOG_LOGGER_TRACE(::util::logging::GetLogger(), __VA_ARGS__)
 #define LOG_DEBUG(...) SPDLOG_LOGGER_DEBUG(::util::logging::GetLogger(), __VA_ARGS__)

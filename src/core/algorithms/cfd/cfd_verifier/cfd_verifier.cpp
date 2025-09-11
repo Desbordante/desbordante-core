@@ -1,12 +1,11 @@
 #include "cfd_verifier.h"
 
-#include "util/logger.h"
-
 #include "cfd/model/cfd_relation_data.h"
 #include "cfd/util/cfd_output_util.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 #include "util/timed_invoke.h"
 
 namespace algos::cfd_verifier {

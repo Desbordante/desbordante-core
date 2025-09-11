@@ -42,7 +42,7 @@ inline void ParallelForeach(It begin, It end, unsigned const threads_num_max, Un
         } catch (std::system_error const& e) {
             /* Could not create a new thread */
             LOG_WARN("Created {} threads in ParallelForeach. Could not create new thread:",
-                         threads.size(), e.what());
+                     threads.size(), e.what());
             /* Fall through to the serial case for the remaining elements */
             p = prev;
             break;

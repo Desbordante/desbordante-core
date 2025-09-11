@@ -7,11 +7,10 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include "util/logger.h"
-
 #include "dc/FastADC/providers/index_provider.h"
 #include "model/types/builtin.h"
 #include "model/types/type.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 
@@ -104,7 +103,7 @@ std::vector<size_t> PliShardBuilder::ColumnToHash(model::TypedColumnData const& 
             break;
         default:
             LOG_DEBUG("Column type " + column.GetType().ToString() +
-                          " is not supported for FastADC's PLI sharding");
+                      " is not supported for FastADC's PLI sharding");
             return {};
     }
 
