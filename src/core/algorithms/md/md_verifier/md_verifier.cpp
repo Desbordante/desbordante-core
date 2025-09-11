@@ -155,7 +155,7 @@ MDValidationCalculator MDVerifier::CreateValidator() const {
 }
 
 void MDVerifier::VerifyMD() {
-    input_md_ = std::make_unique<model::MD>(BuildMD(lhs_, rhs_));
+    input_md_ = BuildMD(lhs_, rhs_);
 
     std::optional<util::WorkerThreadPool> pool;
     if (threads_ > 1) {
@@ -169,8 +169,8 @@ void MDVerifier::VerifyMD() {
     md_holds_ = validator.Holds();
     true_rhs_decision_boundary_ = validator.GetTrueRhsDecisionBoundary();
 
-    md_suggestion_ = std::make_unique<model::MD>(BuildMD(
-            lhs_, ColumnSimilarityClassifier(rhs_.GetColumnMatch(), true_rhs_decision_boundary_)));
+    md_suggestion_ = BuildMD(
+            lhs_, ColumnSimilarityClassifier(rhs_.GetColumnMatch(), true_rhs_decision_boundary_));
 
     highlights_ = MDHighlights::CreateFrom(input_md_->GetDescription().rhs,
                                            validator.GetViolatingRecordsPairs(),
