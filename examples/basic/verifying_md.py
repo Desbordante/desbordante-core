@@ -439,4 +439,4 @@ if __name__ == "__main__":
     print("-" * 100, "\n")
     typos_example()
     print("-" * 100, "\n")
-    # flights_example()
+    flights_example()
