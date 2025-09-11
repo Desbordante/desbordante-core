@@ -4,7 +4,7 @@
 #include <random>
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 #include "agree_set_sample.h"
 
@@ -156,7 +156,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
     agreeSetCountersStr.erase(agreeSetCountersStr.end()-1);
     agreeSetCountersStr += '}';
 
-    LOG(DEBUG) << boost::format {"Created sample focused on %1%: %2%"} %
+    LOG_DEBUG() boost::format {"Created sample focused on %1%: %2%"} %
     restriction_vertical->ToString() % agreeSetCountersStr;
     */
     return std::make_unique<T>(relation, restriction_vertical, sample_size, restriction_nep,

@@ -14,14 +14,19 @@ find_package(Threads REQUIRED)
 # Build core project as a static library
 add_library(${BINARY} STATIC ${lib_sources})
 
+# Set the compile-time log level to the most verbose.
+# This ensures that no log calls are compiled out, allowing full runtime control.
+# The actual filtering will be done at runtime based on the level set in the code.
+target_compile_definitions(${BINARY} PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+
 # Link essential dependencies
 # PRIVATE: Boost and threading internals (implementation details)
-# PUBLIC: easyloggingpp affects public interface (logging in headers)
+# PUBLIC: spdlog affects public interface (logging in headers)
 target_link_libraries(
     ${BINARY}
     PRIVATE ${Boost_LIBRARIES} # Boost components specified in find_package
             Threads::Threads # System threading library
-    PUBLIC easyloggingpp # Logging infrastructure exposed in headers
+    PUBLIC spdlog::spdlog_header_only # Logging infrastructure exposed in headers
 )
 
 # ---- Vertical Hashing Optimization ----

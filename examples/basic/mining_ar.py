@@ -2,6 +2,8 @@ import desbordante
 import pandas
 from tabulate import tabulate
 
+#desbordante.logging.set_level("trace")
+
 TABLE_TABULAR = 'examples/datasets/rules_book_rows.csv'
 TABLE_SINGULAR = 'examples/datasets/rules_book.csv'
 COLOR_CODES = {
