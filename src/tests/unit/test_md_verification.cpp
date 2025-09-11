@@ -116,9 +116,8 @@ TEST_P(TestMDVerifierSuggestions, DefaultCase) {
     bool md_result = ExecuteAlgo(*verifier);
 
     ASSERT_EQ(GetParam().expected, md_result);
-    std::vector<model::MD> suggested_mds = verifier->GetMDSuggestion();
-    ASSERT_EQ(suggested_mds.size(), 1);
-    std::string rhs_suggested_md_string = suggested_mds.front().ToStringActiveLhsOnly();
+    model::MD suggested_md = verifier->GetMDSuggestion();
+    std::string rhs_suggested_md_string = suggested_md.ToStringActiveLhsOnly();
     ASSERT_EQ(rhs_suggested_md_string, GetParam().md_string);
     if (md_result) {
         ASSERT_EQ(rhs_suggested_md_string, verifier->GetInputMD().ToStringActiveLhsOnly());
