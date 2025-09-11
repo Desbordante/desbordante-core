@@ -9,7 +9,7 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace {
 // O(cluster)

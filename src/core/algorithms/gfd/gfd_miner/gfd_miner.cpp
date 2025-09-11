@@ -15,7 +15,7 @@
 #include <boost/graph/copy.hpp>
 #include <boost/graph/isomorphism.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
+#include "util/logger.h"
 
 #include "algorithms/gfd/comparator.h"
 #include "config/option_using.h"
@@ -404,7 +404,7 @@ void GfdMiner::ResetState() {}
 
 unsigned long long GfdMiner::ExecuteInternal() {
     std::size_t elapsed_time = util::TimedInvoke(&GfdMiner::MineGfds, this);
-    LOG(DEBUG) << "Mined GFDs: " << gfds_.size();
+    LOG_DEBUG("Mined GFDs: {}", gfds_.size());
     return elapsed_time;
 }
 

@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 #include "fd/hycommon/types.h"
 #include "inductor.h"
@@ -38,13 +38,13 @@ unsigned long long HyUCC::ExecuteInternal() {
     IdPairs comparison_suggestions;
 
     while (true) {
-        LOG(DEBUG) << "Sampling...";
+        LOG_DEBUG("Sampling...");
         NonUCCList non_uccs = sampler.GetNonUCCs(comparison_suggestions);
 
-        LOG(DEBUG) << "Inducing...";
+        LOG_DEBUG("Inducing...");
         inductor.UpdateUCCTree(std::move(non_uccs));
 
-        LOG(DEBUG) << "Validating...";
+        LOG_DEBUG("Validating...");
         comparison_suggestions = validator.ValidateAndExtendCandidates();
 
         if (comparison_suggestions.empty()) {
@@ -55,9 +55,9 @@ unsigned long long HyUCC::ExecuteInternal() {
     auto uccs = ucc_tree->FillUCCs();
     RegisterUCCs(std::move(uccs), og_mapping);
 
-    LOG(DEBUG) << "Mined UCCs:";
+    LOG_DEBUG("Mined UCCs:");
     for (model::UCC const& ucc : UCCList()) {
-        LOG(DEBUG) << ucc.ToString();
+        LOG_DEBUG(ucc.ToString());
     }
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
