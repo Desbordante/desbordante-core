@@ -5,8 +5,9 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/dc/ADCVerifier/adc_verifier.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
 #include "algorithms/dc/measures/measure.h"
-#include "algorithms/dc/verifier/dc_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
 
@@ -17,8 +18,8 @@ using namespace algos::dc;
 
 namespace mo = model;
 
-static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config, std::string const& dc,
-                                       bool do_collect_violations) {
+static algos::StdParamsMap GetParamsMap(CSVConfig const& csv_config, std::string const& dc,
+                                        bool do_collect_violations) {
     using namespace config::names;
     return {{kCsvConfig, csv_config},
             {kDenialConstraint, dc},
@@ -36,7 +37,7 @@ class TestDCMeasures : public ::testing::TestWithParam<MeasureTestParams> {};
 
 TEST_P(TestDCMeasures, DefaultTest) {
     MeasureTestParams const& p = GetParam();
-    algos::StdParamsMap params = GetParamMap(p.csv_config, p.dc_string, true);
+    algos::StdParamsMap params = GetParamsMap(p.csv_config, p.dc_string, true);
     std::shared_ptr<DCVerifier> verifier = algos::CreateAndLoadAlgorithm<DCVerifier>(params);
     verifier->Execute();
     Measure m(verifier);
@@ -61,7 +62,6 @@ INSTANTIATE_TEST_SUITE_P(
     MeasureTestParams{base_dc, kTestDC5, MeasureType::G2, 0.9285714285714285}
     )
 );
-
 // clang-format on
 
 }  // namespace tests

@@ -1,4 +1,4 @@
-#include "algorithms/dc/verifier/dc_verifier.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
 
 #include <algorithm>
 #include <chrono>
@@ -476,7 +476,7 @@ std::unordered_map<dc::Point<dc::Component>, size_t, Point::Hasher> DCVerifier::
     std::unordered_map<dc::Point<dc::Component>, size_t, Point::Hasher> freqs;
     for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
         std::vector<std::byte const*> row = GetRow(i);
-        dc::Point<dc::Component> cur_tuple = MakePoint(row, indices, i + index_offset_);
+        dc::Point<dc::Component> cur_tuple = MakePoint(row, indices);
         freqs[cur_tuple]++;
     }
     return freqs;

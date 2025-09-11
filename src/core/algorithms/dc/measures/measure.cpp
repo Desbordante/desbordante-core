@@ -5,7 +5,7 @@
 #include <ranges>
 #include <vector>
 
-#include "algorithms/dc/verifier/dc_verifier.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
 
 namespace algos::dc {
 
@@ -50,13 +50,12 @@ std::vector<size_t> Measure::GetFrequencies() const {
     return res;
 }
 
-Measure::Measure(std::shared_ptr<algos::DCVerifier> verifier) {
-    verifier_ = std::move(verifier);
-    rel_size_ = verifier_->relation_->GetNumRows();
-    type_to_method_map_[MeasureType::G1] = &Measure::G1;
-    type_to_method_map_[MeasureType::G1_NORM] = &Measure::G1_NORM;
-    type_to_method_map_[MeasureType::G2] = &Measure::G2;
-}
+Measure::Measure(std::shared_ptr<algos::DCVerifier> verifier)
+    : rel_size_(verifier->relation_->GetNumRows()),
+      verifier_(verifier),
+      type_to_method_map_{{MeasureType::G1, &Measure::G1},
+                          {MeasureType::G1_NORM, &Measure::G1_NORM},
+                          {MeasureType::G2, &Measure::G2}} {}
 
 double Measure::Get(MeasureType type) {
     auto it = type_to_method_map_.find(type);

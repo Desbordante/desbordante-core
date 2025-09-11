@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -116,7 +117,7 @@ private:
     std::vector<std::pair<dc::Point<dc::Component>, dc::Point<dc::Component>>> GetRawViolations()
             const;
 
-    friend class algos::dc::Measure;
+    friend class dc::Measure;
 
 public:
     DCVerifier();
