@@ -5,9 +5,9 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
 #include "algorithms/dc/FastADC/fastadc.h"
 #include "algorithms/dc/measures/measure.h"
-#include "algorithms/dc/verifier/dc_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
 

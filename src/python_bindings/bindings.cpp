@@ -10,6 +10,7 @@
 #include "cfd/bind_cfd.h"
 #include "cfd/bind_cfd_verification.h"
 #include "data/bind_data_types.h"
+#include "dc/bind_adc_verification.h"
 #include "dc/bind_dc_verification.h"
 #include "dc/bind_fastadc.h"
 #include "dd/bind_dd_verification.h"
@@ -75,7 +76,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindFastADC,
                            BindGfd,
                            BindCFDVerification,
-                           BindDDVerification}) {
+                           BindDDVerification,
+                           BindADCVerification}) {
         bind_func(module);
     }
 }
