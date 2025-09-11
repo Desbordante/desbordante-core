@@ -1,7 +1,6 @@
 #include "dfd.h"
 
 #include <boost/asio.hpp>
-#include "util/logger.h"
 
 #include "config/max_lhs/option.h"
 #include "config/thread_number/option.h"
@@ -9,6 +8,7 @@
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/position_list_index.h"
 #include "model/table/relational_schema.h"
+#include "util/logger.h"
 
 namespace algos {
 

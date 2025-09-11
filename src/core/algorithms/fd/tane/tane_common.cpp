@@ -5,8 +5,6 @@
 #include <list>
 #include <memory>
 
-#include "util/logger.h"
-
 #include "config/error/option.h"
 #include "fd/pli_based_fd_algorithm.h"
 #include "fd/tane/model/lattice_level.h"
@@ -14,6 +12,7 @@
 #include "model/table/column_data.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/relational_schema.h"
+#include "util/logger.h"
 
 namespace algos {
 using boost::dynamic_bitset;
@@ -134,7 +133,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
     RelationalSchema const* schema = relation_->GetSchema();
 
     LOG_DEBUG("{} has {} columns, {} rows, and a maximum NIP of {:2}.", schema->GetName(),
-                  relation_->GetNumColumns(), relation_->GetNumRows(), relation_->GetMaximumNip());
+              relation_->GetNumColumns(), relation_->GetNumRows(), relation_->GetMaximumNip());
 
     for (auto& column : schema->GetColumns()) {
         double avg_partners = relation_->GetColumnData(column->GetIndex())
@@ -142,7 +141,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
                                       ->GetNepAsLong() *
                               2.0 / relation_->GetNumRows();
         LOG_DEBUG("*{}: every tuple has {:2} partners on average.", column->ToString(),
-                      avg_partners);
+                  avg_partners);
     }
     auto start_time = std::chrono::system_clock::now();
     double progress_step = 100.0 / (schema->GetNumColumns() + 1);

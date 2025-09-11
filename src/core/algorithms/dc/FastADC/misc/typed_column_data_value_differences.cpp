@@ -6,13 +6,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "util/logger.h"
-
 #include "dc/FastADC/misc/misc.h"
 #include "model/table/column.h"
 #include "model/table/typed_column_data.h"
 #include "model/types/builtin.h"
 #include "model/types/type.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 
@@ -69,8 +68,8 @@ double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnD
             return GetSharedPercentageTyped<std::string>(c1, c2);
         default:
             LOG_DEBUG("Column " + c1.GetColumn()->ToString() + " with type " +
-                          c1.GetType().ToString() +
-                          " is not supported for shared percentage calculation");
+                      c1.GetType().ToString() +
+                      " is not supported for shared percentage calculation");
             return -1.0;
     }
 }

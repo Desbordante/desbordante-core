@@ -1,10 +1,9 @@
 #include "order_utility.h"
 
-#include "util/logger.h"
-
 #include "list_lattice.h"
 #include "model/table/column_index.h"
 #include "model/table/typed_column_data.h"
+#include "util/logger.h"
 
 namespace algos::order {
 

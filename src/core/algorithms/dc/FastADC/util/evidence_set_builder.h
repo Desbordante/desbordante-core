@@ -1,9 +1,8 @@
 #pragma once
 
-#include "util/logger.h"
-
 #include "dc/FastADC/model/evidence_set.h"
 #include "dc/FastADC/util/clue_set_builder.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 

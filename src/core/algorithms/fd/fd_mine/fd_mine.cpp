@@ -4,6 +4,7 @@
 #include <vector>
 
 #include <boost/unordered_map.hpp>
+
 #include "util/logger.h"
 
 namespace algos {
@@ -275,7 +276,7 @@ void FdMine::Display() {
             }
             Vertical lhs_vertical(schema_, lhs);
             LOG_DEBUG("Discovered FD: {} -> {}", lhs_vertical.ToString(),
-                          schema_->GetColumn(j)->GetName());
+                      schema_->GetColumn(j)->GetName());
             RegisterFd(std::move(lhs_vertical), *schema_->GetColumn(j),
                        relation_->GetSharedPtrSchema());
             fd_counter++;

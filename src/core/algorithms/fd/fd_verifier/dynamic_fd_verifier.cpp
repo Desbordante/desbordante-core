@@ -4,8 +4,6 @@
 #include <memory>
 #include <stdexcept>
 
-#include "util/logger.h"
-
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
 #include "config/indices/validate_index.h"
@@ -13,6 +11,7 @@
 #include "config/option_using.h"
 #include "config/tabular_data/crud_operations/operations.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 
 namespace algos::fd_verifier {
 
@@ -122,7 +121,7 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
             std::vector<std::string> row = insert_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns()) {
                 LOG_WARN("Received row with size {}, but expected {}", row.size(),
-                             input_table_->GetNumberOfColumns());
+                         input_table_->GetNumberOfColumns());
                 continue;
             }
             lhs_inserts.emplace_back(std::nullopt, ParseRowForPLI(row.begin(), lhs_indices_));
@@ -135,7 +134,7 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
             std::vector<std::string> row = update_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns() + 1) {
                 LOG_WARN("Received row with size {}, but expected {}", row.size(),
-                             input_table_->GetNumberOfColumns() + 1);
+                         input_table_->GetNumberOfColumns() + 1);
                 continue;
             }
             size_t row_id = std::stoull(row.front());

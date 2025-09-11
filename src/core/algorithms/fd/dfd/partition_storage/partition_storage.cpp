@@ -2,9 +2,9 @@
 
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
-#include "util/logger.h"
 
 #include "model/table/vertical_map.h"
+#include "util/logger.h"
 
 model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
@@ -139,8 +139,8 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     }
 
     LOG_DEBUG((boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-                   operands.size() % (vertical.GetArity() - operands.size()))
-                          .str());
+               operands.size() % (vertical.GetArity() - operands.size()))
+                      .str());
 
     return variant_intersection_pli;
 }

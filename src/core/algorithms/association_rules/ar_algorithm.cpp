@@ -3,11 +3,10 @@
 #include <algorithm>
 #include <cassert>
 
-#include "util/logger.h"
-
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 
 namespace algos {
 
@@ -65,7 +64,6 @@ void ARAlgorithm::LoadDataInternal() {
 unsigned long long ARAlgorithm::ExecuteInternal() {
     auto time = FindFrequent();
     time += GenerateAllRules();
-
 
     LOG_TRACE("trace test");
     LOG_DEBUG("debug test");

@@ -9,7 +9,7 @@
 
 namespace {
 namespace py = pybind11;
-} // namespace
+}  // namespace
 
 namespace python_bindings {
 void BindLogging(py::module_& main_module) {
@@ -19,9 +19,9 @@ void BindLogging(py::module_& main_module) {
 
     auto set_log_level = [](std::string const& level) {
         static std::unordered_map<std::string, spdlog::level::level_enum> const kLevels = {
-            {"trace", spdlog::level::trace}, {"debug", spdlog::level::debug},
-            {"info", spdlog::level::info},   {"warn", spdlog::level::warn},
-            {"error", spdlog::level::err},   {"off", spdlog::level::off}};
+                {"trace", spdlog::level::trace}, {"debug", spdlog::level::debug},
+                {"info", spdlog::level::info},   {"warn", spdlog::level::warn},
+                {"error", spdlog::level::err},   {"off", spdlog::level::off}};
 
         auto logger = util::logging::GetLogger();
         if (!logger) {
@@ -43,5 +43,4 @@ void BindLogging(py::module_& main_module) {
     main_module.attr("logging") = logging_module;
 }
 
-} // namespace python_bindings
-
+}  // namespace python_bindings

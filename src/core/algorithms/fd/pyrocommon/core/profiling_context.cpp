@@ -2,11 +2,10 @@
 
 #include <utility>
 
-#include "util/logger.h"
-
 #include "../model/list_agree_set_sample.h"
 #include "../model/pli_cache.h"
 #include "model/table/vertical_map.h"
+#include "util/logger.h"
 
 using std::shared_ptr;
 

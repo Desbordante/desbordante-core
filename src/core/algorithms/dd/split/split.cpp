@@ -16,7 +16,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/regex.hpp>
-#include "util/logger.h"
 
 #include "algorithms/dd/split/model/distance_position_list_index.h"
 #include "config/names_and_descriptions.h"
@@ -25,6 +24,7 @@
 #include "model/table/column_index.h"
 #include "model/types/numeric_type.h"
 #include "util/levenshtein_distance.h"
+#include "util/logger.h"
 
 namespace algos::dd {
 
@@ -146,7 +146,7 @@ unsigned long long Split::ExecuteInternal() {
 
     for (model::ColumnIndex index = 0; index < num_columns_; index++)
         LOG_INFO("{}: {}, {}", input_table_->GetColumnName(non_empty_cols_[index]),
-                     min_max_dif_[index].lower_bound, min_max_dif_[index].upper_bound);
+                 min_max_dif_[index].lower_bound, min_max_dif_[index].upper_bound);
 
     unsigned const search_size = ReduceDDs(start_time);
 
@@ -192,7 +192,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         dfs_y = SearchSpace(index);
         search_size += search.size() * (dfs_y.size() - 1);
         LOG_DEBUG("Calculated search spaces for column {}",
-                      input_table_->GetColumnName(non_empty_cols_[index]));
+                  input_table_->GetColumnName(non_empty_cols_[index]));
         auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
         LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
@@ -222,7 +222,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
         LOG_INFO("Reduced dependencies with their rhs on column {}",
-                     input_table_->GetColumnName(non_empty_cols_[index]));
+                 input_table_->GetColumnName(non_empty_cols_[index]));
         LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
     }
     return search_size;

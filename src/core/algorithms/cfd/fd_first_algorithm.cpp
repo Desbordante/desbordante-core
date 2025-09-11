@@ -3,7 +3,6 @@
 #include <iterator>
 
 #include <boost/unordered_map.hpp>
-#include "util/logger.h"
 
 #include "algorithms/cfd/util/partition_tidlist_util.h"
 #include "algorithms/cfd/util/partition_util.h"
@@ -13,6 +12,7 @@
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
+#include "util/logger.h"
 
 // see algorithms/cfd/LICENSE
 

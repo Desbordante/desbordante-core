@@ -4,13 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "algorithms/fd/hycommon/preprocessor.h"
 #include "algorithms/fd/hycommon/types.h"
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
 #include "algorithms/ucc/hpivalid/tree_search.h"
+#include "util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

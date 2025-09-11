@@ -5,10 +5,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "util/logger.h"
-
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
+#include "util/logger.h"
 
 namespace model {
 
@@ -61,8 +60,7 @@ public:
             while (insert_data->HasNextRow()) {
                 std::vector<std::string> row = insert_data->GetNextRow();
                 if (row.size() != columns_.size()) {
-                    LOG_DEBUG("Got insert statement row with {}  size, skipping...",
-                                  row.size());
+                    LOG_DEBUG("Got insert statement row with {}  size, skipping...", row.size());
                     continue;
                 }
                 for (size_t i = 0; i < row.size(); ++i) {
@@ -74,8 +72,7 @@ public:
             while (update_data->HasNextRow()) {
                 std::vector<std::string> row = update_data->GetNextRow();
                 if (row.size() != columns_.size() + 1) {
-                    LOG_DEBUG("Got update statement row with {}  size, skipping...",
-                                  row.size());
+                    LOG_DEBUG("Got update statement row with {}  size, skipping...", row.size());
                     continue;
                 }
                 size_t row_id = std::stoull(row.front());

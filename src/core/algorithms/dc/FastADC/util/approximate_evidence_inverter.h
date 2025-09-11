@@ -7,13 +7,13 @@
 #include <vector>
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
-#include "util/logger.h"
 
 #include "dc/FastADC/model/evidence_set.h"
 #include "dc/FastADC/util/dc_candidate_trie.h"
 #include "dc/FastADC/util/denial_constraint_set.h"
 #include "dc/FastADC/util/predicate_builder.h"
 #include "dc/FastADC/util/predicate_organizer.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 
