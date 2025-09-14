@@ -8,7 +8,6 @@
 #include <boost/graph/exterior_property.hpp>
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
 
 #include "algorithms/gfd/gfd_validator/balancer.h"
 #include "config/equal_nulls/option.h"
@@ -16,6 +15,7 @@
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
+#include "util/logger.h"
 
 namespace {
 
@@ -362,7 +362,7 @@ std::vector<model::Gfd> GfdValidator::GenerateSatisfiedGfds(model::graph_t const
         unsatisfied.push_back(empty);
     }
 
-    LOG(DEBUG) << "Messages constructed. Matching...";
+    LOG_DEBUG("Messages constructed. Matching...");
     // calculate unsatisfied forall processor (vf2)
     threads.clear();
     for (int i = 0; i < threads_num_; ++i) {
