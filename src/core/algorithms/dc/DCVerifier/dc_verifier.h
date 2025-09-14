@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -27,6 +28,8 @@ struct SetComparator {
     }
 };
 
+class Measure;
+
 }  // namespace dc
 
 class DCVerifier final : public Algorithm {
@@ -47,12 +50,11 @@ private:
     std::string dc_string_;
     size_t index_offset_;
     bool result_;
+    dc::DC dc_;
 
     void RegisterOptions();
 
     void MakeExecuteOptsAvailable();
-
-    bool Verify(dc::DC dc);
 
     bool VerifyOneTuple(dc::DC const& dc);
 
@@ -107,8 +109,20 @@ private:
         }
     }
 
+    // Return frequency of each tuple (considering only attributes in DC)
+    std::unordered_map<dc::Point<dc::Component>, size_t, dc::Point<dc::Component>::Hasher>
+    GetFrequencies() const;
+
+    // Instead of indices of tuples return pairs of exact values in rows
+    std::vector<std::pair<dc::Point<dc::Component>, dc::Point<dc::Component>>> GetRawViolations()
+            const;
+
+    friend class dc::Measure;
+
 public:
     DCVerifier();
+
+    bool Verify(std::string dc_string);
 
     bool DCHolds() const noexcept {
         return result_;
@@ -120,6 +134,7 @@ public:
 
     void ResetState() final {
         violations_.clear();
+        result_ = false;
     };
 
     void LoadDataInternal() final;
