@@ -178,18 +178,44 @@ constexpr auto kDRightTable = "second table processed by the algorithm";
 // IND
 constexpr auto kDTables = "table collection processed by the algorithm";
 // Metric verifier
-constexpr auto kDDistFromNullIsInfinity =
-        "specify whether distance from NULL value is infinity "
-        "(if not, it is 0)";
 auto const kDMetric = details::kDMetricString.c_str();
 auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
 constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
+// Metric verifier, PAC
+constexpr auto kDDistFromNullIsInfinity =
+        "specify whether distance from NULL value is infinity "
+        "(if not, it is 0)";
 // ND
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
+// PAC
+constexpr auto kDColumnIndices = "Column indices";
+constexpr auto kDDiagonalThreshold =
+        "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
+        "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
+        "containing N rows is not considered a change (default is 1e-5)";
+constexpr auto kDDomainPACComparer =
+        "Custom comparer for Domain PAC. If not specified, operator<=> is used.";
+constexpr auto kDDomainPACFirst = "Lower bound of domain of Domain PAC.";
+constexpr auto kDDOmainPACLast = "Upper bound of domain of Domain PAC";
+constexpr auto kDDomainPACMetric =
+        "Custom metric for Domain PAC. If not defined, |b - a| is used for numeric values, "
+        "Levenshtein distance for strings, and Manhattan metric for tuples.";
+constexpr auto kDEpsilonSteps =
+        "Select how many epsilon values to check while verifying PAC (default is 100)";
+constexpr auto kDMaxEpsilon =
+        "Maximal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is 0)";
+constexpr auto kDMinEpsilon =
+        "Minimal value of epsilon, which shows how much values deviate from exact dependency "
+        "(default is 1)";
+constexpr auto kDMinDelta =
+        "Minimal value of delta, which is a probability at which values satisfy the dependency "
+        "(default is 0.9).";
 // Pyro
 constexpr auto kDCustomRandom =
-        "seed for the custom random generator. Used for consistency of results across platforms.";
+        "seed for the custom random generator. Used for consistency of results across "
+        "platforms.";
 // Spider
 constexpr auto kDMemLimitMB = "memory limit im MBs";
 // Split
