@@ -153,4 +153,23 @@ struct ApproximateDatasets<algos::EulerFD> {
     }};
 };
 
+inline std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
+    std::vector<unsigned int> res;
+    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
+         index = bitset.find_next(index)) {
+        res.push_back(index);
+    }
+    return res;
+}
+
+inline std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        std::list<FD> const& fds) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : fds) {
+        auto const& raw_fd = fd.ToRawFD();
+        set.emplace(BitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
+    }
+    return set;
+}
+
 }  // namespace tests
