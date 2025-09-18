@@ -40,7 +40,7 @@ private:
     unsigned long long ExecuteInternal() override;
 
 public:
-    FdMine(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    FdMine();
 };
 
 }  // namespace algos

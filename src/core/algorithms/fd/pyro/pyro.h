@@ -27,7 +27,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    Pyro(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    Pyro();
 };
 
 }  // namespace algos

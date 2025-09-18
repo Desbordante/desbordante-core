@@ -24,7 +24,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    Depminer(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    Depminer();
 };
 
 }  // namespace algos

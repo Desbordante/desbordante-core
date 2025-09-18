@@ -49,7 +49,7 @@ private:
     config::ThreadNumType threads_num_ = 1;
 
 public:
-    HyFD(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    HyFD();
 };
 
 }  // namespace algos::hyfd

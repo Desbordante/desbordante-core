@@ -33,10 +33,4 @@ std::unique_ptr<T> CreateAndLoadAlgorithm(StdParamsMap const& options) {
     LoadAlgorithm(*algorithm, options);
     return algorithm;
 }
-
-std::unique_ptr<Algorithm> CreateAlgorithm(AlgorithmType algorithm_enum,
-                                           StdParamsMap const& options);
-std::unique_ptr<Algorithm> CreateTypoMiner(StdParamsMap const& options);
-std::unique_ptr<Algorithm> CreateAlgorithm(std::string const& algorithm_name,
-                                           StdParamsMap const& options);
 }  // namespace algos

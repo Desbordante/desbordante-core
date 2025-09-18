@@ -12,8 +12,7 @@
 
 namespace algos {
 
-DFD::DFD(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {
+DFD::DFD() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOptions();
 }
 

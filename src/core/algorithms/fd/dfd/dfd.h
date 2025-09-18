@@ -23,7 +23,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
 public:
-    DFD(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    DFD();
 };
 
 }  // namespace algos
