@@ -20,7 +20,7 @@ private:
                                        model::PositionListIndex const* joint_pli) override;
 
 public:
-    PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    PFDTane();
     static config::ErrorType CalculateZeroAryPFDError(ColumnData const* rhs);
     static config::ErrorType CalculatePFDError(model::PositionListIndex const* x_pli,
                                                model::PositionListIndex const* xa_pli,

@@ -20,8 +20,7 @@
 
 namespace algos::hyfd {
 
-HyFD::HyFD(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedFDAlgorithm({}, relation_manager) {
+HyFD::HyFD() : PliBasedFDAlgorithm({}) {
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 

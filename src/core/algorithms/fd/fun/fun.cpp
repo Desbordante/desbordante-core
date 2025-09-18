@@ -20,8 +20,7 @@ bool FunQuadruple::Contains(Vertical const& that) const {
     return candidate_.Contains(that);
 }
 
-FUN::FUN(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {}
+FUN::FUN() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
 void FUN::ResetStateFd() {
     fds_.clear();

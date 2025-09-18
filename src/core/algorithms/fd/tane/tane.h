@@ -18,7 +18,7 @@ private:
                                        model::PositionListIndex const* joint_pli) override;
 
 public:
-    Tane(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    Tane();
 };
 
 }  // namespace algos
