@@ -30,7 +30,7 @@ private:
     void RegisterAndCountFd(Vertical const& lhs, Column const* rhs);
 
 public:
-    TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    TaneCommon();
 };
 
 }  // namespace algos::tane

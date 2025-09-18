@@ -20,8 +20,7 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {
+TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 

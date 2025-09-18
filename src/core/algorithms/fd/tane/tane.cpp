@@ -9,8 +9,7 @@
 
 namespace algos {
 
-Tane::Tane(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : tane::TaneCommon(relation_manager) {
+Tane::Tane() : tane::TaneCommon() {
     RegisterOption(config::kAfdErrorMeasureOpt(&afd_error_measure_));
 }
 
