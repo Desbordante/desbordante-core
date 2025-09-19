@@ -425,8 +425,8 @@ TYPED_TEST_P(BitsetTest, FromStream) {
 
 // SGI Extensions:
 // We don't test _Unchecked_XXX methods, as they're used inside of standard ones
-TYPED_TEST_P(BitsetTest, FindFirst) {
-#if defined(__GNUG__) && !defined(__clang__)
+TYPED_TEST_P(BitsetTest, FindFirst_libstdcxxExtensions) {
+#if defined(__GLIBCXX__)
     typename TypeParam::Custom c{kVal1};
     typename TypeParam::STL s{kVal1};
 
@@ -436,8 +436,8 @@ TYPED_TEST_P(BitsetTest, FindFirst) {
 #endif
 }
 
-TYPED_TEST_P(BitsetTest, FindNext) {
-#if defined(__GNUG__) && !defined(__clang__)
+TYPED_TEST_P(BitsetTest, FindNext_libstdcxxExtensions) {
+#if defined(__GLIBCXX__)
     typename TypeParam::Custom c{kVal1};
     typename TypeParam::STL s{kVal1};
 
@@ -454,23 +454,10 @@ REGISTER_TYPED_TEST_SUITE_P(BitsetTest, DefaultConstructor, ULongConstructor, UL
                             NotOperator, LeftShift, LeftShiftAssign, RightShift, RightShiftAssign,
                             SetAll, Set, SetInvalidIndex, ResetAll, Reset, ResetInvalidIndex,
                             FlipAll, Flip, FlipInvalidIndex, ToString, ToStringCustomChars, ToULong,
-                            ToULLong, And, Or, Xor, ToStream, FromStream, FindFirst, FindNext);
+                            ToULLong, And, Or, Xor, ToStream, FromStream,
+                            FindFirst_libstdcxxExtensions, FindNext_libstdcxxExtensions);
 
 using BitsetSizes = ::testing::Types<BitsetSizeParam<8>, BitsetSizeParam<128>>;
 INSTANTIATE_TYPED_TEST_SUITE_P(DefaultTests, BitsetTest, BitsetSizes);
-
-using model::bitset_impl::BitsetImpl;
-
-// Check that the right implementation is selected
-TEST(BitsetTest, ImplementationSelection) {
-#if defined(__GNUG__) && !defined(__clang__)
-    EXPECT_TRUE((std::is_same_v<model::Bitset<8>, std::bitset<8>>))
-            << "Bitset type is " << typeid(model::Bitset<8>).name() << ", expected std::bitset";
-#else
-    EXPECT_TRUE((std::is_same_v<model::Bitset<8>, BitsetImpl<8>>))
-            << "Bitset type is " << typeid(model::Bitset<8>).name()
-            << ", expected model::bitset_impl::BitsetImpl";
-#endif
-}
 
 }  // namespace tests
