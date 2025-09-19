@@ -30,8 +30,8 @@ protected:
     // One extra value on table containing 10^5 rows
     constexpr static double kDefaultDiagonalThreshold = 1e-5;
 
-    // General options
     config::InputTable input_table_;
+	// TODO(senichenkov): Dist from null is infinity
     bool distance_from_null_is_infinity_;
 
     double min_epsilon_;

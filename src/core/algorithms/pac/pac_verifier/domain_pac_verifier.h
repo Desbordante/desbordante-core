@@ -2,12 +2,12 @@
 
 #include <cstddef>
 #include <memory>
-#include <string>
 #include <vector>
 
-#include "algorithms/pac/model/metrizable_tuple.h"
 #include "algorithms/pac/pac_verifier/pac_verifier.h"
 #include "indices/type.h"
+#include "pac/model/comparable_tuple_type.h"
+#include "pac/model/idomain.h"
 
 namespace algos::pac_verifier {
 class DomainPACVerifier final : public PACVerifier {
@@ -17,13 +17,11 @@ private:
 
     config::IndicesType column_indices_;
 
-    pac::model::Metric custom_metric_;
-    pac::model::Comparer custom_comparer_;
-    std::vector<std::string> first_str_, last_str_;
+    std::shared_ptr<pac::model::ComparableTupleType> tuple_type_;
+    std::shared_ptr<pac::model::IDomain> domain_;
 
     std::shared_ptr<Tuples> original_value_tuples_;
     std::vector<TuplesIter> sorted_value_tuples_;
-    std::shared_ptr<pac::model::MetrizableTupleType> tuple_type_;
     // Iterators in value_tuples_ that fall into Domain itself (i. e. with epsilon = 0)
     std::vector<TuplesIter>::iterator first_value_it_, last_value_it_;
 
@@ -37,9 +35,9 @@ protected:
                                                            unsigned long eps_steps) override;
 
     virtual void ResetPACTypeState() override {
+        tuple_type_ = nullptr;
         original_value_tuples_ = nullptr;
         sorted_value_tuples_ = {};
-        tuple_type_ = nullptr;
     }
 
 public:

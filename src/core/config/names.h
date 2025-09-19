@@ -95,19 +95,17 @@ constexpr auto kRightTable = "right_table";
 constexpr auto kCsvConfigs = "csv_configs";
 constexpr auto kTables = "tables";
 // Metric verifier
+constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
 // Metric verifier, PAC
 constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
-constexpr auto kMetric = "metric";
 // PAC
 constexpr auto kColumnIndices = "indices";
-constexpr auto kComparer = "comparer";
 constexpr auto kDiagonalThreshold = "diagonal_threshold";
+constexpr auto kDomain = "domain";
 constexpr auto kEpsilonSteps = "epsilon_steps";
-constexpr auto kFirst = "lower_bound";
-constexpr auto kLast = "upper_bound";
 constexpr auto kMinDelta = "min_delta";
 constexpr auto kMaxEpsilon = "max_epsilon";
 constexpr auto kMinEpsilon = "min_epsilon";
