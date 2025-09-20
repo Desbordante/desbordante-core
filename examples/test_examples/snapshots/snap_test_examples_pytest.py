@@ -1544,129 +1544,184 @@ Found UCCs:
 Now we can use \x1b[1m\x1b[36mName\x1b[0m as a key
 '''
 
-snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''options: 
-MINIMUM SUPPORT = 8 , MINIMUM CONFIDENCE = 0.7 , MAXIMUM LHS COUNT = 3
-displaying the first five (or fewer) discovered CFDs:
+snapshots['test_example[basic/mining_cfd.py-None-mining_cfd_output] mining_cfd_output'] = '''\x1b[1;34mCFD Mining Example - Desbordante \x1b[0m
 
-CFD:
-{(3, False)} -> (4, True) :
+\x1b[1;34m=== Understanding Conditional Functional Dependencies ===\x1b[0m
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;41m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;49m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;42m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;42m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;49m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;49m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;41m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;49m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;49m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;49m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  8 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
+Conditional functional dependency (CFD) extends a classic functional
+dependency by introducing additional conditions on attributes.
 
+For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
+and “Location” attributes. In this case:
 
+* An FD Department -> Head means that the head is unambiguously determined by the
+  department, indicating that each department (mentioned in the table) has exactly one head.
 
-CFD:
-{(2, _)} -> (4, _) :
+* On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
+  has Smith as its head. Other departments may or may not follow suit.
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+* Finally, there is CFD with a wildcard: (Department=IT, Position=_) -> (Location=NYC). The
+  wildcard symbol allows any values in its place. Therefore, this CFD means that any IT position
+  in the company is available in NYC.
 
+\x1b[1;32m=== Formal Definition ===\x1b[0m
 
+Conditional functional dependency is a very popular concept in the database community, and
+there are several alternative definitions of CFD. In this example, we will rely on the definition
+provided by J. Rammelaere and F. Geerts in 'Revisiting Conditional Functional Dependency
+Discovery: Splitting the “C” from the “FD”', ECML PKDD 2018.
 
-CFD:
-{(4, _)} -> (2, _) :
+A template tuple t is a tuple where each attribute can either have:
+* A fixed constant value
+* A wildcard symbol ('_'), allowing for generalization across different data records.
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  1
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+\x1b[1;32m=== Key Metrics for CFD ===\x1b[0m
+Support: The number of records satisfying the condition X (LHS part)
+Confidence: The fraction of records where Y occurs given X
 
+\x1b[1;34m=== Available CFD Algorithms ===\x1b[0m
 
+Desbordante provides the following CFD mining algorithm:
+* FDFirst (by J. Rammelaere and F. Geerts): The primary algorithm for CFD discovery
+  - Based on the FD-first approach
+  - Discovers FDs first, then adds conditions
+  - Efficient for datasets with clear functional relationships
 
-CFD:
-{(3, _),(2, _)} -> (4, _) :
+Default algorithm: FDFirst
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;42m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;41m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;42m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;42m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;41m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;42m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  2
-support:  14 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 10 \x1b[1;37m/ 14  =  0.7143
+\x1b[1;34m=== Algorithm Parameters Explanation ===\x1b[0m
 
+CFD mining parameters:
+* cfd_minsup (minimum support):
+  - Range: 1 to number of rows in dataset
 
+* cfd_minconf (minimum confidence):
+  - Range: 0.0 to 1.0
 
-CFD:
-{(2, _),(3, False)} -> (4, _) :
+* cfd_max_lhs (maximum LHS size):
+  - Maximum number of attributes in left-hand side
+  - Range: 1 to number of columns
 
-\x1b[1;49m      Outlook Temperature Humidity  Windy   Play
-\x1b[1;42m 0      sunny         hot     high  False  False \x1b[1;49m
-\x1b[1;49m 1      sunny         hot     high   True  False \x1b[1;49m
-\x1b[1;41m 2   overcast         hot     high  False   True \x1b[1;49m
-\x1b[1;41m 3       rain        mild     high  False   True \x1b[1;49m
-\x1b[1;42m 4       rain        cool   normal  False   True \x1b[1;49m
-\x1b[1;49m 5       rain        cool   normal   True  False \x1b[1;49m
-\x1b[1;49m 6   overcast        cool   normal   True   True \x1b[1;49m
-\x1b[1;42m 7      sunny        mild     high  False  False \x1b[1;49m
-\x1b[1;42m 8      sunny        cool   normal  False   True \x1b[1;49m
-\x1b[1;42m 9       rain        mild   normal  False   True \x1b[1;49m
-\x1b[1;49m 10     sunny        mild   normal   True   True \x1b[1;49m
-\x1b[1;49m 11  overcast        mild     high   True   True \x1b[1;49m
-\x1b[1;42m 12  overcast         hot   normal  False   True \x1b[1;49m
-\x1b[1;49m 13      rain        mild     high   True  False \x1b[1;49m
-lhs count:  2
-support:  8 \x1b[1;42m   \x1b[1;41m   \x1b[1;49m
-confidence:  \x1b[1;32m 6 \x1b[1;37m/ 8  =  0.7500
+\x1b[1;34m=== Dataset Explanation ===\x1b[0m
 
+Let’s consider an example dataset containing employee data.
 
+  Department    Position Location  Salary
+0         IT     Manager      NYC    High
+1         IT   Developer      NYC  Medium
+2         HR     Manager       LA    High
+3         HR  Specialist       LA     Low
+4    Finance     Manager  Chicago    High
+5         IT   Developer      NYC  Medium
+6         HR  Specialist   Boston     Low
+7    Finance     Analyst  Chicago  Medium
+
+Expected patterns in this dataset:
+1. We can see that each position has the same salary level. This can be expressed in the
+   following CFD: Position -> Salary. All managers have high salaries, all developers
+   have average salaries, etc.
+2. We might expect certain positions to be department-specific, but examining the data reveals
+   that Managers work across multiple departments (IT, HR, Finance). This violates the potential
+   CFD: Position -> Department, showing that management roles span organizational boundaries.
+3. Looking at the data, one can note that all HR specialists reside in LA, except for one. This
+   fact can be expressed by the following CFD: Department=HR -> Location=LA. However, an HR
+   specialist in Boston (row 6) violates this location pattern. Therefore, this CFD does not hold in
+   the dataset.
+
+\x1b[1;34m=== Detailed CFD Analysis ===\x1b[0m
+
+Now let's discover all conditional functional dependencies in our dataset...
+
+Running CFD mining with the following parameters:
+* Minimum Support (cfd_minsup): 7
+* Minimum Confidence (cfd_minconf): 0.75
+* Maximum LHS Count (cfd_max_lhs): 2
+
+Discovered 9 CFDs:
+  1. {(1, _)} -> (3, _)
+  2. {(3, _)} -> (1, _)
+  3. {(3, _),(2, _)} -> (1, _)
+  4. {(1, _)} -> (0, _)
+  5. {(3, _),(0, _)} -> (1, _)
+  6. {(0, _)} -> (2, _)
+  7. {(2, _)} -> (0, _)
+  8. {(3, _),(0, _)} -> (2, _)
+  9. {(1, _),(0, _)} -> (2, _)
+
+Column mapping: {0: 'Department', 1: 'Position', 2: 'Location', 3: 'Salary'}
+
+Let's analyze some of the discovered CFDs:
+
+\x1b[1;32mCFD: {(1, _)} -> (3, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This CFD represents Position -> Salary dependency.
+As we expected, each position has a consistent salary level.
+All Managers earn High salary, Developers get Medium, and Specialists receive Low.
+This confirms our compensation structure is working correctly - no violations found.
+
+\x1b[1;32mCFD: {(1, _)} -> (0, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 0.75
+Violations: \x1b[1;31m2 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[0, 2]\x1b[0m
+  Cluster #1 violations:
+    Row 0: \x1b[1;31m['Manager'] -> IT\x1b[0m
+    Row 2: \x1b[1;31m['Manager'] -> HR\x1b[0m
+
+Analysis: This CFD represents Position -> Department dependency.
+We suspected this might not hold perfectly, and indeed it doesn't.
+The violations show that Managers work across multiple departments (IT, HR, Finance).
+This actually makes business sense - management roles often span organizational boundaries.
+
+\x1b[1;32mCFD: {(0, _)} -> (2, _)\x1b[0m
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 8
+Confidence: 0.88
+Violations: \x1b[1;31m1 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[6]\x1b[0m
+  Cluster #1 violations:
+    Row 6: \x1b[1;31m['HR'] -> Boston\x1b[0m
+
+Analysis: This CFD represents Department -> Location dependency.
+Just as we suspected - there's likely a data entry error here.
+The violation shows an HR employee in Boston, but we expected all HR staff in LA.
+This Boston HR specialist is probably a mistake that needs to be corrected.
+
+Note: These CFDs use wildcards (_) indicating they apply to any value in those positions.
+This happens because our dataset is small (8 rows) and we're using relatively low thresholds.
+On larger datasets with higher confidence/support thresholds, you'd see more specific
+CFDs with fixed constant values like (Department=IT) -> (Location=NYC).
+
+\x1b[1;34m=== Experimentation Workflow ===\x1b[0m
+
+CFD mining typically requires experimentation to find meaningful patterns:
+1. Start with conservative parameters (high confidence, low support)
+2. Examine discovered CFDs for domain relevance
+3. Adjust parameters based on findings:
+   - Too few CFDs? Lower confidence or support
+   - Too many CFDs? Raise thresholds or limit LHS size
+   - Irrelevant patterns? Focus on specific attributes
+4. Use CFDs to identify and fix data quality issues
+5. Re-run mining on cleaned data for better patterns
+
+This iterative process helps discover:
+* Business rules encoded in the data
+* Data quality issues and outliers
+* Constraints that should be enforced
+
+\x1b[1;32mCFD mining example completed!\x1b[0m
+
+\x1b[1;32mSee verifying_cfd.py for CFD validation examples.\x1b[0m
 
 '''
 
@@ -2833,15 +2888,81 @@ UCC holds, showing stats for AUCC is useless
 --------------------------------------------------------------------------------
 '''
 
-snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''This example demonstrates how to validate Conditional Functional Dependencies (CFDs) using the Desbordante library.
-The definitions are taken from the paper 'Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”' (ECML PKDD 2018).
-CFD expresses a relationship in which a subset of attributes X defines Y, written as (X -> Y, t), where t is a certain template tuple.
-A template tuple t is a tuple where each attribute can either have a fixed constant value or a wildcard symbol ('_'), allowing for generalization across different data records.
-Validation checks whether a user-specified CFD holds for a given dataset, based on the specified values for support and confidence thresholds. Support is the quantity of records satisfying the condition, and confidence is the fraction of records where Y occurs given X.
-Desbordante detects CFD violations and classifies records based on rule compliance.
+snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''\x1b[1;34mCFD Validation Example - Desbordante\x1b[0m
 
+\x1b[1;34m=== Understanding Conditional Functional Dependencies ===\x1b[0m
 
-In the first example, let's look at a dataset containing real estate properties in different cities.
+Conditional functional dependency (CFD) extends a classic functional
+dependency by introducing additional conditions on attributes.
+
+For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
+and “Location” attributes. In this case:
+
+* An FD Department -> Head means that the head is unambiguously determined by the 
+  department, indicating that each department (mentioned in the table) has exactly one head.
+
+* On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
+  has Smith as its head. Other departments may or may not follow suit.
+
+* Finally, there is CFD with a wildcard: (Department=IT, Position=_) -> (Location=NYC). The
+  wildcard symbol allows any values in its place. Therefore, this CFD means that any IT position,
+  which is available in the company, is located in NYC.
+
+\x1b[1;32m=== Formal Definition ===\x1b[0m
+
+Conditional functional dependency is a very popular concept in the database community, and
+there are several alternative definitions of CFD. In this example, we will rely on the definition
+provided by J. Rammelaere and F. Geerts in 'Revisiting Conditional Functional Dependency
+Discovery: Splitting the “C” from the “FD”', ECML PKDD 2018.
+
+A template tuple t is a tuple where each attribute can either have:
+* A fixed constant value
+* A wildcard symbol ('_'), allowing for generalization across different data records.
+
+\x1b[1;32m=== Key Metrics for CFD ===\x1b[0m
+Support: The number of records satisfying the condition X (LHS part)
+Confidence: The fraction of records where Y occurs given X
+
+\x1b[1;34m=== Algorithm Parameters Explanation ===\x1b[0m
+
+CFD verification parameters:
+* cfd_rule: the CFD to verify
+  - CFD object with LHS and RHS
+  - Required parameter
+  - Example: CFD(lhs=[(0, 'Los Angeles'), (3, '_')], rhs=(4, 'high')), where 0,3,4 are attribute indices
+
+* minconf: minimum confidence threshold
+  - Lower values: more tolerant of violations
+  - Range: 0.0 to 1.0
+
+\x1b[1;34m=== CFD Object Operations ===\x1b[0m
+CFDs are objects that support comparison, sets, and decomposition:
+
+\x1b[1;32m1. String Representation:\x1b[0m
+   CFD1: {(0, Los Angeles)} -> (4, high)
+   CFD2: {(0, Los Angeles)} -> (4, high) \x1b[1;32m(same as CFD1)\x1b[0m
+   CFD3: {(0, New York)} -> (4, high)
+   CFD4: {(3, House)} -> (4, high)
+
+\x1b[1;32m2. Decomposition:\x1b[0m
+   CFD1 LHS: [(0, Los Angeles)]
+   CFD1 RHS: (4, high)
+   First LHS item - attribute: 0, value: Los Angeles
+   RHS - attribute: 4, value: high
+
+\x1b[1;32m3. Equality Comparison:\x1b[0m
+   CFD1 == CFD2: True
+   CFD1 == CFD3: False
+
+\x1b[1;32m4. Set Operations:\x1b[0m
+   Discovered CFDs (duplicates removed): 3 unique
+     1. {(0, Los Angeles)} -> (4, high)
+     2. {(0, New York)} -> (4, high)
+     3. {(3, House)} -> (4, high)
+
+\x1b[1;34m=== Dataset Explanation ===\x1b[0m
+
+Real estate dataset containing property information across major US cities:
 
            City          Street  PostalCode BuildingType BuildingCost
 0   Los Angeles  Hollywood Blvd       90029    Apartment         high
@@ -2860,21 +2981,37 @@ In the first example, let's look at a dataset containing real estate properties 
 13      Chicago    Michigan Ave       60611       Office       medium
 14     New York     Wall Street       10005       Office         high
 
-Let's say we want to check whether highly priced buildings in Los Angeles are determined by (depend on) a specific building type.
+Let's put forward some business hypotheses about this dataset: 
+* Los Angeles properties should consistently have high building costs due to premium market
+* All house-type properties should be expensive regardless of location
+* New York apartments should command high prices in the competitive NYC market
+* Apartment pricing may vary significantly across different cities
 
-This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")
+We'll use CFD verification to test these assumptions and identify any data anomalies.
+This approach helps validate business rules and discover data quality issues.
 
-\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
-CFD holds: \x1b[1;31mFalse\x1b[0m
+\x1b[1;34m=== Scenario 1: Finding RHS Violations ===\x1b[0m
+Let's verify our first hypothesis: Los Angeles properties should consistently have high building costs.
+
+CFD to verify: [City='Los Angeles'] -> BuildingCost='high'
+CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 5
 Confidence: 0.80
+Violations: \x1b[1;31m1 rows\x1b[0m
 Number of clusters violating FD: 1
-\x1b[1;34m #1 cluster: \x1b[0m
-\x1b[0m0: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
-\x1b[1;41m6: ['Los Angeles', 'Apartment'] -> ['low']\x1b[0m
-\x1b[0m9: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
 
-We can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.
+Violating rows: \x1b[1;31m[6]\x1b[0m
+  Cluster #1 violations:
+    Row 6: \x1b[1;31m['Los Angeles'] -> low\x1b[0m
+
+Analysis: Our hypothesis is violated! There is one LA property with a non-high cost.
+This suggests either data quality issues or exceptions to the premium market rule.
+
+Let's investigate and fix potential data quality issues:
+Found 1 LA properties with non-high costs:
+  6: Los Angeles, Hollywood Blvd, 90028, Apartment, low
+
+Assuming these are data entry errors, let's correct them:
 
            City          Street  PostalCode BuildingType BuildingCost
 0   Los Angeles  Hollywood Blvd       90029    Apartment         high
@@ -2883,7 +3020,7 @@ We can see that the rule is violated in line 6, which may indicate incorrect dat
 3   Los Angeles     Sunset Blvd       90001        House         high
 4       Chicago    Michigan Ave       60611       Office         high
 5      New York     Wall Street       10005       Office         high
-\x1b[1;42m6   Los Angeles  Hollywood Blvd       90028    Apartment         high\x1b[0m
+\x1b[1;42m6   Los Angeles  Hollywood Blvd       90028    Apartment         high (FIXED)\x1b[0m
 7       Chicago    State Street       60602    Apartment          low
 8      New York        Broadway       10001    Apartment         high
 9   Los Angeles  Hollywood Blvd       90028    Apartment         high
@@ -2892,13 +3029,115 @@ We can see that the rule is violated in line 6, which may indicate incorrect dat
 12  Los Angeles     Sunset Blvd       90001        House         high
 13      Chicago    Michigan Ave       60611       Office       medium
 14     New York     Wall Street       10005       Office         high
-\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
 CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 5
 Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
 Number of clusters violating FD: 0
 
-Thats all for CFD validation. Desbordante is also capable of CFD discovery, which is discussed in "mining_cfd.py".
+CFD now holds perfectly after correction.
+All Los Angeles properties now have 'high' building costs as expected.
+The violation was indeed a data entry error, not a business exception.
+
+This example demonstrates CFDs as powerful data quality tools:
+* Automatically identify inconsistent data patterns
+* Spot outliers that violate business rules
+* Find encoding errors (e.g., 'Low' vs 'low' vs 'LOW')
+
+\x1b[1;34m=== Scenario 2: Analyzing Different LHS Conditions ===\x1b[0m
+In this scenario, we'll explore how different LHS (Left-Hand Side) conditions
+affect CFD validation.
+
+Let's systematically test our business hypotheses, moving from specific to general conditions.
+
+\x1b[1;32mHypothesis 2: Market Premium for Houses\x1b[0m
+Business Logic: Houses typically require more land and construction, commanding premium prices.
+
+CFD to verify: [BuildingType='House'] -> BuildingCost='high'
+If a property is a house, then its building cost should be high
+
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 2
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: Our house pricing hypothesis is confirmed.
+This CFD holds because houses consistently have high costs across all locations.
+
+\x1b[1;32mHypothesis 3: Location + Type Specificity\x1b[0m
+Business Logic: NYC's competitive market + apartment density = premium pricing.
+
+CFD to verify: [City='New York' AND BuildingType='Apartment'] -> BuildingCost='high'
+If a property is an apartment in New York, then its cost should be high
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 3
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This demonstrates how combining conditions creates stronger rules.
+Multiple LHS conditions (City + BuildingType) create more precise CFDs.
+
+\x1b[1;43m\x1b[1;37mHypothesis 4: Testing Generalization Effects\x1b[0m
+Business Logic: Do apartments universally command high prices, or is location crucial?
+
+CFD to verify: [BuildingType='Apartment'] -> BuildingCost='high'
+If a property is an apartment, then its cost should be high
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 9
+Confidence: 0.56
+Violations: \x1b[1;31m4 rows\x1b[0m
+Number of clusters violating FD: 1
+
+Violating rows: \x1b[1;31m[1, 6, 7, 10]\x1b[0m
+  Cluster #1 violations:
+    Row 1: \x1b[1;31m['Apartment'] -> medium\x1b[0m
+    Row 6: \x1b[1;31m['Apartment'] -> low\x1b[0m
+    Row 7: \x1b[1;31m['Apartment'] -> low\x1b[0m
+
+Analysis: This CFD violation reveals important patterns!
+  * Root cause: Location matters - different cities have different apartment pricing
+  * Evidence: 4 violations suggest Chicago/other cities have lower apartment costs
+  * Lesson: Single-attribute conditions can be too general for real-world data
+  * Solution: Either add City constraints OR accept ~56% confidence for general trends
+
+\x1b[1;34m=== Learning Summary: LHS Condition Design ===\x1b[0m
+Key lessons from this scenario:
+
+1. SINGLE CONDITIONS can work when the attribute strongly predicts the outcome
+   Example: [BuildingType='House'] -> Cost='high'
+
+2. MULTIPLE CONDITIONS create more precise, reliable rules
+   Example: [City='New York' AND BuildingType='Apartment'] -> Cost='high'
+
+3. OVERGENERALIZATION often leads to violations
+   Example: [BuildingType='Apartment'] -> Cost='high'
+
+4. BUSINESS CONTEXT should guide CFD design
+   * Consider market factors, geographic differences, property characteristics
+   * Start specific, then test if generalization is possible
+
+Next steps in real applications:
+* Experiment with wildcards (_) for partial generalization
+* Test different confidence thresholds for noisy data
+* Use violation analysis to discover hidden business rules
+
+\x1b[1;34m=== Experimentation Workflow ===\x1b[0m
+CFD validation typically requires experimentation to find meaningful patterns:
+1. Start with strict confidence (1.0) to find exact violations
+2. Lower confidence gradually to handle noisy data
+3. Use wildcards (_) strategically to generalize patterns
+4. Combine domain knowledge with statistical validation
+5. Validate CFDs incrementally as you clean your data
+
+Performance considerations:
+* Larger datasets may require sampling for exploration
+* Complex CFDs with many conditions may be slower
+* Consider validating subsets of your data first
+
+\x1b[1;32mCFD verifying example completed!\x1b[0m
+
 '''
 
 snapshots['test_example[basic/verifying_dc.py-None-verifying_dc_output] verifying_dc_output'] = '''This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
