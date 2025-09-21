@@ -104,11 +104,20 @@ constexpr auto kRightTable = "right_table";
 constexpr auto kCsvConfigs = "csv_configs";
 constexpr auto kTables = "tables";
 // Metric verifier
-constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
 constexpr auto kMetric = "metric";
 constexpr auto kMetricAlgorithm = "metric_algorithm";
 constexpr auto kParameter = "parameter";
 constexpr auto kQGramLength = "q";
+// Metric verifier, PAC
+constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
+// PAC
+constexpr auto kColumnIndices = "column_indices";
+constexpr auto kDeltaSteps = "delta_steps";
+constexpr auto kDiagonalThreshold = "diagonal_threshold";
+constexpr auto kDomain = "domain";
+constexpr auto kMinDelta = "min_delta";
+constexpr auto kMaxEpsilon = "max_epsilon";
+constexpr auto kMinEpsilon = "min_epsilon";
 // Pyro
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
