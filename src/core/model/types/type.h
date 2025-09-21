@@ -13,7 +13,7 @@ private:
     TypeId type_id_;
 
 public:
-    using Destructor = std::function<void(std::byte*)>;
+    using Destructor = std::function<void(std::byte const*)>;
 
     explicit Type(TypeId const type_id) noexcept : type_id_(type_id) {}
 
