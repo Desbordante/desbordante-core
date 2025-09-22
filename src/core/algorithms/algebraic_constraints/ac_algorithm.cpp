@@ -244,10 +244,10 @@ ACPairsCollection const& ACAlgorithm::GetACPairsByColumns(size_t lhs_i, size_t r
 
 void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) const {
     for (size_t i = 0; i < ranges_.size(); ++i) {
-        LOG_DEBUG("lhs: {}\n", data.at(ranges_[i].col_pair.col_i.first).ToString());
-        LOG_DEBUG("rhs: {}\n", data.at(ranges_[i].col_pair.col_i.second).ToString());
+        LOG_DEBUG("lhs: {}", data.at(ranges_[i].col_pair.col_i.first).ToString());
+        LOG_DEBUG("rhs: {}", data.at(ranges_[i].col_pair.col_i.second).ToString());
         if (ranges_[i].ranges.empty()) {
-            LOG_DEBUG("No intervals were found.\n");
+            LOG_DEBUG("No intervals were found.");
             continue;
         }
 
