@@ -65,11 +65,6 @@ unsigned long long ARAlgorithm::ExecuteInternal() {
     auto time = FindFrequent();
     time += GenerateAllRules();
 
-    LOG_TRACE("trace test");
-    LOG_DEBUG("debug test");
-    LOG_INFO("info test");
-    LOG_WARN("warn test");
-    LOG_ERROR("error test");
     LOG_INFO("> Count of association rules: {}", ar_collection_.size());
     return time;
 }
