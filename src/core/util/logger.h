@@ -37,11 +37,11 @@ inline std::shared_ptr<spdlog::logger> GetLogger(std::string const& logger_name 
 
 }  // namespace util::logging
 
-#define GET_CACHED_LOGGER()                                     \
-    ([]() -> std::shared_ptr<spdlog::logger>& {                 \
-        static thread_local std::shared_ptr<spdlog::logger>     \
-            s_logger = ::util::logging::GetLogger();            \
-        return s_logger;                                        \
+#define GET_CACHED_LOGGER()                                            \
+    ([]() -> std::shared_ptr<spdlog::logger>& {                        \
+        static thread_local std::shared_ptr<spdlog::logger> s_logger = \
+                ::util::logging::GetLogger();                          \
+        return s_logger;                                               \
     }())
 
 #define LOG_TRACE(...) SPDLOG_LOGGER_TRACE(GET_CACHED_LOGGER(), __VA_ARGS__)

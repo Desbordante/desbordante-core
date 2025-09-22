@@ -62,7 +62,8 @@ std::optional<DependencyCandidate> SearchSpace::PollLaunchPad() {
                           [&superset_entries](auto& entry) { superset_entries.push_back(entry); });
         }
         if (superset_entries.empty()) return launch_pad;
-        LOG_TRACE("* Escaping launch_pad {} from: [UNIMPLEMENTED]", launch_pad.vertical_.ToString());
+        LOG_TRACE("* Escaping launch_pad {} from: [UNIMPLEMENTED]",
+                  launch_pad.vertical_.ToString());
         std::vector<Vertical> superset_verticals;
 
         for (auto& entry : superset_entries) {
@@ -128,7 +129,7 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
                 strategy_->CreateDependencyCandidate(escaped_launch_pad_vertical);
         LOG_TRACE("Escaped: {}", escaped_launch_pad_vertical.ToString());
         LOG_DEBUG("Proposed launch pad arity: {} should be <= max_lhs: {}",
-                   escaped_launch_pad.vertical_.GetArity(), context_->GetParameters().max_lhs);
+                  escaped_launch_pad.vertical_.GetArity(), context_->GetParameters().max_lhs);
         if (escaped_launch_pad.vertical_.GetArity() <= context_->GetParameters().max_lhs) {
             launch_pads_.insert(escaped_launch_pad);
             launch_pad_index_->Put(escaped_launch_pad.vertical_,
@@ -182,7 +183,9 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
             if (can_be_dependency) break;
         } else {
             if (traversal_candidate.error_.GetMin() > strategy_->max_dependency_error_) {
-                LOG_TRACE("Skipping check form {} (estimated error: {}).", traversal_candidate.vertical_.ToString(), std::string(traversal_candidate.error_));
+                LOG_TRACE("Skipping check form {} (estimated error: {}).",
+                          traversal_candidate.vertical_.ToString(),
+                          std::string(traversal_candidate.error_));
                 error.reset();
             } else {
                 error = context_->GetParameters().is_estimate_only
@@ -251,8 +254,7 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
     // std::cout << static_cast<std::string>(traversal_candidate) << std::endl;
 
     if (!error) {
-        LOG_TRACE(
-                "Hit ceiling at {}.", traversal_candidate.vertical_.ToString());
+        LOG_TRACE("Hit ceiling at {}.", traversal_candidate.vertical_.ToString());
         error = strategy_->CalculateError(traversal_candidate.vertical_);
         [[maybe_unused]] double error_diff = *error - traversal_candidate.error_.GetMean();
         LOG_TRACE("Checking candidate... actual error: {}", *error);
@@ -262,7 +264,8 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
                           .count();
 
     if (*error <= strategy_->max_dependency_error_) {
-        LOG_TRACE("Key peak in climbing phase e({})={} -> Need to minimize.", traversal_candidate.vertical_.ToString(), *error);
+        LOG_TRACE("Key peak in climbing phase e({})={} -> Need to minimize.",
+                  traversal_candidate.vertical_.ToString(), *error);
         TrickleDown(traversal_candidate.vertical_, *error);
 
         if (recursion_depth_ == 0) {
@@ -279,11 +282,13 @@ bool SearchSpace::Ascend(DependencyCandidate const& launch_pad) {
             global_visitees_->Put(
                     traversal_candidate.vertical_,
                     std::make_unique<VerticalInfo>(VerticalInfo::ForMaximalNonDependency()));
-            LOG_DEBUG("[---] {} is maximum non-dependency (err={}).", traversal_candidate.vertical_.ToString(), *error);
+            LOG_DEBUG("[---] {} is maximum non-dependency (err={}).",
+                      traversal_candidate.vertical_.ToString(), *error);
         } else {
             local_visitees_->Put(traversal_candidate.vertical_,
                                  std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
-            LOG_DEBUG("      {} is local-maximum non-dependency (err={}).", traversal_candidate.vertical_.ToString(), *error);
+            LOG_DEBUG("      {} is local-maximum non-dependency (err={}).",
+                      traversal_candidate.vertical_.ToString(), *error);
         }
     }
     return false;
@@ -361,7 +366,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     int num_uncertain_min_deps = 0;
     for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
         if (info->is_extremal_ && !global_visitees_->ContainsKey(alleged_min_dep)) {
-            LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_, alleged_min_dep.ToString(), info->error_);
+            LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_,
+                      alleged_min_dep.ToString(), info->error_);
             // TODO: Костыль -- info в нескольких местах должен храниться. ХЗ, кому он принадлежит,
             // пока копирую
             global_visitees_->Put(alleged_min_dep, std::make_unique<VerticalInfo>(*info));
@@ -372,7 +378,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
         }
     }
 
-    LOG_DEBUG("* {}/{} alleged minimum dependencies might be non-minimal", num_uncertain_min_deps, alleged_min_deps->GetSize());
+    LOG_DEBUG("* {}/{} alleged minimum dependencies might be non-minimal", num_uncertain_min_deps,
+              alleged_min_deps->GetSize());
 
     auto alleged_min_deps_set = alleged_min_deps->KeySet();
     // TODO: костыль: CalculateHittingSet needs a list, but KeySet returns an unordered_set
@@ -417,7 +424,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
                         ? strategy_->CreateDependencyCandidate(alleged_max_non_dep).error_.GetMean()
                         : strategy_->CalculateError(alleged_max_non_dep);
         bool is_non_dep = error > strategy_->min_non_dependency_error_;
-        LOG_TRACE("* Alleged maximal non-dependency {}: non-dep?: {}, error: {}", alleged_max_non_dep.ToString(), is_non_dep, error);
+        LOG_TRACE("* Alleged maximal non-dependency {}: non-dep?: {}, error: {}",
+                  alleged_max_non_dep.ToString(), is_non_dep, error);
         if (is_non_dep) {
             maximal_non_deps.insert(alleged_max_non_dep);
             local_visitees_->Put(alleged_max_non_dep,
@@ -434,7 +442,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     if (peaks.empty()) {
         for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
             if (!info->is_extremal_ && !global_visitees_->ContainsKey(alleged_min_dep)) {
-                LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_, alleged_min_dep.ToString(), info->error_);
+                LOG_DEBUG("[{}] Minimum dependency: {} (error={})", recursion_depth_,
+                          alleged_min_dep.ToString(), info->error_);
                 // TODO: тут надо сделать non-const - костыльный mutable; опять Info в двух местах
                 // хранится
                 info->is_extremal_ = true;
@@ -494,7 +503,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
 
         for (auto& [alleged_min_dep, info] : alleged_min_deps->EntrySet()) {
             if (!IsImpliedByMinDep(alleged_min_dep, global_visitees_.get())) {
-                LOG_DEBUG("[{}] Minimum dependency: {} (error={}) (was right after all)", recursion_depth_, alleged_min_dep.ToString(), info->error_);
+                LOG_DEBUG("[{}] Minimum dependency: {} (error={}) (was right after all)",
+                          recursion_depth_, alleged_min_dep.ToString(), info->error_);
                 // TODO: тут надо сделать non-const - костыльный mutable; опять Info в двух местах
                 // хранится
                 info->is_extremal_ = true;
@@ -588,7 +598,8 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                                      : strategy->CalculateError(min_dep_candidate.vertical_);
     [[maybe_unused]] double error_diff = candidate_error - min_dep_candidate.error_.GetMean();
     if (candidate_error <= strategy->max_dependency_error_) {
-        LOG_TRACE("* Found {}-ary minimum dependency candidate: {}", min_dep_candidate.vertical_.GetArity(), std::string(min_dep_candidate));
+        LOG_TRACE("* Found {}-ary minimum dependency candidate: {}",
+                  min_dep_candidate.vertical_.GetArity(), std::string(min_dep_candidate));
         alleged_min_deps->RemoveSupersetEntries(min_dep_candidate.vertical_);
         alleged_min_deps->Put(min_dep_candidate.vertical_,
                               std::make_unique<VerticalInfo>(true, are_all_parents_known_non_deps,
@@ -601,7 +612,8 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                                         .count();
         return min_dep_candidate.vertical_;
     } else {
-        LOG_TRACE("* Guessed incorrect {}-ary minimum dependency candidate.", min_dep_candidate.vertical_.GetArity());
+        LOG_TRACE("* Guessed incorrect {}-ary minimum dependency candidate.",
+                  min_dep_candidate.vertical_.GetArity());
         local_visitees_->Put(min_dep_candidate.vertical_,
                              std::make_unique<VerticalInfo>(VerticalInfo::ForNonDependency()));
 
