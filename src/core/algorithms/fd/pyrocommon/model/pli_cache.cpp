@@ -47,13 +47,13 @@ PLICache::~PLICache() {
 std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::GetOrCreateFor(
         Vertical const& vertical, ProfilingContext* profiling_context) {
     std::scoped_lock lock(getting_pli_mutex_);
-    LOG_DEBUG((boost::format{"PLI for %1% requested: "} % vertical.ToString()).str());
+    LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
     PositionListIndex* pli = Get(vertical);
     if (pli != nullptr) {
         pli->IncFreq();
-        LOG_DEBUG((boost::format{"Served from PLI cache."}).str());
+        LOG_DEBUG("Served from PLI cache.");
         // addToUsageCounter
         return pli;
     }
@@ -129,7 +129,7 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
               [](auto& el1, auto& el2) { return el1.pli_->GetSize() < el2.pli_->GetSize(); });
     // TODO: Profiling context stuff
 
-    LOG_DEBUG((boost::format{"Intersecting %1%."} % "[UNIMPLEMENTED]").str());
+    LOG_DEBUG("Intersecting [UNIMPLEMENTED].");
 
     if (operands.empty()) {
         throw std::logic_error("Current implementation assumes operands.size() > 0");
@@ -165,9 +165,7 @@ std::variant<PositionListIndex*, std::unique_ptr<PositionListIndex>> PLICache::G
         }
     }
 
-    LOG_DEBUG((boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-               operands.size() % (vertical.GetArity() - operands.size()))
-                      .str());
+    LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(), (vertical.GetArity() - operands.size()));
 
     return variant_intersection_pli;
 }

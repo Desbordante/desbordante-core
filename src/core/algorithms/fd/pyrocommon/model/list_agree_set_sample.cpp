@@ -93,9 +93,7 @@ unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agre
     Entries:
         continue;
     }
-    LOG_DEBUG((boost::format{"AgreeSetSample for %1% against %2% returned %3% "} %
-               agreement.ToString() % disagreement.ToString() % count)
-                      .str());
+    LOG_DEBUG("AgreeSetSample for {} against {} returned {} ", agreement.ToString(), disagreement.ToString(), count);
     // std::cout << '\n';
     //_numQueries
     //_nanoQueries

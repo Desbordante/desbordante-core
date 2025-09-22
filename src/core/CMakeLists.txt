@@ -14,10 +14,10 @@ find_package(Threads REQUIRED)
 # Build core project as a static library
 add_library(${BINARY} STATIC ${lib_sources})
 
-# Set the compile-time log level to the most verbose.
-# This ensures that no log calls are compiled out, allowing full runtime control.
-# The actual filtering will be done at runtime based on the level set in the code.
-target_compile_definitions(${BINARY} PUBLIC SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+target_compile_definitions(${BINARY} PUBLIC
+        $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE>
+        $<$<CONFIG:Release>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO>
+)
 
 # Link essential dependencies
 # PRIVATE: Boost and threading internals (implementation details)
