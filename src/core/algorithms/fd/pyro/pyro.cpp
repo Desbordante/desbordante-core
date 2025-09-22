@@ -117,8 +117,7 @@ unsigned long long Pyro::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG_INFO((boost::format{"FdG1 error calculation: %1% ms"} % (FdG1Strategy::nanos_ / 1000000))
-                     .str());
+    LOG_INFO("FdG1 error calculation: {} ms", (FdG1Strategy::nanos_ / 1000000));
     LOG_INFO("Init time: {} ms", init_time_millis);
     LOG_INFO("Time: {} milliseconds", elapsed_milliseconds.count());
     LOG_INFO("Error calculation count: {}", total_error_calc_count);

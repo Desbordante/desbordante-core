@@ -144,7 +144,7 @@ model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical cons
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG_TRACE((boost::format{"Creating sample focused on: %1%"} % focus.ToString()).str());
+    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
@@ -156,7 +156,7 @@ model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, restriction_pli, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG_TRACE((boost::format{"Creating sample focused on: %1%"} % focus.ToString()).str());
+    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
