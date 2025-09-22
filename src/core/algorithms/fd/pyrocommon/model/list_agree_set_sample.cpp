@@ -93,7 +93,8 @@ unsigned long long ListAgreeSetSample::GetNumAgreeSupersets(Vertical const& agre
     Entries:
         continue;
     }
-    LOG_DEBUG("AgreeSetSample for {} against {} returned {} ", agreement.ToString(), disagreement.ToString(), count);
+    LOG_DEBUG("AgreeSetSample for {} against {} returned {} ", agreement.ToString(),
+              disagreement.ToString(), count);
     // std::cout << '\n';
     //_numQueries
     //_nanoQueries

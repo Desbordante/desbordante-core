@@ -32,19 +32,33 @@ public:
     }
 
 protected:
-    void sink_it_(const spdlog::details::log_msg& msg) override {
+    void sink_it_(spdlog::details::log_msg const& msg) override {
         if (g_is_shutting_down || py_logger_.is_none()) return;
 
         py::gil_scoped_acquire gil;
         int level;
         switch (msg.level) {
-            case spdlog::level::trace:    level = kPyTraceLevel; break;
-            case spdlog::level::debug:    level = 10; break;
-            case spdlog::level::info:     level = 20; break;
-            case spdlog::level::warn:     level = 30; break;
-            case spdlog::level::err:      level = 40; break;
-            case spdlog::level::critical: level = 50; break;
-            default:                      level = 0;  break;
+            case spdlog::level::trace:
+                level = kPyTraceLevel;
+                break;
+            case spdlog::level::debug:
+                level = 10;
+                break;
+            case spdlog::level::info:
+                level = 20;
+                break;
+            case spdlog::level::warn:
+                level = 30;
+                break;
+            case spdlog::level::err:
+                level = 40;
+                break;
+            case spdlog::level::critical:
+                level = 50;
+                break;
+            default:
+                level = 0;
+                break;
         }
 
         spdlog::memory_buf_t formatted;
@@ -84,14 +98,22 @@ spdlog::level::level_enum PyLevelToSpdlogLevel(int py_level) {
 
 int SpdlogLevelToPyLevel(spdlog::level::level_enum level) {
     switch (level) {
-        case spdlog::level::trace:    return kPyTraceLevel;
-        case spdlog::level::debug:    return 10;
-        case spdlog::level::info:     return 20;
-        case spdlog::level::warn:     return 30;
-        case spdlog::level::err:      return 40;
-        case spdlog::level::critical: return 50;
-        case spdlog::level::off:      return 60;
-        default:                      return 0;
+        case spdlog::level::trace:
+            return kPyTraceLevel;
+        case spdlog::level::debug:
+            return 10;
+        case spdlog::level::info:
+            return 20;
+        case spdlog::level::warn:
+            return 30;
+        case spdlog::level::err:
+            return 40;
+        case spdlog::level::critical:
+            return 50;
+        case spdlog::level::off:
+            return 60;
+        default:
+            return 0;
     }
 }
 
@@ -117,7 +139,7 @@ void SetupLoggingBridge() {
             py_logger.attr("propagate") = false;
         }
 
-    } catch (const py::error_already_set& e) {
+    } catch (py::error_already_set const& e) {
         py::print("ERROR: Error during Python logging setup:", e.what());
     }
 }
@@ -128,60 +150,79 @@ void CleanupAtExit() {
     spdlog::shutdown();
 }
 
-} // namespace
+}  // namespace
 
 namespace python_bindings {
 
 void BindLogging(py::module_& main_module) {
-    auto m = main_module.def_submodule("logging", "Logging configuration for the desbordante library.");
+    auto m = main_module.def_submodule("logging",
+                                       "Logging configuration for the desbordante library.");
 
     static std::once_flag once;
     std::call_once(once, SetupLoggingBridge);
 
     py::module_::import("atexit").attr("register")(py::cpp_function(CleanupAtExit));
 
-    py::class_<LoggerProxy>(m, "Logger", "A proxy to a standard Python logger that syncs its level with the C++ core.")
-        .def(py::init([](py::object logger_obj) {
-            return LoggerProxy{ std::move(logger_obj) };
-        }), py::arg("logger"))
+    py::class_<LoggerProxy>(
+            m, "Logger",
+            "A proxy to a standard Python logger that syncs its level with the C++ core.")
+            .def(py::init([](py::object logger_obj) { return LoggerProxy{std::move(logger_obj)}; }),
+                 py::arg("logger"))
 
-        .def("setLevel", [](LoggerProxy const& self, spdlog::level::level_enum level) {
-            (void)self.real_logger.attr("setLevel")(SpdlogLevelToPyLevel(level));
-            SetCppLoggingLevel(level);
-        }, py::arg("level"), "Sets the logging level using the desbordante.logging.Level enum.")
+            .def(
+                    "setLevel",
+                    [](LoggerProxy const& self, spdlog::level::level_enum level) {
+                        (void)self.real_logger.attr("setLevel")(SpdlogLevelToPyLevel(level));
+                        SetCppLoggingLevel(level);
+                    },
+                    py::arg("level"),
+                    "Sets the logging level using the desbordante.logging.Level enum.")
 
-        .def("setLevel", [](LoggerProxy const& self, int level) {
-            (void)self.real_logger.attr("setLevel")(level);
-            SetCppLoggingLevel(PyLevelToSpdlogLevel(level));
-        }, py::arg("level"), "Sets the logging level using a standard Python integer level (e.g., logging.INFO).")
+            .def(
+                    "setLevel",
+                    [](LoggerProxy const& self, int level) {
+                        (void)self.real_logger.attr("setLevel")(level);
+                        SetCppLoggingLevel(PyLevelToSpdlogLevel(level));
+                    },
+                    py::arg("level"),
+                    "Sets the logging level using a standard Python integer level (e.g., "
+                    "logging.INFO).")
 
-        .def("__getattr__", [](LoggerProxy const& self, const std::string& name) {
-            return self.real_logger.attr(name.c_str());
-        });
+            .def("__getattr__", [](LoggerProxy const& self, std::string const& name) {
+                return self.real_logger.attr(name.c_str());
+            });
 
-    m.def("get_logger", []() -> py::object {
-        if (g_is_shutting_down) {
-            py::print("Warning: get_logger() called during interpreter shutdown. Returning None.");
-            return py::none();
-        }
-        if (g_proxy_instance.is_none()) {
-            py::gil_scoped_acquire gil;
-            py::object real_logger = py::module_::import("logging").attr("getLogger")("desbordante");
-            auto proxy_class = py::module_::import("desbordante.logging").attr("Logger");
-            g_proxy_instance = proxy_class(real_logger);
-        }
-        return g_proxy_instance;
-    }, py::return_value_policy::reference, "Returns a proxy to the standard Python logger that syncs its level with the C++ core.");
+    m.def(
+            "get_logger",
+            []() -> py::object {
+                if (g_is_shutting_down) {
+                    py::print(
+                            "Warning: get_logger() called during interpreter shutdown. Returning "
+                            "None.");
+                    return py::none();
+                }
+                if (g_proxy_instance.is_none()) {
+                    py::gil_scoped_acquire gil;
+                    py::object real_logger =
+                            py::module_::import("logging").attr("getLogger")("desbordante");
+                    auto proxy_class = py::module_::import("desbordante.logging").attr("Logger");
+                    g_proxy_instance = proxy_class(real_logger);
+                }
+                return g_proxy_instance;
+            },
+            py::return_value_policy::reference,
+            "Returns a proxy to the standard Python logger that syncs its level with the C++ "
+            "core.");
 
     py::enum_<spdlog::level::level_enum>(m, "Level", "Logging severity level")
-        .value("TRACE", spdlog::level::trace)
-        .value("DEBUG", spdlog::level::debug)
-        .value("INFO", spdlog::level::info)
-        .value("WARNING", spdlog::level::warn)
-        .value("ERROR", spdlog::level::err)
-        .value("CRITICAL", spdlog::level::critical)
-        .value("OFF", spdlog::level::off)
-        .export_values();
+            .value("TRACE", spdlog::level::trace)
+            .value("DEBUG", spdlog::level::debug)
+            .value("INFO", spdlog::level::info)
+            .value("WARNING", spdlog::level::warn)
+            .value("ERROR", spdlog::level::err)
+            .value("CRITICAL", spdlog::level::critical)
+            .value("OFF", spdlog::level::off)
+            .export_values();
 }
 
-} // namespace python_bindings
+}  // namespace python_bindings

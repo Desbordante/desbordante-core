@@ -138,7 +138,8 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         }
     }
 
-    LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(), (vertical.GetArity() - operands.size()));
+    LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(),
+              (vertical.GetArity() - operands.size()));
 
     return variant_intersection_pli;
 }
