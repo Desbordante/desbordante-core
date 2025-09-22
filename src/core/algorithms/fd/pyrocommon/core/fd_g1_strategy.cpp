@@ -15,7 +15,7 @@ double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
                                                     ->GetColumnData(rhs_->GetIndex())
                                                     .GetProbingTable();
 
-    LOG_DEBUG("Probing table size for {}: {}",  rhs_->ToString(), probing_table.size());
+    LOG_DEBUG("Probing table size for {}: {}", rhs_->ToString(), probing_table.size());
 
     // Perform probing
     int probing_table_value_id;
