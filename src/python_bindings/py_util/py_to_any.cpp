@@ -143,7 +143,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::list<std::string>>,
-        kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>};;
+        kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>};
+;
 
 }  // namespace
 

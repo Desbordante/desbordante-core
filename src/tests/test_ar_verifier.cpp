@@ -62,6 +62,7 @@ TEST_P(TestARVerifying, DefaultTest) {
     verifier->Execute();
     EXPECT_TRUE(verifier->ARHolds());
 }
+
 // clang-format off
 INSTANTIATE_TEST_SUITE_P(
     ARVerifyingTestSingular, TestARVerifying,
@@ -97,6 +98,7 @@ INSTANTIATE_TEST_SUITE_P(
                          {.left={"SUGER"}, .right={"CORNFLAKES"}, .min_sup=0.05, .min_conf=0.1})
     ));
 // clang-format on
+
 class TestARVerifierError : public ::testing::Test {
 protected:
     static void CreateAndExecute(ARVerifyingParams const& params) {
