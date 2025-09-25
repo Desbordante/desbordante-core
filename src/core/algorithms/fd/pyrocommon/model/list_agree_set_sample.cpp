@@ -1,6 +1,14 @@
 #include "list_agree_set_sample.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <string>
+
+#include <boost/format.hpp>
 #include <easylogging++.h>
+
+#include "fd/pyrocommon/model/agree_set_sample.h"
+#include "fd/pyrocommon/model/agree_set_sample_impl.h"
 
 namespace model {
 

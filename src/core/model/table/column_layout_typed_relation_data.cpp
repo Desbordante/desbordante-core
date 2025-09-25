@@ -1,6 +1,13 @@
 #include "column_layout_typed_relation_data.h"
 
+#include <string>
+#include <utility>
+
 #include <easylogging++.h>
+
+#include "table/column.h"
+#include "table/idataset_stream.h"
+#include "table/typed_column_data.h"
 
 namespace model {
 

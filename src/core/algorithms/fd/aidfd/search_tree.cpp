@@ -1,5 +1,7 @@
 #include "search_tree.h"
 
+#include <cassert>
+
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset sets_union,
                        SearchTree::Bitset sets_inter, std::shared_ptr<Node> const& parent,
                        std::shared_ptr<Node> left, std::shared_ptr<Node> right)

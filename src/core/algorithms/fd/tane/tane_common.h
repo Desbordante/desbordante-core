@@ -1,11 +1,15 @@
 #pragma once
 
+#include <optional>
+
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/fd/tane/model/lattice_level.h"
 #include "config/error/type.h"
 #include "model/table/column_data.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/position_list_index.h"
+#include "table/column.h"
+#include "table/vertical.h"
 
 namespace algos::tane {
 

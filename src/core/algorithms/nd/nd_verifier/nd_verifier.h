@@ -1,9 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/nd/nd.h"

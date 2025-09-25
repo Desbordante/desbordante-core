@@ -1,8 +1,14 @@
 #pragma once
 
+#include <string>
+
 #include <boost/format.hpp>
 
 #include "dependency_strategy.h"
+#include "fd/pyrocommon/model/confidence_interval.h"
+#include "table/column.h"
+#include "table/position_list_index.h"
+#include "table/vertical.h"
 
 class FdG1Strategy : public DependencyStrategy {
 private:

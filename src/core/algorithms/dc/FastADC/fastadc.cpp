@@ -1,20 +1,32 @@
 #include "algorithms/dc/FastADC/fastadc.h"
 
+#include <chrono>
+#include <cstddef>
 #include <stdexcept>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include <easylogging++.h>
 
+#include "algorithm.h"
+#include "builtin.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "dc/FastADC/model/denial_constraint.h"
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/approximate_evidence_inverter.h"
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
+#include "descriptions.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "names.h"
+#include "table/column_index.h"
+#include "table/typed_column_data.h"
 
 namespace algos::dc {
 

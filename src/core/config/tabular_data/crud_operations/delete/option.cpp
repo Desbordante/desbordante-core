@@ -1,6 +1,11 @@
 #include "config/tabular_data/crud_operations/delete/option.h"
 
+#include <variant>
+
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "names.h"
 
 namespace config {
 using names::kDeleteStatements, descriptions::kDDeleteStatements;

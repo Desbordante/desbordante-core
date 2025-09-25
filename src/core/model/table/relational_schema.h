@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <memory>
@@ -14,11 +15,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/optional.hpp>
+#include <boost/optional/optional.hpp>
 
 #include "bitset_utils.h"
 
 class Column;
-
 class Vertical;
 
 class RelationalSchema {

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+#include <cstddef>
 #include <memory>
 #include <vector>
 
@@ -11,6 +13,8 @@
 #include "config/error_measure/type.h"
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 
 namespace algos {
 

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <tuple>
+#include <variant>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 

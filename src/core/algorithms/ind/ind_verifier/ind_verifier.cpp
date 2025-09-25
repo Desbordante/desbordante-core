@@ -5,18 +5,29 @@
  */
 #include "ind_verifier.h"
 
+#include <functional>
+#include <iosfwd>
+#include <memory>
+#include <ostream>
 #include <set>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
-#include "config/indices/option.h"
+#include "algorithm.h"
 #include "config/tabular_data/input_tables/option.h"
+#include "exceptions.h"
 #include "indices/option.h"
+#include "indices/type.h"
 #include "model/table/dataset_stream_projection.h"
 #include "model/table/table_index.h"
 #include "table/dataset_stream_fixed.h"
+#include "table/idataset_stream.h"
 #include "table/tuple_index.h"
 #include "tabular_data/input_table_type.h"
 #include "timed_invoke.h"

@@ -1,7 +1,7 @@
 #include "dc/FastADC/util/cross_clue_set_builder.h"
 
-#include <stdexcept>
-#include <stdint.h>
+#include <bitset>
+#include <cstdint>
 
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"

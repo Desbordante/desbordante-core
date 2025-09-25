@@ -1,13 +1,19 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <optional>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/od/fastod/model/attribute_set.h"
 #include "config/equal_nulls/type.h"
 #include "config/tabular_data/input_table_type.h"
+#include "table/column_index.h"
 #include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
 
 namespace algos::fastod {
 

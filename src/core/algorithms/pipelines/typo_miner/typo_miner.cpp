@@ -1,11 +1,37 @@
 #include "typo_miner.h"
 
+#include <algorithm>
+#include <chrono>
+#include <deque>
+#include <initializer_list>
+#include <iterator>
+#include <list>
+#include <numeric>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+
+#include <boost/mp11/algorithm.hpp>
+#include <boost/type_index.hpp>
+
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "create_algorithm.h"
+#include "descriptions.h"
+#include "error/type.h"
+#include "names.h"
+#include "option.h"
+#include "table/column_data.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/idataset_stream.h"
+#include "table/typed_column_data.h"
+#include "table/vertical.h"
 
 namespace {
 using namespace algos;

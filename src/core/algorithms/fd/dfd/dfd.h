@@ -1,7 +1,9 @@
 #pragma once
 
+#include <optional>
 #include <random>
 #include <stack>
+#include <vector>
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "config/thread_number/type.h"

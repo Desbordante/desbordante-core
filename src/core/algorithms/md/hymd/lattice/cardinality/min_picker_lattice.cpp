@@ -1,8 +1,16 @@
 #include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
+#include <algorithm>
 #include <cassert>
+#include <functional>
+#include <map>
+#include <utility>
 
 #include "algorithms/md/hymd/utility/reserve_more.h"
+#include "index.h"
+#include "md/hymd/lattice/md_lattice.h"
+#include "md/hymd/lattice/node_base.h"
+#include "md/hymd/lattice/validation_info.h"
 
 namespace algos::hymd::lattice::cardinality {
 using namespace algos::hymd;

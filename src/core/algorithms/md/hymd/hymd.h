@@ -81,6 +81,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
     class RegisterHelper;
+
     void RegisterResults(SimilarityData const& similarity_data,
                          std::vector<lattice::MdLatticeNodeInfo> lattice_mds);
 

@@ -1,8 +1,13 @@
 #include "config/max_lhs/option.h"
 
 #include <limits>
+#include <variant>
 
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "max_lhs/type.h"
+#include "names.h"
 
 namespace config {
 using names::kMaximumLhs, descriptions::kDMaximumLhs;

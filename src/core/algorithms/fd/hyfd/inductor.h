@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <utility>
+
 #include <boost/dynamic_bitset.hpp>
 
 #include "algorithms/fd/hyfd/model/fd_tree.h"

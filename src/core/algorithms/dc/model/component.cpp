@@ -1,12 +1,12 @@
 #include "component.h"
 
-#include <cstddef>
+#include <cassert>
 #include <stdexcept>
 #include <string>
 
 #include "algorithms/dc/model/operator.h"
 #include "model/types/builtin.h"
-#include "model/types/types.h"
+#include "numeric_type.h"
 
 namespace algos::dc {
 

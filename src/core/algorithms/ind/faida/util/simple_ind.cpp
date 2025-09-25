@@ -1,6 +1,9 @@
 #include "simple_ind.h"
 
-#include "cassert"
+#include <cassert>
+#include <vector>
+
+#include "ind/faida/util/simple_cc.h"
 
 namespace algos::faida {
 

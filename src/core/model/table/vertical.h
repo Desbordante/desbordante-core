@@ -12,6 +12,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "column.h"
+#include "table/relational_schema.h"
 
 class Vertical {
 private:

@@ -1,6 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
@@ -15,7 +17,9 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
+#include "numeric_type.h"
 #include "ranges_collection.h"
+#include "table/typed_column_data.h"
 #include "typed_column_pair.h"
 
 namespace algos {

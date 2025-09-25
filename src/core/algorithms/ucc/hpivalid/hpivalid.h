@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"

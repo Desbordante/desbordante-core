@@ -1,7 +1,10 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <set>
+#include <string>
+#include <vector>
 
 #include <boost/thread/mutex.hpp>
 
@@ -9,6 +12,8 @@
 #include "config/thread_number/type.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
+#include "table/column.h"
+#include "table/relational_schema.h"
 
 namespace algos {
 

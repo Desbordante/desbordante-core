@@ -1,7 +1,12 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "idataset_stream.h"
 #include "relation_data.h"
+#include "table/relational_schema.h"
 #include "typed_column_data.h"
 
 namespace model {

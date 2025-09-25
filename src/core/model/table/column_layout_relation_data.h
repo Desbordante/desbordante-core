@@ -6,6 +6,8 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "column_data.h"

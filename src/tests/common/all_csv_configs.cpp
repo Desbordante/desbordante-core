@@ -1,8 +1,10 @@
 #include "all_csv_configs.h"
 
+#include <filesystem>
 #include <string_view>
 
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
 
 namespace tests {
 

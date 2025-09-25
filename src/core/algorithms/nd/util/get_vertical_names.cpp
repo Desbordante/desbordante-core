@@ -1,6 +1,7 @@
 #include "algorithms/nd/util/get_vertical_names.h"
 
 #include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
 

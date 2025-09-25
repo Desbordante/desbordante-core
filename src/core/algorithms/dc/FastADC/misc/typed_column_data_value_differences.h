@@ -1,3 +1,5 @@
+#pragma once
+
 #include "model/table/typed_column_data.h"
 
 namespace algos::fastadc {

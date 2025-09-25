@@ -4,6 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
@@ -21,6 +22,8 @@
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/rhss.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/lattice/multi_md.h"
 #include "model/index.h"
 
 namespace algos::hymd::lattice {

@@ -1,6 +1,10 @@
 #include "vertical.h"
 
+#include <cassert>
+#include <cstddef>
 #include <utility>
+
+#include "table/column.h"
 
 Vertical::Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices)
     : column_indices_(std::move(indices)), schema_(rel_schema) {}

@@ -1,11 +1,24 @@
+#include <chrono>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
+#include "algebraic_constraints/ac_exception.h"
+#include "algebraic_constraints/ranges_collection.h"
+#include "algebraic_constraints/typed_column_pair.h"
 #include "algorithms/algebraic_constraints/ac_algorithm.h"
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/algo_factory.h"
 #include "all_csv_configs.h"
+#include "builtin.h"
 #include "config/names.h"
-#include "types.h"
+#include "csv_parser/csv_parser.h"
+#include "double_type.h"
+#include "numeric_type.h"
 
 namespace {
 void AssertRanges(std::vector<model::Double>& expected_ranges,

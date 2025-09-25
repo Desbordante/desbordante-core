@@ -1,7 +1,15 @@
 #pragma once
 
+#include <memory>
+#include <optional>
+#include <unordered_set>
+#include <vector>
+
 #include "algorithms/fd/depminer/cmax_set.h"
 #include "algorithms/fd/pli_based_fd_algorithm.h"
+#include "table/column.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 namespace algos {
 

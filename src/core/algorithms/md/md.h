@@ -1,6 +1,11 @@
 #pragma once
 
+#include <iterator>
 #include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/column_similarity_classifier.h"

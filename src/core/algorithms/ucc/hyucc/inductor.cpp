@@ -1,5 +1,14 @@
 #include "inductor.h"
 
+#include <cstddef>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "ucc/hyucc/model/non_ucc_list.h"
+#include "ucc/hyucc/model/ucc_tree.h"
+#include "ucc/raw_ucc.h"
+
 namespace algos::hyucc {
 
 void Inductor::UpdateUCCTree(NonUCCList&& non_uccs) {

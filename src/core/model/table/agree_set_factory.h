@@ -1,12 +1,15 @@
 #pragma once
 
+#include <cstddef>
 #include <deque>
+#include <functional>
 #include <set>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include "algorithms/fd/fd_algorithm.h"
 #include "model/table/column_layout_relation_data.h"

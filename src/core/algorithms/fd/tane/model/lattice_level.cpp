@@ -1,8 +1,14 @@
 #include "lattice_level.h"
 
 #include <algorithm>
+#include <cassert>
+#include <utility>
 
 #include <easylogging++.h>
+
+#include "fd/tane/model/lattice_vertex.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 namespace model {
 

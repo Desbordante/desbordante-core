@@ -1,11 +1,19 @@
+#include <algorithm>
 #include <cstddef>
-#include <filesystem>
+#include <initializer_list>
+#include <iosfwd>
+#include <iterator>
+#include <list>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/any.hpp>
+#include <boost/container/allocator_traits.hpp>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -15,8 +23,11 @@
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "config/tabular_data/input_table_type.h"
+#include "md/hymd/hymd.h"
+#include "md/md.h"
 #include "model/index.h"
 #include "parser/csv_parser/csv_parser.h"
+#include "table/idataset_stream.h"
 
 namespace {
 auto GetCardinality(std::vector<model::md::DecisionBoundary> const& lhs_bounds) {

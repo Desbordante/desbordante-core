@@ -1,11 +1,16 @@
 #include "algorithms/ucc/hpivalid/result_collector.h"
 
 #include <chrono>
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <vector>
 
 #include <easylogging++.h>
+
+#include "ucc/hpivalid/enums.h"
+#include "ucc/hpivalid/hypergraph.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <list>
+#include <unordered_map>
+#include <vector>
+
 #include "model/transaction/transactional_data.h"
 #include "node.h"
 

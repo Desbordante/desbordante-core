@@ -1,14 +1,35 @@
 #pragma once
 
+#include <cassert>
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <boost/any.hpp>
+#include <boost/container/allocator_traits.hpp>
+
+#include "algorithm_types.h"
 #include "algorithms/algorithm.h"
 #include "algorithms/create_algorithm.h"
 #include "algorithms/fd/pyro/pyro.h"
 #include "config/equal_nulls/type.h"
 #include "config/names.h"
 #include "config/tabular_data/input_table_type.h"
+#include "fd/fd.h"
+#include "fd/fd_algorithm.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "imetrizable_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/table/idataset_stream.h"
 #include "parser/csv_parser/csv_parser.h"
+#include "table/column.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "type.h"
 #include "types.h"
 
 namespace algos {

@@ -1,3 +1,4 @@
+#pragma once
 
 #include "config/error/type.h"
 #include "enums.h"

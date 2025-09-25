@@ -1,9 +1,11 @@
 #include "cfd_stats_calculator.h"
 
+#include <algorithm>
+#include <functional>
 #include <ranges>
 
+#include "cfd/cfd_verifier/highlight.h"
 #include "cfd/model/cfd_types.h"
-#include "cfd/util/cfd_output_util.h"
 
 namespace algos::cfd_verifier {
 void CFDStatsCalculator::CreateSupportMask() {

@@ -1,5 +1,10 @@
 #include "sampled_inverted_index.h"
 
+#include <algorithm>
+
+#include "ind/faida/inclusion_testing/hll_data.h"
+#include "ind/faida/util/simple_ind.h"
+
 namespace algos::faida {
 
 void SampledInvertedIndex::Init(std::vector<size_t> const& sampled_hashes, int max_id) {

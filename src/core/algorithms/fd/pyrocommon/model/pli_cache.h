@@ -1,14 +1,19 @@
 #pragma once
 
-class ProfilingContext;
-
+#include <cstddef>
+#include <memory>
 #include <mutex>
+#include <variant>
 
-#include "../core/profiling_context.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
+#include "fd/pyrocommon/core/profiling_context.h"
 #include "model/table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/vertical.h"
 #include "util/maybe_unused_private_field.h"
+
+class ProfilingContext;
 
 namespace model {
 
