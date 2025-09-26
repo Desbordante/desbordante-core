@@ -2,6 +2,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "set_bits_view.h"
+
 namespace util {
 
 template <typename ForwardIt>
