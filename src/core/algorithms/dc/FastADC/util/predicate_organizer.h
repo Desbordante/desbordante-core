@@ -1,6 +1,7 @@
 #pragma once
 
 #include "dc/FastADC/model/evidence_set.h"
+#include "util/set_bits_view.h"
 
 namespace algos::fastadc {
 
@@ -56,8 +57,7 @@ public:
     boost::dynamic_bitset<> Retransform(boost::dynamic_bitset<> const& bitset) const {
         boost::dynamic_bitset<> valid{kPredicateBits};
 
-        for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
-             i = bitset.find_next(i)) {
+        for (size_t i : util::SetBits(bitset)) {
             valid.set(indexes_[i]);  // indexes_[i] is <= than number of predicates
         }
 
@@ -76,7 +76,7 @@ private:
 
         for (auto const& evidence : evidence_set_) {
             PredicateBitset bitset = evidence.evidence;
-            for (size_t i = bitset._Find_first(); i != bitset.size(); i = bitset._Find_next(i)) {
+            for (size_t i : util::SetBits(bitset)) {
                 counts[i]++;
             }
         }

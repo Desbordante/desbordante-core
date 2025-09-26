@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "algorithms/fd/hycommon/util/pli_util.h"
+#include "util/set_bits_view.h"
 
 namespace algos::hy::util {
 
@@ -87,7 +88,7 @@ std::tuple<PLIs, Rows, std::vector<ClusterId>> Preprocess(ColumnLayoutRelationDa
 boost::dynamic_bitset<> RestoreAgreeSet(boost::dynamic_bitset<> const& as,
                                         std::vector<ClusterId> const& og_mapping, size_t num_cols) {
     boost::dynamic_bitset<> mapped_as(num_cols);
-    for (size_t i = as.find_first(); i != boost::dynamic_bitset<>::npos; i = as.find_next(i)) {
+    for (size_t i : ::util::SetBits(as)) {
         mapped_as.set(og_mapping[i]);
     }
     return mapped_as;

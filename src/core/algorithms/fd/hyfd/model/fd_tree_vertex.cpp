@@ -5,6 +5,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "util/set_bits_view.h"
+
 namespace algos::hyfd::fd_tree {
 
 void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
@@ -119,8 +121,7 @@ std::shared_ptr<FDTreeVertex> FDTreeVertex::GetChildIfExists(size_t pos) const {
 }
 
 void FDTreeVertex::FillFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs) const {
-    for (size_t rhs = fds_.find_first(); rhs != boost::dynamic_bitset<>::npos;
-         rhs = fds_.find_next(rhs)) {
+    for (size_t rhs : util::SetBits(fds_)) {
         fds.emplace_back(lhs, rhs);
     }
 

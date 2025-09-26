@@ -1,5 +1,7 @@
 #include "search_tree.h"
 
+#include "util/set_bits_view.h"
+
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset sets_union,
                        SearchTree::Bitset sets_inter, std::shared_ptr<Node> const& parent,
                        std::shared_ptr<Node> left, std::shared_ptr<Node> right)
@@ -44,7 +46,7 @@ SearchTree::SearchTree(Bitset const& set) : number_of_attributes_(set.size()) {
 }
 
 void SearchTree::CreateSingleElementSets(Bitset const& set) {
-    for (size_t bit = set.find_first(); bit != Bitset::npos; bit = set.find_next(bit)) {
+    for (size_t bit : util::SetBits(set)) {
         Bitset bitset_to_add(number_of_attributes_);
         bitset_to_add.set(bit);
         Add(bitset_to_add);

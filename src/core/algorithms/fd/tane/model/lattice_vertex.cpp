@@ -1,5 +1,7 @@
 #include "lattice_vertex.h"
 
+#include "util/set_bits_view.h"
+
 namespace model {
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
@@ -54,8 +56,7 @@ std::ostream& operator<<(std::ostream& os, LatticeVertex& lv) {
     os << "Vertex: " << lv.vertical_.ToString() << endl;
 
     string rhs;
-    for (size_t index = lv.rhs_candidates_.find_first(); index != dynamic_bitset<>::npos;
-         index = lv.rhs_candidates_.find_next(index)) {
+    for (size_t index : util::SetBits(lv.rhs_candidates_)) {
         rhs += std::to_string(index) + " ";
     }
     os << "Rhs Candidates: " << rhs << endl;

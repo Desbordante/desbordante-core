@@ -15,6 +15,7 @@
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
+#include "util/set_bits_view.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -60,8 +61,7 @@ void TreeSearch::Run() {
     std::vector<Edgemark> vertexhittings(partial_hg_.NumVertices(),
                                          Edgemark(partial_hg_.NumEdges()));
     for (std::vector<Edge>::size_type i_e = 0; i_e < partial_hg_.NumEdges(); ++i_e) {
-        for (Edge::size_type i_v = partial_hg_[i_e].find_first(); i_v != Edge::npos;
-             i_v = partial_hg_[i_e].find_next(i_v)) {
+        for (Edge::size_type i_v : util::SetBits(partial_hg_[i_e])) {
             vertexhittings[i_v].set(i_e);
         }
     }
@@ -85,7 +85,7 @@ void TreeSearch::Run() {
     cand -= c;
 
     try {
-        for (Edge::size_type v = c.find_first(); v != Edge::npos; v = c.find_next(v)) {
+        for (Edge::size_type v : util::SetBits(c)) {
             // update crit and uncov
             UpdateCritAndUncov(removed_criticals_stack, crit, uncov, vertexhittings[v]);
 
@@ -136,7 +136,7 @@ void TreeSearch::ComputeNiceness() {
 unsigned long TreeSearch::Niceness(Edge const& e) const {
     unsigned long niceness = 0;
     if (cfg_.tiebreaker_heuristic) {
-        for (std::size_t col = e.find_first(); col != Edge::npos; col = e.find_next(col)) {
+        for (std::size_t col : util::SetBits(e)) {
             if (niceness < niceness_[col]) {
                 niceness = niceness_[col];
             }
@@ -278,7 +278,7 @@ inline bool TreeSearch::ExtendOrConfirmS(
 
     cand -= c;
 
-    for (Edge::size_type v = c.find_first(); v != Edge::npos; v = c.find_next(v)) {
+    for (Edge::size_type v : util::SetBits(c)) {
         // don't branch if v is violater for S
         if (IsViolater(crit, vertexhittings[v])) {
             continue;
@@ -433,8 +433,7 @@ inline void TreeSearch::UpdateEdges(std::vector<Edgemark>& crit, Edgemark& uncov
     }
     for (std::size_t i_e = partial_hg_.NumEdges() - new_edges.NumEdges();
          i_e < partial_hg_.NumEdges(); ++i_e) {
-        for (Edge::size_type i_v = partial_hg_[i_e].find_first(); i_v != Edge::npos;
-             i_v = partial_hg_[i_e].find_next(i_v)) {
+        for (Edge::size_type i_v : util::SetBits(partial_hg_[i_e])) {
             vertexhittings[i_v].set(i_e);
         }
     }

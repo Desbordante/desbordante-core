@@ -7,6 +7,7 @@
 #include <easylogging++.h>
 
 #include "agree_set_sample.h"
+#include "util/set_bits_view.h"
 
 namespace model {
 
@@ -62,9 +63,7 @@ std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData con
     free_column_indices.set();
     free_column_indices &= ~restriction_vertical.GetColumnIndices();
     std::vector<std::reference_wrapper<ColumnData const>> relevant_column_data;
-    for (size_t column_index = free_column_indices.find_first();
-         column_index != boost::dynamic_bitset<>::npos;
-         column_index = free_column_indices.find_next(column_index)) {
+    for (size_t column_index : util::SetBits(free_column_indices)) {
         relevant_column_data.emplace_back(relation->GetColumnData(column_index));
     }
     boost::dynamic_bitset<> agree_set_prototype(restriction_vertical.GetColumnIndices());

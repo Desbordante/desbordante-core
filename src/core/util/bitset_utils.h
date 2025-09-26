@@ -3,6 +3,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "set_bits_view.h"
+#include "util/set_bits_view.h"
 
 namespace util {
 
@@ -22,8 +23,7 @@ boost::dynamic_bitset<> IndicesToBitset(Container const& indices, size_t num_col
 
 template <typename UnaryFunction>
 void ForEachIndex(boost::dynamic_bitset<> const& bitset, UnaryFunction func) {
-    for (auto index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
+    for (auto index : util::SetBits(bitset)) {
         func(index);
     }
 }
