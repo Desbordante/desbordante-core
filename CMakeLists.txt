@@ -35,11 +35,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 endif()
 
 # Untested compiler notification
-if(NOT
-   ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-)
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^GNU|AppleClang|Clang$")
     message(WARNING "This project has primarily been tested with GCC, LLVM Clang, and Apple Clang."
                     "Other compilers may not be fully supported."
     )
