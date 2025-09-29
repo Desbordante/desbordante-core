@@ -19,7 +19,10 @@ using boost::dynamic_bitset;
 
 namespace tane {
 
-TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+// TaneCommon::TaneCommon() : PliBasedFDAlgorithm({kDefaultPhaseName}) {
+
+TaneCommon::TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager)
+    : PliBasedAFDAlgorithm({kDefaultPhaseName}, relation_manager) {
     RegisterOption(config::kErrorOpt(&max_ucc_error_));
 }
 
@@ -28,8 +31,18 @@ double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
-    RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
+// void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
+//     RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
+
+void TaneCommon::RegisterAndCountFd(Vertical const& lhs, Column const* rhs) {
+    dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
+    PliBasedAFDAlgorithm::RegisterAfd(lhs, *rhs, relation_->GetSharedPtrSchema());
+}
+
+void TaneCommon::RegisterAndCountAfd(Vertical const& lhs, Column const* rhs,
+                                     long double threeshold) {
+    dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
+    PliBasedAFDAlgorithm::RegisterAfd(lhs, *rhs, threeshold, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {
@@ -66,7 +79,8 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
                             }
                             // Found fd: vertex->rhs => register it
                             if (is_rhs_candidate) {
-                                RegisterAndCountFd(columns, schema->GetColumn(rhs_index));
+                                RegisterAndCountAfd(columns, schema->GetColumn(rhs_index),
+                                                    ucc_error);
                             }
                         }
                     }
@@ -117,7 +131,7 @@ void TaneCommon::ComputeDependencies(model::LatticeLevel* level) {
             if (error <= max_fd_error_) {
                 Column const* rhs = schema->GetColumns()[a_index].get();
 
-                RegisterAndCountFd(lhs, rhs);
+                RegisterAndCountAfd(lhs, rhs, error);
                 xa_vertex->GetRhsCandidates().set(rhs->GetIndex(), false);
                 if (error == 0) {
                     xa_vertex->GetRhsCandidates() &= lhs.GetColumnIndices();
@@ -172,7 +186,8 @@ unsigned long long TaneCommon::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
+            // RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
+            RegisterAndCountAfd(*schema->empty_vertical_, column.get(), fd_error);
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {
@@ -199,7 +214,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
                      rhs_index < vertex->GetRhsCandidates().size();
                      rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
                     if (rhs_index != column.GetColumnIndices().find_first()) {
-                        RegisterAndCountFd(column, schema->GetColumn(rhs_index));
+                        RegisterAndCountAfd(column, schema->GetColumn(rhs_index), ucc_error);
                     }
                 }
                 vertex->GetRhsCandidates() &= column.GetColumnIndices();
@@ -247,6 +262,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
+
     return apriori_millis;
 }
 

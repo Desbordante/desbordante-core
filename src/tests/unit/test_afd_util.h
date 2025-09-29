@@ -2,22 +2,22 @@
 
 #include <gtest/gtest.h>
 
-#include "core/algorithms/algo_factory.h"
-#include "core/algorithms/fd/fd_algorithm.h"
-#include "core/config/error/type.h"
-#include "core/config/names.h"
-#include "tests/common/all_csv_configs.h"
-#include "tests/common/csv_config_util.h"
+#include "algorithms/algo_factory.h"
+#include "algorithms/fd/afd_algorithm.h"
+#include "all_csv_configs.h"
+#include "config/error/type.h"
+#include "config/names.h"
+#include "csv_config_util.h"
 
 namespace tests {
 template <typename T>
-class AlgorithmTest : public ::testing::Test {
+class AlgorithmAFDTest : public ::testing::Test {
 protected:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+    static std::unique_ptr<algos::AFDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
         using namespace config::names;
         using algos::ConfigureFromMap, algos::StdParamsMap;
 
-        std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
+        std::unique_ptr<algos::AFDAlgorithm> algorithm = std::make_unique<T>();
         ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
         return algorithm;
     }
@@ -28,7 +28,7 @@ protected:
         using namespace config::names;
         return {
                 {kCsvConfig, csv_config},
-                {kError, config::ErrorType{0.0}},
+                {kError, config::ErrorType{0.9}},
                 {kSeed, decltype(algos::pyro::Parameters::seed){0}},
                 {kMaximumLhs, max_lhs_},
         };
@@ -40,7 +40,7 @@ protected:
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
                 EXPECT_EQ(algorithm->Fletcher16(), hash)
-                        << "FD collection hash changed for " << csv_config.path.filename();
+                        << "AFD collection hash changed for " << csv_config.path.filename();
             }
         } catch (std::runtime_error& e) {
             std::cout << "Exception raised in test: " << e.what() << std::endl;
@@ -50,7 +50,7 @@ protected:
     }
 
 public:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(
+    static std::unique_ptr<algos::AFDAlgorithm> CreateAlgorithmInstance(
             CSVConfig const& config,
             unsigned int max_lhs = std::numeric_limits<unsigned int>::max()) {
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config, max_lhs));
@@ -79,16 +79,16 @@ public:
 };
 
 template <typename T>
-class ApproximateFDTest : public ::testing::Test {
+class ApproximateAFDTest : public ::testing::Test {
 protected:
     // alias for choosing datasets' hashes specialization
     using AlgorithmType = T;
 
-    static std::unique_ptr<algos::FDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
+    static std::unique_ptr<algos::AFDAlgorithm> CreateAndConfToLoad(CSVConfig const& csv_config) {
         using namespace config::names;
         using algos::ConfigureFromMap, algos::StdParamsMap;
 
-        std::unique_ptr<algos::FDAlgorithm> algorithm = std::make_unique<T>();
+        std::unique_ptr<algos::AFDAlgorithm> algorithm = std::make_unique<T>();
         ConfigureFromMap(*algorithm, StdParamsMap{{kTable, MakeInputTable(csv_config)}});
         return algorithm;
     }
@@ -107,7 +107,7 @@ protected:
                 auto algorithm = CreateAlgorithmInstance(csv_config);
                 algorithm->Execute();
                 EXPECT_EQ(algorithm->Fletcher16(), hash)
-                        << "FD collection hash changed for " << csv_config.path.filename();
+                        << "AFD collection hash changed for " << csv_config.path.filename();
             }
         } catch (std::runtime_error& e) {
             std::cout << "Exception raised in test: " << e.what() << std::endl;
@@ -117,49 +117,10 @@ protected:
     }
 
 public:
-    static std::unique_ptr<algos::FDAlgorithm> CreateAlgorithmInstance(CSVConfig const& config) {
+    static std::unique_ptr<algos::AFDAlgorithm> CreateAlgorithmInstance(CSVConfig const& config) {
         return algos::CreateAndLoadAlgorithm<T>(GetParamMap(config));
     }
 };
 
-// testing data
-template <typename Alg>
-struct ApproximateDatasets {
-    inline static std::vector<CSVConfigHash> const kLightDatasets;
-    inline static std::vector<CSVConfigHash> const kHeavyDatasets;
-};
 
-// specialization fd for EulerFD
-template <>
-struct ApproximateDatasets<algos::EulerFD> {
-    inline static std::vector<CSVConfigHash> const kLightDatasets = {{
-            {tests::kCIPublicHighway10k, 33398},
-            {tests::kNeighbors10k, 43368},
-            {tests::kWdcAstronomical, 2902},  // answer is 9 / 15
-            {tests::kWdcAppearances, 64338},  // answer is 3 / 4
-            {tests::kWdcAstrology, 40815},    // answer is 34 / 20
-            {tests::kWdcSymbols, 28289},
-            {tests::kBreastCancer, 15121},
-            {tests::kWdcKepler, 17294},  // empty answer, 0 clusters after stripping
-            {tests::kTestLong, 64338},
-        }};
-
-    inline static std::vector<CSVConfigHash> const kHeavyDatasets = {{
-            {tests::kAdult, 23075},
-            {tests::kCIPublicHighway, 13035},
-            {tests::kEpicMeds, 26201},  // answer is 15 / 16
-            {tests::kEpicVitals, 2083},
-            {tests::kIowa1kk, 57837},  // answer is 2531 / 1584 (average 2k, it is bad seed) :(
-            {tests::kLegacyPayors, 43612},
-    }};
-};
-
-inline std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
-    std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
-        res.push_back(index);
-    }
-    return res;
-}
 }  // namespace tests

@@ -34,15 +34,6 @@ namespace tests {
  * 2. in CreateAlgorithmInstance replace "Tane" with <your algorithm class name>
  * */
 
-std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
-    std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
-        res.push_back(index);
-    }
-    return res;
-}
-
 testing::AssertionResult CheckFdListEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
@@ -157,8 +148,8 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             MaxLHSOptionWork);
 
 using Algorithms =
-        ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
-                         algos::FDep, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
+        ::testing::Types<algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
+                         algos::FDep, algos::FUN, algos::hyfd::HyFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
 }  // namespace tests
