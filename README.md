@@ -13,40 +13,40 @@ The **Discovery** task is designed to identify all instances of a specified patt
 
 The **Validation** task is different: it is designed to check whether a specified pattern *instance* is present in a given dataset. This task not only returns True or False, but it also explains why the instance does not hold (e.g. it can list table rows with conflicting values). 
 
-For some patterns Desbordante supports a **dynamic** task variant. The distiguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
+For some patterns Desbordante supports a **dynamic** task variant. The distinguishing feature of dynamic algorithms compared to classic (static) algorithms is that after a result is obtained, the table can be changed and a dynamic algorithm will update the result based just on those changes instead of processing the whole table again. As a result, they can be up to several orders of magnitude faster than classic (static) ones in some situations.
 
 The currently supported data patterns are:
-* Exact functional dependencies (discovery and validation)
+* Exact functional dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Functional_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Functional_Dependencies_Verification.ipynb))
 * Approximate functional dependencies, with 
-    - $g_1$ metric — classic AFDs (discovery and validation)
-    - $\mu+$ metric (discovery)
-    - $\tau$ metric (discovery)
-    - $pdep$ metric (discovery)
-    - $\rho$ metric (discovery)
+    - $g_1$ metric — classic AFDs ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Functional_Dependencies_Verification.ipynb))
+    - $\mu+$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb))
+    - $\tau$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb))
+    - $pdep$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb))
+    - $\rho$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Functional_Dependencies_Mining.ipynb))
 * Probabilistic functional dependencies, with PerTuple and PerValue metrics (discovery and validation)
-* Classic soft functional dependencies (with corellations), with $\rho$ metric (discovery and validation)
+* Classic soft functional dependencies (with correlations), with $\rho$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Soft_Functional_Dependencies_Mining.ipynb) and validation)
 * Dynamic validation of exact and approximate ($g_1$) functional dependencies
 * Numerical dependencies (validation)
-* Graph functional dependencies (validation)
-* Conditional functional dependencies (discovery)
+* Graph functional dependencies (discovery and validation)
+* Conditional functional dependencies (discovery and validation)
 * Inclusion dependencies
-   - Exact inclusion dependencies (discovery and validation)
-   - Approximate inclusion dependencies, with $g^{'}_{3}$ metric (discovery and validation)
+   - Exact inclusion dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Inclusion_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
+   - Approximate inclusion dependencies, with $g^{'}_{3}$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Inclusion_Dependencies%20Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
 * Order dependencies:
    - set-based axiomatization (discovery)
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
-* Fuzzy algebraic constraints (discovery)
-* Differential Dependencies (discovery)
+* Fuzzy algebraic constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Algebraic_Constraints.ipynb))
+* Differential Dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Differential_Dependencies.ipynb) and validation)
 * Unique column combinations:
-   - Exact unique column combination (discovery and validation)
-   - Approximate unique column combination, with $g_1$ metric (discovery and validation)
-* Association rules (discovery)
-* Numerical association rules (discovery)
-* Matching dependencies (discovery)
+   - Exact unique column combination ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Unique_Column_Combinations_Mining.ipynb) and validation)
+   - Approximate unique column combination, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Unique_Column_Combinations_Mining.ipynb) and validation)
+* Association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Association_Rules.ipynb))
+* Numerical association rules ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Numerical_Association_Rules.ipynb))
+* Matching dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Matching_Dependencies.ipynb) and validation)
 * Denial constraints
-   - Exact denial constraints (discovery and validation)
-   - Approximate denial constraints, with $g_1$ metric (discovery)
+   - Exact denial constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
+   - Approximate denial constraints, with $g_1$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Denial_Constraints.ipynb))
 
 The discovered patterns can have many uses:
 * For scientific data, especially those obtained experimentally, an interesting pattern allows to formulate a hypothesis that could lead to a scientific discovery. In some cases it even allows to draw conclusions immediately, if there is enough data. At the very least, the found pattern can provide a direction for further study. 
@@ -128,6 +128,7 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [Paolo Ciaccia et al. 2013. Efficient derivation of numerical dependencies. Information Systems, Volume 38, Issue 3. Pages 410-429.](https://www.sciencedirect.com/science/article/abs/pii/S0306437912001044)
 * Graph functional dependencies
     - [Wenfei Fan, Yinghui Wu, and Jingbo Xu. 2016. Functional Dependencies for Graphs. In Proceedings of the 2016 International Conference on Management of Data (SIGMOD '16). Association for Computing Machinery, New York, NY, USA, 1843–1857.](https://dl.acm.org/doi/pdf/10.1145/2882903.2915232)
+    - [Wenfei Fan, Chunming Hu, Xueli Liu, and Ping Lu. 2020. Discovering Graph Functional Dependencies. ACM Trans. Database Syst. 45, 3, Article 15 (September 2020), 42 pages.](https://doi.org/10.1145/3397198)
 * Conditional functional dependencies
     - [Rammelaere, J., Geerts, F. (2019). Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”. Machine Learning and Knowledge Discovery in Databases. ECML PKDD 2018. ](https://link.springer.com/chapter/10.1007/978-3-030-10928-8_33)
 * Exact and approximate inclusion dependencies
@@ -156,6 +157,7 @@ Here is a list of papers about patterns, organized in the recommended reading or
    - [X. Chu, I. F. Ilyas and P. Papotti. Holistic data cleaning: Putting violations into context. 2013. IEEE 29th International Conference on Data Engineering (ICDE), Brisbane, QLD, Australia, 2013, pp. 458-469,](https://cs.uwaterloo.ca/~ilyas/papers/XuICDE2013.pdf)
    - [Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia Floratou. 2024. Rapidash: Efficient Detection of Constraint Violations. Proc. VLDB Endow. 17, 8 (April 2024), 2009–2021.](https://arxiv.org/pdf/2309.12436)
    - [Renjie Xiao, Zijing Tan, Haojin Wang, and Shuai Ma. 2022. Fast approximate denial constraint discovery. Proc. VLDB Endow. 16, 2 (October 2022), 269–281.](https://doi.org/10.14778/3565816.3565828)
+   - [Meifan Zhang, Hongzhi Wang, Jianzhong Li, and Hong Gao, "One-Pass Inconsistency Detection Algorithms for Big Data," in IEEE Access, vol. 7, pp. 22377-22394, 2019](https://ieeexplore.ieee.org/document/8641478)
 
 ## Installation (this is what you probably want if you are not a project maintainer)
 Desbordante is [available](https://pypi.org/project/desbordante/) at the Python Package Index (PyPI). Dependencies:
@@ -320,19 +322,39 @@ GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Desbordante/desbordante-core.
 ### No type hints in IDE
 If type hints don't work for you in Visual Studio Code, for example, then install stubs using the command:
 ```sh
-pip install desbordate-stubs
+pip install desbordante-stubs
 ```
 **NOTE**: Stubs may not fully support current version of `desbordante` package, as they are updated independently.
 
 ## Cite
-If you use this software for research, please cite one of our papers:
+If you use this software for research, please cite our core paper:
+
+```bibtex
+@inproceedings{10.1145/3703323.3703725,
+   author = {Chernishev, George and Polyntsov, Michael and Chizhov, Anton and Stupakov, Kirill and Shchuckin, Ilya and Smirnov, Alexander and Strutovsky, Maxim and Shlyonskikh, Alexey and Firsov, Mikhail and Manannikov, Stepan and Bobrov, Nikita and Goncharov, Daniil and Barutkin, Ilia and Yakshigulov, Vadim and Shalnev, Vladislav and Muraviev, Kirill and Rakhmukova, Anna and Shcheka, Dmitriy and Chernikov, Anton and Kuzin, Yakov and Sinelnikov, Michael and Abrosimov, Grigorii and Popov, Dmitriy and Demchenko, Artem and Belokonny, Sergey and Soloveva, Liana-Iuliia and Kurbatov, Yaroslav and Vyrodov, Mikhail and Saliou, Arthur and Gaisin, Eduard and Smirnov, Kirill},
+   title = {Desbordante: from benchmarking suite to high-performance science-intensive data profiler},
+   year = {2025},
+   isbn = {9798400711244},
+   publisher = {Association for Computing Machinery},
+   address = {New York, NY, USA},
+   url = {https://doi.org/10.1145/3703323.3703725},
+   doi = {10.1145/3703323.3703725},
+   booktitle = {Proceedings of the 8th International Conference on Data Science and Management of Data (12th ACM IKDD CODS and 30th COMAD)},
+   pages = {234--243},
+   numpages = {10},
+   keywords = {Data Mining, Data Profiling, Pattern Extraction, Data Analysis, Knowledge Discovery, Data Exploration, Anomaly Detection, Data Wrangling},
+   location = {},
+   series = {CODS-COMAD '24}
+}
+```
+
+or cite one of our papers, if you use a particular part:
 1) George Chernishev, et al. Solving Data Quality Problems with Desbordante: a Demo. CoRR abs/2307.14935 (2023).
-2) George Chernishev, et al. "Desbordante: from benchmarking suite to high-performance science-intensive data profiler (preprint)". CoRR abs/2301.05965. (2023).
-3) M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354, doi: 10.23919/FRUCT52173.2021.9435469.
-4) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "Fast Discovery of Inclusion Dependencies with Desbordante," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275, doi: 10.23919/FRUCT58615.2023.10143047.
-5) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
-6) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
-7) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "Lightning Fast Matching Dependency Discovery with Desbordante," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
+2) M. Strutovskiy, N. Bobrov, K. Smirnov and G. Chernishev, "Desbordante: a Framework for Exploring Limits of Dependency Discovery Algorithms," 2021 29th Conference of Open Innovations Association (FRUCT), 2021, pp. 344-354, doi: 10.23919/FRUCT52173.2021.9435469.
+3) A. Smirnov, A. Chizhov, I. Shchuckin, N. Bobrov and G. Chernishev, "Fast Discovery of Inclusion Dependencies with Desbordante," 2023 33rd Conference of Open Innovations Association (FRUCT), Zilina, Slovakia, 2023, pp. 264-275, doi: 10.23919/FRUCT58615.2023.10143047.
+4) Y. Kuzin, D. Shcheka, M. Polyntsov, K. Stupakov, M. Firsov and G. Chernishev, "Order in Desbordante: Techniques for Efficient Implementation of Order Dependency Discovery Algorithms," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 413-424.
+5) I. Barutkin, M. Fofanov, S. Belokonny, V. Makeev and G. Chernishev, "Extending Desbordante with Probabilistic Functional Dependency Discovery Support," 2024 35th Conference of Open Innovations Association (FRUCT), Tampere, Finland, 2024, pp. 158-169.
+6) A. Shlyonskikh, M. Sinelnikov, D. Nikolaev, Y. Litvinov and G. Chernishev, "Lightning Fast Matching Dependency Discovery with Desbordante," 2024 36th Conference of Open Innovations Association (FRUCT), Lappeenranta, Finland, 2024, pp. 729-740.
 
 # Contacts and Q&A
 
