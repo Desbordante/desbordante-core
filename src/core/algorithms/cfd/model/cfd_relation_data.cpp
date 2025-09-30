@@ -5,9 +5,8 @@
 #include <iostream>
 #include <random>
 
-#include <easylogging++.h>
-
 #include "algorithms/cfd/util/set_util.h"
+#include "util/logger.h"
 
 // see algorithms/cfd/LICENSE
 
