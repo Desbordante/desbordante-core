@@ -3946,3 +3946,395 @@ Typo candidates and context:
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
 '''
+
+snapshots['test_example[basic/verifying_md.py-None-verifying_md_output] verifying_md_output'] = '''\x1b[1;49m
+This example demonstrates how to verify matching dependencies (MDs) using the Desbordante library. Matching dependencies are defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al., ACM Transactions on Database Systems (TODS), Vol. 45, No. 3, Article 13, pp. 1–33.
+
+The matching dependency verification algorithm accepts a dependency and determines whether it holds over the specified dataset. If the dependency does not hold, the algorithm returns a list of exceptions (tuples that violate the MD) and suggests adjustments to the dependency to make it hold.
+
+You can also read about mining matching dependencies in examples/basic/mining_md.py.
+
+To verify a matching dependency, first define column similarity classifiers. A column similarity classifiers consists of a column match and a decision boundary. A column match specifies two column identifiers (index or name) — one from the left table and one from the right — and a similarity measure (for example, Levenshtein similarity).
+
+We use the notation [measure(i, j)>=lambda] for a column similarity classifier that specifies the i-th column of the left table, the j-th column of the right table, the similarity measure "measure", and the decision boundary lambda. The notation [measure("left_col_name", "right_col_name")>=lambda] is also valid for a column match that specifies the columns "left_col_name" and "right_col_name" of the left and right tables, respectively.
+
+Finally, the algorithm is defined over two tables: the left table and the right table. For simplicity in this example we use a single table (right table = left table). See the original paper for details on the two-table setting.
+
+As the first example, let's look at the animals_beverages.csv dataset.
+
+       name     zoo animal  diet
+0     Simba  berlin   lion  meat
+1  Clarence  london   lion  mead
+2     Baloo  berlin   bear  fish
+3      Pooh  london   beer  fish 
+
+Let's try to check if the Matching Dependency
+
+	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
+
+holds. Here, Levenshtein similarity with a decision boundary of 1.0 means values must be exactly equal.
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
+2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=0.75
+
+The checked matching dependency used a column similarity classifier with a 1.0 decision boundary on the right side. However, records with similarity 0.75 — which is below the specified boundary — were found. Therefore, the checked matching dependency does not hold.
+
+The matching dependency may fail because of typos in the original dataset. Let's relax both left and right constraints (i.e., require similarity => 0.75) and check the resulting dependency:
+
+	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+We can see that the matching dependency
+
+	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+holds.
+
+Now let's look at what happens if we increase the decision boundary on both the left-hand side and the right-hand side. For example, we'll raise it from 0.75 to 0.76. First, let's increase the left-hand side decision boundary:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+As we can see, nothing changed. Now let's raise the right-hand side decision boundary:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
+2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.76
+
+and the following MD is suggested:
+
+	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+The values "meat" and "mead" have a Levenshtein similarity of 0.75, which is below the required 0.76; therefore the matching dependency does not hold.
+
+Let's see whether correcting typos in the dataset changes that.
+
+Corrected dataset:
+
+       name     zoo animal  diet
+0     Simba  berlin   lion  meat
+1  Clarence  london   lion  meat
+2     Baloo  berlin   bear  fish
+3      Pooh  london   bear  fish
+
+Now let's re-check the original matching dependency with decision boundaries set to 1.0.
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+---------------------------------------------------------------------------------------------------- 
+
+On our next example let's take a view at employee_typos.csv dataset:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City      Main St.17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             yes
+2  Edward    Black    Clerk  Washington D. C.     Third St 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Suppose we already know the following facts about this dataset:
+1. Each city has a single office, i.e. there is a functional dependency [City] -> OfficeLocation.
+2. Only managers and chiefs have high-level access, i.e. there is a functional dependency [Position] -> HighLevelAccess.
+
+As we can see, this dataset contains several typos that we will attempt to detect and correct.
+
+Let's start with the functional dependency [City] -> OfficeLocation. To check it, we examine the following matching dependency:
+
+	[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+2. Records (1, 0) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+3. Records (2, 3) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+4. Records (3, 2) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.909.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=0.909
+
+The output shows issues in record pairs (0, 1) and (2, 3). Values:
+1. record 0: "Main St.17" — record 1: "Main St. 17"
+2. record 2: "Third St 34" — record 3: "Third St. 34"
+
+Now we can see the typos:
+1. Record 0: missing space in "Main St.17" (should be "Main St. 17").
+2. Record 2: missing period in "Third St 34" (should be "Third St. 34").
+
+Now let's fix the typos:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Let's try again:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+Alternatively, if we consider these typos insignificant for our purposes, we can ignore them. As Desbordante suggests, we can relax the right-hand decision boundary and check the dependency
+
+	[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=0.9
+
+over the unmodified table.
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+Let's move on and repeat the procedure for the functional dependency [Position] -> HighLevelAccess. To check it, we examine the following matching dependency:
+
+	[levenshtein(Position, Position)>=1.0] -> levenshtein(High Level Access, High Level Access)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (1, 4) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+2. Records (4, 1) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.667.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=0.667
+
+As we can see, there is a discrepancy in records 1 and 4:
+1. record 1: "yes" — record 4: "Yes"
+
+Now we see the problem. Let's fix it:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Let's re-check the matching dependency again:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+If you look closely, there are still some typos in the dataset:
+1. Record 0: "manager" should be "Manager".
+2. Record 5: "yes" was missed during our procedure and should be fixed.
+
+As a result, we can observe two limitations of our approach:
+1. Typos on the left-hand side of a dependency may go undetected.
+2. Typos in records with a unique left-hand-side value cannot be detected.
+
+There is an alternative approach to finding typos with MDs. We will demonstrate it on the "Position" column: first verify the matching dependency [levenshtein(Position, Position)>=1.0] -> levenshtein(Position, Position)>=1.0, then gradually lower the left-hand side decision boundary until all typos are discovered.
+
+
+Verifying the matching dependency [ levenshtein(Position, Position)>=1.0 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+
+Verifying Matching Dependency [ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+3. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+4. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.857.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=0.857
+
+Here, with decision boundary 0.8, the first typos were found.
+
+Let's decrease the threshold further and see how it affects the algorithm's output.
+
+Verifying Matching Dependency [ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+3. Records (0, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+4. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+5. Records (1, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+6. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+7. Records (4, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+8. Records (2, 5) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
+9. Records (3, 0) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+10. Records (3, 4) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+11. Records (3, 1) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+12. Records (5, 2) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.2.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=0.2
+
+Invoking the algorithm with a decision boundary of 0.8 helped us locate issues in the record pairs (0, 1) and (0, 4). Record 0 has the value "manager" (uncapitalized) in the "Position" column, so we can fix it as follows:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  Manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Invoking the algorithm with a decision boundary of 0.2 revealed some additional, but meaningless, patterns. For example, it considered the value "Clerk" in record 2 and "Chief" in record 5 similar enough.
+
+As a result, we can conclude that this approach allows locating typos without prior knowledge of column dependencies, but requires care in selecting decision boundaries and in analyzing the algorithm's results.
+
+---------------------------------------------------------------------------------------------------- 
+
+Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:
+
+   Flight Number        Date               Departure                 Arrival  Distance  Duration
+0          SU 35  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        64
+1        FV 6015  2024-03-06  Saint Petersburg (LED)            Moscow (VKO)       624        63
+2        FV 6027  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        66
+3        FV 6024  2024-03-03            Moscow (VKO)  Saint Petersburg (LED)       624        58
+4           SU 6  2024-03-06            Moscow (SVO)  Saint Petersburg (LED)       598        62
+5        S7 1009  2024-03-01            Moscow (DME)  Saint Petersburg (LED)       664        66
+6        S7 1010  2024-03-02  Saint Petersburg (LED)            Moscow (DME)       664        70
+7         B2 978  2024-03-07            Moscow (SVO)             Minsk (MSQ)       641        58
+8         DP 967  2024-03-07            Moscow (VKO)             Minsk (MSQ)       622        73
+9         B2 981  2024-03-08             Minsk (MSQ)            Moscow (VKO)       622        61
+10        DP 261  2024-03-06            Moscow (VKO)       Kaliningrad (KGD)      1059       144
+11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92 
+
+Imagine we want to check that when the departure city and the arrival city are the same, flight times do not differ significantly. We will treat all Moscow airports as equivalent and need to determine a decision boundary for this purpose.
+
+Let's create a copy of our table and add new Departure and Arrival columns with airport codes removed:
+
+                 Departure      NewDeparture                 Arrival        NewArrival
+0   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
+1   Saint Petersburg (LED)  Saint Petersburg            Moscow (VKO)            Moscow
+2   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
+3             Moscow (VKO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+4             Moscow (SVO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+5             Moscow (DME)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+6   Saint Petersburg (LED)  Saint Petersburg            Moscow (DME)            Moscow
+7             Moscow (SVO)            Moscow             Minsk (MSQ)             Minsk
+8             Moscow (VKO)            Moscow             Minsk (MSQ)             Minsk
+9              Minsk (MSQ)             Minsk            Moscow (VKO)            Moscow
+10            Moscow (VKO)            Moscow       Kaliningrad (KGD)       Kaliningrad
+11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg 
+
+Now let's check the following matching dependency:
+
+	[ equality(Departure_new, Departure_new)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (3, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+2. Records (3, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+3. Records (3, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+4. Records (4, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+5. Records (4, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+6. Records (4, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+7. Records (4, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+8. Records (5, 4) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+9. Records (5, 7) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+10. Records (5, 10) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+11. Records (5, 3) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+12. Records (5, 8) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+13. Records (7, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+14. Records (7, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+15. Records (7, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+16. Records (7, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+17. Records (8, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+18. Records (8, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+19. Records (8, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+20. Records (10, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+21. Records (10, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+22. Records (10, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+	[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0
+
+and the following MD is suggested:
+
+	[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=0.75
+
+As we can see, Desbordante suggests a decision boundary of 0.75 for the Departure column. For the Arrival column, all values are similar.
+
+For duration similarity we use the custom measure normalized_distance, defined as normalized_distance = 1 - |duration_1 - duration_2| / max(Duration), where duration_1 and duration_2 are values from the Duration column. This similarity measure is supplied to the verification algorithm. You can find more examples of custom similarity measures in examples/basic/mining_md.py.
+
+We will try to verify the following matching dependency:
+
+	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 2) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
+2. Records (0, 1) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
+3. Records (0, 6) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
+4. Records (1, 0) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
+5. Records (1, 2) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
+6. Records (1, 6) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
+7. Records (2, 0) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
+8. Records (2, 1) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
+9. Records (2, 6) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+10. Records (6, 0) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
+11. Records (6, 2) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+12. Records (6, 1) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
+13. Records (3, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+14. Records (3, 5) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
+15. Records (8, 7) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
+16. Records (4, 5) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+17. Records (4, 3) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+18. Records (7, 8) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
+19. Records (5, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+20. Records (5, 3) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.896.
+
+Thus, the following MD was provided:
+
+	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
+
+and the following MD is suggested:
+
+	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=0.896
+
+As a result, we can conclude that durations differ by about 10% for flights with the same departure and arrival cities.
+
+In conclusion, the matching dependency verification algorithm can be helpful for analyzing data, extracting facts, and finding typos. It is a powerful pattern but requires experimentation with decision boundaries and similarity measures.
+
+'''

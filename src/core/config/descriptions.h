@@ -213,4 +213,7 @@ constexpr auto kDRatio =
         "cluster's size";
 // UCC verifier
 constexpr auto kDUCCIndices = "column indices for UCC verification";
+// MD verifier
+constexpr auto kDMDLHS = "Left-hand side of Matching Dependancy";
+constexpr auto kDMDRHS = "Right-hand side of Matching Dependancy";
 }  // namespace config::descriptions

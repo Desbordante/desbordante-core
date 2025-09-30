@@ -119,4 +119,7 @@ constexpr auto kRadius = "radius";
 constexpr auto kRatio = "ratio";
 // UCC verifier
 constexpr auto kUCCIndices = "ucc_indices";
+// MD verifier
+constexpr auto kMDLHS = "lhs";
+constexpr auto kMDRHS = "rhs";
 }  // namespace config::names

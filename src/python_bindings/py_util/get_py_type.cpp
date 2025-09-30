@@ -12,6 +12,7 @@
 #include "algorithms/dd/dd.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
+#include "algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "algorithms/metric/enums.h"
 #include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
@@ -102,6 +103,13 @@ py::tuple GetPyType(std::type_index type_index) {
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
             {typeid(config::InputTables),
              []() { return MakeTypeTuple(kPyList, py::type::of<config::InputTable>()); }},
+            {typeid(algos::md::ColumnSimilarityClassifier),
+             []() { return MakeTypeTuple(py::type::of<algos::md::ColumnSimilarityClassifier>()); }},
+            {typeid(std::vector<algos::md::ColumnSimilarityClassifier>),
+             []() {
+                 return MakeTypeTuple(kPyList,
+                                      py::type::of<algos::md::ColumnSimilarityClassifier>());
+             }},
             PyTypePair<std::filesystem::path, kPyStr>,
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
