@@ -1,0 +1,7 @@
+Name,Surname,Position,City,OfficeLocation,HighLevelAccess
+John,Doe,manager,New-York City,Main St.17,Yes
+Jane,Doe,Manager,New-York City,Main St. 17,yes
+Edward,Black,Clerk,Washington D. C.,Third St 34,No
+Samuel,Smith,Sweeper,Washington D. C.,Third St. 34,No
+Dolly,Porter,Manager,Chicago,General St. 56,Yes
+Mike,Engeals,Chief,Chicago,General St. 56,yes
