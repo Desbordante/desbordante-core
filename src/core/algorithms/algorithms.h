@@ -12,6 +12,7 @@
 #include "algorithms/ind/ind_verifier/ind_verifier.h"
 #include "algorithms/ind/mining_algorithms.h"
 #include "algorithms/md/mining_algorithms.h"
+#include "algorithms/md/verification_algorithms.h"
 #include "algorithms/metric/verification_algorithms.h"
 #include "algorithms/nar/mining_algorithms.h"
 #include "algorithms/od/mining_algorithms.h"
