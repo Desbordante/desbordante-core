@@ -25,7 +25,6 @@ CIND PliCind::ExecuteSingle(model::IND const& aind) {
                 .conditions = GetConditions(attributes),
                 .conditional_attributes = GetConditionalAttributesNames(attributes.conditional)};
     Reset();
-    // fprintf(stderr, "pli_cind ExecuteSingle %s complete\n", aind.ToShortString().c_str());
     return result;
 }
 
