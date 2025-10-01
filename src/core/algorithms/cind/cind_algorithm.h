@@ -48,7 +48,7 @@ private:
     // algos
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
-    AlgoType algo_type_{AlgoType::cinderella};
+    AlgoType algo_type_{AlgoType::pli_cind};
 
     StageTimings timings_;
 };

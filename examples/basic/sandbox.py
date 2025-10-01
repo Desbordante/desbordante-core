@@ -20,10 +20,10 @@ def check(algo1, algo2, cond_type):
     print()
     
 
-algo1 = desbordante.cind.algorithms.Default()
-algo2 = desbordante.cind.algorithms.Default()
-algo3 = desbordante.cind.algorithms.Default()
-algo4 = desbordante.cind.algorithms.Default()
+# algo1 = desbordante.cind.algorithms.Default()
+# algo2 = desbordante.cind.algorithms.Default()
+# algo3 = desbordante.cind.algorithms.Default()
+# algo4 = desbordante.cind.algorithms.Default()
 
 # TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
 #           ['anime_prep', 'manga_prep']]
@@ -34,8 +34,8 @@ TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for ta
 
 # algo1.load_data(tables=TABLES,algo_type="cinderella")
 # algo2.load_data(tables=TABLES,algo_type="cinderella")
-algo3.load_data(tables=TABLES,algo_type="pli_cind")
-algo4.load_data(tables=TABLES,algo_type="pli_cind")
+# algo3.load_data(tables=TABLES,algo_type="pli_cind")
+# algo4.load_data(tables=TABLES,algo_type="pli_cind")
 # VALIDITY = 0.8
 VALIDITY = 0.95
 # COMPLETENESS = 0.005
@@ -44,8 +44,8 @@ COMPLETENESS = 0.05
 
 # algo1.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="row")
 # algo2.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="group")
-algo3.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="row")
-algo4.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="group")
+# algo3.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="row")
+# algo4.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type="group")
 
 # for cond_type in [
 #     "row",
@@ -55,4 +55,15 @@ algo4.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition
 #     algo2.execute(error=0.5, validity=VALIDITY, completeness=COMPLETENESS, condition_type=cond_type)
 #     check(algo1, algo2, cond_type)
 
+import desbordante
 
+# TABLES = ['examples/datasets/ind_datasets/cind_test_de.csv', 'examples/datasets/ind_datasets/cind_test_en.csv']
+
+algo = desbordante.cind.algorithms.Default()
+algo.load_data(tables=TABLES,algo_type="cinderella")
+algo.execute(error=0.5, validity=0.75, completeness=0.25, condition_type="row")
+for cind in algo.get_cinds():
+    print(cind)
+    if (cind.conditions_number()):
+        condition = cind.get_conditions()[0]
+        print(f"First condition metrics: validity = {condition.precision()}, completeness = {condition.recall()}") 
