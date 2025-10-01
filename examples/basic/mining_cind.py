@@ -2,8 +2,8 @@ import desbordante
 
 print("""
     ========================================================================
-    This example demonstrates Desbordante's ability to process
-    conditional inclusion dependencies (CIND's) discovery algorithm.
+    This example demonstrates Desbordante"s ability to process
+    conditional inclusion dependencies (CIND"s) discovery algorithm.
     
     We consider CIND as approximate inclusion dependency (AIND), which 
     scope defined by conditions set over one or more attributes. These
@@ -25,8 +25,8 @@ print("""
 
 algo = desbordante.cind.algorithms.Default()
 
-TABLES = [(f'examples/datasets/ind_datasets/{table_name}.csv', ',', True) for table_name in
-          ['cind_test_de', 'cind_test_en']]
+TABLES = [(f"examples/datasets/ind_datasets/{table_name}.csv", ",", True) for table_name in
+          ["cind_test_de", "cind_test_en"]]
 algo.load_data(tables=TABLES)
 
 ERROR_THRESHOLD = 0.5 # AIND error threshold, since CIND is an AIND
@@ -39,3 +39,26 @@ algo.execute(error=ERROR_THRESHOLD, validity=VALIDITY_THRESHOLD, completeness=CO
 print('Found condotoinal inclusion dependencies (-> means "is included in"):')
 for cind in algo.get_cinds():
     print(cind)
+
+print("CIND's and their conditions, that found by algorithm, are also a valid python objects")
+cind = algo.get_cinds()[0]
+print()
+print("Example CIND object:")
+print(cind)
+print("CIND object has methods:")
+print("    get_condition_attributes: ", cind.get_condition_attributes())
+print("    conditions_number: ", cind.conditions_number())
+print("    get_conditions (get all found conditions as Condition objects)")
+
+condition = cind.get_conditions()[0]
+print()
+print("Example Condition object:")
+print(condition)
+print("Condition object has methods:")
+print("    data: ", condition.data())
+print('    validity (also might be "precision"): ', condition.validity())
+assert condition.validity() == condition.precision()
+print('    completeness (also might be "recall"): ', condition.completeness())
+assert condition.completeness() == condition.recall()
+
+print("Also, CIND and Condition objects have __str__(), __eq__(), __hash__() methods")
