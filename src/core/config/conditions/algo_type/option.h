@@ -5,5 +5,5 @@
 #include "config/common_option.h"
 
 namespace config {
-extern CommonOption<algos::cind::CondType> const kConditionTypeOpt;
+extern CommonOption<algos::cind::AlgoType> const kAlgoTypeOpt;
 }  // namespace config

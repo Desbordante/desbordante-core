@@ -5,8 +5,6 @@
 
 #include <boost/container_hash/hash.hpp>
 
-class ColumnLayoutRelationData;
-
 template <>
 struct std::hash<std::vector<int>> {
     std::size_t operator()(std::vector<int> const& vec) const noexcept {

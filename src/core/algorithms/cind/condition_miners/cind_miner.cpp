@@ -1,6 +1,6 @@
 #include "cind_miner.h"
 
-#include "cind/condition_type.h"
+#include "cind/types.h"
 #include "table/encoded_tables.h"
 #include "timed_invoke.h"
 
@@ -10,28 +10,42 @@ CindMiner::CindMiner(config::InputTables& input_tables)
 
 CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) const {
     Attributes result;
-    for (auto const& column : tables_.GetTable(aind.GetLhs().GetTableIndex()).GetColumnData()) {
-        auto const& ind_columns = aind.GetLhs().GetColumnIndices();
-        auto const& ind_columns_rhs = aind.GetRhs().GetColumnIndices();
-        if (std::find(ind_columns.cbegin(), ind_columns.cend(), column.GetColumn()->GetIndex()) !=
-            ind_columns.cend()) {
+
+    auto const& lhs = aind.GetLhs();
+    auto const& rhs = aind.GetRhs();
+
+    auto const& lhs_indices = lhs.GetColumnIndices();
+    auto const& rhs_indices = rhs.GetColumnIndices();
+
+    auto const lhs_table = lhs.GetTableIndex();
+    auto const rhs_table = rhs.GetTableIndex();
+    bool const same_table = (lhs_table == rhs_table);
+
+    for (auto const& column : tables_.GetTable(lhs_table).GetColumnData()) {
+        auto const col_index = column.GetColumn()->GetIndex();
+
+        if (std::ranges::find(lhs_indices, col_index) != lhs_indices.end()) {
             result.lhs_inclusion.push_back(&column);
-        } else if (aind.GetLhs().GetTableIndex() == aind.GetRhs().GetTableIndex()) {
-            if (std::find(ind_columns_rhs.cbegin(), ind_columns_rhs.cend(),
-                          column.GetColumn()->GetIndex()) == ind_columns_rhs.cend()) {
-                result.conditional.push_back(&column);
-            }
-        } else {
+            continue;
+        }
+
+        if (!same_table) {
+            result.conditional.push_back(&column);
+            continue;
+        }
+
+        if (std::ranges::find(rhs_indices, col_index) == rhs_indices.end()) {
             result.conditional.push_back(&column);
         }
     }
-    for (auto const& column : tables_.GetTable(aind.GetRhs().GetTableIndex()).GetColumnData()) {
-        auto const& ind_columns = aind.GetRhs().GetColumnIndices();
-        if (std::find(ind_columns.cbegin(), ind_columns.cend(), column.GetColumn()->GetIndex()) !=
-            ind_columns.cend()) {
+
+    for (auto const& column : tables_.GetTable(rhs_table).GetColumnData()) {
+        auto const col_index = column.GetColumn()->GetIndex();
+        if (std::ranges::find(rhs_indices, col_index) != rhs_indices.end()) {
             result.rhs_inclusion.push_back(&column);
         }
     }
+
     return result;
 }
 
@@ -45,15 +59,16 @@ unsigned long long CindMiner::Execute(std::list<model::IND> const& aind_list) {
     return util::TimedInvoke(execute);
 }
 
-std::vector<std::string> CindMiner::GetConditionalAttributesNames(
-        AttrsType const& condition_attrs) {
+std::vector<std::string> CindMiner::GetConditionalAttributesNames(AttrsType const& condition_attrs) {
     if (condition_attrs.empty()) {
         return {};
     }
-    std::vector<std::string> result(condition_attrs.size(),
-                                    condition_attrs.back()->GetColumn()->GetSchema()->GetName());
-    for (size_t i = 0; i < result.size(); ++i) {
-        result[i].append(".").append(condition_attrs[i]->GetColumn()->GetName());
+
+    std::vector<std::string> result;
+    result.reserve(condition_attrs.size());
+    for (auto const* col_data : condition_attrs) {
+        auto const* col = col_data->GetColumn();
+        result.emplace_back(col->GetSchema()->GetName() + "." + col->GetName());
     }
     return result;
 }
