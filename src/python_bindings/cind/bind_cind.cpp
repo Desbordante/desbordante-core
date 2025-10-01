@@ -1,3 +1,4 @@
+// bind_cind.cpp
 #include "bind_cind.h"
 
 #include <vector>
@@ -6,11 +7,10 @@
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/cind/cind_algorithm.h"
-#include "algorithms/ind/mining_algorithms.h"
 #include "algorithms/cind/cind.h"
 #include "algorithms/cind/cind_algorithm.h"
 #include "algorithms/cind/condition.h"
+#include "algorithms/ind/mining_algorithms.h"
 #include "py_util/bind_primitive.h"
 
 namespace py = pybind11;
@@ -33,25 +33,16 @@ void BindCind(py::module_& main_module) {
     using namespace algos::cind;
 
     auto cind_module = main_module.def_submodule("cind");
+
     py::class_<Condition>(cind_module, "Condition")
             .def("__str__", &Condition::ToString)
             .def("__eq__", [](Condition const& cond1, Condition const& cond2) { return cond1 == cond2; })
-            .def("__hash__", [](Condition const& cond) { return py::hash(py::int_(std::hash<Condition>{}(cond))); })
-            .def("data", [](Condition const& cond) {
-                return VectorToTuple(cond.condition_attrs_values);
+            .def("__hash__", [](Condition const& cond) {
+                return py::hash(py::int_(std::hash<Condition>{}(cond)));
             })
-            .def("validity", [](Condition const& cond) {
-                return cond.validity;
-            })
-            .def("precision", [](Condition const& cond) {
-                return cond.validity;
-            })
-            .def("completeness", [](Condition const& cond) {
-                return cond.completeness;
-            })
-            .def("recall", [](Condition const& cond) {
-                return cond.completeness;
-            });
+            .def("data", [](Condition const& cond) { return VectorToTuple(cond.condition_attrs_values); })
+            .def("validity", [](Condition const& cond) { return cond.validity; })
+            .def("completeness", [](Condition const& cond) { return cond.completeness; });
 
     py::class_<CIND>(cind_module, "CIND")
             .def("__str__", &CIND::ToString)
@@ -65,9 +56,8 @@ void BindCind(py::module_& main_module) {
                 }
                 return result;
             })
-            .def("get_condition_attributes", [](CIND const& cind) {
-                return VectorToTuple(cind.conditional_attributes);
-            });
+            .def("get_condition_attributes",
+                 [](CIND const& cind) { return VectorToTuple(cind.conditional_attributes); });
 
     BindPrimitiveNoBase<CindAlgorithm>(cind_module, "Cind")
             .def("get_cinds", &CindAlgorithm::CINDList)

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -18,12 +19,17 @@ public:
         }
     }
 
-    ColumnEncodedRelationData& GetTable(size_t index) const {
+    ColumnEncodedRelationData& GetTable(size_t index) {
         assert(index < tables_.size());
         return *tables_[index];
     }
 
-    const std::vector<std::unique_ptr<ColumnEncodedRelationData>>& GetTables() const noexcept {
+    ColumnEncodedRelationData const& GetTable(size_t index) const {
+        assert(index < tables_.size());
+        return *tables_[index];
+    }
+
+    std::vector<std::unique_ptr<ColumnEncodedRelationData>> const& GetTables() const noexcept {
         return tables_;
     }
 

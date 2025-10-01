@@ -1,4 +1,4 @@
-#include <algorithms/cind/condition_type.h>
+#include <algorithms/cind/types.h>
 
 #include <gtest/gtest.h>
 

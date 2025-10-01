@@ -1,7 +1,7 @@
 #pragma once
 
 #include "cind/cind.h"
-#include "cind/condition_type.h"
+#include "cind/types.h"
 #include "ind/ind.h"
 #include "primitive_collection.h"
 #include "table/encoded_tables.h"
