@@ -13,13 +13,13 @@
 #include "algorithms/fd/hycommon/util/pli_util.h"
 #include "algorithms/fd/hycommon/validator_helpers.h"
 #include "hyfd_config.h"
+#include "util/set_bits_view.h"
 
 namespace {
 
 std::unordered_set<size_t> AsSet(boost::dynamic_bitset<> const& bitset) {
     std::unordered_set<size_t> valid_rhss(bitset.count());
-    for (size_t attr = bitset.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = bitset.find_next(attr)) {
+    for (size_t attr : util::SetBits(bitset)) {
         valid_rhss.insert(attr);
     }
     return valid_rhss;
@@ -31,8 +31,7 @@ std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
     rhs_column_ids.reserve(rhs.count());
     std::vector<size_t> rhs_ranks(compressed_records[0].size());
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr : util::SetBits(rhs)) {
         rhs_ranks[attr] = rhs_column_ids.size();
         rhs_column_ids.push_back(attr);
     }
@@ -154,8 +153,7 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     result.SetCountValidations(rhs_count);
     result.SetCountIntersections(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr : util::SetBits(rhs)) {
         if (!(*plis_)[attr]->IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
@@ -180,8 +178,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
     result.SetCountIntersections(rhs_count);
     result.SetCountValidations(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr : util::SetBits(rhs)) {
         for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
@@ -221,8 +218,7 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
     rhs &= ~valid_rhss;
     vertex->SetFds(valid_rhss);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr : util::SetBits(rhs)) {
         result.InvalidInstances().emplace_back(lhs, attr);
     }
 

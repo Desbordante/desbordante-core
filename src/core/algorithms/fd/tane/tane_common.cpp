@@ -14,6 +14,7 @@
 #include "model/table/column_data.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/relational_schema.h"
+#include "util/set_bits_view.h"
 
 namespace algos {
 using boost::dynamic_bitset;
@@ -47,9 +48,7 @@ void TaneCommon::Prune(model::LatticeLevel* level) {
 
                 vertex->SetKeyCandidate(false);
                 if (ucc_error == 0) {
-                    for (std::size_t rhs_index = vertex->GetRhsCandidates().find_first();
-                         rhs_index != boost::dynamic_bitset<>::npos;
-                         rhs_index = vertex->GetRhsCandidates().find_next(rhs_index)) {
+                    for (std::size_t rhs_index : util::SetBits(vertex->GetRhsCandidates())) {
                         Vertical rhs = static_cast<Vertical>(*schema->GetColumn((int)rhs_index));
                         if (!columns.Contains(rhs)) {
                             bool is_rhs_candidate = true;

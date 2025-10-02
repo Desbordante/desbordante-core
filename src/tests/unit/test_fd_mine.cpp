@@ -14,6 +14,7 @@
 #include "csv_config_util.h"
 #include "model/table/relational_schema.h"
 #include "test_fd_util.h"
+#include "util/set_bits_view.h"
 
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;
@@ -40,8 +41,7 @@ using FDMineAlgorithmTest = tests::AlgorithmTest<FdMine>;
 
 std::vector<unsigned int> FdMineBitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
     std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
+    for (size_t index : util::SetBits(bitset)) {
         res.push_back(index);
     }
     return res;

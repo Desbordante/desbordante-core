@@ -1,13 +1,14 @@
 #include "ucc_tree.h"
 
+#include "util/set_bits_view.h"
+
 namespace algos::hyucc {
 
 UCCTreeVertex* UCCTree::AddUCC(boost::dynamic_bitset<> const& ucc, bool* is_new_out) {
     UCCTreeVertex* cur_node = root_.get();
 
     assert(ucc.any());
-    for (size_t attr = ucc.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = ucc.find_next(attr)) {
+    for (size_t attr : util::SetBits(ucc)) {
         bool is_new = cur_node->AddChild(attr);
         if (is_new_out != nullptr) {
             *is_new_out = is_new;

@@ -2,6 +2,7 @@
 
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/util/dc_candidate.h"
+#include "util/set_bits_view.h"
 
 namespace algos::fastadc {
 
@@ -13,8 +14,7 @@ bool DCCandidateTrie::Add(DCCandidate const& add_dc) {
     boost::dynamic_bitset<> const& bitset = add_dc.bitset;
     DCCandidateTrie* tree_node = this;
 
-    for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
-         i = bitset.find_next(i)) {
+    for (size_t i : util::SetBits(bitset)) {
         auto& subtree = tree_node->subtrees_[i];
         if (!subtree) {
             subtree = std::make_unique<DCCandidateTrie>(max_subtrees_);
@@ -48,8 +48,7 @@ void DCCandidateTrie::GetAndRemoveGeneralizationsAux(boost::dynamic_bitset<> con
         dc_.reset();
     }
 
-    for (size_t i = superset.find_first(); i != boost::dynamic_bitset<>::npos;
-         i = superset.find_next(i)) {
+    for (size_t i : util::SetBits(superset)) {
         auto& subtree = subtrees_[i];
         if (subtree) {
             subtree->GetAndRemoveGeneralizationsAux(superset, removed);
@@ -83,8 +82,7 @@ DCCandidate* DCCandidateTrie::GetSubsetAux(DCCandidate const& add) {
 
     boost::dynamic_bitset<> const& bitset = add.bitset;
 
-    for (size_t i = bitset.find_first(); i != boost::dynamic_bitset<>::npos;
-         i = bitset.find_next(i)) {
+    for (size_t i : util::SetBits(bitset)) {
         auto& subtree = subtrees_[i];
         if (subtree) {
             DCCandidate* res = subtree->GetSubsetAux(add);

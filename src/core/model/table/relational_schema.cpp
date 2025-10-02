@@ -3,6 +3,7 @@
 #include <memory>
 #include <utility>
 
+#include "util/set_bits_view.h"
 #include "vertical.h"
 #include "vertical_map.h"
 
@@ -89,10 +90,7 @@ std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
         }
 
         for (auto& invalid_member : invalid_hitting_set_members) {
-            for (size_t corrective_column_index = vertical.GetColumnIndices().find_first();
-                 corrective_column_index != boost::dynamic_bitset<>::npos;
-                 corrective_column_index =
-                         vertical.GetColumnIndices().find_next(corrective_column_index)) {
+            for (size_t corrective_column_index : util::SetBits(vertical.GetColumnIndices())) {
                 auto corrective_column = *GetColumn(corrective_column_index);
                 auto corrected_member =
                         invalid_member.Union(static_cast<Vertical>(corrective_column));

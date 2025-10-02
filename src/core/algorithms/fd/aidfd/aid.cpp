@@ -1,6 +1,7 @@
 #include "aid.h"
 
 #include "config/tabular_data/input_table/option.h"
+#include "util/set_bits_view.h"
 
 namespace algos {
 
@@ -156,9 +157,7 @@ boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
 void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
     boost::dynamic_bitset<> empty_set(number_of_attributes_);
     Vertical lhs = *schema_->empty_vertical_;
-    for (size_t attr_num = constant_columns_.find_first();
-         attr_num != boost::dynamic_bitset<>::npos;
-         attr_num = constant_columns_.find_next(attr_num)) {
+    for (size_t attr_num : util::SetBits(constant_columns_)) {
         attributes[attr_num] = false;
         Column rhs = *schema_->GetColumn(attr_num);
         RegisterFd(lhs, rhs, schema_);
