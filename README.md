@@ -33,7 +33,7 @@ The currently supported data patterns are:
    - Exact inclusion dependencies ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Inclusion_Dependencies_Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
    - Approximate inclusion dependencies, with $g^{'}_{3}$ metric ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_Inclusion_Dependencies%20Mining.ipynb) and [validation](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Approximate_and_Exact_Inclusion_Dependencies_Verification.ipynb))
 * Order dependencies:
-   - set-based axiomatization (discovery)
+   - set-based axiomatization (discovery and validation including approximate)
    - list-based axiomatization (discovery)
 * Metric functional dependencies (validation)
 * Fuzzy algebraic constraints ([discovery](https://colab.research.google.com/github/Desbordante/desbordante-core/blob/main/examples/notebooks/Algebraic_Constraints.ipynb))
