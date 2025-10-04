@@ -1,5 +1,7 @@
 #include "raw_cfd.h"
 
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
 
 namespace algos::cfd {

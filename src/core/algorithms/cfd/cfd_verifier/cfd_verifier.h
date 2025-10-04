@@ -1,11 +1,16 @@
 #pragma once
 
+#include <cstddef>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "cfd/cfd_verifier/highlight.h"
+#include "cfd/model/cfd_relation_data.h"
+#include "cfd/model/cfd_types.h"
 #include "cfd_stats_calculator.h"
 #include "config/tabular_data/input_table_type.h"
 

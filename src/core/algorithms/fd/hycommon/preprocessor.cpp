@@ -1,9 +1,15 @@
 #include "preprocessor.h"
 
 #include <algorithm>
+#include <deque>
+#include <iterator>
+#include <utility>
 #include <vector>
 
 #include "algorithms/fd/hycommon/util/pli_util.h"
+#include "fd/hycommon/types.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 
 namespace algos::hy::util {
 

@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <enum.h>
+
 #include "algorithms/algorithm.h"
 #include "algorithms/metric/aliases.h"
 #include "algorithms/metric/enums.h"
@@ -18,8 +20,10 @@
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
+#include "metric/highlight.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "string_type.h"
 #include "util/convex_hull.h"
 #include "util/qgram_vector.h"
 

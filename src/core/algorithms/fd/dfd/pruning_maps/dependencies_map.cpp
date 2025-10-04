@@ -1,5 +1,11 @@
 #include "dependencies_map.h"
 
+#include <utility>
+
+#include "custom_hashes.h"
+#include "fd/dfd/pruning_maps/pruning_map.h"
+#include "table/vertical.h"
+
 DependenciesMap::DependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 
 std::unordered_set<Vertical> DependenciesMap::GetPrunedSubsets(

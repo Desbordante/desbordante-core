@@ -1,14 +1,38 @@
-#include <functional>
+#include <cassert>
+#include <iostream>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container/allocator_traits.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/mp11/algorithm.hpp>
+#include <boost/smart_ptr/shared_ptr.hpp>
 #include <gtest/gtest.h>
 
+#include "algorithm_types.h"
 #include "algorithms/algo_factory.h"
 #include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "create_algorithm.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
+#include "fd/fd.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 namespace tests {
 namespace onam = config::names;

@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <list>
+#include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -14,7 +18,9 @@
 #include "model/table/column.h"
 #include "model/table/column_index.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "primitive_collection.h"
 #include "sample.h"
+#include "table/typed_column_data.h"
 
 namespace algos {
 class Cords : public FDAlgorithm {

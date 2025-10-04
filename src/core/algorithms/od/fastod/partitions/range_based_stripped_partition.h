@@ -2,11 +2,13 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "algorithms/od/fastod/storage/data_frame.h"
 #include "stripped_partition.h"
+#include "table/column_index.h"
 
 namespace algos::fastod {
 

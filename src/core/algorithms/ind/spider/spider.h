@@ -4,6 +4,7 @@
  * Spider algorithm class definition
  */
 #pragma once
+#include <cstddef>
 #include <vector>
 
 #include "algorithms/ind/ind_algorithm.h"

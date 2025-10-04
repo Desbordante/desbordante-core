@@ -1,8 +1,12 @@
 #include "relational_schema.h"
 
+#include <algorithm>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 
+#include "custom_hashes.h"
+#include "table/column.h"
 #include "vertical.h"
 #include "vertical_map.h"
 

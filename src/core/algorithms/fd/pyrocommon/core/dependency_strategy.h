@@ -1,8 +1,13 @@
 #pragma once
+#include <cmath>
+#include <memory>
+#include <string>
+
 #include "dependency_candidate.h"
 #include "dependency_consumer.h"
 #include "model/table/vertical.h"
 #include "profiling_context.h"
+#include "table/column.h"
 
 class SearchSpace;
 

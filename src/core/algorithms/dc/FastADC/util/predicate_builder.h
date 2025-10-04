@@ -1,12 +1,15 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <stddef.h>
 #include <utility>
 #include <vector>
 
+#include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
+#include "table/typed_column_data.h"
 
 namespace algos::fastadc {
 

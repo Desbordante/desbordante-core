@@ -1,7 +1,10 @@
 #pragma once
 
 #include <filesystem>
+#include <memory>
+#include <optional>
 #include <set>
+#include <unordered_set>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
@@ -10,6 +13,7 @@
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/position_list_index.h"
 #include "model/table/vertical.h"
+#include "table/relational_schema.h"
 
 namespace algos {
 

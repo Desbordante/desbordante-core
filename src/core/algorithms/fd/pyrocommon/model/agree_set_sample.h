@@ -5,11 +5,15 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
 
 #include "confidence_interval.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
+#include "table/position_list_index.h"
 #include "util/custom_random.h"
 
 namespace model {

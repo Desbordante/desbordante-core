@@ -2,11 +2,14 @@
 
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "config/error/type.h"
 #include "model/table/column_combination.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
+#include "table/arity_index.h"
 
 namespace model {
 

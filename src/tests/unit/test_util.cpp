@@ -1,16 +1,32 @@
+#include <chrono>
+#include <cstddef>
+#include <deque>
 #include <iostream>
-#include <thread>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "all_csv_configs.h"
 #include "csv_config_util.h"
+#include "custom_hashes.h"
 #include "fd/pyrocommon/model/list_agree_set_sample.h"
 #include "levenshtein_distance.h"
 #include "model/table/agree_set_factory.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/identifier_set.h"
+#include "table/column_data.h"
+#include "table/position_list_index.h"
+#include "table/vertical.h"
 
 namespace tests {
 

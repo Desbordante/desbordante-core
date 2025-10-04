@@ -1,8 +1,16 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
+#include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "algorithms/md/hymd/column_match_info.h"
 #include "algorithms/md/hymd/indexes/records_info.h"
@@ -11,6 +19,17 @@
 #include "algorithms/md/hymd/recommendation.h"
 #include "algorithms/md/hymd/table_identifiers.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
+#include "desbordante_assume.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/compressed_record.h"
+#include "md/hymd/indexes/compressed_records.h"
+#include "md/hymd/indexes/dictionary_compressor.h"
+#include "md/hymd/indexes/keyed_position_list_index.h"
+#include "md/hymd/indexes/similarity_index.h"
+#include "md/hymd/indexes/similarity_matrix.h"
+#include "md/hymd/lattice/rhs.h"
+#include "md/hymd/lowest_cc_value_id.h"
+#include "md/hymd/md_element.h"
 #include "model/index.h"
 #include "util/worker_thread_pool.h"
 

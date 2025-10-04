@@ -1,4 +1,8 @@
 #include <memory>
+#include <optional>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
 #include <gtest/gtest.h>
 
@@ -6,7 +10,9 @@
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
 #include "error/type.h"
+#include "exceptions.h"
 #include "ind/ind_verifier/ind_verifier.h"
 
 namespace tests {

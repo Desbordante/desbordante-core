@@ -1,6 +1,17 @@
 #pragma once
 
+#include <cstddef>
+#include <filesystem>
+#include <iosfwd>
+#include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "abstract_column_store.h"
+#include "ind/faida/preprocessing/irow_iterator.h"
+#include "table/idataset_stream.h"
 
 namespace algos::faida {
 

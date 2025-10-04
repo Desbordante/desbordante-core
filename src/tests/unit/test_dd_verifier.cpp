@@ -1,10 +1,17 @@
 #include <cstddef>
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
 
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/dd/dd_verifier/dd_verifier.h"
 #include "all_csv_configs.h"
+#include "csv_parser/csv_parser.h"
+#include "dd/dd.h"
+#include "names.h"
 
 namespace tests {
 struct DDVerifyingParams {

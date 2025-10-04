@@ -2,10 +2,19 @@
 
 #include <algorithm>
 #include <cassert>
+#include <deque>
 #include <numeric>
 #include <unordered_map>
 
 #include <easylogging++.h>
+
+#include "fd/fd_verifier/highlight.h"
+#include "mixed_type.h"
+#include "string_type.h"
+#include "table/column_layout_relation_data.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
+#include "type.h"
 
 namespace {
 

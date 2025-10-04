@@ -1,6 +1,13 @@
 #include <algorithm>
+#include <cstddef>
+#include <filesystem>
 #include <memory>
+#include <string>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
+#include <boost/any.hpp>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -9,9 +16,10 @@
 #include "config/indices/type.h"
 #include "config/names.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
 #include "fd/fd_verifier/dynamic_fd_verifier.h"
-#include "fd/fd_verifier/dynamic_stats_calculator.h"
-#include "model/types/builtin.h"
+#include "fd/fd_verifier/highlight.h"
+#include "fd/fd_verifier/stats_calculator.h"
 
 namespace {
 using namespace algos::fd_verifier;

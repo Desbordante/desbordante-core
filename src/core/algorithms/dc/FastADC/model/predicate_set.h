@@ -5,7 +5,9 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <variant>
 
+#include <boost/dynamic_bitset.hpp>
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/move/utility_core.hpp>
 

@@ -1,10 +1,14 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "ac_exception.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "ranges_collection.h"
+#include "table/typed_column_data.h"
 
 namespace algos {
 class ACAlgorithm;

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <iosfwd>
 #include <list>
+#include <memory>
+#include <string>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -10,6 +13,7 @@
 #include "model/table/position_list_index.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
+#include "table/column.h"
 
 namespace model {
 

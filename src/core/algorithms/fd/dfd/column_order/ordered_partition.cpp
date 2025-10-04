@@ -1,5 +1,7 @@
 #include "ordered_partition.h"
 
+#include "table/position_list_index.h"
+
 OrderedPartition::OrderedPartition(model::PositionListIndex const* const partition,
                                    unsigned int number_of_rows, unsigned int column_index)
     : column_index_(column_index) {

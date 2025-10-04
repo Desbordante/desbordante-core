@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>

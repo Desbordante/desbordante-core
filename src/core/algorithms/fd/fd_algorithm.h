@@ -1,14 +1,23 @@
 #pragma once
 
+#include <algorithm>
 #include <filesystem>
 #include <list>
+#include <memory>
 #include <mutex>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include <boost/any.hpp>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/fd/fd.h"
 #include "config/max_lhs/type.h"
+#include "table/column.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 #include "util/primitive_collection.h"
 
 namespace model {

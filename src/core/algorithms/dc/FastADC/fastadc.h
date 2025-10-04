@@ -1,9 +1,11 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "dc/FastADC/providers/index_provider.h"
 #include "dc/FastADC/providers/predicate_provider.h"
 #include "dc/FastADC/util/denial_constraint_set.h"
 #include "model/denial_constraint.h"

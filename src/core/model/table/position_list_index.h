@@ -6,10 +6,12 @@
 #pragma once
 #include <deque>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "model/table/column.h"
+#include "table/relational_schema.h"
 
 class ColumnLayoutRelationData;
 

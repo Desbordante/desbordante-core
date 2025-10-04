@@ -1,10 +1,18 @@
 #pragma once
 
 #include <map>
+#include <memory>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "agree_set_sample.h"
+#include "custom_random.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/vertical.h"
 
 namespace model {
 

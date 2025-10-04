@@ -1,10 +1,14 @@
 #include <bitset>
+#include <cstddef>
+#include <iosfwd>
 #include <limits>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <unordered_set>
+#include <version>
 
+#include <easylogging++.h>
 #include <gtest/gtest.h>
 
 #include "model/types/bitset.h"

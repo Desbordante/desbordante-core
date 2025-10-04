@@ -1,10 +1,15 @@
 #include "fd_algorithm.h"
 
+#include <cassert>
+#include <cstddef>
 #include <map>
-#include <thread>
 #include <vector>
 
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/max_lhs/option.h"
+#include "fd/fd.h"
+#include "primitive_collection.h"
 
 namespace algos {
 

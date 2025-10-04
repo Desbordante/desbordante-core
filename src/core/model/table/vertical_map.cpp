@@ -1,9 +1,13 @@
 #include "vertical_map.h"
 
+#include <algorithm>
 #include <exception>
+#include <mutex>
 #include <queue>
+#include <stdexcept>
 #include <unordered_set>
 
+#include "custom_hashes.h"
 #include "fd/pyrocommon/core/dependency_candidate.h"
 #include "fd/pyrocommon/core/vertical_info.h"
 #include "fd/pyrocommon/model/agree_set_sample.h"

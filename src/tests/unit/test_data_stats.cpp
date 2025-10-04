@@ -1,10 +1,24 @@
+#include <cstddef>
+#include <iosfwd>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <easylogging++.h>
-#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
 #include "all_csv_configs.h"
+#include "builtin.h"
 #include "config/names.h"
+#include "csv_parser/csv_parser.h"
+#include "statistics/statistic.h"
+#include "type.h"
 
 namespace tests {
 namespace mo = model;

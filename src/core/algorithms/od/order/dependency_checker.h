@@ -2,6 +2,7 @@
 
 #include <enum.h>
 
+#include "od/order/dependency_checker.h"
 #include "sorted_partitions.h"
 
 namespace algos::order {

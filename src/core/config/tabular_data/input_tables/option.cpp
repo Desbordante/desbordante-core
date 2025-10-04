@@ -1,8 +1,14 @@
 #include "config/tabular_data/input_tables/option.h"
 
 #include <cassert>
+#include <string>
 
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "exceptions.h"
+#include "names.h"
+#include "tabular_data/input_tables_type.h"
 
 namespace config {
 

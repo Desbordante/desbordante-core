@@ -1,6 +1,9 @@
 
 #include "dependency_consumer.h"
 
+#include "fd/pyrocommon/model/partial_fd.h"
+#include "fd/pyrocommon/model/partial_key.h"
+
 PartialFD DependencyConsumer::RegisterFd(Vertical const& lhs, Column const& rhs, double error,
                                          double score) const {
     PartialFD partial_fd(lhs, rhs, error, score);

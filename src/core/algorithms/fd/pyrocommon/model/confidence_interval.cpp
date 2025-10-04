@@ -1,5 +1,8 @@
 #include "confidence_interval.h"
 
+#include <ios>
+#include <ostream>
+
 namespace model {
 
 std::ostream& operator<<(std::ostream& ofs, ConfidenceInterval const& confidence_interval) {

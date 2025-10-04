@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cassert>
+#include <memory>
 #include <optional>
+#include <string_view>
+#include <vector>
 
 #include "config/equal_nulls/type.h"
 #include "config/tabular_data/input_table_type.h"

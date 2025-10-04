@@ -1,5 +1,9 @@
 #include "list_lattice.h"
 
+#include <cstddef>
+#include <initializer_list>
+#include <utility>
+
 #include "order_utility.h"
 
 namespace algos::order {

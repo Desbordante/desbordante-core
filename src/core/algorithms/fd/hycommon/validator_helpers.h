@@ -6,6 +6,7 @@
 
 #include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/unordered/unordered_flat_map_fwd.hpp>
 #include <boost/version.hpp>
 #include <easylogging++.h>
 

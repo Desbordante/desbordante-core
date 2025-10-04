@@ -7,9 +7,7 @@
 namespace algos::nd_verifier::util {
 
 template <typename T>
-concept Printable = requires(std::stringstream& sstream, T& t) {
-    sstream << t;
-};
+concept Printable = requires(std::stringstream& sstream, T& t) { sstream << t; };
 
 template <Printable T>
 std::string VectorToString(std::vector<T> const& vect) {

@@ -1,7 +1,10 @@
 #pragma once
 
+#include <unordered_set>
+
 #include "model/table/vertical.h"
 #include "pruning_map.h"
+#include "table/relational_schema.h"
 
 class NonDependenciesMap : public PruningMap {
 public:

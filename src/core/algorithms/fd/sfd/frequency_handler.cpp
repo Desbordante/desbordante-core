@@ -1,11 +1,14 @@
 #include "frequency_handler.h"
 
 #include <algorithm>
+#include <compare>
 #include <cstddef>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "model/table/column_index.h"
 #include "model/table/tuple_index.h"

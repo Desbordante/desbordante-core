@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "config/error/type.h"
 #include "enums.h"
 #include "model/table/column_data.h"

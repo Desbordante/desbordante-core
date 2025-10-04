@@ -1,7 +1,16 @@
 #include "pli_based_fd_algorithm.h"
 
+#include <stdexcept>
+#include <utility>
+
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
+#include "fd/fd_algorithm.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 
 namespace algos {
 

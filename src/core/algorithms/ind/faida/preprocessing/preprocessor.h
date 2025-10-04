@@ -1,6 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "hashed_column_store.h"
+#include "ind/faida/preprocessing/abstract_column_store.h"
+#include "table/idataset_stream.h"
 
 namespace algos::faida {
 

@@ -1,4 +1,8 @@
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -9,6 +13,8 @@
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
+#include "od/fastod/model/canonical_od.h"
 
 namespace tests {
 

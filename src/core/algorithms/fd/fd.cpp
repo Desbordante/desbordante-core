@@ -1,5 +1,13 @@
 #include "algorithms/fd/fd.h"
 
+#include <ios>
+#include <iosfwd>
+#include <istream>
+#include <ostream>
+#include <sstream>
+
+#include "table/column.h"
+#include "table/vertical.h"
 #include "util/bitset_utils.h"
 
 std::vector<model::ColumnIndex> FD::GetLhsIndices() const {

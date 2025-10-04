@@ -1,3 +1,9 @@
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -5,6 +11,11 @@
 #include "all_csv_configs.h"
 #include "config/indices/type.h"
 #include "config/names.h"
+#include "csv_parser/csv_parser.h"
+#include "error/type.h"
+#include "error_measure/type.h"
+#include "fd/tane/enums.h"
+#include "table/position_list_index.h"
 
 namespace tests {
 namespace onam = config::names;

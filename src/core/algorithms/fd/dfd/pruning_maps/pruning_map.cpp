@@ -1,5 +1,14 @@
 #include "pruning_map.h"
 
+#include <cstddef>
+#include <memory>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "table/vertical.h"
+
 PruningMap::PruningMap(RelationalSchema const* schema) {
     for (auto const& column : schema->GetColumns()) {
         this->insert(std::make_pair(Vertical(*column), std::unordered_set<Vertical>()));

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <vector>
+
 #include <enum.h>
 
 #include "encoded_nar.h"

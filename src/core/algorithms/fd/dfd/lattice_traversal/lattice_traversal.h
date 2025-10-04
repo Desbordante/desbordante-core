@@ -1,14 +1,20 @@
 #pragma once
 
+#include <list>
 #include <random>
 #include <stack>
+#include <unordered_set>
+#include <vector>
 
-#include "../column_order/column_order.h"
-#include "../lattice_observations/lattice_observations.h"
-#include "../partition_storage/partition_storage.h"
-#include "../pruning_maps/dependencies_map.h"
-#include "../pruning_maps/non_dependencies_map.h"
+#include "custom_hashes.h"
+#include "fd/dfd/column_order/column_order.h"
+#include "fd/dfd/lattice_observations/lattice_observations.h"
+#include "fd/dfd/partition_storage/partition_storage.h"
+#include "fd/dfd/pruning_maps/dependencies_map.h"
+#include "fd/dfd/pruning_maps/non_dependencies_map.h"
 #include "model/table/vertical.h"
+#include "table/column.h"
+#include "table/column_layout_relation_data.h"
 
 class LatticeTraversal {
 private:

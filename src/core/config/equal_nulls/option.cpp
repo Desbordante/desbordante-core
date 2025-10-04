@@ -1,6 +1,12 @@
 #include "config/equal_nulls/option.h"
 
+#include <variant>
+
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "equal_nulls/type.h"
+#include "names.h"
 
 namespace config {
 using names::kEqualNulls, descriptions::kDEqualNulls;

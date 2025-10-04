@@ -1,8 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "algorithms/nar/nar.h"
 #include "encoded_value_range.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "nar/des/rng.h"
+#include "nar/value_range.h"
 
 namespace algos::des {
 using model::NAR;
