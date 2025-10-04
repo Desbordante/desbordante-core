@@ -93,7 +93,7 @@ endif()
 
 # --- Setting CMake build variables ---
 
-# Enable colored output for Ninja messages
+# Enable colored Ninja and compilers diagnostics
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 set(CMAKE_CXX_STANDARD 20)
