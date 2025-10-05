@@ -20,8 +20,9 @@ struct Candidate {
 template <>
 struct std::hash<algos::cfdfinder::Candidate> {
     size_t operator()(algos::cfdfinder::Candidate const& candidate) const {
-        size_t h1 = std::hash<boost::dynamic_bitset<>>{}(candidate.lhs_);
-        size_t h2 = std::hash<int>{}(candidate.rhs_);
-        return h1 ^ (h2 << 1);
+        size_t seed;
+        boost::hash_combine(seed, candidate.lhs_);
+        boost::hash_combine(seed, candidate.rhs_);
+        return seed;
     }
 };
