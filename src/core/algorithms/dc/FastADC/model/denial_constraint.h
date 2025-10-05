@@ -48,13 +48,13 @@ public:
         static std::string const kCNot = "\u00AC";
         static std::string const kCAnd = " ∧ ";
         std::ostringstream sb;
-        sb << kCNot << "{ ";
+        sb << kCNot << "( ";
         std::string separator;
         for (PredicatePtr predicate : predicate_set_) {
             sb << separator << predicate->ToString();
             separator = kCAnd;
         }
-        sb << " }";
+        sb << " )";
         return sb.str();
     }
 
