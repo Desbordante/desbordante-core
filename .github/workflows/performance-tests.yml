@@ -49,23 +49,30 @@ jobs:
           mkdir -p old-results
           for (( i = 0; i < ${{ env.num-runs }}; i = $i + 1 )); do
             ID=$(jq ".[$i]" ids.json)
+            if [[ "$ID" = 'null' ]]; then
+              echo "No ID numbered $i"
+              continue
+            fi
+
+            STARTED_AT=$(gh run view "$ID" --repo "${{ github.repository }}" --json 'startedAt' \
+              --jq '.startedAt')
             # Don't fail on error
-            echo "$ID"
-            gh run download "$ID" --name 'results-v1.json' --repo "${{ github.repository }}" && \
+            echo "$ID (started at $STARTED_AT)"
+            gh run download "$ID" --name 'results-v2.json' --repo "${{ github.repository }}" && \
               cat curr-results.json && \
               mv curr-results.json old-results/$i.json || /bin/true
 
-            rm -rf results-v1.json
+            rm -rf results-v2.json
           done
 
       - name: Get latest log
         run: |
-          if [[ -a old-results/* ]]; then
+          if [ -n "$(ls -A old-results)" ]; then
             FILENAME=old-results/$(ls old-results | head -n 1)
             cp $FILENAME latest.json
           else
             echo "No artifacts found!"
-            echo '[]' > latest.json
+            echo '{"date": "0000-00-00", "results": []}' > latest.json
           fi
 
       - name: Get latest successful job ID
@@ -84,7 +91,7 @@ jobs:
         with:
           # For some reason there's no "when not found" parameter,
           # but job don't fail if `name` is replaced with `pattern`
-          pattern: baseline-v1.json
+          pattern: baseline-v2.json
           run-id: ${{ env.LastSuccID }}
           github-token: ${{ secrets.PERFORMANCEREGRESSIONTESTING }}
         if: ${{ env.LastSuccID != '' }}
@@ -92,7 +99,7 @@ jobs:
         # Each successful run must have a "baseline" attached.
         # If not, there's no baseline at all; use latest instead.
         # Note: such behaviour can be used to manually update baseline in case of some problems
-        run: cp baseline-v1.json/baseline.json baseline.json || cp latest.json baseline.json
+        run: cp baseline-v2.json/baseline.json baseline.json || cp latest.json baseline.json
 
       - name: Test
         working-directory: ${{github.workspace}}/build/target
@@ -104,7 +111,7 @@ jobs:
       # Some of them may fail in that case, but it's not a problem
       - uses: actions/upload-artifact@v4
         with:
-          name: results-v1.json
+          name: results-v2.json
           path: curr-results.json
         if: ${{ !cancelled() }}
 
@@ -130,5 +137,5 @@ jobs:
       - name: Upload baseline
         uses: actions/upload-artifact@v4
         with:
-          name: baseline-v1.json
+          name: baseline-v2.json
           path: baseline.json
