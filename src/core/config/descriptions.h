@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "algorithms/cfd/cfdfinder/enums.h"
 #include "algorithms/cfd/enums.h"
 #include "algorithms/fd/tane/enums.h"
 #include "algorithms/md/hymd/enums.h"
@@ -29,6 +30,11 @@ std::string const kDLevelDefinitionString =
 std::string const kDDifferentialStrategyString =
         "DES mutation strategy to use\n" +
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
+std::string const kDCfdExpansionStrategyString =
+        "CFD expansion strategy to use\n" +
+        util::EnumToAvailableValues<algos::cfdfinder::Expansion>();
+std::string const kDCfdPruningStrategyString =
+        "CFD pruning strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Pruning>();
 }  // namespace details
 
 // Common
@@ -76,6 +82,13 @@ auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 constexpr auto kDCfdTuplesNumber =
         "Number of tuples in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
+constexpr auto kDMaximumG1 = "maximum G1 value for the algorithm";
+constexpr auto kDPatternTreshold = "minimum number of patterns in the tableau";
+constexpr auto kDMinSupportGain = "minimum support gain for the algorithm.";
+constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm.";
+constexpr auto kDLimitPliCache = "limit for the number of PLIs in the cache";
+auto const kDCfdExpansionStrategy = details::kDCfdExpansionStrategyString.c_str();
+auto const kDCfdPruningStrategy = details::kDCfdPruningStrategyString.c_str();
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "
