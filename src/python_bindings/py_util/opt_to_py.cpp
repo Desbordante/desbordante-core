@@ -1,5 +1,3 @@
-#include "python_bindings/py_util/opt_to_py.h"
-
 #include <functional>
 #include <sstream>
 #include <stdexcept>
@@ -9,6 +7,7 @@
 #include <boost/core/demangle.hpp>
 #include <pybind11/stl.h>
 
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/gdd/gdd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -22,6 +21,7 @@
 #include "core/config/thread_number/type.h"
 #include "core/model/transaction/input_format_type.h"
 #include "core/util/enum_to_str.h"
+#include "python_bindings/py_util/opt_to_py.h"
 
 namespace {
 namespace py = pybind11;
@@ -54,7 +54,10 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::od::Ordering>};
+        enum_conv_pair<algos::od::Ordering>,
+        enum_conv_pair<algos::cfdfinder::Expansion>,
+        enum_conv_pair<algos::cfdfinder::Pruning>,
+        enum_conv_pair<algos::cfdfinder::Result>};
 }  // namespace
 
 namespace python_bindings {

@@ -1,0 +1,24 @@
+#include "core/algorithms/cfd/cfdfinder/util/violations_util.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <unordered_map>
+
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
+
+namespace algos::cfdfinder::utils {
+size_t CalculateViolations(Cluster const& cluster, Row const& inverted_rhs_pli) {
+    size_t max_cluster_size = 0;
+    std::unordered_map<size_t, size_t> rhs_cluster_counts;
+
+    for (auto tuple : cluster) {
+        auto cluster_id = inverted_rhs_pli[tuple];
+        if (hy::PLIUtil::IsSingletonCluster(cluster_id)) continue;
+
+        max_cluster_size = std::max(max_cluster_size, ++rhs_cluster_counts[cluster_id]);
+    }
+
+    return (max_cluster_size > 0) ? (cluster.size() - max_cluster_size) : (cluster.size() - 1);
+}
+
+}  // namespace algos::cfdfinder::utils

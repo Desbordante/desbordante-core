@@ -12,6 +12,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
@@ -234,7 +235,9 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
-};
+        kEnumConvPair<algos::cfdfinder::Expansion>,
+        kEnumConvPair<algos::cfdfinder::Pruning>,
+        kEnumConvPair<algos::cfdfinder::Result>};
 
 }  // namespace
 
