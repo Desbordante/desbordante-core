@@ -1,18 +1,10 @@
-// see input_data/cfd_data/LICENSE
-
-#include <filesystem>
-
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/cfd/cfdfinder/cfd.h"
+#include "algo_factory.h"
 #include "algorithms/cfd/cfdfinder/cfdfinder.h"
-#include "algorithms/cfd/cfdfinder/model/expansion/constant_expansion_strategy.h"
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
-#include "algorithms/fd/hycommon/types.h"
 #include "all_csv_configs.h"
 #include "config/indices/option.h"
-#include "config/names.h"
+#include "config/names_and_descriptions.h"
 
 namespace tests {
 
