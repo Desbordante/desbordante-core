@@ -36,6 +36,13 @@ constexpr auto kCFDRuleLeft = "cfd_rule_left";
 constexpr auto kCFDRuleRight = "cfd_rule_right";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
 constexpr auto kCfdTuplesNumber = "tuples_number";
+constexpr auto kMaximumG1 = "max_g1";
+constexpr auto kMaxLevelSupportDrop = "max_level_support_drop";
+constexpr auto kMinSupportGain = "min_support_gain";
+constexpr auto kCfdExpansionStrategy = "expansion_strategy";
+constexpr auto kCfdPruningStrategy = "pruning_strategy";
+constexpr auto kPatternTreshold = "pattern_treshold";
+constexpr auto kLimitPliCache = "limit_pli_cache";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
