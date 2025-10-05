@@ -1,10 +1,10 @@
+#include "cfdfinder_relation_data.h"
+
 #include <map>
 #include <memory>
 #include <utility>
 
 #include <easylogging++.h>
-
-#include "cfdfinder_relation_data.h"
 
 namespace {
 std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap& cluster_map,
@@ -13,7 +13,7 @@ std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap&
     std::vector<int> null_cluster;
     unsigned int size = 0;
     unsigned int relation_size = 0;
-    static constexpr std::string kNullValue = "";
+    static std::string const kNullValue = "";
 
     if (cluster_map.contains(kNullValue)) {
         null_cluster = cluster_map[kNullValue];
