@@ -11,7 +11,7 @@ namespace algos::cfdfinder {
 class PatternDebugController {
 private:
     inline static bool debug_enabled_ = false;
-    inline static unsigned long long counter = 0;
+    inline static unsigned long long counter_ = 0;
 
 public:
     static bool IsDebugEnabled() {
@@ -23,11 +23,11 @@ public:
     }
 
     static void ResetCounter() {
-        counter = 0;
+        counter_ = 0;
     }
 
     static unsigned long long Next() {
-        return counter++;
+        return counter_++;
     }
 };
 

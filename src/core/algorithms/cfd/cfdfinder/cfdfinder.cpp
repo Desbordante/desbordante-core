@@ -58,7 +58,7 @@ namespace algos::cfdfinder {
 CFDFinder::CFDFinder() : Algorithm({}) {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kMaximumLhs, kLimitPliCache, kEqualNulls, kThreads});
+    MakeOptionsAvailable({kTable, kMaximumLhs, kLimitPliCache, kEqualNulls});
 }
 
 void CFDFinder::ResetState() {
@@ -189,8 +189,8 @@ unsigned long long CFDFinder::ExecuteInternal() {
         }
         auto elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::system_clock::now() - start_level_time);
-        LOG(DEBUG) << "Finished level " << height << "(" << elapsed_seconds << ", " << num_results
-                   << " results)";
+        LOG(INFO) << "Finished level " << height << "(" << elapsed_seconds.count() << ", "
+                  << num_results << " results)";
         height--;
     }
     LOG(INFO) << "Total PLI computations: "
@@ -381,8 +381,8 @@ void CFDFinder::RegisterCFD(Candidate candidate, PatternTableau const& tableau,
 std::vector<std::string> CFDFinder::GetEntriesString(
         Pattern const& pattern, InvertedClusterMaps const& inverted_cluster_maps) const {
     std::vector<std::string> result;
-    static std::string constexpr kNullValue = "null";
-    static std::string constexpr kNegationSign = "¬";
+    static std::string const kNullRepresentation = "null";
+    static std::string const kNegationSign = "¬";
 
     for (auto const& [id, entry] : pattern.GetEntries()) {
         auto const& inverted_cluster_map = inverted_cluster_maps[id];
@@ -395,7 +395,7 @@ std::vector<std::string> CFDFinder::GetEntriesString(
                 std::string value =
                         inverted_cluster_map.find(constant_entry->GetConstant())->second;
                 if (value.empty()) {
-                    value = kNullValue;
+                    value = kNullRepresentation;
                 }
 
                 result.push_back(std::move(value));
@@ -407,7 +407,8 @@ std::vector<std::string> CFDFinder::GetEntriesString(
                 std::string value =
                         inverted_cluster_map.find(neg_constant_entry->GetConstant())->second;
 
-                value = (!value.empty()) ? kNegationSign + value : kNegationSign + kNullValue;
+                value = (!value.empty()) ? kNegationSign + value
+                                         : kNegationSign + kNullRepresentation;
                 result.push_back(std::move(value));
                 break;
             }
@@ -419,11 +420,11 @@ std::vector<std::string> CFDFinder::GetEntriesString(
 
                 lower_bound = inverted_cluster_map.find(range_entry->GetLowerBound())->second;
                 if (lower_bound.empty()) {
-                    lower_bound = kNullValue;
+                    lower_bound = kNullRepresentation;
                 }
                 upper_bound = inverted_cluster_map.find(range_entry->GetUpperBound())->second;
                 if (upper_bound.empty()) {
-                    upper_bound = kNullValue;
+                    upper_bound = kNullRepresentation;
                 }
 
                 result.push_back("[" + lower_bound + " - " + upper_bound + "]");
