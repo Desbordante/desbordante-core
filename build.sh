@@ -95,7 +95,7 @@ for i in "$@"; do
     esac
 done
 
-CMAKE_OPTS='-G Ninja'
+CMAKE_OPTS="$CMAKE_OPTS -G Ninja"
 
 if [[ $NO_TESTS == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_TESTS=OFF"
