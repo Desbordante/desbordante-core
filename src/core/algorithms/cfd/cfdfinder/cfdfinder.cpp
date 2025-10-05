@@ -336,12 +336,14 @@ CFDFinder::Lattice CFDFinder::GetLattice(hy::PLIsPtr const& plis,
     candidates.splice(candidates.end(), inductor.FillMaxNonFDs());
     candidates.splice(candidates.end(), validator.FillMaxNonFDs());
 
-    for (auto&& [lhs, rhs] : fds) {
-        for (auto&& subset : GenerateLhsSubsets(std::move(lhs))) {
-            if (!std::any_of(candidates.begin(), candidates.end(), [&](auto const& candidate) {
-                    return rhs == candidate.rhs_ && subset.is_subset_of(candidate.lhs_);
-                })) {
-                candidates.emplace_back(std::move(subset), rhs);
+    for (auto&& fd : fds) {
+        for (auto&& subset : GenerateLhsSubsets(std::move(fd.lhs_))) {
+            if (!std::any_of(candidates.begin(), candidates.end(),
+                             [&subset, rhs = fd.rhs_](auto const& candidate) {
+                                 return rhs == candidate.rhs_ &&
+                                        subset.is_subset_of(candidate.lhs_);
+                             })) {
+                candidates.emplace_back(std::move(subset), fd.rhs_);
             }
         }
     }
