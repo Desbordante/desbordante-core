@@ -49,24 +49,21 @@ jobs:
           mkdir -p old-results
           for (( i = 0; i < ${{ env.num-runs }}; i = $i + 1 )); do
             ID=$(jq ".[$i]" ids.json)
+            if [[ "$ID" = 'null' ]]; then
+              echo "No ID numbered $i"
+              continue
+            fi
+
+            STARTED_AT=$(gh run view "$ID" --repo "${{ github.repository }}" --json 'startedAt' \
+              --jq '.startedAt')
             # Don't fail on error
-            echo "$ID"
-            gh run download "$ID" --name 'results-v1.json' --repo "${{ github.repository }}" && \
+            echo "$ID (started at $STARTED_AT)"
+            gh run download "$ID" --name 'results-v2' --repo "${{ github.repository }}" && \
               cat curr-results.json && \
               mv curr-results.json old-results/$i.json || /bin/true
 
-            rm -rf results-v1.json
+            rm -rf results-v2
           done
-
-      - name: Get latest log
-        run: |
-          if [[ -a old-results/* ]]; then
-            FILENAME=old-results/$(ls old-results | head -n 1)
-            cp $FILENAME latest.json
-          else
-            echo "No artifacts found!"
-            echo '[]' > latest.json
-          fi
 
       - name: Get latest successful job ID
         run: |
@@ -84,7 +81,7 @@ jobs:
         with:
           # For some reason there's no "when not found" parameter,
           # but job don't fail if `name` is replaced with `pattern`
-          pattern: baseline-v1.json
+          pattern: baseline-v2
           run-id: ${{ env.LastSuccID }}
           github-token: ${{ secrets.PERFORMANCEREGRESSIONTESTING }}
         if: ${{ env.LastSuccID != '' }}
@@ -92,28 +89,47 @@ jobs:
         # Each successful run must have a "baseline" attached.
         # If not, there's no baseline at all; use latest instead.
         # Note: such behaviour can be used to manually update baseline in case of some problems
-        run: cp baseline-v1.json/baseline.json baseline.json || cp latest.json baseline.json
+        run: |
+          if [[ -a 'baseline-v2/baseline.json' ]]; then
+            cp baseline-v2/baseline.json baseline.json
+          elif [ -n "$(ls old-results)" ]; then
+            FILENAME=old-results/$(ls old-results | head -n 1)
+            cp $FILENAME baseline.json
+          else
+            echo 'Warning: no baseline and no latest results found'
+          fi
 
       - name: Test
         working-directory: ${{github.workspace}}/build/target
         run: |
-          ./Desbordante_benchmark --baseline ${{ github.workspace }}/baseline.json \
-            --output ${{ github.workspace }}/curr-results.json
+          if [[ -a 'baseline.json' ]]; then
+            ./Desbordante_benchmark --baseline ${{ github.workspace }}/baseline.json \
+              --output ${{ github.workspace }}/curr-results.json
+          else
+            ./Desbordante_benchmark --output ${{ github.workspace }}/curr-results.json
+          fi
 
       # All next steps should be ran even if this one has failed
       # Some of them may fail in that case, but it's not a problem
       - uses: actions/upload-artifact@v4
         with:
-          name: results-v1.json
+          name: results-v2
           path: curr-results.json
         if: ${{ !cancelled() }}
 
       - name: Build plots
         run: |
           python3 -m venv .venv
-          .venv/bin/python3 -m pip install matplotlib
-          .venv/bin/python3 src/tests/benchmark/display_benchmarks.py old-results baseline.json \
-            curr-results.json plots.pdf
+          .venv/bin/python3 -m pip install uv
+          if [[ -a 'baseline.json' ]]; then
+            .venv/bin/python3 -m uv run src/tests/benchmark/display_benchmarks.py \
+              --old_results old-results --baseline baseline.json --curr_results curr-results.json \
+              --output plots.pdf
+          else
+            .venv/bin/python3 -m uv run src/tests/benchmark/display_benchmarks.py \
+              --old_results old-results --curr_results curr-results.json --output plots.pdf
+          fi
+
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@v4
         with:
@@ -130,5 +146,5 @@ jobs:
       - name: Upload baseline
         uses: actions/upload-artifact@v4
         with:
-          name: baseline-v1.json
+          name: baseline-v2
           path: baseline.json
