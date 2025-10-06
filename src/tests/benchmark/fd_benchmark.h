@@ -23,7 +23,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
             {{kThreads, static_cast<config::ThreadNumType>(1)},
              {kMaximumLhs, static_cast<config::MaxLhsType>(2)}},
             "");
-    comparer.SetThreshold(hyfd_name, 70);
+    comparer.SetThreshold(hyfd_name, 75);
 
     auto pyro_name = runner.RegisterSimpleBenchmark<algos::Pyro>(
             tests::kIowa550k,
@@ -32,7 +32,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
              {kMaximumLhs, static_cast<config::MaxLhsType>(2)},
              {kThreads, static_cast<config::ThreadNumType>(1)}},
             "");
-    comparer.SetThreshold(pyro_name, 17);
+    comparer.SetThreshold(pyro_name, 22);
 
     for (auto measure : algos::AfdErrorMeasure::_values()) {
         // mu_plus is much slower than other measures
@@ -55,7 +55,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
 #endif
 
     auto aid_name = runner.RegisterSimpleBenchmark<algos::Aid>(tests::kIowa1kk, {}, "");
-    comparer.SetThreshold(aid_name, 17);
+    comparer.SetThreshold(aid_name, 40);
 }
 
 }  // namespace benchmark

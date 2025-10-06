@@ -94,7 +94,6 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
     '''
     dates = []
     points = []
-    print(f'Got {len(results)} results.')
     for res in results:
         dates.append(res.date)
         time = timedelta(0)
@@ -114,7 +113,7 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
     ax.set_title(name)
     ax.set_xlabel('Date')
     ax.set_ylabel('Time, s')
-    ax.xticks(rotation=45)
+    plt.xticks(rotation=45)
     ax.grid(visible=True, linestyle='--', alpha=0.7)
 
     if baseline:
@@ -125,7 +124,8 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
                            label='Baseline')
 
     ax.legend()
-    pages.savefig(fig)
+    # Padding is needed for date to be displayed correctly
+    pages.savefig(fig, bbox_inches='tight', pad_inches=0.15)
     plt.close(fig)
 
 
