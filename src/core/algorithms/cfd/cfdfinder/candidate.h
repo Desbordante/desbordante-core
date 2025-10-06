@@ -20,7 +20,7 @@ struct Candidate {
 template <>
 struct std::hash<algos::cfdfinder::Candidate> {
     size_t operator()(algos::cfdfinder::Candidate const& candidate) const {
-        size_t seed;
+        size_t seed = 0;
         boost::hash_combine(seed, candidate.lhs_);
         boost::hash_combine(seed, candidate.rhs_);
         return seed;
