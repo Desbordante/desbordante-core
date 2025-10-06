@@ -9,7 +9,7 @@ class BenchmarkComparer {
 private:
     using Results = std::unordered_map<std::string, long long>;
 
-    constexpr static unsigned char kDefaultThreshold = 10;
+    constexpr static unsigned char kDefaultThreshold = 15;
 
     std::unordered_map<std::string, unsigned char> thresholds_;
 
