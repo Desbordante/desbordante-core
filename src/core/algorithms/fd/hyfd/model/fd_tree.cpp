@@ -5,14 +5,15 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "util/set_bits_view.h"
+
 namespace algos::hyfd::fd_tree {
 
 std::shared_ptr<FDTreeVertex> FDTree::AddFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
     FDTreeVertex* cur_node = root_.get();
     cur_node->SetAttribute(rhs);
 
-    for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
-         bit = lhs.find_next(bit)) {
+    for (size_t bit : util::SetBits(lhs)) {
         bool is_new = cur_node->AddChild(bit);
 
         if (is_new && lhs.find_next(bit) == boost::dynamic_bitset<>::npos) {
@@ -32,8 +33,7 @@ std::shared_ptr<FDTreeVertex> FDTree::AddFD(boost::dynamic_bitset<> const& lhs, 
 bool FDTree::ContainsFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
     FDTreeVertex const* cur_node = root_.get();
 
-    for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
-         bit = lhs.find_next(bit)) {
+    for (size_t bit : util::SetBits(lhs)) {
         if (!cur_node->HasChildren() || !cur_node->ContainsChildAt(bit)) {
             return false;
         }

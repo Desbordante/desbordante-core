@@ -2,6 +2,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "util/set_bits_view.h"
+
 namespace algos::hyfd {
 
 void Inductor::UpdateFdTree(NonFDList&& non_fds) {
@@ -12,8 +14,7 @@ void Inductor::UpdateFdTree(NonFDList&& non_fds) {
             auto rhs_bits = lhs_bits;
             rhs_bits.flip();
 
-            for (size_t rhs_id = rhs_bits.find_first(); rhs_id != boost::dynamic_bitset<>::npos;
-                 rhs_id = rhs_bits.find_next(rhs_id)) {
+            for (size_t rhs_id : util::SetBits(rhs_bits)) {
                 SpecializeTreeForNonFd(lhs_bits, rhs_id);
             }
         }

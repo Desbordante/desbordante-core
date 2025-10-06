@@ -14,6 +14,7 @@
 #include "dc/FastADC/util/denial_constraint_set.h"
 #include "dc/FastADC/util/predicate_builder.h"
 #include "dc/FastADC/util/predicate_organizer.h"
+#include "util/set_bits_view.h"
 
 namespace algos::fastadc {
 
@@ -197,8 +198,7 @@ private:
         dc_candidates.ForEach([this](DCCandidate const& dc) { approx_covers_.Add(dc); });
         for (auto const& invalid_dc : invalid_dcs) {
             boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
-            for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
-                 i = can_add.find_next(i)) {
+            for (size_t i : util::SetBits(can_add)) {
                 DCCandidate valid_dc{.bitset = invalid_dc.bitset};
                 valid_dc.bitset.set(i);
                 if (!approx_covers_.ContainsSubset(valid_dc)) approx_covers_.Add(valid_dc);
@@ -211,8 +211,7 @@ private:
                                   PredicateBitset const& evi, size_t e, int64_t target) {
         for (auto const& invalid_dc : invalid_dcs) {
             boost::dynamic_bitset<> can_add = invalid_dc.cand & (~evi);
-            for (size_t i = can_add.find_first(); i != boost::dynamic_bitset<>::npos;
-                 i = can_add.find_next(i)) {
+            for (size_t i : util::SetBits(can_add)) {
                 DCCandidate valid_dc = invalid_dc;
                 valid_dc.bitset.set(i);
                 valid_dc.cand &= (~mutex_map_[i]);

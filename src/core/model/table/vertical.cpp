@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "util/set_bits_view.h"
+
 Vertical::Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices)
     : column_indices_(std::move(indices)), schema_(rel_schema) {}
 
@@ -76,8 +78,7 @@ std::unique_ptr<Vertical> Vertical::EmptyVertical(RelationalSchema const* rel_sc
 
 std::vector<Column const*> Vertical::GetColumns() const {
     std::vector<Column const*> columns;
-    for (size_t index = column_indices_.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = column_indices_.find_next(index)) {
+    for (size_t index : util::SetBits(column_indices_)) {
         columns.push_back(schema_->GetColumns()[index].get());
     }
     return columns;
@@ -85,8 +86,7 @@ std::vector<Column const*> Vertical::GetColumns() const {
 
 std::vector<unsigned> Vertical::GetColumnIndicesAsVector() const {
     std::vector<unsigned> columns;
-    for (size_t index = column_indices_.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = column_indices_.find_next(index)) {
+    for (size_t index : util::SetBits(column_indices_)) {
         columns.push_back(schema_->GetColumns()[index].get()->GetIndex());
     }
     return columns;
@@ -97,8 +97,7 @@ std::string Vertical::ToString() const {
 
     if (column_indices_.find_first() == boost::dynamic_bitset<>::npos) return "[]";
 
-    for (size_t index = column_indices_.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = column_indices_.find_next(index)) {
+    for (size_t index : util::SetBits(column_indices_)) {
         result += schema_->GetColumn(index)->GetName();
         if (column_indices_.find_next(index) != boost::dynamic_bitset<>::npos) {
             result += ' ';
@@ -117,8 +116,7 @@ std::string Vertical::ToIndicesString() const {
         return "[]";
     }
 
-    for (size_t index = column_indices_.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = column_indices_.find_next(index)) {
+    for (size_t index : util::SetBits(column_indices_)) {
         result += std::to_string(index);
         if (column_indices_.find_next(index) != boost::dynamic_bitset<>::npos) {
             result += ',';
@@ -134,9 +132,7 @@ std::vector<Vertical> Vertical::GetParents() const {
     if (GetArity() < 2) return std::vector<Vertical>();
     std::vector<Vertical> parents(GetArity());
     int i = 0;
-    for (size_t column_index = column_indices_.find_first();
-         column_index != boost::dynamic_bitset<>::npos;
-         column_index = column_indices_.find_next(column_index)) {
+    for (size_t column_index : util::SetBits(column_indices_)) {
         auto parent_column_indices = column_indices_;
         parent_column_indices.reset(column_index);
         parents[i++] = GetSchema()->GetVertical(std::move(parent_column_indices));

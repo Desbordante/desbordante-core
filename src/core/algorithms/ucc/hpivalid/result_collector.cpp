@@ -7,6 +7,8 @@
 
 #include <easylogging++.h>
 
+#include "util/set_bits_view.h"
+
 // see algorithms/ucc/hpivalid/LICENSE
 
 namespace algos::hpiv {
@@ -41,7 +43,7 @@ bool ResultCollector::UCCFound(Edge const& ucc) {
 void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
     std::stringstream out;
     for (Edge const& e : hg) {
-        for (Edge::size_type v = e.find_first(); v != Edge::npos; v = e.find_next(v)) {
+        for (Edge::size_type v : util::SetBits(e)) {
             if (v != e.find_first()) {
                 out << ",";
             }
