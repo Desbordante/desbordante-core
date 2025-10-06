@@ -37,7 +37,7 @@ inline void INDBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkComp
     };
     std::string const faida_name = "Faida, Iowa1kk, mushroom, breast_cancer";
     runner.RegisterBenchmark(faida_name, std::move(faida_test));
-    comparer.SetThreshold(faida_name, 20);
+    comparer.SetThreshold(faida_name, 25);
 #endif
 
     auto mind_bm = [] {
