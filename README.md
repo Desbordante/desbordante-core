@@ -181,7 +181,7 @@ Prior to cloning the repository and attempting to build the project, ensure that
 
 - GNU GCC, version 10+, LLVM Clang, version 16+, or Apple Clang, version 15+
 - CMake, version 3.25+
-- Boost library built with compiler you're going to use (GCC or Clang), version 1.85.0+
+- Boost library built with compiler you're going to use (GCC or Clang), version 1.85-1.86, 1.88+
 
 To use test datasets you will need:
 - Git Large File Storage, version 3.0.2+
@@ -206,9 +206,9 @@ You can also set it by default in all sessions: `echo 'export CXX=g++' >> ~/.pro
 For Ubuntu 24.04 and above, you can skip to the build steps. For older versions the Ubuntu APT repository
 might not have a compatible version of Boost, so you'll need to install it manually:
 ```sh
-wget https://archives.boost.io/release/1.87.0/source/boost_1_87_0.tar.gz
-tar xzvf boost_1_87_0.tar.gz
-cd boost_1_87_0 && ./bootstrap.sh
+wget https://archives.boost.io/release/1.89.0/source/boost_1_89_0.tar.gz
+tar xzvf boost_1_89_0.tar.gz
+cd boost_1_89_0 && ./bootstrap.sh
 sudo ./b2 install --prefix=/usr/
 ```
 
