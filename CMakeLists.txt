@@ -293,7 +293,7 @@ if (COMPILE_BENCHMARKS)
 	list(APPEND boost_libraries program_options)
 endif()
 
-find_package(Boost 1.81.0 REQUIRED COMPONENTS ${boost_libraries})
+find_package(Boost 1.85.0 REQUIRED COMPONENTS ${boost_libraries})
 if(Boost_FOUND)
     message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
     include_directories(${Boost_INCLUDE_DIRS})
