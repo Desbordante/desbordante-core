@@ -1,0 +1,41 @@
+[
+    { "include": [ "<bits/unicode-data.h>", "private", "<string>", "public" ] },
+    # std::vector → <vector>, чтобы не путать с <format>
+    { "symbol": ["std::vector", "private", "<vector>", "public"] },
+
+    # assert → всегда из <cassert>, чтобы IWYU не выкидывал
+    # { "symbol": ["assert", "private", "<cassert>", "public"] },
+
+    # std::runtime_error → всегда из <stdexcept>
+    { "symbol": ["std::runtime_error", "private", "<stdexcept>", "public"] },
+
+    # std::cout и std::endl → <iostream>
+    # { "symbol": ["std::cout", "private", "<iostream>", "public"] },
+    # { "symbol": ["std::endl", "private", "<iostream>", "public"] },
+
+    # std::map, std::set → их заголовки, не удалять
+    { "symbol": ["std::map", "private", "<map>", "public"] },
+    { "symbol": ["std::set", "private", "<set>", "public"] },
+    { "symbol": ["std::ranges::*", "private", "<ranges>", "public"] },
+    { "symbol": ["std::same_as", "private", "<concepts>", "public"] },
+
+    # --- GTest ---
+    { "include": ["\"gtest/gtest.h\"", "private", "<gtest/gtest.h>", "public"] },
+    { "include": ["\"gmock/gmock.h\"", "private", "<gmock/gmock.h>", "public"] },
+
+    # --- Easylogging++ ---
+    { "symbol": ["LOG", "private", "<easylogging++.h>", "public"] },
+    { "symbol": ["CDEBUG", "private", "<easylogging++.h>", "public"] },
+    { "symbol": ["CINFO", "private", "<easylogging++.h>", "public"] },
+
+    # --- PSTL ---
+    { "include": ["@<pstl/.*algorithm.*>", "private", "<algorithm>", "public"]}, 
+    { "include": ["@<pstl/.*execution.*>", "private", "<execution>", "public"]}, 
+    { "include": ["@<pstl/.*numeric.*>", "private", "<numeric>", "public"]},
+    { "include": ["@<pstl/.*memory.*>", "private", "<memory>", "public"]},
+
+    # --- KEEP ---
+    { "include": ["\"descriptions.h\"", "private", "\"config/names_and_descriptions.h\"", "public"]},
+    { "include": ["\"names.h\"", "private", "\"config/names_and_descriptions.h\"", "public"]},
+]
+
