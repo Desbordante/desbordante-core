@@ -213,13 +213,19 @@ endif()
 
 # --- Dependencies installation ---
 
-# Set CPM cache location
-if(NOT DEFINED CPM_SOURCE_CACHE)
-    if(DEFINED ENV{CPM_SOURCE_CACHE})
-        set(CPM_SOURCE_CACHE "$ENV{CPM_SOURCE_CACHE}")
-    else()
-        set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache")
-    endif()
+# Set CPM cache location. By default CPM does not enable cache. Here we set the source cache
+# location to a place in the source tree. This is only done if we are the top-level project, i.e.
+# this CMakeLists is used directly by `cmake ..` or similar to avoid the situation where an
+# unrelated project starts caching its dependencies in Desbordante's source tree.
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR
+   AND NOT DEFINED CPM_SOURCE_CACHE
+   AND NOT DEFINED ENV{CPM_SOURCE_CACHE}
+)
+    set(CPM_SOURCE_CACHE
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache"
+        CACHE PATH "Directory to download CPM dependencies"
+    )
+    message(STATUS "Set CPM source cache location to ${CPM_SOURCE_CACHE}")
 endif()
 
 include(cmake/CPM.cmake)
