@@ -55,8 +55,6 @@ protected:
 public:
     PliBasedFDAlgorithm(std::vector<std::string_view> phase_names,
                         std::optional<ColumnLayoutRelationDataManager> relation_manager);
-
-    std::vector<Column const*> GetKeys() const override;
 };
 
 }  // namespace algos
