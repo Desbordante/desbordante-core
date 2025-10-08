@@ -28,8 +28,6 @@ protected:
 
 public:
     PliBasedFDAlgorithm(std::vector<std::string_view> phase_names);
-
-    std::vector<Column const*> GetKeys() const override;
 };
 
 }  // namespace algos

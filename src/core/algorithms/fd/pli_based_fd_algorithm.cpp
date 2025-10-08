@@ -24,17 +24,4 @@ void PliBasedFDAlgorithm::LoadDataInternal() {
     }
 }
 
-std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
-    assert(relation_ != nullptr);
-
-    std::vector<Column const*> keys;
-    for (ColumnData const& col : relation_->GetColumnData()) {
-        if (col.GetPositionListIndex()->AllValuesAreUnique()) {
-            keys.push_back(col.GetColumn());
-        }
-    }
-
-    return keys;
-}
-
 }  // namespace algos
