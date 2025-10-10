@@ -9,6 +9,7 @@
 
 #include <Python.h>
 #include <boost/core/demangle.hpp>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
@@ -19,6 +20,7 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -119,6 +121,11 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
+            {typeid(std::vector<std::string>), []() { return MakeTypeTuple(kPyList, kPyStr); }},
+            {typeid(std::vector<double>), []() { return MakeTypeTuple(kPyList, kPyFloat); }},
+            PyTypePair<pac::model::DomainType, kPyStr>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
     };
 
     auto const it = type_map.find(type_index);
