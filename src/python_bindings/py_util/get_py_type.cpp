@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <boost/core/demangle.hpp>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/cfd/enums.h"
@@ -21,6 +22,7 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -85,6 +87,7 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<unsigned short, &PyLong_Type>,
             kPyTypePair<int, &PyLong_Type>,
             kPyTypePair<unsigned int, &PyLong_Type>,
+            kPyTypePair<unsigned long, &PyLong_Type>,
             kPyTypePair<double, &PyFloat_Type>,
             kPyTypePair<size_t, &PyLong_Type>,
             kPyTypePair<long double, &PyFloat_Type>,
@@ -134,6 +137,9 @@ py::tuple GetPyType(std::type_index type_index) {
             kPyTypePair<std::vector<std::string>, &PyList_Type, &PyUnicode_Type>,
             kPyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, &PyDict_Type,
                         &PyUnicode_Type, &PyList_Type, &PyLong_Type>,
+            kPyTypePair<std::vector<double>, &PyList_Type, &PyFloat_Type>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
     };
 
     auto const it = type_map.find(type_index);
