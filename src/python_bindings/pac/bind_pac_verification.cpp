@@ -1,5 +1,6 @@
-#include "pac/bind_pac_verification.h"
+#include "python_bindings/pac/bind_pac_verification.h"
 
+#include <iterator>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -8,13 +9,13 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithm.h"
-#include "pac/domain_pac.h"
-#include "pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
-#include "pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
-#include "pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
-#include "pac/pac_verifier/pac_verifier.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/pac/domain_pac.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
+#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 
