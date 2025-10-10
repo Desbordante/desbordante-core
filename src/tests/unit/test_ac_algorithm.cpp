@@ -93,8 +93,9 @@ TEST_F(ACAlgorithmTest, NonFuzzyBumpsDetection2) {
 TEST_F(ACAlgorithmTest, SampleSizeCalculation) {
     auto a = CreateACAlgorithmInstance(kIris, algos::Binop::Addition, 0.1, 0.8, 0.05);
     ASSERT_EQ(28, a->CalculateSampleSize(1));
-    ASSERT_EQ(168, a->CalculateSampleSize(13));
-    ASSERT_EQ(331, a->CalculateSampleSize(28));
+    /* Sample size can't be greather than number of rows in the table */
+    ASSERT_EQ(150, a->CalculateSampleSize(13));
+    ASSERT_EQ(150, a->CalculateSampleSize(28));
 }
 
 TEST_F(ACAlgorithmTest, SubNonFuzzy) {
