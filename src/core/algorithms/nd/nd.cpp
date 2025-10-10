@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "algorithms/nd/nd_verifier/util/vector_to_string.h"
 #include "algorithms/nd/util/get_vertical_names.h"
+#include "util/range_to_string.h"
 
 namespace model {
 
@@ -16,14 +16,14 @@ namespace model {
 }
 
 std::string ND::ToShortString() const {
-    using namespace algos::nd_verifier::util;
-    return VectorToString(GetLhsIndices()) + " -> " + VectorToString(GetRhsIndices());
+    using namespace util;
+    return RangeToString(GetLhsIndices()) + " -> " + RangeToString(GetRhsIndices());
 }
 
 std::string ND::ToLongString() const {
-    using namespace algos::nd_verifier::util;
-    return VectorToString(GetLhsNames()) + " -" + std::to_string(GetWeight()) + "-> " +
-           VectorToString(GetRhsNames());
+    using namespace util;
+    return RangeToString(GetLhsNames()) + " -" + std::to_string(GetWeight()) + "-> " +
+           RangeToString(GetRhsNames());
 }
 
 [[nodiscard]] std::tuple<std::vector<std::string>, std::vector<std::string>, WeightType>
