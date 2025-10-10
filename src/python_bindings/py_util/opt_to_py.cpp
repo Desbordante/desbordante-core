@@ -14,6 +14,7 @@
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
@@ -46,6 +47,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<unsigned int>,
         normal_conv_pair<bool>,
         normal_conv_pair<std::vector<std::string>>,
+        normal_conv_pair<std::string>,
         normal_conv_pair<config::ThreadNumType>,
         normal_conv_pair<config::CustomRandomSeedType>,
         normal_conv_pair<config::MaxLhsType>,
@@ -56,11 +58,14 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<config::CustomMetricType>,
         normal_conv_pair<config::CustomMetricsType>,
         normal_conv_pair<config::CustomVectorMetricType>,
+        normal_conv_pair<std::vector<double>>,
+        normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::od::Ordering>};
+        enum_conv_pair<algos::od::Ordering>,
+};
 }  // namespace
 
 namespace python_bindings {
