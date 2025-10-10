@@ -22,6 +22,7 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_metric/custom_metric.h"
 #include "core/config/custom_metric/custom_vector_metric.h"
 #include "core/config/custom_random_seed/type.h"
@@ -178,6 +179,8 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         {typeid(std::shared_ptr<config::ICustomMetric>), CustomMetricToAny},
         {typeid(std::vector<std::shared_ptr<config::ICustomMetric>>), CustomMetricsToAny},
         {typeid(std::shared_ptr<config::ICustomVectorMetric>), CustomVectorMetricToAny},
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
 };
 
 }  // namespace
