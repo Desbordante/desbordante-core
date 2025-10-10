@@ -29,7 +29,7 @@ public:
         return entries_.at(key);
     }
 
-    V const& Set(K const& key, V const& value) {
+    V const& GetOrInsert(K const& key, V const& value) {
         auto [it, inserted] = entries_.try_emplace(key, value);
         if (!inserted) {
             return it->second;
