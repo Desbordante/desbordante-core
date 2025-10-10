@@ -93,26 +93,22 @@ public:
 
 }  // namespace algos::fastod
 
-namespace std {
-
 template <algos::od::Ordering Ordering>
-struct hash<algos::fastod::CanonicalOD<Ordering>> {
+struct std::hash<algos::fastod::CanonicalOD<Ordering>> {
     size_t operator()(algos::fastod::CanonicalOD<Ordering> const& od) const noexcept {
-        size_t const context_hash = hash<algos::fastod::AttributeSet>{}(od.context_);
-        size_t const ap_hash = hash<algos::fastod::AttributePair>{}(od.ap_);
+        size_t const context_hash = std::hash<algos::fastod::AttributeSet>{}(od.context_);
+        size_t const ap_hash = std::hash<algos::fastod::AttributePair>{}(od.ap_);
 
         return algos::fastod::hashing::CombineHashes(context_hash, ap_hash);
     }
 };
 
 template <>
-struct hash<algos::fastod::SimpleCanonicalOD> {
+struct std::hash<algos::fastod::SimpleCanonicalOD> {
     size_t operator()(algos::fastod::SimpleCanonicalOD const& od) const noexcept {
-        size_t const context_hash = hash<algos::fastod::AttributeSet>{}(od.context_);
-        size_t const right_hash = hash<model::ColumnIndex>{}(od.right_);
+        size_t const context_hash = std::hash<algos::fastod::AttributeSet>{}(od.context_);
+        size_t const right_hash = std::hash<model::ColumnIndex>{}(od.right_);
 
         return algos::fastod::hashing::CombineHashes(context_hash, right_hash);
     }
 };
-
-}  // namespace std
