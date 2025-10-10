@@ -1,6 +1,9 @@
-#include "pac/bind_pac.h"
+#include "python_bindings/pac/bind_pac.h"
 
+#include <functional>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <pybind11/detail/common.h>
 #include <pybind11/functional.h>
@@ -8,12 +11,12 @@
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/pac/domain_pac.h"
-#include "algorithms/pac/model/default_domains/ball.h"
-#include "algorithms/pac/model/default_domains/parallelepiped.h"
-#include "algorithms/pac/model/default_domains/untyped_domain.h"
-#include "algorithms/pac/model/idomain.h"
-#include "algorithms/pac/pac.h"
+#include "core/algorithms/pac/domain_pac.h"
+#include "core/algorithms/pac/model/default_domains/ball.h"
+#include "core/algorithms/pac/model/default_domains/parallelepiped.h"
+#include "core/algorithms/pac/model/default_domains/untyped_domain.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac.h"
 
 namespace py = pybind11;
 
@@ -82,9 +85,8 @@ void BindPAC(py::module& main_module) {
             .doc() =
             "A closed n-ary ball, defined by center and radius, i. e. D = {x : dist(center, x) <= "
             "radius}.\n"
-            "Uses \"radius comparer\", i. e. x < y <=> dist(x, center) < dist(y, center) and "
-            "Euclidean\n"
-            "distance: dist(x, y) = sqrt((d_0(x[0], y[0]))^2 + ... + (d_i(x[n], y[n]))^2), where "
+            "Uses Euclidean distance:\n"
+            "dist(x, y) = sqrt((d_1(x[1], y[1]))^2 + ... + (d_i(x[n], y[n]))^2), where "
             "d_i is a default\n"
             "metric for i-th column's data type multiplied by leveling_coefficients[i] (which "
             "defaults to 1).\n";
@@ -97,25 +99,20 @@ void BindPAC(py::module& main_module) {
             .def(py::init<std::string, std::string>(), "lower_bound"_a, "upper_bound"_a)
             .doc() =
             "A closed n-ary parallelepiped, defined by lower and upper bounds, i. e.\n"
-            "D = [lower[0], upper[0]] x ... x [lower[n], upper[n]].\n"
-			"Comapres distances from value to lower bound, i. e. X < Y iff d(X, lower) < d(Y, lower).\n"
-            "Uses Chebyshev distance: dist(x, y) = max{d_0(x[0], y[0]), ..., d_n(x[n], y[n])}, "
+            "D = [lower[1], upper[1]] x ... x [lower[n], upper[n]].\n"
+            "Uses Chebyshev distance: dist(x, y) = max{d_1(x[1], y[1]), ..., d_n(x[n], y[n])}, "
             "where d_i is a default\n"
             "metric for i-th column's data type multiplied by leveling_coefficients[i] (which "
             "defaults to 1).\n";
     py::class_<UntypedDomain, IDomain, std::shared_ptr<UntypedDomain>>(domains_module,
                                                                        "CustomDomain")
-            .def(py::init<std::function<bool(std::vector<std::string> const&,
-                                             std::vector<std::string> const&)>,
-                          std::function<double(std::vector<std::string> const&)>, std::string>(),
-                 "comparer"_a, "dist_from_domain"_a, "name"_a = "Custom domain")
+            .def(py::init<std::function<double(std::vector<std::string> const&)>, std::string>(),
+                 "dist_from_domain"_a, "name"_a = "Custom domain")
             .doc() =
-            "Custom domain, defined by two functions:\n"
-            "\tcomparer: must return true when first tuple is strictly less than second. Tuples "
-            "are passed as lists of strings.\n"
+            "Custom domain, defined by metric:\n"
             "\tdist_from_domain: must return distance from domain to a value, passed as list of "
             "strings.\n"
-            "Third (optional) argument is domain name, which is used to make Domain PAC's string "
+            "Second (optional) argument is domain name, which is used to make Domain PAC's string "
             "representation.\n";
 }
 }  // namespace python_bindings
