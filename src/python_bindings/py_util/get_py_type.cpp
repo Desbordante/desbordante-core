@@ -25,6 +25,7 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -144,6 +145,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<config::CustomMetricType, kPyFunc>,
             PyTypePair<config::CustomMetricsType, kPyList, kPyFunc>,
             PyTypePair<config::CustomVectorMetricType, kPyFunc>,
+            PyTypePair<std::vector<double>, kPyList, kPyFloat>,
+            {typeid(std::shared_ptr<pac::model::IDomain>),
+             []() { return MakeTypeTuple(py::type::of<pac::model::IDomain>()); }},
     };
 
     auto const it = type_map.find(type_index);

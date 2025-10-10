@@ -18,6 +18,7 @@
 #include "core/config/custom_metric/custom_metric/type.h"
 #include "core/config/custom_metric/custom_metrics/type.h"
 #include "core/config/custom_metric/custom_vector_metric/type.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/equal_nulls/type.h"
 #include "core/config/error/type.h"
@@ -63,6 +64,8 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<config::CustomMetricType>,
         normal_conv_pair<config::CustomMetricsType>,
         normal_conv_pair<config::CustomVectorMetricType>,
+        normal_conv_pair<std::vector<double>>,
+        normal_conv_pair<std::shared_ptr<pac::model::IDomain>>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<model::InputFormatType>,
