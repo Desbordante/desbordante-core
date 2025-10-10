@@ -64,7 +64,7 @@ public:
             });
         }
 
-        return cache_.Set(attribute_set, result_partition);
+        return cache_.GetOrInsert(attribute_set, result_partition);
     }
 };
 
