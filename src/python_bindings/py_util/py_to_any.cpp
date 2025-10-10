@@ -24,6 +24,7 @@
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
@@ -198,6 +199,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
         kNormalConvPair<unsigned int>,
+        kNormalConvPair<unsigned long>,
         kNormalConvPair<long double>,
         kNormalConvPair<std::vector<unsigned int>>,
         kNormalConvPair<unsigned short>,
@@ -236,6 +238,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::pair<std::string, std::string>>,
         kNormalConvPair<std::vector<std::string>>,
         kNormalConvPair<std::unordered_map<std::string, std::vector<unsigned int>>>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
 };
 
 }  // namespace
