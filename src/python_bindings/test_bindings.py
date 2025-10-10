@@ -122,6 +122,34 @@ ALGO_CORRECT_OPTIONS_INFO = [
             },
         ),
     ]),
+    (desb.pac_verification.algorithms.DomainPACVerifier, [
+        OptionContainer(
+            "TestLong.csv",
+            {
+                "column_indices": [0, 1],
+                "domain": desb.pac.domains.Parallelepiped(["0", "0"], ["5", "5"], [1, 1.2]),
+            },
+            {
+                "min_epsilon": 0,
+                "max_epsilon": 7,
+                "min_delta": 0.8,
+                "diagonal_threshold": 1e-10,
+            },
+        ),
+        OptionContainer(
+            "TestLong.csv",
+            {
+                "column_indices": [1],
+                "domain": desb.pac.domains.CustomDomain(
+                    lambda a, b: int(a[0]) < int(b[0]),
+                    lambda val: int(val[0]) < 7, "[-\\infty, 7]"),
+            },
+            {
+                "max_epsilon": 7,
+                "min_delta": 0.8,
+            },
+        )
+    ]),
 ]
 
 METRIC_VERIFIER_FAILURE_CASES = [
