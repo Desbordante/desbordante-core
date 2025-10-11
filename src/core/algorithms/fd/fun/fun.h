@@ -78,7 +78,7 @@ public:
 
 class FUN : public PliBasedFDAlgorithm {
 public:
-    FUN(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    FUN();
 
     // Entities from the algorithm itself
 private:

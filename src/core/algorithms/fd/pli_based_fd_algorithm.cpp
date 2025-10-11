@@ -5,26 +5,19 @@
 
 namespace algos {
 
-PliBasedFDAlgorithm::PliBasedFDAlgorithm(
-        std::vector<std::string_view> phase_names,
-        std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : FDAlgorithm(std::move(phase_names)),
-      relation_manager_(relation_manager.has_value()
-                                ? *relation_manager
-                                : ColumnLayoutRelationDataManager{
-                                          &input_table_, &is_null_equal_null_, &relation_}) {
-    if (relation_manager.has_value()) return;
-    RegisterRelationManagerOptions();
+PliBasedFDAlgorithm::PliBasedFDAlgorithm(std::vector<std::string_view> phase_names)
+    : FDAlgorithm(std::move(phase_names)) {
+    RegisterOptions();
     MakeOptionsAvailable({config::kTableOpt.GetName(), config::kEqualNullsOpt.GetName()});
 }
 
-void PliBasedFDAlgorithm::RegisterRelationManagerOptions() {
+void PliBasedFDAlgorithm::RegisterOptions() {
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
 }
 
 void PliBasedFDAlgorithm::LoadDataInternal() {
-    relation_ = relation_manager_.GetRelation();
+    relation_ = ColumnLayoutRelationData::CreateFrom(*input_table_, is_null_equal_null_);
 
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");

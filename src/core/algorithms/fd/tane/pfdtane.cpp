@@ -19,8 +19,7 @@ void PFDTane::MakeExecuteOptsAvailableFDInternal() {
     MakeOptionsAvailable({config::kErrorOpt.GetName(), config::kPfdErrorMeasureOpt.GetName()});
 }
 
-PFDTane::PFDTane(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : tane::TaneCommon(relation_manager) {
+PFDTane::PFDTane() : tane::TaneCommon() {
     RegisterOptions();
 }
 
