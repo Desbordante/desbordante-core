@@ -69,11 +69,6 @@ Vertical Vertical::Invert(Vertical const& scope) const {
     return schema_->GetVertical(flipped_indices);
 }
 
-std::unique_ptr<Vertical> Vertical::EmptyVertical(RelationalSchema const* rel_schema) {
-    return std::make_unique<Vertical>(rel_schema,
-                                      boost::dynamic_bitset<>(rel_schema->GetNumColumns()));
-}
-
 std::vector<Column const*> Vertical::GetColumns() const {
     std::vector<Column const*> columns;
     for (size_t index = column_indices_.find_first(); index != boost::dynamic_bitset<>::npos;
