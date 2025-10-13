@@ -22,8 +22,6 @@ private:
     RelationalSchema const* schema_;
 
 public:
-    static std::unique_ptr<Vertical> EmptyVertical(RelationalSchema const* rel_schema);
-
     Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices);
     Vertical() = default;
 

@@ -12,18 +12,13 @@ RelationalSchema::RelationalSchema(std::string name)
 }
 
 void RelationalSchema::Init() {
-    empty_vertical_ = Vertical::EmptyVertical(this);
+    empty_vertical_ = std::make_unique<Vertical>(this, boost::dynamic_bitset<>(GetNumColumns()));
 }
 
 // TODO: В оригинале тут что-то непонятное + приходится пересоздавать empty_vertical_ -- тут
 // должен быть unique_ptr, тк создаём в остальных случаях новую вершину и выдаём наружу с овнершипом
 Vertical RelationalSchema::GetVertical(boost::dynamic_bitset<> indices) const {
-    if (indices.empty()) return *Vertical::EmptyVertical(this);
-
-    if (indices.count() == 1) {
-        return Vertical(this, std::move(indices));
-    }
-    return Vertical(this, std::move(indices));
+    return {this, std::move(indices)};
 }
 
 bool RelationalSchema::IsColumnInSchema(std::string const& col_name) const {
@@ -69,7 +64,8 @@ std::unordered_set<Vertical> RelationalSchema::CalculateHittingSet(
     model::VerticalMap<Vertical> consolidated_verticals(this);
 
     model::VerticalMap<Vertical> hitting_set(this);
-    hitting_set.Put(*empty_vertical_, Vertical::EmptyVertical(this));
+    hitting_set.Put(*empty_vertical_,
+                    std::make_shared<Vertical>(this, boost::dynamic_bitset<>{GetNumColumns()}));
 
     for (auto& vertical : verticals) {
         if (consolidated_verticals.GetAnySubsetEntry(vertical).second != nullptr) {
