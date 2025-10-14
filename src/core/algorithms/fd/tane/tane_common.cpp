@@ -29,9 +29,8 @@ double TaneCommon::CalculateUccError(model::PositionListIndex const* pli,
     return pli->GetNepAsLong() / static_cast<double>(relation_data->GetNumTuplePairs());
 }
 
-void TaneCommon::RegisterAndCountFd(Vertical const& lhs, Column const* rhs) {
-    dynamic_bitset<> lhs_bitset = lhs.GetColumnIndices();
-    PliBasedFDAlgorithm::RegisterFd(lhs, *rhs, relation_->GetSharedPtrSchema());
+void TaneCommon::RegisterAndCountFd(Vertical lhs, Column const* rhs) {
+    RegisterFd(std::move(lhs), *rhs, relation_->GetSharedPtrSchema());
 }
 
 void TaneCommon::Prune(model::LatticeLevel* level) {
@@ -153,7 +152,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
     std::vector<std::unique_ptr<model::LatticeLevel>> levels;
     auto level0 = std::make_unique<model::LatticeLevel>(0);
     // TODO: через указатели кажется надо переделать
-    level0->Add(std::make_unique<model::LatticeVertex>(*(schema->empty_vertical_)));
+    level0->Add(std::make_unique<model::LatticeVertex>(schema->CreateEmptyVertical()));
     model::LatticeVertex const* empty_vertex = level0->GetVertices().begin()->second.get();
     levels.push_back(std::move(level0));
     AddProgress(progress_step);
@@ -175,7 +174,7 @@ unsigned long long TaneCommon::ExecuteInternal() {
         double fd_error = CalculateZeroAryFdError(&column_data);
         if (fd_error <= max_fd_error_) {  // TODO: max_error
             zeroary_fd_rhs.set(column->GetIndex());
-            RegisterAndCountFd(*schema->empty_vertical_, column.get());
+            RegisterAndCountFd(schema->CreateEmptyVertical(), column.get());
 
             vertex->GetRhsCandidates().set(column->GetIndex(), false);
             if (fd_error == 0) {

@@ -19,7 +19,6 @@ void AbstractColumnStore::LoadData(std::string const& dataset_name, TableIndex t
         auto column = Column(schema_.get(), input_data.GetColumnName(col_idx), col_idx);
         schema_->AppendColumn(std::move(column));
     }
-    schema_->Init();
     column_properties_ =
             std::vector<ColumnProperty>(input_data.GetNumberOfColumns(), ColumnProperty::kOrdinary);
 

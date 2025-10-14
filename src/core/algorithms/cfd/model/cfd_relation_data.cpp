@@ -78,7 +78,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
     }
-    schema->Init();
 
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
                                              std::move(data_rows), std::move(item_dictionary),
@@ -153,7 +152,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
     }
-    schema->Init();
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
                                              std::move(data_rows), std::move(item_dictionary),
                                              std::move(items));

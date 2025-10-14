@@ -11,43 +11,6 @@
 namespace model {
 
 template <typename T>
-std::unique_ptr<T> AgreeSetSample::CreateFor(ColumnLayoutRelationData* relation_data,
-                                             int sample_size) {
-    static_assert(std::is_base_of<AgreeSetSample, T>::value);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> random(0, relation_data->GetNumRows());
-
-    std::unordered_map<boost::dynamic_bitset<>, int> agree_set_counters;
-    sample_size = std::min((unsigned long long)sample_size, relation_data->GetNumTuplePairs());
-
-    for (long i = 0; i < sample_size; i++) {
-        int tuple_index_1 = random(gen);
-        int tuple_index_2 = random(gen);
-        if (tuple_index_1 == tuple_index_2) {
-            i--;
-            continue;
-        }
-
-        boost::dynamic_bitset<> agree_set(relation_data->GetNumColumns());
-        for (auto& column_data : relation_data->GetColumnData()) {
-            int value1 = column_data.GetProbingTableValue(tuple_index_1);
-            if (value1 != PositionListIndex::kSingletonValueId &&
-                value1 == column_data.GetProbingTableValue(tuple_index_2)) {
-                agree_set[column_data.GetColumn()->GetIndex()] = true;
-            }
-        }
-
-        agree_set_counters[agree_set]++;
-    }
-
-    auto instance = std::make_unique<T>(relation_data, relation_data->GetSchema()->empty_vertical_,
-                                        (int)sample_size, relation_data->GetNumTuplePairs(),
-                                        agree_set_counters);
-    return instance;
-}
-
-template <typename T>
 std::unique_ptr<T> AgreeSetSample::CreateFocusedFor(ColumnLayoutRelationData const* relation,
                                                     Vertical const& restriction_vertical,
                                                     PositionListIndex const* restriction_pli,

@@ -18,8 +18,8 @@ public:
     explicit FunQuadruple(Vertical const& candidate)
         : candidate_(candidate),
           count_(0),
-          quasiclosure_(*candidate.GetSchema()->empty_vertical_),
-          closure_(*candidate.GetSchema()->empty_vertical_) {}
+          quasiclosure_(candidate.GetSchema()->CreateEmptyVertical()),
+          closure_(candidate.GetSchema()->CreateEmptyVertical()) {}
 
     explicit FunQuadruple(Column const& candidate) : FunQuadruple(Vertical(candidate)) {}
 

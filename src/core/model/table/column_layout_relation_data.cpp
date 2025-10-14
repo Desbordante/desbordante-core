@@ -65,7 +65,5 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
-    schema->Init();
-
     return std::make_unique<ColumnLayoutRelationData>(std::move(schema), std::move(column_data));
 }

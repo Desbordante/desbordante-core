@@ -81,6 +81,10 @@ public:
         return column_indices_.count();
     }
 
+    bool IsEmpty() const {
+        return column_indices_.none();
+    }
+
     std::vector<Column const*> GetColumns() const;
     std::vector<unsigned> GetColumnIndicesAsVector() const;
     std::vector<Vertical> GetParents() const;

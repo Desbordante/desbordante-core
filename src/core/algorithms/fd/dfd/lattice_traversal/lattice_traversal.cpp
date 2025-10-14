@@ -48,7 +48,7 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                 node = std::move(seeds.top());
                 seeds.pop();
             } else {
-                node = *schema->empty_vertical_;
+                node = schema->CreateEmptyVertical();
             }
 
             do {
@@ -102,7 +102,7 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
                 }
 
                 node = PickNextNode(node, rhs_->GetIndex());
-            } while (node != *node.GetSchema()->empty_vertical_);
+            } while (!node.IsEmpty());
         }
         seeds = GenerateNextSeeds(rhs_);
     } while (!seeds.empty());
@@ -189,7 +189,7 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
         }
     }
 
-    Vertical next_node = *(node.GetSchema()->empty_vertical_);
+    Vertical next_node = node.GetSchema()->CreateEmptyVertical();
     if (!trace_.empty()) {
         next_node = trace_.top();
         trace_.pop();

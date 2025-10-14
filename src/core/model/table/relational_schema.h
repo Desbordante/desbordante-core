@@ -27,16 +27,12 @@ private:
     std::string name_;
 
 public:
-    std::unique_ptr<Vertical> empty_vertical_;
-
     RelationalSchema(std::string name);
 
     RelationalSchema(RelationalSchema const& other) = delete;
     RelationalSchema& operator=(RelationalSchema const& rhs) = delete;
     RelationalSchema(RelationalSchema&& other) noexcept = default;
     RelationalSchema& operator=(RelationalSchema&& rhs) noexcept = default;
-
-    void Init();
 
     std::string GetName() const {
         return name_;
@@ -52,6 +48,8 @@ public:
     Column const* GetColumn(size_t index) const;
     size_t GetNumColumns() const;
     Vertical GetVertical(boost::dynamic_bitset<> indices) const;
+
+    Vertical CreateEmptyVertical() const;
 
     void AppendColumn(std::string const& col_name);
     void AppendColumn(Column column);

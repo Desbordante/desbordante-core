@@ -60,7 +60,7 @@ unsigned long long DFD::ExecuteInternal() {
              * this RHS, so we register it and move to the next RHS
              * */
             if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
-                RegisterFd(*(schema->empty_vertical_), *rhs, relation_->GetSharedPtrSchema());
+                RegisterFd(schema->CreateEmptyVertical(), *rhs, relation_->GetSharedPtrSchema());
                 AddProgress(progress_step);
                 return;
             }
