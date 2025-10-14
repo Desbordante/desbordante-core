@@ -54,11 +54,6 @@ public:
     void AppendColumn(std::string const& col_name);
     void AppendColumn(Column column);
 
-    template <typename Container>
-    boost::dynamic_bitset<> IndicesToBitset(Container const& indices) const;
-    template <typename ForwardIt>
-    boost::dynamic_bitset<> IndicesToBitset(ForwardIt begin, ForwardIt end) const;
-
     std::unordered_set<Vertical> CalculateHittingSet(
             std::vector<Vertical> verticals,
             boost::optional<std::function<bool(Vertical const&)>> pruning_function) const;
@@ -74,14 +69,4 @@ inline bool operator==(RelationalSchema const& l, RelationalSchema const& r) {
 
 inline bool operator!=(RelationalSchema const& l, RelationalSchema const& r) {
     return !(l == r);
-}
-
-template <typename Container>
-boost::dynamic_bitset<> RelationalSchema::IndicesToBitset(Container const& indices) const {
-    return util::IndicesToBitset(indices, GetNumColumns());
-}
-
-template <typename ForwardIt>
-boost::dynamic_bitset<> RelationalSchema::IndicesToBitset(ForwardIt begin, ForwardIt end) const {
-    return util::IndicesToBitset(begin, end, GetNumColumns());
 }
