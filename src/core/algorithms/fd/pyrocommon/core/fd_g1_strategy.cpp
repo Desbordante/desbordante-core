@@ -52,11 +52,11 @@ double FdG1Strategy::CalculateG1(double num_violating_tuple_pairs) const {
 void FdG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
     if (search_space->is_initialized_) return;
 
-    double zero_fd_error =
-            CalculateError(*context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_);
-    search_space->AddLaunchPad(DependencyCandidate(
-            *context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_,
-            model::ConfidenceInterval(zero_fd_error), true));
+    Vertical empty_vertical =
+            context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
+    double zero_fd_error = CalculateError(empty_vertical);
+    search_space->AddLaunchPad(DependencyCandidate(std::move(empty_vertical),
+                                                   model::ConfidenceInterval(zero_fd_error), true));
 
     search_space->is_initialized_ = true;
 }

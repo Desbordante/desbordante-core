@@ -154,7 +154,7 @@ unsigned long long FUN::ExecuteInternal() {
     schema_ = relation_->GetSchema();
     double progress_step = kTotalProgressPercent / (schema_->GetNumColumns() + 1);
     AddProgress(progress_step);
-    Vertical empty_vertical = *schema_->empty_vertical_;
+    Vertical empty_vertical = schema_->CreateEmptyVertical();
 
     r_ = empty_vertical;
     r_prime_ = empty_vertical;

@@ -40,8 +40,6 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
         column_data.emplace_back(std::move(typed_column_data));
     }
 
-    schema->Init();
-
     return std::make_unique<ColumnLayoutTypedRelationData>(std::move(schema),
                                                            std::move(column_data));
 }
