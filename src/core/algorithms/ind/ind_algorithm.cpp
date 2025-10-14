@@ -12,12 +12,13 @@ INDAlgorithm::INDAlgorithm(std::vector<std::string_view> phase_names)
 }
 
 void INDAlgorithm::LoadDataInternal() {
-    schemas_ = std::make_shared<std::vector<RelationalSchema>>();
+    schemas_ = std::make_shared<std::vector<std::unique_ptr<RelationalSchema>>>();
     for (auto const& input_table : input_tables_) {
-        auto& schema = schemas_->emplace_back<std::string>(input_table->GetRelationName());
+        auto schema = std::make_unique<RelationalSchema>(input_table->GetRelationName());
         for (size_t i{0}; i < input_table->GetNumberOfColumns(); ++i) {
-            schema.AppendColumn(input_table->GetColumnName(i));
+            schema->AppendColumn(input_table->GetColumnName(i));
         }
+        schemas_->push_back(std::move(schema));
     }
 
     LoadINDAlgorithmDataInternal();

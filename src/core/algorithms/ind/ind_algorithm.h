@@ -19,7 +19,7 @@ public:
 
 private:
     util::PrimitiveCollection<IND> ind_collection_;
-    std::shared_ptr<std::vector<RelationalSchema>> schemas_;
+    std::shared_ptr<std::vector<std::unique_ptr<RelationalSchema>>> schemas_;
 
     void LoadDataInternal() final;
 
