@@ -31,8 +31,8 @@ public:
 
     RelationalSchema(RelationalSchema const& other) = delete;
     RelationalSchema& operator=(RelationalSchema const& rhs) = delete;
-    RelationalSchema(RelationalSchema&& other) noexcept = default;
-    RelationalSchema& operator=(RelationalSchema&& rhs) noexcept = default;
+    RelationalSchema(RelationalSchema&& other) noexcept = delete;
+    RelationalSchema& operator=(RelationalSchema&& rhs) noexcept = delete;
 
     std::string GetName() const {
         return name_;

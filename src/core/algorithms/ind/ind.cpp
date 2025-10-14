@@ -36,12 +36,12 @@ std::string IND::ToLongString() const {
         std::stringstream ss;
         auto table_idx = cc.GetTableIndex();
         auto const& indices = cc.GetColumnIndices();
-        ss << '(' << schemas_->at(table_idx).GetName() << ", [";
+        ss << '(' << schemas_->at(table_idx)->GetName() << ", [";
         for (auto it = indices.begin(); it != indices.end(); ++it) {
             if (it != indices.begin()) {
                 ss << ", ";
             }
-            ss << schemas_->at(table_idx).GetColumn(*it)->GetName();
+            ss << schemas_->at(table_idx)->GetColumn(*it)->GetName();
         }
         ss << "])";
         return ss.str();
