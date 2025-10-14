@@ -49,26 +49,26 @@ unsigned long long FastFDs::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     LOG(INFO) << "TIME TO DIFF SETS GENERATION: " << elapsed_mills_to_gen_diff_sets.count();
 
-    if (diff_sets_.size() == 1 && diff_sets_.back() == *schema_->empty_vertical_) {
+    if (diff_sets_.size() == 1 && diff_sets_.back().IsEmpty()) {
         auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
         return elapsed_milliseconds.count();
     }
+    Vertical empty_vertical = schema_->CreateEmptyVertical();
 
-    auto task = [this](std::unique_ptr<Column> const& column) {
+    auto task = [this, &empty_vertical](std::unique_ptr<Column> const& column) {
         if (ColumnContainsOnlyEqualValues(*column)) {
-            LOG(DEBUG) << "Registered FD: " << schema_->empty_vertical_->ToString() << "->"
+            LOG(DEBUG) << "Registered FD: " << empty_vertical.ToString() << "->"
                        << column->ToString();
-            RegisterFd(Vertical(), *column, relation_->GetSharedPtrSchema());
+            RegisterFd(empty_vertical, *column, relation_->GetSharedPtrSchema());
             return;
         }
 
         vector<DiffSet> diff_sets_mod = GetDiffSetsMod(*column);
         assert(!diff_sets_mod.empty());
-        if (!(diff_sets_mod.size() == 1 && diff_sets_mod.back() == *schema_->empty_vertical_)) {
+        if (!(diff_sets_mod.size() == 1 && diff_sets_mod.back().IsEmpty())) {
             set<Column, OrderingComparator> init_ordering = GetInitOrdering(diff_sets_mod, *column);
-            FindCovers(*column, diff_sets_mod, diff_sets_mod, *schema_->empty_vertical_,
-                       init_ordering);
+            FindCovers(*column, diff_sets_mod, diff_sets_mod, empty_vertical, init_ordering);
         } else {
             AddProgress(percent_per_col_);
         }

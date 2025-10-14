@@ -39,7 +39,7 @@ public:
     }
 
     Vertical GetIrrelevantColumns() const override {
-        return *context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_;
+        return context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
     }
 
     std::unique_ptr<DependencyStrategy> CreateClone() override;

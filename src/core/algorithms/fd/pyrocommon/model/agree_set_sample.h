@@ -47,9 +47,6 @@ protected:
                    unsigned int sample_size, unsigned long long population_size);
 
     template <typename T>
-    static std::unique_ptr<T> CreateFor(ColumnLayoutRelationData* relation_data, int sample_size);
-
-    template <typename T>
     static std::unique_ptr<T> CreateFocusedFor(ColumnLayoutRelationData const* relation,
                                                Vertical const& restriction_vertical,
                                                PositionListIndex const* restriction_pli,

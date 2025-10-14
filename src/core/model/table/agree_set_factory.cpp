@@ -50,8 +50,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
         }
     }
 
-    // metanome kostil, doesn't work properly in general
-    agree_sets.insert(*relation_->GetSchema()->empty_vertical_);
+    agree_sets.insert(relation_->GetSchema()->CreateEmptyVertical());
 
     auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
