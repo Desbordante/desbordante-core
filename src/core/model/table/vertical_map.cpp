@@ -522,6 +522,8 @@ template class VerticalMap<VerticalInfo>;
 
 template class VerticalMap<Vertical>;
 
+template class VerticalMap<std::monostate>;
+
 template <class V>
 size_t BlockingVerticalMap<V>::GetSize() const {
     std::shared_lock read_lock(read_write_mutex_);

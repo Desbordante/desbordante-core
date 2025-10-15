@@ -1,6 +1,7 @@
 #include "search_space.h"
 
 #include <queue>
+#include <variant>
 
 #include <easylogging++.h>
 
@@ -111,8 +112,7 @@ void SearchSpace::EscapeLaunchPad(Vertical const& launch_pad,
         LOG(TRACE) << boost::format{"Escaping %1% pruned by %2%"} % launch_pad.ToString() %
                               pruning_supersets_str;
     }
-    auto hitting_set = context_->GetSchema()->CalculateHittingSet(
-            std::move(pruning_supersets), boost::make_optional(pruning_function));
+    auto hitting_set = CalculateHittingSet(std::move(pruning_supersets), pruning_function);
     {
         std::string hitting_set_str = "[";
         for (auto& el : hitting_set) {
@@ -330,9 +330,7 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
             std::pop_heap(peaks.begin(), peaks.end(), peaks_comparator);
             peaks.pop_back();
 
-            auto peak_hitting_set = context_->GetSchema()->CalculateHittingSet(
-                    std::move(subset_deps),
-                    boost::optional<std::function<bool(Vertical const&)>>());
+            auto peak_hitting_set = CalculateHittingSet(std::move(subset_deps));
             std::unordered_set<Vertical> escaped_peak_verticals;
 
             for (auto& vertical : peak_hitting_set) {
@@ -393,9 +391,8 @@ void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error)
     auto alleged_min_deps_set = alleged_min_deps->KeySet();
     // TODO: костыль: CalculateHittingSet needs a list, but KeySet returns an unordered_set
     // ещё и морока с transform и unordered_set - мб вообще в лист переделать.
-    auto alleged_max_non_deps_hs = context_->GetSchema()->CalculateHittingSet(
-            std::vector<Vertical>(alleged_min_deps_set.begin(), alleged_min_deps_set.end()),
-            boost::optional<std::function<bool(Vertical const&)>>());
+    auto alleged_max_non_deps_hs = CalculateHittingSet(
+            std::vector<Vertical>(alleged_min_deps_set.begin(), alleged_min_deps_set.end()));
     std::unordered_set<Vertical> alleged_max_non_deps;
 
     for (auto& min_leave_out_vertical : alleged_max_non_deps_hs) {
@@ -640,6 +637,63 @@ std::optional<Vertical> SearchSpace::TrickleDownFrom(
                                         .count();
         return std::optional<Vertical>();
     }
+}
+
+// TODO: critical part - consider optimization
+// TODO: list -> vector as list doesn't have RAIterators therefore can't be sorted
+std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(std::vector<Vertical> verticals,
+                                                              auto pruning_function) const {
+    RelationalSchema const* schema = context_->GetSchema();
+    auto arity_comparer = [](Vertical const& vertical1, Vertical const& vertical2) {
+        return vertical1.GetArity() < vertical2.GetArity();
+    };
+
+    std::ranges::sort(verticals, arity_comparer);
+    model::VerticalMap<std::monostate> consolidated_verticals(schema);
+    model::VerticalMap<std::monostate> hitting_set(schema);
+    // TODO: VerticalMap requires `shared_ptr`s, so using this hack with a dummy pointer here.
+    auto dummy_ptr = std::make_shared<std::monostate>();
+
+    hitting_set.Put(schema->CreateEmptyVertical(), dummy_ptr);
+
+    for (Vertical const& vertical : verticals) {
+        if (consolidated_verticals.GetAnySubsetEntry(vertical).second != nullptr) {
+            continue;
+        }
+        consolidated_verticals.Put(vertical, dummy_ptr);
+
+        std::vector<Vertical> invalid_hitting_set_members =
+                hitting_set.GetSubsetKeys(vertical.Invert());
+        std::ranges::sort(invalid_hitting_set_members, arity_comparer);
+
+        for (auto& invalid_hitting_set_member : invalid_hitting_set_members) {
+            hitting_set.Remove(invalid_hitting_set_member);
+        }
+
+        for (Vertical const& invalid_member : invalid_hitting_set_members) {
+            boost::dynamic_bitset<> const& column_indices = vertical.GetColumnIndices();
+            for (size_t corrective_column_index = column_indices.find_first();
+                 corrective_column_index != boost::dynamic_bitset<>::npos;
+                 corrective_column_index = column_indices.find_next(corrective_column_index)) {
+                Column const& corrective_column = *schema->GetColumn(corrective_column_index);
+                Vertical corrected_member = invalid_member.Union(corrective_column);
+
+                if (hitting_set.GetAnySubsetEntry(corrected_member).second == nullptr) {
+                    bool is_pruned = pruning_function(corrected_member);
+                    if (is_pruned) continue;
+
+                    hitting_set.Put(corrected_member, dummy_ptr);
+                }
+            }
+        }
+        if (hitting_set.IsEmpty()) break;
+    }
+    return hitting_set.KeySet();
+}
+
+std::unordered_set<Vertical> SearchSpace::CalculateHittingSet(
+        std::vector<Vertical> verticals) const {
+    return CalculateHittingSet(std::move(verticals), [](auto&&...) { return false; });
 }
 
 void SearchSpace::RequireMinimalDependency(DependencyStrategy* strategy,
