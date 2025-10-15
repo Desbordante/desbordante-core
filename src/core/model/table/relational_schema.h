@@ -54,10 +54,6 @@ public:
     void AppendColumn(std::string const& col_name);
     void AppendColumn(Column column);
 
-    std::unordered_set<Vertical> CalculateHittingSet(
-            std::vector<Vertical> verticals,
-            boost::optional<std::function<bool(Vertical const&)>> pruning_function) const;
-
     ~RelationalSchema();
 
     friend inline bool operator==(RelationalSchema const& l, RelationalSchema const& r);
