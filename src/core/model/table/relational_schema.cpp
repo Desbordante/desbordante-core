@@ -18,14 +18,14 @@ Vertical RelationalSchema::CreateEmptyVertical() const {
 
 bool RelationalSchema::IsColumnInSchema(std::string const& col_name) const {
     return std::find_if(columns_.begin(), columns_.end(), [&col_name](auto& column) {
-               return column->name_ == col_name;
+               return column->GetName() == col_name;
            }) != columns_.end();
 }
 
 Column const* RelationalSchema::GetColumn(std::string const& col_name) const {
     auto found_entry_iterator =
             std::find_if(columns_.begin(), columns_.end(),
-                         [&col_name](auto& column) { return column->name_ == col_name; });
+                         [&col_name](auto& column) { return column->GetName() == col_name; });
     if (found_entry_iterator != columns_.end()) return found_entry_iterator->get();
 
     throw std::invalid_argument("Couldn't match column name \'" + col_name +
