@@ -13,7 +13,6 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/optional.hpp>
 
 #include "bitset_utils.h"
 
