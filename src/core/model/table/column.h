@@ -9,8 +9,6 @@
 #include "relational_schema.h"
 
 class Column {
-    friend RelationalSchema;
-
 public:
     using IndexType = model::ColumnIndex;
 
@@ -27,7 +25,7 @@ public:
         return index_;
     }
 
-    std::string GetName() const {
+    std::string const& GetName() const {
         return name_;
     }
 
