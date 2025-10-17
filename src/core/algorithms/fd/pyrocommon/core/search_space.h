@@ -1,9 +1,14 @@
 #pragma once
 
+#include <functional>
 #include <list>
 #include <memory>
+#include <optional>
 #include <set>
+#include <string>
+#include <unordered_set>
 #include <utility>
+#include <vector>
 
 #include "dependency_candidate.h"
 #include "dependency_strategy.h"
@@ -12,6 +17,10 @@
 #include "model/table/vertical_map.h"
 #include "profiling_context.h"
 #include "vertical_info.h"
+
+class ProfilingContext;
+class RelationalSchema;
+class VerticalInfo;
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
 private:

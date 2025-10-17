@@ -6,6 +6,12 @@
 #include "algorithms/ucc/hyucc/model/ucc_tree.h"
 #include "algorithms/ucc/raw_ucc.h"
 
+namespace algos {
+namespace hyucc {
+class UCCTree;
+}  // namespace hyucc
+}  // namespace algos
+
 namespace algos::hyucc {
 
 class Inductor {

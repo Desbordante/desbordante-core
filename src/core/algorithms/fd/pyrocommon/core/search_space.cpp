@@ -1,8 +1,29 @@
 #include "search_space.h"
 
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <iterator>
 #include <queue>
+#include <stdexcept>
 
+#include <boost/dynamic_bitset.hpp>
+#include <boost/format.hpp>
+#include <boost/optional/optional.hpp>
 #include <easylogging++.h>
+
+#include "custom_hashes.h"
+#include "fd/pyrocommon/core/dependency_candidate.h"
+#include "fd/pyrocommon/core/dependency_strategy.h"
+#include "fd/pyrocommon/core/parameters.h"
+#include "fd/pyrocommon/core/profiling_context.h"
+#include "fd/pyrocommon/core/vertical_info.h"
+#include "fd/pyrocommon/model/confidence_interval.h"
+#include "table/column.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
+#include "table/vertical_map.h"
 
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
 // delete the object - pass empty deleter [](*) {}

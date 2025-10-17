@@ -1,18 +1,28 @@
 #include "fastfds.h"
 
 #include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <memory>
 #include <mutex>
-#include <thread>
+#include <string_view>
+#include <unordered_set>
+#include <utility>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
-#include <boost/thread.hpp>
 #include <easylogging++.h>
 
-#include "config/max_lhs/option.h"
+#include "common_option.h"
 #include "config/thread_number/option.h"
+#include "custom_hashes.h"
+#include "fd/pli_based_fd_algorithm.h"
 #include "model/table/agree_set_factory.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 #include "util/parallel_for.h"
 
 namespace algos {

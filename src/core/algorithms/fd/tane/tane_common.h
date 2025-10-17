@@ -7,6 +7,16 @@
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/position_list_index.h"
 
+class Column;
+class ColumnData;
+class ColumnLayoutRelationData;
+class Vertical;
+
+namespace model {
+class LatticeLevel;
+class PositionListIndex;
+}  // namespace model
+
 namespace algos::tane {
 
 class TaneCommon : public PliBasedFDAlgorithm {

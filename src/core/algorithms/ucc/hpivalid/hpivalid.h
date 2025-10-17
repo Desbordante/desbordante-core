@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"
@@ -8,9 +9,14 @@
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "model/table/column_layout_relation_data.h"
 
+class ColumnLayoutRelationData;
+
 // see algorithms/ucc/hpivalid/LICENSE
 
 namespace algos {
+namespace hpiv {
+class ResultCollector;
+}  // namespace hpiv
 
 class HPIValid : public UCCAlgorithm {
 private:

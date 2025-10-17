@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <iterator>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -7,6 +9,8 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "algorithms/fd/raw_fd.h"
+
+struct RawFD;
 
 namespace algos::hyfd::fd_tree {
 

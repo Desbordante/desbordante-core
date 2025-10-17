@@ -1,6 +1,9 @@
 #include "mlfq.h"
 
+#include <algorithm>
 #include <cmath>
+
+#include "fd/eulerfd/cluster.h"
 
 namespace algos {
 

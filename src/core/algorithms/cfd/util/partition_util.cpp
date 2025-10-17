@@ -1,6 +1,10 @@
 #include "partition_util.h"
 
+#include <algorithm>
 #include <numeric>
+#include <utility>
+
+#include "cfd/model/cfd_types.h"
 
 // see algorithms/cfd/LICENSE
 

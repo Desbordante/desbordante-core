@@ -1,11 +1,14 @@
 #pragma once
 
 #include <unordered_map>
+#include <unordered_set>
 
-#include "../column_order/column_order.h"
-#include "../node_category.h"
+#include "fd/dfd/column_order/column_order.h"
+#include "fd/dfd/node_category.h"
 #include "model/table/vertical.h"
 #include "util/custom_hashes.h"
+
+class ColumnOrder;
 
 class LatticeObservations : public std::unordered_map<Vertical, NodeCategory> {
 public:

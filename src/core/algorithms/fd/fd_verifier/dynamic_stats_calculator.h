@@ -1,14 +1,21 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "algorithms/fd/fd_verifier/highlight.h"
 #include "config/indices/type.h"
 #include "model/table/dynamic_position_list_index.h"
 #include "model/table/dynamic_table_data.h"
+
+namespace model {
+struct DynamicTableData;
+}  // namespace model
 
 namespace algos::fd_verifier {
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -10,6 +12,8 @@
 #include "model/table/relation_data.h"
 #include "model/table/relational_schema.h"
 #include "model/types/bitset.h"
+
+class RelationalSchema;
 
 namespace algos {
 

@@ -5,6 +5,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 #include <boost/dynamic_bitset.hpp>
 
 #include "confidence_interval.h"
@@ -12,7 +15,10 @@
 #include "model/table/vertical.h"
 #include "util/custom_random.h"
 
+class CustomRandom;
+
 namespace model {
+class PositionListIndex;
 
 // abstract base class for Agree Set Sample implementations (trie <- not used, list)
 class AgreeSetSample {

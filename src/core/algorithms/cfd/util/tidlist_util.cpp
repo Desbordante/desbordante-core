@@ -1,5 +1,10 @@
 #include "tidlist_util.h"
 
+#include <boost/container_hash/hash.hpp>
+
+#include "cfd/model/cfd_types.h"
+#include "cfd/model/partition_tidlist.h"
+
 // see algorithms/cfd/LICENSE
 
 namespace algos::cfd {

@@ -1,13 +1,23 @@
 #include "hyucc.h"
 
 #include <chrono>
+#include <list>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
 #include <easylogging++.h>
 
+#include "fd/hycommon/preprocessor.h"
 #include "fd/hycommon/types.h"
 #include "inductor.h"
-#include "preprocessor.h"
+#include "primitive_collection.h"
 #include "sampler.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "ucc/hyucc/model/non_ucc_list.h"
+#include "ucc/hyucc/model/ucc_tree.h"
+#include "ucc/ucc.h"
 #include "validator.h"
 
 namespace algos {

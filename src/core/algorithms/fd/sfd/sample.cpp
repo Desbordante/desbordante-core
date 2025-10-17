@@ -1,6 +1,9 @@
 #include "sample.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <numbers>
 #include <random>
 #include <string>
 #include <unordered_set>
@@ -8,6 +11,10 @@
 
 #include "frequency_handler.h"
 #include "model/table/tuple_index.h"
+#include "table/column.h"
+#include "table/column_index.h"
+#include "table/relational_schema.h"
+#include "table/typed_column_data.h"
 
 namespace algos {
 Sample::Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIndex rows,

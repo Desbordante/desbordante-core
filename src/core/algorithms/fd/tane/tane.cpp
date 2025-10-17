@@ -1,11 +1,16 @@
 #include "tane.h"
 
+#include <memory>
+#include <vector>
+
 #include "afd_measures.h"
+#include "common_option.h"
 #include "config/error/option.h"
 #include "config/error_measure/option.h"
 #include "enums.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "model/table/column_data.h"
+#include "error/type.h"
+#include "fd/tane/tane_common.h"
+#include "table/column_layout_relation_data.h"
 
 namespace algos {
 

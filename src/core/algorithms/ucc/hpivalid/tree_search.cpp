@@ -1,20 +1,29 @@
 #include "algorithms/ucc/hpivalid/tree_search.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <deque>
+#include <initializer_list>
+#include <iterator>
 #include <limits>
 #include <random>
 #include <stack>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
+#include "table/column_index.h"
+#include "table/position_list_index.h"
+#include "ucc/hpivalid/enums.h"
+#include "ucc/hpivalid/hypergraph.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
