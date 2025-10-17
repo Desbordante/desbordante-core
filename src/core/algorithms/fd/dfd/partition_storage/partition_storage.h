@@ -1,9 +1,21 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
 #include <mutex>
+#include <variant>
 
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical_map.h"
+#include "table/position_list_index.h"
+
+class ColumnLayoutRelationData;
+class Vertical;
+
+namespace model {
+template <class Value>
+class VerticalMap;
+}  // namespace model
 
 class PartitionStorage {
 private:

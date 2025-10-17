@@ -1,7 +1,12 @@
 #pragma once
 
+#include <vector>
+
 #include "model/table/column_data.h"
 #include "model/table/vertical.h"
+
+class ColumnLayoutRelationData;
+class Vertical;
 
 class ColumnOrder {
 private:

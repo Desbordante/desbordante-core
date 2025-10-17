@@ -1,11 +1,16 @@
 #include "agree_set_sample.h"
 
 #include <algorithm>
-#include <exception>
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <random>
+#include <stdexcept>
 #include <utility>
+
+#include "fd/pyrocommon/model/confidence_interval.h"
+#include "table/column_layout_relation_data.h"
+#include "table/vertical.h"
 
 namespace model {
 

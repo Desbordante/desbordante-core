@@ -1,10 +1,16 @@
 #pragma once
 
+#include <cstddef>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "model/table/column_index.h"
 #include "model/table/typed_column_data.h"
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos {
 

@@ -1,7 +1,11 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
+#include "common_option.h"
 #include "config/thread_number/option.h"
 #include "config/thread_number/type.h"
 #include "fd/hycommon/types.h"

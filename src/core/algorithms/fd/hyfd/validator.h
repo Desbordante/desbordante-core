@@ -8,8 +8,18 @@
 #include "algorithms/fd/hyfd/model/fd_tree.h"
 #include "algorithms/fd/raw_fd.h"
 #include "config/thread_number/type.h"
+#include "fd/hycommon/types.h"
+#include "fd/hyfd/model/fd_tree_vertex.h"
 #include "model/table/position_list_index.h"
 #include "types.h"
+
+namespace algos {
+namespace hyfd {
+namespace fd_tree {
+class FDTree;
+}  // namespace fd_tree
+}  // namespace hyfd
+}  // namespace algos
 
 namespace algos::hyfd {
 

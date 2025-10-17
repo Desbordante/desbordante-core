@@ -1,8 +1,21 @@
 #include "list_agree_set_sample.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <string>
+
+#include <boost/format.hpp>
 #include <easylogging++.h>
 
+#include "fd/pyrocommon/model/agree_set_sample.h"
+#include "fd/pyrocommon/model/agree_set_sample_impl.h"
+#include "table/vertical.h"
+
+class ColumnLayoutRelationData;
+class CustomRandom;
+
 namespace model {
+class PositionListIndex;
 
 std::unique_ptr<ListAgreeSetSample> ListAgreeSetSample::CreateFocusedFor(
         ColumnLayoutRelationData const* relation, Vertical const& restriction_vertical,

@@ -1,15 +1,26 @@
 #include "algorithms/fd/fd_verifier/fd_verifier.h"
 
 #include <chrono>
+#include <functional>
 #include <memory>
 #include <stdexcept>
 
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
-#include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "fd/fd_verifier/stats_calculator.h"
+#include "indices/type.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
 
 namespace algos::fd_verifier {
 
