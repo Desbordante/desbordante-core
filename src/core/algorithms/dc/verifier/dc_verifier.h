@@ -1,11 +1,17 @@
 #pragma once
 
+#include <algorithm>
 #include <cstddef>
 #include <functional>
 #include <memory>
+#include <optional>
+#include <set>
 #include <string>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
+#include <boost/container/allocator_traits.hpp>
 #include <frozen/unordered_map.h>
 
 #include "algorithms/algorithm.h"
@@ -13,13 +19,17 @@
 #include "algorithms/dc/model/point.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/tabular_data/input_table_type.h"
+#include "dc/model/component.h"
 #include "model/table/column_layout_relation_data.h"
+#include "table/column.h"
 #include "table/typed_column_data.h"
 #include "util/kdtree.h"
 
 namespace algos {
 
 namespace dc {
+class Predicate;
+
 struct SetComparator {
     bool operator()(std::pair<size_t, size_t> const& lhs,
                     std::pair<size_t, size_t> const& rhs) const {

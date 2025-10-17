@@ -1,5 +1,16 @@
 #include "afd_measures.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <deque>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+#include "error/type.h"
+#include "table/column_data.h"
+#include "table/position_list_index.h"
+
 namespace algos {
 using Cluster = model::PositionListIndex::Cluster;
 

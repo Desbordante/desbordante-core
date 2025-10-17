@@ -1,16 +1,21 @@
 #include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"
 #include "all_csv_configs.h"
-#include "builtin.h"
 #include "config/indices/type.h"
 #include "config/names.h"
-#include "csv_config_util.h"
 #include "fd/fd_verifier/fd_verifier.h"
+#include "fd/fd_verifier/highlight.h"
 #include "fd/fd_verifier/stats_calculator.h"
+
+struct CSVConfig;
 
 namespace {
 using namespace algos::fd_verifier;

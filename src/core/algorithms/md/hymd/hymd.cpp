@@ -1,8 +1,16 @@
 #include "algorithms/md/hymd/hymd.h"
 
 #include <algorithm>
+#include <cassert>
+#include <chrono>
 #include <cstddef>
+#include <functional>
 #include <limits>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
 #include "algorithms/md/hymd/lattice/md_lattice.h"
@@ -16,11 +24,37 @@
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/inverse_permutation.h"
 #include "algorithms/md/hymd/utility/md_less.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "desbordante_assume.h"
+#include "descriptions.h"
+#include "exceptions.h"
+#include "md/column_match.h"
+#include "md/column_similarity_classifier.h"
+#include "md/decision_boundary.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/enums.h"
+#include "md/hymd/indexes/dictionary_compressor.h"
+#include "md/hymd/indexes/records_info.h"
+#include "md/hymd/lattice/md_lattice_node_info.h"
+#include "md/hymd/lattice/md_node.h"
+#include "md/hymd/lattice/rhs.h"
+#include "md/hymd/md_lhs.h"
+#include "md/hymd/preprocessing/column_matches/column_match.h"
+#include "md/hymd/validator.h"
+#include "md/lhs_column_similarity_classifier.h"
+#include "md/md.h"
+#include "md/md_algorithm.h"
 #include "model/index.h"
-#include "model/table/column.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "option.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
+#include "tabular_data/input_table_type.h"
+#include "thread_number/type.h"
 #include "util/get_preallocated_vector.h"
 #include "util/worker_thread_pool.h"
 

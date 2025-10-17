@@ -1,8 +1,12 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <deque>
+#include <memory>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include "algorithms/algorithm.h"
@@ -11,6 +15,18 @@
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/dynamic_table_data.h"
+#include "table/dynamic_position_list_index.h"
+#include "table/idataset_stream.h"
+
+namespace algos {
+namespace fd_verifier {
+class Highlight;
+}  // namespace fd_verifier
+}  // namespace algos
+
+namespace model {
+struct DynamicTableData;
+}  // namespace model
 
 namespace algos::fd_verifier {
 

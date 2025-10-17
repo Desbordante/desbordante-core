@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <list>
 #include <memory>
@@ -18,8 +19,12 @@
 #include "bitset_utils.h"
 
 class Column;
-
 class Vertical;
+
+namespace boost {
+template <class T>
+class optional;
+}  // namespace boost
 
 class RelationalSchema {
 private:

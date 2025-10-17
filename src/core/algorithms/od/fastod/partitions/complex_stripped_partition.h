@@ -1,10 +1,16 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/container/allocator_traits.hpp>
+
 #include "algorithms/od/fastod/storage/data_frame.h"
+#include "table/column_index.h"
 
 namespace algos::fastod {
 
@@ -56,13 +62,13 @@ public:
 
     template <bool Ascending>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const {
-        const size_t group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+        size_t const group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
 
         for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
-            const size_t group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
+            size_t const group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
                                                               : (*rb_begins_)[begin_pointer];
 
-            const size_t group_end = is_stripped_partition_ ? (*sp_begins_)[begin_pointer + 1]
+            size_t const group_end = is_stripped_partition_ ? (*sp_begins_)[begin_pointer + 1]
                                                             : (*rb_begins_)[begin_pointer + 1];
 
             std::vector<std::pair<int, int>> values;
@@ -71,14 +77,14 @@ public:
                 values.reserve(group_end - group_begin);
 
                 for (size_t i = group_begin; i < group_end; ++i) {
-                    const size_t index = (*sp_indexes_)[i];
+                    size_t const index = (*sp_indexes_)[i];
 
                     values.emplace_back(data_->GetValue(index, left),
                                         data_->GetValue(index, right));
                 }
             } else {
                 for (size_t i = group_begin; i < group_end; ++i) {
-                    const DataFrame::Range range = (*rb_indexes_)[i];
+                    DataFrame::Range const range = (*rb_indexes_)[i];
 
                     for (size_t j = range.first; j <= range.second; ++j) {
                         values.emplace_back(data_->GetValue(j, left), data_->GetValue(j, right));
@@ -124,7 +130,7 @@ public:
             auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
             auto rb_begins = std::make_unique<std::vector<size_t>>();
 
-            const size_t tuple_count = data->GetTupleCount();
+            size_t const tuple_count = data->GetTupleCount();
             rb_begins->push_back(0);
 
             if (tuple_count != 0) {

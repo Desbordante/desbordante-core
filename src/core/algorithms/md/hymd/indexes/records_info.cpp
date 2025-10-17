@@ -4,9 +4,13 @@
 #include <vector>
 
 #include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered_map.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "index.h"
+#include "md/hymd/indexes/dictionary_compressor.h"
+#include "table/idataset_stream.h"
 
 namespace {
 using namespace algos::hymd::indexes;

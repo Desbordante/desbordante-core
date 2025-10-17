@@ -1,13 +1,33 @@
 #include "algorithms/md/md_verifier/validation/validation.h"
 
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
 #include <ranges>
 
+#include <boost/container/allocator_traits.hpp>
 #include <boost/hof/first_of.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "algorithms/md/hymd/indexes/records_info.h"
 #include "algorithms/md/hymd/similarity_data.h"
 #include "algorithms/md/hymd/utility/index_range.h"
-#include "util/worker_thread_pool.h"
+#include "md/column_similarity_classifier.h"
+#include "md/decision_boundary.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/column_match_info.h"
+#include "md/hymd/indexes/column_similarity_info.h"
+#include "md/hymd/indexes/dictionary_compressor.h"
+#include "md/hymd/indexes/keyed_position_list_index.h"
+#include "md/hymd/indexes/pli_cluster.h"
+#include "md/hymd/indexes/similarity_index.h"
+#include "md/hymd/indexes/similarity_matrix.h"
+#include "md/md_verifier/highlights/highlights.h"
+#include "md/similarity.h"
+
+namespace util {
+class WorkerThreadPool;
+}  // namespace util
 
 namespace algos::md {
 

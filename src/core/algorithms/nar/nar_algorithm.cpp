@@ -1,8 +1,20 @@
 #include "nar_algorithm.h"
 
+#include <stdexcept>
+#include <utility>
+
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "descriptions.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "nar/nar.h"
+#include "option.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/idataset_stream.h"
 
 namespace algos {
 

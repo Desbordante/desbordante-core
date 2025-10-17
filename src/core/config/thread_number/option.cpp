@@ -1,9 +1,16 @@
 #include "config/thread_number/option.h"
 
+#include <string>
 #include <thread>
+#include <variant>
 
+#include "common_option.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "thread_number/type.h"
 
 namespace config {
 using names::kThreads, descriptions::kDThreads;

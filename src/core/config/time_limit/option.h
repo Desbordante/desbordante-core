@@ -4,5 +4,8 @@
 #include "config/time_limit/type.h"
 
 namespace config {
+template <typename T>
+class CommonOption;
+
 extern CommonOption<TimeLimitSecondsType> const kTimeLimitSecondsOpt;
 }  // namespace config

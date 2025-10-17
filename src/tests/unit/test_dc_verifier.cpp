@@ -1,13 +1,21 @@
+#include <cstddef>
+#include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/dc/verifier/dc_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
+#include "csv_parser/csv_parser.h"
+#include "dc/model/tuple.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "table/idataset_stream.h"
 
 namespace tests {
 

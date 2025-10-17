@@ -6,6 +6,12 @@
 #include "model/table/position_list_index.h"
 #include "tane_common.h"
 
+class ColumnData;
+
+namespace model {
+class PositionListIndex;
+}  // namespace model
+
 namespace algos {
 
 /** Class for pFD mining with TANE algorithm */

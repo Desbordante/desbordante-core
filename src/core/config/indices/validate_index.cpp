@@ -1,6 +1,9 @@
 #include "config/indices/validate_index.h"
 
+#include <string>
+
 #include "config/exceptions.h"
+#include "indices/type.h"
 
 namespace config {
 

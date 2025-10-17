@@ -1,7 +1,21 @@
 #include "dc/FastADC/util/clue_set_builder.h"
 
+#include <bitset>
+#include <cstddef>
+#include <unordered_map>
+#include <utility>
+
+#include <easylogging++.h>
+
+#include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/cross_clue_set_builder.h"
 #include "dc/FastADC/util/single_clue_set_builder.h"
+
+namespace algos {
+namespace fastadc {
+struct PredicatePacks;
+}  // namespace fastadc
+}  // namespace algos
 
 namespace algos::fastadc {
 

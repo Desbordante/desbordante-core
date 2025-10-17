@@ -1,11 +1,16 @@
 #pragma once
 #include <thread>
+#include <tuple>
+#include <variant>
+#include <vector>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_validator/gfd_handler.h"
 #include "config/names_and_descriptions.h"
 #include "config/thread_number/type.h"
+#include "gfd/graph_descriptor.h"
+#include "names_and_descriptions.h"
 
 namespace algos {
 

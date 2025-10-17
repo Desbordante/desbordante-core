@@ -1,6 +1,18 @@
 #include "fun.h"
 
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
+
+#include "custom_hashes.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 
 namespace algos {
 

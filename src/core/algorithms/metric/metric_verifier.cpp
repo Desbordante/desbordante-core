@@ -3,19 +3,49 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
+#include <deque>
+#include <functional>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <utility>
 
 #include <easylogging++.h>
 
+#include "algorithm.h"
+#include "builtin.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/exceptions.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "convex_hull.h"
+#include "descriptions.h"
+#include "indices/type.h"
+#include "metric/aliases.h"
+#include "metric/enums.h"
+#include "metric/highlight.h"
+#include "metric/highlight_calculator.h"
+#include "metric/points.h"
+#include "metric/points_calculator.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "numeric_type.h"
+#include "option.h"
+#include "qgram_vector.h"
+#include "string_type.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/idataset_stream.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
+#include "table/typed_column_data.h"
+#include "type.h"
 
 namespace algos::metric {
 

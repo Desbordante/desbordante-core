@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <numbers>
 #include <vector>
 
@@ -13,7 +14,14 @@
 #include "model/table/typed_column_data.h"
 #include "model/table/vertical.h"
 
+class RelationalSchema;
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
+
 namespace algos {
+class FrequencyHandler;
 
 class Sample {
 private:

@@ -10,6 +10,13 @@
 #include "fd/hycommon/primitive_validations.h"
 #include "fd/hycommon/types.h"
 #include "model/table/position_list_index.h"
+#include "ucc/hyucc/model/ucc_tree_vertex.h"
+
+namespace algos {
+namespace hyucc {
+class UCCTree;
+}  // namespace hyucc
+}  // namespace algos
 
 namespace algos::hyucc {
 

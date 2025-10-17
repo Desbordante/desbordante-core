@@ -2,7 +2,15 @@
 
 #include "stripped_partition.h"
 
+#include <algorithm>
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
+#include <utility>
+
+#include <boost/container/allocator_traits.hpp>
+
+#include "od/fastod/storage/data_frame.h"
 
 namespace algos::fastod {
 
@@ -71,13 +79,13 @@ void StrippedPartition::Product(model::ColumnIndex attribute) {
     size_t fill_pointer = 0;
 
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        const size_t group_begin = begins_[begin_pointer];
-        const size_t group_end = begins_[begin_pointer + 1];
+        size_t const group_begin = begins_[begin_pointer];
+        size_t const group_end = begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, size_t>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; i++) {
-            const size_t index = indexes_[i];
+            size_t const index = indexes_[i];
             values[i - group_begin] = {data_.GetValue(index, attribute), index};
         }
 
@@ -120,8 +128,8 @@ void StrippedPartition::Product(model::ColumnIndex attribute) {
 
 bool StrippedPartition::Split(model::ColumnIndex right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        const size_t group_begin = begins_[begin_pointer];
-        const size_t group_end = begins_[begin_pointer + 1];
+        size_t const group_begin = begins_[begin_pointer];
+        size_t const group_end = begins_[begin_pointer + 1];
 
         int const group_value = data_.GetValue(indexes_[group_begin], right);
 
@@ -138,13 +146,13 @@ bool StrippedPartition::Split(model::ColumnIndex right) const {
 bool StrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right,
                              bool ascending) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        const size_t group_begin = begins_[begin_pointer];
-        const size_t group_end = begins_[begin_pointer + 1];
+        size_t const group_begin = begins_[begin_pointer];
+        size_t const group_end = begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, int>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            const size_t index = indexes_[i];
+            size_t const index = indexes_[i];
             values[i - group_begin] = {data_.GetValue(index, left), data_.GetValue(index, right)};
         }
 

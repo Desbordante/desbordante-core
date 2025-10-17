@@ -1,8 +1,8 @@
 #include "dc/FastADC/util/predicate_builder.h"
 
 #include <array>
-#include <assert.h>
 #include <bitset>
+#include <cassert>
 
 #include <easylogging++.h>
 

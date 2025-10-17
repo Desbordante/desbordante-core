@@ -1,17 +1,37 @@
+#include <array>
+#include <bitset>
+#include <compare>
+#include <cstddef>
+#include <cstdint>
+#include <iterator>
 #include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "all_csv_configs.h"
+#include "builtin.h"
 #include "create_type.h"
 #include "csv_parser/csv_parser.h"
 #include "dc/FastADC/misc/misc.h"
+#include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/denial_constraint.h"
+#include "dc/FastADC/model/evidence.h"
+#include "dc/FastADC/model/evidence_set.h"
 #include "dc/FastADC/model/operator.h"
 #include "dc/FastADC/model/pli_shard.h"
+#include "dc/FastADC/model/predicate.h"
+#include "dc/FastADC/providers/index_provider.h"
+#include "dc/FastADC/providers/predicate_provider.h"
 #include "dc/FastADC/util/approximate_evidence_inverter.h"
 #include "dc/FastADC/util/clue_set_builder.h"
+#include "dc/FastADC/util/common_clue_set_builder.h"
+#include "dc/FastADC/util/denial_constraint_set.h"
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
@@ -19,7 +39,11 @@
 #include "int_type.h"
 #include "string_type.h"
 #include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
 #include "test_dc_structures_correct_results.h"
+#include "type.h"
+
+class Column;
 
 namespace tests {
 

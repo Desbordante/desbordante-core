@@ -1,20 +1,35 @@
+#include <algorithm>
+#include <cassert>
+#include <exception>
+#include <filesystem>
+#include <iosfwd>
+#include <iostream>
+#include <iterator>
+#include <list>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <utility>
+#include <vector>
 
-#include <boost/dynamic_bitset.hpp>
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/ucc/hyucc/hyucc.h"
-#include "algorithms/ucc/ucc.h"
 #include "algorithms/ucc/ucc_algorithm.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "config/thread_number/type.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
+#include "table/vertical.h"
 #include "test_hash_util.h"
+#include "ucc/hpivalid/hpivalid.h"
+#include "ucc/pyroucc/pyroucc.h"
+
+namespace model {
+class UCC;
+}  // namespace model
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();
@@ -77,36 +92,36 @@ public:
     }
 
     inline static std::vector<CSVConfigHash> const kLightDatasets = {
-        {kWdcAstronomical, 2089541732445U},
-        {kWdcSymbols, 1},
-        {kWdcScience, 2658842082150U},
-        {kWdcSatellites, 5208443370856032U},
-        {kWdcAppearances, 82369238361U},
-        {kWdcAstrology, 79554241843163108U},
-        {kWdcGame, 2555214540772530U},
-        {kWdcKepler, 82426217315737U},
-        {kWdcPlanetz, 2555214540772530U},
-        {kWdcAge, 2658842082150U},
-        {kTestWide, 2555250373874U},
-        {kAbalone, 16581571148699134255U},
-        {kIris, 1},
-        {kAdult, 1},
-        {kBreastCancer, 16854900230774656828U},
-        // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
-        // able to process these move them to kHeavyDatasets
-        {kNeighbors10k, 170971924188219U},
+            {kWdcAstronomical, 2089541732445U},
+            {kWdcSymbols, 1},
+            {kWdcScience, 2658842082150U},
+            {kWdcSatellites, 5208443370856032U},
+            {kWdcAppearances, 82369238361U},
+            {kWdcAstrology, 79554241843163108U},
+            {kWdcGame, 2555214540772530U},
+            {kWdcKepler, 82426217315737U},
+            {kWdcPlanetz, 2555214540772530U},
+            {kWdcAge, 2658842082150U},
+            {kTestWide, 2555250373874U},
+            {kAbalone, 16581571148699134255U},
+            {kIris, 1},
+            {kAdult, 1},
+            {kBreastCancer, 16854900230774656828U},
+            // Possibly heavy datasets, if another less efficient algorithm than HyUCC is not
+            // able to process these move them to kHeavyDatasets
+            {kNeighbors10k, 170971924188219U},
 #if 0
         {kNeighbors50k, 1},
 #endif
-        {kNeighbors100k, 170971924188219U},
-        {kCIPublicHighway10k, 82369238361U},
-        {kCIPublicHighway700, 82369238361U},
+            {kNeighbors100k, 170971924188219U},
+            {kCIPublicHighway10k, 82369238361U},
+            {kCIPublicHighway700, 82369238361U},
     };
 
     inline static std::vector<CSVConfigHash> const kHeavyDatasets = {
-        {kEpicVitals, 1},
-        {kEpicMeds, 59037771758954037U},
-        {kIowa1kk, 2654435863U},
+            {kEpicVitals, 1},
+            {kEpicMeds, 59037771758954037U},
+            {kIowa1kk, 2654435863U},
 #if 0
         {kFdReduced30, 275990379954778425U},
         {kFlight1k, 2512091017708538662U},

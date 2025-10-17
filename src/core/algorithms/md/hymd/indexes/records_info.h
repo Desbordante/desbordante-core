@@ -3,9 +3,14 @@
 #include <cstddef>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/dictionary_compressor.h"
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 namespace algos::hymd::indexes {
 

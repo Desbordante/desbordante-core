@@ -1,6 +1,11 @@
 #include "dependency_candidate.h"
 
+#include <cstddef>
+#include <ostream>
+
 #include <boost/dynamic_bitset.hpp>
+
+#include "table/vertical.h"
 
 // TODO: these methods are used in priority_queues, where operator> is needed. (>) !<=> (>=) due to
 // strict weak ordering

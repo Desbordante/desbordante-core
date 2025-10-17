@@ -1,6 +1,11 @@
 #include "cfd_output_util.h"
 
-#include <boost/algorithm/string.hpp>
+#include <iosfwd>
+#include <ostream>
+#include <sstream>
+#include <vector>
+
+#include <boost/algorithm/string/join.hpp>
 
 #include "algorithms/cfd/model/cfd_relation_data.h"
 #include "algorithms/cfd/model/cfd_types.h"

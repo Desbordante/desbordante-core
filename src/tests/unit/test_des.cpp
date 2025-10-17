@@ -1,9 +1,19 @@
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/nar/des/des.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "nar/des/encoded_nar.h"
+#include "nar/des/enums.h"
+#include "nar/nar.h"
+
+struct CSVConfig;
 
 namespace tests {
 

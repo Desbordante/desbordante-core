@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 #include "algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
 #include "algorithms/md/hymd/utility/intersection_size.h"

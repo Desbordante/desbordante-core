@@ -1,8 +1,12 @@
+#include <algorithm>
+#include <cstdlib>
 #include <limits>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
+#include <boost/any.hpp>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -10,6 +14,9 @@
 #include "algorithms/metric/metric_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "metric/highlight.h"
+
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;

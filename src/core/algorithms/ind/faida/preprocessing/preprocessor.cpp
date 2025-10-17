@@ -3,6 +3,11 @@
 #include <cassert>
 
 #include "algorithms/ind/faida/hashing/hashing.h"
+#include "ind/faida/preprocessing/hashed_column_store.h"
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 namespace algos::faida {
 

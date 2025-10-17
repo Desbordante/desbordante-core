@@ -1,6 +1,12 @@
 
 // see input_data/cfd_data/LICENSE
 
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -8,6 +14,8 @@
 #include "algorithms/cfd/fd_first_algorithm.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+
+struct CSVConfig;
 
 namespace tests {
 

@@ -1,19 +1,38 @@
 #include "order.h"
 
 #include <algorithm>
-#include <iostream>
+#include <chrono>
+#include <cstddef>
+#include <initializer_list>
 #include <memory>
+#include <unordered_set>
 #include <utility>
 
 #include <easylogging++.h>
 
+#include "algorithm.h"
+#include "builtin.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
+#include "create_type.h"
 #include "dependency_checker.h"
+#include "descriptions.h"
 #include "list_lattice.h"
+#include "mixed_type.h"
 #include "model/table/tuple_index.h"
-#include "model/types/types.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "od/order/sorted_partitions.h"
 #include "order_utility.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
+#include "type.h"
+
+namespace config {
+template <typename T>
+class Option;
+}  // namespace config
 
 namespace algos::order {
 

@@ -1,16 +1,26 @@
 #pragma once
 
-class ProfilingContext;
-
+#include <cstddef>
+#include <memory>
 #include <mutex>
+#include <variant>
 
-#include "../core/profiling_context.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
+#include "fd/pyrocommon/core/profiling_context.h"
 #include "model/table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 #include "util/maybe_unused_private_field.h"
 
+class ProfilingContext;
+class ColumnLayoutRelationData;
+class Vertical;
+enum class CacheEvictionMethod;
+enum class CachingMethod;
+
 namespace model {
+template <class Value>
+class VerticalMap;
 
 class PLICache {
 private:

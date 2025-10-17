@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <string_view>
+#include <vector>
+
 #include "algorithms/algorithm.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"

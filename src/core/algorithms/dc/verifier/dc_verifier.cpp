@@ -1,34 +1,49 @@
 #include "algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
-#include <cstring>
-#include <ctime>
+#include <exception>
 #include <functional>
-#include <iostream>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/classification.hpp>
-#include <boost/algorithm/string/split.hpp>
-#include <boost/algorithm/string/trim.hpp>
+#include <boost/container_hash/hash.hpp>
+#include <boost/regex.hpp>
 #include <easylogging++.h>
 
+#include "algorithm.h"
 #include "algorithms/dc/model/component.h"
 #include "algorithms/dc/model/point.h"
 #include "algorithms/dc/model/predicate.h"
 #include "algorithms/dc/parser/dc_parser.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "dc/model/column_operand.h"
+#include "dc/model/dc.h"
+#include "dc/model/operator.h"
+#include "dc/model/tuple.h"
+#include "descriptions.h"
 #include "model/table/column_index.h"
 #include "model/table/column_layout_relation_data.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "option.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
 #include "table/typed_column_data.h"
 #include "util/get_preallocated_vector.h"
 #include "util/kdtree.h"
+
+namespace model {
+class Type;
+}  // namespace model
 
 namespace algos {
 

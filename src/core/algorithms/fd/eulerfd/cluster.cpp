@@ -1,6 +1,8 @@
 #include "cluster.h"
 
 #include <cstdint>
+#include <numeric>
+#include <utility>
 
 namespace algos {
 

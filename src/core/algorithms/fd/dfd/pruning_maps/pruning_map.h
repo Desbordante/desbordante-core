@@ -3,8 +3,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../lattice_observations/lattice_observations.h"
+#include "custom_hashes.h"
+#include "fd/dfd/lattice_observations/lattice_observations.h"
 #include "model/table/vertical.h"
+
+class RelationalSchema;
 
 class PruningMap : public std::unordered_map<Vertical, std::unordered_set<Vertical>> {
 public:
