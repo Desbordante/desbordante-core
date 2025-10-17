@@ -1,8 +1,8 @@
 #include "dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 

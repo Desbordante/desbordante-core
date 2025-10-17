@@ -5,6 +5,9 @@
  */
 #pragma once
 
+#include <cstddef>
+#include <vector>
+
 #include "algorithms/algorithm.h"
 #include "config/indices/type.h"
 #include "error/type.h"

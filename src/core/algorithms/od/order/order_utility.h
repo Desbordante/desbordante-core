@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
@@ -9,6 +11,10 @@
 #include "model/table/column_index.h"
 #include "model/table/tuple_index.h"
 #include "model/table/typed_column_data.h"
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos::order {
 using Node = std::vector<model::ColumnIndex>;

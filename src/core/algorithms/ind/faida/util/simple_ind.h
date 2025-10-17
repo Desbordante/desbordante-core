@@ -1,11 +1,16 @@
 #pragma once
 
 #include <bit>
+#include <cstddef>
+#include <functional>
 #include <memory>
+#include <string_view>
 #include <utility>
 
 #include "algorithms/ind/faida/hashing/hashing.h"
 #include "simple_cc.h"
+#include "table/arity_index.h"
+#include "table/column_combination.h"
 
 namespace algos::faida {
 

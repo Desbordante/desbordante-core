@@ -1,6 +1,7 @@
 #include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
 
-#include <algorithm>
+#include <iosfwd>
+#include <istream>
 #include <sstream>
 #include <string>
 #include <vector>

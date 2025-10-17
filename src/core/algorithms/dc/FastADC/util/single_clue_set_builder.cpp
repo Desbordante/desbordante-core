@@ -1,6 +1,7 @@
 #include "dc/FastADC/util/single_clue_set_builder.h"
 
-#include <stdint.h>
+#include <bitset>
+#include <cstdint>
 
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"

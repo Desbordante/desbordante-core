@@ -2,7 +2,9 @@
 
 #include <algorithm>
 #include <functional>
+#include <iosfwd>
 #include <iterator>
+#include <ostream>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>

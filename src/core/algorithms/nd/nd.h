@@ -1,7 +1,13 @@
 #pragma once
 
+#include <string>
+#include <tuple>
+#include <variant>
+#include <vector>
+
 #include "model/table/column.h"
 #include "model/table/vertical.h"
+#include "table/column_index.h"
 
 namespace model {
 

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <memory>
 #include <optional>
+#include <stdexcept>
+#include <vector>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/md/column_match.h"
@@ -12,7 +15,10 @@
 #include "algorithms/md/md_verifier/validation/validation.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/thread_number/type.h"
+#include "md/md.h"
 #include "model/table/relational_schema.h"
+
+class RelationalSchema;
 
 namespace algos::md {
 

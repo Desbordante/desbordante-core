@@ -3,10 +3,17 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <string_view>
+#include <utility>
 
-#include "frozen/string.h"
-#include "frozen/unordered_map.h"
+#include <frozen/string.h>
+#include <frozen/unordered_map.h>
+
 #include "model/types/type.h"
+
+namespace model {
+class Type;
+}  // namespace model
 
 namespace algos::fastadc {
 
