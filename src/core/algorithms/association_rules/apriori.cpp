@@ -2,8 +2,17 @@
 
 #include <algorithm>
 #include <cassert>
+#include <chrono>
+#include <iterator>
+#include <set>
+#include <utility>
 
 #include <easylogging++.h>
+
+#include "association_rules/ar_algorithm.h"
+#include "association_rules/candidate_hash_tree.h"
+#include "association_rules/node.h"
+#include "transaction/transactional_data.h"
 
 namespace algos {
 

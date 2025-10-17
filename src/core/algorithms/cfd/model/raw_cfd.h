@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace algos::cfd {
@@ -19,6 +20,7 @@ public:
         std::optional<std::string> GetValue() const {
             return value;
         }
+
         AttributeIndex attribute;         /* attribute column index */
         std::optional<std::string> value; /* pattern value is optional */
     };

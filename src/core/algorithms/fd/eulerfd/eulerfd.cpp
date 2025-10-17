@@ -1,5 +1,30 @@
 #include "eulerfd.h"
 
+#include <algorithm>
+#include <chrono>
+#include <ctime>
+#include <iostream>
+#include <limits>
+#include <numeric>
+#include <optional>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <utility>
+
+#include "common_option.h"
+#include "custom_random.h"
+#include "custom_random_seed/option.h"
+#include "equal_nulls/option.h"
+#include "fd/eulerfd/mlfq.h"
+#include "fd/eulerfd/search_tree.h"
+#include "table/column.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
+#include "tabular_data/input_table/option.h"
+
 namespace algos {
 
 EulerFD::EulerFD() : FDAlgorithm({kDefaultPhaseName}), mlfq_(kQueuesNumber) {

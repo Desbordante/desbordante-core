@@ -1,6 +1,13 @@
 #include "lattice_vertex.h"
 
+#include <cstddef>
+#include <ostream>
+
+#include "table/column.h"
+#include "table/vertical.h"
+
 namespace model {
+class PositionListIndex;
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
 

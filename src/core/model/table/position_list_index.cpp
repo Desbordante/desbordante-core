@@ -6,8 +6,9 @@
 #include "position_list_index.h"
 
 #include <algorithm>
-#include <chrono>
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <deque>
 #include <map>
 #include <memory>
@@ -18,6 +19,7 @@
 
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/vertical.h"
+#include "table/column_data.h"
 
 namespace model {
 

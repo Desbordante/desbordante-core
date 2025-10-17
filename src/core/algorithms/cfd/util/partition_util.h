@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "algorithms/cfd/model/cfd_types.h"
 
 // see algorithms/cfd/LICENSE

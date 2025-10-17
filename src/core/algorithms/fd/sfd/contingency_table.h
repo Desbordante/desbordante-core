@@ -1,10 +1,20 @@
 #pragma once
+#include <cstddef>
+#include <string>
 #include <vector>
 
 #include "frequency_handler.h"
 #include "sample.h"
+#include "table/column_index.h"
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos {
+class FrequencyHandler;
+class Sample;
+
 class ContingencyTable {
 private:
     model::ColumnIndex col_i_;

@@ -9,6 +9,7 @@
 
 #include "algorithms/nd/nd.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
+#include "nd/nd_verifier/util/highlight.h"
 
 namespace algos::nd_verifier::util {
 

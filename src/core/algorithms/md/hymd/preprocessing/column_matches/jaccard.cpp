@@ -1,6 +1,6 @@
 #include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
 
-#include <algorithm>
+#include <iosfwd>
 #include <iterator>
 #include <sstream>
 #include <string>

@@ -1,10 +1,24 @@
 #include "fd_mine.h"
 
+#include <cassert>
+#include <chrono>
+#include <cstddef>
 #include <queue>
+#include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <boost/unordered_map.hpp>
 #include <easylogging++.h>
+
+#include "fd/pli_based_fd_algorithm.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 namespace algos {
 

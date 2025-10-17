@@ -1,5 +1,8 @@
 #include "column.h"
 
+#include <version>
+
+#include "table/relational_schema.h"
 #include "vertical.h"
 
 using namespace std;

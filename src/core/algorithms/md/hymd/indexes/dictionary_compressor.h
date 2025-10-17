@@ -5,6 +5,7 @@
 
 #include "algorithms/md/hymd/indexes/compressed_records.h"
 #include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "md/hymd/indexes/global_value_identifier.h"
 #include "model/index.h"
 #include "model/table/idataset_stream.h"
 

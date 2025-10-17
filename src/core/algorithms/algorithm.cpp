@@ -1,8 +1,12 @@
 #include "algorithms/algorithm.h"
 
 #include <cassert>
+#include <stdexcept>
+#include <string>
 
 #include "config/exceptions.h"
+#include "ioption.h"
+#include "progress.h"
 
 namespace algos {
 

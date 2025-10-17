@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cassert>
+#include <cstddef>
+#include <deque>
+#include <memory>
 #include <vector>
 
 #include "algorithms/algorithm.h"
@@ -8,6 +12,9 @@
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+
+class ColumnLayoutRelationData;
 
 namespace algos {
 

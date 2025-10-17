@@ -1,11 +1,26 @@
 #include "fd_g1_strategy.h"
 
+#include <deque>
+#include <memory>
+#include <stdexcept>
 #include <unordered_map>
+#include <variant>
+#include <vector>
 
 #include <easylogging++.h>
 
-#include "../model/pli_cache.h"
+#include "fd/pyrocommon/core/dependency_candidate.h"
+#include "fd/pyrocommon/core/dependency_consumer.h"
+#include "fd/pyrocommon/core/dependency_strategy.h"
+#include "fd/pyrocommon/core/parameters.h"
+#include "fd/pyrocommon/core/profiling_context.h"
+#include "fd/pyrocommon/model/agree_set_sample.h"
+#include "fd/pyrocommon/model/pli_cache.h"
 #include "search_space.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
 
 unsigned long long FdG1Strategy::nanos_ = 0;
 

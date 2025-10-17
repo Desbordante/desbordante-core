@@ -5,8 +5,10 @@
 
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <iosfwd>
 #include <string>
 #include <vector>
 

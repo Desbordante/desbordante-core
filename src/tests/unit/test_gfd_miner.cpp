@@ -1,4 +1,10 @@
 #include <cstdlib>
+#include <filesystem>
+#include <iosfwd>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -8,6 +14,7 @@
 #include "algorithms/gfd/gfd_miner/gfd_miner.h"
 #include "all_gfd_paths.h"
 #include "config/names.h"
+#include "gfd/gfd.h"
 
 namespace gfd {
 void PrintTo(model::Gfd const& gfd, std::ostream* os) {

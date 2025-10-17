@@ -1,8 +1,11 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <queue>
 #include <stack>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "algorithms/association_rules/candidate_hash_tree.h"

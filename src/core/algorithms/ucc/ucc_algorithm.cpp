@@ -1,5 +1,10 @@
 #include "ucc_algorithm.h"
 
+#include <memory>
+#include <utility>
+
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 

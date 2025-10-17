@@ -1,7 +1,19 @@
 #include "ac_exception_finder.h"
 
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <utility>
+
 #include "ac_algorithm.h"
+#include "algebraic_constraints/ac_exception.h"
+#include "algebraic_constraints/ranges_collection.h"
+#include "algebraic_constraints/typed_column_pair.h"
 #include "bin_operation_enum.h"
+#include "builtin.h"
+#include "create_type.h"
+#include "numeric_type.h"
+#include "table/typed_column_data.h"
 
 namespace algos::algebraic_constraints {
 

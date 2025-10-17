@@ -59,8 +59,7 @@ public:
         if ((upper_bound & m) == 0)
             res = (int)((upper_bound * (long long)res) >> 31);
         else {
-            for (int u = res; u - (res = u % upper_bound) + m < 0; u = Next(31))
-                ;
+            for (int u = res; u - (res = u % upper_bound) + m < 0; u = Next(31));
         }
         // std::cout << "bounded NextInt generated " <<  res << '\n';
         return res;

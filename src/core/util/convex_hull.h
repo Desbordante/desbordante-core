@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <cmath>
+#include <functional>
+#include <iterator>
 #include <numeric>
 #include <utility>
 #include <vector>

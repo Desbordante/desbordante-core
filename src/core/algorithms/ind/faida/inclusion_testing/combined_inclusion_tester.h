@@ -1,10 +1,18 @@
 #pragma once
 
+#include <cmath>
+#include <cstddef>
 #include <hash_table8.hpp>
+#include <memory>
+#include <optional>
+#include <unordered_map>
 
 #include "algorithms/ind/faida/preprocessing/preprocessor.h"
 #include "hll_data.h"
 #include "iinclusion_tester.h"
+#include "ind/faida/inclusion_testing/hyperloglog.h"
+#include "ind/faida/preprocessing/irow_iterator.h"
+#include "ind/faida/util/simple_cc.h"
 #include "sampled_inverted_index.h"
 
 namespace algos::faida {

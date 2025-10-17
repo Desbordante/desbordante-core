@@ -1,10 +1,17 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "idataset_stream.h"
 #include "relation_data.h"
 #include "typed_column_data.h"
 
+class RelationalSchema;
+
 namespace model {
+class IDatasetStream;
 
 using TypedRelationData = AbstractRelationData<TypedColumnData>;
 

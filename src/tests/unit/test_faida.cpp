@@ -1,9 +1,17 @@
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/ind/faida/faida.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
+#include "ind/ind_algorithm.h"
 #include "test_ind_util.h"
 
 namespace tests {

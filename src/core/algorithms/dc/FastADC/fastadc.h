@@ -1,14 +1,22 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "dc/FastADC/providers/index_provider.h"
 #include "dc/FastADC/providers/predicate_provider.h"
 #include "dc/FastADC/util/denial_constraint_set.h"
 #include "model/denial_constraint.h"
 #include "table/column_layout_typed_relation_data.h"
 #include "tabular_data/input_table_type.h"
+
+namespace algos {
+namespace fastadc {
+class DenialConstraint;
+}  // namespace fastadc
+}  // namespace algos
 
 namespace algos::dc {
 

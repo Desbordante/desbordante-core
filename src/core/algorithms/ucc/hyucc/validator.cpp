@@ -1,13 +1,23 @@
 #include "validator.h"
 
+#include <cassert>
+#include <cstddef>
+#include <deque>
 #include <future>
+#include <memory>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
+#include <boost/dynamic_bitset.hpp>
+#include <boost/unordered_map.hpp>
 
+#include "bitset_utils.h"
 #include "fd/hycommon/efficiency_threshold.h"
 #include "fd/hycommon/validator_helpers.h"
+#include "table/position_list_index.h"
+#include "ucc/hyucc/model/ucc_tree.h"
 #include "ucc/hyucc/model/ucc_tree_vertex.h"
+#include "ucc/raw_ucc.h"
 
 namespace {
 

@@ -1,10 +1,16 @@
 #include "column_order.h"
 
+#include <cassert>
 #include <set>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/relational_schema.h"
 #include "ordered_partition.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/vertical.h"
 
 ColumnOrder::ColumnOrder(ColumnLayoutRelationData const* const relation_data)
     : order_(relation_data->GetSchema()->GetNumColumns()) {

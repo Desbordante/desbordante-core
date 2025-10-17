@@ -4,6 +4,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "fd/hycommon/column_combination_list.h"
+
 namespace algos::hy {
 
 void AllColumnCombinations::Add(boost::dynamic_bitset<>&& column_set) {

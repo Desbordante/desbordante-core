@@ -1,9 +1,14 @@
 #pragma once
 
 #include <bitset>
+#include <cstddef>
 #include <functional>
+#include <initializer_list>
 #include <stdexcept>
 #include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include <boost/functional/hash.hpp>
 

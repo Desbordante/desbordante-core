@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <enum.h>
+
 #include "algorithms/algorithm.h"
 #include "algorithms/metric/aliases.h"
 #include "algorithms/metric/enums.h"
@@ -22,6 +24,26 @@
 #include "model/table/column_layout_typed_relation_data.h"
 #include "util/convex_hull.h"
 #include "util/qgram_vector.h"
+
+class ColumnLayoutRelationData;
+
+namespace algos {
+namespace metric {
+struct Highlight;
+template <typename T>
+struct IndexedPoint;
+}  // namespace metric
+}  // namespace algos
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+class StringType;
+}  // namespace model
+
+namespace util {
+class QGramVector;
+struct Point;
+}  // namespace util
 
 namespace algos::metric {
 
