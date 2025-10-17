@@ -1,13 +1,28 @@
+#include <exception>
+#include <iostream>
+#include <list>
+#include <memory>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "all_csv_configs.h"
 #include "config/equal_nulls/type.h"
-#include "config/max_arity/type.h"
 #include "config/names.h"
 #include "config/thread_number/type.h"
 #include "csv_config_util.h"
+#include "csv_parser/csv_parser.h"
 #include "error/type.h"
+#include "exceptions.h"
+#include "ind/faida/faida.h"
+#include "ind/ind.h"
+#include "ind/mind/mind.h"
+#include "ind/spider/spider.h"
 #include "max_arity/type.h"
 #include "test_hash_util.h"
 #include "test_ind_util.h"

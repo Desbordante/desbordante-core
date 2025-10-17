@@ -1,18 +1,35 @@
 #include <algorithm>
+#include <cstddef>
+#include <filesystem>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <ostream>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <boost/container/allocator_traits.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/fd/fd_mine/fd_mine.h"
 #include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/pfdtane.h"
-#include "algorithms/fd/tane/tane.h"
+#include "all_csv_configs.h"
 #include "config/error/type.h"
 #include "config/names.h"
 #include "csv_config_util.h"
-#include "model/table/relational_schema.h"
+#include "csv_parser/csv_parser.h"
+#include "fd/fd.h"
+#include "fd/fd_algorithm.h"
+#include "fd/pyrocommon/core/parameters.h"
+#include "fd/raw_fd.h"
+#include "table/column.h"
+#include "table/vertical.h"
 #include "test_fd_util.h"
 
 namespace tests {

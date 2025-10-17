@@ -1,12 +1,19 @@
 #include "test_ind_util.h"
 
 #include <algorithm>
+#include <filesystem>
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
+#include <type_traits>
 
 #include <gtest/gtest.h>
 
 #include "all_csv_configs.h"
+#include "csv_parser/csv_parser.h"
+#include "ind/ind.h"
 #include "ind/ind_algorithm.h"
+#include "table/column_combination.h"
 
 namespace tests {
 

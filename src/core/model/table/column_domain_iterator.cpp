@@ -6,6 +6,9 @@
 #include "column_domain_iterator.h"
 
 #include <cassert>
+#include <list>
+
+#include "table/column_domain.h"
 
 namespace model {
 

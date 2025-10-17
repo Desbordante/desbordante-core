@@ -1,7 +1,15 @@
 #include "config/error/option.h"
 
+#include <string>
+#include <variant>
+
+#include "common_option.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
+#include "descriptions.h"
+#include "error/type.h"
+#include "names.h"
+#include "names_and_descriptions.h"
 
 namespace config {
 using names::kError, descriptions::kDError;

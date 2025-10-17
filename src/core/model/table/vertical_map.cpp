@@ -1,15 +1,20 @@
 #include "vertical_map.h"
 
+#include <algorithm>
 #include <exception>
+#include <mutex>
 #include <queue>
+#include <stdexcept>
 #include <unordered_set>
 
-#include "fd/pyrocommon/core/dependency_candidate.h"
-#include "fd/pyrocommon/core/vertical_info.h"
-#include "fd/pyrocommon/model/agree_set_sample.h"
-#include "position_list_index.h"
+#include "custom_hashes.h"
+
+class DependencyCandidate;
+class VerticalInfo;
 
 namespace model {
+class AgreeSetSample;
+class PositionListIndex;
 
 template <class Value>
 std::shared_ptr<Value> VerticalMap<Value>::SetTrie::Associate(Bitset const& key, size_t next_bit,

@@ -6,12 +6,20 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "column_data.h"
 #include "idataset_stream.h"
 #include "relation_data.h"
 #include "relational_schema.h"
+
+class RelationalSchema;
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 class ColumnLayoutRelationData final : public RelationData {
 public:

@@ -1,9 +1,23 @@
+#include <list>
+#include <memory>
+#include <set>
+#include <string>
+#include <utility>
+
+#include <boost/container/allocator_traits.hpp>
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/association_rules/apriori.h"
 #include "all_csv_configs.h"
+#include "association_rules/ar.h"
+#include "association_rules/ar_algorithm.h"
+#include "association_rules/ar_algorithm_enums.h"
 #include "config/names.h"
+
+namespace algos {
+class Apriori;
+}  // namespace algos
+struct CSVConfig;
 
 namespace tests {
 

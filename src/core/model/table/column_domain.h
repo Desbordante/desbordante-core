@@ -6,20 +6,26 @@
 #pragma once
 
 #include <cassert>
+#include <cstddef>
 #include <filesystem>
 #include <list>
 #include <memory>
 #include <numeric>
 #include <set>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 #include "column_combination.h"
 #include "config/mem_limit/type.h"
 #include "config/thread_number/type.h"
 #include "idataset_stream.h"
+#include "table/column_index.h"
+#include "table/table_index.h"
 
 namespace model {
+class IDatasetStream;
 
 using PartitionIndex = unsigned int;
 
