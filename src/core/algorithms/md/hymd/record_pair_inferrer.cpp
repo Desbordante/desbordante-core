@@ -2,14 +2,36 @@
 
 #include <algorithm>
 #include <atomic>
+#include <cassert>
+#include <compare>
 #include <cstddef>
+#include <functional>
+#include <initializer_list>
 #include <ranges>
+#include <variant>
 #include <vector>
 
+#include <boost/unordered_map.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/md/hymd/utility/index_range.h"
+#include "desbordante_assume.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/indexes/column_similarity_info.h"
+#include "md/hymd/indexes/compressed_records.h"
+#include "md/hymd/indexes/dictionary_compressor.h"
+#include "md/hymd/indexes/keyed_position_list_index.h"
+#include "md/hymd/indexes/pli_cluster.h"
+#include "md/hymd/indexes/similarity_index.h"
+#include "md/hymd/indexes/similarity_matrix.h"
+#include "md/hymd/lattice/md_lattice.h"
+#include "md/hymd/lhs_ccv_ids_info.h"
+#include "md/hymd/lowest_cc_value_id.h"
+#include "md/hymd/pair_comparison_result.h"
+#include "md/hymd/recommendation.h"
+#include "md/hymd/utility/zip.h"
 #include "util/get_preallocated_vector.h"
+#include "worker_thread_pool.h"
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,

@@ -14,6 +14,16 @@
 #include "config/thread_number/type.h"
 #include "model/table/relational_schema.h"
 
+class RelationalSchema;
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+struct MdLatticeNodeInfo;
+}  // namespace lattice
+}  // namespace hymd
+}  // namespace algos
+
 namespace algos::hymd {
 
 // Implementation of the algorithm described in "Efficient Discovery of Matching Dependencies" by
@@ -81,6 +91,7 @@ private:
     unsigned long long ExecuteInternal() final;
 
     class RegisterHelper;
+
     void RegisterResults(SimilarityData const& similarity_data,
                          std::vector<lattice::MdLatticeNodeInfo> lattice_mds);
 

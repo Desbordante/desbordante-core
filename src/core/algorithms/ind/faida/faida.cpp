@@ -1,14 +1,30 @@
 #include "faida.h"
 
+#include <chrono>
+#include <list>
+#include <map>
+#include <string_view>
+#include <unordered_set>
+
 #include <easylogging++.h>
 
 #include "algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
 #include "algorithms/ind/faida/inclusion_testing/combined_inclusion_tester.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "descriptions.h"
+#include "ind/faida/inclusion_testing/iinclusion_tester.h"
+#include "ind/faida/preprocessing/irow_iterator.h"
+#include "ind/faida/preprocessing/preprocessor.h"
+#include "ind/faida/util/simple_ind.h"
+#include "ind/ind_algorithm.h"
 #include "max_arity/option.h"
-#include "model/table/column.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "option.h"
+#include "table/relational_schema.h"
 
 namespace algos {
 

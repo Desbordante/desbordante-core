@@ -1,7 +1,10 @@
 #include "algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 #include <cstddef>
+#include <utility>
 
+#include "md/hymd/compressed_record.h"
+#include "md/hymd/indexes/keyed_position_list_index.h"
 #include "model/index.h"
 #include "util/desbordante_assume.h"
 

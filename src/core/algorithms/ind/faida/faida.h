@@ -1,11 +1,23 @@
 #pragma once
 
+#include <cstddef>
+#include <ios>
+#include <iosfwd>
+#include <istream>
+#include <memory>
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <vector>
+
 #include "algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
 #include "algorithms/ind/faida/preprocessing/preprocessor.h"
 #include "algorithms/ind/faida/util/simple_ind.h"
 #include "algorithms/ind/ind_algorithm.h"
 #include "config/max_arity/type.h"
 #include "config/thread_number/type.h"
+#include "ind/faida/preprocessing/abstract_column_store.h"
+#include "ind/faida/util/simple_cc.h"
 
 namespace algos {
 

@@ -1,6 +1,10 @@
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
@@ -9,7 +13,17 @@
 #include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
 #include "algorithms/md/hymd/preprocessing/similarity.h"
 #include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
+#include "md/decision_boundary.h"
+#include "md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
 #include "model/types/builtin.h"
+
+namespace algos {
+namespace hymd {
+namespace indexes {
+class KeyedPositionListIndex;
+}  // namespace indexes
+}  // namespace hymd
+}  // namespace algos
 
 namespace algos::hymd::preprocessing::column_matches {
 namespace detail {

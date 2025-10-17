@@ -2,9 +2,10 @@
 
 #include <easylogging++.h>
 
-#include "list_lattice.h"
 #include "model/table/column_index.h"
 #include "model/table/typed_column_data.h"
+#include "table/tuple_index.h"
+#include "type.h"
 
 namespace algos::order {
 

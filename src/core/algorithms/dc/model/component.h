@@ -2,10 +2,12 @@
 
 #include <cstddef>
 #include <string>
+#include <utility>
 
 #include "algorithms/dc/model/operator.h"
 #include "model/types/builtin.h"
 #include "model/types/types.h"
+#include "type.h"
 
 namespace algos::dc {
 

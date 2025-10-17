@@ -1,8 +1,20 @@
 #include "canonical_od.h"
 
+#include <algorithm>
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
+#include <utility>
 
 #include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
+#include "od/fastod/model/attribute_pair.h"
+#include "od/fastod/storage/partition_cache.h"
+
+namespace algos {
+namespace fastod {
+class DataFrame;
+}  // namespace fastod
+}  // namespace algos
 
 namespace algos::fastod {
 

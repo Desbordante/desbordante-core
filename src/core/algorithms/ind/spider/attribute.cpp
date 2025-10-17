@@ -5,6 +5,11 @@
  */
 #include "attribute.h"
 
+#include <cstddef>
+
+#include "bitset_utils.h"
+#include "error/type.h"
+
 namespace algos::spider {
 
 std::vector<AttributeIndex> AINDAttribute::GetRefIds(config::ErrorType max_error) const {

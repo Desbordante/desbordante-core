@@ -5,8 +5,10 @@
  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <optional>
+#include <string_view>
 
 #include "algorithms/ind/ind_algorithm.h"
 #include "config/error/type.h"

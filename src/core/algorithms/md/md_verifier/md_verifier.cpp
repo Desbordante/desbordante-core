@@ -1,20 +1,39 @@
 #include "algorithms/md/md_verifier/md_verifier.h"
 
 #include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <iterator>
 #include <optional>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <utility>
 
+#include "algorithm.h"
 #include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/lhs_column_similarity_classifier.h"
 #include "algorithms/md/md_verifier/cmptr.h"
 #include "algorithms/md/md_verifier/validation/validation.h"
-#include "config/equal_nulls/option.h"
+#include "common_option.h"
 #include "config/exceptions.h"
-#include "config/indices/option.h"
-#include "config/indices/type.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
+#include "descriptions.h"
+#include "index.h"
+#include "md/column_match.h"
+#include "md/column_similarity_classifier.h"
+#include "md/hymd/preprocessing/column_matches/column_match.h"
+#include "md/md_verifier/column_similarity_classifier.h"
+#include "md/md_verifier/highlights/highlights.h"
+#include "names.h"
+#include "names_and_descriptions.h"
+#include "option.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
+#include "tabular_data/input_table_type.h"
+#include "thread_number/type.h"
 #include "util/timed_invoke.h"
 #include "util/worker_thread_pool.h"
 

@@ -1,14 +1,35 @@
 #include "algorithms/statistics/data_stats.h"
 
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <iosfwd>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <memory>
+#include <ostream>
 #include <set>
+#include <sstream>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/thread.hpp>
+#include <boost/container/allocator_traits.hpp>
 
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
+#include "double_type.h"
+#include "int_type.h"
+#include "mixed_type.h"
+#include "numeric_type.h"
+#include "statistics/statistic.h"
+#include "string_type.h"
+#include "type.h"
 
 namespace algos {
 

@@ -1,8 +1,17 @@
 #include "algorithms/md/md.h"
 
-#include <ranges>
+#include <algorithm>
+#include <iosfwd>
+#include <ostream>
+#include <sstream>
 
+#include "index.h"
+#include "md/column_match.h"
+#include "md/column_similarity_classifier.h"
+#include "md/decision_boundary.h"
+#include "md/lhs_column_similarity_classifier.h"
 #include "model/table/column.h"
+#include "table/relational_schema.h"
 #include "util/get_preallocated_vector.h"
 
 namespace model {

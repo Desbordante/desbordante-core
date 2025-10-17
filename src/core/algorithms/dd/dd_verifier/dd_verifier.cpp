@@ -2,17 +2,30 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
+#include <list>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <easylogging++.h>
 
+#include "builtin.h"
+#include "common_option.h"
 #include "config/descriptions.h"
 #include "config/names.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
-#include "model/table/vertical.h"
+#include "dd/dd.h"
+#include "dd/dd_verifier/highlight.h"
+#include "imetrizable_type.h"
+#include "option.h"
+#include "table/column.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/relational_schema.h"
+#include "table/typed_column_data.h"
+#include "type.h"
 #include "util/timed_invoke.h"
 
 namespace algos::dd {

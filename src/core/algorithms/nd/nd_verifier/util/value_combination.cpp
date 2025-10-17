@@ -1,11 +1,14 @@
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
 
+#include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
 
+#include "builtin.h"
 #include "model/types/create_type.h"
 #include "model/types/mixed_type.h"
+#include "type.h"
 
 namespace algos::nd_verifier::util {
 

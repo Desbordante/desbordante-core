@@ -2,13 +2,18 @@
 
 #include <cstddef>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithm.h"
 #include "algorithms/dd/dd.h"
 #include "algorithms/dd/dd_verifier/highlight.h"
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "table/column_index.h"
 
 namespace algos::dd {
 using DFs = model::DFStringConstraint;

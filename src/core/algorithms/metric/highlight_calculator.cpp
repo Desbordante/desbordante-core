@@ -1,7 +1,14 @@
 #include "algorithms/metric/highlight_calculator.h"
 
 #include <algorithm>
+#include <unordered_map>
 
+#include "builtin.h"
+#include "metric/highlight.h"
+#include "metric/points.h"
+#include "numeric_type.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
 #include "util/convex_hull.h"
 
 namespace {
