@@ -8,6 +8,8 @@
 #include "column_index.h"
 #include "relational_schema.h"
 
+class RelationalSchema;
+
 class Column {
     friend RelationalSchema;
 

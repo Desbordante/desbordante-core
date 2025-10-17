@@ -1,13 +1,18 @@
 #pragma once
+#include <cstddef>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <shared_mutex>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 #include "util/custom_hashes.h"
 
 namespace model {

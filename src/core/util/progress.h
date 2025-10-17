@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cassert>
+#include <cstdint>
+#include <iterator>
 #include <mutex>
 #include <string_view>
 #include <utility>

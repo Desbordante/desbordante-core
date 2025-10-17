@@ -1,3 +1,10 @@
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
@@ -5,6 +12,12 @@
 #include "all_csv_configs.h"
 #include "config/indices/type.h"
 #include "config/names.h"
+#include "table/position_list_index.h"
+#include "thread_number/type.h"
+#include "ucc/hyucc/hyucc.h"
+#include "ucc/ucc.h"
+
+struct CSVConfig;
 
 namespace tests {
 namespace onam = config::names;
@@ -52,6 +65,7 @@ public:
     double GetExpectedError() const {
         return expected_error_;
     }
+
     std::vector<model::PLI::Cluster> const& GetExpectedClustersViolatingUCC() const {
         return clusters_violating_ucc_;
     }

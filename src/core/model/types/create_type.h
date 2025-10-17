@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <stdexcept>
+#include <type_traits>
 
 #include <boost/pointer_cast.hpp>
 
+#include "builtin.h"
 #include "type.h"
 
 namespace model {

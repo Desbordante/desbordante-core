@@ -1,4 +1,6 @@
 #include <cstddef>
+#include <filesystem>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -9,6 +11,8 @@
 #include "all_csv_configs.h"
 #include "csv_config_util.h"
 #include "parser/csv_parser/csv_parser.h"
+#include "table/idataset_stream.h"
+#include "tabular_data/input_table_type.h"
 
 namespace tests {
 

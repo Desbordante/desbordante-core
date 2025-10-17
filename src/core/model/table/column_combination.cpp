@@ -1,7 +1,11 @@
 #include "column_combination.h"
 
 #include <algorithm>
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
+
+#include "table/column_index.h"
 
 namespace model {
 

@@ -1,10 +1,25 @@
-#include <gmock/gmock.h>
+#include <filesystem>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/gfd/gfd_validator/gfd_validator.h"
 #include "all_gfd_paths.h"
 #include "config/names.h"
+#include "gfd/gfd_validator/egfd_validator.h"
+#include "gfd/gfd_validator/naivegfd_validator.h"
+
+namespace algos {
+class GfdHandler;
+}  // namespace algos
+
+namespace model {
+class Gfd;
+}  // namespace model
 
 using namespace algos;
 using algos::StdParamsMap;
