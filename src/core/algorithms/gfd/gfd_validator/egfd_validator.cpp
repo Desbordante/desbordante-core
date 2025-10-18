@@ -18,7 +18,6 @@
 
 #include "config/names_and_descriptions.h"
 #include "gfd/gfd.h"
-#include "names_and_descriptions.h"
 
 namespace {
 

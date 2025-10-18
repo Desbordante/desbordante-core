@@ -30,11 +30,10 @@
 
 #include "algorithm.h"
 #include "algorithms/gfd/comparator.h"
+#include "config/names_and_descriptions.h"
 #include "config/option_using.h"
-#include "descriptions.h"
 #include "gfd/gfd.h"
 #include "graph_parser/graph_parser.h"
-#include "names.h"
 #include "option.h"
 #include "util/timed_invoke.h"
 

@@ -21,10 +21,7 @@
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
 #include "dc/FastADC/util/evidence_set_builder.h"
 #include "dc/FastADC/util/predicate_builder.h"
-#include "descriptions.h"
 #include "model/table/column_layout_typed_relation_data.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "table/column_index.h"
 #include "table/typed_column_data.h"
 

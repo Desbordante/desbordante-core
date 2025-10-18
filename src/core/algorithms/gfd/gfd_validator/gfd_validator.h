@@ -10,7 +10,6 @@
 #include "config/names_and_descriptions.h"
 #include "config/thread_number/type.h"
 #include "gfd/graph_descriptor.h"
-#include "names_and_descriptions.h"
 
 namespace algos {
 

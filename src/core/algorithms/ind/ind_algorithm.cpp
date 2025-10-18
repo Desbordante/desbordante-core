@@ -5,7 +5,6 @@
 #include "algorithm.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_tables/option.h"
-#include "names_and_descriptions.h"
 #include "table/idataset_stream.h"
 #include "table/relational_schema.h"
 

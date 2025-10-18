@@ -13,8 +13,6 @@
 #include "config/names_and_descriptions.h"
 #include "csv_parser/csv_parser.h"
 #include "dc/model/tuple.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "table/idataset_stream.h"
 
 namespace tests {

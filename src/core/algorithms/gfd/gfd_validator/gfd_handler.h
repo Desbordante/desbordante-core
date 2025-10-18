@@ -6,7 +6,6 @@
 #include "algorithms/gfd/gfd.h"
 #include "config/names_and_descriptions.h"
 #include "gfd/graph_descriptor.h"
-#include "names_and_descriptions.h"
 #include "parser/graph_parser/graph_parser.h"
 
 namespace algos {
