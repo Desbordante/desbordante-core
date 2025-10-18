@@ -10,8 +10,6 @@
 #include "algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 
 struct CSVConfig;
 

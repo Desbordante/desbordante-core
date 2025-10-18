@@ -5,10 +5,7 @@
 
 #include "common_option.h"
 #include "config/names_and_descriptions.h"
-#include "descriptions.h"
 #include "max_lhs/type.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 
 namespace config {
 using names::kMaximumLhs, descriptions::kDMaximumLhs;

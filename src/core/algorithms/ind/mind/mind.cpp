@@ -35,7 +35,6 @@
 #include "ind/mind/raw_ind.h"
 #include "max_arity/option.h"
 #include "model/table/dataset_stream_projection.h"
-#include "names_and_descriptions.h"
 #include "table/arity_index.h"
 #include "table/column_combination.h"
 #include "table/dataset_stream_fixed.h"

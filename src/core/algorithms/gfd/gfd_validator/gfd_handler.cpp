@@ -10,11 +10,8 @@
 #include "algorithm.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
-#include "descriptions.h"
 #include "gfd/gfd.h"
 #include "graph_parser/graph_parser.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "option.h"
 
 namespace algos {

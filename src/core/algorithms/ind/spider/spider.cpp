@@ -23,7 +23,6 @@
 #include "config/thread_number/option.h"
 #include "equal_nulls/type.h"
 #include "ind/ind_algorithm.h"
-#include "names_and_descriptions.h"
 #include "table/column_domain.h"
 #include "util/timed_invoke.h"
 

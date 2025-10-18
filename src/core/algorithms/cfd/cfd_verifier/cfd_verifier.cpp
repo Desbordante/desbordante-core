@@ -16,8 +16,6 @@
 #include "config/tabular_data/input_table/option.h"
 #include "descriptions.h"
 #include "exceptions.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "option.h"
 #include "util/timed_invoke.h"
 

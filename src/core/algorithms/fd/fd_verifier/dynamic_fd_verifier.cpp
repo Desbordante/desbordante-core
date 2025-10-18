@@ -18,8 +18,6 @@
 #include "config/tabular_data/input_table/option.h"
 #include "exceptions.h"
 #include "fd/fd_verifier/dynamic_stats_calculator.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "option.h"
 #include "table/dynamic_table_data.h"
 #include "tabular_data/crud_operations/delete/option.h"

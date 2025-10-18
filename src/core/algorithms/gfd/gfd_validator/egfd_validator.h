@@ -8,7 +8,6 @@
 #include "algorithms/gfd/gfd_validator/gfd_handler.h"
 #include "config/names_and_descriptions.h"
 #include "gfd/graph_descriptor.h"
-#include "names_and_descriptions.h"
 
 namespace algos {
 

@@ -12,10 +12,7 @@
 #include "config/exceptions.h"
 #include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
-#include "descriptions.h"
 #include "indices/type.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 
 namespace config {
 

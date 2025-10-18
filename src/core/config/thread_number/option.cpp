@@ -7,9 +7,6 @@
 #include "common_option.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
-#include "descriptions.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "thread_number/type.h"
 
 namespace config {

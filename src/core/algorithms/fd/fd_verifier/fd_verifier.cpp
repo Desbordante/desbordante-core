@@ -14,8 +14,6 @@
 #include "config/tabular_data/input_table/option.h"
 #include "fd/fd_verifier/stats_calculator.h"
 #include "indices/type.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "table/column_data.h"
 #include "table/column_layout_relation_data.h"
 #include "table/column_layout_typed_relation_data.h"

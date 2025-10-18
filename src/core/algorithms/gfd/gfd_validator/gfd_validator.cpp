@@ -35,7 +35,6 @@
 #include "config/thread_number/option.h"
 #include "gfd/gfd.h"
 #include "gfd/gfd_validator/gfd_handler.h"
-#include "names_and_descriptions.h"
 #include "thread_number/type.h"
 
 namespace {

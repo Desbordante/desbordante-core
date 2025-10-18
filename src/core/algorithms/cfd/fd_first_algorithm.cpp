@@ -25,8 +25,6 @@
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "descriptions.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "option.h"
 
 // see algorithms/cfd/LICENSE

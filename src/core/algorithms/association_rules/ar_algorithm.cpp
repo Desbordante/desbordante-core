@@ -16,9 +16,6 @@
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
-#include "descriptions.h"
-#include "names.h"
-#include "names_and_descriptions.h"
 #include "option.h"
 #include "transaction/transactional_data.h"
 
