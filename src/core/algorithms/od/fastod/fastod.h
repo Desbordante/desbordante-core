@@ -1,9 +1,11 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "algorithms/algorithm.h"
@@ -14,6 +16,8 @@
 #include "algorithms/od/fastod/util/timer.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/time_limit/type.h"
+#include "od/fastod/storage/data_frame.h"
+#include "table/column_index.h"
 
 namespace algos {
 
@@ -124,7 +128,7 @@ private:
                 auto const& candidates = CSGet<Ascending>(deleted_attrs[attr]);
 
                 for (AttributePair const& attribute_pair : candidates) {
-                    const AttributeSet context_delete_ab = fastod::DeleteAttribute(
+                    AttributeSet const context_delete_ab = fastod::DeleteAttribute(
                             deleted_attrs[attribute_pair.left], attribute_pair.right);
 
                     bool add_context = true;

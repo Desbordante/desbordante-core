@@ -1,17 +1,34 @@
 #include "pyro.h"
 
 #include <chrono>
+#include <functional>
 #include <mutex>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 #include <thread>
+#include <utility>
+#include <vector>
 
+#include <boost/format.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
+#include "common_option.h"
 #include "config/error/option.h"
-#include "config/max_lhs/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "fd/fd_algorithm.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "fd/pyrocommon/core/dependency_candidate.h"
+#include "fd/pyrocommon/core/dependency_strategy.h"
+#include "fd/pyrocommon/core/profiling_context.h"
+#include "fd/pyrocommon/core/search_space.h"
+#include "option.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
 
 namespace algos {
 

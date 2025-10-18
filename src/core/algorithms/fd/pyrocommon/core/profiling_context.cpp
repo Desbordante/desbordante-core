@@ -1,12 +1,27 @@
 #include "profiling_context.h"
 
+#include <algorithm>
 #include <utility>
+#include <variant>
 
+#include <boost/format.hpp>
 #include <easylogging++.h>
 
-#include "../model/list_agree_set_sample.h"
-#include "../model/pli_cache.h"
+#include "caching_method.h"
+#include "custom_random.h"
+#include "fd/pyrocommon/core/parameters.h"
+#include "fd/pyrocommon/model/list_agree_set_sample.h"
+#include "fd/pyrocommon/model/pli_cache.h"
 #include "model/table/vertical_map.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/position_list_index.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
+
+class PartialFD;
+class PartialKey;
+enum class CacheEvictionMethod;
 
 using std::shared_ptr;
 

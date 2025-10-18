@@ -1,8 +1,15 @@
+#pragma once
 
 #include "config/error/type.h"
 #include "enums.h"
 #include "model/table/column_data.h"
 #include "model/table/position_list_index.h"
+
+class ColumnData;
+
+namespace model {
+class PositionListIndex;
+}  // namespace model
 
 namespace algos {
 config::ErrorType CalculateZeroAryG1(ColumnData const* rhs, unsigned long long num_tuple_pairs);

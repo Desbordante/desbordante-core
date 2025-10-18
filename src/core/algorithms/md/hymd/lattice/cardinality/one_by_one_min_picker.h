@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_set>
 #include <vector>
 
@@ -8,6 +9,7 @@
 #include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
 #include "algorithms/md/hymd/lattice/validation_info.h"
 #include "algorithms/md/hymd/md_lhs.h"
+#include "md/hymd/lattice/md_lattice.h"
 #include "model/index.h"
 
 namespace algos::hymd::lattice::cardinality {

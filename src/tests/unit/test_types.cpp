@@ -1,10 +1,27 @@
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <functional>
 #include <memory>
+#include <string>
+#include <type_traits>
+#include <utility>
 
-#include <gmock/gmock.h>
+#include <boost/date_time/gregorian/parsers.hpp>
 #include <gtest/gtest.h>
 
-#include "types.h"
+#include "builtin.h"
+#include "create_type.h"
+#include "date_type.h"
+#include "double_type.h"
+#include "int_type.h"
+#include "string_type.h"
+#include "type.h"
+
+namespace model {
+template <typename T>
+class NumericType;
+}  // namespace model
 
 namespace tests {
 
@@ -311,7 +328,7 @@ struct TestDateArithmeticsParam {
     std::string const date2;
     long const dist;
     TestDateArithmeticsParam(std::string l, std::string r, long dist)
-        : date1(std::move(l)), date2(std::move(r)), dist(dist){};
+        : date1(std::move(l)), date2(std::move(r)), dist(dist) {};
 };
 
 using DateTypeBinop = std::byte* (mo::DateType::*)(std::byte const* date,

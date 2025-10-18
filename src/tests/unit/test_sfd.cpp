@@ -1,6 +1,11 @@
+#include <cstddef>
+#include <list>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/container/allocator_traits.hpp>
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"
@@ -8,11 +13,17 @@
 #include "algorithms/fd/sfd/frequency_handler.h"
 #include "algorithms/fd/sfd/sample.h"
 #include "all_csv_configs.h"
-#include "config/equal_nulls/option.h"
 #include "config/max_lhs/type.h"
 #include "config/names.h"
 #include "csv_config_util.h"
+#include "fd/fd.h"
+#include "fd/sfd/correlation.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "table/column.h"
+#include "table/column_index.h"
+#include "table/typed_column_data.h"
+
+struct CSVConfig;
 
 namespace {
 void AssertVectors(std::vector<Column> const& expected,

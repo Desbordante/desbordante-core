@@ -3,6 +3,12 @@
 #include "algorithms/cfd/model/cfd_types.h"
 #include "algorithms/cfd/model/partition_tidlist.h"
 
+namespace algos {
+namespace cfd {
+struct PartitionTIdList;
+}  // namespace cfd
+}  // namespace algos
+
 // see algorithms/cfd/LICENSE
 
 namespace algos::cfd {

@@ -1,6 +1,17 @@
 #include "fd_tree_element.h"
 
+#include <cctype>
+#include <fstream>
+#include <ostream>
+#include <utility>
+
+#include <boost/dynamic_bitset.hpp>
+
+#include "fd/fd.h"
 #include "model/types/bitset.h"
+#include "table/column.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 FDTreeElement::FDTreeElement(size_t max_attribute_number)
     : max_attribute_number_(max_attribute_number) {

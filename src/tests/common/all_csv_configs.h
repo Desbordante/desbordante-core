@@ -2,6 +2,8 @@
 
 #include "parser/csv_parser/csv_parser.h"
 
+struct CSVConfig;
+
 namespace tests {
 extern CSVConfig const kAbalone;
 extern CSVConfig const kACShippingDates;

@@ -8,6 +8,10 @@
 #include "model/table/tuple_index.h"
 #include "model/table/typed_column_data.h"
 
+namespace model {
+class TypedColumnData;
+}  // namespace model
+
 namespace algos::dd {
 using ClusterIndex = std::size_t;
 

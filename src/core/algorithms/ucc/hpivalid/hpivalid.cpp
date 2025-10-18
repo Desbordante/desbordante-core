@@ -1,16 +1,28 @@
 #include "algorithms/ucc/hpivalid/hpivalid.h"
 
 #include <deque>
+#include <list>
+#include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
 #include <easylogging++.h>
 
 #include "algorithms/fd/hycommon/preprocessor.h"
-#include "algorithms/fd/hycommon/types.h"
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
 #include "algorithms/ucc/hpivalid/tree_search.h"
+#include "primitive_collection.h"
+#include "table/column_index.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
+#include "ucc/hpivalid/enums.h"
+#include "ucc/hpivalid/pli_table.h"
+#include "ucc/raw_ucc.h"
+#include "ucc/ucc.h"
+
+class RelationalSchema;
 
 // see algorithms/ucc/hpivalid/LICENSE
 

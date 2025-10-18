@@ -1,5 +1,10 @@
 #include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
 
+#include <utility>
+
+#include "md/hymd/indexes/global_value_identifier.h"
+#include "md/hymd/table_identifiers.h"
+
 namespace algos::hymd::indexes {
 
 ValueIdentifier KeyedPositionListIndex::AddNextValue(GlobalValueIdentifier value) {

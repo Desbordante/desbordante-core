@@ -1,18 +1,31 @@
 #include "fd_first_algorithm.h"
 
-#include <iterator>
+#include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <memory>
+#include <numeric>
+#include <string>
+#include <string_view>
 
-#include <boost/unordered_map.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/cfd/util/partition_tidlist_util.h"
 #include "algorithms/cfd/util/partition_util.h"
 #include "algorithms/cfd/util/set_util.h"
 #include "algorithms/cfd/util/tidlist_util.h"
-#include "config/equal_nulls/option.h"
+#include "cfd/cfd_discovery.h"
+#include "cfd/enums.h"
+#include "cfd/miner_node.h"
+#include "cfd/model/cfd_relation_data.h"
+#include "cfd/model/partition_tidlist.h"
+#include "cfd/util/prefix_tree.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
+#include "descriptions.h"
+#include "option.h"
 
 // see algorithms/cfd/LICENSE
 

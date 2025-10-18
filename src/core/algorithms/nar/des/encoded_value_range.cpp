@@ -1,5 +1,14 @@
 #include "algorithms/nar/des/encoded_value_range.h"
 
+#include <algorithm>
+#include <stdexcept>
+#include <string>
+#include <vector>
+
+#include "builtin.h"
+#include "nar/des/rng.h"
+#include "nar/value_range.h"
+
 namespace algos::des {
 
 // TODO: remove code duplication here

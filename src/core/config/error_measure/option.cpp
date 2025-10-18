@@ -1,6 +1,12 @@
 #include "config/error_measure/option.h"
 
+#include <variant>
+
+#include <enum.h>
+
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "error_measure/type.h"
 #include "fd/tane/enums.h"
 
 namespace config {

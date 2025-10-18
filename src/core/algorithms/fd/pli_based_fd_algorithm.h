@@ -1,11 +1,17 @@
 #pragma once
 
+#include <cassert>
+#include <memory>
 #include <optional>
+#include <string_view>
+#include <vector>
 
 #include "config/equal_nulls/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "fd_algorithm.h"
 #include "model/table/column_layout_relation_data.h"
+
+class ColumnLayoutRelationData;
 
 namespace algos {
 

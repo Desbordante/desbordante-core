@@ -4,6 +4,8 @@
 #include "config/error_measure/type.h"
 
 namespace config {
+template <typename T>
+class CommonOption;
 
 extern CommonOption<PfdErrorMeasureType> const kPfdErrorMeasureOpt;
 extern CommonOption<AfdErrorMeasureType> const kAfdErrorMeasureOpt;

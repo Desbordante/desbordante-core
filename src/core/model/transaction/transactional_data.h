@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "itemset.h"
@@ -10,6 +12,7 @@
 #include "transactional_input_format.h"
 
 namespace model {
+class IDatasetStream;
 
 class TransactionalData {
 private:

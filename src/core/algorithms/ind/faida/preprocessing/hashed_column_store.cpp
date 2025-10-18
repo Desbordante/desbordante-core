@@ -1,6 +1,16 @@
 #include "hashed_column_store.h"
 
+#include <fstream>
+#include <ios>
+#include <istream>
+#include <ostream>
+#include <stdexcept>
+#include <unordered_set>
+
+#include "ind/faida/preprocessing/abstract_column_store.h"
 #include "model/table/column.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
 
 namespace algos::faida {
 

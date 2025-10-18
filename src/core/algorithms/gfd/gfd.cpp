@@ -1,12 +1,16 @@
 #include "algorithms/gfd/gfd.h"
 
-#include <cstdlib>
+#include <iosfwd>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/properties.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
 #include "algorithms/gfd/comparator.h"
+#include "gfd/graph_descriptor.h"
 #include "parser/graph_parser/graph_parser.h"
 
 namespace model {

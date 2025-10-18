@@ -5,6 +5,8 @@
 
 #include "model/table/vertical.h"
 
+class Vertical;
+
 namespace algos::nd::util {
 
 [[nodiscard]] std::vector<std::string> GetVerticalNames(Vertical const& vert);

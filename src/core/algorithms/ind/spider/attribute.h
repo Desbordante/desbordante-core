@@ -15,6 +15,7 @@
 #include "model/table/column_combination.h"
 #include "model/table/column_domain_iterator.h"
 #include "model/table/column_index.h"
+#include "table/column_domain.h"
 #include "util/bitset_utils.h"
 
 namespace algos::spider {

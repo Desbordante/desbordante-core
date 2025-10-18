@@ -1,10 +1,15 @@
 #include "typed_column_data.h"
 
 #include <bitset>
+#include <cassert>
 #include <cstddef>
 
 #include "column_layout_typed_relation_data.h"
 #include "create_type.h"
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 namespace {
 

@@ -1,5 +1,7 @@
 #include "attribute_pair.h"
 
+#include "table/column_index.h"
+
 namespace algos::fastod {
 
 AttributePair::AttributePair() : AttributePair(0, 0) {}

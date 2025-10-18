@@ -1,11 +1,17 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "algorithms/nar/nar_algorithm.h"
 #include "config/names.h"
 #include "differential_functions.h"
 #include "encoded_nar.h"
 #include "enums.h"
+#include "nar/value_range.h"
 #include "rng.h"
+#include "table/column_layout_typed_relation_data.h"
 
 namespace algos::des {
 using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;

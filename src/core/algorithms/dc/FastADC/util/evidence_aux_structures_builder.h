@@ -1,4 +1,6 @@
 #pragma once
+#include <algorithm>
+#include <bitset>
 #include <cstddef>
 #include <functional>
 #include <memory>

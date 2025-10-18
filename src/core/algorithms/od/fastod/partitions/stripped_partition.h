@@ -2,10 +2,18 @@
 
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
 #include "range_based_stripped_partition.h"
+#include "table/column_index.h"
+
+namespace algos {
+namespace fastod {
+class DataFrame;
+}  // namespace fastod
+}  // namespace algos
 
 namespace algos::fastod {
 

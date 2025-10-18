@@ -11,6 +11,8 @@
 #include "config/thread_number/type.h"
 #include "model/table/position_list_index.h"
 
+struct RawFD;
+
 namespace algos::hyfd {
 
 /**

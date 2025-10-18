@@ -1,7 +1,12 @@
 #pragma once
 
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <memory>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 #include "algorithms/ind/faida/hashing/hashing.h"
 #include "irow_iterator.h"
@@ -9,6 +14,10 @@
 #include "model/table/idataset_stream.h"
 #include "model/table/relational_schema.h"
 #include "model/table/table_index.h"
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 namespace algos::faida {
 
@@ -35,7 +44,7 @@ protected:
     size_t const null_hash_;
 
     AbstractColumnStore(int sample_goal, size_t null_hash)
-        : sample_goal_(sample_goal), null_hash_(null_hash){};
+        : sample_goal_(sample_goal), null_hash_(null_hash) {};
 
     void LoadData(std::string const& dataset_name, TableIndex table_idx,
                   model::IDatasetStream& input_data);

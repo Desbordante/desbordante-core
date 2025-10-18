@@ -1,5 +1,8 @@
 #pragma once
+#include <cstddef>
+#include <iterator>
 #include <list>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -9,6 +12,15 @@
 #include "algorithms/ind/ind_algorithm.h"
 #include "csv_config_util.h"
 #include "model/table/table_index.h"
+#include "table/column_index.h"
+
+namespace algos {
+class INDAlgorithm;
+}  // namespace algos
+
+namespace model {
+class IND;
+}  // namespace model
 
 namespace tests {
 

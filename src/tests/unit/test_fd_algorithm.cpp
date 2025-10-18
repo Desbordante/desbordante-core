@@ -1,8 +1,20 @@
 #include <algorithm>
+#include <chrono>
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <boost/container/allocator_traits.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "algo_factory.h"
 #include "algorithms/fd/depminer/depminer.h"
 #include "algorithms/fd/dfd/dfd.h"
 #include "algorithms/fd/fastfds/fastfds.h"
@@ -12,7 +24,15 @@
 #include "algorithms/fd/pyro/pyro.h"
 #include "algorithms/fd/tane/pfdtane.h"
 #include "algorithms/fd/tane/tane.h"
-#include "model/table/relational_schema.h"
+#include "all_csv_configs.h"
+#include "csv_parser/csv_parser.h"
+#include "error/type.h"
+#include "fd/fd.h"
+#include "fd/raw_fd.h"
+#include "max_lhs/type.h"
+#include "names.h"
+#include "table/column.h"
+#include "table/vertical.h"
 #include "test_fd_util.h"
 
 using std::string, std::vector;

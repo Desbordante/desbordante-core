@@ -1,13 +1,26 @@
 #pragma once
 
+#include <cstddef>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "algorithms/algorithm.h"
+#include "cfd/model/cfd_types.h"
 #include "cfd_stats_calculator.h"
 #include "config/tabular_data/input_table_type.h"
+
+namespace algos {
+namespace cfd {
+class CFDRelationData;
+}  // namespace cfd
+
+namespace cfd_verifier {
+class Highlight;
+}  // namespace cfd_verifier
+}  // namespace algos
 
 namespace algos::cfd_verifier {
 

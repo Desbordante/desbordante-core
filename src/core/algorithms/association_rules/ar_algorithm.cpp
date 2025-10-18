@@ -2,12 +2,22 @@
 
 #include <algorithm>
 #include <cassert>
+#include <functional>
+#include <iterator>
+#include <stdexcept>
+#include <utility>
 
 #include <easylogging++.h>
 
+#include "algorithm.h"
+#include "association_rules/ar.h"
+#include "association_rules/ar_algorithm_enums.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "option.h"
+#include "transaction/transactional_data.h"
 
 namespace algos {
 

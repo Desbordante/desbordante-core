@@ -1,13 +1,26 @@
 #include "algorithms/fd/depminer/depminer.h"
 
 #include <chrono>
+#include <cstddef>
+#include <iomanip>
 #include <list>
 #include <memory>
+#include <string_view>
+#include <utility>
 
+#include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
+#include "custom_hashes.h"
+#include "fd/depminer/cmax_set.h"
+#include "fd/pli_based_fd_algorithm.h"
 #include "model/table/agree_set_factory.h"
 #include "model/table/relational_schema.h"
+#include "primitive_collection.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/position_list_index.h"
 
 namespace algos {
 

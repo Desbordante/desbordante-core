@@ -1,20 +1,18 @@
 #include "algorithms/gfd/gfd_validator/gfd_handler.h"
 
-#include <iostream>
-#include <set>
-#include <thread>
+#include <chrono>
+#include <fstream>
+#include <iosfwd>
+#include <string_view>
 
-#include <boost/graph/eccentricity.hpp>
-#include <boost/graph/exterior_property.hpp>
-#include <boost/graph/floyd_warshall_shortest.hpp>
-#include <boost/graph/vf2_sub_graph_iso.hpp>
 #include <easylogging++.h>
 
-#include "config/equal_nulls/option.h"
+#include "algorithm.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
+#include "gfd/gfd.h"
+#include "graph_parser/graph_parser.h"
+#include "option.h"
 
 namespace algos {
 

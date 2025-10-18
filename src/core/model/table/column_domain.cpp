@@ -7,14 +7,22 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
+#include <iosfwd>
+#include <iterator>
 #include <numeric>
+#include <ostream>
+#include <stdexcept>
 #include <string>
 
 #include <easylogging++.h>
 
 #include "config/thread_number/type.h"
+#include "mem_limit/type.h"
 #include "model/table/block_dataset_stream.h"
 #include "model/table/dataset_stream_fixed.h"
+#include "table/block_data.h"
+#include "table/idataset_stream.h"
 #include "util/parallel_for.h"
 
 namespace model {

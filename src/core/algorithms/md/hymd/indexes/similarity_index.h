@@ -1,11 +1,16 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <utility>
 #include <vector>
 
+#include <boost/container/allocator_traits.hpp>
 #include <boost/container/flat_map.hpp>
+#include <boost/container/vector.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 
 #include "algorithms/md/hymd/column_classifier_value_id.h"

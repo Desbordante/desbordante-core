@@ -1,17 +1,33 @@
 #pragma once
 
 #include <bitset>
+#include <cstddef>
+#include <functional>
+#include <memory>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
+#include <boost/date_time/gregorian/parsers.hpp>
 #include <boost/regex.hpp>
 
 #include "abstract_column_data.h"
+#include "builtin.h"
+#include "date_type.h"
+#include "empty_type.h"
 #include "idataset_stream.h"
+#include "mixed_type.h"
 #include "model/types/types.h"
+#include "null_type.h"
 #include "relation_data.h"
+#include "string_type.h"
+#include "table/column.h"
+#include "type.h"
 
 namespace model {
+class IDatasetStream;
 
 class TypedColumnData : public model::AbstractColumnData {
 private:

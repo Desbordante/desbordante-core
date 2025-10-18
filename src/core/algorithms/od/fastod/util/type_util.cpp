@@ -1,6 +1,9 @@
 #include "type_util.h"
 
+#include <compare>
 #include <string>
+
+#include "builtin.h"
 
 namespace algos::fastod {
 
@@ -11,8 +14,8 @@ bool IsUnorderedType(model::TypeId type_id) {
 
 model::CompareResult CompareDataAsStrings(std::byte const* left, std::byte const* right,
                                           model::MixedType const* mixed_type) {
-    const std::string left_str = mixed_type->ValueToString(left);
-    const std::string right_str = mixed_type->ValueToString(right);
+    std::string const left_str = mixed_type->ValueToString(left);
+    std::string const right_str = mixed_type->ValueToString(right);
 
     if (left_str == right_str) {
         return model::CompareResult::kEqual;

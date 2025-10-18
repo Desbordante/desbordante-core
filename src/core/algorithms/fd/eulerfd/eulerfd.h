@@ -18,13 +18,18 @@
 #include "config/tabular_data/input_table/option.h"
 #include "custom_random_seed/option.h"
 #include "custom_random_seed/type.h"
+#include "equal_nulls/type.h"
+#include "fd/eulerfd/cluster.h"
 #include "fd/fd_algorithm.h"
 #include "mlfq.h"
 #include "model/table/column.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
 #include "search_tree.h"
+#include "tabular_data/input_table_type.h"
 #include "util/custom_random.h"
+
+class RelationalSchema;
 
 namespace algos {
 

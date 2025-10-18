@@ -1,25 +1,29 @@
 #include "algorithms/md/hymd/validator.h"
 
-#include <cassert>
-#include <functional>
+#include <optional>
+#include <span>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/records_info.h"
+#include <boost/core/pointer_traits.hpp>
+
 #include "algorithms/md/hymd/lattice/rhs.h"
 #include "algorithms/md/hymd/lowest_cc_value_id.h"
 #include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/index_range.h"
 #include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "algorithms/md/hymd/utility/java_hash.h"
 #include "algorithms/md/hymd/utility/reserve_more.h"
-#include "algorithms/md/hymd/utility/size_t_vector_hash.h"
 #include "algorithms/md/hymd/utility/trivial_array.h"
 #include "algorithms/md/hymd/utility/zip.h"
+#include "md/hymd/column_match_info.h"
+#include "md/hymd/indexes/column_similarity_info.h"
+#include "md/hymd/indexes/pli_cluster.h"
+#include "md/hymd/lattice/md_lattice.h"
+#include "md/hymd/lattice/validation_info.h"
+#include "md/hymd/md_lhs.h"
 #include "model/index.h"
 #include "util/bitset_utils.h"
 #include "util/erase_if_replace.h"
 #include "util/get_preallocated_vector.h"
-#include "util/py_tuple_hash.h"
+#include "worker_thread_pool.h"
 
 namespace algos::hymd {
 using indexes::CompressedRecords;

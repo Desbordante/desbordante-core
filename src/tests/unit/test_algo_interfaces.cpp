@@ -1,4 +1,11 @@
+#include <algorithm>
+#include <exception>
 #include <iostream>
+#include <iterator>
+#include <memory>
+#include <ostream>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include <gmock/gmock.h>
@@ -9,6 +16,12 @@
 #include "all_csv_configs.h"
 #include "config/error/type.h"
 #include "config/names.h"
+#include "fd/fd_algorithm.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "fd/pyrocommon/core/parameters.h"
+#include "table/column.h"
+
+struct CSVConfig;
 
 namespace tests {
 

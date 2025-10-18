@@ -1,6 +1,11 @@
+#include <iostream>
 #include <limits>
 #include <memory>
+#include <ostream>
 #include <set>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <gtest/gtest.h>
 
@@ -11,6 +16,12 @@
 #include "algorithms/md/md_verifier/md_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "csv_parser/csv_parser.h"
+#include "index.h"
+#include "md/decision_boundary.h"
+#include "md/md.h"
+#include "md/md_verifier/column_similarity_classifier.h"
+#include "tabular_data/input_table_type.h"
 
 namespace tests {
 using namespace config::names;
