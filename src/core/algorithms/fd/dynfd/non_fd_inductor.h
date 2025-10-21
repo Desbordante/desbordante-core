@@ -14,7 +14,7 @@ class NonFDInductor {
 
     void Dfs(RawFD fd, size_t next_lhs_attr);
 
-    void DeduceNonFds(RawFD fd);
+    void DeduceNonFds(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
 public:
     NonFDInductor(std::shared_ptr<model::FDTree> positive_cover_tree,
@@ -24,6 +24,6 @@ public:
           negative_cover_tree_(std::move(negative_cover_tree)),
           validator_(std::move(validator)) {}
 
-    void FindFds(std::vector<RawFD> const &valid_fds);
+    void FindFds(std::vector<RawFD> const& valid_fds);
 };
 }  // namespace algos::dynfd

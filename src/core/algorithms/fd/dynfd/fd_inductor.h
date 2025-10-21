@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "algorithms/fd/hycommon/column_combination_list.h"
 #include "model/FDTrees/fd_tree.h"
 #include "model/non_fd_tree.h"
@@ -11,7 +9,7 @@ class FDInductor {
     std::shared_ptr<model::FDTree> positive_cover_tree_;
     std::shared_ptr<NonFDTree> negative_cover_tree_;
 
-    void DeduceDependencies(RawFD non_fd);
+    void DeduceDependencies(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
 public:
     FDInductor(std::shared_ptr<model::FDTree> positive_cover_tree,

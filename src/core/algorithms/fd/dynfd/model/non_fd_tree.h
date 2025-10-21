@@ -41,7 +41,7 @@ public:
     std::shared_ptr<NonFDTreeVertex> AddNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs,
                                               ViolatingRecordPair violationPair);
 
-    bool ContainsNonFD(boost::dynamic_bitset<>& lhs, size_t rhs);
+    bool ContainsNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
     std::shared_ptr<NonFDTreeVertex> FindNonFdVertex(boost::dynamic_bitset<> const& lhs);
 
@@ -55,10 +55,10 @@ public:
 
     void RemoveGenerals(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
-    std::vector<boost::dynamic_bitset<>> GetNonFdAndSpecials(boost::dynamic_bitset<>& lhs,
+    std::vector<boost::dynamic_bitset<>> GetNonFdAndSpecials(boost::dynamic_bitset<> const& lhs,
                                                              size_t rhs);
 
-    [[nodiscard]] bool ContainsNonFdOrSpecial(boost::dynamic_bitset<>& lhs, size_t rhs) const;
+    [[nodiscard]] bool ContainsNonFdOrSpecial(boost::dynamic_bitset<> const& lhs, size_t rhs) const;
 
     /**
      * Gets nodes representing NonFDs with LHS of given arity.

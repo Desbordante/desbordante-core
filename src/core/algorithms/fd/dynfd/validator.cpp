@@ -45,7 +45,7 @@ std::vector<std::shared_ptr<DPLI>> Validator::GetSortedPlisForLhs(
 std::shared_ptr<DPLI> Validator::GetFirstPliForLhs(boost::dynamic_bitset<> const& lhs) const {
     std::shared_ptr<DPLI> max_clusters_pli;
 
-    for (auto lhs_attr = lhs.find_first(); lhs_attr != boost::dynamic_bitset<>::npos;
+    for (size_t lhs_attr = lhs.find_first(); lhs_attr != boost::dynamic_bitset<>::npos;
          lhs_attr = lhs.find_next(lhs_attr)) {
         auto pli = relation_->GetColumnData(lhs_attr).GetPositionListIndexPtr();
         if (max_clusters_pli.get() == nullptr ||
@@ -89,7 +89,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
         return rhss;
     }
 
-    auto const lhs_count = lhs.count();
+    size_t const lhs_count = lhs.count();
     if (lhs_count == 0) {
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
@@ -105,7 +105,7 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
     }
 
     if (lhs_count == 1) {
-        auto const lhs_attr = lhs.find_first();
+        size_t const lhs_attr = lhs.find_first();
         auto const& pli = relation_->GetColumnData(lhs_attr).GetPositionListIndex();
         for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
@@ -117,7 +117,6 @@ boost::dynamic_bitset<> Validator::Validate(boost::dynamic_bitset<> lhs,
     }
 
     auto first_pli = GetFirstPliForLhs(lhs);
-    // auto first_pli = relation_->GetColumnData(lhs.find_first()).GetPositionListIndex();
     auto const first_lhs_attr = first_pli->GetColumnIndex();
 
     lhs.reset(first_lhs_attr);
@@ -146,7 +145,7 @@ std::vector<RawFD> Validator::ValidateParallel(std::vector<LhsPair> const& non_f
         auto const& lhs = non_fds[index].second;
         auto const& rhss = futures[index].get();
 
-        for (auto rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+        for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
              rhs = rhss.find_next(rhs)) {
             result.push_back({lhs, rhs});
         }
@@ -189,8 +188,8 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli, size_t rhs_attr,
     std::vector<CompressedRecord> const& compressed_records = relation_->GetCompressedRecords();
 
     for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
-        auto const first_record_id = *cluster.begin();
-        auto const rhs_value = compressed_records[first_record_id][rhs_attr];
+        size_t const first_record_id = *cluster.begin();
+        int const rhs_value = compressed_records[first_record_id][rhs_attr];
         if (rhs_value < 0) {
             if (on_invalid) {
                 (*on_invalid)(rhs_attr, std::nullopt);
@@ -198,8 +197,8 @@ bool Validator::Refines(algos::dynfd::DPLI const& pli, size_t rhs_attr,
             return false;
         }
 
-        for (auto record_id : cluster) {
-            auto const value = compressed_records[record_id][rhs_attr];
+        for (size_t record_id : cluster) {
+            int const value = compressed_records[record_id][rhs_attr];
             if (value != rhs_value) {
                 if (on_invalid) {
                     (*on_invalid)(rhs_attr, std::pair{first_record_id, record_id});
@@ -217,15 +216,15 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
                                            boost::dynamic_bitset<> rhss,
                                            OnValidateResult const& on_invalid,
                                            size_t first_insert_batch_id) const {
-    auto const lhs_size = lhs.count();
-    auto const rhs_size = rhss.count();
+    size_t const lhs_size = lhs.count();
+    size_t const rhs_size = rhss.count();
 
     auto const& compressed_records = relation_->GetCompressedRecords();
 
     std::vector<int> rhs_attr_id_to_ind(relation_->GetNumColumns());
     std::vector<int> rhs_attr_ind_to_id(rhs_size);
     int index = 0;
-    for (auto rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+    for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
          rhs = rhss.find_next(rhs)) {
         rhs_attr_id_to_ind[rhs] = index;
         rhs_attr_ind_to_id[index] = rhs;
@@ -235,7 +234,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
     for (auto const& cluster : pli.GetClustersToCheck(first_insert_batch_id)) {
         std::unordered_map<ClusterIdsArray, ClusterIdsArrayWithRecord> cluster_ids_map;
 
-        for (auto record_id : cluster) {
+        for (size_t record_id : cluster) {
             auto cluster_ids_array = ClusterIdsArray::BuildClusterIdsArray(
                     lhs, lhs_size, compressed_records[record_id]);
 
@@ -243,7 +242,7 @@ boost::dynamic_bitset<> Validator::Refines(algos::dynfd::DPLI const& pli,
             if (cluster_ids_map_it != cluster_ids_map.end()) {
                 auto const rhs_clusters = cluster_ids_map_it->second;
 
-                for (auto rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
+                for (size_t rhs = rhss.find_first(); rhs != boost::dynamic_bitset<>::npos;
                      rhs = rhss.find_next(rhs)) {
                     int rhs_cluster = compressed_records[record_id][rhs];
                     if (rhs_cluster < 0 ||

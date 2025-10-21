@@ -66,7 +66,8 @@ void NonFDTreeVertex::GetNonFdAndSpecialsRecursive(
         return;
     }
 
-    auto limit = next_lhs_bit == boost::dynamic_bitset<>::npos ? num_attributes_ - 1 : next_lhs_bit;
+    size_t limit =
+            next_lhs_bit == boost::dynamic_bitset<>::npos ? num_attributes_ - 1 : next_lhs_bit;
 
     for (; cur_bit <= limit; ++cur_bit) {
         if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs)) {
@@ -95,7 +96,8 @@ bool NonFDTreeVertex::ContainsNonFdOrSpecialRecursive(boost::dynamic_bitset<> co
         return false;
     }
 
-    auto limit = next_lhs_bit == boost::dynamic_bitset<>::npos ? num_attributes_ - 1 : next_lhs_bit;
+    size_t limit =
+            next_lhs_bit == boost::dynamic_bitset<>::npos ? num_attributes_ - 1 : next_lhs_bit;
 
     for (; cur_bit <= limit; ++cur_bit) {
         if (ContainsChildAt(cur_bit) && children_[cur_bit]->IsAttribute(rhs) &&

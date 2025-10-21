@@ -7,7 +7,7 @@
 
 namespace algos::dynfd {
 
-class CompressedColumnData : model::AbstractColumnData {
+class CompressedColumnData final : model::AbstractColumnData {
     std::shared_ptr<DynamicPositionListIndex> position_list_index_;
 
 public:
@@ -19,7 +19,7 @@ public:
         return position_list_index_->GetSize();
     }
 
-    [[nodiscard]] std::string ToString() const final {
+    [[nodiscard]] std::string ToString() const {
         return "Data for " + column_->ToString();
     }
 

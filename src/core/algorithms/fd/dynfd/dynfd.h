@@ -1,4 +1,5 @@
 #pragma once
+
 #include <FDTrees/fd_tree.h>
 #include <algorithm.h>
 #include <fd/fd.h>
@@ -12,7 +13,7 @@
 
 namespace algos::dynfd {
 class DynFD final : public FDAlgorithm {
-    config::InputTable input_table_;
+    config::InputTable input_table_ = nullptr;
     config::InputTable insert_statements_table_ = nullptr;
     config::InputTable update_statements_table_ = nullptr;
     std::unordered_set<size_t> delete_statement_indices_;
@@ -28,8 +29,10 @@ public:
 
 private:
     void RegisterOptions();
+    void CoverInversion();
     void LoadDataInternal() override;
     void MakeExecuteOptsAvailableFDInternal() override;
+    void MineFDs();
     unsigned long long ExecuteInternal() override;
     void RegisterFDs(std::vector<RawFD>&& fds);
     void ExecuteHyFD();

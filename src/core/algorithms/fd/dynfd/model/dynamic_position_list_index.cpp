@@ -117,34 +117,6 @@ int DynamicPositionListIndex::GetRecordValue(size_t record_id) const {
     return hash_index_.at(record_id);
 }
 
-std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::FullIntersect(
-        DynamicPositionListIndex const &that) const {
-    std::unordered_map<int, std::vector<size_t>> partial_index;
-    std::list<Cluster> new_clusters;
-    std::unordered_map<int, std::list<Cluster>::iterator> new_inverted_index;
-    std::unordered_map<size_t, int> new_hash_index;
-    unsigned int new_size = 0;
-
-    for (size_t const record_id : hash_index_ | std::views::keys) {
-        if (!that.hash_index_.contains(record_id)) {
-            LOG(WARNING) << "Record id " << record_id << " not found in that index";
-            continue;
-        }
-        int that_value_id = that.hash_index_.at(record_id);
-        partial_index[that_value_id].push_back(record_id);
-    }
-
-    for (auto &[value_id, cluster] : partial_index) {
-        new_clusters.emplace_back(cluster);
-        new_inverted_index[value_id] = std::prev(new_clusters.end());
-        new_size += cluster.size();
-    }
-
-    return std::make_unique<DynamicPositionListIndex>(
-            std::move(new_clusters), std::move(new_inverted_index), std::move(new_hash_index),
-            next_record_id_, new_size, columnIndex_);
-}
-
 std::string DynamicPositionListIndex::ToString() const {
     std::string res = "[";
     for (auto const &cluster : clusters_) {
