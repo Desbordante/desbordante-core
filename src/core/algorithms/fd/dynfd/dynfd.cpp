@@ -17,28 +17,29 @@
 #include "tabular_data/crud_operations/operations.h"
 #include "tabular_data/crud_operations/update/option.h"
 #include "tabular_data/input_table/option.h"
+#include "util/timed_invoke.h"
 
 namespace algos::dynfd {
 
 void DynFD::ExecuteHyFD() {
     std::shared_ptr hy_fd_relation = ColumnLayoutRelationData::CreateFrom(*input_table_, true);
 
-    auto [plis, pli_records, og_mapping] = hy::Preprocess(hy_fd_relation.get());
+    auto&& [plis, pli_records, og_mapping] = hy::Preprocess(hy_fd_relation.get());
     auto plis_shared = std::make_shared<hy::PLIs>(std::move(plis));
     auto const pli_records_shared = std::make_shared<hy::Rows>(std::move(pli_records));
 
     hyfd::Sampler sampler(plis_shared, pli_records_shared);
 
-    auto positive_cover_tree = std::make_shared<model::FDTree>(hy_fd_relation->GetNumColumns());
-    hyfd::Inductor inductor(positive_cover_tree);
-    hyfd::Validator validator(positive_cover_tree, plis_shared, pli_records_shared, threads_num_);
+    auto hyfd_positive_cover = std::make_shared<model::FDTree>(hy_fd_relation->GetNumColumns());
+    hyfd::Inductor inductor(hyfd_positive_cover);
+    hyfd::Validator validator(hyfd_positive_cover, plis_shared, pli_records_shared, threads_num_);
 
     hy::IdPairs comparison_suggestions;
 
     while (true) {
         auto non_fds = sampler.GetNonFDs(comparison_suggestions);
 
-        inductor.UpdateFdTree(std::move(non_fds));
+        inductor.UpdateFdTree(non_fds);
 
         comparison_suggestions = validator.ValidateAndExtendCandidates();
 
@@ -52,16 +53,14 @@ void DynFD::ExecuteHyFD() {
     for (size_t rhs = 0; rhs < hy_fd_relation->GetNumColumns(); ++rhs) {
         positive_cover_tree_->Remove(boost::dynamic_bitset(hy_fd_relation->GetNumColumns()), rhs);
     }
-    for (auto fd : positive_cover_tree->FillFDs()) {
-        fd.lhs_ = hy::RestoreAgreeSet(fd.lhs_, og_mapping, hy_fd_relation->GetNumColumns());
-        fd.rhs_ = og_mapping[fd.rhs_];
-        positive_cover_tree_->AddFD(fd.lhs_, fd.rhs_);
+    for (RawFD const& fd : hyfd_positive_cover->FillFDs()) {
+        positive_cover_tree_->AddFD(
+                hy::RestoreAgreeSet(fd.lhs_, og_mapping, hy_fd_relation->GetNumColumns()),
+                og_mapping[fd.rhs_]);
     }
 }
 
-unsigned long long DynFD::ExecuteInternal() {
-    auto const start_time = std::chrono::system_clock::now();
-
+void DynFD::MineFDs() {
     bool const is_non_fd_validation_needed =
             (!delete_statement_indices_.empty()) || (update_statements_table_ != nullptr);
     bool const is_fd_validation_needed =
@@ -92,27 +91,13 @@ unsigned long long DynFD::ExecuteInternal() {
 
     SetProgress(kTotalProgressPercent);
     RegisterFDs(positive_cover_tree_->FillFDs());
-    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
 }
 
-void DynFD::LoadDataInternal() {
-    relation_ = DynamicRelationData::CreateFrom(input_table_);
-    if (relation_->GetColumnData().empty()) {
-        throw std::runtime_error(
-                "Got an empty dataset: FD mining is meaningless. If you want to specify columns, "
-                "insert their names");
-    }
-    positive_cover_tree_ = std::make_shared<model::FDTree>(GetRelation().GetNumColumns());
+unsigned long long DynFD::ExecuteInternal() {
+    return util::TimedInvoke(&DynFD::MineFDs, this);
+}
 
-    if (!relation_->Empty()) {
-        ExecuteHyFD();
-    }
-
-    negative_cover_tree_ = std::make_shared<NonFDTree>(GetRelation().GetNumColumns());
-
-    // Cover inversion
+void DynFD::CoverInversion() {
     for (size_t i = 0; i < relation_->GetNumColumns(); i++) {
         boost::dynamic_bitset<> lhs(relation_->GetNumColumns());
         lhs.set();
@@ -123,7 +108,7 @@ void DynFD::LoadDataInternal() {
     for (auto&& [lhs, rhs] : positive_cover_tree_->FillFDs()) {
         std::vector<boost::dynamic_bitset<>> violated =
                 negative_cover_tree_->GetNonFdAndSpecials(lhs, rhs);
-        for (auto&& non_fd : violated) {
+        for (auto const& non_fd : violated) {
             negative_cover_tree_->Remove(non_fd, rhs);
             for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
                  bit = lhs.find_next(bit)) {
@@ -135,6 +120,24 @@ void DynFD::LoadDataInternal() {
             }
         }
     }
+}
+
+void DynFD::LoadDataInternal() {
+    relation_ = DynamicRelationData::CreateFrom(input_table_);
+    if (relation_->GetColumnData().empty()) {
+        throw std::runtime_error(
+                "Got an empty dataset: FD mining is meaningless. If you want to specify columns, "
+                "insert their names");
+    }
+    positive_cover_tree_ = std::make_shared<model::FDTree>(relation_->GetNumColumns());
+
+    if (!relation_->Empty()) {
+        ExecuteHyFD();
+    }
+
+    negative_cover_tree_ = std::make_shared<NonFDTree>(relation_->GetNumColumns());
+
+    CoverInversion();
 
     validator_ = std::make_shared<Validator>(positive_cover_tree_, negative_cover_tree_, relation_);
 }

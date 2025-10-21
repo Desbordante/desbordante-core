@@ -16,7 +16,7 @@ private:
 public:
     explicit Inductor(std::shared_ptr<model::FDTree> tree) noexcept : tree_(std::move(tree)) {}
 
-    void UpdateFdTree(NonFDList&& non_fds);
+    void UpdateFdTree(NonFDList const& non_fds);
 };
 
 }  // namespace algos::hyfd

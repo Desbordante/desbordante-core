@@ -81,9 +81,6 @@ public:
 
     void Erase(size_t record_id);
 
-    std::unique_ptr<DynamicPositionListIndex> FullIntersect(
-            DynamicPositionListIndex const& that) const;
-
     std::string ToString() const;
 
     std::unordered_map<size_t, int> const& GetHashIndex() const;

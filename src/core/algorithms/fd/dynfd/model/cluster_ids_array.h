@@ -12,6 +12,8 @@ public:
 
     bool operator==(ClusterIdsArray const& other) const;
 
+    bool operator!=(ClusterIdsArray const& other) const;
+
     static ClusterIdsArray BuildClusterIdsArray(boost::dynamic_bitset<> lhs, size_t lhs_size,
                                                 CompressedRecord record);
 
@@ -27,7 +29,7 @@ struct std::hash<ClusterIdsArray> {
 class ClusterIdsArrayWithRecord : public ClusterIdsArray {
 public:
     ClusterIdsArrayWithRecord(std::vector<int> cluster_ids, size_t record_id)
-        : ClusterIdsArray(cluster_ids), record_id_(record_id) {}
+        : ClusterIdsArray(std::move(cluster_ids)), record_id_(record_id) {}
 
     size_t GetRecordId() const {
         return record_id_;

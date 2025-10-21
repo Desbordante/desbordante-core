@@ -31,7 +31,7 @@ std::shared_ptr<NonFDTreeVertex> NonFDTree::AddNonFD(
     return nullptr;
 }
 
-bool NonFDTree::ContainsNonFD(boost::dynamic_bitset<>& lhs, size_t rhs) {
+bool NonFDTree::ContainsNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
     NonFDTreeVertex const* cur_node = root_.get();
 
     for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
@@ -61,8 +61,8 @@ std::shared_ptr<NonFDTreeVertex> NonFDTree::FindNonFdVertex(boost::dynamic_bitse
     return cur_node;
 }
 
-std::vector<boost::dynamic_bitset<>> NonFDTree::GetNonFdAndSpecials(boost::dynamic_bitset<>& lhs,
-                                                                    size_t rhs) {
+std::vector<boost::dynamic_bitset<>> NonFDTree::GetNonFdAndSpecials(
+        boost::dynamic_bitset<> const& lhs, size_t rhs) {
     std::vector<boost::dynamic_bitset<>> result;
     boost::dynamic_bitset empty_lhs(GetNumAttributes());
 
@@ -75,7 +75,7 @@ void NonFDTree::RemoveGenerals(boost::dynamic_bitset<> const& lhs, size_t rhs) {
     root_->RemoveGeneralsRecursive(lhs, rhs, lhs.find_first(), false);
 }
 
-bool NonFDTree::ContainsNonFdOrSpecial(boost::dynamic_bitset<>& lhs, size_t rhs) const {
+bool NonFDTree::ContainsNonFdOrSpecial(boost::dynamic_bitset<> const& lhs, size_t rhs) const {
     return root_->ContainsNonFdOrSpecialRecursive(lhs, rhs, 0);
 }
 

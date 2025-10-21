@@ -87,8 +87,6 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
-    schema->Init();
-
     size_t next_record_id = (!column_data.empty() ? column_data[0].GetNumRows() : 0);
     std::vector<size_t> all_ids(next_record_id);
     std::iota(all_ids.begin(), all_ids.end(), 0);

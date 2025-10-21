@@ -11,7 +11,7 @@ void NonFDInductor::FindFds(std::vector<RawFD> const& valid_fds) {
 }
 
 void NonFDInductor::Dfs(RawFD fd, size_t next_lhs_attr) {
-    for (auto removed_lhs_attr = next_lhs_attr; removed_lhs_attr != boost::dynamic_bitset<>::npos;
+    for (size_t removed_lhs_attr = next_lhs_attr; removed_lhs_attr != boost::dynamic_bitset<>::npos;
          removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
         auto new_lhs = fd.lhs_;
         new_lhs.reset(removed_lhs_attr);
@@ -24,17 +24,16 @@ void NonFDInductor::Dfs(RawFD fd, size_t next_lhs_attr) {
         }
     }
 
-    DeduceNonFds(fd);
+    DeduceNonFds(fd.lhs_, fd.rhs_);
 }
 
-void NonFDInductor::DeduceNonFds(RawFD fd) {
-    auto rhs = fd.rhs_;
-    for (auto const& non_fd_lhs : negative_cover_tree_->GetNonFdAndSpecials(fd.lhs_, fd.rhs_)) {
+void NonFDInductor::DeduceNonFds(boost::dynamic_bitset<> const& lhs, size_t rhs) {
+    for (auto const& non_fd_lhs : negative_cover_tree_->GetNonFdAndSpecials(lhs, rhs)) {
         negative_cover_tree_->Remove(non_fd_lhs, rhs);
 
-        for (size_t removed_lhs_attr = fd.lhs_.find_first();
+        for (size_t removed_lhs_attr = lhs.find_first();
              removed_lhs_attr != boost::dynamic_bitset<>::npos;
-             removed_lhs_attr = fd.lhs_.find_next(removed_lhs_attr)) {
+             removed_lhs_attr = lhs.find_next(removed_lhs_attr)) {
             boost::dynamic_bitset<> new_lhs = non_fd_lhs;
             new_lhs.reset(removed_lhs_attr);
 
@@ -44,9 +43,9 @@ void NonFDInductor::DeduceNonFds(RawFD fd) {
         }
     }
 
-    if (!positive_cover_tree_->ContainsFdOrGeneral(fd.lhs_, fd.rhs_)) {
-        positive_cover_tree_->RemoveSpecials(fd.lhs_, fd.rhs_);
-        positive_cover_tree_->AddFD(fd.lhs_, fd.rhs_);
+    if (!positive_cover_tree_->ContainsFdOrGeneral(lhs, rhs)) {
+        positive_cover_tree_->RemoveSpecials(lhs, rhs);
+        positive_cover_tree_->AddFD(lhs, rhs);
     }
 }
 }  // namespace algos::dynfd

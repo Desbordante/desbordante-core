@@ -4,7 +4,7 @@
 
 namespace algos::hyfd {
 
-void Inductor::UpdateFdTree(NonFDList&& non_fds) {
+void Inductor::UpdateFdTree(NonFDList const& non_fds) {
     unsigned const max_level = non_fds.GetDepth();
 
     for (unsigned level = max_level; level != 0; level--) {
