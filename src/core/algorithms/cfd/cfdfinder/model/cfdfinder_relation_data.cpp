@@ -78,8 +78,6 @@ std::unique_ptr<CFDFinderRelationData> CFDFinderRelationData::CreateFrom(
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
 
-    schema->Init();
-
     return std::make_unique<CFDFinderRelationData>(std::move(schema), std::move(column_data),
                                                    std::move(cluster_maps));
 }
