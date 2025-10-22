@@ -33,16 +33,6 @@ static testing::AssertionResult CheckFdListEquality(
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
 }
 
-static std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
-        std::list<FD> const& fds) {
-    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
-    for (auto const& fd : fds) {
-        auto const& raw_fd = fd.ToRawFD();
-        set.emplace(util::BitsetToIndices<unsigned int>(raw_fd.lhs_), raw_fd.rhs_);
-    }
-    return set;
-}
-
 TYPED_TEST_SUITE_P(ApproximateFDTest);
 
 TYPED_TEST_P(ApproximateFDTest, ThrowsOnEmpty) {
