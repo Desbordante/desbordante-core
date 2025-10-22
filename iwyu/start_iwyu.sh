@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="${IWYU_CONFIG:-$SCRIPT_DIR/iwyu_config.json}"
 
