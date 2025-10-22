@@ -10,6 +10,7 @@
 
 #include "column_data.h"
 #include "idataset_stream.h"
+#include "position_list_index_with_singletons.h"
 #include "relation_data.h"
 #include "relational_schema.h"
 
@@ -27,6 +28,12 @@ public:
     }
 
     [[nodiscard]] std::vector<int> GetTuple(int tuple_index) const;
+
+    [[nodiscard]] std::shared_ptr<model::PLI const> CalculatePLI(
+            std::vector<unsigned int> const& indices) const;
+
+    [[nodiscard]] std::shared_ptr<model::PLIWS const> CalculatePLIWS(
+            std::vector<unsigned int> const& indices) const;
 
     static std::unique_ptr<ColumnLayoutRelationData> CreateFrom(model::IDatasetStream& data_stream,
                                                                 bool is_null_eq_null);
