@@ -10,6 +10,7 @@
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"
 #include "algorithms/dd/dd.h"
+#include "algorithms/fd/afd_metric/afd_metric.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -131,6 +132,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
+        kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
