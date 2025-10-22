@@ -3,8 +3,6 @@
 #include <cstddef>
 #include <vector>
 
-#include <boost/container/allocator_traits.hpp>
-
 #include "ac_exception.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "ranges_collection.h"

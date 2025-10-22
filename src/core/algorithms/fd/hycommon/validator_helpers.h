@@ -14,7 +14,7 @@
 #define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
 
 #if UNORDERED_FLAT_MAP_AVAILABLE
-#include <boost/unordered/unordered_flat_map.hpp>
+#include <boost/unordered/unorderd_flat_map.hpp>
 #endif
 
 namespace algos::hy {

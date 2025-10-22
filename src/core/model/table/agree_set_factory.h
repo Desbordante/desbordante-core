@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>
-#include <boost/functional/hash.hpp>
 
 #include "algorithms/fd/fd_algorithm.h"
 #include "model/table/column_layout_relation_data.h"

@@ -6,7 +6,7 @@
 #include <queue>
 #include <unordered_set>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 // see algorithms/cfd/LICENSE
 
