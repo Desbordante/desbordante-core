@@ -1,0 +1,19 @@
+{
+    "output": "result_iwyu",
+    "num_jobs": 4,
+    "target_path": "..",
+    "result_path": ".",
+    "mappings": [
+        "./mappings/desbordante.imp",
+        "./mappings/boost.imp",
+        "./mappings/libcxx.imp",
+        "./mappings/iwyu.gcc.imp"
+    ],
+    "flags": [
+        "--no_default_mappings",
+        "--no_fwd_decls"
+    ],
+    "ignore_paths": [
+        "cmake/"
+    ]
+}
