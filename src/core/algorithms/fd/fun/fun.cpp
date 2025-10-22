@@ -20,8 +20,7 @@ bool FunQuadruple::Contains(Vertical const& that) const {
     return candidate_.Contains(that);
 }
 
-FUN::FUN(std::optional<ColumnLayoutRelationDataManager> relation_manager)
-    : PliBasedFDAlgorithm({kDefaultPhaseName}, relation_manager) {}
+FUN::FUN() : PliBasedFDAlgorithm({kDefaultPhaseName}) {}
 
 void FUN::ResetStateFd() {
     fds_.clear();
@@ -155,7 +154,7 @@ unsigned long long FUN::ExecuteInternal() {
     schema_ = relation_->GetSchema();
     double progress_step = kTotalProgressPercent / (schema_->GetNumColumns() + 1);
     AddProgress(progress_step);
-    Vertical empty_vertical = *schema_->empty_vertical_;
+    Vertical empty_vertical = schema_->CreateEmptyVertical();
 
     r_ = empty_vertical;
     r_prime_ = empty_vertical;

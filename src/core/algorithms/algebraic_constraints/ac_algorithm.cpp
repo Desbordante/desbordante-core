@@ -121,7 +121,10 @@ size_t ACAlgorithm::CalculateSampleSize(size_t k_bumps) const {
      * in Relational Data>> by Paul G. Brown & Peter J. Haas*/
     size_t sample_size = (xp2 * (2 - fuzziness_)) / (4 * fuzziness_) + k_bumps / 2.0;
 
-    return sample_size;
+    /* This formula might give sample size greater than number of rows we have in a small
+     * table, so let's limit it from above */
+    size_t const num_rows = typed_relation_->GetNumRows();
+    return sample_size > num_rows ? num_rows : sample_size;
 }
 
 std::vector<std::byte const*> ACAlgorithm::Sampling(std::vector<model::TypedColumnData> const& data,

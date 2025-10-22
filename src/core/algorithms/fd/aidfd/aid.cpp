@@ -155,7 +155,7 @@ boost::dynamic_bitset<> Aid::BuildAgreeSet(size_t t1, size_t t2) {
 
 void Aid::HandleConstantColumns(boost::dynamic_bitset<>& attributes) {
     boost::dynamic_bitset<> empty_set(number_of_attributes_);
-    Vertical lhs = *schema_->empty_vertical_;
+    Vertical lhs = schema_->CreateEmptyVertical();
     for (size_t attr_num = constant_columns_.find_first();
          attr_num != boost::dynamic_bitset<>::npos;
          attr_num = constant_columns_.find_next(attr_num)) {

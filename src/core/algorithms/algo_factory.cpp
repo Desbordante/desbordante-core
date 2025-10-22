@@ -7,7 +7,6 @@
 
 #include "algorithms/algorithms.h"
 #include "algorithms/create_algorithm.h"
-#include "algorithms/pipelines/typo_miner/typo_miner.h"
 #include "config/names.h"
 #include "tabular_data/input_tables_type.h"
 
@@ -67,30 +66,4 @@ void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options) {
     algorithm.LoadData();
     ConfigureFromMap(algorithm, options);
 }
-
-std::unique_ptr<Algorithm> CreateAlgorithm(AlgorithmType algorithm_enum,
-                                           StdParamsMap const& options) {
-    std::unique_ptr<Algorithm> algorithm = CreateAlgorithmInstance(algorithm_enum);
-    LoadAlgorithm(*algorithm, options);
-    return algorithm;
-}
-
-std::unique_ptr<Algorithm> CreateTypoMiner(StdParamsMap const& options) {
-    using config::names::kPreciseAlgorithm, config::names::kApproximateAlgorithm;
-    AlgorithmType precise_algo = GetOptionValue<AlgorithmType>(options, kPreciseAlgorithm);
-    AlgorithmType approx_algo = GetOptionValue<AlgorithmType>(options, kApproximateAlgorithm);
-    std::unique_ptr<TypoMiner> typo_miner = std::make_unique<TypoMiner>(precise_algo, approx_algo);
-    LoadAlgorithm(*typo_miner, options);
-    return typo_miner;
-}
-
-std::unique_ptr<Algorithm> CreateAlgorithm(std::string const& algorithm_name,
-                                           StdParamsMap const& options) {
-    if (algorithm_name == "typo_miner") {
-        return CreateTypoMiner(options);
-    }
-    AlgorithmType const algorithm_enum = AlgorithmType::_from_string_nocase(algorithm_name.c_str());
-    return CreateAlgorithm(algorithm_enum, options);
-}
-
 }  // namespace algos

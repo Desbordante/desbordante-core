@@ -93,7 +93,7 @@ endif()
 
 # --- Setting CMake build variables ---
 
-# Enable colored output for Ninja messages
+# Enable colored Ninja and compilers diagnostics
 set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -223,13 +223,19 @@ endif()
 
 # --- Dependencies installation ---
 
-# Set CPM cache location
-if(NOT DEFINED CPM_SOURCE_CACHE)
-    if(DEFINED ENV{CPM_SOURCE_CACHE})
-        set(CPM_SOURCE_CACHE "$ENV{CPM_SOURCE_CACHE}")
-    else()
-        set(CPM_SOURCE_CACHE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache")
-    endif()
+# Set CPM cache location. By default CPM does not enable cache. Here we set the source cache
+# location to a place in the source tree. This is only done if we are the top-level project, i.e.
+# this CMakeLists is used directly by `cmake ..` or similar to avoid the situation where an
+# unrelated project starts caching its dependencies in Desbordante's source tree.
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR
+   AND NOT DEFINED CPM_SOURCE_CACHE
+   AND NOT DEFINED ENV{CPM_SOURCE_CACHE}
+)
+    set(CPM_SOURCE_CACHE
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cpm-cache"
+        CACHE PATH "Directory to download CPM dependencies"
+    )
+    message(STATUS "Set CPM source cache location to ${CPM_SOURCE_CACHE}")
 endif()
 
 include(cmake/CPM.cmake)
@@ -293,7 +299,7 @@ if (COMPILE_BENCHMARKS)
 	list(APPEND boost_libraries program_options)
 endif()
 
-find_package(Boost 1.81.0 REQUIRED COMPONENTS ${boost_libraries})
+find_package(Boost 1.85.0 REQUIRED COMPONENTS ${boost_libraries})
 if(Boost_FOUND)
     message(STATUS "Found Boost include dirs: ${Boost_INCLUDE_DIRS}")
     include_directories(${Boost_INCLUDE_DIRS})

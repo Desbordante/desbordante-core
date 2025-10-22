@@ -27,10 +27,10 @@ private:
             model::PositionListIndex const* joint_pli) = 0;
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
-    void RegisterAndCountFd(Vertical const& lhs, Column const* rhs);
+    void RegisterAndCountFd(Vertical lhs, Column const* rhs);
 
 public:
-    TaneCommon(std::optional<ColumnLayoutRelationDataManager> relation_manager = std::nullopt);
+    TaneCommon();
 };
 
 }  // namespace algos::tane

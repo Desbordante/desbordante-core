@@ -47,6 +47,9 @@ private:
                                             std::unordered_set<Vertical>& alleged_non_deps,
                                             model::VerticalMap<VerticalInfo>* global_visitees,
                                             double boost_factor);
+    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals,
+                                                     auto pruning_function) const;
+    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals) const;
 
     // CAREFUL: resets globalVisitees_, therefore SearchSpace could become invalidated
     std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {
