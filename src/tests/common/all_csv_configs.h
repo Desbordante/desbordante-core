@@ -74,6 +74,8 @@ extern CSVConfig const kSimpleTypes1;
 extern CSVConfig const kSimpleTypos;
 extern CSVConfig const kTennis;
 extern CSVConfig const kTest1;
+extern CSVConfig const kTestCINDEn;
+extern CSVConfig const kTestCINDDe;
 extern CSVConfig const kTestDataStats;
 extern CSVConfig const kTestDC;
 extern CSVConfig const kTestDC1;

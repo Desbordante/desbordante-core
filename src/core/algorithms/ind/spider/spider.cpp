@@ -14,8 +14,6 @@
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
 #include "config/mem_limit/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
 #include "config/thread_number/option.h"
 #include "util/timed_invoke.h"
 
@@ -24,8 +22,6 @@ namespace algos {
 using AttributeIndex = spider::AttributeIndex;
 
 Spider::Spider() : INDAlgorithm({}) {
-    DESBORDANTE_OPTION_USING;
-
     RegisterOption(config::kEqualNullsOpt(&is_null_equal_null_));
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
     RegisterOption(config::kMemLimitMbOpt(&mem_limit_mb_));
