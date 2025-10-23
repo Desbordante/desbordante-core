@@ -1,4 +1,4 @@
-#include "algorithms/dc/verifier/dc_verifier.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
 
 #include <algorithm>
 #include <chrono>
@@ -66,10 +66,21 @@ void DCVerifier::LoadDataInternal() {
 
 unsigned long long int DCVerifier::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
+
+    result_ = Verify(dc_string_);
+
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start);
+
+    return elapsed_time.count();
+}
+
+bool DCVerifier::Verify(std::string dc_string) {
     dc::DC dc;
     try {
-        dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
+        dc::DCParser parser = dc::DCParser(dc_string, relation_.get(), data_);
         dc = parser.Parse();
+        dc_ = dc;
     } catch (std::exception const& e) {
         LOG(INFO) << e.what();
         return 0;
@@ -79,15 +90,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
     boost::regex re("[0-9]+");
     bool has_header = !boost::regex_match(col_name, re);
     index_offset_ = 1 + static_cast<size_t>(has_header);
-    result_ = Verify(dc);
 
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start);
-
-    return elapsed_time.count();
-}
-
-bool DCVerifier::Verify(dc::DC dc) {
     dc.ConvertEqualities();
     std::vector<dc::Predicate> no_diseq_preds, diseq_preds;
     std::vector<dc::Predicate> predicates = dc.GetPredicates();
@@ -465,6 +468,31 @@ bool DCVerifier::ContainsNullOrEmpty(std::vector<mo::ColumnIndex> const& indices
                                      size_t tuple_ind) const {
     auto l = [this, tuple_ind](mo::ColumnIndex ind) { return data_[ind].IsNullOrEmpty(tuple_ind); };
     return std::any_of(indices.begin(), indices.end(), l);
+}
+
+std::unordered_map<dc::Point<dc::Component>, size_t, Point::Hasher> DCVerifier::GetFrequencies()
+        const {
+    std::vector<Column::IndexType> indices = dc_.GetColumnIndices();
+    std::unordered_map<dc::Point<dc::Component>, size_t, Point::Hasher> freqs;
+    for (size_t i = 0; i < data_.front().GetNumRows(); ++i) {
+        std::vector<std::byte const*> row = GetRow(i);
+        dc::Point<dc::Component> cur_tuple = MakePoint(row, indices);
+        freqs[cur_tuple]++;
+    }
+    return freqs;
+}
+
+std::vector<std::pair<Point, Point>> DCVerifier::GetRawViolations() const {
+    // We consider same indices for s and t predicates
+    std::vector<Column::IndexType> indices = dc_.GetColumnIndices();
+    std::vector<std::pair<Point, Point>> res;
+    for (auto [first, second] : violations_) {
+        Point first_point = MakePoint(GetRow(first - index_offset_), indices);
+        Point second_point = MakePoint(GetRow(second - index_offset_), indices);
+        res.push_back({std::move(first_point), std::move(second_point)});
+    }
+
+    return res;
 }
 
 }  // namespace algos
