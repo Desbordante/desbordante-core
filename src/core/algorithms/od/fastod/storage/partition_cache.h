@@ -43,8 +43,8 @@ public:
         cache_.Clear();
     }
 
-    ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
-                                                  std::shared_ptr<DataFrame> data) {
+    ComplexStrippedPartition const& GetStrippedPartition(AttributeSet const& attribute_set,
+                                                         DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
@@ -53,17 +53,18 @@ public:
         bool is_product_called = CallProductWithAttributesInCache(result_partition, attribute_set);
 
         if (!is_product_called) {
-            result_partition = data->IsAttributesMostlyRangeBased(attribute_set)
-                                       ? ComplexStrippedPartition::Create<true>(data)
-                                       : ComplexStrippedPartition::Create<false>(data);
+            result_partition = data.IsAttributesMostlyRangeBased(attribute_set)
+                                       ? ComplexStrippedPartition::Create<
+                                                 ComplexStrippedPartition::Type::kRangeBased>(data)
+                                       : ComplexStrippedPartition::Create<
+                                                 ComplexStrippedPartition::Type::kStripped>(data);
 
             attribute_set.Iterate([this, &result_partition](model::ColumnIndex attr) {
                 CallProductWithAttribute(result_partition, attr);
             });
         }
 
-        cache_.Set(attribute_set, result_partition);
-        return result_partition;
+        return cache_.GetOrInsert(attribute_set, result_partition);
     }
 };
 
