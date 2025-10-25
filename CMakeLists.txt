@@ -7,16 +7,16 @@ if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
     message(FATAL_ERROR "The project does not currently support versions 4.0 or higher.")
 endif()
 
-if(POLICY CMP0167)
+if (POLICY CMP0167)
     # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
     # TODO: port project to "Modern CMake" https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
     cmake_policy(SET CMP0167 OLD)
 endif()
-if(POLICY CMP0144)
+if (POLICY CMP0144)
     cmake_policy(SET CMP0144 NEW)
 endif()
 
-if(POLICY CMP0175)
+if (POLICY CMP0175)
     # Don't allow invalid arguments of `add_custom_command()`
     cmake_policy(SET CMP0175 NEW)
 endif()
@@ -98,12 +98,6 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
-
-# -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-set(BUILD_OPTS "-DELPP_THREAD_SAFE")
-if(BUILD_NATIVE)
-    string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
-endif()
 
 # RELEASE build options
 string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}" "-O3")
@@ -241,15 +235,18 @@ endif()
 include(cmake/CPM.cmake)
 
 CPMAddPackage(
-    NAME easyloggingpp
-    GITHUB_REPOSITORY abumq/easyloggingpp
-    VERSION 9.96.7
-    OPTIONS "build_static_lib ON"
+    NAME spdlog
+    GITHUB_REPOSITORY gabime/spdlog
+    GIT_TAG v1.15.2
+    OPTIONS
+        "SPDLOG_BUILD_EXAMPLE OFF"
+        "SPDLOG_BUILD_TESTS OFF"
+        "SPDLOG_INSTALL OFF"
+        "SPDLOG_HEADER_ONLY ON"
     SYSTEM YES
-    EXCLUDE_FROM_ALL YES
 )
-include_directories(SYSTEM "${easyloggingpp_SOURCE_DIR}/src")
-set_target_properties(easyloggingpp PROPERTIES COMPILE_FLAGS "-w")
+
+include_directories(SYSTEM "${spdlog_SOURCE_DIR}/include")
 
 CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
 include_directories(SYSTEM "${emhash_SOURCE_DIR}")
@@ -324,13 +321,7 @@ include_directories(
 
 add_subdirectory("src/core")
 
-# Configure logs
-add_subdirectory("cfg")
-
-# --- Optional Modules Setup ---
-
-# Configure tests
-if(COMPILE_TESTS)
+if (COMPILE_TESTS)
     enable_testing()
 endif()
 
