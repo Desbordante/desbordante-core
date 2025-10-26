@@ -16,7 +16,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/regex.hpp>
-#include <easylogging++.h>
 
 #include "algorithms/dd/split/model/distance_position_list_index.h"
 #include "config/names_and_descriptions.h"
@@ -25,6 +24,7 @@
 #include "model/table/column_index.h"
 #include "model/types/numeric_type.h"
 #include "util/levenshtein_distance.h"
+#include "util/logger.h"
 
 namespace algos::dd {
 
@@ -120,7 +120,7 @@ void Split::ParseDifferenceTable() {
 
 unsigned long long Split::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
-    LOG(DEBUG) << "Start";
+    LOG_DEBUG("Start");
 
     SetLimits();
     CheckTypes();
@@ -129,45 +129,45 @@ unsigned long long Split::ExecuteInternal() {
     CalculateAllDistances();
     CalculateIndexSearchSpaces();
 
-    LOG(INFO) << "Calculated distances";
+    LOG_INFO("Calculated distances");
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
+    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
 
     if (reduce_method_ == +Reduce::IEHybrid) {
         CalculateTuplePairs();
     }
 
-    LOG(INFO) << "Calculated tuple pairs";
+    LOG_INFO("Calculated tuple pairs");
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
-    LOG(INFO) << "Minimum and maximum distances for each column with non-empty search space:";
+    LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
+    LOG_INFO("Minimum and maximum distances for each column with non-empty search space:");
 
     for (model::ColumnIndex index = 0; index < num_columns_; index++)
-        LOG(INFO) << input_table_->GetColumnName(non_empty_cols_[index]) << ": "
-                  << min_max_dif_[index].lower_bound << ", " << min_max_dif_[index].upper_bound;
+        LOG_INFO("{}: {}, {}", input_table_->GetColumnName(non_empty_cols_[index]),
+                 min_max_dif_[index].lower_bound, min_max_dif_[index].upper_bound);
 
     unsigned const search_size = ReduceDDs(start_time);
 
-    LOG(DEBUG) << "Reduced dependencies";
+    LOG_DEBUG("Reduced dependencies");
 
     unsigned num_cycles = RemoveRedundantDDs();
 
-    LOG(INFO) << "Removed redundant dependencies";
-    LOG(DEBUG) << "Cycles: " << num_cycles;
+    LOG_INFO("Removed redundant dependencies");
+    LOG_DEBUG("Cycles: {}", num_cycles);
 
     num_cycles = RemoveTransitiveDDs();
 
-    LOG(INFO) << "Removed transitive dependencies";
-    LOG(DEBUG) << "Cycles: " << num_cycles;
-    LOG(INFO) << "Search space size: " << search_size;
+    LOG_INFO("Removed transitive dependencies");
+    LOG_DEBUG("Cycles: {}", num_cycles);
+    LOG_INFO("Search space size: {}", search_size);
 
     PrintResults();
 
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "Algorithm time: " << elapsed_milliseconds.count();
+    LOG_INFO("Algorithm time: {}", elapsed_milliseconds.count());
     return elapsed_milliseconds.count();
 }
 
@@ -191,13 +191,13 @@ unsigned Split::ReduceDDs(auto const& start_time) {
         search = SearchSpace(indices);
         dfs_y = SearchSpace(index);
         search_size += search.size() * (dfs_y.size() - 1);
-        LOG(DEBUG) << "Calculated search spaces for column "
-                   << input_table_->GetColumnName(non_empty_cols_[index]);
+        LOG_DEBUG("Calculated search spaces for column {}",
+                  input_table_->GetColumnName(non_empty_cols_[index]));
         auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
-        LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
-        LOG(DEBUG) << "Lhs and rhs search space sizes: " << search.size() << " " << dfs_y.size();
-        LOG(DEBUG) << "Number of verifications for each df in rhs:";
+        LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
+        LOG_DEBUG("Lhs and rhs search space sizes: {} {}", search.size(), dfs_y.size());
+        LOG_DEBUG("Number of verifications for each df in rhs:");
 
         for (auto& df_y : dfs_y) {
             unsigned cnt = 0;
@@ -217,13 +217,13 @@ unsigned Split::ReduceDDs(auto const& start_time) {
                 }
                 dd_collection_.splice(dd_collection_.end(), reduced);
             }
-            LOG(DEBUG) << cnt;
+            LOG_DEBUG("{}", cnt);
         }
         elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
-        LOG(INFO) << "Reduced dependencies with their rhs on column "
-                  << input_table_->GetColumnName(non_empty_cols_[index]);
-        LOG(DEBUG) << "Current time: " << elapsed_milliseconds.count();
+        LOG_INFO("Reduced dependencies with their rhs on column {}",
+                 input_table_->GetColumnName(non_empty_cols_[index]));
+        LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
     }
     return search_size;
 }
@@ -714,9 +714,9 @@ std::list<DD> Split::InstanceExclusionReduce(std::vector<std::size_t> const& tup
 
 void Split::PrintResults() {
     std::list<model::DDString> const result_strings = GetDDStringList();
-    LOG(INFO) << "Minimal cover size: " << result_strings.size();
+    LOG_INFO("Minimal cover size: {}", result_strings.size());
     for (auto const& result_str : result_strings) {
-        LOG(DEBUG) << result_str.ToString();
+        LOG_DEBUG("{}", result_str.ToString());
     }
 }
 
