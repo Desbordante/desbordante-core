@@ -170,7 +170,7 @@ void BindLogging(py::module_& main_module) {
                  py::arg("logger"))
 
             .def(
-                    "setLevel",
+                    "set_level",
                     [](LoggerProxy const& self, spdlog::level::level_enum level) {
                         (void)self.real_logger.attr("setLevel")(SpdlogLevelToPyLevel(level));
                         SetCppLoggingLevel(level);
@@ -179,7 +179,7 @@ void BindLogging(py::module_& main_module) {
                     "Sets the logging level using the desbordante.logging.Level enum.")
 
             .def(
-                    "setLevel",
+                    "set_level",
                     [](LoggerProxy const& self, int level) {
                         (void)self.real_logger.attr("setLevel")(level);
                         SetCppLoggingLevel(PyLevelToSpdlogLevel(level));

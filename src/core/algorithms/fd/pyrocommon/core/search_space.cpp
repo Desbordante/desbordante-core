@@ -300,8 +300,7 @@ void SearchSpace::CheckEstimate([[maybe_unused]] DependencyStrategy* strategy,
 }
 
 void SearchSpace::TrickleDown(Vertical const& main_peak, double main_peak_error) {
-    LOG_DEBUG(
-            (boost::format{"====== Trickling down from %1% ======"} % main_peak.ToString()).str());
+    LOG_DEBUG("====== Trickling down from {} ======", main_peak.ToString());
 
     std::unordered_set<Vertical> maximal_non_deps;
     auto alleged_min_deps =
@@ -750,5 +749,5 @@ void SearchSpace::EnsureInitialized() {
     for (auto const& pad : launch_pads_) {
         initialized_launch_pads += std::string(pad) + " ";
     }
-    LOG_TRACE("Initialized with launch pads: " + initialized_launch_pads);
+    LOG_TRACE("Initialized with launch pads: {}", initialized_launch_pads);
 }

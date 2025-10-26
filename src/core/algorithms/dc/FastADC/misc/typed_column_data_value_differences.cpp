@@ -67,9 +67,8 @@ double GetSharedPercentage(model::TypedColumnData const& c1, model::TypedColumnD
         case model::TypeId::kString:
             return GetSharedPercentageTyped<std::string>(c1, c2);
         default:
-            LOG_DEBUG("Column " + c1.GetColumn()->ToString() + " with type " +
-                      c1.GetType().ToString() +
-                      " is not supported for shared percentage calculation");
+            LOG_DEBUG("Column {} with type {} is not supported for shared percentage calculation",
+                      c1.GetColumn()->ToString(), c1.GetType().ToString());
             return -1.0;
     }
 }
@@ -90,7 +89,7 @@ double GetAverageRatio(model::TypedColumnData const& c1, model::TypedColumnData 
             avg2 = CalculateAverageTyped<double>(c2);
             break;
         default:
-            LOG_DEBUG("Column type  " + c1.GetType().ToString() + " is not numeric");
+            LOG_DEBUG("Column type  {} is not numeric", c1.GetType().ToString());
             return -1.0;
     }
 

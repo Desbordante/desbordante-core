@@ -28,7 +28,7 @@ public:
             t_.join();
         }
     } catch (std::system_error const& e) {
-        LOG_ERROR(e.what());
+        LOG_ERROR("{}", e.what());
         return;  // Don't pass exception on
     }
 

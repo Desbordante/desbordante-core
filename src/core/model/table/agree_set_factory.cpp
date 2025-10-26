@@ -85,7 +85,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& id_set : identifier_sets) {
-        LOG_DEBUG(id_set.ToString());
+        LOG_DEBUG("{}", id_set.ToString());
     }
 
     // compute agree sets using identifier sets
@@ -127,7 +127,7 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
 
     LOG_DEBUG("Identifier sets:");
     for (auto const& [index, id_set] : identifier_sets) {
-        LOG_DEBUG(id_set.ToString());
+        LOG_DEBUG("{}", id_set.ToString());
     }
 
     // compute agree sets using identifier sets

@@ -217,7 +217,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
                 }
                 dd_collection_.splice(dd_collection_.end(), reduced);
             }
-            LOG_DEBUG(cnt);
+            LOG_DEBUG("{}", cnt);
         }
         elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time);
