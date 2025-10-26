@@ -4,7 +4,7 @@
 
 namespace algos::hyfd {
 
-void Inductor::UpdateFdTree(NonFDList&& non_fds) {
+void Inductor::UpdateFdTree(NonFDList const& non_fds) {
     unsigned const max_level = non_fds.GetDepth();
 
     for (unsigned level = max_level; level != 0; level--) {
@@ -33,7 +33,7 @@ void Inductor::SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, s
 
             invalid_lhs_bits.set(i);
 
-            if (tree_->FindFdOrGeneral(invalid_lhs_bits, rhs_id)) {
+            if (tree_->ContainsFdOrGeneral(invalid_lhs_bits, rhs_id)) {
                 invalid_lhs_bits.reset(i);
                 continue;
             }
