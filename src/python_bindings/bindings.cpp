@@ -5,6 +5,7 @@
 #include <pybind11/pybind11.h>
 
 #include "ac/bind_ac.h"
+#include "afd_metric/bind_afd_metric_calculation.h"
 #include "ar/bind_ar.h"
 #include "bind_main_classes.h"
 #include "cfd/bind_cfd.h"

@@ -8,6 +8,7 @@
 #include <boost/dynamic_bitset.hpp>
 
 #include "model/table/position_list_index.h"
+#include "model/table/position_list_index_with_singletons.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
 
@@ -17,7 +18,9 @@ class LatticeVertex {
 private:
     Vertical vertical_;
     // holds either an owned PLI (unique_ptr) or a non-owned one (const*)
-    std::variant<std::unique_ptr<PositionListIndex>, PositionListIndex const*> position_list_index_;
+    std::variant<std::unique_ptr<PositionListIndex>, PositionListIndex const*,
+                 std::unique_ptr<PLIWS>, PLIWS const*>
+            position_list_index_;
     boost::dynamic_bitset<> rhs_candidates_;
     bool is_key_candidate_ = false;
     std::vector<LatticeVertex const*> parents_;
@@ -65,11 +68,21 @@ public:
 
     PositionListIndex const* GetPositionListIndex() const;
 
+    PLIWithSingletons const* GetPositionListIndexWithSingletones() const;
+
     void SetPositionListIndex(PositionListIndex const* position_list_index) {
         position_list_index_ = position_list_index;
     }
 
     void AcquirePositionListIndex(std::unique_ptr<PositionListIndex> position_list_index) {
+        position_list_index_ = std::move(position_list_index);
+    }
+
+    void SetPLIWithSingletones(PLIWithSingletons const* position_list_index) {
+        position_list_index_ = position_list_index;
+    }
+
+    void AcquirePLIWithSingletones(std::unique_ptr<PLIWithSingletons> position_list_index) {
         position_list_index_ = std::move(position_list_index);
     }
 
