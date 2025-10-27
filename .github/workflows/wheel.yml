@@ -1,7 +1,7 @@
 name: Wheel
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
     paths-ignore:
       - docs/**
       - README.md
@@ -27,6 +27,8 @@ on:
       - COPYING
       - build.*
       - pull_datasets.sh
+  schedule:
+    - cron: "0 3 * * 1" 
   workflow_dispatch:
   release:
     types:
@@ -47,6 +49,36 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install cibuildwheel
         run: pipx install cibuildwheel==3.2.1
+      - name: Set CIBW_BUILD pattern based on trigger
+        id: set-build-pattern
+        run: |
+          if [[ "${{ env.BUILD_MODE }}" == "minimal" ]]; then
+            echo "Running minimal build for Linux on PR. Detecting oldest and newest versions automatically."
+            
+            ALL_IDS=$(cibuildwheel --print-build-identifiers --platform linux)
+            PYTHON_VERSIONS=$(echo "$ALL_IDS" | cut -d- -f1 | sort -uV)
+            OLDEST_VERSION=$(echo "$PYTHON_VERSIONS" | head -n 1)
+            NEWEST_VERSION=$(echo "$PYTHON_VERSIONS" | tail -n 1)
+
+            echo "Detected oldest version: $OLDEST_VERSION"
+            echo "Detected newest version: $NEWEST_VERSION"
+
+            if [ "$OLDEST_VERSION" == "$NEWEST_VERSION" ]; then
+              CIBW_PATTERN="${OLDEST_VERSION}-*manylinux*"
+            else
+              CIBW_PATTERN="${OLDEST_VERSION}-*manylinux* ${NEWEST_VERSION}-*manylinux*"
+            fi
+            
+            echo "CIBW_BUILD=$CIBW_PATTERN" >> $GITHUB_ENV
+            echo "Final pattern: $CIBW_PATTERN"
+
+          else
+            echo "Running full build for Linux."
+            echo "CIBW_BUILD=*manylinux*" >> $GITHUB_ENV
+          fi
+        env:
+          BUILD_MODE: ${{ (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'run-full-wheels-build')) && 'minimal' || 'full' }}
+
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -61,7 +93,6 @@ jobs:
         run: echo "${{ steps.set-matrix.outputs.include }}"
     env:
       CIBW_ARCHS_LINUX: x86_64
-      CIBW_BUILD: "*manylinux*"
       CIBW_SKIP: "cp37-*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
@@ -76,6 +107,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install cibuildwheel
         run: pipx install cibuildwheel==3.2.1
+      - name: Set CIBW_BUILD pattern for macOS based on trigger
+        id: set-build-pattern
+        run: |
+          if [[ "${{ env.BUILD_MODE }}" == "minimal" ]]; then
+            echo "skipping macOS build on PR by default."
+            echo "CIBW_BUILD=skip-this" >> $GITHUB_ENV
+          else
+            echo "Running full build for macOS."
+            echo "CIBW_BUILD=*macos*" >> $GITHUB_ENV
+          fi
+        env:
+          BUILD_MODE: ${{ (github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'run-full-wheels-build')) && 'minimal' || 'full' }}
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -94,7 +137,6 @@ jobs:
         run: echo "${{ steps.set-matrix.outputs.include }}"
     env:
       CIBW_ARCHS_MACOS: arm64 x86_64
-      CIBW_BUILD: "*macos*"
       # https://github.com/pypa/cibuildwheel/issues/2126
       CIBW_SKIP: "cp37-*"
       CIBW_TEST_REQUIRES: pytest
