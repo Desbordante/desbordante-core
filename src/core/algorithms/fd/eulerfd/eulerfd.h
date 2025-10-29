@@ -11,7 +11,6 @@
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/unordered_set.hpp>
 
 #include "config/equal_nulls/option.h"

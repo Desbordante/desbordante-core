@@ -1,7 +1,6 @@
 #include "config/custom_random_seed/option.h"
 
 #include <optional>
-#include <variant>
 
 #include "common_option.h"
 #include "config/names_and_descriptions.h"
