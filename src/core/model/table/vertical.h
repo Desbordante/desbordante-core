@@ -5,13 +5,14 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
 #include "column.h"
+
+class RelationalSchema;
 
 class Vertical {
 private:

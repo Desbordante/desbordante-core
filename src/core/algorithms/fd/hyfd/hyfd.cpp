@@ -1,9 +1,9 @@
 #include "hyfd.h"
 
-#include <algorithm>
 #include <chrono>
 #include <memory>
-#include <tuple>
+#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -11,11 +11,19 @@
 #include <easylogging++.h>
 
 #include "algorithms/fd/hycommon/preprocessor.h"
-#include "algorithms/fd/hycommon/util/pli_util.h"
+#include "common_option.h"
 #include "config/names.h"
 #include "config/thread_number/option.h"
+#include "fd/hycommon/types.h"
+#include "fd/hyfd/model/fd_tree.h"
+#include "fd/pli_based_fd_algorithm.h"
+#include "fd/raw_fd.h"
 #include "inductor.h"
 #include "sampler.h"
+#include "table/column.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 #include "validator.h"
 
 namespace algos::hyfd {

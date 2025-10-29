@@ -3,14 +3,19 @@
 #include <list>
 #include <memory>
 #include <vector>
-
 // For printing Dependencies
+#include <cstddef>
 #include <fstream>
+#include <iosfwd>
+#include <limits>
 #include <string>
 
 #include "algorithms/fd/fd.h"
 #include "model/table/relational_schema.h"
 #include "model/types/bitset.h"
+
+class FD;
+class RelationalSchema;
 
 class FDTreeElement {
 public:

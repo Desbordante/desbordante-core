@@ -1,5 +1,13 @@
 #include "value_range.h"
 
+#include <iosfwd>
+#include <ostream>
+#include <ranges>
+#include <sstream>
+#include <unordered_set>
+
+#include "type.h"
+
 namespace model {
 
 ValueRange::~ValueRange() {}

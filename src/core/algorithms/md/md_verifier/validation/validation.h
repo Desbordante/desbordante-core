@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -13,6 +14,23 @@
 #include "algorithms/md/md_verifier/highlights/highlights.h"
 #include "algorithms/md/similarity.h"
 #include "config/tabular_data/input_table_type.h"
+#include "index.h"
+#include "md/hymd/indexes/records_info.h"
+#include "md/hymd/table_identifiers.h"
+
+namespace algos {
+namespace hymd {
+class SimilarityData;
+}  // namespace hymd
+
+namespace md {
+class MDHighlights;
+}  // namespace md
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}  // namespace util
 
 namespace algos::md {
 

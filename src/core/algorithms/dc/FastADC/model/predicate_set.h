@@ -1,16 +1,21 @@
 #pragma once
 
-#include <assert.h>
 #include <cstddef>
 #include <iterator>
 #include <memory>
 #include <string>
 
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <boost/move/utility_core.hpp>
 
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
+
+namespace algos {
+namespace fastadc {
+class PredicateProvider;
+}  // namespace fastadc
+}  // namespace algos
 
 namespace algos::fastadc {
 

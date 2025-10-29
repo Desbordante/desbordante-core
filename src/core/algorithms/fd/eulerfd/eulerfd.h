@@ -2,29 +2,29 @@
 
 #include <array>
 #include <cstdlib>
-#include <iostream>
-#include <limits>
 #include <memory>
-#include <numeric>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>
-#include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/unordered_set.hpp>
 
 #include "config/equal_nulls/option.h"
 #include "config/tabular_data/input_table/option.h"
 #include "custom_random_seed/option.h"
 #include "custom_random_seed/type.h"
+#include "equal_nulls/type.h"
+#include "fd/eulerfd/cluster.h"
 #include "fd/fd_algorithm.h"
 #include "mlfq.h"
 #include "model/table/column.h"
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
 #include "search_tree.h"
+#include "tabular_data/input_table_type.h"
 #include "util/custom_random.h"
+
+class RelationalSchema;
 
 namespace algos {
 

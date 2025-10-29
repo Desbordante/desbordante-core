@@ -5,8 +5,11 @@
  */
 #pragma once
 
+#include <compare>
+#include <functional>
 #include <memory>
 #include <queue>
+#include <string>
 #include <vector>
 
 #include "column_domain.h"

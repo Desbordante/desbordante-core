@@ -7,6 +7,8 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
+#include <iterator>
 #include <limits>
 
 namespace model {

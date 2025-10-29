@@ -1,6 +1,14 @@
 #include "config/tabular_data/input_table/option.h"
 
+#include <memory>
+#include <optional>
+#include <string>
+#include <variant>
+
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
+#include "exceptions.h"
+#include "tabular_data/input_table_type.h"
 
 namespace config {
 using names::kTable, descriptions::kDTable;

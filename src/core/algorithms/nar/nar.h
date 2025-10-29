@@ -1,12 +1,19 @@
 #pragma once
 
-#include <vector>
+#include <cstddef>
+#include <iosfwd>
+#include <memory>
+#include <ostream>
+#include <sstream>
+#include <string>
+#include <unordered_map>
 
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
 #include "value_range.h"
 
 namespace model {
+class ValueRange;
 
 struct NARQualities {
     double fitness = -1.0;

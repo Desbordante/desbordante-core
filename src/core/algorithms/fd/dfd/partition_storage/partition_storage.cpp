@@ -1,10 +1,23 @@
 #include "partition_storage.h"
 
+#include <algorithm>
+#include <cassert>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
-#include <boost/optional.hpp>
+#include <boost/optional/optional.hpp>
 #include <easylogging++.h>
 
 #include "model/table/vertical_map.h"
+#include "table/column.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();

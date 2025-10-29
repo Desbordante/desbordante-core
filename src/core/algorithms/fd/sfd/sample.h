@@ -1,8 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <cmath>
-#include <numbers>
+#include <cstddef>
 #include <vector>
 
 #include "frequency_handler.h"
@@ -13,7 +12,14 @@
 #include "model/table/typed_column_data.h"
 #include "model/table/vertical.h"
 
+class RelationalSchema;
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
+
 namespace algos {
+class FrequencyHandler;
 
 class Sample {
 private:

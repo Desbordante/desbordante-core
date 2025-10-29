@@ -1,12 +1,25 @@
 #pragma once
 
-#include <stdexcept>
+#include <cstddef>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/dc/model/dc.h"
 #include "algorithms/dc/model/operator.h"
 #include "algorithms/dc/model/predicate.h"
+#include "dc/model/column_operand.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/typed_column_data.h"
+
+class ColumnLayoutRelationData;
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos::dc {
 

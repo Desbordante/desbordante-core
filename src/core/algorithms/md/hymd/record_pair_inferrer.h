@@ -1,21 +1,39 @@
 #pragma once
 
-#include <cassert>
-#include <cstdint>
-#include <list>
+#include <cstddef>
 #include <queue>
-#include <span>
+#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/md/hymd/lattice/md_lattice.h"
 #include "algorithms/md/hymd/lhs_ccv_ids_info.h"
 #include "algorithms/md/hymd/pair_comparison_result.h"
 #include "algorithms/md/hymd/recommendation.h"
 #include "algorithms/md/hymd/similarity_data.h"
+#include "index.h"
+#include "md/hymd/column_match_info.h"
+#include "md/hymd/compressed_record.h"
+#include "md/hymd/indexes/records_info.h"
+#include "md/hymd/table_identifiers.h"
 #include "util/desbordante_assume.h"
 #include "util/worker_thread_pool.h"
+
+namespace algos {
+namespace hymd {
+namespace lattice {
+class MdLattice;
+}  // namespace lattice
+struct LhsCCVIdsInfo;
+}  // namespace hymd
+}  // namespace algos
+
+namespace util {
+class WorkerThreadPool;
+}  // namespace util
 
 namespace algos::hymd {
 
@@ -27,7 +45,6 @@ private:
     using RankedRecordsColumnMatch = std::vector<RankedRecordsValue>;
 
     class RecordRanker;
-
     template <bool SampleShort>
     class Sampler;
 

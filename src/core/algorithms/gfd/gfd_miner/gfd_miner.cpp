@@ -3,22 +3,38 @@
 #include <algorithm>
 #include <cstdlib>
 #include <fstream>
+#include <iosfwd>
 #include <iterator>
+#include <list>
 #include <map>
 #include <numeric>
 #include <ranges>
 #include <set>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
+#include <boost/graph/adjacency_iterator.hpp>
+#include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
-#include <boost/graph/isomorphism.hpp>
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/iteration_macros.hpp>
+#include <boost/graph/properties.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/property_map/property_map.hpp>
+#include <boost/range/irange.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <easylogging++.h>
 
+#include "algorithm.h"
 #include "algorithms/gfd/comparator.h"
+#include "config/names_and_descriptions.h"
 #include "config/option_using.h"
+#include "gfd/gfd.h"
+#include "graph_parser/graph_parser.h"
+#include "option.h"
 #include "util/timed_invoke.h"
 
 namespace algos {

@@ -1,8 +1,10 @@
 #pragma once
-#include <functional>
+
+#include <iosfwd>
+#include <string>
 #include <utility>
 
-#include "../model/confidence_interval.h"
+#include "fd/pyrocommon/model/confidence_interval.h"
 #include "model/table/vertical.h"
 
 class DependencyCandidate {

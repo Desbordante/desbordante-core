@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include <boost/dynamic_bitset.hpp>
 
@@ -12,6 +14,9 @@
 #include "model/table/relational_schema.h"
 #include "model/table/vertical.h"
 #include "search_tree.h"
+
+class RelationalSchema;
+class SearchTree;
 
 namespace algos {
 

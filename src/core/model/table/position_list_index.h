@@ -6,12 +6,14 @@
 #pragma once
 #include <deque>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "model/table/column.h"
 
 class ColumnLayoutRelationData;
+class Vertical;
 
 namespace model {
 

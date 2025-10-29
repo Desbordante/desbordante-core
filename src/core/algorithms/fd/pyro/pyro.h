@@ -1,11 +1,14 @@
 #pragma once
 
 #include <list>
-#include <mutex>
+#include <memory>
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/fd/pyrocommon/core/dependency_consumer.h"
 #include "algorithms/fd/pyrocommon/core/search_space.h"
+#include "cache_eviction_method.h"
+#include "caching_method.h"
+#include "fd/pyrocommon/core/parameters.h"
 
 namespace algos {
 

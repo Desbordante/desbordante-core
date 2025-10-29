@@ -1,13 +1,17 @@
-#include <iostream>
+#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <boost/container/allocator_traits.hpp>
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"
 #include "algorithms/cfd/cfd_verifier/cfd_verifier.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
+
+struct CSVConfig;
 
 namespace tests {
 

@@ -1,6 +1,10 @@
 #include "attribute_set.h"
 
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
+
+#include "table/column_index.h"
 
 namespace algos::fastod {
 

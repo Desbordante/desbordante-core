@@ -1,6 +1,11 @@
 #pragma once
+#include <cstddef>
 #include <memory>
+#include <optional>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <variant>
 #include <vector>
 
 #include "model/table/column.h"

@@ -1,12 +1,23 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/providers/index_provider.h"
+
+namespace algos {
+namespace fastadc {
+class ColumnOperand;
+class PredicateProvider;
+}  // namespace fastadc
+}  // namespace algos
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos::fastadc {
 

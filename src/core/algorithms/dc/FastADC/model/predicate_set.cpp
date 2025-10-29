@@ -1,8 +1,17 @@
 #include "dc/FastADC/model/predicate_set.h"
 
 #include <algorithm>
+#include <iosfwd>
+#include <ostream>
+#include <sstream>
 
 #include "dc/FastADC/model/predicate.h"
+
+namespace algos {
+namespace fastadc {
+class PredicateProvider;
+}  // namespace fastadc
+}  // namespace algos
 
 namespace algos::fastadc {
 

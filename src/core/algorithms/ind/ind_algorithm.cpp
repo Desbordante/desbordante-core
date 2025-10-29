@@ -1,7 +1,12 @@
 #include "ind_algorithm.h"
 
+#include <cstddef>
+
+#include "algorithm.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_tables/option.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
 
 namespace algos {
 

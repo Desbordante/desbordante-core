@@ -1,11 +1,17 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <vector>
 
 #include "dc/FastADC/model/pli_shard.h"
 #include "dc/FastADC/util/common_clue_set_builder.h"
 #include "dc/FastADC/util/evidence_aux_structures_builder.h"
+
+namespace algos {
+namespace fastadc {
+struct PredicatePacks;
+}  // namespace fastadc
+}  // namespace algos
 
 namespace algos::fastadc {
 

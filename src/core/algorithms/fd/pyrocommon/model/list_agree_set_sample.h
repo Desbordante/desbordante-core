@@ -1,12 +1,20 @@
 #pragma once
 
-#include <map>
+#include <memory>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "agree_set_sample.h"
 
+class ColumnLayoutRelationData;
+class CustomRandom;
+class Vertical;
+
 namespace model {
+class PositionListIndex;
 
 // TODO: Java long ~ C++ long long => consider replacing ints with longlongs
 class ListAgreeSetSample : public AgreeSetSample {

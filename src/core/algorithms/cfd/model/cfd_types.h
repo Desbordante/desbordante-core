@@ -8,7 +8,7 @@
 #include <utility>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <boost/unordered_map.hpp>
 
 #include "raw_cfd.h"

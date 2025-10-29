@@ -1,7 +1,14 @@
 #pragma once
 
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
 #include "algorithms/cfd/model/partition_tidlist.h"
 #include "algorithms/cfd/util/prefix_tree.h"
+#include "cfd/model/cfd_types.h"
 #include "cfd_discovery.h"
 #include "enums.h"
 #include "miner_node.h"

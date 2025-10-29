@@ -1,15 +1,25 @@
 #pragma once
 
 #include <cstddef>
+#include <memory>
+#include <string>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "cfd/model/raw_cfd.h"
 #include "cfd_column_data.h"
 #include "cfd_types.h"
 #include "model/table/idataset_stream.h"
 #include "model/table/relation_data.h"
+#include "table/relational_schema.h"
+
+namespace model {
+class IDatasetStream;
+}  // namespace model
 
 // see algorithms/cfd/LICENSE
 

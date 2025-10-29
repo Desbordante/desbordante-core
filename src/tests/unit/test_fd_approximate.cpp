@@ -1,10 +1,22 @@
 #include <algorithm>
+#include <list>
+#include <set>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include <boost/container/allocator_traits.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "algo_factory.h"
 #include "algorithms/fd/eulerfd/eulerfd.h"
 #include "all_csv_configs.h"
+#include "fd/fd.h"
+#include "fd/raw_fd.h"
+#include "table/column.h"
+#include "table/vertical.h"
 #include "test_fd_util.h"
 #include "util/bitset_utils.h"
 

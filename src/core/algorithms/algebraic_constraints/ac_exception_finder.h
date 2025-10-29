@@ -1,13 +1,18 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 #include "ac_exception.h"
-#include "model/table/column_layout_typed_relation_data.h"
 #include "ranges_collection.h"
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos {
 class ACAlgorithm;
+struct RangesCollection;
 }  // namespace algos
 
 namespace algos::algebraic_constraints {

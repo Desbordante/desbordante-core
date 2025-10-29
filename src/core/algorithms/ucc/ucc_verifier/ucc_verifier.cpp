@@ -1,14 +1,24 @@
 #include "ucc_verifier.h"
 
 #include <chrono>
+#include <functional>
 #include <numeric>
 #include <stdexcept>
+#include <string_view>
+#include <utility>
 
+#include "algorithm.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "indices/type.h"
+#include "table/column_data.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "ucc/ucc_verifier/ucc_stats_calculator.h"
 
 namespace algos {
 

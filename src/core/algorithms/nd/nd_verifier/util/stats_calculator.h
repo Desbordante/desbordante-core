@@ -1,14 +1,26 @@
 #pragma once
 
+#include <algorithm>
+#include <climits>
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include "algorithms/nd/nd.h"
 #include "algorithms/nd/nd_verifier/util/highlight.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
+
+namespace algos {
+namespace nd_verifier {
+namespace util {
+class ValueCombination;
+}  // namespace util
+}  // namespace nd_verifier
+}  // namespace algos
 
 namespace algos::nd_verifier::util {
 

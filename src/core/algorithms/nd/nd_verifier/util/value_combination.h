@@ -1,11 +1,12 @@
 #pragma once
 
 #include <cstddef>
-#include <memory>
-#include <ostream>
-#include <stdexcept>
+#include <iosfwd>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "model/types/builtin.h"
 

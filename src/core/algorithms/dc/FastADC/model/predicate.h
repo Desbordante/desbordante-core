@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bitset>
 #include <cstddef>
 #include <span>
 #include <string>
@@ -12,6 +11,10 @@
 #include "dc/FastADC/model/operator.h"
 #include "model/types/bitset.h"
 #include "table/typed_column_data.h"
+
+namespace model {
+class TypedColumnData;
+}  // namespace model
 
 namespace algos::fastadc {
 

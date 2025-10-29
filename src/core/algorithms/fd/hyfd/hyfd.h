@@ -1,8 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <tuple>
-#include <utility>
 #include <vector>
 
 #include "algorithms/fd/hycommon/types.h"
@@ -10,6 +7,8 @@
 #include "algorithms/fd/raw_fd.h"
 #include "config/thread_number/type.h"
 #include "model/table/position_list_index.h"
+
+struct RawFD;
 
 namespace algos::hyfd {
 

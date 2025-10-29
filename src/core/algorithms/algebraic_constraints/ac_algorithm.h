@@ -1,7 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
-#include <unordered_map>
+#include <memory>
 #include <vector>
 
 #include <enum.h>
@@ -15,10 +16,16 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/types.h"
+#include "numeric_type.h"
 #include "ranges_collection.h"
 #include "typed_column_pair.h"
 
+namespace model {
+class TypedColumnData;
+}  // namespace model
+
 namespace algos {
+struct ACException;
 
 /* Discovers Algebraic Constraints (AC). In theory AC consists of: 1) Set of value
  * pairs (a_i, b_k), where a_i from column A and b_k from column B. 2) Pairing

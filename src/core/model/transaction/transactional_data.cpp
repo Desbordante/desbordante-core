@@ -1,8 +1,10 @@
 #include "transactional_data.h"
 
 #include <cassert>
-#include <stdexcept>
 #include <unordered_map>
+
+#include "table/idataset_stream.h"
+#include "transaction/itemset.h"
 
 namespace model {
 

@@ -1,14 +1,25 @@
 #pragma once
 
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <string>
+#include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "algorithms/fd/fd_verifier/highlight.h"
+#include "builtin.h"
 #include "config/indices/type.h"
 #include "model/table/column_layout_relation_data.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "table/position_list_index.h"
+
+class ColumnLayoutRelationData;
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+}  // namespace model
 
 namespace algos::fd_verifier {
 

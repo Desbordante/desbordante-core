@@ -8,6 +8,8 @@
 #include "algorithms/md/hymd/lattice/md_lattice.h"
 #include "algorithms/md/hymd/lattice/node_base.h"
 #include "algorithms/md/hymd/lattice/validation_info.h"
+#include "md/hymd/column_classifier_value_id.h"
+#include "md/hymd/md_lhs.h"
 #include "model/index.h"
 
 namespace algos::hymd::lattice::cardinality {

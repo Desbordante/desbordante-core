@@ -1,15 +1,11 @@
 #pragma once
 
 #include <algorithm>
-#include <bitset>
 #include <cmath>
-#include <concepts>
 #include <ctime>
-#include <functional>
-#include <iostream>
-#include <map>
+#include <iterator>
 #include <random>
-#include <ranges>
+#include <utility>
 #include <vector>
 
 // see algorithms/cfd/LICENSE

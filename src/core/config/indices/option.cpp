@@ -1,10 +1,18 @@
 #include "config/indices/option.h"
 
 #include <algorithm>
+#include <cassert>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+#include <vector>
 
+#include "common_option.h"
 #include "config/exceptions.h"
 #include "config/indices/validate_index.h"
 #include "config/names_and_descriptions.h"
+#include "indices/type.h"
 
 namespace config {
 

@@ -1,7 +1,9 @@
 #pragma once
 
-#include <string>
-#include <utility>
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <string_view>
 #include <vector>
 
 #include "algorithm.h"
@@ -14,9 +16,16 @@
 #include "model/table/column.h"
 #include "model/table/column_index.h"
 #include "model/table/column_layout_typed_relation_data.h"
+#include "primitive_collection.h"
 #include "sample.h"
 
+namespace model {
+class TypedColumnData;
+}  // namespace model
+
 namespace algos {
+class Sample;
+
 class Cords : public FDAlgorithm {
 private:
     using TypedRelation = model::ColumnLayoutTypedRelationData;

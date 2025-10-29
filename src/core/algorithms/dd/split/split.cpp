@@ -1,15 +1,17 @@
 #include "algorithms/dd/split/split.h"
 
 #include <algorithm>
-#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <limits>
 #include <list>
 #include <numeric>
+#include <optional>
 #include <ranges>
 #include <set>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -18,13 +20,23 @@
 #include <boost/regex.hpp>
 #include <easylogging++.h>
 
+#include "algorithm.h"
 #include "algorithms/dd/split/model/distance_position_list_index.h"
+#include "builtin.h"
+#include "common_option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "dd/dd.h"
+#include "dd/split/enums.h"
+#include "imetrizable_type.h"
 #include "model/table/column_index.h"
-#include "model/types/numeric_type.h"
-#include "util/levenshtein_distance.h"
+#include "option.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/idataset_stream.h"
+#include "table/typed_column_data.h"
+#include "tabular_data/input_table_type.h"
+#include "type.h"
 
 namespace algos::dd {
 

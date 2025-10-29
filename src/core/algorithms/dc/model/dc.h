@@ -1,13 +1,15 @@
 #pragma once
 
 #include <algorithm>
+#include <iterator>
 #include <set>
-#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "algorithms/dc/model/predicate.h"
+#include "dc/model/column_operand.h"
+#include "dc/model/operator.h"
 #include "model/table/column.h"
 #include "model/table/vertical.h"
 

@@ -1,6 +1,13 @@
 #include "differential_functions.h"
 
 #include <algorithm>
+#include <cassert>
+#include <set>
+#include <stdexcept>
+
+#include "nar/des/encoded_nar.h"
+#include "nar/des/enums.h"
+#include "nar/des/rng.h"
 
 namespace algos::des {
 

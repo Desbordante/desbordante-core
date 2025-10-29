@@ -1,5 +1,11 @@
 #include "nar.h"
 
+#include <stdexcept>
+#include <utility>
+
+#include "nar/value_range.h"
+#include "table/typed_column_data.h"
+
 namespace model {
 
 std::string NAR::ToString() const {

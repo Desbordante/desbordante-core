@@ -1,15 +1,35 @@
 #include "ac_algorithm.h"
 
+#include <algorithm>
+#include <cassert>
+#include <chrono>
 #include <cmath>
-#include <functional>
-#include <iostream>
+#include <ostream>
 #include <random>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
 
+#include <boost/any.hpp>
 #include <easylogging++.h>
 
+#include "algebraic_constraints/ac.h"
+#include "algebraic_constraints/ac_exception_finder.h"
+#include "algebraic_constraints/ac_pairs_collection.h"
+#include "algebraic_constraints/bin_operation_enum.h"
+#include "algebraic_constraints/ranges_collection.h"
+#include "algebraic_constraints/typed_column_pair.h"
+#include "algorithm.h"
+#include "builtin.h"
+#include "common_option.h"
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
+#include "option.h"
+#include "table/column_layout_typed_relation_data.h"
+#include "table/typed_column_data.h"
+#include "type.h"
 #include "types/create_type.h"
 
 namespace algos {

@@ -4,6 +4,7 @@
 #include "algorithms/algorithm.h"
 #include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/gfd_validator/gfd_handler.h"
+#include "gfd/graph_descriptor.h"
 
 namespace algos {
 

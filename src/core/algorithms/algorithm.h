@@ -1,6 +1,8 @@
 #pragma once
 
-#include <filesystem>
+#include <cassert>
+#include <cstdint>
+#include <memory>
 #include <string_view>
 #include <typeindex>
 #include <unordered_map>

@@ -1,8 +1,12 @@
 #include "ind.h"
 
+#include <iosfwd>
+#include <ostream>
 #include <sstream>
 
 #include "model/table/column.h"
+#include "table/column_combination.h"
+#include "table/relational_schema.h"
 
 namespace model {
 

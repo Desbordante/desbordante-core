@@ -1,12 +1,12 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
-#include <string>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include <boost/container_hash/hash.hpp>
 
 #include "cfd/model/cfd_relation_data.h"
 #include "cfd/model/cfd_types.h"

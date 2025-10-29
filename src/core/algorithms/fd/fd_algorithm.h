@@ -1,15 +1,23 @@
 #pragma once
 
-#include <filesystem>
+#include <algorithm>
 #include <list>
-#include <mutex>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 #include <boost/any.hpp>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/fd/fd.h"
 #include "config/max_lhs/type.h"
+#include "table/column.h"
+#include "table/vertical.h"
 #include "util/primitive_collection.h"
+
+class RelationalSchema;
 
 namespace model {
 class AgreeSetFactory;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cassert>
-#include <deque>
-#include <string>
+#include <cstddef>
+#include <memory>
 #include <vector>
 
 #include "algorithms/algorithm.h"
@@ -10,6 +10,19 @@
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
 #include "config/tabular_data/input_table_type.h"
+#include "table/position_list_index.h"
+
+class ColumnLayoutRelationData;
+
+namespace algos {
+namespace fd_verifier {
+class Highlight;
+}  // namespace fd_verifier
+}  // namespace algos
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+}  // namespace model
 
 namespace algos::fd_verifier {
 

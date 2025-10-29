@@ -1,7 +1,19 @@
 #pragma once
+
+#include <string>
+
 #include <boost/format.hpp>
 
 #include "dependency_strategy.h"
+#include "fd/pyrocommon/core/profiling_context.h"
+#include "fd/pyrocommon/model/confidence_interval.h"
+#include "table/column_layout_relation_data.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
+
+namespace model {
+class PositionListIndex;
+}  // namespace model
 
 class KeyG1Strategy : public DependencyStrategy {
 private:

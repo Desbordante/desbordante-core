@@ -1,8 +1,8 @@
 #pragma once
 
-#include <algorithm>
-#include <memory>
+#include <cstddef>
 #include <queue>
+#include <utility>
 #include <vector>
 
 #include "cluster.h"

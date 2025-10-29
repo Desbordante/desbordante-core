@@ -1,11 +1,21 @@
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "error/type.h"
+#include "fd/tane/enums.h"
 #include "fd/tane/pfdtane.h"
 #include "model/table/column_layout_relation_data.h"
 #include "parser/csv_parser/csv_parser.h"
+#include "table/column_data.h"
+#include "table/position_list_index.h"
 
 namespace tests {
 namespace onam = config::names;

@@ -1,6 +1,10 @@
 #pragma once
 
 #include <memory>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "algorithms/md/column_match.h"
 #include "algorithms/md/column_similarity_classifier.h"
@@ -9,7 +13,12 @@
 #include "model/index.h"
 #include "model/table/relational_schema.h"
 
+class RelationalSchema;
+
 namespace model {
+namespace md {
+struct ColumnMatch;
+}  // namespace md
 
 struct ColumnDescription {
     std::string column_name;

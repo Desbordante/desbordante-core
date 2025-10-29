@@ -1,13 +1,16 @@
 #include "algo_factory.h"
 
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
-#include "algorithms/algorithms.h"
-#include "algorithms/create_algorithm.h"
+#include "algorithm.h"
 #include "config/names.h"
+#include "csv_parser/csv_parser.h"
+#include "tabular_data/input_table_type.h"
 #include "tabular_data/input_tables_type.h"
 
 namespace algos {

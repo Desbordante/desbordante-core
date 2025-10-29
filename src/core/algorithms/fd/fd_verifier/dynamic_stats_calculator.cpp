@@ -5,7 +5,9 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include "fd/fd_verifier/highlight.h"
+#include "table/dynamic_position_list_index.h"
+#include "table/dynamic_table_data.h"
 
 namespace algos::fd_verifier {
 

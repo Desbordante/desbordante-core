@@ -1,15 +1,21 @@
 #pragma once
 
+#include <list>
 #include <memory>
+#include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "algorithms/algorithm.h"
 #include "error/type.h"
 #include "ind.h"
 #include "model/table/relational_schema.h"
+#include "table/column_combination.h"
 #include "tabular_data/input_tables_type.h"
 #include "util/primitive_collection.h"
+
+class RelationalSchema;
 
 namespace algos {
 

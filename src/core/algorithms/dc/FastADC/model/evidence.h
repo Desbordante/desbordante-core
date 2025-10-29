@@ -1,3 +1,5 @@
+#pragma once
+
 #include "dc/FastADC/model/predicate.h"
 #include "dc/FastADC/util/common_clue_set_builder.h"
 

@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cstddef>
+#include <unordered_map>
+
+#include <boost/dynamic_bitset.hpp>
+
 #include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 #include "algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
 #include "algorithms/md/hymd/lattice/level_getter.h"

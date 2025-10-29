@@ -6,17 +6,40 @@
 #include "mind.h"
 
 #include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <functional>
+#include <iterator>
+#include <list>
+#include <string>
+#include <type_traits>
+#include <typeindex>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
+#include <boost/container_hash/hash.hpp>
+#include <boost/mp11/algorithm.hpp>
+#include <boost/type_index.hpp>
+
+#include "algorithm.h"
+#include "algorithm_types.h"
 #include "algorithms/create_algorithm.h"
+#include "common_option.h"
 #include "config/error/option.h"
 #include "config/names_and_descriptions.h"
 #include "error/type.h"
+#include "exceptions.h"
+#include "ind/ind.h"
 #include "ind/ind_algorithm.h"
+#include "ind/mind/raw_ind.h"
 #include "max_arity/option.h"
 #include "model/table/dataset_stream_projection.h"
+#include "table/arity_index.h"
 #include "table/column_combination.h"
 #include "table/dataset_stream_fixed.h"
+#include "table/idataset_stream.h"
+#include "table/tuple_index.h"
 #include "tabular_data/input_table_type.h"
 #include "util/timed_invoke.h"
 

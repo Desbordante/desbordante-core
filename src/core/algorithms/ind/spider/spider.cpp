@@ -10,13 +10,20 @@
 #include <string>
 #include <type_traits>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "attribute.h"
+#include "bitset_utils.h"
+#include "common_option.h"
 #include "config/equal_nulls/option.h"
 #include "config/error/option.h"
 #include "config/mem_limit/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/thread_number/option.h"
+#include "equal_nulls/type.h"
+#include "ind/ind_algorithm.h"
+#include "table/column_domain.h"
 #include "util/timed_invoke.h"
 
 namespace algos {

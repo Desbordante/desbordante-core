@@ -1,24 +1,35 @@
 #pragma once
 
+#include <functional>
+#include <memory>
 #include <random>
 #include <string>
+#include <vector>
 
-#include "../model/agree_set_sample.h"
-#include "../model/partial_fd.h"
-#include "../model/partial_key.h"
 #include "cache_eviction_method.h"
 #include "caching_method.h"
 #include "dependency_consumer.h"
+#include "fd/pyrocommon/model/agree_set_sample.h"
+#include "fd/pyrocommon/model/partial_fd.h"
+#include "fd/pyrocommon/model/partial_key.h"
 #include "parameters.h"
+#include "table/column_layout_relation_data.h"
 #include "util/custom_random.h"
+
+class PartialFD;
+class PartialKey;
+class RelationalSchema;
+class Vertical;
+enum class CacheEvictionMethod;
+enum class CachingMethod;
 
 namespace model {
 
 // forward declaration
 class PLICache;
-
 template <class Value>
 class VerticalMap;
+class PositionListIndex;
 
 }  // namespace model
 

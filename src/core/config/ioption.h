@@ -4,7 +4,7 @@
 #include <string_view>
 #include <typeindex>
 
-#include "boost/any.hpp"
+#include <boost/any.hpp>
 
 namespace config {
 struct OptValue {

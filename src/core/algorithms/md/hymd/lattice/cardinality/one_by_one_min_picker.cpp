@@ -1,9 +1,11 @@
 #include "algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
 
-#include <algorithm>
 #include <cassert>
+#include <utility>
 
 #include "algorithms/md/hymd/md_lhs.h"
+#include "index.h"
+#include "md/hymd/lattice/validation_info.h"
 #include "util/desbordante_assume.h"
 
 namespace algos::hymd::lattice::cardinality {

@@ -1,6 +1,17 @@
 #include "aid.h"
 
+#include <algorithm>
+#include <chrono>
+#include <stdexcept>
+#include <string>
+
+#include "common_option.h"
 #include "config/tabular_data/input_table/option.h"
+#include "fd/aidfd/search_tree.h"
+#include "table/column.h"
+#include "table/idataset_stream.h"
+#include "table/relational_schema.h"
+#include "table/vertical.h"
 
 namespace algos {
 

@@ -1,9 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/nd/nd.h"
@@ -15,6 +19,19 @@
 #include "config/tabular_data/input_table_type.h"
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/builtin.h"
+
+namespace algos {
+namespace nd_verifier {
+namespace util {
+class Highlight;
+}  // namespace util
+}  // namespace nd_verifier
+}  // namespace algos
+
+namespace model {
+class ColumnLayoutTypedRelationData;
+class TypeId;
+}  // namespace model
 
 namespace algos::nd_verifier {
 

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <filesystem>
-#include <list>
-#include <map>
-#include <mutex>
+#include <memory>
+#include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/any.hpp>
@@ -12,6 +11,12 @@
 #include "algorithms/cfd/model/cfd_relation_data.h"
 #include "algorithms/cfd/model/cfd_types.h"
 #include "config/tabular_data/input_table_type.h"
+
+namespace algos {
+namespace cfd {
+class CFDRelationData;
+}  // namespace cfd
+}  // namespace algos
 
 // see algorithms/cfd/LICENSE
 

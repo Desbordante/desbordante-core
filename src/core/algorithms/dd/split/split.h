@@ -1,11 +1,12 @@
 #pragma once
 
 #include <cstddef>
-#include <filesystem>
 #include <list>
 #include <memory>
 #include <utility>
 #include <vector>
+
+#include <boost/container/allocator_traits.hpp>
 
 #include "algorithms/algorithm.h"
 #include "algorithms/dd/dd.h"
