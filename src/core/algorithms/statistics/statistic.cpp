@@ -1,7 +1,6 @@
 #include "statistic.h"
 
 #include <iosfwd>
-#include <istream>
 #include <memory>
 #include <ostream>
 #include <sstream>

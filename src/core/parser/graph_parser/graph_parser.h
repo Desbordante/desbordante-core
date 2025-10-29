@@ -1,9 +1,6 @@
 #pragma once
 #include <filesystem>
-#include <fstream>
 #include <iosfwd>
-#include <string>
-#include <vector>
 
 #include "algorithms/gfd/gfd.h"
 #include "algorithms/gfd/graph_descriptor.h"

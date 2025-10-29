@@ -1,7 +1,5 @@
 #include "value_range.h"
 
-#include <functional>
-#include <ios>
 #include <iosfwd>
 #include <ostream>
 #include <ranges>

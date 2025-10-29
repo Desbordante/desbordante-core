@@ -4,7 +4,6 @@
 #include <cctype>
 #include <chrono>
 #include <iosfwd>
-#include <istream>
 #include <iterator>
 #include <limits>
 #include <memory>

@@ -1,9 +1,7 @@
 #include "dc/FastADC/model/predicate_set.h"
 
 #include <algorithm>
-#include <ios>
 #include <iosfwd>
-#include <istream>
 #include <ostream>
 #include <sstream>
 

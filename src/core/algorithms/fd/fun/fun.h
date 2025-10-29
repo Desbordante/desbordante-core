@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <memory>
 #include <set>
 #include <unordered_map>
 

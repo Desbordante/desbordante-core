@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <boost/container_hash/hash.hpp>

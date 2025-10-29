@@ -1,11 +1,7 @@
 #pragma once
 
-#include <cassert>
 #include <cstddef>
-#include <cstdint>
-#include <list>
 #include <queue>
-#include <span>
 #include <tuple>
 #include <unordered_set>
 #include <utility>

@@ -1,10 +1,8 @@
 #pragma once
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <functional>
-#include <numeric>
 #include <vector>
 
 namespace algos {

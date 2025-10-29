@@ -6,7 +6,6 @@
 #include <condition_variable>
 #include <iterator>
 #include <map>
-#include <memory>
 #include <mutex>
 #include <stdexcept>
 #include <thread>

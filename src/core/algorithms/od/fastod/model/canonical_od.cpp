@@ -1,6 +1,5 @@
 #include "canonical_od.h"
 
-#include <algorithm>
 #include <iosfwd>
 #include <ostream>
 #include <sstream>

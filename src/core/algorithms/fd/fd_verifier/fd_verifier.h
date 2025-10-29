@@ -2,9 +2,7 @@
 
 #include <cassert>
 #include <cstddef>
-#include <deque>
 #include <memory>
-#include <string>
 #include <vector>
 
 #include "algorithms/algorithm.h"

@@ -1,7 +1,5 @@
 #pragma once
-#include <thread>
 #include <tuple>
-#include <variant>
 #include <vector>
 
 #include "algorithms/algorithm.h"

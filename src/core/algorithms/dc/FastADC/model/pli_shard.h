@@ -1,11 +1,8 @@
 #pragma once
 
-#include <assert.h>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <stddef.h>
-#include <stdint.h>
 #include <string>
 #include <type_traits>
 #include <unordered_map>

@@ -6,11 +6,8 @@
 #pragma once
 
 #include <cstddef>
-#include <functional>
-#include <list>
 #include <memory>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>

@@ -5,8 +5,8 @@
 #include <chrono>
 #include <iterator>
 #include <queue>
-#include <variant>
 #include <stdexcept>
+#include <variant>
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>

@@ -1,8 +1,6 @@
 #pragma once
 
-#include <list>
 #include <memory>
-#include <mutex>
 
 #include "algorithms/fd/pli_based_fd_algorithm.h"
 #include "algorithms/fd/pyrocommon/core/dependency_consumer.h"

@@ -1,9 +1,9 @@
 #pragma once
+
 #include <cstddef>
 #include <functional>
 #include <memory>
 #include <optional>
-#include <stddef.h>
 #include <vector>
 
 #include <boost/dynamic_bitset.hpp>

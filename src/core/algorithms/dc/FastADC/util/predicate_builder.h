@@ -2,7 +2,6 @@
 
 #include <cstddef>
 #include <memory>
-#include <stddef.h>
 #include <utility>
 #include <vector>
 

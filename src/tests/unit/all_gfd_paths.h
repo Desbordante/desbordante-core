@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 
 #include "algorithms/gfd/gfd.h"
 #include "parser/graph_parser/graph_parser.h"

@@ -1,8 +1,5 @@
 #include "fd_algorithm.h"
 
-#include <cassert>
-#include <cstddef>
-#include <map>
 #include <vector>
 
 #include "algorithm.h"

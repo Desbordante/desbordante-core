@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iosfwd>
-#include <list>
 #include <memory>
 #include <string>
 #include <utility>

@@ -1,10 +1,8 @@
 #pragma once
 #include <cstddef>
-#include <iterator>
 #include <memory>
 #include <optional>
 #include <string>
-#include <typeindex>
 #include <unordered_map>
 #include <unordered_set>
 #include <variant>
