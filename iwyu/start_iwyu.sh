@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONFIG_FILE="${IWYU_CONFIG:-$SCRIPT_DIR/iwyu_config.json}"
@@ -101,7 +102,7 @@ RESULT_PATH=$(resolve_path "$RESULT_PATH")
 
 mkdir -p "$RESULT_PATH/logs/"
 
-cd "$TARGET_PATH" || { echo "Error: Cannot cd to $TARGET_PATH"; exit 1; }
+cd "$TARGET_PATH"
 
 BUILD_DIR="$TARGET_PATH/build"
 COMPILE_COMMANDS_FILE="$BUILD_DIR/compile_commands.json"
@@ -112,21 +113,21 @@ if [ -d "$BUILD_DIR" ]; then
         echo "compile_commands.json found, skipping rebuild"
     else
         echo "compile_commands.json not found, rebuilding"
-        rm -rf "$BUILD_DIR" || { echo "Error: Cannot remove $BUILD_DIR"; exit 1; }
-        mkdir -p "$BUILD_DIR" || { echo "Error: Cannot create $BUILD_DIR"; exit 1; }
-        cd "$BUILD_DIR" || { echo "Error: Cannot cd to $BUILD_DIR"; exit 1; }
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. || { echo "Error: CMake failed"; exit 1; }
+        rm -rf "$BUILD_DIR"
+        mkdir -p "$BUILD_DIR"
+        cd "$BUILD_DIR"
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
         echo "Build directory and compile_commands.json recreated"
     fi
 else
     echo "Build directory not found, creating"
-    mkdir -p "$BUILD_DIR" || { echo "Error: Cannot create $BUILD_DIR"; exit 1; }
-    cd "$BUILD_DIR" || { echo "Error: Cannot cd to $BUILD_DIR"; exit 1; }
-    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .. || { echo "Error: CMake failed"; exit 1; }
+    mkdir -p "$BUILD_DIR"
+    cd "$BUILD_DIR"
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
     echo "Build directory and compile_commands.json created"
 fi
 
-cd "$BUILD_DIR" || { echo "Error: Cannot cd to $BUILD_DIR"; exit 1; }
+cd "$BUILD_DIR"
 
 generate_iwyu_args() {
     local args=""
