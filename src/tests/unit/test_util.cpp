@@ -78,6 +78,44 @@ TEST(pliIntersectChecker, first) {
     ASSERT_THAT(intersection->GetIndex(), ContainerEq(ans));
 }
 
+TEST(pliEntropyTest, first) {
+    std::shared_ptr<model::PositionListIndex> res_pli;
+
+    try {
+        auto input_table = MakeInputTable(kTestFD);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
+        res_pli = test->GetColumnData(1).GetPliOwnership();
+    } catch (std::runtime_error& e) {
+        cout << "Exception raised in test: " << e.what() << endl;
+        FAIL();
+    }
+
+    ASSERT_EQ(res_pli->GetEntropy(), -log((double)3 / (double)12));
+    ASSERT_EQ(res_pli->GetGiniImpurity(), (double)3 / 4);
+    ASSERT_EQ(res_pli->GetInvertedEntropy(), -3 * log((double)3 / (double)4));
+}
+
+TEST(pliEntropyTest, second) {
+    std::shared_ptr<model::PositionListIndex> res_pli;
+
+    try {
+        auto input_table = MakeInputTable(kTestFD);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
+
+        auto pli1 = test->GetColumnData(4).GetPositionListIndex();
+        auto pli2 = test->GetColumnData(5).GetPositionListIndex();
+
+        res_pli = pli1->Intersect(pli2);
+    } catch (std::runtime_error& e) {
+        cout << "Exception raised in test: " << e.what() << endl;
+        FAIL();
+    }
+
+    ASSERT_EQ(res_pli->GetEntropy(), -0.5 * log((double)2 / (double)144));
+    ASSERT_EQ(res_pli->GetGiniImpurity(), 21 / 24);
+    ASSERT_EQ(res_pli->GetInvertedEntropy(), -1 / 2 * (log((double)1464100000 / 5159780352)));
+}
+
 TEST(testingBitsetToLonglong, first) {
     size_t encoded_num = 1254;
     boost::dynamic_bitset<> simple_bitset{20, encoded_num};
