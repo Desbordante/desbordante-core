@@ -20,18 +20,10 @@ public:
     /* Vector of tuple indices */
     using Cluster = std::vector<int>;
 
-private:
+protected:
     std::deque<Cluster> index_;
-    Cluster null_cluster_;
-    unsigned int size_;
-    double entropy_;
-    double inverted_entropy_;
-    double gini_impurity_;
-    unsigned long long nep_;
     unsigned int relation_size_;
-    unsigned int original_relation_size_;
-    std::shared_ptr<std::vector<int> const> probing_table_cache_;
-    unsigned int freq_ = 0;
+    unsigned int size_;
 
     static unsigned long long CalculateNep(unsigned int num_elements) {
         return static_cast<unsigned long long>(num_elements) * (num_elements - 1) / 2;
@@ -40,6 +32,16 @@ private:
     static void SortClusters(std::deque<Cluster>& clusters);
     static bool TakeProbe(int position, ColumnLayoutRelationData& relation_data,
                           Vertical const& probing_columns, std::vector<int>& probe);
+
+private:
+    Cluster null_cluster_;
+    double entropy_;
+    double inverted_entropy_;
+    double gini_impurity_;
+    unsigned long long nep_;
+    unsigned int original_relation_size_;
+    std::shared_ptr<std::vector<int> const> probing_table_cache_;
+    unsigned int freq_ = 0;
 
 public:
     static int intersection_count_;
@@ -50,6 +52,7 @@ public:
                       double entropy, unsigned long long nep, unsigned int relation_size,
                       unsigned int original_relation_size, double inverted_entropy = 0,
                       double gini_impurity = 0);
+
     static std::unique_ptr<PositionListIndex> CreateFor(std::vector<int>& data,
                                                         bool is_null_eq_null);
 

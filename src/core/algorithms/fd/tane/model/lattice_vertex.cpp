@@ -1,5 +1,9 @@
 #include "lattice_vertex.h"
 
+#include <iostream>
+
+#include "util/getting_ptr.h"
+
 namespace model {
 
 using boost::dynamic_bitset, std::vector, std::shared_ptr, std::make_shared, std::string;
@@ -66,11 +70,22 @@ std::ostream& operator<<(std::ostream& os, LatticeVertex& lv) {
 }
 
 PositionListIndex const* LatticeVertex::GetPositionListIndex() const {
-    if (std::holds_alternative<std::unique_ptr<PositionListIndex>>(position_list_index_)) {
-        return std::get<std::unique_ptr<PositionListIndex>>(position_list_index_).get();
-    } else {
-        return std::get<PositionListIndex const*>(position_list_index_);
-    }
+    return std::visit([](auto&& ptr) -> PositionListIndex const* { return util::GetPointer(ptr); },
+                      position_list_index_);
+}
+
+PLIWithSingletons const* LatticeVertex::GetPositionListIndexWithSingletones() const {
+    return std::visit(
+            [](auto const& ptr) -> PLIWS const* {
+                auto a = util::GetPointer(ptr);
+                if constexpr (std::is_same_v<std::decay_t<decltype(a)>, PLIWithSingletons const*>) {
+                    return a;
+                } else {
+                    assert(false);
+                    __builtin_unreachable();
+                }
+            },
+            position_list_index_);
 }
 
 }  // namespace model
