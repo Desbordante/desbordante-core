@@ -15,9 +15,8 @@ private:
     void RegisterOptions();
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;
-    config::ErrorType CalculateFdError(model::PositionListIndex const* lhs_pli,
-                                       model::PositionListIndex const* rhs_pli,
-                                       model::PositionListIndex const* joint_pli) override;
+    config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli, model::PLIWS const* rhs_pli,
+                                       model::PLIWS const* joint_pli) override;
 
 public:
     PFDTane();
