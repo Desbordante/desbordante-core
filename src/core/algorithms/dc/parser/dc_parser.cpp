@@ -22,10 +22,11 @@ DCParser::DCParser(std::string dc_string, ColumnLayoutRelationData const* relati
       dc_string_(std::move(dc_string)),
       has_next_predicate_(true),
       cur_(0) {
+    // TODO: Consider changing str_operations_ to std::vector<std::string_view>
+    // as the source are static string literals.
     str_operators_.reserve(str_operators_.size());
-    for (auto const& [frozen_str, _] : Operator::kStringToOperatorType) {
-        std::string str_op = frozen_str.data();
-        str_operators_.emplace_back(std::move(str_op));
+    for (auto const& pair : Operator::kStringToOperatorType) {
+        str_operators_.emplace_back(pair.first);
     }
 };
 
@@ -95,7 +96,8 @@ Predicate DCParser::ConvertToPredicate(std::string const& pred) {
 
     auto [left_operand, right_operand] = GetOperands(str_left_operand, str_right_operand);
 
-    return {std::move(str_operator), std::move(left_operand), std::move(right_operand)};
+    Operator op(str_operator);
+    return {op, std::move(left_operand), std::move(right_operand)};
 }
 
 std::pair<ColumnOperand, ColumnOperand> DCParser::GetOperands(std::string str_left_op,
