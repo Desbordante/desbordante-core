@@ -5,7 +5,9 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/dc/verifier/dc_verifier.h"
+#include "algorithms/dc/DCVerifier/dc_verifier.h"
+#include "algorithms/dc/FastADC/fastadc.h"
+#include "algorithms/dc/measures/measure.h"
 #include "all_csv_configs.h"
 #include "config/names_and_descriptions.h"
 
@@ -79,10 +81,31 @@ INSTANTIATE_TEST_SUITE_P(
     DCTestParams{"!(t.ORDERKEY == s.PARTKEY)", true, false, kLineItem, {{40, 449}, {40, 450}, {40, 451}, {40, 452}, {40, 453}, {40, 454}}},
     DCTestParams{"!(s.PARTKEY == t.ORDERKEY and t.LINENUMBER == s.LINENUMBER and t.LINENUMBER == 2)", true, false, kLineItem, {{40, 450}}},
     DCTestParams{"!(s.PARTKEY == t.ORDERKEY and t.LINENUMBER == s.LINENUMBER and t.LINENUMBER == 2 and s.QUANTITY == 0.02)", true, true, kLineItem, {}},
-    DCTestParams{"!(t.Salary < 1500  and  t.FedTaxRate > 0.1)", false, false, kTestDC1, {}}
+    DCTestParams{"!(t.Salary < 1500  and  t.FedTaxRate > 0.1)", false, false, kTestDC1, {}},
+    DCTestParams{"¬(t.State == Texas ∧ s.Salary > 5000)", true, false, kTestDC1, {{6, 8}, {6, 9}, {6, 10}, {6, 11}}},
+    DCTestParams{"!(t.State == s.State and t.Salary == s.Salary ∧ s.FedTaxRate != t.FedTaxRate)", true, false, kTestDC1, {{10, 11}}}
     )
 );
 
 // clang-format on
+
+TEST(TestDCVerifier, VerifyMining) {
+    using namespace config::names;
+    CSVConfig const dataset = kWdcAstrology;
+    algos::StdParamsMap miner_params = {{kCsvConfig, dataset},
+                                        {kAllowCrossColumns, true},
+                                        {kShardLength, 7u},
+                                        {kEvidenceThreshold, 0.0}};
+    auto miner = algos::CreateAndLoadAlgorithm<FastADC>(miner_params);
+    miner->Execute();
+
+    algos::StdParamsMap verifier_params = {{kCsvConfig, dataset}, {kDoCollectViolations, true}};
+    auto verifier = algos::CreateAndLoadAlgorithm<DCVerifier>(verifier_params);
+
+    for (auto const& dc : miner->GetDCs()) {
+        bool res = verifier->Verify(dc.ToString());
+        ASSERT_TRUE(res);
+    }
+}
 
 }  // namespace tests

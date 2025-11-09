@@ -49,6 +49,8 @@ constexpr auto kMinStructuralZeroesAmount = "min_structural_zeroes_amount";
 constexpr auto kOnlySFD = "only_sfd";
 // DC verifier
 constexpr auto kDenialConstraint = "denial_constraint";
+// ADC verifier
+constexpr auto kADCErrorMeasure = "adc_error_measure";
 // DD verifier
 constexpr auto kDDString = "dd";
 // DES
