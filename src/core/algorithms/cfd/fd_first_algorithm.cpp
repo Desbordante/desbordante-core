@@ -230,9 +230,9 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
             Itemset const sub = ConstructSubset(iset, out);
             MineFD(inode, sub, out);
 
-            if (ss == +Substrategy::dfs) {
+            if (ss == Substrategy::dfs) {
                 MinePatternsDFS(sub, out, inode.tids);
-            } else if (ss == +Substrategy::bfs) {
+            } else if (ss == Substrategy::bfs) {
                 MinePatternsBFS(sub, out, inode.tids);
             }
         }

@@ -21,8 +21,8 @@ ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
 void ARAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
-    auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
+    auto sing_eq = [](InputFormat input_format) { return input_format == InputFormat::singular; };
+    auto tab_eq = [](InputFormat input_format) { return input_format == InputFormat::tabular; };
 
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});

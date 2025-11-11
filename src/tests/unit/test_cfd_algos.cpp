@@ -36,7 +36,8 @@ protected:
                 {kCfdMinimumSupport, minsup},
                 {kCfdMinimumConfidence, minconf},
                 {kCfdMaximumLhs, max_lhs},
-                {kCfdSubstrategy, algos::cfd::Substrategy::_from_string(substrategy)},
+                {kCfdSubstrategy,
+                 magic_enum::enum_cast<algos::cfd::Substrategy>(substrategy).value()},
                 {kCfdTuplesNumber, tuples_number},
                 {kCfdColumnsNumber, columns_number}};
         return algos::CreateAndLoadAlgorithm<algos::cfd::FDFirstAlgorithm>(params);

@@ -29,8 +29,9 @@ std::pair<std::type_index, ConvFunction> normal_conv_pair{
 
 template <typename T>
 std::pair<std::type_index, ConvFunction> enum_conv_pair{
-        std::type_index(typeid(T)),
-        [](boost::any value) { return py::cast(boost::any_cast<T>(value)._to_string()); }};
+        std::type_index(typeid(T)), [](boost::any value) {
+            return py::cast(magic_enum::enum_name(boost::any_cast<T>(value)));
+        }};
 std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<int>,
         normal_conv_pair<double>,

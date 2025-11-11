@@ -1,6 +1,6 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 #include "algorithms/algorithms.h"
 
@@ -21,7 +21,8 @@ using AlgorithmTypes =
  * NOTE: algorithm string name representation is taken from the value in this
  * enum, so name it appropriately (lowercase and without additional symbols).
  */
-BETTER_ENUM(AlgorithmType, char,
+
+enum class AlgorithmType : char {
 /* Functional dependency mining algorithms */
     depminer = 0,
     dfd,
@@ -98,10 +99,10 @@ BETTER_ENUM(AlgorithmType, char,
 
 /* CFD verifier algorithm */
     cfd_verifier
-)
+};
 // clang-format on
 
-static_assert(std::tuple_size_v<AlgorithmTypes> == AlgorithmType::_size(),
+static_assert(std::tuple_size_v<AlgorithmTypes> == magic_enum::enum_count<AlgorithmType>(),
               "The AlgorithmTypes tuple and the AlgorithmType enum sizes must be the same. Did you "
               "forget to add your new algorithm to either of those?");
 

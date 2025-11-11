@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <easylogging++.h>
+#include <magic_enum/magic_enum.hpp>
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -22,7 +23,7 @@ ResultCollector::ResultCollector(double timeout)
     : timeout_(timeout),
       ucc_count_(0),
       diff_sets_final_(0),
-      timers_(timer::TimerName::num_of_timers),
+      timers_(magic_enum::enum_integer(timer::TimerName::num_of_timers)),
       diff_sets_(0),
       diff_sets_initial_(0),
       tree_complexity_(0),
@@ -34,7 +35,7 @@ bool ResultCollector::UCCFound(Edge const& ucc) {
     ucc_count_++;
     ucc_vector_.push_back(ucc);
     return std::chrono::duration_cast<std::chrono::duration<double>>(
-                   clock::now() - timers_[timer::TimerName::total].begin)
+                   clock::now() - timers_[magic_enum::enum_integer(timer::TimerName::total)].begin)
                    .count() <= timeout_;
 }
 
@@ -55,18 +56,20 @@ void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
 }
 
 void ResultCollector::StartTimer(timer::TimerName timer) {
-    timers_[timer].begin = clock::now();
+    timers_[magic_enum::enum_integer(timer)].begin = clock::now();
 }
 
 void ResultCollector::StopTimer(timer::TimerName timer) {
-    timers_[timer].end = clock::now();
-    timers_[timer].elapsed += std::chrono::duration_cast<std::chrono::milliseconds>(
-                                      timers_[timer].end - timers_[timer].begin)
-                                      .count();
+    timers_[magic_enum::enum_integer(timer)].end = clock::now();
+    timers_[magic_enum::enum_integer(timer)].elapsed +=
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                    timers_[magic_enum::enum_integer(timer)].end -
+                    timers_[magic_enum::enum_integer(timer)].begin)
+                    .count();
 }
 
 unsigned long long ResultCollector::Time(timer::TimerName timer) const {
-    return timers_[timer].elapsed;
+    return timers_[magic_enum::enum_integer(timer)].elapsed;
 }
 
 void ResultCollector::CountDiffSets(unsigned number) {
