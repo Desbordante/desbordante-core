@@ -20,8 +20,8 @@
 #include "model/table/typed_column_data.h"
 #include "model/types/builtin.h"
 #include "model/types/type.h"
-#include "util/range_to_string.h"
 #include "util/logger.h"
+#include "util/range_to_string.h"
 #include "util/timed_invoke.h"
 
 namespace algos::nd_verifier {

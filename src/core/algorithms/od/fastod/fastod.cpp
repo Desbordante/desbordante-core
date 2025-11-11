@@ -71,15 +71,15 @@ unsigned long long Fastod::ExecuteInternal() {
     size_t const elapsed_milliseconds = util::TimedInvoke(&Fastod::Discover, this);
 
     for (auto const& od : result_asc_) {
-        LOG_DEBUG(od.ToString());
+        LOG_DEBUG("{}", od.ToString());
     }
 
     for (auto const& od : result_desc_) {
-        LOG_DEBUG(od.ToString());
+        LOG_DEBUG("{}", od.ToString());
     }
 
     for (auto const& od : result_simple_) {
-        LOG_DEBUG(od.ToString());
+        LOG_DEBUG("{}", od.ToString());
     }
 
     return elapsed_milliseconds;

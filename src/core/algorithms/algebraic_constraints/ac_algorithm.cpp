@@ -262,7 +262,7 @@ void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) c
             }
         }
         interval_str += '\n';
-        LOG_DEBUG(interval_str);
+        LOG_DEBUG("{}", interval_str);
     }
 }
 

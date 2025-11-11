@@ -392,7 +392,7 @@ TEST(TestDataStats, TestShowSample) {
         for (auto const &str : row) {
             result << str << " \t";
         }
-        LOG_INFO(result.str());
+        LOG_INFO("{}", result.str());
     }
 }
 
@@ -401,7 +401,7 @@ TEST(TestDataStats, TestShowAllStats) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
-    LOG_INFO(stats.ToString());
+    LOG_INFO("{}", stats.ToString());
 }
 
 TEST(TestDataStats, TestGetSTD) {

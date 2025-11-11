@@ -93,10 +93,10 @@ unsigned long long CFDVerifier::ExecuteInternal() {
     LOG_DEBUG("\tRule to verify: {}", cfd::Output::CFDToString(cfd_, relation_));
 
     auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerifyCFD, this);
-    LOG_DEBUG("CFD verification took {} ms", std::to_string(verification_time));
+    LOG_DEBUG("CFD verification took {} ms", verification_time);
 
     auto stats_calculation_time = ::util::TimedInvoke(&CFDVerifier::CalculateStatistics, this);
-    LOG_DEBUG("Statistics calculation took {} ms ", std::to_string(stats_calculation_time));
+    LOG_DEBUG("Statistics calculation took {} ms ", stats_calculation_time);
 
     return verification_time + stats_calculation_time;
 }

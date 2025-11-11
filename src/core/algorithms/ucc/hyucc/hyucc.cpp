@@ -56,7 +56,7 @@ unsigned long long HyUCC::ExecuteInternal() {
 
     LOG_DEBUG("Mined UCCs:");
     for (model::UCC const& ucc : UCCList()) {
-        LOG_DEBUG(ucc.ToString());
+        LOG_DEBUG("{}", ucc.ToString());
     }
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(

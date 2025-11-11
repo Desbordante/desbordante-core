@@ -75,9 +75,11 @@ void FastADC::CheckTypes() {
         model::TypeId type_id = column.GetTypeId();
 
         if (type_id == +model::TypeId::kMixed) {
-            LOG_WARN("Column with index \"" + std::to_string(column_index) +
-                     "\" contains values of different types. Those values will be "
-                     "treated as strings.");
+            LOG_WARN(
+                    "Column with index \"{}\" contains values of different types. Those values "
+                    "will be "
+                    "treated as strings.",
+                    column_index);
         } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +
@@ -95,7 +97,7 @@ void FastADC::CheckTypes() {
 void FastADC::PrintResults() {
     LOG_DEBUG("Total denial constraints: {}", dcs_.TotalDCSize());
     LOG_DEBUG("Minimal denial constraints: {}", dcs_.MinDCSize());
-    LOG_DEBUG(dcs_.ToString());
+    LOG_DEBUG("{}", dcs_.ToString());
 }
 
 unsigned long long FastADC::ExecuteInternal() {

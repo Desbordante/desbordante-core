@@ -102,8 +102,8 @@ std::vector<size_t> PliShardBuilder::ColumnToHash(model::TypedColumnData const& 
             ColumnToHashTyped<std::string>(hashed_column, column);
             break;
         default:
-            LOG_DEBUG("Column type " + column.GetType().ToString() +
-                      " is not supported for FastADC's PLI sharding");
+            LOG_DEBUG("Column type {} is not supported for FastADC's PLI sharding",
+                      column.GetType().ToString());
             return {};
     }
 

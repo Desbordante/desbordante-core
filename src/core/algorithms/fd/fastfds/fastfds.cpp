@@ -58,8 +58,7 @@ unsigned long long FastFDs::ExecuteInternal() {
 
     auto task = [this, &empty_vertical](std::unique_ptr<Column> const& column) {
         if (ColumnContainsOnlyEqualValues(*column)) {
-            LOG_DEBUG("Registered FD {} -> {}: ", empty_vertical.ToString(),
-                       column->ToString());
+            LOG_DEBUG("Registered FD {} -> {}: ", empty_vertical.ToString(), column->ToString());
             RegisterFd(empty_vertical, *column, relation_->GetSharedPtrSchema());
             return;
         }
@@ -258,7 +257,7 @@ vector<FastFDs::DiffSet> FastFDs::GetDiffSetsMod(Column const& col) const {
 
     LOG_DEBUG("Compute minimal difference sets modulo {}:", col.ToString());
     for (auto& item : diff_sets_mod) {
-        LOG_DEBUG(item.ToString());
+        LOG_DEBUG("{}", item.ToString());
     }
 
     return diff_sets_mod;

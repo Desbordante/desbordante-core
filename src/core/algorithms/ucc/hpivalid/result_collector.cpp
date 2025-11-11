@@ -49,7 +49,7 @@ void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
         }
         out << "\n";
     }
-    LOG_DEBUG(out.str());
+    LOG_DEBUG("{}", out.str());
 
     diff_sets_final_ = hg.NumEdges();
 }

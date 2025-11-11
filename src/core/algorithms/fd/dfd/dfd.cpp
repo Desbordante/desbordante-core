@@ -73,7 +73,7 @@ unsigned long long DFD::ExecuteInternal() {
                 RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
             }
             AddProgress(progress_step);
-            LOG_INFO(static_cast<int>(GetProgress().second));
+            LOG_INFO("{}", static_cast<int>(GetProgress().second));
         });
     }
 

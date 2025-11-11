@@ -79,7 +79,7 @@ void HPIValid::PrintInfo(hpiv::ResultCollector const& rc) const {
     LOG_INFO("Minimal UCCs: {}", rc.UCCs());
     LOG_DEBUG("Mined UCCs:");
     for (model::UCC const& ucc : UCCList()) {
-        LOG_DEBUG(ucc.ToString());
+        LOG_DEBUG("{}", ucc.ToString());
     }
     LOG_INFO("Minimal difference sets: {}", rc.DiffSetsFinal());
     LOG_INFO("Sampled difference sets: {} (initial: {})", rc.DiffSets(), rc.DiffSetsInitial());

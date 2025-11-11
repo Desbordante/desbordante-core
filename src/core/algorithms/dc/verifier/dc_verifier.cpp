@@ -71,7 +71,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
-        LOG_INFO(e.what());
+        LOG_INFO("{}", e.what());
         return 0;
     }
 
