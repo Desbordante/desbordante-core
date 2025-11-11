@@ -1,9 +1,5 @@
 #pragma once
 
-#include <numeric>
-#include <string>
-#include <unordered_set>
-
 #include "pattern.h"
 
 namespace algos::cfdfinder {

@@ -1,15 +1,22 @@
 #pragma once
 
-#include <boost/dynamic_bitset.hpp>
+#include "types/bitset.h"
 
 namespace algos::cfdfinder {
 struct Candidate {
-    boost::dynamic_bitset<> lhs_;
+    BitSet lhs_;
     size_t rhs_;
 
     Candidate() = default;
 
-    Candidate(boost::dynamic_bitset<> lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
+    Candidate(BitSet lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
+
+    bool operator<(Candidate const& other) const {
+        if (rhs_ != other.rhs_) {
+            return rhs_ < other.rhs_;
+        }
+        return lhs_ < other.lhs_;
+    }
 
     bool operator==(Candidate const& other) const {
         return rhs_ == other.rhs_ && lhs_ == other.lhs_;
