@@ -2,6 +2,7 @@
 // see input_data/cfd_data/LICENSE
 
 #include <gtest/gtest.h>
+#include <magic_enum/magic_enum.hpp>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/cfd/enums.h"
@@ -36,7 +37,8 @@ protected:
                 {kCfdMinimumSupport, minsup},
                 {kCfdMinimumConfidence, minconf},
                 {kCfdMaximumLhs, max_lhs},
-                {kCfdSubstrategy, algos::cfd::Substrategy::_from_string(substrategy)},
+                {kCfdSubstrategy,
+                 magic_enum::enum_cast<algos::cfd::Substrategy>(substrategy).value()},
                 {kCfdTuplesNumber, tuples_number},
                 {kCfdColumnsNumber, columns_number}};
         return algos::CreateAndLoadAlgorithm<algos::cfd::FDFirstAlgorithm>(params);
@@ -44,7 +46,7 @@ protected:
 };
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
-    auto algorithm = CreateAlgorithmInstance(kTennis, 2, 0.85, "dfs", 3, 4, 5);
+    auto algorithm = CreateAlgorithmInstance(kTennis, 2, 0.85, "kDfs", 3, 4, 5);
     algorithm->Execute();
     std::string expected_data =
             "outlook temp humidity windy\nsunny hot high false\nsunny hot high true\n";
@@ -53,7 +55,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataStringFormatTest) {
 }
 
 TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
-    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "dfs", 3);
+    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "kDfs", 3);
     algorithm->Execute();
     std::vector<int> tids = {0, 2, 4, 6};
     std::string expected_data =
@@ -64,7 +66,7 @@ TEST_F(CFDAlgorithmTest, CfdRelationDataPartialStringFormatTest) {
 }
 
 TEST_F(CFDAlgorithmTest, FullTennisDataset) {
-    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "dfs", 3);
+    auto algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "kDfs", 3);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetItemsetCfds()) {
@@ -85,13 +87,13 @@ TEST_F(CFDAlgorithmTest, FullTennisDataset) {
                                            "(windy, humidity, outlook) => play"};
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 
-    algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "bfs", 3);
+    algorithm = CreateAlgorithmInstance(kTennis, 8, 0.85, "kBfs", 3);
     algorithm->Execute();
     CheckCfdSetsEquality(actual_cfds, expected_cfds);
 }
 
 TEST_F(CFDAlgorithmTest, PartialMushroomDataset) {
-    auto algorithm = CreateAlgorithmInstance(kMushroom, 4, 0.9, "dfs", 4, 4, 50);
+    auto algorithm = CreateAlgorithmInstance(kMushroom, 4, 0.9, "kDfs", 4, 4, 50);
     algorithm->Execute();
     std::set<std::string> actual_cfds;
     for (auto const& cfd : algorithm->GetItemsetCfds()) {

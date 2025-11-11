@@ -22,7 +22,7 @@ bool ValueCombination::CompareValues(ValueCombination::TypedValue a,
         return false;
     }
     auto type = CreateType(a.first, false);
-    if (a.first == +(TypeId::kMixed)) {
+    if (a.first == (TypeId::kMixed)) {
         if (MixedType::RetrieveTypeId(a.second) != MixedType::RetrieveTypeId(b.second)) {
             return false;
         }

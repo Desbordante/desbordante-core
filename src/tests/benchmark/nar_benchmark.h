@@ -20,7 +20,7 @@ inline void NARBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkComp
                             {kMaxFitnessEvaluations, static_cast<unsigned>(std::pow(10, 5))},
                             {kCrossoverProbability, 0.9},
                             {kDifferentialScale, 0.5},
-                            {kDifferentialStrategy, +algos::des::DifferentialStrategy::rand1Bin}});
+                            {kDifferentialStrategy, algos::des::DifferentialStrategy::kRand1Bin}});
 }
 
 }  // namespace benchmark

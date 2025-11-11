@@ -11,23 +11,28 @@ namespace py = pybind11;
 namespace nar_serialization {
 
 py::object SerializeValueRange(std::shared_ptr<model::ValueRange> const& vr) {
-    switch (int type_code = vr->GetTypeId()) {
+    switch (auto const type_id = vr->GetTypeId()) {
         case model::TypeId::kString: {
             auto svr = std::dynamic_pointer_cast<model::StringValueRange>(vr);
-            return py::make_tuple(type_code, svr->domain);
+            return py::make_tuple(magic_enum::enum_integer(type_id), svr->domain);
         }
         case model::TypeId::kDouble: {
             auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Double>>(vr);
-            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+            return py::make_tuple(magic_enum::enum_integer(type_id),
+                                  py::make_tuple(nvr->lower_bound, nvr->upper_bound));
         }
         case model::TypeId::kInt: {
             auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Int>>(vr);
-            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+            return py::make_tuple(magic_enum::enum_integer(type_id),
+                                  py::make_tuple(nvr->lower_bound, nvr->upper_bound));
         }
-        default: {
-            throw std::runtime_error("Unsupported ValueRange type in serialization.");
-        }
+
+        default:
+            throw std::runtime_error(std::string("Unsupported type: ") +
+                                     std::string(magic_enum::enum_name(type_id)));
     }
+
+    throw std::runtime_error("Unsupported ValueRange type in serialization.");
 }
 
 std::shared_ptr<model::ValueRange> DeserializeValueRange(py::object const& obj) {
@@ -36,7 +41,8 @@ std::shared_ptr<model::ValueRange> DeserializeValueRange(py::object const& obj) 
         throw std::runtime_error("Invalid ValueRange tuple size!");
     }
     int type_code = tup[0].cast<int>();
-    model::TypeId type_id = model::TypeId::_from_integral(type_code);
+    model::TypeId type_id =
+            magic_enum::enum_cast<model::TypeId>(type_code).value_or(model::TypeId::kUndefined);
     switch (type_id) {
         case model::TypeId::kString: {
             auto domain = tup[1].cast<std::vector<std::string>>();

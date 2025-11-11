@@ -148,8 +148,8 @@ void Fastod::ComputeODs() {
 
         CCPut(context, context_cc);
 
-        AddCandidates<od::Ordering::descending>(context, del_attrs);
-        AddCandidates<od::Ordering::ascending>(context, del_attrs);
+        AddCandidates<od::Ordering::kDescending>(context, del_attrs);
+        AddCandidates<od::Ordering::kAscending>(context, del_attrs);
     }
 
     size_t delete_index = 0;
@@ -181,8 +181,8 @@ void Fastod::ComputeODs() {
                     }
                 });
 
-        CalculateODs<od::Ordering::descending>(context, del_attrs);
-        CalculateODs<od::Ordering::ascending>(context, del_attrs);
+        CalculateODs<od::Ordering::kDescending>(context, del_attrs);
+        CalculateODs<od::Ordering::kAscending>(context, del_attrs);
     }
 }
 
@@ -194,8 +194,8 @@ void Fastod::PruneLevels() {
     for (auto attribute_set_it = context_in_current_level_.begin();
          attribute_set_it != context_in_current_level_.end();) {
         if (IsEmptySet(CCGet(*attribute_set_it)) &&
-            CSGet<od::Ordering::ascending>(*attribute_set_it).empty() &&
-            CSGet<od::Ordering::descending>(*attribute_set_it).empty()) {
+            CSGet<od::Ordering::kAscending>(*attribute_set_it).empty() &&
+            CSGet<od::Ordering::kDescending>(*attribute_set_it).empty()) {
             context_in_current_level_.erase(attribute_set_it++);
         } else {
             ++attribute_set_it;
@@ -227,7 +227,7 @@ void Fastod::CalculateNextLevel() {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
 
-                const AttributeSet candidate = fastod::AddAttribute(
+                AttributeSet const candidate = fastod::AddAttribute(
                         fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([this, &candidate, &create_context](model::ColumnIndex attr) {

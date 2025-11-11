@@ -13,7 +13,8 @@ using namespace algos::fastadc;
 namespace fastadc_serialization {
 
 py::tuple SerializeColumnOperand(ColumnOperand const& operand) {
-    return py::make_tuple(operand.GetColumn()->GetIndex(), operand.GetTuple()._to_string());
+    return py::make_tuple(operand.GetColumn()->GetIndex(),
+                          magic_enum::enum_name(operand.GetTuple()));
 }
 
 ColumnOperand DeserializeColumnOperand(py::tuple t,
@@ -21,7 +22,7 @@ ColumnOperand DeserializeColumnOperand(py::tuple t,
     if (t.size() != 2) throw std::runtime_error("Invalid state for ColumnOperand pickle!");
     auto col_index = t[0].cast<size_t>();
     auto tuple_str = t[1].cast<std::string>();
-    auto tuple_type = ColumnOperandTuple::_from_string(tuple_str.c_str());
+    auto tuple_type = magic_enum::enum_cast<ColumnOperandTuple>(tuple_str.c_str()).value();
     return ColumnOperand(schema->GetColumn(col_index), tuple_type);
 }
 

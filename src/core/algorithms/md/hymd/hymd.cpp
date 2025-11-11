@@ -50,9 +50,9 @@ lattice::SingleLevelFunc GetLevelDefinitionFunc(LevelDefinition definition_enum)
     // TODO: make infrastructure for depth level.
     // TODO: use depth level and validate several levels depending on thread number.
     switch (definition_enum) {
-        case +LevelDefinition::cardinality:
+        case LevelDefinition::kCardinality:
             return [](...) { return 1; };
-        case +LevelDefinition::lattice:
+        case LevelDefinition::kLattice:
             return {nullptr};
         default:
             DESBORDANTE_ASSUME(false);
@@ -148,7 +148,7 @@ void HyMD::RegisterOptions() {
                           std::numeric_limits<std::size_t>::max()});
     RegisterOption(config::kThreadNumberOpt(&threads_));
     RegisterOption(Option{&level_definition_, kLevelDefinition, kDLevelDefinition,
-                          +LevelDefinition::cardinality});
+                          LevelDefinition::kCardinality});
 }
 
 void HyMD::ResetStateMd() {}

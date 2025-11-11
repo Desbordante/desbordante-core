@@ -42,24 +42,24 @@ public:
 
     constexpr static auto kName = "OC";
 
-    friend bool operator==(CanonicalOD<od::Ordering::ascending> const& x,
-                           CanonicalOD<od::Ordering::ascending> const& y);
-    friend bool operator!=(CanonicalOD<od::Ordering::ascending> const& x,
-                           CanonicalOD<od::Ordering::ascending> const& y);
-    friend bool operator<(CanonicalOD<od::Ordering::ascending> const& x,
-                          CanonicalOD<od::Ordering::ascending> const& y);
-    friend bool operator==(CanonicalOD<od::Ordering::descending> const& x,
-                           CanonicalOD<od::Ordering::descending> const& y);
-    friend bool operator!=(CanonicalOD<od::Ordering::descending> const& x,
-                           CanonicalOD<od::Ordering::descending> const& y);
-    friend bool operator<(CanonicalOD<od::Ordering::descending> const& x,
-                          CanonicalOD<od::Ordering::descending> const& y);
+    friend bool operator==(CanonicalOD<od::Ordering::kAscending> const& De,
+                           CanonicalOD<od::Ordering::kAscending> const& y);
+    friend bool operator!=(CanonicalOD<od::Ordering::kAscending> const& x,
+                           CanonicalOD<od::Ordering::kAscending> const& y);
+    friend bool operator<(CanonicalOD<od::Ordering::kAscending> const& x,
+                          CanonicalOD<od::Ordering::kAscending> const& y);
+    friend bool operator==(CanonicalOD<od::Ordering::kDescending> const& x,
+                           CanonicalOD<od::Ordering::kDescending> const& y);
+    friend bool operator!=(CanonicalOD<od::Ordering::kDescending> const& x,
+                           CanonicalOD<od::Ordering::kDescending> const& y);
+    friend bool operator<(CanonicalOD<od::Ordering::kDescending> const& x,
+                          CanonicalOD<od::Ordering::kDescending> const& y);
 
     friend struct std::hash<CanonicalOD<Ordering>>;
 };
 
-using AscCanonicalOD = CanonicalOD<od::Ordering::ascending>;
-using DescCanonicalOD = CanonicalOD<od::Ordering::descending>;
+using AscCanonicalOD = CanonicalOD<od::Ordering::kAscending>;
+using DescCanonicalOD = CanonicalOD<od::Ordering::kDescending>;
 
 class SimpleCanonicalOD {
 private:

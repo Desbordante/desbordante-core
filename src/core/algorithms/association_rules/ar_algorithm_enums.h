@@ -1,9 +1,8 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos {
 
-BETTER_ENUM(InputFormat, char, singular = 0, tabular);
-
+enum class InputFormat : char { kSingular = 0, kTabular };
 }  // namespace algos

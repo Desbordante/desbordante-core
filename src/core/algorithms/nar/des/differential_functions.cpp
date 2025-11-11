@@ -40,7 +40,7 @@ EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_
 // TODO: name is probably inconsistent with how it's called in the field.
 MutationFunction EnumToMutationStrategy(DifferentialStrategy strategy) {
     switch (strategy) {
-        case DifferentialStrategy::rand1Bin:
+        case DifferentialStrategy::kRand1Bin:
             return Rand1Bin;
         default:
             throw std::logic_error("No mutation function corresponding to DifferentialStategy.");

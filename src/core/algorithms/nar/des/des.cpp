@@ -1,6 +1,7 @@
 #include "des.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -21,7 +22,8 @@ DES::DES() : NARAlgorithm({}) {
 void DES::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    DifferentialStrategy default_strategy = DifferentialStrategy::rand1Bin;
+    DifferentialStrategy default_strategy = DifferentialStrategy::kRand1Bin;
+    RegisterOption(Option{&seed_, kSeed, kDSeed, 2ul});
     RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize, 100u});
     RegisterOption(
             Option{&num_evaluations_, kMaxFitnessEvaluations, kDMaxFitnessEvaluations, 1000u});
@@ -36,7 +38,7 @@ void DES::RegisterOptions() {
 void DES::MakeExecuteOptsAvailable() {
     NARAlgorithm::MakeExecuteOptsAvailable();
     using namespace config::names;
-    MakeOptionsAvailable({kPopulationSize, kMaxFitnessEvaluations, kDifferentialScale,
+    MakeOptionsAvailable({kSeed, kPopulationSize, kMaxFitnessEvaluations, kDifferentialScale,
                           kCrossoverProbability, kDifferentialStrategy});
 }
 
@@ -57,7 +59,7 @@ std::vector<EncodedNAR> DES::GetRandomPopulationInDomains(FeatureDomains const& 
     auto compare_by_fitness = [](EncodedNAR const& a, EncodedNAR const& b) {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
-    std::ranges::sort(population, compare_by_fitness);
+    std::ranges::stable_sort(population, compare_by_fitness);
     return population;
 }
 
@@ -69,6 +71,9 @@ EncodedNAR DES::MutatedIndividual(std::vector<EncodedNAR> const& population, siz
 }
 
 unsigned long long DES::ExecuteInternal() {
+    rng_.SetSeed(seed_);
+    auto const start_time = std::chrono::system_clock::now();
+
     FeatureDomains feature_domains = FindFeatureDomains(typed_relation_.get());
     std::vector<EncodedNAR> population = GetRandomPopulationInDomains(feature_domains, rng_);
 
@@ -90,7 +95,10 @@ unsigned long long DES::ExecuteInternal() {
         return a.GetQualities().fitness > b.GetQualities().fitness;
     };
     std::ranges::sort(nar_collection_, compare_by_fitness);
-    return 0;
+
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now() - start_time);
+    return elapsed_milliseconds.count();
 }
 
 }  // namespace algos::des

@@ -29,16 +29,16 @@ void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
         config::IndexType column_index = rhs_indices[0];
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
-        if (type_id == +model::TypeId::kUndefined) {
+        if (type_id == model::TypeId::kUndefined) {
             throw config::ConfigurationError("Column with index \"" + std::to_string(column_index) +
                                              "\" type undefined.");
         }
-        if (type_id == +model::TypeId::kMixed) {
+        if (type_id == model::TypeId::kMixed) {
             throw config::ConfigurationError("Column with index \"" + std::to_string(column_index) +
                                              "\" contains values of different types.");
         }
 
-        if (metric_ == +Metric::euclidean) {
+        if (metric_ == Metric::kEuclidean) {
             if (!column.IsNumeric()) {
                 throw config::ConfigurationError(
                         "\"Euclidean\" metric is only available for numeric "
@@ -46,19 +46,19 @@ void MetricVerifier::ValidateRhs(config::IndicesType const& rhs_indices) {
             }
             return;
         }
-        if (type_id == +model::TypeId::kString) return;
+        if (type_id == model::TypeId::kString) return;
         throw config::ConfigurationError("The chosen metric is available only for string columns.");
     }
-    if (metric_ == +Metric::euclidean) {
+    if (metric_ == Metric::kEuclidean) {
         for (config::IndexType column_index : rhs_indices) {
             model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
             model::TypeId type_id = column.GetTypeId();
-            if (type_id == +model::TypeId::kUndefined) {
+            if (type_id == model::TypeId::kUndefined) {
                 throw config::ConfigurationError("Column with index \"" +
                                                  std::to_string(column_index) +
                                                  "\" type undefined.");
             }
-            if (type_id == +model::TypeId::kMixed) {
+            if (type_id == model::TypeId::kMixed) {
                 throw config::ConfigurationError("Column with index \"" +
                                                  std::to_string(column_index) +
                                                  "\" contains values of different types.");
@@ -85,16 +85,16 @@ void MetricVerifier::RegisterOptions() {
     auto get_schema_columns = [this]() { return relation_->GetSchema()->GetNumColumns(); };
     auto check_rhs = [this](config::IndicesType const& rhs_indices) { ValidateRhs(rhs_indices); };
     auto need_algo_and_q = [this]([[maybe_unused]] config::IndicesType const& _) {
-        return metric_ == +Metric::cosine;
+        return metric_ == Metric::kCosine;
     };
     auto need_algo_only = [this](config::IndicesType const& rhs_indices) {
-        assert(metric_ == +Metric::levenshtein || metric_ == +Metric::euclidean);
-        return metric_ == +Metric::levenshtein || rhs_indices.size() != 1;
+        assert(metric_ == Metric::kLevenshtein || metric_ == Metric::kEuclidean);
+        return metric_ == Metric::kLevenshtein || rhs_indices.size() != 1;
     };
     auto algo_check = [this](MetricAlgo metric_algo) {
-        assert(!(metric_ == +Metric::euclidean && rhs_indices_.size() == 1));
-        if (metric_algo == +MetricAlgo::calipers) {
-            if (!(metric_ == +Metric::euclidean && rhs_indices_.size() == 2))
+        assert(!(metric_ == Metric::kEuclidean && rhs_indices_.size() == 1));
+        if (metric_algo == MetricAlgo::kCalipers) {
+            if (!(metric_ == Metric::kEuclidean && rhs_indices_.size() == 2))
                 throw config::ConfigurationError(
                         "\"calipers\" algorithm is only available for "
                         "2-dimensional RHS and \"euclidean\" metric.");
@@ -233,7 +233,7 @@ void MetricVerifier::VerifyMetricFD() {
     for (auto const& cluster : pli->GetIndex()) {
         if (!cluster_func(cluster)) {
             metric_fd_holds_ = false;
-            if (algo_ == +MetricAlgo::approx) {
+            if (algo_ == MetricAlgo::kApprox) {
                 break;
             }
         }
@@ -243,7 +243,7 @@ void MetricVerifier::VerifyMetricFD() {
 ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
     model::TypedColumnData const& col = typed_relation_->GetColumnData(rhs_indices_[0]);
 
-    if (metric_ == +Metric::euclidean) {
+    if (metric_ == Metric::kEuclidean) {
         assert(col.IsNumeric());
         return CalculateClusterFunction<IndexedOneDimensionalPoint>(
                 [this](auto const& cluster) {
@@ -256,11 +256,11 @@ ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
                 });
     }
 
-    assert(col.GetTypeId() == +model::TypeId::kString);
+    assert(col.GetTypeId() == model::TypeId::kString);
     auto const& type = static_cast<model::StringType const&>(col.GetType());
 
     std::function<ClusterFunction(DistanceFunction<std::byte const*>)> verify_func;
-    if (algo_ == +MetricAlgo::brute) {
+    if (algo_ == MetricAlgo::kBrute) {
         verify_func = [this](auto dist_func) {
             return CalculateClusterFunction<IndexedOneDimensionalPoint>(
                     [this](auto const& cluster) {
@@ -285,7 +285,7 @@ ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
         };
     }
 
-    if (metric_ == +Metric::levenshtein) {
+    if (metric_ == Metric::kLevenshtein) {
         return verify_func(
                 [&type](std::byte const* l, std::byte const* r) { return type.Dist(l, r); });
     }
@@ -297,7 +297,7 @@ ClusterFunction MetricVerifier::GetClusterFunctionForOneDimension() {
 }
 
 ClusterFunction MetricVerifier::GetClusterFunctionForSeveralDimensions() {
-    if (algo_ == +MetricAlgo::calipers) {
+    if (algo_ == MetricAlgo::kCalipers) {
         return [this](model::PLI::Cluster const& cluster) {
             auto result = points_calculator_->CalculateMultidimensionalPointsForCalipers(cluster);
             if (!CheckMFDFailIfHasNulls(result.has_nulls) &&
@@ -312,7 +312,7 @@ ClusterFunction MetricVerifier::GetClusterFunctionForSeveralDimensions() {
             return false;
         };
     }
-    if (algo_ == +MetricAlgo::brute) {
+    if (algo_ == MetricAlgo::kBrute) {
         return CalculateClusterFunction<IndexedVector>(
                 [this](auto const& cluster) {
                     return points_calculator_->CalculateMultidimensionalIndexedPoints(cluster);

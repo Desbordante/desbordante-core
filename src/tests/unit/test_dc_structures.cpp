@@ -229,9 +229,9 @@ TEST(Predicate, PredicateCreatesCorrectly) {
     PredicateProvider pred_provider;
     Column const *first = col_data[0].GetColumn(), *second = col_data[1].GetColumn();
 
-    ColumnOperand t_a(first, ColumnOperandTuple::t);
-    ColumnOperand s_a(first, ColumnOperandTuple::s);
-    ColumnOperand s_b(second, ColumnOperandTuple::s);
+    ColumnOperand t_a(first, ColumnOperandTuple::kT);
+    ColumnOperand s_a(first, ColumnOperandTuple::kS);
+    ColumnOperand s_b(second, ColumnOperandTuple::kS);
 
     PredicatePtr t_a_less_s_b = pred_provider.GetPredicate(Operator(OperatorType::kLess), t_a, s_b);
 
