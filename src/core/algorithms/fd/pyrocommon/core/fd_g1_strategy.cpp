@@ -2,10 +2,9 @@
 
 #include <unordered_map>
 
-#include <easylogging++.h>
-
 #include "../model/pli_cache.h"
 #include "search_space.h"
+#include "util/logger.h"
 
 unsigned long long FdG1Strategy::nanos_ = 0;
 
@@ -16,8 +15,7 @@ double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
                                                     ->GetColumnData(rhs_->GetIndex())
                                                     .GetProbingTable();
 
-    LOG(DEBUG) << boost::format{"Probing table size for %1%: %2%"} % rhs_->ToString() %
-                          std::to_string(probing_table.size());
+    LOG_DEBUG("Probing table size for {}: {}", rhs_->ToString(), probing_table.size());
 
     // Perform probing
     int probing_table_value_id;

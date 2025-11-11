@@ -1,10 +1,10 @@
-#include <easylogging++.h>
 #include <gmock/gmock.h>
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/statistics/data_stats.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
+#include "util/logger.h"
 
 namespace tests {
 namespace mo = model;
@@ -392,7 +392,7 @@ TEST(TestDataStats, TestShowSample) {
         for (auto const &str : row) {
             result << str << " \t";
         }
-        LOG(INFO) << result.str();
+        LOG_INFO("{}", result.str());
     }
 }
 
@@ -401,7 +401,7 @@ TEST(TestDataStats, TestShowAllStats) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
     stats.Execute();
-    LOG(INFO) << stats.ToString();
+    LOG_INFO("{}", stats.ToString());
 }
 
 TEST(TestDataStats, TestGetSTD) {
@@ -442,17 +442,17 @@ TEST(TestDataStats, CorrectExecutionEmpty) {
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
-        LOG(INFO) << "thread num = " << thread_num;
+        LOG_INFO("thread num = {}", thread_num);
         auto start_time = std::chrono::system_clock::now();
         algos::CsvStats stats(MakeConfig(kEpicMeds, true, thread_num));
         auto elapsed_milliseconds =
             std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now() - start_time
             );
-        LOG(INFO) << "Reading time = " << elapsed_milliseconds.count();
+        LOG_INFO("Reading time = {}", elapsed_milliseconds.count());
         unsigned time = stats.Execute();
-        LOG(INFO) << "Executing time = " << time;
-        //LOG(INFO) << stats.toString();
+        LOG_INFO("Executing time = {}", time);
+        //LOG_INFO() stats.toString();
     }
 }
 #endif

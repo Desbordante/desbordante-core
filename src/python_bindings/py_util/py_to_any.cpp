@@ -2,10 +2,10 @@
 #include <unordered_map>
 
 #include <boost/any.hpp>
-#include <easylogging++.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "algorithms/cfd/enums.h"

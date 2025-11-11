@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-#include <easylogging++.h>
+#include <spdlog/spdlog.h>
 
 #include "algorithms/od/fastod/model/canonical_od.h"
 #include "config/column_index/option.h"
@@ -63,17 +63,17 @@ unsigned long long SetBasedAodVerifier::ExecuteInternal() {
     unsigned long long const elapsed_milliseconds =
             util::TimedInvoke(&SetBasedAodVerifier::Verify, this);
 
-    LOG(DEBUG) << "AOD holds with error " << GetError();
-    LOG(DEBUG) << "Removal set: " << util::RangeToString(removal_set_);
+    LOG_DEBUG("AOD holds with error {}", GetError());
+    LOG_DEBUG("Removal set: {}", util::RangeToString(removal_set_));
 
     return elapsed_milliseconds;
 }
 
 template <typename OD>
 void SetBasedAodVerifier::CalculateRemovalSetForOD(OD const& od) {
-    LOG(DEBUG) << "Processing " << OD::kName << ": " << od.ToString();
+    LOG_DEBUG("Processing {}: {}", OD::kName, od.ToString());
     RemovalSetAsVec removal_set = od.CalculateRemovalSet(data_, partition_cache_);
-    LOG(DEBUG) << OD::kName << " removal set: " << util::RangeToString(removal_set);
+    LOG_DEBUG("{} removal set: {}", OD::kName, util::RangeToString(removal_set));
     removal_set_.insert(removal_set.begin(), removal_set.end());
 }
 
