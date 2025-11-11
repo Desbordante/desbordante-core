@@ -1,7 +1,5 @@
 #include "inductor.h"
 
-#include <boost/dynamic_bitset.hpp>
-
 namespace algos::cfdfinder {
 
 void Inductor::UpdateFdTree(NonFDList&& non_fds) {
@@ -12,7 +10,7 @@ void Inductor::UpdateFdTree(NonFDList&& non_fds) {
             auto rhs_bits = lhs_bits;
             rhs_bits.flip();
 
-            for (size_t rhs_id = rhs_bits.find_first(); rhs_id != boost::dynamic_bitset<>::npos;
+            for (size_t rhs_id = rhs_bits.find_first(); rhs_id != BitSet::npos;
                  rhs_id = rhs_bits.find_next(rhs_id)) {
                 SpecializeTreeForNonFd(lhs_bits, rhs_id);
             }
@@ -20,7 +18,7 @@ void Inductor::UpdateFdTree(NonFDList&& non_fds) {
     }
 }
 
-void Inductor::SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, size_t rhs_id) {
+void Inductor::SpecializeTreeForNonFd(BitSet const& lhs_bits, size_t rhs_id) {
     auto invalid_lhss = tree_->GetFdAndGenerals(lhs_bits, rhs_id);
 
     if (invalid_lhss.empty()) {

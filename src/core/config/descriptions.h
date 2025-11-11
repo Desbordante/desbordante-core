@@ -38,6 +38,8 @@ std::string const kDCfdExpansionStrategyString =
         util::EnumToAvailableValues<algos::cfdfinder::Expansion>();
 std::string const kDCfdPruningStrategyString =
         "CFD pruning strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Pruning>();
+std::string const kDCfdResultStrategyString =
+        "CFD result strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Result>();
 }  // namespace details
 
 // Common
@@ -92,6 +94,7 @@ constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm."
 constexpr auto kDLimitPliCache = "limit for the number of PLIs in the cache";
 auto const kDCfdExpansionStrategy = details::kDCfdExpansionStrategyString.c_str();
 auto const kDCfdPruningStrategy = details::kDCfdPruningStrategyString.c_str();
+auto const kDCfdResultStrategy = details::kDCfdResultStrategyString.c_str();
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "

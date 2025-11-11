@@ -5,6 +5,8 @@
 #include <vector>
 
 namespace algos::cfdfinder {
-using InvertedClusterMap = std::map<size_t, std::string>;
+using ClusterId = size_t;
+using AttributeValue = std::string;
+using InvertedClusterMap = std::map<ClusterId, AttributeValue>;
 using InvertedClusterMaps = std::vector<InvertedClusterMap>;
 }  // namespace algos::cfdfinder

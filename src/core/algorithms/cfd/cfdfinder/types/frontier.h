@@ -24,7 +24,7 @@ public:
     }
 
     Pattern Poll() {
-        auto pattern(std::move(sorted_index_.top()));
+        auto pattern(sorted_index_.top());
         sorted_index_.pop();
         search_index_.erase(pattern.GetEntries());
         return pattern;
