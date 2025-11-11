@@ -1,4 +1,4 @@
-#include "algorithms/cfd/cfdfinder/util/preprocessor.h"
+#include "algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
 
 #include "algorithms/fd/hycommon/preprocessor.h"
 
@@ -16,15 +16,14 @@ PLIs BuildPLIs(algos::cfdfinder::CFDFinderRelationData* relation) {
 
 namespace algos::cfdfinder {
 
-std::tuple<hy::PLIs, hy::Columns, hy::Rows> Preprocess(CFDFinderRelationData* relation) {
+std::tuple<hy::PLIsPtr, ColumnsPtr, hy::RowsPtr> Preprocess(CFDFinderRelationData* relation) {
     hy::PLIs plis = BuildPLIs(relation);
-
     auto inverted_plis = hy::util::BuildInvertedPlis(plis);
-
     auto compressed_records = hy::util::BuildRecordRepresentation(inverted_plis);
 
-    return std::make_tuple(std::move(plis), std::move(inverted_plis),
-                           std::move(compressed_records));
+    return std::make_tuple(std::make_shared<hy::PLIs>(std::move(plis)),
+                           std::make_shared<hy::Columns>(std::move(inverted_plis)),
+                           std::make_shared<hy::Rows>(std::move(compressed_records)));
 }
 
 }  // namespace algos::cfdfinder

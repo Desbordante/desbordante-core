@@ -1,9 +1,5 @@
 #pragma once
 
-#include <set>
-#include <string>
-#include <vector>
-
 #include "config/indices/type.h"
 #include "support_independent_strategy.h"
 
@@ -15,10 +11,10 @@ private:
 
 public:
     RhsFilterPruning(size_t pattern_threshold, double min_support_gain,
-                     double max_level_support_drop, double min_confidence, size_t num_attributes,
+                     double max_level_support_drop, double min_confidence,
                      config::IndicesType possible_rhs)
         : SupportIndependentPruning(pattern_threshold, min_support_gain, max_level_support_drop,
-                                    min_confidence, num_attributes),
+                                    min_confidence),
           possible_rhs_(std::move(possible_rhs)) {}
 
     bool ContinueGeneration(PatternTableau const& current_tableau) override {

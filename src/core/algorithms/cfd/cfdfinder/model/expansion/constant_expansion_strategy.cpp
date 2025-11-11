@@ -5,10 +5,9 @@
 
 namespace algos::cfdfinder {
 
-Pattern ConstantExpansion::GenerateNullPattern(boost::dynamic_bitset<> const& attributes) {
+Pattern ConstantExpansion::GenerateNullPattern(BitSet const& attributes) {
     Entries entries;
-    for (size_t i = attributes.find_first(); i != boost::dynamic_bitset<>::npos;
-         i = attributes.find_next(i)) {
+    for (size_t i = attributes.find_first(); i != BitSet::npos; i = attributes.find_next(i)) {
         entries.emplace_back(i, std::make_shared<VariableEntry>());
     }
     return Pattern(std::move(entries));

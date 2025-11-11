@@ -7,32 +7,31 @@
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
 #include "algorithms/fd/hycommon/util/pli_util.h"
 #include "algorithms/fd/hycommon/validator_helpers.h"
 #include "algorithms/fd/hyfd/hyfd_config.h"
+#include "types/bitset.h"
 
 namespace {
+using BitSet = boost::dynamic_bitset<>;
 
-std::unordered_set<size_t> AsSet(boost::dynamic_bitset<> const& bitset) {
+std::unordered_set<size_t> AsSet(BitSet const& bitset) {
     std::unordered_set<size_t> valid_rhss(bitset.count());
-    for (size_t attr = bitset.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = bitset.find_next(attr)) {
+    for (size_t attr = bitset.find_first(); attr != BitSet::npos; attr = bitset.find_next(attr)) {
         valid_rhss.insert(attr);
     }
     return valid_rhss;
 }
 
 std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
-        boost::dynamic_bitset<> const& rhs, algos::hy::Rows const& compressed_records) {
+        BitSet const& rhs, algos::hy::Rows const& compressed_records) {
     std::vector<size_t> rhs_column_ids;
     rhs_column_ids.reserve(rhs.count());
     std::vector<size_t> rhs_ranks(compressed_records[0].size());
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
         rhs_ranks[attr] = rhs_column_ids.size();
         rhs_column_ids.push_back(attr);
     }
@@ -63,8 +62,7 @@ void ValidateRhss(RhsRowId const& rhs_record, algos::hy::Rows const& compressed_
     }
 }
 
-RhsRowId BuildRhsRowId(algos::hy::Rows const& compressed_records,
-                       boost::dynamic_bitset<> const& rhs,
+RhsRowId BuildRhsRowId(algos::hy::Rows const& compressed_records, BitSet const& rhs,
                        std::vector<size_t> const& rhs_column_ids, size_t row) {
     std::vector<size_t> rhs_sub_cluster(rhs.count());
     for (size_t i = 0; i < rhs.count(); ++i) {
@@ -74,11 +72,9 @@ RhsRowId BuildRhsRowId(algos::hy::Rows const& compressed_records,
     return std::make_pair(std::move(rhs_sub_cluster), row);
 }
 
-boost::dynamic_bitset<> Refine(algos::hy::IdPairs& comparison_suggestions,
-                               algos::hy::PLIs const& plis,
-                               algos::hy::Rows const& compressed_records,
-                               boost::dynamic_bitset<> const& lhs,
-                               boost::dynamic_bitset<> const& rhs, size_t firstAttr) {
+BitSet Refine(algos::hy::IdPairs& comparison_suggestions, algos::hy::PLIs const& plis,
+              algos::hy::Rows const& compressed_records, BitSet const& lhs, BitSet const& rhs,
+              size_t firstAttr) {
     auto valid_rhs_ids = AsSet(rhs);
     auto const lhs_column_ids = util::BitsetToIndices<algos::hy::ClusterId>(lhs);
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
@@ -123,7 +119,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::cfdfinder::LhsPair>& 
                 continue;
             }
 
-            boost::dynamic_bitset<> lhs_ext = lhs;
+            BitSet lhs_ext = lhs;
             lhs_ext.set(attr);
 
             if (fds_tree.FindFdOrGeneral(lhs_ext, rhs)) {
@@ -160,8 +156,7 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     result.SetCountValidations(rhs_count);
     result.SetCountIntersections(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
         if (!(*plis_)[attr]->IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
@@ -178,7 +173,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
     size_t const rhs_count = rhs.count();
 
     size_t const lhs_attr = lhs.find_first();
-    if (lhs_attr == boost::dynamic_bitset<>::npos) {
+    if (lhs_attr == BitSet::npos) {
         return {};
     }
 
@@ -186,8 +181,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
     result.SetCountIntersections(rhs_count);
     result.SetCountValidations(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
         for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
@@ -220,15 +214,14 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
     size_t const first_attr = lhs.find_first();
 
     lhs.reset(first_attr);
-    boost::dynamic_bitset<> const valid_rhss = Refine(result.ComparisonSuggestions(), *plis_,
-                                                      *compressed_records_, lhs, rhs, first_attr);
+    BitSet const valid_rhss = Refine(result.ComparisonSuggestions(), *plis_, *compressed_records_,
+                                     lhs, rhs, first_attr);
     lhs.set(first_attr);
 
     rhs &= ~valid_rhss;
     vertex->SetFds(valid_rhss);
 
-    for (size_t attr = rhs.find_first(); attr != boost::dynamic_bitset<>::npos;
-         attr = rhs.find_next(attr)) {
+    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
         result.InvalidInstances().emplace_back(lhs, attr);
     }
 
@@ -286,8 +279,7 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
     if (current_level_number_ != 0) {
         cur_level_vertices = fds_->GetLevel(current_level_number_);
     } else {
-        cur_level_vertices.emplace_back(fds_->GetRootPtr(),
-                                        boost::dynamic_bitset<>(num_attributes));
+        cur_level_vertices.emplace_back(fds_->GetRootPtr(), BitSet(num_attributes));
     }
 
     size_t previous_num_invalid_fds = 0;

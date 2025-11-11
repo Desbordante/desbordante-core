@@ -14,8 +14,7 @@ size_t CalculateViolations(Cluster const& cluster, hy::Row const& inverted_rhs_p
         if (hy::PLIUtil::IsSingletonCluster(cluster_id)) continue;
 
         rhs_cluster_counts[cluster_id] += 1;
-        if (max_cluster_size < rhs_cluster_counts[cluster_id])
-            max_cluster_size = rhs_cluster_counts[cluster_id];
+        max_cluster_size = std::max(max_cluster_size, rhs_cluster_counts[cluster_id]);
     }
 
     return (max_cluster_size > 0) ? (cluster.size() - max_cluster_size) : cluster.size() - 1;

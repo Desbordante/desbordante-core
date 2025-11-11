@@ -1,10 +1,6 @@
 #pragma once
 
-#include <cmath>
-#include <string>
-#include <vector>
-
-#include "algorithms/cfd/cfdfinder/util/cluster_maps.h"
+#include "algorithms/cfd/cfdfinder/types/cluster_maps.h"
 #include "model/table/column_data.h"
 #include "model/table/idataset_stream.h"
 #include "model/table/relation_data.h"

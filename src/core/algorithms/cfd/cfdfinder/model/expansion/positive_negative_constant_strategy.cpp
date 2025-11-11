@@ -1,9 +1,5 @@
 #include "positive_negative_constant_strategy.h"
 
-#include <memory>
-#include <unordered_map>
-#include <vector>
-
 #include "algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
 #include "algorithms/cfd/cfdfinder/model/pattern/negative_constant_entry.h"
 

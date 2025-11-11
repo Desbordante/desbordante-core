@@ -1,7 +1,5 @@
 #include "legacy_pruning_strategy.h"
 
-#include <fstream>
-
 #include "cfd/cfdfinder/model/pattern/variable_entry.h"
 
 namespace algos::cfdfinder {

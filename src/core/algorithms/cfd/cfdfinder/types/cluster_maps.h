@@ -7,7 +7,8 @@
 #include "cluster.h"
 
 namespace algos::cfdfinder {
-using ClusterMap = std::unordered_map<std::string, Cluster>;
+using AttributeValue = std::string;
+using ClusterMap = std::unordered_map<AttributeValue, Cluster>;
 using ClusterMaps = std::vector<ClusterMap>;
 
 }  // namespace algos::cfdfinder

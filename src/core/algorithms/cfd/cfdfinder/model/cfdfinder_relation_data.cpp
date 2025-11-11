@@ -1,8 +1,10 @@
 #include "cfdfinder_relation_data.h"
 
-#include <map>
+#include <deque>
 #include <memory>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include <easylogging++.h>
 

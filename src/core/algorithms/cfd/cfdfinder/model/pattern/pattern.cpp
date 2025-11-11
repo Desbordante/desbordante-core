@@ -1,6 +1,6 @@
 #include "pattern.h"
 
-#include <boost/dynamic_bitset.hpp>
+#include <numeric>
 
 namespace algos::cfdfinder {
 bool Pattern::Matches(algos::hy::Row const& tuple) const {

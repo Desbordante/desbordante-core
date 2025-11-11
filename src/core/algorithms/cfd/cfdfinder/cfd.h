@@ -1,18 +1,17 @@
 #pragma once
 
-#include <variant>
-
 #include <boost/algorithm/string/join.hpp>
 
 #include "algorithms/fd/fd.h"
+#include "cfd/cfdfinder/types/inverted_cluster_maps.h"
 #include "model/pattern/pattern_tableau.h"
 
 namespace algos::cfdfinder {
 class CFD {
 private:
     using Entry = std::string;
-    using Pattern = std::vector<Entry>;
-    using Tableau = std::vector<Pattern>;
+    using Condition = std::vector<Entry>;
+    using Tableau = std::vector<Condition>;
 
     FD embedded_fd_;
     Tableau patterns_;
@@ -21,24 +20,10 @@ private:
 
 public:
     CFD(Vertical lhs, Column rhs, PatternTableau const& tableau,
-        std::shared_ptr<RelationalSchema const> schema, Tableau patterns_values)
-        : embedded_fd_(std::move(lhs), std::move(rhs), std::move(schema)),
-          patterns_(std::move(patterns_values)) {
-        support_ = tableau.GetSupport();
-        confidence_ = tableau.GetConfidence();
-    }
+        std::shared_ptr<RelationalSchema const> schema,
+        InvertedClusterMaps const& inverted_cluster_maps);
 
-    std::string ToString() const {
-        std::ostringstream oss;
-        oss << embedded_fd_.ToLongString();
-        oss << "\nPatternTableau {\n";
-
-        for (auto const& pattern : patterns_) {
-            oss << "\t(" << boost::algorithm::join(pattern, "|") << ")\n";
-        }
-        oss << "}\n";
-        return oss.str();
-    }
+    std::string ToString() const;
 
     double GetSupport() const {
         return support_;

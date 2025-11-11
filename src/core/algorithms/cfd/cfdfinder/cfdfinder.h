@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-#include <unordered_set>
+#include <set>
 
 #include "algorithms/algorithm.h"
 #include "candidate.h"
@@ -15,14 +15,16 @@
 #include "model/cfdfinder_relation_data.h"
 #include "model/expansion/expansion_strategy.h"
 #include "model/pruning/pruning_strategy.h"
-#include "util/inverted_cluster_maps.h"
+#include "model/result/result_strategy.h"
+#include "types/bitset.h"
+#include "types/inverted_cluster_maps.h"
 #include "util/pli_cache.h"
 
 namespace algos::cfdfinder {
 
 class CFDFinder : public Algorithm {
 private:
-    using Level = std::unordered_set<Candidate>;
+    using Level = std::set<Candidate>;
     using Lattice = std::vector<Level>;
 
     config::MaxLhsType max_lhs_;
@@ -33,6 +35,8 @@ private:
 
     Expansion expansion_strategy_ = Expansion::constant;
     Pruning pruning_strategy_ = Pruning::legacy;
+    Result result_strategy_ = Result::lattice;
+
     double min_confidence_;
     double min_support_;
     double max_g1_;
@@ -47,35 +51,30 @@ private:
     void RegisterOptions();
     void ResetState() final;
 
-    Lattice GetLattice(hy::PLIsPtr const& plis, hy::RowsPtr const& compressed_records);
-    std::vector<std::string> GetEntriesString(
-            Pattern const& pattern, InvertedClusterMaps const& inverted_cluster_maps) const;
-    void EnrichCompressedRecords(hy::RowsPtr& compressed_records,
-                                 EnrichedPLIs const& enriched_plis);
+    Lattice GetLattice(hy::PLIsPtr plis, hy::RowsPtr compressed_records);
+    void EnrichCompressedRecords(hy::RowsPtr compressed_records, EnrichedPLIs enriched_plis);
 
-    std::vector<Cluster> EnrichPLI(model::PositionListIndex const* pli, int num_tuples);
+    std::vector<Cluster> EnrichPLI(model::PLI const* pli, int num_tuples);
 
-    std::shared_ptr<model::PositionListIndex const> GetLhsPli(PLICache& pli_cache,
-                                                              boost::dynamic_bitset<> const& lhs,
-                                                              hy::PLIsPtr const& plis);
+    std::shared_ptr<model::PLI const> GetLhsPli(PLICache& pli_cache, BitSet const& lhs,
+                                                hy::PLIs const& plis);
 
-    void RegisterCFD(Candidate candidate, PatternTableau const& tableau,
-                     InvertedClusterMaps const& inverted_cluster_maps);
-
-    PatternTableau GenerateTableau(boost::dynamic_bitset<> const& lhs_attributes,
-                                   model::PositionListIndex const* lhs_pli,
+    PatternTableau GenerateTableau(BitSet const& lhs_attributes, model::PLI const* lhs_pli,
                                    hy::Row const& inverted_pli_rhs,
-                                   hy::RowsPtr const& compressed_records_shared,
-                                   ExpansionStrategy* const expansion_strategy,
-                                   PruningStrategy* const pruning_strategy);
+                                   hy::RowsPtr compressed_records_shared,
+                                   std::shared_ptr<ExpansionStrategy> expansion_strategy,
+                                   std::shared_ptr<PruningStrategy> pruning_strategy);
 
     std::list<Cluster> DetermineCover(Pattern const& child_pattern, Pattern const& current_pattern,
-                                      hy::RowsPtr const& pli_records) const;
+                                      hy::Rows const& pli_records) const;
 
-    std::unique_ptr<ExpansionStrategy> InitExpansionStrategy(
-            hy::RowsPtr const& pli_records, InvertedClusterMaps const& inverted_cluster_maps);
+    std::shared_ptr<ExpansionStrategy> InitExpansionStrategy(
+            hy::RowsPtr pli_records, InvertedClusterMaps const& inverted_cluster_maps);
+    std::shared_ptr<PruningStrategy> InitPruningStrategy(hy::RowsPtr inverted_plis);
+    std::shared_ptr<ResultStrategy> InitResultStrategy();
 
-    std::unique_ptr<PruningStrategy> InitPruningStrategy(hy::RowsPtr const& inverted_plis);
+    void RegisterResults(std::shared_ptr<ResultStrategy> result_receiver,
+                         InvertedClusterMaps inverted_cluster_maps);
 
 protected:
     void MakeExecuteOptsAvailable() override;

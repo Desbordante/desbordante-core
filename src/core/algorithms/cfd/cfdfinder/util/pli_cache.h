@@ -1,18 +1,15 @@
 #pragma once
 
 #include <memory>
-#include <unordered_map>
-#include <vector>
-
-#include <boost/dynamic_bitset.hpp>
 
 #include "model/table/position_list_index.h"
 #include "model/table/vertical_map.h"
+#include "types/bitset.h"
 
 namespace algos::cfdfinder {
 class PLICache {
 private:
-    using PLIMap = model::VerticalMap<model::PositionListIndex>;
+    using PLIMap = model::VerticalMap<model::PLI>;
 
     std::unique_ptr<PLIMap> index_;
     RelationalSchema const* schema_;
@@ -23,7 +20,7 @@ private:
     size_t total_misses_;
 
 public:
-    explicit PLICache(size_t limit, RelationalSchema const* schema)
+    PLICache(size_t limit, RelationalSchema const* schema)
         : index_(std::make_unique<PLIMap>(schema)),
           schema_(schema),
           limit_(limit),
@@ -32,11 +29,11 @@ public:
           partial_hits_(0),
           total_misses_(0) {}
 
-    std::shared_ptr<model::PositionListIndex const> Get(boost::dynamic_bitset<> const& columns) {
+    std::shared_ptr<model::PLI const> Get(BitSet const& columns) const {
         return index_->Get(columns);
     }
 
-    void Put(boost::dynamic_bitset<> columns, std::shared_ptr<model::PositionListIndex> pli) {
+    void Put(BitSet columns, std::shared_ptr<model::PLI> pli) {
         if (size_ >= limit_) {
             return;
         }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <numeric>
 
 #include "cfd/cfdfinder/util/violations_util.h"
 #include "pattern_item.h"
@@ -109,22 +108,6 @@ public:
 };
 
 }  // namespace algos::cfdfinder
-
-template <>
-struct std::hash<algos::cfdfinder::Entries> {
-    size_t operator()(algos::cfdfinder::Entries const& entries) const {
-        size_t seed = 0;
-
-        boost::hash_combine(seed, entries.size());
-
-        for (auto const& [id, entry] : entries) {
-            boost::hash_combine(seed, id);
-            boost::hash_combine(seed, entry->Hash());
-        }
-
-        return seed;
-    }
-};
 
 template <>
 struct std::hash<algos::cfdfinder::Pattern> {
