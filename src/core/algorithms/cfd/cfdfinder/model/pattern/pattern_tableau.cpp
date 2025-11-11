@@ -1,5 +1,7 @@
 #include "pattern_tableau.h"
 
+#include <numeric>
+
 namespace algos::cfdfinder {
 
 size_t PatternTableau::GetGlobalCover() const {

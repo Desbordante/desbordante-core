@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 #include "pruning_strategy.h"
 
@@ -11,7 +10,6 @@ namespace algos::cfdfinder {
 class SupportIndependentPruning : public PruningStrategy {
 private:
     size_t max_patterns_;
-    size_t num_attributes_;
     double min_support_gain_;
     double min_confidence_;
     double max_level_support_drop_;
@@ -24,8 +22,7 @@ protected:
 
 public:
     SupportIndependentPruning(size_t pattern_threshold, double min_support_gain,
-                              double max_level_support_drop, double min_confidence,
-                              size_t num_attributes);
+                              double max_level_support_drop, double min_confidence);
 
     void StartNewTableau(Candidate const& candidate) override;
     void AddPattern([[maybe_unused]] Pattern const& pattern) override;

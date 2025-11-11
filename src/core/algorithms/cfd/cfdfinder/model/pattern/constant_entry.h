@@ -1,8 +1,5 @@
 #pragma once
 
-#include <cstddef>
-#include <memory>
-
 #include "entry.h"
 
 namespace algos::cfdfinder {

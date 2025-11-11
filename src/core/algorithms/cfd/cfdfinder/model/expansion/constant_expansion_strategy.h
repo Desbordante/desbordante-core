@@ -1,8 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
+#include "algorithms/fd/hycommon/types.h"
 #include "expansion_strategy.h"
 
 namespace algos::cfdfinder {
@@ -17,7 +15,7 @@ public:
     explicit ConstantExpansion(hy::RowsPtr compressed_records)
         : compressed_records_(std::move(compressed_records)) {}
 
-    Pattern GenerateNullPattern(boost::dynamic_bitset<> const& attributes) override;
+    Pattern GenerateNullPattern(BitSet const& attributes) override;
     std::list<Pattern> GetChildPatterns(Pattern const& current_pattern) override;
 };
 

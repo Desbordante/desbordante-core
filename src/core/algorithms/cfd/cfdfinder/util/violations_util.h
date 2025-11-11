@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "cfd/cfdfinder/util/enriched_plis.h"
+#include "cfd/cfdfinder/types/enriched_plis.h"
 #include "fd/hycommon/types.h"
 
 namespace algos::cfdfinder::util {

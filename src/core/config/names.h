@@ -41,6 +41,7 @@ constexpr auto kMaxLevelSupportDrop = "max_level_support_drop";
 constexpr auto kMinSupportGain = "min_support_gain";
 constexpr auto kCfdExpansionStrategy = "expansion_strategy";
 constexpr auto kCfdPruningStrategy = "pruning_strategy";
+constexpr auto kCfdResultStrategy = "result_strategy";
 constexpr auto kPatternTreshold = "pattern_treshold";
 constexpr auto kLimitPliCache = "limit_pli_cache";
 // CORDS

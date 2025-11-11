@@ -8,13 +8,14 @@
 
 namespace algos::cfdfinder {
 class RangeEntry final : public Entry {
-    std::vector<size_t> sorted_cluster_ids_;
+    std::shared_ptr<std::vector<size_t>> sorted_cluster_ids_;
     size_t min_cluster_;
     size_t max_cluster_;
 
 public:
-    RangeEntry(std::vector<size_t> const& sorted_clusters, size_t min_cluster, size_t max_cluster)
-        : sorted_cluster_ids_(sorted_clusters),
+    RangeEntry(std::shared_ptr<std::vector<size_t>> sorted_clusters, size_t min_cluster,
+               size_t max_cluster)
+        : sorted_cluster_ids_(std::move(sorted_clusters)),
           min_cluster_(min_cluster),
           max_cluster_(max_cluster) {}
 
@@ -36,11 +37,11 @@ public:
     }
 
     size_t GetLowerBound() const {
-        return sorted_cluster_ids_[min_cluster_];
+        return sorted_cluster_ids_->at(min_cluster_);
     }
 
     size_t GetUpperBound() const {
-        return sorted_cluster_ids_[max_cluster_];
+        return sorted_cluster_ids_->at(max_cluster_);
     }
 
     inline bool Matches(size_t value) const final override {
@@ -56,7 +57,7 @@ public:
     }
 
     size_t Hash() const override {
-        size_t hash = boost::hash_range(sorted_cluster_ids_.begin(), sorted_cluster_ids_.end());
+        size_t hash = boost::hash_range(sorted_cluster_ids_->begin(), sorted_cluster_ids_->end());
         hash += std::hash<size_t>{}(min_cluster_);
         hash += std::hash<size_t>{}(max_cluster_);
 
