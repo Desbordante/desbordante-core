@@ -1,7 +1,5 @@
 #pragma once
 
-#include <enum.h>
-
 #include "encoded_nar.h"
 #include "enums.h"
 #include "rng.h"

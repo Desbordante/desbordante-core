@@ -1,9 +1,8 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos {
 
-BETTER_ENUM(Binop, char, Addition = '+', Subtraction = '-', Multiplication = '*', Division = '/');
-
+enum class Binop : char { Addition = '+', Subtraction = '-', Multiplication = '*', Division = '/' };
 }  // namespace algos
