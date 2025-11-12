@@ -2,9 +2,9 @@
 
 #include <memory>
 
+#include "algorithms/cfd/cfdfinder/types/bitset.h"
 #include "model/table/position_list_index.h"
 #include "model/table/vertical_map.h"
-#include "types/bitset.h"
 
 namespace algos::cfdfinder {
 class PLICache {
