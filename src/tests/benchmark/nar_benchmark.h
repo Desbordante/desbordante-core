@@ -14,8 +14,8 @@ inline void NARBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkComp
     using namespace config::names;
 
     runner.RegisterSimpleBenchmark<algos::des::DES>(
-            tests::kAdult, {{kMinimumSupport, 0.0},
-                            {kMinimumConfidence, 0.0},
+            tests::kAdult, {{kArMinimumSupport, 0.0},
+                            {kArMinimumConfidence, 0.0},
                             {kPopulationSize, static_cast<unsigned>(std::pow(10, 5))},
                             {kMaxFitnessEvaluations, static_cast<unsigned>(std::pow(10, 5))},
                             {kCrossoverProbability, 0.9},
