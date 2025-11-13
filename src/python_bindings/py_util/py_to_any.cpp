@@ -14,12 +14,12 @@
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "algorithms/metric/enums.h"
-#include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
 #include "config/error_measure/type.h"
 #include "config/exceptions.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
+#include "model/transaction/input_format_type.h"
 #include "od/fastod/od_ordering.h"
 #include "parser/csv_parser/csv_parser.h"
 #include "py_util/create_dataframe_reader.h"
@@ -132,7 +132,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
-        kEnumConvPair<algos::InputFormat>,
+        kEnumConvPair<model::InputFormatType>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
         kEnumConvPair<algos::od::Ordering>,

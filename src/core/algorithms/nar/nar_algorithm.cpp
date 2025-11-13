@@ -29,13 +29,13 @@ void NARAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
-    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0.0});
+    RegisterOption(Option{&minconf_, kArMinimumConfidence, kDArMinimumConfidence, 0.0});
+    RegisterOption(Option{&minsup_, kArMinimumSupport, kDArMinimumSupport, 0.0});
 }
 
 void NARAlgorithm::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
+    MakeOptionsAvailable({kArMinimumSupport, kArMinimumConfidence});
 }
 
 }  // namespace algos
