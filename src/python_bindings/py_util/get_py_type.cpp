@@ -14,12 +14,12 @@
 #include "algorithms/md/hymd/hymd.h"
 #include "algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "algorithms/metric/enums.h"
-#include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
 #include "config/error_measure/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/tabular_data/input_tables_type.h"
 #include "model/table/column_combination.h"
+#include "model/transaction/input_format_type.h"
 #include "od/fastod/od_ordering.h"
 
 namespace py = pybind11;
@@ -86,7 +86,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::PfdErrorMeasureType, kPyStr>,
             PyTypePair<config::AfdErrorMeasureType, kPyStr>,
-            PyTypePair<algos::InputFormat, kPyStr>,
+            PyTypePair<model::InputFormatType, kPyStr>,
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
             PyTypePair<algos::od::Ordering, kPyStr>,

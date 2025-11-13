@@ -61,8 +61,10 @@ constexpr auto kDWeight =
 constexpr auto kDFirstColumnTId = "indicates that the first column contains the transaction IDs";
 constexpr auto kDInputFormat = "format of the input dataset for AR mining\n[singular|tabular]";
 constexpr auto kDItemColumnIndex = "index of the column where an item name is stored";
-constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)";
-constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
+constexpr auto kDArMinimumConfidence = "Ar minimum confidence value (between 0 and 1)";
+constexpr auto kDArMinimumSupport = "Ar minimum support value (between 0 and 1)";
+constexpr auto kDArLhsRule = "left part of association rule to verify";
+constexpr auto kDArRhsRule = "right part of association rule to verify";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
 constexpr auto kDCfdColumnsNumber =

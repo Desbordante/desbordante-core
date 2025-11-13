@@ -9,13 +9,13 @@
 #include "algorithms/dd/dd.h"
 #include "algorithms/md/hymd/enums.h"
 #include "algorithms/metric/enums.h"
-#include "association_rules/ar_algorithm_enums.h"
 #include "config/custom_random_seed/type.h"
 #include "config/equal_nulls/type.h"
 #include "config/error/type.h"
 #include "config/indices/type.h"
 #include "config/max_lhs/type.h"
 #include "config/thread_number/type.h"
+#include "model/transaction/input_format_type.h"
 #include "od/fastod/od_ordering.h"
 
 namespace {
@@ -45,7 +45,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<model::DDString>,
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
-        enum_conv_pair<algos::InputFormat>,
+        enum_conv_pair<model::InputFormatType>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
         enum_conv_pair<algos::od::Ordering>};
 }  // namespace
