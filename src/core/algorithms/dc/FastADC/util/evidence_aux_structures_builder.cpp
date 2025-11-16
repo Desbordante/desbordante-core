@@ -3,9 +3,8 @@
 #include <assert.h>
 #include <stddef.h>
 
-#include <easylogging++.h>
-
 #include "dc/FastADC/model/predicate.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 
@@ -96,7 +95,7 @@ void EvidenceAuxStructuresBuilder::BuildAll() {
     ProcessNumPredicates(num_single_, packs_.num_single, count);
     ProcessNumPredicates(num_cross_, packs_.num_cross, count);
 
-    LOG(DEBUG) << "  [CLUE] # of bits in clue: " << count;
+    LOG_DEBUG("  [CLUE] # of bits in clue: {}", count);
     assert(count <= kPredicateBits);
 }
 

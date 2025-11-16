@@ -7,14 +7,14 @@
 
 #include <algorithm>
 #include <cmath>
+#include <fstream>
 #include <numeric>
 #include <string>
-
-#include <easylogging++.h>
 
 #include "config/thread_number/type.h"
 #include "model/table/block_dataset_stream.h"
 #include "model/table/dataset_stream_fixed.h"
+#include "util/logger.h"
 #include "util/parallel_for.h"
 
 namespace model {
@@ -122,7 +122,7 @@ bool DomainPartition::TrySwap() {
                                 "." + std::to_string(GetPartitionId()));
     std::ofstream file{file_path};
     if (!file.is_open()) {
-        LOG(ERROR) << "unable to open file for swapping";
+        LOG_ERROR("unable to open file for swapping");
         throw std::runtime_error("Cannot open file for swapping");
     }
 

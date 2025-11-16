@@ -1,6 +1,6 @@
 #include "fun.h"
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace algos {
 
@@ -196,8 +196,8 @@ unsigned long long FUN::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG(INFO) << "Total FD count: " << total_fds;
-    LOG(INFO) << "HASH: " << Fletcher16();
+    LOG_INFO("Total FD count: {}", total_fds);
+    LOG_INFO("HASH: {}", Fletcher16());
 
     return elapsed_milliseconds.count();
 }

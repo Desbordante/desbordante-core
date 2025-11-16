@@ -15,7 +15,6 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <easylogging++.h>
 
 #include "algorithms/dc/model/component.h"
 #include "algorithms/dc/model/point.h"
@@ -29,6 +28,7 @@
 #include "table/typed_column_data.h"
 #include "util/get_preallocated_vector.h"
 #include "util/kdtree.h"
+#include "util/logger.h"
 
 namespace algos {
 
@@ -71,7 +71,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
-        LOG(INFO) << e.what();
+        LOG_INFO("{}", e.what());
         return 0;
     }
 

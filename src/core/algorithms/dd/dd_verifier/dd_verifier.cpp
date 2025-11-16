@@ -6,13 +6,12 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
-
 #include "config/descriptions.h"
 #include "config/names.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "model/table/vertical.h"
+#include "util/logger.h"
 #include "util/timed_invoke.h"
 
 namespace algos::dd {
@@ -37,11 +36,9 @@ void DDVerifier::VisualizeHighlights() const {
         auto const &col_data = typed_relation_->GetColumnData(hl.GetAttributeIndex());
         RelationalSchema const *col_schema = typed_relation_->GetSchema();
         auto const &pair = hl.GetPairRows();
-        LOG(DEBUG) << "DD does not hold in "
-                   << col_schema->GetColumn(hl.GetAttributeIndex())->GetName() << " in "
-                   << pair.first << " and " << pair.second << " rows with values "
-                   << col_data.GetDataAsString(pair.first) << ", "
-                   << col_data.GetDataAsString(pair.second) << '\n';
+        LOG_DEBUG("DD does not hold in {} in {} and {} rows with values {}, {}\n",
+                  col_schema->GetColumn(hl.GetAttributeIndex())->GetName(), pair.first, pair.second,
+                  col_data.GetDataAsString(pair.first), col_data.GetDataAsString(pair.second));
     }
 }
 
@@ -186,11 +183,11 @@ bool DDVerifier::DDHolds() const {
 
 void DDVerifier::PrintStatistics() const {
     if (DDHolds()) {
-        LOG(DEBUG) << "DD holds.";
+        LOG_DEBUG("DD holds.");
     } else {
-        LOG(DEBUG) << "DD does not hold.";
-        LOG(DEBUG) << "Number of rhs rows with errors: " << GetNumErrorRhs();
-        LOG(DEBUG) << "DD error threshold: " << GetError();
+        LOG_DEBUG("DD does not hold.");
+        LOG_DEBUG("Number of rhs rows with errors: {}", GetNumErrorRhs());
+        LOG_DEBUG("DD error threshold: {}", GetError());
         VisualizeHighlights();
     }
 }

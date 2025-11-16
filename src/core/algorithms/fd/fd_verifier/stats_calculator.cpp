@@ -5,7 +5,7 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace {
 
@@ -48,12 +48,12 @@ namespace algos::fd_verifier {
 
 void StatsCalculator::PrintStatistics() const {
     if (FDHolds()) {
-        LOG(DEBUG) << "FD holds.";
+        LOG_DEBUG("FD holds.");
     } else {
-        LOG(DEBUG) << "FD does not hold.";
-        LOG(DEBUG) << "Number of clusters with errors: " << GetNumErrorClusters();
-        LOG(DEBUG) << "Number of rows with errors: " << GetNumErrorRows();
-        LOG(DEBUG) << "AFD error threshold: " << GetError();
+        LOG_DEBUG("FD does not hold.");
+        LOG_DEBUG("Number of clusters with errors: {}", GetNumErrorClusters());
+        LOG_DEBUG("Number of rows with errors: {}", GetNumErrorRows());
+        LOG_DEBUG("AFD error threshold: {}", GetError());
         VisualizeHighlights();
     }
 }
@@ -114,14 +114,14 @@ size_t StatsCalculator::CalculateNumDistinctRhsValues(
 
 void StatsCalculator::VisualizeHighlights() const {
     for (auto const& highlight : highlights_) {
-        LOG(DEBUG) << "- LHS value: " << GetLhsStringValue(highlight.GetCluster()[0])
-                   << ", Size: " << highlight.GetCluster().size()
-                   << ", Number of different RHS values: " << highlight.GetNumDistinctRhsValues()
-                   << ", Proportion of most frequent RHS value: "
-                   << highlight.GetMostFrequentRhsValueProportion();
+        LOG_DEBUG(
+                "- LHS value: {}, Size: {}, Number of different RHS values: {}, "
+                "Proportion of most frequent RHS value: {}",
+                GetLhsStringValue(highlight.GetCluster()[0]), highlight.GetCluster().size(),
+                highlight.GetNumDistinctRhsValues(), highlight.GetMostFrequentRhsValueProportion());
         if (rhs_indices_.size() == 1) {
             for (auto index : highlight.GetCluster()) {
-                LOG(DEBUG) << GetStringValueByIndex(index, rhs_indices_[0]);
+                LOG_DEBUG("{}", GetStringValueByIndex(index, rhs_indices_[0]));
             }
         }
     }

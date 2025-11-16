@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace algos {
 
@@ -172,7 +172,7 @@ unsigned long long Apriori::GenerateAllRules() {
             std::chrono::system_clock::now() - start_time);
     long long millis = elapsed_milliseconds.count();
 
-    LOG(INFO) << "> Count of frequent itemsets: " << frequent_count;
+    LOG_INFO("> Count of frequent itemsets: {}", frequent_count);
     return millis;
 }
 

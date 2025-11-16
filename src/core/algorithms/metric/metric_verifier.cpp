@@ -8,14 +8,13 @@
 #include <string>
 #include <utility>
 
-#include <easylogging++.h>
-
 #include "config/equal_nulls/option.h"
 #include "config/exceptions.h"
 #include "config/indices/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "util/logger.h"
 
 namespace algos::metric {
 
@@ -151,9 +150,9 @@ unsigned long long MetricVerifier::ExecuteInternal() {
     VerifyMetricFD();
 
     if (metric_fd_holds_) {
-        LOG(DEBUG) << "Metric fd holds.";
+        LOG_DEBUG("Metric fd holds.");
     } else {
-        LOG(DEBUG) << "Metric fd does not hold.";
+        LOG_DEBUG("Metric fd does not hold.");
     }
 
     SortHighlightsByDistanceDescending();
@@ -195,8 +194,8 @@ void MetricVerifier::VisualizeHighlights() const {
         return;
     }
     for (auto const& cluster_highlight : highlight_calculator_->GetHighlights()) {
-        LOG(DEBUG) << "----------------------------------------- LHS value: "
-                   << GetStringValue(lhs_indices_, cluster_highlight[0].data_index);
+        LOG_DEBUG("----------------------------------------- LHS value: {}",
+                  GetStringValue(lhs_indices_, cluster_highlight[0].data_index));
         for (auto const& highlight : cluster_highlight) {
             bool is_null =
                     typed_relation_->GetColumnData(rhs_indices_[0]).IsNull(highlight.data_index);
@@ -215,8 +214,8 @@ void MetricVerifier::VisualizeHighlights() const {
                            "\t| furthest point value: " +
                            GetStringValue(rhs_indices_, highlight.furthest_data_index);
             }
-            LOG(DEBUG) << begin_desc << "index: " << highlight.data_index << "\t| value: " << value
-                       << end_desc;
+            LOG_DEBUG("{}index: {}\t| value: {}{}", begin_desc, highlight.data_index, value,
+                      end_desc);
         }
     }
 }

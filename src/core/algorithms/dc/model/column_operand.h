@@ -7,12 +7,11 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
-
 #include "algorithms/dc/model/tuple.h"
 #include "model/table/column.h"
 #include "model/table/relation_data.h"
 #include "model/types/type.h"
+#include "util/logger.h"
 
 namespace algos::dc {
 
