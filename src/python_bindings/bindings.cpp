@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <initializer_list>
 
-#include <easylogging++.h>
 #include <pybind11/pybind11.h>
 
 #include "ac/bind_ac.h"
@@ -30,28 +29,19 @@
 #include "od/bind_od.h"
 #include "od/bind_od_verification.h"
 #include "pfd/bind_pfd_verification.h"
+#include "py_util/logging.h"
 #include "sfd/bind_sfd.h"
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
 
-INITIALIZE_EASYLOGGINGPP
-
 namespace python_bindings {
 
 PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
     using namespace pybind11::literals;
-
-    if (std::filesystem::exists("logging.conf")) {
-        el::Loggers::configureFromGlobal("logging.conf");
-    } else {
-        el::Configurations conf;
-        conf.set(el::Level::Global, el::ConfigurationType::Enabled, "false");
-        el::Loggers::reconfigureAllLoggers(conf);
-    }
-
     for (auto bind_func : {BindMainClasses,
                            BindDataTypes,
+                           BindLogging,
                            BindFd,
                            BindCfd,
                            BindAr,

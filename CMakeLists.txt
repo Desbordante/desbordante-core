@@ -99,6 +99,10 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
+if(BUILD_NATIVE)
+    string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
+endif()
+
 # RELEASE build options
 string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}" "-O3")
 
@@ -321,7 +325,10 @@ include_directories(
 
 add_subdirectory("src/core")
 
-if (COMPILE_TESTS)
+# --- Optional Modules Setup ---
+
+# Configure tests
+if(COMPILE_TESTS)
     enable_testing()
 endif()
 
