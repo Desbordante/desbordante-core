@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
-
 #include "algorithms/nd/nd_verifier/util/stats_calculator.h"
 #include "algorithms/nd/nd_verifier/util/value_combination.h"
 #include "config/descriptions.h"
@@ -22,6 +20,7 @@
 #include "model/table/typed_column_data.h"
 #include "model/types/builtin.h"
 #include "model/types/type.h"
+#include "util/logger.h"
 #include "util/range_to_string.h"
 #include "util/timed_invoke.h"
 
@@ -59,20 +58,20 @@ void NDVerifier::MakeExecuteOptsAvailable() {
 }
 
 unsigned long long NDVerifier::ExecuteInternal() {
-    LOG(INFO) << "Parameters of NDVerifier:";
-    LOG(INFO) << "\tInput table: " << input_table_->GetRelationName();
-    LOG(INFO) << "\tNull equals null: " << is_null_equal_null_;
-    LOG(INFO) << "\tLhs indices: " << ::util::RangeToString(lhs_indices_);
-    LOG(INFO) << "\tRhs indices: " << ::util::RangeToString(rhs_indices_);
-    LOG(INFO) << "\tWeight: " << weight_;
+    LOG_INFO("Parameters of NDVerifier:");
+    LOG_INFO("\tInput table: {}", input_table_->GetRelationName());
+    LOG_INFO("\tNull equals null: {}", is_null_equal_null_);
+    LOG_INFO("\tLhs indices: {}", ::util::RangeToString(lhs_indices_));
+    LOG_INFO("\tRhs indices: {}", ::util::RangeToString(rhs_indices_));
+    LOG_INFO("\tWeight: {}", weight_);
 
     auto verification_time = ::util::TimedInvoke(&NDVerifier::VerifyND, this);
 
-    LOG(DEBUG) << "ND verification took " << std::to_string(verification_time) << "ms";
+    LOG_DEBUG("ND verification took {} ms", std::to_string(verification_time));
 
     auto stats_calculation_time = ::util::TimedInvoke(&NDVerifier::CalculateStats, this);
 
-    LOG(DEBUG) << "Statistics calculation took " << std::to_string(stats_calculation_time) << "ms";
+    LOG_DEBUG("Statistics calculation took {} ms", std::to_string(stats_calculation_time));
 
     return verification_time + stats_calculation_time;
 }
@@ -126,7 +125,7 @@ NDVerifier::CombinedValuesType NDVerifier::CombineValues(
 
             std::byte const* bytes_ptr = byte_data[row_idx];
             if (bytes_ptr == nullptr) {
-                LOG(INFO) << "WARNING: Cell (" << *col_idx_pt << ", " << row_idx << ") is empty";
+                LOG_WARN("WARNING: Cell ({}, {}) is empty", static_cast<int>(*col_idx_pt), row_idx);
                 was_null = true;
             }
 
@@ -143,11 +142,10 @@ void NDVerifier::VerifyND() {
     auto [lhs_values, combined_lhs] = CombineValues(lhs_indices_);
     auto [rhs_values, combined_rhs] = CombineValues(rhs_indices_);
 
-    LOG(DEBUG) << "Values combination took "
-               << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                         std::chrono::system_clock::now() - local_start_time)
-                                         .count())
-               << "ms";
+    LOG_DEBUG("Values combination took {} ms",
+              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                     std::chrono::system_clock::now() - local_start_time)
+                                     .count()));
 
     local_start_time = std::chrono::system_clock::now();
     std::unordered_map<size_t, std::unordered_set<size_t>> value_deps{};
@@ -162,11 +160,10 @@ void NDVerifier::VerifyND() {
             value_deps[lhs_code].insert(rhs_code);
         }
     }
-    LOG(DEBUG) << "Value deps calculation took "
-               << std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
-                                         std::chrono::system_clock::now() - local_start_time)
-                                         .count())
-               << "ms";
+    LOG_DEBUG("Value deps calculation took {} ms",
+              std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                     std::chrono::system_clock::now() - local_start_time)
+                                     .count()));
 
     stats_calculator_ = util::StatsCalculator(std::move(value_deps), std::move(lhs_values),
                                               std::move(rhs_values), std::move(combined_lhs),
