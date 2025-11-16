@@ -4,8 +4,6 @@
 #include <assert.h>
 #include <bitset>
 
-#include <easylogging++.h>
-
 #include "dc/FastADC/misc/typed_column_data_value_differences.h"
 #include "dc/FastADC/model/column_operand.h"
 #include "dc/FastADC/model/operator.h"
@@ -14,6 +12,7 @@
 #include "dc/FastADC/providers/predicate_provider.h"
 #include "model/types/builtin.h"
 #include "table/typed_column_data.h"
+#include "util/logger.h"
 
 namespace algos::fastadc {
 
@@ -37,7 +36,7 @@ void PredicateBuilder::BuildPredicateSpace(std::vector<model::TypedColumnData> c
     BuildMutexMap();
     BuildInverseMap();
 
-    LOG(DEBUG) << " [Predicate] Predicate space size: " << predicates_.size();
+    LOG_DEBUG(" [Predicate] Predicate space size: {}", predicates_.size());
 }
 
 size_t PredicateBuilder::PredIdx(PredicatePtr const& p) {

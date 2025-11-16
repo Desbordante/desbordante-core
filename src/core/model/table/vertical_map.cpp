@@ -1,7 +1,9 @@
 #include "vertical_map.h"
 
 #include <exception>
+#include <mutex>
 #include <queue>
+#include <shared_mutex>
 #include <unordered_set>
 
 #include "fd/pyrocommon/core/dependency_candidate.h"

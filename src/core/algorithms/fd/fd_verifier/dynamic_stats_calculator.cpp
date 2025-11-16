@@ -5,8 +5,6 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <easylogging++.h>
-
 namespace algos::fd_verifier {
 
 void DynamicStatsCalculator::CalculateStatistics(model::DynPLI const* lhs_pli,

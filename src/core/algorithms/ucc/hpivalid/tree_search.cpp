@@ -10,11 +10,10 @@
 #include <utility>
 #include <vector>
 
-#include <easylogging++.h>
-
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/pli_table.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
+#include "util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -104,11 +103,11 @@ void TreeSearch::Run() {
             cand.set(v);
         }
         // report final hypergraph
-        LOG(DEBUG) << "Final hypergraph:";
+        LOG_DEBUG("Final hypergraph:");
         rc_.FinalHypergraph(partial_hg_);
     } catch (unsigned timeout) {
         // report current partial hypergraph
-        LOG(DEBUG) << "Current partial hypergraph:";
+        LOG_DEBUG("Current partial hypergraph:");
         rc_.FinalHypergraph(partial_hg_);
     }
 }

@@ -4,13 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include <easylogging++.h>
-
 #include "algorithms/fd/hycommon/preprocessor.h"
 #include "algorithms/fd/hycommon/types.h"
 #include "algorithms/ucc/hpivalid/config.h"
 #include "algorithms/ucc/hpivalid/result_collector.h"
 #include "algorithms/ucc/hpivalid/tree_search.h"
+#include "util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -63,7 +62,7 @@ unsigned long long HPIValid::ExecuteInternal() {
     PrintInfo(rc);
 
     rc.StopTimer(hpiv::timer::TimerName::total);
-    LOG(INFO) << "Elapsed time: " << rc.Time(hpiv::timer::TimerName::total);
+    LOG_INFO("Elapsed time: {}", rc.Time(hpiv::timer::TimerName::total));
 
     return rc.Time(hpiv::timer::TimerName::total);
 }
@@ -77,16 +76,15 @@ void HPIValid::RegisterUCCs(hpiv::ResultCollector const& rc) {
 }
 
 void HPIValid::PrintInfo(hpiv::ResultCollector const& rc) const {
-    LOG(INFO) << "Minimal UCCs: " << rc.UCCs();
-    LOG(DEBUG) << "Mined UCCs:";
+    LOG_INFO("Minimal UCCs: {}", rc.UCCs());
+    LOG_DEBUG("Mined UCCs:");
     for (model::UCC const& ucc : UCCList()) {
-        LOG(DEBUG) << ucc.ToString();
+        LOG_DEBUG("{}", ucc.ToString());
     }
-    LOG(INFO) << "Minimal difference sets: " << rc.DiffSetsFinal();
-    LOG(INFO) << "Sampled difference sets: " << rc.DiffSets()
-              << " (initial: " << rc.DiffSetsInitial() << ")";
-    LOG(INFO) << "PLI intersections: " << rc.Intersections();
-    LOG(INFO) << "Tree size: " << rc.TreeNodes();
+    LOG_INFO("Minimal difference sets: {}", rc.DiffSetsFinal());
+    LOG_INFO("Sampled difference sets: {} (initial: {})", rc.DiffSets(), rc.DiffSetsInitial());
+    LOG_INFO("PLI intersections: {}", rc.Intersections());
+    LOG_INFO("Tree size: {}", rc.TreeNodes());
 }
 
 }  // namespace algos

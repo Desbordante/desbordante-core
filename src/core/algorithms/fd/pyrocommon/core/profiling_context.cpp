@@ -2,11 +2,10 @@
 
 #include <utility>
 
-#include <easylogging++.h>
-
 #include "../model/list_agree_set_sample.h"
 #include "../model/pli_cache.h"
 #include "model/table/vertical_map.h"
+#include "util/logger.h"
 
 using std::shared_ptr;
 
@@ -145,7 +144,7 @@ model::AgreeSetSample const* ProfilingContext::CreateFocusedSample(Vertical cons
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, pli_pointer, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG(TRACE) << boost::format{"Creating sample focused on: %1%"} % focus.ToString();
+    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
@@ -157,7 +156,7 @@ model::AgreeSetSample const* ProfilingContext::CreateColumnFocusedSample(
     std::unique_ptr<model::ListAgreeSetSample> sample = model::ListAgreeSetSample::CreateFocusedFor(
             relation_data_, focus, restriction_pli, parameters_.sample_size * boost_factor,
             custom_random_);
-    LOG(TRACE) << boost::format{"Creating sample focused on: %1%"} % focus.ToString();
+    LOG_TRACE("Creating sample focused on: {}", focus.ToString());
     auto sample_ptr = sample.get();
     agree_set_samples_->Put(focus, std::move(sample));
     return sample_ptr;
@@ -177,7 +176,7 @@ shared_ptr<model::AgreeSetSample const> ProfilingContext::GetAgreeSetSample(
 double ProfilingContext::GetMedianValue(std::vector<double>&& values,
                                         std::string const& measure_name) {
     if (values.size() <= 1) {
-        LOG(WARNING) << "Got " << measure_name << " == 0\n";
+        LOG_WARN("Got {} == 0\n", measure_name);
         return 0;
     }
 

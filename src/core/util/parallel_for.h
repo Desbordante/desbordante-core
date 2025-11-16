@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace util {
 
@@ -41,8 +41,8 @@ inline void ParallelForeach(It begin, It end, unsigned const threads_num_max, Un
             threads.emplace_back(task, prev, p);
         } catch (std::system_error const& e) {
             /* Could not create a new thread */
-            LOG(WARNING) << "Created " << threads.size() << " threads in ParallelForeach. "
-                         << "Could not create new thread: " << e.what();
+            LOG_WARN("Created {} threads in ParallelForeach. Could not create new thread:",
+                     threads.size(), e.what());
             /* Fall through to the serial case for the remaining elements */
             p = prev;
             break;
