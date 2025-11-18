@@ -5,6 +5,7 @@ cmake-build-debug/
 dist/
 lib/
 venv/
+datasets/datasets.zip
 
 # IDE and related files
 .cache/
