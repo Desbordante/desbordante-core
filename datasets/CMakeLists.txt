@@ -23,7 +23,7 @@ if (COMPILE_BENCHMARKS)
 	# Please, don't forget to add here names of datasets you want to produce
 	set(cropped_dataset_names
 		adult9attr.csv CIPublicHighway20attr55k.csv iowa550k.csv iowa650k.csv
-		mushroom+3attr1500.csv mushroom+4attr1300.csv neighbors120k.csv)
+		mushroom+2attr1500.csv mushroom+4attr1300.csv neighbors120k.csv)
 
 	add_custom_target(cropDatasets ALL DEPENDS ${cropped_dataset_names})
 	add_custom_command(
