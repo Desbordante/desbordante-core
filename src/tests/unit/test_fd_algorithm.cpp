@@ -5,6 +5,7 @@
 
 #include "algorithms/fd/depminer/depminer.h"
 #include "algorithms/fd/dfd/dfd.h"
+#include "algorithms/fd/dynfd/dynfd.h"
 #include "algorithms/fd/fastfds/fastfds.h"
 #include "algorithms/fd/fdep/fdep.h"
 #include "algorithms/fd/fun/fun.h"
@@ -34,15 +35,6 @@ namespace tests {
  * 2. in CreateAlgorithmInstance replace "Tane" with <your algorithm class name>
  * */
 
-std::vector<unsigned int> BitsetToIndexVector(boost::dynamic_bitset<> const& bitset) {
-    std::vector<unsigned int> res;
-    for (size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-         index = bitset.find_next(index)) {
-        res.push_back(index);
-    }
-    return res;
-}
-
 testing::AssertionResult CheckFdListEquality(
         std::set<std::pair<std::vector<unsigned int>, unsigned int>> actual,
         std::list<FD> const& expected) {
@@ -61,15 +53,6 @@ testing::AssertionResult CheckFdListEquality(
     }
     return actual.empty() ? testing::AssertionSuccess()
                           : testing::AssertionFailure() << "some FDs remain undiscovered";
-}
-
-std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(std::list<FD> const& fds) {
-    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
-    for (auto const& fd : fds) {
-        auto const& raw_fd = fd.ToRawFD();
-        set.emplace(BitsetToIndexVector(raw_fd.lhs_), raw_fd.rhs_);
-    }
-    return set;
 }
 
 TYPED_TEST_SUITE_P(AlgorithmTest);
@@ -156,9 +139,9 @@ REGISTER_TYPED_TEST_SUITE_P(AlgorithmTest, ThrowsOnEmpty, ReturnsEmptyOnSingleNo
                             HeavyDatasetsConsistentHash, ConsistentRepeatedExecution,
                             MaxLHSOptionWork);
 
-using Algorithms =
-        ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD, algos::Depminer,
-                         algos::FDep, algos::FUN, algos::hyfd::HyFD, algos::PFDTane>;
+using Algorithms = ::testing::Types<algos::Tane, algos::Pyro, algos::FastFDs, algos::DFD,
+                                    algos::Depminer, algos::FDep, algos::FUN, algos::hyfd::HyFD,
+                                    algos::PFDTane, algos::dynfd::DynFD>;
 INSTANTIATE_TYPED_TEST_SUITE_P(AlgorithmTest, AlgorithmTest, Algorithms);
 
 }  // namespace tests

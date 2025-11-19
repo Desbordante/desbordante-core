@@ -8,13 +8,10 @@
 
 #include "algorithms/fd/raw_fd.h"
 
-namespace algos::hyfd::fd_tree {
+namespace model {
 
 class FDTreeVertex;
 
-/**
- * Pair of pointer ot FD tree node and the corresponding LHS.
- */
 using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>>;
 
 /**
@@ -27,6 +24,10 @@ using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>
  * RHS of the FD is represented by the fds attribute of the node.
  */
 class FDTreeVertex : public std::enable_shared_from_this<FDTreeVertex> {
+    /**
+     * Pair of pointer ot FD tree node and the corresponding LHS.
+     */
+
 private:
     std::vector<std::shared_ptr<FDTreeVertex>> children_;
     boost::dynamic_bitset<> fds_;
@@ -99,10 +100,13 @@ private:
                                    boost::dynamic_bitset<> cur_lhs, size_t rhs, size_t cur_bit,
                                    std::vector<boost::dynamic_bitset<>>& result) const;
 
-    bool FindFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
-                                  size_t cur_bit) const;
+    bool ContainsFdOrGeneralRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                                      size_t cur_bit) const;
 
     bool RemoveRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t current_lhs_attr);
+
+    void RemoveSpecialsRecursive(boost::dynamic_bitset<> const& lhs, size_t rhs, size_t cur_bit,
+                                 bool is_specialized);
 
     bool IsLastNodeOf(size_t rhs) const noexcept;
 
@@ -153,6 +157,8 @@ public:
     bool HasChildren() const noexcept {
         return children_count_ > 0;
     }
+
+    bool CheckChildren();
 };
 
-}  // namespace algos::hyfd::fd_tree
+}  // namespace model
