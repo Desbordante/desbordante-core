@@ -49,3 +49,22 @@ exclude = [
     "src/tests/*",
     "examples/*",
 ]
+
+[tool.typos]
+[tool.typos.files]
+extend-exclude = [
+    "README.md",
+    "/README_PYPI.md",
+    "examples/notebooks",
+    "examples/datasets",
+    "test_input_data"
+]
+
+[tool.typos.default.extend-words]
+abd = "abd"
+ba = "ba"
+countr = "countr"
+helo = "helo"
+nd = "nd"
+identificator = "identificator"
+
