@@ -84,3 +84,13 @@ jobs:
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  typos-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.39.2
+        with:
+          config: ./pyproject.toml
