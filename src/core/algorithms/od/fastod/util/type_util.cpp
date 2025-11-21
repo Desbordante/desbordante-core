@@ -5,8 +5,8 @@
 namespace algos::fastod {
 
 bool IsUnorderedType(model::TypeId type_id) {
-    return type_id == +model::TypeId::kEmpty || type_id == +model::TypeId::kNull ||
-           type_id == +model::TypeId::kUndefined;
+    return type_id == model::TypeId::kEmpty || type_id == model::TypeId::kNull ||
+           type_id == model::TypeId::kUndefined;
 }
 
 model::CompareResult CompareDataAsStrings(std::byte const* left, std::byte const* right,

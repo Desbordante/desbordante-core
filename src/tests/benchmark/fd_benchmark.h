@@ -36,13 +36,13 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
 
     for (auto measure : algos::AfdErrorMeasure::_values()) {
         // mu_plus is much slower than other measures
-        auto const& dataset = measure == +algos::AfdErrorMeasure::mu_plus
+        auto const& dataset = measure == algos::AfdErrorMeasure::mu_plus
                                       ? tests::kMushroomPlus3attr1500
                                       : tests::kMushroomPlus4attr1300;
         auto tane_name = runner.RegisterSimpleBenchmark<algos::Tane>(
                 dataset,
                 {{kError, static_cast<config::ErrorType>(0.95)}, {kAfdErrorMeasure, measure}},
-                measure._to_string());
+                magic_enum::enum_name(measure));
         comparer.SetThreshold(tane_name, 20);
     }
 
