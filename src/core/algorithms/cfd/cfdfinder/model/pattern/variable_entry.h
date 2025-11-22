@@ -25,7 +25,7 @@ public:
         return false;
     }
 
-    std::string ToString([[maybe_unused]] InvertedClusterMap const& cluster_map) const {
+    std::string ToString([[maybe_unused]] InvertedClusterMap const& cluster_map) const override {
         static std::string const kWildCard = "_";
         return kWildCard;
     }
