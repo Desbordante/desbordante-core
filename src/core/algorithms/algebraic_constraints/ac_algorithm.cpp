@@ -5,12 +5,11 @@
 #include <iostream>
 #include <random>
 
-#include <easylogging++.h>
-
 #include "config/exceptions.h"
 #include "config/names_and_descriptions.h"
 #include "config/tabular_data/input_table/option.h"
 #include "types/create_type.h"
+#include "util/logger.h"
 
 namespace algos {
 
@@ -245,21 +244,25 @@ ACPairsCollection const& ACAlgorithm::GetACPairsByColumns(size_t lhs_i, size_t r
 
 void ACAlgorithm::PrintRanges(std::vector<model::TypedColumnData> const& data) const {
     for (size_t i = 0; i < ranges_.size(); ++i) {
-        LOG(DEBUG) << "lhs: " << data.at(ranges_[i].col_pair.col_i.first).ToString() << std::endl;
-        LOG(DEBUG) << "rhs: " << data.at(ranges_[i].col_pair.col_i.second).ToString() << std::endl;
+        LOG_DEBUG("lhs: {}", data.at(ranges_[i].col_pair.col_i.first).ToString());
+        LOG_DEBUG("rhs: {}", data.at(ranges_[i].col_pair.col_i.second).ToString());
         if (ranges_[i].ranges.empty()) {
-            LOG(DEBUG) << "No intervals were found." << std::endl;
+            LOG_DEBUG("No intervals were found.");
             continue;
         }
+
+        std::string interval_str;
+
         for (size_t k = 0; k < ranges_[i].ranges.size() - 1; k += 2) {
             auto* num_type = ranges_[i].col_pair.num_type.get();
-            LOG(DEBUG) << "[" << num_type->ValueToString(ranges_[i].ranges[k]) << ", "
-                       << num_type->ValueToString(ranges_[i].ranges[k + 1]) << "]";
+            interval_str += fmt::format("[{}, {}]", num_type->ValueToString(ranges_[i].ranges[k]),
+                                        num_type->ValueToString(ranges_[i].ranges[k + 1]));
             if (k != ranges_[i].ranges.size() - 2) {
-                LOG(DEBUG) << ", ";
+                interval_str += ", ";
             }
         }
-        LOG(DEBUG) << std::endl;
+        interval_str += '\n';
+        LOG_DEBUG("{}", interval_str);
     }
 }
 

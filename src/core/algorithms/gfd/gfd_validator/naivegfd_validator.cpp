@@ -4,9 +4,9 @@
 #include <set>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
 
 #include "algorithms/gfd/gfd.h"
+#include "util/logger.h"
 
 namespace {
 
@@ -110,7 +110,7 @@ bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
                                          boost::get(boost::vertex_index, pattern),
                                          boost::get(boost::vertex_index, graph),
                                          vertex_order_by_mult(pattern), ecompare, vcompare);
-    LOG(DEBUG) << "Checked embeddings: " << amount;
+    LOG_DEBUG("Checked embeddings: {}", amount);
     if (!found) {
         return true;
     }

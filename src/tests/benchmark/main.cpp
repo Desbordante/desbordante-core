@@ -6,7 +6,6 @@
 #include <boost/program_options/errors.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <easylogging++.h>
 
 #include "adc_benchmark.h"
 #include "benchmark_cli.h"
@@ -18,15 +17,14 @@
 #include "ind_benchmark.h"
 #include "md_benchmark.h"
 #include "nar_benchmark.h"
-
-INITIALIZE_EASYLOGGINGPP
+#include "util/logger.h"
 
 namespace po = boost::program_options;
 
 int main(int argc, char* argv[]) {
     using namespace benchmark;
 
-    el::Loggers::configureFromGlobal("logging.conf");
+    ::util::logging::EnsureInitialized();
 
     BenchmarkRunner bm_runner;
     BenchmarkComparer bm_comparer;
