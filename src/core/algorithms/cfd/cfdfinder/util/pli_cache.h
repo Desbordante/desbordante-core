@@ -2,7 +2,8 @@
 
 #include <memory>
 
-#include "algorithms/cfd/cfdfinder/types/bitset.h"
+#include <boost/dynamic_bitset.hpp>
+
 #include "model/table/position_list_index.h"
 #include "model/table/vertical_map.h"
 
@@ -29,28 +30,28 @@ public:
           partial_hits_(0),
           total_misses_(0) {}
 
-    std::shared_ptr<model::PLI const> Get(BitSet const& columns) const {
+    std::shared_ptr<model::PLI const> Get(boost::dynamic_bitset<> const& columns) const {
         return index_->Get(columns);
     }
 
-    void Put(BitSet columns, std::shared_ptr<model::PLI> pli) {
+    void Put(boost::dynamic_bitset<> columns, std::shared_ptr<model::PLI> pli) {
         if (size_ >= limit_) {
             return;
         }
         index_->Put(Vertical(schema_, std::move(columns)), std::move(pli));
-        size_++;
+        ++size_;
     }
 
     void AddFullHit() {
-        full_hits_++;
+        ++full_hits_;
     }
 
     void AddPartialHit() {
-        partial_hits_++;
+        ++partial_hits_;
     }
 
     void AddMiss() {
-        total_misses_++;
+        ++total_misses_;
     }
 
     size_t GetFullHits() const {

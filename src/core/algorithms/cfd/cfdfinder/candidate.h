@@ -1,15 +1,17 @@
 #pragma once
+#include <cstddef>
 
-#include "types/bitset.h"
+#include <boost/dynamic_bitset.hpp>
+#include <boost/functional/hash.hpp>
 
 namespace algos::cfdfinder {
 struct Candidate {
-    BitSet lhs_;
+    boost::dynamic_bitset<> lhs_;
     size_t rhs_;
 
     Candidate() = default;
 
-    Candidate(BitSet lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
+    Candidate(boost::dynamic_bitset<> lhs, size_t rhs) noexcept : lhs_(std::move(lhs)), rhs_(rhs) {}
 
     bool operator<(Candidate const& other) const {
         if (rhs_ != other.rhs_) {

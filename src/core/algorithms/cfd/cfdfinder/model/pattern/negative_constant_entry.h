@@ -1,6 +1,11 @@
 #pragma once
 
-#include "entry.h"
+#include <cstddef>
+#include <string>
+
+#include <boost/functional/hash.hpp>
+
+#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 
@@ -15,21 +20,28 @@ public:
         return constant_ != value;
     }
 
-    bool operator==(Entry const& other) const override {
-        if (other.GetType() != EntryType::kNegativeConstant) return false;
-        return constant_ == static_cast<NegativeConstantEntry const&>(other).constant_;
+    bool operator==(Entry const& other) const override final {
+        auto const* other_constant = dynamic_cast<NegativeConstantEntry const*>(&other);
+        return other_constant != nullptr && constant_ == other_constant->constant_;
     }
 
     size_t Hash() const override {
-        return std::hash<size_t>{}(constant_) * 31;
+        return boost::hash_value(constant_) * 31;
     }
 
     size_t GetConstant() const {
         return constant_;
     }
 
-    EntryType GetType() const override final {
-        return EntryType::kNegativeConstant;
+    bool IsConstant() const override {
+        return true;
+    }
+
+    std::string ToString(InvertedClusterMap const& cluster_map) const override {
+        static std::string const kNegationSign = "¬";
+        std::string value = cluster_map.at(constant_);
+
+        return kNegationSign + (!value.empty() ? value : kNullRepresentation);
     }
 };
 }  // namespace algos::cfdfinder

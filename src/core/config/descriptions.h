@@ -25,6 +25,13 @@ std::string const kDPfdErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::PfdErrorMeasure>();
 std::string const kDAfdErrorMeasureString =
         "AFD error measure to use\n" + util::EnumToAvailableValues<algos::AfdErrorMeasure>();
+std::string const kDCfdExpansionStrategyString =
+        "CFD expansion strategy to use\n" +
+        util::EnumToAvailableValues<algos::cfdfinder::Expansion>();
+std::string const kDCfdPruningStrategyString =
+        "CFD pruning strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Pruning>();
+std::string const kDCfdResultStrategyString =
+        "CFD result strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Result>();
 std::string const kDLevelDefinitionString =
         "MD lattice level definition to use\n" +
         util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
@@ -33,13 +40,6 @@ std::string const kDDifferentialStrategyString =
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
 std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
                                      util::EnumToAvailableValues<algos::od::Ordering>();
-std::string const kDCfdExpansionStrategyString =
-        "CFD expansion strategy to use\n" +
-        util::EnumToAvailableValues<algos::cfdfinder::Expansion>();
-std::string const kDCfdPruningStrategyString =
-        "CFD pruning strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Pruning>();
-std::string const kDCfdResultStrategyString =
-        "CFD result strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Result>();
 }  // namespace details
 
 // Common
@@ -73,6 +73,7 @@ constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
+auto const kDCfdExpansionStrategy = details::kDCfdExpansionStrategyString.c_str();
 constexpr auto kDCfdColumnsNumber =
         "Number of columns in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
@@ -81,20 +82,19 @@ constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0
 constexpr auto kDCfdMinimumSupport =
         "minimum support value (integer number "
         "between 1 and number of tuples in dataset)";
-constexpr auto kDCFDRuleLeft = "CFD left rule";
-constexpr auto kDCFDRuleRight = "CFD right rule";
+auto const kDCfdPruningStrategy = details::kDCfdPruningStrategyString.c_str();
+auto const kDCfdResultStrategy = details::kDCfdResultStrategyString.c_str();
 auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 constexpr auto kDCfdTuplesNumber =
         "Number of tuples in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
-constexpr auto kDMaximumG1 = "maximum G1 value for the algorithm";
-constexpr auto kDPatternTreshold = "minimum number of patterns in the tableau";
-constexpr auto kDMinSupportGain = "minimum support gain for the algorithm.";
-constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm.";
+constexpr auto kDCFDRuleLeft = "CFD left rule";
+constexpr auto kDCFDRuleRight = "CFD right rule";
 constexpr auto kDLimitPliCache = "limit for the number of PLIs in the cache";
-auto const kDCfdExpansionStrategy = details::kDCfdExpansionStrategyString.c_str();
-auto const kDCfdPruningStrategy = details::kDCfdPruningStrategyString.c_str();
-auto const kDCfdResultStrategy = details::kDCfdResultStrategyString.c_str();
+constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm.";
+constexpr auto kDMaximumG1 = "maximum G1 value for the algorithm";
+constexpr auto kDMinSupportGain = "minimum support gain for the algorithm.";
+constexpr auto kDPatternTreshold = "minimum number of patterns in the tableau";
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "

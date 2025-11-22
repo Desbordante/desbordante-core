@@ -1,9 +1,13 @@
 #pragma once
 
 #include <algorithm>
+#include <cstddef>
+#include <list>
+#include <ranges>
 
-#include "cfd/cfdfinder/util/violations_util.h"
-#include "pattern_item.h"
+#include "algorithms/cfd/cfdfinder/model/pattern/pattern_item.h"
+#include "algorithms/cfd/cfdfinder/types/cluster.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder {
 
@@ -56,9 +60,9 @@ public:
         return entries_ == other.entries_;
     };
 
-    bool Matches(algos::hy::Row const& tuple) const;
+    bool Matches(Row const& tuple) const;
     void UpdateCover(Pattern const& pattern);
-    void UpdateKeepers(algos::hy::Row const& inverted_pli_rhs);
+    void UpdateKeepers(Row const& inverted_pli_rhs);
     size_t GetNumCover() const;
 
     Entries const& GetEntries() const {
@@ -75,26 +79,19 @@ public:
 
     double GetConfidence() const {
         auto num_cover = GetNumCover();
-        return num_cover == 0 ? 0
-                              : static_cast<double>(num_keepers_) / static_cast<double>(num_cover);
+        return num_cover == 0 ? 0 : static_cast<double>(num_keepers_) / num_cover;
     }
 
     std::list<Cluster> const& GetCover() const {
         return cover_;
     }
 
-    void ClearCover() {
-        cover_.clear();
-    }
-
     void SetCover(std::list<Cluster>&& new_cover) {
         cover_ = std::move(new_cover);
 
         if (PatternDebugController::IsDebugEnabled()) {
-            for (auto& cluster : cover_) {
-                std::sort(cluster.begin(), cluster.end());
-            }
-            cover_.sort([](Cluster const& a, Cluster const& b) { return a.front() < b.front(); });
+            std::ranges::for_each(cover_, [](auto& cluster) { std::ranges::sort(cluster); });
+            cover_.sort([](auto const& a, auto const& b) { return a.front() < b.front(); });
         }
     }
 

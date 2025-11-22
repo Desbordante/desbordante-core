@@ -1,22 +1,25 @@
 #pragma once
 
-#include "algorithms/fd/hycommon/types.h"
-#include "expansion_strategy.h"
+#include <list>
+
+#include "algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder {
 
 class ConstantExpansion : public ExpansionStrategy {
 protected:
-    hy::RowsPtr compressed_records_;
+    RowsPtr compressed_records_;
 
-    virtual std::list<Pattern> GetChildPatterns(Pattern const& pattern, Cluster const& cluster);
+    virtual std::list<Pattern> GetChildPatterns(Pattern const& pattern,
+                                                Cluster const& cluster) const;
 
 public:
-    explicit ConstantExpansion(hy::RowsPtr compressed_records)
+    explicit ConstantExpansion(RowsPtr&& compressed_records)
         : compressed_records_(std::move(compressed_records)) {}
 
-    Pattern GenerateNullPattern(BitSet const& attributes) override;
-    std::list<Pattern> GetChildPatterns(Pattern const& current_pattern) override;
+    Pattern GenerateNullPattern(BitSet const& attributes) const override;
+    std::list<Pattern> GetChildPatterns(Pattern const& current_pattern) const override;
 };
 
 }  // namespace algos::cfdfinder

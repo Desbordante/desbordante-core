@@ -1,13 +1,16 @@
 #pragma once
 
 #include <list>
-#include <set>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "algorithms/cfd/cfdfinder/candidate.h"
-#include "types/bitset.h"
+#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 
 namespace algos::cfdfinder::util {
+using BitSet = boost::dynamic_bitset<>;
+
 std::list<BitSet> GenerateLhsSubsets(BitSet const& lhs);
 std::list<BitSet> GenerateLhsSupersets(BitSet const& lhs);
-void AddLhsSubsets(Candidate const& candidate, std::set<Candidate>& level);
+
 }  // namespace algos::cfdfinder::util

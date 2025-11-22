@@ -1,9 +1,11 @@
 #pragma once
 
+#include <list>
+#include <memory>
 #include <vector>
 
-#include "cfd/cfdfinder/types/inverted_cluster_maps.h"
-#include "expansion_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
+#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
 
 namespace algos::cfdfinder {
 
@@ -14,9 +16,9 @@ private:
     std::vector<SortedClustersIdPtr> sorted_clusters_ids_;
 
 public:
-    RangePatternExpansion(InvertedClusterMaps const& inverted_cluster_maps);
-    Pattern GenerateNullPattern(BitSet const& attributes) override;
-    std::list<Pattern> GetChildPatterns(Pattern const& current_pattern) override;
+    explicit RangePatternExpansion(InvertedClusterMaps const& inverted_cluster_maps);
+    Pattern GenerateNullPattern(BitSet const& attributes) const override;
+    std::list<Pattern> GetChildPatterns(Pattern const& current_pattern) const override;
 };
 
 }  // namespace algos::cfdfinder
