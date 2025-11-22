@@ -309,8 +309,8 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
         cur_level_vertices = std::move(next_level);
         ++current_level_number_;
 
-        if ((static_cast<double>(num_invalid_fds) / num_valid_fds >
-             hyfd::HyFDConfig::kEfficiencyThreshold) &&
+        if ((num_valid_fds == 0 || static_cast<double>(num_invalid_fds) / num_valid_fds >
+                                           hyfd::HyFDConfig::kEfficiencyThreshold) &&
             previous_num_invalid_fds < num_invalid_fds) {
             return comparison_suggestions;
         }
