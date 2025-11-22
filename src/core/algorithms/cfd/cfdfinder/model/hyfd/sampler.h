@@ -1,6 +1,7 @@
 #pragma once
 
-#include "fd/hyfd/sampler.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
+#include "algorithms/fd/hyfd/sampler.h"
 
 namespace algos::cfdfinder {
 
@@ -9,7 +10,7 @@ private:
     hy::Sampler sampler_;
 
 public:
-    Sampler(hy::PLIsPtr plis, hy::RowsPtr pli_records, config::ThreadNumType threads_num = 1)
+    Sampler(PLIsPtr plis, RowsPtr pli_records, config::ThreadNumType threads_num = 1)
         : sampler_(std::move(plis), std::move(pli_records), threads_num) {}
 
     hyfd::NonFDList GetNonFDs(hy::IdPairs const& comparison_suggestions) {

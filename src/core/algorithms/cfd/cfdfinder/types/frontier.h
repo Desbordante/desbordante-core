@@ -1,10 +1,7 @@
 #pragma once
 
-#include <map>
 #include <queue>
-#include <string>
 #include <unordered_set>
-#include <vector>
 
 #include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 

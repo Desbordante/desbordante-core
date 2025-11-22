@@ -1,24 +1,28 @@
 #pragma once
 
 #include <list>
+#include <memory>
 #include <set>
+#include <vector>
+
+#include <boost/dynamic_bitset.hpp>
 
 #include "algorithms/algorithm.h"
-#include "candidate.h"
-#include "cfd.h"
+#include "algorithms/cfd/cfdfinder/candidate.h"
+#include "algorithms/cfd/cfdfinder/cfd.h"
+#include "algorithms/cfd/cfdfinder/enums.h"
+#include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
+#include "algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/result/result_strategy.h"
+#include "algorithms/cfd/cfdfinder/types/enriched_plis.h"
+#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
+#include "algorithms/cfd/cfdfinder/util/pli_cache.h"
 #include "config/equal_nulls/type.h"
 #include "config/indices/type.h"
 #include "config/max_lhs/type.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/thread_number/type.h"
-#include "enums.h"
-#include "model/cfdfinder_relation_data.h"
-#include "model/expansion/expansion_strategy.h"
-#include "model/pruning/pruning_strategy.h"
-#include "model/result/result_strategy.h"
-#include "types/bitset.h"
-#include "types/inverted_cluster_maps.h"
-#include "util/pli_cache.h"
 
 namespace algos::cfdfinder {
 
@@ -51,28 +55,30 @@ private:
     void RegisterOptions();
     void ResetState() final;
 
-    Lattice GetLattice(hy::PLIsPtr plis, hy::RowsPtr compressed_records);
-    void EnrichCompressedRecords(hy::RowsPtr compressed_records, EnrichedPLIs enriched_plis);
+    Lattice GetLattice(PLIsPtr plis, RowsPtr compressed_records);
+    void EnrichCompressedRecords(RowsPtr compressed_records, EnrichedPLIs enriched_plis) const;
 
-    std::vector<Cluster> EnrichPLI(model::PLI const* pli, int num_tuples);
+    std::vector<Cluster> EnrichPLI(model::PLI const* pli, int num_tuples) const;
 
-    std::shared_ptr<model::PLI const> GetLhsPli(PLICache& pli_cache, BitSet const& lhs,
-                                                hy::PLIs const& plis);
+    std::shared_ptr<model::PLI const> GetLhsPli(PLICache& pli_cache,
+                                                boost::dynamic_bitset<> const& lhs,
+                                                PLIs const& plis);
 
-    PatternTableau GenerateTableau(BitSet const& lhs_attributes, model::PLI const* lhs_pli,
-                                   hy::Row const& inverted_pli_rhs,
-                                   hy::RowsPtr compressed_records_shared,
+    PatternTableau GenerateTableau(boost::dynamic_bitset<> const& lhs_attributes,
+                                   model::PLI const* lhs_pli, Row const& inverted_pli_rhs,
+                                   RowsPtr compressed_records_shared,
                                    std::shared_ptr<ExpansionStrategy> expansion_strategy,
                                    std::shared_ptr<PruningStrategy> pruning_strategy);
 
     std::list<Cluster> DetermineCover(Pattern const& child_pattern, Pattern const& current_pattern,
-                                      hy::Rows const& pli_records) const;
+                                      Rows const& pli_records) const;
 
     std::shared_ptr<ExpansionStrategy> InitExpansionStrategy(
-            hy::RowsPtr pli_records, InvertedClusterMaps const& inverted_cluster_maps);
-    std::shared_ptr<PruningStrategy> InitPruningStrategy(hy::RowsPtr inverted_plis);
+            RowsPtr pli_records, InvertedClusterMaps const& inverted_cluster_maps);
+    std::shared_ptr<PruningStrategy> InitPruningStrategy(ColumnsPtr inverted_plis);
     std::shared_ptr<ResultStrategy> InitResultStrategy();
-
+    InvertedClusterMaps BuildEnrichedStructures(PLIsPtr plis_shared,
+                                                RowsPtr compressed_records_shared) const;
     void RegisterResults(std::shared_ptr<ResultStrategy> result_receiver,
                          InvertedClusterMaps inverted_cluster_maps);
 
