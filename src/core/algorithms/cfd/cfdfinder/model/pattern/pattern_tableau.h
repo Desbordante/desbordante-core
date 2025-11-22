@@ -1,6 +1,9 @@
 #pragma once
 
-#include "pattern.h"
+#include <cstddef>
+#include <vector>
+
+#include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 
 namespace algos::cfdfinder {
 class PatternTableau {

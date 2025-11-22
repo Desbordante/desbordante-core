@@ -1,24 +1,24 @@
-#include "inductor.h"
+#include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
+
+#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 
 namespace algos::cfdfinder {
 
-void Inductor::UpdateFdTree(NonFDList&& non_fds) {
+void Inductor::UpdateFdTree(NonFDList const& non_fds) {
     unsigned const max_level = non_fds.GetDepth();
 
-    for (unsigned level = max_level; level != 0; level--) {
+    for (unsigned level = max_level; level != 0; --level) {
         for (auto const& lhs_bits : non_fds.GetLevel(level)) {
             auto rhs_bits = lhs_bits;
             rhs_bits.flip();
-
-            for (size_t rhs_id = rhs_bits.find_first(); rhs_id != BitSet::npos;
-                 rhs_id = rhs_bits.find_next(rhs_id)) {
+            util::ForEachSetBit(rhs_bits, [this, &lhs_bits](size_t rhs_id) {
                 SpecializeTreeForNonFd(lhs_bits, rhs_id);
-            }
+            });
         }
     }
 }
 
-void Inductor::SpecializeTreeForNonFd(BitSet const& lhs_bits, size_t rhs_id) {
+void Inductor::SpecializeTreeForNonFd(boost::dynamic_bitset<> const& lhs_bits, size_t rhs_id) {
     auto invalid_lhss = tree_->GetFdAndGenerals(lhs_bits, rhs_id);
 
     if (invalid_lhss.empty()) {
@@ -44,7 +44,9 @@ void Inductor::SpecializeTreeForNonFd(BitSet const& lhs_bits, size_t rhs_id) {
             invalid_lhs_bits.reset(i);
         }
     }
-    max_non_fds_.emplace_back(lhs_bits, rhs_id);
+    if (lhs_bits.any()) {
+        max_non_fds_.emplace_back(lhs_bits, rhs_id);
+    }
 }
 
 }  // namespace algos::cfdfinder

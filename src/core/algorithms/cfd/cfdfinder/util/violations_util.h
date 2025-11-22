@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <cstddef>
 
-#include "cfd/cfdfinder/types/enriched_plis.h"
-#include "fd/hycommon/types.h"
+#include "algorithms/cfd/cfdfinder/types/cluster.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder::util {
-size_t CalculateViolations(Cluster const& cluster, hy::Row const& inverted_rhs_pli);
+size_t CalculateViolations(Cluster const& cluster, Row const& inverted_rhs_pli);
 }  // namespace algos::cfdfinder::util

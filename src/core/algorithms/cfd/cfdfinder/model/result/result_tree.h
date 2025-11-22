@@ -2,6 +2,8 @@
 
 #include <list>
 
+#include <boost/dynamic_bitset.hpp>
+
 #include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
 #include "raw_cfd.h"
 
@@ -14,14 +16,14 @@ private:
     void AppendLeaves(ResultTree* node, std::list<RawCFD>& leaves) {
         if (node->children_.empty()) {
             leaves.push_back(std::move(node->root_));
-        } else {
-            for (auto& child : node->children_) {
-                AppendLeaves(&child, leaves);
-            }
+            return;
+        }
+        for (auto& child : node->children_) {
+            AppendLeaves(&child, leaves);
         }
     }
 
-    ResultTree* FindNode(BitSet const& lhs, size_t rhs) {
+    ResultTree* FindNode(boost::dynamic_bitset<> const& lhs, size_t rhs) {
         auto const& embedded_fd = root_.embedded_fd_;
         if (embedded_fd.rhs_ != rhs) {
             return nullptr;

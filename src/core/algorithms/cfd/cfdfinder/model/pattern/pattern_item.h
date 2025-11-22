@@ -1,9 +1,10 @@
 #pragma once
+#include <memory>
 #include <vector>
 
 #include <boost/functional/hash.hpp>
 
-#include "entry.h"
+#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 struct PatternItem {

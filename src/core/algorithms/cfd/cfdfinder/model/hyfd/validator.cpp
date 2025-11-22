@@ -1,4 +1,4 @@
-#include "validator.h"
+#include "algorithms/cfd/cfdfinder/model/hyfd/validator.h"
 
 #include <algorithm>
 #include <future>
@@ -9,41 +9,43 @@
 #include <boost/asio/thread_pool.hpp>
 #include <easylogging++.h>
 
+#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
 #include "algorithms/fd/hycommon/validator_helpers.h"
 #include "algorithms/fd/hyfd/hyfd_config.h"
-#include "types/bitset.h"
 
 namespace {
 using BitSet = boost::dynamic_bitset<>;
+using algos::cfdfinder::util::ForEachSetBit;
 
 std::unordered_set<size_t> AsSet(BitSet const& bitset) {
-    std::unordered_set<size_t> valid_rhss(bitset.count());
-    for (size_t attr = bitset.find_first(); attr != BitSet::npos; attr = bitset.find_next(attr)) {
-        valid_rhss.insert(attr);
-    }
+    std::unordered_set<size_t> valid_rhss;
+    valid_rhss.reserve(bitset.count());
+    ForEachSetBit(bitset, [&valid_rhss](size_t attr) { valid_rhss.insert(attr); });
+
     return valid_rhss;
 }
 
 std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
-        BitSet const& rhs, algos::hy::Rows const& compressed_records) {
+        BitSet const& rhs, algos::cfdfinder::Rows const& compressed_records) {
     std::vector<size_t> rhs_column_ids;
     rhs_column_ids.reserve(rhs.count());
     std::vector<size_t> rhs_ranks(compressed_records[0].size());
 
-    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
+    ForEachSetBit(rhs, [&rhs_ranks, &rhs_column_ids](size_t attr) {
         rhs_ranks[attr] = rhs_column_ids.size();
         rhs_column_ids.push_back(attr);
-    }
+    });
 
-    return std::make_pair(std::move(rhs_column_ids), std::move(rhs_ranks));
+    return {std::move(rhs_column_ids), std::move(rhs_ranks)};
 }
 
 using LhsRow = std::vector<size_t>;
 using RhsRowId = std::pair<std::vector<size_t>, size_t>;
 
-void ValidateRhss(RhsRowId const& rhs_record, algos::hy::Rows const& compressed_records, size_t row,
-                  std::vector<size_t> const& rhs_ranks, std::unordered_set<size_t>& valid_rhs_ids,
+void ValidateRhss(RhsRowId const& rhs_record, algos::cfdfinder::Rows const& compressed_records,
+                  size_t row, std::vector<size_t> const& rhs_ranks,
+                  std::unordered_set<size_t>& valid_rhs_ids,
                   algos::hy::IdPairs& comparison_suggestions) {
     for (auto it = valid_rhs_ids.begin(); it != valid_rhs_ids.end();) {
         size_t const rhs_column = *it;
@@ -53,28 +55,25 @@ void ValidateRhss(RhsRowId const& rhs_record, algos::hy::Rows const& compressed_
             value != rhs_record.first[rhs_ranks[rhs_column]]) {
             comparison_suggestions.emplace_back(row, rhs_record.second);
             it = valid_rhs_ids.erase(it);
-            if (valid_rhs_ids.empty()) {
-                return;
-            }
         } else {
             ++it;
         }
     }
 }
 
-RhsRowId BuildRhsRowId(algos::hy::Rows const& compressed_records, BitSet const& rhs,
+RhsRowId BuildRhsRowId(algos::cfdfinder::Rows const& compressed_records, BitSet const& rhs,
                        std::vector<size_t> const& rhs_column_ids, size_t row) {
     std::vector<size_t> rhs_sub_cluster(rhs.count());
     for (size_t i = 0; i < rhs.count(); ++i) {
         rhs_sub_cluster[i] = compressed_records[row][rhs_column_ids[i]];
     }
 
-    return std::make_pair(std::move(rhs_sub_cluster), row);
+    return {std::move(rhs_sub_cluster), row};
 }
 
-BitSet Refine(algos::hy::IdPairs& comparison_suggestions, algos::hy::PLIs const& plis,
-              algos::hy::Rows const& compressed_records, BitSet const& lhs, BitSet const& rhs,
-              size_t firstAttr) {
+BitSet Refine(algos::hy::IdPairs& comparison_suggestions, algos::cfdfinder::PLIs const& plis,
+              algos::cfdfinder::Rows const& compressed_records, BitSet const& lhs,
+              BitSet const& rhs, size_t firstAttr) {
     auto valid_rhs_ids = AsSet(rhs);
     auto const lhs_column_ids = util::BitsetToIndices<algos::hy::ClusterId>(lhs);
     auto const [rhs_column_ids, rhs_ranks] = BuildRhsMappings(rhs, compressed_records);
@@ -132,9 +131,9 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::cfdfinder::LhsPair>& 
                 continue;
             }
             next_level.emplace_back(std::move(child), std::move(lhs_ext));
-            candidates++;
+            ++candidates;
         }
-        if (!found) {
+        if (!found && lhs.any()) {
             max_non_fds.emplace_back(lhs, rhs);
         }
     }
@@ -145,7 +144,7 @@ size_t AddExtendedCandidatesFromInvalid(std::vector<algos::cfdfinder::LhsPair>& 
 
 namespace algos::cfdfinder {
 
-Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
+Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) const {
     FDValidations result;
 
     auto vertex = lhsPair.first;
@@ -156,17 +155,17 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) {
     result.SetCountValidations(rhs_count);
     result.SetCountIntersections(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
-        if (!(*plis_)[attr]->IsConstant()) {
+    ForEachSetBit(rhs, [&](size_t attr) {
+        if (!plis_->at(attr)->IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
         }
-    }
+    });
 
     return result;
 }
 
-Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
+Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) const {
     auto vertex = lhs_pair.first;
     auto const lhs = lhs_pair.second;
     auto const rhs = vertex->GetFDs();
@@ -181,8 +180,8 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
     result.SetCountIntersections(rhs_count);
     result.SetCountValidations(rhs_count);
 
-    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
-        for (auto const& cluster : (*plis_)[lhs_attr]->GetIndex()) {
+    ForEachSetBit(rhs, [&](size_t attr) {
+        for (auto const& cluster : plis_->at(lhs_attr)->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
                 std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {
@@ -193,7 +192,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) {
                 break;
             }
         }
-    }
+    });
     return result;
 }
 
@@ -221,9 +220,9 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
     rhs &= ~valid_rhss;
     vertex->SetFds(valid_rhss);
 
-    for (size_t attr = rhs.find_first(); attr != BitSet::npos; attr = rhs.find_next(attr)) {
+    ForEachSetBit(rhs, [&lhs, &result](size_t attr) {
         result.InvalidInstances().emplace_back(lhs, attr);
-    }
+    });
 
     return result;
 }
@@ -308,9 +307,10 @@ algos::hy::IdPairs Validator::ValidateAndExtendCandidates() {
         size_t const num_invalid_fds = result.InvalidInstances().size();
         size_t const num_valid_fds = result.CountValidations() - num_invalid_fds;
         cur_level_vertices = std::move(next_level);
-        current_level_number_++;
+        ++current_level_number_;
 
-        if (num_invalid_fds > (long double)hyfd::HyFDConfig::kEfficiencyThreshold * num_valid_fds &&
+        if ((static_cast<double>(num_invalid_fds) / num_valid_fds >
+             hyfd::HyFDConfig::kEfficiencyThreshold) &&
             previous_num_invalid_fds < num_invalid_fds) {
             return comparison_suggestions;
         }

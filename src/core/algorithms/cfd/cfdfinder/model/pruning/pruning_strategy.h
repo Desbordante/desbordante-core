@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "algorithms/cfd/cfdfinder/candidate.h"
 #include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 #include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"

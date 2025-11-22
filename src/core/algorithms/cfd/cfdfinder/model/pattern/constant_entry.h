@@ -1,6 +1,11 @@
 #pragma once
 
-#include "entry.h"
+#include <cstddef>
+#include <string>
+
+#include <boost/functional/hash.hpp>
+
+#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 
@@ -16,20 +21,26 @@ public:
     }
 
     bool operator==(Entry const& other) const override final {
-        if (other.GetType() != EntryType::kConstant) return false;
-        return constant_ == static_cast<ConstantEntry const&>(other).constant_;
+        auto const* other_constant = dynamic_cast<ConstantEntry const*>(&other);
+        return other_constant != nullptr && constant_ == other_constant->constant_;
     }
 
     size_t Hash() const override {
-        return std::hash<size_t>{}(constant_);
+        return boost::hash_value(constant_);
     }
 
     size_t GetConstant() const {
         return constant_;
     }
 
-    EntryType GetType() const override final {
-        return EntryType::kConstant;
+    bool IsConstant() const override {
+        return true;
+    }
+
+    std::string ToString(InvertedClusterMap const& cluster_map) const override {
+        std::string value = cluster_map.at(constant_);
+
+        return !value.empty() ? value : kNullRepresentation;
     }
 };
 }  // namespace algos::cfdfinder

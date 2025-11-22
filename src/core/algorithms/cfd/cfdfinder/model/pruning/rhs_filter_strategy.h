@@ -1,7 +1,8 @@
 #pragma once
+#include <cstddef>
 
+#include "algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
 #include "config/indices/type.h"
-#include "support_independent_strategy.h"
 
 namespace algos::cfdfinder {
 

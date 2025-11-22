@@ -1,4 +1,6 @@
-#include "support_independent_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
+
+#include <algorithm>
 
 #include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
 
@@ -27,8 +29,7 @@ void SupportIndependentPruning::AddPattern([[maybe_unused]] Pattern const& patte
 void SupportIndependentPruning::ExpandPattern([[maybe_unused]] Pattern const& pattern) {}
 
 void SupportIndependentPruning::ProcessChild(Pattern& child) {
-    child.ClearCover();
-    visited_.insert(child);
+    visited_.insert(child.GetEntries());
 }
 
 bool SupportIndependentPruning::HasEnoughPatterns(std::vector<Pattern> const& tableau) {
@@ -48,7 +49,7 @@ bool SupportIndependentPruning::IsPatternWorthAdding(Pattern const& pattern) {
 }
 
 bool SupportIndependentPruning::ValidForProcessing(Pattern const& child) {
-    return !visited_.contains(child);
+    return !visited_.contains(child.GetEntries());
 }
 
 bool SupportIndependentPruning::ContinueGeneration(PatternTableau const& current_tableau) {

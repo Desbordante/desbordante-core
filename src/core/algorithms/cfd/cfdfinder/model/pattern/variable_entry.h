@@ -1,6 +1,9 @@
 #pragma once
 
-#include "entry.h"
+#include <cstddef>
+#include <string>
+
+#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 
@@ -11,15 +14,20 @@ public:
     }
 
     bool operator==(Entry const& other) const override final {
-        return other.GetType() == EntryType::kVariable;
-    }
-
-    EntryType GetType() const override final {
-        return EntryType::kVariable;
+        return dynamic_cast<VariableEntry const*>(&other) != nullptr;
     }
 
     size_t Hash() const override {
         return 0x9e3779b9;
+    }
+
+    bool IsConstant() const override {
+        return false;
+    }
+
+    std::string ToString([[maybe_unused]] InvertedClusterMap const& cluster_map) const {
+        static std::string const kWildCard = "_";
+        return kWildCard;
     }
 };
 }  // namespace algos::cfdfinder

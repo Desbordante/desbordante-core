@@ -1,3 +1,4 @@
+#include <boost/algorithm/string/join.hpp>
 #include <gtest/gtest.h>
 
 #include "algo_factory.h"

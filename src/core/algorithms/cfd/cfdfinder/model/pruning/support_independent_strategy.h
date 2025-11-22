@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_map>
 #include <unordered_set>
 
-#include "pruning_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 
 namespace algos::cfdfinder {
 
@@ -15,7 +16,7 @@ private:
     double max_level_support_drop_;
     bool insufficient_support_gain_;
     std::unordered_map<Candidate, double> support_map_;
-    std::unordered_set<Pattern> visited_;
+    std::unordered_set<Entries> visited_;
 
 protected:
     Candidate current_candidate_;

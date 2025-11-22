@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cstddef>
 #include <unordered_set>
 
-#include "pruning_strategy.h"
+#include "algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 
 namespace algos::cfdfinder {
 

@@ -1,4 +1,4 @@
-#include "pattern_tableau.h"
+#include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
 
 #include <numeric>
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <list>
 #include <unordered_map>
 
@@ -12,19 +13,20 @@ private:
     size_t rhs_;
     std::map<size_t, std::list<RawCFD>, std::greater<size_t>> layers_;
 
-    bool HasChildrens(RawCFD const& node) const {
+    bool HasChildren(RawCFD const& node) const {
         size_t level_num = node.embedded_fd_.lhs_.count() - 1;
         if (!layers_.contains(level_num)) {
             return false;
         }
-        for (auto const& bitset : cfdfinder::util::GenerateLhsSubsets(node.embedded_fd_.lhs_)) {
-            for (auto const& result : layers_.at(level_num)) {
-                if (result.embedded_fd_.lhs_ == bitset) {
-                    return true;
-                }
-            }
-        }
-        return false;
+
+        auto const& level = layers_.at(level_num);
+        auto subsets = cfdfinder::util::GenerateLhsSubsets(node.embedded_fd_.lhs_);
+
+        return std::ranges::any_of(subsets, [&level](auto const& subset) {
+            return std::ranges::any_of(level, [&subset](auto const& result) {
+                return result.embedded_fd_.lhs_ == subset;
+            });
+        });
     }
 
 public:
@@ -47,7 +49,7 @@ public:
         std::list<RawCFD> leaves;
         for (auto& layer : layers_) {
             for (auto& result : layer.second) {
-                if (!HasChildrens(result)) {
+                if (!HasChildren(result)) {
                     leaves.push_back(std::move(result));
                 }
             }

@@ -1,6 +1,8 @@
-#include "cfd.h"
+#include "algorithms/cfd/cfdfinder/cfd.h"
 
-#include "cfd/cfdfinder/model/entries.h"
+#include <boost/algorithm/string/join.hpp>
+
+#include "algorithms/cfd/cfdfinder/model/entries.h"
 
 namespace {
 using namespace algos::cfdfinder;
@@ -9,61 +11,9 @@ using Condition = std::vector<std::string>;
 Condition GetEntriesString(Pattern const& pattern,
                            InvertedClusterMaps const& inverted_cluster_maps) {
     Condition result;
-    static std::string const kNullRepresentation = "null";
-    static std::string const kNegationSign = "¬";
-    static std::string const kWildCard = "_";
-
     for (auto const& [id, entry] : pattern.GetEntries()) {
         auto const& inverted_cluster_map = inverted_cluster_maps[id];
-        switch (entry->GetType()) {
-            case EntryType::kVariable:
-                result.push_back(kWildCard);
-                break;
-            case EntryType::kConstant: {
-                auto const* constant_entry = static_cast<ConstantEntry const*>(entry.get());
-                std::string value =
-                        inverted_cluster_map.find(constant_entry->GetConstant())->second;
-                if (value.empty()) {
-                    value = kNullRepresentation;
-                }
-
-                result.push_back(std::move(value));
-                break;
-            }
-            case EntryType::kNegativeConstant: {
-                auto const* neg_constant_entry =
-                        static_cast<NegativeConstantEntry const*>(entry.get());
-                std::string value =
-                        inverted_cluster_map.find(neg_constant_entry->GetConstant())->second;
-
-                value = (!value.empty()) ? kNegationSign + value
-                                         : kNegationSign + kNullRepresentation;
-                result.push_back(std::move(value));
-                break;
-            }
-            case EntryType::kRange: {
-                auto const* range_entry = static_cast<RangeEntry const*>(entry.get());
-
-                std::string lower_bound;
-                std::string upper_bound;
-
-                lower_bound = inverted_cluster_map.find(range_entry->GetLowerBound())->second;
-                upper_bound = inverted_cluster_map.find(range_entry->GetUpperBound())->second;
-                // if (range_entry->GetLowerBound() == range_entry->GetUpperBound()) {
-                //     result.push_back("[" + lower_bound + "]");
-                //     break;
-                // }
-                if (lower_bound.empty()) {
-                    lower_bound = kNullRepresentation;
-                }
-                if (upper_bound.empty()) {
-                    upper_bound = kNullRepresentation;
-                }
-
-                result.push_back("[" + lower_bound + " - " + upper_bound + "]");
-                break;
-            }
-        }
+        result.push_back(entry->ToString(inverted_cluster_map));
     }
 
     return result;

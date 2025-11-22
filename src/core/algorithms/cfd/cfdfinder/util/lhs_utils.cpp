@@ -1,26 +1,25 @@
-#include "lhs_utils.h"
+#include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
+
+#include <cstddef>
+#include <list>
+
+#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 
 namespace algos::cfdfinder::util {
 
 std::list<BitSet> GenerateLhsSubsets(BitSet const& lhs) {
     std::list<BitSet> subsets;
 
-    for (size_t i = lhs.find_first(); i != BitSet::npos; i = lhs.find_next(i)) {
+    ForEachSetBit(lhs, [&](size_t attr) {
         auto subset = lhs;
-        subset.flip(i);
+        subset.flip(attr);
 
         if (subset.any()) {
             subsets.push_back(std::move(subset));
         }
-    }
+    });
 
     return subsets;
-}
-
-void AddLhsSubsets(Candidate const& candidate, std::set<Candidate>& level) {
-    for (auto&& subset : GenerateLhsSubsets(candidate.lhs_)) {
-        level.emplace(std::move(subset), candidate.rhs_);
-    }
 }
 
 std::list<BitSet> GenerateLhsSupersets(BitSet const& lhs) {

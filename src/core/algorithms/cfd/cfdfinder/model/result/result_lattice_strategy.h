@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 
 #include "result_lattice.h"
 #include "result_strategy.h"

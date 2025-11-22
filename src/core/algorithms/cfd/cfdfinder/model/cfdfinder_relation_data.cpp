@@ -1,4 +1,4 @@
-#include "cfdfinder_relation_data.h"
+#include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
 
 #include <deque>
 #include <memory>
@@ -32,8 +32,7 @@ std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap&
         clusters.push_back(iter.second);
     }
     relation_size += size;
-    std::sort(clusters.begin(), clusters.end(),
-              [](std::vector<int> const& a, std::vector<int> const& b) { return a[0] < b[0]; });
+    std::ranges::sort(clusters, {}, [](std::vector<int> const& a) { return a[0]; });
 
     return std::make_unique<model::PositionListIndex>(std::move(clusters), std::move(null_cluster),
                                                       size, 0, 0, relation_size, relation_size, 0);
@@ -60,16 +59,16 @@ std::unique_ptr<CFDFinderRelationData> CFDFinderRelationData::CreateFrom(
         }
 
         int attribute_id = 0;
-        for (auto field : row) {
+        for (auto&& field : row) {
             auto& cluster_map = cluster_maps[attribute_id++];
             if (!cluster_map.contains(field)) {
-                cluster_map[field] = std::vector<int>{row_id};
+                cluster_map[std::move(field)] = std::vector<int>{row_id};
             } else {
                 cluster_map[field].push_back(row_id);
             }
         }
 
-        row_id++;
+        ++row_id;
     }
 
     std::vector<ColumnData> column_data;

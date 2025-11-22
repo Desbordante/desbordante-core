@@ -1,10 +1,12 @@
 #pragma once
 
-#include <boost/algorithm/string/join.hpp>
+#include <memory>
+#include <string>
+#include <vector>
 
+#include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
+#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
 #include "algorithms/fd/fd.h"
-#include "cfd/cfdfinder/types/inverted_cluster_maps.h"
-#include "model/pattern/pattern_tableau.h"
 
 namespace algos::cfdfinder {
 class CFD {

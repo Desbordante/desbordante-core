@@ -3,27 +3,26 @@
 #include "algorithms/fd/hycommon/preprocessor.h"
 
 namespace {
-using PLIs = algos::hy::PLIs;
+using PLIs = algos::cfdfinder::PLIs;
 
 PLIs BuildPLIs(algos::cfdfinder::CFDFinderRelationData* relation) {
-    PLIs plis;
-    std::transform(relation->GetColumnData().begin(), relation->GetColumnData().end(),
-                   std::back_inserter(plis),
-                   [](auto& column_data) { return column_data.GetPositionListIndex(); });
+    auto& col_data = relation->GetColumnData();
+    PLIs plis(col_data.size());
+    std::ranges::transform(col_data, plis.begin(),
+                           [](auto& column_data) { return column_data.GetPositionListIndex(); });
     return plis;
 }
 }  // namespace
 
 namespace algos::cfdfinder {
 
-std::tuple<hy::PLIsPtr, ColumnsPtr, hy::RowsPtr> Preprocess(CFDFinderRelationData* relation) {
-    hy::PLIs plis = BuildPLIs(relation);
-    auto inverted_plis = hy::util::BuildInvertedPlis(plis);
-    auto compressed_records = hy::util::BuildRecordRepresentation(inverted_plis);
+std::tuple<PLIs, Columns, Rows> Preprocess(CFDFinderRelationData* relation) {
+    PLIs plis = BuildPLIs(relation);
+    Columns inverted_plis = hy::util::BuildInvertedPlis(plis);
+    Rows compressed_records = hy::util::BuildRecordRepresentation(inverted_plis);
 
-    return std::make_tuple(std::make_shared<hy::PLIs>(std::move(plis)),
-                           std::make_shared<hy::Columns>(std::move(inverted_plis)),
-                           std::make_shared<hy::Rows>(std::move(compressed_records)));
+    return std::make_tuple(std::move(plis), std::move(inverted_plis),
+                           std::move(compressed_records));
 }
 
 }  // namespace algos::cfdfinder

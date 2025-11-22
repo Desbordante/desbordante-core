@@ -1,11 +1,8 @@
 #pragma once
 
-#include <memory>
-
 #include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
-#include "algorithms/fd/hycommon/types.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder {
-using ColumnsPtr = std::shared_ptr<hy::Columns>;
-std::tuple<hy::PLIsPtr, ColumnsPtr, hy::RowsPtr> Preprocess(CFDFinderRelationData* relation);
+std::tuple<PLIs, Columns, Rows> Preprocess(CFDFinderRelationData* relation);
 }  // namespace algos::cfdfinder
