@@ -1,8 +1,14 @@
 #include "python_bindings/cfd/bind_cfd.h"
 
-#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
+#include <cstddef>
+#include <optional>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/cfd/fd_first_algorithm.h"
@@ -16,6 +22,7 @@ using algos::cfd::RawCFD;
 
 RawCFD CreateRawCFDFromTuples(py::list lhs_tuples, py::tuple rhs_tuple) {
     RawCFD::RawItems lhs;
+    lhs.reserve(lhs_tuples.size());
     for (auto item : lhs_tuples) {
         py::tuple tup = py::cast<py::tuple>(item);
         if (tup.size() != 2) throw py::value_error("LHS items must be (attribute, value) tuples");
@@ -31,7 +38,7 @@ RawCFD CreateRawCFDFromTuples(py::list lhs_tuples, py::tuple rhs_tuple) {
     std::optional<std::string> rhs_value;
     if (!rhs_tuple[1].is_none()) rhs_value = py::cast<std::string>(rhs_tuple[1]);
 
-    return RawCFD(lhs, RawCFD::RawItem{rhs_attr, rhs_value});
+    return RawCFD(std::move(lhs), RawCFD::RawItem{rhs_attr, rhs_value});
 }
 
 template <typename ElementType>
@@ -45,8 +52,8 @@ py::tuple VectorToTuple(std::vector<ElementType> vec) {
 }
 
 py::tuple MakeCfdTuple(algos::cfd::RawCFD const& cfd) {
-    auto const& lhs = cfd.GetLhs();
-    auto const& rhs = cfd.GetRhs();
+    RawCFD::RawItems lhs = cfd.GetLhs();
+    RawCFD::RawItem rhs = cfd.GetRhs();
     return py::make_tuple(VectorToTuple(std::move(lhs)), py::cast(rhs));
 }
 

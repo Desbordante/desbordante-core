@@ -181,7 +181,7 @@ def display_violations(df, verifier, cfd):
 
     violating_rows = set()
     for highlight in highlights:
-        violating_rows.update(highlight.get_violating_rows)
+        violating_rows.update(highlight.violating_rows)
 
     if not violating_rows:
         return
@@ -192,10 +192,10 @@ def display_violations(df, verifier, cfd):
     rhs_item = cfd.rhs
 
     for j, highlight in enumerate(highlights[:2], start=1):
-        cluster_violating = highlight.get_violating_rows
+        cluster_violating = highlight.violating_rows
         if cluster_violating:
             print(f"  Cluster #{j} violations:")
-            for row_idx in list(cluster_violating)[:3]:
+            for row_idx in list(cluster_violating)[:5]:
                 lhs_values = [df.iloc[row_idx, item.attribute] for item in lhs_items]
                 rhs_value = df.iloc[row_idx, rhs_item.attribute]
                 print(f"    Row {row_idx}: {Colors.RED_FG}{lhs_values} -> {rhs_value}{Colors.RESET}")
