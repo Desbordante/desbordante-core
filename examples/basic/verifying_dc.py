@@ -1,4 +1,3 @@
-from os import path
 import desbordante as db
 import pandas as pd
 
