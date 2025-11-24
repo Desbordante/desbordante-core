@@ -1,7 +1,9 @@
 #include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 
+#include <algorithm>
 #include <numeric>
-#include <ranges>
+#include <tuple>
+#include <unordered_set>
 
 #include "algorithms/cfd/cfdfinder/util/violations_util.h"
 
@@ -42,11 +44,12 @@ void Pattern::UpdateCover(Pattern const& pattern) {
 }
 
 void Pattern::UpdateKeepers(Row const& inverted_pli_rhs) {
-    size_t child_violations = std::accumulate(
-            cover_.begin(), cover_.end(), 0u,
-            [&inverted_pli_rhs](size_t sum, Cluster const& cluster) {
-                return sum + algos::cfdfinder::util::CalculateViolations(cluster, inverted_pli_rhs);
-            });
+    size_t child_violations =
+            std::accumulate(cover_.begin(), cover_.end(), 0u,
+                            [&inverted_pli_rhs](size_t sum, Cluster const& cluster) {
+                                return sum + algos::cfdfinder::utils::CalculateViolations(
+                                                     cluster, inverted_pli_rhs);
+                            });
 
     num_keepers_ = GetNumCover() - child_violations;
 }

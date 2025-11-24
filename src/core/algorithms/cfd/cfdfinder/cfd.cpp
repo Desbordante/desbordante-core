@@ -1,8 +1,8 @@
 #include "algorithms/cfd/cfdfinder/cfd.h"
 
-#include <boost/algorithm/string/join.hpp>
+#include <sstream>
 
-#include "algorithms/cfd/cfdfinder/model/entries.h"
+#include <boost/algorithm/string/join.hpp>
 
 namespace {
 using namespace algos::cfdfinder;

@@ -9,7 +9,6 @@
 #include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "algorithms/cfd/cfdfinder/model/entries.h"
 #include "algorithms/cfd/cfdfinder/model/expansion_strategies.h"
 #include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
 #include "algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
@@ -18,7 +17,6 @@
 #include "algorithms/cfd/cfdfinder/model/pruning_strategies.h"
 #include "algorithms/cfd/cfdfinder/model/result_strategies.h"
 #include "algorithms/cfd/cfdfinder/types/frontier.h"
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 #include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
 #include "algorithms/cfd/cfdfinder/util/violations_util.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
@@ -29,6 +27,7 @@
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
+#include "util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 
@@ -150,7 +149,7 @@ unsigned long long CFDFinder::ExecuteInternal() {
             }
             if (height > 0) {
                 auto& target_level = levels[height - 1];
-                for (auto&& subset : util::GenerateLhsSubsets(candidate.lhs_)) {
+                for (auto&& subset : utils::GenerateLhsSubsets(candidate.lhs_)) {
                     target_level.emplace(std::move(subset), candidate.rhs_);
                 }
             }
@@ -286,7 +285,7 @@ std::shared_ptr<model::PLI const> CFDFinder::GetLhsPli(PLICache& pli_cache,
     boost::dynamic_bitset<> current_lhs(lhs.size());
     std::shared_ptr<model::PLI const> result;
 
-    util::ForEachSetBit(lhs, [&](size_t index) {
+    util::ForEachIndex(lhs, [&](size_t index) {
         current_lhs.flip(index);
 
         if (auto cached = pli_cache.Get(current_lhs)) {
@@ -356,7 +355,7 @@ CFDFinder::Lattice CFDFinder::GetLattice(PLIsPtr plis, RowsPtr compressed_record
     candidates.splice(candidates.end(), validator.FillMaxNonFDs());
 
     for (auto const& fd : fds) {
-        for (auto&& subset : util::GenerateLhsSubsets(fd.lhs_)) {
+        for (auto&& subset : utils::GenerateLhsSubsets(fd.lhs_)) {
             if (!std::any_of(candidates.begin(), candidates.end(),
                              [&subset, rhs = fd.rhs_](auto const& candidate) {
                                  return rhs == candidate.rhs_ &&
@@ -393,7 +392,7 @@ PatternTableau CFDFinder::GenerateTableau(boost::dynamic_bitset<> const& lhs_att
 
     size_t violations = 0;
     for (auto&& cluster : enriched_clusters) {
-        violations += util::CalculateViolations(cluster, inverted_pli_rhs);
+        violations += utils::CalculateViolations(cluster, inverted_pli_rhs);
         null_cover.push_back(std::move(cluster));
     }
     null_pattern.SetCover(std::move(null_cover));

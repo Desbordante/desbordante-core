@@ -2,6 +2,7 @@
 
 #include <list>
 #include <memory>
+#include <ranges>
 
 #include "algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
 

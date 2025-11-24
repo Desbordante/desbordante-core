@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <vector>
+
 #include "algorithms/cfd/cfdfinder/types/cluster_maps.h"
 #include "model/table/column_data.h"
 #include "model/table/idataset_stream.h"

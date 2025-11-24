@@ -1,5 +1,6 @@
 #pragma once
 
+#include <limits>
 #include <list>
 
 #include "result_strategy.h"

@@ -1,7 +1,7 @@
 #pragma once
 
+#include <list>
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include "algorithms/cfd/cfdfinder/candidate.h"

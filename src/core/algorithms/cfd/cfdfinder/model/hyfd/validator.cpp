@@ -1,27 +1,28 @@
 #include "algorithms/cfd/cfdfinder/model/hyfd/validator.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <future>
+#include <unordered_set>
 #include <utility>
-#include <vector>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
+#include <boost/dynamic_bitset.hpp>
 #include <easylogging++.h>
 
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
 #include "algorithms/fd/hycommon/util/pli_util.h"
 #include "algorithms/fd/hycommon/validator_helpers.h"
 #include "algorithms/fd/hyfd/hyfd_config.h"
+#include "util/bitset_utils.h"
 
 namespace {
 using BitSet = boost::dynamic_bitset<>;
-using algos::cfdfinder::util::ForEachSetBit;
 
 std::unordered_set<size_t> AsSet(BitSet const& bitset) {
     std::unordered_set<size_t> valid_rhss;
     valid_rhss.reserve(bitset.count());
-    ForEachSetBit(bitset, [&valid_rhss](size_t attr) { valid_rhss.insert(attr); });
+    util::ForEachIndex(bitset, [&valid_rhss](size_t attr) { valid_rhss.insert(attr); });
 
     return valid_rhss;
 }
@@ -32,7 +33,7 @@ std::pair<std::vector<size_t>, std::vector<size_t>> BuildRhsMappings(
     rhs_column_ids.reserve(rhs.count());
     std::vector<size_t> rhs_ranks(compressed_records[0].size());
 
-    ForEachSetBit(rhs, [&rhs_ranks, &rhs_column_ids](size_t attr) {
+    util::ForEachIndex(rhs, [&rhs_ranks, &rhs_column_ids](size_t attr) {
         rhs_ranks[attr] = rhs_column_ids.size();
         rhs_column_ids.push_back(attr);
     });
@@ -155,7 +156,7 @@ Validator::FDValidations Validator::ProcessZeroLevel(LhsPair const& lhsPair) con
     result.SetCountValidations(rhs_count);
     result.SetCountIntersections(rhs_count);
 
-    ForEachSetBit(rhs, [&](size_t attr) {
+    util::ForEachIndex(rhs, [&](size_t attr) {
         if (!plis_->at(attr)->IsConstant()) {
             vertex->RemoveFd(attr);
             result.InvalidInstances().emplace_back(lhs, attr);
@@ -180,7 +181,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) c
     result.SetCountIntersections(rhs_count);
     result.SetCountValidations(rhs_count);
 
-    ForEachSetBit(rhs, [&](size_t attr) {
+    util::ForEachIndex(rhs, [&](size_t attr) {
         for (auto const& cluster : plis_->at(lhs_attr)->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
@@ -220,7 +221,7 @@ Validator::FDValidations Validator::ProcessHigherLevel(LhsPair const& lhs_pair) 
     rhs &= ~valid_rhss;
     vertex->SetFds(valid_rhss);
 
-    ForEachSetBit(rhs, [&lhs, &result](size_t attr) {
+    util::ForEachIndex(rhs, [&lhs, &result](size_t attr) {
         result.InvalidInstances().emplace_back(lhs, attr);
     });
 

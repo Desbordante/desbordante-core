@@ -1,5 +1,7 @@
 #include "algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
 
+#include <ranges>
+
 #include "algorithms/fd/hycommon/preprocessor.h"
 
 namespace {

@@ -4,13 +4,13 @@
 
 #include "algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
 #include "algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
+#include "util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 
 Pattern ConstantExpansion::GenerateNullPattern(BitSet const& attributes) const {
     Entries entries;
-    util::ForEachSetBit(attributes, [&entries](size_t attr) {
+    util::ForEachIndex(attributes, [&entries](size_t attr) {
         entries.emplace_back(attr, std::make_shared<VariableEntry>());
     });
 
