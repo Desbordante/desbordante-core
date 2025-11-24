@@ -1,6 +1,8 @@
 #pragma once
 #include <list>
 
+#include "algorithms/cfd/cfdfinder/candidate.h"
+#include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
 #include "raw_cfd.h"
 
 namespace algos::cfdfinder {

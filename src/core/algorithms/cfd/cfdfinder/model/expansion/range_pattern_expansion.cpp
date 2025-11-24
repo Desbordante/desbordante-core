@@ -6,7 +6,7 @@
 #include <utility>
 
 #include "algorithms/cfd/cfdfinder/model/pattern/range_entry.h"
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
+#include "util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 
@@ -37,7 +37,7 @@ RangePatternExpansion::RangePatternExpansion(InvertedClusterMaps const& inverted
 
 Pattern RangePatternExpansion::GenerateNullPattern(BitSet const& attributes) const {
     Entries entries;
-    util::ForEachSetBit(attributes, [&](size_t attr) {
+    util::ForEachIndex(attributes, [&](size_t attr) {
         auto const& clusters = sorted_clusters_ids_.at(attr);
         entries.emplace_back(attr, std::make_shared<RangeEntry>(clusters, 0, clusters->size() - 1));
     });

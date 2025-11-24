@@ -60,7 +60,7 @@ bool SupportIndependentPruning::ContinueGeneration(PatternTableau const& current
     support_map_[current_candidate_] = current_tableau.GetSupport();
     double max_support = 0.0;
 
-    for (auto&& superset : cfdfinder::util::GenerateLhsSupersets(current_candidate_.lhs_)) {
+    for (auto&& superset : utils::GenerateLhsSupersets(current_candidate_.lhs_)) {
         Candidate parent(std::move(superset), current_candidate_.rhs_);
 
         if (support_map_.contains(parent)) {

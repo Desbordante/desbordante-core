@@ -1,6 +1,6 @@
 #include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
 
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
+#include "util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 
@@ -11,7 +11,7 @@ void Inductor::UpdateFdTree(NonFDList const& non_fds) {
         for (auto const& lhs_bits : non_fds.GetLevel(level)) {
             auto rhs_bits = lhs_bits;
             rhs_bits.flip();
-            util::ForEachSetBit(rhs_bits, [this, &lhs_bits](size_t rhs_id) {
+            util::ForEachIndex(rhs_bits, [this, &lhs_bits](size_t rhs_id) {
                 SpecializeTreeForNonFd(lhs_bits, rhs_id);
             });
         }

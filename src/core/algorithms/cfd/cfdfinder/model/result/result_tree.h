@@ -57,7 +57,7 @@ public:
 
     ResultTree* GetInsertPosition(RawCFD const& result) {
         ResultTree* child;
-        for (auto const& bitset : util::GenerateLhsSupersets(result.embedded_fd_.lhs_)) {
+        for (auto const& bitset : utils::GenerateLhsSupersets(result.embedded_fd_.lhs_)) {
             child = FindNode(bitset, result.embedded_fd_.rhs_);
             if (child != nullptr) {
                 return child;

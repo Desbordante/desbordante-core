@@ -2,7 +2,8 @@
 
 #include <cstddef>
 #include <list>
-#include <unordered_map>
+#include <map>
+#include <ranges>
 
 #include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
 #include "raw_cfd.h"
@@ -20,7 +21,7 @@ private:
         }
 
         auto const& level = layers_.at(level_num);
-        auto subsets = cfdfinder::util::GenerateLhsSubsets(node.embedded_fd_.lhs_);
+        auto subsets = cfdfinder::utils::GenerateLhsSubsets(node.embedded_fd_.lhs_);
 
         return std::ranges::any_of(subsets, [&level](auto const& subset) {
             return std::ranges::any_of(level, [&subset](auto const& result) {

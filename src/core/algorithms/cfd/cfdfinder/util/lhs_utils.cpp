@@ -3,14 +3,14 @@
 #include <cstddef>
 #include <list>
 
-#include "algorithms/cfd/cfdfinder/util/bitset_util.h"
+#include "util/bitset_utils.h"
 
-namespace algos::cfdfinder::util {
+namespace algos::cfdfinder::utils {
 
 std::list<BitSet> GenerateLhsSubsets(BitSet const& lhs) {
     std::list<BitSet> subsets;
 
-    ForEachSetBit(lhs, [&](size_t attr) {
+    util::ForEachIndex(lhs, [&](size_t attr) {
         auto subset = lhs;
         subset.flip(attr);
 
@@ -33,4 +33,4 @@ std::list<BitSet> GenerateLhsSupersets(BitSet const& lhs) {
     }
     return supersets;
 }
-}  // namespace algos::cfdfinder::util
+}  // namespace algos::cfdfinder::utils

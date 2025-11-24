@@ -16,6 +16,7 @@
 #include "algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 #include "algorithms/cfd/cfdfinder/model/result/result_strategy.h"
 #include "algorithms/cfd/cfdfinder/types/enriched_plis.h"
+#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 #include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
 #include "algorithms/cfd/cfdfinder/util/pli_cache.h"
 #include "config/equal_nulls/type.h"

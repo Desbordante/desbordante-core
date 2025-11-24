@@ -2,6 +2,7 @@
 
 #include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
 #include "algorithms/fd/hyfd/sampler.h"
+#include "config/thread_number/type.h"
 
 namespace algos::cfdfinder {
 

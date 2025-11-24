@@ -1,4 +1,5 @@
 #pragma once
+#include <tuple>
 
 #include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
 #include "algorithms/cfd/cfdfinder/types/hyfd_types.h"

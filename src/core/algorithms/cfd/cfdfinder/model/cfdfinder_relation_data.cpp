@@ -1,10 +1,8 @@
 #include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
 
 #include <deque>
-#include <memory>
+#include <ranges>
 #include <string>
-#include <utility>
-#include <vector>
 
 #include <easylogging++.h>
 

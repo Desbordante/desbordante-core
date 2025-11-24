@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 #include <cstddef>
 
 #include "algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
