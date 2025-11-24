@@ -2,6 +2,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace algos::cfd {
@@ -25,9 +26,7 @@ public:
         AttributeIndex attribute;         /* attribute column index */
         std::optional<std::string> value; /* pattern value is optional */
 
-        bool operator==(RawItem const& other) const {
-            return attribute == other.attribute && value == other.value;
-        }
+        bool operator==(RawItem const& other) const = default;
     };
 
     using RawItems = std::vector<RawItem>;
@@ -53,9 +52,7 @@ public:
         return rhs_;
     }
 
-    bool operator==(RawCFD const& other) const {
-        return lhs_ == other.lhs_ && rhs_ == other.rhs_;
-    }
+    bool operator==(RawCFD const& other) const = default;
 };
 
 }  // namespace algos::cfd
