@@ -1554,7 +1554,7 @@ dependency by introducing additional conditions on attributes.
 For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
 and “Location” attributes. In this case:
 
-* An FD Department -> Head means that the head is unambiguously determined by the
+* An FD Department -> Head means that the head is unambiguously determined by the 
   department, indicating that each department (mentioned in the table) has exactly one head.
 
 * On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
@@ -1618,7 +1618,7 @@ Let’s consider an example dataset containing employee data.
 
 Expected patterns in this dataset:
 1. We can see that each position has the same salary level. This can be expressed in the
-   following CFD: Position -> Salary. All managers have high salaries, all developers
+   following CFD: Position -> Salary. All managers have high salaries, all developers 
    have average salaries, etc.
 2. We might expect certain positions to be department-specific, but examining the data reveals
    that Managers work across multiple departments (IT, HR, Finance). This violates the potential
@@ -3095,6 +3095,7 @@ Violating rows: \x1b[1;31m[1, 6, 7, 10]\x1b[0m
     Row 1: \x1b[1;31m['Apartment'] -> medium\x1b[0m
     Row 6: \x1b[1;31m['Apartment'] -> low\x1b[0m
     Row 7: \x1b[1;31m['Apartment'] -> low\x1b[0m
+    Row 10: \x1b[1;31m['Apartment'] -> medium\x1b[0m
 
 Analysis: This CFD violation reveals important patterns!
   * Root cause: Location matters - different cities have different apartment pricing

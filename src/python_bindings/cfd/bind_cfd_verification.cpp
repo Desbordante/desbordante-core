@@ -1,4 +1,4 @@
-#include "cfd/bind_cfd_verification.h"
+#include "python_bindings/cfd/bind_cfd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -22,7 +22,7 @@ void BindCFDVerification(py::module_& main_module) {
 
     py::class_<Highlight>(cfd_verification_module, "Highlight")
             .def_property_readonly("cluster", &Highlight::GetCluster)
-            .def_property_readonly("get_violating_rows", &Highlight::GetViolatingRows);
+            .def_property_readonly("violating_rows", &Highlight::GetViolatingRows);
 
     BindPrimitiveNoBase<CFDVerifier>(cfd_verification_module, "CFDVerifier")
             .def("cfd_holds", &CFDVerifier::CFDHolds)
