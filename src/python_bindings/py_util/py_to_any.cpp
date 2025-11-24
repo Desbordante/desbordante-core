@@ -13,8 +13,8 @@
 
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/cfd/enums.h"
-#include "core/algorithms/cind/types.h"
 #include "core/algorithms/cfd/model/raw_cfd.h"
+#include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"

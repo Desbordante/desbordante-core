@@ -1716,7 +1716,7 @@ dependency by introducing additional conditions on attributes.
 For example, consider employee data (a table), containing “Department”, “Head”, “Position”,
 and “Location” attributes. In this case:
 
-* An FD Department -> Head means that the head is unambiguously determined by the
+* An FD Department -> Head means that the head is unambiguously determined by the 
   department, indicating that each department (mentioned in the table) has exactly one head.
 
 * On the other hand, a CFD: (Department=IT) -> (Head=Smith) means that the IT department
@@ -1800,13 +1800,13 @@ Let’s consider an example dataset containing employee data.
 
 Expected patterns in this dataset:
 1. We can see that each position has the same salary level. This can be expressed in the
-   following CFD: Position -> Salary. All managers have high salaries, all developers
+   following CFD: (Position=_) -> (Salary=_). All managers have high salaries, all developers
    have average salaries, etc.
 2. We might expect certain positions to be department-specific, but examining the data reveals
    that Managers work across multiple departments (IT, HR, Finance). This violates the potential
-   CFD: Position -> Department, showing that management roles span organizational boundaries.
+   CFD: (Position=_) -> (Department=_), showing that management roles span organizational boundaries.
 3. Looking at the data, one can note that all HR specialists reside in LA, except for one. This
-   fact can be expressed by the following CFD: Department=HR -> Location=LA. However, an HR
+   fact can be expressed by the following CFD: (Department=HR) -> (Location=LA). However, an HR
    specialist in Boston (row 6) violates this location pattern. Therefore, this CFD does not hold in
    the dataset.
 
@@ -3530,9 +3530,29 @@ A template tuple t is a tuple where each attribute can either have:
 * A fixed constant value
 * A wildcard symbol ('_'), allowing for generalization across different data records.
 
+The wildcard in the RHS determines the TYPE of CFD:
+* Constant CFD - the RHS has a fixed value, e.g. (Department=HR) -> (Location=LA).
+  Such a CFD constrains a single value and is essentially an association rule (AR).
+* Variable CFD - the RHS holds a wildcard, e.g. (Position=_) -> (Salary=_). It states that
+  the RHS is functionally determined by the LHS for the records matching the LHS pattern.
+  A fully-wildcarded variable CFD, e.g. (Position=_) -> (Salary=_), is essentially an AFD.
+* Mixed CFD - the LHS mixes constants and wildcards while the RHS is a wildcard, e.g.
+  (Department=IT, Position=_) -> (Location=_). This case is specific to CFDs: it is neither
+  a plain AR nor a plain AFD, since the dependency holds only on the subset of records
+  fixed by the constant part of the LHS.
+
+See mining_ar.py and mining_afd.py for the AR and AFD primitives referenced above.
+
 \x1b[1;32m=== Key Metrics for CFD ===\x1b[0m
 Support: The number of records satisfying the condition X (LHS part)
 Confidence: The fraction of records where Y occurs given X
+
+A CFD is considered to HOLD (is discovered) when both its support and confidence are
+greater than or equal to the specified minimum thresholds. The confidence value also
+indicates how strictly the dependency is followed:
+* confidence = 1.0 means the CFD holds exactly, with no violating records;
+* confidence < 1.0 means there are violations - the lower the confidence, the more records
+  break the dependency.
 
 \x1b[1;34m=== Algorithm Parameters Explanation ===\x1b[0m
 
@@ -3542,7 +3562,7 @@ CFD verification parameters:
   - Required parameter
   - Example: CFD(lhs=[(0, 'Los Angeles'), (3, '_')], rhs=(4, 'high')), where 0,3,4 are attribute indices
 
-* minconf: minimum confidence threshold
+* cfd_minconf: minimum confidence threshold
   - Lower values: more tolerant of violations
   - Range: 0.0 to 1.0
 
@@ -3605,7 +3625,8 @@ This approach helps validate business rules and discover data quality issues.
 Let's verify our first hypothesis: Los Angeles properties should consistently have high building costs.
 
 CFD to verify: [City='Los Angeles'] -> BuildingCost='high'
-CFD holds: \x1b[1;32mTrue\x1b[0m
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;31mFalse\x1b[0m
 Support: 5
 Confidence: 0.80
 Violations: \x1b[1;31m1 rows\x1b[0m
@@ -3640,6 +3661,7 @@ Assuming these are data entry errors, let's correct them:
 12  Los Angeles     Sunset Blvd       90001        House         high
 13      Chicago    Michigan Ave       60611       Office       medium
 14     New York     Wall Street       10005       Office         high
+Verifying with minimum confidence (cfd_minconf): 0.9
 CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 5
 Confidence: 1.00
@@ -3667,6 +3689,7 @@ Business Logic: Houses typically require more land and construction, commanding 
 CFD to verify: [BuildingType='House'] -> BuildingCost='high'
 If a property is a house, then its building cost should be high
 
+Verifying with minimum confidence (cfd_minconf): 0.9
 CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 2
 Confidence: 1.00
@@ -3681,6 +3704,7 @@ Business Logic: NYC's competitive market + apartment density = premium pricing.
 
 CFD to verify: [City='New York' AND BuildingType='Apartment'] -> BuildingCost='high'
 If a property is an apartment in New York, then its cost should be high
+Verifying with minimum confidence (cfd_minconf): 0.9
 CFD holds: \x1b[1;32mTrue\x1b[0m
 Support: 3
 Confidence: 1.00
@@ -3695,23 +3719,24 @@ Business Logic: Do apartments universally command high prices, or is location cr
 
 CFD to verify: [BuildingType='Apartment'] -> BuildingCost='high'
 If a property is an apartment, then its cost should be high
-CFD holds: \x1b[1;32mTrue\x1b[0m
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;31mFalse\x1b[0m
 Support: 9
-Confidence: 0.56
-Violations: \x1b[1;31m4 rows\x1b[0m
+Confidence: 0.67
+Violations: \x1b[1;31m3 rows\x1b[0m
 Number of clusters violating FD: 1
 
-Violating rows: \x1b[1;31m[1, 6, 7, 10]\x1b[0m
+Violating rows: \x1b[1;31m[1, 7, 10]\x1b[0m
   Cluster #1 violations:
     Row 1: \x1b[1;31m['Apartment'] -> medium\x1b[0m
-    Row 6: \x1b[1;31m['Apartment'] -> low\x1b[0m
     Row 7: \x1b[1;31m['Apartment'] -> low\x1b[0m
+    Row 10: \x1b[1;31m['Apartment'] -> medium\x1b[0m
 
 Analysis: This CFD violation reveals important patterns!
   * Root cause: Location matters - different cities have different apartment pricing
-  * Evidence: 4 violations suggest Chicago/other cities have lower apartment costs
+  * Evidence: 3 violations suggest Chicago has lower apartment costs
   * Lesson: Single-attribute conditions can be too general for real-world data
-  * Solution: Either add City constraints OR accept ~56% confidence for general trends
+  * Solution: Either add City constraints OR accept ~67% confidence for general trends
 
 \x1b[1;34m=== Learning Summary: LHS Condition Design ===\x1b[0m
 Key lessons from this scenario:
@@ -3733,6 +3758,68 @@ Next steps in real applications:
 * Experiment with wildcards (_) for partial generalization
 * Test different confidence thresholds for noisy data
 * Use violation analysis to discover hidden business rules
+
+\x1b[1;34m=== Scenario 3: Variable and Mixed CFDs ===\x1b[0m
+The previous scenarios used constant CFDs, where the RHS has a fixed value.
+Now let's explore variable CFDs (wildcard on the RHS) and mixed CFDs (constants
+and wildcards combined on the LHS, wildcard on the RHS).
+
+\x1b[1;32mHypothesis 5: Variable CFD - Street determines BuildingCost\x1b[0m
+Business Logic: Buildings on the same street should have relatively close costs.
+
+CFD to verify: (Street=_) -> (BuildingCost=_)
+For any street, the building cost is uniquely determined by the street name.
+
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;31mFalse\x1b[0m
+Support: 15
+Confidence: 0.87
+Violations: \x1b[1;31m2 rows\x1b[0m
+Number of clusters violating FD: 2
+
+Violating rows: \x1b[1;31m[4, 7]\x1b[0m
+  Cluster #1 violations:
+    Row 4: \x1b[1;31m['Michigan Ave'] -> high\x1b[0m
+  Cluster #2 violations:
+    Row 7: \x1b[1;31m['State Street'] -> low\x1b[0m
+
+Analysis: This variable CFD does not hold.
+Some streets contain buildings with different costs - for example, State Street has
+both medium and low cost apartments, and Michigan Ave has both high and medium cost
+buildings. A single attribute (Street) is not enough to determine the cost.
+
+\x1b[1;32mHypothesis 6: Mixed CFD - City + Street determines BuildingCost\x1b[0m
+Business Logic: The above hypothesis may hold when restricted to a single city.
+Let's check if New York buildings on the same street have consistent costs.
+
+CFD to verify: (City='New York' AND Street=_) -> (BuildingCost=_)
+For buildings in New York, the building cost is uniquely determined by the street.
+
+Verifying with minimum confidence (cfd_minconf): 0.9
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 5
+Confidence: 1.00
+Violations: \x1b[1;32m0 rows\x1b[0m
+Number of clusters violating FD: 0
+
+Analysis: This mixed CFD holds! By fixing the city to New York and keeping the street
+as a wildcard, the dependency becomes valid. This illustrates the key strength of CFDs:
+the constant part of the LHS restricts the rule to a relevant subset of records, while
+the wildcard part expresses a functional dependency within that subset. Neither a plain
+AR nor a plain AFD can capture this kind of dependency.
+
+\x1b[1;34m=== Learning Summary: CFD Types ===\x1b[0m
+Key lessons from this scenario:
+
+1. CONSTANT CFDs (fixed RHS value) act like association rules - they check whether a
+   specific value assignment holds for matching records.
+
+2. VARIABLE CFDs (wildcard RHS) act like approximate functional dependencies - they
+   check whether the RHS is functionally determined by the LHS pattern.
+
+3. MIXED CFDs (constant + wildcard LHS, wildcard RHS) are specific to CFDs: they
+   express a functional dependency that holds only on the subset of records fixed by
+   the constant part of the LHS.
 
 \x1b[1;34m=== Experimentation Workflow ===\x1b[0m
 CFD validation typically requires experimentation to find meaningful patterns:

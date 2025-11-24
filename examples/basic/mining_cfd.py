@@ -127,13 +127,13 @@ def create_and_explain_dataset():
 
     print("Expected patterns in this dataset:")
     print("1. We can see that each position has the same salary level. This can be expressed in the")
-    print("   following CFD: Position -> Salary. All managers have high salaries, all developers ")
+    print("   following CFD: (Position=_) -> (Salary=_). All managers have high salaries, all developers")
     print("   have average salaries, etc.")
     print("2. We might expect certain positions to be department-specific, but examining the data reveals")
     print("   that Managers work across multiple departments (IT, HR, Finance). This violates the potential")
-    print("   CFD: Position -> Department, showing that management roles span organizational boundaries.")
+    print("   CFD: (Position=_) -> (Department=_), showing that management roles span organizational boundaries.")
     print("3. Looking at the data, one can note that all HR specialists reside in LA, except for one. This")
-    print("   fact can be expressed by the following CFD: Department=HR -> Location=LA. However, an HR")
+    print("   fact can be expressed by the following CFD: (Department=HR) -> (Location=LA). However, an HR")
     print("   specialist in Boston (row 6) violates this location pattern. Therefore, this CFD does not hold in")
     print("   the dataset.")
     print()
@@ -262,7 +262,7 @@ def display_violations(df, verifier, cfd):
 
     violating_rows = set()
     for highlight in highlights:
-        violating_rows.update(highlight.get_violating_rows)
+        violating_rows.update(highlight.violating_rows)
 
     if not violating_rows:
         return
@@ -273,7 +273,7 @@ def display_violations(df, verifier, cfd):
     rhs_item = cfd.rhs
 
     for j, highlight in enumerate(highlights[:2], start=1):
-        cluster_violating = highlight.get_violating_rows
+        cluster_violating = highlight.violating_rows
         if cluster_violating:
             print(f"  Cluster #{j} violations:")
             for row_idx in list(cluster_violating)[:3]:

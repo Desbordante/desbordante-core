@@ -2,7 +2,8 @@ import desbordante
 import pandas as pd
 
 TABLE_PATH = 'examples/datasets/cfd_datasets/city.csv'
-TABLE_PATH_FIXED = 'examples/datasets/cfd_datasets/city_fixed.csv'
+
+MINIMUM_CONFIDENCE = 0.9  # Minimum confidence threshold for a CFD to hold
 
 class Colors:
     GREEN_BG = '\033[1;42m'
@@ -49,10 +50,30 @@ def explain_cfd_concept():
     print("* A fixed constant value")
     print("* A wildcard symbol ('_'), allowing for generalization across different data records.")
     print()
+    print("The wildcard in the RHS determines the TYPE of CFD:")
+    print("* Constant CFD - the RHS has a fixed value, e.g. (Department=HR) -> (Location=LA).")
+    print("  Such a CFD constrains a single value and is essentially an association rule (AR).")
+    print("* Variable CFD - the RHS holds a wildcard, e.g. (Position=_) -> (Salary=_). It states that")
+    print("  the RHS is functionally determined by the LHS for the records matching the LHS pattern.")
+    print("  A fully-wildcarded variable CFD, e.g. (Position=_) -> (Salary=_), is essentially an AFD.")
+    print("* Mixed CFD - the LHS mixes constants and wildcards while the RHS is a wildcard, e.g.")
+    print("  (Department=IT, Position=_) -> (Location=_). This case is specific to CFDs: it is neither")
+    print("  a plain AR nor a plain AFD, since the dependency holds only on the subset of records")
+    print("  fixed by the constant part of the LHS.")
+    print()
+    print("See mining_ar.py and mining_afd.py for the AR and AFD primitives referenced above.")
+    print()
 
     print(f"{Colors.GREEN_FG}=== Key Metrics for CFD ==={Colors.RESET}")
     print("Support: The number of records satisfying the condition X (LHS part)")
     print("Confidence: The fraction of records where Y occurs given X")
+    print()
+    print("A CFD is considered to HOLD (is discovered) when both its support and confidence are")
+    print("greater than or equal to the specified minimum thresholds. The confidence value also")
+    print("indicates how strictly the dependency is followed:")
+    print("* confidence = 1.0 means the CFD holds exactly, with no violating records;")
+    print("* confidence < 1.0 means there are violations - the lower the confidence, the more records")
+    print("  break the dependency.")
     print()
 
 
@@ -156,7 +177,8 @@ def print_table_with_highlight(table, indices_to_highlight):
 def print_cfd_metrics(df, cfd, verifier):
     """Print CFD verification metrics and violations."""
 
-    verifier.execute(cfd_rule=cfd, cfd_minconf=0)
+    print(f"Verifying with minimum confidence (cfd_minconf): {MINIMUM_CONFIDENCE}")
+    verifier.execute(cfd_rule=cfd, cfd_minconf=MINIMUM_CONFIDENCE)
 
     holds = verifier.cfd_holds()
     support = verifier.get_real_support()
@@ -181,7 +203,7 @@ def display_violations(df, verifier, cfd):
 
     violating_rows = set()
     for highlight in highlights:
-        violating_rows.update(highlight.get_violating_rows)
+        violating_rows.update(highlight.violating_rows)
 
     if not violating_rows:
         return
@@ -192,10 +214,10 @@ def display_violations(df, verifier, cfd):
     rhs_item = cfd.rhs
 
     for j, highlight in enumerate(highlights[:2], start=1):
-        cluster_violating = highlight.get_violating_rows
+        cluster_violating = highlight.violating_rows
         if cluster_violating:
             print(f"  Cluster #{j} violations:")
-            for row_idx in list(cluster_violating)[:3]:
+            for row_idx in list(cluster_violating)[:5]:
                 lhs_values = [df.iloc[row_idx, item.attribute] for item in lhs_items]
                 rhs_value = df.iloc[row_idx, rhs_item.attribute]
                 print(f"    Row {row_idx}: {Colors.RED_FG}{lhs_values} -> {rhs_value}{Colors.RESET}")
@@ -255,6 +277,8 @@ def scenario_find_rhs_violations(df):
     print("* Spot outliers that violate business rules")
     print("* Find encoding errors (e.g., 'Low' vs 'low' vs 'LOW')")
     print()
+
+    return df_fixed
 
 
 def scenario_find_lhs_violations(df):
@@ -324,9 +348,9 @@ def scenario_find_lhs_violations(df):
 
     print("Analysis: This CFD violation reveals important patterns!")
     print("  * Root cause: Location matters - different cities have different apartment pricing")
-    print("  * Evidence: 4 violations suggest Chicago/other cities have lower apartment costs")
+    print("  * Evidence: 3 violations suggest Chicago has lower apartment costs")
     print("  * Lesson: Single-attribute conditions can be too general for real-world data")
-    print("  * Solution: Either add City constraints OR accept ~56% confidence for general trends")
+    print("  * Solution: Either add City constraints OR accept ~67% confidence for general trends")
     print()
 
 
@@ -351,6 +375,76 @@ def scenario_find_lhs_violations(df):
     print("* Experiment with wildcards (_) for partial generalization")
     print("* Test different confidence thresholds for noisy data")
     print("* Use violation analysis to discover hidden business rules")
+    print()
+
+
+def scenario_variable_and_mixed_cfds(df):
+    """Scenario: Verifying variable and mixed CFDs."""
+    print(f"{Colors.BLUE_FG}=== Scenario 3: Variable and Mixed CFDs ==={Colors.RESET}")
+    print("The previous scenarios used constant CFDs, where the RHS has a fixed value.")
+    print("Now let's explore variable CFDs (wildcard on the RHS) and mixed CFDs (constants")
+    print("and wildcards combined on the LHS, wildcard on the RHS).")
+    print()
+
+    verifier = desbordante.cfd_verification.algorithms.Default()
+    verifier.load_data(table=df)
+
+    # Variable CFD: (Street=_) -> (BuildingCost=_)
+    print(f"{Colors.GREEN_FG}Hypothesis 5: Variable CFD - Street determines BuildingCost{Colors.RESET}")
+    print("Business Logic: Buildings on the same street should have relatively close costs.")
+    print()
+
+    cfd_street = CFD(
+        lhs=[(1, None)],  # Street='_'
+        rhs=(4, None)     # BuildingCost='_'
+    )
+
+    print("CFD to verify: (Street=_) -> (BuildingCost=_)")
+    print("For any street, the building cost is uniquely determined by the street name.")
+    print()
+    print_cfd_metrics(df, cfd_street, verifier)
+
+    print("Analysis: This variable CFD does not hold.")
+    print("Some streets contain buildings with different costs - for example, State Street has")
+    print("both medium and low cost apartments, and Michigan Ave has both high and medium cost")
+    print("buildings. A single attribute (Street) is not enough to determine the cost.")
+    print()
+
+    # Mixed CFD: (City='New York', Street=_) -> (BuildingCost=_)
+    print(f"{Colors.GREEN_FG}Hypothesis 6: Mixed CFD - City + Street determines BuildingCost{Colors.RESET}")
+    print("Business Logic: The above hypothesis may hold when restricted to a single city.")
+    print("Let's check if New York buildings on the same street have consistent costs.")
+    print()
+
+    cfd_ny_street = CFD(
+        lhs=[(0, "New York"), (1, None)],  # City='New York' AND Street='_'
+        rhs=(4, None)                       # BuildingCost='_'
+    )
+
+    print("CFD to verify: (City='New York' AND Street=_) -> (BuildingCost=_)")
+    print("For buildings in New York, the building cost is uniquely determined by the street.")
+    print()
+    print_cfd_metrics(df, cfd_ny_street, verifier)
+
+    print("Analysis: This mixed CFD holds! By fixing the city to New York and keeping the street")
+    print("as a wildcard, the dependency becomes valid. This illustrates the key strength of CFDs:")
+    print("the constant part of the LHS restricts the rule to a relevant subset of records, while")
+    print("the wildcard part expresses a functional dependency within that subset. Neither a plain")
+    print("AR nor a plain AFD can capture this kind of dependency.")
+    print()
+
+    print(f"{Colors.BLUE_FG}=== Learning Summary: CFD Types ==={Colors.RESET}")
+    print("Key lessons from this scenario:")
+    print()
+    print("1. CONSTANT CFDs (fixed RHS value) act like association rules - they check whether a")
+    print("   specific value assignment holds for matching records.")
+    print()
+    print("2. VARIABLE CFDs (wildcard RHS) act like approximate functional dependencies - they")
+    print("   check whether the RHS is functionally determined by the LHS pattern.")
+    print()
+    print("3. MIXED CFDs (constant + wildcard LHS, wildcard RHS) are specific to CFDs: they")
+    print("   express a functional dependency that holds only on the subset of records fixed by")
+    print("   the constant part of the LHS.")
     print()
 
 
@@ -382,10 +476,10 @@ def main():
     demonstrate_cfd_object_operations()
 
     df = create_and_explain_dataset()
-    scenario_find_rhs_violations(df)
+    df_fixed = scenario_find_rhs_violations(df)
 
-    df = pd.read_csv(TABLE_PATH)
-    scenario_find_lhs_violations(df)
+    scenario_find_lhs_violations(df_fixed)
+    scenario_variable_and_mixed_cfds(df_fixed)
 
     demonstrate_experimentation_workflow()
 
