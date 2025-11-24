@@ -36,7 +36,7 @@ exact_fd.load_data(table=(TABLE, ';', False))
 exact_fd.execute()
 result_exact = set(exact_fd.get_fds())
 
-print(f"An exact FD discovery algorithm, in contrast, consistently identified 78 FDs.")
+print("An exact FD discovery algorithm, in contrast, consistently identified 78 FDs.")
 
 print('''
 This highlights a key property of EulerFD: it may produce results with both

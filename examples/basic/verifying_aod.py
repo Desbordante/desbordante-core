@@ -132,7 +132,7 @@ printlns(
 algo.execute(oc_context=[0], oc_left_index=1,
              oc_right_index=2, left_ordering='ascending')
 print_verification_result(
-    algo, f"OC {{'year'}}: 'employee_grade'<= ~ 'avg_salary'")
+    algo, "OC {'year'}: 'employee_grade'<= ~ 'avg_salary'")
 printlns("""Note that the error is zero and the removal set is empty. A removal set is a set of
 rows that should be removed for an OC (or OD) to hold exactly. In this case, the OC holds exactly,
 which is why the set is empty.""")
@@ -140,7 +140,7 @@ which is why the set is empty.""")
 printlns(
     "Now let's verify the OFD {'employee_grade'} : [] -> 'year', which also holds exactly.")
 algo.execute(ofd_context=[1], ofd_right_index=0)
-print_verification_result(algo, f"OFD {{'employee_grade'}}: [] -> 'year'")
+print_verification_result(algo, "OFD {'employee_grade'}: [] -> 'year'")
 printlns("""Note that the error once again is zero and the removal set is empty because the OFD holds
 exactly.""")
 
@@ -155,7 +155,7 @@ algo.load_data(table=table)
 algo.execute(oc_context=[0], oc_left_index=1,
              oc_right_index=2, left_ordering='ascending')
 print_verification_result(
-    algo, f"OC {{'year'}}: 'employee_grade'<= ~ 'avg_salary'")
+    algo, "OC {'year'}: 'employee_grade'<= ~ 'avg_salary'")
 printlns("""Note that now the OC does not hold exactly and that the removal set is {4}. This means
 that for the OC to hold exactly, it is enough to remove row number 4 (indexed from 0) from the
 table. Note that rows 8 and 4 are interchangeable in this sense because the problem with ordering
@@ -164,7 +164,7 @@ algorithm guarantees to return a minimal removal set in terms of size but does n
 one exactly if there are several candidates.""")
 
 algo.execute(ofd_context=[1], ofd_right_index=0)
-print_verification_result(algo, f"OFD {{'employee_grade'}}: [] -> 'year'")
+print_verification_result(algo, "OFD {'employee_grade'}: [] -> 'year'")
 printlns("""Note once again that the OFD does not hold exactly anymore and the removal set is not
 empty. By adding row 8 with the same value in the 'employee_grade' column as in row 5 but with a
 different value in the 'year' column, we broke the FD 'employee_grade'->'year' and thus broke the
