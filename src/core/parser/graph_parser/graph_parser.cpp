@@ -129,13 +129,18 @@ model::graph_t ReadGraph(std::filesystem::path const& path) {
     return result;
 };
 
-void WriteGraph(std::ostream& stream, model::graph_t& result) {
-    boost::attributes_writer<AMap> vw(boost::get(&model::Vertex::attributes, result));
-    boost::label_writer<RMap> ew(boost::get(&model::Edge::label, result));
+void WriteGraph(std::ostream& stream, model::graph_t const& result) {
+    using ConstAMap =
+            boost::property_map<model::graph_t, std::unordered_map<std::string, std::string>
+                                                        model::Vertex::*>::const_type;
+    using ConstRMap = boost::property_map<model::graph_t, std::string model::Edge::*>::const_type;
+
+    boost::attributes_writer<ConstAMap> vw(boost::get(&model::Vertex::attributes, result));
+    boost::label_writer<ConstRMap> ew(boost::get(&model::Edge::label, result));
     write_graphviz(stream, result, vw, ew);
 };
 
-void WriteGraph(std::filesystem::path const& path, model::graph_t& result) {
+void WriteGraph(std::filesystem::path const& path, model::graph_t const& result) {
     std::ofstream f(path);
     WriteGraph(f, result);
     f.close();
@@ -163,7 +168,7 @@ void WriteGfd(std::ostream& stream, model::Gfd const& result) {
     WriteGraph(stream, pattern);
 };
 
-void WriteGfd(std::filesystem::path const& path, model::Gfd& result) {
+void WriteGfd(std::filesystem::path const& path, model::Gfd const& result) {
     std::ofstream f(path);
     WriteGfd(f, result);
     f.close();
