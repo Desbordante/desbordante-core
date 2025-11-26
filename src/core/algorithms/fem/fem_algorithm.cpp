@@ -1,5 +1,4 @@
 #include "fem_algorithm.h"
-#pragma once
 
 namespace algos {
 
