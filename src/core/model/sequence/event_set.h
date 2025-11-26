@@ -2,15 +2,15 @@
 
 #include <vector>
 
-#include "event_type.h"
+#include "event.h"
 
 namespace model {
 
 class EventSet {
 private:
-    std::vector<EventType> event_set_;
+    std::vector<Event> event_set_;
 public:
-    EventSet(std::vector<EventType> event_set) : event_set_(std::move(event_set)) {}
+    EventSet(std::vector<Event> event_set) : event_set_(std::move(event_set)) {}
 
     auto begin() const {
         return event_set_.begin();
@@ -19,6 +19,8 @@ public:
     auto end() const {
         return event_set_.end();
     }
+
+    void mapEvents(std::vector<Event> const& mapping);
 };
 
 }  // namespace model
