@@ -64,7 +64,6 @@ jobs:
           download-pybind: true
       - name: Generate compile_commands.json
         run: |
-          source .venv/bin/activate
           cmake -DCMAKE_CXX_COMPILER=g++-10 \
             -DCMAKE_BUILD_TYPE=Debug \
             -Dgtest_disable_pthreads=OFF \
