@@ -5,7 +5,7 @@
 #include <typeindex>
 #include <vector>
 
-#include "boost/any.hpp"
+#include <boost/any.hpp>
 
 namespace config {
 struct OptValue {
