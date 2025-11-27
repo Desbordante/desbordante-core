@@ -1,4 +1,4 @@
-#include "column_combination.h"
+#include "core/model/table/column_combination.h"
 
 #include <algorithm>
 #include <sstream>

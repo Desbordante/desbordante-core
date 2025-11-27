@@ -4,7 +4,7 @@
 #include <functional>
 #include <vector>
 
-#include "model/table/position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::metric {
 

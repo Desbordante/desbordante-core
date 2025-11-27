@@ -3,7 +3,7 @@
  *
  * implementation of the column domain data iterator
  */
-#include "column_domain_iterator.h"
+#include "core/model/table/column_domain_iterator.h"
 
 #include <cassert>
 

@@ -11,7 +11,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column.h"
+#include "core/model/table/column.h"
 
 class Vertical {
 private:

@@ -2,8 +2,8 @@
 
 #include <mutex>
 
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical_map.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical_map.h"
 
 class PartitionStorage {
 private:

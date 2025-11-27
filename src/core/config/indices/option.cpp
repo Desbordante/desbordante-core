@@ -1,10 +1,10 @@
-#include "config/indices/option.h"
+#include "core/config/indices/option.h"
 
 #include <algorithm>
 
-#include "config/column_index/validate_index.h"
-#include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
+#include "core/config/column_index/validate_index.h"
+#include "core/config/exceptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 

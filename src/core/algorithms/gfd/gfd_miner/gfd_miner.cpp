@@ -1,4 +1,4 @@
-#include "algorithms/gfd/gfd_miner/gfd_miner.h"
+#include "core/algorithms/gfd/gfd_miner/gfd_miner.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -16,10 +16,10 @@
 #include <boost/graph/isomorphism.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "algorithms/gfd/comparator.h"
-#include "config/option_using.h"
-#include "util/logger.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/gfd/comparator.h"
+#include "core/config/option_using.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 

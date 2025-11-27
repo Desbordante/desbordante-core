@@ -1,11 +1,11 @@
 #pragma once
 #include <thread>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/gfd/gfd.h"
-#include "algorithms/gfd/gfd_validator/gfd_handler.h"
-#include "config/names_and_descriptions.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/gfd_validator/gfd_handler.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos {
 

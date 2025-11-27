@@ -2,7 +2,7 @@
 
 #include <atomic>
 
-#include "type.h"
+#include "core/model/types/type.h"
 
 namespace model {
 

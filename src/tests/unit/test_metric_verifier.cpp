@@ -5,11 +5,11 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/metric/enums.h"
-#include "algorithms/metric/metric_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/metric/enums.h"
+#include "core/algorithms/metric/metric_verifier.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;

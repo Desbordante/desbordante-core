@@ -6,10 +6,10 @@
 
 #include <boost/any.hpp>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/fd.h"
-#include "config/max_lhs/type.h"
-#include "util/primitive_collection.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/config/max_lhs/type.h"
+#include "core/util/primitive_collection.h"
 
 namespace model {
 class AgreeSetFactory;

@@ -1,13 +1,13 @@
-#include "faida.h"
+#include "core/algorithms/ind/faida/faida.h"
 
-#include "algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
-#include "algorithms/ind/faida/inclusion_testing/combined_inclusion_tester.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/thread_number/option.h"
-#include "max_arity/option.h"
-#include "model/table/column.h"
-#include "util/logger.h"
+#include "core/algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
+#include "core/algorithms/ind/faida/inclusion_testing/combined_inclusion_tester.h"
+#include "core/config/max_arity/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/thread_number/option.h"
+#include "core/model/table/column.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

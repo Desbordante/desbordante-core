@@ -1,10 +1,10 @@
-#include "bind_od_verification.h"
+#include "python_bindings/od/bind_od_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/od/set_based_verifier//verifier.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/od/set_based_verifier/verifier.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

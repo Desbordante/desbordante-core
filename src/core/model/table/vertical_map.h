@@ -8,7 +8,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "util/custom_hashes.h"
+#include "core/util/custom_hashes.h"
 
 namespace model {
 

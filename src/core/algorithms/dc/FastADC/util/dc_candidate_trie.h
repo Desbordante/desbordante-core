@@ -7,8 +7,8 @@
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/util/dc_candidate.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/util/dc_candidate.h"
 
 namespace algos::fastadc {
 class DCCandidateTrie {

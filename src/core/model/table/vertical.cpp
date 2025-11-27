@@ -1,4 +1,4 @@
-#include "vertical.h"
+#include "core/model/table/vertical.h"
 
 #include <utility>
 

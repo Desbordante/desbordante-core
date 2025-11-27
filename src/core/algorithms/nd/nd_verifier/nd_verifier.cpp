@@ -1,4 +1,4 @@
-#include "algorithms/nd/nd_verifier/nd_verifier.h"
+#include "core/algorithms/nd/nd_verifier/nd_verifier.h"
 
 #include <chrono>
 #include <cstddef>
@@ -7,22 +7,22 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "config/descriptions.h"
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/names.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/table/typed_column_data.h"
-#include "model/types/builtin.h"
-#include "model/types/type.h"
-#include "util/logger.h"
-#include "util/range_to_string.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/nd/nd_verifier/util/stats_calculator.h"
+#include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/config/descriptions.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/names.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
+#include "core/util/logger.h"
+#include "core/util/range_to_string.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::nd_verifier {
 

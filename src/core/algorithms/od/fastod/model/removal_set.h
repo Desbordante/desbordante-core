@@ -3,7 +3,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "model/table/tuple_index.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::od {
 

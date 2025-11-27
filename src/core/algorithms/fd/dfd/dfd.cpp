@@ -1,14 +1,14 @@
-#include "dfd.h"
+#include "core/algorithms/fd/dfd/dfd.h"
 
 #include <boost/asio.hpp>
 
-#include "config/max_lhs/option.h"
-#include "config/thread_number/option.h"
-#include "lattice_traversal/lattice_traversal.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
-#include "model/table/relational_schema.h"
-#include "util/logger.h"
+#include "core/algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

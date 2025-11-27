@@ -1,8 +1,8 @@
-#include "dc/FastADC/util/clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 
-#include "dc/FastADC/util/cross_clue_set_builder.h"
-#include "dc/FastADC/util/single_clue_set_builder.h"
-#include "util/logger.h"
+#include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 

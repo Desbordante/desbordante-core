@@ -2,13 +2,13 @@
 // Created by Ilya Vologin
 // https://github.com/cupertank
 //
-#include "column_layout_relation_data.h"
+#include "core/model/table/column_layout_relation_data.h"
 
 #include <map>
 #include <memory>
 #include <utility>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
     int num_columns = schema_->GetNumColumns();

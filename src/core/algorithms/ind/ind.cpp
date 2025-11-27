@@ -1,8 +1,8 @@
-#include "ind.h"
+#include "core/algorithms/ind/ind.h"
 
 #include <sstream>
 
-#include "model/table/column.h"
+#include "core/model/table/column.h"
 
 namespace model {
 

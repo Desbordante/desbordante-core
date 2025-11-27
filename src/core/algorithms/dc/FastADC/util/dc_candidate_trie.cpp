@@ -1,7 +1,7 @@
-#include "dc/FastADC/util/dc_candidate_trie.h"
+#include "core/algorithms/dc/FastADC/util/dc_candidate_trie.h"
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/util/dc_candidate.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/util/dc_candidate.h"
 
 namespace algos::fastadc {
 

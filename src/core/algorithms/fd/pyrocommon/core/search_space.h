@@ -5,13 +5,13 @@
 #include <set>
 #include <utility>
 
-#include "dependency_candidate.h"
-#include "dependency_strategy.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
-#include "model/table/vertical_map.h"
-#include "profiling_context.h"
-#include "vertical_info.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
+#include "core/algorithms/fd/pyrocommon/core/vertical_info.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
+#include "core/model/table/vertical_map.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
 private:

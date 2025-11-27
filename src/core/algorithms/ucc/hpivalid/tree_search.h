@@ -5,8 +5,8 @@
 #include <stack>
 #include <vector>
 
-#include "algorithms/ucc/hpivalid/hypergraph.h"
-#include "model/table/position_list_index.h"
+#include "core/algorithms/ucc/hpivalid/hypergraph.h"
+#include "core/model/table/position_list_index.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

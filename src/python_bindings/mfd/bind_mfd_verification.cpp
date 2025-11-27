@@ -1,11 +1,11 @@
-#include "bind_mfd_verification.h"
+#include "python_bindings/mfd/bind_mfd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/metric/highlight.h"
-#include "algorithms/metric/verification_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/metric/highlight.h"
+#include "core/algorithms/metric/verification_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

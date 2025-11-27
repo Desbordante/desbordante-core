@@ -1,12 +1,12 @@
-#include "md/bind_md_verification.h"
+#include "python_bindings/md/bind_md_verification.h"
 
 #include <pybind11/stl.h>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
-#include "algorithms/md/md_verifier/column_similarity_classifier.h"
-#include "algorithms/md/md_verifier/highlights/highlights.h"
-#include "algorithms/md/md_verifier/md_verifier.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
+#include "core/algorithms/md/md_verifier/highlights/highlights.h"
+#include "core/algorithms/md/md_verifier/md_verifier.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

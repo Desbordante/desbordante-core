@@ -8,14 +8,14 @@
 
 #include <frozen/unordered_map.h>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/dc/model/dc.h"
-#include "algorithms/dc/model/point.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "table/typed_column_data.h"
-#include "util/kdtree.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/dc/model/dc.h"
+#include "core/algorithms/dc/model/point.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/util/kdtree.h"
 
 namespace algos {
 

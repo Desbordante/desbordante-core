@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/table/vertical.h"
-#include "pruning_map.h"
+#include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
+#include "core/model/table/vertical.h"
 
 class NonDependenciesMap : public PruningMap {
 public:

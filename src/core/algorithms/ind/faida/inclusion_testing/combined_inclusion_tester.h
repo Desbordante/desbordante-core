@@ -2,10 +2,10 @@
 
 #include <hash_table8.hpp>
 
-#include "algorithms/ind/faida/preprocessing/preprocessor.h"
-#include "hll_data.h"
-#include "iinclusion_tester.h"
-#include "sampled_inverted_index.h"
+#include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
+#include "core/algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
+#include "core/algorithms/ind/faida/inclusion_testing/sampled_inverted_index.h"
+#include "core/algorithms/ind/faida/preprocessing/preprocessor.h"
 
 namespace algos::faida {
 

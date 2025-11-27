@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/od/fastod/model/removal_set.h"
-#include "algorithms/od/set_based_verifier/verifier.h"
-#include "all_csv_configs.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/od/fastod/model/removal_set.h"
+#include "core/algorithms/od/set_based_verifier/verifier.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

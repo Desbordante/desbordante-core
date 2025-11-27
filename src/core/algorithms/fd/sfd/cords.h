@@ -4,17 +4,17 @@
 #include <utility>
 #include <vector>
 
-#include "algorithm.h"
-#include "algorithms/fd/fd_algorithm.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "contingency_table.h"
-#include "correlation.h"
-#include "frequency_handler.h"
-#include "model/table/column.h"
-#include "model/table/column_index.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "sample.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/sfd/contingency_table.h"
+#include "core/algorithms/fd/sfd/correlation.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/algorithms/fd/sfd/sample.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos {
 class Cords : public FDAlgorithm {

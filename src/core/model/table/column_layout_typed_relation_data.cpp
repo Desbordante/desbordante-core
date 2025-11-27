@@ -1,6 +1,6 @@
-#include "column_layout_typed_relation_data.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace model {
 

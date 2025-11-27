@@ -12,9 +12,9 @@
 #include <utility>
 #include <vector>
 
-#include "model/table/column_index.h"
-#include "model/table/dataset_stream_wrapper.h"
-#include "model/table/idataset_stream.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/dataset_stream_wrapper.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace model {
 

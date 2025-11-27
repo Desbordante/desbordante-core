@@ -5,10 +5,10 @@
 #include <stack>
 #include <vector>
 
-#include "algorithms/association_rules/candidate_hash_tree.h"
-#include "algorithms/association_rules/node.h"
-#include "ar_algorithm.h"
-#include "model/transaction/itemset.h"
+#include "core/algorithms/association_rules/ar_algorithm.h"
+#include "core/algorithms/association_rules/candidate_hash_tree.h"
+#include "core/algorithms/association_rules/node.h"
+#include "core/model/transaction/itemset.h"
 
 namespace algos {
 

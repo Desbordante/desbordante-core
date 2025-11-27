@@ -1,7 +1,7 @@
-#include "create_dataframe_reader.h"
+#include "python_bindings/py_util/create_dataframe_reader.h"
 
-#include "config/exceptions.h"
-#include "py_util/dataframe_reader.h"
+#include "core/config/exceptions.h"
+#include "python_bindings/py_util/dataframe_reader.h"
 
 namespace python_bindings {
 

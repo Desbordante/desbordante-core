@@ -1,10 +1,10 @@
-#include "bind_statistics.h"
+#include "python_bindings/statistics/bind_statistics.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/statistics/data_stats.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/statistics/data_stats.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

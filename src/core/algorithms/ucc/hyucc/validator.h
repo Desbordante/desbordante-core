@@ -4,12 +4,12 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/ucc/hyucc/model/ucc_tree.h"
-#include "algorithms/ucc/raw_ucc.h"
-#include "config/thread_number/type.h"
-#include "fd/hycommon/primitive_validations.h"
-#include "fd/hycommon/types.h"
-#include "model/table/position_list_index.h"
+#include "core/algorithms/fd/hycommon/primitive_validations.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
+#include "core/algorithms/ucc/raw_ucc.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::hyucc {
 

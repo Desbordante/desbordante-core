@@ -2,15 +2,15 @@
 
 #include <memory>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/hymd/hymd.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/hymd.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 

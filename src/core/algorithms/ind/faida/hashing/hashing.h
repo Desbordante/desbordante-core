@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "murmur_hash_3.h"
+#include "core/algorithms/ind/faida/hashing/murmur_hash_3.h"
 
 namespace algos::faida::hashing {
 

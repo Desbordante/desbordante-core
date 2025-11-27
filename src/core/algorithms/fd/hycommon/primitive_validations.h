@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "types.h"
+#include "core/algorithms/fd/hycommon/types.h"
 
 namespace algos::hy {
 

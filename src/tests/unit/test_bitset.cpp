@@ -7,7 +7,7 @@
 
 #include <gtest/gtest.h>
 
-#include "model/types/bitset.h"
+#include "core/model/types/bitset.h"
 
 namespace tests {
 

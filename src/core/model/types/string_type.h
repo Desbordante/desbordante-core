@@ -1,8 +1,8 @@
 #pragma once
 
-#include "imetrizable_type.h"
-#include "type.h"
-#include "util/levenshtein_distance.h"
+#include "core/model/types/imetrizable_type.h"
+#include "core/model/types/type.h"
+#include "core/util/levenshtein_distance.h"
 
 namespace model {
 

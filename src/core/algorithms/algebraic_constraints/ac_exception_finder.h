@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include "ac_exception.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "ranges_collection.h"
+#include "core/algorithms/algebraic_constraints/ac_exception.h"
+#include "core/algorithms/algebraic_constraints/ranges_collection.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos {
 class ACAlgorithm;

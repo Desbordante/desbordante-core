@@ -5,9 +5,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "itemset.h"
-#include "model/table/idataset_stream.h"
-#include "transactional_input_format.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/transaction/itemset.h"
+#include "core/model/transaction/transactional_input_format.h"
 
 namespace model {
 

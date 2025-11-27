@@ -6,12 +6,12 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "config/tabular_data/input_table_type.h"
-#include "fd/fd_algorithm.h"
-#include "model/table/column.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
-#include "search_tree.h"
+#include "core/algorithms/fd/aidfd/search_tree.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace algos {
 

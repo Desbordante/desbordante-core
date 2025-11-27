@@ -1,13 +1,13 @@
-#include "hyucc.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
 
 #include <chrono>
 
-#include "fd/hycommon/types.h"
-#include "inductor.h"
-#include "preprocessor.h"
-#include "sampler.h"
-#include "util/logger.h"
-#include "validator.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/algorithms/ucc/hyucc/inductor.h"
+#include "core/algorithms/ucc/hyucc/preprocessor.h"
+#include "core/algorithms/ucc/hyucc/sampler.h"
+#include "core/algorithms/ucc/hyucc/validator.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

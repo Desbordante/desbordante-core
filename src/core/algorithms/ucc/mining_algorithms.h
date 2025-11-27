@@ -1,5 +1,5 @@
 #pragma once
 
-#include "algorithms/ucc/hpivalid/hpivalid.h"
-#include "algorithms/ucc/hyucc/hyucc.h"
-#include "algorithms/ucc/pyroucc/pyroucc.h"
+#include "core/algorithms/ucc/hpivalid/hpivalid.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"

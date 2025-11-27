@@ -9,8 +9,8 @@
 #include <string_view>
 #include <vector>
 
-#include "column_index.h"
-#include "table/idataset_stream.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace model {
 

@@ -1,9 +1,9 @@
-#include "preprocessor.h"
+#include "core/algorithms/fd/hycommon/preprocessor.h"
 
 #include <algorithm>
 #include <vector>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
 
 namespace algos::hy::util {
 

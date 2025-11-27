@@ -1,8 +1,8 @@
 #pragma once
 
-#include "algorithms/algorithm.h"
-#include "algorithms/md/md.h"
-#include "util/primitive_collection.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/md/md.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 

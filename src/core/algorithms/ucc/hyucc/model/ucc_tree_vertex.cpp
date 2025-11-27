@@ -1,4 +1,4 @@
-#include "ucc_tree_vertex.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace algos::hyucc {
 

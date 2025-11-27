@@ -1,8 +1,8 @@
 #pragma once
 
-#include "idataset_stream.h"
-#include "relation_data.h"
-#include "typed_column_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relation_data.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace model {
 
