@@ -1,11 +1,6 @@
 # ---- CMake Policies ----
 
-cmake_minimum_required(VERSION 3.25...3.31)
-
-# https://github.com/Desbordante/desbordante-core/issues/549
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
-    message(FATAL_ERROR "The project does not currently support versions 4.0 or higher.")
-endif()
+cmake_minimum_required(VERSION 3.25)
 
 if(POLICY CMP0167)
     # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
