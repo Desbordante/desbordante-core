@@ -7,7 +7,6 @@
 #include <unordered_set>
 
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
 
 #include "algorithms/cfd/cfdfinder/model/expansion_strategies.h"
 #include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
@@ -28,6 +27,7 @@
 #include "config/tabular_data/input_table/option.h"
 #include "config/thread_number/option.h"
 #include "util/bitset_utils.h"
+#include "util/logger.h"
 
 namespace algos::cfdfinder {
 
@@ -158,18 +158,18 @@ unsigned long long CFDFinder::ExecuteInternal() {
         }
         auto elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>(
                 std::chrono::system_clock::now() - start_level_time);
-        LOG(INFO) << "Finished level " << height << "(" << elapsed_seconds.count() << ", "
-                  << num_results << " results)";
+        LOG_INFO("Finished level {} ({}), {} results.", height, elapsed_seconds.count(),
+                 num_results);
         --height;
     }
 
     RegisterResults(std::move(result_receiver), std::move(inverted_cluster_maps));
-    LOG(INFO) << "Total PLI computations: "
-              << pli_cache.GetTotalMisses() + pli_cache.GetFullHits() + pli_cache.GetPartialHits();
-    LOG(INFO) << "Total PLI cache misses: " << pli_cache.GetTotalMisses();
-    LOG(INFO) << "Total PLI cache hits: " << pli_cache.GetFullHits() + pli_cache.GetPartialHits();
-    LOG(INFO) << "Total full PLI cache hits: " << pli_cache.GetFullHits();
-    LOG(INFO) << "Total partial PLI cache hits: " << pli_cache.GetPartialHits();
+    LOG_INFO("Total PLI computations: {}",
+             pli_cache.GetTotalMisses() + pli_cache.GetFullHits() + pli_cache.GetPartialHits());
+    LOG_INFO("Total PLI cache misses: {}", pli_cache.GetTotalMisses());
+    LOG_INFO("Total PLI cache hits: {}", pli_cache.GetFullHits() + pli_cache.GetPartialHits());
+    LOG_INFO("Total full PLI cache hits: {}", pli_cache.GetFullHits());
+    LOG_INFO("Total partial PLI cache hits: {}", pli_cache.GetPartialHits());
 
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
@@ -366,7 +366,7 @@ CFDFinder::Lattice CFDFinder::GetLattice(PLIsPtr plis, RowsPtr compressed_record
         }
     }
 
-    LOG(INFO) << candidates.size() << " maximal non-FDs (initial candidates).";
+    LOG_INFO("{} maximal non-FDs (initial candidates).", candidates.size());
     Lattice levels(relation_->GetNumColumns() - 1);
 
     for (auto&& candidate : candidates) {
