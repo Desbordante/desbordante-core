@@ -6,6 +6,7 @@
 #include <iterator>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 #include "descriptions.h"
@@ -47,19 +48,8 @@ void PACVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kEpsilonSteps, kMinDelta, kDiagonalThreshold});
 }
 
-unsigned long long PACVerifier::ExecuteInternal() {
-    auto start = std::chrono::system_clock::now();
-    LOG_INFO("Verifying {}...", pac_->ToLongString());
-
-    auto epsilon_step = (max_epsilon_ - min_epsilon_) / (epsilon_steps_ - 1);
-    auto satisfying_tuples = CountSatisfyingTuples(min_epsilon_, max_epsilon_, epsilon_steps_);
-    std::vector<double> empirical_probabilities;
-    auto const num_rows = typed_relation_->GetNumRows();
-    std::ranges::transform(satisfying_tuples, std::back_inserter(empirical_probabilities),
-                           [num_rows](unsigned long const number) {
-                               return static_cast<double>(number) / num_rows;
-                           });
-
+std::pair<double, double> PACVerifier::FindEpsilonDelta(
+        std::vector<double> const& empirical_probabilities) const {
     std::vector<bool> horizontal(epsilon_steps_);
     for (std::size_t i = 0; i < epsilon_steps_ - 1; ++i) {
         auto k = empirical_probabilities[i + 1] - empirical_probabilities[i];
@@ -93,13 +83,8 @@ unsigned long long PACVerifier::ExecuteInternal() {
         delta = std::max(empirical_probabilities[max_start], min_delta_);
     }
 
-    pac_->SetEpsilon(min_epsilon_ + max_start * epsilon_step);
-    pac_->SetDelta(delta);
-    LOG_INFO("Result: {}", pac_->ToLongString());
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-                           std::chrono::system_clock::now() - start)
-                           .count();
-    LOG_INFO("Validation took {}ms", elapsed);
-    return elapsed;
+    auto epsilon_step = (max_epsilon_ - min_epsilon_) / (epsilon_steps_ - 1);
+    auto epsilon = min_epsilon_ + max_start * epsilon_step;
+    return {epsilon, delta};
 }
 }  // namespace algos::pac_verifier
