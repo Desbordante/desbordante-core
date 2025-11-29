@@ -30,16 +30,22 @@ private:
     // Iterators in value_tuples_ that fall into Domain itself (i. e. with epsilon = 0)
     std::vector<TuplesIter>::iterator first_value_it_, after_last_value_it_;
 
+    /// @brief For @c eps_steps epsilons in range [@c min_eps, @c max_eps] calculate number of
+    /// values that satisfy approximate dependency with this epsilon.
+    /// @c i-th place contains number of values for
+    /// epsilon = @c min_eps + (@c max_eps - @c min_eps) / @c eps_steps * @c i
+    virtual std::vector<std::size_t> CountSatisfyingTuples();
+
 protected:
     std::shared_ptr<pac::model::IDomain> domain_;
 
     virtual void ProcessPACTypeOptions() override;
     virtual void PreparePACTypeData() override;
-    virtual std::vector<std::size_t> CountSatisfyingTuples(double min_eps, double max_eps,
-                                                           unsigned long eps_steps) override;
 
     virtual std::unique_ptr<PACHighlight> GetHighlightsInternal(double eps_1 = -1,
                                                                 double eps_2 = -1) const override;
+
+    unsigned long long ExecuteInternal() override;
 
 public:
     DomainPACVerifierBase() : PACVerifier() {

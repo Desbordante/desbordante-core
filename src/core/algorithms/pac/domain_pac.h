@@ -22,7 +22,8 @@ private:
 
     std::string StringStem(std::string const& arg) const {
         std::ostringstream oss;
-        oss << "Pr(" << arg << " ∈ " << domain_->ToString() << "±" << epsilon_ << ") ≥ " << delta_;
+        oss << "Pr(" << arg << " ∈ " << domain_->ToString() << "±" << GetEpsilon() << ") ≥ "
+            << GetDelta();
         return oss.str();
     }
 

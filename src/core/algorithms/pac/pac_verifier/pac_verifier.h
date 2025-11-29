@@ -72,7 +72,6 @@ protected:
 
     virtual void LoadDataInternal() override;
     virtual void MakeExecuteOptsAvailable() override;
-    virtual unsigned long long ExecuteInternal() override;
 
     /// @brief Process options for concrete PAC type
     /// @note As a side effect, this metrhod should initialize @c pac_ and may initialize
@@ -83,12 +82,11 @@ protected:
     /// Called after processing options.
     virtual void PreparePACTypeData() {}
 
-    /// @brief For @c eps_steps epsilons in range [@c min_eps, @c max_eps] calculate number of
-    /// values that satisfy approximate dependency with this epsilon.
-    /// @c i-th place contains number of values for
-    /// epsilon = @c min_eps + (@c max_eps - @c min_eps) / @c eps_steps * @c i
-    virtual std::vector<std::size_t> CountSatisfyingTuples(double min_eps, double max_eps,
-                                                           unsigned long eps_steps) = 0;
+    /// @brief Find PAC's epsilon and delta using elbow method on ECDF defined by @c
+    /// empirical_probabilities
+    /// @return epsilon, delta
+    std::pair<double, double> FindEpsilonDelta(
+            std::vector<double> const& empirical_probabilities) const;
 
     /// @brief Reset state specific for concrete PAC type
     virtual void ResetPACTypeState() {}
@@ -105,6 +103,10 @@ public:
     virtual ~PACVerifier() = default;
 
     model::PAC const& GetPAC() const {
+        return *pac_;
+    }
+
+    model::PAC& GetPAC() {
         return *pac_;
     }
 

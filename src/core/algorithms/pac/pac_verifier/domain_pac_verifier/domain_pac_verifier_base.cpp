@@ -1,10 +1,12 @@
 #include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
 
 #include <algorithm>
+#include <chrono>
 #include <cstddef>
 #include <iterator>
 #include <memory>
 
+#include "logger.h"
 #include "pac/domain_pac.h"
 #include "pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "util/bitset_utils.h"
@@ -51,9 +53,7 @@ void DomainPACVerifierBase::PreparePACTypeData() {
                       [this](auto a, auto b) { return tuple_type_->Less(*a, *b); });
 }
 
-std::vector<std::size_t> DomainPACVerifierBase::CountSatisfyingTuples(double min_eps,
-                                                                      double max_eps,
-                                                                      unsigned long eps_steps) {
+std::vector<std::size_t> DomainPACVerifierBase::CountSatisfyingTuples() {
     std::vector<std::size_t> falls_into_domain;
     // Special cases: infinity -- domain \cap values = \emptyset
     bool minus_infty = false;
@@ -79,9 +79,9 @@ std::vector<std::size_t> DomainPACVerifierBase::CountSatisfyingTuples(double min
     after_last_value_it_ = after_last_it;
 
     // Step 2: repeatedly widen domain
-    auto eps_step = (max_eps - min_eps) / (eps_steps - 1);
-    for (std::size_t step = 0; step < eps_steps; ++step) {
-        auto eps = min_eps + eps_step * step;
+    auto eps_step = (MaxEpsilon() - MinEpsilon()) / (EpsilonSteps() - 1);
+    for (std::size_t step = 0; step < EpsilonSteps(); ++step) {
+        auto eps = MinEpsilon() + step * eps_step;
 
         if (first_it == sorted_value_tuples_.end()) {
             std::advance(first_it, -1);
@@ -131,5 +131,28 @@ std::unique_ptr<PACHighlight> DomainPACVerifierBase::GetHighlightsInternal(doubl
     highlighted_tuples.insert(highlighted_tuples.end(), after_last_1_it, after_last_2_it);
     return std::make_unique<DomainPACHighlight>(tuple_type_, original_value_tuples_,
                                                 std::move(highlighted_tuples));
+}
+
+unsigned long long DomainPACVerifierBase::ExecuteInternal() {
+    auto start = std::chrono::system_clock::now();
+    LOG_INFO("Verifying {}...", GetPAC().ToLongString());
+    auto satisfying_tuples = CountSatisfyingTuples();
+
+    std::vector<double> empirical_probabilities(satisfying_tuples.size());
+    auto const num_rows = TypedRelation().GetNumRows();
+    std::ranges::transform(satisfying_tuples, empirical_probabilities.begin(),
+                           [num_rows](unsigned long const number) {
+                               return static_cast<double>(number) / num_rows;
+                           });
+    auto [eps, delta] = FindEpsilonDelta(empirical_probabilities);
+    GetPAC().SetEpsilon(eps);
+    GetPAC().SetDelta(delta);
+
+    LOG_INFO("Result: {}", GetPAC().ToLongString());
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                           std::chrono::system_clock::now() - start)
+                           .count();
+    LOG_INFO("Validation took {}ms", elapsed);
+    return elapsed;
 }
 }  // namespace algos::pac_verifier
