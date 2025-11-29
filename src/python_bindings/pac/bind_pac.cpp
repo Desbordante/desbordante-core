@@ -49,8 +49,8 @@ void BindPAC(py::module& main_module) {
             .def("__str__", &PAC::ToLongString);
     // None of current PAC types can be pickled, because all of them contain user-defined metrics
     py::class_<DomainPAC, PAC>(pac_module, "DomainPAC")
-			.def_property_readonly("epsilon", &PAC::GetEpsilon)
-			.def_property_readonly("delta", &PAC::GetDelta)
+            .def_property_readonly("epsilon", &PAC::GetEpsilon)
+            .def_property_readonly("delta", &PAC::GetDelta)
             .def_property_readonly("domain", &DomainPAC::GetDomain,
                                    pybind11::return_value_policy::reference)
             .def_property_readonly("column_indices",
