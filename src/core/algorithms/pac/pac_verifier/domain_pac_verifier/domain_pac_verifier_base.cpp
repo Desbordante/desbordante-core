@@ -9,6 +9,7 @@
 #include "logger.h"
 #include "pac/domain_pac.h"
 #include "pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
+#include "pac/pac_verifier/util/make_tuples.h"
 #include "util/bitset_utils.h"
 
 namespace algos::pac_verifier {
@@ -32,18 +33,8 @@ void DomainPACVerifierBase::ProcessPACTypeOptions() {
 }
 
 void DomainPACVerifierBase::PreparePACTypeData() {
-    std::vector<std::vector<std::byte const*> const*> columns_data;
-    auto const& col_data = TypedRelation().GetColumnData();
-    std::ranges::transform(
-            column_indices_, std::back_inserter(columns_data),
-            [&col_data](auto const col_idx) { return &col_data[col_idx].GetData(); });
-
-    original_value_tuples_ = std::make_shared<Tuples>();
-    for (std::size_t row_idx = 0; row_idx < TypedRelation().GetNumRows(); ++row_idx) {
-        auto& tuple = original_value_tuples_->emplace_back();
-        std::ranges::transform(columns_data, std::back_inserter(tuple),
-                               [row_idx](auto const* col_data) { return (*col_data)[row_idx]; });
-    }
+    original_value_tuples_ =
+            pac::util::MakeTuples(TypedRelation().GetColumnData(), column_indices_);
 
     sorted_value_tuples_ = {};
     for (auto it = original_value_tuples_->begin(); it != original_value_tuples_->end(); ++it) {
