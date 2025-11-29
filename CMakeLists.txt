@@ -305,6 +305,7 @@ endif()
 # --- Core Project Structure and Module Setup ---
 
 include_directories(
+    "src"
     "src/core"
     "src/core/algorithms"
     "src/core/model"
