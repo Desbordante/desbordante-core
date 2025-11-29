@@ -1,8 +1,8 @@
-#include "canonical_od.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
 
 #include <sstream>
 
-#include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
+#include "core/algorithms/od/fastod/partitions/complex_stripped_partition.h"
 
 namespace algos::fastod {
 

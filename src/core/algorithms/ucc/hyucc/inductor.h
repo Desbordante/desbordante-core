@@ -2,9 +2,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/ucc/hyucc/model/non_ucc_list.h"
-#include "algorithms/ucc/hyucc/model/ucc_tree.h"
-#include "algorithms/ucc/raw_ucc.h"
+#include "core/algorithms/ucc/hyucc/model/non_ucc_list.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree.h"
+#include "core/algorithms/ucc/raw_ucc.h"
 
 namespace algos::hyucc {
 

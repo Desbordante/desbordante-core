@@ -4,10 +4,10 @@
 #include <optional>
 #include <vector>
 
-#include "algorithms/od/fastod/model/attribute_set.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "table/column_layout_typed_relation_data.h"
+#include "core/algorithms/od/fastod/model/attribute_set.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::fastod {
 

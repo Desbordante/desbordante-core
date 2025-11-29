@@ -3,8 +3,8 @@
 #include <cstddef>
 #include <vector>
 
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
 
 namespace algos::hymd::lattice {
 

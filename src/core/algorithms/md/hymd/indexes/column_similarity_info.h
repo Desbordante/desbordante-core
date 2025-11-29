@@ -3,12 +3,12 @@
 #include <cstddef>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/indexes/similarity_index.h"
-#include "algorithms/md/hymd/indexes/similarity_matrix.h"
-#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/indexes/similarity_index.h"
+#include "core/algorithms/md/hymd/indexes/similarity_matrix.h"
+#include "core/algorithms/md/hymd/lhs_ccv_ids_info.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/preprocessing/similarity.h"
 
 namespace algos::hymd::indexes {
 struct ColumnMatchSimilarityInfo {

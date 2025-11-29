@@ -2,12 +2,12 @@
 
 #include <set>
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/statistics/statistic.h"
-#include "config/equal_nulls/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/thread_number/type.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/statistics/statistic.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos {
 

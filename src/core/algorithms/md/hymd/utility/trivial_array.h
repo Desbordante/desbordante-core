@@ -6,9 +6,9 @@
 #include <span>
 #include <type_traits>
 
-#include "algorithms/md/hymd/utility/make_unique_for_overwrite.h"
-#include "algorithms/md/hymd/utility/zip.h"
-#include "util/py_tuple_hash.h"
+#include "core/algorithms/md/hymd/utility/make_unique_for_overwrite.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
+#include "core/util/py_tuple_hash.h"
 
 namespace algos::hymd::utility {
 template <typename T>

@@ -1,10 +1,10 @@
-#include "combined_inclusion_tester.h"
+#include "core/algorithms/ind/faida/inclusion_testing/combined_inclusion_tester.h"
 
 #ifdef __AVX2__
 #include "immintrin.h"
 #endif
-#include "algorithms/ind/faida/hashing/hashing.h"
-#include "util/parallel_for.h"
+#include "core/algorithms/ind/faida/hashing/hashing.h"
+#include "core/util/parallel_for.h"
 
 namespace algos::faida {
 

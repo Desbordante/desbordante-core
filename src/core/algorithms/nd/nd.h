@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/table/column.h"
-#include "model/table/vertical.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

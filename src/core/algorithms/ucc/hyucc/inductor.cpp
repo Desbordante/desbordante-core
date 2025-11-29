@@ -1,4 +1,4 @@
-#include "inductor.h"
+#include "core/algorithms/ucc/hyucc/inductor.h"
 
 namespace algos::hyucc {
 

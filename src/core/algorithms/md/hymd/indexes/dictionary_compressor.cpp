@@ -1,9 +1,9 @@
-#include "algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 #include <cstddef>
 
-#include "model/index.h"
-#include "util/desbordante_assume.h"
+#include "core/model/index.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::indexes {
 

@@ -1,15 +1,15 @@
 #pragma once
 
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/preprocessing/build_indexes.h"
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
-#include "algorithms/md/hymd/preprocessing/encode_results.h"
-#include "algorithms/md/hymd/preprocessing/valid_table_results.h"
-#include "util/argument_type.h"
-#include "util/get_preallocated_vector.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/preprocessing/build_indexes.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
+#include "core/algorithms/md/hymd/preprocessing/encode_results.h"
+#include "core/algorithms/md/hymd/preprocessing/valid_table_results.h"
+#include "core/util/argument_type.h"
+#include "core/util/get_preallocated_vector.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 using DistanceFunction = std::function<size_t(std::byte const*, std::byte const*)>;

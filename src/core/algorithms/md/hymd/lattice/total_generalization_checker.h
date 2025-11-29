@@ -2,9 +2,9 @@
 
 #include <type_traits>
 
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::lattice {
 template <typename NodeType, typename Unspecialized = NodeType::Specialization::Unspecialized>

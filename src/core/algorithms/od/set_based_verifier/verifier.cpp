@@ -1,15 +1,15 @@
-#include "verifier.h"
+#include "core/algorithms/od/set_based_verifier/verifier.h"
 
 #include <stdexcept>
 
-#include "algorithms/od/fastod/model/canonical_od.h"
-#include "config/column_index/option.h"
-#include "config/indices/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/logger.h"
-#include "util/range_to_string.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
+#include "core/config/column_index/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
+#include "core/util/range_to_string.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::od {
 

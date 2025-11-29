@@ -1,15 +1,15 @@
-#include "algorithms/ucc/pyroucc/pyroucc.h"
+#include "core/algorithms/ucc/pyroucc/pyroucc.h"
 
 #include <chrono>
 #include <mutex>
 #include <thread>
 
-#include "algorithms/fd/pyrocommon/core/key_g1_strategy.h"
-#include "config/error/option.h"
-#include "config/max_lhs/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "util/logger.h"
+#include "core/algorithms/fd/pyrocommon/core/key_g1_strategy.h"
+#include "core/config/error/option.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/util/logger.h"
 
 namespace algos {
 
