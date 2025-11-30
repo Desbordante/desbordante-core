@@ -7,7 +7,7 @@
 #include "algorithms/pac/model/comparable_tuple_type.h"
 #include "algorithms/pac/model/idomain.h"
 #include "algorithms/pac/model/tuple.h"
-#include "algorithms/pac/pac_verifier/pac_highlight.h"
+#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "algorithms/pac/pac_verifier/pac_verifier.h"
 #include "descriptions.h"
 #include "indices/type.h"
@@ -42,9 +42,6 @@ protected:
     virtual void ProcessPACTypeOptions() override;
     virtual void PreparePACTypeData() override;
 
-    virtual std::unique_ptr<PACHighlight> GetHighlightsInternal(double eps_1 = -1,
-                                                                double eps_2 = -1) const override;
-
     unsigned long long ExecuteInternal() override;
 
 public:
@@ -54,5 +51,7 @@ public:
         RegisterOption(Option(&column_indices_, kColumnIndices, kDColumnIndices));
         MakeOptionsAvailable({kColumnIndices});
     }
+
+    DomainPACHighlight GetHighlights(double eps_1 = -1, double eps_2 = -1) const;
 };
 }  // namespace algos::pac_verifier

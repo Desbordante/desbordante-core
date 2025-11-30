@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -8,7 +7,6 @@
 #include "algorithm.h"
 #include "algorithms/pac/pac.h"
 #include "names.h"
-#include "pac/pac_verifier/pac_highlight.h"
 #include "table/column_layout_typed_relation_data.h"
 #include "tabular_data/input_table/option.h"
 #include "tabular_data/input_table_type.h"
@@ -91,9 +89,6 @@ protected:
     /// @brief Reset state specific for concrete PAC type
     virtual void ResetPACTypeState() {}
 
-    virtual std::unique_ptr<PACHighlight> GetHighlightsInternal(double eps_1,
-                                                                double eps_2) const = 0;
-
 public:
     PACVerifier() : Algorithm({}) {
         RegisterOptions();
@@ -112,10 +107,6 @@ public:
 
     std::shared_ptr<model::PAC> GetPACPtr() {
         return pac_;
-    }
-
-    std::unique_ptr<PACHighlight> GetHighlights(double eps_1, double eps_2) const {
-        return GetHighlightsInternal(eps_1, eps_2);
     }
 };
 }  // namespace algos::pac_verifier

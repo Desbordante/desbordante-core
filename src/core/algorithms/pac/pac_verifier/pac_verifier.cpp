@@ -1,9 +1,7 @@
 #include "algorithms/pac/pac_verifier/pac_verifier.h"
 
 #include <algorithm>
-#include <chrono>
 #include <cstddef>
-#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <utility>
@@ -13,7 +11,6 @@
 #include "names.h"
 #include "option_using.h"
 #include "tabular_data/input_table/option.h"
-#include "util/logger.h"
 
 namespace algos::pac_verifier {
 void PACVerifier::RegisterOptions() {
