@@ -5,10 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/ind/ind.h"
-#include "algorithms/ind/ind_algorithm.h"
-#include "csv_config_util.h"
-#include "model/table/table_index.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/model/table/table_index.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

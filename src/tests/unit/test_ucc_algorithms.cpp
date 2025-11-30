@@ -6,15 +6,15 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/ucc/hyucc/hyucc.h"
-#include "algorithms/ucc/ucc.h"
-#include "algorithms/ucc/ucc_algorithm.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
-#include "csv_config_util.h"
-#include "test_hash_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ucc/hyucc/hyucc.h"
+#include "core/algorithms/ucc/ucc.h"
+#include "core/algorithms/ucc/ucc_algorithm.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
+#include "tests/unit/test_hash_util.h"
 
 std::ostream& operator<<(std::ostream& os, Vertical const& v) {
     os << v.ToString();

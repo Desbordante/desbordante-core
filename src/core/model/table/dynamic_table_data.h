@@ -5,9 +5,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include "config/exceptions.h"
-#include "config/tabular_data/input_table_type.h"
-#include "util/logger.h"
+#include "core/config/exceptions.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/util/logger.h"
 
 namespace model {
 

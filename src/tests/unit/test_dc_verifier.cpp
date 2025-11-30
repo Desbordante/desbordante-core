@@ -4,10 +4,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/dc/verifier/dc_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names_and_descriptions.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dc/verifier/dc_verifier.h"
+#include "core/config/names_and_descriptions.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

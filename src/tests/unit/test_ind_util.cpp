@@ -1,12 +1,12 @@
-#include "test_ind_util.h"
+#include "tests/unit/test_ind_util.h"
 
 #include <algorithm>
 #include <sstream>
 
 #include <gtest/gtest.h>
 
-#include "all_csv_configs.h"
-#include "ind/ind_algorithm.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

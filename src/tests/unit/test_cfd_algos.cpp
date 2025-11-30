@@ -3,11 +3,11 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/cfd/enums.h"
-#include "algorithms/cfd/fd_first_algorithm.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/cfd/fd_first_algorithm.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

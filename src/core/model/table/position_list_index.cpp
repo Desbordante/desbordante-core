@@ -3,7 +3,7 @@
 // https://github.com/cupertank
 //
 
-#include "position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 #include <algorithm>
 #include <chrono>
@@ -15,9 +15,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
-#include "util/logger.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
+#include "core/util/logger.h"
 
 namespace model {
 
