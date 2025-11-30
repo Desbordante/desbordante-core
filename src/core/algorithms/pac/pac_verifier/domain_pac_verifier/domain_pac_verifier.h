@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <vector>
 
 #include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
