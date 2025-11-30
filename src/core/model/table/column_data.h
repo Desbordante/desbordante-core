@@ -10,13 +10,22 @@
 #include "core/model/table/abstract_column_data.h"
 #include "core/model/table/column.h"
 #include "core/model/table/position_list_index.h"
+#include "core/model/table/position_list_index_with_singletons.h"
+
 
 class ColumnData final : public model::AbstractColumnData {
-    std::shared_ptr<model::PositionListIndex> position_list_index_;
+    std::shared_ptr<model::PLIWithSingletons> position_list_index_;
 
 public:
-    ColumnData(Column const* column, std::unique_ptr<model::PositionListIndex> position_list_index)
+    ColumnData(Column const* column, std::unique_ptr<model::PLIWithSingletons> position_list_index)
         : AbstractColumnData(column), position_list_index_(std::move(position_list_index)) {
+        position_list_index_->ForceCacheProbingTable();
+    }
+
+    ColumnData(Column const* column, std::unique_ptr<model::PositionListIndex> position_list_index)
+        : AbstractColumnData(column) {
+        position_list_index_ =
+                std::make_shared<model::PLIWithSingletons>(std::move(position_list_index));
         position_list_index_->ForceCacheProbingTable();
     }
 
@@ -41,11 +50,27 @@ public:
         return position_list_index_.get();
     }
 
+    model::PLIWithSingletons const* GetPLWSIndex() const {
+        return position_list_index_.get();
+    }
+
+    model::PLIWithSingletons* GetPLWSIndex() {
+        return position_list_index_.get();
+    }
+
     std::shared_ptr<model::PositionListIndex> GetPliOwnership() {
         return position_list_index_;
     }
 
     std::shared_ptr<model::PositionListIndex const> GetPliOwnership() const {
+        return position_list_index_;
+    }
+
+    std::shared_ptr<model::PLIWithSingletons> GetPliwsOwnership() {
+        return position_list_index_;
+    }
+
+    std::shared_ptr<model::PLIWithSingletons const> GetPliwsOwnership() const {
         return position_list_index_;
     }
 
