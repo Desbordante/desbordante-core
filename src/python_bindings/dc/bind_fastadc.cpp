@@ -1,11 +1,11 @@
-#include "bind_fastadc.h"
+#include "python_bindings/dc/bind_fastadc.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/dc/FastADC/fastadc.h"
-#include "py_util/bind_primitive.h"
-#include "py_util/table_serialization.h"
+#include "core/algorithms/dc/FastADC/fastadc.h"
+#include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 namespace py = pybind11;
 using namespace algos::fastadc;

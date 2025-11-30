@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/dd/split/split.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
+#include "core/algorithms/dd/split/split.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 

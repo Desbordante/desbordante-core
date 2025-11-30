@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include "column_data.h"
-#include "relational_schema.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/relational_schema.h"
 
 template <typename T>
 class AbstractRelationData {

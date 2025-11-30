@@ -2,11 +2,11 @@
 
 #include <cmath>
 
-#include "algorithms/nar/des/des.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
-#include "config/names.h"
+#include "core/algorithms/nar/des/des.h"
+#include "core/config/names.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 

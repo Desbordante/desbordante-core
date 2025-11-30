@@ -1,6 +1,6 @@
-#include "all_gfd_paths.h"
+#include "tests/unit/all_gfd_paths.h"
 
-#include "csv_config_util.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

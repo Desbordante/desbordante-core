@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "arity_index.h"
-#include "column_index.h"
-#include "table_index.h"
+#include "core/model/table/arity_index.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/table_index.h"
 
 namespace model {
 

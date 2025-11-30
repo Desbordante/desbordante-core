@@ -2,12 +2,12 @@
 
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "error/type.h"
-#include "ind/ind_verifier/ind_verifier.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
+#include "core/config/error/type.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

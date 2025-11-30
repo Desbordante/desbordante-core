@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/pfd_verifier/pfd_verifier.h"
-#include "all_csv_configs.h"
-#include "config/indices/type.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
+#include "core/config/indices/type.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;

@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/ind/faida/faida.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "test_ind_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/ind/faida/faida.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/unit/test_ind_util.h"
 
 namespace tests {
 namespace {

@@ -5,7 +5,7 @@
 #include <boost/math/special_functions/next.hpp>
 #include <boost/math/special_functions/relative_difference.hpp>
 
-#include "numeric_type.h"
+#include "core/model/types/numeric_type.h"
 
 namespace model {
 

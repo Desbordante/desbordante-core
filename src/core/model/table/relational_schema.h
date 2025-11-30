@@ -14,7 +14,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "bitset_utils.h"
+#include "core/util/bitset_utils.h"
 
 class Column;
 

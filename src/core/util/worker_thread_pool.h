@@ -10,10 +10,10 @@
 #include <variant>
 #include <vector>
 
-#include "model/index.h"
-#include "util/auto_join_thread.h"
-#include "util/barrier.h"
-#include "util/desbordante_assume.h"
+#include "core/model/index.h"
+#include "core/util/auto_join_thread.h"
+#include "core/util/barrier.h"
+#include "core/util/desbordante_assume.h"
 
 namespace util {
 class WorkerThreadPool {

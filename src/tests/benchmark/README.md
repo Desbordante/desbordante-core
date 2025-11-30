@@ -13,10 +13,10 @@ Then you'll need to add file `src/tests/benchmark/XX_benchmark.h` with following
 
 // There're `BenchmarkRunner` and `BenchmarkComparer` classes that control
 // execution of all benchmarks.
-// They live in `src/tests/benchmark/benchmark_runner.h` and
-// `src/test/benchmark/benchmark_comparer.h`:
-#include "benchmark_runner.h"
-#include "benchmark_comparer.h"
+// They live in `src/test/benchmark/benchmark_comparer.h` and
+// `src/tests/benchmark/benchmark_runner.h`:
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
 
 void XXBenchmark(benchmark::BenchmarkRunner& runner, benchmark::BenchmarkComparer& comparer) {
     // Test body. Will be further discussed
