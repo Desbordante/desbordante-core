@@ -272,7 +272,7 @@ TEST_P(TestDomainPACHighlight, DefaultTest) {
 
     for (auto const& [epsilons, expected_values] : p.expected_highlights) {
         auto actual_highlight = algo->GetHighlights(epsilons.first, epsilons.second);
-        EXPECT_THAT(actual_highlight->GetStringData(), ::testing::ContainerEq(expected_values));
+        EXPECT_THAT(actual_highlight.GetStringData(), ::testing::ContainerEq(expected_values));
     }
 }
 
