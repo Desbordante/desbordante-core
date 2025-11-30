@@ -10,12 +10,17 @@
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
 #include "core/util/enum_to_available_values.h"
+#include "core/algorithms/fd/afd_metric/afd_metric.h"
+
 
 namespace config::descriptions {
 
 namespace details {
 std::string const kDMetricString =
         "metric to use\n" + util::EnumToAvailableValues<algos::metric::Metric>();
+std::string const kDAFDMetricString =
+        "AFD metric to calculate\n" +
+        util::EnumToAvailableValues<algos::afd_metric_calculator::AFDMetric>();
 std::string const kDMetricAlgorithmString =
         "MFD algorithm to use\n" + util::EnumToAvailableValues<algos::metric::MetricAlgo>();
 std::string const kDCfdSubstrategyString = "CFD lattice traversal strategy to use\n" +
@@ -181,12 +186,14 @@ constexpr auto kDRightTable = "second table processed by the algorithm";
 // IND
 constexpr auto kDTables = "table collection processed by the algorithm";
 // Metric verifier
+auto const kDMetric = details::kDMetricString.c_str();
+auto const kDAFDMetric = details::kDAFDMetricString.c_str();
+constexpr auto kDRhsIndex = "RHS column index";
+constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDDistFromNullIsInfinity =
         "specify whether distance from NULL value is infinity "
         "(if not, it is 0)";
-auto const kDMetric = details::kDMetricString.c_str();
 auto const kDMetricAlgorithm = details::kDMetricAlgorithmString.c_str();
-constexpr auto kDParameter = "metric FD parameter";
 constexpr auto kDQGramLength = "q-gram length for cosine metric";
 // ND
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
