@@ -6,10 +6,12 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl/filesystem.h>
 
+
 #include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/fd/afd_metric/afd_metric.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -23,6 +25,7 @@
 #include "core/parser/csv_parser/csv_parser.h"
 #include "core/util/enum_to_available_values.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
+
 
 namespace {
 
@@ -131,6 +134,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::metric::MetricAlgo>,
         kEnumConvPair<config::PfdErrorMeasureType>,
         kEnumConvPair<config::AfdErrorMeasureType>,
+        kEnumConvPair<algos::afd_metric_calculator::AFDMetric>,
         kEnumConvPair<algos::InputFormat>,
         kEnumConvPair<algos::cfd::Substrategy>,
         kEnumConvPair<algos::hymd::LevelDefinition>,
