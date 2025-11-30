@@ -4,11 +4,11 @@ class ProfilingContext;
 
 #include <mutex>
 
-#include "../core/profiling_context.h"
-#include "cache_eviction_method.h"
-#include "caching_method.h"
-#include "model/table/column_layout_relation_data.h"
-#include "util/maybe_unused_private_field.h"
+#include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/util/cache_eviction_method.h"
+#include "core/util/caching_method.h"
+#include "core/util/maybe_unused_private_field.h"
 
 namespace model {
 

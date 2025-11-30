@@ -1,4 +1,4 @@
-#include "confidence_interval.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
 
 namespace model {
 

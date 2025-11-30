@@ -1,12 +1,12 @@
-#include "cfd_verifier.h"
+#include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
-#include "cfd/model/cfd_relation_data.h"
-#include "cfd/util/cfd_output_util.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/logger.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "core/algorithms/cfd/util/cfd_output_util.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::cfd_verifier {
 

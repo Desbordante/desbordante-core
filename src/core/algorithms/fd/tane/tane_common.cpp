@@ -1,18 +1,18 @@
-#include "tane_common.h"
+#include "core/algorithms/fd/tane/tane_common.h"
 
 #include <chrono>
 #include <iomanip>
 #include <list>
 #include <memory>
 
-#include "config/error/option.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "fd/tane/model/lattice_level.h"
-#include "fd/tane/model/lattice_vertex.h"
-#include "model/table/column_data.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/relational_schema.h"
-#include "util/logger.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/tane/model/lattice_level.h"
+#include "core/algorithms/fd/tane/model/lattice_vertex.h"
+#include "core/config/error/option.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace algos {
 using boost::dynamic_bitset;

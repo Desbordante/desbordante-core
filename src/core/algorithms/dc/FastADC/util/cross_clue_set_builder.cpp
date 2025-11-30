@@ -1,10 +1,10 @@
-#include "dc/FastADC/util/cross_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 
 #include <stdexcept>
 #include <stdint.h>
 
-#include "dc/FastADC/model/pli_shard.h"
-#include "dc/FastADC/util/evidence_aux_structures_builder.h"
+#include "core/algorithms/dc/FastADC/model/pli_shard.h"
+#include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
 
 namespace algos::fastadc {
 

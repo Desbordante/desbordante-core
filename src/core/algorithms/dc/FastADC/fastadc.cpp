@@ -1,19 +1,19 @@
-#include "algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/FastADC/fastadc.h"
 
 #include <stdexcept>
 #include <vector>
 
-#include "config/names_and_descriptions.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "dc/FastADC/model/pli_shard.h"
-#include "dc/FastADC/util/approximate_evidence_inverter.h"
-#include "dc/FastADC/util/evidence_aux_structures_builder.h"
-#include "dc/FastADC/util/evidence_set_builder.h"
-#include "dc/FastADC/util/predicate_builder.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "util/logger.h"
+#include "core/algorithms/dc/FastADC/model/pli_shard.h"
+#include "core/algorithms/dc/FastADC/util/approximate_evidence_inverter.h"
+#include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
+#include "core/algorithms/dc/FastADC/util/evidence_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/predicate_builder.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/util/logger.h"
 
 namespace algos::dc {
 

@@ -1,11 +1,11 @@
-#include "cfd_relation_data.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <random>
 
-#include "algorithms/cfd/util/set_util.h"
+#include "core/algorithms/cfd/util/set_util.h"
 
 // see algorithms/cfd/LICENSE
 

@@ -1,12 +1,12 @@
-#include "component.h"
+#include "core/algorithms/dc/model/component.h"
 
 #include <cstddef>
 #include <stdexcept>
 #include <string>
 
-#include "algorithms/dc/model/operator.h"
-#include "model/types/builtin.h"
-#include "model/types/types.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/types.h"
 
 namespace algos::dc {
 

@@ -1,6 +1,6 @@
 #pragma once
-#include "algorithms/fd/hycommon/sampler.h"
-#include "algorithms/fd/hyfd/model/non_fd_list.h"
+#include "core/algorithms/fd/hycommon/sampler.h"
+#include "core/algorithms/fd/hyfd/model/non_fd_list.h"
 
 namespace algos::hyfd {
 

@@ -2,8 +2,8 @@
 
 #include <numeric>
 
-#include "dc/FastADC/model/evidence.h"
-#include "util/logger.h"
+#include "core/algorithms/dc/FastADC/model/evidence.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 

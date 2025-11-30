@@ -1,12 +1,12 @@
-#include "pfdtane.h"
+#include "core/algorithms/fd/tane/pfdtane.h"
 
 #include <algorithm>
 
-#include "config/error/option.h"
-#include "config/error_measure/option.h"
-#include "enums.h"
-#include "fd/pli_based_fd_algorithm.h"
-#include "model/table/column_data.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/config/error/option.h"
+#include "core/config/error_measure/option.h"
+#include "core/model/table/column_data.h"
 
 namespace algos {
 using Cluster = model::PositionListIndex::Cluster;

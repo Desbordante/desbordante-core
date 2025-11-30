@@ -2,7 +2,7 @@
 
 #include <boost/mp11.hpp>
 
-#include "algorithms/algorithm_types.h"
+#include "core/algorithms/algorithm_types.h"
 
 namespace algos {
 

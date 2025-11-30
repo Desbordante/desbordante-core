@@ -2,7 +2,7 @@
 
 #include <enum.h>
 
-#include "algorithms/algorithms.h"
+#include "core/algorithms/algorithms.h"
 
 namespace algos {
 

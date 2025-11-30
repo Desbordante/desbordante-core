@@ -1,3 +1,3 @@
 #pragma once
 
-#include "algorithms/association_rules/apriori.h"
+#include "core/algorithms/association_rules/apriori.h"

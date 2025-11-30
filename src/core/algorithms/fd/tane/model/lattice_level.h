@@ -3,7 +3,7 @@
 #include <map>
 #include <vector>
 
-#include "lattice_vertex.h"
+#include "core/algorithms/fd/tane/model/lattice_vertex.h"
 
 namespace model {
 

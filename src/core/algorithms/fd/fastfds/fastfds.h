@@ -5,10 +5,10 @@
 
 #include <boost/thread/mutex.hpp>
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "config/thread_number/type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
 
 namespace algos {
 

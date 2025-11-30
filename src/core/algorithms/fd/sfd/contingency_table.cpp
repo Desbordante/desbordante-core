@@ -1,9 +1,9 @@
-#include "contingency_table.h"
+#include "core/algorithms/fd/sfd/contingency_table.h"
 
 #include <boost/math/distributions/chi_squared.hpp>
 
-#include "frequency_handler.h"
-#include "sample.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/algorithms/fd/sfd/sample.h"
 
 namespace algos {
 ContingencyTable::ContingencyTable(model::ColumnIndex col_i, model::ColumnIndex col_k,

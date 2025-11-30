@@ -2,11 +2,11 @@
 
 #include <stdexcept>
 
-#include "algorithms/dc/model/dc.h"
-#include "algorithms/dc/model/operator.h"
-#include "algorithms/dc/model/predicate.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/typed_column_data.h"
+#include "core/algorithms/dc/model/dc.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/algorithms/dc/model/predicate.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::dc {
 

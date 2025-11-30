@@ -1,9 +1,9 @@
-#include "pli_cache.h"
+#include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
 #include <boost/optional.hpp>
 
-#include "model/table/vertical_map.h"
-#include "util/logger.h"
+#include "core/model/table/vertical_map.h"
+#include "core/util/logger.h"
 
 namespace model {
 

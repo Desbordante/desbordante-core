@@ -3,12 +3,12 @@
 #include <random>
 #include <stack>
 
-#include "../column_order/column_order.h"
-#include "../lattice_observations/lattice_observations.h"
-#include "../partition_storage/partition_storage.h"
-#include "../pruning_maps/dependencies_map.h"
-#include "../pruning_maps/non_dependencies_map.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/fd/dfd/column_order/column_order.h"
+#include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
+#include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
+#include "core/algorithms/fd/dfd/pruning_maps/dependencies_map.h"
+#include "core/algorithms/fd/dfd/pruning_maps/non_dependencies_map.h"
+#include "core/model/table/vertical.h"
 
 class LatticeTraversal {
 private:

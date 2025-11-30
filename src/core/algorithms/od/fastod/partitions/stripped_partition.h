@@ -5,8 +5,8 @@
 #include <string>
 #include <vector>
 
-#include "range_based_stripped_partition.h"
 #include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "range_based_stripped_partition.h"
 
 namespace algos::fastod {
 

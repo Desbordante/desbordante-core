@@ -1,3 +1,3 @@
 #pragma once
 
-#include "algorithms/algebraic_constraints/ac_algorithm.h"
+#include "core/algorithms/algebraic_constraints/ac_algorithm.h"
