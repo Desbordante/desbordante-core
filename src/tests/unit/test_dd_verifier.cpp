@@ -2,9 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/dd/dd_verifier/dd_verifier.h"
-#include "all_csv_configs.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dd/dd_verifier/dd_verifier.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 struct DDVerifyingParams {

@@ -5,7 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 int main(int argc, char** argv) {
     util::logging::EnsureInitialized();

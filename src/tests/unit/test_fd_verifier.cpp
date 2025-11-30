@@ -3,14 +3,14 @@
 
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "builtin.h"
-#include "config/indices/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "fd/fd_verifier/fd_verifier.h"
-#include "fd/fd_verifier/stats_calculator.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd_verifier/fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
+#include "core/config/indices/type.h"
+#include "core/config/names.h"
+#include "core/model/types/builtin.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace {
 using namespace algos::fd_verifier;

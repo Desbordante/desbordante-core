@@ -1,6 +1,6 @@
 #pragma once
 
-#include "numeric_type.h"
+#include "core/model/types/numeric_type.h"
 
 namespace model {
 

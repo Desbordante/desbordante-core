@@ -1,4 +1,4 @@
-#include "py_util/logging.h"
+#include "python_bindings/py_util/logging.h"
 
 #include <memory>
 #include <mutex>
@@ -18,7 +18,7 @@
 #include <spdlog/sinks/base_sink.h>
 #include <spdlog/spdlog.h>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace {
 namespace py = pybind11;

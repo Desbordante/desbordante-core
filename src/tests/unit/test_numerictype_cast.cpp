@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "types.h"
+#include "core/model/types/types.h"
 
 namespace tests {
 class NumericCast : public ::testing::Test {

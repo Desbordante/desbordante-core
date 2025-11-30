@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parser/csv_parser/csv_parser.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 extern CSVConfig const kAbalone;

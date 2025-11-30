@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/lcs.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/lcs.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
 using namespace algos::hymd::preprocessing::column_matches;
 

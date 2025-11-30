@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "types.h"
+#include "core/model/types/types.h"
 
 namespace tests {
 

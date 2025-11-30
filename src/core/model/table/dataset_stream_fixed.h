@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "dataset_stream_wrapper.h"
-#include "idataset_stream.h"
-#include "util/logger.h"
+#include "core/model/table/dataset_stream_wrapper.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/util/logger.h"
 
 namespace model {
 

@@ -3,12 +3,12 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/od/fastod/fastod.h"
-#include "algorithms/od/fastod/hashing/hashing.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/od/fastod/fastod.h"
+#include "core/algorithms/od/fastod/hashing/hashing.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

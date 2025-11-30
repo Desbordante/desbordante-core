@@ -6,8 +6,8 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 
-#include "imetrizable_type.h"
-#include "type.h"
+#include "core/model/types/imetrizable_type.h"
+#include "core/model/types/type.h"
 
 namespace model {
 

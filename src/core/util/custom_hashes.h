@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 class CustomHashing {
 private:

@@ -2,9 +2,9 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/cfd/model/cfd_relation_data.h"
-#include "all_csv_configs.h"
-#include "csv_config_util.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

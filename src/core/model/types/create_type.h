@@ -4,7 +4,7 @@
 
 #include <boost/pointer_cast.hpp>
 
-#include "type.h"
+#include "core/model/types/type.h"
 
 namespace model {
 

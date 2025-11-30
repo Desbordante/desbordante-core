@@ -4,10 +4,10 @@
 
 #include <pybind11/pybind11.h>
 
-#include "model/table/column.h"
-#include "model/table/column_combination.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace py = pybind11;
 
