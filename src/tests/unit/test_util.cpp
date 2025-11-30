@@ -78,6 +78,74 @@ TEST(pliIntersectChecker, first) {
     ASSERT_THAT(intersection->GetIndex(), ContainerEq(ans));
 }
 
+TEST(pliwsChecker, first) {
+    deque<vector<int>> ans_index = {
+            {0, 2, 8, 11}, {1, 5, 9}, {4, 14}, {6, 7, 18}, {10, 17}  // null
+    };
+    deque<vector<int>> ans_sngt = {{3}, {12}, {13}, {15}, {16}};
+    deque<vector<int>> index;
+    deque<vector<int>> sngt;
+    try {
+        auto input_table = MakeInputTable(kTest1);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, true);
+        auto column_data = test->GetColumnData(0);
+        index = column_data.GetPLWSIndex()->GetIndex();
+        sngt = column_data.GetPLWSIndex()->GetSingletons();
+    } catch (std::runtime_error& e) {
+        cout << "Exception raised in test: " << e.what() << endl;
+        FAIL();
+    }
+    ASSERT_THAT(index, ContainerEq(ans_index));
+    ASSERT_THAT(sngt, ContainerEq(ans_sngt));
+}
+
+TEST(pliwsChecker, second) {
+    deque<vector<int>> ans_index = {
+            {0, 2, 8, 11},
+            {1, 5, 9},
+            {4, 14},
+            {6, 7, 18},
+    };
+    deque<vector<int>> ans_sngt = {{3}, {12}, {13}, {15}, {16}};
+    deque<vector<int>> index;
+    deque<vector<int>> sngt;
+    try {
+        auto input_table = MakeInputTable(kTest1);
+        auto test = ColumnLayoutRelationData::CreateFrom(*input_table, false);
+        auto column_data = test->GetColumnData(0);
+        index = column_data.GetPLWSIndex()->GetIndex();
+        sngt = column_data.GetPLWSIndex()->GetSingletons();
+    } catch (std::runtime_error& e) {
+        cout << "Exception raised in test: " << e.what() << endl;
+        FAIL();
+    }
+    ASSERT_THAT(index, ContainerEq(ans_index));
+    ASSERT_THAT(sngt, ContainerEq(ans_sngt));
+}
+
+TEST(pliwsIntersectChecker, first) {
+    deque<vector<int>> ans_index = {{2, 5}};
+    deque<vector<int>> ans_sngt = {{0}, {1}, {3}, {4}, {6}, {7}, {8}, {9}, {10}, {11}};
+    std::shared_ptr<model::PLIWithSingletons> intersection;
+
+    try {
+        auto input_table_1 = MakeInputTable(kProbeTest1);
+        auto input_table_2 = MakeInputTable(kProbeTest2);
+
+        auto test1 = ColumnLayoutRelationData::CreateFrom(*input_table_1, false);
+        auto test2 = ColumnLayoutRelationData::CreateFrom(*input_table_2, false);
+        auto pli1 = test1->GetColumnData(0).GetPLWSIndex();
+        auto pli2 = test2->GetColumnData(0).GetPLWSIndex();
+
+        intersection = pli1->Intersect(pli2);
+    } catch (std::runtime_error& e) {
+        cout << "Exception raised in test: " << e.what() << endl;
+        FAIL();
+    }
+    ASSERT_THAT(intersection->GetIndex(), ContainerEq(ans_index));
+    ASSERT_THAT(intersection->GetSingletons(), ContainerEq(ans_sngt));
+}
+
 TEST(pliEntropyTest, first) {
     std::shared_ptr<model::PositionListIndex> res_pli;
 
