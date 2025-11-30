@@ -1,9 +1,9 @@
-#include "algorithms/md/md.h"
+#include "core/algorithms/md/md.h"
 
 #include <ranges>
 
-#include "model/table/column.h"
-#include "util/get_preallocated_vector.h"
+#include "core/model/table/column.h"
+#include "core/util/get_preallocated_vector.h"
 
 namespace model {
 

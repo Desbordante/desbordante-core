@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/md.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/md.h"
 
 namespace algos::hymd::utility {
 

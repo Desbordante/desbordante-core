@@ -8,13 +8,13 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/indexes/pli_cluster.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/preprocessing/valid_table_results.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/preprocessing/valid_table_results.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::preprocessing {
 inline void SortAllRows(EnumeratedValidTableResults& tr_res) {

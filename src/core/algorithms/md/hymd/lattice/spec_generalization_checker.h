@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/md/hymd/lattice/lhs_specialization.h"
-#include "algorithms/md/hymd/lattice/total_generalization_checker.h"
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
+#include "core/algorithms/md/hymd/lattice/total_generalization_checker.h"
 
 namespace algos::hymd::lattice {
 template <typename NodeType, typename Specialization = NodeType::Specialization>

@@ -1,4 +1,4 @@
-#include "des.h"
+#include "core/algorithms/nar/des/des.h"
 
 #include <algorithm>
 #include <chrono>
@@ -6,11 +6,11 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/nar/value_range.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/types/types.h"
+#include "core/algorithms/nar/value_range.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/types/types.h"
 
 namespace algos::des {
 using model::ValueRange;

@@ -4,13 +4,13 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "algorithms/algorithm.h"
-#include "config/tabular_data/input_table_type.h"
-#include "dependency_checker.h"
-#include "list_lattice.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "order_utility.h"
-#include "sorted_partitions.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/od/order/dependency_checker.h"
+#include "core/algorithms/od/order/list_lattice.h"
+#include "core/algorithms/od/order/order_utility.h"
+#include "core/algorithms/od/order/sorted_partitions.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::order {
 

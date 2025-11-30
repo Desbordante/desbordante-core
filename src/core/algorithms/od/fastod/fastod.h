@@ -7,15 +7,15 @@
 #include <unordered_set>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/od/fastod/model/attribute_pair.h"
-#include "algorithms/od/fastod/model/attribute_set.h"
-#include "algorithms/od/fastod/model/canonical_od.h"
-#include "algorithms/od/fastod/storage/partition_cache.h"
-#include "algorithms/od/fastod/util/timer.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/time_limit/type.h"
-#include "error/type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/od/fastod/model/attribute_pair.h"
+#include "core/algorithms/od/fastod/model/attribute_set.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
+#include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/algorithms/od/fastod/util/timer.h"
+#include "core/config/error/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/time_limit/type.h"
 
 namespace algos {
 

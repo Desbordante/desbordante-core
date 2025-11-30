@@ -2,9 +2,9 @@
 
 #include <enum.h>
 
-#include "encoded_nar.h"
-#include "enums.h"
-#include "rng.h"
+#include "core/algorithms/nar/des/encoded_nar.h"
+#include "core/algorithms/nar/des/enums.h"
+#include "core/algorithms/nar/des/rng.h"
 
 namespace algos::des {
 

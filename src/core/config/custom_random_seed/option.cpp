@@ -1,8 +1,8 @@
-#include "config/custom_random_seed/option.h"
+#include "core/config/custom_random_seed/option.h"
 
 #include <utility>
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 extern CommonOption<CustomRandomSeedType> const kCustomRandomFlagOpt{

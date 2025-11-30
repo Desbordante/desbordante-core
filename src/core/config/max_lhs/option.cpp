@@ -1,8 +1,8 @@
-#include "config/max_lhs/option.h"
+#include "core/config/max_lhs/option.h"
 
 #include <limits>
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kMaximumLhs, descriptions::kDMaximumLhs;

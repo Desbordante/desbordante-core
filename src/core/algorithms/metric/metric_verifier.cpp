@@ -1,4 +1,4 @@
-#include "algorithms/metric/metric_verifier.h"
+#include "core/algorithms/metric/metric_verifier.h"
 
 #include <algorithm>
 #include <cassert>
@@ -8,13 +8,13 @@
 #include <string>
 #include <utility>
 
-#include "config/equal_nulls/option.h"
-#include "config/exceptions.h"
-#include "config/indices/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/logger.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/exceptions.h"
+#include "core/config/indices/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::metric {
 

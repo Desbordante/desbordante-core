@@ -1,13 +1,13 @@
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
+#include "core/algorithms/nd/nd_verifier/util/stats_calculator.h"
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "util/logger.h"
+#include "core/algorithms/nd/nd.h"
+#include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/util/logger.h"
 
 namespace algos::nd_verifier::util {
 

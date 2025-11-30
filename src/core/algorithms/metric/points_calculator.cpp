@@ -1,4 +1,4 @@
-#include "algorithms/metric/points_calculator.h"
+#include "core/algorithms/metric/points_calculator.h"
 
 namespace {
 

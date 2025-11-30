@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/md/hymd/md_lhs.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
 
 namespace algos::hymd::lattice {
 struct SpecializationData {

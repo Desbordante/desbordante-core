@@ -3,7 +3,7 @@
  *
  * Attribute class methods definition
  */
-#include "attribute.h"
+#include "core/algorithms/ind/spider/attribute.h"
 
 namespace algos::spider {
 

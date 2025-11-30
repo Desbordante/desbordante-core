@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/md/hymd/preprocessing/column_matches/lv_normalized.h"
-#include "config/exceptions.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/lv_normalized.h"
+#include "core/config/exceptions.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 inline double NumberDifference(model::Double left, model::Double right) {

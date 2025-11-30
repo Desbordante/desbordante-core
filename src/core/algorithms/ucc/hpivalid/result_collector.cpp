@@ -1,11 +1,11 @@
-#include "algorithms/ucc/hpivalid/result_collector.h"
+#include "core/algorithms/ucc/hpivalid/result_collector.h"
 
 #include <chrono>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

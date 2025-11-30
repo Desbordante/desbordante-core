@@ -1,4 +1,4 @@
-#include "algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
 
 #include <algorithm>
 #include <cassert>
@@ -6,16 +6,16 @@
 #include <numeric>
 #include <type_traits>
 
-#include "algorithms/md/hymd/lattice/md_specialization.h"
-#include "algorithms/md/hymd/lattice/multi_md_specialization.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lattice/spec_generalization_checker.h"
-#include "algorithms/md/hymd/lattice/total_generalization_checker.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/hymd/utility/zip.h"
-#include "util/desbordante_assume.h"
-#include "util/erase_if_replace.h"
+#include "core/algorithms/md/hymd/lattice/md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/multi_md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/lattice/spec_generalization_checker.h"
+#include "core/algorithms/md/hymd/lattice/total_generalization_checker.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
+#include "core/util/desbordante_assume.h"
+#include "core/util/erase_if_replace.h"
 
 namespace {
 using model::Index;

@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/od/fastod/model/removal_set.h"
-#include "algorithms/od/fastod/od_ordering.h"
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "table/tuple_index.h"
+#include "core/algorithms/od/fastod/model/removal_set.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::fastod {
 

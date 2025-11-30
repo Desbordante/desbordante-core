@@ -5,10 +5,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/md/hymd/lattice/md_lattice_node_info.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice_node_info.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::lattice::cardinality {
 

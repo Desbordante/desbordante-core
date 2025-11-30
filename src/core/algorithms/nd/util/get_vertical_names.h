@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "model/table/vertical.h"
+#include "core/model/table/vertical.h"
 
 namespace algos::nd::util {
 

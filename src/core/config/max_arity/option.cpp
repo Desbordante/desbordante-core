@@ -1,8 +1,8 @@
-#include "config/max_arity/option.h"
+#include "core/config/max_arity/option.h"
 
 #include <limits>
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kMaximumArity, descriptions::kDMaximumArity;
