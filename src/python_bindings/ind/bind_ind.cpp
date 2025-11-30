@@ -1,12 +1,12 @@
-#include "ind/bind_ind.h"
+#include "python_bindings/ind/bind_ind.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/ind/ind.h"
-#include "algorithms/ind/ind_algorithm.h"
-#include "algorithms/ind/mining_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/algorithms/ind/mining_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 

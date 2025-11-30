@@ -1,11 +1,11 @@
-#include "bind_ar.h"
+#include "python_bindings/ar/bind_ar.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/association_rules/ar.h"
-#include "algorithms/association_rules/mining_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/association_rules/ar.h"
+#include "core/algorithms/association_rules/mining_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

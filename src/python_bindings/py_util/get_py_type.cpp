@@ -1,4 +1,4 @@
-#include "get_py_type.h"
+#include "python_bindings/py_util/get_py_type.h"
 
 #include <functional>
 #include <typeinfo>
@@ -8,19 +8,19 @@
 #include <Python.h>
 #include <pybind11/stl/filesystem.h>
 
-#include "algorithms/cfd/enums.h"
-#include "algorithms/dd/dd.h"
-#include "algorithms/md/hymd/enums.h"
-#include "algorithms/md/hymd/hymd.h"
-#include "algorithms/md/md_verifier/column_similarity_classifier.h"
-#include "algorithms/metric/enums.h"
-#include "association_rules/ar_algorithm_enums.h"
-#include "config/custom_random_seed/type.h"
-#include "config/error_measure/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/tabular_data/input_tables_type.h"
-#include "model/table/column_combination.h"
-#include "od/fastod/od_ordering.h"
+#include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/md/hymd/enums.h"
+#include "core/algorithms/md/hymd/hymd.h"
+#include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
+#include "core/algorithms/metric/enums.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/config/custom_random_seed/type.h"
+#include "core/config/error_measure/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/column_combination.h"
 
 namespace py = pybind11;
 

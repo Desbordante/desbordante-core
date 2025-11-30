@@ -1,16 +1,16 @@
 #pragma once
 
-#include "algorithms/fd/aidfd/aid.h"
-#include "algorithms/fd/eulerfd/eulerfd.h"
-#include "algorithms/fd/hyfd/hyfd.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/tane.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
-#include "config/max_lhs/type.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/fd/aidfd/aid.h"
+#include "core/algorithms/fd/eulerfd/eulerfd.h"
+#include "core/algorithms/fd/hyfd/hyfd.h"
+#include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/tane/tane.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 

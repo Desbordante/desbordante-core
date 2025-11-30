@@ -1,4 +1,4 @@
-#include "graph_parser.h"
+#include "core/parser/graph_parser/graph_parser.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/bind/bind.hpp>

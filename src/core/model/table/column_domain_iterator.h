@@ -9,7 +9,7 @@
 #include <queue>
 #include <vector>
 
-#include "column_domain.h"
+#include "core/model/table/column_domain.h"
 
 namespace model {
 

@@ -1,10 +1,10 @@
-#include "bind_data_types.h"
+#include "python_bindings/data/bind_data_types.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_combination.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_combination.h"
 
 namespace {
 namespace py = pybind11;

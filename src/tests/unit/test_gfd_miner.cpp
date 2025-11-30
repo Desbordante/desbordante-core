@@ -4,10 +4,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/gfd/gfd_miner/gfd_miner.h"
-#include "all_gfd_paths.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/gfd/gfd_miner/gfd_miner.h"
+#include "core/config/names.h"
+#include "tests/unit/all_gfd_paths.h"
 
 namespace gfd {
 void PrintTo(model::Gfd const& gfd, std::ostream* os) {

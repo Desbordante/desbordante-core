@@ -1,4 +1,4 @@
-#include "agree_set_factory.h"
+#include "core/model/table/agree_set_factory.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -14,9 +14,9 @@
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
 
-#include "identifier_set.h"
-#include "parallel_for.h"
-#include "util/logger.h"
+#include "core/model/table/identifier_set.h"
+#include "core/util/logger.h"
+#include "core/util/parallel_for.h"
 
 namespace model {
 

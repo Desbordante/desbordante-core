@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/nd_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/nd/nd.h"
+#include "core/algorithms/nd/nd_verifier/nd_verifier.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;

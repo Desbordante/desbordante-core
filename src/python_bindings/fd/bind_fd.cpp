@@ -1,15 +1,15 @@
-#include "bind_fd.h"
+#include "python_bindings/fd/bind_fd.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/fd/fd.h"
-#include "algorithms/fd/fd_algorithm.h"
-#include "algorithms/fd/mining_algorithms.h"
-#include "config/indices/type.h"
-#include "py_util/bind_primitive.h"
-#include "py_util/table_serialization.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/fd/mining_algorithms.h"
+#include "core/config/indices/type.h"
+#include "core/util/bitset_utils.h"
+#include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 namespace {
 namespace py = pybind11;

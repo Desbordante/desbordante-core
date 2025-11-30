@@ -1,6 +1,6 @@
 #pragma once
 
-#include "string_type.h"
+#include "core/model/types/string_type.h"
 
 namespace model {
 

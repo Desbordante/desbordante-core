@@ -8,10 +8,10 @@
 #include <cmath>
 #include <vector>
 
-#include "column_data.h"
-#include "idataset_stream.h"
-#include "relation_data.h"
-#include "relational_schema.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relation_data.h"
+#include "core/model/table/relational_schema.h"
 
 class ColumnLayoutRelationData final : public RelationData {
 public:
