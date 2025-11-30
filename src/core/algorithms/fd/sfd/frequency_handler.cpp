@@ -1,4 +1,4 @@
-#include "frequency_handler.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-#include "model/table/column_index.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos {
 void FrequencyHandler::InitFrequencyHandler(std::vector<model::TypedColumnData> const &data,

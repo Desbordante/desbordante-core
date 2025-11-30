@@ -1,11 +1,11 @@
-#include "fd_mine.h"
+#include "core/algorithms/fd/fd_mine/fd_mine.h"
 
 #include <queue>
 #include <vector>
 
 #include <boost/unordered_map.hpp>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

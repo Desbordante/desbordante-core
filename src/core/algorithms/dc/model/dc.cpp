@@ -1,4 +1,4 @@
-#include "algorithms/dc/model/dc.h"
+#include "core/algorithms/dc/model/dc.h"
 
 #include <algorithm>
 #include <ranges>
@@ -8,8 +8,8 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/dc/model/operator.h"
-#include "algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/algorithms/dc/model/predicate.h"
 
 namespace algos::dc {
 

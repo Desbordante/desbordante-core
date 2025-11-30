@@ -1,10 +1,10 @@
-#include "partition_storage.h"
+#include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
 
-#include "model/table/vertical_map.h"
-#include "util/logger.h"
+#include "core/model/table/vertical_map.h"
+#include "core/util/logger.h"
 
 model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();

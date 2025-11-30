@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/gfd/graph_descriptor.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 
 namespace model {
 

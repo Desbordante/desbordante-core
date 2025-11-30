@@ -8,9 +8,9 @@
 #include <utility>
 #include <vector>
 
-#include "dc/FastADC/misc/misc.h"
-#include "dc/FastADC/providers/index_provider.h"
-#include "table/typed_column_data.h"
+#include "core/algorithms/dc/FastADC/misc/misc.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::fastadc {
 

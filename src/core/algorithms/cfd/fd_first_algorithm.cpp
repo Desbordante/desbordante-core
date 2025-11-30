@@ -1,18 +1,18 @@
-#include "fd_first_algorithm.h"
+#include "core/algorithms/cfd/fd_first_algorithm.h"
 
 #include <iterator>
 
 #include <boost/unordered_map.hpp>
 
-#include "algorithms/cfd/util/partition_tidlist_util.h"
-#include "algorithms/cfd/util/partition_util.h"
-#include "algorithms/cfd/util/set_util.h"
-#include "algorithms/cfd/util/tidlist_util.h"
-#include "config/equal_nulls/option.h"
-#include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "util/logger.h"
+#include "core/algorithms/cfd/util/partition_tidlist_util.h"
+#include "core/algorithms/cfd/util/partition_util.h"
+#include "core/algorithms/cfd/util/set_util.h"
+#include "core/algorithms/cfd/util/tidlist_util.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/exceptions.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/util/logger.h"
 
 // see algorithms/cfd/LICENSE
 

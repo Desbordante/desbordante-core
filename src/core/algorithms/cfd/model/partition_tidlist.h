@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cfd_types.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd {
 

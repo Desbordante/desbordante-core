@@ -2,8 +2,8 @@
 
 #include <list>
 
-#include "model/transaction/itemset.h"
-#include "model/transaction/transactional_data.h"
+#include "core/model/transaction/itemset.h"
+#include "core/model/transaction/transactional_data.h"
 
 namespace model {
 

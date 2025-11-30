@@ -1,6 +1,6 @@
-#include "dc/FastADC/providers/index_provider.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 
-#include "dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 

@@ -2,8 +2,8 @@
 
 #include <set>
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "util/custom_hashes.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/util/custom_hashes.h"
 
 namespace algos {
 

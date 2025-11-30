@@ -1,10 +1,10 @@
-#include "algorithms/dd/split/model/distance_position_list_index.h"
+#include "core/algorithms/dd/split/model/distance_position_list_index.h"
 
 #include <string>
 #include <utility>
 
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::dd {
 template <typename T>

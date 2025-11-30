@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "algorithms/fd/hycommon/types.h"
+#include "core/algorithms/fd/hycommon/types.h"
 
 namespace algos::hy {
 

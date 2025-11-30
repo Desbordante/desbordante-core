@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
 
 namespace algos::fastadc {
 

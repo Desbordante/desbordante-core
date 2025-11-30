@@ -6,7 +6,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/fd/hycommon/column_combination_list.h"
+#include "core/algorithms/fd/hycommon/column_combination_list.h"
 
 namespace algos::hyfd {
 

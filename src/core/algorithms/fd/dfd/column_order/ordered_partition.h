@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/table/position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 class OrderedPartition {
 private:

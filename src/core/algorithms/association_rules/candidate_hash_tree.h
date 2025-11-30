@@ -1,7 +1,7 @@
 #pragma once
 
-#include "model/transaction/transactional_data.h"
-#include "node.h"
+#include "core/algorithms/association_rules/node.h"
+#include "core/model/transaction/transactional_data.h"
 
 namespace algos {
 
