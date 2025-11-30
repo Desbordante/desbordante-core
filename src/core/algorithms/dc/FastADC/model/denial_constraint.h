@@ -6,8 +6,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/model/predicate_set.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/model/predicate_set.h"
 
 namespace algos::fastadc {
 

@@ -1,9 +1,9 @@
-#include "key_g1_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/key_g1_strategy.h"
 
 #include <unordered_map>
 
-#include "../model/pli_cache.h"
-#include "search_space.h"
+#include "core/algorithms/fd/pyrocommon/core/search_space.h"
+#include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 
 double KeyG1Strategy::CalculateKeyError(model::PositionListIndex* pli) const {
     return CalculateKeyError(pli->GetNepAsLong());

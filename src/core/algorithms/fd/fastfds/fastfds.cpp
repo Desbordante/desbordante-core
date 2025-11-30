@@ -1,4 +1,4 @@
-#include "fastfds.h"
+#include "core/algorithms/fd/fastfds/fastfds.h"
 
 #include <algorithm>
 #include <mutex>
@@ -9,11 +9,11 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread.hpp>
 
-#include "config/max_lhs/option.h"
-#include "config/thread_number/option.h"
-#include "model/table/agree_set_factory.h"
-#include "util/logger.h"
-#include "util/parallel_for.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/model/table/agree_set_factory.h"
+#include "core/util/logger.h"
+#include "core/util/parallel_for.h"
 
 namespace algos {
 

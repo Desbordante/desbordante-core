@@ -2,7 +2,7 @@
 #include <string>
 #include <utility>
 
-#include "model/table/column.h"
+#include "core/model/table/column.h"
 
 namespace algos {
 struct Correlation {

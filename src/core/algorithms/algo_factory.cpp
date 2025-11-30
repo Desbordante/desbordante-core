@@ -1,14 +1,14 @@
-#include "algo_factory.h"
+#include "core/algorithms/algo_factory.h"
 
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
 
-#include "algorithms/algorithms.h"
-#include "algorithms/create_algorithm.h"
-#include "config/names.h"
-#include "tabular_data/input_tables_type.h"
+#include "core/algorithms/algorithms.h"
+#include "core/algorithms/create_algorithm.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_tables_type.h"
 
 namespace algos {
 

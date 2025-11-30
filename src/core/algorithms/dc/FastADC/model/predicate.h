@@ -8,10 +8,10 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "dc/FastADC/model/column_operand.h"
-#include "dc/FastADC/model/operator.h"
-#include "model/types/bitset.h"
-#include "table/typed_column_data.h"
+#include "core/algorithms/dc/FastADC/model/column_operand.h"
+#include "core/algorithms/dc/FastADC/model/operator.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/bitset.h"
 
 namespace algos::fastadc {
 

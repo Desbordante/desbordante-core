@@ -1,6 +1,6 @@
-#include "algorithms/fd/fd.h"
+#include "core/algorithms/fd/fd.h"
 
-#include "util/bitset_utils.h"
+#include "core/util/bitset_utils.h"
 
 std::vector<model::ColumnIndex> FD::GetLhsIndices() const {
     return util::BitsetToIndices<model::ColumnIndex>(lhs_.GetColumnIndices());

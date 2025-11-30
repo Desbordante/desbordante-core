@@ -7,10 +7,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "confidence_interval.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
-#include "util/custom_random.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_random.h"
 
 namespace model {
 
@@ -73,4 +73,4 @@ private:
 }  // namespace model
 
 // include template implementation
-#include "agree_set_sample_impl.h"
+#include "core/algorithms/fd/pyrocommon/model/agree_set_sample_impl.h"

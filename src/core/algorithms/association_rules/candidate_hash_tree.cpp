@@ -1,4 +1,4 @@
-#include "candidate_hash_tree.h"
+#include "core/algorithms/association_rules/candidate_hash_tree.h"
 
 #include <algorithm>
 #include <cassert>

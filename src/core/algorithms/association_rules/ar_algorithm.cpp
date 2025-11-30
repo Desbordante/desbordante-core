@@ -1,12 +1,12 @@
-#include "ar_algorithm.h"
+#include "core/algorithms/association_rules/ar_algorithm.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/logger.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

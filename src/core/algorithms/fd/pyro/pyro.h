@@ -3,9 +3,9 @@
 #include <list>
 #include <mutex>
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "algorithms/fd/pyrocommon/core/dependency_consumer.h"
-#include "algorithms/fd/pyrocommon/core/search_space.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
+#include "core/algorithms/fd/pyrocommon/core/search_space.h"
 
 namespace algos {
 

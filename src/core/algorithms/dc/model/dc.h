@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/dc/model/predicate.h"
-#include "model/table/column.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/dc/model/predicate.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 namespace algos::dc {
 

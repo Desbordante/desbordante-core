@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "algorithm.h"
-#include "algorithms/dd/dd.h"
-#include "algorithms/dd/dd_verifier/highlight.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/dd_verifier/highlight.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::dd {
 using DFs = model::DFStringConstraint;

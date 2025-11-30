@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "ac.h"
-#include "typed_column_pair.h"
+#include "core/algorithms/algebraic_constraints/ac.h"
+#include "core/algorithms/algebraic_constraints/typed_column_pair.h"
 
 namespace algos {
 

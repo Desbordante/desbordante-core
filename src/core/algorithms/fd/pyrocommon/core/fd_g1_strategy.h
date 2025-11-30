@@ -2,7 +2,7 @@
 
 #include <boost/format.hpp>
 
-#include "dependency_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
 
 class FdG1Strategy : public DependencyStrategy {
 private:

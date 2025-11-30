@@ -7,15 +7,15 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/dd/dd.h"
-#include "algorithms/dd/split/model/distance_position_list_index.h"
-#include "config/tabular_data/input_table_type.h"
-#include "enums.h"
-#include "model/table/column_index.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/types/builtin.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/split/enums.h"
+#include "core/algorithms/dd/split/model/distance_position_list_index.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::dd {
 

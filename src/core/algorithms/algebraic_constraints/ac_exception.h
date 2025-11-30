@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "typed_column_pair.h"
+#include "core/algorithms/algebraic_constraints/typed_column_pair.h"
 
 namespace algos {
 

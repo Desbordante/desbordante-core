@@ -10,8 +10,8 @@
 
 #include <boost/test/tools/floating_point_comparison.hpp>
 
-#include "model/types/builtin.h"
-#include "model/types/double_type.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/double_type.h"
 
 namespace model {
 

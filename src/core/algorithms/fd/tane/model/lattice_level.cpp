@@ -1,8 +1,8 @@
-#include "lattice_level.h"
+#include "core/algorithms/fd/tane/model/lattice_level.h"
 
 #include <algorithm>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace model {
 

@@ -8,9 +8,9 @@
 #include <fstream>
 #include <string>
 
-#include "algorithms/fd/fd.h"
-#include "model/table/relational_schema.h"
-#include "model/types/bitset.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/types/bitset.h"
 
 class FDTreeElement {
 public:

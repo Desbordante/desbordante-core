@@ -1,9 +1,9 @@
-#include "search_space.h"
+#include "core/algorithms/fd/pyrocommon/core/search_space.h"
 
 #include <queue>
 #include <variant>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 // TODO: extra careful with const& -> shared_ptr conversions via make_shared-smart pointer may
 // delete the object - pass empty deleter [](*) {}

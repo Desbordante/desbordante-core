@@ -1,6 +1,6 @@
-#include "aid.h"
+#include "core/algorithms/fd/aidfd/aid.h"
 
-#include "config/tabular_data/input_table/option.h"
+#include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {
 

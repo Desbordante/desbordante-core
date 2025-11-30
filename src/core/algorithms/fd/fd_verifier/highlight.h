@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "model/table/position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::fd_verifier {
 

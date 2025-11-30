@@ -5,7 +5,7 @@
 #include <queue>
 #include <vector>
 
-#include "cluster.h"
+#include "core/algorithms/fd/eulerfd/cluster.h"
 
 namespace algos {
 

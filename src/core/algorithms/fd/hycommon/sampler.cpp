@@ -1,4 +1,4 @@
-#include "sampler.h"
+#include "core/algorithms/fd/hycommon/sampler.h"
 
 #include <algorithm>
 #include <memory>
@@ -9,8 +9,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/thread/future.hpp>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "efficiency.h"
+#include "core/algorithms/fd/hycommon/efficiency.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
 
 namespace {
 

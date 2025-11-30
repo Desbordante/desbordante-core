@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/fd/fd_verifier/highlight.h"
-#include "config/indices/type.h"
-#include "model/table/dynamic_position_list_index.h"
-#include "model/table/dynamic_table_data.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/dynamic_position_list_index.h"
+#include "core/model/table/dynamic_table_data.h"
 
 namespace algos::fd_verifier {
 

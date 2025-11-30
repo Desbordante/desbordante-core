@@ -1,3 +1,3 @@
 #pragma once
 
-#include "algorithms/dd/split/split.h"
+#include "core/algorithms/dd/split/split.h"

@@ -1,4 +1,4 @@
-#include "lattice_observations.h"
+#include "core/algorithms/fd/dfd/lattice_observations/lattice_observations.h"
 
 NodeCategory LatticeObservations::UpdateDependencyCategory(Vertical const& node) {
     NodeCategory new_category;

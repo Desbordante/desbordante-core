@@ -1,9 +1,9 @@
-#include "algorithms/algorithm.h"
+#include "core/algorithms/algorithm.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "config/exceptions.h"
+#include "core/config/exceptions.h"
 
 namespace algos {
 

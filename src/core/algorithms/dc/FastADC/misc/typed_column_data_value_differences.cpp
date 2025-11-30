@@ -1,4 +1,4 @@
-#include "dc/FastADC/misc/typed_column_data_value_differences.h"
+#include "core/algorithms/dc/FastADC/misc/typed_column_data_value_differences.h"
 
 #include <algorithm>
 #include <stddef.h>
@@ -6,12 +6,12 @@
 #include <string>
 #include <unordered_map>
 
-#include "dc/FastADC/misc/misc.h"
-#include "model/table/column.h"
-#include "model/table/typed_column_data.h"
-#include "model/types/builtin.h"
-#include "model/types/type.h"
-#include "util/logger.h"
+#include "core/algorithms/dc/FastADC/misc/misc.h"
+#include "core/model/table/column.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 

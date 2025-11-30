@@ -1,19 +1,19 @@
-#include "cords.h"
+#include "core/algorithms/fd/sfd/cords.h"
 
 #include <chrono>
 #include <utility>
 #include <vector>
 
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "contingency_table.h"
-#include "frequency_handler.h"
-#include "model/table/column_index.h"
-#include "model/table/typed_column_data.h"
-#include "sample.h"
+#include "core/algorithms/fd/sfd/contingency_table.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/algorithms/fd/sfd/sample.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos {
 Cords::Cords() : FDAlgorithm({kFirstPhaseName, kSecondPhaseName}) {

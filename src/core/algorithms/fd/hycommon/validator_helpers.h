@@ -8,8 +8,8 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/version.hpp>
 
-#include "types.h"
-#include "util/logger.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/util/logger.h"
 
 #define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
 
