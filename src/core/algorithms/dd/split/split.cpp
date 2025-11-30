@@ -1,4 +1,4 @@
-#include "algorithms/dd/split/split.h"
+#include "core/algorithms/dd/split/split.h"
 
 #include <algorithm>
 #include <cassert>
@@ -17,14 +17,14 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/regex.hpp>
 
-#include "algorithms/dd/split/model/distance_position_list_index.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_index.h"
-#include "model/types/numeric_type.h"
-#include "util/levenshtein_distance.h"
-#include "util/logger.h"
+#include "core/algorithms/dd/split/model/distance_position_list_index.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_index.h"
+#include "core/model/types/numeric_type.h"
+#include "core/util/levenshtein_distance.h"
+#include "core/util/logger.h"
 
 namespace algos::dd {
 

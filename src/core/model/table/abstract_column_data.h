@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "column.h"
+#include "core/model/table/column.h"
 
 namespace model {
 

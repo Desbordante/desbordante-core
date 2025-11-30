@@ -8,8 +8,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/ind/faida/util/simple_ind.h"
-#include "hll_data.h"
+#include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
+#include "core/algorithms/ind/faida/util/simple_ind.h"
 
 namespace algos::faida {
 

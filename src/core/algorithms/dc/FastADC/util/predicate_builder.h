@@ -5,8 +5,8 @@
 #include <utility>
 #include <vector>
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/providers/index_provider.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 
 namespace algos::fastadc {
 

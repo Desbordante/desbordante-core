@@ -1,4 +1,4 @@
-#include "algorithms/dd/dd_verifier/dd_verifier.h"
+#include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -6,13 +6,13 @@
 #include <string>
 #include <vector>
 
-#include "config/descriptions.h"
-#include "config/names.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/vertical.h"
-#include "util/logger.h"
-#include "util/timed_invoke.h"
+#include "core/config/descriptions.h"
+#include "core/config/names.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/vertical.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::dd {
 DDVerifier::DDVerifier() : Algorithm({}) {

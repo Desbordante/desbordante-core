@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/cfd/model/partition_tidlist.h"
+#include "core/algorithms/cfd/model/partition_tidlist.h"
 
 namespace algos::cfd {
 

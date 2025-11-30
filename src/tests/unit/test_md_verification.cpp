@@ -4,13 +4,13 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "algorithms/md/md_verifier/highlights/highlights.h"
-#include "algorithms/md/md_verifier/md_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/md_verifier/highlights/highlights.h"
+#include "core/algorithms/md/md_verifier/md_verifier.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 using namespace config::names;

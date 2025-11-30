@@ -2,8 +2,8 @@
 
 #include <unordered_set>
 
-#include "model/table/column_layout_relation_data.h"
-#include "util/custom_hashes.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/util/custom_hashes.h"
 
 class CMAXSet {
 private:

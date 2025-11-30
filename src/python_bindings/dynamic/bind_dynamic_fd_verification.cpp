@@ -1,15 +1,15 @@
-#include "dynamic/bind_dynamic_fd_verification.h"
+#include "python_bindings/dynamic/bind_dynamic_fd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
-#include "algorithms/fd/verification_algorithms.h"
-#include "config/names.h"
-#include "config/tabular_data/crud_operations/operations.h"
-#include "py_util/bind_primitive.h"
-#include "py_util/py_to_any.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
+#include "core/algorithms/fd/verification_algorithms.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/crud_operations/operations.h"
+#include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/py_to_any.h"
 
 namespace {
 namespace py = pybind11;

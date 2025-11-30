@@ -3,7 +3,7 @@
 #include <utility>
 #include <vector>
 
-#include "model/table/abstract_column_data.h"
+#include "core/model/table/abstract_column_data.h"
 
 // see algorithms/cfd/LICENSE
 

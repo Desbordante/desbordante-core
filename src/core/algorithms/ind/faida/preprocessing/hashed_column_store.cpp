@@ -1,6 +1,6 @@
-#include "hashed_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 
-#include "model/table/column.h"
+#include "core/model/table/column.h"
 
 namespace algos::faida {
 

@@ -1,6 +1,6 @@
-#include "config/equal_nulls/option.h"
+#include "core/config/equal_nulls/option.h"
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kEqualNulls, descriptions::kDEqualNulls;

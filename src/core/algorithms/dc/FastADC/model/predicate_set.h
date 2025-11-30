@@ -9,8 +9,8 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/move/utility_core.hpp>
 
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/providers/index_provider.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
 
 namespace algos::fastadc {
 

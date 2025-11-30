@@ -3,7 +3,7 @@
  *
  * BlockData and ColumnData classes methods definition
  */
-#include "block_data.h"
+#include "core/model/table/block_data.h"
 
 #include <algorithm>
 #include <cassert>

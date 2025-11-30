@@ -1,4 +1,4 @@
-#include "algorithms/ucc/hpivalid/hypergraph.h"
+#include "core/algorithms/ucc/hpivalid/hypergraph.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

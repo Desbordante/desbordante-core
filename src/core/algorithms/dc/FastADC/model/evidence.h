@@ -1,5 +1,5 @@
-#include "dc/FastADC/model/predicate.h"
-#include "dc/FastADC/util/common_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/algorithms/dc/FastADC/util/common_clue_set_builder.h"
 
 namespace algos::fastadc {
 

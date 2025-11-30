@@ -1,10 +1,10 @@
 #include <gmock/gmock.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/statistics/data_stats.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "util/logger.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/statistics/data_stats.h"
+#include "core/config/names.h"
+#include "core/util/logger.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace mo = model;

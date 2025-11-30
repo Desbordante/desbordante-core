@@ -1,4 +1,4 @@
-#include "algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/gfd.h"
 
 #include <cstdlib>
 #include <sstream>
@@ -6,8 +6,8 @@
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "algorithms/gfd/comparator.h"
-#include "parser/graph_parser/graph_parser.h"
+#include "core/algorithms/gfd/comparator.h"
+#include "core/parser/graph_parser/graph_parser.h"
 
 namespace model {
 

@@ -2,10 +2,10 @@
 
 #include <string>
 
-#include "config/equal_nulls/type.h"
-#include "config/error/type.h"
-#include "config/max_lhs/type.h"
-#include "config/thread_number/type.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/error/type.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos::pyro {
 

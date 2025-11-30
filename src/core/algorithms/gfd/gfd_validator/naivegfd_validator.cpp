@@ -1,12 +1,12 @@
-#include "algorithms/gfd/gfd_validator/naivegfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/naivegfd_validator.h"
 
 #include <iostream>
 #include <set>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "algorithms/gfd/gfd.h"
-#include "util/logger.h"
+#include "core/algorithms/gfd/gfd.h"
+#include "core/util/logger.h"
 
 namespace {
 

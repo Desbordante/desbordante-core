@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/cfd/model/cfd_types.h"
-#include "algorithms/cfd/model/partition_tidlist.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
+#include "core/algorithms/cfd/model/partition_tidlist.h"
 
 // see algorithms/cfd/LICENSE
 

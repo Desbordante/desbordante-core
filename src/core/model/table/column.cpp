@@ -1,6 +1,6 @@
-#include "column.h"
+#include "core/model/table/column.h"
 
-#include "vertical.h"
+#include "core/model/table/vertical.h"
 
 using namespace std;
 

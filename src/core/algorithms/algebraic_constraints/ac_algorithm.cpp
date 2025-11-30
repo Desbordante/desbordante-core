@@ -1,15 +1,15 @@
-#include "ac_algorithm.h"
+#include "core/algorithms/algebraic_constraints/ac_algorithm.h"
 
 #include <cmath>
 #include <functional>
 #include <iostream>
 #include <random>
 
-#include "config/exceptions.h"
-#include "config/names_and_descriptions.h"
-#include "config/tabular_data/input_table/option.h"
-#include "types/create_type.h"
-#include "util/logger.h"
+#include "core/config/exceptions.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/types/create_type.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

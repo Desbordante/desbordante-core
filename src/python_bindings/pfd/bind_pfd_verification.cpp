@@ -1,10 +1,10 @@
-#include "bind_pfd_verification.h"
+#include "python_bindings/pfd/bind_pfd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/fd/pfd_verifier/pfd_verifier.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

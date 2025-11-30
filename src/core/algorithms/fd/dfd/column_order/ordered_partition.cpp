@@ -1,4 +1,4 @@
-#include "ordered_partition.h"
+#include "core/algorithms/fd/dfd/column_order/ordered_partition.h"
 
 OrderedPartition::OrderedPartition(model::PositionListIndex const* const partition,
                                    unsigned int number_of_rows, unsigned int column_index)

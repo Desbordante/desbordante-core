@@ -1,12 +1,12 @@
-#include "algorithms/fd/depminer/depminer.h"
+#include "core/algorithms/fd/depminer/depminer.h"
 
 #include <chrono>
 #include <list>
 #include <memory>
 
-#include "model/table/agree_set_factory.h"
-#include "model/table/relational_schema.h"
-#include "util/logger.h"
+#include "core/model/table/agree_set_factory.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace algos {
 

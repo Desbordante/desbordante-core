@@ -6,10 +6,10 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "cfd_column_data.h"
-#include "cfd_types.h"
-#include "model/table/idataset_stream.h"
-#include "model/table/relation_data.h"
+#include "core/algorithms/cfd/model/cfd_column_data.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relation_data.h"
 
 // see algorithms/cfd/LICENSE
 

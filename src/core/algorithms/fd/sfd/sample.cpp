@@ -1,4 +1,4 @@
-#include "sample.h"
+#include "core/algorithms/fd/sfd/sample.h"
 
 #include <chrono>
 #include <random>
@@ -6,8 +6,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "frequency_handler.h"
-#include "model/table/tuple_index.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos {
 Sample::Sample(bool fixed_sample, unsigned long long sample_size, model::TupleIndex rows,

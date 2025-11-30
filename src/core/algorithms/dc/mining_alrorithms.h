@@ -1,3 +1,3 @@
 #pragma once
 
-#include "algorithms/dc/FastADC/fastadc.h"
+#include "core/algorithms/dc/FastADC/fastadc.h"

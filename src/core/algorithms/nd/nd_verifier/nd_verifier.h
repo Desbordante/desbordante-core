@@ -5,16 +5,16 @@
 #include <unordered_map>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/highlight.h"
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "config/equal_nulls/type.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/table/column_layout_typed_relation_data.h"
-#include "model/types/builtin.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/nd/nd.h"
+#include "core/algorithms/nd/nd_verifier/util/highlight.h"
+#include "core/algorithms/nd/nd_verifier/util/stats_calculator.h"
+#include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::nd_verifier {
 

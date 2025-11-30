@@ -5,13 +5,13 @@
 #include <numbers>
 #include <vector>
 
-#include "frequency_handler.h"
-#include "model/table/column.h"
-#include "model/table/column_index.h"
-#include "model/table/relational_schema.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/model/table/column.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/model/table/vertical.h"
 
 namespace algos {
 

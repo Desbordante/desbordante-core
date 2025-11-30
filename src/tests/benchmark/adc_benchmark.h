@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/dc/FastADC/fastadc.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
+#include "core/algorithms/dc/FastADC/fastadc.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 

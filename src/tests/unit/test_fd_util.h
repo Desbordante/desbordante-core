@@ -2,12 +2,12 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/fd_algorithm.h"
-#include "all_csv_configs.h"
-#include "config/error/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/config/error/type.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 template <typename T>

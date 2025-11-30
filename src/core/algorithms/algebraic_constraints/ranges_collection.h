@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "numeric_type.h"
-#include "typed_column_pair.h"
+#include "core/algorithms/algebraic_constraints/typed_column_pair.h"
+#include "core/model/types/numeric_type.h"
 
 namespace algos {
 

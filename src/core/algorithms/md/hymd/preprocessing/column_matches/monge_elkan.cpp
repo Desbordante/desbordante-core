@@ -1,11 +1,11 @@
-#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
 
 #include <algorithm>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/smith_waterman_gotoh.h"
 
 namespace {
 std::vector<std::string> Tokenize(std::string const& text) {

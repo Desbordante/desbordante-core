@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <string>
 
-#include "algorithms/dc/model/operator.h"
-#include "model/types/builtin.h"
-#include "model/types/types.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/types.h"
 
 namespace algos::dc {
 

@@ -6,10 +6,10 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/vertical.h"
 
 namespace algos {
 

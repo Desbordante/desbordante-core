@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/md_element.h"
 
 namespace algos::hymd {
 using Rhss = std::vector<MdElement>;

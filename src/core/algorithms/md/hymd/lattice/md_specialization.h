@@ -1,8 +1,8 @@
 #pragma once
 
-#include "algorithms/md/hymd/lattice/lhs_specialization.h"
-#include "algorithms/md/hymd/lattice/md.h"
-#include "algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
+#include "core/algorithms/md/hymd/lattice/md.h"
+#include "core/algorithms/md/hymd/md_element.h"
 
 namespace algos::hymd::lattice {
 struct MdSpecialization {

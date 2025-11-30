@@ -1,4 +1,4 @@
-#include "algorithms/gfd/comparator.h"
+#include "core/algorithms/gfd/comparator.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -9,7 +9,7 @@
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/gfd.h"
 
 namespace gfd::comparator {
 

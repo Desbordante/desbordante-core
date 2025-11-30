@@ -1,4 +1,4 @@
-#include "dc/FastADC/model/pli_shard.h"
+#include "core/algorithms/dc/FastADC/model/pli_shard.h"
 
 #include <algorithm>
 #include <functional>
@@ -7,10 +7,10 @@
 #include <stdexcept>
 #include <unordered_set>
 
-#include "dc/FastADC/providers/index_provider.h"
-#include "model/types/builtin.h"
-#include "model/types/type.h"
-#include "util/logger.h"
+#include "core/algorithms/dc/FastADC/providers/index_provider.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 

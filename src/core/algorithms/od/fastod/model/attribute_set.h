@@ -9,8 +9,8 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "model/table/column_index.h"
-#include "model/types/bitset.h"
+#include "core/model/table/column_index.h"
+#include "core/model/types/bitset.h"
 
 namespace algos::fastod {
 

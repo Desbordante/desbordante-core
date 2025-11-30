@@ -3,16 +3,16 @@
 
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "algorithms/fd/sfd/cords.h"
-#include "algorithms/fd/sfd/frequency_handler.h"
-#include "algorithms/fd/sfd/sample.h"
-#include "all_csv_configs.h"
-#include "config/equal_nulls/option.h"
-#include "config/max_lhs/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/sfd/cords.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/algorithms/fd/sfd/sample.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/names.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace {
 void AssertVectors(std::vector<Column> const& expected,

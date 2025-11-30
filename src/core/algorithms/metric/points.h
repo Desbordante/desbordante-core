@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/metric/highlight.h"
+#include "core/algorithms/metric/highlight.h"
 
 namespace algos::metric {
 

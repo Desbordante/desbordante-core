@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "config/common_option.h"
-#include "config/indices/type.h"
+#include "core/config/common_option.h"
+#include "core/config/indices/type.h"
 
 namespace config {
 

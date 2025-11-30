@@ -1,9 +1,9 @@
-#include "dependency_checker.h"
+#include "core/algorithms/od/order/dependency_checker.h"
 
 #include <algorithm>
 #include <unordered_set>
 
-#include "model/table/tuple_index.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::order {
 

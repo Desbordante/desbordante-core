@@ -1,4 +1,4 @@
-#include "pruning_map.h"
+#include "core/algorithms/fd/dfd/pruning_maps/pruning_map.h"
 
 PruningMap::PruningMap(RelationalSchema const* schema) {
     for (auto const& column : schema->GetColumns()) {

@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "algorithms/od/fastod/hashing/hashing.h"
-#include "model/table/column_index.h"
+#include "core/algorithms/od/fastod/hashing/hashing.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::fastod {
 

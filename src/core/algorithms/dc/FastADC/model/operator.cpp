@@ -1,7 +1,7 @@
-#include "dc/FastADC/model/operator.h"
+#include "core/algorithms/dc/FastADC/model/operator.h"
 
-#include "model/types/builtin.h"
-#include "model/types/type.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
 
 namespace algos::fastadc {
 

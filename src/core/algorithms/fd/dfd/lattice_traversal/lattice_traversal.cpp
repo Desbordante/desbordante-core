@@ -1,8 +1,8 @@
-#include "lattice_traversal.h"
+#include "core/algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
 
 #include <random>
 
-#include "model/table/position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 LatticeTraversal::LatticeTraversal(Column const* const rhs,
                                    ColumnLayoutRelationData const* const relation,

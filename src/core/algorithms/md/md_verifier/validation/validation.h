@@ -4,15 +4,15 @@
 #include <variant>
 #include <vector>
 
-#include "algorithms/md/column_match.h"
-#include "algorithms/md/column_similarity_classifier.h"
-#include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/hymd/column_match_info.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/md_verifier/cmptr.h"
-#include "algorithms/md/md_verifier/highlights/highlights.h"
-#include "algorithms/md/similarity.h"
-#include "config/tabular_data/input_table_type.h"
+#include "core/algorithms/md/column_match.h"
+#include "core/algorithms/md/column_similarity_classifier.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/column_match_info.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/md_verifier/cmptr.h"
+#include "core/algorithms/md/md_verifier/highlights/highlights.h"
+#include "core/algorithms/md/similarity.h"
+#include "core/config/tabular_data/input_table_type.h"
 
 namespace algos::md {
 

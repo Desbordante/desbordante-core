@@ -8,10 +8,10 @@
 #include <memory>
 #include <optional>
 
-#include "algorithms/ind/ind_algorithm.h"
-#include "config/error/type.h"
-#include "config/max_arity/type.h"
-#include "raw_ind.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/algorithms/ind/mind/raw_ind.h"
+#include "core/config/error/type.h"
+#include "core/config/max_arity/type.h"
 
 namespace algos {
 

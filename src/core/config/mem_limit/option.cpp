@@ -1,6 +1,6 @@
-#include "config/mem_limit/option.h"
+#include "core/config/mem_limit/option.h"
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kMemLimitMB, descriptions::kDMemLimitMB;

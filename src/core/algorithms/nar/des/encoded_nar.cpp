@@ -1,7 +1,7 @@
-#include "encoded_nar.h"
+#include "core/algorithms/nar/des/encoded_nar.h"
 
-#include "algorithms/nar/value_range.h"
-#include "model/types/types.h"
+#include "core/algorithms/nar/value_range.h"
+#include "core/model/types/types.h"
 
 namespace algos::des {
 

@@ -1,8 +1,8 @@
-#include "algorithms/metric/highlight_calculator.h"
+#include "core/algorithms/metric/highlight_calculator.h"
 
 #include <algorithm>
 
-#include "util/convex_hull.h"
+#include "core/util/convex_hull.h"
 
 namespace {
 

@@ -1,11 +1,11 @@
-#include "algorithms/fd/fd_verifier/stats_calculator.h"
+#include "core/algorithms/fd/fd_verifier/stats_calculator.h"
 
 #include <algorithm>
 #include <cassert>
 #include <numeric>
 #include <unordered_map>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace {
 

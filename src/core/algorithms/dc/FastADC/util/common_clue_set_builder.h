@@ -4,8 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "dc/FastADC/model/predicate.h"
-#include "model/types/bitset.h"
+#include "core/algorithms/dc/FastADC/model/predicate.h"
+#include "core/model/types/bitset.h"
 
 namespace algos::fastadc {
 

@@ -5,11 +5,11 @@
  */
 #pragma once
 
-#include "algorithms/algorithm.h"
-#include "config/indices/type.h"
-#include "error/type.h"
-#include "table/tuple_index.h"
-#include "tabular_data/input_tables_type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/config/error/type.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos {
 

@@ -2,9 +2,9 @@
 
 #include <string>
 
-#include "model/table/column.h"
-#include "model/table/vertical.h"
-#include "raw_fd.h"
+#include "core/algorithms/fd/raw_fd.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 class FD {
 private:

@@ -1,11 +1,11 @@
-#include "algorithms/nd/util/get_vertical_names.h"
+#include "core/algorithms/nd/util/get_vertical_names.h"
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
-#include "model/table/column.h"
-#include "model/table/vertical.h"
+#include "core/model/table/column.h"
+#include "core/model/table/vertical.h"
 
 namespace algos::nd::util {
 

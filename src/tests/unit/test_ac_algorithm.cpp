@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/algebraic_constraints/ac_algorithm.h"
-#include "algorithms/algebraic_constraints/bin_operation_enum.h"
-#include "algorithms/algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "types.h"
+#include "core/algorithms/algebraic_constraints/ac_algorithm.h"
+#include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/config/names.h"
+#include "core/model/types/types.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace {
 void AssertRanges(std::vector<model::Double>& expected_ranges,

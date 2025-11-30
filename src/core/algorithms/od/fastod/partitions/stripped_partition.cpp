@@ -1,6 +1,6 @@
 // This part of code not currently used
 
-#include "stripped_partition.h"
+#include "core/algorithms/od/fastod/partitions/stripped_partition.h"
 
 #include <sstream>
 

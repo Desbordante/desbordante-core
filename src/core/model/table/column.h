@@ -5,8 +5,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column_index.h"
-#include "relational_schema.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/relational_schema.h"
 
 class Column {
 public:

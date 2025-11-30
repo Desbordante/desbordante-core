@@ -4,15 +4,15 @@
 #include <unordered_set>
 #include <vector>
 
-#include "algorithms/md/hymd/column_match_info.h"
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lattice/validation_info.h"
-#include "algorithms/md/hymd/recommendation.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "model/index.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/column_match_info.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/validation_info.h"
+#include "core/algorithms/md/hymd/recommendation.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
+#include "core/model/index.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd {
 

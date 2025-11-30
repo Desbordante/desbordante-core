@@ -1,4 +1,4 @@
-#include "algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
+#include "core/algorithms/fd/fd_verifier/dynamic_stats_calculator.h"
 
 #include <algorithm>
 #include <cassert>

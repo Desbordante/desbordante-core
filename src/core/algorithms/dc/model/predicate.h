@@ -3,10 +3,10 @@
 #include <string>
 #include <variant>
 
-#include "algorithms/dc/model/column_operand.h"
-#include "algorithms/dc/model/operator.h"
-#include "algorithms/dc/model/tuple.h"
-#include "model/table/typed_column_data.h"
+#include "core/algorithms/dc/model/column_operand.h"
+#include "core/algorithms/dc/model/operator.h"
+#include "core/algorithms/dc/model/tuple.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::dc {
 

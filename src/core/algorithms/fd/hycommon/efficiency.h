@@ -1,6 +1,6 @@
 #include <cstddef>
 
-#include "sampler.h"
+#include "core/algorithms/fd/hycommon/sampler.h"
 
 namespace algos::hy {
 

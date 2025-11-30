@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
-#include "algorithms/md/md_verifier/cmptr.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "core/algorithms/md/md_verifier/cmptr.h"
 
 namespace algos::md {
 class ColumnSimilarityClassifier {

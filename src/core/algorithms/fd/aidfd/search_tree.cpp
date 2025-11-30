@@ -1,4 +1,4 @@
-#include "search_tree.h"
+#include "core/algorithms/fd/aidfd/search_tree.h"
 
 SearchTree::Node::Node(size_t bit, SearchTree::Bitset set, SearchTree::Bitset sets_union,
                        SearchTree::Bitset sets_inter, std::shared_ptr<Node> const& parent,

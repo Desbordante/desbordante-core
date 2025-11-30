@@ -6,12 +6,12 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
-#include "algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
+#include "core/algorithms/md/hymd/preprocessing/similarity.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 namespace detail {

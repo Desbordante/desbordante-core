@@ -4,8 +4,8 @@
 #include <memory>
 #include <utility>
 
-#include "algorithms/ind/faida/hashing/hashing.h"
-#include "simple_cc.h"
+#include "core/algorithms/ind/faida/hashing/hashing.h"
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 
 namespace algos::faida {
 

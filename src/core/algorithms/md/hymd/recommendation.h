@@ -4,10 +4,10 @@
 #include <functional>
 #include <unordered_set>
 
-#include "algorithms/md/hymd/compressed_record.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/java_hash.h"
-#include "util/py_tuple_hash.h"
+#include "core/algorithms/md/hymd/compressed_record.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/algorithms/md/hymd/utility/java_hash.h"
+#include "core/util/py_tuple_hash.h"
 
 namespace algos::hymd {
 struct Recommendation {

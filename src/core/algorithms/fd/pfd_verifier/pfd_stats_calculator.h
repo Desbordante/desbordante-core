@@ -1,10 +1,10 @@
 #pragma once
 
-#include "config/error/type.h"
-#include "config/error_measure/type.h"
-#include "config/indices/type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
+#include "core/config/error/type.h"
+#include "core/config/error_measure/type.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos {
 

@@ -8,7 +8,7 @@
 
 #include <boost/functional/hash/hash.hpp>
 
-#include "algorithms/dc/model/component.h"
+#include "core/algorithms/dc/model/component.h"
 
 namespace algos::dc {
 

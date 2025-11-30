@@ -3,22 +3,22 @@
  *
  * Mind algorithm class methods definition
  */
-#include "mind.h"
+#include "core/algorithms/ind/mind/mind.h"
 
 #include <algorithm>
 #include <unordered_set>
 
-#include "algorithms/create_algorithm.h"
-#include "config/error/option.h"
-#include "config/names_and_descriptions.h"
-#include "error/type.h"
-#include "ind/ind_algorithm.h"
-#include "max_arity/option.h"
-#include "model/table/dataset_stream_projection.h"
-#include "table/column_combination.h"
-#include "table/dataset_stream_fixed.h"
-#include "tabular_data/input_table_type.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/create_algorithm.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/config/error/option.h"
+#include "core/config/error/type.h"
+#include "core/config/max_arity/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/dataset_stream_fixed.h"
+#include "core/model/table/dataset_stream_projection.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 
