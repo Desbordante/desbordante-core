@@ -9,13 +9,11 @@
 
 #include "algorithms/pac/model/tuple.h"
 #include "pac/model/comparable_tuple_type.h"
-#include "pac/pac_verifier/pac_highlight.h"
 #include "type.h"
 
 namespace algos::pac_verifier {
 /// @brief Values that violate Domain PAC with given epsilon
-// Looks like there's no Domain PAC-specific things, maybe this class may become PACHighlight?
-class DomainPACHighlight : public PACHighlight {
+class DomainPACHighlight {
 private:
     using Tuples = std::vector<pac::model::Tuple>;
     using TuplesIter = Tuples::iterator;
@@ -33,7 +31,7 @@ public:
           highlighted_tuples_(std::move(highlighted_tuples)) {}
 
     /// @brief Get row numbers of highlighted values
-    virtual std::vector<std::size_t> GetRowNums() const override {
+    std::vector<std::size_t> GetRowNums() const {
         std::vector<std::size_t> indices;
         std::ranges::transform(highlighted_tuples_, std::back_inserter(indices),
                                [beg = original_value_tuples_->begin()](auto const it) {
@@ -43,13 +41,13 @@ public:
     }
 
     /// @brief Get @c Types of columns associated with this @c Highlight
-    virtual std::vector<model::Type const*> const& GetTypes() const override {
+    std::vector<model::Type const*> const& GetTypes() const {
         return tuple_type_->GetTypes();
     }
 
     /// @brief Get highlighted values as pointers to @c std::byte, that can be used with types (see
     /// @c GetTypes())
-    virtual Tuples GetByteData() const override {
+    Tuples GetByteData() const {
         Tuples tuples;
         std::ranges::transform(highlighted_tuples_, std::back_inserter(tuples),
                                [](auto const it) { return *it; });
@@ -57,7 +55,7 @@ public:
     }
 
     /// @brief Get highlighted values as strings
-    virtual std::vector<std::string> GetStringData() const override {
+    std::vector<std::string> GetStringData() const {
         std::vector<std::string> strings;
         std::ranges::transform(highlighted_tuples_, std::back_inserter(strings),
                                [this](auto const it) { return tuple_type_->ValueToString(*it); });

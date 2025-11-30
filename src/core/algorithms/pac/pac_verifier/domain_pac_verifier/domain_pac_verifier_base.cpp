@@ -91,39 +91,6 @@ std::vector<std::size_t> DomainPACVerifierBase::CountSatisfyingTuples() {
     return falls_into_domain;
 }
 
-std::unique_ptr<PACHighlight> DomainPACVerifierBase::GetHighlightsInternal(double eps_1,
-                                                                           double eps_2) const {
-    if (eps_1 < 0) {
-        eps_1 = MinEpsilon();
-    }
-    if (eps_2 < 0) {
-        eps_2 = GetPAC().GetEpsilon();
-    }
-
-    if (eps_2 <= eps_1) {
-        return std::make_unique<DomainPACHighlight>(tuple_type_, original_value_tuples_,
-                                                    std::vector<TuplesIter>{});
-    }
-
-    auto first_1_it = std::ranges::partition_point(
-            sorted_value_tuples_.begin(), std::next(first_value_it_),
-            [this, eps_1](auto const it) { return domain_->DistFromDomain(*it) > eps_1; });
-    auto first_2_it = std::ranges::partition_point(
-            sorted_value_tuples_.begin(), first_1_it,
-            [this, eps_2](auto const it) { return domain_->DistFromDomain(*it) > eps_2; });
-    auto after_last_1_it = std::ranges::partition_point(
-            std::prev(after_last_value_it_), sorted_value_tuples_.end(),
-            [this, eps_1](auto const it) { return domain_->DistFromDomain(*it) <= eps_1; });
-    auto after_last_2_it = std::ranges::partition_point(
-            std::prev(after_last_1_it), sorted_value_tuples_.end(),
-            [this, eps_2](auto const it) { return domain_->DistFromDomain(*it) <= eps_2; });
-
-    std::vector<TuplesIter> highlighted_tuples(first_2_it, first_1_it);
-    highlighted_tuples.insert(highlighted_tuples.end(), after_last_1_it, after_last_2_it);
-    return std::make_unique<DomainPACHighlight>(tuple_type_, original_value_tuples_,
-                                                std::move(highlighted_tuples));
-}
-
 unsigned long long DomainPACVerifierBase::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
     LOG_INFO("Verifying {}...", GetPAC().ToLongString());
@@ -145,5 +112,35 @@ unsigned long long DomainPACVerifierBase::ExecuteInternal() {
                            .count();
     LOG_INFO("Validation took {}ms", elapsed);
     return elapsed;
+}
+
+DomainPACHighlight DomainPACVerifierBase::GetHighlights(double eps_1, double eps_2) const {
+    if (eps_1 < 0) {
+        eps_1 = MinEpsilon();
+    }
+    if (eps_2 < 0) {
+        eps_2 = GetPAC().GetEpsilon();
+    }
+
+    if (eps_2 <= eps_1) {
+        return DomainPACHighlight{tuple_type_, original_value_tuples_, std::vector<TuplesIter>{}};
+    }
+
+    auto first_1_it = std::ranges::partition_point(
+            sorted_value_tuples_.begin(), std::next(first_value_it_),
+            [this, eps_1](auto const it) { return domain_->DistFromDomain(*it) > eps_1; });
+    auto first_2_it = std::ranges::partition_point(
+            sorted_value_tuples_.begin(), first_1_it,
+            [this, eps_2](auto const it) { return domain_->DistFromDomain(*it) > eps_2; });
+    auto after_last_1_it = std::ranges::partition_point(
+            std::prev(after_last_value_it_), sorted_value_tuples_.end(),
+            [this, eps_1](auto const it) { return domain_->DistFromDomain(*it) <= eps_1; });
+    auto after_last_2_it = std::ranges::partition_point(
+            std::prev(after_last_1_it), sorted_value_tuples_.end(),
+            [this, eps_2](auto const it) { return domain_->DistFromDomain(*it) <= eps_2; });
+
+    std::vector<TuplesIter> highlighted_tuples(first_2_it, first_1_it);
+    highlighted_tuples.insert(highlighted_tuples.end(), after_last_1_it, after_last_2_it);
+    return DomainPACHighlight{tuple_type_, original_value_tuples_, std::move(highlighted_tuples)};
 }
 }  // namespace algos::pac_verifier
