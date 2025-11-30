@@ -1,13 +1,13 @@
-#include "algorithms/md/md_verifier/validation/validation.h"
+#include "core/algorithms/md/md_verifier/validation/validation.h"
 
 #include <ranges>
 
 #include <boost/hof/first_of.hpp>
 
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::md {
 

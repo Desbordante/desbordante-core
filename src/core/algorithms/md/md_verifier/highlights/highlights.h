@@ -2,11 +2,11 @@
 
 #include <sstream>
 
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/md.h"
-#include "algorithms/md/similarity.h"
-#include "config/indices/type.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/algorithms/md/md.h"
+#include "core/algorithms/md/similarity.h"
+#include "core/config/indices/type.h"
+#include "core/model/index.h"
 
 namespace algos::md {
 class MDHighlights {

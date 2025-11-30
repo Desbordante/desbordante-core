@@ -2,8 +2,8 @@
 
 #include <thread>
 
-#include "config/common_option.h"
-#include "config/thread_number/type.h"
+#include "core/config/common_option.h"
+#include "core/config/thread_number/type.h"
 
 namespace config {
 extern CommonOption<ThreadNumType> const kThreadNumberOpt;

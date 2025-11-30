@@ -2,7 +2,7 @@
 
 #include <optional>
 
-#include "hyperloglog.h"
+#include "core/algorithms/ind/faida/inclusion_testing/hyperloglog.h"
 
 namespace algos::faida {
 

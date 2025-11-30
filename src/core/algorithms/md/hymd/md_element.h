@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/model/index.h"
 
 namespace algos::hymd {
 struct MdElement {

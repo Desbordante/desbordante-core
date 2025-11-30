@@ -1,14 +1,14 @@
-#include "fastod.h"
+#include "core/algorithms/od/fastod/fastod.h"
 
 #include <memory>
 
 #include <boost/unordered/unordered_map.hpp>
 
-#include "config/tabular_data/input_table/option.h"
-#include "config/time_limit/option.h"
-#include "error/option.h"
-#include "util/logger.h"
-#include "util/timed_invoke.h"
+#include "core/config/error/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/time_limit/option.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 

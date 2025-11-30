@@ -1,4 +1,4 @@
-#include "sampled_inverted_index.h"
+#include "core/algorithms/ind/faida/inclusion_testing/sampled_inverted_index.h"
 
 namespace algos::faida {
 

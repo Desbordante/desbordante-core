@@ -1,25 +1,25 @@
-#include "algorithms/md/hymd/validator.h"
+#include "core/algorithms/md/hymd/validator.h"
 
 #include <cassert>
 #include <functional>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/records_info.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/hymd/utility/invalidated_rhss.h"
-#include "algorithms/md/hymd/utility/java_hash.h"
-#include "algorithms/md/hymd/utility/reserve_more.h"
-#include "algorithms/md/hymd/utility/size_t_vector_hash.h"
-#include "algorithms/md/hymd/utility/trivial_array.h"
-#include "algorithms/md/hymd/utility/zip.h"
-#include "model/index.h"
-#include "util/bitset_utils.h"
-#include "util/erase_if_replace.h"
-#include "util/get_preallocated_vector.h"
-#include "util/py_tuple_hash.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/algorithms/md/hymd/utility/invalidated_rhss.h"
+#include "core/algorithms/md/hymd/utility/java_hash.h"
+#include "core/algorithms/md/hymd/utility/reserve_more.h"
+#include "core/algorithms/md/hymd/utility/size_t_vector_hash.h"
+#include "core/algorithms/md/hymd/utility/trivial_array.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
+#include "core/model/index.h"
+#include "core/util/bitset_utils.h"
+#include "core/util/erase_if_replace.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/py_tuple_hash.h"
 
 namespace algos::hymd {
 using indexes::CompressedRecords;

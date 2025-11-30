@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "model/types/builtin.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::nd_verifier::util {
 

@@ -1,14 +1,14 @@
-#include "algorithms/gfd/gfd_validator/egfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
 
 #include <iostream>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/logger.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace {
 

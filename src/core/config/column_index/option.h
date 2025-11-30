@@ -2,8 +2,8 @@
 
 #include <string_view>
 
-#include "config/column_index/type.h"
-#include "config/common_option.h"
+#include "core/config/column_index/type.h"
+#include "core/config/common_option.h"
 
 namespace config {
 

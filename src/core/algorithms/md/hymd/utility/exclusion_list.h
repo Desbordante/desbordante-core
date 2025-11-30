@@ -6,8 +6,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "model/index.h"
-#include "util/bitset_utils.h"
+#include "core/model/index.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::hymd::utility {
 template <typename T>

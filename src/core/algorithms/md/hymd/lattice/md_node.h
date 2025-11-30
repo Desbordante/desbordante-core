@@ -1,13 +1,13 @@
 #pragma once
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/lattice/md.h"
-#include "algorithms/md/hymd/lattice/md_specialization.h"
-#include "algorithms/md/hymd/lattice/multi_md.h"
-#include "algorithms/md/hymd/lattice/node_base.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/utility/exclusion_list.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/lattice/md.h"
+#include "core/algorithms/md/hymd/lattice/md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/multi_md.h"
+#include "core/algorithms/md/hymd/lattice/node_base.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/utility/exclusion_list.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::lattice {
 class MdNode : public NodeBase<MdNode> {

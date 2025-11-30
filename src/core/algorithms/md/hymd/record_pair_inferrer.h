@@ -9,13 +9,13 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lhs_ccv_ids_info.h"
-#include "algorithms/md/hymd/pair_comparison_result.h"
-#include "algorithms/md/hymd/recommendation.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "util/desbordante_assume.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lhs_ccv_ids_info.h"
+#include "core/algorithms/md/hymd/pair_comparison_result.h"
+#include "core/algorithms/md/hymd/recommendation.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/util/desbordante_assume.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd {
 

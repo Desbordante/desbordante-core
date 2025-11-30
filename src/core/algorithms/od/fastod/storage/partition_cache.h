@@ -2,9 +2,9 @@
 
 #include <memory>
 
-#include "algorithms/od/fastod/model/attribute_set.h"
-#include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
-#include "cache_with_limit.h"
+#include "core/algorithms/od/fastod/model/attribute_set.h"
+#include "core/algorithms/od/fastod/partitions/complex_stripped_partition.h"
+#include "core/algorithms/od/fastod/storage/cache_with_limit.h"
 
 namespace algos::fastod {
 

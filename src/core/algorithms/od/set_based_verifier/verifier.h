@@ -2,13 +2,13 @@
 
 #include <cstddef>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/od/fastod/od_ordering.h"
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "algorithms/od/fastod/storage/partition_cache.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_table_type.h"
-#include "od/fastod/model/removal_set.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/od/fastod/model/removal_set.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_table_type.h"
 
 namespace algos::od {
 

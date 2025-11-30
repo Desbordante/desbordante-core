@@ -6,9 +6,9 @@
 
 #include <boost/align/aligned_allocator.hpp>
 
-#include "algorithms/ind/faida/preprocessing/abstract_column_store.h"
-#include "algorithms/ind/faida/preprocessing/irow_iterator.h"
-#include "algorithms/ind/faida/util/simple_cc.h"
+#include "core/algorithms/ind/faida/preprocessing/abstract_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"
+#include "core/algorithms/ind/faida/util/simple_cc.h"
 
 namespace algos::faida {
 

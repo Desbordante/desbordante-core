@@ -1,4 +1,4 @@
-#include "algorithms/statistics/data_stats.h"
+#include "core/algorithms/statistics/data_stats.h"
 
 #include <set>
 
@@ -6,9 +6,9 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/thread_number/option.h"
 
 namespace algos {
 

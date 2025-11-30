@@ -1,11 +1,11 @@
 #pragma once
 
-#include "algorithms/nar/nar_algorithm.h"
-#include "config/names.h"
-#include "differential_functions.h"
-#include "encoded_nar.h"
-#include "enums.h"
-#include "rng.h"
+#include "core/algorithms/nar/des/differential_functions.h"
+#include "core/algorithms/nar/des/encoded_nar.h"
+#include "core/algorithms/nar/des/enums.h"
+#include "core/algorithms/nar/des/rng.h"
+#include "core/algorithms/nar/nar_algorithm.h"
+#include "core/config/names.h"
 
 namespace algos::des {
 using FeatureDomains = std::vector<std::shared_ptr<model::ValueRange>> const;

@@ -1,4 +1,4 @@
-#include "apriori_candidate_generator.h"
+#include "core/algorithms/ind/faida/candidate_generation/apriori_candidate_generator.h"
 
 #include <algorithm>
 #include <unordered_set>

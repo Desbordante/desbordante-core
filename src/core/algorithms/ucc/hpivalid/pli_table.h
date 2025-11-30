@@ -4,9 +4,9 @@
 #include <limits>
 #include <vector>
 
-#include "algorithms/fd/hycommon/types.h"
-#include "model/table/position_list_index.h"
-#include "model/table/tuple_index.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/tuple_index.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

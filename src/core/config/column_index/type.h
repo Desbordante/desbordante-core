@@ -1,6 +1,6 @@
 #pragma once
 
-#include "model/table/column_index.h"
+#include "core/model/table/column_index.h"
 
 namespace config {
 using IndexType = model::ColumnIndex;

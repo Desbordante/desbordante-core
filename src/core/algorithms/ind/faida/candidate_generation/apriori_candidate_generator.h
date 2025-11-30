@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/ind/faida/util/simple_ind.h"
+#include "core/algorithms/ind/faida/util/simple_ind.h"
 
 namespace algos::faida::apriori_candidate_generator {
 

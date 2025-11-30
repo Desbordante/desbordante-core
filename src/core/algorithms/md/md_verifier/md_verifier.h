@@ -2,17 +2,17 @@
 
 #include <optional>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/md/column_match.h"
-#include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/md_algorithm.h"
-#include "algorithms/md/md_verifier/cmptr.h"
-#include "algorithms/md/md_verifier/column_similarity_classifier.h"
-#include "algorithms/md/md_verifier/highlights/highlights.h"
-#include "algorithms/md/md_verifier/validation/validation.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/thread_number/type.h"
-#include "model/table/relational_schema.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/md/column_match.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/md_algorithm.h"
+#include "core/algorithms/md/md_verifier/cmptr.h"
+#include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
+#include "core/algorithms/md/md_verifier/highlights/highlights.h"
+#include "core/algorithms/md/md_verifier/validation/validation.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos::md {
 
