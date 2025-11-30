@@ -32,13 +32,13 @@ PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index,
                                      unsigned int original_relation_size, double inverted_entropy,
                                      double gini_impurity)
     : index_(std::move(index)),
-      null_cluster_(std::move(null_cluster)),
+      relation_size_(relation_size),
       size_(size),
+      null_cluster_(std::move(null_cluster)),
       entropy_(entropy),
       inverted_entropy_(inverted_entropy),
       gini_impurity_(gini_impurity),
       nep_(nep),
-      relation_size_(relation_size),
       original_relation_size_(original_relation_size),
       probing_table_cache_() {}
 
@@ -119,7 +119,7 @@ void PositionListIndex::SortClusters(std::deque<std::vector<int>>& clusters) {
 std::shared_ptr<std::vector<int> const> PositionListIndex::CalculateAndGetProbingTable() const {
     if (probing_table_cache_ != nullptr) return probing_table_cache_;
 
-    std::vector<int> probing_table = std::vector<int>(original_relation_size_);
+    std::vector<int> probing_table = std::vector<int>(original_relation_size_, kSingletonValueId);
     int next_cluster_id = kSingletonValueId + 1;
     for (auto& cluster : index_) {
         int value_id = next_cluster_id++;
