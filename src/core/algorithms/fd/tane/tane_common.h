@@ -21,10 +21,9 @@ private:
     void ComputeDependencies(model::LatticeLevel* level);
     unsigned long long ExecuteInternal() final;
     virtual config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) = 0;
-    virtual config::ErrorType CalculateFdError(
-            model::PositionListIndex const* lhs_pli,
-            [[maybe_unused]] model::PositionListIndex const* rhs_pli,
-            model::PositionListIndex const* joint_pli) = 0;
+    virtual config::ErrorType CalculateFdError(model::PLIWS const* lhs_pli,
+                                               [[maybe_unused]] model::PLIWS const* rhs_pli,
+                                               model::PLIWS const* joint_pli) = 0;
     static double CalculateUccError(model::PositionListIndex const* pli,
                                     ColumnLayoutRelationData const* relation_data);
     void RegisterAndCountFd(Vertical lhs, Column const* rhs);
