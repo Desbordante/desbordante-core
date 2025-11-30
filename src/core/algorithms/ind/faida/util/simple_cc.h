@@ -4,9 +4,9 @@
 #include <numeric>
 #include <vector>
 
-#include "model/table/column_combination.h"
-#include "model/table/table_index.h"
-#include "table/column_index.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/table_index.h"
 
 namespace algos::faida {
 

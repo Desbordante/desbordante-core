@@ -2,9 +2,9 @@
 
 #include <optional>
 
-#include "algorithms/md/column_similarity_classifier.h"
-#include "algorithms/md/decision_boundary.h"
-#include "model/index.h"
+#include "core/algorithms/md/column_similarity_classifier.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/model/index.h"
 
 namespace model::md {
 

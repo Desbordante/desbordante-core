@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
 
 namespace algos::hymd::indexes {
 

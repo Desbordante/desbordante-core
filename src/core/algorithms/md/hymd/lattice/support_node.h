@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/lattice/lhs_specialization.h"
-#include "algorithms/md/hymd/lattice/node_base.h"
-#include "algorithms/md/hymd/md_lhs.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
+#include "core/algorithms/md/hymd/lattice/node_base.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
 
 namespace algos::hymd::lattice {
 class SupportNode : public NodeBase<SupportNode> {

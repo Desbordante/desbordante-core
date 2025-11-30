@@ -4,7 +4,7 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 namespace similarity_measures {

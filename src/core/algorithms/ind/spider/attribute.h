@@ -11,11 +11,11 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "config/error/type.h"
-#include "model/table/column_combination.h"
-#include "model/table/column_domain_iterator.h"
-#include "model/table/column_index.h"
-#include "util/bitset_utils.h"
+#include "core/config/error/type.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/column_domain_iterator.h"
+#include "core/model/table/column_index.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::spider {
 

@@ -3,8 +3,8 @@
 #include <array>
 #include <cstdlib>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/lv_normalized.h"
-#include "config/exceptions.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/lv_normalized.h"
+#include "core/config/exceptions.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 inline size_t DateDifference(model::Date const& left, model::Date const& right) {

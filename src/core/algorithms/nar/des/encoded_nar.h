@@ -1,8 +1,8 @@
 #pragma once
 
-#include "algorithms/nar/nar.h"
-#include "encoded_value_range.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/nar/des/encoded_value_range.h"
+#include "core/algorithms/nar/nar.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::des {
 using model::NAR;

@@ -8,9 +8,9 @@
 #include <boost/container/flat_map.hpp>
 #include <boost/unordered/unordered_flat_set.hpp>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::indexes {
 using EndIdMap = boost::container::flat_map<ColumnClassifierValueId, model::Index, std::greater<>>;

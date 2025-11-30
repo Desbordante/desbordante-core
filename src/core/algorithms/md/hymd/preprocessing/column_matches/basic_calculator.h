@@ -3,19 +3,19 @@
 #include <memory>
 #include <type_traits>
 
-#include "algorithms/md/hymd/indexes/column_similarity_info.h"
-#include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/preprocessing/build_indexes.h"
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
-#include "algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
-#include "algorithms/md/hymd/preprocessing/encode_results.h"
-#include "algorithms/md/hymd/preprocessing/similarity.h"
-#include "algorithms/md/hymd/preprocessing/valid_table_results.h"
-#include "config/exceptions.h"
-#include "util/argument_type.h"
-#include "util/get_preallocated_vector.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/indexes/column_similarity_info.h"
+#include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/preprocessing/build_indexes.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/index_uniform.h"
+#include "core/algorithms/md/hymd/preprocessing/ccv_id_pickers/pick_lhs_ccv_ids_type.h"
+#include "core/algorithms/md/hymd/preprocessing/encode_results.h"
+#include "core/algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/algorithms/md/hymd/preprocessing/valid_table_results.h"
+#include "core/config/exceptions.h"
+#include "core/util/argument_type.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 template <typename ComparerCreatorSupplier, bool Symmetric, bool EqMax, bool MultiThreaded = true>

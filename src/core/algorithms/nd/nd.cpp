@@ -1,9 +1,9 @@
-#include "algorithms/nd/nd.h"
+#include "core/algorithms/nd/nd.h"
 
 #include <algorithm>
 
-#include "algorithms/nd/util/get_vertical_names.h"
-#include "util/range_to_string.h"
+#include "core/algorithms/nd/util/get_vertical_names.h"
+#include "core/util/range_to_string.h"
 
 namespace model {
 

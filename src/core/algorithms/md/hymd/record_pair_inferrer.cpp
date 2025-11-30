@@ -1,4 +1,4 @@
-#include "algorithms/md/hymd/record_pair_inferrer.h"
+#include "core/algorithms/md/hymd/record_pair_inferrer.h"
 
 #include <algorithm>
 #include <atomic>
@@ -6,9 +6,9 @@
 #include <ranges>
 #include <vector>
 
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "util/get_preallocated_vector.h"
-#include "util/logger.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/logger.h"
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,

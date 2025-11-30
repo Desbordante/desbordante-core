@@ -3,13 +3,13 @@
 #include <sstream>
 #include <string>
 
-#include "algorithms/cfd/enums.h"
-#include "algorithms/fd/tane/enums.h"
-#include "algorithms/md/hymd/enums.h"
-#include "algorithms/metric/enums.h"
-#include "algorithms/nar/des/enums.h"
-#include "algorithms/od/fastod/od_ordering.h"
-#include "util/enum_to_available_values.h"
+#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/algorithms/md/hymd/enums.h"
+#include "core/algorithms/metric/enums.h"
+#include "core/algorithms/nar/des/enums.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/util/enum_to_available_values.h"
 
 namespace config::descriptions {
 

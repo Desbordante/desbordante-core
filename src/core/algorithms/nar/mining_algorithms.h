@@ -1,3 +1,3 @@
 #pragma once
 
-#include "des/des.h"
+#include "core/algorithms/nar/des/des.h"

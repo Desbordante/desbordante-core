@@ -4,8 +4,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::lattice {
 

@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-#include "model/index.h"
+#include "core/model/index.h"
 
 namespace model::md {
 

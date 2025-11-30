@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "algorithms/od/fastod/hashing/hashing.h"
-#include "algorithms/od/fastod/od_ordering.h"
-#include "algorithms/od/fastod/storage/partition_cache.h"
-#include "attribute_pair.h"
-#include "error/type.h"
+#include "core/algorithms/od/fastod/hashing/hashing.h"
+#include "core/algorithms/od/fastod/model/attribute_pair.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/config/error/type.h"
 
 namespace algos::fastod {
 

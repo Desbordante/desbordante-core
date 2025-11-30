@@ -1,13 +1,13 @@
 #pragma once
 
-#include "algorithms/md/hymd/indexes/dictionary_compressor.h"
-#include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
-#include "algorithms/md/hymd/lattice/level_getter.h"
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/recommendation.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/hymd/validator.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/indexes/dictionary_compressor.h"
+#include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
+#include "core/algorithms/md/hymd/lattice/level_getter.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/recommendation.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/hymd/validator.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::hymd {
 

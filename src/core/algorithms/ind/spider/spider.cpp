@@ -3,21 +3,21 @@
  *
  * Spider algorithm class methods definition
  */
-#include "spider.h"
+#include "core/algorithms/ind/spider/spider.h"
 
 #include <functional>
 #include <queue>
 #include <string>
 #include <type_traits>
 
-#include "attribute.h"
-#include "config/equal_nulls/option.h"
-#include "config/error/option.h"
-#include "config/mem_limit/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/thread_number/option.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/ind/spider/attribute.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/error/option.h"
+#include "core/config/mem_limit/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/thread_number/option.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 

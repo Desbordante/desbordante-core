@@ -3,7 +3,7 @@
  *
  * Algorithm for veryfing AIND implementation.
  */
-#include "ind_verifier.h"
+#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 
 #include <set>
 #include <sstream>
@@ -11,15 +11,14 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "config/indices/option.h"
-#include "config/tabular_data/input_tables/option.h"
-#include "indices/option.h"
-#include "model/table/dataset_stream_projection.h"
-#include "model/table/table_index.h"
-#include "table/dataset_stream_fixed.h"
-#include "table/tuple_index.h"
-#include "tabular_data/input_table_type.h"
-#include "timed_invoke.h"
+#include "core/config/indices/option.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/tabular_data/input_tables/option.h"
+#include "core/model/table/dataset_stream_fixed.h"
+#include "core/model/table/dataset_stream_projection.h"
+#include "core/model/table/table_index.h"
+#include "core/model/table/tuple_index.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 

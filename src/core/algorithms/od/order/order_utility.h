@@ -6,9 +6,9 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "model/table/column_index.h"
-#include "model/table/tuple_index.h"
-#include "model/table/typed_column_data.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace algos::order {
 using Node = std::vector<model::ColumnIndex>;

@@ -10,7 +10,7 @@
 // clang-format off
 // NOLINTBEGIN(readability-identifier-naming)
 
-#include "murmur_hash_3.h"
+#include "core/algorithms/ind/faida/hashing/murmur_hash_3.h"
 
 //-----------------------------------------------------------------------------
 // Platform-specific functions and macros

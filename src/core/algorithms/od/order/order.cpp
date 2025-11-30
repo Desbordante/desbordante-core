@@ -1,18 +1,18 @@
-#include "order.h"
+#include "core/algorithms/od/order/order.h"
 
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
 
-#include "config/names_and_descriptions.h"
-#include "config/tabular_data/input_table/option.h"
-#include "dependency_checker.h"
-#include "list_lattice.h"
-#include "model/table/tuple_index.h"
-#include "model/types/types.h"
-#include "order_utility.h"
-#include "util/logger.h"
+#include "core/algorithms/od/order/dependency_checker.h"
+#include "core/algorithms/od/order/list_lattice.h"
+#include "core/algorithms/od/order/order_utility.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/types/types.h"
+#include "core/util/logger.h"
 
 namespace algos::order {
 

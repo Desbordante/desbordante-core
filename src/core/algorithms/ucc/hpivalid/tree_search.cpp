@@ -1,4 +1,4 @@
-#include "algorithms/ucc/hpivalid/tree_search.h"
+#include "core/algorithms/ucc/hpivalid/tree_search.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -10,10 +10,10 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/ucc/hpivalid/config.h"
-#include "algorithms/ucc/hpivalid/pli_table.h"
-#include "algorithms/ucc/hpivalid/result_collector.h"
-#include "util/logger.h"
+#include "core/algorithms/ucc/hpivalid/config.h"
+#include "core/algorithms/ucc/hpivalid/pli_table.h"
+#include "core/algorithms/ucc/hpivalid/result_collector.h"
+#include "core/util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 

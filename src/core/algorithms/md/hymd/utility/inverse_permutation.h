@@ -2,7 +2,7 @@
 
 #include <cstddef>
 
-#include "model/index.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::utility {
 // swap should swap indices too

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/nar/value_range.h"
-#include "rng.h"
+#include "core/algorithms/nar/des/rng.h"
+#include "core/algorithms/nar/value_range.h"
 
 namespace algos::des {
 

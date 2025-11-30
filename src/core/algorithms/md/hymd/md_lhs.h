@@ -3,9 +3,9 @@
 #include <cstddef>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "model/index.h"
-#include "util/py_tuple_hash.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/model/index.h"
+#include "core/util/py_tuple_hash.h"
 
 namespace algos::hymd {
 struct LhsNode {

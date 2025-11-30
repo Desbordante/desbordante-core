@@ -1,10 +1,10 @@
 #pragma once
 
-#include "algorithms/md/hymd/lattice/lhs_specialization.h"
-#include "algorithms/md/hymd/lattice/md.h"
-#include "algorithms/md/hymd/lattice/multi_md.h"
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/utility/exclusion_list.h"
+#include "core/algorithms/md/hymd/lattice/lhs_specialization.h"
+#include "core/algorithms/md/hymd/lattice/md.h"
+#include "core/algorithms/md/hymd/lattice/multi_md.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/utility/exclusion_list.h"
 
 namespace algos::hymd::lattice {
 struct MultiMdSpecialization {
