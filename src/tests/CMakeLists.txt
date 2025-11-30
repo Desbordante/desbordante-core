@@ -22,8 +22,6 @@ if (COMPILE_TESTS)
 
 	# ---- Test Dependencies ----
 
-    target_include_directories(${UNIT_TEST_BINARY} PRIVATE "common")
-
 	# Link test executable with:
 	# PRIVATE:
 	# - Core library (implementation under test)
@@ -43,8 +41,6 @@ if (COMPILE_BENCHMARKS)
 	add_executable(${BENCHMARK_BINARY} ${common_sources} ${benchmark_sources})
 
 	# ---- Benchmark Dependencies ----
-
-    target_include_directories(${BENCHMARK_BINARY} PRIVATE "common")
 
 	# Link benchmark executable with:
 	# PRIVATE:
