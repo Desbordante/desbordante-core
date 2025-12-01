@@ -311,8 +311,8 @@ class BatchValidator::MultiCardPartitionElementProvider {
                     kSLTVPartitionColumn;
             // LHS has cardinality greater than 1, so is not empty.
             DESBORDANTE_ASSUME(lhs_iter_ != lhs_end_);
-            rhs_records_matching_criteria_.push_back(
-                    {cur_col_match_index_, kSLTVPartitionColumn, lhs_iter_->ccv_id});
+            rhs_records_matching_criteria_.emplace_back(cur_col_match_index_, kSLTVPartitionColumn,
+                                                        lhs_iter_->ccv_id);
             ++cur_col_match_index_;
             ++lhs_iter_;
         }
@@ -333,8 +333,8 @@ class BatchValidator::MultiCardPartitionElementProvider {
                     sltvpe_partition_key_.push_back(left_column_index);
                 }
 
-                rhs_records_matching_criteria_.push_back(
-                        {cur_col_match_index_, partition_key_index, ccv_id});
+                rhs_records_matching_criteria_.emplace_back(cur_col_match_index_,
+                                                            partition_key_index, ccv_id);
                 ++cur_col_match_index_;
             }
         }

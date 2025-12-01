@@ -37,10 +37,6 @@ struct TaneValidationParams {
     algos::AfdErrorMeasure error_measure;
     std::vector<AFD> afds;
     CSVConfig csv_config;
-
-    TaneValidationParams(algos::AfdErrorMeasure error_measure, std::vector<AFD>&& afds,
-                         CSVConfig const& csv_config)
-        : error_measure(error_measure), afds(afds), csv_config(csv_config) {}
 };
 
 struct ColumnErr {
@@ -51,9 +47,6 @@ struct ColumnErr {
 struct PdepSelfValidationParams {
     std::vector<ColumnErr> errors;
     CSVConfig csv_config;
-
-    PdepSelfValidationParams(std::vector<ColumnErr>&& errors, CSVConfig const& csv_config)
-        : errors(errors), csv_config(csv_config) {}
 };
 
 class TestTanePdepSelfValidation : public ::testing::TestWithParam<PdepSelfValidationParams> {};

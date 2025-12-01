@@ -71,7 +71,7 @@ private:
         void AddRecommendations(RecordCluster const& same_left_value_records,
                                 CompressedRecord const& right_record) {
             for (RecPtr left_record_ptr : same_left_value_records) {
-                recommendations_->push_back({left_record_ptr, &right_record});
+                recommendations_->emplace_back(left_record_ptr, &right_record);
             }
         }
 
@@ -79,7 +79,7 @@ private:
                           CompressedRecord const& right_record) {
             current_ccv_id_ = kLowestCCValueId;
             for (RecPtr left_record_ptr : same_left_value_records) {
-                recommendations_->push_back({left_record_ptr, &right_record});
+                recommendations_->emplace_back(left_record_ptr, &right_record);
             }
         }
 
