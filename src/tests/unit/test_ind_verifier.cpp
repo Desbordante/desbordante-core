@@ -23,10 +23,6 @@ struct INDVerifierTestConfig {
     algos::INDVerifier::RawIND ind;
     /* `std::nullopt` iff IND holds */
     std::optional<INDVerifierErrorInfo> error_opt{};
-
-    INDVerifierTestConfig(CSVConfigs const& csv_configs, algos::INDVerifier::RawIND&& ind,
-                          std::optional<INDVerifierErrorInfo>&& error_opt = {})
-        : csv_configs(csv_configs), ind(std::move(ind)), error_opt(error_opt) {}
 };
 
 namespace {
