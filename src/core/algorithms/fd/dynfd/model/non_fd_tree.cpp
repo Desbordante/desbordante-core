@@ -7,28 +7,18 @@
 
 namespace algos::dynfd {
 
-std::shared_ptr<NonFDTreeVertex> NonFDTree::AddNonFD(
-        boost::dynamic_bitset<> const& lhs, size_t rhs,
-        ViolatingRecordPair violationPair = std::nullopt) {
+void NonFDTree::AddNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                         ViolatingRecordPair violationPair) {
     NonFDTreeVertex* cur_node = root_.get();
     cur_node->SetAttribute(rhs);
 
     for (size_t bit = lhs.find_first(); bit != boost::dynamic_bitset<>::npos;
          bit = lhs.find_next(bit)) {
-        bool is_new = cur_node->AddChild(bit);
-
-        if (is_new && lhs.find_next(bit) == boost::dynamic_bitset<>::npos) {
-            auto added_node = cur_node->GetChildPtr(bit);
-            added_node->SetAttribute(rhs);
-            added_node->SetNonFd(rhs, violationPair);
-            return added_node;
-        }
-
+        cur_node->AddChild(bit);
         cur_node = cur_node->GetChild(bit);
         cur_node->SetAttribute(rhs);
     }
     cur_node->SetNonFd(rhs, violationPair);
-    return nullptr;
 }
 
 bool NonFDTree::ContainsNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs) {
@@ -55,7 +45,7 @@ std::shared_ptr<NonFDTreeVertex> NonFDTree::FindNonFdVertex(boost::dynamic_bitse
             return nullptr;
         }
 
-        cur_node = cur_node->GetChildShared(bit);
+        cur_node = cur_node->GetChildPtr(bit);
     }
 
     return cur_node;
@@ -79,7 +69,7 @@ bool NonFDTree::ContainsNonFdOrSpecial(boost::dynamic_bitset<> const& lhs, size_
     return root_->ContainsNonFdOrSpecialRecursive(lhs, rhs, 0);
 }
 
-std::vector<LhsPair> NonFDTree::GetLevel(unsigned int target_level) {
+std::vector<LhsPair> NonFDTree::GetLevel(size_t target_level) {
     boost::dynamic_bitset const empty_lhs(GetNumAttributes());
 
     std::vector<LhsPair> vertices;

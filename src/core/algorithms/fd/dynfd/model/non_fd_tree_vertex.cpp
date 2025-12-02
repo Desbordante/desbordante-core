@@ -21,7 +21,7 @@ bool NonFDTreeVertex::AddChild(size_t const pos) {
     return false;
 }
 
-void NonFDTreeVertex::GetLevelRecursive(unsigned const target_level, unsigned const cur_level,
+void NonFDTreeVertex::GetLevelRecursive(size_t const target_level, size_t const cur_level,
                                         boost::dynamic_bitset<> lhs,
                                         std::vector<LhsPair>& vertices) {
     if (cur_level == target_level) {

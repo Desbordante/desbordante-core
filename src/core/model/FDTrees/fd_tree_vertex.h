@@ -57,7 +57,7 @@ private:
         fds_.set(pos);
     }
 
-    boost::dynamic_bitset<> GetAttributes() const noexcept {
+    boost::dynamic_bitset<> const& GetAttributes() const noexcept {
         return attributes_;
     }
 
@@ -93,7 +93,7 @@ private:
         return false;
     }
 
-    void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
+    void GetLevelRecursive(size_t target_level, size_t cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
     void GetFdAndGeneralsRecursive(boost::dynamic_bitset<> const& lhs,
@@ -120,7 +120,7 @@ public:
         return num_attributes_;
     }
 
-    boost::dynamic_bitset<> GetFDs() const noexcept {
+    boost::dynamic_bitset<> const& GetFDs() const noexcept {
         return fds_;
     }
 
@@ -157,8 +157,6 @@ public:
     bool HasChildren() const noexcept {
         return children_count_ > 0;
     }
-
-    bool CheckChildren();
 };
 
 }  // namespace model

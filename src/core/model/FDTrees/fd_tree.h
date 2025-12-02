@@ -119,7 +119,7 @@ public:
      * Gets nodes representing FDs with LHS of given arity.
      * @param target_level arity of returned FDs LHSs
      */
-    std::vector<LhsPair> GetLevel(unsigned target_level) {
+    std::vector<LhsPair> GetLevel(size_t target_level) {
         boost::dynamic_bitset const empty_lhs(GetNumAttributes());
 
         std::vector<LhsPair> vertices;

@@ -3,7 +3,7 @@
 #include <numeric>
 #include <unordered_map>
 
-#include <easylogging++.h>
+#include "util/logger.h"
 
 namespace algos::dynfd {
 
@@ -31,53 +31,104 @@ size_t DynamicRelationData::GetNextRecordId() const {
     return next_record_id_;
 }
 
+/**
+ * Gets or generates value_id for a field and stores it in compressed records.
+ *
+ * Strategy:
+ * 1. First occurrence:
+ *    We assume the field might remain unique. For optimizations in algorithm
+ *    we store negative markers instead of the actual ID.
+ *    - col_dict[field] = -record_index - 1
+ *    - compressed_records = -value_id - 1
+ *
+ * 2. Second occurrence:
+ *    The field is no longer unique. We must fix the previous entry.
+ *    - We recover the original record_index from the dictionary.
+ *      first_record_index = -col_dict[field] - 1
+ *    - We recover the original value_id from the compressed record.
+ *      value_id = -compressed_records[first_record_index][col_index] - 1
+ *    - We update both the dictionary and the old record to use the positive value_id.
+ *
+ * 3. Subsequent occurrences:
+ *    Standard dictionary lookup.
+ *    compressed_records[record_index][col_index] == value_id == col_dict[field]
+ */
+int DynamicRelationData::GetAndStoreValueId(size_t col_index, std::string const& field,
+                                            ValueDictionary& value_dictionary, int& next_value_id,
+                                            CompressedRecords& compressed_records) {
+    auto& col_dict = value_dictionary[col_index];
+    auto location = col_dict.find(field);
+    int value_id;
+
+    if (location == col_dict.end()) {
+        value_id = next_value_id++;
+        col_dict[field] = -static_cast<int>(compressed_records.size());
+        compressed_records.back()[col_index] = -value_id - 1;
+    } else {
+        value_id = location->second;
+        if (value_id < 0) {
+            int first_record_index = -value_id - 1;
+            value_id = -compressed_records[first_record_index][col_index] - 1;
+            location->second = value_id;
+            compressed_records[first_record_index][col_index] = value_id;
+        }
+        compressed_records.back()[col_index] = value_id;
+    }
+    return value_id;
+}
+
+void DynamicRelationData::ProcessInputBatch(
+        config::InputTable& table, size_t num_columns, size_t col_offset,
+        ValueDictionary& value_dictionary, int& next_value_id,
+        CompressedRecords& compressed_records,
+        std::function<void(size_t col_index, int value_id)> const& on_value,
+        std::function<void()> const& on_row_finished) {
+    if (table == nullptr) {
+        LOG_WARN("Input table is null, skipping batch");
+        return;
+    }
+
+    size_t const expected_row_size = num_columns + col_offset;
+
+    while (table->HasNextRow()) {
+        std::vector<std::string> row = table->GetNextRow();
+
+        if (row.size() != expected_row_size) {
+            LOG_WARN("Unexpected number of columns for a row, skipping (expected {}, got {})",
+                     expected_row_size, row.size());
+            continue;
+        }
+
+        compressed_records.emplace_back(num_columns);
+
+        for (size_t index = 0; index < num_columns; ++index) {
+            std::string const& field = row[index + col_offset];
+            int value_id = GetAndStoreValueId(index, field, value_dictionary, next_value_id,
+                                              compressed_records);
+            on_value(index, value_id);
+        }
+
+        if (on_row_finished) {
+            on_row_finished();
+        }
+    }
+    table->Reset();
+}
+
 std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
         config::InputTable const& input_table) {
     auto schema = std::make_unique<RelationalSchema>(input_table->GetRelationName());
     int next_value_id = 1;
     size_t const num_columns = input_table->GetNumberOfColumns();
     ValueDictionary value_dictionary(num_columns);
-    std::vector<std::vector<int>> column_dictionary_encoded_data =
-            std::vector<std::vector<int>>(num_columns);
-    std::vector<std::vector<int>> compressed_records;
+    std::vector<std::vector<int>> column_dictionary_encoded_data(num_columns);
+    CompressedRecords compressed_records;
 
-    while (input_table->HasNextRow()) {
-        std::vector<std::string> row = input_table->GetNextRow();
-
-        if (row.size() != num_columns) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << num_columns << ", got " << row.size() << ")";
-            continue;
-        }
-
-        compressed_records.emplace_back(num_columns);
-
-        for (size_t index = 0; index < row.size(); ++index) {
-            std::string const& field = row[index];
-
-            auto location = value_dictionary[index].find(field);
-            int value_id;
-            if (location == value_dictionary[index].end()) {
-                value_id = next_value_id++;
-                value_dictionary[index][field] = -static_cast<int>(compressed_records.size());
-
-                compressed_records.back()[index] = -value_id - 1;
-            } else {
-                value_id = location->second;
-
-                if (value_id < 0) {
-                    int column_ind = -value_id - 1;
-                    value_id = -compressed_records[column_ind][index] - 1;
-                    location->second = value_id;
-                    compressed_records[column_ind][index] = value_id;
-                }
-
-                compressed_records.back()[index] = value_id;
-            }
-
-            column_dictionary_encoded_data[index].push_back(value_id);
-        }
-    }
+    ProcessInputBatch(const_cast<config::InputTable&>(input_table), num_columns, 0,
+                      value_dictionary, next_value_id, compressed_records,
+                      [&](size_t col_idx, int value_id) {
+                          column_dictionary_encoded_data[col_idx].push_back(value_id);
+                      });
 
     std::vector<CompressedColumnData> column_data;
     for (size_t i = 0; i < num_columns; ++i) {
@@ -91,70 +142,41 @@ std::unique_ptr<DynamicRelationData> DynamicRelationData::CreateFrom(
     std::vector<size_t> all_ids(next_record_id);
     std::iota(all_ids.begin(), all_ids.end(), 0);
 
-    input_table->Reset();
-
     return std::make_unique<DynamicRelationData>(std::move(schema), std::move(column_data),
                                                  std::unordered_set(all_ids.begin(), all_ids.end()),
                                                  std::move(value_dictionary), next_value_id,
                                                  next_record_id, std::move(compressed_records));
 }
 
-// ReSharper disable once CppParameterMayBeConstPtrOrRef
 void DynamicRelationData::InsertBatch(config::InputTable& insert_statements_table) {
-    if (insert_statements_table == nullptr) {
-        LOG(WARNING) << "Insert statements table is null, skipping insert batch";
-        return;
-    }
+    ProcessInputBatch(
+            insert_statements_table, GetNumColumns(), 0, value_dictionary_, next_value_id_,
+            *compressed_records_,
+            [this](size_t col_idx, int value_id) {
+                size_t const new_record_id =
+                        column_data_[col_idx].GetPositionListIndexPtr()->Insert(value_id);
+                assert(new_record_id == next_record_id_);
+            },
+            [this]() { stored_row_ids_.insert(next_record_id_++); });
+}
 
-    while (insert_statements_table->HasNextRow()) {
-        std::vector<std::string> row = insert_statements_table->GetNextRow();
-
-        if (row.size() != GetNumColumns()) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << GetNumColumns() << ", got " << row.size() << ")";
-            continue;
-        }
-
-        compressed_records_->emplace_back(row.size());
-
-        for (size_t index = 0; index < row.size(); ++index) {
-            std::string const& field = row[index];
-
-            int value_id;
-            if (auto location = value_dictionary_[index].find(field);
-                location == value_dictionary_[index].end()) {
-                value_id = next_value_id_++;
-                value_dictionary_[index][field] = -static_cast<int>(compressed_records_->size());
-
-                compressed_records_->back()[index] = -value_id - 1;
-            } else {
-                value_id = location->second;
-
-                if (value_id < 0) {
-                    int column_ind = -value_id - 1;
-                    value_id = -(*compressed_records_)[column_ind][index] - 1;
-                    location->second = value_id;
-                    (*compressed_records_)[column_ind][index] = value_id;
-                }
-
-                compressed_records_->back()[index] = value_id;
-            }
-
-            size_t const new_record_id =
-                    column_data_[index].GetPositionListIndexPtr()->Insert(value_id);
-            assert(new_record_id == next_record_id_);
-        }
-
-        stored_row_ids_.insert(next_record_id_++);
-    }
-
-    insert_statements_table->Reset();
+void DynamicRelationData::InsertRecordsFromUpdateBatch(
+        config::InputTable& update_statements_table) {
+    ProcessInputBatch(
+            update_statements_table, GetNumColumns(), 1, value_dictionary_, next_value_id_,
+            *compressed_records_,
+            [&](size_t col_idx, int value_id) {
+                size_t const new_record_id =
+                        column_data_[col_idx].GetPositionListIndexPtr()->Insert(value_id);
+                assert(new_record_id == next_record_id_);
+            },
+            [&]() { stored_row_ids_.insert(next_record_id_++); });
 }
 
 void DynamicRelationData::DeleteBatch(std::unordered_set<size_t> const& delete_statement_indices) {
     for (size_t row_id : delete_statement_indices) {
         if (!IsRowIndexValid(row_id)) {
-            LOG(WARNING) << "Row ID " << row_id << " is not valid, skipping update";
+            LOG_WARN("Row ID {} is not valid, skipping update", row_id);
             continue;
         }
 
@@ -168,7 +190,7 @@ void DynamicRelationData::DeleteBatch(std::unordered_set<size_t> const& delete_s
 void DynamicRelationData::DeleteRecordsFromUpdateBatch(
         config::InputTable& update_statements_table) {
     if (update_statements_table == nullptr) {
-        LOG(WARNING) << "Update statements table is null, skipping update batch";
+        LOG_WARN("Update statements table is null, skipping update batch");
         return;
     }
 
@@ -176,71 +198,20 @@ void DynamicRelationData::DeleteRecordsFromUpdateBatch(
         std::vector<std::string> row = update_statements_table->GetNextRow();
 
         if (row.size() != GetNumColumns() + 1) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << GetNumColumns() + 1 << ", got " << row.size() << ")";
+            LOG_WARN("Unexpected number of columns for a row, skipping (expected {}, got {})",
+                     GetNumColumns() + 1, row.size());
             continue;
         }
 
         size_t row_id = std::stoull(row.front());
         if (!IsRowIndexValid(row_id)) {
-            LOG(WARNING) << "Row ID " << row_id << " is not valid, skipping update";
+            LOG_WARN("Row ID {} is not valid, skipping update", row_id);
             continue;
         }
 
         for (size_t i = 0; i < GetNumColumns(); ++i) {
             column_data_[i].GetPositionListIndexPtr()->Erase(row_id);
         }
-    }
-
-    update_statements_table->Reset();
-}
-
-void DynamicRelationData::InsertRecordsFromUpdateBatch(
-        config::InputTable& update_statements_table) {
-    if (update_statements_table == nullptr) {
-        LOG(WARNING) << "Update statements table is null, skipping update batch";
-        return;
-    }
-
-    while (update_statements_table->HasNextRow()) {
-        std::vector<std::string> row = update_statements_table->GetNextRow();
-
-        if (row.size() != GetNumColumns() + 1) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << GetNumColumns() + 1 << ", got " << row.size() << ")";
-            continue;
-        }
-
-        compressed_records_->emplace_back(GetNumColumns());
-
-        for (size_t index = 0; index < GetNumColumns(); ++index) {
-            std::string const& field = row[index + 1];
-
-            int value_id;
-            if (auto location = value_dictionary_[index].find(field);
-                location == value_dictionary_[index].end()) {
-                value_id = next_value_id_++;
-                value_dictionary_[index][field] = -static_cast<int>(compressed_records_->size());
-
-                compressed_records_->back()[index] = -value_id - 1;
-            } else {
-                value_id = location->second;
-
-                if (value_id < 0) {
-                    int column_ind = -value_id - 1;
-                    value_id = -(*compressed_records_)[column_ind][index] - 1;
-                    location->second = value_id;
-                    (*compressed_records_)[column_ind][index] = value_id;
-                }
-
-                compressed_records_->back()[index] = value_id;
-            }
-
-            size_t const new_record_id =
-                    column_data_[index].GetPositionListIndexPtr()->Insert(value_id);
-            assert(new_record_id == next_record_id_);
-        }
-        stored_row_ids_.insert(next_record_id_++);
     }
 
     update_statements_table->Reset();

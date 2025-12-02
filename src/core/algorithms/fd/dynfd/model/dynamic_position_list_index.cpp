@@ -2,8 +2,6 @@
 
 #include <ranges>
 
-#include <easylogging++.h>
-
 namespace algos::dynfd {
 DynamicPositionListIndex::Cluster::Cluster(std::vector<size_t> unsorted_records) {
     std::ranges::sort(unsorted_records);
@@ -51,7 +49,7 @@ DynamicPositionListIndex::DynamicPositionListIndex(
       columnIndex_(columnIndex) {}
 
 std::unique_ptr<DynamicPositionListIndex> DynamicPositionListIndex::CreateFor(
-        std::vector<int> const &data, model::ColumnIndex columnIndex) {
+        std::vector<int> const& data, model::ColumnIndex columnIndex) {
     std::list<Cluster> clusters;
     std::unordered_map<int, std::list<Cluster>::iterator> inverted_index;
     std::unordered_map<size_t, int> hash_index;
@@ -101,7 +99,7 @@ unsigned int DynamicPositionListIndex::GetSize() const {
     return size_;
 }
 
-DynamicPositionListIndex::Cluster const &DynamicPositionListIndex::GetCluster(
+DynamicPositionListIndex::Cluster const& DynamicPositionListIndex::GetCluster(
         int cluster_id) const {
     auto it = clusters_.begin();
     std::advance(it, cluster_id);
@@ -119,7 +117,7 @@ int DynamicPositionListIndex::GetRecordValue(size_t record_id) const {
 
 std::string DynamicPositionListIndex::ToString() const {
     std::string res = "[";
-    for (auto const &cluster : clusters_) {
+    for (auto const& cluster : clusters_) {
         res.push_back('[');
         for (int const v : cluster) {
             res.append(std::to_string(v) + ", ");
@@ -137,7 +135,7 @@ model::ColumnIndex DynamicPositionListIndex::GetColumnIndex() const {
     return columnIndex_;
 }
 
-std::unordered_map<size_t, int> const &DynamicPositionListIndex::GetHashIndex() const {
+std::unordered_map<size_t, int> const& DynamicPositionListIndex::GetHashIndex() const {
     return hash_index_;
 }
 

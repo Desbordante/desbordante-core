@@ -1,7 +1,5 @@
 #include "dynfd.h"
 
-#include <easylogging++.h>
-
 #include "algo_factory.h"
 #include "algorithms/fd/hycommon/all_column_combinations.h"
 #include "algorithms/fd/hycommon/preprocessor.h"
@@ -22,7 +20,7 @@
 namespace algos::dynfd {
 
 void DynFD::ExecuteHyFD() {
-    std::shared_ptr hy_fd_relation = ColumnLayoutRelationData::CreateFrom(*input_table_, true);
+    auto hy_fd_relation = ColumnLayoutRelationData::CreateFrom(*input_table_, true);
 
     auto&& [plis, pli_records, og_mapping] = hy::Preprocess(hy_fd_relation.get());
     auto plis_shared = std::make_shared<hy::PLIs>(std::move(plis));
@@ -46,8 +44,6 @@ void DynFD::ExecuteHyFD() {
         if (comparison_suggestions.empty()) {
             break;
         }
-
-        LOG(TRACE) << "Cycle done";
     }
 
     for (size_t rhs = 0; rhs < hy_fd_relation->GetNumColumns(); ++rhs) {

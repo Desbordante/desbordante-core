@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -29,6 +30,17 @@ class DynamicRelationData : public AbstractRelationData<CompressedColumnData> {
 
 private:
     [[nodiscard]] size_t GetNumRows() const final;
+
+    static int GetAndStoreValueId(size_t col_index, std::string const& field,
+                                  ValueDictionary& value_dictionary, int& next_value_id,
+                                  CompressedRecords& compressed_records);
+
+    static void ProcessInputBatch(
+            config::InputTable& table, size_t num_columns, size_t col_offset,
+            ValueDictionary& value_dictionary, int& next_value_id,
+            CompressedRecords& compressed_records,
+            std::function<void(size_t col_index, int value_id)> const& on_value,
+            std::function<void()> const& on_row_finished = nullptr);
 
 public:
     explicit DynamicRelationData(std::unique_ptr<RelationalSchema> schema,

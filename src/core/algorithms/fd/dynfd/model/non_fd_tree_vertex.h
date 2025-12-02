@@ -14,7 +14,7 @@
 namespace algos::dynfd {
 
 /**
- * Pair of pointer ot FD tree node and the corresponding LHS.
+ * Pair of pointer of FD tree node and the corresponding LHS.
  */
 
 struct NonFDTreeVertex;
@@ -59,11 +59,7 @@ private:
         return children_.at(pos).get();
     }
 
-    std::shared_ptr<NonFDTreeVertex> GetChildShared(size_t pos) {
-        return children_.at(pos);
-    }
-
-    boost::dynamic_bitset<> GetAttributes() const noexcept {
+    boost::dynamic_bitset<> const& GetAttributes() const noexcept {
         return attributes_;
     }
 
@@ -87,7 +83,7 @@ private:
      */
     bool AddChild(size_t pos);
 
-    void GetLevelRecursive(unsigned target_level, unsigned cur_level, boost::dynamic_bitset<> lhs,
+    void GetLevelRecursive(size_t target_level, size_t cur_level, boost::dynamic_bitset<> lhs,
                            std::vector<LhsPair>& vertices);
 
     void GetNonFdAndSpecialsRecursive(boost::dynamic_bitset<> const& lhs,
@@ -106,8 +102,6 @@ private:
 
     void FillNonFDs(std::vector<RawFD>& fds, boost::dynamic_bitset<>& lhs) const;
 
-    bool CheckChildren();
-
 public:
     explicit NonFDTreeVertex(size_t numAttributes) noexcept
         : non_fds_(numAttributes),
@@ -119,7 +113,7 @@ public:
         return num_attributes_;
     }
 
-    boost::dynamic_bitset<> GetNonFDs() const noexcept {
+    boost::dynamic_bitset<> const& GetNonFDs() const noexcept {
         return non_fds_;
     }
 
@@ -163,14 +157,10 @@ public:
         return children_.at(pos).get();
     }
 
-    std::shared_ptr<NonFDTreeVertex> GetChildShared(size_t const pos) const {
-        return children_.at(pos);
-    }
-
     std::shared_ptr<NonFDTreeVertex> GetChildIfExists(size_t pos) const;
 
     bool ContainsChildAt(size_t const pos) const {
-        return children_.at(pos) != nullptr;
+        return !children_.empty() && children_.at(pos) != nullptr;
     }
 
     bool HasChildren() const noexcept {

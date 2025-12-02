@@ -7,7 +7,7 @@
 
 namespace model {
 
-void FDTreeVertex::GetLevelRecursive(unsigned target_level, unsigned cur_level,
+void FDTreeVertex::GetLevelRecursive(size_t target_level, size_t cur_level,
                                      boost::dynamic_bitset<> lhs, std::vector<LhsPair>& vertices) {
     if (cur_level == target_level) {
         if (fds_.any()) {

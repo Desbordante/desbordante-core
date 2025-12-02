@@ -38,8 +38,8 @@ public:
         return *root_;
     }
 
-    std::shared_ptr<NonFDTreeVertex> AddNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs,
-                                              ViolatingRecordPair violationPair);
+    void AddNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs,
+                  ViolatingRecordPair violationPair);
 
     bool ContainsNonFD(boost::dynamic_bitset<> const& lhs, size_t rhs);
 
@@ -64,7 +64,7 @@ public:
      * Gets nodes representing NonFDs with LHS of given arity.
      * @param target_level arity of returned NonFDs LHSs
      */
-    std::vector<LhsPair> GetLevel(unsigned target_level);
+    std::vector<LhsPair> GetLevel(size_t target_level);
 
     /**
      * @return vector of all NonFDs
