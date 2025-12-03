@@ -16,41 +16,50 @@ Example usage:
 
 from os import scandir
 from sys import argv
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
+from collections import namedtuple
 from json import load as j_load
 from pathlib import Path
 
-# Read serialized results from JSON file
-def read_results(filename: str) -> dict[str: int]:
-    with open(filename, 'r') as file:
-        return {algo['name'] : algo['time'] for algo in j_load(file)}
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
-def read_all_results(directory: str) -> list[dict[str, int]]:
+Results = namedtuple('Results', ['date', 'results'])
+
+
+# Read serialized results from JSON file
+def read_results(filename: str) -> Results:
+    with open(filename, 'r') as file:
+        json_file = j_load(file)
+        date = json_file['date']
+        results = json_file['results']
+        return Results(date, {algo['name']: algo['time'] for algo in results})
+
+
+def read_all_results(directory: str) -> list[Results]:
     '''Read all results from directory sorted by recency.
 
     Args:
         directory: Path to directory with JSON results files
 
     Returns:
-        List of results dictionaries, most recent first
+        List of results objects, most recent first
     '''
     all_results = []
     try:
         # Sort numerically by filename (without extension)
-        for fd in sorted(
-            scandir(directory), 
-            key=lambda x: int(Path(x.name).stem), 
-            reverse=True
-        ):
+        for fd in sorted(scandir(directory),
+                         key=lambda x: int(Path(x.name).stem),
+                         reverse=True):
             if fd.is_file() and fd.name.endswith('.json'):
                 all_results.append(read_results(fd.path))
     except (FileNotFoundError, PermissionError) as e:
-        raise RuntimeError(f'Failed to scan results directory {directory}') from e
+        raise RuntimeError(
+            f'Failed to scan results directory {directory}') from e
 
     return all_results
 
-def build_plot(results: list[dict[str, int]], baseline: dict[str, int], name: str,
+
+def build_plot(results: list[Results], baseline: Results, name: str,
                pages: PdfPages) -> None:
     '''Build and save a plot for specific algorithm.
 
@@ -60,24 +69,35 @@ def build_plot(results: list[dict[str, int]], baseline: dict[str, int], name: st
         name: Name of the algorithm
         pages: PdfPages object to save the plot to
     '''
+    dates = []
     points = []
     for res in results:
-        points.append(res.get(name, 0) / 1000)
+        dates.append(res.date)
+        points.append(res.results.get(name, 0) / 1000)
 
     fig, ax = plt.subplots()
-    ax.stairs(points, fill=True, label='Results')
+    # Dates are not guaranteed to be unique, so tick_label must be used
+    ax.bar(range(len(points)),
+           points,
+           tick_label=dates,
+           fill=True,
+           label='Results')
     ax.set_title(name)
-    ax.set_xlabel('Run number')
+    ax.set_xlabel('Date')
     ax.set_ylabel('Time, s')
+    plt.xticks(rotation=45)
     ax.grid(visible=True, linestyle='--', alpha=0.7)
 
-    if name in baseline:
-        ax.stairs([baseline[name] / 1000 for i in range(len(results))], hatch='//',
-                  label='Baseline')
+    if name in baseline.results:
+        ax.axhline(baseline.results[name] / 1000,
+                   color='green',
+                   label='Baseline')
 
     ax.legend()
-    pages.savefig(fig)
+    # Padding is needed for date to be displayed correctly
+    pages.savefig(fig, bbox_inches='tight', pad_inches=0.15)
     plt.close(fig)
+
 
 def main() -> None:
     '''Main function to generate performance plots.
@@ -89,8 +109,9 @@ def main() -> None:
     4. Output PDF filename
     '''
     if len(argv) != 5:
-        print('Usage: python3 display_benchmarks.py <old_results> <baseline.json> '
-              '<curr_result.json> <out.pdf>')
+        print(
+            'Usage: python3 display_benchmarks.py <old_results> <baseline.json> '
+            '<curr_result.json> <out.pdf>')
         exit(1)
 
     results = read_all_results(argv[1])
@@ -99,8 +120,9 @@ def main() -> None:
     results.append(last_res)
 
     with PdfPages(argv[4]) as pdf:
-        for name in last_res:
+        for name in last_res.results:
             build_plot(results, baseline, name, pdf)
+
 
 if __name__ == '__main__':
     main()
