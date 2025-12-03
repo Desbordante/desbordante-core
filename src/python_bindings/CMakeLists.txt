@@ -6,7 +6,7 @@ project(
     DESCRIPTION "Python bindings to the interface of the Desbordante C++ core library"
 )
 
-CPMAddPackage("gh:pybind/pybind11@2.13.4")
+CPMAddPackage("gh:pybind/pybind11@3.0.4")
 
 # ---- Python Bindings Configuration ----
 
