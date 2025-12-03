@@ -63,21 +63,52 @@ TEST_P(TestINDVerifier, DefaultTest) {
 INSTANTIATE_TEST_SUITE_P(
         INDVerifierTestSuite, TestINDVerifier,
         ::testing::Values(
-            INDVerifierTestConfig({kIndTest3aryInds}, {{3}, {0}}),
-            INDVerifierTestConfig({kIndTest3aryInds}, {{4}, {1}}),
-            INDVerifierTestConfig({kIndTest3aryInds}, {{1}, {4}}, INDVerifierErrorInfo{.num_violating_rows = 1, .num_violating_clusters = 1, .error = config::ErrorType{1}/3}),
-            INDVerifierTestConfig({kIndTestTableFirst, kIndTestTableSecond}, {{0, 1, 2, 3}, {0, 1, 3, 4}}, std::nullopt),
-            INDVerifierTestConfig({kIndTestTableSecond, kIndTestTableFirst}, {{0, 1, 3, 4}, {0, 1, 2, 3}}, std::nullopt),
-            INDVerifierTestConfig({kIndTestTypos}, {{0}, {1}}, INDVerifierErrorInfo{.num_violating_rows = 8, .num_violating_clusters = 6, .error = config::ErrorType{6}/6}),
-            INDVerifierTestConfig({kIndTestTypos}, {{0}, {2}}, INDVerifierErrorInfo{.num_violating_rows = 3, .num_violating_clusters = 2, .error = config::ErrorType{2}/6}),
-            INDVerifierTestConfig({kIndTestTypos}, {{1}, {3}}, INDVerifierErrorInfo{.num_violating_rows = 3, .num_violating_clusters = 2, .error = config::ErrorType{2}/6}),
-            INDVerifierTestConfig({kIndTestTypos}, {{0,1}, {2,3}}, INDVerifierErrorInfo{.num_violating_rows = 3, .num_violating_clusters = 2, .error = config::ErrorType{2}/6}),
-            INDVerifierTestConfig({kIndTestTypos}, {{2}, {0}}, INDVerifierErrorInfo{.num_violating_rows = 4, .num_violating_clusters = 4, .error = config::ErrorType{4}/8}),
-            INDVerifierTestConfig({kIndTestTypos}, {{4}, {0}}, INDVerifierErrorInfo{.num_violating_rows = 5, .num_violating_clusters = 2, .error = config::ErrorType{2}/5}),
-            INDVerifierTestConfig({kIndTestTypos}, {{4}, {1}}, INDVerifierErrorInfo{.num_violating_rows = 3, .num_violating_clusters = 3, .error = config::ErrorType{3}/5}),
-            INDVerifierTestConfig({kIndTestTypos}, {{4}, {2}}, INDVerifierErrorInfo{.num_violating_rows = 7, .num_violating_clusters = 4, .error = config::ErrorType{4}/5}),
-            INDVerifierTestConfig({kIndTestTypos}, {{4}, {3}}, INDVerifierErrorInfo{.num_violating_rows = 4, .num_violating_clusters = 4, .error = config::ErrorType{4}/5})
-            ));
+                INDVerifierTestConfig({kIndTest3aryInds}, {{3}, {0}}),
+                INDVerifierTestConfig({kIndTest3aryInds}, {{4}, {1}}),
+                INDVerifierTestConfig({kIndTest3aryInds}, {{1}, {4}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 1,
+                                                           .num_violating_clusters = 1,
+                                                           .error = config::ErrorType{1} / 3}),
+                INDVerifierTestConfig({kIndTestTableFirst, kIndTestTableSecond},
+                                      {{0, 1, 2, 3}, {0, 1, 3, 4}}, std::nullopt),
+                INDVerifierTestConfig({kIndTestTableSecond, kIndTestTableFirst},
+                                      {{0, 1, 3, 4}, {0, 1, 2, 3}}, std::nullopt),
+                INDVerifierTestConfig({kIndTestTypos}, {{0}, {1}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 8,
+                                                           .num_violating_clusters = 6,
+                                                           .error = config::ErrorType{6} / 6}),
+                INDVerifierTestConfig({kIndTestTypos}, {{0}, {2}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 3,
+                                                           .num_violating_clusters = 2,
+                                                           .error = config::ErrorType{2} / 6}),
+                INDVerifierTestConfig({kIndTestTypos}, {{1}, {3}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 3,
+                                                           .num_violating_clusters = 2,
+                                                           .error = config::ErrorType{2} / 6}),
+                INDVerifierTestConfig({kIndTestTypos}, {{0, 1}, {2, 3}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 3,
+                                                           .num_violating_clusters = 2,
+                                                           .error = config::ErrorType{2} / 6}),
+                INDVerifierTestConfig({kIndTestTypos}, {{2}, {0}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 4,
+                                                           .num_violating_clusters = 4,
+                                                           .error = config::ErrorType{4} / 8}),
+                INDVerifierTestConfig({kIndTestTypos}, {{4}, {0}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 5,
+                                                           .num_violating_clusters = 2,
+                                                           .error = config::ErrorType{2} / 5}),
+                INDVerifierTestConfig({kIndTestTypos}, {{4}, {1}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 3,
+                                                           .num_violating_clusters = 3,
+                                                           .error = config::ErrorType{3} / 5}),
+                INDVerifierTestConfig({kIndTestTypos}, {{4}, {2}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 7,
+                                                           .num_violating_clusters = 4,
+                                                           .error = config::ErrorType{4} / 5}),
+                INDVerifierTestConfig({kIndTestTypos}, {{4}, {3}},
+                                      INDVerifierErrorInfo{.num_violating_rows = 4,
+                                                           .num_violating_clusters = 4,
+                                                           .error = config::ErrorType{4} / 5})));
 
 class TestINDVerifierRuntimeError : public ::testing::TestWithParam<INDVerifierTestConfig> {};
 
@@ -97,13 +128,11 @@ TEST_P(TestINDVerifierConfigurationError, TestIncorrectIndices) {
     ASSERT_THROW(create_and_execute(GetParam()), config::ConfigurationError);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        INDVerifierFailureTestSuite, TestINDVerifierConfigurationError,
-        ::testing::Values(
-            INDVerifierTestConfig({kIndTestTypos}, {{0}, {5}}),
-            INDVerifierTestConfig({kIndTestTypos}, {{6}, {7}}),
-            INDVerifierTestConfig({kIndTestTypos}, {{0, 1}, {2, 3, 4}}),
-            INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2, 3}}),
-            INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2}})
-            ));
+INSTANTIATE_TEST_SUITE_P(INDVerifierFailureTestSuite, TestINDVerifierConfigurationError,
+                         ::testing::Values(INDVerifierTestConfig({kIndTestTypos}, {{0}, {5}}),
+                                           INDVerifierTestConfig({kIndTestTypos}, {{6}, {7}}),
+                                           INDVerifierTestConfig({kIndTestTypos},
+                                                                 {{0, 1}, {2, 3, 4}}),
+                                           INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2, 3}}),
+                                           INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2}})));
 }  // namespace tests
