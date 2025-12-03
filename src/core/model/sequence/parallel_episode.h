@@ -5,9 +5,12 @@
 namespace model {
 
 class ParallelEpisode {
-private:
+protected:
     EventSet event_set_;
+
 public:
+    ParallelEpisode() {}
+
     ParallelEpisode(EventSet event_set) : event_set_(event_set) {}
 };
 

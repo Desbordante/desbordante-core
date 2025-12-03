@@ -5,6 +5,7 @@
 #include "algorithms/fem/fem_algorithm.h"
 #include "model/sequence/complex_event_sequence.h"
 #include "algorithms/fem/maxfem/model/location_list.h"
+#include "algorithms/fem/maxfem/model/parallel_episode.h"
 
 namespace algos::maxfem {
 
@@ -23,9 +24,12 @@ private:
 
     std::vector<size_t> GetEventsSupports() const;
 
-    void RemoveInfrequentEpisodes(std::vector<size_t>& events_supports);
+    void RemoveInfrequentEvents();
 
-    std::vector<LocationList> BuildLocationLists() const;
+    std::vector<ParallelEpisode> FindFrequentParallelEpisodes() const;
+
+    std::vector<std::shared_ptr<LocationList>> BuildEventsLocationLists() const;
+
 public:
     MaxFEM() {}
 };

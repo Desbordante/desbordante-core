@@ -8,6 +8,8 @@ class LocationList {
 private:
     std::vector<size_t> loc_list_;
 public:
+    LocationList() {}
+
     LocationList(std::vector<size_t> loc_list) : loc_list_(std::move(loc_list)) {}
 
     void PushBack(size_t new_location) {
