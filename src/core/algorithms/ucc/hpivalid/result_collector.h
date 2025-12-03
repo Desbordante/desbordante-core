@@ -18,7 +18,7 @@ namespace timer {
 
 using clock = std::chrono::high_resolution_clock;
 
-extern std::vector<std::string> description;
+extern std::vector<std::string> const kDescription;
 
 struct TimerInfo {
     clock::time_point begin;

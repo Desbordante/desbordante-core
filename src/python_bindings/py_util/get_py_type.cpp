@@ -26,14 +26,6 @@ namespace py = pybind11;
 
 namespace {
 
-constexpr PyTypeObject* const kPyInt = &PyLong_Type;
-constexpr PyTypeObject* const kPyBool = &PyBool_Type;
-constexpr PyTypeObject* const kPyFloat = &PyFloat_Type;
-constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
-constexpr PyTypeObject* const kPyList = &PyList_Type;
-constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
-constexpr PyTypeObject* const kPySet = &PySet_Type;
-
 py::handle MakeType(py::type type) {
     return type;
 }
@@ -56,7 +48,7 @@ py::tuple MakeTypeTuple(TypePtrs... type_ptrs) {
 }
 
 template <typename CppType, PyTypeObject*... PyTypes>
-std::pair<std::type_index, std::function<py::tuple()>> const PyTypePair{
+std::pair<std::type_index, std::function<py::tuple()>> const kPyTypePair{
         std::type_index{typeid(CppType)}, []() { return MakeTypeTuple(PyTypes...); }};
 
 }  // namespace
@@ -73,49 +65,50 @@ py::tuple GetPyType(std::type_index type_index) {
     // possible) as storing pybind11's objects themselves statically is
     // unpredictable and can lead to errors related to garbage collection.
     static std::unordered_map<std::type_index, std::function<py::tuple()>> const type_map{
-            PyTypePair<bool, kPyBool>,
-            PyTypePair<unsigned short, kPyInt>,
-            PyTypePair<int, kPyInt>,
-            PyTypePair<unsigned int, kPyInt>,
-            PyTypePair<double, kPyFloat>,
-            PyTypePair<size_t, kPyInt>,
-            PyTypePair<long double, kPyFloat>,
-            PyTypePair<std::size_t, kPyInt>,
-            PyTypePair<config::CustomRandomSeedType, kPyInt>,
-            PyTypePair<algos::metric::Metric, kPyStr>,
-            PyTypePair<algos::metric::MetricAlgo, kPyStr>,
-            PyTypePair<config::PfdErrorMeasureType, kPyStr>,
-            PyTypePair<config::AfdErrorMeasureType, kPyStr>,
-            PyTypePair<algos::InputFormat, kPyStr>,
-            PyTypePair<algos::cfd::Substrategy, kPyStr>,
-            PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
-            PyTypePair<algos::od::Ordering, kPyStr>,
-            PyTypePair<std::vector<unsigned int>, kPyList, kPyInt>,
+            kPyTypePair<bool, &PyBool_Type>,
+            kPyTypePair<unsigned short, &PyLong_Type>,
+            kPyTypePair<int, &PyLong_Type>,
+            kPyTypePair<unsigned int, &PyLong_Type>,
+            kPyTypePair<double, &PyFloat_Type>,
+            kPyTypePair<size_t, &PyLong_Type>,
+            kPyTypePair<long double, &PyFloat_Type>,
+            kPyTypePair<std::size_t, &PyLong_Type>,
+            kPyTypePair<config::CustomRandomSeedType, &PyLong_Type>,
+            kPyTypePair<algos::metric::Metric, &PyUnicode_Type>,
+            kPyTypePair<algos::metric::MetricAlgo, &PyUnicode_Type>,
+            kPyTypePair<config::PfdErrorMeasureType, &PyUnicode_Type>,
+            kPyTypePair<config::AfdErrorMeasureType, &PyUnicode_Type>,
+            kPyTypePair<algos::InputFormat, &PyUnicode_Type>,
+            kPyTypePair<algos::cfd::Substrategy, &PyUnicode_Type>,
+            kPyTypePair<algos::hymd::LevelDefinition, &PyUnicode_Type>,
+            kPyTypePair<algos::od::Ordering, &PyUnicode_Type>,
+            kPyTypePair<std::vector<unsigned int>, &PyList_Type, &PyLong_Type>,
             {typeid(algos::hymd::HyMD::ColumnMatches),
              []() {
                  return MakeTypeTuple(
-                         kPyList,
+                         &PyList_Type,
                          py::type::of<algos::hymd::preprocessing::column_matches::ColumnMatch>());
              }},
             {typeid(model::DDString),
              []() {
-                 return MakeTypeTuple(kPyTuple, kPyList, py::type::of<model::DFStringConstraint>());
+                 return MakeTypeTuple(&PyTuple_Type, &PyList_Type,
+                                      py::type::of<model::DFStringConstraint>());
              }},
             {typeid(config::InputTable),
              []() { return MakeTypeTuple(py::type::of<config::InputTable>()); }},
             {typeid(config::InputTables),
-             []() { return MakeTypeTuple(kPyList, py::type::of<config::InputTable>()); }},
+             []() { return MakeTypeTuple(&PyList_Type, py::type::of<config::InputTable>()); }},
             {typeid(algos::md::ColumnSimilarityClassifier),
              []() { return MakeTypeTuple(py::type::of<algos::md::ColumnSimilarityClassifier>()); }},
             {typeid(std::vector<algos::md::ColumnSimilarityClassifier>),
              []() {
-                 return MakeTypeTuple(kPyList,
+                 return MakeTypeTuple(&PyList_Type,
                                       py::type::of<algos::md::ColumnSimilarityClassifier>());
              }},
-            PyTypePair<std::filesystem::path, kPyStr>,
-            PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
-            PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
-            PyTypePair<std::string, kPyStr>,
+            kPyTypePair<std::filesystem::path, &PyUnicode_Type>,
+            kPyTypePair<std::vector<std::filesystem::path>, &PyList_Type, &PyUnicode_Type>,
+            kPyTypePair<std::unordered_set<size_t>, &PySet_Type, &PyLong_Type>,
+            kPyTypePair<std::string, &PyUnicode_Type>,
     };
     return type_map.at(type_index)();
 }
