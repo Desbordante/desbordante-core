@@ -13,6 +13,7 @@ namespace algos {
 class Pyro : public DependencyConsumer, public PliBasedFDAlgorithm {
 private:
     std::list<std::unique_ptr<SearchSpace>> search_spaces_;
+    std::mutex search_spaces_mutex_;
 
     CachingMethod caching_method_ = CachingMethod::kCoin;
     CacheEvictionMethod eviction_method_ = CacheEvictionMethod::kDefault;

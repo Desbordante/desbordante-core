@@ -2,8 +2,6 @@
 
 namespace algos::cfd {
 
-int const PartitionTIdList::kSep = -1;
-
 bool PartitionTIdList::operator==(PartitionTIdList const& b) const {
     return sets_number == b.sets_number && tids == b.tids;
 }

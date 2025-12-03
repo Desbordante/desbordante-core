@@ -53,7 +53,7 @@ protected:
                                                unsigned int sample_size, CustomRandom& random);
 
 private:
-    static double std_dev_smoothing_;
+    static constexpr double kStdDevSmoothing = 1;
 
     double RatioToRelationRatio(double ratio) const {
         return ratio * population_size_ / relation_data_->GetNumTuplePairs();

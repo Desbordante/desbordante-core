@@ -31,10 +31,10 @@ namespace {
 // ARAlgorithmTest for example).
 template <typename AlgorithmUnderTest>
 class UCCAlgorithmTest : public ::testing::Test {
-    static config::ThreadNumType threads_;
+    config::ThreadNumType threads_;
 
 protected:
-    static void SetThreadsParam(config::ThreadNumType threads) noexcept {
+    void SetThreadsParam(config::ThreadNumType threads) noexcept {
         assert(threads > 0);
         threads_ = threads;
     }
@@ -62,7 +62,7 @@ protected:
     }
 
 public:
-    static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config) {
+    algos::StdParamsMap GetParamMap(CSVConfig const& csv_config) const {
         using namespace config::names;
         // Here we return StdParamsMap with option kThreads but some algorithms does not need this
         // option (PyroUCC for example). This does not generate errors, because when creating the
@@ -71,7 +71,7 @@ public:
         return {{kCsvConfig, csv_config}, {kThreads, threads_}};
     }
 
-    static std::unique_ptr<algos::UCCAlgorithm> CreateAlgorithmInstance(
+    std::unique_ptr<algos::UCCAlgorithm> const CreateAlgorithmInstance(
             CSVConfig const& csv_config) {
         return algos::CreateAndLoadAlgorithm<AlgorithmUnderTest>(GetParamMap(csv_config));
     }
@@ -116,31 +116,28 @@ public:
     };
 };
 
-template <typename AlgorithmUnderTest>
-config::ThreadNumType UCCAlgorithmTest<AlgorithmUnderTest>::threads_ = 1;
-
 }  // namespace
 
 TYPED_TEST_SUITE_P(UCCAlgorithmTest);
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets) {
-    TestFixture::SetThreadsParam(1);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
+    this->SetThreadsParam(1);
+    this->PerformConsistentHashTestOn(TestFixture::kLightDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasets) {
-    TestFixture::SetThreadsParam(1);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
+    this->SetThreadsParam(1);
+    this->PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnLightDatasetsParallel) {
-    TestFixture::SetThreadsParam(4);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kLightDatasets);
+    this->SetThreadsParam(4);
+    this->PerformConsistentHashTestOn(TestFixture::kLightDatasets);
 }
 
 TYPED_TEST_P(UCCAlgorithmTest, ConsistentHashOnHeavyDatasetsParallel) {
-    TestFixture::SetThreadsParam(4);
-    TestFixture::PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
+    this->SetThreadsParam(4);
+    this->PerformConsistentHashTestOn(TestFixture::kHeavyDatasets);
 }
 
 REGISTER_TYPED_TEST_SUITE_P(UCCAlgorithmTest, ConsistentHashOnLightDatasets,

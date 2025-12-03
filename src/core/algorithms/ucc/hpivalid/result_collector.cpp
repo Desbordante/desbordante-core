@@ -12,10 +12,11 @@
 namespace algos::hpiv {
 
 namespace timer {
-std::vector<std::string> description = {"Total Execution Time", "Cluster-Structures Construction",
-                                        "Total Enumeration Algo Time"
-                                        "Difference Set Sampling (all)",
-                                        "Cluster Intersection (validation)"};
+std::vector<std::string> const kDescription = {"Total Execution Time",
+                                               "Cluster-Structures Construction",
+                                               "Total Enumeration Algo Time"
+                                               "Difference Set Sampling (all)",
+                                               "Cluster Intersection (validation)"};
 }  // namespace timer
 
 ResultCollector::ResultCollector(double timeout)
