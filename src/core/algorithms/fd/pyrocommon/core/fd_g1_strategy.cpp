@@ -6,7 +6,9 @@
 #include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
 #include "core/util/logger.h"
 
+#if 0
 unsigned long long FdG1Strategy::nanos_ = 0;
+#endif
 
 double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
     unsigned long long num_violations = 0;
