@@ -86,7 +86,7 @@ jobs:
             | jq -sR 'split("\n") | map(select(length > 0)) | map(
               {
                 "only": ., 
-                "os": (if contains("x86_64") then "macos-13" else "macos-latest" end), 
+                "os": (if contains("x86_64") then "macos-15-intel" else "macos-latest" end), 
                 "toolset": "apple-clang",
               })' \
             | jq -c
