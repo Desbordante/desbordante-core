@@ -5,21 +5,20 @@
 #include <vector>
 
 #include "core/algorithms/fd/hycommon/primitive_validations.h"
-#include "core/algorithms/fd/hyfd/model/fd_tree.h"
 #include "core/algorithms/fd/raw_fd.h"
 #include "core/config/thread_number/type.h"
+#include "core/model/FDTrees/fd_tree.h"
 #include "core/model/table/position_list_index.h"
 #include "core/model/types/types.h"
 
 namespace algos::hyfd {
 
-using LhsPair = fd_tree::LhsPair;
+using LhsPair = model::LhsPair;
 
 class Validator {
-private:
     using FDValidations = hy::PrimitiveValidations<RawFD>;
 
-    std::shared_ptr<fd_tree::FDTree> fds_;
+    std::shared_ptr<model::FDTree> fds_;
 
     hy::PLIsPtr plis_;
     hy::RowsPtr compressed_records_;
@@ -43,8 +42,8 @@ private:
     config::ThreadNumType threads_num_ = 1;
 
 public:
-    Validator(std::shared_ptr<fd_tree::FDTree> fds, hy::PLIsPtr plis,
-              hy::RowsPtr compressed_records, config::ThreadNumType threads_num) noexcept
+    Validator(std::shared_ptr<model::FDTree> fds, hy::PLIsPtr plis, hy::RowsPtr compressed_records,
+              config::ThreadNumType threads_num) noexcept
         : fds_(std::move(fds)),
           plis_(std::move(plis)),
           compressed_records_(std::move(compressed_records)),

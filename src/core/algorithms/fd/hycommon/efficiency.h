@@ -1,10 +1,10 @@
-#include <cstddef>
+#pragma once
 
-#include "core/algorithms/fd/hycommon/sampler.h"
+#include <cstddef>
 
 namespace algos::hy {
 
-class Sampler::Efficiency {
+class Efficiency {
 private:
     size_t column_id_;
 

@@ -39,8 +39,7 @@ unsigned long long HyFD::ExecuteInternal() {
 
     Sampler sampler(plis_shared, pli_records_shared, threads_num_);
 
-    auto const positive_cover_tree =
-            std::make_shared<fd_tree::FDTree>(GetRelation().GetNumColumns());
+    auto const positive_cover_tree = std::make_shared<model::FDTree>(GetRelation().GetNumColumns());
     Inductor inductor(positive_cover_tree);
     Validator validator(positive_cover_tree, plis_shared, pli_records_shared, threads_num_);
 
@@ -49,7 +48,7 @@ unsigned long long HyFD::ExecuteInternal() {
     while (true) {
         auto non_fds = sampler.GetNonFDs(comparison_suggestions);
 
-        inductor.UpdateFdTree(std::move(non_fds));
+        inductor.UpdateFdTree(non_fds);
 
         comparison_suggestions = validator.ValidateAndExtendCandidates();
 

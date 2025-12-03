@@ -145,6 +145,26 @@ public:
         freq_++;
     }
 
+    // Iterator support
+    // NOLINTBEGIN(*-identifier-naming)
+    auto begin() {
+        return index_.begin();
+    }
+
+    auto end() {
+        return index_.end();
+    }
+
+    auto begin() const {
+        return index_.begin();
+    }
+
+    auto end() const {
+        return index_.end();
+    }
+
+    // NOLINTEND(*-identifier-naming)
+
     std::unique_ptr<PositionListIndex> Intersect(PositionListIndex const* that) const;
     std::unique_ptr<PositionListIndex> Probe(
             std::shared_ptr<std::vector<int> const> probing_table) const;

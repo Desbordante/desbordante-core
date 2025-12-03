@@ -3,6 +3,7 @@
 #include "core/algorithms/fd/aidfd/aid.h"
 #include "core/algorithms/fd/depminer/depminer.h"
 #include "core/algorithms/fd/dfd/dfd.h"
+#include "core/algorithms/fd/dynfd/dynfd.h"
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 #include "core/algorithms/fd/fastfds/fastfds.h"
 #include "core/algorithms/fd/fd_mine/fd_mine.h"
