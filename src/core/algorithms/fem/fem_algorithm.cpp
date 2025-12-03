@@ -2,6 +2,8 @@
 
 namespace algos {
 
+void FEMAlgorithm::LoadDataInternal() {}
+
 FEMAlgorithm::FEMAlgorithm() : Algorithm({}) {}
 
 }  // namespace algos
