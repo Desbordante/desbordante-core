@@ -83,7 +83,6 @@ TEST_P(TestFDVerifying, DefaultTest) {
     TestSorting(std::move(verifier));
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         FDVerifierTestSuite, TestFDVerifying,
         ::testing::Values(
@@ -121,6 +120,4 @@ INSTANTIATE_TEST_SUITE_P(
             FDVerifyingParams({1, 4}, {2, 3, 5}, 3, 8, 10.L/132),
             FDVerifyingParams({0, 1}, {1, 4}, 2, 6, 8.L/132)
             ));
-// clang-format on
-
 }  // namespace tests
