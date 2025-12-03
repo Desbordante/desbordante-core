@@ -42,7 +42,7 @@ private:
     unsigned int freq_ = 0;
 
 public:
-    static int const kSingletonValueId;
+    static constexpr int kSingletonValueId = 0;
 
     PositionListIndex(std::deque<Cluster> index, unsigned int size, double entropy,
                       unsigned long long nep, unsigned int relation_size,

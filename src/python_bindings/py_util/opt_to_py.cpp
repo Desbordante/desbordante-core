@@ -29,34 +29,35 @@ namespace py = pybind11;
 using ConvFunction = std::function<py::object(boost::any)>;
 
 template <typename T>
-std::pair<std::type_index, ConvFunction> normal_conv_pair{
+std::pair<std::type_index, ConvFunction> const kNormalConvPair{
         std::type_index(typeid(T)),
         [](boost::any value) { return py::cast(boost::any_cast<T>(value)); }};
 
 template <typename T>
-std::pair<std::type_index, ConvFunction> enum_conv_pair{
+std::pair<std::type_index, ConvFunction> const kEnumConvPair{
         std::type_index(typeid(T)),
         [](boost::any value) { return py::cast(util::EnumToStr(boost::any_cast<T>(value))); }};
+
 std::unordered_map<std::type_index, ConvFunction> const kConverters{
-        normal_conv_pair<int>,
-        normal_conv_pair<double>,
-        normal_conv_pair<long double>,
-        normal_conv_pair<unsigned int>,
-        normal_conv_pair<bool>,
-        normal_conv_pair<std::vector<std::string>>,
-        normal_conv_pair<config::ThreadNumType>,
-        normal_conv_pair<config::CustomRandomSeedType>,
-        normal_conv_pair<config::MaxLhsType>,
-        normal_conv_pair<config::ErrorType>,
-        normal_conv_pair<config::IndicesType>,
-        normal_conv_pair<model::DDString>,
-        normal_conv_pair<model::Gdd>,
-        enum_conv_pair<algos::metric::MetricAlgo>,
-        enum_conv_pair<algos::metric::Metric>,
-        enum_conv_pair<model::InputFormatType>,
-        enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::des::DifferentialStrategy>,
-        enum_conv_pair<algos::od::Ordering>};
+        kNormalConvPair<int>,
+        kNormalConvPair<double>,
+        kNormalConvPair<long double>,
+        kNormalConvPair<unsigned int>,
+        kNormalConvPair<bool>,
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<config::ThreadNumType>,
+        kNormalConvPair<config::CustomRandomSeedType>,
+        kNormalConvPair<config::MaxLhsType>,
+        kNormalConvPair<config::ErrorType>,
+        kNormalConvPair<config::IndicesType>,
+        kNormalConvPair<model::DDString>,
+        kNormalConvPair<model::Gdd>,
+        kEnumConvPair<algos::metric::MetricAlgo>,
+        kEnumConvPair<algos::metric::Metric>,
+        kEnumConvPair<model::InputFormatType>,
+        kEnumConvPair<algos::hymd::LevelDefinition>,
+        kEnumConvPair<algos::des::DifferentialStrategy>,
+        kEnumConvPair<algos::od::Ordering>};
 }  // namespace
 
 namespace python_bindings {

@@ -13,8 +13,6 @@
 
 namespace algos {
 
-std::mutex search_spaces_mutex;
-
 Pyro::Pyro() : PliBasedFDAlgorithm() {
     RegisterOptions();
     fd_consumer_ = [this](auto const& fd) {
@@ -72,13 +70,13 @@ void Pyro::ExecuteInternal() {
 
     unsigned int total_error_calc_count = 0;
 
-    auto const work_on_search_space = [](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
-                                         ProfilingContext* profiling_context,
-                                         [[maybe_unused]] int id) {
+    auto const work_on_search_space = [this](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
+                                             ProfilingContext* profiling_context,
+                                             [[maybe_unused]] int id) {
         while (true) {
             std::unique_ptr<SearchSpace> polled_space;
             {
-                std::scoped_lock<std::mutex> lock(search_spaces_mutex);
+                std::scoped_lock<std::mutex> lock(search_spaces_mutex_);
                 if (search_spaces.empty()) {
                     break;
                 }
