@@ -20,8 +20,6 @@
 
 namespace model {
 
-int const PositionListIndex::kSingletonValueId = 0;
-
 PositionListIndex::PositionListIndex(std::deque<std::vector<int>> index, unsigned int size,
                                      double entropy, unsigned long long nep,
                                      unsigned int relation_size, double inverted_entropy,

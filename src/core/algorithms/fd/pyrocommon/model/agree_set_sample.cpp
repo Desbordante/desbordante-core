@@ -11,8 +11,6 @@ namespace model {
 
 using namespace std;
 
-double AgreeSetSample::std_dev_smoothing_ = 1;
-
 AgreeSetSample::AgreeSetSample(ColumnLayoutRelationData const* relation_data, Vertical focus,
                                unsigned int sample_size, unsigned long long population_size)
     : relation_data_(relation_data),
@@ -89,7 +87,7 @@ ConfidenceInterval AgreeSetSample::EstimateGivenNumHits(unsigned long long num_h
     normal_distribution normal_distribution;
     double z = ProbitFunction((confidence + 1) / 2);
     double smoothed_sample_ratio =
-            (num_hits + std_dev_smoothing_ / 2) / (sample_size_ + std_dev_smoothing_);
+            (num_hits + kStdDevSmoothing / 2) / (sample_size_ + kStdDevSmoothing);
     double std_dev_positive_tuples =
             sqrt(smoothed_sample_ratio * (1 - smoothed_sample_ratio) / sample_size_);
     double min_ratio =
@@ -106,21 +104,23 @@ ConfidenceInterval AgreeSetSample::EstimateGivenNumHits(unsigned long long num_h
 double AgreeSetSample::ProbitFunction(double quantile) const {
     // This is the Beasley-Springer-Moro algorithm which can
     // be found in Glasserman [2004].
-    static double a[4] = {2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637};
+    static constexpr double kA[4] = {2.50662823884, -18.61500062529, 41.39119773534,
+                                     -25.44106049637};
 
-    static double b[4] = {-8.47351093090, 23.08336743743, -21.06224101826, 3.13082909833};
+    static constexpr double kB[4] = {-8.47351093090, 23.08336743743, -21.06224101826,
+                                     3.13082909833};
 
-    static double c[9] = {0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
-                          0.0276438810333863, 0.0038405729373609, 0.0003951896511919,
-                          0.0000321767881768, 0.0000002888167364, 0.0000003960315187};
+    static constexpr double kC[9] = {0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
+                                     0.0276438810333863, 0.0038405729373609, 0.0003951896511919,
+                                     0.0000321767881768, 0.0000002888167364, 0.0000003960315187};
 
     if (quantile >= 0.5 && quantile <= 0.92) {
         double num = 0.0;
         double denom = 1.0;
 
         for (int i = 0; i < 4; i++) {
-            num += a[i] * pow((quantile - 0.5), 2 * i + 1);
-            denom += b[i] * pow((quantile - 0.5), 2 * i);
+            num += kA[i] * pow((quantile - 0.5), 2 * i + 1);
+            denom += kB[i] * pow((quantile - 0.5), 2 * i);
         }
         return num / denom;
 
@@ -128,7 +128,7 @@ double AgreeSetSample::ProbitFunction(double quantile) const {
         double num = 0.0;
 
         for (int i = 0; i < 9; i++) {
-            num += c[i] * pow((log(-log(1 - quantile))), i);
+            num += kC[i] * pow((log(-log(1 - quantile))), i);
         }
         return num;
 

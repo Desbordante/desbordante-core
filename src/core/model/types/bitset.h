@@ -1102,9 +1102,8 @@ std::basic_istream<CharT, Traits>& operator>>(std::basic_istream<CharT, Traits>&
     typename IStreamType::sentry sentry(is);
     if (sentry) {
         try {
+            typename Traits::int_type const eof = Traits::eof();
             for (size_t i{NumBits}; i > 0; --i) {
-                static typename Traits::int_type eof = Traits::eof();
-
                 typename Traits::int_type c1 = is.rdbuf()->sbumpc();
                 if (Traits::eq_int_type(c1, eof)) {
                     state |= IOSBase::eofbit;
