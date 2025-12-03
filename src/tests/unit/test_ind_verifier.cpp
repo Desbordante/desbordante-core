@@ -64,7 +64,6 @@ TEST_P(TestINDVerifier, DefaultTest) {
     EXPECT_EQ(verifier->GetViolatingRowsCount(), error_info.num_violating_rows);
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         INDVerifierTestSuite, TestINDVerifier,
         ::testing::Values(
@@ -83,7 +82,6 @@ INSTANTIATE_TEST_SUITE_P(
             INDVerifierTestConfig({kIndTestTypos}, {{4}, {2}}, INDVerifierErrorInfo{.num_violating_rows = 7, .num_violating_clusters = 4, .error = config::ErrorType{4}/5}),
             INDVerifierTestConfig({kIndTestTypos}, {{4}, {3}}, INDVerifierErrorInfo{.num_violating_rows = 4, .num_violating_clusters = 4, .error = config::ErrorType{4}/5})
             ));
-// clang-format on
 
 class TestINDVerifierRuntimeError : public ::testing::TestWithParam<INDVerifierTestConfig> {};
 
@@ -103,7 +101,6 @@ TEST_P(TestINDVerifierConfigurationError, TestIncorrectIndices) {
     ASSERT_THROW(create_and_execute(GetParam()), config::ConfigurationError);
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         INDVerifierFailureTestSuite, TestINDVerifierConfigurationError,
         ::testing::Values(
@@ -113,6 +110,4 @@ INSTANTIATE_TEST_SUITE_P(
             INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2, 3}}),
             INDVerifierTestConfig({kIndTestTypos}, {{0, 0}, {2}})
             ));
-// clang-format on
-
 }  // namespace tests
