@@ -39,6 +39,38 @@ PredicatePtr DeserializePredicate(py::tuple t, std::shared_ptr<RelationalSchema 
 }
 }  // namespace fastadc_serialization
 
+namespace {
+    using DC = algos::fastadc::DenialConstraint;
+    // function for getting a sorted set of strings representing all predicates in DC
+    std::vector<std::string> GetSortedPredicatesAsStrings(DC const& dc) {
+        std::vector<std::string> predicate_strings;
+
+        for (PredicatePtr predicate : dc.GetPredicateSet()) {
+            predicate_strings.push_back(predicate->ToString());
+        }
+
+        std::sort(predicate_strings.begin(), predicate_strings.end());
+        return predicate_strings;
+    }
+
+    // function for getting a sorted set of py::tuple objects representing all predicates in DC
+    std::vector<py::tuple> GetSortedPredicatesAsTuples(DC const& dc) {
+        std::vector<PredicatePtr> predicate_ptrs;
+        for (PredicatePtr predicate : dc.GetPredicateSet()){
+            predicate_ptrs.push_back(predicate);
+        }
+        std::sort(predicate_ptrs.begin(), predicate_ptrs.end(),
+        [](PredicatePtr const& p1, PredicatePtr const& p2){
+            return p1->ToString() < p2->ToString();
+        });
+        std::vector<py::tuple> predicates;
+        for (PredicatePtr predicate : predicate_ptrs) {
+            predicates.push_back(fastadc_serialization::SerializePredicate(predicate));
+        }
+        return predicates;
+    }
+} // namespace
+
 namespace python_bindings {
 void BindFastADC(py::module_& main_module) {
     using namespace algos;
@@ -48,6 +80,25 @@ void BindFastADC(py::module_& main_module) {
     py::class_<DC>(dc_module, "DC")
             .def("__str__", &DC::ToString)
             .def("__repr__", &DC::ToString)
+            .def("__eq__", [](DC const& dc1, DC const& dc2){
+                if (&dc1 == &dc2){
+                    return true;
+                }
+                if (*dc1.GetSchema() != *dc2.GetSchema()){
+                    return false;
+                }
+
+                auto dc1_predicates = GetSortedPredicatesAsStrings(dc1);
+                auto dc2_predicates = GetSortedPredicatesAsStrings(dc2);
+
+                return dc1_predicates == dc2_predicates;
+            })
+            .def("__hash__", [](DC const& dc){
+                auto dc_predicates = GetSortedPredicatesAsTuples(dc);
+
+                py::tuple predicates_tuple = py::cast(dc_predicates);
+                return py::hash(predicates_tuple);
+            })
             .def(py::pickle(
                     //__getstate__
                     [](DenialConstraint const& dc) {

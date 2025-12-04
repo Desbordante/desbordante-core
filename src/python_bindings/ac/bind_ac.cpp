@@ -31,6 +31,7 @@ void BindAc(py::module_& main_module) {
                     [](ACException const& exc) {
                         return py::make_tuple(exc.row_i, exc.column_pairs);
                     },
+                    // __setstate__
                     [](py::tuple t) {
                         if (t.size() != 2) {
                             throw std::runtime_error("Invalid state for ACException pickle!");
