@@ -1,7 +1,5 @@
 #pragma once
 
-#include <enum.h>
-
 #include "model/table/column_layout_typed_relation_data.h"
 #include "model/types/type.h"
 

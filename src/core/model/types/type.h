@@ -4,6 +4,8 @@
 #include <memory>
 #include <sstream>
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "builtin.h"
 
 namespace model {
@@ -34,20 +36,20 @@ public:
     }
 
     [[nodiscard]] bool IsNumeric() const noexcept {
-        return type_id_ == +TypeId::kInt /* || type_id_ == +TypeId::kBigInt */ ||
-               type_id_ == +TypeId::kDouble;
+        return type_id_ == TypeId::kInt /* || type_id_ == TypeId::kBigInt */ ||
+               type_id_ == TypeId::kDouble;
     }
 
     [[nodiscard]] bool IsDate() const noexcept {
-        return type_id_ == +TypeId::kDate;
+        return type_id_ == TypeId::kDate;
     }
 
     [[nodiscard]] bool IsMetrizable() const noexcept {
-        return IsNumeric() || type_id_ == +TypeId::kString || IsDate();
+        return IsNumeric() || type_id_ == TypeId::kString || IsDate();
     }
 
     [[nodiscard]] std::string ToString() const {
-        return type_id_._to_string();
+        return std::string(magic_enum::enum_name(type_id_));
     }
 
     /* Operations on values of current type */
@@ -126,8 +128,8 @@ public:
     }
 
     static bool IsOrdered(TypeId const& type_id) {
-        return !(type_id == +TypeId::kEmpty || type_id == +TypeId::kNull ||
-                 type_id == +TypeId::kUndefined || type_id == +TypeId::kMixed);
+        return !(type_id == TypeId::kEmpty || type_id == TypeId::kNull ||
+                 type_id == TypeId::kUndefined || type_id == TypeId::kMixed);
     }
 
     virtual Destructor GetDestructor() const {

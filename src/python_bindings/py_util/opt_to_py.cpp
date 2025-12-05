@@ -17,6 +17,7 @@
 #include "config/max_lhs/type.h"
 #include "config/thread_number/type.h"
 #include "od/fastod/od_ordering.h"
+#include "py_util/naming_converter.h"
 
 namespace {
 namespace py = pybind11;
@@ -29,8 +30,10 @@ std::pair<std::type_index, ConvFunction> normal_conv_pair{
 
 template <typename T>
 std::pair<std::type_index, ConvFunction> enum_conv_pair{
-        std::type_index(typeid(T)),
-        [](boost::any value) { return py::cast(boost::any_cast<T>(value)._to_string()); }};
+        std::type_index(typeid(T)), [](boost::any value) {
+            return py::cast(python_bindings::KCamelToSnake(
+                    magic_enum::enum_name(boost::any_cast<T>(value))));
+        }};
 std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<int>,
         normal_conv_pair<double>,

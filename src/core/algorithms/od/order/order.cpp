@@ -62,13 +62,13 @@ void Order::CreateSingleColumnSortedPartitions() {
         std::unique_ptr<model::MixedType> mixed_type =
                 model::CreateSpecificType<model::MixedType>(model::TypeId::kMixed, true);
         auto less = [&type, &mixed_type](IndexedByteData const& l, IndexedByteData const& r) {
-            if (type->GetTypeId() == +(model::TypeId::kMixed)) {
+            if (type->GetTypeId() == (model::TypeId::kMixed)) {
                 return mixed_type->CompareAsStrings(l.data, r.data) == model::CompareResult::kLess;
             }
             return type->Compare(l.data, r.data) == model::CompareResult::kLess;
         };
         auto equal = [&type, &mixed_type](IndexedByteData const& l, IndexedByteData const& r) {
-            if (type->GetTypeId() == +(model::TypeId::kMixed)) {
+            if (type->GetTypeId() == (model::TypeId::kMixed)) {
                 return mixed_type->CompareAsStrings(l.data, r.data) == model::CompareResult::kEqual;
             }
             return type->Compare(l.data, r.data) == model::CompareResult::kEqual;
@@ -122,11 +122,11 @@ ValidityType Order::CheckCandidateValidity(AttributeList const& lhs, AttributeLi
             break;
         }
     }
-    ValidityType candidate_validity = +ValidityType::merge;
+    ValidityType candidate_validity = ValidityType::kMerge;
     if (!is_merge_immediately) {
         CreateSortedPartitionsFromSingletons(lhs);
         if (sorted_partitions_[lhs].Size() == 1) {
-            candidate_validity = +ValidityType::valid;
+            candidate_validity = ValidityType::kValid;
             candidate_sets_[lhs].erase(rhs);
         } else {
             CreateSortedPartitionsFromSingletons(rhs);
@@ -151,7 +151,7 @@ void Order::ComputeDependencies(ListLattice::LatticeLevel const& lattice_level) 
                 continue;
             }
             ValidityType candidate_validity = CheckCandidateValidity(lhs, rhs);
-            if (candidate_validity == +ValidityType::valid) {
+            if (candidate_validity == ValidityType::kValid) {
                 bool non_minimal_by_merge = false;
                 for (AttributeList const& merge_lhs : GetPrefixes(lhs)) {
                     if (InUnorderedMap(merge_invalidated_, merge_lhs, rhs)) {
@@ -170,9 +170,9 @@ void Order::ComputeDependencies(ListLattice::LatticeLevel const& lattice_level) 
                 if (lhs_unique) {
                     candidate_sets_[lhs].erase(rhs);
                 }
-            } else if (candidate_validity == +ValidityType::swap) {
+            } else if (candidate_validity == ValidityType::kSwap) {
                 candidate_sets_[lhs].erase(rhs);
-            } else if (candidate_validity == +ValidityType::merge) {
+            } else if (candidate_validity == ValidityType::kMerge) {
                 if (merge_invalidated_.find(lhs) == merge_invalidated_.end()) {
                     merge_invalidated_[lhs] = {};
                 }

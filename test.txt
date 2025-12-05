@@ -1,0 +1,29 @@
+ERROR: Error during Python logging setup: IndentationError: expected an indented block after function definition on line 4 (<string>, line 5)
+[1;49mShowcase: Controlling C++ Log Levels from Python
+[0m
+This example demonstrates how to use Python's standard `logging` module to control the log verbosity of the desbordante C++ core. The key is to use [1;32mlogging.getLogger('desbordante')[0m.
+
+[1;46m SCENARIO 1: INFO Level (Default Verbosity) [1;49m
+By default, the library is configured to show logs at the INFO level and higher.
+We'll explicitly set it to [1;32mINFO[0m[1;49m to demonstrate.[0m
+>>> Running a C++ algorithm (PyroUCC)...
+<<< C++ algorithm finished.
+
+As you can see, only INFO, WARNING, ERROR, and CRITICAL messages (if any) are displayed.
+
+[1;46m SCENARIO 2: DEBUG Level (Detailed Verbosity) [1;49m
+To see more detailed messages from the C++ core, we can lower the log level.
+Let's set it to [1;33mDEBUG[0m.
+>>> Running a C++ algorithm (PyroUCC)...
+<<< C++ algorithm finished.
+
+Now, the output includes verbose DEBUG messages, which are essential for troubleshooting.
+
+[1;46m SCENARIO 3: TRACE Level (Maximum Verbosity) [1;49m
+For deep debugging, the C++ core provides a [1;34mTRACE[0m[1;49m level, which is even more
+detailed than DEBUG. The desbordante library automatically registers this level
+with Python's `logging` module for your convenience[0m.
+>>> Running a C++ algorithm (PyroUCC)...
+<<< C++ algorithm finished.
+
+With TRACE enabled, you get the most granular view of the C++ core's execution.

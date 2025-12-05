@@ -1,0 +1,5 @@
+[2025-11-19 20:35:03,555] [desbordante] [INFO    ] This is the first message from Python, written to the file.
+[2025-11-19 20:35:03,559] [desbordante] [INFO    ] Init time: 0 ms
+[2025-11-19 20:35:03,561] [desbordante] [INFO    ] Time: 2  milliseconds
+[2025-11-19 20:35:03,561] [desbordante] [INFO    ] Total intersection time: 0 ms
+[2025-11-19 20:35:03,562] [desbordante] [INFO    ] This is the final message from Python.

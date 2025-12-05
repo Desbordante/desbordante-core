@@ -25,7 +25,7 @@ FDFirstAlgorithm::FDFirstAlgorithm() : CFDDiscovery({kDefaultPhaseName}) {
 void FDFirstAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    Substrategy default_val = Substrategy::dfs;
+    Substrategy default_val = Substrategy::kDfs;
     RegisterOption(Option{&min_supp_, kCfdMinimumSupport, kDCfdMinimumSupport, 0u});
     RegisterOption(Option{&min_conf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
     RegisterOption(Option{&max_lhs_, kCfdMaximumLhs, kDCfdMaximumLhs, 0u});
@@ -230,9 +230,9 @@ void FDFirstAlgorithm::FdsFirstDFS(Itemset const& prefix, PIdListMiners const& i
             Itemset const sub = ConstructSubset(iset, out);
             MineFD(inode, sub, out);
 
-            if (ss == +Substrategy::dfs) {
+            if (ss == Substrategy::kDfs) {
                 MinePatternsDFS(sub, out, inode.tids);
-            } else if (ss == +Substrategy::bfs) {
+            } else if (ss == Substrategy::kBfs) {
                 MinePatternsBFS(sub, out, inode.tids);
             }
         }

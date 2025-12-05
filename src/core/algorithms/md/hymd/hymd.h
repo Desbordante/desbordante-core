@@ -63,7 +63,7 @@ private:
     bool prune_nondisjoint_ = true;
     std::size_t max_cardinality_ = -1;
     config::ThreadNumType threads_;
-    LevelDefinition level_definition_ = +LevelDefinition::cardinality;
+    LevelDefinition level_definition_ = LevelDefinition::kCardinality;
     // TODO: different level definitions (cardinality currently used)
     // TODO: comparing only some values during similarity calculation
     // TODO: automatically calculating minimal support

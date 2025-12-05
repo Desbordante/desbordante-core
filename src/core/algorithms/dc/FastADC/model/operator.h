@@ -3,10 +3,10 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <string_view>
 
-#include "core/model/types/type.h"
-#include "frozen/string.h"
-#include "frozen/unordered_map.h"
+#include "model/types/type.h"
+#include "util/static_map.h"
 
 namespace algos::fastadc {
 
@@ -62,50 +62,52 @@ class Operator {
     static constexpr OperatorType kLeTransitives[] = {OperatorType::kLess, OperatorType::kLessEqual,
                                                       OperatorType::kEqual};
 
-    using OperatorMapType = frozen::unordered_map<OperatorType, OperatorType, 6>;
-    using OperatorMapSpan = frozen::unordered_map<OperatorType, OperatorSpan, 6>;
-    using OperatorMapString = frozen::unordered_map<OperatorType, frozen::string, 6>;
+    using OperatorMapType = util::StaticMap<OperatorType, OperatorType, 6>;
+    using OperatorMapSpan = util::StaticMap<OperatorType, OperatorSpan, 6>;
+    using OperatorMapString = util::StaticMap<OperatorType, std::string_view, 6>;
 
-    static constexpr OperatorMapType kInverseMap{
+    static constexpr OperatorMapType kInverseMap{{{
             {OperatorType::kEqual, OperatorType::kUnequal},
             {OperatorType::kUnequal, OperatorType::kEqual},
             {OperatorType::kGreater, OperatorType::kLessEqual},
             {OperatorType::kLess, OperatorType::kGreaterEqual},
             {OperatorType::kGreaterEqual, OperatorType::kLess},
             {OperatorType::kLessEqual, OperatorType::kGreater},
-    };
+    }}};
 
-    static constexpr OperatorMapType kSymmetricMap{
+    static constexpr OperatorMapType kSymmetricMap{{{
             {OperatorType::kEqual, OperatorType::kEqual},
             {OperatorType::kUnequal, OperatorType::kUnequal},
             {OperatorType::kGreater, OperatorType::kLess},
             {OperatorType::kLess, OperatorType::kGreater},
             {OperatorType::kGreaterEqual, OperatorType::kLessEqual},
             {OperatorType::kLessEqual, OperatorType::kGreaterEqual},
-    };
+    }}};
 
-    static constexpr OperatorMapSpan kImplicationsMap{
+    static constexpr OperatorMapSpan kImplicationsMap{{{
             {OperatorType::kEqual, OperatorSpan(kEqImplications, 3)},
             {OperatorType::kUnequal, OperatorSpan(kUneqImplications, 1)},
             {OperatorType::kGreater, OperatorSpan(kGtImplications, 3)},
             {OperatorType::kLess, OperatorSpan(kLtImplications, 3)},
             {OperatorType::kGreaterEqual, OperatorSpan(kGeImplications, 1)},
             {OperatorType::kLessEqual, OperatorSpan(kLeImplications, 1)},
-    };
+    }}};
 
-    static constexpr OperatorMapSpan kTransitivesMap{
+    static constexpr OperatorMapSpan kTransitivesMap{{{
             {OperatorType::kEqual, OperatorSpan(kEqTransitives, 1)},
             {OperatorType::kUnequal, OperatorSpan(kUneqTransitives, 1)},
             {OperatorType::kGreater, OperatorSpan(kGtTransitives, 3)},
             {OperatorType::kLess, OperatorSpan(kLtTransitives, 3)},
             {OperatorType::kGreaterEqual, OperatorSpan(kGeTransitives, 3)},
             {OperatorType::kLessEqual, OperatorSpan(kLeTransitives, 3)},
-    };
+    }}};
 
-    static constexpr OperatorMapString kOperatorTypeToString{
-            {OperatorType::kEqual, "=="},        {OperatorType::kUnequal, "!="},
-            {OperatorType::kGreater, ">"},       {OperatorType::kLess, "<"},
-            {OperatorType::kGreaterEqual, ">="}, {OperatorType::kLessEqual, "<="}};
+    static constexpr OperatorMapString kOperatorTypeToString{{{{OperatorType::kEqual, "=="},
+                                                               {OperatorType::kUnequal, "!="},
+                                                               {OperatorType::kGreater, ">"},
+                                                               {OperatorType::kLess, "<"},
+                                                               {OperatorType::kGreaterEqual, ">="},
+                                                               {OperatorType::kLessEqual, "<="}}}};
 
 public:
     Operator(OperatorType type) : op_(type) {}
@@ -117,27 +119,27 @@ public:
 
     // 'a op b' <=> !'a op.inverse b'
     Operator GetInverse() const {
-        return Operator(kInverseMap.at(op_));
+        return Operator(kInverseMap.At(op_));
     }
 
     // 'a op b' <=> 'b op.symmetric a'
     Operator GetSymmetric() const {
-        return Operator(kSymmetricMap.at(op_));
+        return Operator(kSymmetricMap.At(op_));
     }
 
     // If 'a op b', then 'a op.implications[i] b'
     OperatorSpan GetImplications() const {
-        return kImplicationsMap.at(op_);
+        return kImplicationsMap.At(op_);
     }
 
     // If 'a op b' and 'b op.transitives[i] c', then 'a op c'
     OperatorSpan GetTransitives() const {
-        return kTransitivesMap.at(op_);
+        return kTransitivesMap.At(op_);
     }
 
     std::string ToString() const {
-        frozen::string str = kOperatorTypeToString.at(op_);
-        return {str.begin(), str.end()};
+        std::string_view sv = kOperatorTypeToString.At(op_);
+        return std::string(sv);
     }
 
     OperatorType GetType() const {

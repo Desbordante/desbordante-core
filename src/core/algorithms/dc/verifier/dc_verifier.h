@@ -6,16 +6,15 @@
 #include <string>
 #include <vector>
 
-#include <frozen/unordered_map.h>
-
-#include "core/algorithms/algorithm.h"
-#include "core/algorithms/dc/model/dc.h"
-#include "core/algorithms/dc/model/point.h"
-#include "core/config/tabular_data/input_table/option.h"
-#include "core/config/tabular_data/input_table_type.h"
-#include "core/model/table/column_layout_relation_data.h"
-#include "core/model/table/typed_column_data.h"
-#include "core/util/kdtree.h"
+#include "algorithms/algorithm.h"
+#include "algorithms/dc/model/dc.h"
+#include "algorithms/dc/model/point.h"
+#include "config/tabular_data/input_table/option.h"
+#include "config/tabular_data/input_table_type.h"
+#include "model/table/column_layout_relation_data.h"
+#include "table/typed_column_data.h"
+#include "util/kdtree.h"
+#include "util/static_map.h"
 
 namespace algos {
 
@@ -92,13 +91,13 @@ private:
     dc::DC GetDC(std::vector<dc::Predicate> const& no_diseq_preds,
                  std::vector<dc::Predicate> const& diseq_preds, size_t cur_signs);
 
-    static constexpr frozen::unordered_map<dc::DCType, bool (DCVerifier::*)(dc::DC const&), 5>
+    static constexpr util::StaticMap<dc::DCType, bool (DCVerifier::*)(dc::DC const&), 5>
             kDCTypeToVerificationMethod{
-                    {dc::DCType::kAllEquality, &DCVerifier::VerifyAllEquality},
-                    {dc::DCType::kOneInequality, &DCVerifier::VerifyOneInequality},
-                    {dc::DCType::kOneTuple, &DCVerifier::VerifyOneTuple},
-                    {dc::DCType::kTwoTuples, &DCVerifier::VerifyTwoTuples},
-                    {dc::DCType::kMixed, &DCVerifier::VerifyMixed}};
+                    {{{dc::DCType::kAllEquality, &DCVerifier::VerifyAllEquality},
+                      {dc::DCType::kOneInequality, &DCVerifier::VerifyOneInequality},
+                      {dc::DCType::kOneTuple, &DCVerifier::VerifyOneTuple},
+                      {dc::DCType::kTwoTuples, &DCVerifier::VerifyTwoTuples},
+                      {dc::DCType::kMixed, &DCVerifier::VerifyMixed}}}};
 
     template <typename InputIt>
     void AddHighlights(InputIt first, InputIt last, size_t cur_index) {

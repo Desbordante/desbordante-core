@@ -20,8 +20,8 @@ ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
 void ARAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
-    auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
+    auto sing_eq = [](InputFormat input_format) { return input_format == InputFormat::kSingular; };
+    auto tab_eq = [](InputFormat input_format) { return input_format == InputFormat::kTabular; };
 
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
@@ -45,11 +45,11 @@ void ARAlgorithm::MakeExecuteOptsAvailable() {
 
 void ARAlgorithm::LoadDataInternal() {
     switch (input_format_) {
-        case InputFormat::singular:
+        case InputFormat::kSingular:
             transactional_data_ = model::TransactionalData::CreateFromSingular(
                     *input_table_, tid_column_index_, item_column_index_);
             break;
-        case InputFormat::tabular:
+        case InputFormat::kTabular:
             transactional_data_ =
                     model::TransactionalData::CreateFromTabular(*input_table_, first_column_tid_);
             break;

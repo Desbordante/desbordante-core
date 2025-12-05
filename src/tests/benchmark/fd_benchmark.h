@@ -1,5 +1,7 @@
 #pragma once
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "algorithms/fd/aidfd/aid.h"
 #include "algorithms/fd/eulerfd/eulerfd.h"
 #include "algorithms/fd/hyfd/hyfd.h"
@@ -34,15 +36,15 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
             "");
     comparer.SetThreshold(pyro_name, 17);
 
-    for (auto measure : algos::AfdErrorMeasure::_values()) {
+    for (auto measure : magic_enum::enum_values<algos::AfdErrorMeasure>()) {
         // mu_plus is much slower than other measures
-        auto const& dataset = measure == +algos::AfdErrorMeasure::mu_plus
+        auto const& dataset = measure == algos::AfdErrorMeasure::kMuPlus
                                       ? tests::kMushroomPlus3attr1500
                                       : tests::kMushroomPlus4attr1300;
         auto tane_name = runner.RegisterSimpleBenchmark<algos::Tane>(
                 dataset,
                 {{kError, static_cast<config::ErrorType>(0.95)}, {kAfdErrorMeasure, measure}},
-                measure._to_string());
+                std::string(magic_enum::enum_name(measure)));
         comparer.SetThreshold(tane_name, 20);
     }
 
