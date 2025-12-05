@@ -19,10 +19,10 @@ namespace py = pybind11;
 
 namespace {
 /// @brief Convert Domain PAC to Python tuple, which first element is string representation of
-/// Domain, other elements are column names.
+/// Domain, then follow column names, and then epsilon and delta.
 py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     auto const column_names = d_pac.GetColumnNames();
-    py::tuple result(column_names.size() + 1);
+    py::tuple result(column_names.size() + 3);
     // It's unlikely that set of Domain PACs will contain PACs on different domains, so using
     // Domain's string representation shouldn't lead to a lot of collisions.
     result[0] = d_pac.GetDomain().ToString();
@@ -30,6 +30,8 @@ py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
     for (std::size_t i = 0; i < column_names.size(); ++i) {
         result[i] = column_names[i];
     }
+    result[column_names.size() + 1] = d_pac.GetEpsilon();
+    result[column_names.size() + 2] = d_pac.GetDelta();
     return result;
 }
 }  // namespace
@@ -58,6 +60,12 @@ void BindPAC(py::module& main_module) {
                                        return d_pac.GetColumns().GetColumnIndicesAsVector();
                                    })
             .def_property_readonly("column_names", &model::DomainPAC::GetColumnNames)
+            .def("__eq__",
+                 [](DomainPAC const& a, DomainPAC const& b) {
+                     return a.GetDomain().ToString() == b.GetDomain().ToString() &&
+                            a.GetColumns() == b.GetColumns() && a.GetEpsilon() == b.GetEpsilon() &&
+                            a.GetDelta() == b.GetDelta();
+                 })
             .def("__hash__",
                  [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); });
 
