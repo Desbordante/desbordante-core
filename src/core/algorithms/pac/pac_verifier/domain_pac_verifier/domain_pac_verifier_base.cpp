@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <iterator>
 #include <memory>
+#include <sstream>
 
 #include "logger.h"
 #include "pac/domain_pac.h"
@@ -24,12 +25,6 @@ void DomainPACVerifierBase::ProcessPACTypeOptions() {
     domain_->SetTypes(std::move(types));
     domain_->SetDistFromNullIsInfinity(DistFromNullIsInfty());
     tuple_type_ = domain_->GetTupleTypePtr();
-
-    auto const rel_schema = TypedRelation().GetSharedPtrSchema();
-    MakePAC<model::DomainPAC>(
-            rel_schema, 0, 0, domain_,
-            Vertical(rel_schema.get(),
-                     util::IndicesToBitset(column_indices_, rel_schema->GetNumColumns())));
 }
 
 void DomainPACVerifierBase::PreparePACTypeData() {
@@ -93,7 +88,16 @@ std::vector<std::size_t> DomainPACVerifierBase::CountSatisfyingTuples() {
 
 unsigned long long DomainPACVerifierBase::ExecuteInternal() {
     auto start = std::chrono::system_clock::now();
-    LOG_INFO("Verifying {}...", GetPAC().ToLongString());
+    std::ostringstream oss;
+    oss << '{';
+    for (auto it = column_indices_.begin(); it != column_indices_.end(); ++it) {
+        if (it != column_indices_.begin()) {
+            oss << ", ";
+        }
+        oss << *it;
+    }
+    oss << '}';
+    LOG_INFO("Verifying Domain PAC on columns {} with domain {}", oss.str(), domain_->ToString());
     auto satisfying_tuples = CountSatisfyingTuples();
 
     std::vector<double> empirical_probabilities(satisfying_tuples.size());
@@ -103,8 +107,11 @@ unsigned long long DomainPACVerifierBase::ExecuteInternal() {
                                return static_cast<double>(number) / num_rows;
                            });
     auto [eps, delta] = FindEpsilonDelta(empirical_probabilities);
-    GetPAC().SetEpsilon(eps);
-    GetPAC().SetDelta(delta);
+
+    auto const schema = TypedRelation().GetSharedPtrSchema();
+    MakePAC<model::DomainPAC>(
+            schema, eps, delta, domain_,
+            schema->GetVertical(util::IndicesToBitset(column_indices_, schema->GetNumColumns())));
 
     LOG_INFO("Result: {}", GetPAC().ToLongString());
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
