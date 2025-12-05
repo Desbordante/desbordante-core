@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -102,6 +103,9 @@ public:
     }
 
     model::PAC& GetPAC() {
+        if (!pac_) {
+            throw std::runtime_error("Cannot get PAC: it's nullptr");
+        }
         return *pac_;
     }
 
