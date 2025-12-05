@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
+
+#include "model/table/relational_schema.h"
 
 namespace model {
 
@@ -12,15 +15,22 @@ namespace model {
 /// Epsilon is a measure of "proximity", which shows how much PAC deviates from exact
 /// dependency. Delta is a probability at which approximate dependency holds.
 class PAC {
-protected:
+private:
+    std::shared_ptr<RelationalSchema const> rel_schema_;
     std::vector<double> epsilons_;
     std::vector<double> deltas_;
 
 public:
-    PAC(double epsilon, double delta) : epsilons_({epsilon}), deltas_({delta}) {}
+    PAC() = default;
 
-    PAC(std::vector<double>&& epsilons, std::vector<double>&& deltas)
-        : epsilons_(std::move(epsilons)), deltas_(std::move(deltas)) {}
+    PAC(std::shared_ptr<RelationalSchema const> rel_schema, double epsilon, double delta)
+        : rel_schema_(std::move(rel_schema)), epsilons_({epsilon}), deltas_({delta}) {}
+
+    PAC(std::shared_ptr<RelationalSchema const> rel_schema, std::vector<double>&& epsilons,
+        std::vector<double>&& deltas)
+        : rel_schema_(std::move(rel_schema)),
+          epsilons_(std::move(epsilons)),
+          deltas_(std::move(deltas)) {}
 
     PAC(PAC const&) = default;
     PAC(PAC&&) = default;
@@ -70,6 +80,10 @@ public:
 
     void SetDeltas(std::vector<double>&& new_values) {
         deltas_ = std::move(new_values);
+    }
+
+    std::shared_ptr<RelationalSchema const> GetRelSchema() const {
+        return rel_schema_;
     }
 };
 }  // namespace model

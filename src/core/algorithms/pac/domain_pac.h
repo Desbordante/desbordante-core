@@ -10,6 +10,7 @@
 
 #include "algorithms/pac/model/idomain.h"
 #include "algorithms/pac/pac.h"
+#include "table/relational_schema.h"
 #include "table/vertical.h"
 
 namespace model {
@@ -28,9 +29,9 @@ private:
     }
 
 public:
-    DomainPAC(double epsilon, double delta, std::shared_ptr<pac::model::IDomain> domain,
-              Vertical const& columns)
-        : PAC(epsilon, delta), domain_(std::move(domain)), columns_(columns) {}
+    DomainPAC(std::shared_ptr<RelationalSchema const> rel_schema, double epsilon, double delta,
+              std::shared_ptr<pac::model::IDomain> domain, Vertical const& columns)
+        : PAC(rel_schema, epsilon, delta), domain_(std::move(domain)), columns_(columns) {}
 
     DomainPAC(DomainPAC const&) = default;
     DomainPAC(DomainPAC&&) = default;
