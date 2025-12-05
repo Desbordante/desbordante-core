@@ -1,0 +1,65 @@
+#pragma once
+
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "algorithms/pac/model/tuple.h"
+#include "pac/model/comparable_tuple_type.h"
+#include "type.h"
+
+namespace algos::pac_verifier {
+/// @brief Values that violate Domain PAC with given epsilon
+class DomainPACHighlight {
+private:
+    using Tuples = std::vector<pac::model::Tuple>;
+    using TuplesIter = Tuples::iterator;
+
+    std::shared_ptr<pac::model::ComparableTupleType> tuple_type_;
+    std::shared_ptr<Tuples> original_value_tuples_;
+    std::vector<TuplesIter> highlighted_tuples_;
+
+public:
+    DomainPACHighlight(std::shared_ptr<pac::model::ComparableTupleType> tuple_type,
+                       std::shared_ptr<Tuples> original_value_tuples,
+                       std::vector<TuplesIter>&& highlighted_tuples)
+        : tuple_type_(std::move(tuple_type)),
+          original_value_tuples_(std::move(original_value_tuples)),
+          highlighted_tuples_(std::move(highlighted_tuples)) {}
+
+    /// @brief Get row numbers of highlighted values
+    std::vector<std::size_t> GetRowNums() const {
+        std::vector<std::size_t> indices;
+        std::ranges::transform(highlighted_tuples_, std::back_inserter(indices),
+                               [beg = original_value_tuples_->begin()](auto const it) {
+                                   return std::distance(beg, it);
+                               });
+        return indices;
+    }
+
+    /// @brief Get @c Types of columns associated with this @c Highlight
+    std::vector<model::Type const*> const& GetTypes() const {
+        return tuple_type_->GetTypes();
+    }
+
+    /// @brief Get highlighted values as pointers to @c std::byte, that can be used with types (see
+    /// @c GetTypes())
+    Tuples GetByteData() const {
+        Tuples tuples;
+        std::ranges::transform(highlighted_tuples_, std::back_inserter(tuples),
+                               [](auto const it) { return *it; });
+        return tuples;
+    }
+
+    /// @brief Get highlighted values as strings
+    std::vector<std::string> GetStringData() const {
+        std::vector<std::string> strings;
+        std::ranges::transform(highlighted_tuples_, std::back_inserter(strings),
+                               [this](auto const it) { return tuple_type_->ValueToString(*it); });
+        return strings;
+    }
+};
+}  // namespace algos::pac_verifier

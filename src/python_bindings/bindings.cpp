@@ -28,6 +28,8 @@
 #include "nd/bind_nd_verification.h"
 #include "od/bind_od.h"
 #include "od/bind_od_verification.h"
+#include "pac/bind_pac.h"
+#include "pac/bind_pac_verification.h"
 #include "pfd/bind_pfd_verification.h"
 #include "py_util/logging.h"
 #include "sfd/bind_sfd.h"
@@ -69,7 +71,9 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindGfd,
                            BindCFDVerification,
                            BindDDVerification,
-                           BindAODVerification}) {
+                           BindAODVerification,
+                           BindPAC,
+                           BindPACVerification}) {
         bind_func(module);
     }
 }
