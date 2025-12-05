@@ -183,9 +183,6 @@ Prior to cloning the repository and attempting to build the project, ensure that
 - CMake, version 3.25+
 - Boost library built with compiler you're going to use (GCC or Clang), version 1.85-1.86, 1.88+
 
-To use test datasets you will need:
-- Git Large File Storage, version 3.0.2+
-
 Instructions below are given for GCC (on Linux) and Apple Clang (on macOS).
 Instructions for other supported compilers can be found in [Desbordante wiki](https://github.com/Desbordante/desbordante-core/wiki/Building).
 
@@ -197,7 +194,7 @@ by following their [official guide](https://apt.kitware.com) to install the late
 Then run the following commands:
 ```sh 
 sudo apt update && sudo apt upgrade
-sudo apt install g++ cmake ninja-build libboost-all-dev git-lfs python3 python3-venv
+sudo apt install g++ cmake ninja-build libboost-all-dev python3 python3-venv
 export CXX=g++
 ```
 The last line sets g++ as CMake compiler in your terminal session.
@@ -311,25 +308,6 @@ log.setLevel(logging.INFO) # Or logging.DEBUG, logging.TRACE, etc.
 ```
 
 ## Troubleshooting
-
-### Git LFS
-If, when cloning the repo with git lfs installed, `git clone` produces the following (or similar) error:
-```
-Cloning into 'Desbordante'...
-remote: Enumerating objects: 13440, done.
-remote: Counting objects: 100% (13439/13439), done.
-remote: Compressing objects: 100% (3784/3784), done.
-remote: Total 13440 (delta 9537), reused 13265 (delta 9472), pack-reused 1
-Receiving objects: 100% (13440/13440), 125.78 MiB | 8.12 MiB/s, done.
-Resolving deltas: 100% (9537/9537), done.
-Updating files: 100% (478/478), done.
-Downloading datasets/datasets.zip (102 MB)
-Error downloading object: datasets/datasets.zip (2085458): Smudge error: Error downloading datasets/datasets.zip (2085458e26e55ea68d79bcd2b8e5808de731de6dfcda4407b06b30bce484f97b): batch response: This repository is over its data quota. Account responsible for LFS bandwidth should purchase more data packs to restore access.
-```
-delete the already cloned version, set `GIT_LFS_SKIP_SMUDGE=1` environment variable and clone the repo again:
-```sh
-GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/Desbordante/desbordante-core.git
-```
 
 ### No type hints in IDE
 If type hints don't work for you in Visual Studio Code, for example, then install stubs using the command:
