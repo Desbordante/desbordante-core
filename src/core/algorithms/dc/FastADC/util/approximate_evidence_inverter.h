@@ -163,7 +163,7 @@ private:
             for (auto const& dc : unhit_evi_dcs) {
                 boost::dynamic_bitset<> unhit_cand = dc.cand & evi;
                 if (unhit_cand.any())
-                    new_candidates.Add(DCCandidate{dc.bitset, unhit_cand});
+                    new_candidates.Add(DCCandidate(dc.bitset, unhit_cand));
                 else if (!approx_covers_.ContainsSubset(dc) &&
                          IsApproxCover(dc.bitset, e + 1, target))
                     approx_covers_.Add(dc);

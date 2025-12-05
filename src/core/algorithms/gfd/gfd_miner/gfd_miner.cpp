@@ -698,7 +698,7 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
             Embedding embedding{{boost::vertex(0, pattern), v}};
             embeddings_set.emplace_back(std::vector{embedding});
 
-            forbidden_rules_set.push_back({});
+            forbidden_rules_set.emplace_back();
         }
         for (std::pair<std::string const, std::string> const& attr : graph_attributes) {
             if (attr.first == "label") {

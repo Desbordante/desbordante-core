@@ -83,7 +83,7 @@ std::vector<IndexedByteData> GetIndexedByteData(
         if (null_rows.find(k) != null_rows.end()) {
             continue;
         }
-        indexed_byte_data.push_back({k, byte_data[k]});
+        indexed_byte_data.emplace_back(k, byte_data[k]);
     }
     return indexed_byte_data;
 }
