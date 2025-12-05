@@ -25,10 +25,10 @@ void DomainPACVerifierBase::ProcessPACTypeOptions() {
     domain_->SetDistFromNullIsInfinity(DistFromNullIsInfty());
     tuple_type_ = domain_->GetTupleTypePtr();
 
-    auto const* rel_schema = TypedRelation().GetSchema();
+    auto const rel_schema = TypedRelation().GetSharedPtrSchema();
     MakePAC<model::DomainPAC>(
-            0, 0, domain_,
-            Vertical(rel_schema,
+            rel_schema, 0, 0, domain_,
+            Vertical(rel_schema.get(),
                      util::IndicesToBitset(column_indices_, rel_schema->GetNumColumns())));
 }
 
