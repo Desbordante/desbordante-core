@@ -7,8 +7,8 @@
 
 #include <boost/any.hpp>
 
-#include "config/exceptions.h"
-#include "config/ioption.h"
+#include "core/config/exceptions.h"
+#include "core/config/ioption.h"
 
 namespace config {
 

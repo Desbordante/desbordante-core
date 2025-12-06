@@ -3,10 +3,10 @@
 #include <cstddef>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/compressed_records.h"
-#include "algorithms/md/hymd/indexes/keyed_position_list_index.h"
-#include "model/index.h"
-#include "model/table/idataset_stream.h"
+#include "core/algorithms/md/hymd/indexes/compressed_records.h"
+#include "core/algorithms/md/hymd/indexes/keyed_position_list_index.h"
+#include "core/model/index.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace algos::hymd::indexes {
 

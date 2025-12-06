@@ -1,11 +1,11 @@
 #pragma once
 
-#include "algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
-#include "algorithms/ind/faida/preprocessing/preprocessor.h"
-#include "algorithms/ind/faida/util/simple_ind.h"
-#include "algorithms/ind/ind_algorithm.h"
-#include "config/max_arity/type.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/ind/faida/inclusion_testing/iinclusion_tester.h"
+#include "core/algorithms/ind/faida/preprocessing/preprocessor.h"
+#include "core/algorithms/ind/faida/util/simple_ind.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/config/max_arity/type.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos {
 

@@ -1,13 +1,13 @@
-#include "validator.h"
+#include "core/algorithms/ucc/hyucc/validator.h"
 
 #include <future>
 
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 
-#include "fd/hycommon/efficiency_threshold.h"
-#include "fd/hycommon/validator_helpers.h"
-#include "ucc/hyucc/model/ucc_tree_vertex.h"
+#include "core/algorithms/fd/hycommon/efficiency_threshold.h"
+#include "core/algorithms/fd/hycommon/validator_helpers.h"
+#include "core/algorithms/ucc/hyucc/model/ucc_tree_vertex.h"
 
 namespace {
 

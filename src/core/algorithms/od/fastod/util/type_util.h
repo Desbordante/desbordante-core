@@ -1,7 +1,7 @@
 #pragma once
 
-#include "algorithms/od/fastod/storage/data_frame.h"
-#include "model/types/builtin.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
+#include "core/model/types/builtin.h"
 
 namespace algos::fastod {
 

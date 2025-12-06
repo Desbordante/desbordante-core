@@ -1,28 +1,28 @@
-#include "algorithms/md/hymd/hymd.h"
+#include "core/algorithms/md/hymd/hymd.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <limits>
 
-#include "algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
-#include "algorithms/md/hymd/lattice/md_lattice.h"
-#include "algorithms/md/hymd/lattice/single_level_func.h"
-#include "algorithms/md/hymd/lattice_traverser.h"
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "algorithms/md/hymd/record_pair_inferrer.h"
-#include "algorithms/md/hymd/similarity_data.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/hymd/utility/inverse_permutation.h"
-#include "algorithms/md/hymd/utility/md_less.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/thread_number/option.h"
-#include "model/index.h"
-#include "model/table/column.h"
-#include "util/get_preallocated_vector.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/lattice/cardinality/min_picking_level_getter.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/single_level_func.h"
+#include "core/algorithms/md/hymd/lattice_traverser.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/hymd/record_pair_inferrer.h"
+#include "core/algorithms/md/hymd/similarity_data.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/algorithms/md/hymd/utility/inverse_permutation.h"
+#include "core/algorithms/md/hymd/utility/md_less.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/thread_number/option.h"
+#include "core/model/index.h"
+#include "core/model/table/column.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace {
 using namespace algos::hymd;

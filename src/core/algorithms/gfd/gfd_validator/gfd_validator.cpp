@@ -1,4 +1,4 @@
-#include "algorithms/gfd/gfd_validator/gfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/gfd_validator.h"
 
 #include <iostream>
 #include <set>
@@ -9,13 +9,13 @@
 #include <boost/graph/floyd_warshall_shortest.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
 
-#include "algorithms/gfd/gfd_validator/balancer.h"
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
-#include "util/logger.h"
+#include "core/algorithms/gfd/gfd_validator/balancer.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/util/logger.h"
 
 namespace {
 

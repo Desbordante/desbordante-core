@@ -1,4 +1,4 @@
-#include "nar.h"
+#include "core/algorithms/nar/nar.h"
 
 namespace model {
 

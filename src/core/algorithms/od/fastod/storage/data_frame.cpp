@@ -1,10 +1,10 @@
-#include "data_frame.h"
+#include "core/algorithms/od/fastod/storage/data_frame.h"
 
 #include <memory>
 #include <stdexcept>
 
-#include "algorithms/od/fastod/util/type_util.h"
-#include "csv_parser/csv_parser.h"
+#include "core/algorithms/od/fastod/util/type_util.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace algos::fastod {
 

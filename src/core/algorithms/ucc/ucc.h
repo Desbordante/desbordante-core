@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "model/table/vertical.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 

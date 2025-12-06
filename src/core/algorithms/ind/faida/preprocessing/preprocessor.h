@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hashed_column_store.h"
+#include "core/algorithms/ind/faida/preprocessing/hashed_column_store.h"
 
 namespace algos::faida {
 

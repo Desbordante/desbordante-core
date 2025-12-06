@@ -3,12 +3,12 @@
 #include <filesystem>
 #include <fstream>
 
-#include "algorithms/ind/faida/hashing/hashing.h"
-#include "irow_iterator.h"
-#include "model/table/column_index.h"
-#include "model/table/idataset_stream.h"
-#include "model/table/relational_schema.h"
-#include "model/table/table_index.h"
+#include "core/algorithms/ind/faida/hashing/hashing.h"
+#include "core/algorithms/ind/faida/preprocessing/irow_iterator.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/table_index.h"
 
 namespace algos::faida {
 

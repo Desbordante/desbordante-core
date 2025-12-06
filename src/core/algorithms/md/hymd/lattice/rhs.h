@@ -5,11 +5,11 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "model/index.h"
-#include "util/desbordante_assume.h"
-#include "util/get_preallocated_vector.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/model/index.h"
+#include "core/util/desbordante_assume.h"
+#include "core/util/get_preallocated_vector.h"
 
 namespace algos::hymd::lattice {
 struct Rhs {

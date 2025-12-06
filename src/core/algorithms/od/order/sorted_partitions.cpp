@@ -1,9 +1,9 @@
-#include "sorted_partitions.h"
+#include "core/algorithms/od/order/sorted_partitions.h"
 
 #include <unordered_map>
 #include <vector>
 
-#include "model/table/tuple_index.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::order {
 

@@ -4,12 +4,12 @@
 #include <string_view>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "error/type.h"
-#include "ind.h"
-#include "model/table/relational_schema.h"
-#include "tabular_data/input_tables_type.h"
-#include "util/primitive_collection.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/config/error/type.h"
+#include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/primitive_collection.h"
 
 namespace algos {
 

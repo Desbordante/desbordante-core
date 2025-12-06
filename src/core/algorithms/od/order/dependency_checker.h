@@ -2,7 +2,7 @@
 
 #include <enum.h>
 
-#include "sorted_partitions.h"
+#include "core/algorithms/od/order/sorted_partitions.h"
 
 namespace algos::order {
 

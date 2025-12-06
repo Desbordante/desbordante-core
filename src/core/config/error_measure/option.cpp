@@ -1,7 +1,7 @@
-#include "config/error_measure/option.h"
+#include "core/config/error_measure/option.h"
 
-#include "config/names_and_descriptions.h"
-#include "fd/tane/enums.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kPfdErrorMeasure, names::kAfdErrorMeasure, descriptions::kDPfdErrorMeasure,

@@ -2,11 +2,11 @@
 
 #include <memory>
 
-#include "algorithms/ucc/hpivalid/config.h"
-#include "algorithms/ucc/hpivalid/pli_table.h"
-#include "algorithms/ucc/hpivalid/result_collector.h"
-#include "algorithms/ucc/ucc_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
+#include "core/algorithms/ucc/hpivalid/config.h"
+#include "core/algorithms/ucc/hpivalid/pli_table.h"
+#include "core/algorithms/ucc/hpivalid/result_collector.h"
+#include "core/algorithms/ucc/ucc_algorithm.h"
+#include "core/model/table/column_layout_relation_data.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
