@@ -1,16 +1,15 @@
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/equal_nulls/type.h"
-#include "config/max_arity/type.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
-#include "csv_config_util.h"
-#include "error/type.h"
-#include "max_arity/type.h"
-#include "test_hash_util.h"
-#include "test_ind_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/error/type.h"
+#include "core/config/max_arity/type.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
+#include "tests/unit/test_hash_util.h"
+#include "tests/unit/test_ind_util.h"
 
 namespace tests {
 namespace {

@@ -1,5 +1,5 @@
 #pragma once
-#include "algorithms/dd/dd.h"
+#include "core/algorithms/dd/dd.h"
 
 namespace util::dd {
 model::DFStringConstraint CreateDf(std::string_view const& col_name, double lower_bound,

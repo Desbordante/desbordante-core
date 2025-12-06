@@ -1,6 +1,6 @@
 #pragma once
 
-#include "idataset_stream.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace model {
 

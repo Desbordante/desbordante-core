@@ -4,13 +4,13 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "all_csv_configs.h"
-#include "csv_config_util.h"
-#include "fd/pyrocommon/model/list_agree_set_sample.h"
-#include "levenshtein_distance.h"
-#include "model/table/agree_set_factory.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/identifier_set.h"
+#include "core/algorithms/fd/pyrocommon/model/list_agree_set_sample.h"
+#include "core/model/table/agree_set_factory.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/identifier_set.h"
+#include "core/util/levenshtein_distance.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

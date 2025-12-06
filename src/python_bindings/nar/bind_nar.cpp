@@ -1,10 +1,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/nar/mining_algorithms.h"
-#include "algorithms/nar/nar.h"
-#include "algorithms/nar/value_range.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/nar/mining_algorithms.h"
+#include "core/algorithms/nar/nar.h"
+#include "core/algorithms/nar/value_range.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 

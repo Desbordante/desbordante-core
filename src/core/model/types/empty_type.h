@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "type.h"
+#include "core/model/types/type.h"
 
 namespace model {
 

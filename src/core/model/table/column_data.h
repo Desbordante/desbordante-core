@@ -7,9 +7,9 @@
 
 #include <vector>
 
-#include "abstract_column_data.h"
-#include "column.h"
-#include "position_list_index.h"
+#include "core/model/table/abstract_column_data.h"
+#include "core/model/table/column.h"
+#include "core/model/table/position_list_index.h"
 
 class ColumnData final : public model::AbstractColumnData {
     std::shared_ptr<model::PositionListIndex> position_list_index_;

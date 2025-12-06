@@ -1,15 +1,15 @@
-#include "bind_od.h"
+#include "python_bindings/od/bind_od.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/od/fastod/fastod.h"
-#include "algorithms/od/fastod/model/canonical_od.h"
-#include "algorithms/od/mining_algorithms.h"
-#include "algorithms/od/order/list_od.h"
-#include "config/indices/type.h"
-#include "py_util/bind_primitive.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/od/fastod/fastod.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
+#include "core/algorithms/od/mining_algorithms.h"
+#include "core/algorithms/od/order/list_od.h"
+#include "core/config/indices/type.h"
+#include "core/util/bitset_utils.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

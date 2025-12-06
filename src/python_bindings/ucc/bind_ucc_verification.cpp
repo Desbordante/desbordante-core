@@ -1,10 +1,10 @@
-#include "bind_ucc_verification.h"
+#include "python_bindings/ucc/bind_ucc_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/ucc/verification_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/ucc/verification_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

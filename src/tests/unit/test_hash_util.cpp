@@ -3,7 +3,7 @@
  *
  * Helper functions to calculate hash definition
  */
-#include "test_hash_util.h"
+#include "tests/unit/test_hash_util.h"
 
 #include <vector>
 

@@ -3,7 +3,7 @@
  *
  * implementation of partition reader classes and domain creation manager
  */
-#include "column_domain.h"
+#include "core/model/table/column_domain.h"
 
 #include <algorithm>
 #include <cmath>
@@ -11,11 +11,11 @@
 #include <numeric>
 #include <string>
 
-#include "config/thread_number/type.h"
-#include "model/table/block_dataset_stream.h"
-#include "model/table/dataset_stream_fixed.h"
-#include "util/logger.h"
-#include "util/parallel_for.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/block_dataset_stream.h"
+#include "core/model/table/dataset_stream_fixed.h"
+#include "core/util/logger.h"
+#include "core/util/parallel_for.h"
 
 namespace model {
 

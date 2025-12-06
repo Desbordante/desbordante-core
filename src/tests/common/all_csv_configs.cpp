@@ -1,8 +1,8 @@
-#include "all_csv_configs.h"
+#include "tests/common/all_csv_configs.h"
 
 #include <string_view>
 
-#include "csv_config_util.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

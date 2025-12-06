@@ -8,10 +8,10 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
-#include "util/custom_hashes.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_hashes.h"
 
 namespace model {
 

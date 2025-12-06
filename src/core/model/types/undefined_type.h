@@ -1,7 +1,7 @@
 #pragma once
 
-#include "empty_type.h"
-#include "null_type.h"
+#include "core/model/types/empty_type.h"
+#include "core/model/types/null_type.h"
 
 namespace model {
 

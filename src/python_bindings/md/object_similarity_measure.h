@@ -7,12 +7,12 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
-#include "algorithms/md/hymd/preprocessing/similarity.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/basic_calculator.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match_impl.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/single_transformer.h"
+#include "core/algorithms/md/hymd/preprocessing/similarity.h"
 
 namespace python_bindings {
 namespace detail {

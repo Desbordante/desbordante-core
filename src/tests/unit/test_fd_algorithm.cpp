@@ -3,17 +3,17 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/fd/depminer/depminer.h"
-#include "algorithms/fd/dfd/dfd.h"
-#include "algorithms/fd/fastfds/fastfds.h"
-#include "algorithms/fd/fdep/fdep.h"
-#include "algorithms/fd/fun/fun.h"
-#include "algorithms/fd/hyfd/hyfd.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/pfdtane.h"
-#include "algorithms/fd/tane/tane.h"
-#include "model/table/relational_schema.h"
-#include "test_fd_util.h"
+#include "core/algorithms/fd/depminer/depminer.h"
+#include "core/algorithms/fd/dfd/dfd.h"
+#include "core/algorithms/fd/fastfds/fastfds.h"
+#include "core/algorithms/fd/fdep/fdep.h"
+#include "core/algorithms/fd/fun/fun.h"
+#include "core/algorithms/fd/hyfd/hyfd.h"
+#include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/tane/pfdtane.h"
+#include "core/algorithms/fd/tane/tane.h"
+#include "core/model/table/relational_schema.h"
+#include "tests/unit/test_fd_util.h"
 
 using std::string, std::vector;
 using ::testing::ContainerEq, ::testing::Eq;

@@ -1,12 +1,12 @@
-#include "bind_fd_verification.h"
+#include "python_bindings/fd/bind_fd_verification.h"
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/fd/fd_verifier/fd_verifier.h"
-#include "algorithms/fd/fd_verifier/highlight.h"
-#include "algorithms/fd/verification_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/fd/fd_verifier/fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/algorithms/fd/verification_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
 namespace py = pybind11;

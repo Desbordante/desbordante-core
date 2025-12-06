@@ -8,15 +8,15 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/md/decision_boundary.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "algorithms/md/hymd/utility/md_less.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/index.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/hymd/utility/md_less.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/index.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace {
 auto GetCardinality(std::vector<model::md::DecisionBoundary> const& lhs_bounds) {

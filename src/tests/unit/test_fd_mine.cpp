@@ -4,16 +4,16 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "algorithms/fd/fd_mine/fd_mine.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/pfdtane.h"
-#include "algorithms/fd/tane/tane.h"
-#include "config/error/type.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "model/table/relational_schema.h"
-#include "test_fd_util.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/fd_mine/fd_mine.h"
+#include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/tane/pfdtane.h"
+#include "core/algorithms/fd/tane/tane.h"
+#include "core/config/error/type.h"
+#include "core/config/names.h"
+#include "core/model/table/relational_schema.h"
+#include "tests/common/csv_config_util.h"
+#include "tests/unit/test_fd_util.h"
 
 namespace tests {
 using ::testing::ContainerEq, ::testing::Eq;

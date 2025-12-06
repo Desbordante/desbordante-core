@@ -8,8 +8,8 @@
 
 #include <pybind11/pybind11.h>
 
-#include "algorithms/algorithm.h"
-#include "util/mem_ptr_deduce.h"
+#include "core/algorithms/algorithm.h"
+#include "core/util/mem_ptr_deduce.h"
 
 namespace python_bindings {
 
