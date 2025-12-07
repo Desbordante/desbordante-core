@@ -28,7 +28,8 @@ private:
 
     std::unordered_map<std::size_t, std::shared_ptr<TranslatingMinimizeTree>> minimize_tree_map_;
 
-    static constexpr HittingSetEnumerationStrategy strategy_ = HittingSetEnumerationStrategy::MMCS;
+    static constexpr HittingSetEnumerationStrategy strategy_ =
+            HittingSetEnumerationStrategy::EvidenceInverter;
 
     void BuildClueIndices();
     std::vector<boost::dynamic_bitset<>> MinimizeDifferentialSet(
