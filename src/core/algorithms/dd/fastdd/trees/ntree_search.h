@@ -10,6 +10,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
+#include "core/util/dynamic_bitset.h"
+
 namespace algos::dd {
 
 /**
@@ -21,14 +23,14 @@ private:
     // Maps a bit-position to a child node
     std::vector<std::unique_ptr<NTreeSearch>> children_;
     // Bitset that shows for each bit-position whether a child node is present in the map
-    boost::dynamic_bitset<> children_bitset_;
+    util::DynamicBitset<> children_bitset_;
 
     // Optional to hold a terminal bitset at this node.
     // If present, it represents a complete bitset stored here.
-    std::optional<boost::dynamic_bitset<>> stored_bitset_;
+    std::optional<util::DynamicBitset<>> stored_bitset_;
 
-    void InsertImpl(boost::dynamic_bitset<> const& bs, std::size_t cur_bit, std::size_t next_bit) {
-        if (next_bit == boost::dynamic_bitset<>::npos) {
+    void InsertImpl(util::DynamicBitset<> const& bs, std::size_t cur_bit, std::size_t next_bit) {
+        if (next_bit == util::DynamicBitset<>::npos) {
             stored_bitset_ = bs;
             return;
         }
@@ -38,10 +40,10 @@ private:
                 stored_bitset_ = bs;
                 return;
             } else {
-                std::size_t stored_next_bit = cur_bit == boost::dynamic_bitset<>::npos
+                std::size_t stored_next_bit = cur_bit == util::DynamicBitset<>::npos
                                                       ? stored_bitset_->find_first()
                                                       : stored_bitset_->find_next(cur_bit);
-                if (stored_next_bit != boost::dynamic_bitset<>::npos) {
+                if (stored_next_bit != util::DynamicBitset<>::npos) {
                     if (children_.empty()) {
                         children_.resize(bs.size());
                     }
@@ -65,13 +67,13 @@ private:
         child->InsertImpl(bs, next_bit, bs.find_next(next_bit));
     }
 
-    bool FindSubset(boost::dynamic_bitset<> const& bs, std::size_t next_bit) const {
+    bool FindSubset(util::DynamicBitset<> const& bs, std::size_t next_bit) const {
         // If the current node stores a bitset, it is a subset by definition
         if (stored_bitset_) {
             return stored_bitset_->is_subset_of(bs);
         }
 
-        while (next_bit != boost::dynamic_bitset<>::npos) {
+        while (next_bit != util::DynamicBitset<>::npos) {
             std::size_t next_index = bs.find_next(next_bit);
             if (children_bitset_[next_bit]) {
                 if (children_[next_bit]->FindSubset(bs, next_index)) {
@@ -84,8 +86,8 @@ private:
         return false;
     }
 
-    bool GetAndRemoveGeneralizations(boost::dynamic_bitset<> const& bs, std::size_t next_bit,
-                                     std::vector<boost::dynamic_bitset<>>& result) {
+    bool GetAndRemoveGeneralizations(util::DynamicBitset<> const& bs, std::size_t next_bit,
+                                     std::vector<util::DynamicBitset<>>& result) {
         if (stored_bitset_) {
             if (stored_bitset_->is_subset_of(bs)) {
                 result.push_back(stored_bitset_.value());
@@ -95,7 +97,7 @@ private:
             }
         }
 
-        while (next_bit != boost::dynamic_bitset<>::npos) {
+        while (next_bit != util::DynamicBitset<>::npos) {
             std::size_t next_index = bs.find_next(next_bit);
             if (children_bitset_[next_bit]) {
                 if (children_[next_bit]->GetAndRemoveGeneralizations(bs, next_index, result)) {
@@ -111,28 +113,31 @@ private:
 
 public:
     void Insert(boost::dynamic_bitset<> const& bs) {
-        InsertImpl(bs, boost::dynamic_bitset<>::npos, bs.find_first());
+        util::DynamicBitset bitset(bs);
+        InsertImpl(bitset, util::DynamicBitset<>::npos, bitset.find_first());
     }
 
     [[nodiscard]]
     bool ContainsSubset(boost::dynamic_bitset<> const& bs) const {
-        return FindSubset(bs, bs.find_first());
+        util::DynamicBitset bitset(bs);
+        return FindSubset(bitset, bitset.find_first());
     }
 
-    std::vector<boost::dynamic_bitset<>> GetAndRemoveGeneralizations(
+    std::vector<util::DynamicBitset<>> GetAndRemoveGeneralizations(
             boost::dynamic_bitset<> const& bs) {
-        std::vector<boost::dynamic_bitset<>> removed;
-        GetAndRemoveGeneralizations(bs, bs.find_first(), removed);
+        std::vector<util::DynamicBitset<>> removed;
+        util::DynamicBitset bitset(bs);
+        GetAndRemoveGeneralizations(bitset, bitset.find_first(), removed);
         return removed;
     }
 
     void ForEach(std::function<void(boost::dynamic_bitset<> const&)> const& consumer) {
         if (stored_bitset_) {
-            consumer(*stored_bitset_);
+            consumer(stored_bitset_->to_boost_dynamic_bitset());
         }
 
         for (std::size_t index = children_bitset_.find_first();
-             index != boost::dynamic_bitset<>::npos; index = children_bitset_.find_next(index)) {
+             index != util::DynamicBitset<>::npos; index = children_bitset_.find_next(index)) {
             children_[index]->ForEach(consumer);
         }
     }
@@ -140,7 +145,7 @@ public:
     explicit NTreeSearch(std::size_t bitset_size = 64UL)
         : children_(), children_bitset_(bitset_size), stored_bitset_() {}
 
-    NTreeSearch(std::size_t bitset_size, std::optional<boost::dynamic_bitset<>> const& bs)
+    NTreeSearch(std::size_t bitset_size, std::optional<util::DynamicBitset<>> const& bs)
         : children_(), children_bitset_(bitset_size), stored_bitset_(bs) {}
 };
 
