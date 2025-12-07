@@ -4,9 +4,10 @@
 #include <cstddef>
 #include <string>
 
+#include <frozen/string.h>
+#include <frozen/unordered_map.h>
+
 #include "core/model/types/type.h"
-#include "frozen/string.h"
-#include "frozen/unordered_map.h"
 
 namespace algos::fastadc {
 
