@@ -204,38 +204,16 @@ void BindNar(py::module_& main_module) {
                 if (&nar1 == &nar2) {
                     return true;
                 }
+                try{
+                    py::tuple nar1_state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar1);
+                    py::tuple nar2_state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar2);
 
-                auto const& ante1 = nar1.GetAnte();
-                auto const& ante2 = nar2.GetAnte();
-
-                auto const& cons1 = nar1.GetCons();
-                auto const& cons2 = nar2.GetCons();
-
-                if ((ante1 != ante2) || (cons1 != cons2)) {
-                    return false;
+                    return nar1_state_tuple.equal(nar2_state_tuple);
                 }
-                
-                bool qualities_consistency1 = nar1.IsQualitiesConsistent();
-                bool qualities_consistency2 = nar2.IsQualitiesConsistent();
-
-                if (qualities_consistency1 != qualities_consistency2) {
-                    return false;
+                catch(const std::exception& e)
+                {
+                    return nar1.ToString() == nar2.ToString();
                 }
-
-                if (!qualities_consistency1 && !qualities_consistency2) {
-                    return true;
-                }
-                
-                auto const& qualities1 = nar1.GetQualities();
-                auto const& qualities2 = nar2.GetQualities();
-                
-                auto double_eq = [](double d1, double d2) {
-                    return std::round(d1 * kRoundingValue) == std::round(d2 * kRoundingValue);
-                };
-
-                return double_eq(qualities1.fitness, qualities2.fitness) &&
-                    double_eq(qualities1.support, qualities2.support) &&
-                    double_eq(qualities1.confidence, qualities2.confidence);
             })
             .def("__hash__", [](NAR const& nar) {
                 try{
