@@ -88,7 +88,7 @@ jobs:
         if: steps.review.outputs.total_comments > 0
         run: exit 1
 
-  pep8-check:
+  ruff-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
