@@ -49,3 +49,10 @@ exclude = [
     "src/tests/*",
     "examples/*",
 ]
+
+[tool.ruff]
+exclude = [
+    ".git",
+    "build/",
+    "examples/notebooks/*.ipynb",
+]
