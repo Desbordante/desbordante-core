@@ -110,6 +110,18 @@ py::tuple SerializeMD(MD const& md_obj) {
     return py::make_tuple(std::move(left_schema_state), std::move(right_schema_state),
                          std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
 }
+
+py::tuple ConvertMdToImmutableTuple(MD const& md_obj) {
+    py::tuple left_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetLeftSchema().get());
+    py::tuple right_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetRightSchema().get());
+
+    py::tuple match_tuple = SerializeColumnMatch(md_obj);
+    py::tuple lhs_tuple = SerializeLhs(md_obj);
+    py::tuple rhs_tuple = SerializeRhs(md_obj);
+
+    return py::make_tuple(std::move(left_schema_tuple), std::move(right_schema_tuple),
+        std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+}
 }  // namespace
 
 namespace python_bindings {
@@ -163,19 +175,13 @@ void BindMd(py::module_& main_module) {
             .def_property_readonly("single_table", &MD::SingleTable)
             .def("get_description", &MD::GetDescription)
             .def("__eq__", [](MD const& md1, MD const& md2){
-                return md1.ToStringFull() == md2.ToStringFull();
+                py::tuple md1_state_tuple = ConvertMdToImmutableTuple(md1);
+                py::tuple md2_state_tuple = ConvertMdToImmutableTuple(md2);
+                return md1_state_tuple.equal(md2_state_tuple);
 
             })
             .def("__hash__", [](MD const& md_obj){
-                py::tuple left_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetLeftSchema().get());
-                py::tuple right_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetRightSchema().get());
-
-                py::tuple match_tuple = SerializeColumnMatch(md_obj);
-                py::tuple lhs_tuple = SerializeLhs(md_obj);
-                py::tuple rhs_tuple = SerializeRhs(md_obj);
-
-                py::tuple state_tuple = py::make_tuple(std::move(left_schema_tuple), std::move(right_schema_tuple),
-                    std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+                py::tuple state_tuple = ConvertMdToImmutableTuple(md_obj);
                 return py::hash(state_tuple);
 
                 
