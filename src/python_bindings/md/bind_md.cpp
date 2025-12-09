@@ -68,7 +68,8 @@ void BindColumnMatchWithConstructor(Args&&... args) {
 
 py::tuple SerializeColumnMatch(MD const& md_obj) {
     std::vector<py::tuple> match_tuples;
-    std::shared_ptr<std::vector<model::md::ColumnMatch> const> matches_ptr = md_obj.GetColumnMatches();
+    std::shared_ptr<std::vector<model::md::ColumnMatch> const> matches_ptr =
+            md_obj.GetColumnMatches();
     if (matches_ptr) {
         for (model::md::ColumnMatch const& cm : *matches_ptr) {
             match_tuples.push_back(py::make_tuple(cm.left_col_index, cm.right_col_index, cm.name));
@@ -96,10 +97,10 @@ py::tuple SerializeRhs(MD const& md_obj) {
 }
 
 py::tuple SerializeMD(MD const& md_obj) {
-    py::tuple left_schema_state = table_serialization::SerializeRelationalSchema(
-            md_obj.GetLeftSchema().get());
-    py::tuple right_schema_state = table_serialization::SerializeRelationalSchema(
-            md_obj.GetRightSchema().get());
+    py::tuple left_schema_state =
+            table_serialization::SerializeRelationalSchema(md_obj.GetLeftSchema().get());
+    py::tuple right_schema_state =
+            table_serialization::SerializeRelationalSchema(md_obj.GetRightSchema().get());
 
     py::tuple match_tuple = SerializeColumnMatch(md_obj);
 
@@ -108,19 +109,21 @@ py::tuple SerializeMD(MD const& md_obj) {
     py::tuple rhs_tuple = SerializeRhs(md_obj);
 
     return py::make_tuple(std::move(left_schema_state), std::move(right_schema_state),
-                         std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+                          std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
 }
 
 py::tuple ConvertMdToImmutableTuple(MD const& md_obj) {
-    py::tuple left_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetLeftSchema().get());
-    py::tuple right_schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetRightSchema().get());
+    py::tuple left_schema_tuple =
+            table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetLeftSchema().get());
+    py::tuple right_schema_tuple =
+            table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetRightSchema().get());
 
     py::tuple match_tuple = SerializeColumnMatch(md_obj);
     py::tuple lhs_tuple = SerializeLhs(md_obj);
     py::tuple rhs_tuple = SerializeRhs(md_obj);
 
     return py::make_tuple(std::move(left_schema_tuple), std::move(right_schema_tuple),
-        std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+                          std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
 }
 }  // namespace
 
@@ -174,18 +177,17 @@ void BindMd(py::module_& main_module) {
             .def("__str__", &MD::ToStringActiveLhsOnly)
             .def_property_readonly("single_table", &MD::SingleTable)
             .def("get_description", &MD::GetDescription)
-            .def("__eq__", [](MD const& md1, MD const& md2){
-                py::tuple md1_state_tuple = ConvertMdToImmutableTuple(md1);
-                py::tuple md2_state_tuple = ConvertMdToImmutableTuple(md2);
-                return md1_state_tuple.equal(md2_state_tuple);
-
-            })
-            .def("__hash__", [](MD const& md_obj){
-                py::tuple state_tuple = ConvertMdToImmutableTuple(md_obj);
-                return py::hash(state_tuple);
-
-                
-            })
+            .def("__eq__",
+                 [](MD const& md1, MD const& md2) {
+                     py::tuple md1_state_tuple = ConvertMdToImmutableTuple(md1);
+                     py::tuple md2_state_tuple = ConvertMdToImmutableTuple(md2);
+                     return md1_state_tuple.equal(md2_state_tuple);
+                 })
+            .def("__hash__",
+                 [](MD const& md_obj) {
+                     py::tuple state_tuple = ConvertMdToImmutableTuple(md_obj);
+                     return py::hash(state_tuple);
+                 })
             .def(py::pickle(
                     // __getstate__
                     [](MD const& md_obj) { return SerializeMD(md_obj); },

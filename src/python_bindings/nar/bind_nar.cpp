@@ -13,8 +13,8 @@
 namespace py = pybind11;
 
 namespace {
-    constexpr double kRoundingValue = 1e12;
-} // namespace
+constexpr double kRoundingValue = 1e12;
+}  // namespace
 
 namespace nar_serialization {
 py::object SerializeValueRange(std::shared_ptr<model::ValueRange> const& vr) {
@@ -111,14 +111,15 @@ py::tuple ConvertValueRangeToImmutableTuple(std::shared_ptr<model::ValueRange> c
     }
 }
 
-py::tuple ConvertRangeMapToImmutableTuple(std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> const& map) {
+py::tuple ConvertRangeMapToImmutableTuple(
+        std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> const& map) {
     std::vector<std::pair<size_t, std::shared_ptr<model::ValueRange>>> sorted_ranges;
     sorted_ranges.reserve(map.size());
     for (auto const& [key, value] : map) {
         sorted_ranges.emplace_back(key, value);
     }
     std::sort(sorted_ranges.begin(), sorted_ranges.end(),
-        [](auto const& elem1, auto const& elem2) {return elem1.first < elem2.first;});
+              [](auto const& elem1, auto const& elem2) { return elem1.first < elem2.first; });
 
     py::tuple ranges_tuple = py::tuple(sorted_ranges.size());
     for (size_t i = 0; i < sorted_ranges.size(); i++) {
@@ -141,14 +142,10 @@ py::tuple ConvertNarToImmutableTuple(model::NAR const& nar) {
             return std::round(d * kRoundingValue) / kRoundingValue;
         };
 
-        return py::make_tuple(
-            std::move(ante_tuple),
-            std::move(cons_tuple),
-            is_consistent,
-            round_double_val(qualities.fitness),
-            round_double_val(qualities.support),
-            round_double_val(qualities.confidence)
-        );
+        return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent,
+                              round_double_val(qualities.fitness),
+                              round_double_val(qualities.support),
+                              round_double_val(qualities.confidence));
     }
     return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent);
 }
@@ -200,29 +197,31 @@ void BindNar(py::module_& main_module) {
             .def_property_readonly("fitness", [](NAR const& n) { return n.GetQualities().fitness; })
             .def_property_readonly("ante", &NAR::GetAnte)
             .def_property_readonly("cons", &NAR::GetCons)
-            .def("__eq__", [](NAR const& nar1, NAR const& nar2) {
-                if (&nar1 == &nar2) {
-                    return true;
-                }
-                try{
-                    py::tuple nar1_state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar1);
-                    py::tuple nar2_state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar2);
+            .def("__eq__",
+                 [](NAR const& nar1, NAR const& nar2) {
+                     if (&nar1 == &nar2) {
+                         return true;
+                     }
+                     try {
+                         py::tuple nar1_state_tuple =
+                                 nar_serialization::ConvertNarToImmutableTuple(nar1);
+                         py::tuple nar2_state_tuple =
+                                 nar_serialization::ConvertNarToImmutableTuple(nar2);
 
-                    return nar1_state_tuple.equal(nar2_state_tuple);
-                }
-                catch(const std::exception& e)
-                {
-                    return nar1.ToString() == nar2.ToString();
-                }
-            })
-            .def("__hash__", [](NAR const& nar) {
-                try{
-                    py::tuple state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar);
-                    return py::hash(state_tuple);
-                } catch (const std::exception& e) {
-                    return static_cast<long>(0);
-                }
-            })
+                         return nar1_state_tuple.equal(nar2_state_tuple);
+                     } catch (std::exception const& e) {
+                         return nar1.ToString() == nar2.ToString();
+                     }
+                 })
+            .def("__hash__",
+                 [](NAR const& nar) {
+                     try {
+                         py::tuple state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar);
+                         return py::hash(state_tuple);
+                     } catch (std::exception const& e) {
+                         return static_cast<long>(0);
+                     }
+                 })
             .def(py::pickle(
                     // __getstate__
                     [](NAR const& nar) {
