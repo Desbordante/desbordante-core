@@ -6,9 +6,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/cfd/cfdfinder/candidate.h"
-#include "algorithms/fd/hyfd/model/fd_tree.h"
-#include "algorithms/fd/hyfd/model/non_fd_list.h"
+#include "core/algorithms/cfd/cfdfinder/candidate.h"
+#include "core/algorithms/fd/hyfd/model/fd_tree.h"
+#include "core/algorithms/fd/hyfd/model/non_fd_list.h"
 
 namespace algos::cfdfinder {
 

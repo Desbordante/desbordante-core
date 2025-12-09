@@ -1,9 +1,9 @@
-#include "algorithms/cfd/cfdfinder/model/pruning/partial_fd_pruning.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/partial_fd_pruning.h"
 
 #include <cmath>
 #include <unordered_map>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
 
 namespace algos::cfdfinder {
 double PartialFdPruning::CalculateG1(Pattern const& pattern) const {

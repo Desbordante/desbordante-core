@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
+#include "core/algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
 
 namespace algos::cfdfinder {
 class Entry {

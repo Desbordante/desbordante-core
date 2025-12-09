@@ -1,11 +1,11 @@
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 
 #include <algorithm>
 #include <numeric>
 #include <tuple>
 #include <unordered_set>
 
-#include "algorithms/cfd/cfdfinder/util/violations_util.h"
+#include "core/algorithms/cfd/cfdfinder/util/violations_util.h"
 
 namespace algos::cfdfinder {
 bool Pattern::Matches(Row const& tuple) const {

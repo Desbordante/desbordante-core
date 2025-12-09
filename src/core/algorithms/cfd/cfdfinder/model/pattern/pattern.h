@@ -4,9 +4,9 @@
 #include <list>
 #include <ranges>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern_item.h"
-#include "algorithms/cfd/cfdfinder/types/cluster.h"
-#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_item.h"
+#include "core/algorithms/cfd/cfdfinder/types/cluster.h"
+#include "core/algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder {
 

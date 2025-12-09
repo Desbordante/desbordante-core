@@ -1,12 +1,12 @@
-#include "algorithms/cfd/cfdfinder/model/expansion/range_pattern_expansion.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion/range_pattern_expansion.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <ranges>
 #include <utility>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/range_entry.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/range_entry.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 

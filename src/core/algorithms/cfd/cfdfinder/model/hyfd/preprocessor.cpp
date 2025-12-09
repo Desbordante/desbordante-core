@@ -1,8 +1,8 @@
-#include "algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
 
 #include <ranges>
 
-#include "algorithms/fd/hycommon/preprocessor.h"
+#include "core/algorithms/fd/hycommon/preprocessor.h"
 
 namespace {
 using PLIs = algos::cfdfinder::PLIs;

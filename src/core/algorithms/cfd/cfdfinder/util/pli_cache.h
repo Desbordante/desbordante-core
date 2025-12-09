@@ -5,9 +5,9 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "model/table/position_list_index.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical_map.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical_map.h"
 
 namespace algos::cfdfinder {
 class PLICache {

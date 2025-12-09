@@ -1,4 +1,4 @@
-#include "cfdfinder.h"
+#include "core/algorithms/cfd/cfdfinder/cfdfinder.h"
 
 #include <algorithm>
 #include <chrono>
@@ -8,26 +8,26 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/cfd/cfdfinder/model/expansion_strategies.h"
-#include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
-#include "algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
-#include "algorithms/cfd/cfdfinder/model/hyfd/sampler.h"
-#include "algorithms/cfd/cfdfinder/model/hyfd/validator.h"
-#include "algorithms/cfd/cfdfinder/model/pruning_strategies.h"
-#include "algorithms/cfd/cfdfinder/model/result_strategies.h"
-#include "algorithms/cfd/cfdfinder/types/frontier.h"
-#include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
-#include "algorithms/cfd/cfdfinder/util/violations_util.h"
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/max_lhs/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
-#include "util/bitset_utils.h"
-#include "util/logger.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion_strategies.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/preprocessor.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/sampler.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/validator.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning_strategies.h"
+#include "core/algorithms/cfd/cfdfinder/model/result_strategies.h"
+#include "core/algorithms/cfd/cfdfinder/types/frontier.h"
+#include "core/algorithms/cfd/cfdfinder/util/lhs_utils.h"
+#include "core/algorithms/cfd/cfdfinder/util/violations_util.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/util/bitset_utils.h"
+#include "core/util/logger.h"
 
 namespace algos::cfdfinder {
 

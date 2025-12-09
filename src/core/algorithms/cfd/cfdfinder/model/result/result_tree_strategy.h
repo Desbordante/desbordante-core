@@ -3,8 +3,8 @@
 #include <limits>
 #include <list>
 
-#include "result_strategy.h"
-#include "result_tree.h"
+#include "core/algorithms/cfd/cfdfinder/model/result/result_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/result/result_tree.h"
 
 namespace algos::cfdfinder {
 class ResultTreeStrategy : public ResultStrategy {

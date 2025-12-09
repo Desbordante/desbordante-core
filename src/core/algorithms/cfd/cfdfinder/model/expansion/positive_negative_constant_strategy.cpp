@@ -1,9 +1,9 @@
-#include "algorithms/cfd/cfdfinder/model/expansion/positive_negative_constant_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion/positive_negative_constant_strategy.h"
 
 #include <cstddef>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
-#include "algorithms/cfd/cfdfinder/model/pattern/negative_constant_entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/negative_constant_entry.h"
 
 namespace algos::cfdfinder {
 

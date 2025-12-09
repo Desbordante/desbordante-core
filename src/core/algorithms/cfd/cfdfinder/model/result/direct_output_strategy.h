@@ -1,7 +1,7 @@
 #pragma once
 #include <list>
 
-#include "result_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/result/result_strategy.h"
 
 namespace algos::cfdfinder {
 class DirectOutputStrategy : public ResultStrategy {

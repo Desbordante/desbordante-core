@@ -1,11 +1,11 @@
 #include <boost/algorithm/string/join.hpp>
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "algorithms/cfd/cfdfinder/cfdfinder.h"
-#include "all_csv_configs.h"
-#include "config/indices/option.h"
-#include "config/names_and_descriptions.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/cfd/cfdfinder/cfdfinder.h"
+#include "core/config/indices/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

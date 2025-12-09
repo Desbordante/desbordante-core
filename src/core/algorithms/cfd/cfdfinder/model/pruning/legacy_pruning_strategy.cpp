@@ -1,10 +1,10 @@
-#include "algorithms/cfd/cfdfinder/model/pruning/legacy_pruning_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/legacy_pruning_strategy.h"
 
 #include <list>
 #include <memory>
 #include <ranges>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
 
 namespace algos::cfdfinder {
 

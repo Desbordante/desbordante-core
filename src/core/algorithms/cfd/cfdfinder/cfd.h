@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
-#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
-#include "algorithms/fd/fd.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
+#include "core/algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
+#include "core/algorithms/fd/fd.h"
 
 namespace algos::cfdfinder {
 class CFD {

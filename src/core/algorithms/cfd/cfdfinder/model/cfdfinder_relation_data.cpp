@@ -1,10 +1,10 @@
-#include "algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
+#include "core/algorithms/cfd/cfdfinder/model/cfdfinder_relation_data.h"
 
 #include <deque>
 #include <ranges>
 #include <string>
 
-#include "util/logger.h"
+#include "core/util/logger.h"
 
 namespace {
 std::unique_ptr<model::PositionListIndex> FetchPLI(algos::cfdfinder::ClusterMap& cluster_map,

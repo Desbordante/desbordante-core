@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <cstddef>
 
-#include "algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
-#include "config/indices/type.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
+#include "core/config/indices/type.h"
 
 namespace algos::cfdfinder {
 

@@ -1,9 +1,9 @@
-#include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
+#include "core/algorithms/cfd/cfdfinder/util/lhs_utils.h"
 
 #include <cstddef>
 #include <list>
 
-#include "util/bitset_utils.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::cfdfinder::utils {
 

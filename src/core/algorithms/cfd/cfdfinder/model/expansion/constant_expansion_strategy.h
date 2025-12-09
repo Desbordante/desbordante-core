@@ -2,8 +2,8 @@
 
 #include <list>
 
-#include "algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
-#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/types/hyfd_types.h"
 
 namespace algos::cfdfinder {
 

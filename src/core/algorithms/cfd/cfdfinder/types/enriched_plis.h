@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "algorithms/cfd/cfdfinder/types/cluster.h"
+#include "core/algorithms/cfd/cfdfinder/types/cluster.h"
 
 namespace algos::cfdfinder {
 using EnrichedPLIs = std::vector<std::vector<Cluster>>;

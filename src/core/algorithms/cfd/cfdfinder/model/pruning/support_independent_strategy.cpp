@@ -1,8 +1,8 @@
-#include "algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/support_independent_strategy.h"
 
 #include <algorithm>
 
-#include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
+#include "core/algorithms/cfd/cfdfinder/util/lhs_utils.h"
 
 namespace algos::cfdfinder {
 

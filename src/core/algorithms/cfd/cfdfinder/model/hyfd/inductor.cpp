@@ -1,6 +1,6 @@
-#include "algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/inductor.h"
 
-#include "util/bitset_utils.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 

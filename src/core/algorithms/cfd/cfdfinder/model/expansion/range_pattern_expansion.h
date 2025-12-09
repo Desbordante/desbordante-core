@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
-#include "algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion/expansion_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/types/inverted_cluster_maps.h"
 
 namespace algos::cfdfinder {
 

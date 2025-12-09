@@ -4,11 +4,11 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/cfd/cfdfinder/types/cluster_maps.h"
-#include "model/table/column_data.h"
-#include "model/table/idataset_stream.h"
-#include "model/table/relation_data.h"
-#include "model/table/relational_schema.h"
+#include "core/algorithms/cfd/cfdfinder/types/cluster_maps.h"
+#include "core/model/table/column_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relation_data.h"
+#include "core/model/table/relational_schema.h"
 
 namespace algos::cfdfinder {
 

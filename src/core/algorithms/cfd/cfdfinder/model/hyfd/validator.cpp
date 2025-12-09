@@ -1,4 +1,4 @@
-#include "algorithms/cfd/cfdfinder/model/hyfd/validator.h"
+#include "core/algorithms/cfd/cfdfinder/model/hyfd/validator.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -10,10 +10,10 @@
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "algorithms/fd/hycommon/validator_helpers.h"
-#include "algorithms/fd/hyfd/hyfd_config.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/algorithms/fd/hycommon/validator_helpers.h"
+#include "core/algorithms/fd/hyfd/hyfd_config.h"
+#include "core/util/bitset_utils.h"
 
 namespace {
 using BitSet = boost::dynamic_bitset<>;

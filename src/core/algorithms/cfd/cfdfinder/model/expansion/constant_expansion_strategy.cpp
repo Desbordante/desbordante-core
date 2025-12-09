@@ -1,10 +1,10 @@
-#include "algorithms/cfd/cfdfinder/model/expansion/constant_expansion_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/expansion/constant_expansion_strategy.h"
 
 #include <cstddef>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
-#include "algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/constant_entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
+#include "core/util/bitset_utils.h"
 
 namespace algos::cfdfinder {
 

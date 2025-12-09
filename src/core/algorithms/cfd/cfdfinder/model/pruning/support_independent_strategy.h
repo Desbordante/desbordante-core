@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
+#include "core/algorithms/cfd/cfdfinder/model/pruning/pruning_strategy.h"
 
 namespace algos::cfdfinder {
 

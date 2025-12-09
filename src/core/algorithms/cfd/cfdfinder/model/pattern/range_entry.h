@@ -7,7 +7,7 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 class RangeEntry final : public Entry {

@@ -3,7 +3,7 @@
 #include <queue>
 #include <unordered_set>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern.h"
 
 namespace algos::cfdfinder {
 

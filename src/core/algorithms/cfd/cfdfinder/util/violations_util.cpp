@@ -1,10 +1,10 @@
-#include "algorithms/cfd/cfdfinder/util/violations_util.h"
+#include "core/algorithms/cfd/cfdfinder/util/violations_util.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <unordered_map>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
 
 namespace algos::cfdfinder::utils {
 size_t CalculateViolations(Cluster const& cluster, Row const& inverted_rhs_pli) {

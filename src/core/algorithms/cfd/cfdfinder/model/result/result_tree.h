@@ -4,8 +4,8 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "algorithms/cfd/cfdfinder/util/lhs_utils.h"
-#include "raw_cfd.h"
+#include "core/algorithms/cfd/cfdfinder/model/result/raw_cfd.h"
+#include "core/algorithms/cfd/cfdfinder/util/lhs_utils.h"
 
 namespace algos::cfdfinder {
 class ResultTree {

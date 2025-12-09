@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <string>
 
-#include "algorithms/cfd/cfdfinder/model/pattern/entry.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/entry.h"
 
 namespace algos::cfdfinder {
 

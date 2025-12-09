@@ -1,8 +1,8 @@
 #pragma once
 
-#include "algorithms/cfd/cfdfinder/types/hyfd_types.h"
-#include "algorithms/fd/hyfd/sampler.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/cfd/cfdfinder/types/hyfd_types.h"
+#include "core/algorithms/fd/hyfd/sampler.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos::cfdfinder {
 

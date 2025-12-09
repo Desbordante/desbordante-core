@@ -1,9 +1,9 @@
 #pragma once
 #include <list>
 
-#include "algorithms/cfd/cfdfinder/candidate.h"
-#include "algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
-#include "raw_cfd.h"
+#include "core/algorithms/cfd/cfdfinder/candidate.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
+#include "core/algorithms/cfd/cfdfinder/model/result/raw_cfd.h"
 
 namespace algos::cfdfinder {
 class ResultStrategy {

@@ -3,8 +3,8 @@
 #include <memory>
 #include <vector>
 
-#include "model/table/column_index.h"
-#include "model/table/position_list_index.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/position_list_index.h"
 
 namespace algos::cfdfinder {
 using PLIs = std::vector<model::PositionListIndex*>;
