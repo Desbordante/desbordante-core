@@ -41,8 +41,8 @@ void BindAr(py::module_& main_module) {
                         auto right_vec = t[1].cast<std::vector<std::string>>();
                         double conf = t[2].cast<double>();
                         double supp = t[3].cast<double>();
-                        std::list<std::string> left_list(left_vec.begin(), left_vec.end());
-                        std::list<std::string> right_list(right_vec.begin(), right_vec.end());
+                        std::vector<std::string> left_list(left_vec.begin(), left_vec.end());
+                        std::vector<std::string> right_list(right_vec.begin(), right_vec.end());
                         return ARStrings(std::move(left_list), std::move(right_list), conf, supp);
                     }));
 
