@@ -508,22 +508,22 @@ TEST_F(FastADC, TransformedEvidenceSetAndMutexMap) {
     PredicateOrganizer organizer(predicate_builder_->PredicateCount(), std::move(evidence_set),
                                  std::move(predicate_builder_->TakeMutexMap()));
 
-    std::vector<Evidence> transfromed_evidence_set = organizer.TransformEvidenceSet();
+    std::vector<Evidence> transformed_evidence_set = organizer.TransformEvidenceSet();
 
     std::unordered_set<PredicateBitset> expected;
     for (auto const& expected_vec : expected_transformed_evidence_set) {
         expected.insert(VectorToBitset(expected_vec));
     }
 
-    for (auto const& evidence : transfromed_evidence_set) {
+    for (auto const& evidence : transformed_evidence_set) {
         auto const& actual_evidence = evidence.evidence;
         EXPECT_TRUE(expected.find(actual_evidence) != expected.end())
                 << "Unexpected evidence: " << actual_evidence;
     }
 
-    std::vector<PredicateBitset> transfromed_mutex_map = organizer.TransformMutexMap();
-    for (size_t i = 0; i < transfromed_mutex_map.size(); i++) {
-        EXPECT_EQ(transfromed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
+    std::vector<PredicateBitset> transformed_mutex_map = organizer.TransformMutexMap();
+    for (size_t i = 0; i < transformed_mutex_map.size(); i++) {
+        EXPECT_EQ(transformed_mutex_map[i], VectorToBitset(expected_mutex_map[i]));
     }
 }
 

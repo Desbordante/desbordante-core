@@ -13,7 +13,7 @@ namespace algos::hyfd::fd_tree {
 class FDTreeVertex;
 
 /**
- * Pair of pointer ot FD tree node and the corresponding LHS.
+ * Pair of pointer to FD tree node and the corresponding LHS.
  */
 using LhsPair = std::pair<std::shared_ptr<FDTreeVertex>, boost::dynamic_bitset<>>;
 

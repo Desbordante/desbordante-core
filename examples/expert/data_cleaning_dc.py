@@ -59,7 +59,7 @@ def main():
     print("This is an advanced example explaining how to use Denial Constraint (DC) verification for data cleaning.\n"
     "A basic example of using Denial Constraints is located in examples/basic/verifying_dc.py.\n")
 
-    print("DC verification is perfomed by the Rapidash algorithm:\n"
+    print("DC verification is performed by the Rapidash algorithm:\n"
     "Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia\n"
     "Floratou. 2023. Rapidash: Efficient Constraint Discovery via Rapid Verification.\n"
     "URL: https://arxiv.org/abs/2309.12436\n")

@@ -10,7 +10,7 @@ namespace util {
 
 // Describes a progress of a primitive mining algorithm.
 // Progress of the algorithm is represented as a set of phases each of which has separate double
-// value between 0 and 100. This value descibes progress of specific phase in natural way:
+// value between 0 and 100. This value describes progress of specific phase in natural way:
 // 0 - nothing done yet, 100 - the phase is finished and each value in between represents the
 // percentage of the work associated with the phase done.
 class Progress {
@@ -33,7 +33,7 @@ public:
     // Resets current phase and its progress to zeros
     void ResetProgress() noexcept;
     // Returns pair with current progress state.
-    // Pair has the form <current phase id, current phase progess>
+    // Pair has the form <current phase id, current phase progress>
     std::pair<uint8_t, double> GetProgress() const noexcept;
     // Finishes current phase and moves to the next one
     void ToNextProgressPhase() noexcept;
