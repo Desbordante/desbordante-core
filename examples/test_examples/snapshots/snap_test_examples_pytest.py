@@ -163,7 +163,7 @@ AFDs ∩ pFDs = OrderedSet(['[Data] -> Id', '[Data] -> DeviceId', '[Id] -> Devic
 1 - PerValue([DeviceId] -> Data) = 0.1714285714
 e([DeviceId] -> Data) = 0.23076923076923078
 In case of PerValue error measure, violations on data from the single "glitchy"
-sensor device among many do not prevent dependecy from being found
+sensor device among many do not prevent dependency from being found
 '''
 
 snapshots['test_example[advanced/comparison_ucc_and_aucc_1.py-None-comparison_ucc_and_aucc_1_output] comparison_ucc_and_aucc_1_output'] = '''\x1b[1m\x1b[36mThis example illustrates the difference between exact and approximate Unique
@@ -268,7 +268,7 @@ Found AUCCs:
 \t\x1b[1m\x1b[36m[Last_name Grade Salary]\x1b[0m
 \t\x1b[1m\x1b[36m[Work_experience]\x1b[0m
 
-Let's run UCC mining algorihm:
+Let's run UCC mining algorithm:
 Found UCCs:
 \t\x1b[1m\x1b[36m[First_name Grade Salary]\x1b[0m
 \t\x1b[1m\x1b[36m[Work_experience]\x1b[0m
@@ -2057,7 +2057,7 @@ Resulting dependencies for this table are:
 ['weight', 'days'] -> ['shipping cost']
 ['weight'] -> ['shipping cost']
 
-Depenency [weight] -> [shipping cost] means that ordering table by weight
+Dependency [weight] -> [shipping cost] means that ordering table by weight
 will also order table by shipping cost automatically. Let's order by weight: 
 
 +----+----------+-----------------+--------+
@@ -4028,7 +4028,7 @@ As we can notice from the results, decreasing δ tightens the constraint, and, a
 
 Let's take a closer look at them.
 
-Both google and geocoder provided coordinates for multiple addresses that didn't have matching coordinates across different sources, yet were close enough for us to assume that they point to approximately the same place with a degree of accuracy that is sufficient for us to consider them basically the same. For example, in \x1b[1;46mCluster 3\x1b[1;49m, the appartments differ by 0.000229 in longitude and by 0.00004 in latitude, with the 2 points being merely around 0.01979 km (or 0.012298 miles) apart, which is considered to be the same place with parameter δ = 0.001, but violates the MFD with parameter δ = 0.0001.
+Both google and geocoder provided coordinates for multiple addresses that didn't have matching coordinates across different sources, yet were close enough for us to assume that they point to approximately the same place with a degree of accuracy that is sufficient for us to consider them basically the same. For example, in \x1b[1;46mCluster 3\x1b[1;49m, the apartments differ by 0.000229 in longitude and by 0.00004 in latitude, with the 2 points being merely around 0.01979 km (or 0.012298 miles) apart, which is considered to be the same place with parameter δ = 0.001, but violates the MFD with parameter δ = 0.0001.
 --------------------------------------------------------------------------------
 MFD discovery can even be performed on \x1b[1;42mstrings\x1b[1;49m using cosine distance.
 Let's showcase this by checking addresses_names.csv and trying to verify a metric functional dependency in it.
@@ -4344,7 +4344,7 @@ MFD holds.
 snapshots['test_example[expert/data_cleaning_dc.py-None-data_cleaning_dc_output] data_cleaning_dc_output'] = '''This is an advanced example explaining how to use Denial Constraint (DC) verification for data cleaning.
 A basic example of using Denial Constraints is located in examples/basic/verifying_dc.py.
 
-DC verification is perfomed by the Rapidash algorithm:
+DC verification is performed by the Rapidash algorithm:
 Zifan Liu, Shaleen Deep, Anna Fariha, Fotis Psallidas, Ashish Tiwari, and Avrilia
 Floratou. 2023. Rapidash: Efficient Constraint Discovery via Rapid Verification.
 URL: https://arxiv.org/abs/2309.12436

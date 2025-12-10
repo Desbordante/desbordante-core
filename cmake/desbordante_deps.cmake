@@ -67,7 +67,7 @@ if(DESBORDANTE_BUILD_TESTS)
     # TODO(senichenkov): remove when googletest gets updated
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
         message(WARNING "Googletest has a bug recognized by Clang 21+. "
-                "Supressing character-conversion warning. "
+                "Suppressing character-conversion warning. "
                 "Consider using an older version of Clang.")
         target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
     endif()

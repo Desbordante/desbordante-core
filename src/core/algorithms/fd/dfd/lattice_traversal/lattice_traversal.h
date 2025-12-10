@@ -35,8 +35,8 @@ private:
 
     std::list<Vertical> Minimize(std::unordered_set<Vertical> const& node_list) const;
     Vertical const& TakeRandom(std::unordered_set<Vertical>& node_set);
-    static void SubstractSets(std::unordered_set<Vertical>& set,
-                              std::unordered_set<Vertical> const& set_to_substract);
+    static void SubtractSets(std::unordered_set<Vertical>& set,
+                              std::unordered_set<Vertical> const& set_to_subtract);
 
 public:
     LatticeTraversal(Column const* const rhs, ColumnLayoutRelationData const* const relation,
