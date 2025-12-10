@@ -141,7 +141,7 @@ endif()
 # TODO(senichenkov): remove when googletest gets updated
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
 	message(WARNING "Googletest has a bug recognized by Clang 21+. "
-					"Supressing character-conversion warning. "
+					"Suppressing character-conversion warning. "
 					"Consider using an older version of Clang.")
 				list(APPEND DEBUG_BUILD_OPTS "-Wno-error=character-conversion")
 endif()
@@ -159,7 +159,7 @@ if(ASAN)
         # is Clang and host distro is Ubuntu:
         message(
             WARNING
-                "Running on Ubuntu. ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch check will be supressed.
+                "Running on Ubuntu. ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch check will be suppressed.
         Consider using another distro for full ASAN coverage"
         )
         string(JOIN ";" ASAN_OPTS
