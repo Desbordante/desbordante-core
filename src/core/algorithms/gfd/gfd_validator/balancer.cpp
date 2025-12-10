@@ -120,9 +120,9 @@ void Balancer::DeleteFirstSmall() {
     result_.insert(result_.end(), small_processors.begin(), small_processors.end());
     result_.insert(result_.end(), large_processors.begin(), large_processors.end());
     large_procs_num_ = large_processors.size();
-    std::size_t larges_num = large_processors.size() + deleted_large_.size();
+    std::size_t largest_num = large_processors.size() + deleted_large_.size();
     // work
-    border_ = larges_num < m_ ? result_.end() - larges_num : result_.begin();
+    border_ = largest_num < m_ ? result_.end() - largest_num : result_.begin();
     for (auto it = border_; it != result_.end(); ++it) {
         auto last = it->end();
         if (*(last - 1) > optimal_ / 2) {

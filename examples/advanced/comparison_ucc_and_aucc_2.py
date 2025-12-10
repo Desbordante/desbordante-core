@@ -51,7 +51,7 @@ for aucc in sorted(auccs, key=lambda x: x.to_long_string()):
     print(f'\t{CYAN}{aucc.to_long_string()}{ENDC}')
 print()
 
-print('Let\'s run UCC mining algorihm:')
+print('Let\'s run UCC mining algorithm:')
 e_algo = desbordante.ucc.algorithms.Default()
 e_algo.load_data(table=(TABLE, ',', True))
 e_algo.execute()

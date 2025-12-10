@@ -32,7 +32,7 @@ std::unordered_set<Vertical> LatticeTraversal::FindLHSs() {
     std::stack<Vertical> seeds;
 
     /* Temporary fix. I think `GetOrderHighDistinctCount` should return vector of
-     * unsigned integers since `order` sould be something non-negative.
+     * unsigned integers since `order` should be something non-negative.
      */
     for (unsigned partition_index :
          column_order_.GetOrderHighDistinctCount(Vertical(*rhs_).Invert())) {
@@ -149,7 +149,7 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
             for (auto const& pruned_subset : pruned_non_dep_subsets) {
                 observations_[pruned_subset] = NodeCategory::kNonDependency;
             }
-            SubstractSets(unchecked_subsets, pruned_non_dep_subsets);
+            SubtractSets(unchecked_subsets, pruned_non_dep_subsets);
 
             if (unchecked_subsets.empty() && pruned_non_dep_subsets.empty()) {
                 minimal_deps_.insert(node);
@@ -174,8 +174,8 @@ Vertical LatticeTraversal::PickNextNode(Vertical const& node, unsigned int rhs_i
                 observations_[pruned_superset] = NodeCategory::kDependency;
             }
 
-            SubstractSets(unchecked_supersets, pruned_dep_supersets);
-            SubstractSets(unchecked_supersets, pruned_non_dep_supersets);
+            SubtractSets(unchecked_supersets, pruned_dep_supersets);
+            SubtractSets(unchecked_supersets, pruned_non_dep_supersets);
 
             if (unchecked_supersets.empty() && pruned_non_dep_supersets.empty()) {
                 maximal_non_deps_.insert(node);
@@ -302,9 +302,9 @@ std::list<Vertical> LatticeTraversal::Minimize(
     return new_seeds;
 }
 
-void LatticeTraversal::SubstractSets(std::unordered_set<Vertical>& set,
-                                     std::unordered_set<Vertical> const& set_to_substract) {
-    for (auto const& node_to_delete : set_to_substract) {
+void LatticeTraversal::SubtractSets(std::unordered_set<Vertical>& set,
+                                     std::unordered_set<Vertical> const& set_to_subtract) {
+    for (auto const& node_to_delete : set_to_subtract) {
         auto found_element_iter = set.find(node_to_delete);
         if (found_element_iter != set.end()) {
             set.erase(found_element_iter);

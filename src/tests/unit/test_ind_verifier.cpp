@@ -26,7 +26,7 @@ struct INDVerifierTestConfig {
 };
 
 namespace {
-static std::unique_ptr<algos::INDVerifier> CreateINDVerfier(INDVerifierTestConfig const& config) {
+static std::unique_ptr<algos::INDVerifier> CreateINDVerifier(INDVerifierTestConfig const& config) {
     using namespace config::names;
     return algos::CreateAndLoadAlgorithm<algos::INDVerifier>(algos::StdParamsMap{
             {kCsvConfigs, config.csv_configs},
@@ -42,7 +42,7 @@ TEST_P(TestINDVerifier, DefaultTest) {
     using namespace config::names;
 
     INDVerifierTestConfig const& config = GetParam();
-    std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerfier(config);
+    std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerifier(config);
     verifier->Execute();
 
     static INDVerifierErrorInfo const kINDHolds{
@@ -85,7 +85,7 @@ class TestINDVerifierRuntimeError : public ::testing::TestWithParam<INDVerifierT
 
 TEST_F(TestINDVerifierRuntimeError, TestEmptyTable) {
     INDVerifierTestConfig const& config = INDVerifierTestConfig({kIndTestEmpty}, {{0}, {0}});
-    std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerfier(config);
+    std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerifier(config);
     ASSERT_THROW(verifier->Execute(), std::runtime_error);
 }
 
@@ -93,7 +93,7 @@ class TestINDVerifierConfigurationError : public ::testing::TestWithParam<INDVer
 
 TEST_P(TestINDVerifierConfigurationError, TestIncorrectIndices) {
     auto const create_and_execute = [&](INDVerifierTestConfig const& config) {
-        std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerfier(config);
+        std::unique_ptr<algos::INDVerifier> verifier = CreateINDVerifier(config);
         verifier->Execute();
     };
     ASSERT_THROW(create_and_execute(GetParam()), config::ConfigurationError);

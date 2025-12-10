@@ -124,7 +124,7 @@ public:
         int rank = std::countl_zero((value_hash << b_) | ((1 << (b_ - 1)) + 1)) + 1;
 
         // (alexandrsmirn) Another way to calculate rank.
-        // This value should be identical with the current calculaton method, and may be useful in
+        // This value should be identical with the current calculation method, and may be useful in
         // the future for debugging purposes (in case Faida emits wrong result).
         // int rank = zcf(value_hash, b_) + 1;
 

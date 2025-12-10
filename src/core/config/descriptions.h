@@ -217,8 +217,8 @@ constexpr auto kDRatio =
 // UCC verifier
 constexpr auto kDUCCIndices = "column indices for UCC verification";
 // MD verifier
-constexpr auto kDMDLHS = "Left-hand side of Matching Dependancy";
-constexpr auto kDMDRHS = "Right-hand side of Matching Dependancy";
+constexpr auto kDMDLHS = "Left-hand side of Matching Dependency";
+constexpr auto kDMDRHS = "Right-hand side of Matching Dependency";
 // AOD verifier
 constexpr auto kDOcContext = "Context of the OC to verify";
 constexpr auto kDOcLeftIndex = "Index of the left attribute of the OC to verify";

@@ -880,7 +880,7 @@ unsigned long long DataStats::ExecuteInternal() {
             // will use all_stats_[index].sum
             all_stats_[index].avg = GetAvg(index);
 
-            GetQuantile(0.25, index, true);  // distint is calculated here
+            GetQuantile(0.25, index, true);  // distinct is calculated here
             // after distinct, for faster executing
             all_stats_[index].kurtosis = GetKurtosis(index);
             all_stats_[index].skewness = GetSkewness(index);

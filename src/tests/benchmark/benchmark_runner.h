@@ -16,7 +16,7 @@
 namespace benchmark {
 using BenchmarkBody = std::function<void()>;
 
-/// @brief Runs benchmars and tracks their execution time
+/// @brief Runs benchmarks and tracks their execution time
 class BenchmarkRunner {
 private:
     std::unordered_map<std::string, BenchmarkBody> benchmarks_;
