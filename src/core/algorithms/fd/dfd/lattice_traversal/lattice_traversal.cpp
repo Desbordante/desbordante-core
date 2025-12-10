@@ -303,7 +303,7 @@ std::list<Vertical> LatticeTraversal::Minimize(
 }
 
 void LatticeTraversal::SubtractSets(std::unordered_set<Vertical>& set,
-                                     std::unordered_set<Vertical> const& set_to_subtract) {
+                                    std::unordered_set<Vertical> const& set_to_subtract) {
     for (auto const& node_to_delete : set_to_subtract) {
         auto found_element_iter = set.find(node_to_delete);
         if (found_element_iter != set.end()) {
