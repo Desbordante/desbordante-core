@@ -41,15 +41,15 @@ private:
     std::default_random_engine gen_;
     Hypergraph Sample(std::deque<model::PLI::Cluster> const& pli);
 
-    inline void UpdateCritAndUncov(std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+    inline void UpdateCritAndUncov(std::vector<std::vector<Edgemark>>& removed_critical_stack,
                                    std::vector<Edgemark>& crit, Edgemark& uncov,
                                    Edgemark const& v_hittings) const;
-    inline void RestoreCritAndUncov(std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+    inline void RestoreCritAndUncov(std::vector<std::vector<Edgemark>>& removed_critical_stack,
                                     std::vector<Edgemark>& crit, Edgemark& uncov) const;
 
     inline bool ExtendOrConfirmS(Edge& s, Edge& cand, std::vector<Edgemark>& crit, Edgemark& uncov,
                                  std::vector<Edgemark>& vertexhittings,
-                                 std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+                                 std::vector<std::vector<Edgemark>>& removed_critical_stack,
                                  std::stack<std::deque<model::PLI::Cluster>>& intersection_stack,
                                  std::deque<Edge::size_type>& tointersect_queue);
 
@@ -62,7 +62,7 @@ private:
 
     inline void UpdateEdges(std::vector<Edgemark>& crit, Edgemark& uncov,
                             std::vector<Edgemark>& vertexhittings,
-                            std::vector<std::vector<Edgemark>>& removed_criticals_stack,
+                            std::vector<std::vector<Edgemark>>& removed_critical_stack,
                             std::deque<model::PLI::Cluster> const& pli);
 
     inline bool SFulfillsMinimalityCondition(std::vector<Edgemark> const& crit) const;

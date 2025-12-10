@@ -1,7 +1,7 @@
 /** \file
  * \brief INDVerifier algorithm
  *
- * Algorithm for veryfing AIND.
+ * Algorithm for verifying AIND.
  */
 #pragma once
 

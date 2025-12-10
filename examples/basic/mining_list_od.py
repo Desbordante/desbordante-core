@@ -40,7 +40,7 @@ if __name__ == '__main__':
     print("Resulting dependencies for this table are:")
     print_named_ods(ods, df)
     print()
-    print("Depenency [weight] -> [shipping cost] means that ordering table by weight")
+    print("Dependency [weight] -> [shipping cost] means that ordering table by weight")
     print("will also order table by shipping cost automatically. Let's order by weight: ")
     
     df_sorted = df.sort_values("weight")
