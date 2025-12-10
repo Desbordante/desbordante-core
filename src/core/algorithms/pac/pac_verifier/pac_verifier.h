@@ -36,13 +36,6 @@ private:
 
     void RegisterOptions();
 
-    virtual void ResetState() override {
-        pac_->SetEpsilon(0);
-        pac_->SetDelta(0);
-
-        ResetPACTypeState();
-    }
-
 protected:
     bool DistFromNullIsInfty() const {
         return distance_from_null_is_infinity_;
@@ -87,8 +80,9 @@ protected:
     std::pair<double, double> FindEpsilonDelta(
             std::vector<double> const& empirical_probabilities) const;
 
-    /// @brief Reset state specific for concrete PAC type
-    virtual void ResetPACTypeState() {}
+    void ResetState() override {
+        pac_ = nullptr;
+    }
 
 public:
     PACVerifier() : Algorithm({}) {
