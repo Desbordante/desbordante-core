@@ -27,7 +27,7 @@ class PredicateProvider;
  * TODO: Java code uses LongBitSet, which is like boost::dynamic_bitset, but
  * restructs number of bits in the clue to kPredicateBits. Need to investigate further whether
  * the Java's algorithm could work with predicate space more than kPredicateBits.
- * But for now we use kPredicateBits as maxumum amount of predicates
+ * But for now we use kPredicateBits as maximum amount of predicates
  */
 constexpr auto kPredicateBits = 128;
 using PredicateBitset = model::Bitset<kPredicateBits>;

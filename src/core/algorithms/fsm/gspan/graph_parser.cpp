@@ -19,9 +19,9 @@ std::vector<gspan::graph_t> ReadGraphs(std::istream& stream) {
             }
 
             gspan::graph_t graph;
-            std::vector<std::string> splitted;
-            boost::split(splitted, line, boost::is_any_of(" "));
-            int graph_id = std::stoi(splitted[2]);
+            std::vector<std::string> items;
+            boost::split(items, line, boost::is_any_of(" "));
+            int graph_id = std::stoi(items[2]);
             graph[boost::graph_bundle].original_id = graph_id;
 
             std::unordered_map<int, vertex_t> id_to_desc;

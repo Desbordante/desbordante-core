@@ -18,7 +18,7 @@ namespace algos::dc {
 //  Left operand - Tuple::kS.
 //  Right operand is a constant value thus it has no tuple.
 //  If the Predicate involves only one variable ColumnOperand thus Predicate.tuple_ is
-//  the same as the tuple_ of involved varialble ColumnOperand.
+//  the same as the tuple_ of involved variable ColumnOperand.
 //  In this case Predicate.tuple_ is set to Tuple::kS.
 //
 enum class Tuple { kS, kT, kMixed };
