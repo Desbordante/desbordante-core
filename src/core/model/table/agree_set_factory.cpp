@@ -324,7 +324,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingCalculateSupersets() co
 
 AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandleEqvClass() const {
     SetOfVectors max_representation;
-    // set of all equivalence classes of all paritions
+    // set of all equivalence classes of all partitions
     auto less = [](vector<int> const& lhs, vector<int> const& rhs) {
         if (lhs.size() != rhs.size()) {
             return lhs.size() < rhs.size();
@@ -370,7 +370,7 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcUsingHandleEqvClass() const 
 set<vector<int>, AgreeSetFactory::VectorComp> AgreeSetFactory::GenSortedEqvClasses(
         VectorComp comp) const {
     vector<ColumnData> const& columns_data = relation_->GetColumnData();
-    // set of all equivalence classes of all paritions
+    // set of all equivalence classes of all partitions
     set<vector<int>, VectorComp> sorted_eqv_classes(comp);
 
     // Fill sorted_partitions

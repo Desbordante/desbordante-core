@@ -35,7 +35,7 @@ std::unique_ptr<std::vector<unsigned long long>> AgreeSetSample::GetNumAgreeSupe
 
 double AgreeSetSample::EstimateAgreements(Vertical const& agreement) const {
     if (!agreement.Contains(this->focus_)) {
-        throw std::runtime_error("An agreement in estimateAgreemnts should contain the focus");
+        throw std::runtime_error("An agreement in estimateAgreements should contain the focus");
     }
 
     if (population_size_ == 0) {
@@ -48,7 +48,7 @@ ConfidenceInterval AgreeSetSample::EstimateAgreements(Vertical const& agreement,
                                                       double confidence) const {
     if (!agreement.Contains(this->focus_)) {
         throw std::runtime_error(
-                "An agreement in estimateAgreemnts with confidence should contain the focus");
+                "An agreement in estimateAgreements with confidence should contain the focus");
     }
     if (population_size_ == 0) {
         return ConfidenceInterval(0, 0, 0);
