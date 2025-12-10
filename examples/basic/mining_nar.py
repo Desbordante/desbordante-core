@@ -79,7 +79,7 @@ if __name__ == '__main__':
     confidence_percent = round(example_nar.confidence * 100)
     support_percent = round(example_nar.support * 100)
     print_10_nars([example_nar], df.columns)
-    
+
     print(f"\nThe above NAR is one of the {discovered_nar_count} rules discovered"
           f" with these settings. The NAR states that about {confidence_percent}%"
           " of all dog breeds of type 'Hound' have an intelligence rating between"
@@ -88,7 +88,7 @@ if __name__ == '__main__':
           "if that is true.\n")
 
     hound_rows = df[df['Type'] == 'Hound']
-    
+
     violating_row_indices = []
     min_intelligence = example_nar.cons[9].lower_bound
     max_intelligence = example_nar.cons[9].upper_bound
@@ -100,7 +100,7 @@ if __name__ == '__main__':
         if (intelligence < min_intelligence or intelligence > max_intelligence or
             friendliness < min_friendliness or friendliness > max_friendliness):
             violating_row_indices.append(i)
-        
+
     header, *hound_row_strings = hound_rows[['Name', 'Type', 'Intelligence', 'Friendliness']].to_string().splitlines()
     print(header)
     for i, hound_row_string in enumerate(hound_row_strings):
@@ -108,7 +108,7 @@ if __name__ == '__main__':
             print(f"{Back.RED}{hound_row_string}{Back.RESET}")
         else:
             print(hound_row_string)
-    
+
     print("\nAs observed, only 1 row with 'Type' equal to 'Hound' falls outside "
           "either the intelligence or friendliness bounds. This record accounts for "
           f"the (27-1)/27 ~= {confidence_percent}% confidence level of this rule.\n")

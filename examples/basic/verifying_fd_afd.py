@@ -14,7 +14,7 @@ def print_clusters(verifier, data, lhs, rhs):
         print(f"{BLUE_CODE} #{i} cluster: {DEFAULT_COLOR_CODE}")
         for el in highlight.cluster:
             print(f"{el}: {data[data.columns[lhs]][el]} -> {data[data.columns[rhs]][el]}")
-        
+
         print(f"Most frequent rhs value proportion: {highlight.most_frequent_rhs_value_proportion}")
         print(f"Num distinct rhs values: {highlight.num_distinct_rhs_values}\n")
 
@@ -44,7 +44,7 @@ def exact_scenario(table='examples/datasets/duplicates_short.csv'):
 
     algo = desbordante.afd_verification.algorithms.Default()
     algo.load_data(table=data)
-    
+
     print(DEFAULT_COLOR_CODE)
     # Verifying exact FD (holds)
     print("Checking whether [id] -> [name] FD holds")
@@ -78,7 +78,7 @@ def approximate_scenario(table='examples/datasets/DnD.csv'):
 
     data = pd.read_csv(table, header=[0])
     print(data, end="\n\n")
-    
+
     algo = desbordante.afd_verification.algorithms.Default()
     algo.load_data(table=data)
     algo.execute(lhs_indices=[0], rhs_indices=[1])

@@ -127,7 +127,7 @@ def main():
 
     # Start cleaning algorithm
     cleaner = DataCleaner(violations)
-    
+
     cleaner.draw("Graph before", False)
     cleaner.clean()
     cleaner.draw("Graph after")

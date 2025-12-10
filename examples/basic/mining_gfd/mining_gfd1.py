@@ -99,7 +99,7 @@ def show_example():
     for ax in axarr[:, 1]:
         ax.remove()
     axsbig = fig.add_subplot(gs[:, -1])
-    
+
     axarr[0, 0].set_axis_off()
     axarr[0, 0].set_title('$Original$ $graph$')
     axarr[0, 0].imshow(mpimg.imread(GRAPH_IMAGE))
