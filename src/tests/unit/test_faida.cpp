@@ -36,7 +36,7 @@ protected:
 
 using FaidaTestConfig = FaidaINDAlgorithmTest::Config;
 
-static FaidaTestConfig parallel_test_config{
+static constexpr FaidaTestConfig kParallelTestConfig{
         .sample_size = 500,
         .hll_accuracy = 0.001,
         .num_threads = 4,
@@ -45,7 +45,7 @@ static FaidaTestConfig parallel_test_config{
 
 TEST_F(FaidaINDAlgorithmTest, EqualityTest) {
     for (auto& [csv_configs, expected_inds] : kINDEqualityTestConfigs) {
-        CheckINDsListsEqualityTest(CreateFaidaInstance(csv_configs, parallel_test_config),
+        CheckINDsListsEqualityTest(CreateFaidaInstance(csv_configs, kParallelTestConfig),
                                    expected_inds);
     }
 }
@@ -54,7 +54,7 @@ TEST_F(FaidaINDAlgorithmTest, TestTwoTables) {
     INDTestSet expected_inds_subset{{{0, {0, 1, 2, 3}}, {1, {0, 1, 3, 4}}},
                                     {{1, {0, 1, 3, 4}}, {0, {0, 1, 2, 3}}}};
     CheckINDsResultContainsINDsTest(
-            CreateFaidaInstance({kIndTestTableFirst, kIndTestTableSecond}, parallel_test_config),
+            CreateFaidaInstance({kIndTestTableFirst, kIndTestTableSecond}, kParallelTestConfig),
             expected_inds_subset, 47);
 }
 

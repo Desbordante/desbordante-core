@@ -280,7 +280,7 @@ if(COMPILE_TESTS)
 endif()
 
 if(PYTHON)
-    CPMAddPackage("gh:pybind/pybind11@2.13.4")
+    CPMAddPackage("gh:pybind/pybind11@3.0.1")
 endif()
 
 # Configure boost
