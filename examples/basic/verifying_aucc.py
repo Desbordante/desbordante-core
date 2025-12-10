@@ -1,6 +1,5 @@
 import desbordante
 import pandas as pd
-import termcolor
 
 def print_results(ucc_verifier):
     if ucc_verifier.ucc_holds():
