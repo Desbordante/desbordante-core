@@ -838,7 +838,7 @@ bool FullMatch(CPI& cpi, Match& match, std::set<model::vertex_t> const& root_can
                std::set<model::vertex_t> const& core, std::vector<model::vertex_t> const& seq,
                std::map<model::vertex_t, model::vertex_t> const& parent,
                model::graph_t const& graph, model::graph_t const& query) {
-    match.push_back({root_candidates.begin(), root_candidates.end()});
+    match.emplace_back(root_candidates.begin(), root_candidates.end());
     for (std::size_t i = 1; i < core.size(); ++i) {
         std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
         int index = std::find(seq.begin(), seq.end(), parent.at(seq.at(i))) - seq.begin();
@@ -858,7 +858,7 @@ bool FullMatch(CPI& cpi, Match& match, std::set<model::vertex_t> const& root_can
         }
     }
     for (std::size_t i = core.size(); i < seq.size(); ++i) {
-        match.push_back({root_candidates.end(), root_candidates.end()});
+        match.emplace_back(root_candidates.end(), root_candidates.end());
     }
     return false;
 }

@@ -17,9 +17,6 @@ using mo::TypeId;
 struct TypeParsingParams {
     std::vector<mo::TypeId> expected;
     CSVConfig const& csv_config;
-
-    TypeParsingParams(std::vector<mo::TypeId>&& expected, CSVConfig const& csv_config)
-        : expected(std::move(expected)), csv_config(csv_config) {}
 };
 
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};

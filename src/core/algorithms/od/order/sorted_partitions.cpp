@@ -41,7 +41,7 @@ SortedPartition::HashProduct SortedPartition::BuildHashProduct(SortedPartition c
             pos_it->second.back().insert(tuple_index);
         }
         for (PartitionIndex position : visited_positions) {
-            hash_product[position].push_back({});
+            hash_product[position].emplace_back();
         }
     }
     return hash_product;
