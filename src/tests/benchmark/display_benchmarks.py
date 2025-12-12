@@ -26,25 +26,24 @@ from sys import argv
 from collections import namedtuple
 from pathlib import Path
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Annotated
 from datetime import timedelta, date
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import click
-from pydantic import BaseModel, TypeAdapter, field_validator
+from pydantic import BaseModel, BeforeValidator, PlainSerializer
+
+MillisTimeDelta = Annotated[
+    timedelta,
+    BeforeValidator(lambda v: timedelta(milliseconds=v)),
+    PlainSerializer(lambda td: td.total_seconds() * 1000, return_type=int),
+]
 
 
 class Result(BaseModel):
     name: str
-    time: timedelta
-
-    @field_validator('time', mode='before')
-    @classmethod
-    def from_millis(cls, value: Any) -> Any:
-        if not isinstance(value, int | float):
-            raise ValueError(f'{value} is not a number')
-        return timedelta(milliseconds=value)
+    time: MillisTimeDelta
 
 
 class Results(BaseModel):
@@ -102,7 +101,6 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
                 time = record.time
                 break
         points.append(time.seconds)
-        # points.append(res.results.get(name, timedelta(0)).seconds)
 
     fig, ax = plt.subplots()
     # Dates are not guaranteed to be unique, so tick_label must be used
