@@ -23,6 +23,7 @@ from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
+import click
 
 Result = dict[str:str]
 
@@ -66,7 +67,7 @@ def read_all_results(directory: str) -> list[Results]:
     return all_results
 
 
-def build_plot(results: list[Results], baseline: Results, name: str,
+def build_plot(results: list[Results], baseline: Results | None, name: str,
                pages: PdfPages) -> None:
     '''Build and save a plot for specific algorithm.
 
@@ -95,10 +96,11 @@ def build_plot(results: list[Results], baseline: Results, name: str,
     plt.xticks(rotation=45)
     ax.grid(visible=True, linestyle='--', alpha=0.7)
 
-    if name in baseline.results:
-        ax.axhline(baseline.results[name] / 1000,
-                   color='green',
-                   label='Baseline')
+    if baseline:
+        if name in baseline.results:
+            ax.axhline(baseline.results[name] / 1000,
+                       color='green',
+                       label='Baseline')
 
     ax.legend()
     # Padding is needed for date to be displayed correctly
@@ -106,29 +108,39 @@ def build_plot(results: list[Results], baseline: Results, name: str,
     plt.close(fig)
 
 
-def main() -> None:
-    '''Main function to generate performance plots.
-
-    Expects 4 command line arguments:
-    1. Directory with test results
-    2. Baseline results JSON
-    3. Current run results JSON
-    4. Output PDF filename
-    '''
-    if len(argv) != 5:
-        print(
-            'Usage: python3 display_benchmarks.py <old_results> <baseline.json> '
-            '<curr_result.json> <out.pdf>')
-        exit(1)
-
-    results = read_all_results(argv[1])
-    baseline = read_results(argv[2])
-    last_res = read_results(argv[3])
+@click.command()
+@click.option('--old_results',
+              '-R',
+              'old_results',
+              type=click.Path(exists=True, file_okay=False, dir_okay=True),
+              required=True,
+              help='Directory with previous test results')
+@click.option('--curr_results',
+              '-r',
+              'curr_results',
+              type=click.Path(exists=True, file_okay=True, dir_okay=False),
+              required=True,
+              help='Current test results')
+@click.option('--output',
+              '-o',
+              'output',
+              type=click.Path(exists=False, file_okay=True, dir_okay=False),
+              required=True,
+              help='Output PDF filename')
+@click.option('--baseline',
+              '-b',
+              'baseline',
+              type=click.Path(exists=True, file_okay=True, dir_okay=False),
+              help='Latest successful test results')
+def main(old_results, curr_results, output, baseline) -> None:
+    results = read_all_results(old_results)
+    baseline_results = read_results(baseline) if baseline else None
+    last_res = read_results(curr_results)
     results.append(last_res)
 
-    with PdfPages(argv[4]) as pdf:
+    with PdfPages(output) as pdf:
         for name in last_res.results:
-            build_plot(results, baseline, name, pdf)
+            build_plot(results, baseline_results, name, pdf)
 
 
 if __name__ == '__main__':

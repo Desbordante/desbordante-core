@@ -65,16 +65,6 @@ jobs:
             rm -rf results-v2.json
           done
 
-      - name: Get latest log
-        run: |
-          if [ -n "$(ls old-results)" ]; then
-            FILENAME=old-results/$(ls old-results | head -n 1)
-            cp $FILENAME latest.json
-          else
-            echo "No artifacts found!"
-            echo '{"date": "0000-00-00", "results": []}' > latest.json
-          fi
-
       - name: Get latest successful job ID
         run: |
           echo ${{ secrets.PERFORMANCEREGRESSIONTESTING }} | gh auth login --with-token
@@ -99,7 +89,15 @@ jobs:
         # Each successful run must have a "baseline" attached.
         # If not, there's no baseline at all; use latest instead.
         # Note: such behaviour can be used to manually update baseline in case of some problems
-        run: cp baseline-v2.json/baseline.json baseline.json || cp latest.json baseline.json
+        run: |
+          if [[ -a 'baseline-v2.json/baseline.json' ]]; then
+            cp baseline-v2.json/baseline.json baseline.json
+          elif [ -n "$(ls old-results)" ]; then
+            FILENAME=old-results/$(ls old-results | head -n 1)
+            cp $FILENAME baseline.json
+          else
+            echo 'Warning: no baseline and no latest results found'
+          fi
 
       - name: Test
         working-directory: ${{github.workspace}}/build/target
@@ -119,8 +117,14 @@ jobs:
         run: |
           python3 -m venv .venv
           .venv/bin/python3 -m pip install matplotlib
-          .venv/bin/python3 src/tests/benchmark/display_benchmarks.py old-results baseline.json \
-            curr-results.json plots.pdf
+          if [[ -a 'baseline.json' ]]; then
+            .venv/bin/python3 src/tests/benchmark/display_benchmarks.py --old_results old-results \
+              --baseline baseline.json --curr_results curr-results.json --output plots.pdf
+          else
+            .venv/bin/python3 src/tests/benchmark/display_benchmarks.py --old_results old-results \
+              --curr_results curr-results.json --output plots.pdf
+          fi
+
         if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@v4
         with:
