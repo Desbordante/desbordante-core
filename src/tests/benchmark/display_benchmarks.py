@@ -3,6 +3,7 @@
 # dependencies = [
 #     "click>=8.2.0",
 #     "matplotlib>=3.8.0",
+#     "pydantic>=2.10.0"
 # ]
 # ///
 ''' Benchmark results visualization tool
@@ -17,42 +18,44 @@ Input:
 Output:
 - PDF file with plots showing metric trends over time
 
-Example usage:
-    python performance_plots.py results/ latest.json report.pdf
+See python3 display_benchmarks.py --help for more info.
 '''
 
 from os import scandir
 from sys import argv
 from collections import namedtuple
-import json
 from pathlib import Path
 from dataclasses import dataclass
-from typing import TypeAlias
-from datetime import timedelta
+from typing import Any
+from datetime import timedelta, date
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import click
+from pydantic import BaseModel, TypeAdapter, field_validator
 
-Result: TypeAlias = dict[str:timedelta]
+
+class Result(BaseModel):
+    name: str
+    time: timedelta
+
+    @field_validator('time', mode='before')
+    @classmethod
+    def from_millis(cls, value: Any) -> Any:
+        if not isinstance(value, int | float):
+            raise ValueError(f'{value} is not a number')
+        return timedelta(milliseconds=value)
 
 
-@dataclass
-class Results:
-    date: str
+class Results(BaseModel):
+    date: date
     results: list[Result]
 
 
 # Read serialized results from JSON file
 def read_results(filename: str) -> Results:
     with open(filename, 'r') as file:
-        json_file = json.load(file)
-        date = json_file['date']
-        results = json_file['results']
-        return Results(date, {
-            algo['name']: timedelta(milliseconds=algo['time'])
-            for algo in results
-        })
+        return Results.model_validate_json(file.read())
 
 
 def read_all_results(directory: str) -> list[Results]:
@@ -93,7 +96,13 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
     points = []
     for res in results:
         dates.append(res.date)
-        points.append(res.results.get(name, timedelta(0)).seconds)
+        time = timedelta(0)
+        for record in res.results:
+            if record.name == name:
+                time = record.time
+                break
+        points.append(time.seconds)
+        # points.append(res.results.get(name, timedelta(0)).seconds)
 
     fig, ax = plt.subplots()
     # Dates are not guaranteed to be unique, so tick_label must be used
@@ -109,10 +118,11 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
     ax.grid(visible=True, linestyle='--', alpha=0.7)
 
     if baseline:
-        if name in baseline.results:
-            ax.axhline(baseline.results[name].seconds,
-                       color='green',
-                       label='Baseline')
+        for record in baseline.results:
+            if record.name == name:
+                ax.axhline(record.time.seconds,
+                           color='green',
+                           label='Baseline')
 
     ax.legend()
     # Padding is needed for date to be displayed correctly
@@ -151,8 +161,8 @@ def main(old_results, curr_results, output, baseline) -> None:
     results.append(last_res)
 
     with PdfPages(output) as pdf:
-        for name in last_res.results:
-            build_plot(results, baseline_results, name, pdf)
+        for record in last_res.results:
+            build_plot(results, baseline_results, record.name, pdf)
 
 
 if __name__ == '__main__':
