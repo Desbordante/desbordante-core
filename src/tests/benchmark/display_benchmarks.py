@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.10"
+# dependencies = [
+#     "click>=8.2.0",
+#     "matplotlib>=3.8.0",
+# ]
+# ///
 ''' Benchmark results visualization tool
 
 This script processes JSON files containing benchmark results and generates a
@@ -20,12 +27,14 @@ from collections import namedtuple
 import json
 from pathlib import Path
 from dataclasses import dataclass
+from typing import TypeAlias
+from datetime import timedelta
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import click
 
-Result = dict[str:str]
+Result: TypeAlias = dict[str:timedelta]
 
 
 @dataclass
@@ -40,7 +49,10 @@ def read_results(filename: str) -> Results:
         json_file = json.load(file)
         date = json_file['date']
         results = json_file['results']
-        return Results(date, {algo['name']: algo['time'] for algo in results})
+        return Results(date, {
+            algo['name']: timedelta(milliseconds=algo['time'])
+            for algo in results
+        })
 
 
 def read_all_results(directory: str) -> list[Results]:
@@ -81,7 +93,7 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
     points = []
     for res in results:
         dates.append(res.date)
-        points.append(res.results.get(name, 0) / 1000)
+        points.append(res.results.get(name, timedelta(0)).seconds)
 
     fig, ax = plt.subplots()
     # Dates are not guaranteed to be unique, so tick_label must be used
@@ -98,7 +110,7 @@ def build_plot(results: list[Results], baseline: Results | None, name: str,
 
     if baseline:
         if name in baseline.results:
-            ax.axhline(baseline.results[name] / 1000,
+            ax.axhline(baseline.results[name].seconds,
                        color='green',
                        label='Baseline')
 
