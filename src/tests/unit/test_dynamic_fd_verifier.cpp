@@ -95,7 +95,6 @@ TEST_P(TestDynFDVerifyingInit, InitializationTest) {
     TestSorting(std::move(verifier));
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         DynamicFDVerifierTestSuite, TestDynFDVerifyingInit,
         ::testing::Values(
@@ -107,8 +106,6 @@ INSTANTIATE_TEST_SUITE_P(
             DynFDVerifyingParams({1, 4}, {2, 3, 5}, 3, 8, 10.L/132),
             DynFDVerifyingParams({0, 1}, {1, 4}, 2, 6, 8.L/132)
             ));
-
-// clang-format on
 
 class TestDynFDVerifyingModify : public ::testing::TestWithParam<DynFDVerifyingParams> {};
 
@@ -125,7 +122,6 @@ TEST_P(TestDynFDVerifyingModify, ModifyingTest) {
     TestSorting(std::move(verifier));
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         DynamicFDVerifierTestSuite, TestDynFDVerifyingModify,
         ::testing::Values(
@@ -138,8 +134,6 @@ INSTANTIATE_TEST_SUITE_P(
             DynFDVerifyingParams({1, 4}, {2, 3, 5}, 2, 5, 1.L/12, {}, kTestDynamicFDUpdate, {1, 6, 3}),
             DynFDVerifyingParams({0, 1}, {1, 4}, 2, 5, 1.L/22, kTestDynamicFDInsert, kTestDynamicFDUpdate, {1, 6, 3})
             ));
-
-// clang-format on
 
 class TestDynFDVerifyingExceptions : public ::testing::TestWithParam<DynFDVerifyingParams> {};
 
@@ -154,7 +148,6 @@ TEST_P(TestDynFDVerifyingExceptions, ExceptionsTest) {
     ASSERT_THROW(CreateLoadExeute(mp), config::ConfigurationError);
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         DynamicFDVerifierTestSuite, TestDynFDVerifyingExceptions,
         ::testing::Values(
@@ -167,7 +160,4 @@ INSTANTIATE_TEST_SUITE_P(
             DynFDVerifyingParams({1}, {2}, 3, 4, 5., {}, {}, {100000}),
             DynFDVerifyingParams({1}, {2}, 3, 4, 5., {}, kTestDynamicFDUpdate, {4})
             ));
-
-// clang-format on
-
 }  // namespace tests

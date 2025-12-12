@@ -64,7 +64,6 @@ TEST_P(TestPFDTaneValidation, ErrorCalculationTest) {
     }
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         PFDTaneTestMiningSuite, TestPFDTaneMining,
         ::testing::Values(
@@ -83,7 +82,4 @@ INSTANTIATE_TEST_SUITE_P(
                     PFDTaneValidationParams({{2, 3, 0.083333}, {4, 5, 0.333333}, {3, 2, 0.5}, {0, 1, 0.75},
                                              {1, 0, 0.0}, {4, 3, 0.083333}, {1, 5, 0.416666}, {5, 1, 0.0}}, +algos::PfdErrorMeasure::per_tuple, kTestFD)
                 ));
-
-// clang-format on
-
 }  // namespace tests
