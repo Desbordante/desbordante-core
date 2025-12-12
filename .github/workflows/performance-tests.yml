@@ -67,7 +67,7 @@ jobs:
 
       - name: Get latest log
         run: |
-          if [ -n "$(ls -A old-results)" ]; then
+          if [ -n "$(ls old-results)" ]; then
             FILENAME=old-results/$(ls old-results | head -n 1)
             cp $FILENAME latest.json
           else

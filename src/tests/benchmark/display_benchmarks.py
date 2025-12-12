@@ -17,19 +17,26 @@ Example usage:
 from os import scandir
 from sys import argv
 from collections import namedtuple
-from json import load as j_load
+import json
 from pathlib import Path
+from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
-Results = namedtuple('Results', ['date', 'results'])
+Result = dict[str:str]
+
+
+@dataclass
+class Results:
+    date: str
+    results: list[Result]
 
 
 # Read serialized results from JSON file
 def read_results(filename: str) -> Results:
     with open(filename, 'r') as file:
-        json_file = j_load(file)
+        json_file = json.load(file)
         date = json_file['date']
         results = json_file['results']
         return Results(date, {algo['name']: algo['time'] for algo in results})
