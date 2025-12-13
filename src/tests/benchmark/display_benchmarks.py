@@ -37,7 +37,8 @@ from pydantic import BaseModel, BeforeValidator, PlainSerializer
 MillisTimeDelta = Annotated[
     timedelta,
     BeforeValidator(lambda v: timedelta(milliseconds=v)),
-    PlainSerializer(lambda td: td.total_seconds() * 1000, return_type=int),
+    PlainSerializer(lambda td: td / timedelta(milliseconds=1), return_type=int
+                    ),
 ]
 
 
