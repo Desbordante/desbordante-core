@@ -23,8 +23,11 @@ DDVerifier::DDVerifier() : Algorithm() {
 void DDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
     auto const default_dd = DDs();
+    std::unordered_map<std::string, std::shared_ptr<Metric>> default_metrics;
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
+    RegisterOption(Option<std::unordered_map<std::string, std::shared_ptr<Metric>>>{
+            &metrics_, kDDudm, kDDDudm, default_metrics});
 }
 
 double DDVerifier::GetError() const {
@@ -62,11 +65,16 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
 }
 
 double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
-                                     std::pair<std::size_t, std::size_t> const& tuple_pair) const {
-    model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
-    std::byte const* first_value = column.GetValue(tuple_pair.first);
-    std::byte const* second_value = column.GetValue(tuple_pair.second);
-    auto const& type = static_cast<model::IMetrizableType const&>(column.GetType());
+                                     std::pair<std::size_t, std::size_t> const &tuple_pair) const {
+    model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
+    auto const column_name = column.GetColumn()->GetName();
+    std::byte const *first_value = column.GetValue(tuple_pair.first);
+    std::byte const *second_value = column.GetValue(tuple_pair.second);
+    auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+    auto it = metrics_.find(column_name);
+    if (it != metrics_.end()) {
+        return it->second->Dist(first_value, second_value);
+    }
     return type.Dist(first_value, second_value);
 }
 
@@ -99,7 +107,7 @@ void DDVerifier::LoadDataInternal() {
 
 void DDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kDDString});
+    MakeOptionsAvailable({kDDString, kDDudm});
 }
 
 void DDVerifier::CheckCorrectnessDd() const {
