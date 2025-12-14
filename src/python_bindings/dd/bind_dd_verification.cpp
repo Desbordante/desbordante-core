@@ -1,10 +1,21 @@
 #include "python_bindings/dd/bind_dd_verification.h"
 
-#include <pybind11/pybind11.h>
+#include <cstddef>
+#include <functional>
+#include <memory>
+#include <string_view>
+#include <unordered_map>
 
+#include <pybind11/complex.h>
+#include <pybind11/functional.h>
+#include <pybind11/operators.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/dd.h"
+#include "core/algorithms/dd/dd_verifier/FuncMetric.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "core/algorithms/dd/dd_verifier/highlight.h"
 #include "core/util/create_dd.h"
@@ -13,17 +24,65 @@
 namespace python_bindings {
 namespace py = pybind11;
 
-void BindDDVerification(py::module_& main_module) {
+void BindDDVerification(py::module_ &main_module) {
     using namespace algos;
     auto dd_verification_module = main_module.def_submodule("dd_verification");
     py::class_<model::DFStringConstraint>(dd_verification_module, "DF")
-            .def(py::init(&util::dd::CreateDf));
-
+            .def(py::init(&util::dd::CreateDf))
+            .def("__str__", &model::DFStringConstraint::ToString)
+            .def_property_readonly(
+                    "attribute_name",
+                    [](model::DFStringConstraint const &DF) { return DF.column_name; })
+            .def_property_readonly(
+                    "lower_bound",
+                    [](model::DFStringConstraint const &DF) { return DF.constraint.lower_bound; })
+            .def_property_readonly(
+                    "upper_bound",
+                    [](model::DFStringConstraint const &DF) { return DF.constraint.upper_bound; })
+            .def(pybind11::self == pybind11::self)
+            .def(pybind11::self != pybind11::self)
+            .def("__hash__",
+                 [](model::DFStringConstraint const &dd) {
+                     return py::hash(py::str(dd.ToString()));
+                 })
+            .def("to_json", &model::DFStringConstraint::ToJSON);
     py::class_<Highlight>(dd_verification_module, "Highlight")
             .def_property_readonly("attribute_index", &Highlight::GetAttributeIndex)
             .def_property_readonly("distance", &Highlight::GetDistance)
             .def_property_readonly("pair_rows", &Highlight::GetPairRows);
+    py::class_<Metric, std::shared_ptr<Metric>>(dd_verification_module, "Metric");
+    py::class_<FuncMetric<int>, Metric, std::shared_ptr<FuncMetric<int>>>(dd_verification_module,
+                                                                          "MetricInt")
+            .def(py::init<std::function<double(int, int)>>());
+    py::class_<FuncMetric<std::string>, Metric, std::shared_ptr<FuncMetric<std::string>>>(
+            dd_verification_module, "MetricStr")
+            .def(py::init<std::function<double(std::string, std::string)>>());
+    py::class_<FuncMetric<double>, Metric, std::shared_ptr<FuncMetric<double>>>(
+            dd_verification_module, "MetricDouble")
+            .def(py::init<std::function<double(double, double)>>());
+    dd_verification_module.def(
+            "make_metric_ptr", [](py::tuple metric_tuple) -> std::shared_ptr<Metric> {
+                if (py::len(metric_tuple) != 2) {
+                    throw std::runtime_error("Input must be a tuple of (function, type_string)");
+                }
 
+                std::string type_tag = metric_tuple[1].cast<std::string>();
+
+                if (type_tag == "int") {
+                    return std::make_shared<FuncMetric<int>>(
+                            metric_tuple[0].cast<std::function<double(int, int)>>());
+                } else if (type_tag == "double") {
+                    return std::make_shared<FuncMetric<double>>(
+                            metric_tuple[0].cast<std::function<double(double, double)>>());
+                } else if (type_tag == "string") {
+                    return std::make_shared<FuncMetric<std::string>>(
+                            metric_tuple[0]
+                                    .cast<std::function<double(std::string, std::string)>>());
+                } else {
+                    throw std::runtime_error(
+                            "Unsupported type tag. Use 'int', 'double', or 'string'.");
+                }
+            });
     BindPrimitiveNoBase<dd::DDVerifier>(dd_verification_module, "DDVerifier")
             .def("dd_holds", &dd::DDVerifier::DDHolds)
             .def("get_error", &dd::DDVerifier::GetError)

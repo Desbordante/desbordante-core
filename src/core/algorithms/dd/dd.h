@@ -122,6 +122,10 @@ struct DFStringConstraint {
 
     auto operator<=>(DFStringConstraint const& other) const = default;
 
+    auto operator==(DFStringConstraint const& other) const {
+        return column_name == other.column_name && constraint == other.constraint;
+    }
+
     std::string ToString() const {
         std::stringstream s;
         s << column_name << " " << constraint.ToString();

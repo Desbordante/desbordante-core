@@ -1,8 +1,11 @@
 #include <cstddef>
+#include <memory>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dd/dd_verifier/FuncMetric.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "tests/common/all_csv_configs.h"
 
@@ -11,7 +14,6 @@ struct DDVerifyingParams {
     algos::StdParamsMap params;
     double const error = 0.;
     std::size_t const num_error_pairs = 0;
-
 
     DDVerifyingParams(model::DDString const& dd, std::size_t const num_error_pairs = 0,
                       double const error = 0.,

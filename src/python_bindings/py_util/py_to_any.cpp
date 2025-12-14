@@ -3,6 +3,7 @@
 #include <functional>
 #include <sstream>
 #include <stdexcept>
+#include <string>
 #include <unordered_map>
 
 #include <boost/any.hpp>
@@ -16,6 +17,7 @@
 #include "core/algorithms/cind/types.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/fd/afd_metric/afd_metric.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/md/hymd/hymd.h"
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
@@ -172,6 +174,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
         kNormalConvPair<model::DDString>,
+        kNormalConvPair<std::unordered_map<std::string, std::shared_ptr<Metric>>>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
         kNormalConvPair<std::pair<std::string, std::string>>};
