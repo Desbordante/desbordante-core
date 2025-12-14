@@ -3269,6 +3269,40 @@ correct this error and observe the subsequent changes.
 
 After correcting the error, the error threshold
 dropped to \x1b[1;32m0.0\x1b[0m and the \x1b[1;32mDD holds.\x1b[0m
+----------------------------------------------------------------------------------------------------
+Example #5
+
+Also, our validator supports user-defined metrics.
+We will check the differential dependency
+
+\x1b[1;33mdepartment [0, 0] ; salary_level [0, 0.3] -> experience_years [0, 0.5]\x1b[0m
+
+in the salaries_dd.csv table.
+
+   employee_id department  salary_level  experience_years
+0            1         IT             3                 2
+1            2         HR             2                 1
+2            3         IT             4                 5
+3            4      Sales             2                 2
+4            5         IT             3                 3
+5            6         HR             1                 1
+6            7      Sales             3                 4
+7            8         IT             5                 7
+8            9         HR             2                 2
+9           10      Sales             4                 6
+
+We will pass to the validator a function to calculate the normalized 
+distance, which is defined as (distance between pair of fields) / (maximum 
+distance among all field pairs).
+
+This \x1b[1;32mDD holds.\x1b[0m
+
+Thus, across various departments, employee
+compensation is logically tied to professional experience.
+Specifically, when considering tuple pairs where employees
+share the same value in the "department" column and have
+close values in the "salary_level" column, their values in
+the "experience_years" column should also demonstrate proximity.
 '''
 
 snapshots['test_example[basic/verifying_fd_afd.py-None-verifying_fd_afd_output] verifying_fd_afd_output'] = '''First, let's look at the duplicates_short.csv table and try to verify the functional dependency in it.

@@ -1,0 +1,11 @@
+employee_id,department,salary_level,experience_years
+1,IT,3,2
+2,HR,2,1
+3,IT,4,5
+4,Sales,2,2
+5,IT,3,3
+6,HR,1,1
+7,Sales,3,4
+8,IT,5,7
+9,HR,2,2
+10,Sales,4,6

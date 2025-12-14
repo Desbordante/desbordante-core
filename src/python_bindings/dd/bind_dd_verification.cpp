@@ -1,5 +1,7 @@
 #include "python_bindings/dd/bind_dd_verification.h"
 
+#include <pybind11/pybind11.h>
+
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -9,7 +11,6 @@
 #include <pybind11/complex.h>
 #include <pybind11/functional.h>
 #include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
@@ -24,7 +25,7 @@
 namespace python_bindings {
 namespace py = pybind11;
 
-void BindDDVerification(py::module_ &main_module) {
+void BindDDVerification(py::module_& main_module) {
     using namespace algos;
     auto dd_verification_module = main_module.def_submodule("dd_verification");
     py::class_<model::DFStringConstraint>(dd_verification_module, "DF")
@@ -32,17 +33,17 @@ void BindDDVerification(py::module_ &main_module) {
             .def("__str__", &model::DFStringConstraint::ToString)
             .def_property_readonly(
                     "attribute_name",
-                    [](model::DFStringConstraint const &DF) { return DF.column_name; })
+                    [](model::DFStringConstraint const& DF) { return DF.column_name; })
             .def_property_readonly(
                     "lower_bound",
-                    [](model::DFStringConstraint const &DF) { return DF.constraint.lower_bound; })
+                    [](model::DFStringConstraint const& DF) { return DF.constraint.lower_bound; })
             .def_property_readonly(
                     "upper_bound",
-                    [](model::DFStringConstraint const &DF) { return DF.constraint.upper_bound; })
+                    [](model::DFStringConstraint const& DF) { return DF.constraint.upper_bound; })
             .def(pybind11::self == pybind11::self)
             .def(pybind11::self != pybind11::self)
             .def("__hash__",
-                 [](model::DFStringConstraint const &dd) {
+                 [](model::DFStringConstraint const& dd) {
                      return py::hash(py::str(dd.ToString()));
                  })
             .def("to_json", &model::DFStringConstraint::ToJSON);

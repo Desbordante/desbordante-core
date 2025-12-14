@@ -1,8 +1,8 @@
 #include "python_bindings/dd/bind_split.h"
 
-#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
+#include <pybind11/operators.h>
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dd/dd.h"

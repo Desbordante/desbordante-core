@@ -65,12 +65,12 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
 }
 
 double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
-                                     std::pair<std::size_t, std::size_t> const &tuple_pair) const {
-    model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
+                                     std::pair<std::size_t, std::size_t> const& tuple_pair) const {
+    model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
     auto const column_name = column.GetColumn()->GetName();
-    std::byte const *first_value = column.GetValue(tuple_pair.first);
-    std::byte const *second_value = column.GetValue(tuple_pair.second);
-    auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+    std::byte const* first_value = column.GetValue(tuple_pair.first);
+    std::byte const* second_value = column.GetValue(tuple_pair.second);
+    auto const& type = static_cast<model::IMetrizableType const&>(column.GetType());
     auto it = metrics_.find(column_name);
     if (it != metrics_.end()) {
         return it->second->Dist(first_value, second_value);

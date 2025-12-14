@@ -40,26 +40,33 @@ TEST_P(TestDDHoldsVerifying, DDHoldsTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         DDVerifierTestSuite, TestDDHoldsVerifying,
-        ::testing::Values(DDVerifyingParams({{{"Col0", 0, 0}}, {{"Col1", 0, 0}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 12}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 1, 2}}, {{"Col1", 2, 12}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 6, 16}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 3, 16}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 111, 555}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 0, 10000}}, {{"Col4", 0, 10000}}}, 0, 0.),
-                          DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
-                                             {{"Col3", 222, 333}, {"Col4", 111, 555}}},
-                                            0, 0.),
-                          DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
-                                             {{"Col3", 222, 333}, {"Col4", 111, 550}}},
-                                            1, 1. / 2.),
-                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 11}}}, 1, 1. / 7.),
-                          DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 3, 10}}}, 2, 2. / 7.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),
-                          DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
-                          DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5,
-                                            5. / 10.),
-			  DDVerifyingParams({{{"Col0", 0, 0}}, {{"Col2", 0, 1},{"Col1", 0, 20}}}, 0, 0., {{"Col0", (std::make_shared<FuncMetric<int>>([](int first, int second){return first - first + second - second;}))},{"Col2", std::make_shared<FuncMetric<int>>([](int first, int second){return first - first + second - second + 1;})}})));
+        ::testing::Values(
+                DDVerifyingParams({{{"Col0", 0, 0}}, {{"Col1", 0, 0}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 12}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 1, 2}}, {{"Col1", 2, 12}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 6, 16}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 3, 16}}}, 0, 0.),
+                DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 111, 555}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 0, 10000}}, {{"Col4", 0, 10000}}}, 0, 0.),
+                DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
+                                   {{"Col3", 222, 333}, {"Col4", 111, 555}}},
+                                  0, 0.),
+                DDVerifyingParams({{{"Col0", 1, 1}, {"Col1", 4, 6}},
+                                   {{"Col3", 222, 333}, {"Col4", 111, 550}}},
+                                  1, 1. / 2.),
+                DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 0, 11}}}, 1, 1. / 7.),
+                DDVerifyingParams({{{"Col0", 0, 2}}, {{"Col1", 3, 10}}}, 2, 2. / 7.),
+                DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),
+                DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
+                DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5, 5. / 10.),
+                DDVerifyingParams(
+                        {{{"Col0", 0, 0}}, {{"Col2", 0, 1}, {"Col1", 0, 20}}}, 0, 0.,
+                        {{"Col0", (std::make_shared<FuncMetric<int>>([](int first, int second) {
+                              return first - first + second - second;
+                          }))},
+                         {"Col2", std::make_shared<FuncMetric<int>>([](int first, int second) {
+                              return first - first + second - second + 1;
+                          })}})));
 
 // clang-format on
 }  // namespace tests
