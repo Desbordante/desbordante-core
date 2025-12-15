@@ -68,7 +68,7 @@ def scenario_incorrect_data():
     algo.load_data(table=table)
 
     lhs, rhs = [("City", "Los Angeles"), ("BuildingType", "_")], ("BuildingCost", "high")
-    print(f'This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
+    print('This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
     algo.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, minconf = 1)
 
     print_results(table, algo, lhs, rhs)

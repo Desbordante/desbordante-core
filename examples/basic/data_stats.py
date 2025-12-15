@@ -39,7 +39,7 @@ def main() -> None:
     # Stats for a whole table
     for description, method in table_methods.items():
         res = method()
-        if type(res) == set:
+        if type(res) is set:
             res = sorted(res)
         if res is not None:
             print(f"{description}: {res}")
@@ -50,7 +50,7 @@ def main() -> None:
         print(f"Column num: {i}")
         for description, method in column_methods.items():
             res = method(i)
-            if type(res) == set:
+            if type(res) is set:
                 res = sorted(res)
             if res is not None:
                 print(f"{description}: {res}")

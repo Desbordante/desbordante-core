@@ -11,12 +11,12 @@ def print_data_frame(data_frame, title = None):
 def print_table(table, headers = None, title = None):
     if title is not None:
         print(title)
-    
+
     print(tabulate(table, headers=headers, tablefmt='psql'))
 
 def print_attribute_symbols(table):
     print('Attribute symbols:')
-    
+
     counter = 1
 
     for column in table:
@@ -61,7 +61,7 @@ def print_asc_ods_with_comments(asc_ods, table):
 
     print()
     print_data_frame(table_part2, 'Part 2: this part of table corresponds to class [2021]')
-    
+
     print()
     print('Let\'s sort it by attribute "avg_salary".')
 
@@ -98,7 +98,7 @@ def print_simple_ods_with_comments(simple_ods, table):
 
     employee_grade_classes = [f'[{i}]' for i in table['employee_grade']]
     employee_grade_classes_str = ', '.join(employee_grade_classes)
-    
+
     print()
     print(f'For example, let\'s look at "{simple_ods[0]}". The context of this')
     print('dependency is attribute "employee_grade". We have 8 equivalence classes')
