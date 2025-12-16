@@ -39,6 +39,7 @@ desbordante_add_test(
     ar
     SRCS
     test_apriori.cpp
+    test_ar_verifier.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ar
     ${DESBORDANTE_PREFIX}::ar::apriori
