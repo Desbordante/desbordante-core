@@ -2,7 +2,7 @@
 
 namespace algos::maxfem {
 
-std::vector<ParallelEpisode> ParallelEpisode::BuildParallelEpisodes(
+std::vector<ParallelEpisode> ParallelEpisode::BuildParallelEpisodesWithEvents(
         model::ComplexEventSequence const& event_sequence,
         std::vector<std::shared_ptr<LocationList>> const& events_location_lists,
         model::Event events_num) {
@@ -21,7 +21,10 @@ size_t ParallelEpisode::GetSupport() const {
 
 ParallelEpisode ParallelEpisode::ParallelExtension(
         model::Event event, LocationList const& event_location_list) const {
-    return ParallelEpisode();
+    model::EventSet new_event_set = event_set_;
+    new_event_set.Add(event);
+    auto new_loc_list = location_list_->Merge(event_location_list);
+    return ParallelEpisode(std::move(new_event_set), std::move(new_loc_list));
 }
 
 }  // namespace algos::maxfem

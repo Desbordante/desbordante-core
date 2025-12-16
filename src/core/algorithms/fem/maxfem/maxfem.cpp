@@ -17,16 +17,6 @@ void MaxFEM::FindFrequentEpisodes() {
     auto parallel_episodes = FindFrequentParallelEpisodes();
 }
 
-std::vector<size_t> MaxFEM::GetEventsSupports() const {
-    std::vector<size_t> supports(events_num_, 0);
-    for (auto const& event_set : *event_sequence_) {
-        for (model::Event const event : event_set) {
-            supports[event] += 1;
-        }
-    }
-    return supports;
-}
-
 void MaxFEM::RemoveInfrequentEvents() {
     std::vector<size_t> events_supports = GetEventsSupports();
 
@@ -48,18 +38,33 @@ void MaxFEM::RemoveInfrequentEvents() {
     }
 }
 
-std::vector<ParallelEpisode> MaxFEM::FindFrequentParallelEpisodes() const {
-    auto events_loc_lists = BuildEventsLocationLists();
-    std::vector<ParallelEpisode> parallel_episodes =
-        ParallelEpisode::BuildParallelEpisodes(*event_sequence_, events_loc_lists, events_num_);
-
-    for (auto const& parallel_episode : parallel_episodes) {
-        for (model::Event event = model::kStartEvent; event < events_num_; ++event) {
-            ParallelEpisode new_episode = parallel_episode.ParallelExtension(event, *events_loc_lists[event]);
+std::vector<size_t> MaxFEM::GetEventsSupports() const {
+    std::vector<size_t> supports(events_num_, 0);
+    for (auto const& event_set : *event_sequence_) {
+        for (model::Event const event : event_set) {
+            supports[event] += 1;
         }
     }
+    return supports;
+}
 
-    return parallel_episodes;
+std::vector<ParallelEpisode> MaxFEM::FindFrequentParallelEpisodes() const {
+    auto events_loc_lists = BuildEventsLocationLists();
+    std::vector<ParallelEpisode> seeds = 
+        ParallelEpisode::BuildParallelEpisodesWithEvents(*event_sequence_, events_loc_lists, events_num_);
+    std::vector<ParallelEpisode> all_episodes;
+
+    for (const auto& seed : seeds) {
+        FindFrequentEpisodesRecursive(seed, events_loc_lists, all_episodes);
+    }
+
+    all_episodes.insert(
+        all_episodes.end(),
+        std::make_move_iterator(seeds.begin()),
+        std::make_move_iterator(seeds.end())
+    );
+
+    return all_episodes;
 }
 
 std::vector<std::shared_ptr<LocationList>> MaxFEM::BuildEventsLocationLists() const {
@@ -74,6 +79,19 @@ std::vector<std::shared_ptr<LocationList>> MaxFEM::BuildEventsLocationLists() co
         }
     }
     return location_lists;
+}
+
+void MaxFEM::FindFrequentEpisodesRecursive(
+        ParallelEpisode const& current_episode,
+        std::vector<std::shared_ptr<LocationList>> const& events_loc_lists,
+        std::vector<ParallelEpisode>& results) const {
+    for (model::Event event = current_episode.GetLastEvent() + 1; event < events_num_; ++event) {
+        ParallelEpisode new_episode = current_episode.ParallelExtension(event, *events_loc_lists[event]);
+        if (new_episode.GetSupport() >= min_support_) {
+            FindFrequentEpisodesRecursive(new_episode, events_loc_lists, results);
+            results.push_back(std::move(new_episode));
+        }
+    }
 }
 
 }  // namespace algos::maxfem
