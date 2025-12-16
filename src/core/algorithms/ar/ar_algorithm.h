@@ -8,8 +8,9 @@
 #include <boost/any.hpp>
 
 #include "core/algorithms/algorithm.h"
-#include "core/algorithms/association_rules/ar.h"
-#include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/algorithms/ar/ar.h"
+#include "core/config/ar_minimum_conf/type.h"
+#include "core/config/ar_minimum_support/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/transaction/transactional_data.h"
 
@@ -17,13 +18,8 @@ namespace algos {
 
 class ARAlgorithm : public Algorithm {
 private:
-    config::InputTable input_table_;
-
-    double minconf_;
-    InputFormat input_format_ = InputFormat::singular;
-    unsigned int tid_column_index_;
-    unsigned int item_column_index_;
-    bool first_column_tid_;
+    model::TransactionalData::Params transactional_data_params_;
+    config::ArMinimumConfidenceType minconf_;
     std::list<model::ArIDs> ar_collection_;
 
     struct RuleNode {
@@ -50,7 +46,7 @@ private:
 
 protected:
     std::shared_ptr<model::TransactionalData> transactional_data_;
-    double minsup_;
+    config::ArMinimumSupportType minsup_;
 
     void GenerateRulesFrom(std::vector<unsigned> const& frequent_itemset, double support);
 

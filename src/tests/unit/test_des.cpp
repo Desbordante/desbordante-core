@@ -14,8 +14,8 @@ protected:
                                            unsigned int evalNum, double crossProb, double diffScale,
                                            algos::des::DifferentialStrategy diffStrategy) {
         using namespace config::names;
-        return {{kCsvConfig, csv_config},          {kMinimumSupport, minsup},
-                {kMinimumConfidence, minconf},     {kPopulationSize, popSize},
+        return {{kCsvConfig, csv_config},          {kArMinimumSupport, minsup},
+                {kArMinimumConfidence, minconf},   {kPopulationSize, popSize},
                 {kMaxFitnessEvaluations, evalNum}, {kCrossoverProbability, crossProb},
                 {kDifferentialScale, diffScale},   {kDifferentialStrategy, diffStrategy}};
     }

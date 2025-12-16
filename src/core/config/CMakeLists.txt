@@ -4,7 +4,9 @@ set(NAME config)
 desbordante_add_lib(NAME OBJECT)
 target_sources(
     ${NAME}
-    PRIVATE ${CONDITIONS_SRCS}
+    PRIVATE ar_minimum_conf/option.cpp
+            ar_minimum_support/option.cpp
+            ${CONDITIONS_SRCS}
             column_index/option.cpp
             column_index/validate_index.cpp
             custom_random_seed/option.cpp
@@ -22,5 +24,6 @@ target_sources(
             tabular_data/input_tables/option.cpp
             thread_number/option.cpp
             time_limit/option.cpp
+            transactional_data/option.cpp
 )
 target_link_libraries(${NAME} PRIVATE better-enums Boost::headers)

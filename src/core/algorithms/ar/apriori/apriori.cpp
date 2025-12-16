@@ -1,4 +1,4 @@
-#include "core/algorithms/association_rules/apriori.h"
+#include "core/algorithms/ar/apriori/apriori.h"
 
 #include <algorithm>
 #include <cassert>
