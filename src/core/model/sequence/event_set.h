@@ -26,6 +26,10 @@ public:
         event_set_.push_back(event);
     }
 
+    Event GetLast() const {
+        return event_set_.back();
+    }
+
     void mapEvents(std::vector<Event> const& mapping);
 };
 
