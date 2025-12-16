@@ -84,7 +84,7 @@ unsigned long long Pyro::ExecuteInternal() {
 
     auto const work_on_search_space =
             [this, &progress_step](std::list<std::unique_ptr<SearchSpace>>& search_spaces,
-                                   ProfilingContext* profiling_context, int id) {
+                                   ProfilingContext* profiling_context, [[maybe_unused]] int id) {
                 while (true) {
                     std::unique_ptr<SearchSpace> polled_space;
                     {

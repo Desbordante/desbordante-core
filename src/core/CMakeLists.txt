@@ -14,9 +14,19 @@ find_package(Threads REQUIRED)
 # Build core project as a static library
 add_library(${BINARY} STATIC ${lib_sources})
 
+# Set log level based on user input or build type
+if(LOG_LEVEL)
+    set(SPDLOG_LEVEL "SPDLOG_LEVEL_${LOG_LEVEL}")
+else()
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(SPDLOG_LEVEL "SPDLOG_LEVEL_DEBUG")
+    else()
+        set(SPDLOG_LEVEL "SPDLOG_LEVEL_INFO")
+    endif()
+endif()
+
 target_compile_definitions(${BINARY} PUBLIC
-        $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE>
-        $<$<CONFIG:Release>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_INFO>
+        SPDLOG_ACTIVE_LEVEL=${SPDLOG_LEVEL}
 )
 
 # Link essential dependencies

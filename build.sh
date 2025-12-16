@@ -23,6 +23,7 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -L[LEVEL]   --log-level[=LEVEL]     Set log level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
   -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
   -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
 EOF
@@ -70,6 +71,14 @@ for i in "$@"; do
         # Use GDB's debug information format
         -g)
             GDB_DEBUG=true
+            ;;
+        # Set log level, long option
+        --log-level=*)
+            LOG_LEVEL="${i#*=}"
+            ;;
+        # Set log level, short option
+        -L*)
+            LOG_LEVEL="${i#*L}"
             ;;
         # Forward option to CMake, long option
         --cmake-opt=*)
@@ -127,6 +136,10 @@ fi
 
 if [[ -n $SANITIZER ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D SANITIZER=${SANITIZER}"
+fi
+
+if [[ -n $LOG_LEVEL ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D LOG_LEVEL=${LOG_LEVEL}"
 fi
 
 rm -f build/CMakeCache.txt
