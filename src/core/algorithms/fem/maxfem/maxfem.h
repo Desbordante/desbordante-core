@@ -30,6 +30,11 @@ private:
 
     std::vector<std::shared_ptr<LocationList>> BuildEventsLocationLists() const;
 
+    void FindFrequentEpisodesRecursive(
+        ParallelEpisode const& current_episode,
+        std::vector<std::shared_ptr<LocationList>> const& events_loc_lists,
+        std::vector<ParallelEpisode>& results) const;
+
 public:
     MaxFEM() {}
 };

@@ -1,12 +1,15 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 
 namespace algos::maxfem {
 
 class LocationList {
 private:
+    // Elements of loc_lists_ are sorted
     std::vector<size_t> loc_list_;
+
 public:
     LocationList() {}
 
@@ -16,7 +19,7 @@ public:
         loc_list_.push_back(new_location);
     }
 
-    LocationList Merge(LocationList const& other) const;
+    std::shared_ptr<LocationList> Merge(LocationList const& other) const;
 
     size_t Size() const {
         return loc_list_.size();

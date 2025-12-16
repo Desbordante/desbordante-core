@@ -12,6 +12,10 @@ public:
     ParallelEpisode() {}
 
     ParallelEpisode(EventSet event_set) : event_set_(event_set) {}
+
+    GetLastEvent() const {
+        return event_set_.GetLast();
+    }
 };
 
 }  // namespace model
