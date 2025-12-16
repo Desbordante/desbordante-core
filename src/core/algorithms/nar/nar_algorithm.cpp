@@ -1,5 +1,7 @@
 #include "core/algorithms/nar/nar_algorithm.h"
 
+#include "core/config/ar_minimum_conf/option.h"
+#include "core/config/ar_minimum_support/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -29,13 +31,13 @@ void NARAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
-    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0.0});
+    RegisterOption(config::kArMinimumConfidenceOpt(&minconf_));
+    RegisterOption(config::kArMinimumSupportOpt(&minsup_));
 }
 
 void NARAlgorithm::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
+    MakeOptionsAvailable({kArMinimumSupport, kArMinimumConfidence});
 }
 
 }  // namespace algos
