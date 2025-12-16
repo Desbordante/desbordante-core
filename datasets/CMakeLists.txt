@@ -1,5 +1,5 @@
 # ---- Dataset pulling and extracting----
-include(../cmake/desbordante_configure_datasets.cmake)
+include(desbordante_configure_datasets)
 
 # Create input data directory (safe for incremental builds)
 set(INPUT_DATA_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/input_data")
