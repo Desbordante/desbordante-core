@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <unordered_map>
 
+#include "core/config/exceptions.h"
+
 namespace model {
 
 std::unique_ptr<TransactionalData> TransactionalData::CreateFromSingular(
@@ -99,4 +101,14 @@ std::unique_ptr<TransactionalData> TransactionalData::CreateFromTabular(IDataset
             new TransactionalData(std::move(item_universe), std::move(transactions)));
 }
 
+std::unique_ptr<TransactionalData> TransactionalData::CreateFrom(Params& params) {
+    switch (params.input_format_type) {
+        case InputFormatType::singular:
+            return CreateFromSingular(*params.input_table, params.tid_column_index,
+                                      params.item_column_index);
+        case InputFormatType::tabular:
+            return CreateFromTabular(*params.input_table, params.first_column_tid);
+    }
+    throw config::ConfigurationError("Unsupported or unknown input format specified.");
+}
 }  // namespace model

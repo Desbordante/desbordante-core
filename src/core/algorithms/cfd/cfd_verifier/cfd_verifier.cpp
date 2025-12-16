@@ -50,8 +50,8 @@ void CFDVerifier::RegisterOptions() {
     RegisterOption(
             Option{&string_rule_right_, kCFDRuleRight, kDCFDRuleRight, CFDAttributeValuePair{}}
                     .SetValueCheck(validate_single_pair));
-    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
-    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0});
+    RegisterOption(Option{&minconf_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 0.0});
+    RegisterOption(Option{&minsup_, kCfdMinimumSupport, kDCfdMinimumSupport, 0});
 }
 
 void CFDVerifier::LoadDataInternal() {
@@ -64,7 +64,7 @@ void CFDVerifier::LoadDataInternal() {
 
 void CFDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kMinimumSupport, kMinimumConfidence});
+    MakeOptionsAvailable({kCFDRuleLeft, kCFDRuleRight, kCfdMinimumSupport, kCfdMinimumConfidence});
 }
 
 unsigned long long CFDVerifier::ExecuteInternal() {

@@ -21,8 +21,8 @@ struct CFDVerifierParams {
                       int support = 0, bool expect_holds = true)
         : params({{config::names::kCFDRuleLeft, std::move(left)},
                   {config::names::kCFDRuleRight, std::move(right)},
-                  {config::names::kMinimumConfidence, confidence},
-                  {config::names::kMinimumSupport, support},
+                  {config::names::kCfdMinimumConfidence, confidence},
+                  {config::names::kCfdMinimumSupport, support},
                   {config::names::kCsvConfig, csv_config}}),
           expect_holds(expect_holds) {}
 };

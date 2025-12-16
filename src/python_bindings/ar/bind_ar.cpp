@@ -3,8 +3,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "core/algorithms/association_rules/ar.h"
-#include "core/algorithms/association_rules/mining_algorithms.h"
+#include "core/algorithms/ar/ar.h"
+#include "core/algorithms/ar/mining_algorithms.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace {
@@ -41,9 +41,7 @@ void BindAr(py::module_& main_module) {
                         auto right_vec = t[1].cast<std::vector<std::string>>();
                         double conf = t[2].cast<double>();
                         double supp = t[3].cast<double>();
-                        std::list<std::string> left_list(left_vec.begin(), left_vec.end());
-                        std::list<std::string> right_list(right_vec.begin(), right_vec.end());
-                        return ARStrings(std::move(left_list), std::move(right_list), conf, supp);
+                        return ARStrings(std::move(left_vec), std::move(right_vec), conf, supp);
                     }));
 
     py::class_<ArIDs>(ar_module, "ArIDs")
