@@ -22,7 +22,7 @@ inline void EnsureInitialized(std::string const& logger_name = "desbordante",
     auto logger = std::make_shared<spdlog::logger>(logger_name, sinks.begin(), sinks.end());
     logger->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%^%l%$] %v");
 
-    logger->set_level(spdlog::level::trace);
+    logger->set_level(spdlog::level::debug);
 
     spdlog::register_logger(logger);
 }

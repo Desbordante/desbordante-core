@@ -53,6 +53,10 @@ set(SANITIZER
     ""
     CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB"
 )
+set(LOG_LEVEL
+    ""
+    CACHE STRING "Set log level, possible values: TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL"
+)
 
 set(PYTHON
     OFF
