@@ -1,11 +1,15 @@
-#include "core/algorithms/association_rules/ar_algorithm.h"
+#include "core/algorithms/ar/ar_algorithm.h"
 
 #include <algorithm>
 #include <cassert>
 
+#include "core/config/ar_minimum_conf/option.h"
+#include "core/config/ar_minimum_support/option.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
+#include "core/config/transactional_data/option.h"
+#include "core/model/transaction/input_format_type.h"
 #include "core/util/logger.h"
 
 namespace algos {
@@ -20,17 +24,18 @@ ARAlgorithm::ARAlgorithm(std::vector<std::string_view> phase_names)
 void ARAlgorithm::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    auto sing_eq = [](InputFormat input_format) { return input_format == +InputFormat::singular; };
-    auto tab_eq = [](InputFormat input_format) { return input_format == +InputFormat::tabular; };
+    RegisterOption(config::kTableOpt(&transactional_data_params_.input_table));
+    RegisterOption(config::kInputFormatOpt(&transactional_data_params_.input_format_type)
+                           .SetConditionalOpts(
+                                   {{config::IsSingularFormat, {kTIdColumnIndex, kItemColumnIndex}},
+                                    {config::IsTabularFormat, {kFirstColumnTId}}}));
 
-    RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&first_column_tid_, kFirstColumnTId, kDFirstColumnTId, false});
-    RegisterOption(Option{&item_column_index_, kItemColumnIndex, kDItemColumnIndex, 1u});
-    RegisterOption(Option{&minconf_, kMinimumConfidence, kDMinimumConfidence, 0.0});
-    RegisterOption(Option{&minsup_, kMinimumSupport, kDMinimumSupport, 0.0});
-    RegisterOption(Option{&tid_column_index_, kTIdColumnIndex, kDTIdColumnIndex, 0u});
-    RegisterOption(Option{&input_format_, kInputFormat, kDInputFormat}.SetConditionalOpts(
-            {{sing_eq, {kTIdColumnIndex, kItemColumnIndex}}, {tab_eq, {kFirstColumnTId}}}));
+    RegisterOption(config::kFirstColumnTIdOpt(&transactional_data_params_.first_column_tid));
+    RegisterOption(config::kItemColumnOpt(&transactional_data_params_.item_column_index));
+    RegisterOption(config::kTIdColumnOpt(&transactional_data_params_.tid_column_index));
+
+    RegisterOption(config::kArMinimumConfidenceOpt(&minconf_));
+    RegisterOption(config::kArMinimumSupportOpt(&minsup_));
 }
 
 void ARAlgorithm::ResetState() {
@@ -40,22 +45,11 @@ void ARAlgorithm::ResetState() {
 
 void ARAlgorithm::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kMinimumSupport, kMinimumConfidence});
+    MakeOptionsAvailable({kArMinimumSupport, kArMinimumConfidence});
 }
 
 void ARAlgorithm::LoadDataInternal() {
-    switch (input_format_) {
-        case InputFormat::singular:
-            transactional_data_ = model::TransactionalData::CreateFromSingular(
-                    *input_table_, tid_column_index_, item_column_index_);
-            break;
-        case InputFormat::tabular:
-            transactional_data_ =
-                    model::TransactionalData::CreateFromTabular(*input_table_, first_column_tid_);
-            break;
-        default:
-            assert(0);
-    }
+    transactional_data_ = model::TransactionalData::CreateFrom(transactional_data_params_);
     if (transactional_data_->GetNumTransactions() == 0) {
         throw std::runtime_error("Got an empty dataset: AR mining is meaningless.");
     }

@@ -69,7 +69,7 @@ def scenario_incorrect_data():
 
     lhs, rhs = [("City", "Los Angeles"), ("BuildingType", "_")], ("BuildingCost", "high")
     print(f'This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")\n')
-    algo.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, minconf = 1)
+    algo.execute(cfd_rule_left=lhs, cfd_rule_right=rhs, cfd_minconf = 1)
 
     print_results(table, algo, lhs, rhs)
     print("\nWe can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.\n") #
