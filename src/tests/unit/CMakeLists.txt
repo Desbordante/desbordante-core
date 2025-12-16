@@ -39,8 +39,10 @@ desbordante_add_test(
     ar
     SRCS
     test_apriori.cpp
+    test_ar_verifier.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ar
+    ${DESBORDANTE_PREFIX}::ar::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
     better-enums

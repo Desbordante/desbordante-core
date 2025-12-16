@@ -36,6 +36,7 @@ constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
+constexpr PyTypeObject* const kPyDict = &PyDict_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -119,6 +120,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
+            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
+            PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
+                       kPyList, kPyInt>,
     };
 
     auto const it = type_map.find(type_index);
