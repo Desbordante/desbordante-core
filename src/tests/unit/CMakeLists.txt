@@ -41,6 +41,8 @@ desbordante_add_test(
     test_apriori.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ar
+    ${DESBORDANTE_PREFIX}::ar::apriori
+    ${DESBORDANTE_PREFIX}::ar::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
     better-enums

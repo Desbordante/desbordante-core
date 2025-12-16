@@ -76,6 +76,8 @@ desbordante_add_bind(
     ar/bind_ar.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ar
+    ${DESBORDANTE_PREFIX}::ar::apriori
+    ${DESBORDANTE_PREFIX}::ar::verifier
     better-enums
     Boost::headers
 )
