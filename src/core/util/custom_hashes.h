@@ -8,7 +8,7 @@ private:
     enum class BitsetHashingMethod { kTryConvertToUlong, kTrimAndConvertToUlong };
 
     static constexpr BitsetHashingMethod kDefaultHashingMethod =
-#ifdef SAFE_VERTICAL_HASHING
+#ifdef DESBORDANTE_SAFE_VERTICAL_HASHING
             BitsetHashingMethod::kTrimAndConvertToUlong;
 #else
             BitsetHashingMethod::kTryConvertToUlong;

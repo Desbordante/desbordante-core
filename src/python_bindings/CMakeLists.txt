@@ -25,7 +25,7 @@ target_link_libraries(
 
 # ---- Installation Setup ----
 
-if(PYTHON STREQUAL "INSTALL")
+if(DESBORDANTE_BINDINGS STREQUAL "INSTALL")
     # Install Python bindings module to system
     # Places the compiled library in the root installation directory
     install(TARGETS ${BINDINGS_NAME} LIBRARY DESTINATION .)

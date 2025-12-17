@@ -15,8 +15,8 @@ find_package(Threads REQUIRED)
 add_library(${BINARY} STATIC ${lib_sources})
 
 # Set log level based on user input or build type
-if(LOG_LEVEL)
-    set(SPDLOG_LEVEL "SPDLOG_LEVEL_${LOG_LEVEL}")
+if(DESBORDANTE_LOG_LEVEL)
+    set(SPDLOG_LEVEL "SPDLOG_LEVEL_${DESBORDANTE_LOG_LEVEL}")
 else()
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         set(SPDLOG_LEVEL "SPDLOG_LEVEL_DEBUG")
@@ -39,19 +39,9 @@ target_link_libraries(
     PUBLIC spdlog::spdlog_header_only # Logging infrastructure exposed in headers
 )
 
-# ---- Vertical Hashing Optimization ----
-
-# Performance/functionality trade-off:
-# - Disabled by default for maximum performance
-# - Enabled for wide datasets (>32 columns) with potential performance penalty
-option(SAFE_VERTICAL_HASHING
-       "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
-    at the cost of reduced performance. Recommended for exploratory data analysis." OFF
-)
-
 # Propagate the setting to all consumers of the library
-if(SAFE_VERTICAL_HASHING)
+if(DESBORDANTE_SAFE_VERTICAL_HASHING)
     target_compile_definitions(
-        ${BINARY} PUBLIC SAFE_VERTICAL_HASHING # Affects compilation of dependent code
+        ${BINARY} PUBLIC DESBORDANTE_SAFE_VERTICAL_HASHING # Affects compilation of dependent code
     )
 endif()
