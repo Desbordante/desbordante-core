@@ -67,7 +67,6 @@ jobs:
           cmake -DCMAKE_CXX_COMPILER=g++-10 \
             -DCMAKE_BUILD_TYPE=Debug \
             -Dgtest_disable_pthreads=OFF \
-            -DASAN=OFF \
             -DDESBORDANTE_BINDINGS=BUILD \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCPM_SOURCE_CACHE=${{github.workspace}}/cmake/cpm-cache \
