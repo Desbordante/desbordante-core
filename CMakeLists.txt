@@ -43,43 +43,52 @@ endif()
 
 # --- Build Configuration Options ---
 
-option(COMPILE_TESTS "Build tests" ON)
-option(COMPILE_BENCHMARKS "Build benchmarks" OFF)
-option(UNPACK_DATASETS "Unpack datasets" ON)
-option(BUILD_NATIVE "Build for host machine" ON)
-option(USE_LTO "Build using interprocedural optimization" OFF)
-option(GDB_DEBUG "Include debug information for use by GDB" OFF)
-set(SANITIZER
+option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
+option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
+option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
+# ---- Vertical Hashing Optimization ----
+# Performance/functionality trade-off:
+# - Disabled by default for maximum performance
+# - Enabled for wide datasets (>32 columns) with potential performance penalty
+option(DESBORDANTE_SAFE_VERTICAL_HASHING
+        "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
+    at the cost of reduced performance. Recommended for exploratory data analysis." OFF
+)
+option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
+option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
+
+set(DESBORDANTE_SANITIZER
     ""
     CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB"
 )
-set(LOG_LEVEL
+set(DESBORDANTE_LOG_LEVEL
     ""
     CACHE STRING "Set log level, possible values: TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL"
 )
 
-set(PYTHON
+set(DESBORDANTE_BINDINGS
     OFF
-    CACHE STRING "Compile Python bindings"
+    CACHE STRING "Build Python bindings"
 )
-set_property(CACHE PYTHON PROPERTY STRINGS OFF COMPILE INSTALL)
+set_property(CACHE DESBORDANTE_BINDINGS PROPERTY STRINGS OFF BUILD INSTALL)
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(SANITIZER)
-    if(SANITIZER STREQUAL "ADDRESS")
+if(DESBORDANTE_SANITIZER)
+    if(DESBORDANTE_SANITIZER STREQUAL "ADDRESS")
         set(ASAN ON)
-    elseif(SANITIZER STREQUAL "UB")
+    elseif(DESBORDANTE_SANITIZER STREQUAL "UB")
         set(UBSAN ON)
     else()
-        message(FATAL_ERROR "Unknown sanitizer '${SANITIZER}', try cmake -LH")
+        message(FATAL_ERROR "Unknown sanitizer '${DESBORDANTE_SANITIZER}', try cmake -LH")
     endif()
 endif()
 
-if(ASAN AND PYTHON)
+if(ASAN AND DESBORDANTE_BINDINGS)
     message(
         WARNING
             "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so"
@@ -94,7 +103,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
-if(BUILD_NATIVE)
+if(DESBORDANTE_BUILD_NATIVE)
     string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
 endif()
 
@@ -197,7 +206,7 @@ else()
     string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O0")
 endif()
 
-if(GDB_DEBUG)
+if(DESBORDANTE_GDB_SYMBOLS)
     add_compile_options(-ggdb3)
 endif()
 
@@ -206,11 +215,11 @@ add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 
 add_compile_options("$<$<CONFIG:Release>:${RELEASE_BUILD_OPTS}>")
 
-if(USE_LTO)
+if(DESBORDANTE_USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -274,7 +283,7 @@ CPMAddPackage(
 )
 include_directories(SYSTEM "${atomicbitvector_SOURCE_DIR}/include")
 
-if(COMPILE_TESTS)
+if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
         NAME googletest
         GITHUB_REPOSITORY google/googletest
@@ -283,7 +292,7 @@ if(COMPILE_TESTS)
     )
 endif()
 
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     CPMAddPackage("gh:pybind/pybind11@2.13.4")
 endif()
 
@@ -291,7 +300,7 @@ endif()
 set(Boost_USE_STATIC_LIBS OFF)
 
 set(boost_libraries container thread graph)
-if (COMPILE_BENCHMARKS)
+if (DESBORDANTE_BUILD_BENCHMARKS)
 	list(APPEND boost_libraries program_options)
 endif()
 
@@ -315,20 +324,20 @@ add_subdirectory("src/core")
 # --- Optional Modules Setup ---
 
 # Configure tests
-if(COMPILE_TESTS)
+if(DESBORDANTE_BUILD_TESTS)
     enable_testing()
 endif()
 
-if (COMPILE_TESTS OR COMPILE_BENCHMARKS)
+if (DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
     add_subdirectory("src/tests")
 endif()
 
 # Configure datasets
-if(UNPACK_DATASETS)
+if(DESBORDANTE_UNPACK_DATASETS)
     add_subdirectory("datasets")
 endif()
 
 # Configure Python bindings
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     add_subdirectory("src/python_bindings")
 endif()

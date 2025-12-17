@@ -68,7 +68,7 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug \
             -Dgtest_disable_pthreads=OFF \
             -DASAN=OFF \
-            -DPYTHON=COMPILE \
+            -DDESBORDANTE_BINDINGS=BUILD \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             -DCPM_SOURCE_CACHE=${{github.workspace}}/cmake/cpm-cache \
             -S . -B ${{github.workspace}}/build
