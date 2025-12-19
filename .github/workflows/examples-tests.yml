@@ -10,7 +10,6 @@ on:
       - .gitignore
       - COPYING
       - build.*
-      - pull_datasets.sh
   push:
     branches:
       - main
@@ -22,7 +21,6 @@ on:
       - .gitignore
       - COPYING
       - build.*
-      - pull_datasets.sh
   workflow_dispatch:
   
 concurrency:

@@ -12,7 +12,6 @@ on:
       - .gitignore
       - COPYING
       - build.*
-      - pull_datasets.sh
   push:
     branches:
       - main
@@ -26,7 +25,6 @@ on:
       - .gitignore
       - COPYING
       - build.*
-      - pull_datasets.sh
   schedule:
     - cron: "0 3 * * 1" 
   workflow_dispatch:
