@@ -14,7 +14,6 @@ Possible options:
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
   -b          --benchmark             Build benchmarks
-  -u,         --no-unpack             Don't unpack datasets
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
   -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
@@ -23,6 +22,7 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -f,         --no-fetch-datasets     Don't fetch datasets for tests or benchmarks
   -L[LEVEL]   --log-level[=LEVEL]     Set log level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
   -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
   -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
@@ -40,13 +40,9 @@ for i in "$@"; do
         -n | --no-tests)
             NO_TESTS=true
             ;;
-		# Build benchmarks
-        -b|--benchmark)
+            # Build benchmarks
+        -b | --benchmark)
             BENCHMARK=true
-            ;;
-        # Don't unpack datasets
-        -u | --no-unpack)
-            NO_UNPACK=true
             ;;
         # The maximum number of concurrent processes for building
         -j* | --parallel*)
@@ -71,6 +67,10 @@ for i in "$@"; do
         # Use GDB's debug information format
         -g)
             GDB_DEBUG=true
+            ;;
+        # Don't fetch datasets for tests or benchmarks
+        -f | --no-fetch-datasets)
+            NO_FETCH_DATASETS=true
             ;;
         # Set log level, long option
         --log-level=*)
@@ -114,10 +114,6 @@ if [[ $BENCHMARK == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_BENCHMARKS=ON"
 fi
 
-if [[ $NO_UNPACK == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_UNPACK_DATASETS=OFF"
-fi
-
 if [[ $PYBIND == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BINDINGS=BUILD"
 fi
@@ -128,6 +124,10 @@ fi
 
 if [[ $GDB_DEBUG == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_GDB_SYMBOLS=ON"
+fi
+
+if [[ $NO_FETCH_DATASETS == true ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_FETCH_DATASETS=OFF"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
