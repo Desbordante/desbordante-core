@@ -186,7 +186,7 @@ INSTANTIATE_TEST_SUITE_P(
                 DomainPACVerifyingParams(kCustomMetricBalls, {2, 3},
                                          std::make_shared<Parallelepiped>(Strings{"-5", "-5"},
                                                                           Strings{"5", "5"}),
-                                         1.22, 0.935, 0, 3, 1000, 0.7),
+                                         0, 0.822, 0, 3, 1000, 0.7),
                 // Check not-metrizable type:
                 // 	a. only not-null values
                 DomainPACVerifyingParams(kMixedWithNulls, {0}, std::make_shared<NotNullDomain>(), 0,
@@ -241,7 +241,7 @@ INSTANTIATE_TEST_SUITE_P(
                                                DomainType::ball, {}, {"0", "0"}, 5, {}, {}, nullptr,
                                                nullptr, "", 0, 3, 1000, 0.7),
                 // 2D rectangle
-                DomainPACVerifyingPythonParams(kCustomMetricBalls, {2, 3}, 1.22, 0.935,
+                DomainPACVerifyingPythonParams(kCustomMetricBalls, {2, 3}, 0, 0.822,
                                                DomainType::parallelepiped, {}, {}, 0, {"-5", "-5"},
                                                {"5", "5"}, nullptr, nullptr, "", 0, 3, 1000, 0.7)));
 
@@ -272,7 +272,8 @@ TEST_P(TestDomainPACHighlight, DefaultTest) {
 
     for (auto const& [epsilons, expected_values] : p.expected_highlights) {
         auto actual_highlight = algo->GetHighlights(epsilons.first, epsilons.second);
-        EXPECT_THAT(actual_highlight.GetStringData(), ::testing::ContainerEq(expected_values));
+        EXPECT_THAT(actual_highlight.GetStringData(),
+                    ::testing::UnorderedElementsAreArray(expected_values));
     }
 }
 

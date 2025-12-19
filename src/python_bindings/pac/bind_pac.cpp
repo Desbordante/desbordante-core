@@ -98,8 +98,8 @@ void BindPAC(py::module& main_module) {
             .doc() =
             "A closed n-ary parallelepiped, defined by lower and upper bounds, i. e.\n"
             "D = [lower[0], upper[0]] x ... x [lower[n], upper[n]].\n"
-            "Uses product comparer, i. e.x < y <=> x[0] < y[0] & ... & x[n] < y[n]\n"
-            "and Chebyshev distance: dist(x, y) = max{d_0(x[0], y[0]), ..., d_n(x[n], y[n])}, "
+			"Comapres distances from value to lower bound, i. e. X < Y iff d(X, lower) < d(Y, lower).\n"
+            "Uses Chebyshev distance: dist(x, y) = max{d_0(x[0], y[0]), ..., d_n(x[n], y[n])}, "
             "where d_i is a default\n"
             "metric for i-th column's data type multiplied by leveling_coefficients[i] (which "
             "defaults to 1).\n";

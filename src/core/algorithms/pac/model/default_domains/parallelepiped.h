@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -22,12 +21,16 @@ private:
     /// d(X, Y) = max{|x[0] - y[0]|, |x[1] - y[1]|, ..., |x[n] - y[n]|}
     double ChebyshevDist(Tuple const& x, Tuple const& y) const;
 
+    /// @c Compare using product order.
+    /// X < Y iff x[0] < y[0] & x[1] < y[1] & ... & x[n] < y[n]
+    bool ProductCompare(Tuple const& x, Tuple const& y) const;
+
 protected:
     virtual double DistFromDomainInternal(Tuple const& value) const override;
     virtual void ConvertValues() override;
 
-    /// @c Compare using product order.
-    /// X < Y iff x[0] < y[0] & x[1] < y[1] & ... & x[n] < y[n]
+    /// @c Compare distances between value and bottom-left corner of parallelepiped:
+    /// X < Y iff d(X, D) < d(Y, D)
     virtual bool CompareInternal(Tuple const& x, Tuple const& y) const override;
 
 public:

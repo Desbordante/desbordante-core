@@ -38,6 +38,9 @@ public:
     ::model::CompareResult CompareBytes(std::size_t const type_num, std::byte const* x,
                                         std::byte const* y);
 
+    /// @brief Comapre two value tuples
+    /// @note This function is not guaranteed to define total strict order relation.
+    /// Do not use it as a comparer where such relation is needed (e. g. std::set)
     bool Less(Tuple const& x, Tuple const& y) const {
         assert(x.size() >= types_.size());
         assert(y.size() >= types_.size());
