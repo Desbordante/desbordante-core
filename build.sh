@@ -14,7 +14,6 @@ Possible options:
   -p,         --pybind                Compile python bindings
   -n,         --no-tests              Don't build tests
   -b          --benchmark             Build benchmarks
-  -u,         --no-unpack             Don't unpack datasets
   -j[N],      --parallel[N]           The maximum number of concurrent processes for building
   -d,         --debug                 Set debug build type
   -s[S],      --sanitizer[=S]         Build with sanitizer S (has effect only for debug build).
@@ -43,10 +42,6 @@ for i in "$@"; do
 		# Build benchmarks
         -b|--benchmark)
             BENCHMARK=true
-            ;;
-        # Don't unpack datasets
-        -u | --no-unpack)
-            NO_UNPACK=true
             ;;
         # The maximum number of concurrent processes for building
         -j* | --parallel*)
@@ -112,10 +107,6 @@ fi
 
 if [[ $BENCHMARK == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_BENCHMARKS=ON"
-fi
-
-if [[ $NO_UNPACK == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_UNPACK_DATASETS=OFF"
 fi
 
 if [[ $PYBIND == true ]]; then

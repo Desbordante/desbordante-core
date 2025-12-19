@@ -1,6 +1,6 @@
 # ---- CMake Policies ----
 
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.26)
 
 if(POLICY CMP0167)
     # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
@@ -329,12 +329,9 @@ if(DESBORDANTE_BUILD_TESTS)
 endif()
 
 if (DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
-    add_subdirectory("src/tests")
-endif()
-
-# Configure datasets
-if(DESBORDANTE_UNPACK_DATASETS)
+    # Configure the datasets required for tests and benchmarks (downloaded from desbordante-data)
     add_subdirectory("datasets")
+    add_subdirectory("src/tests")
 endif()
 
 # Configure Python bindings
