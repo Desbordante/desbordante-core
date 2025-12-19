@@ -83,8 +83,6 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
-      - name: Download datasets
-        uses: ./.github/composite-actions/download-datasets
       - name: Build
         shell: bash
         run: |
