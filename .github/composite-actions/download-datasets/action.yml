@@ -7,9 +7,5 @@ runs:
     uses: actions/cache@v3
     id: cache-datasets
     with:
-      path: ${{github.workspace}}/datasets/datasets.zip
-      key: ${{ runner.os }}datasets
-  - name: Pull datasets
-    run: ./pull_datasets.sh
-    shell: bash
-    if: steps.cache-datasets.outputs.cache-hit != 'true'
+      path: '${{github.workspace}}/datasets/*.zip'
+      key: ${{ runner.os }}-datasets-${{ hashFiles('datasets/*.zip') }}
