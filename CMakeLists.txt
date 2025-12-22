@@ -143,7 +143,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSIO
 	message(WARNING "Googletest has a bug recognized by Clang 21+. "
 					"Supressing character-conversion warning. "
 					"Consider using an older version of Clang.")
-				list(APPEND DEBUG_BUILD_OPTS "-Wno-error=character-conversion")
+    target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
 endif()
 
 if(ASAN)
