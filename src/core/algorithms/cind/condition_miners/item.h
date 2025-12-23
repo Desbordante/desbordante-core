@@ -14,10 +14,7 @@ struct Item {
     }
 
     bool operator<(Item const& that) const {
-        if (this->column_id != that.column_id) {
-            return this->column_id < that.column_id;
-        }
-        return this->value < that.value;
+        return std::tie(column_id, value) < std::tie(that.column_id, that.value);
     }
 };
 }  // namespace algos::cind

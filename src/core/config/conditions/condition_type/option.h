@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithms/cind/condition_type.h>
+#include <algorithms/cind/types.h>
 
 #include "config/common_option.h"
 

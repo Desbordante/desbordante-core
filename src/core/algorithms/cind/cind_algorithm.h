@@ -1,34 +1,41 @@
 #pragma once
-#include <ind/spider/spider.h>
+
+#include <cstdint>
 #include <memory>
+#include <string_view>
+#include <unordered_set>
+#include <vector>
+
+#include <ind/spider/spider.h>
 
 #include "algorithms/algorithm.h"
-#include "cind/condition_type.h"
+#include "cind/types.h"
 #include "condition_miners/cind_miner.h"
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {
-    /// timing information for algorithm stages
-    struct StageTimings {
-        size_t load;    /**< time taken for the data loading */
-        size_t compute; /**< time taken for the inds computing */
-        size_t total;   /**< total time taken for all stages */
-    };
-
 public:
     explicit CindAlgorithm(std::vector<std::string_view> phase_names = {});
 
-    unsigned long long TimeTaken() const {
+    [[nodiscard]] std::uint64_t TimeTaken() const noexcept {
         return timings_.total;
     }
 
-    std::list<model::IND> const& AINDList() const noexcept {
+    [[nodiscard]] auto const& AINDList() const noexcept {
         return spider_algo_->INDList();
     }
 
-    std::list<CIND> const& CINDList() const noexcept {
+    [[nodiscard]] auto const& CINDList() const noexcept {
         return cind_miner_->CINDList();
     }
+
+private:
+    /// timing information for algorithm stages
+    struct StageTimings {
+        std::uint64_t load{0};    /**< time taken for the data loading */
+        std::uint64_t compute{0}; /**< time taken for the inds computing */
+        std::uint64_t total{0};   /**< total time taken for all stages */
+    };
 
 private:
     void LoadDataInternal() final;
@@ -45,12 +52,10 @@ private:
             std::unordered_set<std::string_view>& previous_options) const final;
 
 private:
-    // algos
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
     AlgoType algo_type_{AlgoType::pli_cind};
 
-    StageTimings timings_;
+    StageTimings timings_{};
 };
-
 }  // namespace algos::cind

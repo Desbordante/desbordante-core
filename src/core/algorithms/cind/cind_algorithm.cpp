@@ -1,9 +1,10 @@
 #include "cind_algorithm.h"
 
+#include <cstdint>
 #include <memory>
 
 #include "algorithms/create_algorithm.h"
-#include "cind/condition_type.h"
+#include "cind/types.h"
 #include "condition_miners/cinderella.h"
 #include "condition_miners/pli_cind.h"
 #include "conditions/algo_type/option.h"
@@ -40,7 +41,7 @@ void CindAlgorithm::RegisterSpiderOptions() {
 }
 
 void CindAlgorithm::LoadDataInternal() {
-    timings_.load = util::TimedInvoke(&Algorithm::LoadData, spider_algo_);
+    timings_.load = static_cast<std::uint64_t>(util::TimedInvoke(&Algorithm::LoadData, spider_algo_));
     CreateCindMinerAlgo();
 }
 
@@ -80,15 +81,18 @@ void CindAlgorithm::AddSpecificNeededOptions(
 }
 
 unsigned long long CindAlgorithm::ExecuteInternal() {
-    auto spider_exec_time = spider_algo_->Execute();
-    auto cind_exec_time = cind_miner_->Execute(spider_algo_->INDList());
+    auto const spider_exec_time = static_cast<std::uint64_t>(spider_algo_->Execute());
+    auto const cind_exec_time = static_cast<std::uint64_t>(cind_miner_->Execute(spider_algo_->INDList()));
+
     timings_.compute = spider_exec_time + cind_exec_time;
     timings_.total = timings_.load + timings_.compute;
-    return timings_.total;
+
+    return static_cast<unsigned long long>(timings_.total);
 }
 
 void CindAlgorithm::ResetState() {
     timings_.load = 0;
     timings_.compute = 0;
+    timings_.total = 0;
 }
 }  // namespace algos::cind

@@ -27,12 +27,12 @@ public:
 
     std::string const& GetStringValue(size_t index) const {
         assert(index < column_data_.size());
-        return value_dictionary_->ToString(column_data_.at(index));
+        return value_dictionary_->ToString(column_data_[index]);
     }
 
     int GetValue(size_t index) const {
         assert(index < column_data_.size());
-        return column_data_.at(index);
+        return column_data_[index];
     }
 
     std::vector<int> const& GetValues() const noexcept {
@@ -56,6 +56,11 @@ public:
     }
 
     std::string DecodeValue(int value) const {
+        // 0 is treated as NULL value id in the project (can appear in conditions)
+        constexpr int kNullValueId = 0;
+        if (value == kNullValueId) {
+            return "NULL";
+        }
         return value_dictionary_->ToString(value);
     }
 

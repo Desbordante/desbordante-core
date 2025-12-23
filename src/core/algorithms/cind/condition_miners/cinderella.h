@@ -8,9 +8,9 @@
 #include "itemset.h"
 
 namespace algos::cind {
-class Cinderella final : public algos::cind::CindMiner {
+class Cinderella final : public CindMiner {
 public:
-    Cinderella(config::InputTables& input_tables);
+    explicit Cinderella(config::InputTables& input_tables);
 
 private:
     CIND ExecuteSingle(model::IND const& aind) final;
@@ -20,6 +20,6 @@ private:
     std::vector<Condition> GetConditions(std::vector<Basket> const& baskets,
                                          AttrsType const& condition_attrs) const;
 
-    void CreateNewItemsets(Itemset &itemset) const;
+    void CreateNewItemsets(Itemset& itemset) const;
 };
 }  // namespace algos::cind

@@ -1,3 +1,4 @@
+import sys
 import desbordante
 
 print("""
@@ -36,23 +37,32 @@ COMPLETENESS_THRESHOLD = 0.25
 
 algo.execute(error=ERROR_THRESHOLD, validity=VALIDITY_THRESHOLD, completeness=COMPLETENESS_THRESHOLD, condition_type=CONDITION_TYPE)
 
-print('Found condotoinal inclusion dependencies (-> means "is included in"):')
-for cind in algo.get_cinds():
+cinds = algo.get_cinds()
+print('Found conditional inclusion dependencies (-> means "is included in"):')
+if not cinds:
+    print("No CINDs found with the given thresholds/condition type.")
+    sys.exit(0)
+
+for cind in cinds:
     print(cind)
 
-print("CIND's and their conditions, that found by algorithm, are also a valid python objects")
-cind = algo.get_cinds()[0]
-print()
-print("Example CIND object:")
+print("\nCINDs and their conditions found by the algorithm are valid Python objects.")
+cind = cinds[0]
+
+print("\nExample CIND object:")
 print(cind)
 print("CIND object has methods:")
 print("    get_condition_attributes: ", cind.get_condition_attributes())
 print("    conditions_number: ", cind.conditions_number())
 print("    get_conditions (get all found conditions as Condition objects)")
 
-condition = cind.get_conditions()[0]
-print()
-print("Example Condition object:")
+conditions = cind.get_conditions()
+if not conditions:
+    print("This CIND has no conditions.")
+    sys.exit(0)
+
+condition = conditions[0]
+print("\nExample Condition object:")
 print(condition)
 print("Condition object has methods:")
 print("    data: ", condition.data())
@@ -61,4 +71,4 @@ assert condition.validity() == condition.precision()
 print('    completeness (also might be "recall"): ', condition.completeness())
 assert condition.completeness() == condition.recall()
 
-print("Also, CIND and Condition objects have __str__(), __eq__(), __hash__() methods")
+print("\nAlso, CIND and Condition objects have __str__(), __eq__(), __hash__() methods")
