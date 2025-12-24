@@ -6,5 +6,5 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::table ${DESBORDANTE_PREFIX}::algos
-                    spdlog::spdlog_header_only better-enums Boost::headers
+                    spdlog::spdlog_header_only magic_enum::magic_enum Boost::headers
 )

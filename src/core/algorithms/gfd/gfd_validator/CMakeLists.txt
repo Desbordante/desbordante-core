@@ -7,5 +7,5 @@ target_sources(
 target_link_libraries(
     ${NAME}
     PRIVATE ${DESBORDANTE_PREFIX}::parser::graph spdlog::spdlog_header_only
-            ${DESBORDANTE_PREFIX}::gfd ${DESBORDANTE_PREFIX}::algos better-enums Boost::headers
+            ${DESBORDANTE_PREFIX}::gfd ${DESBORDANTE_PREFIX}::algos magic_enum::magic_enum Boost::headers
 )

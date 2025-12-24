@@ -20,7 +20,7 @@ private:
     config::InputTable input_table_;
 
     double minconf_;
-    InputFormat input_format_ = InputFormat::singular;
+    InputFormat input_format_ = InputFormat::kSingular;
     unsigned int tid_column_index_;
     unsigned int item_column_index_;
     bool first_column_tid_;

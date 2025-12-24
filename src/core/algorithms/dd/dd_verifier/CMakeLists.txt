@@ -8,6 +8,6 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::model::types
             spdlog::spdlog_header_only
             ${DESBORDANTE_PREFIX}::algos
-            better-enums
+            magic_enum::magic_enum
             Boost::headers
 )

@@ -74,13 +74,13 @@ void FastADC::CheckTypes() {
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
 
-        if (type_id == +model::TypeId::kMixed) {
+        if (type_id == model::TypeId::kMixed) {
             LOG_WARN(
                     "Column with index \"{}\" contains values of different types. Those values "
                     "will be "
                     "treated as strings.",
                     column_index);
-        } else if (!column.IsNumeric() && type_id != +model::TypeId::kString) {
+        } else if (!column.IsNumeric() && type_id != model::TypeId::kString) {
             throw std::invalid_argument(
                     "Column with index \"" + std::to_string(column_index) +
                     "\" is of unsupported type. Only numeric and string types are supported.");
