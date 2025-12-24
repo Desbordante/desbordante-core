@@ -28,8 +28,8 @@ public:
     using Iterator = model::ColumnDomainIterator;
 
 protected:
-    AttributeIndex id_;         /* attribute unique identificator */
-    AttributeIndex attr_count_; /* attribute unique identificator */
+    AttributeIndex id_;         /* attribute unique identifier */
+    AttributeIndex attr_count_; /* attribute unique identifier */
     Iterator it_;               /* domain iterator */
 
 public:
