@@ -18,7 +18,6 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::ind
             emhash
             magic_enum::magic_enum
-            atomic_bitvector
             Boost::headers
             ${DESBORDANTE_PREFIX}::model::table
 )

@@ -48,17 +48,6 @@ CPMAddPackage(
     SYSTEM YES
 )
 
-CPMAddPackage(
-    NAME atomicbitvector
-    GITHUB_REPOSITORY ekg/atomicbitvector
-    GIT_TAG e295358fea9532fa4c37197630d037a4a53ddede
-    DOWNLOAD_ONLY True
-)
-add_library(atomic_bitvector INTERFACE)
-target_include_directories(
-        atomic_bitvector SYSTEM INTERFACE "${atomicbitvector_SOURCE_DIR}/include"
-)
-
 if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
         NAME googletest
