@@ -63,12 +63,12 @@ print('Let\'s look at clusters violating ND:')
 print(f'Number of clusters: {len(highlights)}')
 highlight_indices = []
 for high in highlights:
-    highlight_indices += high.get_occurences_indices()
+    highlight_indices += high.get_occurrences_indices()
 
 print(CYAN, end='')
 print_table(EXPIRED_PASSPORT_TABLE, highlight_indices)
 print(ENDC)
-print(f'So, {highlights[0].lhs_value} has {highlights[0].occurences_number} documents')
+print(f'So, {highlights[0].lhs_value} has {highlights[0].occurrences_number} documents')
 print('One of them is expired and shouldn\'t appear in this table. Let\'s remove this line:')
 print(CYAN, end='')
 print_table(VALID_PASSPORTS_TABLE)

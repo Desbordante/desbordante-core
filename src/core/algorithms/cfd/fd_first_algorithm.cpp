@@ -80,7 +80,7 @@ void FDFirstAlgorithm::CheckForIncorrectInput() const {
     if (tuples_number_ != 0 && columns_number_ == 0) {
         throw config::ConfigurationError(
                 "[ERROR] Illegal columns_number and tuples_number values: tuples_number is " +
-                std::to_string(tuples_number_) + " while columnes_number is 0");
+                std::to_string(tuples_number_) + " while columns_number is 0");
     }
 
     if (columns_number_ != 0 && tuples_number_ != 0 && min_supp_ > tuples_number_) {

@@ -25,7 +25,7 @@ private:
     std::unique_ptr<hymd::indexes::RecordsInfo> records_info_;
 
     // Column Matches and Column Similarity Classifiers for both rhs and lhs are being stored in the
-    // same vector. Last elements of such vectors reffers to rhs, others to lhs
+    // same vector. Last elements of such vectors refers to rhs, others to lhs
     std::vector<CMPtr> column_matches_;
     std::vector<bool> non_informative_lhs_classifiers_;  // Indicates whenever lhs classifier is non
                                                          // informative

@@ -22,7 +22,7 @@ namespace algos {
 
 /* Discovers Algebraic Constraints (AC). In theory AC consists of: 1) Set of value
  * pairs (a_i, b_k), where a_i from column A and b_k from column B. 2) Pairing
- * rule - bijection beetwen columns A and B. Algorithm was implemented with Trivial
+ * rule - bijection between columns A and B. Algorithm was implemented with Trivial
  * pairing rule. Trivial pairing rule creates (a_i, b_i) pairs, both values are from
  * the same row.  3) Binary operation. 4) Ranges - set of ranges/intervals that was
  * constructed by grouping results of binary operation between a_i and b_k, boundary
@@ -88,7 +88,7 @@ public:
     }
 
     size_t CalculateSampleSize(size_t k_bumps) const;
-    /* Returns ranges reconstucted with new weight for pair of columns */
+    /* Returns ranges reconstructed with new weight for pair of columns */
     RangesCollection ReconstructRangesByColumns(size_t lhs_i, size_t rhs_i, double weight);
 
     std::vector<RangesCollection> const& GetRangesCollections() const {
