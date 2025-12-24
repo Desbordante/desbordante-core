@@ -256,12 +256,7 @@ CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
 include_directories(SYSTEM "${emhash_SOURCE_DIR}")
 
 CPMAddPackage(
-    NAME frozen
-    GITHUB_REPOSITORY serge-sans-paille/frozen
-    GIT_TAG 1.2.0
-    DOWNLOAD_ONLY True
 )
-include_directories(SYSTEM "${frozen_SOURCE_DIR}/include")
 
 CPMAddPackage(
     NAME better-enums
