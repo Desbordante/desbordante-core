@@ -44,8 +44,8 @@ endif()
 # --- Build Configuration Options ---
 
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
-option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
-option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
+option(DESBORDANTE_BUILD_NATIVE "Build for host machine" OFF)
+option(DESBORDANTE_BUILD_TESTS "Build tests" OFF)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
@@ -57,13 +57,10 @@ option(DESBORDANTE_SAFE_VERTICAL_HASHING
         "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
     at the cost of reduced performance. Recommended for exploratory data analysis." OFF
 )
-option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
+option(DESBORDANTE_SANITIZER "Build with sanitizers (UBSan + ASan)" OFF)
+option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" OFF)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
 
-set(DESBORDANTE_SANITIZER
-    ""
-    CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB"
-)
 set(DESBORDANTE_LOG_LEVEL
     ""
     CACHE STRING "Set log level, possible values: TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL"
@@ -80,145 +77,63 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(DESBORDANTE_SANITIZER)
-    if(DESBORDANTE_SANITIZER STREQUAL "ADDRESS")
-        set(ASAN ON)
-    elseif(DESBORDANTE_SANITIZER STREQUAL "UB")
-        set(UBSAN ON)
-    else()
-        message(FATAL_ERROR "Unknown sanitizer '${DESBORDANTE_SANITIZER}', try cmake -LH")
-    endif()
-endif()
-
-if(ASAN AND DESBORDANTE_BINDINGS)
-    message(
-        WARNING
-            "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so"
-    )
-endif()
-
-# --- Setting CMake build variables ---
-
-# Enable colored Ninja and compilers diagnostics
-set(CMAKE_COLOR_DIAGNOSTICS ON)
-
-set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
-if(DESBORDANTE_BUILD_NATIVE)
-    string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
-endif()
-
-# RELEASE build options
-string(JOIN ";" RELEASE_BUILD_OPTS "${BUILD_OPTS}" "-O3")
-
-set(DEBUG_BUILD_OPTS "${BUILD_OPTS}")
-
-# Set common DEBUG build options
-string(
-    JOIN
-    ";"
-    DEBUG_BUILD_OPTS
-    "${DEBUG_BUILD_OPTS}"
-    "-g"
-    "-Wall"
-    "-Wextra"
-    "-Werror"
-    "-fno-omit-frame-pointer"
-    "-fno-optimize-sibling-calls"
-)
-
-# Workaround for Clang bug in versions 18 and above:
-# See issue https://github.com/llvm/llvm-project/issues/76515
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "18")
-    message(WARNING "C++ compiler is Clang++-${CMAKE_CXX_COMPILER_VERSION}. "
-                    "Suppressing deprecated declaration warnings. "
-                    "Consider using another version of Clang."
-    )
-    list(APPEND DEBUG_BUILD_OPTS "-Wno-deprecated-declarations")
-endif()
-
-# Workaround for googletest bug with char conversions, being recognized by Clang 21+
-# See https://github.com/google/googletest/issues/4762
-# TODO(senichenkov): remove when googletest gets updated
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
-	message(WARNING "Googletest has a bug recognized by Clang 21+. "
-					"Supressing character-conversion warning. "
-					"Consider using an older version of Clang.")
-    target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
-endif()
-
-if(ASAN)
-    # Set DEBUG build options specific for build with ASAN
-    set(ASAN_OPTS "-fsanitize=address")
-
-    execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
-    if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
-        # alloc-dealloc-mismatch generates false positives on boost exceptions
-        # This applies only to Ubuntu package:
-        # https://github.com/llvm/llvm-project/issues/59432
+if(DESBORDANTE_BINDINGS)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+    if(DESBORDANTE_SANITIZER)
         message(
             WARNING
-                "Running on Ubuntu with libc++. ASAN is broken in Ubuntu package with libc++15-19. If you are using \
-                these versions of libc++, set ASAN_OPTIONS=alloc_dealloc_mismatch=0 to suppress alloc-dealloc-mismatch \
-                check or consider using another distro or higher libc++ version for full ASAN coverage"
+            "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so"
         )
     endif()
-
-    string(
-        JOIN
-        ";"
-        DEBUG_BUILD_OPTS
-        "${DEBUG_BUILD_OPTS}"
-        "-O1"
-        "-Wno-error" # Use of -Werror is discouraged with sanitizers
-        # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
-        "${ASAN_OPTS}"
-    )
-    set(DEBUG_LINK_OPTS "${ASAN_OPTS}")
-elseif(UBSAN)
-    # Set DEBUG build options specific for build with UBSAN
-    string(
-        JOIN
-        ";"
-        UBSAN_OPTS
-        "-fsanitize=undefined"
-        "-fsanitize=float-divide-by-zero"
-        "-Wno-error" # Use of -Werror is discouraged with sanitizers
-        # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
-        "-fno-sanitize=signed-integer-overflow" # Remove this when CustomRandom gets fixed
-        "-fno-sanitize=shift" # Remove this when CustomRandom gets fixed
-        "-fno-sanitize-recover=all"
-    ) # For tests to fail if UBSan finds an error
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
-        # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
-        # because libraries (STL, googletest, boost, etc.) are somehow broken
-        string(JOIN ";" UBSAN_OPTS ${UBSAN_OPTS}
-               "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
-        )
-    endif()
-    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O1" "${UBSAN_OPTS}")
-    set(DEBUG_LINK_OPTS "${UBSAN_OPTS}")
-else()
-    # No sanitizer, just debug build
-    string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O0")
 endif()
-
-if(DESBORDANTE_GDB_SYMBOLS)
-    add_compile_options(-ggdb3)
-endif()
-
-add_compile_options("$<$<CONFIG:Debug>:${DEBUG_BUILD_OPTS}>")
-add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
-
-add_compile_options("$<$<CONFIG:Release>:${RELEASE_BUILD_OPTS}>")
 
 if(DESBORDANTE_USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(DESBORDANTE_BINDINGS)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+# Can't move this to desbordante_flags.cmake, because for some reason
+# `CMAKE_CXX_COMPILER_ID` is empty when the file is processing.
+if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    # Workaround for Clang bug in versions 18 and above:
+    # See issue https://github.com/llvm/llvm-project/issues/76515
+    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "18")
+        message(WARNING "C++ compiler is Clang++-${CMAKE_CXX_COMPILER_VERSION}. "
+                "Suppressing deprecated declaration warnings. "
+                "Consider using another version of Clang."
+        )
+        add_compile_options("-Wno-deprecated-declarations")
+    endif()
+
+    # Workaround for googletest bug with char conversions, being recognized by Clang 21+
+    # See https://github.com/google/googletest/issues/4762
+    # TODO(senichenkov): remove when googletest gets updated
+    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
+        message(WARNING "Googletest has a bug recognized by Clang 21+. "
+                "Supressing character-conversion warning. "
+                "Consider using an older version of Clang.")
+        target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
+    endif()
+
+    if(CMAKE_HOST_APPLE)
+        # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
+        # because libraries (STL, googletest, boost, etc.) are somehow broken
+        add_compile_options("-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt")
+    endif()
+endif()
+
+execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
+if(DESBORDANTE_SANITIZER AND IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
+    # alloc-dealloc-mismatch generates false positives on boost exceptions
+    # This applies only to Ubuntu package:
+    # https://github.com/llvm/llvm-project/issues/59432
+    message(
+            WARNING
+            "Running on Ubuntu with libc++. ASAN is broken in Ubuntu package with libc++15-19. If you are using \
+                these versions of libc++, set ASAN_OPTIONS=alloc_dealloc_mismatch=0 to suppress alloc-dealloc-mismatch \
+                check or consider using another distro or higher libc++ version for full ASAN coverage"
+    )
 endif()
 
 # --- Dependencies installation ---

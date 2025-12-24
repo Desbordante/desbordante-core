@@ -72,8 +72,7 @@ jobs:
         cfg:
           - { BUILD_TYPE: Release }
           - { BUILD_TYPE: Debug }
-          - { BUILD_TYPE: Debug, SANITIZER : ADDRESS }
-          - { BUILD_TYPE: Debug, SANITIZER : UB }
+          - { BUILD_TYPE: DebugSan }
 
     runs-on: ${{ matrix.system.os }}
     steps:
@@ -87,14 +86,9 @@ jobs:
         shell: bash
         run: |
           export ${{ matrix.system.env }}
-
-          if [[ "${{matrix.cfg.BUILD_TYPE}}" == "Debug" ]]; then
-            ./build.sh --debug --sanitizer=${{ matrix.cfg.SANITIZER }}
-          else
-            ./build.sh
-          fi
+          cmake --preset ${{matrix.cfg.BUILD_TYPE}}
+          cmake --build --preset ${{matrix.cfg.BUILD_TYPE}}
       - name: Test
-        working-directory: ${{github.workspace}}/build
         shell: bash
         run: |
           export ${{ matrix.system.runtime-env }}
@@ -102,5 +96,5 @@ jobs:
           if [[ "${{ inputs.parallel-tests }}" != "false" ]]; then
             export CTEST_ARGS="-j ${nproc}"
           fi
-
-          ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
+          
+          ctest --preset ${{matrix.cfg.BUILD_TYPE}} $CTEST_ARGS

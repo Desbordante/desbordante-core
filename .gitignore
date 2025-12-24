@@ -17,3 +17,6 @@ datasets/*.zip
 **/.DS_Store
 
 .env
+
+# File, which allows developers to specify their own local build configurations and options
+CMakeUserPresets.json
