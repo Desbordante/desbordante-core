@@ -13,12 +13,6 @@ target_sources(
             faida.cpp
 )
 target_link_libraries(
-    ${NAME}
-    PRIVATE spdlog::spdlog_header_only
-            ${DESBORDANTE_PREFIX}::ind
-            emhash
-            magic_enum::magic_enum
-            atomic_bitvector
-            Boost::headers
-            ${DESBORDANTE_PREFIX}::model::table
+    ${NAME} PRIVATE spdlog::spdlog_header_only ${DESBORDANTE_PREFIX}::ind emhash
+                    magic_enum::magic_enum Boost::headers ${DESBORDANTE_PREFIX}::model::table
 )
