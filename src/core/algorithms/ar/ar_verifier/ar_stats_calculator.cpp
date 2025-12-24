@@ -2,20 +2,22 @@
 
 #include <ranges>
 
+#include "core/util/enum_to_str.h"
+
 namespace algos::ar_verifier {
 ClusterPriority ARStatsCalculator::CalculateClusterPriority(model::RuleCoverage const& coverage) {
     if (coverage.IsLeftFull()) {
         if (coverage.IsRightPresented()) {
-            if (coverage.IsRightFull()) return ClusterPriority::full_left_full_right;
-            return ClusterPriority::full_left_partial_right;
+            if (coverage.IsRightFull()) return ClusterPriority::kFullLeftFullRight;
+            return ClusterPriority::kFullLeftPartialRight;
         }
-        return ClusterPriority::full_left_no_right;
+        return ClusterPriority::kFullLeftNoRight;
     }
     if (coverage.IsRightPresented()) {
-        if (coverage.IsRightFull()) return ClusterPriority::partial_left_full_right;
-        return ClusterPriority::partial_left_partial_right;
+        if (coverage.IsRightFull()) return ClusterPriority::kPartialLeftFullRight;
+        return ClusterPriority::kPartialLeftPartialRight;
     }
-    return ClusterPriority::partial_left_no_right;
+    return ClusterPriority::kPartialLeftNoRight;
 }
 
 void ARStatsCalculator::CalculateRuleCoverageCoefficients() {
@@ -58,8 +60,8 @@ void ARStatsCalculator::CalculateStatistics() {
     CalculateConfidence();
     for (auto const& [transaction_id, coefficients] : rule_coverage_coefficients_) {
         if (ClusterPriority priority = CalculateClusterPriority(coefficients);
-            priority != static_cast<ClusterPriority>(ClusterPriority::full_left_full_right)) {
-            clusters_violating_ar_[priority._to_string()].push_back(transaction_id);
+            priority != ClusterPriority::kFullLeftFullRight) {
+            clusters_violating_ar_[util::EnumToStr(priority)].push_back(transaction_id);
         }
     }
 

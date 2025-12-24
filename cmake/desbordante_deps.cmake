@@ -40,13 +40,13 @@ add_library(emhash INTERFACE)
 target_include_directories(emhash SYSTEM INTERFACE ${emhash_SOURCE_DIR})
 
 CPMAddPackage(
-    NAME better-enums
-    GITHUB_REPOSITORY aantron/better-enums
-    GIT_TAG 0.11.3
-    DOWNLOAD_ONLY True
+    NAME magic_enum
+    GITHUB_REPOSITORY Neargye/magic_enum
+    VERSION 0.9.7
+    OPTIONS "MAGIC_ENUM_OPT_BUILD_EXAMPLES OFF" "MAGIC_ENUM_OPT_BUILD_TESTS OFF"
+            "MAGIC_ENUM_OPT_INSTALL OFF"
+    SYSTEM YES
 )
-add_library(better-enums INTERFACE)
-target_include_directories(better-enums SYSTEM INTERFACE "${better-enums_SOURCE_DIR}")
 
 CPMAddPackage(
     NAME atomicbitvector

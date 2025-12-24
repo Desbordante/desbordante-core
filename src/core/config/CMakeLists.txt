@@ -26,4 +26,4 @@ target_sources(
             time_limit/option.cpp
             transactional_data/option.cpp
 )
-target_link_libraries(${NAME} PRIVATE better-enums Boost::headers)
+target_link_libraries(${NAME} PRIVATE magic_enum::magic_enum Boost::headers)

@@ -32,7 +32,7 @@ struct ARVerifierParams {
 
     ARVerifierParams(SingularDataset const& dataset, RuleConfig const& config)
         : params({{onam::kCsvConfig, dataset.csv_config},
-                  {onam::kInputFormat, +model::InputFormatType::singular},
+                  {onam::kInputFormat, model::InputFormatType::kSingular},
                   {onam::kArMinimumSupport, config.min_sup},
                   {onam::kArMinimumConfidence, config.min_conf},
                   {onam::kArLhsRule, config.left},
@@ -42,7 +42,7 @@ struct ARVerifierParams {
 
     ARVerifierParams(TabularDataset const& dataset, RuleConfig const& config)
         : params({{onam::kCsvConfig, dataset.csv_config},
-                  {onam::kInputFormat, +model::InputFormatType::tabular},
+                  {onam::kInputFormat, model::InputFormatType::kTabular},
                   {onam::kArMinimumSupport, config.min_sup},
                   {onam::kArMinimumConfidence, config.min_conf},
                   {onam::kArLhsRule, config.left},

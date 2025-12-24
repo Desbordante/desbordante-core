@@ -83,11 +83,11 @@ void Split::CheckTypes() {
         model::TypedColumnData const& column = typed_relation_->GetColumnData(column_index);
         model::TypeId type_id = column.GetTypeId();
 
-        if (type_id == +model::TypeId::kUndefined) {
+        if (type_id == model::TypeId::kUndefined) {
             throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                         "\" type undefined.");
         }
-        if (type_id == +model::TypeId::kMixed) {
+        if (type_id == model::TypeId::kMixed) {
             throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                         "\" contains values of different types.");
         }
@@ -134,7 +134,7 @@ unsigned long long Split::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
 
-    if (reduce_method_ == +Reduce::IEHybrid) {
+    if (reduce_method_ == Reduce::kIeHybrid) {
         CalculateTuplePairs();
     }
 
@@ -177,7 +177,7 @@ unsigned Split::ReduceDDs(auto const& start_time) {
     std::list<DD> reduced;
 
     std::vector<std::size_t> tuple_pair_indices;
-    if (reduce_method_ == +Reduce::IEHybrid) {
+    if (reduce_method_ == Reduce::kIeHybrid) {
         tuple_pair_indices.resize(tuple_pair_num_);
         std::iota(tuple_pair_indices.begin(), tuple_pair_indices.end(), 0);
     }
@@ -203,13 +203,13 @@ unsigned Split::ReduceDDs(auto const& start_time) {
             unsigned cnt = 0;
             if (df_y != dfs_y.front()) {
                 switch (reduce_method_) {
-                    case +Reduce::Negative:
+                    case Reduce::kNegative:
                         reduced = NegativePruningReduce(df_y, search, cnt);
                         break;
-                    case +Reduce::Hybrid:
+                    case Reduce::kHybrid:
                         reduced = HybridPruningReduce(df_y, search, cnt);
                         break;
-                    case +Reduce::IEHybrid:
+                    case Reduce::kIeHybrid:
                         reduced = InstanceExclusionReduce(tuple_pair_indices, search, df_y, cnt);
                         break;
                     default:
@@ -362,7 +362,7 @@ inline bool Split::CheckDFConstraint(DFConstraint const& dif_constraint,
     ClusterIndex const max_cluster = std::max(first_cluster, second_cluster);
     double const dif = distances_[column_index][min_cluster][max_cluster - min_cluster];
 
-    if (type_ids_[column_index] == +model::TypeId::kDouble) {
+    if (type_ids_[column_index] == model::TypeId::kDouble) {
         return dif_constraint.Contains(dif);
     }
 
@@ -454,7 +454,7 @@ std::vector<DFConstraint> Split::IndexSearchSpace(model::ColumnIndex index) {
 
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
-        if (type_id == +model::TypeId::kString) {
+        if (type_id == model::TypeId::kString) {
             std::string df_str = dif_column.GetDataAsString(row_index);
             boost::smatch matches;
             if (boost::regex_match(df_str, matches, df_regex)) {

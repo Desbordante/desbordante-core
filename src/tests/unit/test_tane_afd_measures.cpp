@@ -82,23 +82,16 @@ TEST_P(TestTaneAfdMeasuresValidation, ErrorCalculationTest) {
         auto const& rhs = relation->GetColumnData(rhs_id).GetPLWSIndex();
         config::ErrorType error;
         switch (p.error_measure) {
-            case +algos::AfdErrorMeasure::pdep:
-                // error =
-                // algos::afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(lhs,
-                // lhs->Intersect(rhs).get());
+            case algos::AfdErrorMeasure::kPdep:
                 error = algos::CalculatePdepMeasure(lhs, lhs->Intersect(rhs).get());
                 break;
-            case +algos::AfdErrorMeasure::tau:
-                // error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs, rhs,
-                // lhs->Intersect(rhs).get());
+            case algos::AfdErrorMeasure::kTau:
                 error = algos::CalculateTauMeasure(lhs, rhs, lhs->Intersect(rhs).get());
                 break;
-            case +algos::AfdErrorMeasure::mu_plus:
-                // error = algos::afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs,
-                // rhs, lhs->Intersect(rhs).get());
+            case algos::AfdErrorMeasure::kMuPlus:
                 error = algos::CalculateMuPlusMeasure(lhs, rhs, lhs->Intersect(rhs).get());
                 break;
-            case +algos::AfdErrorMeasure::rho:
+            case algos::AfdErrorMeasure::kRho:
                 error = algos::CalculateRhoMeasure(lhs, lhs->Intersect(rhs).get());
                 break;
             default:
@@ -140,7 +133,7 @@ INSTANTIATE_TEST_SUITE_P(PdepSelfTaneValidationSuite, TestTanePdepSelfValidation
 INSTANTIATE_TEST_SUITE_P(
         AfdMeasuresTaneValidationSuite, TestTaneAfdMeasuresValidation,
         ::testing::Values(
-                TaneValidationParams(+algos::AfdErrorMeasure::pdep,
+                TaneValidationParams(algos::AfdErrorMeasure::kPdep,
                                      {{0, 1, 0.25},
                                       {0, 2, 0.13888888888888887},
                                       {0, 3, 0.3749999999999999},
@@ -172,7 +165,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {5, 3, 1.0},
                                       {5, 4, 1.0}},
                                      kTestFD),
-                TaneValidationParams(+algos::AfdErrorMeasure::pdep,
+                TaneValidationParams(algos::AfdErrorMeasure::kPdep,
                                      {{0, 1, 0.32647619047619053}, {0, 2, 0.29765079365079367},
                                       {0, 3, 0.35943386243386244}, {0, 4, 0.6805925925925925},
                                       {1, 0, 0.21734432234432235}, {1, 2, 0.20246682946682948},
@@ -184,7 +177,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {4, 0, 0.07680000000000001}, {4, 1, 0.10613333333333334},
                                       {4, 2, 0.10933333333333332}, {4, 3, 0.21973333333333336}},
                                      kIris),
-                TaneValidationParams(+algos::AfdErrorMeasure::tau,
+                TaneValidationParams(algos::AfdErrorMeasure::kTau,
                                      {{0, 1, 0.0},
                                       {0, 2, -3.2232281360085186e-17},
                                       {0, 3, -8.881784197001253e-17},
@@ -216,7 +209,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {5, 3, 1.0},
                                       {5, 4, 1.0}},
                                      kTestFD),
-                TaneValidationParams(+algos::AfdErrorMeasure::tau,
+                TaneValidationParams(algos::AfdErrorMeasure::kTau,
                                      {{0, 1, 0.26903889087952376},  {0, 2, 0.2692658308121177},
                                       {0, 3, 0.3060122257685817},   {0, 4, 0.5208888888888887},
                                       {1, 0, 0.18473366910866912},  {1, 2, 0.1702350718118775},
@@ -228,7 +221,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {4, 0, 0.038333333333333344}, {4, 1, 0.029905460158209544},
                                       {4, 2, 0.07333764912605197},  {4, 3, 0.15466101694915257}},
                                      kIris),
-                TaneValidationParams(+algos::AfdErrorMeasure::mu_plus,
+                TaneValidationParams(algos::AfdErrorMeasure::kMuPlus,
                                      {{0, 1, 0.0},
                                       {0, 2, 0.0},
                                       {0, 3, 0.0},
@@ -260,7 +253,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {5, 3, 1.0},
                                       {5, 4, 1.0}},
                                      kTestFD),
-                TaneValidationParams(+algos::AfdErrorMeasure::mu_plus,
+                TaneValidationParams(algos::AfdErrorMeasure::kMuPlus,
                                      {{0, 1, 0.052928649922165616}, {0, 2, 0.053222685139178605},
                                       {0, 3, 0.10083323164798841},  {0, 4, 0.37923864734299506},
                                       {1, 0, 0.0435064306865488},   {1, 2, 0.026496265354092552},
@@ -272,7 +265,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {4, 0, 0.025249433106575903}, {4, 1, 0.016706894990293986},
                                       {4, 2, 0.060729998093753235}, {4, 3, 0.14315980629539937}},
                                      kIris),
-                TaneValidationParams(+algos::AfdErrorMeasure::rho,
+                TaneValidationParams(algos::AfdErrorMeasure::kRho,
                                      {{0, 1, 0.25},
                                       {0, 2, 0.125},
                                       {0, 3, 0.25},
@@ -304,7 +297,7 @@ INSTANTIATE_TEST_SUITE_P(
                                       {5, 3, 1.0},
                                       {5, 4, 1.0}},
                                      kTestFD),
-                TaneValidationParams(+algos::AfdErrorMeasure::rho,
+                TaneValidationParams(algos::AfdErrorMeasure::kRho,
                                      {{0, 1, 0.3017241379310345},
                                       {0, 2, 0.2845528455284553},
                                       {0, 3, 0.3181818181818182},
@@ -330,25 +323,25 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
         AfdMeasuresTaneMiningSuite, TestTaneAfdMeasuresMining,
         ::testing::Values(
-                TaneMiningParams(3325, 0.3, +algos::AfdErrorMeasure::pdep, kTestFD),
-                TaneMiningParams(19266, 0.174, +algos::AfdErrorMeasure::pdep, kIris),
-                TaneMiningParams(18528, 0.1, +algos::AfdErrorMeasure::pdep, kIris),
-                TaneMiningParams(31178, 0.15, +algos::AfdErrorMeasure::pdep, kNeighbors10k),
-                TaneMiningParams(1182, 0.21, +algos::AfdErrorMeasure::pdep, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, +algos::AfdErrorMeasure::tau, kTestFD),
-                TaneMiningParams(11680, 0.1, +algos::AfdErrorMeasure::tau, kIris),
-                TaneMiningParams(60896, 0.01, +algos::AfdErrorMeasure::tau, kIris),
-                TaneMiningParams(52638, 0.1, +algos::AfdErrorMeasure::tau, kNeighbors10k),
-                TaneMiningParams(44991, 0.01, +algos::AfdErrorMeasure::tau, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, +algos::AfdErrorMeasure::mu_plus, kTestFD),
-                TaneMiningParams(60841, 0.1, +algos::AfdErrorMeasure::mu_plus, kIris),
-                TaneMiningParams(60896, 0.01, +algos::AfdErrorMeasure::mu_plus, kIris),
-                TaneMiningParams(12185, 0.1, +algos::AfdErrorMeasure::mu_plus, kNeighbors10k),
-                TaneMiningParams(12185, 0.01, +algos::AfdErrorMeasure::mu_plus, kNeighbors10k),
-                TaneMiningParams(33180, 0.01, +algos::AfdErrorMeasure::rho, kTestFD),
-                TaneMiningParams(11873, 0.1, +algos::AfdErrorMeasure::rho, kIris),
-                TaneMiningParams(47878, 0.01, +algos::AfdErrorMeasure::rho, kIris),
-                TaneMiningParams(52638, 0.1, +algos::AfdErrorMeasure::rho, kNeighbors10k),
-                TaneMiningParams(52638, 0.01, +algos::AfdErrorMeasure::rho, kNeighbors10k)));
+                TaneMiningParams(3325, 0.3, algos::AfdErrorMeasure::kPdep, kTestFD),
+                TaneMiningParams(19266, 0.174, algos::AfdErrorMeasure::kPdep, kIris),
+                TaneMiningParams(18528, 0.1, algos::AfdErrorMeasure::kPdep, kIris),
+                TaneMiningParams(31178, 0.15, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(1182, 0.21, algos::AfdErrorMeasure::kPdep, kNeighbors10k),
+                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kTau, kTestFD),
+                TaneMiningParams(11680, 0.1, algos::AfdErrorMeasure::kTau, kIris),
+                TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kTau, kIris),
+                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(44991, 0.01, algos::AfdErrorMeasure::kTau, kNeighbors10k),
+                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kMuPlus, kTestFD),
+                TaneMiningParams(60841, 0.1, algos::AfdErrorMeasure::kMuPlus, kIris),
+                TaneMiningParams(60896, 0.01, algos::AfdErrorMeasure::kMuPlus, kIris),
+                TaneMiningParams(12185, 0.1, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(12185, 0.01, algos::AfdErrorMeasure::kMuPlus, kNeighbors10k),
+                TaneMiningParams(33180, 0.01, algos::AfdErrorMeasure::kRho, kTestFD),
+                TaneMiningParams(11873, 0.1, algos::AfdErrorMeasure::kRho, kIris),
+                TaneMiningParams(47878, 0.01, algos::AfdErrorMeasure::kRho, kIris),
+                TaneMiningParams(52638, 0.1, algos::AfdErrorMeasure::kRho, kNeighbors10k),
+                TaneMiningParams(52638, 0.01, algos::AfdErrorMeasure::kRho, kNeighbors10k)));
 
 }  // namespace tests

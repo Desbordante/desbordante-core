@@ -1,9 +1,16 @@
 #pragma once
 
-#include "core/util/better_enum_with_visibility.h"
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos::ar_verifier {
-BETTER_ENUM(ClusterPriority, char, full_left_full_right = -1, full_left_partial_right,
-            full_left_no_right, partial_left_full_right, partial_left_partial_right,
-            partial_left_no_right)
-}
+
+enum class ClusterPriority : char {
+    kFullLeftFullRight = -1,
+    kFullLeftPartialRight,
+    kFullLeftNoRight,
+    kPartialLeftFullRight,
+    kPartialLeftPartialRight,
+    kPartialLeftNoRight,
+};
+
+}  // namespace algos::ar_verifier

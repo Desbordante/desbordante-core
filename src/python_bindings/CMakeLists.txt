@@ -22,7 +22,7 @@ target_link_libraries(
     ${MODULE_NAME}
     PRIVATE pybind11::module
             Desbordante::algos
-            better-enums
+            magic_enum::magic_enum
             spdlog::spdlog_header_only
             Boost::headers
             Desbordante.bindlib.util
@@ -51,7 +51,8 @@ target_sources(
             py_util/table_serialization.cpp
 )
 target_link_libraries(
-    ${NAME} PRIVATE better-enums spdlog::spdlog_header_only Boost::headers pybind11::pybind11
+    ${NAME} PRIVATE magic_enum::magic_enum spdlog::spdlog_header_only Boost::headers
+                    pybind11::pybind11
 )
 set_target_properties(${NAME} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
 
@@ -61,7 +62,7 @@ desbordante_add_bind(
     ac/bind_ac.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::ac
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -79,7 +80,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::ar
     ${DESBORDANTE_PREFIX}::ar::apriori
     ${DESBORDANTE_PREFIX}::ar::verifier
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -91,7 +92,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cfd
     ${DESBORDANTE_PREFIX}::cfd::verifier
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -103,7 +104,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::cind
     ${DESBORDANTE_PREFIX}::cind::verifier
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -115,7 +116,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
-    better-enums
+    magic_enum::magic_enum
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only
     Boost::headers
@@ -129,7 +130,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::dd::verifier
     ${DESBORDANTE_PREFIX}::dd::split
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -153,7 +154,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::fd::tane
     ${DESBORDANTE_PREFIX}::fd::tane::pfd
     ${DESBORDANTE_PREFIX}::bindlib::util
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -164,7 +165,7 @@ desbordante_add_bind(
     dynamic/bind_dynamic_fd_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd::verifier::dynamic
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -177,7 +178,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::gfd::miner
     ${DESBORDANTE_PREFIX}::gfd::validator
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -187,7 +188,7 @@ desbordante_add_bind(
     gspan/bind_gspan.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fsm::gspan
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -212,7 +213,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::md::verifier
     ${DESBORDANTE_PREFIX}::bindlib::util
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -223,7 +224,7 @@ desbordante_add_bind(
     mfd/bind_mfd_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::metric::verifier
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -233,7 +234,7 @@ desbordante_add_bind(
     nar/bind_nar.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::nar::des
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -245,7 +246,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::nd::verifier
     ${DESBORDANTE_PREFIX}::nd
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -258,7 +259,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::od::fast
     ${DESBORDANTE_PREFIX}::od::order
     ${DESBORDANTE_PREFIX}::od::set_based_aod_verifier
-    better-enums
+    magic_enum::magic_enum
     spdlog::spdlog_header_only
     Boost::headers
 )
@@ -269,7 +270,7 @@ desbordante_add_bind(
     pfd/bind_pfd_verification.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::fd::pfd_verifier
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -280,7 +281,7 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::fd::sfd::cords
     ${DESBORDANTE_PREFIX}::bindlib::util
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -290,7 +291,7 @@ desbordante_add_bind(
     statistics/bind_statistics.cpp
     LIBS
     ${DESBORDANTE_PREFIX}::datastats
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 
@@ -305,7 +306,7 @@ desbordante_add_bind(
     ${DESBORDANTE_PREFIX}::ucc::pyro
     ${DESBORDANTE_PREFIX}::ucc::verifier
     ${DESBORDANTE_PREFIX}::bindlib::util
-    better-enums
+    magic_enum::magic_enum
     Boost::headers
 )
 

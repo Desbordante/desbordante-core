@@ -22,7 +22,7 @@ private:
 
     std::unique_ptr<Spider> spider_algo_;
     std::unique_ptr<CindMiner> cind_miner_;
-    AlgoType algo_type_{AlgoType::pli_cind};
+    AlgoType algo_type_{AlgoType::kPliCind};
     StageTimings timings_{};
 
     void LoadDataInternal() final;

@@ -19,7 +19,7 @@ void Tane::MakeExecuteOptsAvailableFDInternal() {
 }
 
 config::ErrorType Tane::CalculateZeroAryFdError(ColumnData const* rhs) {
-    if (afd_error_measure_ == +AfdErrorMeasure::g1)
+    if (afd_error_measure_ == AfdErrorMeasure::kG1)
         return CalculateZeroAryG1(rhs, relation_.get()->GetNumTuplePairs());
     return 1;
 }
@@ -28,16 +28,16 @@ config::ErrorType Tane::CalculateFdError(model::PLIWithSingletons const* lhs_pli
                                          model::PLIWithSingletons const* rhs_pli,
                                          model::PLIWithSingletons const* joint_pli) {
     switch (afd_error_measure_) {
-        case +AfdErrorMeasure::pdep:
+        case AfdErrorMeasure::kPdep:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculatePdepMeasure(lhs_pli,
                                                                                         joint_pli);
-        case +AfdErrorMeasure::tau:
+        case AfdErrorMeasure::kTau:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateTau(lhs_pli, rhs_pli,
                                                                                 joint_pli);
-        case +AfdErrorMeasure::mu_plus:
+        case AfdErrorMeasure::kMuPlus:
             return 1 - afd_metric_calculator::AFDMetricCalculator::CalculateMuPlus(lhs_pli, rhs_pli,
                                                                                    joint_pli);
-        case +AfdErrorMeasure::rho:
+        case AfdErrorMeasure::kRho:
             return 1 - CalculateRhoMeasure(lhs_pli, joint_pli);
         default:
             return CalculateG1Error(lhs_pli, joint_pli, relation_.get()->GetNumTuplePairs());

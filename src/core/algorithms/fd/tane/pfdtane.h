@@ -11,7 +11,7 @@ namespace algos {
 /** Class for pFD mining with TANE algorithm */
 class PFDTane : public tane::TaneCommon {
 private:
-    PfdErrorMeasure pfd_error_measure_ = +PfdErrorMeasure::per_tuple;
+    PfdErrorMeasure pfd_error_measure_ = PfdErrorMeasure::kPerTuple;
     void RegisterOptions();
     void MakeExecuteOptsAvailableFDInternal() final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;

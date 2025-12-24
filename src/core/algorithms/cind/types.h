@@ -1,8 +1,6 @@
 #pragma once
 
-#include "core/util/better_enum_with_visibility.h"
-
 namespace algos::cind {
-BETTER_ENUM(CondType, char, row = 0, group)
-BETTER_ENUM(AlgoType, char, cinderella = 0, pli_cind)
+enum class CondType : char { kRow = 0, kGroup };
+enum class AlgoType : char { kCinderella = 0, kPliCind };
 }  // namespace algos::cind

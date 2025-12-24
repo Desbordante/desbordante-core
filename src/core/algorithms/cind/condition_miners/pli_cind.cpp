@@ -49,7 +49,7 @@ std::pair<std::vector<int>, std::vector<int>> PliCind::ClassifyRows(Attributes c
     // included row_id for rows, group_id for groups
     std::vector<int> included_pos;
 
-    bool const is_group = (condition_type_._value == CondType::group);
+    bool const is_group = (condition_type_ == CondType::kGroup);
     std::unordered_map<std::vector<int>, int, VectorIntHash> group_idx;
     std::vector<int> row_to_group;
     if (is_group) {
@@ -138,7 +138,7 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> const&
 
         size_t cluster_size = cluster.size();
 
-        if (condition_type_._value == CondType::group) {
+        if (condition_type_ == CondType::kGroup) {
             std::vector<int> group_cluster;
             group_cluster.reserve(cluster.size());
             for (int row_id : cluster) {

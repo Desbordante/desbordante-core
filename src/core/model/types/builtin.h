@@ -5,7 +5,8 @@
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
 
-#include "core/util/better_enum_with_visibility.h"
+#define MAGIC_ENUM_ENABLE_HASH
+#include <magic_enum/magic_enum.hpp>
 
 namespace model {
 
@@ -47,7 +48,8 @@ using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
  * Maybe we need to use separate enums to describe column types and value types to
  * avoid confusion.
  */
-BETTER_ENUM(TypeId, char,
+// clang-format off
+enum class TypeId : char  {
     kInt = 0,   /* Except for nulls and empties column contains only ints
                  * (fixed-precision integer value) */
     kDouble,    /* Except for nulls and empties column contains only doubles
@@ -62,7 +64,8 @@ BETTER_ENUM(TypeId, char,
     kEmpty,     /* Column contains only empties ("" value) */
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
-);
+};
+// clang-format on
 
 template <typename T>
 struct TypeConverter {};
@@ -137,6 +140,3 @@ struct TupleMaxAlign<std::tuple<Ts...>> {
 inline constexpr size_t kTypesMaxAlignment = detail::TupleMaxAlign<AllValueTypes>::kValue;
 
 }  // namespace model
-
-/* Should be outside the namespace */
-BETTER_ENUMS_DECLARE_STD_HASH(model::TypeId)

@@ -73,7 +73,7 @@ private:
 
     template <od::Ordering Ordering>
     [[nodiscard]] static consteval bool IsAscending() {
-        return Ordering == +od::Ordering::ascending;
+        return Ordering == od::Ordering::kAscending;
     }
 
     template <od::Ordering Ordering>

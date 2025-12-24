@@ -92,7 +92,7 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
             row.push_back(attr->GetValue(index));
         }
 
-        if (condition_type_._value == CondType::group) {
+        if (condition_type_ == CondType::kGroup) {
             auto it = basket_id_by_value.find(row);
             if (it == basket_id_by_value.end()) {
                 bool const included = rhs_values.contains(row);

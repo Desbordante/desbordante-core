@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/util/better_enum_with_visibility.h"
+#include <magic_enum/magic_enum.hpp>
 
 namespace model {
 
-BETTER_ENUM(InputFormatType, char, singular = 0, tabular);
+enum class InputFormatType : char { kSingular = 0, kTabular };
 
 }  // namespace model

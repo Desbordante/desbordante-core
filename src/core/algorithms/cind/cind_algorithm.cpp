@@ -28,7 +28,7 @@ CindAlgorithm::CindAlgorithm() {
 }
 
 void CindAlgorithm::CreateSpiderAlgo() {
-    spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::spider);
+    spider_algo_ = CreateAlgorithmInstance<Spider>(AlgorithmType::kSpider);
 }
 
 void CindAlgorithm::RegisterSpiderOptions() {
@@ -46,7 +46,7 @@ void CindAlgorithm::LoadDataInternal() {
 }
 
 void CindAlgorithm::CreateCindMinerAlgo() {
-    if (algo_type_._value == AlgoType::cinderella) {
+    if (algo_type_ == AlgoType::kCinderella) {
         cind_miner_ = std::make_unique<Cinderella>(spider_algo_->input_tables_);
     } else {
         cind_miner_ = std::make_unique<PliCind>(spider_algo_->input_tables_);

@@ -17,7 +17,7 @@ target_link_libraries(
     PRIVATE spdlog::spdlog_header_only
             ${DESBORDANTE_PREFIX}::ind
             emhash
-            better-enums
+            magic_enum::magic_enum
             atomic_bitvector
             Boost::headers
             ${DESBORDANTE_PREFIX}::model::table

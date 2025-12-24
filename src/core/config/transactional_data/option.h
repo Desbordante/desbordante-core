@@ -12,11 +12,11 @@ extern CommonOption<model::ColumnIndex> const kItemColumnOpt;
 extern CommonOption<bool> const kFirstColumnTIdOpt;
 
 inline bool IsSingularFormat(model::InputFormatType format) {
-    return format == +model::InputFormatType::singular;
+    return format == model::InputFormatType::kSingular;
 }
 
 inline bool IsTabularFormat(model::InputFormatType format) {
-    return format == +model::InputFormatType::tabular;
+    return format == model::InputFormatType::kTabular;
 }
 
 }  // namespace config

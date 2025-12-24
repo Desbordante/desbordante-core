@@ -82,7 +82,7 @@ std::vector<model::EncodedColumnData const*> BuildOrderedColumns(
 
 }  // namespace
 
-CINDVerifier::CINDVerifier() : condition_type_(CondType::group) {
+CINDVerifier::CINDVerifier() : condition_type_(CondType::kGroup) {
     RegisterOptions();
     MakeOptionsAvailable({config::kTablesOpt.GetName()});
 }
@@ -234,7 +234,7 @@ void CINDVerifier::VerifyCIND() {
                                                    .violating_rows = std::move(cluster)};
                        });
 
-        bool const is_group = (condition_type_._value == CondType::group);
+        bool const is_group = (condition_type_ == CondType::kGroup);
         supporting_baskets_ = is_group ? distinct_keys : lhs_rows;
         std::size_t const violating = is_group ? violating_clusters_.size() : violating_rows_;
         included_support_ = supporting_baskets_ - violating;
@@ -318,12 +318,12 @@ void CINDVerifier::VerifyCIND() {
     for (auto const& [_, acc] : acc_by_key) {
         if (acc.included) {
             included_baskets_total_ +=
-                    (condition_type_._value == CondType::group) ? 1 : acc.basket_rows.size();
+                    (condition_type_ == CondType::kGroup) ? 1 : acc.basket_rows.size();
         }
     }
 
     // Compute support and violations
-    bool const is_group = (condition_type_._value == CondType::group);
+    bool const is_group = (condition_type_ == CondType::kGroup);
     for (auto& [_, acc] : acc_by_key) {
         if (acc.matching_rows.empty()) continue;
 

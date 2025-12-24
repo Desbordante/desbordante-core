@@ -33,7 +33,7 @@ private:
 public:
     struct Params {
         config::InputTable input_table;
-        InputFormatType input_format_type = InputFormatType::singular;
+        InputFormatType input_format_type = InputFormatType::kSingular;
         ColumnIndex tid_column_index = 0;
         ColumnIndex item_column_index = 1;
 

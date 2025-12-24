@@ -3,14 +3,13 @@
 #include "core/algorithms/nar/des/encoded_nar.h"
 #include "core/algorithms/nar/des/enums.h"
 #include "core/algorithms/nar/des/rng.h"
-#include "core/util/better_enum_with_visibility.h"
 
 namespace algos::des {
 
 struct DifferentialOptions {
     double differential_scale;
     double crossover_probability;
-    DifferentialStrategy differential_strategy = DifferentialStrategy::best1Exp;
+    DifferentialStrategy differential_strategy = DifferentialStrategy::kBest1Exp;
 };
 
 EncodedNAR Rand1Bin(std::vector<EncodedNAR> const& population, size_t candidate_index,

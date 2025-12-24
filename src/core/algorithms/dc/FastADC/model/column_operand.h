@@ -1,9 +1,10 @@
 #pragma once
 
 #include <boost/container_hash/hash.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "core/model/table/column.h"
-#include "core/util/better_enum_with_visibility.h"
+#include "core/util/enum_to_str.h"
 
 namespace algos::fastadc {
 
@@ -26,7 +27,7 @@ namespace algos::fastadc {
  * indicates an operand from the first tuple (t), and `ColumnOperandTuple::S` indicates an operand
  * from the second tuple (s).
  */
-BETTER_ENUM(ColumnOperandTuple, char, t, s);
+enum class ColumnOperandTuple : char { kT, kS };
 
 // TODO: remove code duplication cause we already have "dc/model/column_operand.h" that is used for
 // DC verification.
@@ -36,7 +37,7 @@ private:
     ColumnOperandTuple tuple_;
 
     static ColumnOperandTuple Invert(ColumnOperandTuple tuple) {
-        return tuple == +ColumnOperandTuple::t ? ColumnOperandTuple::s : ColumnOperandTuple::t;
+        return tuple == ColumnOperandTuple::kT ? ColumnOperandTuple::kS : ColumnOperandTuple::kT;
     }
 
 public:
@@ -61,7 +62,7 @@ public:
     }
 
     std::string ToString() const {
-        return std::string(tuple_._to_string()) + "." + column_->GetName();
+        return util::EnumToStr(tuple_) + "." + column_->GetName();
     }
 };
 
@@ -76,7 +77,7 @@ struct std::hash<algos::fastadc::ColumnOperand> {
     size_t operator()(algos::fastadc::ColumnOperand const& k) const noexcept {
         size_t seed = 0;
         boost::hash_combine(seed, k.GetColumn()->GetIndex());
-        boost::hash_combine(seed, k.GetTuple()._value);
+        boost::hash_combine(seed, magic_enum::enum_integer(k.GetTuple()));
         return seed;
     }
 };

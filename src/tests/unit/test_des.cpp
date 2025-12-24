@@ -39,7 +39,7 @@ protected:
 
 TEST_F(DESTest, LaunchTest1) {
     auto algorithm = CreateAlgorithmInstance(kAbalone, 0.0, 0.0, 100u, 100u, 0.9, 0.5,
-                                             algos::des::DifferentialStrategy::rand1Bin);
+                                             algos::des::DifferentialStrategy::kRand1Bin);
     algorithm->Execute();
     auto result = ExtractFitnessValues(algorithm->GetNARVector());
     std::vector<std::string> expected = {"0.609963", "0.518598", "0.514174", "0.497616", "0.483237",
@@ -52,7 +52,7 @@ TEST_F(DESTest, LaunchTest1) {
 
 TEST_F(DESTest, LaunchTest2) {
     auto algorithm = CreateAlgorithmInstance(kAbalone, 0.2, 0.6, 200u, 300u, 0.9, 0.5,
-                                             algos::des::DifferentialStrategy::rand1Bin);
+                                             algos::des::DifferentialStrategy::kRand1Bin);
     algorithm->Execute();
     auto result = ExtractFitnessValues(algorithm->GetNARVector());
     std::vector<std::string> expected = {"0.598929", "0.587854", "0.566134", "0.524618",

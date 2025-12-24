@@ -7,6 +7,7 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/transactional_data/option.h"
 #include "core/model/transaction/input_format_type.h"
+#include "core/util/enum_to_str.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
 
@@ -78,7 +79,7 @@ unsigned long long ARVerifier::ExecuteInternal() {
                              minconf_, minsup_);
     LOG_DEBUG("Parameters of ARVerifier:");
     LOG_DEBUG("\tInput table: {}", transactional_data_params_.input_table->GetRelationName());
-    LOG_DEBUG("\tInput format: {}", transactional_data_params_.input_format_type._to_string());
+    LOG_DEBUG("\tInput format: {}", util::EnumToStr(transactional_data_params_.input_format_type));
     LOG_DEBUG("\tARule to verify: {}",
               ::model::ARStrings(ar_ids_, transactional_data_.get()).ToString());
 

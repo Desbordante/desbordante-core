@@ -77,7 +77,7 @@ protected:
                                            unsigned int itemColumnIndex) {
         using namespace config::names;
         return {{kCsvConfig, csv_config},
-                {kInputFormat, +model::InputFormatType::singular},
+                {kInputFormat, model::InputFormatType::kSingular},
                 {kArMinimumSupport, minsup},
                 {kArMinimumConfidence, minconf},
                 {kTIdColumnIndex, tidColumnIndex},
@@ -88,7 +88,7 @@ protected:
                                            double minconf, bool firstColumnTid) {
         using namespace config::names;
         return {{kCsvConfig, csv_config},
-                {kInputFormat, +model::InputFormatType::tabular},
+                {kInputFormat, model::InputFormatType::kTabular},
                 {kArMinimumSupport, minsup},
                 {kArMinimumConfidence, minconf},
                 {kFirstColumnTId, firstColumnTid}};

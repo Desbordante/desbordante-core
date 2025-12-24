@@ -15,7 +15,6 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 #include "core/model/types/types.h"
-#include "core/util/better_enum_with_visibility.h"
 
 namespace algos {
 
@@ -38,7 +37,7 @@ private:
 
     config::InputTable input_table_;
 
-    Binop bin_operation_ = Binop::_values()[0];
+    Binop bin_operation_ = magic_enum::enum_values<Binop>().front();
     /* Desired ratio of exceptions. Value lies in (0, 1] */
     double fuzziness_;
     /* Value lies in (0, 1]. Closer to 0 - many short intervals.

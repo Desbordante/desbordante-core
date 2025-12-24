@@ -8,7 +8,7 @@
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)
-    : tables_(input_tables), condition_type_(CondType::group) {}
+    : tables_(input_tables), condition_type_(CondType::kGroup) {}
 
 CindMiner::Attributes CindMiner::ClassifyAttributes(model::IND const& aind) const {
     Attributes result;

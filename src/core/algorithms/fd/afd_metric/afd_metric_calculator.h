@@ -19,7 +19,7 @@ class AFDMetricCalculator : public Algorithm {
 private:
     config::InputTable input_table_;
 
-    AFDMetric metric_ = AFDMetric::_values()[0];
+    AFDMetric metric_ = magic_enum::enum_values<AFDMetric>().front();
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
 
