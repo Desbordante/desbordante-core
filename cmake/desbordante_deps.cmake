@@ -40,15 +40,6 @@ add_library(emhash INTERFACE)
 target_include_directories(emhash SYSTEM INTERFACE ${emhash_SOURCE_DIR})
 
 CPMAddPackage(
-    NAME frozen
-    GITHUB_REPOSITORY serge-sans-paille/frozen
-    GIT_TAG 1.2.0
-    DOWNLOAD_ONLY True
-)
-add_library(frozen INTERFACE)
-target_include_directories(frozen SYSTEM INTERFACE "${frozen_SOURCE_DIR}/include")
-
-CPMAddPackage(
     NAME better-enums
     GITHUB_REPOSITORY aantron/better-enums
     GIT_TAG 0.11.3

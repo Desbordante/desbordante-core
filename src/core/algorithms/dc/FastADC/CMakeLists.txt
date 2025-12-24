@@ -15,12 +15,12 @@ target_sources(
             util/predicate_builder.cpp
             util/single_clue_set_builder.cpp
 )
-target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only frozen better-enums Boost::headers)
+target_link_libraries(${NAME} PRIVATE spdlog::spdlog_header_only better-enums Boost::headers)
 
 set(NAME dc.fastadc)
 desbordante_add_lib(NAME)
 target_sources(${NAME} PRIVATE fastadc.cpp)
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::dc::fastadc::structs spdlog::spdlog_header_only
-                    better-enums frozen Boost::headers
+                    better-enums Boost::headers
 )

@@ -100,7 +100,6 @@ desbordante_add_bind(
     LIBS
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::dc::fastadc
-    frozen
     better-enums
     ${DESBORDANTE_PREFIX}::bindlib::util
     spdlog::spdlog_header_only

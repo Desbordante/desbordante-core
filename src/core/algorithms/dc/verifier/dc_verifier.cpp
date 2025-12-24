@@ -110,7 +110,7 @@ bool DCVerifier::Verify(dc::DC dc) {
     if (dc_type == dc::DCType::kOneInequality and do_collect_violations_ == true)
         dc_type = dc::DCType::kTwoTuples;
 
-    auto check = kDCTypeToVerificationMethod.at(dc_type);
+    auto check = kDCTypeToVerificationMethod.At(dc_type);
 
     // TODO: check the article for optimization 2^l -> 2^(l-1) dc's
 
