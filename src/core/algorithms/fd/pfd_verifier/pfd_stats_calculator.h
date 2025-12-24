@@ -74,7 +74,7 @@ public:
                 clusters_violating_pfd_.push_back(x_cluster);
             }
             num_rows_violating_pfd_ += x_cluster_size - max;
-            sum += error_measure_ == +PfdErrorMeasure::per_tuple
+            sum += error_measure_ == PfdErrorMeasure::kPerTuple
                            ? static_cast<double>(max)
                            : static_cast<double>(max) / x_cluster_size;
             cluster_rows_count += x_cluster.size();
@@ -83,8 +83,8 @@ public:
                 static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
         double probability =
                 static_cast<double>(sum + unique_rows) /
-                (error_measure_ == +PfdErrorMeasure::per_tuple ? x_pli->GetRelationSize()
-                                                               : x_index.size() + unique_rows);
+                (error_measure_ == PfdErrorMeasure::kPerTuple ? x_pli->GetRelationSize()
+                                                              : x_index.size() + unique_rows);
         error_ = 1.0 - probability;
     }
 };

@@ -8,6 +8,6 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::dc::model
             ${DESBORDANTE_PREFIX}::dc::parser
             spdlog::spdlog_header_only
-            better-enums
+            magic_enum::magic_enum
             Boost::headers
 )

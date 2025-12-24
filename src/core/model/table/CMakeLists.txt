@@ -19,7 +19,8 @@ target_sources(
             vertical.cpp
             vertical_map.cpp
 )
+target_link_libraries(${NAME} PUBLIC magic_enum::magic_enum)
 target_link_libraries(
-    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::types spdlog::spdlog_header_only better-enums
-                    Boost::headers ${DESBORDANTE_PREFIX}::algos
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::model::types spdlog::spdlog_header_only Boost::headers
+                    ${DESBORDANTE_PREFIX}::algos
 )

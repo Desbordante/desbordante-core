@@ -20,7 +20,7 @@ private:
 
     config::IndicesType lhs_indices_;
     config::IndicesType rhs_indices_;
-    config::PfdErrorMeasureType error_measure_ = +PfdErrorMeasure::per_tuple;
+    config::PfdErrorMeasureType error_measure_ = PfdErrorMeasure::kPerTuple;
 
     std::shared_ptr<ColumnLayoutRelationData> relation_;
     std::unique_ptr<PFDStatsCalculator> stats_calculator_;
