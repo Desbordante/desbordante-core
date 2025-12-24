@@ -12,7 +12,7 @@ WhitespaceSensitiveMacros:
 IncludeCategories:
   - Regex: <pybind11/pybind11[.]h>|<Python[.]h>
     Priority: 1
-  - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11|frozen).+>'
+  - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11).+>'
     Priority: 3
   - Regex: '<.+>'
     Priority: 2

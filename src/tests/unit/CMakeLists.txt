@@ -128,7 +128,6 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::model::types
     ${DESBORDANTE_PREFIX}::model::table
     spdlog::spdlog_header_only
-    frozen
     better-enums
     gmock
     Boost::headers
@@ -141,7 +140,6 @@ desbordante_add_test(
     ${DESBORDANTE_PREFIX}::dc::verifier
     ${DESBORDANTE_PREFIX}::testlib::common
     spdlog::spdlog_header_only
-    frozen
     better-enums
     gmock
     Boost::headers
