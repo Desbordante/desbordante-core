@@ -8,7 +8,6 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::dc::model
             ${DESBORDANTE_PREFIX}::dc::parser
             spdlog::spdlog_header_only
-            frozen
             better-enums
             Boost::headers
 )

@@ -19,7 +19,6 @@ target_link_libraries(
             ${DESBORDANTE_PREFIX}::nar::des
             Boost::program_options
             better-enums
-            frozen
             spdlog::spdlog_header_only
 )
 add_dependencies(
