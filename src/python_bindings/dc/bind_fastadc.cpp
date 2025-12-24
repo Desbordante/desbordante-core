@@ -4,6 +4,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/dc/FastADC/fastadc.h"
+#include "core/util/enum_to_str.h"
 #include "python_bindings/py_util/bind_primitive.h"
 #include "python_bindings/py_util/table_serialization.h"
 
@@ -13,7 +14,7 @@ using namespace algos::fastadc;
 namespace fastadc_serialization {
 
 py::tuple SerializeColumnOperand(ColumnOperand const& operand) {
-    return py::make_tuple(operand.GetColumn()->GetIndex(), operand.GetTuple()._to_string());
+    return py::make_tuple(operand.GetColumn()->GetIndex(), util::EnumToStr(operand.GetTuple()));
 }
 
 ColumnOperand DeserializeColumnOperand(py::tuple t,
@@ -21,8 +22,9 @@ ColumnOperand DeserializeColumnOperand(py::tuple t,
     if (t.size() != 2) throw std::runtime_error("Invalid state for ColumnOperand pickle!");
     auto col_index = t[0].cast<size_t>();
     auto tuple_str = t[1].cast<std::string>();
-    auto tuple_type = ColumnOperandTuple::_from_string(tuple_str.c_str());
-    return ColumnOperand(schema->GetColumn(col_index), tuple_type);
+    auto tuple_type = util::EnumFromStr<ColumnOperandTuple>(tuple_str);
+    if (!tuple_type) throw std::runtime_error("Invalid tuple type: " + tuple_str);
+    return ColumnOperand(schema->GetColumn(col_index), *tuple_type);
 }
 
 py::tuple SerializePredicate(PredicatePtr predicate) {

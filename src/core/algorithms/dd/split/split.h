@@ -38,7 +38,7 @@ private:
     config::InputTable difference_table_;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation_;
 
-    Reduce const reduce_method_ = Reduce::IEHybrid;  // currently, the fastest method
+    Reduce const reduce_method_ = Reduce::kIeHybrid;  // currently, the fastest method
     unsigned const num_dfs_per_column_ = 5;
 
     std::vector<DistancePositionListIndex> plis_;

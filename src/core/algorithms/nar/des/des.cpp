@@ -22,7 +22,7 @@ DES::DES() : NARAlgorithm({}) {
 void DES::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
-    DifferentialStrategy default_strategy = DifferentialStrategy::rand1Bin;
+    DifferentialStrategy default_strategy = DifferentialStrategy::kRand1Bin;
     RegisterOption(Option{&seed_, kSeed, kDSeed, 2ul});
     RegisterOption(Option{&population_size_, kPopulationSize, kDPopulationSize, 100u});
     RegisterOption(

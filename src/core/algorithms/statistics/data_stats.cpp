@@ -184,11 +184,13 @@ size_t DataStats::MixedDistinct(size_t index) const {
     std::vector<std::byte const*> const& data = col.GetData();
     mo::MixedType mixed_type(is_null_equal_null_);
 
-    std::vector<std::vector<std::byte const*>> values_by_type_id(mo::TypeId::_size());
+    std::vector<std::vector<std::byte const*>> values_by_type_id(
+            magic_enum::enum_count<mo::TypeId>());
 
     for (size_t i = 0; i < data.size(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-        values_by_type_id[mixed_type.RetrieveTypeId(data[i])._to_index()].push_back(data[i]);
+        auto type_id = mixed_type.RetrieveTypeId(data[i]);
+        values_by_type_id[magic_enum::enum_index(type_id).value()].push_back(data[i]);
     }
 
     size_t result = 0;
@@ -202,7 +204,7 @@ size_t DataStats::MixedDistinct(size_t index) const {
 size_t DataStats::Distinct(size_t index) {
     if (all_stats_[index].distinct != 0) return all_stats_[index].distinct;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() == +mo::TypeId::kMixed) {
+    if (col.GetTypeId() == mo::TypeId::kMixed) {
         all_stats_[index].distinct = MixedDistinct(index);
         return all_stats_[index].distinct;
     }
@@ -234,8 +236,8 @@ bool DataStats::IsCategorical(size_t index, size_t quantity) {
 std::vector<std::byte const*> DataStats::DeleteNullAndEmpties(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
     mo::TypeId type_id = col.GetTypeId();
-    if (type_id == +mo::TypeId::kNull || type_id == +mo::TypeId::kEmpty ||
-        type_id == +mo::TypeId::kUndefined)
+    if (type_id == mo::TypeId::kNull || type_id == mo::TypeId::kEmpty ||
+        type_id == mo::TypeId::kUndefined)
         return {};
     std::vector<std::byte const*> const& data = col.GetData();
     std::vector<std::byte const*> res;
@@ -492,7 +494,7 @@ Statistic DataStats::GetMedianAD(size_t index) const {
 Statistic DataStats::GetVocab(size_t index) const {
     if (all_stats_[index].vocab.HasValue()) return all_stats_[index].vocab;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     mo::StringType string_type;
     std::string string_data;
@@ -548,7 +550,7 @@ Statistic DataStats::GetNumberOfUppercaseChars(size_t index) const {
 template <class Pred>
 Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     size_t count = 0;
     mo::IntType int_type;
@@ -567,7 +569,7 @@ Statistic DataStats::CountIfInColumn(Pred pred, size_t index) const {
 
 Statistic DataStats::GetNumberOfChars(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringSumOf(index, [](std::string const& line) { return line.size(); });
 }
@@ -576,7 +578,7 @@ Statistic DataStats::GetAvgNumberOfChars(size_t index) const {
     if (all_stats_[index].num_avg_chars.HasValue()) return all_stats_[index].num_avg_chars;
 
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     mo::DoubleType double_type;
     mo::IntType int_type;
@@ -656,7 +658,7 @@ Statistic DataStats::GetStringSumOf(size_t index, Pred pred) const {
 Statistic DataStats::GetMinNumberOfChars(size_t index) const {
     if (all_stats_[index].min_num_chars.HasValue()) return all_stats_[index].min_num_chars;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringMinOf(index, [](std::string const& line) { return line.size(); });
 }
@@ -664,7 +666,7 @@ Statistic DataStats::GetMinNumberOfChars(size_t index) const {
 Statistic DataStats::GetMaxNumberOfChars(size_t index) const {
     if (all_stats_[index].max_num_chars.HasValue()) return all_stats_[index].max_num_chars;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringMaxOf(index, [](std::string const& line) { return line.size(); });
 }
@@ -678,7 +680,7 @@ std::vector<std::string> DataStats::GetWordsInString(std::string line) {
 
 std::set<std::string> DataStats::GetWords(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     mo::StringType string_type;
     std::set<std::string> words;
@@ -707,7 +709,7 @@ Statistic DataStats::GetMinNumberOfWords(size_t index) const {
     if (all_stats_[index].min_num_words.HasValue()) return all_stats_[index].min_num_words;
 
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringMinOf(index,
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
@@ -716,7 +718,7 @@ Statistic DataStats::GetMinNumberOfWords(size_t index) const {
 Statistic DataStats::GetMaxNumberOfWords(size_t index) const {
     if (all_stats_[index].max_num_words.HasValue()) return all_stats_[index].max_num_words;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringMaxOf(index,
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
@@ -725,7 +727,7 @@ Statistic DataStats::GetMaxNumberOfWords(size_t index) const {
 Statistic DataStats::GetNumberOfWords(size_t index) const {
     if (all_stats_[index].num_words.HasValue()) return all_stats_[index].num_words;
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     return GetStringSumOf(index,
                           [](std::string const& line) { return GetNumberOfWordsInString(line); });
@@ -733,7 +735,7 @@ Statistic DataStats::GetNumberOfWords(size_t index) const {
 
 std::vector<char> DataStats::GetTopKChars(size_t index, size_t k) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     mo::StringType string_type;
     std::unordered_map<char, size_t> count_chars;
@@ -768,7 +770,7 @@ std::vector<char> DataStats::GetTopKChars(size_t index, size_t k) const {
 
 std::vector<std::string> DataStats::GetTopKWords(size_t index, size_t k) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     mo::StringType string_type;
     std::unordered_map<std::string, size_t> count_words;
@@ -844,7 +846,7 @@ bool DataStats::IsEntirelyLowercase(std::string word) {
 template <class Pred>
 Statistic DataStats::CountIfInColumnForWords(Pred pred, size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
-    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    if (col.GetTypeId() != mo::TypeId::kString) return {};
 
     std::size_t count = 0;
     std::string string_data;
@@ -873,7 +875,7 @@ unsigned long long DataStats::ExecuteInternal() {
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
     auto task = [percent_per_col, this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
-        if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
+        if (this->col_data_[index].GetTypeId() != mo::TypeId::kMixed) {
             all_stats_[index].min = GetMin(index);
             all_stats_[index].max = GetMax(index);
             all_stats_[index].sum = GetSum(index);

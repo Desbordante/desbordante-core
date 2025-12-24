@@ -47,7 +47,7 @@ long double PointsCalculator::GetCoordinate(bool& has_values, ClusterIndex row_i
     }
 
     has_values = true;
-    return col.GetType().GetTypeId() == +model::TypeId::kInt
+    return col.GetType().GetTypeId() == model::TypeId::kInt
                    ? (long double)model::Type::GetValue<model::Int>(col.GetData()[row_index])
                    : model::Type::GetValue<model::Double>(col.GetData()[row_index]);
 }

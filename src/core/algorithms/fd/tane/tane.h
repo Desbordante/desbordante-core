@@ -10,7 +10,7 @@ namespace algos {
 
 class Tane : public tane::TaneCommon {
 private:
-    AfdErrorMeasure afd_error_measure_ = +AfdErrorMeasure::g1;
+    AfdErrorMeasure afd_error_measure_ = AfdErrorMeasure::kG1;
     void MakeExecuteOptsAvailableFDInternal() override final;
     config::ErrorType CalculateZeroAryFdError(ColumnData const* rhs) override;
     config::ErrorType CalculateFdError(model::PositionListIndex const* lhs_pli,
