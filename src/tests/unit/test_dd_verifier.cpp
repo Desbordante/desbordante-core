@@ -1,8 +1,11 @@
 #include <cstddef>
+#include <memory>
 
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
+#include "core/algorithms/dd/dd_verifier/FuncMetric.h"
+#include "core/algorithms/dd/dd_verifier/Metric.h"
 #include "core/algorithms/dd/dd_verifier/dd_verifier.h"
 #include "tests/common/all_csv_configs.h"
 
@@ -12,9 +15,13 @@ struct DDVerifyingParams {
     double const error = 0.;
     std::size_t const num_error_pairs = 0;
 
-    explicit DDVerifyingParams(model::DDString const& dd, std::size_t const num_error_pairs = 0,
-                               double const error = 0., CSVConfig const& csv_config = kTestDD)
-        : params({{config::names::kCsvConfig, csv_config}, {config::names::kDDString, dd}}),
+    DDVerifyingParams(model::DDString const& dd, std::size_t const num_error_pairs = 0,
+                      double const error = 0.,
+                      std::unordered_map<std::string, Metric const*> metrics = {},
+                      CSVConfig const& csv_config = kTestDD)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kDDString, dd},
+                  {"metrics_map", metrics}}),
           error(error),
           num_error_pairs(num_error_pairs) {}
 };
@@ -52,7 +59,8 @@ INSTANTIATE_TEST_SUITE_P(
                           DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 9, 10}}}, 4, 4. / 5.),
                           DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
                           DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5,
-                                            5. / 10.)));
+                                            5. / 10.),
+			  DDVerifyingParams({{{"Col0", 0, 0}}, {{"Col2", 0, 1},{"Col1", 0, 20}}}, 0, 0., {{"Col0", (new FuncMetric<int>([](int first, int second){return first - first + second - second;}))},{"Col2", new FuncMetric<int>([](int first, int second){return first - first + second - second + 1;})}})));
 
 // clang-format on
 }  // namespace tests

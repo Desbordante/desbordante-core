@@ -264,6 +264,38 @@ correct this error and observe the subsequent changes.
     if algorithm3.dd_holds():
         print(f'''After correcting the error, the error threshold
 dropped to {COLOR_CODES["green"]}{algorithm3.get_error()}{COLOR_CODES["nocolor"]} and the {COLOR_CODES["green"]}DD holds.{COLOR_CODES["nocolor"]}''')
+def print_about_fifth_dd():
+    data = pd.read_csv(SALARIES_TABLE)
+    print(f'''Also, our validator supports user-defined metrics.
+We will check the differential dependency
+
+{COLOR_CODES["yellow"]}{dd5.__str__()}{COLOR_CODES["nocolor"]}
+
+in the salaries_dd.csv table.
+
+{data}
+
+We will pass to the validator a function to calculate the normalized 
+distance, which is defined as (distance between pair of fields) / (maximum 
+distance among all field pairs).
+''')
+    algo = desbordante.dd_verification.algorithms.DDVerifier()
+    algo.load_data(table=(SALARIES_TABLE, ',', True))
+    def normalized_distance_salary(first: int, second: int) -> float:
+        result =  abs(first - second)/5
+        return result
+    def normalized_distance_experience(first: int, second: int) -> float:
+        result =  abs(first - second)/7
+        return result
+    algo.execute(dd=dd5, metrics_map = {"salary_level": desbordante.dd_verification.make_metric_ptr((normalized_distance_salary,"int")), "experience_years": desbordante.dd_verification.make_metric_ptr((normalized_distance_experience, "int"))})
+    print_holds(algo.dd_holds())
+    print('''Thus, across various departments, employee
+compensation is logically tied to professional experience.
+Specifically, when considering tuple pairs where employees
+share the same value in the "department" column and have
+close values in the "salary_level" column, their values in
+the "experience_years" column should also demonstrate proximity.''')
+
 
 
 
@@ -278,11 +310,12 @@ def print_holds(result: bool) -> None:
         print(f'This {COLOR_CODES["red"]}DD doesn`t hold.{COLOR_CODES["nocolor"]}\n')
 
 
-TABLE = 'examples/datasets/stores_dd.csv'  # 'examples/datasets/stores_dd.csv'
-FLIGHT_TABLE = 'examples/datasets/flights_dd_verifier_example.csv' # 'examples/datasets/flights_dd_verifier_example.csv'
+TABLE = 'examples/datasets/stores_dd.csv'  
+FLIGHT_TABLE = 'examples/datasets/flights_dd_verifier_example.csv'
 GRADES_TABLE = 'examples/datasets/grades_dd.csv'
 GRADES_TABLE2 = 'examples/datasets/grades_dd2.csv'
 GRADES_TABLE3 = 'examples/datasets/grades_dd3.csv'
+SALARIES_TABLE = 'examples/datasets/salaries_dd.csv'
 lhs1 = [desbordante.dd_verification.DF("product_name", 0, 0)]
 rhs1 = [desbordante.dd_verification.DF("stock_quantity", 0, 20),
         desbordante.dd_verification.DF("price_per_unit", 0, 60)]
@@ -300,6 +333,9 @@ algo.execute(dd=dd1)
 lhs4 = [desbordante.dd_verification.DF("student_id", 0, 0)]
 rhs4 = [desbordante.dd_verification.DF("student_name", 0, 0)]
 dd4 = desbordante.dd.DD(lhs4, rhs4)
+lhs5 = [desbordante.dd_verification.DF("department", 0, 0), desbordante.dd_verification.DF("salary_level", 0, 0.3)]
+rhs5 = [desbordante.dd_verification.DF("experience_years", 0, 0.5)]
+dd5 = desbordante.dd.DD(lhs5, rhs5)
 with open(TABLE, newline='') as csvtable:
     table = list(csv.reader(csvtable))
 print_intro(TABLE)
@@ -318,3 +354,6 @@ print_third_dd_verified(algo)
 print("-" * 100)
 print("Example #4\n")
 print_about_fourth_dd()
+print("-" * 100)
+print("Example #5\n")
+print_about_fifth_dd()
