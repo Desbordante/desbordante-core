@@ -1,13 +1,14 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos::dd {
 
 // Defines what strategy of reducing dependencies will be used in the algorithm
-BETTER_ENUM(Reduce, char,
-            Negative = 0,  // negative pruning reduce
-            Hybrid,        // hybrid pruning reduce
-            IEHybrid       // instance exclusion reduce (currently, the fastest)
-);
+enum class Reduce : char {
+    kNegative = 0,  // negative pruning reduce
+    kHybrid,        // hybrid pruning reduce
+    kIeHybrid       // instance exclusion reduce (currently, the fastest)
+
+};
 }  // namespace algos::dd

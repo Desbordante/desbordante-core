@@ -285,11 +285,14 @@ std::vector<std::string> expected_denial_constraints = {
         "¬{ t.A < s.D ∧ t.C >= s.C }",
         "¬{ t.A < s.D ∧ t.D >= s.D }",
         "¬{ t.A < s.D ∧ t.E <= s.E ∧ t.F == s.F }",
-        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A != s.D ∧ t.C >= s.C ∧ t.D != s.D ∧ t.G != s.G }",
+        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A != s.D ∧ t.C >= s.C ∧ t.D != s.D ∧ t.G != "
+        "s.G }",
         "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A > s.D ∧ t.D != s.D ∧ t.G != s.G }",
-        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A >= s.D ∧ t.B >= s.B ∧ t.D != s.D ∧ t.G != s.G }",
+        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A >= s.D ∧ t.B >= s.B ∧ t.D != s.D ∧ t.G != "
+        "s.G }",
         "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.A >= s.D ∧ t.D != s.D ∧ t.F != s.F }",
-        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.B >= s.B ∧ t.C >= s.C ∧ t.D != s.D ∧ t.G != s.G }",
+        "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.B >= s.B ∧ t.C >= s.C ∧ t.D != s.D ∧ t.G != "
+        "s.G }",
         "¬{ t.A <= s.A ∧ t.A != s.C ∧ t.C >= s.C ∧ t.D != s.D ∧ t.F != s.F }",
         "¬{ t.A <= s.A ∧ t.A != s.D ∧ t.B <= s.B ∧ t.C != s.D ∧ t.G != s.G }",
         "¬{ t.A <= s.A ∧ t.A != s.D ∧ t.B <= s.B ∧ t.C >= s.C }",

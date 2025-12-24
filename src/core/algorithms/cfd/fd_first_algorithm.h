@@ -19,7 +19,7 @@ private:
     unsigned max_cfd_size_;
     unsigned max_lhs_;
     double min_conf_;
-    Substrategy substrategy_ = Substrategy::dfs;
+    Substrategy substrategy_ = Substrategy::kDfs;
 
     std::map<Itemset, PartitionTIdList> store_;
     PrefixTree<Itemset, Itemset> cand_store_;
@@ -33,7 +33,7 @@ private:
 
     void FdsFirstDFS();
     void FdsFirstDFS(Itemset const &, std::vector<MinerNode<PartitionTIdList>> const &,
-                     Substrategy = Substrategy::dfs);
+                     Substrategy = Substrategy::kDfs);
     void MinePatternsBFS(Itemset const &lhs, int rhs, PartitionTIdList const &all_tids);
     void MinePatternsDFS(Itemset const &lhs, int rhs, PartitionTIdList const &all_tids);
     void MinePatternsDFS(Itemset const &, std::vector<MinerNode<SimpleTIdList>> &, Itemset const &,

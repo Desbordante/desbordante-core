@@ -256,15 +256,11 @@ CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
 include_directories(SYSTEM "${emhash_SOURCE_DIR}")
 
 CPMAddPackage(
+    NAME magic_enum
+    GITHUB_REPOSITORY Neargye/magic_enum
+    VERSION 0.9.7
+    SYSTEM YES
 )
-
-CPMAddPackage(
-    NAME better-enums
-    GITHUB_REPOSITORY aantron/better-enums
-    GIT_TAG 0.11.3
-    DOWNLOAD_ONLY True
-)
-include_directories(SYSTEM "${better-enums_SOURCE_DIR}")
 
 CPMAddPackage(
     NAME atomicbitvector

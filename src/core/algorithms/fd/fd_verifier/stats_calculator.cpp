@@ -34,7 +34,7 @@ model::CompareResult CompareTypesInCol(model::TypedColumnData const& col,
     std::byte const* v1 = col.GetValue(i1);
     std::byte const* v2 = col.GetValue(i2);
 
-    if (col.GetTypeId() != +model::TypeId::kMixed) {
+    if (col.GetTypeId() != model::TypeId::kMixed) {
         return col.GetType().Compare(v1, v2);
     }
 

@@ -24,15 +24,15 @@ namespace model {
 TypeId TypedColumnDataFactory::DeduceColumnType() const {
     bool is_undefined = true;
     std::bitset<5> candidate_types_bitset("11111");
-    TypeId first_type_id = +TypeId::kUndefined;
+    TypeId first_type_id = TypeId::kUndefined;
     for (std::size_t i = 0; i != unparsed_.size(); ++i) {
         if (!kNullCheck(unparsed_[i]) && !kEmptyCheck(unparsed_[i])) {
             is_undefined = false;
-            if (first_type_id != +TypeId::kUndefined) {
+            if (first_type_id != TypeId::kUndefined) {
                 auto& type_check = kTypeIdToChecker.at(first_type_id);
                 if (type_check(unparsed_[i])) {
                     // undelimited and delimited dates have different bitsets
-                    if (first_type_id == +TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
+                    if (first_type_id == TypeId::kDate && kDelimitedDateCheck(unparsed_[i])) {
                         candidate_types_bitset &= kTypeIdToBitset.at(first_type_id);
                     }
                     continue;
@@ -43,36 +43,36 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
             bool matched = false;
             for (auto const& [type_id, type_check] : kTypeIdToChecker) {
                 if (type_id != first_type_id && type_check(unparsed_[i])) {
-                    if (first_type_id == +TypeId::kUndefined && !matched) {
+                    if (first_type_id == TypeId::kUndefined && !matched) {
                         first_type_id = type_id;
                     }
                     matched = true;
                     new_candidate_types_bitset |= kTypeIdToBitset.at(type_id);
                     // possible value types are known at the first match except for dates
                     // (undelimited dates could be ints or doubles and delimited couldn't)
-                    if (type_id == +TypeId::kDate && kUndelimitedDateCheck(unparsed_[i])) {
-                        new_candidate_types_bitset |= kTypeIdToBitset.at(+TypeId::kInt);
+                    if (type_id == TypeId::kDate && kUndelimitedDateCheck(unparsed_[i])) {
+                        new_candidate_types_bitset |= kTypeIdToBitset.at(TypeId::kInt);
                     }
                     break;
                 }
             }
             if (!matched) {
-                new_candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
+                new_candidate_types_bitset = kTypeIdToBitset.at(TypeId::kString);
             }
 
             candidate_types_bitset &= new_candidate_types_bitset;
             if (candidate_types_bitset.none()) {
                 if (treat_mixed_as_string_) {
-                    candidate_types_bitset = kTypeIdToBitset.at(+TypeId::kString);
+                    candidate_types_bitset = kTypeIdToBitset.at(TypeId::kString);
                 } else {
-                    return +TypeId::kMixed;
+                    return TypeId::kMixed;
                 }
             }
         }
     }
 
     if (is_undefined) {
-        return +TypeId::kUndefined;
+        return TypeId::kUndefined;
     }
 
     for (std::size_t i = 0; i < 5; i++) {
@@ -81,17 +81,17 @@ TypeId TypedColumnDataFactory::DeduceColumnType() const {
         }
     }
 
-    return +TypeId::kMixed;
+    return TypeId::kMixed;
 }
 
 TypedColumnDataFactory::TypeMap TypedColumnDataFactory::CreateTypeMap(TypeId const type_id) const {
     TypeMap type_map;
     auto const match = [&type_map, type_id](std::string const& val, size_t const row) {
         if (kNullCheck(val)) {
-            type_map[+TypeId::kNull].insert(row);
+            type_map[TypeId::kNull].insert(row);
         } else if (kEmptyCheck(val)) {
-            type_map[+TypeId::kEmpty].insert(row);
-        } else if (type_id != +TypeId::kMixed) {
+            type_map[TypeId::kEmpty].insert(row);
+        } else if (type_id != TypeId::kMixed) {
             type_map[type_id].insert(row);
         } else {
             bool matched = false;
@@ -156,7 +156,7 @@ size_t TypedColumnDataFactory::CalculateMixedBufSize(
 
 TypedColumnData TypedColumnDataFactory::CreateMixedFromTypeMap(std::unique_ptr<Type const> type,
                                                                TypeMap type_map) {
-    assert(type->GetTypeId() == +TypeId::kMixed);
+    assert(type->GetTypeId() == TypeId::kMixed);
     MixedType const* mixed_type = static_cast<MixedType const*>(type.get());
     std::vector<std::byte const*> data;
     data.reserve(unparsed_.size());
@@ -201,7 +201,7 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
                                                                   TypeMap type_map) {
     TypeId const type_id = type->GetTypeId();
 
-    if (type_id == +TypeId::kMixed) {
+    if (type_id == TypeId::kMixed) {
         /* For mixed type use CreateMixedFromTypeMap. */
         assert(0);
     }
@@ -215,7 +215,7 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
 
     std::vector<std::byte const*> data(unparsed_.size());
 
-    if (type_id == +TypeId::kUndefined) {
+    if (type_id == TypeId::kUndefined) {
         return TypedColumnData(column_, std::move(type), rows_num, nulls_num, empties_num, nullptr,
                                std::move(data), std::move(nulls), std::move(empties));
     }
@@ -238,7 +238,7 @@ TypedColumnData TypedColumnDataFactory::CreateConcreteFromTypeMap(std::unique_pt
 
 TypedColumnData TypedColumnDataFactory::CreateFromTypeMap(std::unique_ptr<Type const> type,
                                                           TypeMap type_map) {
-    if (type->GetTypeId() == +TypeId::kMixed) {
+    if (type->GetTypeId() == TypeId::kMixed) {
         return CreateMixedFromTypeMap(std::move(type), std::move(type_map));
     } else {
         return CreateConcreteFromTypeMap(std::move(type), std::move(type_map));

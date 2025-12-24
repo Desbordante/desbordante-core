@@ -1,5 +1,6 @@
 #include "python_bindings/ac/bind_ac.h"
 
+#include <magic_enum/magic_enum.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -83,7 +84,8 @@ void BindAc(py::module_& main_module) {
                         auto col_indices = t[0].cast<std::pair<size_t, size_t>>();
                         int type_id_int = t[1].cast<int>();
                         auto s_ranges = t[2].cast<std::vector<std::string>>();
-                        model::TypeId type_id = model::TypeId::_from_integral(type_id_int);
+                        auto type_id = magic_enum::enum_cast<model::TypeId>(type_id_int)
+                                               .value_or(model::TypeId::kUndefined);
                         std::unique_ptr<model::INumericType> num_type =
                                 CreateNumericTypeFromTypeId(type_id);
                         std::vector<std::byte const*> ranges;

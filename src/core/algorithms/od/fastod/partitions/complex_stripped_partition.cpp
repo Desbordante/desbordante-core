@@ -8,7 +8,7 @@ namespace {
 
 template <od::Ordering Ordering>
 using Comp =
-        std::conditional_t<Ordering == +od::Ordering::ascending, std::less<int>, std::greater<int>>;
+        std::conditional_t<Ordering == od::Ordering::kAscending, std::less<int>, std::greater<int>>;
 
 }  // namespace
 
@@ -148,9 +148,9 @@ bool ComplexStrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex 
     return false;
 }
 
-template bool ComplexStrippedPartition::Swap<od::Ordering::ascending>(
+template bool ComplexStrippedPartition::Swap<od::Ordering::kAscending>(
         model::ColumnIndex left, model::ColumnIndex right) const;
-template bool ComplexStrippedPartition::Swap<od::Ordering::descending>(
+template bool ComplexStrippedPartition::Swap<od::Ordering::kDescending>(
         model::ColumnIndex left, model::ColumnIndex right) const;
 
 namespace {
@@ -242,9 +242,9 @@ od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet(
 }
 
 template od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet<
-        od::Ordering::ascending>(model::ColumnIndex left, model::ColumnIndex right) const;
+        od::Ordering::kAscending>(model::ColumnIndex left, model::ColumnIndex right) const;
 template od::RemovalSetAsVec ComplexStrippedPartition::CalculateSwapRemovalSet<
-        od::Ordering::descending>(model::ColumnIndex left, model::ColumnIndex right) const;
+        od::Ordering::kDescending>(model::ColumnIndex left, model::ColumnIndex right) const;
 
 od::RemovalSetAsVec ComplexStrippedPartition::CommonSplitRemovalSet(
         model::ColumnIndex right) const {
