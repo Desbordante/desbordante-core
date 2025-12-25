@@ -4,8 +4,9 @@
 
 #include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/serialization/strong_typedef.hpp>
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
+#define MAGIC_ENUM_ENABLE_HASH
 namespace model {
 
 /* Aliases below are used to describe types containing in ColumnData and a ColumnData type itself.
@@ -47,7 +48,7 @@ using AllValueTypes = std::tuple<Int, Double, BigInt, String, Null, Empty>;
  * avoid confusion.
  */
 // clang-format off
-BETTER_ENUM(TypeId, char,
+enum class TypeId : char  {
     kInt = 0,   /* Except for nulls and empties column contains only ints
                  * (fixed-precision integer value) */
     kDouble,    /* Except for nulls and empties column contains only doubles
@@ -62,7 +63,7 @@ BETTER_ENUM(TypeId, char,
     kEmpty,     /* Column contains only empties ("" value) */
     kUndefined, /* Column contains only nulls and empties */
     kMixed      /* Except for nulls and empties column contains more than one type */
-);
+};
 
 // clang-format on
 
@@ -139,6 +140,3 @@ struct TupleMaxAlign<std::tuple<Ts...>> {
 inline constexpr size_t kTypesMaxAlignment = detail::TupleMaxAlign<AllValueTypes>::kValue;
 
 }  // namespace model
-
-/* Should be outside the namespace */
-BETTER_ENUMS_DECLARE_STD_HASH(model::TypeId)

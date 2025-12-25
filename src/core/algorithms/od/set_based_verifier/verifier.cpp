@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#include <magic_enum/magic_enum.hpp>
+
 #include "core/algorithms/od/fastod/model/canonical_od.h"
 #include "core/config/column_index/option.h"
 #include "core/config/indices/option.h"
@@ -35,7 +37,7 @@ void SetBasedAodVerifier::RegisterOptions() {
     RegisterOption(config::ColumnIndexOption{kOcLeftIndex, kDOcLeftIndex}(&oc_.left, get_cols_num));
     RegisterOption(ColumnIndexOption{kOcRightIndex, kDOcRightIndex}(&oc_.right, get_cols_num));
     RegisterOption(Option<Ordering>{&oc_.left_ordering, kOcLeftOrdering, kDODLeftOrdering,
-                                    Ordering::ascending});
+                                    Ordering::kAscending});
     RegisterOption(IndicesOption{kOFDContext, kDOFDContext, true}(&ofd_.context, get_cols_num)
                            .SetConditionalOpts({{nullptr, {kOFDRightIndex}}})
                            .SetIsRequiredFunc([this]() { return !OptionIsSet(kOcContext); }));
@@ -98,15 +100,15 @@ void SetBasedAodVerifier::Verify() {
 
     if (OptionIsSet(config::names::kOcContext)) {
         switch (oc_.left_ordering) {
-            case od::Ordering::ascending:
-                CalculateRemovalSetForOC<od::Ordering::ascending>();
+            case od::Ordering::kAscending:
+                CalculateRemovalSetForOC<od::Ordering::kAscending>();
                 break;
-            case od::Ordering::descending:
-                CalculateRemovalSetForOC<od::Ordering::descending>();
+            case od::Ordering::kDescending:
+                CalculateRemovalSetForOC<od::Ordering::kDescending>();
                 break;
             default:
                 throw std::invalid_argument(std::string{"Unknown ordering: "} +
-                                            oc_.left_ordering._to_string());
+                                            std::string(magic_enum::enum_name(oc_.left_ordering)));
         }
     }
 

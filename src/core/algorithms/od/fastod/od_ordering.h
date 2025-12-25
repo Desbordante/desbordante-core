@@ -1,7 +1,7 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos::od {
-BETTER_ENUM(Ordering, char, ascending = 0, descending);
+enum class Ordering : char { kAscending = 0, kDescending };
 }  // namespace algos::od

@@ -50,11 +50,11 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
     model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
     model::TypeId const type_id = column.GetTypeId();
 
-    if (type_id == +model::TypeId::kUndefined) {
+    if (type_id == model::TypeId::kUndefined) {
         throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                     "\" type undefined.");
     }
-    if (type_id == +model::TypeId::kMixed) {
+    if (type_id == model::TypeId::kMixed) {
         throw std::invalid_argument("Column with index \"" + std::to_string(column_index) +
                                     "\" contains values of different types.");
     }
