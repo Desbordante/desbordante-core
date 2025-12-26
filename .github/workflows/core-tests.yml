@@ -50,7 +50,7 @@ jobs:
 
           - os: ubuntu-latest
             toolset: llvm-clang
-            env: CXX=clang++-17 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
+            env: CXX=clang++-20 CXXFLAGS="-stdlib=libc++" LDFLAGS="-lc++abi"
 
           # Uncomment this to enable macOS GCC tests:
           # - os: macos-latest

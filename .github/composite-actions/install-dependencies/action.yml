@@ -84,7 +84,7 @@ runs:
       run: |
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh 17 all
+        sudo ./llvm.sh 20 all
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install GCC toolset (on macOS)
@@ -93,7 +93,7 @@ runs:
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
     - name: Install LLVM Clang toolset (on macOS)
-      run: brew install llvm@17
+      run: brew install llvm@20
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     # Apple Clang is installed by default on macOS runner
@@ -136,10 +136,10 @@ runs:
       run: |
         cd lib/boost
         ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
-        echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
+        echo "using darwin : : $(brew --prefix llvm@20)/bin/clang++ ;" > user-config.jam
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
-         cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
-         linkflags="-L$(brew --prefix llvm@17)/lib/c++"
+         cxxflags="-std=c++11 -I$(brew --prefix llvm@20)/include" \
+         linkflags="-L$(brew --prefix llvm@20)/lib/c++"
       shell: bash
       if: inputs.boost-libraries != '' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     - name: Install Boost built with Apple Clang
