@@ -151,19 +151,15 @@ if(ASAN)
     set(ASAN_OPTS "-fsanitize=address")
 
     execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
-    if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
         # alloc-dealloc-mismatch generates false positives on boost exceptions
         # This applies only to Ubuntu package:
-        # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
-        # Disable this check on files listed in address_sanitizer_ignore_list.txt if compiler
-        # is Clang and host distro is Ubuntu:
+        # https://github.com/llvm/llvm-project/issues/59432
         message(
             WARNING
-                "Running on Ubuntu. ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch check will be supressed.
-        Consider using another distro for full ASAN coverage"
-        )
-        string(JOIN ";" ASAN_OPTS
-               "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/address_sanitizer_ignore_list.txt"
+                "Running on Ubuntu with libc++. ASAN is broken in Ubuntu package with libc++15-19. If you are using \
+                these versions of libc++, set ASAN_OPTIONS=alloc_dealloc_mismatch=0 to suppress alloc-dealloc-mismatch \
+                check or consider using another distro or higher libc++ version for full ASAN coverage"
         )
     endif()
 
@@ -195,7 +191,7 @@ elseif(UBSAN)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
         # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
         # because libraries (STL, googletest, boost, etc.) are somehow broken
-        string(JOIN ";" UBSAN_OPTS
+        string(JOIN ";" UBSAN_OPTS ${UBSAN_OPTS}
                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
         )
     endif()
