@@ -1,4 +1,4 @@
-#include "algorithms/pac/model/default_domains/parallelepiped.h"
+#include "core/algorithms/pac/model/default_domains/parallelepiped.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -6,51 +6,46 @@
 #include <sstream>
 #include <string>
 
-#include "algorithms/pac/model/comparable_tuple_type.h"
-#include "algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
+#include "core/config/exceptions.h"
+#include "core/model/types/builtin.h"
 
 namespace pac::model {
-double Parallelepiped::ChebyshevDist(Tuple const& x, Tuple const& y) const {
-    double max_dist = -1;
+double Parallelepiped::DistFromDomainInternal(Tuple const& value) const {
+    // d(x, D) = min{rho(x, y)}, where y in D, rho is Chebyshev dist:
+    //   rho(x, y) = max{|x[i] - y[i]|}, i = 1, ..., n
+    // For parallelepiped only points on bounds need to be considered, i. e. y in dD
+    // For each dimension bounds are first_[i] and last_[i]
+    // Distance from bounds on one dimension is min{|x[i] - first_[i]|, |x[i] - last_[i]|}
+    // Thus, distance becomes
+    //   d(x, D) = max{min{|x[i] - first_[i]|, |x[i] - last_[i]|}}, i = 1, ..., n
+    double max_dist = 0;
     for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
-        max_dist = std::max(max_dist, DistBetweenBytes(i, x[i], y[i]));
+        double one_dim_dist = 0;
+        if (tuple_type_->CompareBytes(i, value[i], first_[i]) == ::model::CompareResult::kLess) {
+            one_dim_dist = DistBetweenBytes(i, value[i], first_[i]);
+        } else if (tuple_type_->CompareBytes(i, last_[i], value[i]) ==
+                   ::model::CompareResult::kLess) {
+            one_dim_dist = DistBetweenBytes(i, value[i], last_[i]);
+        }
+        max_dist = std::max(max_dist, one_dim_dist);
     }
     return max_dist;
-}
-
-bool Parallelepiped::ProductCompare(Tuple const& x, Tuple const& y) const {
-    bool all_less = true;
-    for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
-        auto comp_res = tuple_type_->CompareBytes(i, x[i], y[i]);
-        if (comp_res == ::model::CompareResult::kEqual) {
-            all_less = false;
-        }
-        if (comp_res == ::model::CompareResult::kGreater) {
-            return false;
-        }
-    }
-    return all_less;
-}
-
-double Parallelepiped::DistFromDomainInternal(Tuple const& value) const {
-    // This comparison is not symmetric, so using it properly is a nightmare
-    if (!ProductCompare(first_, value)) {
-        return ChebyshevDist(value, first_);
-    }
-    if (!ProductCompare(value, last_)) {
-        return ChebyshevDist(value, last_);
-    }
-    return 0;
 }
 
 void Parallelepiped::ConvertValues() {
     first_ = AllocateValues(first_str_);
     last_ = AllocateValues(last_str_);
     destructors_ = GetDestructors();
-}
 
-bool Parallelepiped::CompareInternal(Tuple const& x, Tuple const& y) const {
-    return DistFromDomainInternal(x) < DistFromDomainInternal(y);
+    // Check that first_ <= last_
+    for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
+        if (tuple_type_->CompareBytes(i, first_[i], last_[i]) == ::model::CompareResult::kGreater) {
+            throw config::ConfigurationError(
+                    "Lower bound of Parallelepiped must be less or equal than the upper bound.");
+        }
+    }
 }
 
 Parallelepiped::~Parallelepiped() {

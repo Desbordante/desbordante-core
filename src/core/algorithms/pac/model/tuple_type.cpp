@@ -1,35 +1,32 @@
-#include "algorithms/pac/model/comparable_tuple_type.h"
+#include "core/algorithms/pac/model/tuple_type.h"
 
+#include <iterator>
 #include <numeric>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/tuple.h"
-#include "builtin.h"
-#include "model/types/type.h"
+#include "core/model/types/builtin.h"
 
 namespace pac::model {
-using namespace ::model;
-
-CompareResult ComparableTupleType::CompareBytes(std::size_t const type_num, std::byte const* x,
-                                                std::byte const* y) {
+::model::CompareResult TupleType::CompareBytes(std::size_t const type_num, std::byte const* x,
+                                               std::byte const* y) {
     assert(type_num < types_.size());
 
     if (x == y) {
-        return CompareResult::kEqual;
+        return ::model::CompareResult::kEqual;
     }
     if (x == nullptr) {
-        return CompareResult::kLess;
+        return ::model::CompareResult::kLess;
     }
     if (y == nullptr) {
-        return CompareResult::kGreater;
+        return ::model::CompareResult::kGreater;
     }
     return types_[type_num]->Compare(x, y);
 }
 
-std::string ComparableTupleType::ValueToString(Tuple const& value) const {
-    assert(value.size() >= types_.size());
+std::string TupleType::ValueToString(Tuple const& value) const {
+    assert(value.size() == types_.size());
 
     if (types_.size() == 1) {
         return ByteToString(0, value.front());

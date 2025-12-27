@@ -8,13 +8,12 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/comparable_tuple_type.h"
-#include "algorithms/pac/model/idomain.h"
-#include "algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
 
 namespace pac::model {
 using StringValues = std::vector<std::string>;
-using StringCompare = std::function<bool(StringValues const&, StringValues const&)>;
 using StringDistFromDomain = std::function<double(StringValues const&)>;
 
 /// @brief Domain that uses string value representations instead of typed values.
@@ -22,7 +21,6 @@ using StringDistFromDomain = std::function<double(StringValues const&)>;
 /// or cannot be obtained (e. g. Python bindings)
 class UntypedDomain final : public IDomain {
 private:
-    StringCompare string_compare_;
     StringDistFromDomain string_dist_;
     std::string name_;
 
@@ -35,15 +33,12 @@ private:
     }
 
 public:
-    /// @param string_compare -- function that returns true if first argument is less than second.
-    /// @param string_dist_from_domain -- function that returns from this domain to its argument;
-    /// second argument is dist_from_null_is_infinity.
+    /// @param string_dist_from_domain -- function that calculates the distance from this domain to
+    /// its argument
     /// @param name -- displayed name of this domain; should be short, but informative.
-    UntypedDomain(StringCompare&& string_compare, StringDistFromDomain&& string_dist_from_domain,
+    UntypedDomain(StringDistFromDomain&& string_dist_from_domain,
                   std::string&& name = "Untyped Domain")
-        : string_compare_(std::move(string_compare)),
-          string_dist_(std::move(string_dist_from_domain)),
-          name_(std::move(name)) {}
+        : string_dist_(std::move(string_dist_from_domain)), name_(std::move(name)) {}
 
     virtual double DistFromDomain(Tuple const& value) const override {
         return string_dist_(ValuesToStrings(value));
@@ -54,10 +49,7 @@ public:
     }
 
     virtual void SetTypes(std::vector<::model::Type const*>&& types) override {
-        tuple_type_ = std::make_shared<ComparableTupleType>(
-                std::move(types), [this](Tuple const& a, Tuple const& b) {
-                    return string_compare_(ValuesToStrings(a), ValuesToStrings(b));
-                });
+        tuple_type_ = std::make_shared<TupleType>(std::move(types));
     }
 };
 }  // namespace pac::model
