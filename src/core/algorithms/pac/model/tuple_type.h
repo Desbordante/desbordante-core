@@ -1,32 +1,28 @@
 #pragma once
 
-#include <cstddef>
-#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/tuple.h"
-#include "builtin.h"
-#include "model/types/type.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/type.h"
 
 namespace pac::model {
-using Comparer = std::function<bool(Tuple const&, Tuple const&)>;
-
-/// @brief Provides operations to compare fixed-sized tuples of values
-class ComparableTupleType {
+/// @brief Provides operations for fixed-size tuples of values on a fixed set of attributes
+class TupleType {
 private:
     std::vector<::model::Type const*> types_;
-    Comparer comparer_;
 
 public:
-    ComparableTupleType(std::vector<::model::Type const*>&& types, Comparer&& comparer)
-        : types_(std::move(types)), comparer_(std::move(comparer)) {}
+    TupleType(std::vector<::model::Type const*>&& types) : types_(std::move(types)) {}
 
     /// @brief Convert @c std::byte* of type @c types[type_num] to string.
     /// Consider using this function rather than directly calling @c types[type_num]->ValueToString,
     /// because it correctly handles NULLs
     std::string ByteToString(std::size_t type_num, std::byte const* value) const {
+        assert(type_num < types_.size());
+
         if (value == nullptr) {
             return "NULL";
         }
@@ -38,16 +34,6 @@ public:
     /// it correctly handles NULLs (NULL is considered less than any value).
     ::model::CompareResult CompareBytes(std::size_t const type_num, std::byte const* x,
                                         std::byte const* y);
-
-    /// @brief Comapre two value tuples
-    /// @note This function is not guaranteed to define total strict order relation.
-    /// Do not use it as a comparer where such relation is needed (e. g. std::set)
-    bool Less(Tuple const& x, Tuple const& y) const {
-        assert(x.size() >= types_.size());
-        assert(y.size() >= types_.size());
-
-        return comparer_(x, y);
-    }
 
     std::string ValueToString(Tuple const& value) const;
 
