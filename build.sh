@@ -29,6 +29,8 @@ Possible options:
 EOF
 }
 
+GDB_DEBUG=true
+
 # TODO: use getopts or something else instead of bash
 for i in "$@"; do
     case $i in

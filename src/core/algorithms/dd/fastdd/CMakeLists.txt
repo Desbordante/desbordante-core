@@ -33,3 +33,12 @@ target_link_libraries(
             magic_enum::magic_enum
             Boost::headers
 )
+
+set(NAME dd.fastdd_run)
+add_executable(${NAME})
+set_target_properties(${NAME} PROPERTIES LINK_LIBRARIES_ONLY_TARGETS ON)
+target_sources(${NAME} PRIVATE main.cpp)
+target_link_libraries(
+    ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::dd::fastdd spdlog::spdlog_header_only
+                    magic_enum::magic_enum Boost::headers
+)
