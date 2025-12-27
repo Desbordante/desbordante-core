@@ -1,6 +1,7 @@
 #pragma once
 
-#include "algorithms/pac/model/comparable_tuple_type.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
 
 namespace pac::model {
 /// @brief Ordered domain in a metric space of attribute values.
@@ -9,7 +10,7 @@ namespace pac::model {
 /// x in D iff exist a, b in D such that a <= x <= b
 class IDomain {
 protected:
-    std::shared_ptr<ComparableTupleType> tuple_type_;
+    std::shared_ptr<TupleType> tuple_type_;
     bool dist_from_null_is_infty_ = false;
 
 public:
@@ -21,14 +22,14 @@ public:
     virtual std::string ToString() const = 0;
 
     // Types are set by algorithm after input table is read, so they cannot be set in constructor.
-    virtual void SetTypes([[maybe_unused]] std::vector<::model::Type const*>&& types) {}
+    virtual void SetTypes(std::vector<::model::Type const*>&&) {}
 
     // Dist_from_null is algorithm parameter, so it cannot be set in constructor.
     void SetDistFromNullIsInfinity(bool value) {
         dist_from_null_is_infty_ = value;
     }
 
-    std::shared_ptr<ComparableTupleType> GetTupleTypePtr() const {
+    std::shared_ptr<TupleType> GetTupleTypePtr() const {
         return tuple_type_;
     }
 };
