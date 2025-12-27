@@ -1,30 +1,27 @@
-#include <cstddef>
-#include <cstdlib>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "algorithms/pac/model/comparable_tuple_type.h"
-#include "algorithms/pac/model/default_domains/ball.h"
-#include "algorithms/pac/model/default_domains/domain_type.h"
-#include "algorithms/pac/model/default_domains/parallelepiped.h"
-#include "algorithms/pac/model/default_domains/untyped_domain.h"
-#include "algorithms/pac/model/idomain.h"
-#include "algorithms/pac/model/tuple.h"
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
-#include "all_csv_configs.h"
-#include "builtin.h"
-#include "csv_parser/csv_parser.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "indices/type.h"
-#include "mixed_type.h"
-#include "names.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/pac/model/default_domains/ball.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/model/default_domains/parallelepiped.h"
+#include "core/algorithms/pac/model/default_domains/untyped_domain.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
+#include "core/config/indices/type.h"
+#include "core/config/names.h"
+#include "core/model/types/builtin.h"
+#include "core/model/types/mixed_type.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 using namespace config::names;
@@ -40,17 +37,17 @@ struct DomainPACVerifyingParams {
 
     DomainPACVerifyingParams(CSVConfig const& csv_config, config::IndicesType&& col_indices,
                              std::shared_ptr<pac::model::IDomain>&& domain, double expected_epsilon,
-                             double expected_delta, double min_epsilon = 0, double max_epsilon = 1,
-                             unsigned long epsilon_steps = 100, double min_delta = 0.9,
+                             double expected_delta, double min_delta = -1, double min_eps = -1,
+                             double max_eps = -1, unsigned long delta_steps = 0,
                              bool dist_from_null_is_infinity = false,
                              double diagonal_threshold = 1e-5)
         : params({{kCsvConfig, csv_config},
                   {kColumnIndices, std::move(col_indices)},
                   {kDomain, std::move(domain)},
-                  {kMinEpsilon, min_epsilon},
-                  {kMaxEpsilon, max_epsilon},
-                  {kEpsilonSteps, epsilon_steps},
                   {kMinDelta, min_delta},
+                  {kMinEpsilon, min_eps},
+                  {kMaxEpsilon, max_eps},
+                  {kDeltaSteps, delta_steps},
                   {kDistFromNullIsInfinity, dist_from_null_is_infinity},
                   {kDiagonalThreshold, diagonal_threshold}}),
           exp_epsilon(expected_epsilon),
@@ -81,18 +78,15 @@ struct DomainPACVerifyingPythonParams {
             double expected_delta, DomainType domain_type,
             std::vector<double>&& leveling_coeffs = {}, std::vector<std::string>&& center = {},
             double radius = 0, std::vector<std::string>&& first = {},
-            std::vector<std::string>&& last = {}, StringCompare&& string_compare = nullptr,
+            std::vector<std::string>&& last = {},
             StringDistFromDomain&& string_dist_from_domain = nullptr,
-            std::string&& domain_name = "", double min_epsilon = 0, double max_epsilon = 1,
-            unsigned long epsilon_steps = 100, double min_delta = 0.9,
+            std::string&& domain_name = "", double min_delta = -1, unsigned long delta_steps = 0,
             bool dist_from_domain_is_infty = false, double diagonal_threshold = 1e-5)
         : params({{kCsvConfig, csv_config},
                   {kColumnIndices, std::move(col_indices)},
                   {kDomainType, domain_type},
-                  {kMinEpsilon, min_epsilon},
-                  {kMaxEpsilon, max_epsilon},
-                  {kEpsilonSteps, epsilon_steps},
                   {kMinDelta, min_delta},
+                  {kDeltaSteps, delta_steps},
                   {kDistFromNullIsInfinity, dist_from_domain_is_infty},
                   {kDiagonalThreshold, diagonal_threshold}}),
           exp_epsilon(expected_epsilon),
@@ -109,7 +103,6 @@ struct DomainPACVerifyingPythonParams {
                 params[kLast] = std::move(last);
                 break;
             case pac::model::DomainType::custom_domain:
-                params[kStringCompare] = std::move(string_compare);
                 params[kStringDistFromDomain] = std::move(string_dist_from_domain);
                 params[kDomainName] = std::move(domain_name);
                 break;
@@ -139,15 +132,6 @@ inline bool IsNull(Tuple const& value) {
     return type_id == +model::TypeId::kNull || real_value == nullptr;
 }
 
-/// @brief Compares nulls and not nulls on a single column of mixed type.
-class NullComparer {
-public:
-    /// @brief null < not-null
-    bool operator()(Tuple const& x, Tuple const& y) {
-        return IsNull(x) && !IsNull(y);
-    }
-};
-
 /// @brief x in D iff x is not null.
 /// Works on a single column of mixed type.
 class NotNullDomain final : public IDomain {
@@ -156,8 +140,7 @@ private:
 
 public:
     NotNullDomain() : mixed_type_(true) {
-        tuple_type_ = std::make_shared<ComparableTupleType>(
-                std::vector<model::Type const*>{&mixed_type_}, NullComparer{});
+        tuple_type_ = std::make_shared<TupleType>(std::vector<model::Type const*>{&mixed_type_});
     }
 
     virtual double DistFromDomain(Tuple const& value) const override {
@@ -171,50 +154,64 @@ public:
 
 using Strings = std::vector<std::string>;
 
+DomainPACVerifyingParams CustomMetricBallsIntervalsParams(double min_eps, double max_eps,
+                                                          double expected_eps,
+                                                          double expected_delta,
+                                                          double min_delta = -1,
+                                                          unsigned long delta_steps = 0) {
+    return {kCustomMetricBalls,
+            {0, 1},
+            std::make_shared<Ball>(Strings{"0", "0"}, 5),
+            expected_eps,
+            expected_delta,
+            min_delta,
+            min_eps,
+            max_eps,
+            delta_steps};
+}
+
 INSTANTIATE_TEST_SUITE_P(
         DomainPACVerifierTests, TestDomainPACVerifier,
         ::testing::Values(
+                // -- "Refinement" --
+                // (finding optimal eps, delta)
                 // A simple test on 1D-array
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("0", "5"), 0, 0.9, 0, 7,
-                                         100, 0.8),
+                                         std::make_shared<Parallelepiped>("0", "5"), 0, 0.9, 0.8),
+                // A simple test on 1D-array, but values don't fall into domain
+                DomainPACVerifyingParams(kSimpleTypos, {1},
+                                         std::make_shared<Parallelepiped>("5", "7"), 4, 1),
                 // A ball in R^2 with center (0, 0) and radius 5
                 DomainPACVerifyingParams(kCustomMetricBalls, {0, 1},
-                                         std::make_shared<Ball>(Strings{"0", "0"}, 5), 2.525, 0.891,
-                                         0, 3, 1000, 0.7),
+                                         std::make_shared<Ball>(Strings{"0", "0"}, 5), 6.217, 0.999,
+                                         0.7),
                 // A square-shaped domain in R^2 with corners (-5, -5) and (5, 5)
                 DomainPACVerifyingParams(kCustomMetricBalls, {2, 3},
                                          std::make_shared<Parallelepiped>(Strings{"-5", "-5"},
                                                                           Strings{"5", "5"}),
-                                         0, 0.822, 0, 3, 1000, 0.7),
+                                         4.379, 0.999, 0.7),
                 // Check not-metrizable type:
-                // 	a. only not-null values
+                //  a. only not-null values
                 DomainPACVerifyingParams(kMixedWithNulls, {0}, std::make_shared<NotNullDomain>(), 0,
-                                         0.8, 0, 0.5, 15, 0.7, true),
-                // 	b. all values
+                                         0.8, 0.7),
+                //  b. all values
                 DomainPACVerifyingParams(kMixedWithNulls, {0}, std::make_shared<NotNullDomain>(), 1,
-                                         1, 0, 1, 15, 0.9, true),
+                                         1, 0.9),
                 // Special cases:
                 //	a. +\infty
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("11", "11"), 8, 0.4, 0, 9,
-                                         100, 0.3),
+                                         std::make_shared<Parallelepiped>("11", "11"), 8, 0.4, 0.3),
                 // 	b. -\infty
                 DomainPACVerifyingParams(kSimpleTypos, {1},
-                                         std::make_shared<Parallelepiped>("0", "0"), 4, 0.9, 0, 9,
-                                         100, 0.3),
+                                         std::make_shared<Parallelepiped>("0", "0"), 4, 0.9, 0.3),
                 // Test leveling coefficients
                 DomainPACVerifyingParams(kTestDC1, {1, 2},
                                          std::make_shared<Ball>(Strings{"3500", "0.2"}, 1,
                                                                 std::vector<double>{1e-3, 10}),
-                                         1.565, 1, 0, 5),
+                                         0.803, 0.8, 0.7),
                 // Test Untyped Domain
                 DomainPACVerifyingParams(kSimpleTypos, {1},
                                          std::make_shared<UntypedDomain>(
-                                                 [](Strings const& a, Strings const& b) {
-                                                     return std::stoi(a.front()) <
-                                                            std::stoi(b.front());
-                                                 },
                                                  [](Strings const& value) {
                                                      auto val = std::stoi(value.front());
                                                      if (val < 0) {
@@ -226,7 +223,21 @@ INSTANTIATE_TEST_SUITE_P(
                                                      return 0;
                                                  },
                                                  "[\"0\", \"5\"]"),
-                                         0, 0.9, 0, 7, 100, 0.8)));
+                                         0, 0.9, 0.8),
+                // -- Paramethrized "refinement" --
+                // (finding optimal eps, delta on some segment of ECDF)
+                // Example from Comparison slides
+                // (https://github.com/p-senichenkov/Domain-PAC-validation-comparison/blob/main/slides/slides.pdf)
+                CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625),
+                CustomMetricBallsIntervalsParams(1.2, 1.3, 1.225, 0.73),
+                CustomMetricBallsIntervalsParams(2, 5, 4.709, 0.991),
+                // Min_delta is greater than delta for max_eps => should return (??, min_delta)
+                CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
+                // -- Validation --
+                // (finding delta for the given eps)
+                CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
+                // Min delta is greater than actual delta => should return actual delta
+                CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
 
 // Same, but Python versions
 INSTANTIATE_TEST_SUITE_P(
@@ -235,15 +246,15 @@ INSTANTIATE_TEST_SUITE_P(
                 // 1D array
                 DomainPACVerifyingPythonParams(kSimpleTypos, {1}, 0, 0.9,
                                                DomainType::parallelepiped, {}, {}, 0, {"0"}, {"5"},
-                                               nullptr, nullptr, "", 0, 7, 100, 0.8),
+                                               nullptr, "", 0.8),
                 // 2D ball
-                DomainPACVerifyingPythonParams(kCustomMetricBalls, {0, 1}, 2.525, 0.891,
+                DomainPACVerifyingPythonParams(kCustomMetricBalls, {0, 1}, 6.217, 0.999,
                                                DomainType::ball, {}, {"0", "0"}, 5, {}, {}, nullptr,
-                                               nullptr, "", 0, 3, 1000, 0.7),
+                                               "", 0.7),
                 // 2D rectangle
-                DomainPACVerifyingPythonParams(kCustomMetricBalls, {2, 3}, 0, 0.822,
+                DomainPACVerifyingPythonParams(kCustomMetricBalls, {2, 3}, 4.379, 0.999,
                                                DomainType::parallelepiped, {}, {}, 0, {"-5", "-5"},
-                                               {"5", "5"}, nullptr, nullptr, "", 0, 3, 1000, 0.7)));
+                                               {"5", "5"}, nullptr, "", 0.7)));
 
 using Epsilons = std::pair<double, double>;
 using HighlightValues = std::vector<std::string>;
@@ -277,11 +288,39 @@ TEST_P(TestDomainPACHighlight, DefaultTest) {
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(DomainPACVerifierHighlightsTests, TestDomainPACHighlight,
-                         ::testing::Values(DomainPACHighlightParams(
-                                 kTest1, {0}, std::make_shared<Parallelepiped>("4", "6"),
-                                 {{{0.1, 1.1}, {"3", "7"}},
-                                  {{1.1, 2.1}, {"2", "2", "2", "8"}},
-                                  {{2.1, 3.1}, {"1", "1", "1", "1", "9"}}},
-                                 true)));
+INSTANTIATE_TEST_SUITE_P(
+        DomainPACVerifierHighlightsTests, TestDomainPACHighlight,
+        ::testing::Values(
+                // Some values fall into domain, highlighed values on both sides of domain
+                DomainPACHighlightParams(kTest1, {0}, std::make_shared<Parallelepiped>("4", "6"),
+                                         {{{0.1, 1.1}, {"3", "7"}},
+                                          {{1.1, 2.1}, {"2", "2", "2", "8"}},
+                                          {{2.1, 3.1}, {"1", "1", "1", "1", "9"}}},
+                                         true),
+                // No values fall into domain, highlighted values on both sides of domain
+                DomainPACHighlightParams(kSimpleTypos, {2},
+                                         std::make_shared<Ball>(Strings{"17"}, 4),
+                                         {{
+                                                  {0.1, 1.1},
+                                                  {"22", "22"},
+                                          },
+                                          {{1.1, 2.1}, {"11", "11", "11", "11"}},
+                                          {{2.1, 5.1}, {"10"}},
+                                          {{5.1, 25.1}, {"33", "34", "44"}}}),
+                // Custom domain
+                DomainPACHighlightParams(kSimpleTypos, {1},
+                                         std::make_shared<UntypedDomain>(
+                                                 [](Strings const& value) {
+                                                     auto val = std::stoi(value.front());
+                                                     if (val < 3) {
+                                                         return 3 - val;
+                                                     }
+                                                     if (val > 8) {
+                                                         return val - 8;
+                                                     }
+                                                     return 0;
+                                                 },
+                                                 "[\"3\", \"8\"]"),
+                                         {{{0.1, 1.1}, {"2", "2"}},
+                                          {{1.1, 2.1}, {"1", "1", "1", "1", "10"}}})));
 }  // namespace tests
