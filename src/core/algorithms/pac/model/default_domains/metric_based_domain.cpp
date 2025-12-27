@@ -1,7 +1,8 @@
-#include "metric_based_domain.h"
+#include "core/algorithms/pac/model/default_domains/metric_based_domain.h"
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
@@ -24,14 +25,6 @@ void MetricBasedDomain::ThrowIfEmpty() const {
     }
 }
 
-bool MetricBasedDomain::Compare(Tuple const& x, Tuple const& y) const {
-    ThrowIfEmpty();
-    assert(x.size() >= metrizable_types_.size());
-    assert(y.size() >= metrizable_types_.size());
-
-    return CompareInternal(x, y);
-}
-
 double MetricBasedDomain::DistBetweenBytes(std::size_t type_num, std::byte const* x,
                                            std::byte const* y) const {
     if (x == nullptr || y == nullptr) {
@@ -42,7 +35,11 @@ double MetricBasedDomain::DistBetweenBytes(std::size_t type_num, std::byte const
 
 std::vector<std::byte const*> MetricBasedDomain::AllocateValues(
         std::vector<std::string> const& str_values) const {
-    assert(str_values.size() >= metrizable_types_.size());
+    if (str_values.size() != metrizable_types_.size()) {
+        throw config::ConfigurationError(
+                "Metric-based domain must be initialized with the same number of values as the "
+                "number of columns used");
+    }
 
     std::vector<std::byte const*> values(metrizable_types_.size());
     for (std::size_t i = 0; i < metrizable_types_.size(); ++i) {
@@ -77,13 +74,12 @@ void MetricBasedDomain::SetTypes(std::vector<Type const*>&& types) {
     std::ranges::fill_n(std::back_inserter(leveling_coeffs_),
                         types.size() - leveling_coeffs_.size(), 1);
 
-    tuple_type_ = std::make_shared<ComparableTupleType>(
-            std::move(types), std::bind(&MetricBasedDomain::Compare, this, _1, _2));
+    tuple_type_ = std::make_shared<TupleType>(std::move(types));
     ConvertValues();
 }
 
 double MetricBasedDomain::DistFromDomain(Tuple const& value) const {
-    assert(value.size() >= metrizable_types_.size());
+    assert(value.size() == metrizable_types_.size());
     ThrowIfEmpty();
 
     return DistFromDomainInternal(value);
