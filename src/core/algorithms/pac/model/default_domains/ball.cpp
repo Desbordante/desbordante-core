@@ -1,12 +1,12 @@
-#include "algorithms/pac/model/default_domains/ball.h"
+#include "core/algorithms/pac/model/default_domains/ball.h"
 
 #include <cmath>
 #include <cstddef>
 #include <sstream>
 #include <string>
 
-#include "algorithms/pac/model/comparable_tuple_type.h"
-#include "algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
 
 namespace pac::model {
 double Ball::EuclideanDist(Tuple const& x, Tuple const& y) const {
