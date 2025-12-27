@@ -5,10 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/idomain.h"
-#include "algorithms/pac/model/tuple.h"
-#include "model/types/imetrizable_type.h"
-#include "model/types/type.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/model/types/imetrizable_type.h"
+#include "core/model/types/type.h"
 
 namespace pac::model {
 /// @brief Utility base class for Domains based on IMetrizableType
@@ -17,7 +17,6 @@ private:
     std::vector<double> leveling_coeffs_;
 
     void ThrowIfEmpty() const;
-    bool Compare(Tuple const& x, Tuple const& y) const;
 
 protected:
     std::vector<::model::IMetrizableType const*> metrizable_types_ = {};
@@ -28,7 +27,6 @@ protected:
     double DistBetweenBytes(std::size_t type_num, std::byte const* x, std::byte const* y) const;
 
     virtual double DistFromDomainInternal(Tuple const& value) const = 0;
-    virtual bool CompareInternal(Tuple const& x, Tuple const& y) const = 0;
     std::vector<std::byte const*> AllocateValues(std::vector<std::string> const&) const;
 
     // MetricBasedDomain's destructor is called before derived classes' destructors, so value
