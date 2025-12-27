@@ -104,11 +104,11 @@ constexpr auto kDistFromNullIsInfinity = "dist_from_null_is_infinity";
 // PAC
 constexpr auto kCenter = "center";
 constexpr auto kColumnIndices = "column_indices";
+constexpr auto kDeltaSteps = "delta_steps";
 constexpr auto kDiagonalThreshold = "diagonal_threshold";
 constexpr auto kDomain = "domain";
 constexpr auto kDomainName = "domain_name";
 constexpr auto kDomainType = "domain_type";
-constexpr auto kEpsilonSteps = "epsilon_steps";
 constexpr auto kFirst = "lower_bound";
 constexpr auto kLast = "upper_bound";
 constexpr auto kLevelingCoeffs = "leveling_coefficients";
