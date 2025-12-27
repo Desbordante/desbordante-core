@@ -1,16 +1,15 @@
 #pragma once
 
 #include <algorithm>
-#include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/tuple.h"
-#include "pac/model/default_domains/metric_based_domain.h"
+#include "core/algorithms/pac/model/default_domains/metric_based_domain.h"
+#include "core/algorithms/pac/model/tuple.h"
 
 namespace pac::model {
-/// @brief Closed ball, defined by @c center and @c radius.
+/// @brief Closed ball (disk), defined by @c center and @c radius.
 /// D = {x | d(x, @c center) <= @c radius}
 class Ball final : public MetricBasedDomain {
 private:
@@ -31,12 +30,6 @@ protected:
     virtual void ConvertValues() override {
         center_ = AllocateValues(center_str_);
         destructors_ = GetDestructors();
-    }
-
-    /// @brief Compare radii.
-    /// X < Y iff d(X, @c center) < d(Y, @c center)
-    virtual bool CompareInternal(Tuple const& x, Tuple const& y) const override {
-        return EuclideanDist(x, center_) < EuclideanDist(y, center_);
     }
 
 public:
