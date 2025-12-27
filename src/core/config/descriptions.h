@@ -197,6 +197,10 @@ constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
 // PAC
 constexpr auto kDCenter = "N-ary ball center.";
 constexpr auto kDColumnIndices = "Column indices.";
+constexpr auto kDDeltaSteps =
+        "Select how many delta values to check while verifying PAC. "
+        "0 has special meaning: make (1 - min_delta) * 1000 steps, i. e. 10 steps per cent. "
+        "Default is 0.";
 constexpr auto kDDiagonalThreshold =
         "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
@@ -209,8 +213,6 @@ constexpr auto kDDomainName =
         "Optional name for custom domain. This name is displayed as a part of Domain PAC's string "
         "reprsentation, so short unique names are preferrable.";
 auto const kDDomainType = details::kDDomainTypeString.c_str();
-constexpr auto kDEpsilonSteps =
-        "Select how many epsilon values to check while verifying PAC (default is 100).";
 constexpr auto kDFirst = "Lower bound of n-ary parallelepiped.";
 constexpr auto kDLast = "Upper bound of n-ary parallelepiped.";
 constexpr auto kDLevelingCoeffs =
@@ -218,13 +220,13 @@ constexpr auto kDLevelingCoeffs =
         "domains based on coordinate-wise metrics). Default is [1, 1, ..., 1].";
 constexpr auto kDMaxEpsilon =
         "Maximal value of epsilon, which shows how much values deviate from exact dependency "
-        "(default is 0).";
+        "(default is +infinity).";
 constexpr auto kDMinEpsilon =
         "Minimal value of epsilon, which shows how much values deviate from exact dependency "
-        "(default is 1).";
+        "(default is 0).";
 constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
-        "(default is 0.9).";
+        "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
 constexpr auto kDPACRadius = "Radius of n-ary ball.";
 constexpr auto kDStringCompare =
         "Custom comparer for n-ary value tuples. Both arguments are lists of strings. Must return "
