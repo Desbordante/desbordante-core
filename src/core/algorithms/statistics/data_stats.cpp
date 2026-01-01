@@ -894,6 +894,8 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].mean_ad = GetMeanAD(index);
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
+
+            all_stats_[index].monotonicity = GetMonotonicity(index);
             
             if (this->col_data_[index].GetTypeId() == +mo::TypeId::kString) {
                 all_stats_[index].vocab = GetVocab(index);
@@ -998,14 +1000,7 @@ void DataStats::LoadDataInternal() {
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }
 
-/**
- * @brief Calculate interquartile range (IQR) = Q3 - Q1
- * @param index Column index
- * @return Statistic containing IQR or empty if column is not numeric
- * 
- * Межквартильный размах - разница между 75-м и 25-м перцентилями.
- * Устойчивая мера разброса данных, менее чувствительная к выбросам.
- */
+
 Statistic DataStats::GetInterquartileRange(size_t index) const {
     if (all_stats_[index].interquartile_range.HasValue()) 
         return all_stats_[index].interquartile_range;
@@ -1065,6 +1060,41 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
     double_type.Free(zero);
     
     return Statistic(cv_val, &double_type, false);
+}
+
+Statistic DataStats::GetMonotonicity(size_t index) const {
+    if (all_stats_[index].monotonicity.HasValue()) 
+        return all_stats_[index].monotonicity;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
+    
+    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
+    if (data.size() < 2) {
+        mo::StringType string_type;
+        return Statistic(string_type.MakeValue("none"), &string_type, false);
+    }
+    
+    mo::Type const& type = col.GetType();
+    bool ascending = true;
+    bool descending = true;
+    
+    for (size_t i = 0; i < data.size() - 1; ++i) {
+        mo::CompareResult cmp = type.Compare(data[i], data[i + 1]);
+        if (cmp == mo::CompareResult::kGreater) descending = false;
+        if (cmp == mo::CompareResult::kLess) ascending = false;
+    }
+    
+    mo::StringType string_type;
+    if (ascending && descending) {
+        return Statistic(string_type.MakeValue("equal"), &string_type, false);
+    } else if (ascending) {
+        return Statistic(string_type.MakeValue("ascending"), &string_type, false);
+    } else if (descending) {
+        return Statistic(string_type.MakeValue("descending"), &string_type, false);
+    } else {
+        return Statistic(string_type.MakeValue("none"), &string_type, false);
+    }
 }
 
 }  // namespace algos

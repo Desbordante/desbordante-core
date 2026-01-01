@@ -492,6 +492,20 @@ TEST(TestDataStats, TestCoefficientOfVariation) {
     EXPECT_GT(cv, 0.0);
 }
 
+TEST(TestDataStats, TestMonotonicity) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    
+    auto monotonicity_stat = stats.GetMonotonicity(4);
+    EXPECT_TRUE(monotonicity_stat.HasValue());
+    
+    std::string monotonicity = mo::Type::GetValue<mo::String>(monotonicity_stat.GetData());
+    EXPECT_TRUE(monotonicity == "ascending" || 
+                monotonicity == "descending" || 
+                monotonicity == "equal" ||
+                monotonicity == "none");
+}
+
 TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
@@ -502,6 +516,7 @@ TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     
     EXPECT_TRUE(all_stats.find("interquartile_range") != std::string::npos);
     EXPECT_TRUE(all_stats.find("coefficient_of_variation") != std::string::npos);
+    EXPECT_TRUE(all_stats.find("monotonicity") != std::string::npos);
 }
 
 };  // namespace tests

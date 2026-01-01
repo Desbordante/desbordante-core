@@ -173,6 +173,10 @@ void BindStatistics(pybind11::module_& main_module) {
              py::arg("index"))
           .def("get_coefficient_of_variation", &DataStats::GetCoefficientOfVariation,
              "Returns coefficient of variation (std/mean) for numeric column.",
+             py::arg("index"))
+          .def("get_monotonicity", &DataStats::GetMonotonicity,
+             "Returns monotonicity flag: 'ascending', 'descending', 'equal' or 'none'.",
              py::arg("index"));
+
 }
 }  // namespace python_bindings
