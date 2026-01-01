@@ -481,6 +481,17 @@ TEST(TestDataStats, TestInterquartileRange) {
     EXPECT_FALSE(iqr_stat_str.HasValue());
 }
 
+TEST(TestDataStats, TestCoefficientOfVariation) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    
+    auto cv_stat = stats.GetCoefficientOfVariation(2);
+    EXPECT_TRUE(cv_stat.HasValue());
+    
+    double cv = mo::Type::GetValue<mo::Double>(cv_stat.GetData());
+    EXPECT_GT(cv, 0.0);
+}
+
 TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
@@ -490,6 +501,7 @@ TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     std::string all_stats = stats.ToString();
     
     EXPECT_TRUE(all_stats.find("interquartile_range") != std::string::npos);
+    EXPECT_TRUE(all_stats.find("coefficient_of_variation") != std::string::npos);
 }
 
 };  // namespace tests

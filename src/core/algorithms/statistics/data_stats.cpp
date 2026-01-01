@@ -914,6 +914,7 @@ unsigned long long DataStats::ExecuteInternal() {
             
             if (this->col_data_[index].IsNumeric()) {
                 all_stats_[index].interquartile_range = GetInterquartileRange(index);
+                all_stats_[index].coefficient_of_variation = GetCoefficientOfVariation(index);
             }
         }
         
@@ -1030,6 +1031,40 @@ Statistic DataStats::GetInterquartileRange(size_t index) const {
     double_type.Free(q3_val);
     
     return Statistic(iqr_val, &double_type, false);
+}
+
+Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
+    if (all_stats_[index].coefficient_of_variation.HasValue()) 
+        return all_stats_[index].coefficient_of_variation;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+    
+    Statistic std_stat = GetCorrectedSTD(index);
+    Statistic mean_stat = GetAvg(index);
+    
+    if (!std_stat.HasValue() || !mean_stat.HasValue()) return {};
+    
+    mo::DoubleType double_type;
+    std::byte* std_val = mo::DoubleType::MakeFrom(std_stat.GetData(), *std_stat.GetType());
+    std::byte* mean_val = mo::DoubleType::MakeFrom(mean_stat.GetData(), *mean_stat.GetType());
+    
+    std::byte* zero = double_type.MakeValue(0.0);
+    if (double_type.Compare(mean_val, zero) == mo::CompareResult::kEqual) {
+        double_type.Free(std_val);
+        double_type.Free(mean_val);
+        double_type.Free(zero);
+        return {};
+    }
+    
+    std::byte* cv_val = double_type.Allocate();
+    double_type.Div(std_val, mean_val, cv_val);
+    
+    double_type.Free(std_val);
+    double_type.Free(mean_val);
+    double_type.Free(zero);
+    
+    return Statistic(cv_val, &double_type, false);
 }
 
 }  // namespace algos

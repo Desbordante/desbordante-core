@@ -27,6 +27,7 @@ def main() -> None:
         "Char vocabulary": data_stats.get_vocab,
         "Word vocabulary": data_stats.get_words,
         "IQR": data_stats.get_interquartile_range,
+        "Coefficient of variation": data_stats.get_coefficient_of_variation,
     }
 
     table_methods = {
