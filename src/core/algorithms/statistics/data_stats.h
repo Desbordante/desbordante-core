@@ -168,6 +168,7 @@ public:
     Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
 
     Statistic GetInterquartileRange(size_t index) const;
+    Statistic GetCoefficientOfVariation(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;

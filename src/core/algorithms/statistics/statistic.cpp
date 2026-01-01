@@ -127,6 +127,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(num_entirely_lowercase, "num_entirely_lowercase");
 
     try_add_stat(interquartile_range, "interquartile_range");
+    try_add_stat(coefficient_of_variation, "coefficient_of_variation");
 
     return res;
 }

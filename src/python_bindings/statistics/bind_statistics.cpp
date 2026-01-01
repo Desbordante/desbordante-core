@@ -168,6 +168,11 @@ void BindStatistics(pybind11::module_& main_module) {
                &DataStats::GetNumberOfEntirelyUppercaseWords,
                "Returns the amount of entirely uppercase words in a column.", py::arg("index"))
           
-          .def("get_interquartile_range", &DataStats::GetInterquartileRange);
+          .def("get_interquartile_range", &DataStats::GetInterquartileRange,
+             "Returns interquartile range (IQR) for numeric column.",
+             py::arg("index"))
+          .def("get_coefficient_of_variation", &DataStats::GetCoefficientOfVariation,
+             "Returns coefficient of variation (std/mean) for numeric column.",
+             py::arg("index"));
 }
 }  // namespace python_bindings

@@ -257,11 +257,17 @@ class TestDataStats(unittest.TestCase):
         
         res_str = self.data_stats.get_interquartile_range(1)
         self.assertIsNone(res_str)
+
+    def test_coefficient_of_variation(self):
+        res = self.data_stats.get_coefficient_of_variation(2)
+        self.assertIsNotNone(res)
+        self.assertGreater(res, 0)
     
     def test_all_new_statistics_in_output(self):
         all_stats_str = self.data_stats.get_all_statistics_as_string()
         
         self.assertIn("interquartile_range", all_stats_str)
+        self.assertIn("coefficient_of_variation", all_stats_str)
 
 if __name__ == "__main__":
     unittest.main()
