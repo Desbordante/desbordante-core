@@ -468,4 +468,28 @@ TEST(TestDataStats, MultipleExecutionConsistentResults) {
     }
 }
 
+TEST(TestDataStats, TestInterquartileRange) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    
+    stats.Execute();
+    
+    auto iqr_stat = stats.GetInterquartileRange(2);
+    EXPECT_TRUE(iqr_stat.HasValue());
+    
+    auto iqr_stat_str = stats.GetInterquartileRange(1);
+    EXPECT_FALSE(iqr_stat_str.HasValue());
+}
+
+TEST(TestDataStats, TestAllNewStatisticsIntegration) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    
+    stats.Execute();
+    
+    std::string all_stats = stats.ToString();
+    
+    EXPECT_TRUE(all_stats.find("interquartile_range") != std::string::npos);
+}
+
 };  // namespace tests
