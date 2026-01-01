@@ -129,6 +129,7 @@ std::unordered_map<std::string, std::string> ColumnStats::ToKeyValueMap() const 
     try_add_stat(interquartile_range, "interquartile_range");
     try_add_stat(coefficient_of_variation, "coefficient_of_variation");
     try_add_stat(monotonicity, "monotonicity");
+    try_add_stat(jarque_bera_statistic, "jarque_bera_statistic");
 
     return res;
 }

@@ -506,6 +506,17 @@ TEST(TestDataStats, TestMonotonicity) {
                 monotonicity == "none");
 }
 
+TEST(TestDataStats, TestJarqueBeraStatistic) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    
+    auto jb_stat = stats.GetJarqueBeraStatistic(2);
+    EXPECT_TRUE(jb_stat.HasValue());
+    
+    double jb = mo::Type::GetValue<mo::Double>(jb_stat.GetData());
+    EXPECT_GE(jb, 0.0);
+}
+
 TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
@@ -517,6 +528,7 @@ TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     EXPECT_TRUE(all_stats.find("interquartile_range") != std::string::npos);
     EXPECT_TRUE(all_stats.find("coefficient_of_variation") != std::string::npos);
     EXPECT_TRUE(all_stats.find("monotonicity") != std::string::npos);
+    EXPECT_TRUE(all_stats.find("jarque_bera_statistic") != std::string::npos);
 }
 
 };  // namespace tests

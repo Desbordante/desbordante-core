@@ -267,6 +267,11 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_monotonicity(4)
         self.assertIsNotNone(res)
         self.assertIn(res, ["ascending", "descending", "equal", "none"])
+
+    def test_jarque_bera_statistic(self):
+        res = self.data_stats.get_jarque_bera_statistic(2)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0)
     
     def test_all_new_statistics_in_output(self):
         all_stats_str = self.data_stats.get_all_statistics_as_string()
@@ -274,6 +279,7 @@ class TestDataStats(unittest.TestCase):
         self.assertIn("interquartile_range", all_stats_str)
         self.assertIn("coefficient_of_variation", all_stats_str)
         self.assertIn("monotonicity", all_stats_str)
+        self.assertIn("jarque_bera_statistic", all_stats_str)
 
 if __name__ == "__main__":
     unittest.main()

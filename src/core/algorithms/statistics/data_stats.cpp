@@ -917,6 +917,7 @@ unsigned long long DataStats::ExecuteInternal() {
             if (this->col_data_[index].IsNumeric()) {
                 all_stats_[index].interquartile_range = GetInterquartileRange(index);
                 all_stats_[index].coefficient_of_variation = GetCoefficientOfVariation(index);
+                all_stats_[index].jarque_bera_statistic = GetJarqueBeraStatistic(index);
             }
         }
         
@@ -1095,6 +1096,28 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     } else {
         return Statistic(string_type.MakeValue("none"), &string_type, false);
     }
+}
+
+Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
+    if (all_stats_[index].jarque_bera_statistic.HasValue()) 
+        return all_stats_[index].jarque_bera_statistic;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+    
+    Statistic skewness_stat = GetSkewness(index);
+    Statistic kurtosis_stat = GetKurtosis(index);
+    
+    if (!skewness_stat.HasValue() || !kurtosis_stat.HasValue()) return {};
+    
+    double skewness = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
+    double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
+    size_t n = NumberOfValues(index);
+    
+    double jb = n / 6.0 * (skewness * skewness + (kurtosis - 3) * (kurtosis - 3) / 4.0);
+    
+    mo::DoubleType double_type;
+    return Statistic(double_type.MakeValue(jb), &double_type, false);
 }
 
 }  // namespace algos
