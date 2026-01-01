@@ -176,6 +176,9 @@ void BindStatistics(pybind11::module_& main_module) {
              py::arg("index"))
           .def("get_monotonicity", &DataStats::GetMonotonicity,
              "Returns monotonicity flag: 'ascending', 'descending', 'equal' or 'none'.",
+             py::arg("index"))
+          .def("get_jarque_bera_statistic", &DataStats::GetJarqueBeraStatistic,
+             "Returns Jarque-Bera statistic for normality test.",
              py::arg("index"));
 
 }
