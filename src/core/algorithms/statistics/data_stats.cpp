@@ -871,8 +871,10 @@ unsigned long long DataStats::ExecuteInternal() {
 
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
+    
     auto task = [percent_per_col, this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
+        
         if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
             all_stats_[index].min = GetMin(index);
             all_stats_[index].max = GetMax(index);
@@ -880,7 +882,7 @@ unsigned long long DataStats::ExecuteInternal() {
             // will use all_stats_[index].sum
             all_stats_[index].avg = GetAvg(index);
 
-            GetQuantile(0.25, index, true);  // distint is calculated here
+            GetQuantile(0.25, index, true);  // distinct is calculated here
             // after distinct, for faster executing
             all_stats_[index].kurtosis = GetKurtosis(index);
             all_stats_[index].skewness = GetSkewness(index);
@@ -892,24 +894,32 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].mean_ad = GetMeanAD(index);
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
-            all_stats_[index].vocab = GetVocab(index);
-            all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
-            all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
-            all_stats_[index].num_lowercase_chars = GetNumberOfLowercaseChars(index);
-            all_stats_[index].num_uppercase_chars = GetNumberOfUppercaseChars(index);
-            all_stats_[index].num_chars = GetNumberOfChars(index);
-            all_stats_[index].num_avg_chars = GetAvgNumberOfChars(index);
-            all_stats_[index].min_num_chars = GetMinNumberOfChars(index);
-            all_stats_[index].max_num_chars = GetMaxNumberOfChars(index);
-            all_stats_[index].min_num_words = GetMinNumberOfWords(index);
-            all_stats_[index].max_num_words = GetMaxNumberOfWords(index);
-            all_stats_[index].num_words = GetNumberOfWords(index);
-            all_stats_[index].num_entirely_uppercase = GetNumberOfEntirelyUppercaseWords(index);
-            all_stats_[index].num_entirely_lowercase = GetNumberOfEntirelyLowercaseWords(index);
+            
+            if (this->col_data_[index].GetTypeId() == +mo::TypeId::kString) {
+                all_stats_[index].vocab = GetVocab(index);
+                all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
+                all_stats_[index].num_digit_chars = GetNumberOfDigitChars(index);
+                all_stats_[index].num_lowercase_chars = GetNumberOfLowercaseChars(index);
+                all_stats_[index].num_uppercase_chars = GetNumberOfUppercaseChars(index);
+                all_stats_[index].num_chars = GetNumberOfChars(index);
+                all_stats_[index].num_avg_chars = GetAvgNumberOfChars(index);
+                all_stats_[index].min_num_chars = GetMinNumberOfChars(index);
+                all_stats_[index].max_num_chars = GetMaxNumberOfChars(index);
+                all_stats_[index].min_num_words = GetMinNumberOfWords(index);
+                all_stats_[index].max_num_words = GetMaxNumberOfWords(index);
+                all_stats_[index].num_words = GetNumberOfWords(index);
+                all_stats_[index].num_entirely_uppercase = GetNumberOfEntirelyUppercaseWords(index);
+                all_stats_[index].num_entirely_lowercase = GetNumberOfEntirelyLowercaseWords(index);
+            }
+            
+            if (this->col_data_[index].IsNumeric()) {
+                all_stats_[index].interquartile_range = GetInterquartileRange(index);
+            }
         }
-        // distinct for mixed type will be calculated here
+        
         all_stats_[index].is_categorical = IsCategorical(
-                index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
+            index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000)
+        );
         all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
         AddProgress(percent_per_col);
     };
@@ -925,7 +935,8 @@ unsigned long long DataStats::ExecuteInternal() {
 
     SetProgress(kTotalProgressPercent);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
+        std::chrono::system_clock::now() - start_time
+    );
     return elapsed_milliseconds.count();
 }
 
@@ -984,6 +995,41 @@ std::string DataStats::ToString() const {
 void DataStats::LoadDataInternal() {
     col_data_ = mo::CreateTypedColumnData(*input_table_, is_null_equal_null_);
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
+}
+
+/**
+ * @brief Calculate interquartile range (IQR) = Q3 - Q1
+ * @param index Column index
+ * @return Statistic containing IQR or empty if column is not numeric
+ * 
+ * Межквартильный размах - разница между 75-м и 25-м перцентилями.
+ * Устойчивая мера разброса данных, менее чувствительная к выбросам.
+ */
+Statistic DataStats::GetInterquartileRange(size_t index) const {
+    if (all_stats_[index].interquartile_range.HasValue()) 
+        return all_stats_[index].interquartile_range;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (!col.IsNumeric()) return {};
+    
+    Statistic q1 = all_stats_[index].quantile25;
+    Statistic q3 = all_stats_[index].quantile75;
+    
+    if (!q1.HasValue() || !q3.HasValue()) {
+        return {};
+    }
+    
+    mo::DoubleType double_type;
+    std::byte* q1_val = mo::DoubleType::MakeFrom(q1.GetData(), *q1.GetType());
+    std::byte* q3_val = mo::DoubleType::MakeFrom(q3.GetData(), *q3.GetType());
+    std::byte* iqr_val = double_type.Allocate();
+    
+    double_type.Sub(q3_val, q1_val, iqr_val);
+    
+    double_type.Free(q1_val);
+    double_type.Free(q3_val);
+    
+    return Statistic(iqr_val, &double_type, false);
 }
 
 }  // namespace algos

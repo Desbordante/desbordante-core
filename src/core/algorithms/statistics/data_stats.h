@@ -167,6 +167,8 @@ public:
     // Returns the amount of entirely lowercase words in a string column.
     Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
 
+    Statistic GetInterquartileRange(size_t index) const;
+
     ColumnStats const& GetAllStats(size_t index) const;
     std::vector<ColumnStats> const& GetAllStats() const;
     std::string ToString() const;

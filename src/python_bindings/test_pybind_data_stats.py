@@ -1,7 +1,7 @@
 import unittest
 import desbordante as db
 
-DATASET_PATH = "TestDataStats.csv"
+DATASET_PATH = "./test_input_data/TestDataStats.csv"
 SEPARATOR = ','
 HAS_HEADER = False
 
@@ -249,6 +249,19 @@ class TestDataStats(unittest.TestCase):
         res = self.data_stats.get_words(6)
         expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
         self.assertEqual(expected, res)
+
+    def test_interquartile_range(self):
+        res = self.data_stats.get_interquartile_range(2)
+        self.assertIsNotNone(res)
+        self.assertGreater(res, 0)
+        
+        res_str = self.data_stats.get_interquartile_range(1)
+        self.assertIsNone(res_str)
+    
+    def test_all_new_statistics_in_output(self):
+        all_stats_str = self.data_stats.get_all_statistics_as_string()
+        
+        self.assertIn("interquartile_range", all_stats_str)
 
 if __name__ == "__main__":
     unittest.main()
