@@ -30,6 +30,8 @@ def main() -> None:
         "Coefficient of variation": data_stats.get_coefficient_of_variation,
         "Monotonicity": data_stats.get_monotonicity,
         "Jarque-Bera statistic": data_stats.get_jarque_bera_statistic,
+        "Entropy": data_stats.get_entropy,
+        "Gini coefficient": data_stats.get_gini_coefficient,
     }
 
     table_methods = {

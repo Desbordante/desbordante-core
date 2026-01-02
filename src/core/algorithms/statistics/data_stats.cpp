@@ -10,6 +10,8 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
 
+#include "core/util/logger.h"
+
 namespace algos {
 
 namespace fs = std::filesystem;
@@ -895,7 +897,9 @@ unsigned long long DataStats::ExecuteInternal() {
             all_stats_[index].median = GetMedian(index);
             all_stats_[index].median_ad = GetMedianAD(index);
 
-            all_stats_[index].monotonicity = GetMonotonicity(index);
+            if (mo::Type::IsOrdered(this->col_data_[index].GetTypeId())) {
+                all_stats_[index].monotonicity = GetMonotonicity(index);
+            }
             
             if (this->col_data_[index].GetTypeId() == +mo::TypeId::kString) {
                 all_stats_[index].vocab = GetVocab(index);
@@ -912,6 +916,9 @@ unsigned long long DataStats::ExecuteInternal() {
                 all_stats_[index].num_words = GetNumberOfWords(index);
                 all_stats_[index].num_entirely_uppercase = GetNumberOfEntirelyUppercaseWords(index);
                 all_stats_[index].num_entirely_lowercase = GetNumberOfEntirelyLowercaseWords(index);
+
+                all_stats_[index].entropy = GetEntropy(index);
+                all_stats_[index].gini_coefficient = GetGiniCoefficient(index);
             }
             
             if (this->col_data_[index].IsNumeric()) {
@@ -1035,15 +1042,20 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
     
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
-    
-    Statistic std_stat = GetCorrectedSTD(index);
-    Statistic mean_stat = GetAvg(index);
-    
-    if (!std_stat.HasValue() || !mean_stat.HasValue()) return {};
-    
+
+    if (!all_stats_[index].STD.HasValue() || !all_stats_[index].avg.HasValue()) {
+        return {};
+    }
+        
     mo::DoubleType double_type;
-    std::byte* std_val = mo::DoubleType::MakeFrom(std_stat.GetData(), *std_stat.GetType());
-    std::byte* mean_val = mo::DoubleType::MakeFrom(mean_stat.GetData(), *mean_stat.GetType());
+    std::byte* std_val = mo::DoubleType::MakeFrom(
+        all_stats_[index].STD.GetData(), 
+        *all_stats_[index].STD.GetType()
+    );
+    std::byte* mean_val = mo::DoubleType::MakeFrom(
+        all_stats_[index].avg.GetData(), 
+        *all_stats_[index].avg.GetType()
+    );
     
     std::byte* zero = double_type.MakeValue(0.0);
     if (double_type.Compare(mean_val, zero) == mo::CompareResult::kEqual) {
@@ -1064,39 +1076,92 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
 }
 
 Statistic DataStats::GetMonotonicity(size_t index) const {
-    if (all_stats_[index].monotonicity.HasValue()) 
+    if (all_stats_[index].monotonicity.HasValue()) {
         return all_stats_[index].monotonicity;
+    }
     
     mo::TypedColumnData const& col = col_data_[index];
-    if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
-    
-    std::vector<std::byte const*> data = DeleteNullAndEmpties(index);
-    if (data.size() < 2) {
-        mo::StringType string_type;
-        return Statistic(string_type.MakeValue("none"), &string_type, false);
+    if (!mo::Type::IsOrdered(col.GetTypeId())) {
+        return {};
     }
     
-    mo::Type const& type = col.GetType();
-    bool ascending = true;
-    bool descending = true;
+    LOG_TRACE("Column {}: type={}, rows={}, nulls={}, empties={}", 
+              index, 
+              col.GetType().ToString(),
+              col.GetNumRows(),
+              col.GetNumNulls(),
+              col.GetNumEmpties());
     
-    for (size_t i = 0; i < data.size() - 1; ++i) {
-        mo::CompareResult cmp = type.Compare(data[i], data[i + 1]);
-        if (cmp == mo::CompareResult::kGreater) descending = false;
-        if (cmp == mo::CompareResult::kLess) ascending = false;
+    bool increasing = true;
+    bool decreasing = true;
+    std::byte const* prev = nullptr;
+    bool has_prev = false;
+    size_t valid_values = 0;
+    
+    for (size_t i = 0; i < col.GetNumRows(); ++i) {
+        if (col.IsNullOrEmpty(i)) {
+            LOG_TRACE("Skipping NULL/empty at row {} in column {}", i, index);
+            continue;
+        }
+        
+        std::byte const* current = col.GetData()[i];
+        valid_values++;
+        
+        if (has_prev) {
+            mo::CompareResult cmp = col.GetType().Compare(prev, current);
+            
+            LOG_TRACE("Comparison at row {}: prev vs current = {}", i, 
+                     cmp == mo::CompareResult::kLess ? "less" :
+                     cmp == mo::CompareResult::kGreater ? "greater" : "equal");
+            
+            if (cmp == mo::CompareResult::kLess) {
+                decreasing = false;
+                LOG_TRACE("Sequence is not decreasing at row {}", i);
+            } else if (cmp == mo::CompareResult::kGreater) {
+                increasing = false;
+                LOG_TRACE("Sequence is not increasing at row {}", i);
+            }
+            
+            if (!increasing && !decreasing) {
+                LOG_DEBUG("Sequence is not monotonic, breaking early at row {}", i);
+                break;
+            }
+        } else {
+            has_prev = true;
+            LOG_TRACE("First valid value at row {} in column {}", i, index);
+        }
+        prev = current;
     }
+    
+    if (!has_prev) {
+        LOG_WARN("Column {} has no valid values for monotonicity check", index);
+        return {};
+    }
+    
+    std::string result;
+    if (increasing && !decreasing) {
+        result = "ascending";
+        LOG_DEBUG("Column {} is monotonically ascending", index);
+    } else if (!increasing && decreasing) {
+        result = "descending";
+        LOG_DEBUG("Column {} is monotonically descending", index);
+    } else if (increasing && decreasing) {
+        result = "equal";
+        LOG_DEBUG("Column {} has all equal values, treated as ascending", index);
+    } else {
+        result = "none";
+        LOG_DEBUG("Column {} is not monotonic", index);
+    }
+    
+    LOG_INFO("Monotonicity for column {}: {} (valid values: {})", 
+             index, result, valid_values);
     
     mo::StringType string_type;
-    if (ascending && descending) {
-        return Statistic(string_type.MakeValue("equal"), &string_type, false);
-    } else if (ascending) {
-        return Statistic(string_type.MakeValue("ascending"), &string_type, false);
-    } else if (descending) {
-        return Statistic(string_type.MakeValue("descending"), &string_type, false);
-    } else {
-        return Statistic(string_type.MakeValue("none"), &string_type, false);
-    }
+    std::byte const* result_data = string_type.MakeValue(result);
+    
+    return Statistic(result_data, &string_type, false);
 }
+
 
 Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
     if (all_stats_[index].jarque_bera_statistic.HasValue()) 
@@ -1104,20 +1169,81 @@ Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
     
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
+
+    if (!all_stats_[index].skewness.HasValue() || !all_stats_[index].kurtosis.HasValue()) {
+        return {};
+    }
     
-    Statistic skewness_stat = GetSkewness(index);
-    Statistic kurtosis_stat = GetKurtosis(index);
-    
-    if (!skewness_stat.HasValue() || !kurtosis_stat.HasValue()) return {};
-    
-    double skewness = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
-    double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
     size_t n = NumberOfValues(index);
+    if (n < 2) return {};
     
-    double jb = n / 6.0 * (skewness * skewness + (kurtosis - 3) * (kurtosis - 3) / 4.0);
+    double skewness = mo::Type::GetValue<mo::Double>(all_stats_[index].skewness.GetData());
+    double kurtosis = mo::Type::GetValue<mo::Double>(all_stats_[index].kurtosis.GetData());
+    
+    double jb = static_cast<double>(n) / 6.0 * (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
     
     mo::DoubleType double_type;
     return Statistic(double_type.MakeValue(jb), &double_type, false);
+}
+
+Statistic DataStats::GetEntropy(size_t index) const {
+    if (all_stats_[index].entropy.HasValue()) 
+        return all_stats_[index].entropy;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    
+    std::unordered_map<std::string, size_t> freq_map;
+    size_t total_count = 0;
+    
+    for (size_t i = 0; i < col.GetNumRows(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+        
+        std::string value = mo::Type::GetValue<std::string>(col.GetValue(i));
+        freq_map[value]++;
+        total_count++;
+    }
+    
+    if (total_count == 0) return {};
+    
+    double entropy = 0.0;
+    for (const auto& [value, count] : freq_map) {
+        double probability = static_cast<double>(count) / static_cast<double>(total_count);
+        entropy -= probability * std::log2(probability);
+    }
+    
+    mo::DoubleType double_type;
+    return Statistic(double_type.MakeValue(entropy), &double_type, false);
+}
+
+Statistic DataStats::GetGiniCoefficient(size_t index) const {
+    if (all_stats_[index].gini_coefficient.HasValue()) 
+        return all_stats_[index].gini_coefficient;
+    
+    mo::TypedColumnData const& col = col_data_[index];
+    if (col.GetTypeId() != +mo::TypeId::kString) return {};
+    
+    std::unordered_map<std::string, size_t> freq_map;
+    size_t total_count = 0;
+    
+    for (size_t i = 0; i < col.GetNumRows(); ++i) {
+        if (col.IsNullOrEmpty(i)) continue;
+        
+        std::string value = mo::Type::GetValue<std::string>(col.GetValue(i));
+        freq_map[value]++;
+        total_count++;
+    }
+    
+    if (total_count == 0) return {};
+    
+    double gini = 1.0;
+    for (const auto& [value, count] : freq_map) {
+        double probability = static_cast<double>(count) / static_cast<double>(total_count);
+        gini -= probability * probability;
+    }
+    
+    mo::DoubleType double_type;
+    return Statistic(double_type.MakeValue(gini), &double_type, false);
 }
 
 }  // namespace algos

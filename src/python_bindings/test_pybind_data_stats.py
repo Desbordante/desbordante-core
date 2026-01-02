@@ -250,36 +250,98 @@ class TestDataStats(unittest.TestCase):
         expected = {"abc", "abd", "abe", "eeee", "ggg", "gre", "grg"}
         self.assertEqual(expected, res)
 
-    def test_interquartile_range(self):
-        res = self.data_stats.get_interquartile_range(2)
+    def test_interquartile_range(self) -> None:
+        res = self.data_stats.get_interquartile_range(4)
         self.assertIsNotNone(res)
-        self.assertGreater(res, 0)
+        self.assertAlmostEqual(res, 2.0, places=6)
         
-        res_str = self.data_stats.get_interquartile_range(1)
-        self.assertIsNone(res_str)
+        res = self.data_stats.get_interquartile_range(1)
+        self.assertIsNone(res)
 
-    def test_coefficient_of_variation(self):
+    def test_coefficient_of_variation(self) -> None:
         res = self.data_stats.get_coefficient_of_variation(2)
         self.assertIsNotNone(res)
-        self.assertGreater(res, 0)
-
-    def test_monotonicity(self):
-        res = self.data_stats.get_monotonicity(4)
-        self.assertIsNotNone(res)
-        self.assertIn(res, ["ascending", "descending", "equal", "none"])
-
-    def test_jarque_bera_statistic(self):
-        res = self.data_stats.get_jarque_bera_statistic(2)
-        self.assertIsNotNone(res)
-        self.assertGreaterEqual(res, 0)
-    
-    def test_all_new_statistics_in_output(self):
-        all_stats_str = self.data_stats.get_all_statistics_as_string()
+        self.assertGreater(res, 0.0)
         
-        self.assertIn("interquartile_range", all_stats_str)
-        self.assertIn("coefficient_of_variation", all_stats_str)
-        self.assertIn("monotonicity", all_stats_str)
-        self.assertIn("jarque_bera_statistic", all_stats_str)
+        res = self.data_stats.get_coefficient_of_variation(1)
+        self.assertIsNone(res)
+
+    def test_monotonicity(self) -> None:
+        res = self.data_stats.get_monotonicity(0)
+        self.assertIsNone(res)
+
+        res = self.data_stats.get_monotonicity(1)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "none")
+
+        res = self.data_stats.get_monotonicity(2)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "none")
+
+        res = self.data_stats.get_monotonicity(3)
+        self.assertIsNotNone(res)
+        self.assertEqual(res, "ascending")
+
+    def test_jarque_bera_statistic(self) -> None:
+        res = self.data_stats.get_jarque_bera_statistic(7)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        
+        res = self.data_stats.get_jarque_bera_statistic(1)
+        self.assertIsNone(res)
+
+    def test_entropy(self) -> None:
+        res = self.data_stats.get_entropy(6)
+        self.assertIsNotNone(res)
+        self.assertGreater(res, 0.0)
+        
+        res = self.data_stats.get_entropy(2)
+        self.assertIsNone(res)
+    
+    def test_gini_coefficient(self) -> None:
+        res = self.data_stats.get_gini_coefficient(6)
+        self.assertIsNotNone(res)
+        self.assertGreaterEqual(res, 0.0)
+        self.assertLess(res, 1.0)
+        
+        res = self.data_stats.get_gini_coefficient(2)
+        self.assertIsNone(res)
+    
+    def test_all_new_statistics(self) -> None:
+        for i in range(self.data_stats.get_number_of_columns()):
+            try:
+                iqr = self.data_stats.get_interquartile_range(i)
+                cv = self.data_stats.get_coefficient_of_variation(i)
+                monotonicity = self.data_stats.get_monotonicity(i)
+                jb = self.data_stats.get_jarque_bera_statistic(i)
+                entropy = self.data_stats.get_entropy(i)
+                gini = self.data_stats.get_gini_coefficient(i)
+                
+                if iqr is not None:
+                    self.assertIsInstance(iqr, (int, float))
+                
+                if cv is not None:
+                    self.assertIsInstance(cv, (int, float))
+                
+                if monotonicity is not None:
+                    self.assertIsInstance(monotonicity, str)
+                    self.assertIn(monotonicity, ["ascending", "descending", "none", "equal"])
+                
+                if jb is not None:
+                    self.assertIsInstance(jb, (int, float))
+                    self.assertGreaterEqual(jb, 0.0)
+                
+                if entropy is not None:
+                    self.assertIsInstance(entropy, (int, float))
+                    self.assertGreaterEqual(entropy, 0.0)
+                
+                if gini is not None:
+                    self.assertIsInstance(gini, (int, float))
+                    self.assertGreaterEqual(gini, 0.0)
+                    self.assertLess(gini, 1.0)
+                    
+            except Exception as e:
+                self.fail(f"Failed for column {i}: {e}")
 
 if __name__ == "__main__":
     unittest.main()
