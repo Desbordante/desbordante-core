@@ -272,7 +272,7 @@ class TestDataStats(unittest.TestCase):
 
         res = self.data_stats.get_monotonicity(1)
         self.assertIsNotNone(res)
-        self.assertEqual(res, "none")
+        self.assertEqual(res, "ascending")
 
         res = self.data_stats.get_monotonicity(2)
         self.assertIsNotNone(res)
