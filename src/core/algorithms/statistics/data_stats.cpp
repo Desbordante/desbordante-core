@@ -1085,13 +1085,6 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
         return {};
     }
     
-    LOG_TRACE("Column {}: type={}, rows={}, nulls={}, empties={}", 
-              index, 
-              col.GetType().ToString(),
-              col.GetNumRows(),
-              col.GetNumNulls(),
-              col.GetNumEmpties());
-    
     bool increasing = true;
     bool decreasing = true;
     std::byte const* prev = nullptr;
@@ -1100,7 +1093,6 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) {
-            LOG_TRACE("Skipping NULL/empty at row {} in column {}", i, index);
             continue;
         }
         
@@ -1110,58 +1102,41 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
         if (has_prev) {
             mo::CompareResult cmp = col.GetType().Compare(prev, current);
             
-            LOG_TRACE("Comparison at row {}: prev vs current = {}", i, 
-                     cmp == mo::CompareResult::kLess ? "less" :
-                     cmp == mo::CompareResult::kGreater ? "greater" : "equal");
-            
             if (cmp == mo::CompareResult::kLess) {
                 decreasing = false;
-                LOG_TRACE("Sequence is not decreasing at row {}", i);
             } else if (cmp == mo::CompareResult::kGreater) {
                 increasing = false;
-                LOG_TRACE("Sequence is not increasing at row {}", i);
             }
             
             if (!increasing && !decreasing) {
-                LOG_DEBUG("Sequence is not monotonic, breaking early at row {}", i);
                 break;
             }
         } else {
             has_prev = true;
-            LOG_TRACE("First valid value at row {} in column {}", i, index);
         }
         prev = current;
     }
     
     if (!has_prev) {
-        LOG_WARN("Column {} has no valid values for monotonicity check", index);
         return {};
     }
     
     std::string result;
     if (increasing && !decreasing) {
         result = "ascending";
-        LOG_DEBUG("Column {} is monotonically ascending", index);
     } else if (!increasing && decreasing) {
         result = "descending";
-        LOG_DEBUG("Column {} is monotonically descending", index);
     } else if (increasing && decreasing) {
         result = "equal";
-        LOG_DEBUG("Column {} has all equal values, treated as ascending", index);
     } else {
         result = "none";
-        LOG_DEBUG("Column {} is not monotonic", index);
     }
-    
-    LOG_INFO("Monotonicity for column {}: {} (valid values: {})", 
-             index, result, valid_values);
     
     mo::StringType string_type;
     std::byte const* result_data = string_type.MakeValue(result);
     
     return Statistic(result_data, &string_type, false);
 }
-
 
 Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
     if (all_stats_[index].jarque_bera_statistic.HasValue()) 
