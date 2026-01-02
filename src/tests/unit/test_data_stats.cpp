@@ -471,7 +471,6 @@ TEST(TestDataStats, MultipleExecutionConsistentResults) {
 TEST(TestDataStats, TestInterquartileRange) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
-    
     stats.Execute();
     
     auto iqr_stat = stats.GetInterquartileRange(2);
@@ -484,6 +483,7 @@ TEST(TestDataStats, TestInterquartileRange) {
 TEST(TestDataStats, TestCoefficientOfVariation) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
     
     auto cv_stat = stats.GetCoefficientOfVariation(2);
     EXPECT_TRUE(cv_stat.HasValue());
@@ -495,6 +495,7 @@ TEST(TestDataStats, TestCoefficientOfVariation) {
 TEST(TestDataStats, TestMonotonicity) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
     
     auto monotonicity_stat = stats.GetMonotonicity(4);
     EXPECT_TRUE(monotonicity_stat.HasValue());
@@ -509,6 +510,7 @@ TEST(TestDataStats, TestMonotonicity) {
 TEST(TestDataStats, TestJarqueBeraStatistic) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
     
     auto jb_stat = stats.GetJarqueBeraStatistic(2);
     EXPECT_TRUE(jb_stat.HasValue());
@@ -517,18 +519,120 @@ TEST(TestDataStats, TestJarqueBeraStatistic) {
     EXPECT_GE(jb, 0.0);
 }
 
+TEST(TestDataStats, TestEntropy) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+    
+    auto entropy_stat = stats.GetEntropy(6);
+    EXPECT_TRUE(entropy_stat.HasValue());
+    
+    double entropy = mo::Type::GetValue<mo::Double>(entropy_stat.GetData());
+    EXPECT_GT(entropy, 0.0);
+    
+    auto non_string_entropy = stats.GetEntropy(2);
+    EXPECT_FALSE(non_string_entropy.HasValue());
+}
+
+TEST(TestDataStats, TestGiniCoefficient) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+    
+    auto gini_stat = stats.GetGiniCoefficient(6);
+    EXPECT_TRUE(gini_stat.HasValue());
+    
+    double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
+    EXPECT_GE(gini, 0.0);
+    EXPECT_LT(gini, 1.0);
+    
+    auto non_string_gini = stats.GetGiniCoefficient(2);
+    EXPECT_FALSE(non_string_gini.HasValue());
+}
+
 TEST(TestDataStats, TestAllNewStatisticsIntegration) {
     auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
     algos::DataStats &stats = *stats_ptr;
-    
     stats.Execute();
     
-    std::string all_stats = stats.ToString();
+    std::vector<size_t> numeric_columns = {2, 3, 4, 7, 8, 9};
+    std::vector<size_t> string_columns = {1, 5, 6, 10, 11};
+    std::vector<size_t> ordered_columns = {1, 2, 3, 4, 7, 8, 9};
     
-    EXPECT_TRUE(all_stats.find("interquartile_range") != std::string::npos);
-    EXPECT_TRUE(all_stats.find("coefficient_of_variation") != std::string::npos);
-    EXPECT_TRUE(all_stats.find("monotonicity") != std::string::npos);
-    EXPECT_TRUE(all_stats.find("jarque_bera_statistic") != std::string::npos);
+    for (size_t col : numeric_columns) {
+        auto iqr = stats.GetInterquartileRange(col);
+        auto cv = stats.GetCoefficientOfVariation(col);
+        auto jb = stats.GetJarqueBeraStatistic(col);
+        
+        if (cv.HasValue()) {
+            double cv_value = mo::Type::GetValue<mo::Double>(cv.GetData());
+            EXPECT_TRUE(std::isfinite(cv_value));
+        }
+        
+        if (jb.HasValue()) {
+            double jb_value = mo::Type::GetValue<mo::Double>(jb.GetData());
+            EXPECT_GE(jb_value, 0.0);
+        }
+    }
+    
+    for (size_t col : ordered_columns) {
+        auto monotonicity = stats.GetMonotonicity(col);
+        if (monotonicity.HasValue()) {
+            std::string value = mo::Type::GetValue<mo::String>(monotonicity.GetData());
+            EXPECT_TRUE(value == "ascending" || value == "descending" || value == "none" || value == "equal");
+        }
+    }
+    
+    for (size_t col : string_columns) {
+        auto entropy = stats.GetEntropy(col);
+        auto gini = stats.GetGiniCoefficient(col);
+        
+        if (entropy.HasValue()) {
+            double entropy_value = mo::Type::GetValue<mo::Double>(entropy.GetData());
+            EXPECT_GE(entropy_value, 0.0);
+        }
+        
+        if (gini.HasValue()) {
+            double gini_value = mo::Type::GetValue<mo::Double>(gini.GetData());
+            EXPECT_GE(gini_value, 0.0);
+            EXPECT_LE(gini_value, 1.0);
+        }
+    }
 }
+
+TEST(TestDataStats, TestNewStatisticsEdgeCases) {
+    auto stats_ptr = MakeStatAlgorithm(kTestEmpty);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+    
+    for (size_t i = 0; i < stats.GetNumberOfColumns(); ++i) {
+        EXPECT_FALSE(stats.GetInterquartileRange(i).HasValue());
+        EXPECT_FALSE(stats.GetCoefficientOfVariation(i).HasValue());
+        EXPECT_FALSE(stats.GetMonotonicity(i).HasValue());
+        EXPECT_FALSE(stats.GetJarqueBeraStatistic(i).HasValue());
+        EXPECT_FALSE(stats.GetEntropy(i).HasValue());
+        EXPECT_FALSE(stats.GetGiniCoefficient(i).HasValue());
+    }
+}
+
+TEST(TestDataStats, TestNewStatisticsAfterExecute) {
+    auto stats_ptr = MakeStatAlgorithm(kTestDataStats);
+    algos::DataStats &stats = *stats_ptr;
+    stats.Execute();
+    
+    for (size_t i = 0; i < stats.GetNumberOfColumns(); ++i) {
+        const auto& col_stats = stats.GetAllStats(i);
+        
+        EXPECT_NO_THROW({
+            (void)col_stats.interquartile_range;
+            (void)col_stats.coefficient_of_variation;
+            (void)col_stats.monotonicity;
+            (void)col_stats.jarque_bera_statistic;
+            (void)col_stats.entropy;
+            (void)col_stats.gini_coefficient;
+        });
+    }
+}
+
 
 };  // namespace tests

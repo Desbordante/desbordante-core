@@ -179,6 +179,12 @@ void BindStatistics(pybind11::module_& main_module) {
              py::arg("index"))
           .def("get_jarque_bera_statistic", &DataStats::GetJarqueBeraStatistic,
              "Returns Jarque-Bera statistic for normality test.",
+             py::arg("index"))
+          .def("get_entropy", &DataStats::GetEntropy,
+             "Returns Shannon entropy for categorical column.",
+             py::arg("index"))
+          .def("get_gini_coefficient", &DataStats::GetGiniCoefficient,
+             "Returns Gini coefficient for categorical column.",
              py::arg("index"));
 
 }
