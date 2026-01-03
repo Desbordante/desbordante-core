@@ -98,7 +98,7 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
                 bool const included = rhs_values.contains(row);
                 std::size_t const id = result.size();
 
-                result.emplace_back(included, ItemsInfo{});
+                result.emplace_back(algos::cind::Basket{included, ItemsInfo{}});
                 it = basket_id_by_value.emplace(row, id).first;
             }
 
@@ -113,7 +113,7 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
                 Item item{cond_attr->GetColumnId(), cond_attr->GetValue(index)};
                 basket_items[item].push_back(index);
             }
-            result.emplace_back(rhs_values.contains(row), std::move(basket_items));
+            result.emplace_back(algos::cind::Basket{rhs_values.contains(row), std::move(basket_items)});
         }
     }
     return result;
