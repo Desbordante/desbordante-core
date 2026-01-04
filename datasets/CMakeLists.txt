@@ -20,15 +20,18 @@ if(DESBORDANTE_FETCH_DATASETS)
 endif()
 
 foreach(name IN LISTS DATASETS)
-    desbordante_configure_datasets(
-        STAMP_FILE
-        NAME
-        ${name}
-        DOWNLOAD_DIR
-        ${CMAKE_CURRENT_LIST_DIR}
-        EXTRACT_DIR
-        ${INPUT_DATA_DIR}
-    )
+    if(NOT DESBORDANTE_FETCH_DATASETS)
+        message(WARNING "There could be updates in dataset ${filename} (Fetch disabled)")
+    else()
+        desbordante_fetch_datasets(NAME ${name} DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR})
+    endif()
+    set(FILE_PATH "${CMAKE_CURRENT_LIST_DIR}/${name}.zip")
+    if(NOT EXISTS ${FILE_PATH})
+        message(FATAL_ERROR "Cannot access ${FILE_PATH}: no such file. Datasets are required for \
+        unit tests or benchmarks."
+        )
+    endif()
+    desbordante_unpack_datasets(STAMP_FILE PATH ${FILE_PATH} EXTRACT_DIR ${INPUT_DATA_DIR})
     add_custom_target(Desbordante.zip.${name} DEPENDS ${STAMP_FILE})
 endforeach()
 
