@@ -11,11 +11,14 @@ if(DESBORDANTE_BUILD_BENCHMARKS)
     list(APPEND DATASETS performance-tests)
 endif()
 
-set(MESSAGE "Fetch test datasets")
-if(DESBORDANTE_BUILD_BENCHMARKS)
-    set(MESSAGE "Fetch test and benchmark datasets")
+if(DESBORDANTE_FETCH_DATASETS)
+    set(MESSAGE "Fetch test datasets")
+    if(DESBORDANTE_BUILD_BENCHMARKS)
+        set(MESSAGE "Fetch test and benchmark datasets")
+    endif()
+    message(STATUS ${MESSAGE})
 endif()
-message(STATUS ${MESSAGE})
+
 foreach(name IN LISTS DATASETS)
     desbordante_configure_datasets(
         STAMP_FILE

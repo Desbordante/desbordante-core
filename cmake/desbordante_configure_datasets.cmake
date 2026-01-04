@@ -54,61 +54,65 @@ function(desbordante_configure_datasets stamp_file_var)
     cmake_parse_arguments(PARSE_ARGV 0 arg "" "NAME;DOWNLOAD_DIR;EXTRACT_DIR" "")
 
     set(filename "${arg_NAME}.zip")
-    set(hashfile_name "${arg_NAME}.sha256")
-
-    set(local_hashfile "${arg_DOWNLOAD_DIR}/${hashfile_name}")
-
-    file(DOWNLOAD "${BASE_URL}/${hashfile_name}" STATUS download_status)
-    list(GET download_status 0 status_code)
-    if(NOT status_code EQUAL 0)
-        list(GET download_status 1 str_val)
-        set(message_mode WARNING)
-        if(NOT EXISTS ${local_hashfile})
-            set(message_mode "FATAL_ERROR")
-        endif()
-        message(
-                "${message_mode}" "${hashfile_name} cannot be downloaded: [${status_code}] ${str_val}."
-        )
-        return()
-    endif()
-
-    file(DOWNLOAD "${BASE_URL}/${hashfile_name}" "${local_hashfile}" STATUS download_status)
-    list(GET download_status 0 status_code)
-    if(NOT status_code EQUAL 0)
-        list(GET download_status 1 str_val)
-        message(
-                WARNING "Failed to download hash for ${filename}: [${status_code}] ${str_val}. Skip"
-        )
-        return()
-    endif()
-
-    file(READ "${local_hashfile}" remote_hash)
-    string(STRIP "${remote_hash}" remote_hash)
-
-    set(need_download ON)
     set(file_path "${arg_DOWNLOAD_DIR}/${filename}")
-    if(EXISTS "${file_path}")
-        file(SHA256 "${file_path}" local_hash)
-        if("${local_hash}" STREQUAL "${remote_hash}")
-            message(STATUS "-> ${filename} is up to date.")
-            set(need_download OFF)
-        else()
-            message(STATUS "-> Hashes differ (Remote: ${remote_hash} vs Local: ${local_hash})")
-        endif()
-    endif()
 
-    if(need_download)
-        message(STATUS "-> Download ${filename}")
-        file(
-            DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
-            EXPECTED_HASH SHA256=${remote_hash}
-            STATUS download_status
-        )
+    if(NOT DESBORDANTE_FETCH_DATASETS)
+        message(WARNING "There could be updates in dataset ${filename} (Fetch disabled)")
+    else()
+        set(hashfile_name "${arg_NAME}.sha256")
+        set(local_hashfile "${arg_DOWNLOAD_DIR}/${hashfile_name}")
 
+        file(DOWNLOAD "${BASE_URL}/${hashfile_name}" STATUS download_status)
         list(GET download_status 0 status_code)
         if(NOT status_code EQUAL 0)
             list(GET download_status 1 str_val)
-            message(FATAL_ERROR "Failed to download ${filename}: [${status_code}] ${str_val}.")
+            set(message_mode WARNING)
+            if(NOT EXISTS ${local_hashfile})
+                set(message_mode "FATAL_ERROR")
+            endif()
+            message(
+                    "${message_mode}" "${hashfile_name} cannot be downloaded: [${status_code}] ${str_val}."
+            )
+            return()
+        endif()
+
+        file(DOWNLOAD "${BASE_URL}/${hashfile_name}" "${local_hashfile}" STATUS download_status)
+        list(GET download_status 0 status_code)
+        if(NOT status_code EQUAL 0)
+            list(GET download_status 1 str_val)
+            message(
+                    WARNING "Failed to download hash for ${filename}: [${status_code}] ${str_val}. Skip"
+            )
+            return()
+        endif()
+
+        file(READ "${local_hashfile}" remote_hash)
+        string(STRIP "${remote_hash}" remote_hash)
+
+        set(need_download ON)
+        if(EXISTS "${file_path}")
+            file(SHA256 "${file_path}" local_hash)
+            if("${local_hash}" STREQUAL "${remote_hash}")
+                message(STATUS "-> ${filename} is up to date.")
+                set(need_download OFF)
+            else()
+                message(STATUS "-> Hashes differ (Remote: ${remote_hash} vs Local: ${local_hash})")
+            endif()
+        endif()
+
+        if(need_download)
+            message(STATUS "-> Download ${filename}")
+            file(
+                    DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
+                    EXPECTED_HASH SHA256=${remote_hash}
+                    STATUS download_status
+            )
+
+            list(GET download_status 0 status_code)
+            if(NOT status_code EQUAL 0)
+                list(GET download_status 1 str_val)
+                message(FATAL_ERROR "Failed to download ${filename}: [${status_code}] ${str_val}.")
+            endif()
         endif()
     endif()
 
