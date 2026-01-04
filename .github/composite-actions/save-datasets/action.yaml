@@ -1,0 +1,19 @@
+name: Save Datasets
+description: Save datasets to cache if missing
+inputs:
+  hash:
+    description: "Hash used for cache key"
+    required: true
+  cache-hit:
+    description: "Skip saving if true"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Save cache
+      if: inputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: datasets/*.zip
+        key: datasets-${{ inputs.hash }}

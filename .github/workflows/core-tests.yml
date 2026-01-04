@@ -83,8 +83,9 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
-      - name: Download datasets
-        uses: ./.github/composite-actions/download-datasets
+      - name: Restore Datasets
+        id: restore
+        uses: ./.github/composite-actions/restore-datasets
       - name: Build
         shell: bash
         run: |
@@ -106,3 +107,9 @@ jobs:
           fi
 
           ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
+      - name: Save datasets
+        if: always()
+        uses: ./.github/composite-actions/save-datasets
+        with:
+          cache-hit: '${{ steps.restore.outputs.hash }}'
+          hash: '${{ steps.restore.outputs.cache-hit }}'

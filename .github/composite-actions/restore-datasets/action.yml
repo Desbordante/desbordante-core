@@ -1,0 +1,25 @@
+name: Restore Datasets
+description: Fetch hash and try to restore cache
+outputs:
+  hash:
+    description: "Upstream commit SHA"
+    value: ${{ steps.hash.outputs.sha }}
+  cache-hit:
+    description: "Cache hit status"
+    value: ${{ steps.restore.outputs.cache-hit }}
+runs:
+  using: "composite"
+  steps:
+    - name: Get upstream hash
+      id: hash
+      shell: bash
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: echo "sha=$(gh api repos/desbordante/desbordante-data/commits/HEAD --jq '.sha')" >> $GITHUB_OUTPUT
+
+    - name: Restore cache
+      id: cache-datasets-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: datasets/*.zip
+        key: datasets-${{ steps.hash.outputs.sha }}
