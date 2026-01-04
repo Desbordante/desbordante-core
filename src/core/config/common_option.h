@@ -6,7 +6,7 @@
 
 #include <boost/functional/overloaded_function.hpp>
 
-#include "config/option.h"
+#include "core/config/option.h"
 
 namespace config {
 

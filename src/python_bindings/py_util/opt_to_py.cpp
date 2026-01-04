@@ -1,4 +1,4 @@
-#include "opt_to_py.h"
+#include "python_bindings/py_util/opt_to_py.h"
 
 #include <functional>
 #include <typeinfo>
@@ -6,16 +6,17 @@
 
 #include <pybind11/stl.h>
 
-#include "algorithms/dd/dd.h"
-#include "algorithms/md/hymd/enums.h"
-#include "algorithms/metric/enums.h"
-#include "association_rules/ar_algorithm_enums.h"
-#include "config/custom_random_seed/type.h"
-#include "config/equal_nulls/type.h"
-#include "config/error/type.h"
-#include "config/indices/type.h"
-#include "config/max_lhs/type.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/algorithms/dd/dd.h"
+#include "core/algorithms/md/hymd/enums.h"
+#include "core/algorithms/metric/enums.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/config/custom_random_seed/type.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/error/type.h"
+#include "core/config/indices/type.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/thread_number/type.h"
 
 namespace {
 namespace py = pybind11;
@@ -46,7 +47,8 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::MetricAlgo>,
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
-        enum_conv_pair<algos::hymd::LevelDefinition>};
+        enum_conv_pair<algos::hymd::LevelDefinition>,
+        enum_conv_pair<algos::od::Ordering>};
 }  // namespace
 
 namespace python_bindings {

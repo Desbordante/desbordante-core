@@ -1,19 +1,21 @@
 #pragma once
 
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/od/fastod/model/attribute_pair.h"
-#include "algorithms/od/fastod/model/attribute_set.h"
-#include "algorithms/od/fastod/model/canonical_od.h"
-#include "algorithms/od/fastod/storage/partition_cache.h"
-#include "algorithms/od/fastod/util/timer.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/time_limit/type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/od/fastod/model/attribute_pair.h"
+#include "core/algorithms/od/fastod/model/attribute_set.h"
+#include "core/algorithms/od/fastod/model/canonical_od.h"
+#include "core/algorithms/od/fastod/storage/partition_cache.h"
+#include "core/algorithms/od/fastod/util/timer.h"
+#include "core/config/error/type.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/config/time_limit/type.h"
 
 namespace algos {
 
@@ -45,8 +47,9 @@ private:
     PartitionCache partition_cache_;
 
     AttributeSet schema_;
-    std::shared_ptr<DataFrame> data_;
+    DataFrame data_;
     config::InputTable input_table_;
+    config::ErrorType error_;
 
     void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
@@ -68,36 +71,41 @@ private:
     void CCPut(AttributeSet const& key, AttributeSet attribute_set);
     AttributeSet const& CCGet(AttributeSet const& key);
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
+    [[nodiscard]] static consteval bool IsAscending() {
+        return Ordering == +od::Ordering::ascending;
+    }
+
+    template <od::Ordering Ordering>
     void CSPut(AttributeSet const& key, AttributePair const& value) {
-        if constexpr (Ascending) {
+        if constexpr (IsAscending<Ordering>()) {
             cs_asc_[key].emplace(value);
         } else {
             cs_desc_[key].emplace(value);
         }
     }
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
     void CSPut(AttributeSet const& key, AttributePair&& value) {
-        if constexpr (Ascending) {
+        if constexpr (IsAscending<Ordering>()) {
             cs_asc_[key].emplace(std::move(value));
         } else {
             cs_desc_[key].emplace(std::move(value));
         }
     }
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
     std::unordered_set<AttributePair>& CSGet(AttributeSet const& key) {
-        if constexpr (Ascending) {
+        if constexpr (IsAscending<Ordering>()) {
             return cs_asc_[key];
         } else {
             return cs_desc_[key];
         }
     }
 
-    template <bool Ascending>
-    void AddToResult(fastod::CanonicalOD<Ascending>&& od) {
-        if constexpr (Ascending) {
+    template <od::Ordering Ordering>
+    void AddToResult(fastod::CanonicalOD<Ordering>&& od) {
+        if constexpr (IsAscending<Ordering>()) {
             result_asc_.emplace_back(std::move(od));
         } else {
             result_desc_.emplace_back(std::move(od));
@@ -108,23 +116,25 @@ private:
         result_simple_.emplace_back(std::move(od));
     }
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
     void AddCandidates(AttributeSet const& context,
                        std::vector<AttributeSet> const& deleted_attrs) {
         if (level_ == 2) {
-            for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); i++) {
-                for (model::ColumnIndex j = 0; j < data_->GetColumnCount(); j++) {
+            for (model::ColumnIndex i = 0; i < data_.GetColumnCount(); i++) {
+                for (model::ColumnIndex j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j) continue;
-                    CSPut<Ascending>(fastod::CreateAttributeSet({i, j}, data_->GetColumnCount()),
-                                     AttributePair(i, j));
+                    CSPut<Ordering>(fastod::CreateAttributeSet(
+                                            std::initializer_list<model::ColumnIndex>{i, j},
+                                            data_.GetColumnCount()),
+                                    AttributePair(i, j));
                 }
             }
         } else if (level_ > 2) {
             context.Iterate([this, &deleted_attrs, &context](model::ColumnIndex attr) {
-                auto const& candidates = CSGet<Ascending>(deleted_attrs[attr]);
+                auto const& candidates = CSGet<Ordering>(deleted_attrs[attr]);
 
                 for (AttributePair const& attribute_pair : candidates) {
-                    const AttributeSet context_delete_ab = fastod::DeleteAttribute(
+                    AttributeSet const context_delete_ab = fastod::DeleteAttribute(
                             deleted_attrs[attribute_pair.left], attribute_pair.right);
 
                     bool add_context = true;
@@ -132,7 +142,7 @@ private:
                     context_delete_ab.Iterate([this, &deleted_attrs, &attribute_pair,
                                                &add_context](model::ColumnIndex attr) {
                         std::unordered_set<AttributePair> const& cs =
-                                CSGet<Ascending>(deleted_attrs[attr]);
+                                CSGet<Ordering>(deleted_attrs[attr]);
 
                         if (cs.find(attribute_pair) == cs.end()) {
                             add_context = false;
@@ -141,16 +151,16 @@ private:
                     });
 
                     if (add_context) {
-                        CSPut<Ascending>(context, attribute_pair);
+                        CSPut<Ordering>(context, attribute_pair);
                     }
                 }
             });
         }
     }
 
-    template <bool Ascending>
+    template <od::Ordering Ordering>
     void CalculateODs(AttributeSet const& context, std::vector<AttributeSet> const& deleted_attrs) {
-        auto& cs_for_con = CSGet<Ascending>(context);
+        auto& cs_for_con = CSGet<Ordering>(context);
 
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
             model::ColumnIndex a = it->left;
@@ -158,10 +168,10 @@ private:
 
             if (ContainsAttribute(CCGet(deleted_attrs[b]), a) &&
                 ContainsAttribute(CCGet(deleted_attrs[a]), b)) {
-                fastod::CanonicalOD<Ascending> od(fastod::DeleteAttribute(deleted_attrs[a], b), a,
-                                                  b);
+                fastod::CanonicalOD<Ordering> od(fastod::DeleteAttribute(deleted_attrs[a], b), a,
+                                                 b);
 
-                if (od.IsValid(data_, partition_cache_)) {
+                if (od.IsValid(data_, partition_cache_, error_)) {
                     AddToResult(std::move(od));
                     cs_for_con.erase(it++);
                 } else {

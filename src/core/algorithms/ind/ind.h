@@ -3,10 +3,10 @@
 #include <memory>
 #include <string>
 
-#include "config/error/type.h"
-#include "model/table/column_combination.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
+#include "core/config/error/type.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 
@@ -21,12 +21,13 @@ class IND {
 private:
     std::shared_ptr<ColumnCombination> lhs_;
     std::shared_ptr<ColumnCombination> rhs_;
-    std::shared_ptr<std::vector<RelationalSchema>> schemas_;
+    std::shared_ptr<std::vector<std::unique_ptr<RelationalSchema>>> schemas_;
     config::ErrorType error_;
 
 public:
     IND(std::shared_ptr<ColumnCombination> lhs, std::shared_ptr<ColumnCombination> rhs,
-        std::shared_ptr<std::vector<RelationalSchema>> schemas, config::ErrorType error = 0.0)
+        std::shared_ptr<std::vector<std::unique_ptr<RelationalSchema>>> schemas,
+        config::ErrorType error = 0.0)
         : lhs_(std::move(lhs)), rhs_(std::move(rhs)), schemas_(std::move(schemas)), error_(error) {}
 
     ColumnCombination const& GetLhs() const {
@@ -37,7 +38,7 @@ public:
         return *rhs_;
     }
 
-    std::shared_ptr<std::vector<RelationalSchema>> const& GetSchemas() const {
+    std::shared_ptr<std::vector<std::unique_ptr<RelationalSchema>>> const& GetSchemas() const {
         return schemas_;
     }
 

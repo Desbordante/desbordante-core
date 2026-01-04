@@ -1,4 +1,4 @@
-#include "model/table/dynamic_position_list_index.h"
+#include "core/model/table/dynamic_position_list_index.h"
 
 #include <algorithm>
 #include <chrono>
@@ -9,7 +9,6 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
 
 namespace {
 // O(cluster)

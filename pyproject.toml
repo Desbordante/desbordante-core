@@ -1,10 +1,10 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11", "cmake>=3.25,<4.0"]
+requires = ["scikit-build-core", "pybind11", "cmake>=3.25"]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "desbordante"
-version = "2.4.0"
+version = "2.4.1"
 description = "Science-intensive high-performance data profiler"
 requires-python = ">=3.8"
 readme = "README_PYPI.md"
@@ -20,6 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",    
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
@@ -27,10 +28,10 @@ classifiers = [
 urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/desbordante/desbordante-core", issues = "https://github.com/desbordante/desbordante-core/issues" }
 
 [tool.scikit-build.cmake.define]
-PYTHON = "INSTALL"
-UNPACK_DATASETS = "OFF"
-COMPILE_TESTS = "OFF"
-BUILD_NATIVE = "OFF"
+DESBORDANTE_BINDINGS = "INSTALL"
+DESBORDANTE_BUILD_NATIVE = "OFF"
+DESBORDANTE_BUILD_TESTS = "OFF"
+DESBORDANTE_UNPACK_DATASETS = "OFF"
 ASAN = "OFF"
 CMAKE_BUILD_TYPE = "Release"
 CPM_SOURCE_CACHE = {env="CPM_SOURCE_CACHE", default = "./cmake/cpm-cache"}

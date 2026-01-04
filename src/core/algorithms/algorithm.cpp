@@ -1,8 +1,9 @@
-#include "algorithms/algorithm.h"
+#include "core/algorithms/algorithm.h"
 
+#include <algorithm>
 #include <cassert>
 
-#include "config/exceptions.h"
+#include "core/config/exceptions.h"
 
 namespace algos {
 
@@ -13,6 +14,10 @@ bool Algorithm::SetExternalOption([[maybe_unused]] std::string_view option_name,
 
 std::type_index Algorithm::GetExternalTypeIndex(std::string_view) const {
     return typeid(void);
+}
+
+bool Algorithm::ExternalOptionIsRequired([[maybe_unused]] std::string_view option_name) const {
+    return false;
 }
 
 void Algorithm::AddSpecificNeededOptions(
@@ -64,8 +69,15 @@ void Algorithm::MakeOptionsAvailable(std::vector<std::string_view> const& option
     }
 }
 
+bool Algorithm::AllRequiredOptionsAreSet() const noexcept {
+    std::unordered_set<std::string_view> needed = GetNeededOptions();
+    return std::ranges::none_of(needed, [this](std::string_view option_name) {
+        return possible_options_.at(option_name)->IsRequired();
+    });
+}
+
 void Algorithm::LoadData() {
-    if (!GetNeededOptions().empty())
+    if (!AllRequiredOptionsAreSet())
         throw std::logic_error("All options need to be set before starting processing.");
     LoadDataInternal();
     ExecutePrepare();
@@ -75,7 +87,7 @@ unsigned long long Algorithm::Execute() {
     if (!data_loaded_) {
         throw std::logic_error("Data must be processed before execution.");
     }
-    if (!GetNeededOptions().empty())
+    if (!AllRequiredOptionsAreSet())
         throw std::logic_error("All options need to be set before execution.");
     progress_.ResetProgress();
     ResetState();
@@ -116,10 +128,20 @@ void Algorithm::SetOption(std::string_view option_name, boost::any const& value)
     child_opts.insert(child_opts.end(), new_opts.begin(), new_opts.end());
 }
 
+bool Algorithm::OptionIsRequired(std::string_view option_name) const {
+    if (ExternalOptionIsRequired(option_name)) {
+        return true;
+    }
+
+    auto it = possible_options_.find(option_name);
+    return it != possible_options_.end() && it->second->IsRequired();
+}
+
 std::unordered_set<std::string_view> Algorithm::GetNeededOptions() const {
     std::unordered_set<std::string_view> needed{};
     for (std::string_view name : available_options_) {
-        if (!possible_options_.at(name)->IsSet()) {
+        if (std::unique_ptr<config::IOption> const& opt = possible_options_.at(name);
+            !opt->IsSet() && opt->IsRequired()) {
             needed.insert(name);
         }
     }
@@ -150,6 +172,11 @@ std::string_view Algorithm::GetDescription(std::string_view option_name) const {
     } else {
         return it->second->GetDescription();
     }
+}
+
+[[nodiscard]] bool Algorithm::OptionIsSet(std::string_view option_name) const {
+    auto it = possible_options_.find(option_name);
+    return it != possible_options_.end() && it->second->IsSet();
 }
 
 }  // namespace algos

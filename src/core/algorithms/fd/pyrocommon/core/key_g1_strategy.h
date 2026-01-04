@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/format.hpp>
 
-#include "dependency_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
 
 class KeyG1Strategy : public DependencyStrategy {
 private:
@@ -39,7 +39,7 @@ public:
     }
 
     Vertical GetIrrelevantColumns() const override {
-        return *context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_;
+        return context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
     }
 
     std::unique_ptr<DependencyStrategy> CreateClone() override;

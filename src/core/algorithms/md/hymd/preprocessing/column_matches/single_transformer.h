@@ -6,10 +6,10 @@
 #include <variant>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/global_value_identifier.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
-#include "model/types/builtin.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/transformed_columns_holder.h"
+#include "core/model/types/builtin.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 template <typename ReturnType>

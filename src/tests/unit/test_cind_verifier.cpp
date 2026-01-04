@@ -3,13 +3,13 @@
 
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "csv_config_util.h"
-#include "ind/ind_verifier/ind_verifier.h"
+#include "core/algorithms/algo_factory.h"
+#include "tests/common/all_csv_configs.h"
+#include "core/config/names.h"
+#include "tests/common/csv_config_util.h"
+#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
 
-#include "algorithms/cind/cind_verifier/cind_verifier.h"
+#include "core/algorithms/cind/cind_verifier/cind_verifier.h"
 
 namespace tests {
 

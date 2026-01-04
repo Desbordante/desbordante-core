@@ -1,11 +1,10 @@
-#include "fd_g1_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/fd_g1_strategy.h"
 
 #include <unordered_map>
 
-#include <easylogging++.h>
-
-#include "../model/pli_cache.h"
-#include "search_space.h"
+#include "core/algorithms/fd/pyrocommon/core/search_space.h"
+#include "core/algorithms/fd/pyrocommon/model/pli_cache.h"
+#include "core/util/logger.h"
 
 unsigned long long FdG1Strategy::nanos_ = 0;
 
@@ -16,8 +15,7 @@ double FdG1Strategy::CalculateG1(model::PositionListIndex* lhs_pli) const {
                                                     ->GetColumnData(rhs_->GetIndex())
                                                     .GetProbingTable();
 
-    LOG(DEBUG) << boost::format{"Probing table size for %1%: %2%"} % rhs_->ToString() %
-                          std::to_string(probing_table.size());
+    LOG_DEBUG("Probing table size for {}: {}", rhs_->ToString(), probing_table.size());
 
     // Perform probing
     int probing_table_value_id;
@@ -52,11 +50,11 @@ double FdG1Strategy::CalculateG1(double num_violating_tuple_pairs) const {
 void FdG1Strategy::EnsureInitialized(SearchSpace* search_space) const {
     if (search_space->is_initialized_) return;
 
-    double zero_fd_error =
-            CalculateError(*context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_);
-    search_space->AddLaunchPad(DependencyCandidate(
-            *context_->GetColumnLayoutRelationData()->GetSchema()->empty_vertical_,
-            model::ConfidenceInterval(zero_fd_error), true));
+    Vertical empty_vertical =
+            context_->GetColumnLayoutRelationData()->GetSchema()->CreateEmptyVertical();
+    double zero_fd_error = CalculateError(empty_vertical);
+    search_space->AddLaunchPad(DependencyCandidate(std::move(empty_vertical),
+                                                   model::ConfidenceInterval(zero_fd_error), true));
 
     search_space->is_initialized_ = true;
 }

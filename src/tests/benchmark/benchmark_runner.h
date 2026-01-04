@@ -9,9 +9,9 @@
 
 #include <boost/core/demangle.hpp>
 
-#include "algorithms/algo_factory.h"
-#include "config/names.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/config/names.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace benchmark {
 using BenchmarkBody = std::function<void()>;

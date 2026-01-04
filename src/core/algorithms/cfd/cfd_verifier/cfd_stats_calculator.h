@@ -8,9 +8,9 @@
 
 #include <boost/functional/hash.hpp>
 
-#include "cfd/model/cfd_relation_data.h"
-#include "cfd/model/cfd_types.h"
-#include "highlight.h"
+#include "core/algorithms/cfd/cfd_verifier/highlight.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "core/algorithms/cfd/model/cfd_types.h"
 
 namespace algos::cfd_verifier {
 class CFDStatsCalculator {

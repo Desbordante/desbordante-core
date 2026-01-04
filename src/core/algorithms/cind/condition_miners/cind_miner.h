@@ -1,11 +1,11 @@
 #pragma once
 
-#include "cind/cind.h"
-#include "cind/types.h"
-#include "ind/ind.h"
-#include "primitive_collection.h"
-#include "table/encoded_tables.h"
-#include "tabular_data/input_tables_type.h"
+#include "core/algorithms/cind/cind.h"
+#include "core/algorithms/cind/types.h"
+#include "core/algorithms/ind/ind.h"
+#include "core/util/primitive_collection.h"
+#include "core/model/table/encoded_tables.h"
+#include "core/config/tabular_data/input_tables_type.h"
 
 namespace algos::cind {
 class CindAlgorithm;

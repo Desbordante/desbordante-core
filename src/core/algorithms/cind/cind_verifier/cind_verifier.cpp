@@ -14,21 +14,21 @@
 #include <boost/container_hash/hash.hpp>
 #include <boost/functional/hash.hpp>
 
-#include "cind/condition.h"
-#include "config/indices/option.h"
-#include "config/option.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_tables/option.h"
-#include "conditions/completeness/option.h"
-#include "conditions/condition_type/option.h"
-#include "conditions/validity/option.h"
-#include "indices/option.h"
-#include "model/table/dataset_stream_projection.h"
-#include "table/dataset_stream_fixed.h"
-#include "table/encoded_column_data.h"
-#include "table/encoded_tables.h"
-#include "table/tuple_index.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/config/indices/option.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_tables/option.h"
+#include "core/config/conditions/completeness/option.h"
+#include "core/config/conditions/condition_type/option.h"
+#include "core/config/conditions/validity/option.h"
+#include "core/config/indices/option.h"
+#include "core/model/table/dataset_stream_projection.h"
+#include "core/model/table/dataset_stream_fixed.h"
+#include "core/model/table/encoded_column_data.h"
+#include "core/model/table/encoded_tables.h"
+#include "core/model/table/tuple_index.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 namespace {

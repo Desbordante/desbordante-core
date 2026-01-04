@@ -6,9 +6,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "all_csv_configs.h"
-#include "csv_config_util.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 

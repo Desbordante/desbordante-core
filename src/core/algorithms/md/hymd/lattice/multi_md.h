@@ -1,9 +1,9 @@
 #pragma once
 
-#include "algorithms/md/hymd/lattice/md.h"
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "algorithms/md/hymd/utility/exclusion_list.h"
+#include "core/algorithms/md/hymd/lattice/md.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/algorithms/md/hymd/utility/exclusion_list.h"
 
 namespace algos::hymd::lattice {
 struct MultiMd {

@@ -1,6 +1,6 @@
-#include "config/conditions/condition_type/option.h"
+#include "core/config/conditions/condition_type/option.h"
 
-#include "config/names_and_descriptions.h"
+#include "core/config/names_and_descriptions.h"
 
 namespace config {
 using names::kAlgoType, descriptions::kDAlgoType;

@@ -1,4 +1,4 @@
-#include "table_serialization.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 #include <utility>
 
@@ -42,7 +42,7 @@ Vertical DeserializeVertical(py::tuple t, RelationalSchema const* schema) {
         throw std::runtime_error("Invalid state for Vertical pickle!");
     }
     auto idx_vec = t[0].cast<std::vector<unsigned int>>();
-    boost::dynamic_bitset<> bitset = schema->IndicesToBitset(idx_vec);
+    boost::dynamic_bitset<> bitset = util::IndicesToBitset(idx_vec, schema->GetNumColumns());
     return Vertical(schema, std::move(bitset));
 }
 

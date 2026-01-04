@@ -1,13 +1,11 @@
-#include "cfd_relation_data.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
 #include <random>
 
-#include <easylogging++.h>
-
-#include "algorithms/cfd/util/set_util.h"
+#include "core/algorithms/cfd/util/set_util.h"
 
 // see algorithms/cfd/LICENSE
 
@@ -78,7 +76,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
     }
-    schema->Init();
 
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
                                              std::move(data_rows), std::move(item_dictionary),
@@ -153,7 +150,6 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
         schema->AppendColumn(std::move(column));
         column_data.emplace_back(schema->GetColumn(i), columns_values_dict[i]);
     }
-    schema->Init();
     return std::make_unique<CFDRelationData>(std::move(schema), std::move(column_data),
                                              std::move(data_rows), std::move(item_dictionary),
                                              std::move(items));

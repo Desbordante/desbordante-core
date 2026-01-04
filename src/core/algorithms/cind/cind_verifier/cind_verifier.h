@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "cind/types.h"
-#include "config/indices/type.h"
-#include "config/tabular_data/input_tables_type.h"
-#include "table/tuple_index.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/cind/types.h"
+#include "core/config/indices/type.h"
+#include "core/config/tabular_data/input_tables_type.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::cind {
 

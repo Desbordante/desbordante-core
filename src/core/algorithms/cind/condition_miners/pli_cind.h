@@ -3,7 +3,7 @@
 #include <vector>
 
 // #include "algorithms/ind/cind/condition.h"
-#include "cind/cind.h"
+#include "core/algorithms/cind/cind.h"
 #include "cind_miner.h"
 #include "position_lists_set.h"
 

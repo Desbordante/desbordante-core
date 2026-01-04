@@ -1,8 +1,8 @@
-#include "all_csv_configs.h"
+#include "tests/common/all_csv_configs.h"
 
 #include <string_view>
 
-#include "csv_config_util.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 
@@ -47,8 +47,8 @@ CSVConfig const kLegacyPayors = CreateCsvConfig("LegacyPayors.csv", '|', true);
 CSVConfig const kLetter = CreateCsvConfig("letter.csv", ',', false);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
 CSVConfig const kMushroom = CreateCsvConfig("cfd_data/mushroom.csv", ',', true);
-CSVConfig const kMushroomPlus3attr1500 = CreateCsvConfig("mushroom+3attr1500.csv", ',', true);
-CSVConfig const kMushroomPlus4attr1300 = CreateCsvConfig("mushroom+4attr1300.csv", ',', true);
+CSVConfig const kMushroomPlus2attr1500 = CreateCsvConfig("mushroom+2attr1500.csv", ',', true);
+CSVConfig const kMushroomPlus3attr1300 = CreateCsvConfig("mushroom+3attr1300.csv", ',', true);
 CSVConfig const kNeighbors10k = CreateCsvConfig("neighbors10k.csv", ',', true);
 CSVConfig const kNeighbors50k = CreateCsvConfig("neighbors50k.csv", ',', true);
 CSVConfig const kNeighbors100k = CreateCsvConfig("neighbors100k.csv", ',', true);

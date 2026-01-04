@@ -1,14 +1,14 @@
-#include "algorithms/gfd/gfd_validator/egfd_validator.h"
+#include "core/algorithms/gfd/gfd_validator/egfd_validator.h"
 
 #include <iostream>
 
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
 
-#include "config/equal_nulls/option.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace {
 
@@ -838,7 +838,7 @@ bool FullMatch(CPI& cpi, Match& match, std::set<model::vertex_t> const& root_can
                std::set<model::vertex_t> const& core, std::vector<model::vertex_t> const& seq,
                std::map<model::vertex_t, model::vertex_t> const& parent,
                model::graph_t const& graph, model::graph_t const& query) {
-    match.push_back({root_candidates.begin(), root_candidates.end()});
+    match.emplace_back(root_candidates.begin(), root_candidates.end());
     for (std::size_t i = 1; i < core.size(); ++i) {
         std::pair<model::vertex_t, model::vertex_t> edge(parent.at(seq.at(i)), seq.at(i));
         int index = std::find(seq.begin(), seq.end(), parent.at(seq.at(i))) - seq.begin();
@@ -853,12 +853,12 @@ bool FullMatch(CPI& cpi, Match& match, std::set<model::vertex_t> const& root_can
             match.at(i).first++;
         }
         if (match.at(i).first == match.at(i).second) {
-            LOG(DEBUG) << "Trivially satisfied";
+            LOG_DEBUG("Trivially satisfied");
             return true;
         }
     }
     for (std::size_t i = core.size(); i < seq.size(); ++i) {
-        match.push_back({root_candidates.end(), root_candidates.end()});
+        match.emplace_back(root_candidates.end(), root_candidates.end());
     }
     return false;
 }
@@ -910,7 +910,7 @@ bool CheckTrivially(const CPI& cpi, Match& match,
             match.at(k).first++;
         }
         if (match.at(k).first == match.at(k).second) {
-            LOG(DEBUG) << "Trivially satisfied";
+            LOG_DEBUG("Trivially satisfied");
             return true;
         }
     }
@@ -957,7 +957,7 @@ bool CheckMatch(const CPI& cpi, Match& match,
             continue;
         }
         if (!Satisfied(graph, query, seq, match, gfd.GetConclusion())) {
-            LOG(DEBUG) << "Checked embeddings: " << amount;
+            LOG_DEBUG("Checked embeddings: {}", amount);
             return false;
         }
     }
@@ -994,7 +994,7 @@ bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
     // check
     if (Satisfied(graph, query, seq, match, gfd.GetPremises()) &&
         !Satisfied(graph, query, seq, match, gfd.GetConclusion())) {
-        LOG(DEBUG) << "Checked embeddings: " << amount;
+        LOG_DEBUG("Checked embeddings: {}", amount);
         return false;
     }
 
@@ -1012,7 +1012,7 @@ bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
                 continue;
             }
             if (!Satisfied(graph, query, seq, match, gfd.GetConclusion())) {
-                LOG(DEBUG) << "Checked embeddings: " << amount;
+                LOG_DEBUG("Checked embeddings: {}", amount);
                 return false;
             }
             continue;
@@ -1026,7 +1026,7 @@ bool Check(CPI& cpi, model::graph_t const& graph, model::Gfd const& gfd,
             return false;
         }
     }
-    LOG(DEBUG) << "total number of embeddings: " << amount;
+    LOG_DEBUG("total number of embeddings: {}", amount);
     return true;
 }
 
@@ -1067,7 +1067,7 @@ bool Validate(model::graph_t const& graph, model::Gfd const& gfd) {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG(DEBUG) << "CPI constructed in " << elapsed_milliseconds.count() << ". Matching...";
+    LOG_DEBUG("CPI constructed in {}. Matching...", elapsed_milliseconds.count());
     return Check(cpi, graph, gfd, core, forest, parent, nte);
 }
 

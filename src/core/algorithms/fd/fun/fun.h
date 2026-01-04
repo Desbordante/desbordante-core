@@ -2,8 +2,8 @@
 
 #include <set>
 
-#include "algorithms/fd/pli_based_fd_algorithm.h"
-#include "util/custom_hashes.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
+#include "core/util/custom_hashes.h"
 
 namespace algos {
 
@@ -18,8 +18,8 @@ public:
     explicit FunQuadruple(Vertical const& candidate)
         : candidate_(candidate),
           count_(0),
-          quasiclosure_(*candidate.GetSchema()->empty_vertical_),
-          closure_(*candidate.GetSchema()->empty_vertical_) {}
+          quasiclosure_(candidate.GetSchema()->CreateEmptyVertical()),
+          closure_(candidate.GetSchema()->CreateEmptyVertical()) {}
 
     explicit FunQuadruple(Column const& candidate) : FunQuadruple(Vertical(candidate)) {}
 

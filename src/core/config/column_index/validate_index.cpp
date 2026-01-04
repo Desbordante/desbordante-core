@@ -1,6 +1,6 @@
-#include "config/indices/validate_index.h"
+#include "core/config/column_index/validate_index.h"
 
-#include "config/exceptions.h"
+#include "core/config/exceptions.h"
 
 namespace config {
 

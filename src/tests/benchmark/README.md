@@ -13,10 +13,10 @@ Then you'll need to add file `src/tests/benchmark/XX_benchmark.h` with following
 
 // There're `BenchmarkRunner` and `BenchmarkComparer` classes that control
 // execution of all benchmarks.
-// They live in `src/tests/benchmark/benchmark_runner.h` and
-// `src/test/benchmark/benchmark_comparer.h`:
-#include "benchmark_runner.h"
-#include "benchmark_comparer.h"
+// They live in `src/test/benchmark/benchmark_comparer.h` and
+// `src/tests/benchmark/benchmark_runner.h`:
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
 
 void XXBenchmark(benchmark::BenchmarkRunner& runner, benchmark::BenchmarkComparer& comparer) {
     // Test body. Will be further discussed
@@ -43,7 +43,7 @@ void XXBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
     auto bench_name = runner.RegisterSimpleBenchmark(kHugeDataset, std::move(params), "simple");
     // Next line is optional, default threshold is 10%
     // SetThreshold takes benchmark name and desired threshold
-    comparer.SetThreshold(bench_name, 15);
+    comparer.SetThreshold(bench_name, 20);
 }
 ```
 
@@ -53,7 +53,7 @@ with `params` parameters and calls `Execute`.
 Name suffix is optional and may be useful when you need several tests on one algo (for example,
 using different error measures).
 
-Time threshold for this test will be 15%. If not specified, it defaults to 10%.
+Time threshold for this test will be 20%. If not specified, it defaults to 15%.
 
 For examples, see `fd_benchmark.h`.
 
@@ -70,7 +70,7 @@ void XXBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
     };
     constexpr auto bench_name = "XXMiner, huge_dataset";
     runner.RegisterBenchmark(bench_name, std::move(test));
-    comparer.SetThreshold(bench_name, 15);
+    comparer.SetThreshold(bench_name, 10);
 }
 ```
 

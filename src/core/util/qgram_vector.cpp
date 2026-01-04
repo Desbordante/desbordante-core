@@ -1,4 +1,4 @@
-#include "qgram_vector.h"
+#include "core/util/qgram_vector.h"
 
 #include <algorithm>
 #include <cassert>

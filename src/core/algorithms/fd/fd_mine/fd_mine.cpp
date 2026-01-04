@@ -1,10 +1,11 @@
-#include "fd_mine.h"
+#include "core/algorithms/fd/fd_mine/fd_mine.h"
 
 #include <queue>
 #include <vector>
 
 #include <boost/unordered_map.hpp>
-#include <easylogging++.h>
+
+#include "core/util/logger.h"
 
 namespace algos {
 
@@ -274,14 +275,14 @@ void FdMine::Display() {
                 continue;
             }
             Vertical lhs_vertical(schema_, lhs);
-            LOG(DEBUG) << "Discovered FD: " << lhs_vertical.ToString() << " -> "
-                       << schema_->GetColumn(j)->GetName();
+            LOG_DEBUG("Discovered FD: {} -> {}", lhs_vertical.ToString(),
+                      schema_->GetColumn(j)->GetName());
             RegisterFd(std::move(lhs_vertical), *schema_->GetColumn(j),
                        relation_->GetSharedPtrSchema());
             fd_counter++;
         }
     }
-    LOG(DEBUG) << "TOTAL FDs " << fd_counter;
+    LOG_DEBUG("TOTAL FDs: {}", fd_counter);
 }
 
 }  // namespace algos

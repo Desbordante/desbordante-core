@@ -2,13 +2,13 @@
 // Created by Ilya Vologin
 // https://github.com/cupertank
 //
-#include "column_layout_relation_data.h"
+#include "core/model/table/column_layout_relation_data.h"
 
 #include <map>
 #include <memory>
 #include <utility>
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 std::vector<int> ColumnLayoutRelationData::GetTuple(int tuple_index) const {
     int num_columns = schema_->GetNumColumns();
@@ -33,8 +33,10 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         row = data_stream.GetNextRow();
 
         if (row.size() != num_columns) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << num_columns << ", got " << row.size() << ")";
+            LOG_WARN(
+                    "Unexpected number of columns for a row, "
+                    "skipping (expected {}, got {})",
+                    num_columns, row.size());
             continue;
         }
 
@@ -64,8 +66,6 @@ std::unique_ptr<ColumnLayoutRelationData> ColumnLayoutRelationData::CreateFrom(
         auto pli = model::PositionListIndex::CreateFor(column_vectors[i], is_null_eq_null);
         column_data.emplace_back(schema->GetColumn(i), std::move(pli));
     }
-
-    schema->Init();
 
     return std::make_unique<ColumnLayoutRelationData>(std::move(schema), std::move(column_data));
 }

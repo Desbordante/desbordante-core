@@ -4,10 +4,10 @@
 #include <iterator>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/md_element.h"
-#include "algorithms/md/hymd/rhss.h"
-#include "model/index.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/md_element.h"
+#include "core/algorithms/md/hymd/rhss.h"
+#include "core/model/index.h"
 
 namespace algos::hymd::utility {
 class InvalidatedRhss {

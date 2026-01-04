@@ -1,7 +1,7 @@
 #pragma once
 
-#include "config/common_option.h"
-#include "config/error/type.h"
+#include "core/config/common_option.h"
+#include "core/config/error/type.h"
 
 namespace config {
 extern CommonOption<ErrorType> const kCompletenessOpt;

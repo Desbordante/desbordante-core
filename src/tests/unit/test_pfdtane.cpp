@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "fd/tane/pfdtane.h"
-#include "model/table/column_layout_relation_data.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/tane/pfdtane.h"
+#include "core/config/names.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;
@@ -32,10 +32,6 @@ struct PFDTaneValidationParams {
     std::vector<PFD> fds;
     algos::PfdErrorMeasure error_measure;
     CSVConfig csv_config;
-
-    PFDTaneValidationParams(std::vector<PFD>&& fds, algos::PfdErrorMeasure const& error_measure,
-                            CSVConfig const& csv_config)
-        : fds(fds), error_measure(error_measure), csv_config(csv_config) {}
 };
 
 class TestPFDTaneMining : public ::testing::TestWithParam<PFDTaneMiningParams> {};

@@ -7,11 +7,11 @@
 #include <variant>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/global_value_identifier.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/column_match.h"
-#include "config/exceptions.h"
-#include "model/index.h"
-#include "model/table/column.h"
+#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/column_match.h"
+#include "core/config/exceptions.h"
+#include "core/model/index.h"
+#include "core/model/table/column.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 using ColumnIdentifier = std::variant<std::string, model::Index>;

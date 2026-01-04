@@ -7,9 +7,9 @@
 #include <boost/container_hash/hash.hpp>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/version.hpp>
-#include <easylogging++.h>
 
-#include "types.h"
+#include "core/algorithms/fd/hycommon/types.h"
+#include "core/util/logger.h"
 
 #define UNORDERED_FLAT_MAP_AVAILABLE (BOOST_VERSION >= 108100)
 
@@ -37,11 +37,12 @@ void LogLevel(std::vector<VertexAndAgreeSet> const& cur_level_vertices,
     int const num_invalid_instances = result.InvalidInstances().size();
     int const num_valid_instances = result.CountValidations() - num_invalid_instances;
 
-    LOG(INFO) << "LEVEL " << current_level_number << "(" << cur_level_vertices.size()
-              << "): " << result.CountIntersections() << " intersections; "
-              << result.CountValidations() << " validations; " << num_invalid_instances
-              << " invalid; " << candidates << " new candidates; --> " << num_valid_instances << " "
-              << primitive << "s";
+    LOG_INFO(
+            "LEVEL {} ({}): {} intersections; {} validations; {} invalid; {} new candidates; --> "
+            "{} {}s",
+            current_level_number, cur_level_vertices.size(), result.CountIntersections(),
+            result.CountValidations(), num_invalid_instances, candidates, num_valid_instances,
+            primitive);
 }
 
 template <typename T>

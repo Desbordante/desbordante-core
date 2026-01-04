@@ -1,14 +1,13 @@
-#include "algorithms/nd/nd_verifier/util/stats_calculator.h"
+#include "core/algorithms/nd/nd_verifier/util/stats_calculator.h"
 
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
-
-#include "algorithms/nd/nd.h"
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/algorithms/nd/nd.h"
+#include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/util/logger.h"
 
 namespace algos::nd_verifier::util {
 
@@ -42,8 +41,10 @@ void StatsCalculator::CalculateStats() {
 
         if (weight == 0) {
             // This value is associated with no rhs values, but is somehow present in value_deps
-            LOG(INFO) << "WARNING: Lhs value '" << (*lhs_values_)[code]
-                      << "''s weight is 0, but it's present in value_deps";
+            LOG_INFO(
+                    "WARNING: Lhs value '{}''s "
+                    "weight is 0, but it's present in value_deps",
+                    (*lhs_values_)[code].ToString());
         }
 
         if (weight > max_weight) {
@@ -72,8 +73,8 @@ void StatsCalculator::CalculateStats() {
     real_weight_ = max_weight;
     global_min_weight_ = min_weight;
 
-    LOG(INFO) << "Minimal weight: " << global_min_weight_;
-    LOG(INFO) << "Maximal weight (real weight): " << real_weight_;
+    LOG_INFO("Minimal weight: {}", global_min_weight_);
+    LOG_INFO("Maximal weight (real weight): {}", real_weight_);
 }
 
 }  // namespace algos::nd_verifier::util

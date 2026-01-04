@@ -12,7 +12,7 @@ file(GLOB common_sources "common/*.h" "common/*.cpp")
 file(GLOB unit_test_sources "unit/*.h" "unit/*.cpp")
 file(GLOB benchmark_sources "benchmark/*.h" "benchmark/*.cpp")
 
-if (COMPILE_TESTS)
+if (DESBORDANTE_BUILD_TESTS)
 	enable_testing()
 	# Load CMake's built-in GoogleTest module
     include(GoogleTest)
@@ -21,8 +21,6 @@ if (COMPILE_TESTS)
     add_executable(${UNIT_TEST_BINARY} ${common_sources} ${unit_test_sources})
 
 	# ---- Test Dependencies ----
-
-    target_include_directories(${UNIT_TEST_BINARY} PRIVATE "common")
 
 	# Link test executable with:
 	# PRIVATE:
@@ -38,13 +36,11 @@ if (COMPILE_TESTS)
     gtest_discover_tests(${UNIT_TEST_BINARY} WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif()
 
-if (COMPILE_BENCHMARKS)
+if (DESBORDANTE_BUILD_BENCHMARKS)
 	# Create benchmark executable
 	add_executable(${BENCHMARK_BINARY} ${common_sources} ${benchmark_sources})
 
 	# ---- Benchmark Dependencies ----
-
-    target_include_directories(${BENCHMARK_BINARY} PRIVATE "common")
 
 	# Link benchmark executable with:
 	# PRIVATE:

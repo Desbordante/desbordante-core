@@ -1,14 +1,14 @@
-#include "algo_factory.h"
+#include "core/algorithms/algo_factory.h"
 
 #include <algorithm>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
 
-#include "algorithms/algorithms.h"
-#include "algorithms/create_algorithm.h"
-#include "config/names.h"
-#include "tabular_data/input_tables_type.h"
+#include "core/algorithms/algorithms.h"
+#include "core/algorithms/create_algorithm.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_tables_type.h"
 
 namespace algos {
 
@@ -42,7 +42,7 @@ void ConfigureFromMap(Algorithm& algorithm, StdParamsMap const& options) {
     });
 }
 
-void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options) {
+void LoadAlgorithmData(Algorithm& algorithm, StdParamsMap const& options) {
     ConfigureFromFunction(algorithm, [&options](std::string_view option_name) {
         using namespace config::names;
         auto create_input_table = [](CSVConfig const& csv_config) -> config::InputTable {
@@ -64,6 +64,10 @@ void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options) {
         return GetOrEmpty(options, option_name);
     });
     algorithm.LoadData();
+}
+
+void LoadAlgorithm(Algorithm& algorithm, StdParamsMap const& options) {
+    LoadAlgorithmData(algorithm, options);
     ConfigureFromMap(algorithm, options);
 }
 }  // namespace algos

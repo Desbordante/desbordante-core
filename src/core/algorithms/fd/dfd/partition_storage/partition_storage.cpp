@@ -1,10 +1,10 @@
-#include "partition_storage.h"
+#include "core/algorithms/fd/dfd/partition_storage/partition_storage.h"
 
 #include <boost/format.hpp>
 #include <boost/optional.hpp>
-#include <easylogging++.h>
 
-#include "model/table/vertical_map.h"
+#include "core/model/table/vertical_map.h"
+#include "core/util/logger.h"
 
 model::PositionListIndex* PartitionStorage::Get(Vertical const& vertical) {
     return index_->Get(vertical).get();
@@ -26,13 +26,13 @@ PartitionStorage::~PartitionStorage() {}
 std::variant<model::PositionListIndex*, std::unique_ptr<model::PositionListIndex>>
 PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     std::scoped_lock lock(getting_pli_mutex_);
-    LOG(DEBUG) << boost::format{"PLI for %1% requested: "} % vertical.ToString();
+    LOG_DEBUG("PLI for {} requested: ", vertical.ToString());
 
     // is PLI already cached?
     model::PositionListIndex* pli = Get(vertical);
     if (pli != nullptr) {
         pli->IncFreq();
-        LOG(DEBUG) << boost::format{"Served from PLI cache."};
+        LOG_DEBUG("Served from PLI cache.");
         // addToUsageCounter
         return pli;
     }
@@ -105,7 +105,7 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
     std::sort(operands.begin(), operands.end(),
               [](auto& el1, auto& el2) { return el1.pli_->GetSize() < el2.pli_->GetSize(); });
 
-    LOG(DEBUG) << boost::format{"Intersecting %1%."} % "[UNIMPLEMENTED]";
+    LOG_DEBUG("Intersecting [UNIMPLEMENTED]");
 
     if (operands.empty()) {
         throw std::logic_error("Current implementation assumes operands.size() > 0");
@@ -138,8 +138,8 @@ PartitionStorage::GetOrCreateFor(Vertical const& vertical) {
         }
     }
 
-    LOG(DEBUG) << boost::format{"Calculated from %1% sub-PLIs (saved %2% intersections)."} %
-                          operands.size() % (vertical.GetArity() - operands.size());
+    LOG_DEBUG("Calculated from {} sub-PLIs (saved {} intersections).", operands.size(),
+              (vertical.GetArity() - operands.size()));
 
     return variant_intersection_pli;
 }

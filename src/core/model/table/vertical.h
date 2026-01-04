@@ -11,7 +11,7 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column.h"
+#include "core/model/table/column.h"
 
 class Vertical {
 private:
@@ -22,8 +22,6 @@ private:
     RelationalSchema const* schema_;
 
 public:
-    static std::unique_ptr<Vertical> EmptyVertical(RelationalSchema const* rel_schema);
-
     Vertical(RelationalSchema const* rel_schema, boost::dynamic_bitset<> indices);
     Vertical() = default;
 
@@ -81,6 +79,10 @@ public:
 
     unsigned int GetArity() const {
         return column_indices_.count();
+    }
+
+    bool IsEmpty() const {
+        return column_indices_.none();
     }
 
     std::vector<Column const*> GetColumns() const;

@@ -6,10 +6,10 @@
 
 #include <boost/any.hpp>
 
-#include "algorithms/algorithm.h"
-#include "algorithms/fd/fd.h"
-#include "config/max_lhs/type.h"
-#include "util/primitive_collection.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/fd/fd.h"
+#include "core/config/max_lhs/type.h"
+#include "core/util/primitive_collection.h"
 
 namespace model {
 class AgreeSetFactory;
@@ -75,19 +75,6 @@ public:
      * понадобится загрузить список в питон и как-нибудь его поанализировать
      * */
     std::string GetJsonFDs() const;
-
-    /* Returns a vector of columns containing only unique values (i.e. keys).
-     * Should be called after execute() only.
-     * NOTE: retrieves keys from mined fds, so could be quite slow on wide
-     * tables with many fds.
-     * If your algorithm is inherited from FDAlgorithm but not from
-     * PliBasedFDAlgorithm and generates ColumnLayoutRelationData from the
-     * input table or in some similar way parses table, override this method
-     * and use parsed table representation to retrieve keys (for performance
-     * purposes).
-     * PliBasedFDAlgorithm::GetKeys() is already overriding this method.
-     */
-    virtual std::vector<Column const*> GetKeys() const;
 
     // считает контрольную сумму Флетчера - нужно для тестирования по хешу
     unsigned int Fletcher16();

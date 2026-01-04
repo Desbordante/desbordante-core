@@ -1,4 +1,4 @@
-#include "algorithms/nd/nd_verifier/util/highlight.h"
+#include "core/algorithms/nd/nd_verifier/util/highlight.h"
 
 #include <algorithm>
 #include <memory>
@@ -7,8 +7,8 @@
 #include <unordered_set>
 #include <vector>
 
-#include "algorithms/nd/nd_verifier/util/value_combination.h"
-#include "algorithms/nd/nd_verifier/util/vector_to_string.h"
+#include "core/algorithms/nd/nd_verifier/util/value_combination.h"
+#include "core/util/range_to_string.h"
 
 namespace algos::nd_verifier::util {
 
@@ -100,14 +100,14 @@ std::vector<std::string> const& Highlight::GetRhsValues() {
 }
 
 [[nodiscard]] std::string Highlight::ToIndicesString() const {
-    return util::VectorToString(CalculateOccurencesIndices());
+    return ::util::RangeToString(CalculateOccurencesIndices());
 }
 
 [[nodiscard]] std::string Highlight::ToValuesString() const {
     std::string const& lhs = GetLhsValue();
     std::vector<std::string> const& rhs = CalculateRhsValues();
 
-    return lhs + " -> " + util::VectorToString(rhs);
+    return lhs + " -> " + ::util::RangeToString(rhs);
 }
 
 std::ostream& operator<<(std::ostream& os, Highlight const& hl) {

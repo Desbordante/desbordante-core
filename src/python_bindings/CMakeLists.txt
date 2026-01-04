@@ -23,12 +23,9 @@ target_link_libraries(
     ${BINDINGS_NAME} PRIVATE ${CMAKE_PROJECT_NAME} # Desbordante core static library
 )
 
-# Enable local header inclusion
-include_directories(".")
-
 # ---- Installation Setup ----
 
-if(PYTHON STREQUAL "INSTALL")
+if(DESBORDANTE_BINDINGS STREQUAL "INSTALL")
     # Install Python bindings module to system
     # Places the compiled library in the root installation directory
     install(TARGETS ${BINDINGS_NAME} LIBRARY DESTINATION .)

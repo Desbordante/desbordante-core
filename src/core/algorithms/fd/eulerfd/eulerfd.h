@@ -14,17 +14,17 @@
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
 #include <boost/unordered_set.hpp>
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
-#include "custom_random_seed/option.h"
-#include "custom_random_seed/type.h"
-#include "fd/fd_algorithm.h"
-#include "mlfq.h"
-#include "model/table/column.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
-#include "search_tree.h"
-#include "util/custom_random.h"
+#include "core/algorithms/fd/eulerfd/mlfq.h"
+#include "core/algorithms/fd/eulerfd/search_tree.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/config/custom_random_seed/option.h"
+#include "core/config/custom_random_seed/type.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_random.h"
 
 namespace algos {
 

@@ -6,10 +6,10 @@
 #include <type_traits>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "algorithms/md/hymd/md_lhs.h"
-#include "model/index.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/model/index.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::lattice {
 

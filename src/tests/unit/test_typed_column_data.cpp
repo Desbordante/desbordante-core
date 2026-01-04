@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/fd/fd_algorithm.h"
-#include "all_csv_configs.h"
-#include "csv_config_util.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 
@@ -17,9 +17,6 @@ using mo::TypeId;
 struct TypeParsingParams {
     std::vector<mo::TypeId> expected;
     CSVConfig const& csv_config;
-
-    TypeParsingParams(std::vector<mo::TypeId>&& expected, CSVConfig const& csv_config)
-        : expected(std::move(expected)), csv_config(csv_config) {}
 };
 
 class TestTypeParsing : public ::testing::TestWithParam<TypeParsingParams> {};

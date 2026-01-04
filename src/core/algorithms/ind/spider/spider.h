@@ -6,12 +6,12 @@
 #pragma once
 #include <vector>
 
-#include "algorithms/ind/ind_algorithm.h"
-#include "config/equal_nulls/type.h"
-#include "config/error/type.h"
-#include "config/mem_limit/type.h"
-#include "config/thread_number/type.h"
-#include "model/table/column_domain.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/config/equal_nulls/type.h"
+#include "core/config/error/type.h"
+#include "core/config/mem_limit/type.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/column_domain.h"
 
 namespace algos {
 namespace cind {

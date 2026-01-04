@@ -7,11 +7,11 @@
 
 #include <boost/any.hpp>
 
-#include "algorithms/algorithm.h"
-#include "ar.h"
-#include "ar_algorithm_enums.h"
-#include "config/tabular_data/input_table_type.h"
-#include "model/transaction/transactional_data.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/association_rules/ar.h"
+#include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/transaction/transactional_data.h"
 
 namespace algos {
 

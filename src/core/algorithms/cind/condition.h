@@ -10,7 +10,7 @@
 
 #include "condition_miners/itemset_node.h"
 #include "condition_miners/position_lists_set.h"
-#include "table/encoded_column_data.h"
+#include "core/model/table/encoded_column_data.h"
 
 namespace algos::cind {
 char const* const kAnyValue = "-";

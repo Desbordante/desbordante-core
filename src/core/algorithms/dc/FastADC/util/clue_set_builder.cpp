@@ -1,7 +1,8 @@
-#include "dc/FastADC/util/clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 
-#include "dc/FastADC/util/cross_clue_set_builder.h"
-#include "dc/FastADC/util/single_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/util/single_clue_set_builder.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 
@@ -9,7 +10,7 @@ ClueSet BuildClueSet(std::vector<PliShard> const& pliShards, PredicatePacks cons
     ClueSet clue_set;
     ClueSet partial_clue_set;
     size_t task_count = (pliShards.size() * (pliShards.size() + 1)) / 2;
-    LOG(DEBUG) << "  [CLUE] task count: " << task_count;
+    LOG_DEBUG("  [CLUE] task count: {}", task_count);
 
     // Range of all pliShards is equal, so it's safe to pass a pre-allocated vector of
     // pliShards[0]'s range

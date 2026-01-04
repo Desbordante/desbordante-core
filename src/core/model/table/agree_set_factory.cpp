@@ -1,4 +1,4 @@
-#include "agree_set_factory.h"
+#include "core/model/table/agree_set_factory.h"
 
 #include <atomic>
 #include <condition_variable>
@@ -13,10 +13,10 @@
 #define BOOST_THREAD_PROVIDES_FUTURE_WHEN_ALL_WHEN_ANY
 #include <boost/thread.hpp>
 #include <boost/thread/future.hpp>
-#include <easylogging++.h>
 
-#include "identifier_set.h"
-#include "parallel_for.h"
+#include "core/model/table/identifier_set.h"
+#include "core/util/logger.h"
+#include "core/util/parallel_for.h"
 
 namespace model {
 
@@ -50,13 +50,12 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAgreeSets() const {
         }
     }
 
-    // metanome kostil, doesn't work properly in general
-    agree_sets.insert(*relation_->GetSchema()->empty_vertical_);
+    agree_sets.insert(relation_->GetSchema()->CreateEmptyVertical());
 
     auto elapsed_mills_to_gen_agree_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "TIME TO GENERATE AGREE SETS WITH METHOD " << method_str << ": "
-              << elapsed_mills_to_gen_agree_sets.count();
+    LOG_INFO("TIME TO GENERATE AGREE SETS WITH METHOD {}: {}", method_str,
+             elapsed_mills_to_gen_agree_sets.count());
 
     return agree_sets;
 }
@@ -82,11 +81,11 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingVectorOfIdSets() cons
 
     auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "TIME TO IDENTIFIER SETS GENERATION: " << elapsed_mills_to_gen_id_sets.count();
+    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
-    LOG(DEBUG) << "Identifier sets:";
+    LOG_DEBUG("Identifier sets:");
     for (auto const& id_set : identifier_sets) {
-        LOG(DEBUG) << id_set.ToString();
+        LOG_DEBUG("{}", id_set.ToString());
     }
 
     // compute agree sets using identifier sets
@@ -124,11 +123,11 @@ AgreeSetFactory::SetOfAgreeSets AgreeSetFactory::GenAsUsingMapOfIdSets() const {
 
     auto elapsed_mills_to_gen_id_sets = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(INFO) << "TIME TO IDENTIFIER SETS GENERATION: " << elapsed_mills_to_gen_id_sets.count();
+    LOG_INFO("TIME TO IDENTIFIER SETS GENERATION: {}", elapsed_mills_to_gen_id_sets.count());
 
-    LOG(DEBUG) << "Identifier sets:";
+    LOG_DEBUG("Identifier sets:");
     for (auto const& [index, id_set] : identifier_sets) {
-        LOG(DEBUG) << id_set.ToString();
+        LOG_DEBUG("{}", id_set.ToString());
     }
 
     // compute agree sets using identifier sets
@@ -292,8 +291,8 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenPliMaxRepresentation() const {
     auto elapsed_mills_to_gen_max_representation =
             std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() -
                                                                   start_time);
-    LOG(INFO) << "TIME TO GENERATE MAX REPRESENTATION WITH METHOD " << method_str << ": "
-              << elapsed_mills_to_gen_max_representation.count();
+    LOG_INFO("TIME TO GENERATE MAX REPRESENTATION WITH METHOD {}: {}", method_str,
+             elapsed_mills_to_gen_max_representation.count());
 
     return max_representation;
 }
@@ -427,8 +426,8 @@ AgreeSetFactory::SetOfVectors AgreeSetFactory::GenMcParallel() const {
     throw std::runtime_error("MCParallel max representation method is not implemented yet.");
 #if 0
     if (config_.threads_num == 1) {
-        LOG(WARNING) << "Using parallel max representation generation"
-                        " method with 1 thread specified";
+        LOG_WARN("Using parallel max representation generation"
+                        " method with 1 thread specified");
     }
 
     SetOfVectors max_representation;

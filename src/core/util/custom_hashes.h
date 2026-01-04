@@ -1,14 +1,14 @@
 #pragma once
 
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 class CustomHashing {
 private:
     enum class BitsetHashingMethod { kTryConvertToUlong, kTrimAndConvertToUlong };
 
     static constexpr BitsetHashingMethod kDefaultHashingMethod =
-#ifdef SAFE_VERTICAL_HASHING
+#ifdef DESBORDANTE_SAFE_VERTICAL_HASHING
             BitsetHashingMethod::kTrimAndConvertToUlong;
 #else
             BitsetHashingMethod::kTryConvertToUlong;

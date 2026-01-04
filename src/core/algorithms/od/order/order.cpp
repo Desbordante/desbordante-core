@@ -1,19 +1,18 @@
-#include "order.h"
+#include "core/algorithms/od/order/order.h"
 
 #include <algorithm>
 #include <iostream>
 #include <memory>
 #include <utility>
 
-#include <easylogging++.h>
-
-#include "config/names_and_descriptions.h"
-#include "config/tabular_data/input_table/option.h"
-#include "dependency_checker.h"
-#include "list_lattice.h"
-#include "model/table/tuple_index.h"
-#include "model/types/types.h"
-#include "order_utility.h"
+#include "core/algorithms/od/order/dependency_checker.h"
+#include "core/algorithms/od/order/list_lattice.h"
+#include "core/algorithms/od/order/order_utility.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/tuple_index.h"
+#include "core/model/types/types.h"
+#include "core/util/logger.h"
 
 namespace algos::order {
 
@@ -298,63 +297,63 @@ void Order::MergePrune() {
 }
 
 void Order::PrintValidOD() {
-    LOG(DEBUG) << "***PREVIOUS CANDIDATE SETS***" << '\n';
+    LOG_DEBUG("***PREVIOUS CANDIDATE SETS***\n");
     for (auto const& [lhs, rhs_list] : previous_candidate_sets_) {
         if (rhs_list.empty()) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << "-> empty";
-            LOG(DEBUG) << '\n';
+            LOG_DEBUG("-> empty");
+            LOG_DEBUG('\n');
         }
         for (AttributeList const& rhs : rhs_list) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            LOG_DEBUG("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            LOG_DEBUG('\n');
         }
     }
-    LOG(DEBUG) << "***CANDIDATE SETS***" << '\n';
+    LOG_DEBUG("***CANDIDATE SETS***\n");
     for (auto const& [lhs, rhs_list] : candidate_sets_) {
         if (rhs_list.empty()) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << "-> empty";
-            LOG(DEBUG) << '\n';
+            LOG_DEBUG("-> empty");
+            LOG_DEBUG('\n');
         }
         for (AttributeList const& rhs : rhs_list) {
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            LOG_DEBUG("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            LOG_DEBUG('\n');
         }
     }
-    LOG(DEBUG) << "***VALID ORDER DEPENDENCIES***" << '\n';
+    LOG_DEBUG("***VALID ORDER DEPENDENCIES***\n");
     unsigned int cnt = 0;
     for (auto const& [lhs, rhs_list] : valid_) {
         for (AttributeList const& rhs : rhs_list) {
             ++cnt;
             for (auto const& attr : lhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << "->";
+            LOG_DEBUG("->");
             for (auto const& attr : rhs) {
-                LOG(DEBUG) << attr + 1 << ",";
+                LOG_DEBUG("{},", attr + 1);
             }
-            LOG(DEBUG) << '\n';
+            LOG_DEBUG('\n');
         }
     }
-    LOG(DEBUG) << "OD amount: " << cnt;
-    LOG(DEBUG) << '\n' << '\n';
+    LOG_DEBUG("OD amount: {}", cnt);
+    LOG_DEBUG("\n\n");
 }
 
 unsigned long long Order::ExecuteInternal() {
@@ -369,7 +368,7 @@ unsigned long long Order::ExecuteInternal() {
     PrintValidOD();
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
-    LOG(DEBUG) << "ms: " << elapsed_milliseconds.count() << '\n';
+    LOG_DEBUG("ms: {}\n", elapsed_milliseconds.count());
     return elapsed_milliseconds.count();
 }
 

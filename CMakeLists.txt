@@ -1,11 +1,6 @@
 # ---- CMake Policies ----
 
-cmake_minimum_required(VERSION 3.25...3.31)
-
-# https://github.com/Desbordante/desbordante-core/issues/549
-if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0)
-    message(FATAL_ERROR "The project does not currently support versions 4.0 or higher.")
-endif()
+cmake_minimum_required(VERSION 3.25)
 
 if(POLICY CMP0167)
     # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
@@ -40,11 +35,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
 endif()
 
 # Untested compiler notification
-if(NOT
-   ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang"
-    OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
-)
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|AppleClang|Clang)$")
     message(WARNING "This project has primarily been tested with GCC, LLVM Clang, and Apple Clang."
                     "Other compilers may not be fully supported."
     )
@@ -52,39 +43,52 @@ endif()
 
 # --- Build Configuration Options ---
 
-option(COMPILE_TESTS "Build tests" ON)
-option(COMPILE_BENCHMARKS "Build benchmarks" OFF)
-option(UNPACK_DATASETS "Unpack datasets" ON)
-option(BUILD_NATIVE "Build for host machine" ON)
-option(USE_LTO "Build using interprocedural optimization" OFF)
-option(GDB_DEBUG "Include debug information for use by GDB" OFF)
-set(SANITIZER
+option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
+option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
+option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
+# ---- Vertical Hashing Optimization ----
+# Performance/functionality trade-off:
+# - Disabled by default for maximum performance
+# - Enabled for wide datasets (>32 columns) with potential performance penalty
+option(DESBORDANTE_SAFE_VERTICAL_HASHING
+        "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
+    at the cost of reduced performance. Recommended for exploratory data analysis." OFF
+)
+option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
+option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
+
+set(DESBORDANTE_SANITIZER
     ""
     CACHE STRING "Build with sanitizer, possible values: ADDRESS, UB"
 )
-
-set(PYTHON
-    OFF
-    CACHE STRING "Compile Python bindings"
+set(DESBORDANTE_LOG_LEVEL
+    ""
+    CACHE STRING "Set log level, possible values: TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL"
 )
-set_property(CACHE PYTHON PROPERTY STRINGS OFF COMPILE INSTALL)
+
+set(DESBORDANTE_BINDINGS
+    OFF
+    CACHE STRING "Build Python bindings"
+)
+set_property(CACHE DESBORDANTE_BINDINGS PROPERTY STRINGS OFF BUILD INSTALL)
 
 # By default select Debug build
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(SANITIZER)
-    if(SANITIZER STREQUAL "ADDRESS")
+if(DESBORDANTE_SANITIZER)
+    if(DESBORDANTE_SANITIZER STREQUAL "ADDRESS")
         set(ASAN ON)
-    elseif(SANITIZER STREQUAL "UB")
+    elseif(DESBORDANTE_SANITIZER STREQUAL "UB")
         set(UBSAN ON)
     else()
-        message(FATAL_ERROR "Unknown sanitizer '${SANITIZER}', try cmake -LH")
+        message(FATAL_ERROR "Unknown sanitizer '${DESBORDANTE_SANITIZER}', try cmake -LH")
     endif()
 endif()
 
-if(ASAN AND PYTHON)
+if(ASAN AND DESBORDANTE_BINDINGS)
     message(
         WARNING
             "ASan runtime must be linked with Python or manually preloaded with LD_PRELOAD=/usr/lib/libasan.so"
@@ -99,9 +103,7 @@ set(CMAKE_COLOR_DIAGNOSTICS ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
-# -DELPP_THREAD_SAFE -- for easylogging++ thread safety
-set(BUILD_OPTS "-DELPP_THREAD_SAFE")
-if(BUILD_NATIVE)
+if(DESBORDANTE_BUILD_NATIVE)
     string(JOIN ";" BUILD_OPTS "${BUILD_OPTS}" "-march=native")
 endif()
 
@@ -149,19 +151,15 @@ if(ASAN)
     set(ASAN_OPTS "-fsanitize=address")
 
     execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
-    if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    if(IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
         # alloc-dealloc-mismatch generates false positives on boost exceptions
         # This applies only to Ubuntu package:
-        # https://github.com/llvm/llvm-project/issues/59432?ysclid=m4y0iqca2c577414782
-        # Disable this check on files listed in address_sanitizer_ignore_list.txt if compiler
-        # is Clang and host distro is Ubuntu:
+        # https://github.com/llvm/llvm-project/issues/59432
         message(
             WARNING
-                "Running on Ubuntu. ASAN is broken in Ubuntu package, therefore alloc-dealloc-mismatch check will be supressed.
-        Consider using another distro for full ASAN coverage"
-        )
-        string(JOIN ";" ASAN_OPTS
-               "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/address_sanitizer_ignore_list.txt"
+                "Running on Ubuntu with libc++. ASAN is broken in Ubuntu package with libc++15-19. If you are using \
+                these versions of libc++, set ASAN_OPTIONS=alloc_dealloc_mismatch=0 to suppress alloc-dealloc-mismatch \
+                check or consider using another distro or higher libc++ version for full ASAN coverage"
         )
     endif()
 
@@ -193,7 +191,7 @@ elseif(UBSAN)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_HOST_APPLE)
         # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
         # because libraries (STL, googletest, boost, etc.) are somehow broken
-        string(JOIN ";" UBSAN_OPTS
+        string(JOIN ";" UBSAN_OPTS ${UBSAN_OPTS}
                "-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt"
         )
     endif()
@@ -204,7 +202,7 @@ else()
     string(JOIN ";" DEBUG_BUILD_OPTS "${DEBUG_BUILD_OPTS}" "-O0")
 endif()
 
-if(GDB_DEBUG)
+if(DESBORDANTE_GDB_SYMBOLS)
     add_compile_options(-ggdb3)
 endif()
 
@@ -213,11 +211,11 @@ add_link_options("$<$<CONFIG:Debug>:${DEBUG_LINK_OPTS}>")
 
 add_compile_options("$<$<CONFIG:Release>:${RELEASE_BUILD_OPTS}>")
 
-if(USE_LTO)
+if(DESBORDANTE_USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 endif()
 
@@ -241,15 +239,18 @@ endif()
 include(cmake/CPM.cmake)
 
 CPMAddPackage(
-    NAME easyloggingpp
-    GITHUB_REPOSITORY abumq/easyloggingpp
-    VERSION 9.96.7
-    OPTIONS "build_static_lib ON"
+    NAME spdlog
+    GITHUB_REPOSITORY gabime/spdlog
+    GIT_TAG v1.15.2
+    OPTIONS
+        "SPDLOG_BUILD_EXAMPLE OFF"
+        "SPDLOG_BUILD_TESTS OFF"
+        "SPDLOG_INSTALL OFF"
+        "SPDLOG_HEADER_ONLY ON"
     SYSTEM YES
-    EXCLUDE_FROM_ALL YES
 )
-include_directories(SYSTEM "${easyloggingpp_SOURCE_DIR}/src")
-set_target_properties(easyloggingpp PROPERTIES COMPILE_FLAGS "-w")
+
+include_directories(SYSTEM "${spdlog_SOURCE_DIR}/include")
 
 CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
 include_directories(SYSTEM "${emhash_SOURCE_DIR}")
@@ -278,7 +279,7 @@ CPMAddPackage(
 )
 include_directories(SYSTEM "${atomicbitvector_SOURCE_DIR}/include")
 
-if(COMPILE_TESTS)
+if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(
         NAME googletest
         GITHUB_REPOSITORY google/googletest
@@ -287,7 +288,7 @@ if(COMPILE_TESTS)
     )
 endif()
 
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     CPMAddPackage("gh:pybind/pybind11@2.13.4")
 endif()
 
@@ -295,7 +296,7 @@ endif()
 set(Boost_USE_STATIC_LIBS OFF)
 
 set(boost_libraries container thread graph)
-if (COMPILE_BENCHMARKS)
+if (DESBORDANTE_BUILD_BENCHMARKS)
 	list(APPEND boost_libraries program_options)
 endif()
 
@@ -312,38 +313,27 @@ endif()
 
 # --- Core Project Structure and Module Setup ---
 
-include_directories(
-    "src/core"
-    "src/core/algorithms"
-    "src/core/model"
-    "src/core/model/types"
-    "src/core/parser"
-    "src/core/util"
-    "src/core/config"
-)
+include_directories("src")
 
 add_subdirectory("src/core")
-
-# Configure logs
-add_subdirectory("cfg")
 
 # --- Optional Modules Setup ---
 
 # Configure tests
-if(COMPILE_TESTS)
+if(DESBORDANTE_BUILD_TESTS)
     enable_testing()
 endif()
 
-if (COMPILE_TESTS OR COMPILE_BENCHMARKS)
+if (DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
     add_subdirectory("src/tests")
 endif()
 
 # Configure datasets
-if(UNPACK_DATASETS)
+if(DESBORDANTE_UNPACK_DATASETS)
     add_subdirectory("datasets")
 endif()
 
 # Configure Python bindings
-if(PYTHON)
+if(DESBORDANTE_BINDINGS)
     add_subdirectory("src/python_bindings")
 endif()

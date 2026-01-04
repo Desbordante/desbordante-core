@@ -1,8 +1,8 @@
 #include "cind_miner.h"
 
-#include "cind/types.h"
-#include "table/encoded_tables.h"
-#include "timed_invoke.h"
+#include "core/algorithms/cind/types.h"
+#include "core/model/table/encoded_tables.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::cind {
 CindMiner::CindMiner(config::InputTables& input_tables)

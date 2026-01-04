@@ -1,14 +1,14 @@
-#include "dfd.h"
+#include "core/algorithms/fd/dfd/dfd.h"
 
 #include <boost/asio.hpp>
-#include <easylogging++.h>
 
-#include "config/max_lhs/option.h"
-#include "config/thread_number/option.h"
-#include "lattice_traversal/lattice_traversal.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/position_list_index.h"
-#include "model/table/relational_schema.h"
+#include "core/algorithms/fd/dfd/lattice_traversal/lattice_traversal.h"
+#include "core/config/max_lhs/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/position_list_index.h"
+#include "core/model/table/relational_schema.h"
+#include "core/util/logger.h"
 
 namespace algos {
 
@@ -60,7 +60,7 @@ unsigned long long DFD::ExecuteInternal() {
              * this RHS, so we register it and move to the next RHS
              * */
             if (rhs_pli->GetNepAsLong() == relation_->GetNumTuplePairs()) {
-                RegisterFd(*(schema->empty_vertical_), *rhs, relation_->GetSharedPtrSchema());
+                RegisterFd(schema->CreateEmptyVertical(), *rhs, relation_->GetSharedPtrSchema());
                 AddProgress(progress_step);
                 return;
             }
@@ -73,7 +73,7 @@ unsigned long long DFD::ExecuteInternal() {
                 RegisterFd(minimal_dependency_lhs, *rhs, relation_->GetSharedPtrSchema());
             }
             AddProgress(progress_step);
-            LOG(INFO) << static_cast<int>(GetProgress().second);
+            LOG_INFO("{}", static_cast<int>(GetProgress().second));
         });
     }
 
@@ -84,8 +84,8 @@ unsigned long long DFD::ExecuteInternal() {
             std::chrono::system_clock::now() - start_time);
     long long apriori_millis = elapsed_milliseconds.count();
 
-    LOG(INFO) << "> FD COUNT: " << fd_collection_.Size();
-    LOG(INFO) << "> HASH: " << PliBasedFDAlgorithm::Fletcher16();
+    LOG_INFO("> FD COUNT: {}", fd_collection_.Size());
+    LOG_INFO("> HASH: {}", PliBasedFDAlgorithm::Fletcher16());
 
     return apriori_millis;
 }

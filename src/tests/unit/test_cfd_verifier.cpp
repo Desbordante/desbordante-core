@@ -4,10 +4,10 @@
 
 #include <gtest/gtest.h>
 
-#include "algo_factory.h"
-#include "algorithms/cfd/cfd_verifier/cfd_verifier.h"
-#include "all_csv_configs.h"
-#include "config/names_and_descriptions.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
+#include "core/config/names_and_descriptions.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 

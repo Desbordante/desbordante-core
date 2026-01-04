@@ -3,12 +3,13 @@
 #include <sstream>
 #include <string>
 
-#include "algorithms/cfd/enums.h"
-#include "algorithms/fd/tane/enums.h"
-#include "algorithms/md/hymd/enums.h"
-#include "algorithms/metric/enums.h"
-#include "algorithms/nar/des/enums.h"
-#include "util/enum_to_available_values.h"
+#include "core/algorithms/cfd/enums.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/algorithms/md/hymd/enums.h"
+#include "core/algorithms/metric/enums.h"
+#include "core/algorithms/nar/des/enums.h"
+#include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/util/enum_to_available_values.h"
 
 namespace config::descriptions {
 
@@ -29,6 +30,8 @@ std::string const kDLevelDefinitionString =
 std::string const kDDifferentialStrategyString =
         "DES mutation strategy to use\n" +
         util::EnumToAvailableValues<algos::des::DifferentialStrategy>();
+std::string const kDODLeftOrdering = "Ordering of the left attribute of OC or OD to use\n" +
+                                     util::EnumToAvailableValues<algos::od::Ordering>();
 }  // namespace details
 
 // Common
@@ -216,6 +219,14 @@ constexpr auto kDUCCIndices = "column indices for UCC verification";
 // MD verifier
 constexpr auto kDMDLHS = "Left-hand side of Matching Dependancy";
 constexpr auto kDMDRHS = "Right-hand side of Matching Dependancy";
+// AOD verifier
+constexpr auto kDOcContext = "Context of the OC to verify";
+constexpr auto kDOcLeftIndex = "Index of the left attribute of the OC to verify";
+constexpr auto kDOcRightIndex = "Index of the right attribute of the OC to verify";
+auto const kDODLeftOrdering = details::kDODLeftOrdering.c_str();
+constexpr auto kDOFDContext = "Context of the OFD to verify";
+constexpr auto kDOFDRightIndex = "Right index of the OFD to verify";
+
 // CIND
 constexpr auto kDValidity = "Percentage of rows/groups that form IND when the pattern tuple is satisfied";
 constexpr auto kDCompleteness = "Percentage of rows/groups from IND that satisfies the pattern tuple";

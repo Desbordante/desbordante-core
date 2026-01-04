@@ -4,8 +4,8 @@
 #include <string>
 #include <unordered_set>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
-#include "algorithms/md/hymd/utility/intersection_size.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/pairwise.h"
+#include "core/algorithms/md/hymd/utility/intersection_size.h"
 
 namespace algos::hymd::preprocessing::column_matches {
 namespace similarity_measures {

@@ -1,4 +1,4 @@
-#include "algorithms/dc/verifier/dc_verifier.h"
+#include "core/algorithms/dc/verifier/dc_verifier.h"
 
 #include <algorithm>
 #include <chrono>
@@ -15,20 +15,20 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <easylogging++.h>
 
-#include "algorithms/dc/model/component.h"
-#include "algorithms/dc/model/point.h"
-#include "algorithms/dc/model/predicate.h"
-#include "algorithms/dc/parser/dc_parser.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_index.h"
-#include "model/table/column_layout_relation_data.h"
-#include "table/typed_column_data.h"
-#include "util/get_preallocated_vector.h"
-#include "util/kdtree.h"
+#include "core/algorithms/dc/model/component.h"
+#include "core/algorithms/dc/model/point.h"
+#include "core/algorithms/dc/model/predicate.h"
+#include "core/algorithms/dc/parser/dc_parser.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/kdtree.h"
+#include "core/util/logger.h"
 
 namespace algos {
 
@@ -71,7 +71,7 @@ unsigned long long int DCVerifier::ExecuteInternal() {
         dc::DCParser parser = dc::DCParser(dc_string_, relation_.get(), data_);
         dc = parser.Parse();
     } catch (std::exception const& e) {
-        LOG(INFO) << e.what();
+        LOG_INFO("{}", e.what());
         return 0;
     }
 

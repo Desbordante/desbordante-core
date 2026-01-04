@@ -1,8 +1,8 @@
-#include "lattice_level.h"
+#include "core/algorithms/fd/tane/model/lattice_level.h"
 
 #include <algorithm>
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 namespace model {
 
@@ -25,7 +25,7 @@ LatticeVertex const* LatticeLevel::GetLatticeVertex(
 void LatticeLevel::GenerateNextLevel(std::vector<std::unique_ptr<LatticeLevel>>& levels) {
     unsigned int arity = levels.size() - 1;
     assert(arity >= 1);
-    LOG(TRACE) << "-------------Creating level " << arity + 1 << "...-----------------\n";
+    LOG_TRACE("-------------Creating level {}...-----------------\n", arity + 1);
 
     LatticeLevel* current_level = levels[arity].get();
 

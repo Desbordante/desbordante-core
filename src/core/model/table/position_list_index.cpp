@@ -3,7 +3,7 @@
 // https://github.com/cupertank
 //
 
-#include "position_list_index.h"
+#include "core/model/table/position_list_index.h"
 
 #include <algorithm>
 #include <chrono>
@@ -14,10 +14,10 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
 
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
+#include "core/util/logger.h"
 
 namespace model {
 
@@ -172,12 +172,11 @@ std::unique_ptr<PositionListIndex> PositionListIndex::Probe(
 
     for (auto& positions : index_) {
         for (int position : positions) {
-            if (probing_table == nullptr) LOG(DEBUG) << "NULLPTR";
+            if (probing_table == nullptr) LOG_DEBUG("NULLPTR");
             if (position < 0 || static_cast<size_t>(position) >= probing_table->size()) {
-                LOG(DEBUG) << "position: " + std::to_string(position) +
-                                      ", size: " + std::to_string(probing_table->size());
+                LOG_DEBUG("position: {} size: {}", position, probing_table->size());
                 for (size_t i = 0; i < positions.size(); ++i) {
-                    LOG(DEBUG) << "Position " + std::to_string(positions[i]);
+                    LOG_DEBUG("Position {}", positions[i]);
                 }
             }
             int probing_table_value_id = (*probing_table)[position];

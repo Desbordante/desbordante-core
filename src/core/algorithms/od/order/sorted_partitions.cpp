@@ -1,9 +1,9 @@
-#include "sorted_partitions.h"
+#include "core/algorithms/od/order/sorted_partitions.h"
 
 #include <unordered_map>
 #include <vector>
 
-#include "model/table/tuple_index.h"
+#include "core/model/table/tuple_index.h"
 
 namespace algos::order {
 
@@ -41,7 +41,7 @@ SortedPartition::HashProduct SortedPartition::BuildHashProduct(SortedPartition c
             pos_it->second.back().insert(tuple_index);
         }
         for (PartitionIndex position : visited_positions) {
-            hash_product[position].push_back({});
+            hash_product[position].emplace_back();
         }
     }
     return hash_product;

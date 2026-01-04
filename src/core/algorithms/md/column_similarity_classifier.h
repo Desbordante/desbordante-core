@@ -2,8 +2,8 @@
 
 #include <cstddef>
 
-#include "algorithms/md/decision_boundary.h"
-#include "model/index.h"
+#include "core/algorithms/md/decision_boundary.h"
+#include "core/model/index.h"
 
 namespace model::md {
 

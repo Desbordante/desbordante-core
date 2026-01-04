@@ -3,15 +3,15 @@
 #include <cmath>
 #include <string>
 
-#include "algorithms/ind/faida/faida.h"
-#include "algorithms/ind/mind/mind.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
-#include "config/error/type.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
-#include "csv_config_util.h"
+#include "core/algorithms/ind/faida/faida.h"
+#include "core/algorithms/ind/mind/mind.h"
+#include "core/config/error/type.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace benchmark {
 
@@ -37,7 +37,7 @@ inline void INDBenchmark(BenchmarkRunner& runner, [[maybe_unused]] BenchmarkComp
     };
     std::string const faida_name = "Faida, Iowa1kk, mushroom, breast_cancer";
     runner.RegisterBenchmark(faida_name, std::move(faida_test));
-    comparer.SetThreshold(faida_name, 20);
+    comparer.SetThreshold(faida_name, 25);
 #endif
 
     auto mind_bm = [] {

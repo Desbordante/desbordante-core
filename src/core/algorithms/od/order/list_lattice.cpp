@@ -1,6 +1,6 @@
-#include "list_lattice.h"
+#include "core/algorithms/od/order/list_lattice.h"
 
-#include "order_utility.h"
+#include "core/algorithms/od/order/order_utility.h"
 
 namespace algos::order {
 

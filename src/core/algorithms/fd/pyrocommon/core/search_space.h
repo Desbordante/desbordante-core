@@ -5,13 +5,13 @@
 #include <set>
 #include <utility>
 
-#include "dependency_candidate.h"
-#include "dependency_strategy.h"
-#include "model/table/relational_schema.h"
-#include "model/table/vertical.h"
-#include "model/table/vertical_map.h"
-#include "profiling_context.h"
-#include "vertical_info.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_strategy.h"
+#include "core/algorithms/fd/pyrocommon/core/profiling_context.h"
+#include "core/algorithms/fd/pyrocommon/core/vertical_info.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
+#include "core/model/table/vertical_map.h"
 
 class SearchSpace : public std::enable_shared_from_this<SearchSpace> {
 private:
@@ -47,6 +47,9 @@ private:
                                             std::unordered_set<Vertical>& alleged_non_deps,
                                             model::VerticalMap<VerticalInfo>* global_visitees,
                                             double boost_factor);
+    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals,
+                                                     auto pruning_function) const;
+    std::unordered_set<Vertical> CalculateHittingSet(std::vector<Vertical> verticals) const;
 
     // CAREFUL: resets globalVisitees_, therefore SearchSpace could become invalidated
     std::unique_ptr<model::VerticalMap<VerticalInfo>> MoveOutGlobalVisitees() {

@@ -3,9 +3,9 @@
 #include <memory>
 #include <utility>
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
-#include "table/table_index.h"
+#include "core/model/table/table_index.h"
 
 namespace model {
 std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom(
@@ -20,8 +20,8 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
     while (data_stream->HasNextRow()) {
         row = data_stream->GetNextRow();
         if (row.size() != num_columns) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << num_columns << ", got " << row.size() << ")";
+            LOG_WARN("Unexpected number of columns for a row, skipping (expected {}, got {})",
+                        num_columns, row.size());
             continue;
         }
         for (size_t index = 0; index < row.size(); ++index) {
@@ -42,7 +42,6 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
         column_data.emplace_back(table_id, schema->GetColumn(i), std::move(column_vectors[i]),
                                  std::move(unique_values[i]), value_dictionary);
     }
-    schema->Init();
     return std::make_unique<ColumnEncodedRelationData>(std::move(schema), std::move(column_data));
 }
 }  // namespace model

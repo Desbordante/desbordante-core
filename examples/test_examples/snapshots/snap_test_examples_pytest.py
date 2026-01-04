@@ -118,239 +118,6 @@ A higher threshold will reveal more potential errors, but it might also include
 non-typo cases, such as customers who have not made any orders yet.
 '''
 
-snapshots['test_example[basic/verifying_dd.py-None-verifying_dd_output] verifying_dd_output'] = '''This is an example of validating differential dependencies.
-
-Differential dependencies were introduced by Song, Shaoxu,
-and Chen, Lei in their 2011 article, "Differential
-Dependencies: Reasoning and Discovery," published in ACM
-Transactions on Database Systems (Vol. 36, No. 3).
-
-A differential dependency (DD) defines constraints on the
-differences between attribute values within a table.
-These dependencies are formalized using differential
-functions, which specify permissible distance ranges
-between attribute values.
-
-For instance, consider the following differential
-dependency:
-
-flight_id[0,0]; date[0, 7] -> price[0, 250].
-
-This expression is composed of three differential functions:
-flight_id[0,0], date[0, 7], and price[0, 250]. If this
-dependency is applied to a flight schedule table, it
-implies that for any two tuples where the difference
-for identical flights (sharing the same id) in the date
-attribute is no more than 7 days, the corresponding
-difference in the price attribute must not exceed 250 units.
-In simpler terms, this means that the price difference
-between any two identical flights scheduled within the
-same week will be within a 250-unit margin.
-
-Flight schedule table:
-
-   flight_id        date  price
-0         25  2023-08-19    370
-1         25  2023-08-22    200
-2         11  2023-09-01    850
-3         25  2023-09-02    120
-4         11  2023-09-07    700
-5         11  2023-09-12    460
-6         25  2023-10-11    200
-
-It can be observed that this dependency holds true for the
-flights table.
-
-To illustrate this further, we will examine the
-stores_dd.csv dataset and validate a specified
-differential dependency.
-
-It is worth noting that this validator implements
-standard distance metrics for numerical data types
-and dates, as well as the Levenshtein distance for
-strings.
-
-Finally, an additional example of differential dependency
-mining, using the Split algorithm, is also available in
-the Desbordante project.
-
-    store_name        product_name     category  stock_quantity  price_per_unit
-0   BestBuy NY     Apple iPhone 15  Smartphones              50             999
-1   BestBuy LA     Apple iPhone 15  Smartphones              30            1029
-2   Walmart TX     Apple iPhone 15  Smartphones              40             989
-3   BestBuy NY  Samsung Galaxy S23  Smartphones              25             899
-4   BestBuy LA  Samsung Galaxy S23  Smartphones              20             920
-5   Walmart TX  Samsung Galaxy S23  Smartphones              35             880
-6   BestBuy NY     Sony WH-1000XM5   Headphones              15             399
-7   BestBuy LA     Sony WH-1000XM5   Headphones              18             410
-8   Walmart TX     Sony WH-1000XM5   Headphones              10             395
-9   BestBuy NY   Apple MacBook Air      Laptops              10            1299
-10  BestBuy LA   Apple MacBook Air      Laptops               8            1349
-11  Walmart TX   Apple MacBook Air      Laptops              12            1289
-
-----------------------------------------------------------------------------------------------------
-Example #1
-
-To better understand the differential dependency concept,
-let's examine a practical example.
-
-Consider the following DD:
-
-\x1b[1;33mproduct_name [0, 0] -> stock_quantity [0, 20] ; price_per_unit [0, 60]\x1b[0m
-
-This \x1b[1;32mDD holds.\x1b[0m
-
-This dependency requires that for any two records
-with the same product_name, the difference in
-their stock_quantity must not exceed 20, and
-the difference in price_per_unit must not
-exceed 60.
-
-In other words, for the same product sold
-across different stores, stock levels cannot
-vary by more than 20 units, and the price
-cannot vary by more than 60 units.
-----------------------------------------------------------------------------------------------------
-Example #2
-
-Now, let`s check the DD:
-
-\x1b[1;33mstore_name [0, 0] -> stock_quantity [0, 25]\x1b[0m
-
-This means that for a single product, the
-difference in stock quantity between any
-two stores cannot exceed 25 units.
-
-This \x1b[1;31mDD doesn`t hold.\x1b[0m
-
-Desbordante can automatically detect pairs of
-violating tuples. Let’s do it.
-
-Desbordante returned 4 pairs of records that
-violate the stock_quantity threshold.
-
-The error threshold of a differential
-dependency is the ratio of record pairs
-that satisfy the left-hand side (LHS) but
-violate the right-hand side (RHS), to the
-total number of record pairs that satisfy
-the LHS.
-
-In our example error threshold is: \x1b[1;31m0.2222222222222222\x1b[0m
-
-Now, let us look at the pairs of violating tuples:
-
-1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
-7) \x1b[1;32mBestBuy NY\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m15\x1b[0m 399
-
-1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
-10) \x1b[1;32mBestBuy NY\x1b[0m Apple MacBook Air Laptops \x1b[1;31m10\x1b[0m 1299
-
-3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
-9) \x1b[1;32mWalmart TX\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m10\x1b[0m 395
-
-3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
-12) \x1b[1;32mWalmart TX\x1b[0m Apple MacBook Air Laptops \x1b[1;31m12\x1b[0m 1289
-
-Clearly, this DD has no practical
-significance, however, it remains useful for
-demonstration purposes.
-----------------------------------------------------------------------------------------------------
-Example #3
-
-Our previous dependency failed because it
-didn't account for key operational factors.
-For instance, stock levels are influenced
-by product demand and store size, not just
-the store location.
-
-To address this, we refine the dependency
-by adding a constraint on the product_category.
-Next DD, which we are going to check: 
-
-\x1b[1;33mstore_name [0, 0] ; category [0, 0] -> stock_quantity [0, 25]\x1b[0m
-
-This \x1b[1;32mDD holds.\x1b[0m
-
-This differential dependency states:
-
-For tuples with the same store_name and category,
-the stock_quantity must not differ by more than
-25 units.
-----------------------------------------------------------------------------------------------------
-Example #4
-
-Validation of Differential Dependencies can
-also be utilized for mitigating data inaccuracies.
-
-Consider the grades_dd.py table.
-
-   student_id student_name     course   exam_date  grade_score
-0           1        Alice       Math  2025-06-15           95
-1           1        Akice       Math  2025-06-20           92
-2           1        Alice    Physics  2025-06-18           80
-3           2        Alice       Math  2025-06-21           42
-4           2          Bob       Math  2025-06-16           70
-5           2          Bob       Math  2025-06-21           68
-6           3      Charlie  Chemistry  2025-06-17           55
-
-We will check the DD:
-
-\x1b[1;33mstudent_id [0, 0] -> student_name [0, 0]\x1b[0m
-
-This \x1b[1;31mDD doesn`t hold.\x1b[0m
-
-1) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-15 95
-2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
-
-2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
-3) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Physics 2025-06-18 80
-
-4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
-5) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-16 70
-
-4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
-6) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-21 68
-
-Error threshold: \x1b[1;31m0.6666666666666666\x1b[0m
-
-We have two pairs of rows that do not conform to
-the constraints imposed by the DD. Let's rectify
-this data error by changing "Akice" to "Alice"
-in the first row of the "student_name" column
-and then re-evaluate the DD's over this table.
-
-   student_id student_name     course   exam_date  grade_score
-0           1        Alice       Math  2025-06-15           95
-1           1        Alice       Math  2025-06-20           92
-2           1        Alice    Physics  2025-06-18           80
-3           2        Alice       Math  2025-06-21           42
-4           2          Bob       Math  2025-06-16           70
-5           2          Bob       Math  2025-06-21           68
-6           3      Charlie  Chemistry  2025-06-17           55
-
-After correcting the error, the error threshold
-dropped to \x1b[1;31m0.3333333333333333\x1b[0m
-
-A potential error may also exist in the left-hand
-side of the DD. For instance, in rows 3, 4 and 5
-of the table, we have three entries with an identical
-student_id but a different student_name. Let's
-correct this error and observe the subsequent changes.
-
-   student_id student_name     course   exam_date  grade_score
-0           1        Alice       Math  2025-06-15           95
-1           1        Alice       Math  2025-06-20           92
-2           1        Alice    Physics  2025-06-18           80
-3           1        Alice       Math  2025-06-21           42
-4           2          Bob       Math  2025-06-16           70
-5           2          Bob       Math  2025-06-21           68
-6           3      Charlie  Chemistry  2025-06-17           55
-
-After correcting the error, the error threshold
-dropped to \x1b[1;32m0.0\x1b[0m and the \x1b[1;32mDD holds.\x1b[0m
-'''
-
 snapshots['test_example[advanced/comparison_mining_fd_approximate.py-None-comparison_mining_fd_approximate_output] comparison_mining_fd_approximate_output'] = '''
 =======================================================
 This example demonstrates key characteristics of the
@@ -1184,7 +951,7 @@ We have a table examples/datasets/player_stats.csv with the following data:
 |    7 |          1 |        23 |
 |    8 |          6 |        16 |
 
-Let's apply binary operation "+" to the Strength and Agility columns and observe the results.
+Let\'s apply binary operation "+" to the Strength and Agility columns and observe the results.
 
 \x1b[1;42mDiscovered ranges\x1b[0m for (Strength + Agility) are:
 [(4.0, 5.0), (22.0, 24.0)]
@@ -2828,6 +2595,178 @@ We need to select a combination of two columns, that will serve as an ID.
 \x1b[1m\x1b[36m[First_name Last_name]\x1b[0m is a good candidate.
 '''
 
+snapshots['test_example[basic/verifying_aod.py-None-verifying_aod_output] verifying_aod_output'] = '''This example verifies set-based Order Dependencies (ODs).
+Set-based ODs were first introduced in the paper [1] Jaroslaw Szlichta, Parke
+Godfrey, Lukasz Golab, Mehdi Kargar, and Divesh Srivastava. 2017. Effective and
+complete discovery of order dependencies via set-based axiomatization. Proc.
+VLDB Endow. 10, 7 (March 2017), 721–732.
+https://doi.org/10.14778/3067421.3067422
+This example is based on the subsequent work [2] Karegar, Reza et al. “Efficient
+Discovery of Approximate Order Dependencies.” ArXiv abs/2101.02174 (2021): n.
+pag.
+
+First, let's introduce the required definitions from paper [2]. Note that there
+is some discrepancy between definitions in [1] and [2]. In this example, we
+adhere to the definitions and notations from [2].
+
+Definition 1. Let X and Y be lists of attributes in a table. X -> Y denotes an
+Order Dependency. If t is a tuple, let t[X] denote a projection of t onto X. The
+dependency X -> Y holds if and only if for any two tuples s and t, s[X] <= t[X]
+implies s[Y] <= t[Y].
+
+In simpler terms, if the dependency X->Y holds for a table r, it means that
+sorting the table by the attribute list X also guarantees to sort it by the
+attribute list Y.
+
+Please observe the following dataset, which we are going to use throughout the
+example.
++----+--------+------------------+--------------+
+|    |   year |   employee_grade |   avg_salary |
+|----+--------+------------------+--------------|
+|  0 |   2020 |               24 |         1000 |
+|  1 |   2020 |               40 |         7000 |
+|  2 |   2020 |               32 |         5000 |
+|  3 |   2020 |               29 |         3000 |
+|  4 |   2020 |               49 |        10000 |
+|  5 |   2021 |               50 |        15000 |
+|  6 |   2021 |               25 |         1500 |
+|  7 |   2021 |               30 |         6000 |
++----+--------+------------------+--------------+
+
+For example, in the table above, the order dependency ['year', 'employee_grade']
+-> ['year', 'avg_salary'] holds, while the dependency ['year', 'employee_grade']
+-> ['avg_salary'] does not. If we sort the table by ['year', 'employee_grade'],
+it will also be guaranteed to be sorted by ['year', 'avg_salary'].
+
+Definition 2. Let H be a set of attributes. We define an equivalence class of H
+as a set of tuples where for any two tuples s and t in the set, s[H] = t[H].
+For example, in the table above, let's take H={'year'}. Then there are two
+equivalence classes of H: one with the value 2020 (tuples with indices {0, 1, 2,
+3, 4}) and the other with the value 2021 (tuples with indices {5, 6, 7}).
+
+Definition 3. Given a set of attributes H and attributes A and B, H: A<= ~ B
+denotes a Canonical Order Compatibility (OC) with relation <= for attribute A.
+The canonical order compatibility H: A<= ~ B holds if and only if inside each
+equivalence class of H, there exists a total ordering of tuples such that they
+are ordered by both A and B. A<= means that when we are comparing s[A] vs t[A],
+we use the <= relation.
+
+For example, in the table above, the OC `{'year'} : 'employee_grade'<= ~
+'avg_salary'` holds. Within both equivalence classes of {'year'}, a total
+ordering of tuples exists, so the tuples are ordered by both 'employee_grade'<=
+and 'avg_salary'. That is, ordering [0,3,2,1,4] and [6, 7, 5]. At the same time,
+the OC `{}: 'employee_grade'<= ~ 'avg_salary'` does not hold. For an empty set
+of attributes, there is only one equivalence class, which consists of all tuples
+in the table. There is no such ordering in the table that all tuples are sorted
+at the same time by 'employee_grade'<= and 'year'. This is because for tuples 2
+and 7, the order for 'employee_grade' is > while for 'avg_salary' it is <.
+
+Definition 4. Given a set of attributes H and an attribute A, H: [] -> A denotes
+a Canonical Order Functional Dependency (OFD). H: [] -> A holds if and only if
+attribute A is constant within each equivalence class of H. This is equivalent
+to the list-based OD H -> HA for any permutation of H.
+
+For example, in the table above, the OFD {'avg_salary'}: [] ->
+['employee_grade'] holds. Since all values in the 'avg_salary' column are
+unique, each equivalence class of {'avg_salary'} consists of exactly one tuple.
+Within each set of a single tuple, 'employee_grade' is constant (as is any other
+attribute).
+
+Note that the list-based OD HA -> HB for any permutation of H is logically
+equivalent to the OC H: A ~ B and the OFD HA: [] -> B. This means that the OD HA
+-> HB holds if and only if both the corresponding OC and OFD hold.
+
+Definition 5. A set-based canonical order dependency denotes either a canonical
+order compatibility or a canonical order functional dependency.
+
+Definition 6. An Approximate set-based canonical Order Dependency (AOD) is a
+set-based canonical order dependency that holds only on a subset of the table.
+An AOD holds if and only if there exists a set of tuples that can be removed
+from the table for the AOD to hold exactly. The minimal set of such tuples is
+called a removal set. The error E of an AOD is calculated as the cardinality of
+the removal set (the number of tuples in the set) divided by the cardinality of
+the table. We say that an AOD holds with error E if and only if the error of the
+AOD is less than the value E.
+
+You might also want to take a look at the set-based ODs mining example
+(examples/basic/mining_set_od_1.py).
+
+Now, let's move to the set-based canonical OD verification via Desbordante.
+
+Let's start by verifying an exact OC that holds on the table above.
+As we showed above, the OC `{'year'} : 'employee_grade'<= ~ 'avg_salary'` holds.
+
+Running `algo.execute()` on OC {'year'}: 'employee_grade'<= ~ 'avg_salary'
+produces the following results:
+    `algo.holds()`: True
+    `algo.get_removal_set()`: set()
+    `algo.get_error()`: 0.0
+Note that the error is zero and the removal set is empty. A removal set is a set
+of rows that should be removed for an OC (or OD) to hold exactly. In this case,
+the OC holds exactly, which is why the set is empty.
+
+Now let's verify the OFD {'employee_grade'} : [] -> 'year', which also holds
+exactly.
+
+Running `algo.execute()` on OFD {'employee_grade'}: [] -> 'year' produces the
+following results:
+    `algo.holds()`: True
+    `algo.get_removal_set()`: set()
+    `algo.get_error()`: 0.0
+Note that the error once again is zero and the removal set is empty because the
+OFD holds exactly.
+
+Now let's add a row to the table to break the exact holding of these
+dependencies.
++----+--------+------------------+--------------+
+|    |   year |   employee_grade |   avg_salary |
+|----+--------+------------------+--------------|
+|  0 |   2020 |               24 |         1000 |
+|  1 |   2020 |               40 |         7000 |
+|  2 |   2020 |               32 |         5000 |
+|  3 |   2020 |               29 |         3000 |
+|  4 |   2020 |               49 |        10000 |
+|  5 |   2021 |               50 |        15000 |
+|  6 |   2021 |               25 |         1500 |
+|  7 |   2021 |               30 |         6000 |
+|  8 |   2020 |               50 |         9000 |
++----+--------+------------------+--------------+
+Note that the row with index 8 was added to the table.
+
+Running `algo.execute()` on OC {'year'}: 'employee_grade'<= ~ 'avg_salary'
+produces the following results:
+    `algo.holds()`: False
+    `algo.get_removal_set()`: {4}
+    `algo.get_error()`: 0.1111111111111111
+Note that now the OC does not hold exactly and that the removal set is {4}. This
+means that for the OC to hold exactly, it is enough to remove row number 4
+(indexed from 0) from the table. Note that rows 8 and 4 are interchangeable in
+this sense because the problem with ordering is caused by their simultaneous
+presence in the table, and removing either of them will fix it. The algorithm
+guarantees to return a minimal removal set in terms of size but does not specify
+which one exactly if there are several candidates.
+
+Running `algo.execute()` on OFD {'employee_grade'}: [] -> 'year' produces the
+following results:
+    `algo.holds()`: False
+    `algo.get_removal_set()`: {5}
+    `algo.get_error()`: 0.1111111111111111
+Note once again that the OFD does not hold exactly anymore and the removal set
+is not empty. By adding row 8 with the same value in the 'employee_grade' column
+as in row 5 but with a different value in the 'year' column, we broke the FD
+'employee_grade'->'year' and thus broke the OFD {'employee_grade'}: [] ->
+'year'. Removing either of these two rows will make the OFD hold exactly; thus,
+the removal set is {5}.
+
+We hope this example helped you understand how to verify exact and approximate
+set-based order dependencies. We've seen how even a single row can affect the
+result and what a removal set is.
+
+Feel free to play around with the code: modify the table with different values,
+try verifying other AODs, or even load your own datasets to see what you can
+discover!
+'''
+
 snapshots['test_example[basic/verifying_aucc.py-None-verifying_aucc_output] verifying_aucc_output'] = '''Dataset AUCC_example.csv:
    ID  name  card_num  card_active
 0   1  Alex       665         True
@@ -2894,7 +2833,75 @@ UCC holds, showing stats for AUCC is useless
 --------------------------------------------------------------------------------
 '''
 
-snapshots['test_example[basic/verifying_dc.py-None-verifying_dcoutput] verifying_dcoutput'] = '''This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
+snapshots['test_example[basic/verifying_cfd.py-None-verifying_cfd_output] verifying_cfd_output'] = '''This example demonstrates how to validate Conditional Functional Dependencies (CFDs) using the Desbordante library.
+The definitions are taken from the paper 'Revisiting Conditional Functional Dependency Discovery: Splitting the “C” from the “FD”' (ECML PKDD 2018).
+CFD expresses a relationship in which a subset of attributes X defines Y, written as (X -> Y, t), where t is a certain template tuple.
+A template tuple t is a tuple where each attribute can either have a fixed constant value or a wildcard symbol ('_'), allowing for generalization across different data records.
+Validation checks whether a user-specified CFD holds for a given dataset, based on the specified values for support and confidence thresholds. Support is the quantity of records satisfying the condition, and confidence is the fraction of records where Y occurs given X.
+Desbordante detects CFD violations and classifies records based on rule compliance.
+
+
+In the first example, let's look at a dataset containing real estate properties in different cities.
+
+           City          Street  PostalCode BuildingType BuildingCost
+0   Los Angeles  Hollywood Blvd       90029    Apartment         high
+1       Chicago    State Street       60601    Apartment       medium
+2      New York        Broadway       10002    Apartment         high
+3   Los Angeles     Sunset Blvd       90001        House         high
+4       Chicago    Michigan Ave       60611       Office         high
+5      New York     Wall Street       10005       Office         high
+6   Los Angeles  Hollywood Blvd       90028    Apartment          low
+7       Chicago    State Street       60602    Apartment          low
+8      New York        Broadway       10001    Apartment         high
+9   Los Angeles  Hollywood Blvd       90028    Apartment         high
+10      Chicago    State Street       60601    Apartment       medium
+11     New York        Broadway       10001    Apartment         high
+12  Los Angeles     Sunset Blvd       90001        House         high
+13      Chicago    Michigan Ave       60611       Office       medium
+14     New York     Wall Street       10005       Office         high
+
+Let's say we want to check whether highly priced buildings in Los Angeles are determined by (depend on) a specific building type.
+
+This hypothesis will be expressed as a rule: [("City", "Los Angeles"), ("BuildingType", "_")] -> ("BuildingCost", "high")
+
+\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
+CFD holds: \x1b[1;31mFalse\x1b[0m
+Support: 5
+Confidence: 0.80
+Number of clusters violating FD: 1
+\x1b[1;34m #1 cluster: \x1b[0m
+\x1b[0m0: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
+\x1b[1;41m6: ['Los Angeles', 'Apartment'] -> ['low']\x1b[0m
+\x1b[0m9: ['Los Angeles', 'Apartment'] -> ['high']\x1b[0m
+
+We can see that the rule is violated in line 6, which may indicate incorrect data entry. Let's fix them.
+
+           City          Street  PostalCode BuildingType BuildingCost
+0   Los Angeles  Hollywood Blvd       90029    Apartment         high
+1       Chicago    State Street       60601    Apartment       medium
+2      New York        Broadway       10002    Apartment         high
+3   Los Angeles     Sunset Blvd       90001        House         high
+4       Chicago    Michigan Ave       60611       Office         high
+5      New York     Wall Street       10005       Office         high
+\x1b[1;42m6   Los Angeles  Hollywood Blvd       90028    Apartment         high\x1b[0m
+7       Chicago    State Street       60602    Apartment          low
+8      New York        Broadway       10001    Apartment         high
+9   Los Angeles  Hollywood Blvd       90028    Apartment         high
+10      Chicago    State Street       60601    Apartment       medium
+11     New York        Broadway       10001    Apartment         high
+12  Los Angeles     Sunset Blvd       90001        House         high
+13      Chicago    Michigan Ave       60611       Office       medium
+14     New York     Wall Street       10005       Office         high
+\x1b[1;49mCFD: [('City', 'Los Angeles'), ('BuildingType', '_')] -> ('BuildingCost', 'high')
+CFD holds: \x1b[1;32mTrue\x1b[0m
+Support: 5
+Confidence: 1.00
+Number of clusters violating FD: 0
+
+Thats all for CFD validation. Desbordante is also capable of CFD discovery, which is discussed in "mining_cfd.py".
+'''
+
+snapshots['test_example[basic/verifying_dc.py-None-verifying_dc_output] verifying_dc_output'] = '''This is a basic example explaining how to use Denial Constraint (DC) verification for checking hypotheses on data.
 A more advanced example of using Denial Constraints is located in examples/expert/data_cleaning_dc.py.
 
 DC verification is performed by the Rapidash algorithm:
@@ -2960,6 +2967,239 @@ Such pairs of records that contradict a DC are called violations. We can retriev
 violations from the algorithm object. In this case, the following pairs are the violations:
 (8, 11), (9, 11), (10, 11), where each number is an index of a record in the table.
 
+'''
+
+snapshots['test_example[basic/verifying_dd.py-None-verifying_dd_output] verifying_dd_output'] = '''This is an example of validating differential dependencies.
+
+Differential dependencies were introduced by Song, Shaoxu,
+and Chen, Lei in their 2011 article, "Differential
+Dependencies: Reasoning and Discovery," published in ACM
+Transactions on Database Systems (Vol. 36, No. 3).
+
+A differential dependency (DD) defines constraints on the
+differences between attribute values within a table.
+These dependencies are formalized using differential
+functions, which specify permissible distance ranges
+between attribute values.
+
+For instance, consider the following differential
+dependency:
+
+flight_id[0,0]; date[0, 7] -> price[0, 250].
+
+This expression is composed of three differential functions:
+flight_id[0,0], date[0, 7], and price[0, 250]. If this
+dependency is applied to a flight schedule table, it
+implies that for any two tuples where the difference
+for identical flights (sharing the same id) in the date
+attribute is no more than 7 days, the corresponding
+difference in the price attribute must not exceed 250 units.
+In simpler terms, this means that the price difference
+between any two identical flights scheduled within the
+same week will be within a 250-unit margin.
+
+Flight schedule table:
+
+   flight_id        date  price
+0         25  2023-08-19    370
+1         25  2023-08-22    200
+2         11  2023-09-01    850
+3         25  2023-09-02    120
+4         11  2023-09-07    700
+5         11  2023-09-12    460
+6         25  2023-10-11    200
+
+It can be observed that this dependency holds true for the
+flights table.
+
+To illustrate this further, we will examine the
+stores_dd.csv dataset and validate a specified
+differential dependency.
+
+It is worth noting that this validator implements
+standard distance metrics for numerical data types
+and dates, as well as the Levenshtein distance for
+strings.
+
+Finally, an additional example of differential dependency
+mining, using the Split algorithm, is also available in
+the Desbordante project.
+
+    store_name        product_name     category  stock_quantity  price_per_unit
+0   BestBuy NY     Apple iPhone 15  Smartphones              50             999
+1   BestBuy LA     Apple iPhone 15  Smartphones              30            1029
+2   Walmart TX     Apple iPhone 15  Smartphones              40             989
+3   BestBuy NY  Samsung Galaxy S23  Smartphones              25             899
+4   BestBuy LA  Samsung Galaxy S23  Smartphones              20             920
+5   Walmart TX  Samsung Galaxy S23  Smartphones              35             880
+6   BestBuy NY     Sony WH-1000XM5   Headphones              15             399
+7   BestBuy LA     Sony WH-1000XM5   Headphones              18             410
+8   Walmart TX     Sony WH-1000XM5   Headphones              10             395
+9   BestBuy NY   Apple MacBook Air      Laptops              10            1299
+10  BestBuy LA   Apple MacBook Air      Laptops               8            1349
+11  Walmart TX   Apple MacBook Air      Laptops              12            1289
+
+----------------------------------------------------------------------------------------------------
+Example #1
+
+To better understand the differential dependency concept,
+let's examine a practical example.
+
+Consider the following DD:
+
+\x1b[1;33mproduct_name [0, 0] -> stock_quantity [0, 20] ; price_per_unit [0, 60]\x1b[0m
+
+This \x1b[1;32mDD holds.\x1b[0m
+
+This dependency requires that for any two records
+with the same product_name, the difference in
+their stock_quantity must not exceed 20, and
+the difference in price_per_unit must not
+exceed 60.
+
+In other words, for the same product sold
+across different stores, stock levels cannot
+vary by more than 20 units, and the price
+cannot vary by more than 60 units.
+----------------------------------------------------------------------------------------------------
+Example #2
+
+Now, let`s check the DD:
+
+\x1b[1;33mstore_name [0, 0] -> stock_quantity [0, 25]\x1b[0m
+
+This means that for a single product, the
+difference in stock quantity between any
+two stores cannot exceed 25 units.
+
+This \x1b[1;31mDD doesn`t hold.\x1b[0m
+
+Desbordante can automatically detect pairs of
+violating tuples. Let’s do it.
+
+Desbordante returned 4 pairs of records that
+violate the stock_quantity threshold.
+
+The error threshold of a differential
+dependency is the ratio of record pairs
+that satisfy the left-hand side (LHS) but
+violate the right-hand side (RHS), to the
+total number of record pairs that satisfy
+the LHS.
+
+In our example error threshold is: \x1b[1;31m0.2222222222222222\x1b[0m
+
+Now, let us look at the pairs of violating tuples:
+
+1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
+7) \x1b[1;32mBestBuy NY\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m15\x1b[0m 399
+
+1) \x1b[1;32mBestBuy NY\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m50\x1b[0m 999
+10) \x1b[1;32mBestBuy NY\x1b[0m Apple MacBook Air Laptops \x1b[1;31m10\x1b[0m 1299
+
+3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
+9) \x1b[1;32mWalmart TX\x1b[0m Sony WH-1000XM5 Headphones \x1b[1;31m10\x1b[0m 395
+
+3) \x1b[1;32mWalmart TX\x1b[0m Apple iPhone 15 Smartphones \x1b[1;31m40\x1b[0m 989
+12) \x1b[1;32mWalmart TX\x1b[0m Apple MacBook Air Laptops \x1b[1;31m12\x1b[0m 1289
+
+Clearly, this DD has no practical
+significance, however, it remains useful for
+demonstration purposes.
+----------------------------------------------------------------------------------------------------
+Example #3
+
+Our previous dependency failed because it
+didn't account for key operational factors.
+For instance, stock levels are influenced
+by product demand and store size, not just
+the store location.
+
+To address this, we refine the dependency
+by adding a constraint on the product_category.
+Next DD, which we are going to check: 
+
+\x1b[1;33mstore_name [0, 0] ; category [0, 0] -> stock_quantity [0, 25]\x1b[0m
+
+This \x1b[1;32mDD holds.\x1b[0m
+
+This differential dependency states:
+
+For tuples with the same store_name and category,
+the stock_quantity must not differ by more than
+25 units.
+----------------------------------------------------------------------------------------------------
+Example #4
+
+Validation of Differential Dependencies can
+also be utilized for mitigating data inaccuracies.
+
+Consider the grades_dd.py table.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Akice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           2        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+We will check the DD:
+
+\x1b[1;33mstudent_id [0, 0] -> student_name [0, 0]\x1b[0m
+
+This \x1b[1;31mDD doesn`t hold.\x1b[0m
+
+1) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-15 95
+2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
+
+2) \x1b[1;32m1\x1b[0m \x1b[1;31mAkice\x1b[0m Math 2025-06-20 92
+3) \x1b[1;32m1\x1b[0m \x1b[1;31mAlice\x1b[0m Physics 2025-06-18 80
+
+4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
+5) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-16 70
+
+4) \x1b[1;32m2\x1b[0m \x1b[1;31mAlice\x1b[0m Math 2025-06-21 42
+6) \x1b[1;32m2\x1b[0m \x1b[1;31mBob\x1b[0m Math 2025-06-21 68
+
+Error threshold: \x1b[1;31m0.6666666666666666\x1b[0m
+
+We have two pairs of rows that do not conform to
+the constraints imposed by the DD. Let's rectify
+this data error by changing "Akice" to "Alice"
+in the first row of the "student_name" column
+and then re-evaluate the DD's over this table.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Alice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           2        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+After correcting the error, the error threshold
+dropped to \x1b[1;31m0.3333333333333333\x1b[0m
+
+A potential error may also exist in the left-hand
+side of the DD. For instance, in rows 3, 4 and 5
+of the table, we have three entries with an identical
+student_id but a different student_name. Let's
+correct this error and observe the subsequent changes.
+
+   student_id student_name     course   exam_date  grade_score
+0           1        Alice       Math  2025-06-15           95
+1           1        Alice       Math  2025-06-20           92
+2           1        Alice    Physics  2025-06-18           80
+3           1        Alice       Math  2025-06-21           42
+4           2          Bob       Math  2025-06-16           70
+5           2          Bob       Math  2025-06-21           68
+6           3      Charlie  Chemistry  2025-06-17           55
+
+After correcting the error, the error threshold
+dropped to \x1b[1;32m0.0\x1b[0m and the \x1b[1;32mDD holds.\x1b[0m
 '''
 
 snapshots['test_example[basic/verifying_fd_afd.py-None-verifying_fd_afd_output] verifying_fd_afd_output'] = '''First, let's look at the duplicates_short.csv table and try to verify the functional dependency in it.
@@ -3308,6 +3548,398 @@ Checking the IND [orders.customer_id] -> [customers.id]
 The missing customer has been successfully added to the 'customers' dataset.
 
 All issues in the 'orders' and 'customers' datasets have been resolved.
+'''
+
+snapshots['test_example[basic/verifying_md.py-None-verifying_md_output] verifying_md_output'] = '''\x1b[1;49m
+This example demonstrates how to verify matching dependencies (MDs) using the Desbordante library. Matching dependencies are defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al., ACM Transactions on Database Systems (TODS), Vol. 45, No. 3, Article 13, pp. 1–33.
+
+The matching dependency verification algorithm accepts a dependency and determines whether it holds over the specified dataset. If the dependency does not hold, the algorithm returns a list of exceptions (tuples that violate the MD) and suggests adjustments to the dependency to make it hold.
+
+You can also read about mining matching dependencies in examples/basic/mining_md.py.
+
+To verify a matching dependency, first define column similarity classifiers. A column similarity classifiers consists of a column match and a decision boundary. A column match specifies two column identifiers (index or name) — one from the left table and one from the right — and a similarity measure (for example, Levenshtein similarity).
+
+We use the notation [measure(i, j)>=lambda] for a column similarity classifier that specifies the i-th column of the left table, the j-th column of the right table, the similarity measure "measure", and the decision boundary lambda. The notation [measure("left_col_name", "right_col_name")>=lambda] is also valid for a column match that specifies the columns "left_col_name" and "right_col_name" of the left and right tables, respectively.
+
+Finally, the algorithm is defined over two tables: the left table and the right table. For simplicity in this example we use a single table (right table = left table). See the original paper for details on the two-table setting.
+
+As the first example, let's look at the animals_beverages.csv dataset.
+
+       name     zoo animal  diet
+0     Simba  berlin   lion  meat
+1  Clarence  london   lion  mead
+2     Baloo  berlin   bear  fish
+3      Pooh  london   beer  fish 
+
+Let's try to check if the Matching Dependency
+
+\t[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
+
+holds. Here, Levenshtein similarity with a decision boundary of 1.0 means values must be exactly equal.
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
+2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=0.75
+
+The checked matching dependency used a column similarity classifier with a 1.0 decision boundary on the right side. However, records with similarity 0.75 — which is below the specified boundary — were found. Therefore, the checked matching dependency does not hold.
+
+The matching dependency may fail because of typos in the original dataset. Let's relax both left and right constraints (i.e., require similarity => 0.75) and check the resulting dependency:
+
+\t[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+We can see that the matching dependency
+
+\t[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+holds.
+
+Now let's look at what happens if we increase the decision boundary on both the left-hand side and the right-hand side. For example, we'll raise it from 0.75 to 0.76. First, let's increase the left-hand side decision boundary:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+As we can see, nothing changed. Now let's raise the right-hand side decision boundary:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
+2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.76
+
+and the following MD is suggested:
+
+\t[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
+
+The values "meat" and "mead" have a Levenshtein similarity of 0.75, which is below the required 0.76; therefore the matching dependency does not hold.
+
+Let's see whether correcting typos in the dataset changes that.
+
+Corrected dataset:
+
+       name     zoo animal  diet
+0     Simba  berlin   lion  meat
+1  Clarence  london   lion  meat
+2     Baloo  berlin   bear  fish
+3      Pooh  london   bear  fish
+
+Now let's re-check the original matching dependency with decision boundaries set to 1.0.
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+---------------------------------------------------------------------------------------------------- 
+
+On our next example let's take a view at employee_typos.csv dataset:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City      Main St.17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             yes
+2  Edward    Black    Clerk  Washington D. C.     Third St 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Suppose we already know the following facts about this dataset:
+1. Each city has a single office, i.e. there is a functional dependency [City] -> OfficeLocation.
+2. Only managers and chiefs have high-level access, i.e. there is a functional dependency [Position] -> HighLevelAccess.
+
+As we can see, this dataset contains several typos that we will attempt to detect and correct.
+
+Let's start with the functional dependency [City] -> OfficeLocation. To check it, we examine the following matching dependency:
+
+\t[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 1) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+2. Records (1, 0) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+3. Records (2, 3) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+4. Records (3, 2) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.909.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=0.909
+
+The output shows issues in record pairs (0, 1) and (2, 3). Values:
+1. record 0: "Main St.17" — record 1: "Main St. 17"
+2. record 2: "Third St 34" — record 3: "Third St. 34"
+
+Now we can see the typos:
+1. Record 0: missing space in "Main St.17" (should be "Main St. 17").
+2. Record 2: missing period in "Third St 34" (should be "Third St. 34").
+
+Now let's fix the typos:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Let's try again:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+Alternatively, if we consider these typos insignificant for our purposes, we can ignore them. As Desbordante suggests, we can relax the right-hand decision boundary and check the dependency
+
+\t[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=0.9
+
+over the unmodified table.
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+Let's move on and repeat the procedure for the functional dependency [Position] -> HighLevelAccess. To check it, we examine the following matching dependency:
+
+\t[levenshtein(Position, Position)>=1.0] -> levenshtein(High Level Access, High Level Access)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (1, 4) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+2. Records (4, 1) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.667.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=0.667
+
+As we can see, there is a discrepancy in records 1 and 4:
+1. record 1: "yes" — record 4: "Yes"
+
+Now we see the problem. Let's fix it:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Let's re-check the matching dependency again:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+If you look closely, there are still some typos in the dataset:
+1. Record 0: "manager" should be "Manager".
+2. Record 5: "yes" was missed during our procedure and should be fixed.
+
+As a result, we can observe two limitations of our approach:
+1. Typos on the left-hand side of a dependency may go undetected.
+2. Typos in records with a unique left-hand-side value cannot be detected.
+
+There is an alternative approach to finding typos with MDs. We will demonstrate it on the "Position" column: first verify the matching dependency [levenshtein(Position, Position)>=1.0] -> levenshtein(Position, Position)>=1.0, then gradually lower the left-hand side decision boundary until all typos are discovered.
+
+
+Verifying the matching dependency [ levenshtein(Position, Position)>=1.0 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;42mMD holds\x1b[1;49m
+
+
+Verifying Matching Dependency [ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+3. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+4. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.857.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=0.857
+
+Here, with decision boundary 0.8, the first typos were found.
+
+Let's decrease the threshold further and see how it affects the algorithm's output.
+
+Verifying Matching Dependency [ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+3. Records (0, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+4. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+5. Records (1, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+6. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
+7. Records (4, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+8. Records (2, 5) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
+9. Records (3, 0) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+10. Records (3, 4) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+11. Records (3, 1) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
+12. Records (5, 2) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.2.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=0.2
+
+Invoking the algorithm with a decision boundary of 0.8 helped us locate issues in the record pairs (0, 1) and (0, 4). Record 0 has the value "manager" (uncapitalized) in the "Position" column, so we can fix it as follows:
+
+     Name  Surname Position              City  OfficeLocation HighLevelAccess
+0    John      Doe  Manager     New-York City     Main St. 17             Yes
+1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
+2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
+3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
+4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
+5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
+
+Invoking the algorithm with a decision boundary of 0.2 revealed some additional, but meaningless, patterns. For example, it considered the value "Clerk" in record 2 and "Chief" in record 5 similar enough.
+
+As a result, we can conclude that this approach allows locating typos without prior knowledge of column dependencies, but requires care in selecting decision boundaries and in analyzing the algorithm's results.
+
+---------------------------------------------------------------------------------------------------- 
+
+Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:
+
+   Flight Number        Date               Departure                 Arrival  Distance  Duration
+0          SU 35  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        64
+1        FV 6015  2024-03-06  Saint Petersburg (LED)            Moscow (VKO)       624        63
+2        FV 6027  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        66
+3        FV 6024  2024-03-03            Moscow (VKO)  Saint Petersburg (LED)       624        58
+4           SU 6  2024-03-06            Moscow (SVO)  Saint Petersburg (LED)       598        62
+5        S7 1009  2024-03-01            Moscow (DME)  Saint Petersburg (LED)       664        66
+6        S7 1010  2024-03-02  Saint Petersburg (LED)            Moscow (DME)       664        70
+7         B2 978  2024-03-07            Moscow (SVO)             Minsk (MSQ)       641        58
+8         DP 967  2024-03-07            Moscow (VKO)             Minsk (MSQ)       622        73
+9         B2 981  2024-03-08             Minsk (MSQ)            Moscow (VKO)       622        61
+10        DP 261  2024-03-06            Moscow (VKO)       Kaliningrad (KGD)      1059       144
+11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92 
+
+Imagine we want to check that when the departure city and the arrival city are the same, flight times do not differ significantly. We will treat all Moscow airports as equivalent and need to determine a decision boundary for this purpose.
+
+Let's create a copy of our table and add new Departure and Arrival columns with airport codes removed:
+
+                 Departure      NewDeparture                 Arrival        NewArrival
+0   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
+1   Saint Petersburg (LED)  Saint Petersburg            Moscow (VKO)            Moscow
+2   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
+3             Moscow (VKO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+4             Moscow (SVO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+5             Moscow (DME)            Moscow  Saint Petersburg (LED)  Saint Petersburg
+6   Saint Petersburg (LED)  Saint Petersburg            Moscow (DME)            Moscow
+7             Moscow (SVO)            Moscow             Minsk (MSQ)             Minsk
+8             Moscow (VKO)            Moscow             Minsk (MSQ)             Minsk
+9              Minsk (MSQ)             Minsk            Moscow (VKO)            Moscow
+10            Moscow (VKO)            Moscow       Kaliningrad (KGD)       Kaliningrad
+11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg 
+
+Now let's check the following matching dependency:
+
+\t[ equality(Departure_new, Departure_new)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0:
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (3, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+2. Records (3, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+3. Records (3, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+4. Records (4, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+5. Records (4, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+6. Records (4, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+7. Records (4, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+8. Records (5, 4) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+9. Records (5, 7) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+10. Records (5, 10) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+11. Records (5, 3) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+12. Records (5, 8) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+13. Records (7, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+14. Records (7, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+15. Records (7, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+16. Records (7, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+17. Records (8, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+18. Records (8, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+19. Records (8, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+20. Records (10, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+21. Records (10, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
+22. Records (10, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.75.
+
+Thus, the following MD was provided:
+
+\t[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0
+
+and the following MD is suggested:
+
+\t[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=0.75
+
+As we can see, Desbordante suggests a decision boundary of 0.75 for the Departure column. For the Arrival column, all values are similar.
+
+For duration similarity we use the custom measure normalized_distance, defined as normalized_distance = 1 - |duration_1 - duration_2| / max(Duration), where duration_1 and duration_2 are values from the Duration column. This similarity measure is supplied to the verification algorithm. You can find more examples of custom similarity measures in examples/basic/mining_md.py.
+
+We will try to verify the following matching dependency:
+
+\t[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
+
+\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
+1. Records (0, 2) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
+2. Records (0, 1) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
+3. Records (0, 6) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
+4. Records (1, 0) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
+5. Records (1, 2) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
+6. Records (1, 6) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
+7. Records (2, 0) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
+8. Records (2, 1) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
+9. Records (2, 6) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+10. Records (6, 0) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
+11. Records (6, 2) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+12. Records (6, 1) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
+13. Records (3, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+14. Records (3, 5) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
+15. Records (8, 7) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
+16. Records (4, 5) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+17. Records (4, 3) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+18. Records (7, 8) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
+19. Records (5, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
+20. Records (5, 3) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
+
+Desbordante suggests to use the following right-hand side decision boundary: 0.896.
+
+Thus, the following MD was provided:
+
+\t[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
+
+and the following MD is suggested:
+
+\t[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=0.896
+
+As a result, we can conclude that durations differ by about 10% for flights with the same departure and arrival cities.
+
+In conclusion, the matching dependency verification algorithm can be helpful for analyzing data, extracting facts, and finding typos. It is a powerful pattern but requires experimentation with decision boundaries and similarity measures.
+
 '''
 
 snapshots['test_example[basic/verifying_mfd.py-None-verifying_mfd_output] verifying_mfd_output'] = '''\x1b[1;49m
@@ -3945,396 +4577,4 @@ Typo candidates and context:
                                      id       worker_name supervisor_surname     workshop salary                 job_post
 0  404f50cb-caf0-4974-97f9-9463434537e1    Jennifer Moore        Galen Calla  Yogatacular    980  Client Solution Analyst
 7  ddba9118-ec89-472d-9f3f-bebd919f0e3a  William Robinson      Galen Calella  Yogatacular    975            Store Manager
-'''
-
-snapshots['test_example[basic/verifying_md.py-None-verifying_md_output] verifying_md_output'] = '''\x1b[1;49m
-This example demonstrates how to verify matching dependencies (MDs) using the Desbordante library. Matching dependencies are defined in "Efficient Discovery of Matching Dependencies" by Schirmer et al., ACM Transactions on Database Systems (TODS), Vol. 45, No. 3, Article 13, pp. 1–33.
-
-The matching dependency verification algorithm accepts a dependency and determines whether it holds over the specified dataset. If the dependency does not hold, the algorithm returns a list of exceptions (tuples that violate the MD) and suggests adjustments to the dependency to make it hold.
-
-You can also read about mining matching dependencies in examples/basic/mining_md.py.
-
-To verify a matching dependency, first define column similarity classifiers. A column similarity classifiers consists of a column match and a decision boundary. A column match specifies two column identifiers (index or name) — one from the left table and one from the right — and a similarity measure (for example, Levenshtein similarity).
-
-We use the notation [measure(i, j)>=lambda] for a column similarity classifier that specifies the i-th column of the left table, the j-th column of the right table, the similarity measure "measure", and the decision boundary lambda. The notation [measure("left_col_name", "right_col_name")>=lambda] is also valid for a column match that specifies the columns "left_col_name" and "right_col_name" of the left and right tables, respectively.
-
-Finally, the algorithm is defined over two tables: the left table and the right table. For simplicity in this example we use a single table (right table = left table). See the original paper for details on the two-table setting.
-
-As the first example, let's look at the animals_beverages.csv dataset.
-
-       name     zoo animal  diet
-0     Simba  berlin   lion  meat
-1  Clarence  london   lion  mead
-2     Baloo  berlin   bear  fish
-3      Pooh  london   beer  fish 
-
-Let's try to check if the Matching Dependency
-
-	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
-
-holds. Here, Levenshtein similarity with a decision boundary of 1.0 means values must be exactly equal.
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
-2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.75.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(animal, animal)>=1.0 ] -> levenshtein(diet, diet)>=0.75
-
-The checked matching dependency used a column similarity classifier with a 1.0 decision boundary on the right side. However, records with similarity 0.75 — which is below the specified boundary — were found. Therefore, the checked matching dependency does not hold.
-
-The matching dependency may fail because of typos in the original dataset. Let's relax both left and right constraints (i.e., require similarity => 0.75) and check the resulting dependency:
-
-	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-We can see that the matching dependency
-
-	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
-
-holds.
-
-Now let's look at what happens if we increase the decision boundary on both the left-hand side and the right-hand side. For example, we'll raise it from 0.75 to 0.76. First, let's increase the left-hand side decision boundary:
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-As we can see, nothing changed. Now let's raise the right-hand side decision boundary:
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 1) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
-2. Records (1, 0) have similarity 0.75, while dependency states levenshtein(diet, diet)>=0.76
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.75.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.76
-
-and the following MD is suggested:
-
-	[ levenshtein(animal, animal)>=0.75 ] -> levenshtein(diet, diet)>=0.75
-
-The values "meat" and "mead" have a Levenshtein similarity of 0.75, which is below the required 0.76; therefore the matching dependency does not hold.
-
-Let's see whether correcting typos in the dataset changes that.
-
-Corrected dataset:
-
-       name     zoo animal  diet
-0     Simba  berlin   lion  meat
-1  Clarence  london   lion  meat
-2     Baloo  berlin   bear  fish
-3      Pooh  london   bear  fish
-
-Now let's re-check the original matching dependency with decision boundaries set to 1.0.
-
-\x1b[1;42mMD holds\x1b[1;49m
-
----------------------------------------------------------------------------------------------------- 
-
-On our next example let's take a view at employee_typos.csv dataset:
-
-     Name  Surname Position              City  OfficeLocation HighLevelAccess
-0    John      Doe  manager     New-York City      Main St.17             Yes
-1    Jane      Doe  Manager     New-York City     Main St. 17             yes
-2  Edward    Black    Clerk  Washington D. C.     Third St 34              No
-3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
-4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
-
-Suppose we already know the following facts about this dataset:
-1. Each city has a single office, i.e. there is a functional dependency [City] -> OfficeLocation.
-2. Only managers and chiefs have high-level access, i.e. there is a functional dependency [Position] -> HighLevelAccess.
-
-As we can see, this dataset contains several typos that we will attempt to detect and correct.
-
-Let's start with the functional dependency [City] -> OfficeLocation. To check it, we examine the following matching dependency:
-
-	[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=1.0
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 1) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
-2. Records (1, 0) have similarity 0.909, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
-3. Records (2, 3) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
-4. Records (3, 2) have similarity 0.917, while dependency states levenshtein(OfficeLocation, OfficeLocation)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.909.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(City, City)>=1.0 ] -> levenshtein(OfficeLocation, OfficeLocation)>=0.909
-
-The output shows issues in record pairs (0, 1) and (2, 3). Values:
-1. record 0: "Main St.17" — record 1: "Main St. 17"
-2. record 2: "Third St 34" — record 3: "Third St. 34"
-
-Now we can see the typos:
-1. Record 0: missing space in "Main St.17" (should be "Main St. 17").
-2. Record 2: missing period in "Third St 34" (should be "Third St. 34").
-
-Now let's fix the typos:
-
-     Name  Surname Position              City  OfficeLocation HighLevelAccess
-0    John      Doe  manager     New-York City     Main St. 17             Yes
-1    Jane      Doe  Manager     New-York City     Main St. 17             yes
-2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
-3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
-4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
-
-Let's try again:
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-Alternatively, if we consider these typos insignificant for our purposes, we can ignore them. As Desbordante suggests, we can relax the right-hand decision boundary and check the dependency
-
-	[levenshtein(City, City)>=1.0] -> levenshtein(Office Location, Office Location)>=0.9
-
-over the unmodified table.
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-Let's move on and repeat the procedure for the functional dependency [Position] -> HighLevelAccess. To check it, we examine the following matching dependency:
-
-	[levenshtein(Position, Position)>=1.0] -> levenshtein(High Level Access, High Level Access)>=1.0
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (1, 4) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
-2. Records (4, 1) have similarity 0.667, while dependency states levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.667.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(Position, Position)>=1.0 ] -> levenshtein(HighLevelAccess, HighLevelAccess)>=0.667
-
-As we can see, there is a discrepancy in records 1 and 4:
-1. record 1: "yes" — record 4: "Yes"
-
-Now we see the problem. Let's fix it:
-
-     Name  Surname Position              City  OfficeLocation HighLevelAccess
-0    John      Doe  manager     New-York City     Main St. 17             Yes
-1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
-2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
-3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
-4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
-
-Let's re-check the matching dependency again:
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-If you look closely, there are still some typos in the dataset:
-1. Record 0: "manager" should be "Manager".
-2. Record 5: "yes" was missed during our procedure and should be fixed.
-
-As a result, we can observe two limitations of our approach:
-1. Typos on the left-hand side of a dependency may go undetected.
-2. Typos in records with a unique left-hand-side value cannot be detected.
-
-There is an alternative approach to finding typos with MDs. We will demonstrate it on the "Position" column: first verify the matching dependency [levenshtein(Position, Position)>=1.0] -> levenshtein(Position, Position)>=1.0, then gradually lower the left-hand side decision boundary until all typos are discovered.
-
-
-Verifying the matching dependency [ levenshtein(Position, Position)>=1.0 ] -> levenshtein(Position, Position)>=1.0:
-
-\x1b[1;42mMD holds\x1b[1;49m
-
-
-Verifying Matching Dependency [ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0:
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-3. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-4. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.857.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(Position, Position)>=0.8 ] -> levenshtein(Position, Position)>=0.857
-
-Here, with decision boundary 0.8, the first typos were found.
-
-Let's decrease the threshold further and see how it affects the algorithm's output.
-
-Verifying Matching Dependency [ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0:
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 4) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-2. Records (0, 1) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-3. Records (0, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-4. Records (1, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-5. Records (1, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-6. Records (4, 0) have similarity 0.857, while dependency states levenshtein(Position, Position)>=1.0
-7. Records (4, 3) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-8. Records (2, 5) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
-9. Records (3, 0) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-10. Records (3, 4) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-11. Records (3, 1) have similarity 0.286, while dependency states levenshtein(Position, Position)>=1.0
-12. Records (5, 2) have similarity 0.2, while dependency states levenshtein(Position, Position)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.2.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(Position, Position)>=0.2 ] -> levenshtein(Position, Position)>=0.2
-
-Invoking the algorithm with a decision boundary of 0.8 helped us locate issues in the record pairs (0, 1) and (0, 4). Record 0 has the value "manager" (uncapitalized) in the "Position" column, so we can fix it as follows:
-
-     Name  Surname Position              City  OfficeLocation HighLevelAccess
-0    John      Doe  Manager     New-York City     Main St. 17             Yes
-1    Jane      Doe  Manager     New-York City     Main St. 17             Yes
-2  Edward    Black    Clerk  Washington D. C.    Third St. 34              No
-3  Samuel    Smith  Sweeper  Washington D. C.    Third St. 34              No
-4   Dolly   Porter  Manager           Chicago  General St. 56             Yes
-5    Mike  Engeals    Chief           Chicago  General St. 56             yes 
-
-Invoking the algorithm with a decision boundary of 0.2 revealed some additional, but meaningless, patterns. For example, it considered the value "Clerk" in record 2 and "Chief" in record 5 similar enough.
-
-As a result, we can conclude that this approach allows locating typos without prior knowledge of column dependencies, but requires care in selecting decision boundaries and in analyzing the algorithm's results.
-
----------------------------------------------------------------------------------------------------- 
-
-Now let's examine another example. We will use the flights_dd.csv dataset for this purpose:
-
-   Flight Number        Date               Departure                 Arrival  Distance  Duration
-0          SU 35  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        64
-1        FV 6015  2024-03-06  Saint Petersburg (LED)            Moscow (VKO)       624        63
-2        FV 6027  2024-03-06  Saint Petersburg (LED)            Moscow (SVO)       598        66
-3        FV 6024  2024-03-03            Moscow (VKO)  Saint Petersburg (LED)       624        58
-4           SU 6  2024-03-06            Moscow (SVO)  Saint Petersburg (LED)       598        62
-5        S7 1009  2024-03-01            Moscow (DME)  Saint Petersburg (LED)       664        66
-6        S7 1010  2024-03-02  Saint Petersburg (LED)            Moscow (DME)       664        70
-7         B2 978  2024-03-07            Moscow (SVO)             Minsk (MSQ)       641        58
-8         DP 967  2024-03-07            Moscow (VKO)             Minsk (MSQ)       622        73
-9         B2 981  2024-03-08             Minsk (MSQ)            Moscow (VKO)       622        61
-10        DP 261  2024-03-06            Moscow (VKO)       Kaliningrad (KGD)      1059       144
-11        DP 536  2024-03-05       Kaliningrad (KGD)  Saint Petersburg (LED)       798        92 
-
-Imagine we want to check that when the departure city and the arrival city are the same, flight times do not differ significantly. We will treat all Moscow airports as equivalent and need to determine a decision boundary for this purpose.
-
-Let's create a copy of our table and add new Departure and Arrival columns with airport codes removed:
-
-                 Departure      NewDeparture                 Arrival        NewArrival
-0   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
-1   Saint Petersburg (LED)  Saint Petersburg            Moscow (VKO)            Moscow
-2   Saint Petersburg (LED)  Saint Petersburg            Moscow (SVO)            Moscow
-3             Moscow (VKO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
-4             Moscow (SVO)            Moscow  Saint Petersburg (LED)  Saint Petersburg
-5             Moscow (DME)            Moscow  Saint Petersburg (LED)  Saint Petersburg
-6   Saint Petersburg (LED)  Saint Petersburg            Moscow (DME)            Moscow
-7             Moscow (SVO)            Moscow             Minsk (MSQ)             Minsk
-8             Moscow (VKO)            Moscow             Minsk (MSQ)             Minsk
-9              Minsk (MSQ)             Minsk            Moscow (VKO)            Moscow
-10            Moscow (VKO)            Moscow       Kaliningrad (KGD)       Kaliningrad
-11       Kaliningrad (KGD)       Kaliningrad  Saint Petersburg (LED)  Saint Petersburg 
-
-Now let's check the following matching dependency:
-
-	[ equality(Departure_new, Departure_new)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0:
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (3, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-2. Records (3, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-3. Records (3, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-4. Records (4, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-5. Records (4, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-6. Records (4, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-7. Records (4, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-8. Records (5, 4) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-9. Records (5, 7) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-10. Records (5, 10) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-11. Records (5, 3) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-12. Records (5, 8) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-13. Records (7, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-14. Records (7, 10) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-15. Records (7, 3) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-16. Records (7, 8) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-17. Records (8, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-18. Records (8, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-19. Records (8, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-20. Records (10, 4) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-21. Records (10, 5) have similarity 0.75, while dependency states levenshtein(Departure, Departure)>=1.0
-22. Records (10, 7) have similarity 0.833, while dependency states levenshtein(Departure, Departure)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.75.
-
-Thus, the following MD was provided:
-
-	[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=1.0
-
-and the following MD is suggested:
-
-	[ equality(NewDeparture, NewDeparture)>=1.0 ] -> levenshtein(Departure, Departure)>=0.75
-
-As we can see, Desbordante suggests a decision boundary of 0.75 for the Departure column. For the Arrival column, all values are similar.
-
-For duration similarity we use the custom measure normalized_distance, defined as normalized_distance = 1 - |duration_1 - duration_2| / max(Duration), where duration_1 and duration_2 are values from the Duration column. This similarity measure is supplied to the verification algorithm. You can find more examples of custom similarity measures in examples/basic/mining_md.py.
-
-We will try to verify the following matching dependency:
-
-	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
-
-\x1b[1;41mMD does not hold. The following rows selected by the dependency's left-hand side do not satisfy the condition of the right-hand side:\x1b[1;49m
-1. Records (0, 2) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
-2. Records (0, 1) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
-3. Records (0, 6) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
-4. Records (1, 0) have similarity 0.993, while dependency states normalized_distance(Duration, Duration)>=1.0
-5. Records (1, 2) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
-6. Records (1, 6) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
-7. Records (2, 0) have similarity 0.986, while dependency states normalized_distance(Duration, Duration)>=1.0
-8. Records (2, 1) have similarity 0.979, while dependency states normalized_distance(Duration, Duration)>=1.0
-9. Records (2, 6) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-10. Records (6, 0) have similarity 0.958, while dependency states normalized_distance(Duration, Duration)>=1.0
-11. Records (6, 2) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-12. Records (6, 1) have similarity 0.951, while dependency states normalized_distance(Duration, Duration)>=1.0
-13. Records (3, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-14. Records (3, 5) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
-15. Records (8, 7) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
-16. Records (4, 5) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-17. Records (4, 3) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-18. Records (7, 8) have similarity 0.896, while dependency states normalized_distance(Duration, Duration)>=1.0
-19. Records (5, 4) have similarity 0.972, while dependency states normalized_distance(Duration, Duration)>=1.0
-20. Records (5, 3) have similarity 0.944, while dependency states normalized_distance(Duration, Duration)>=1.0
-
-Desbordante suggests to use the following right-hand side decision boundary: 0.896.
-
-Thus, the following MD was provided:
-
-	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=1.0
-
-and the following MD is suggested:
-
-	[ levenshtein(Departure, Departure)>=0.75 | levenshtein(Arrival, Arrival)>=0.75 ] -> normalized_distance(Duration, Duration)>=0.896
-
-As a result, we can conclude that durations differ by about 10% for flights with the same departure and arrival cities.
-
-In conclusion, the matching dependency verification algorithm can be helpful for analyzing data, extracting facts, and finding typos. It is a powerful pattern but requires experimentation with decision boundaries and similarity measures.
-
 '''

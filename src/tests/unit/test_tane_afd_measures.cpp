@@ -3,14 +3,14 @@
 
 #include <gtest/gtest.h>
 
-#include "algorithms/algo_factory.h"
-#include "all_csv_configs.h"
-#include "config/names.h"
-#include "fd/tane/afd_measures.h"
-#include "fd/tane/enums.h"
-#include "fd/tane/tane.h"
-#include "model/table/column_layout_relation_data.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/algorithms/algo_factory.h"
+#include "core/algorithms/fd/tane/afd_measures.h"
+#include "core/algorithms/fd/tane/enums.h"
+#include "core/algorithms/fd/tane/tane.h"
+#include "core/config/names.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace tests {
 namespace onam = config::names;
@@ -37,10 +37,6 @@ struct TaneValidationParams {
     algos::AfdErrorMeasure error_measure;
     std::vector<AFD> afds;
     CSVConfig csv_config;
-
-    TaneValidationParams(algos::AfdErrorMeasure error_measure, std::vector<AFD>&& afds,
-                         CSVConfig const& csv_config)
-        : error_measure(error_measure), afds(afds), csv_config(csv_config) {}
 };
 
 struct ColumnErr {
@@ -51,9 +47,6 @@ struct ColumnErr {
 struct PdepSelfValidationParams {
     std::vector<ColumnErr> errors;
     CSVConfig csv_config;
-
-    PdepSelfValidationParams(std::vector<ColumnErr>&& errors, CSVConfig const& csv_config)
-        : errors(errors), csv_config(csv_config) {}
 };
 
 class TestTanePdepSelfValidation : public ::testing::TestWithParam<PdepSelfValidationParams> {};

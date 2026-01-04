@@ -3,14 +3,13 @@
 // https://github.com/cupertank
 //
 
-#include <easylogging++.h>
 #include <gtest/gtest.h>
 
-INITIALIZE_EASYLOGGINGPP
+#include "core/util/logger.h"
 
 int main(int argc, char** argv) {
-    el::Loggers::configureFromGlobal("logging.conf");
-
+    util::logging::EnsureInitialized();
     ::testing::InitGoogleTest(&argc, argv);
+
     return RUN_ALL_TESTS();
 }

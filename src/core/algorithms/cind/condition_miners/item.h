@@ -2,7 +2,7 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "table/column_index.h"
+#include "core/model/table/column_index.h"
 
 namespace algos::cind {
 struct Item {

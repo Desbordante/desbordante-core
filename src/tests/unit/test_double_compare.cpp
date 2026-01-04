@@ -1,7 +1,7 @@
 #include <boost/math/special_functions/next.hpp>
 #include <gtest/gtest.h>
 
-#include "types.h"
+#include "core/model/types/types.h"
 
 namespace tests {
 

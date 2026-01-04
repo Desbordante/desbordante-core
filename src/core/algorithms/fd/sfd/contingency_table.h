@@ -1,8 +1,8 @@
 #pragma once
 #include <vector>
 
-#include "frequency_handler.h"
-#include "sample.h"
+#include "core/algorithms/fd/sfd/frequency_handler.h"
+#include "core/algorithms/fd/sfd/sample.h"
 
 namespace algos {
 class ContingencyTable {

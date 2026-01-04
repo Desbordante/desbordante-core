@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "model/table/idataset_stream.h"
+#include "core/model/table/idataset_stream.h"
 
 struct CSVConfig {
     std::filesystem::path path;

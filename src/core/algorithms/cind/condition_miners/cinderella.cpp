@@ -10,9 +10,9 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "cind/condition.h"
-#include "cind/condition_miners/basket.h"
-#include "cind/types.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/algorithms/cind/condition_miners/basket.h"
+#include "core/algorithms/cind/types.h"
 #include "itemset_node.h"
 
 namespace algos::cind {

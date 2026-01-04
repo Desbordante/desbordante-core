@@ -1,7 +1,7 @@
-#include "pli_based_fd_algorithm.h"
+#include "core/algorithms/fd/pli_based_fd_algorithm.h"
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {
 
@@ -22,19 +22,6 @@ void PliBasedFDAlgorithm::LoadDataInternal() {
     if (relation_->GetColumnData().empty()) {
         throw std::runtime_error("Got an empty dataset: FD mining is meaningless.");
     }
-}
-
-std::vector<Column const*> PliBasedFDAlgorithm::GetKeys() const {
-    assert(relation_ != nullptr);
-
-    std::vector<Column const*> keys;
-    for (ColumnData const& col : relation_->GetColumnData()) {
-        if (col.GetPositionListIndex()->AllValuesAreUnique()) {
-            keys.push_back(col.GetColumn());
-        }
-    }
-
-    return keys;
 }
 
 }  // namespace algos

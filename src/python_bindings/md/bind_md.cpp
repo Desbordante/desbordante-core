@@ -1,4 +1,4 @@
-#include "md/bind_md.h"
+#include "python_bindings/md/bind_md.h"
 
 #include <pybind11/cast.h>
 #include <pybind11/functional.h>
@@ -6,18 +6,18 @@
 #include <pybind11/stl.h>
 #include <pybind11/typing.h>
 
-#include "algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/equality.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/lcs.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
-#include "algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
-#include "algorithms/md/md.h"
-#include "algorithms/md/mining_algorithms.h"
-#include "md/object_similarity_measure.h"
-#include "py_util/bind_primitive.h"
-#include "py_util/table_serialization.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/date_difference.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/equality.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/jaccard.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/lcs.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/monge_elkan.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/number_difference.h"
+#include "core/algorithms/md/md.h"
+#include "core/algorithms/md/mining_algorithms.h"
+#include "python_bindings/md/object_similarity_measure.h"
+#include "python_bindings/py_util/bind_primitive.h"
+#include "python_bindings/py_util/table_serialization.h"
 
 namespace {
 namespace py = pybind11;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fd/tane/enums.h"
+#include "core/algorithms/fd/tane/enums.h"
 
 namespace config {
 using PfdErrorMeasureType = algos::PfdErrorMeasure;

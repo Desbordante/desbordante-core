@@ -3,14 +3,14 @@
 #include <cstddef>
 #include <vector>
 
-#include "algorithms/md/hymd/column_classifier_value_id.h"
-#include "model/index.h"
-#include "util/py_tuple_hash.h"
+#include "core/algorithms/md/hymd/column_classifier_value_id.h"
+#include "core/model/index.h"
+#include "core/util/py_tuple_hash.h"
 
 namespace algos::hymd {
 struct LhsNode {
     model::Index offset;
-    ColumnClassifierValueId ccv_id = 0;
+    ColumnClassifierValueId ccv_id;
 
     friend bool operator==(LhsNode const& l, LhsNode const& r) {
         return l.offset == r.offset && l.ccv_id == r.ccv_id;
@@ -34,8 +34,7 @@ public:
     }
 
     ColumnClassifierValueId& AddNext(model::Index offset) {
-        values_.push_back({offset});
-        return values_.back().ccv_id;
+        return values_.emplace_back(offset).ccv_id;
     }
 
     void RemoveLast() {

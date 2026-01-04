@@ -1,7 +1,7 @@
 name: Wheel
 on:
   pull_request:
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
     paths-ignore:
       - docs/**
       - README.md
@@ -27,6 +27,8 @@ on:
       - COPYING
       - build.*
       - pull_datasets.sh
+  schedule:
+    - cron: "0 3 * * 1" 
   workflow_dispatch:
   release:
     types:
@@ -39,6 +41,7 @@ concurrency:
 
 jobs:
   generate-linux-wheels-matrix:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'python-packaging-risk')
     name: Generate Linux wheel matrix
     runs-on: ubuntu-latest
     outputs:
@@ -46,7 +49,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==2.22.0
+        run: pipx install cibuildwheel==3.2.1
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -62,12 +65,12 @@ jobs:
     env:
       CIBW_ARCHS_LINUX: x86_64
       CIBW_BUILD: "*manylinux*"
-      CIBW_SKIP: "cp37-*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
       CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
 
   generate-macos-wheels-matrix:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'python-packaging-risk')
     name: Generate macOS wheel matrix
     runs-on: macos-latest
     outputs:
@@ -75,7 +78,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install cibuildwheel
-        run: pipx install cibuildwheel==2.22.0
+        run: pipx install cibuildwheel==3.2.1
       - id: set-matrix
         run: |
           MATRIX=$(
@@ -83,7 +86,7 @@ jobs:
             | jq -sR 'split("\n") | map(select(length > 0)) | map(
               {
                 "only": ., 
-                "os": (if contains("x86_64") then "macos-13" else "macos-latest" end), 
+                "os": (if contains("x86_64") then "macos-15-intel" else "macos-latest" end), 
                 "toolset": "apple-clang",
               })' \
             | jq -c
@@ -95,8 +98,6 @@ jobs:
     env:
       CIBW_ARCHS_MACOS: arm64 x86_64
       CIBW_BUILD: "*macos*"
-      # https://github.com/pypa/cibuildwheel/issues/2126
-      CIBW_SKIP: "cp37-*"
       CIBW_TEST_REQUIRES: pytest
       CIBW_BUILD_VERBOSITY: 1
 
@@ -139,7 +140,7 @@ jobs:
           download-pybind: true
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.22.0
+        uses: pypa/cibuildwheel@v3.2.1
         with:
           only: ${{ matrix.only }}
         env:

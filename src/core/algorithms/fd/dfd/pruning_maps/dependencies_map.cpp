@@ -1,4 +1,4 @@
-#include "dependencies_map.h"
+#include "core/algorithms/fd/dfd/pruning_maps/dependencies_map.h"
 
 DependenciesMap::DependenciesMap(RelationalSchema const* schema) : PruningMap(schema) {}
 

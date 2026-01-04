@@ -1,4 +1,4 @@
-#include "algorithms/gfd/gfd_miner/gfd_miner.h"
+#include "core/algorithms/gfd/gfd_miner/gfd_miner.h"
 
 #include <algorithm>
 #include <cstdlib>
@@ -15,11 +15,11 @@
 #include <boost/graph/copy.hpp>
 #include <boost/graph/isomorphism.hpp>
 #include <boost/graph/vf2_sub_graph_iso.hpp>
-#include <easylogging++.h>
 
-#include "algorithms/gfd/comparator.h"
-#include "config/option_using.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/gfd/comparator.h"
+#include "core/config/option_using.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos {
 
@@ -404,7 +404,7 @@ void GfdMiner::ResetState() {}
 
 unsigned long long GfdMiner::ExecuteInternal() {
     std::size_t elapsed_time = util::TimedInvoke(&GfdMiner::MineGfds, this);
-    LOG(DEBUG) << "Mined GFDs: " << gfds_.size();
+    LOG_DEBUG("Mined GFDs: {}", gfds_.size());
     return elapsed_time;
 }
 
@@ -698,7 +698,7 @@ void GfdMiner::Initialize(std::set<std::string>& vertex_labels, std::set<std::st
             Embedding embedding{{boost::vertex(0, pattern), v}};
             embeddings_set.emplace_back(std::vector{embedding});
 
-            forbidden_rules_set.push_back({});
+            forbidden_rules_set.emplace_back();
         }
         for (std::pair<std::string const, std::string> const& attr : graph_attributes) {
             if (attr.first == "label") {

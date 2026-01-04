@@ -10,10 +10,10 @@
 
 #include <boost/container_hash/hash.hpp>
 
-#include "cind/condition.h"
-#include "cind/condition_miners/position_lists_set.h"
-#include "cind/types.h"
-#include "table/encoded_column_data.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/algorithms/cind/condition_miners/position_lists_set.h"
+#include "core/algorithms/cind/types.h"
+#include "core/model/table/encoded_column_data.h"
 
 namespace algos::cind {
 

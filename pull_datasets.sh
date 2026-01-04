@@ -1,9 +1,13 @@
-git lfs pull
-if [ $? -eq 0 ]; then
-    echo "PULLED VIA GIT LFS"
-else
-    echo "FAILED TO PULL VIA GIT LFS, RETRIEVING FROM 'desbordante-data' REPOSITORY"
-    git clone https://github.com/Desbordante/desbordante-data.git
-    mv desbordante-data/datasets.zip datasets/datasets.zip
-    rm -rf desbordante-data
-fi
+set -e
+
+git clone https://github.com/Desbordante/desbordante-data.git
+
+# Merge all archives
+cd desbordante-data
+mkdir all-datasets
+for fname in *.zip; do unzip -d all-datasets -o -u $fname; done
+zip -r -j all-datasets.zip all-datasets
+cd ..
+
+mv desbordante-data/all-datasets.zip datasets/datasets.zip
+rm -rf desbordante-data

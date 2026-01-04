@@ -2,8 +2,8 @@
 #include <functional>
 #include <utility>
 
-#include "../model/confidence_interval.h"
-#include "model/table/vertical.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
+#include "core/model/table/vertical.h"
 
 class DependencyCandidate {
 private:

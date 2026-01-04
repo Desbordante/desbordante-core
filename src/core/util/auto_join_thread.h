@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <thread>
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 namespace util::jthread {
 
@@ -28,7 +28,7 @@ public:
             t_.join();
         }
     } catch (std::system_error const& e) {
-        LOG(ERROR) << e.what();
+        LOG_ERROR("{}", e.what());
         return;  // Don't pass exception on
     }
 

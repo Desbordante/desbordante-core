@@ -1,10 +1,10 @@
-#include "algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
+#include "core/algorithms/md/hymd/lattice/cardinality/one_by_one_min_picker.h"
 
 #include <algorithm>
 #include <cassert>
 
-#include "algorithms/md/hymd/md_lhs.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/md_lhs.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::lattice::cardinality {
 
@@ -107,7 +107,7 @@ void OneByOnePicker::AddGeneralizations(MdLattice::MdVerificationMessenger& mess
         }
     }
     assert(!considered_indices.none());
-    currently_picked_.push_back({&messenger, std::move(considered_indices)});
+    currently_picked_.emplace_back(&messenger, std::move(considered_indices));
 }
 
 std::vector<ValidationInfo> OneByOnePicker::GetAll() noexcept {

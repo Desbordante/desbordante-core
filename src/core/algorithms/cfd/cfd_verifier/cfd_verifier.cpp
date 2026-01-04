@@ -1,13 +1,12 @@
-#include "cfd_verifier.h"
+#include "core/algorithms/cfd/cfd_verifier/cfd_verifier.h"
 
-#include <easylogging++.h>
-
-#include "cfd/model/cfd_relation_data.h"
-#include "cfd/util/cfd_output_util.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "util/timed_invoke.h"
+#include "core/algorithms/cfd/model/cfd_relation_data.h"
+#include "core/algorithms/cfd/util/cfd_output_util.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
+#include "core/util/timed_invoke.h"
 
 namespace algos::cfd_verifier {
 
@@ -90,14 +89,14 @@ unsigned long long CFDVerifier::ExecuteInternal() {
 
     cfd_ = {build_item_ids(string_rule_left_), build_item_ids({string_rule_right_}).front()};
 
-    LOG(DEBUG) << "Starting CFD verification...";
-    LOG(DEBUG) << "\tRule to verify: " << cfd::Output::CFDToString(cfd_, relation_);
+    LOG_DEBUG("Starting CFD verification...");
+    LOG_DEBUG("\tRule to verify: {}", cfd::Output::CFDToString(cfd_, relation_));
 
     auto verification_time = ::util::TimedInvoke(&CFDVerifier::VerifyCFD, this);
-    LOG(DEBUG) << "CFD verification took " << std::to_string(verification_time) << "ms";
+    LOG_DEBUG("CFD verification took {} ms", verification_time);
 
     auto stats_calculation_time = ::util::TimedInvoke(&CFDVerifier::CalculateStatistics, this);
-    LOG(DEBUG) << "Statistics calculation took " << std::to_string(stats_calculation_time) << "ms";
+    LOG_DEBUG("Statistics calculation took {} ms ", stats_calculation_time);
 
     return verification_time + stats_calculation_time;
 }

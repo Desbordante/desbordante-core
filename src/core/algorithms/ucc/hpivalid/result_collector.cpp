@@ -1,11 +1,11 @@
-#include "algorithms/ucc/hpivalid/result_collector.h"
+#include "core/algorithms/ucc/hpivalid/result_collector.h"
 
 #include <chrono>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 // see algorithms/ucc/hpivalid/LICENSE
 
@@ -49,7 +49,7 @@ void ResultCollector::FinalHypergraph(Hypergraph const& hg) {
         }
         out << "\n";
     }
-    LOG(DEBUG) << out.str();
+    LOG_DEBUG("{}", out.str());
 
     diff_sets_final_ = hg.NumEdges();
 }

@@ -1,18 +1,16 @@
-#include "algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
+#include "core/algorithms/fd/fd_verifier/dynamic_fd_verifier.h"
 
 #include <chrono>
 #include <memory>
 #include <stdexcept>
 
-#include <easylogging++.h>
-
-#include "config/equal_nulls/option.h"
-#include "config/indices/option.h"
-#include "config/indices/validate_index.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/crud_operations/operations.h"
-#include "config/tabular_data/input_table/option.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/crud_operations/operations.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::fd_verifier {
 
@@ -121,8 +119,8 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
         while (insert_statements_table_->HasNextRow()) {
             std::vector<std::string> row = insert_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns()) {
-                LOG(WARNING) << "Received row with size " << row.size() << ", but expected "
-                             << input_table_->GetNumberOfColumns();
+                LOG_WARN("Received row with size {}, but expected {}", row.size(),
+                         input_table_->GetNumberOfColumns());
                 continue;
             }
             lhs_inserts.emplace_back(std::nullopt, ParseRowForPLI(row.begin(), lhs_indices_));
@@ -134,8 +132,8 @@ unsigned long long DynamicFDVerifier::ExecuteInternal() {
         while (update_statements_table_->HasNextRow()) {
             std::vector<std::string> row = update_statements_table_->GetNextRow();
             if (row.size() != input_table_->GetNumberOfColumns() + 1) {
-                LOG(WARNING) << "Received row with size " << row.size() << ", but expected "
-                             << input_table_->GetNumberOfColumns() + 1;
+                LOG_WARN("Received row with size {}, but expected {}", row.size(),
+                         input_table_->GetNumberOfColumns() + 1);
                 continue;
             }
             size_t row_id = std::stoull(row.front());

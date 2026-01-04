@@ -14,10 +14,10 @@
 #include <string>
 #include <vector>
 
-#include "column_combination.h"
-#include "config/mem_limit/type.h"
-#include "config/thread_number/type.h"
-#include "idataset_stream.h"
+#include "core/config/mem_limit/type.h"
+#include "core/config/thread_number/type.h"
+#include "core/model/table/column_combination.h"
+#include "core/model/table/idataset_stream.h"
 
 namespace model {
 

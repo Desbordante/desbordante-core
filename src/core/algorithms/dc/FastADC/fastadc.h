@@ -3,12 +3,12 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/algorithm.h"
-#include "dc/FastADC/providers/predicate_provider.h"
-#include "dc/FastADC/util/denial_constraint_set.h"
-#include "model/denial_constraint.h"
-#include "table/column_layout_typed_relation_data.h"
-#include "tabular_data/input_table_type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/dc/FastADC/model/denial_constraint.h"
+#include "core/algorithms/dc/FastADC/providers/predicate_provider.h"
+#include "core/algorithms/dc/FastADC/util/denial_constraint_set.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::dc {
 

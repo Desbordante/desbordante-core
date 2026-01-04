@@ -1,12 +1,12 @@
-#include "algorithms/md/hymd/indexes/records_info.h"
+#include "core/algorithms/md/hymd/indexes/records_info.h"
 
 #include <string>
 #include <vector>
 
 #include <boost/unordered/unordered_flat_map.hpp>
-#include <easylogging++.h>
 
-#include "algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/util/logger.h"
 
 namespace {
 using namespace algos::hymd::indexes;
@@ -25,9 +25,10 @@ std::shared_ptr<DictionaryCompressor> MakeCompressor(model::IDatasetStream& tabl
         std::vector<std::string> record = table.GetNextRow();
         std::size_t record_size = record.size();
         if (record_size != attributes_num) {
-            LOG(WARNING) << "Unexpected number of columns for a record, skipping (expected "
-                         << attributes_num << ", got " << record_size
-                         << "). Records processed so far: " << records_processed << ".";
+            LOG_WARN(
+                    "Unexpected number of columns for a record, "
+                    "skipping (expected {}, got {}). Records processed so far: {}.",
+                    attributes_num, record_size, records_processed);
             continue;
         }
         for (model::Index i = 0; i != attributes_num; ++i) {

@@ -23,6 +23,7 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -L[LEVEL]   --log-level[=LEVEL]     Set log level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
   -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
   -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
 EOF
@@ -71,6 +72,14 @@ for i in "$@"; do
         -g)
             GDB_DEBUG=true
             ;;
+        # Set log level, long option
+        --log-level=*)
+            LOG_LEVEL="${i#*=}"
+            ;;
+        # Set log level, short option
+        -L*)
+            LOG_LEVEL="${i#*L}"
+            ;;
         # Forward option to CMake, long option
         --cmake-opt=*)
             CMAKE_OPTS="$CMAKE_OPTS ${i#*=}"
@@ -98,27 +107,27 @@ done
 CMAKE_OPTS="$CMAKE_OPTS -G Ninja"
 
 if [[ $NO_TESTS == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_TESTS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_TESTS=OFF"
 fi
 
 if [[ $BENCHMARK == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D COMPILE_BENCHMARKS=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BUILD_BENCHMARKS=ON"
 fi
 
 if [[ $NO_UNPACK == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D UNPACK_DATASETS=OFF"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_UNPACK_DATASETS=OFF"
 fi
 
 if [[ $PYBIND == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D PYTHON=COMPILE"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_BINDINGS=BUILD"
 fi
 
 if [[ $LTO == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D USE_LTO=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_USE_LTO=ON"
 fi
 
 if [[ $GDB_DEBUG == true ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D GDB_DEBUG=ON"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_GDB_SYMBOLS=ON"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
@@ -126,7 +135,11 @@ if [[ $DEBUG_MODE != true ]]; then
 fi
 
 if [[ -n $SANITIZER ]]; then
-    CMAKE_OPTS="$CMAKE_OPTS -D SANITIZER=${SANITIZER}"
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_SANITIZER=${SANITIZER}"
+fi
+
+if [[ -n $LOG_LEVEL ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_LOG_LEVEL=${LOG_LEVEL}"
 fi
 
 rm -f build/CMakeCache.txt

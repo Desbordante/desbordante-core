@@ -1,11 +1,11 @@
-#include "algorithms/fd/fdep/fdep.h"
+#include "core/algorithms/fd/fdep/fdep.h"
 
 #include <chrono>
 
-#include "config/equal_nulls/option.h"
-#include "config/tabular_data/input_table/option.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/types/bitset.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/types/bitset.h"
 
 // #ifndef PRINT_FDS
 // #define PRINT_FDS

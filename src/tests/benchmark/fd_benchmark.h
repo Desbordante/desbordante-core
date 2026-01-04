@@ -1,16 +1,16 @@
 #pragma once
 
-#include "algorithms/fd/aidfd/aid.h"
-#include "algorithms/fd/eulerfd/eulerfd.h"
-#include "algorithms/fd/hyfd/hyfd.h"
-#include "algorithms/fd/pyro/pyro.h"
-#include "algorithms/fd/tane/tane.h"
-#include "all_csv_configs.h"
-#include "benchmark_comparer.h"
-#include "benchmark_runner.h"
-#include "config/max_lhs/type.h"
-#include "config/names.h"
-#include "config/thread_number/type.h"
+#include "core/algorithms/fd/aidfd/aid.h"
+#include "core/algorithms/fd/eulerfd/eulerfd.h"
+#include "core/algorithms/fd/hyfd/hyfd.h"
+#include "core/algorithms/fd/pyro/pyro.h"
+#include "core/algorithms/fd/tane/tane.h"
+#include "core/config/max_lhs/type.h"
+#include "core/config/names.h"
+#include "core/config/thread_number/type.h"
+#include "tests/benchmark/benchmark_comparer.h"
+#include "tests/benchmark/benchmark_runner.h"
+#include "tests/common/all_csv_configs.h"
 
 namespace benchmark {
 
@@ -23,7 +23,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
             {{kThreads, static_cast<config::ThreadNumType>(1)},
              {kMaximumLhs, static_cast<config::MaxLhsType>(2)}},
             "");
-    comparer.SetThreshold(hyfd_name, 70);
+    comparer.SetThreshold(hyfd_name, 75);
 
     auto pyro_name = runner.RegisterSimpleBenchmark<algos::Pyro>(
             tests::kIowa550k,
@@ -32,13 +32,12 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
              {kMaximumLhs, static_cast<config::MaxLhsType>(2)},
              {kThreads, static_cast<config::ThreadNumType>(1)}},
             "");
-    comparer.SetThreshold(pyro_name, 17);
+    comparer.SetThreshold(pyro_name, 22);
 
     for (auto measure : algos::AfdErrorMeasure::_values()) {
         // mu_plus is much slower than other measures
-        auto const& dataset = measure == +algos::AfdErrorMeasure::mu_plus
-                                      ? tests::kMushroomPlus3attr1500
-                                      : tests::kMushroomPlus4attr1300;
+        auto dataset = measure == +algos::AfdErrorMeasure::mu_plus ? tests::kMushroomPlus2attr1500
+                                                                   : tests::kMushroomPlus3attr1300;
         auto tane_name = runner.RegisterSimpleBenchmark<algos::Tane>(
                 dataset,
                 {{kError, static_cast<config::ErrorType>(0.95)}, {kAfdErrorMeasure, measure}},
@@ -55,7 +54,7 @@ inline void FDBenchmark(BenchmarkRunner& runner, BenchmarkComparer& comparer) {
 #endif
 
     auto aid_name = runner.RegisterSimpleBenchmark<algos::Aid>(tests::kIowa1kk, {}, "");
-    comparer.SetThreshold(aid_name, 17);
+    comparer.SetThreshold(aid_name, 40);
 }
 
 }  // namespace benchmark

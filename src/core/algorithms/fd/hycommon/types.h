@@ -2,7 +2,7 @@
 #include <utility>
 #include <vector>
 
-#include "model/table/column_index.h"
+#include "core/model/table/column_index.h"
 
 namespace model {
 

@@ -1,6 +1,6 @@
-#include "fun.h"
+#include "core/algorithms/fd/fun/fun.h"
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 namespace algos {
 
@@ -154,7 +154,7 @@ unsigned long long FUN::ExecuteInternal() {
     schema_ = relation_->GetSchema();
     double progress_step = kTotalProgressPercent / (schema_->GetNumColumns() + 1);
     AddProgress(progress_step);
-    Vertical empty_vertical = *schema_->empty_vertical_;
+    Vertical empty_vertical = schema_->CreateEmptyVertical();
 
     r_ = empty_vertical;
     r_prime_ = empty_vertical;
@@ -196,8 +196,8 @@ unsigned long long FUN::ExecuteInternal() {
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    LOG(INFO) << "Total FD count: " << total_fds;
-    LOG(INFO) << "HASH: " << Fletcher16();
+    LOG_INFO("Total FD count: {}", total_fds);
+    LOG_INFO("HASH: {}", Fletcher16());
 
     return elapsed_milliseconds.count();
 }

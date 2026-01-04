@@ -8,10 +8,10 @@
 #include <memory>
 #include <optional>
 
-#include "algorithms/ind/ind_algorithm.h"
-#include "config/error/type.h"
-#include "config/max_arity/type.h"
-#include "raw_ind.h"
+#include "core/algorithms/ind/ind_algorithm.h"
+#include "core/algorithms/ind/mind/raw_ind.h"
+#include "core/config/error/type.h"
+#include "core/config/max_arity/type.h"
 
 namespace algos {
 
@@ -45,6 +45,7 @@ private:
     bool SetExternalOption(std::string_view option_name, boost::any const& value) override;
     std::type_index GetExternalTypeIndex(std::string_view option_name) const override;
 
+    bool ExternalOptionIsRequired(std::string_view option_name) const override;
     void LoadINDAlgorithmDataInternal() override;
 
     ///

@@ -1,8 +1,8 @@
-#include "algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
+#include "core/algorithms/md/hymd/lattice/cardinality/min_picker_lattice.h"
 
 #include <cassert>
 
-#include "algorithms/md/hymd/utility/reserve_more.h"
+#include "core/algorithms/md/hymd/utility/reserve_more.h"
 
 namespace algos::hymd::lattice::cardinality {
 using namespace algos::hymd;
@@ -92,8 +92,8 @@ void MinPickerLattice::AddGeneralizations(MdLattice::MdVerificationMessenger& me
         if (considered_indices.none()) return;
     }
     RemoveSpecializations(root_, messenger, lhs.begin(), considered_indices);
-    info_.push_back({&messenger, std::move(considered_indices)});
-    Add(&info_.back());
+    ValidationInfo& added_ref = info_.emplace_back(&messenger, std::move(considered_indices));
+    Add(&added_ref);
 }
 
 std::vector<ValidationInfo> MinPickerLattice::GetAll() noexcept(kNeedsEmptyRemoval) {

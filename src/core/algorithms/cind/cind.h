@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ind/ind.h>
+#include "core/algorithms/ind/ind.h"
 
 #include "condition.h"
 

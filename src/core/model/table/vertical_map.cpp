@@ -1,13 +1,15 @@
-#include "vertical_map.h"
+#include "core/model/table/vertical_map.h"
 
 #include <exception>
+#include <mutex>
 #include <queue>
+#include <shared_mutex>
 #include <unordered_set>
 
-#include "fd/pyrocommon/core/dependency_candidate.h"
-#include "fd/pyrocommon/core/vertical_info.h"
-#include "fd/pyrocommon/model/agree_set_sample.h"
-#include "position_list_index.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_candidate.h"
+#include "core/algorithms/fd/pyrocommon/core/vertical_info.h"
+#include "core/algorithms/fd/pyrocommon/model/agree_set_sample.h"
+#include "core/model/table/position_list_index.h"
 
 namespace model {
 
@@ -521,6 +523,8 @@ template class VerticalMap<DependencyCandidate>;
 template class VerticalMap<VerticalInfo>;
 
 template class VerticalMap<Vertical>;
+
+template class VerticalMap<std::monostate>;
 
 template <class V>
 size_t BlockingVerticalMap<V>::GetSize() const {

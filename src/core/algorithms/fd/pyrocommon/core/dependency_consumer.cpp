@@ -1,5 +1,5 @@
 
-#include "dependency_consumer.h"
+#include "core/algorithms/fd/pyrocommon/core/dependency_consumer.h"
 
 PartialFD DependencyConsumer::RegisterFd(Vertical const& lhs, Column const& rhs, double error,
                                          double score) const {

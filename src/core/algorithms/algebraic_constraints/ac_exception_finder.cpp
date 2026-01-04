@@ -1,7 +1,7 @@
-#include "ac_exception_finder.h"
+#include "core/algorithms/algebraic_constraints/ac_exception_finder.h"
 
-#include "ac_algorithm.h"
-#include "bin_operation_enum.h"
+#include "core/algorithms/algebraic_constraints/ac_algorithm.h"
+#include "core/algorithms/algebraic_constraints/bin_operation_enum.h"
 
 namespace algos::algebraic_constraints {
 

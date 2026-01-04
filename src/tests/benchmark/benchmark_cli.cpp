@@ -1,4 +1,4 @@
-#include "benchmark_cli.h"
+#include "tests/benchmark/benchmark_cli.h"
 
 #include <boost/program_options.hpp>
 

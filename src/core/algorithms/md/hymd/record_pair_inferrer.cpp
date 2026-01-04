@@ -1,4 +1,4 @@
-#include "algorithms/md/hymd/record_pair_inferrer.h"
+#include "core/algorithms/md/hymd/record_pair_inferrer.h"
 
 #include <algorithm>
 #include <atomic>
@@ -6,10 +6,9 @@
 #include <ranges>
 #include <vector>
 
-#include <easylogging++.h>
-
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "util/get_preallocated_vector.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/util/get_preallocated_vector.h"
+#include "core/util/logger.h"
 
 namespace {
 algos::hymd::ColumnClassifierValueId GetCCVId(algos::hymd::indexes::SimilarityMatrixRow const& row,
@@ -380,8 +379,7 @@ auto RecordPairInferrer::CreateSamplingQueue() -> std::priority_queue<ColumnMatc
             DESBORDANTE_ASSUME(rhs_lhs_map.size() > 1);
             // TODO: sort based on column matches where the number of LHS values is greater
             // than 1, discard pairs with the highest CCV ID.
-            LOG(WARNING) << "Sampling for column match " << column_match_index
-                         << " not implemented.";
+            LOG_WARN("Sampling for column match {} not implemented.", column_match_index);
             continue;
         }
 

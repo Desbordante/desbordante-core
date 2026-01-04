@@ -11,7 +11,7 @@
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 
-#include "raw_cfd.h"
+#include "core/algorithms/cfd/model/raw_cfd.h"
 
 // see algorithms/cfd/LICENSE
 

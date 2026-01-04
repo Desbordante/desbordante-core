@@ -1,6 +1,6 @@
-#include "column_layout_typed_relation_data.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
-#include <easylogging++.h>
+#include "core/util/logger.h"
 
 namespace model {
 
@@ -19,8 +19,10 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
         row = data_stream.GetNextRow();
 
         if (row.size() != num_columns) {
-            LOG(WARNING) << "Unexpected number of columns for a row, skipping (expected "
-                         << num_columns << ", got " << row.size() << ")";
+            LOG_WARN(
+                    "Unexpected number of columns for a row, "
+                    "skipping (expected {}, got {})",
+                    num_columns, row.size());
             continue;
         }
 
@@ -39,8 +41,6 @@ std::unique_ptr<ColumnLayoutTypedRelationData> ColumnLayoutTypedRelationData::Cr
                 treat_mixed_as_string);
         column_data.emplace_back(std::move(typed_column_data));
     }
-
-    schema->Init();
 
     return std::make_unique<ColumnLayoutTypedRelationData>(std::move(schema),
                                                            std::move(column_data));

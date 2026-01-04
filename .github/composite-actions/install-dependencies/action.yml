@@ -62,26 +62,14 @@ runs:
         restore-keys: |
           ${{ runner.os }}-cpm-
 
-    - name: Create python virtual environment
-      run: | 
-          python3 -m venv .venv
-      shell: bash
-
-    # Add-hoc for https://github.com/Desbordante/desbordante-core/issues/549
-    - name: Install cmake 3.31.6 in python venv
-      run: |
-        source .venv/bin/activate
-        python3 -m pip install cmake==3.31.6 # ad-hoc
-      shell: bash
-
     - name: Install build tools using apt
       run: |
         sudo apt-get update -y
-        sudo apt install ninja-build python3 python3-venv -y
+        sudo apt install cmake ninja-build python3 python3-venv -y
       shell: bash
       if: env.OS == 'ubuntu'
     - name: Install build tools using brew
-      run: brew install ninja python3 --formula
+      run: brew install cmake ninja python3 --formula
       shell: bash
       if: env.OS == 'macos'
 
@@ -96,7 +84,7 @@ runs:
       run: |
         wget https://apt.llvm.org/llvm.sh
         chmod +x llvm.sh
-        sudo ./llvm.sh 17 all
+        sudo ./llvm.sh 20 all
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'ubuntu'
     - name: Install GCC toolset (on macOS)
@@ -105,7 +93,7 @@ runs:
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'gcc' && env.OS == 'macos'
     - name: Install LLVM Clang toolset (on macOS)
-      run: brew install llvm@17
+      run: brew install llvm@20
       shell: bash
       if: inputs.install-toolset == 'true' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     # Apple Clang is installed by default on macOS runner
@@ -148,10 +136,10 @@ runs:
       run: |
         cd lib/boost
         ./bootstrap.sh --with-libraries=${{ inputs.boost-libraries }}
-        echo "using darwin : : $(brew --prefix llvm@17)/bin/clang++ ;" > user-config.jam
+        echo "using darwin : : $(brew --prefix llvm@20)/bin/clang++ ;" > user-config.jam
         sudo ./b2 install -a --user-config=user-config.jam --prefix=/usr/local \
-         cxxflags="-std=c++11 -I$(brew --prefix llvm@17)/include" \
-         linkflags="-L$(brew --prefix llvm@17)/lib/c++"
+         cxxflags="-std=c++11 -I$(brew --prefix llvm@20)/include" \
+         linkflags="-L$(brew --prefix llvm@20)/lib/c++"
       shell: bash
       if: inputs.boost-libraries != '' && inputs.toolset == 'llvm-clang' && env.OS == 'macos'
     - name: Install Boost built with Apple Clang

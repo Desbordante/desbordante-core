@@ -7,10 +7,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "confidence_interval.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/vertical.h"
-#include "util/custom_random.h"
+#include "core/algorithms/fd/pyrocommon/model/confidence_interval.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/vertical.h"
+#include "core/util/custom_random.h"
 
 namespace model {
 
@@ -47,9 +47,6 @@ protected:
                    unsigned int sample_size, unsigned long long population_size);
 
     template <typename T>
-    static std::unique_ptr<T> CreateFor(ColumnLayoutRelationData* relation_data, int sample_size);
-
-    template <typename T>
     static std::unique_ptr<T> CreateFocusedFor(ColumnLayoutRelationData const* relation,
                                                Vertical const& restriction_vertical,
                                                PositionListIndex const* restriction_pli,
@@ -76,4 +73,4 @@ private:
 }  // namespace model
 
 // include template implementation
-#include "agree_set_sample_impl.h"
+#include "core/algorithms/fd/pyrocommon/model/agree_set_sample_impl.h"

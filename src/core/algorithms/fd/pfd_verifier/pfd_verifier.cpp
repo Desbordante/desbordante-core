@@ -1,14 +1,14 @@
-#include "algorithms/fd/pfd_verifier/pfd_verifier.h"
+#include "core/algorithms/fd/pfd_verifier/pfd_verifier.h"
 
 #include <chrono>
 #include <memory>
 
-#include "algorithms/algorithm.h"
-#include "config/equal_nulls/option.h"
-#include "config/error_measure/option.h"
-#include "config/indices/option.h"
-#include "config/names.h"
-#include "config/tabular_data/input_table/option.h"
+#include "core/algorithms/algorithm.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/error_measure/option.h"
+#include "core/config/indices/option.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
 
 namespace algos {
 

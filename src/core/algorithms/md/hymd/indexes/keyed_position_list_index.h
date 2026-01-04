@@ -3,10 +3,10 @@
 #include <unordered_map>
 #include <vector>
 
-#include "algorithms/md/hymd/indexes/global_value_identifier.h"
-#include "algorithms/md/hymd/indexes/pli_cluster.h"
-#include "algorithms/md/hymd/table_identifiers.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/indexes/global_value_identifier.h"
+#include "core/algorithms/md/hymd/indexes/pli_cluster.h"
+#include "core/algorithms/md/hymd/table_identifiers.h"
+#include "core/util/desbordante_assume.h"
 
 namespace algos::hymd::indexes {
 

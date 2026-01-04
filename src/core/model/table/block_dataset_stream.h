@@ -10,10 +10,9 @@
 #include <numeric>
 #include <string>
 
-#include <easylogging++.h>
-
-#include "block_data.h"
-#include "dataset_stream_wrapper.h"
+#include "core/model/table/block_data.h"
+#include "core/model/table/dataset_stream_wrapper.h"
+#include "core/util/logger.h"
 
 namespace model {
 

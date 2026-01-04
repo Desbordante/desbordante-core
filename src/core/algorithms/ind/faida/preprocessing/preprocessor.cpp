@@ -1,8 +1,8 @@
-#include "preprocessor.h"
+#include "core/algorithms/ind/faida/preprocessing/preprocessor.h"
 
 #include <cassert>
 
-#include "algorithms/ind/faida/hashing/hashing.h"
+#include "core/algorithms/ind/faida/hashing/hashing.h"
 
 namespace algos::faida {
 

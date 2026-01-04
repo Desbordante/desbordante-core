@@ -3,8 +3,8 @@
 #include <filesystem>
 #include <vector>
 
-#include "config/tabular_data/input_table_type.h"
-#include "parser/csv_parser/csv_parser.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/parser/csv_parser/csv_parser.h"
 
 namespace tests {
 

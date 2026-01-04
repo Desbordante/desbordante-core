@@ -1,4 +1,4 @@
-#include "vertical.h"
+#include "core/model/table/vertical.h"
 
 #include <utility>
 
@@ -67,11 +67,6 @@ Vertical Vertical::Invert(Vertical const& scope) const {
     boost::dynamic_bitset<> flipped_indices(column_indices_);
     flipped_indices ^= scope.column_indices_;
     return schema_->GetVertical(flipped_indices);
-}
-
-std::unique_ptr<Vertical> Vertical::EmptyVertical(RelationalSchema const* rel_schema) {
-    return std::make_unique<Vertical>(rel_schema,
-                                      boost::dynamic_bitset<>(rel_schema->GetNumColumns()));
 }
 
 std::vector<Column const*> Vertical::GetColumns() const {

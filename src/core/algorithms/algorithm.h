@@ -10,11 +10,11 @@
 
 #include <boost/any.hpp>
 
-#include "config/ioption.h"
-#include "config/option.h"
-#include "model/table/idataset_stream.h"
-#include "parser/csv_parser/csv_parser.h"
-#include "util/progress.h"
+#include "core/config/ioption.h"
+#include "core/config/option.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/parser/csv_parser/csv_parser.h"
+#include "core/util/progress.h"
 
 namespace algos {
 
@@ -38,6 +38,7 @@ private:
     void ClearOptions() noexcept;
     virtual void LoadDataInternal() = 0;
     virtual unsigned long long ExecuteInternal() = 0;
+    bool AllRequiredOptionsAreSet() const noexcept;
 
 protected:
     void AddProgress(double val) noexcept {
@@ -70,6 +71,7 @@ protected:
     // pipeline.
     virtual std::type_index GetExternalTypeIndex(std::string_view) const;
 
+    virtual bool ExternalOptionIsRequired(std::string_view option_name) const;
     virtual void AddSpecificNeededOptions(
             std::unordered_set<std::string_view>& previous_options) const;
     void ExecutePrepare();
@@ -96,6 +98,7 @@ public:
     unsigned long long Execute();
 
     void SetOption(std::string_view option_name, boost::any const& value = {});
+    bool OptionIsRequired(std::string_view option_name) const;
 
     [[nodiscard]] std::unordered_set<std::string_view> GetNeededOptions() const;
 
@@ -114,6 +117,8 @@ public:
 
     [[nodiscard]] std::unordered_set<std::string_view> GetPossibleOptions() const;
     [[nodiscard]] std::string_view GetDescription(std::string_view option_name) const;
+
+    [[nodiscard]] bool OptionIsSet(std::string_view option_name) const;
 
     std::unordered_map<std::string_view, config::OptValue> GetOptValues() const {
         std::unordered_map<std::string_view, config::OptValue> opt_values;

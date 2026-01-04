@@ -1,13 +1,13 @@
-#include "algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
+#include "core/algorithms/md/hymd/preprocessing/column_matches/levenshtein.h"
 
 #include <algorithm>
 #include <cstddef>
 #include <numeric>
 
-#include "algorithms/md/hymd/lowest_bound.h"
-#include "model/index.h"
-#include "model/types/string_type.h"
-#include "util/desbordante_assume.h"
+#include "core/algorithms/md/hymd/lowest_bound.h"
+#include "core/model/index.h"
+#include "core/model/types/string_type.h"
+#include "core/util/desbordante_assume.h"
 
 namespace {
 using namespace algos::hymd;

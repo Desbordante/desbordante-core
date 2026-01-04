@@ -5,8 +5,8 @@
 #include <limits>
 #include <sstream>
 
-#include "imetrizable_type.h"
-#include "type.h"
+#include "core/model/types/imetrizable_type.h"
+#include "core/model/types/type.h"
 
 namespace model {
 

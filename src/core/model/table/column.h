@@ -5,12 +5,10 @@
 
 #include <boost/dynamic_bitset.hpp>
 
-#include "column_index.h"
-#include "relational_schema.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/relational_schema.h"
 
 class Column {
-    friend RelationalSchema;
-
 public:
     using IndexType = model::ColumnIndex;
 
@@ -27,7 +25,7 @@ public:
         return index_;
     }
 
-    std::string GetName() const {
+    std::string const& GetName() const {
         return name_;
     }
 

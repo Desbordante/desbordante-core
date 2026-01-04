@@ -1,6 +1,6 @@
 #pragma once
 
-#include "algorithms/fd/hycommon/efficiency_threshold.h"
+#include "core/algorithms/fd/hycommon/efficiency_threshold.h"
 
 namespace algos::hyfd {
 

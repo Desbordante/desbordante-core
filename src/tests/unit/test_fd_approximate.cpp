@@ -3,10 +3,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "algorithms/fd/eulerfd/eulerfd.h"
-#include "all_csv_configs.h"
-#include "test_fd_util.h"
-#include "util/bitset_utils.h"
+#include "core/algorithms/fd/eulerfd/eulerfd.h"
+#include "core/util/bitset_utils.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/unit/test_fd_util.h"
 
 using ::testing::ContainerEq, ::testing::Eq;
 

@@ -1,20 +1,20 @@
-#include "order_utility.h"
+#include "core/algorithms/od/order/order_utility.h"
 
-#include <easylogging++.h>
-
-#include "list_lattice.h"
-#include "model/table/column_index.h"
-#include "model/table/typed_column_data.h"
+#include "core/algorithms/od/order/list_lattice.h"
+#include "core/model/table/column_index.h"
+#include "core/model/table/typed_column_data.h"
+#include "core/util/logger.h"
 
 namespace algos::order {
 
 void PrintOD(AttributeList const& lhs, AttributeList const& rhs) {
     for (model::ColumnIndex attr : lhs) {
-        LOG(DEBUG) << attr << " ";
+        LOG_DEBUG("{} ", attr);
     }
-    LOG(DEBUG) << "-> ";
+    LOG_DEBUG("-> ");
     for (model::ColumnIndex attr : rhs) {
-        LOG(DEBUG) << attr << " ";
+        LOG_DEBUG("{} ", attr);
+        ;
     }
 }
 
@@ -83,7 +83,7 @@ std::vector<IndexedByteData> GetIndexedByteData(
         if (null_rows.find(k) != null_rows.end()) {
             continue;
         }
-        indexed_byte_data.push_back({k, byte_data[k]});
+        indexed_byte_data.emplace_back(k, byte_data[k]);
     }
     return indexed_byte_data;
 }

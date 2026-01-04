@@ -5,10 +5,10 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/fd/fd_verifier/highlight.h"
-#include "config/indices/type.h"
-#include "model/table/column_layout_relation_data.h"
-#include "model/table/column_layout_typed_relation_data.h"
+#include "core/algorithms/fd/fd_verifier/highlight.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/column_layout_relation_data.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::fd_verifier {
 

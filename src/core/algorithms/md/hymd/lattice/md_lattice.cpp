@@ -1,4 +1,4 @@
-#include "algorithms/md/hymd/lattice/md_lattice.h"
+#include "core/algorithms/md/hymd/lattice/md_lattice.h"
 
 #include <algorithm>
 #include <cassert>
@@ -6,16 +6,16 @@
 #include <numeric>
 #include <type_traits>
 
-#include "algorithms/md/hymd/lattice/md_specialization.h"
-#include "algorithms/md/hymd/lattice/multi_md_specialization.h"
-#include "algorithms/md/hymd/lattice/rhs.h"
-#include "algorithms/md/hymd/lattice/spec_generalization_checker.h"
-#include "algorithms/md/hymd/lattice/total_generalization_checker.h"
-#include "algorithms/md/hymd/lowest_cc_value_id.h"
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/hymd/utility/zip.h"
-#include "util/desbordante_assume.h"
-#include "util/erase_if_replace.h"
+#include "core/algorithms/md/hymd/lattice/md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/multi_md_specialization.h"
+#include "core/algorithms/md/hymd/lattice/rhs.h"
+#include "core/algorithms/md/hymd/lattice/spec_generalization_checker.h"
+#include "core/algorithms/md/hymd/lattice/total_generalization_checker.h"
+#include "core/algorithms/md/hymd/lowest_cc_value_id.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/algorithms/md/hymd/utility/zip.h"
+#include "core/util/desbordante_assume.h"
+#include "core/util/erase_if_replace.h"
 
 namespace {
 using model::Index;
@@ -478,8 +478,7 @@ public:
           get_lhs_ccv_id_(std::move(get_lhs_ccv_id)),
           get_nonlhs_ccv_id_(std::move(get_nonlhs_ccv_id)),
           prune_nondisjoint_(prune_nondisjoint),
-          current_specialization_(
-                  {LhsSpecialization{lhs, SpecializationData{lhs.begin(), LhsNode{}}}, rhs}) {}
+          current_specialization_({lhs, {lhs.begin(), {}}}, rhs) {}
 
     void Specialize() {
         if (GetLhs().Cardinality() == cardinality_limit_) {
@@ -675,7 +674,7 @@ void MdLattice::TryDeleteEmptyNode(MdLhs const& lhs) {
         } else {
             DESBORDANTE_ASSUME(it != map.end());
         }
-        path_to_node.push_back({cur_node_ptr, &map, it});
+        path_to_node.emplace_back(cur_node_ptr, &map, it);
         cur_node_ptr = &it->second;
     }
 
@@ -876,7 +875,7 @@ std::vector<MdLatticeNodeInfo> MdLattice::GetAll() {
     std::vector<MdLatticeNodeInfo> collected;
     MdLhs current_lhs(column_matches_size_);
     GetAll(md_root_, current_lhs, [&collected](MdLhs& cur_node_lhs, MdNode& cur_node) {
-        collected.push_back({cur_node_lhs, &cur_node});
+        collected.emplace_back(cur_node_lhs, &cur_node);
     });
     assert(std::ranges::none_of(collected, [this](MdLatticeNodeInfo const& node_info) {
         return IsUnsupported(node_info.lhs);

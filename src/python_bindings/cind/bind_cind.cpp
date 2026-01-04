@@ -7,11 +7,11 @@
 #include <pybind11/pytypes.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/cind/cind.h"
-#include "algorithms/cind/cind_algorithm.h"
-#include "algorithms/cind/condition.h"
-#include "algorithms/ind/mining_algorithms.h"
-#include "py_util/bind_primitive.h"
+#include "core/algorithms/cind/cind.h"
+#include "core/algorithms/cind/cind_algorithm.h"
+#include "core/algorithms/cind/condition.h"
+#include "core/algorithms/ind/mining_algorithms.h"
+#include "python_bindings/py_util/bind_primitive.h"
 
 namespace py = pybind11;
 

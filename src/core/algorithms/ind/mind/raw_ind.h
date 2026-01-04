@@ -7,7 +7,7 @@
 
 #include <sstream>
 
-#include "model/table/column_combination.h"
+#include "core/model/table/column_combination.h"
 
 namespace algos::mind {
 

@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/gfd/gfd.h"
-#include "algorithms/gfd/graph_descriptor.h"
+#include "core/algorithms/gfd/gfd.h"
+#include "core/algorithms/gfd/graph_descriptor.h"
 
 namespace parser {
 

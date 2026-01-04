@@ -6,10 +6,10 @@
 
 #include <boost/regex.hpp>
 
-#include "abstract_column_data.h"
-#include "idataset_stream.h"
-#include "model/types/types.h"
-#include "relation_data.h"
+#include "core/model/table/abstract_column_data.h"
+#include "core/model/table/idataset_stream.h"
+#include "core/model/table/relation_data.h"
+#include "core/model/types/types.h"
 
 namespace model {
 

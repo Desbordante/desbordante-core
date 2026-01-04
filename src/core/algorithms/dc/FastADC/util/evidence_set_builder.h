@@ -1,9 +1,8 @@
 #pragma once
 
-#include <easylogging++.h>
-
-#include "dc/FastADC/model/evidence_set.h"
-#include "dc/FastADC/util/clue_set_builder.h"
+#include "core/algorithms/dc/FastADC/model/evidence_set.h"
+#include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
+#include "core/util/logger.h"
 
 namespace algos::fastadc {
 
@@ -31,8 +30,8 @@ public:
             evidence_set.EmplaceBack(clue, count, cardinality_mask, correction_map);
         }
 
-        LOG(DEBUG) << " [Evidence] # of evidences: " << evidence_set.Size();
-        LOG(DEBUG) << " [Evidence] Accumulated evidence count: " << evidence_set.GetTotalCount();
+        LOG_DEBUG(" [Evidence] # of evidences: {}", evidence_set.Size());
+        LOG_DEBUG(" [Evidence] Accumulated evidence count: {}", evidence_set.GetTotalCount());
     }
 
 private:

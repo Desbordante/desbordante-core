@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "column_encoded_relation_data.h"
-#include "tabular_data/input_tables_type.h"
+#include "core/config/tabular_data/input_tables_type.h"
 
 namespace model {
 class EncodedTables {

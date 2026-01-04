@@ -1,4 +1,4 @@
-#include "validator.h"
+#include "core/algorithms/fd/hyfd/validator.h"
 
 #include <algorithm>
 #include <future>
@@ -8,11 +8,10 @@
 #include <boost/asio/post.hpp>
 #include <boost/asio/thread_pool.hpp>
 #include <boost/dynamic_bitset.hpp>
-#include <easylogging++.h>
 
-#include "algorithms/fd/hycommon/util/pli_util.h"
-#include "algorithms/fd/hycommon/validator_helpers.h"
-#include "hyfd_config.h"
+#include "core/algorithms/fd/hycommon/util/pli_util.h"
+#include "core/algorithms/fd/hycommon/validator_helpers.h"
+#include "core/algorithms/fd/hyfd/hyfd_config.h"
 
 namespace {
 

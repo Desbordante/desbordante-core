@@ -1,22 +1,22 @@
-#include "algorithms/md/md_verifier/md_verifier.h"
+#include "core/algorithms/md/md_verifier/md_verifier.h"
 
 #include <algorithm>
 #include <optional>
 
-#include "algorithms/md/hymd/utility/index_range.h"
-#include "algorithms/md/lhs_column_similarity_classifier.h"
-#include "algorithms/md/md_verifier/cmptr.h"
-#include "algorithms/md/md_verifier/validation/validation.h"
-#include "config/equal_nulls/option.h"
-#include "config/exceptions.h"
-#include "config/indices/option.h"
-#include "config/indices/type.h"
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
-#include "config/tabular_data/input_table/option.h"
-#include "config/thread_number/option.h"
-#include "util/timed_invoke.h"
-#include "util/worker_thread_pool.h"
+#include "core/algorithms/md/hymd/utility/index_range.h"
+#include "core/algorithms/md/lhs_column_similarity_classifier.h"
+#include "core/algorithms/md/md_verifier/cmptr.h"
+#include "core/algorithms/md/md_verifier/validation/validation.h"
+#include "core/config/equal_nulls/option.h"
+#include "core/config/exceptions.h"
+#include "core/config/indices/option.h"
+#include "core/config/indices/type.h"
+#include "core/config/names_and_descriptions.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/thread_number/option.h"
+#include "core/util/timed_invoke.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace {
 struct PoolHolder {

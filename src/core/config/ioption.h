@@ -3,8 +3,9 @@
 #include <memory>
 #include <string_view>
 #include <typeindex>
+#include <vector>
 
-#include "boost/any.hpp"
+#include <boost/any.hpp>
 
 namespace config {
 struct OptValue {
@@ -20,6 +21,7 @@ public:
     [[nodiscard]] virtual std::string_view GetName() const = 0;
     [[nodiscard]] virtual std::string_view GetDescription() const = 0;
     [[nodiscard]] virtual std::type_index GetTypeIndex() const = 0;
+    [[nodiscard]] virtual bool IsRequired() const = 0;
     virtual ~IOption() = default;
     virtual OptValue GetOptValue() const = 0;
 };

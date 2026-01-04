@@ -1,6 +1,6 @@
-#include "fd_tree_element.h"
+#include "core/algorithms/fd/fdep/fd_tree_element.h"
 
-#include "model/types/bitset.h"
+#include "core/model/types/bitset.h"
 
 FDTreeElement::FDTreeElement(size_t max_attribute_number)
     : max_attribute_number_(max_attribute_number) {
