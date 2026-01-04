@@ -1,5 +1,10 @@
 name: Restore Datasets
 description: Fetch hash and try to restore cache
+inputs:
+  github-token:
+    description: "GitHub token used for authentication on GitHub. It is required when obtaining the sha of the latest
+      commit in desbordante-data."
+    required: true
 outputs:
   hash:
     description: "Upstream commit SHA"
@@ -14,7 +19,7 @@ runs:
       id: hash
       shell: bash
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.github-token }}
       run: echo "sha=$(gh api repos/desbordante/desbordante-data/commits/HEAD --jq '.sha')" >> $GITHUB_OUTPUT
 
     - name: Restore cache
