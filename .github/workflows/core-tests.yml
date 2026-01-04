@@ -83,7 +83,7 @@ jobs:
         with:
           os: ${{ matrix.system.os }}
           toolset: ${{ matrix.system.toolset }}
-      - name: Restore Datasets
+      - name: Restore datasets
         id: restore
         uses: ./.github/composite-actions/restore-datasets
         with:
