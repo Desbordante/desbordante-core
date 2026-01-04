@@ -36,6 +36,7 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<long double>,
         normal_conv_pair<unsigned int>,
         normal_conv_pair<bool>,
+        normal_conv_pair<std::vector<std::string>>,
         normal_conv_pair<config::ThreadNumType>,
         normal_conv_pair<config::CustomRandomSeedType>,
         normal_conv_pair<config::MaxLhsType>,

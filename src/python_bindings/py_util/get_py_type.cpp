@@ -80,6 +80,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<size_t, kPyInt>,
             PyTypePair<long double, kPyFloat>,
             PyTypePair<std::size_t, kPyInt>,
+            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
             PyTypePair<config::CustomRandomSeedType, kPyInt>,
             PyTypePair<algos::metric::Metric, kPyStr>,
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,

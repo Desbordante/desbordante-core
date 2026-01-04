@@ -115,6 +115,26 @@ boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     return parsers;
 }
 
+boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
+    if (obj.is_none()) {
+        return std::vector<std::string>{};
+    }
+
+    if (!py::isinstance<py::sequence>(obj) || py::isinstance<py::str>(obj)) {
+        throw config::ConfigurationError(
+                "Option \"" + std::string(option_name) + "\" must be a list of strings");
+    }
+
+    std::vector<std::string> out;
+    auto seq = py::reinterpret_borrow<py::sequence>(obj);
+    out.reserve(py::len(seq));
+
+    for (py::handle item : seq) {
+        out.push_back(py::cast<std::string>(py::str(item)));
+    }
+    return out;
+}
+
 std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<bool>,
         kNormalConvPair<double>,
@@ -140,6 +160,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
         {typeid(config::InputTables), InputTablesToAny},
+        {typeid(std::vector<std::string>), StringVectorToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
         kNormalConvPair<std::unordered_set<size_t>>,
@@ -153,7 +174,14 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
 namespace python_bindings {
 
 boost::any PyToAny(std::string_view option_name, std::type_index index, py::handle obj) {
-    return kConverters.at(index)(option_name, obj);
+    auto it = kConverters.find(index);
+    if (it == kConverters.end()) {
+        throw config::ConfigurationError(
+                "No Python->C++ converter registered for option \"" + std::string(option_name) +
+                "\" (C++ type: " + std::string(index.name()) + ")");
+    }
+    return it->second(option_name, obj);
 }
+
 
 }  // namespace python_bindings

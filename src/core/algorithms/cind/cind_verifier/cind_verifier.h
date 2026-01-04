@@ -47,7 +47,6 @@ private:
 
 private:
     void RegisterOptions();
-    void MakeExecuteOptsAvailable() final;
     void ResetState() final;
 
     void LoadDataInternal() final;
@@ -75,6 +74,8 @@ public:
     std::size_t GetSupportingBaskets() const noexcept { return supporting_baskets_; }
     std::size_t GetIncludedSupportingBaskets() const noexcept { return included_support_; }
     std::size_t GetIncludedBasketsTotal() const noexcept { return included_baskets_total_; }
+
+    void MakeExecuteOptsAvailable() final;
 };
 
 }  // namespace algos::cind

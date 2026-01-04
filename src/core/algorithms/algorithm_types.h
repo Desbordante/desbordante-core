@@ -10,7 +10,7 @@ using AlgorithmTypes =
         std::tuple<Depminer, DFD, FastFDs, FDep, FdMine, Pyro, Tane, PFDTane, FUN, hyfd::HyFD, Aid,
                    EulerFD, Apriori, des::DES, metric::MetricVerifier, DataStats,
                    fd_verifier::FDVerifier, HyUCC, PyroUCC, HPIValid, cfd::FDFirstAlgorithm,
-                   ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, Fastod, GfdValidator,
+                   ACAlgorithm, UCCVerifier, Faida, Spider, Mind, INDVerifier, cind::CINDVerifier, Fastod, GfdValidator,
                    EGfdValidator, NaiveGfdValidator, order::Order, dd::Split, Cords, hymd::HyMD,
                    PFDVerifier, cfd_verifier::CFDVerifier>;
 
@@ -72,6 +72,9 @@ BETTER_ENUM(AlgorithmType, char,
 
 /* IND verifier algorithm */
     ind_verifier,
+
+/* CIND verifier algorithm */
+    cind_verifier,
 
 /* Order dependency mining algorithms */
     fastod,
