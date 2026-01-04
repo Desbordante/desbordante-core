@@ -90,15 +90,15 @@ function(desbordante_configure_datasets stamp_file_var)
     if(EXISTS "${file_path}")
         file(SHA256 "${file_path}" local_hash)
         if("${local_hash}" STREQUAL "${remote_hash}")
-            message(STATUS "→ ${filename} is up to date.")
+            message(STATUS "-> ${filename} is up to date.")
             set(need_download OFF)
         else()
-            message(STATUS "→ Hashes differ (Remote: ${remote_hash} vs Local: ${local_hash})")
+            message(STATUS "-> Hashes differ (Remote: ${remote_hash} vs Local: ${local_hash})")
         endif()
     endif()
 
     if(need_download)
-        message(STATUS "→ Downloading ${filename}…")
+        message(STATUS "-> Download ${filename}")
         file(
             DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
             EXPECTED_HASH SHA256=${remote_hash}
@@ -119,7 +119,7 @@ function(desbordante_configure_datasets stamp_file_var)
         COMMAND ${CMAKE_COMMAND} -E touch ${${stamp_file_var}}
         WORKING_DIRECTORY ${arg_EXTRACT_DIR}
         DEPENDS ${file_path}
-        COMMENT "Extracting ${filename}…"
+        COMMENT "Extract ${filename}"
     )
     return(PROPAGATE ${stamp_file_var})
 endfunction()
