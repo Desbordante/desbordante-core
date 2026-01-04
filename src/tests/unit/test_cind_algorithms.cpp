@@ -1,13 +1,12 @@
-#include "core/algorithms/cind/types.h"
-
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "tests/common/all_csv_configs.h"
 #include "core/algorithms/cind/cind_algorithm.h"
-#include "core/config/names.h"
-#include "tests/common/csv_config_util.h"
+#include "core/algorithms/cind/types.h"
 #include "core/config/error/type.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 namespace {

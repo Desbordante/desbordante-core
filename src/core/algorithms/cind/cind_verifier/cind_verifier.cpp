@@ -15,16 +15,15 @@
 #include <boost/functional/hash.hpp>
 
 #include "core/algorithms/cind/condition.h"
-#include "core/config/indices/option.h"
-#include "core/config/option.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/input_tables/option.h"
 #include "core/config/conditions/completeness/option.h"
 #include "core/config/conditions/condition_type/option.h"
 #include "core/config/conditions/validity/option.h"
 #include "core/config/indices/option.h"
-#include "core/model/table/dataset_stream_projection.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_tables/option.h"
 #include "core/model/table/dataset_stream_fixed.h"
+#include "core/model/table/dataset_stream_projection.h"
 #include "core/model/table/encoded_column_data.h"
 #include "core/model/table/encoded_tables.h"
 #include "core/model/table/tuple_index.h"
@@ -33,10 +32,11 @@
 namespace algos::cind {
 namespace {
 
-static constexpr char kCindCondValues[]  = "cind_condition_values";
+static constexpr char kCindCondValues[] = "cind_condition_values";
 static constexpr char kDCindCondValues[] =
-    "Condition values aligned with conditional attributes order from CindMiner::ClassifyAttributes. "
-    "Use '-' or '_' as wildcard. If empty => all wildcards.";
+        "Condition values aligned with conditional attributes order from "
+        "CindMiner::ClassifyAttributes. "
+        "Use '-' or '_' as wildcard. If empty => all wildcards.";
 
 struct VecIntHash {
     std::size_t operator()(std::vector<int> const& v) const noexcept {
@@ -60,16 +60,6 @@ inline std::string StripQuotes(std::string s) {
         return s.substr(1, s.size() - 2);
     }
     return s;
-}
-
-std::vector<int> MakeKeyCodes(std::size_t row,
-                              std::vector<model::EncodedColumnData const*> const& cols) {
-    std::vector<int> key;
-    key.reserve(cols.size());
-    for (auto const* c : cols) {
-        key.push_back(c->GetValue(row));
-    }
-    return key;
 }
 
 std::vector<std::string> MakeKeyDecoded(std::size_t row,
@@ -125,29 +115,27 @@ void CINDVerifier::RegisterOptions() {
     };
 
     RegisterOption(config::kLhsRawIndicesOpt(
-        &ind_.lhs,
-        [this]() { return input_tables_.front()->GetNumberOfColumns(); },
-        [&rhs = ind_.rhs, &check_uniqueness](config::IndicesType const& indices) {
-            check_uniqueness(indices);
-            if (!rhs.empty() && rhs.size() != indices.size()) {
-                throw config::ConfigurationError{
-                    "Invalid input: LHS and RHS indices must have the same size"};
-            }
-        }));
+            &ind_.lhs, [this]() { return input_tables_.front()->GetNumberOfColumns(); },
+            [&rhs = ind_.rhs, &check_uniqueness](config::IndicesType const& indices) {
+                check_uniqueness(indices);
+                if (!rhs.empty() && rhs.size() != indices.size()) {
+                    throw config::ConfigurationError{
+                            "Invalid input: LHS and RHS indices must have the same size"};
+                }
+            }));
 
     RegisterOption(config::kRhsRawIndicesOpt(
-        &ind_.rhs,
-        [this]() { return input_tables_.back()->GetNumberOfColumns(); },
-        [&lhs = ind_.lhs, &check_uniqueness](config::IndicesType const& indices) {
-            check_uniqueness(indices);
-            if (!lhs.empty() && lhs.size() != indices.size()) {
-                throw config::ConfigurationError{
-                    "Invalid input: LHS and RHS indices must have the same size"};
-            }
-        }));
+            &ind_.rhs, [this]() { return input_tables_.back()->GetNumberOfColumns(); },
+            [&lhs = ind_.lhs, &check_uniqueness](config::IndicesType const& indices) {
+                check_uniqueness(indices);
+                if (!lhs.empty() && lhs.size() != indices.size()) {
+                    throw config::ConfigurationError{
+                            "Invalid input: LHS and RHS indices must have the same size"};
+                }
+            }));
 
     RegisterOption(config::Option{&condition_values_, kCindCondValues, kDCindCondValues,
-                                 std::vector<std::string>{}});
+                                  std::vector<std::string>{}});
 
     RegisterOption(config::kValidityOpt(&min_validity_));
     RegisterOption(config::kCompletenessOpt(&min_completeness_));
@@ -156,12 +144,12 @@ void CINDVerifier::RegisterOptions() {
 
 void CINDVerifier::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({
-        config::kLhsIndicesOpt.GetName(),
-        config::kRhsIndicesOpt.GetName(),
-        kCindCondValues,
-        config::kValidityOpt.GetName(),
-        config::kCompletenessOpt.GetName(),
-        config::kConditionTypeOpt.GetName(),
+            config::kLhsIndicesOpt.GetName(),
+            config::kRhsIndicesOpt.GetName(),
+            kCindCondValues,
+            config::kValidityOpt.GetName(),
+            config::kCompletenessOpt.GetName(),
+            config::kConditionTypeOpt.GetName(),
     });
 }
 
@@ -181,8 +169,7 @@ void CINDVerifier::ResetState() {
     real_completeness_ = 0.0;
 }
 
-void CINDVerifier::LoadDataInternal() {
-}
+void CINDVerifier::LoadDataInternal() {}
 
 unsigned long long CINDVerifier::ExecuteInternal() {
     return util::TimedInvoke(&CINDVerifier::VerifyCIND, this);
@@ -218,15 +205,13 @@ void CINDVerifier::VerifyCIND() {
     } else {
         if (cond_vals.size() != conditional_indices.size()) {
             throw std::runtime_error(
-                "cind_condition_values size must equal number of conditional attributes");
+                    "cind_condition_values size must equal number of conditional attributes");
         }
     }
     for (auto& s : cond_vals) s = StripQuotes(s);
 
-    bool const all_wildcards =
-        std::all_of(cond_vals.begin(), cond_vals.end(), [](std::string const& s) {
-            return IsWildcard(s);
-        });
+    bool const all_wildcards = std::all_of(cond_vals.begin(), cond_vals.end(),
+                                           [](std::string const& s) { return IsWildcard(s); });
 
     if (all_wildcards) {
         using FixedStream = model::DatasetStreamFixed<model::IDatasetStream*>;
@@ -290,17 +275,15 @@ void CINDVerifier::VerifyCIND() {
         included_support_ = lhs_cardinality - violating_clusters;
         included_baskets_total_ = included_support_;
 
-        real_validity_ =
-            (supporting_baskets_ == 0)
-                ? -1.0
-                : static_cast<double>(included_support_) /
-                      static_cast<double>(supporting_baskets_);
+        real_validity_ = (supporting_baskets_ == 0)
+                                 ? -1.0
+                                 : static_cast<double>(included_support_) /
+                                           static_cast<double>(supporting_baskets_);
 
-        real_completeness_ =
-            (included_baskets_total_ == 0)
-                ? 0.0
-                : static_cast<double>(included_support_) /
-                      static_cast<double>(included_baskets_total_);
+        real_completeness_ = (included_baskets_total_ == 0)
+                                     ? 0.0
+                                     : static_cast<double>(included_support_) /
+                                               static_cast<double>(included_baskets_total_);
         return;
     }
 
@@ -308,7 +291,8 @@ void CINDVerifier::VerifyCIND() {
 
     model::TableIndex const lhs_table_idx = 0;
     model::TableIndex const rhs_table_idx =
-        (input_tables_.size() == 1) ? 0 : static_cast<model::TableIndex>(input_tables_.size() - 1);
+            (input_tables_.size() == 1) ? 0
+                                        : static_cast<model::TableIndex>(input_tables_.size() - 1);
 
     auto const& lhs_enc = tables.GetTable(lhs_table_idx);
     auto const& rhs_enc = tables.GetTable(rhs_table_idx);
@@ -320,9 +304,9 @@ void CINDVerifier::VerifyCIND() {
     bool const same_table_enc = (lhs_table_idx == rhs_table_idx);
 
     std::vector<model::EncodedColumnData const*> lhs_inclusion =
-        BuildOrderedColumns(lhs_enc, ind_.lhs);
+            BuildOrderedColumns(lhs_enc, ind_.lhs);
     std::vector<model::EncodedColumnData const*> rhs_inclusion =
-        BuildOrderedColumns(rhs_enc, ind_.rhs);
+            BuildOrderedColumns(rhs_enc, ind_.rhs);
 
     if (lhs_inclusion.empty() || rhs_inclusion.empty()) {
         throw std::runtime_error("CIND verification requires non-empty inclusion attributes");
@@ -349,7 +333,7 @@ void CINDVerifier::VerifyCIND() {
     }
     if (cond_vals2.size() != conditional.size()) {
         throw std::runtime_error(
-            "cind_condition_values size must equal number of conditional attributes");
+                "cind_condition_values size must equal number of conditional attributes");
     }
     for (auto& s : cond_vals2) s = StripQuotes(s);
 
@@ -418,7 +402,11 @@ void CINDVerifier::VerifyCIND() {
             auto it = acc_by_key.find(key);
             if (it == acc_by_key.end()) {
                 bool included = rhs_keys.contains(key);
-                it = acc_by_key.emplace(std::move(key), Acc{.included = included}).first;
+                it = acc_by_key
+                             .emplace(std::move(key), Acc{.included = included,
+                                                          .basket_rows = {},
+                                                          .matching_rows = {}})
+                             .first;
             }
 
             it->second.basket_rows.push_back(static_cast<model::TupleIndex>(l));
@@ -449,8 +437,8 @@ void CINDVerifier::VerifyCIND() {
             } else {
                 violating_rows_ += acc.matching_rows.size();
                 violating_clusters_.push_back(ViolatingCluster{
-                    .basket_rows = std::move(acc.basket_rows),
-                    .violating_rows = std::move(acc.matching_rows),
+                        .basket_rows = std::move(acc.basket_rows),
+                        .violating_rows = std::move(acc.matching_rows),
                 });
             }
         } else {
@@ -460,22 +448,21 @@ void CINDVerifier::VerifyCIND() {
             } else {
                 violating_rows_ += acc.matching_rows.size();
                 violating_clusters_.push_back(ViolatingCluster{
-                    .basket_rows = std::move(acc.basket_rows),
-                    .violating_rows = std::move(acc.matching_rows),
+                        .basket_rows = std::move(acc.basket_rows),
+                        .violating_rows = std::move(acc.matching_rows),
                 });
             }
         }
     }
 
-    real_validity_ =
-        (supporting_baskets_ == 0)
-            ? -1.0
-            : static_cast<double>(included_support_) / static_cast<double>(supporting_baskets_);
+    real_validity_ = (supporting_baskets_ == 0) ? -1.0
+                                                : static_cast<double>(included_support_) /
+                                                          static_cast<double>(supporting_baskets_);
 
-    real_completeness_ =
-        (included_baskets_total_ == 0)
-            ? 0.0
-            : static_cast<double>(included_support_) / static_cast<double>(included_baskets_total_);
+    real_completeness_ = (included_baskets_total_ == 0)
+                                 ? 0.0
+                                 : static_cast<double>(included_support_) /
+                                           static_cast<double>(included_baskets_total_);
 }
 
 }  // namespace algos::cind

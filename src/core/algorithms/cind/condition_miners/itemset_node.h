@@ -14,8 +14,8 @@ using BasketInfo = std::tuple<size_t, std::vector<size_t>, bool>;
 
 class ItemsetNode : public std::enable_shared_from_this<ItemsetNode> {
 public:
-    ItemsetNode(std::shared_ptr<ItemsetNode> parent, Item value, std::vector<BasketInfo> baskets_info,
-                double validity, double completeness)
+    ItemsetNode(std::shared_ptr<ItemsetNode> parent, Item value,
+                std::vector<BasketInfo> baskets_info, double validity, double completeness)
         : value_(std::move(value)),
           baskets_info_(std::move(baskets_info)),
           validity_(validity),
@@ -30,18 +30,16 @@ public:
         }
 
         // avoid nan/inf if included_baskets_cnt == 0
-        double const completeness =
-                (included_baskets_cnt == 0)
-                        ? 0.0
-                        : included_contained_baskets_cnt /
-                                  static_cast<double>(included_baskets_cnt);
+        double const completeness = (included_baskets_cnt == 0)
+                                            ? 0.0
+                                            : included_contained_baskets_cnt /
+                                                      static_cast<double>(included_baskets_cnt);
 
         if (completeness >= min_completeness) {
-            double const validity =
-                    baskets_info.empty()
-                            ? -1.0
-                            : included_contained_baskets_cnt /
-                                      static_cast<double>(baskets_info.size());
+            double const validity = baskets_info.empty()
+                                            ? -1.0
+                                            : included_contained_baskets_cnt /
+                                                      static_cast<double>(baskets_info.size());
 
             auto new_element =
                     std::make_shared<ItemsetNode>(shared_from_this(), std::move(value),

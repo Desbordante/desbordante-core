@@ -59,7 +59,8 @@ unsigned long long CindMiner::Execute(std::list<model::IND> const& aind_list) {
     return util::TimedInvoke(execute);
 }
 
-std::vector<std::string> CindMiner::GetConditionalAttributesNames(AttrsType const& condition_attrs) {
+std::vector<std::string> CindMiner::GetConditionalAttributesNames(
+        AttrsType const& condition_attrs) {
     if (condition_attrs.empty()) {
         return {};
     }

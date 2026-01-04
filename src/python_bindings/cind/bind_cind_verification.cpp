@@ -24,14 +24,14 @@ void BindCindVerification(py::module_& main_module) {
     auto cls = BindPrimitiveNoBase<CINDVerifier>(m, "CINDVerifier");
 
     cls.def("holds", &CINDVerifier::Holds)
-       .def("get_real_validity", &CINDVerifier::GetRealValidity)
-       .def("get_real_completeness", &CINDVerifier::GetRealCompleteness)
-       .def("get_violating_rows_count", &CINDVerifier::GetViolatingRowsCount)
-       .def("get_violating_clusters_count", &CINDVerifier::GetViolatingClustersCount)
-       .def("get_violating_clusters", &CINDVerifier::GetViolatingClusters)
-       .def("get_supporting_baskets", &CINDVerifier::GetSupportingBaskets)
-       .def("get_included_supporting_baskets", &CINDVerifier::GetIncludedSupportingBaskets)
-       .def("get_included_baskets_total", &CINDVerifier::GetIncludedBasketsTotal);
+            .def("get_real_validity", &CINDVerifier::GetRealValidity)
+            .def("get_real_completeness", &CINDVerifier::GetRealCompleteness)
+            .def("get_violating_rows_count", &CINDVerifier::GetViolatingRowsCount)
+            .def("get_violating_clusters_count", &CINDVerifier::GetViolatingClustersCount)
+            .def("get_violating_clusters", &CINDVerifier::GetViolatingClusters)
+            .def("get_supporting_baskets", &CINDVerifier::GetSupportingBaskets)
+            .def("get_included_supporting_baskets", &CINDVerifier::GetIncludedSupportingBaskets)
+            .def("get_included_baskets_total", &CINDVerifier::GetIncludedBasketsTotal);
 
     py::module_ alg = m.def_submodule("algorithms");
     alg.attr("Default") = py::reinterpret_borrow<py::object>(cls);

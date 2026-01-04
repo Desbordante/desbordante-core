@@ -4,6 +4,7 @@
 #include <utility>
 
 #include <boost/dynamic_bitset.hpp>
+
 #include "core/util/logger.h"
 
 namespace model {

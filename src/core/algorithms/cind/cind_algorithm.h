@@ -6,11 +6,10 @@
 #include <unordered_set>
 #include <vector>
 
-#include "core/algorithms/ind/spider/spider.h"
-
+#include "condition_miners/cind_miner.h"
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/cind/types.h"
-#include "condition_miners/cind_miner.h"
+#include "core/algorithms/ind/spider/spider.h"
 
 namespace algos::cind {
 class CindAlgorithm final : public Algorithm {

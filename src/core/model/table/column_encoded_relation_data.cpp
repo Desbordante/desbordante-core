@@ -3,9 +3,8 @@
 #include <memory>
 #include <utility>
 
-#include "core/util/logger.h"
-
 #include "core/model/table/table_index.h"
+#include "core/util/logger.h"
 
 namespace model {
 std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom(
@@ -21,7 +20,7 @@ std::unique_ptr<ColumnEncodedRelationData> ColumnEncodedRelationData::CreateFrom
         row = data_stream->GetNextRow();
         if (row.size() != num_columns) {
             LOG_WARN("Unexpected number of columns for a row, skipping (expected {}, got {})",
-                        num_columns, row.size());
+                     num_columns, row.size());
             continue;
         }
         for (size_t index = 0; index < row.size(); ++index) {

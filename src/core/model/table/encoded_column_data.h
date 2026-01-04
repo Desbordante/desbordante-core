@@ -57,8 +57,8 @@ public:
 
     std::string DecodeValue(int value) const {
         // 0 is treated as NULL value id in the project (can appear in conditions)
-        constexpr int kNullValueId = 0;
-        if (value == kNullValueId) {
+        constexpr int k_null_value_id = 0;
+        if (value == k_null_value_id) {
             return "NULL";
         }
         return value_dictionary_->ToString(value);

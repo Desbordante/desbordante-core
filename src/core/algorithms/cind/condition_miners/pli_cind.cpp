@@ -144,7 +144,7 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> const&
             }
             std::sort(group_cluster.begin(), group_cluster.end());
             group_cluster.erase(std::unique(group_cluster.begin(), group_cluster.end()),
-                               group_cluster.end());
+                                group_cluster.end());
 
             std::set_intersection(included_pos.begin(), included_pos.end(), group_cluster.begin(),
                                   group_cluster.end(), std::back_inserter(included_cluster));
@@ -155,18 +155,19 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> const&
                                   cluster.end(), std::back_inserter(included_cluster));
         }
 
-        double const completeness =
-                static_cast<double>(included_cluster.size()) / static_cast<double>(included_pos.size());
+        double const completeness = static_cast<double>(included_cluster.size()) /
+                                    static_cast<double>(included_pos.size());
 
         if (completeness >= min_completeness_) {
-            good_clusters.emplace_back(
-                    cluster_value, is_first_level ? cluster : std::move(cluster));
+            good_clusters.emplace_back(cluster_value,
+                                       is_first_level ? cluster : std::move(cluster));
 
-            double const validity =
-                    static_cast<double>(included_cluster.size()) / static_cast<double>(cluster_size);
+            double const validity = static_cast<double>(included_cluster.size()) /
+                                    static_cast<double>(cluster_size);
 
             if (validity >= min_validity_) {
-                result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, validity, completeness);
+                result.emplace_back(new_curr_attrs, cluster_value, cond_attrs, validity,
+                                    completeness);
             }
         }
     }
@@ -174,7 +175,8 @@ std::vector<Condition> PliCind::Analyze(size_t attr_idx, std::vector<int> const&
     if (!good_clusters.empty()) {
         PLSetShared new_curr_pls = PLSet::CreateFor(std::move(good_clusters), relation_size_);
 
-        for (size_t next_attr_idx = attr_idx + 1; next_attr_idx < cond_attrs.size(); ++next_attr_idx) {
+        for (size_t next_attr_idx = attr_idx + 1; next_attr_idx < cond_attrs.size();
+             ++next_attr_idx) {
             auto conditions = Analyze(next_attr_idx, new_curr_attrs, new_curr_pls, cond_attrs,
                                       row_to_group, included_pos);
 

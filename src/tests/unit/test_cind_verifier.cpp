@@ -4,12 +4,11 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "tests/common/all_csv_configs.h"
-#include "core/config/names.h"
-#include "tests/common/csv_config_util.h"
-#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
-
 #include "core/algorithms/cind/cind_verifier/cind_verifier.h"
+#include "core/algorithms/ind/ind_verifier/ind_verifier.h"
+#include "core/config/names.h"
+#include "tests/common/all_csv_configs.h"
+#include "tests/common/csv_config_util.h"
 
 namespace tests {
 
@@ -32,7 +31,8 @@ static std::unique_ptr<algos::INDVerifier> CreateINDVerifier(CINDVerifierTestCon
     });
 }
 
-static std::unique_ptr<algos::cind::CINDVerifier> CreateCINDVerifier(CINDVerifierTestConfig const& cfg) {
+static std::unique_ptr<algos::cind::CINDVerifier> CreateCINDVerifier(
+        CINDVerifierTestConfig const& cfg) {
     using namespace config::names;
     return algos::CreateAndLoadAlgorithm<algos::cind::CINDVerifier>(algos::StdParamsMap{
             {kCsvConfigs, cfg.csv_configs},
@@ -110,18 +110,20 @@ struct CINDVerifierBadConfig {
         : csv_configs(csv_configs), ind(std::move(ind)) {}
 };
 
-class TestCINDVerifierConfigurationError : public ::testing::TestWithParam<CINDVerifierBadConfig> {};
+class TestCINDVerifierConfigurationError : public ::testing::TestWithParam<CINDVerifierBadConfig> {
+};
 
 TEST_P(TestCINDVerifierConfigurationError, TestIncorrectIndices) {
     using namespace config::names;
 
     auto const& p = GetParam();
     auto create_and_execute = [&]() {
-        auto verifier = algos::CreateAndLoadAlgorithm<algos::cind::CINDVerifier>(algos::StdParamsMap{
-                {kCsvConfigs, p.csv_configs},
-                {kLhsIndices, p.ind.lhs},
-                {kRhsIndices, p.ind.rhs},
-        });
+        auto verifier =
+                algos::CreateAndLoadAlgorithm<algos::cind::CINDVerifier>(algos::StdParamsMap{
+                        {kCsvConfigs, p.csv_configs},
+                        {kLhsIndices, p.ind.lhs},
+                        {kRhsIndices, p.ind.rhs},
+                });
         verifier->Execute();
     };
 

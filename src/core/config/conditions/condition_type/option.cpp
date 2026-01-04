@@ -4,6 +4,6 @@
 
 namespace config {
 using names::kConditionType, descriptions::kDConditionType;
-extern CommonOption<algos::cind::CondType> const kConditionTypeOpt{
-        kConditionType, kDConditionType, algos::cind::CondType::row};
+extern CommonOption<algos::cind::CondType> const kConditionTypeOpt{kConditionType, kDConditionType,
+                                                                   algos::cind::CondType::row};
 }  // namespace config

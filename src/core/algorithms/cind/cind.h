@@ -1,8 +1,7 @@
 #pragma once
 
-#include "core/algorithms/ind/ind.h"
-
 #include "condition.h"
+#include "core/algorithms/ind/ind.h"
 
 namespace algos::cind {
 struct CIND {
@@ -38,9 +37,9 @@ struct CIND {
     }
 
     size_t Hash() const {
-        static const auto kCondHasher = std::hash<Condition>{};
+        static auto const kCondHasher = std::hash<Condition>{};
         size_t result = boost::hash_value(&ind);
-        for (const auto& cond : conditions) {
+        for (auto const& cond : conditions) {
             boost::hash_combine(result, kCondHasher(cond));
         }
         return result;

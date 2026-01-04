@@ -57,23 +57,41 @@ private:
 public:
     CINDVerifier();
 
-    double GetRealValidity() const noexcept { return real_validity_; }
-    double GetRealCompleteness() const noexcept { return real_completeness_; }
+    double GetRealValidity() const noexcept {
+        return real_validity_;
+    }
+
+    double GetRealCompleteness() const noexcept {
+        return real_completeness_;
+    }
 
     bool Holds() const noexcept {
         return (real_validity_ >= min_validity_) && (real_completeness_ >= min_completeness_);
     }
 
-    std::size_t GetViolatingRowsCount() const noexcept { return violating_rows_; }
-    std::size_t GetViolatingClustersCount() const noexcept { return violating_clusters_.size(); }
+    std::size_t GetViolatingRowsCount() const noexcept {
+        return violating_rows_;
+    }
+
+    std::size_t GetViolatingClustersCount() const noexcept {
+        return violating_clusters_.size();
+    }
 
     std::vector<ViolatingCluster> const& GetViolatingClusters() const noexcept {
         return violating_clusters_;
     }
 
-    std::size_t GetSupportingBaskets() const noexcept { return supporting_baskets_; }
-    std::size_t GetIncludedSupportingBaskets() const noexcept { return included_support_; }
-    std::size_t GetIncludedBasketsTotal() const noexcept { return included_baskets_total_; }
+    std::size_t GetSupportingBaskets() const noexcept {
+        return supporting_baskets_;
+    }
+
+    std::size_t GetIncludedSupportingBaskets() const noexcept {
+        return included_support_;
+    }
+
+    std::size_t GetIncludedBasketsTotal() const noexcept {
+        return included_baskets_total_;
+    }
 
     void MakeExecuteOptsAvailable() final;
 };

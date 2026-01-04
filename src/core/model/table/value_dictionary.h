@@ -11,7 +11,7 @@ class ValueDictionary {
 public:
     ValueDictionary() = default;
 
-    bool Contains(std::string const &value) const {
+    bool Contains(std::string const& value) const {
         return to_int_map_.contains(value);
     }
 
@@ -19,13 +19,13 @@ public:
         return value > 0 && value < static_cast<int>(to_string_map_.size());
     }
 
-    std::string const &ToString(int value) const {
+    std::string const& ToString(int value) const {
         assert(Contains(value));
         return to_string_map_.at(value);
     }
 
-    int ToInt(std::string const &new_value) {
-        if (auto const &[it, success] =
+    int ToInt(std::string const& new_value) {
+        if (auto const& [it, success] =
                     to_int_map_.insert(std::make_pair(new_value, to_string_map_.size()));
             success) {
             to_string_map_.emplace_back(new_value);

@@ -121,8 +121,8 @@ boost::any StringVectorToAny(std::string_view option_name, py::handle obj) {
     }
 
     if (!py::isinstance<py::sequence>(obj) || py::isinstance<py::str>(obj)) {
-        throw config::ConfigurationError(
-                "Option \"" + std::string(option_name) + "\" must be a list of strings");
+        throw config::ConfigurationError("Option \"" + std::string(option_name) +
+                                         "\" must be a list of strings");
     }
 
     std::vector<std::string> out;
@@ -177,12 +177,11 @@ namespace python_bindings {
 boost::any PyToAny(std::string_view option_name, std::type_index index, py::handle obj) {
     auto it = kConverters.find(index);
     if (it == kConverters.end()) {
-        throw config::ConfigurationError(
-                "No Python->C++ converter registered for option \"" + std::string(option_name) +
-                "\" (C++ type: " + std::string(index.name()) + ")");
+        throw config::ConfigurationError("No Python->C++ converter registered for option \"" +
+                                         std::string(option_name) +
+                                         "\" (C++ type: " + std::string(index.name()) + ")");
     }
     return it->second(option_name, obj);
 }
-
 
 }  // namespace python_bindings
