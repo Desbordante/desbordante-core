@@ -1,5 +1,6 @@
 #pragma once
 
+#include "event.h"
 #include "event_set.h"
 
 namespace model {
@@ -13,7 +14,7 @@ public:
 
     ParallelEpisode(EventSet event_set) : event_set_(event_set) {}
 
-    GetLastEvent() const {
+    Event GetLastEvent() const {
         return event_set_.GetLast();
     }
 };

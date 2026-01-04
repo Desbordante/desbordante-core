@@ -2,6 +2,6 @@
 
 namespace model {
 
-using Timestamp = unsigned int;
+using Timestamp = uint64_t;
 
 }  // namespace model

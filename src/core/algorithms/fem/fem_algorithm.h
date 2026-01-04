@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "algorithms/algorithm.h"
-#include "model/sequence/complex_event_sequence.h"
+#include "core/algorithms/algorithm.h"
+#include "core/model/sequence/complex_event_sequence.h"
 
 namespace algos {
 

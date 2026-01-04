@@ -1,3 +1,3 @@
 #pragma once
 
-#include "algorithms/fem/maxfem/maxfem.h"
+#include "core/algorithms/fem/maxfem/maxfem.h"
