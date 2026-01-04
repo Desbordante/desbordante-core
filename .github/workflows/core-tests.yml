@@ -110,7 +110,6 @@ jobs:
 
           ctest --exclude-regex ".*HeavyDatasets.*" $CTEST_ARGS
       - name: Save datasets
-        if: always()
         uses: ./.github/composite-actions/save-datasets
         with:
           cache-hit: '${{ steps.restore.outputs.hash }}'
