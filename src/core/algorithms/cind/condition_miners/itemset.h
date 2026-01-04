@@ -15,9 +15,9 @@ public:
     using ItemsMap = std::unordered_map<Item, std::vector<BasketInfo>>;
 
     Itemset(ItemsMap items, std::size_t included_baskets_cnt, double min_completeness)
-        : included_baskets_cnt_(included_baskets_cnt),
-          min_completeness_(min_completeness) {
-        root_ = std::make_shared<ItemsetNode>(nullptr, Item{}, std::vector<BasketInfo>{}, -1.0, 0.0);
+        : included_baskets_cnt_(included_baskets_cnt), min_completeness_(min_completeness) {
+        root_ = std::make_shared<ItemsetNode>(nullptr, Item{}, std::vector<BasketInfo>{}, -1.0,
+                                              0.0);
         prev_items_.clear();
         prev_items_.push_back(root_);
 
@@ -25,8 +25,8 @@ public:
         items_.reserve(items.size());
 
         for (auto& [item, baskets] : items) {
-            if (auto child = root_->CreateChild(item, std::move(baskets),
-                                                included_baskets_cnt_, min_completeness_)) {
+            if (auto child = root_->CreateChild(item, std::move(baskets), included_baskets_cnt_,
+                                                min_completeness_)) {
                 items_.push_back(std::move(child));
             }
         }

@@ -44,7 +44,7 @@ private:
 
     /* execution stage fields */
     std::vector<model::ColumnDomain> domains_; /*< loaded data */
-    StageTimings timings_;                                      /*< timings info */
+    StageTimings timings_;                     /*< timings info */
 
     void MakeLoadOptsAvailable();
     void LoadINDAlgorithmDataInternal() final;

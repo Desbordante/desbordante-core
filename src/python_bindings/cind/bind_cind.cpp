@@ -36,11 +36,14 @@ void BindCind(py::module_& main_module) {
 
     py::class_<Condition>(cind_module, "Condition")
             .def("__str__", &Condition::ToString)
-            .def("__eq__", [](Condition const& cond1, Condition const& cond2) { return cond1 == cond2; })
-            .def("__hash__", [](Condition const& cond) {
-                return py::hash(py::int_(std::hash<Condition>{}(cond)));
-            })
-            .def("data", [](Condition const& cond) { return VectorToTuple(cond.condition_attrs_values); })
+            .def("__eq__",
+                 [](Condition const& cond1, Condition const& cond2) { return cond1 == cond2; })
+            .def("__hash__",
+                 [](Condition const& cond) {
+                     return py::hash(py::int_(std::hash<Condition>{}(cond)));
+                 })
+            .def("data",
+                 [](Condition const& cond) { return VectorToTuple(cond.condition_attrs_values); })
             .def("validity", [](Condition const& cond) { return cond.validity; })
             .def("completeness", [](Condition const& cond) { return cond.completeness; });
 
@@ -49,13 +52,14 @@ void BindCind(py::module_& main_module) {
             .def("__eq__", [](CIND const& cind1, CIND const& cind2) { return cind1 == cind2; })
             .def("__hash__", [](CIND const& cind) { return py::hash(py::int_(cind.Hash())); })
             .def("conditions_number", &CIND::ConditionsNumber)
-            .def("get_conditions", [](CIND const& cind) {
-                py::list result;
-                for (auto const& cond : cind.conditions) {
-                    result.append(cond);
-                }
-                return result;
-            })
+            .def("get_conditions",
+                 [](CIND const& cind) {
+                     py::list result;
+                     for (auto const& cond : cind.conditions) {
+                         result.append(cond);
+                     }
+                     return result;
+                 })
             .def("get_condition_attributes",
                  [](CIND const& cind) { return VectorToTuple(cind.conditional_attributes); });
 

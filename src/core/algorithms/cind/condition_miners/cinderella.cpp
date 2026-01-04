@@ -113,7 +113,8 @@ std::vector<Basket> Cinderella::GetBaskets(Attributes const& attributes) {
                 Item item{cond_attr->GetColumnId(), cond_attr->GetValue(index)};
                 basket_items[item].push_back(index);
             }
-            result.emplace_back(algos::cind::Basket{rhs_values.contains(row), std::move(basket_items)});
+            result.emplace_back(
+                    algos::cind::Basket{rhs_values.contains(row), std::move(basket_items)});
         }
     }
     return result;
@@ -161,7 +162,8 @@ std::vector<Condition> Cinderella::GetConditions(std::vector<Basket> const& bask
 }
 
 void Cinderella::CreateNewItemsets(Itemset& itemset) const {
-    std::vector<std::tuple<std::shared_ptr<ItemsetNode>, Item, std::vector<BasketInfo>>> new_items_info;
+    std::vector<std::tuple<std::shared_ptr<ItemsetNode>, Item, std::vector<BasketInfo>>>
+            new_items_info;
 
     for (auto const& itemset_prefix : itemset.GetPrevItems()) {
         std::vector<Item> candidate = itemset_prefix->GetContents();
