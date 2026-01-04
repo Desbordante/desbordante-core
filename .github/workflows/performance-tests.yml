@@ -31,8 +31,9 @@ jobs:
           os: ubuntu-latest
           toolset: gcc
           boost-libraries: 'container,thread,graph,program_options'
-      - name: Download datasets
-        uses: ./.github/composite-actions/download-datasets
+      - name: Restore Datasets
+        id: restore
+        uses: ./.github/composite-actions/restore-datasets
       - name: Build
         run: |
           export CXX=g++-10
@@ -148,3 +149,9 @@ jobs:
         with:
           name: baseline-v2
           path: baseline.json
+      - name: Save datasets
+        if: always()
+        uses: ./.github/composite-actions/save-datasets
+        with:
+          cache-hit: '${{ steps.restore.outputs.hash }}'
+          hash: '${{ steps.restore.outputs.cache-hit }}'
