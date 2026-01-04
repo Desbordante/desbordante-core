@@ -7,8 +7,10 @@ namespace model {
 class ComplexEventSequence {
 private:
     std::vector<TimedEventSet> event_sequence_;
+
 public:
-    ComplexEventSequence(std::vector<TimedEventSet> event_sequence) : event_sequence_(std::move(event_sequence)) {}
+    ComplexEventSequence(std::vector<TimedEventSet> event_sequence)
+        : event_sequence_(std::move(event_sequence)) {}
 
     auto begin() {
         return event_sequence_.begin();

@@ -9,6 +9,7 @@ namespace model {
 class EventSet {
 private:
     std::vector<Event> event_set_;
+
 public:
     EventSet() {}
 
@@ -30,7 +31,7 @@ public:
         return event_set_.back();
     }
 
-    void mapEvents(std::vector<Event> const& mapping);
+    void MapEvents(std::vector<Event> const& mapping);
 };
 
 }  // namespace model
