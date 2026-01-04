@@ -8,10 +8,10 @@ namespace model {
 class TimedEventSet : public EventSet {
 private:
     Timestamp timestamp_;
+
 public:
     TimedEventSet(std::vector<Event> event_set, Timestamp timestamp)
-        : EventSet(std::move(event_set)), timestamp_(timestamp) {
-    }
+        : EventSet(std::move(event_set)), timestamp_(timestamp) {}
 
     Timestamp GetTimestamp() {
         return timestamp_;

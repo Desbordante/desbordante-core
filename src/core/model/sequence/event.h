@@ -2,7 +2,7 @@
 
 namespace model {
 
-using Event = unsigned int;
+using Event = uint64_t;
 
 constexpr Event kInvalidEvent = -1;
 constexpr Event kStartEvent = 0;
