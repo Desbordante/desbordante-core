@@ -56,7 +56,7 @@ public:
     }
 
     std::string DecodeValue(int value) const {
-        // 0 is treated as NULL value id in the project (can appear in conditions)
+        // 0 is treated as NULL value id
         constexpr int k_null_value_id = 0;
         if (value == k_null_value_id) {
             return "NULL";

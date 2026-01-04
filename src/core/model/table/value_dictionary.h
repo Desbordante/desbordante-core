@@ -20,6 +20,12 @@ public:
     }
 
     std::string const& ToString(int value) const {
+        static std::string const k_null = "NULL";
+        constexpr int k_null_value_id = 0;
+
+        if (value == k_null_value_id) {
+            return k_null;
+        }
         assert(Contains(value));
         return to_string_map_.at(value);
     }
