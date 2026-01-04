@@ -35,7 +35,8 @@ struct Condition {
         for (size_t column_id = condition_attrs.size(); column_id-- > 0;) {
             auto const& attribute = condition_attrs[column_id];
 
-            if (auto const& item = item_ptr->GetValue(); attribute->GetColumnId() == item.column_id) {
+            if (auto const& item = item_ptr->GetValue();
+                attribute->GetColumnId() == item.column_id) {
                 condition_attrs_values[column_id] = attribute->DecodeValue(item.value);
 
                 item_ptr = item_ptr->GetParent().get();
@@ -91,12 +92,13 @@ struct std::hash<algos::cind::Condition> {
     size_t operator()(algos::cind::Condition const& cond) const noexcept {
         size_t result = 0;
 
-        boost::hash_combine(result, boost::hash_value(algos::cind::Condition::QuantizeDouble(cond.validity)));
-        boost::hash_combine(result,
-                            boost::hash_value(algos::cind::Condition::QuantizeDouble(cond.completeness)));
-        boost::hash_combine(result,
-                            boost::hash_range(cond.condition_attrs_values.begin(),
-                                              cond.condition_attrs_values.end()));
+        boost::hash_combine(
+                result, boost::hash_value(algos::cind::Condition::QuantizeDouble(cond.validity)));
+        boost::hash_combine(
+                result,
+                boost::hash_value(algos::cind::Condition::QuantizeDouble(cond.completeness)));
+        boost::hash_combine(result, boost::hash_range(cond.condition_attrs_values.begin(),
+                                                      cond.condition_attrs_values.end()));
 
         return result;
     }
