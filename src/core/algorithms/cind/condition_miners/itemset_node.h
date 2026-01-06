@@ -29,7 +29,6 @@ public:
             included_contained_baskets_cnt += is_included;
         }
 
-        // avoid nan/inf if included_baskets_cnt == 0
         double const completeness = (included_baskets_cnt == 0)
                                             ? 0.0
                                             : included_contained_baskets_cnt /
@@ -52,10 +51,11 @@ public:
     }
 
     std::vector<Item> GetContents() const {
-        if (parent_node_ == nullptr) {
+        auto parent = parent_node_.lock();
+        if (!parent) {
             return {};
         }
-        std::vector<Item> result = parent_node_->GetContents();
+        auto result = parent->GetContents();
         result.emplace_back(value_);
         return result;
     }
@@ -72,8 +72,8 @@ public:
         return completeness_;
     }
 
-    std::shared_ptr<ItemsetNode> const& GetParent() const noexcept {
-        return parent_node_;
+    std::shared_ptr<ItemsetNode> GetParent() const noexcept {
+        return parent_node_.lock();
     }
 
     std::unordered_map<Item, std::shared_ptr<ItemsetNode>> const& GetChildNodes() const noexcept {
@@ -92,8 +92,8 @@ public:
     }
 
     void Cleanup() {
-        if (parent_node_ != nullptr) {
-            parent_node_->Erase(shared_from_this());
+        if (auto parent = parent_node_.lock()) {
+            parent->Erase(shared_from_this());
         }
     }
 
@@ -103,6 +103,7 @@ private:
     double validity_;
     double completeness_;
     std::unordered_map<Item, std::shared_ptr<ItemsetNode>> child_nodes_;
-    std::shared_ptr<ItemsetNode> parent_node_;
+    std::weak_ptr<ItemsetNode> parent_node_;
 };
+
 }  // namespace algos::cind

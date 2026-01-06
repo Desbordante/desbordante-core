@@ -31,16 +31,17 @@ struct Condition {
         : validity(itemset->GetValidity()), completeness(itemset->GetCompleteness()) {
         condition_attrs_values.resize(condition_attrs.size(), kAnyValue);
 
-        ItemsetNode const* item_ptr = itemset.get();
-        for (size_t column_id = condition_attrs.size(); column_id-- > 0;) {
+        std::shared_ptr<ItemsetNode> node = std::move(itemset);
+
+        for (size_t column_id = condition_attrs.size(); column_id-- > 0 && node;) {
             auto const& attribute = condition_attrs[column_id];
 
-            if (auto const& item = item_ptr->GetValue();
-                attribute->GetColumnId() == item.column_id) {
+            auto const& item = node->GetValue();
+            if (attribute->GetColumnId() == item.column_id) {
                 condition_attrs_values[column_id] = attribute->DecodeValue(item.value);
 
-                item_ptr = item_ptr->GetParent().get();
-                if (item_ptr == nullptr || item_ptr->GetParent() == nullptr) {
+                node = node->GetParent();
+                if (!node || !node->GetParent()) {
                     break;
                 }
             }
