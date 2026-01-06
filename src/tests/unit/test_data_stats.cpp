@@ -677,11 +677,10 @@ TEST_F(TestNewStatistics, JarqueBera_NonNormalDistributionHighValue) {
     double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
     size_t n = stats_ptr_->NumberOfValues(8);
 
-    // Формула Харке-Бера: JB = n/6 * (S² + (K-3)²/4)
-    double expected_jb = static_cast<double>(n) / 6.0 * 
-                        (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
+    double expected_jb = static_cast<double>(n) / 6.0 *
+                         (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
 
-    // Проверяем, что значения близки (допуск 1e-10 для вычислений с double)
+    // Проверяем, что значения близки
     EXPECT_NEAR(jb, expected_jb, 1e-10);
 }
 
