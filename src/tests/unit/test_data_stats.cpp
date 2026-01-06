@@ -478,7 +478,6 @@ protected:
     std::unique_ptr<algos::DataStats> stats_ptr_;
 };
 
-
 TEST_F(TestNewStatistics, InterquartileRange_NumericColumn) {
     // Колонка 2: [1.07, 17.21, 143.9, 50.43] -> сортировка: [1.07, 17.21, 50.43, 143.9]
     // n=4, Q1 позиция = 0.25*4 = 1 -> значение 17.21
@@ -523,7 +522,6 @@ TEST_F(TestNewStatistics, InterquartileRange_NegativeValues) {
     EXPECT_NEAR(iqr, 920.0, 0.001);
 }
 
-
 TEST_F(TestNewStatistics, CoefficientOfVariation_NumericColumn) {
     // [0.0, 0.0, 85.432, 0.0, 43.5, 523.09, 13.29, 901.72]
 
@@ -542,7 +540,8 @@ TEST_F(TestNewStatistics, CoefficientOfVariation_NumericColumn) {
     // (13.29 - 195.879)^2 = 33339.3
     // (901.72 - 195.879)^2 = 498208.0
 
-    // Сумма квадратов отклонений = 38368.6 + 38368.6 + 12199.5 + 38368.6 + 23220.6 + 107065.0 + 33339.3 + 498208.0 = 789138.2
+    // Сумма квадратов отклонений = 38368.6 + 38368.6 + 12199.5 + 38368.6 + 23220.6 + 107065.0 +
+    // 33339.3 + 498208.0 = 789138.2
 
     // Дисперсия = 789138.2 / 7 = 112734.0
     // STD = sqrt(112734.0) = 335.76
@@ -587,7 +586,6 @@ TEST_F(TestNewStatistics, CoefficientOfVariation_NonNumericColumnReturnsEmpty) {
     EXPECT_FALSE(cv_stat.HasValue());
 }
 
-
 TEST_F(TestNewStatistics, Monotonicity_AscendingSequence) {
     // [1, 2, 2, 3, 3, 4, 5]
     auto monotonicity_stat = stats_ptr_->GetMonotonicity(3);
@@ -630,7 +628,6 @@ TEST_F(TestNewStatistics, Monotonicity_NonOrderedTypeReturnsEmpty) {
     EXPECT_FALSE(monotonicity_stat.HasValue());
 }
 
-
 TEST_F(TestNewStatistics, JarqueBera_ConsistentWithSkewnessAndKurtosis) {
     // Проверяем формулу: JB = n/6 * (S^2 + (K-3)^2/4)
     auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(7);
@@ -646,8 +643,8 @@ TEST_F(TestNewStatistics, JarqueBera_ConsistentWithSkewnessAndKurtosis) {
     double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
     size_t n = stats_ptr_->NumberOfValues(7);
 
-    double expected_jb = static_cast<double>(n) / 6.0 * 
-                        (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
+    double expected_jb = static_cast<double>(n) / 6.0 *
+                         (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
 
     EXPECT_NEAR(jb, expected_jb, 1e-10);
 }
@@ -692,7 +689,6 @@ TEST_F(TestNewStatistics, JarqueBera_NonNumericColumnReturnsEmpty) {
     auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(1);
     EXPECT_FALSE(jb_stat.HasValue());
 }
-
 
 TEST_F(TestNewStatistics, Entropy_StringColumn) {
     // ["abc", "abc", "abd", "abe", "eeee", "gre", "ggg", "grg"]
@@ -742,7 +738,6 @@ TEST_F(TestNewStatistics, Entropy_EmptyColumnReturnsEmpty) {
     EXPECT_FALSE(entropy_stat.HasValue());
 }
 
-
 TEST_F(TestNewStatistics, GiniCoefficient_StringColumn) {
     // ["abc", "abc", "abd", "abe", "eeee", "gre", "ggg", "grg"]
     // Частоты: abc:2, другие по 1
@@ -765,7 +760,7 @@ TEST_F(TestNewStatistics, GiniCoefficient_MaximumForUniformDistribution) {
 
     double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
     size_t unique_count = stats_ptr_->Distinct(10);
-    double expected_gini = 1.0 - 1.0/static_cast<double>(unique_count);
+    double expected_gini = 1.0 - 1.0 / static_cast<double>(unique_count);
 
     EXPECT_NEAR(gini, expected_gini, 0.001);
 }
