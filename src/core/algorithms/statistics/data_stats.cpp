@@ -871,10 +871,10 @@ unsigned long long DataStats::ExecuteInternal() {
 
     auto start_time = std::chrono::system_clock::now();
     double percent_per_col = kTotalProgressPercent / all_stats_.size();
-    
+
     auto task = [percent_per_col, this](size_t index) {
         all_stats_[index].count = NumberOfValues(index);
-        
+
         if (this->col_data_[index].GetTypeId() != +mo::TypeId::kMixed) {
             all_stats_[index].min = GetMin(index);
             all_stats_[index].max = GetMax(index);
@@ -898,7 +898,7 @@ unsigned long long DataStats::ExecuteInternal() {
             if (mo::Type::IsOrdered(this->col_data_[index].GetTypeId())) {
                 all_stats_[index].monotonicity = GetMonotonicity(index);
             }
-            
+
             if (this->col_data_[index].GetTypeId() == +mo::TypeId::kString) {
                 all_stats_[index].vocab = GetVocab(index);
                 all_stats_[index].num_non_letter_chars = GetNumberOfNonLetterChars(index);
@@ -918,14 +918,14 @@ unsigned long long DataStats::ExecuteInternal() {
                 all_stats_[index].entropy = GetEntropy(index);
                 all_stats_[index].gini_coefficient = GetGiniCoefficient(index);
             }
-            
+
             if (this->col_data_[index].IsNumeric()) {
                 all_stats_[index].interquartile_range = GetInterquartileRange(index);
                 all_stats_[index].coefficient_of_variation = GetCoefficientOfVariation(index);
                 all_stats_[index].jarque_bera_statistic = GetJarqueBeraStatistic(index);
             }
         }
-        
+
         all_stats_[index].is_categorical = IsCategorical(
             index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
         all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
@@ -1006,39 +1006,37 @@ void DataStats::LoadDataInternal() {
 
 
 Statistic DataStats::GetInterquartileRange(size_t index) const {
-    if (all_stats_[index].interquartile_range.HasValue()) 
-        return all_stats_[index].interquartile_range;
-    
+    if (all_stats_[index].interquartile_range.HasValue()) return all_stats_[index].interquartile_range;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
-    
+
     Statistic q1 = all_stats_[index].quantile25;
     Statistic q3 = all_stats_[index].quantile75;
-    
+
     if (!q1.HasValue() || !q3.HasValue()) return {};
-    
+
     mo::DoubleType double_type;
     std::byte* q1_val = mo::DoubleType::MakeFrom(q1.GetData(), *q1.GetType());
     std::byte* q3_val = mo::DoubleType::MakeFrom(q3.GetData(), *q3.GetType());
     std::byte* iqr_val = double_type.Allocate();
-    
+
     double_type.Sub(q3_val, q1_val, iqr_val);
-    
+
     double_type.Free(q1_val);
     double_type.Free(q3_val);
-    
+
     return Statistic(iqr_val, &double_type, false);
 }
 
 Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
-    if (all_stats_[index].coefficient_of_variation.HasValue()) 
-        return all_stats_[index].coefficient_of_variation;
-    
+    if (all_stats_[index].coefficient_of_variation.HasValue()) return all_stats_[index].coefficient_of_variation;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
     if (!all_stats_[index].STD.HasValue() || !all_stats_[index].avg.HasValue()) return {};
-        
+
     mo::DoubleType double_type;
     std::byte* std_val = mo::DoubleType::MakeFrom(
         all_stats_[index].STD.GetData(), 
@@ -1046,7 +1044,7 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
     std::byte* mean_val = mo::DoubleType::MakeFrom(
         all_stats_[index].avg.GetData(), 
         *all_stats_[index].avg.GetType());
-    
+
     std::byte* zero = double_type.MakeValue(0.0);
     if (double_type.Compare(mean_val, zero) == mo::CompareResult::kEqual) {
         double_type.Free(std_val);
@@ -1054,54 +1052,51 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
         double_type.Free(zero);
         return {};
     }
-    
+
     std::byte* cv_val = double_type.Allocate();
     double_type.Div(std_val, mean_val, cv_val);
-    
+
     double_type.Free(std_val);
     double_type.Free(mean_val);
     double_type.Free(zero);
-    
+
     return Statistic(cv_val, &double_type, false);
 }
 
 Statistic DataStats::GetMonotonicity(size_t index) const {
-    if (all_stats_[index].monotonicity.HasValue()) {
-        return all_stats_[index].monotonicity;
-    }
-    
+    if (all_stats_[index].monotonicity.HasValue()) return all_stats_[index].monotonicity;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
-    
+
     bool increasing = true;
     bool decreasing = true;
     std::byte const* prev = nullptr;
     bool has_prev = false;
-    
+
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-        
+
         std::byte const* current = col.GetData()[i];
-        
+
         if (has_prev) {
             mo::CompareResult cmp = col.GetType().Compare(prev, current);
-            
+
             if (cmp == mo::CompareResult::kLess) {
                 decreasing = false;
             } else if (cmp == mo::CompareResult::kGreater) {
                 increasing = false;
             }
-            
+
             if (!increasing && !decreasing) break;
         } else {
             has_prev = true;
         }
         prev = current;
     }
-    
+
     if (!has_prev) return {};
 
-    
     std::string result;
     if (increasing && !decreasing) {
         result = "ascending";
@@ -1112,90 +1107,87 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     } else {
         result = "none";
     }
-    
+
     mo::StringType string_type;
     std::byte const* result_data = string_type.MakeValue(result);
-    
+
     return Statistic(result_data, &string_type, false);
 }
 
 Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
-    if (all_stats_[index].jarque_bera_statistic.HasValue()) 
-        return all_stats_[index].jarque_bera_statistic;
-    
+    if (all_stats_[index].jarque_bera_statistic.HasValue()) return all_stats_[index].jarque_bera_statistic;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
     if (!all_stats_[index].skewness.HasValue() || !all_stats_[index].kurtosis.HasValue()) return {};
-    
+
     size_t n = NumberOfValues(index);
     if (n < 2) return {};
-    
+
     double skewness = mo::Type::GetValue<mo::Double>(all_stats_[index].skewness.GetData());
     double kurtosis = mo::Type::GetValue<mo::Double>(all_stats_[index].kurtosis.GetData());
-    
+
     double jb = static_cast<double>(n) / 6.0 * (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
-    
+
     mo::DoubleType double_type;
     return Statistic(double_type.MakeValue(jb), &double_type, false);
 }
 
 Statistic DataStats::GetEntropy(size_t index) const {
-    if (all_stats_[index].entropy.HasValue()) 
-        return all_stats_[index].entropy;
-    
+    if (all_stats_[index].entropy.HasValue()) return all_stats_[index].entropy;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != +mo::TypeId::kString) return {};
-    
+
     std::unordered_map<std::string, size_t> freq_map;
     size_t total_count = 0;
-    
+
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-        
+
         std::string value = mo::Type::GetValue<std::string>(col.GetValue(i));
         freq_map[value]++;
         total_count++;
     }
-    
+
     if (total_count == 0) return {};
-    
+
     double entropy = 0.0;
-    for (const auto& [value, count] : freq_map) {
+    for (auto const& [value, count] : freq_map) {
         double probability = static_cast<double>(count) / static_cast<double>(total_count);
         entropy -= probability * std::log2(probability);
     }
-    
+
     mo::DoubleType double_type;
     return Statistic(double_type.MakeValue(entropy), &double_type, false);
 }
 
 Statistic DataStats::GetGiniCoefficient(size_t index) const {
-    if (all_stats_[index].gini_coefficient.HasValue()) 
-        return all_stats_[index].gini_coefficient;
-    
+    if (all_stats_[index].gini_coefficient.HasValue()) return all_stats_[index].gini_coefficient;
+
     mo::TypedColumnData const& col = col_data_[index];
     if (col.GetTypeId() != +mo::TypeId::kString) return {};
-    
+
     std::unordered_map<std::string, size_t> freq_map;
     size_t total_count = 0;
-    
+
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-        
+
         std::string value = mo::Type::GetValue<std::string>(col.GetValue(i));
         freq_map[value]++;
         total_count++;
     }
-    
+
     if (total_count == 0) return {};
-    
+
     double gini = 1.0;
-    for (const auto& [value, count] : freq_map) {
+    for (auto const& [value, count] : freq_map) {
         double probability = static_cast<double>(count) / static_cast<double>(total_count);
         gini -= probability * probability;
     }
-    
+
     mo::DoubleType double_type;
     return Statistic(double_type.MakeValue(gini), &double_type, false);
 }

@@ -167,7 +167,7 @@ void BindStatistics(pybind11::module_& main_module) {
           .def("get_number_of_entirely_uppercase_words",
                &DataStats::GetNumberOfEntirelyUppercaseWords,
                "Returns the amount of entirely uppercase words in a column.", py::arg("index"))
-          
+
           .def("get_interquartile_range", &DataStats::GetInterquartileRange,
              "Returns interquartile range (IQR) for numeric column.",
              py::arg("index"))
