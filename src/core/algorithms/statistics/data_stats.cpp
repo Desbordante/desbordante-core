@@ -927,8 +927,7 @@ unsigned long long DataStats::ExecuteInternal() {
         }
         
         all_stats_[index].is_categorical = IsCategorical(
-            index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000)
-        );
+            index, std::min(all_stats_[index].count - 1, 10 + all_stats_[index].count / 1000));
         all_stats_[index].type = this->col_data_[index].GetType().ToString().substr(1);
         AddProgress(percent_per_col);
     };
@@ -944,8 +943,7 @@ unsigned long long DataStats::ExecuteInternal() {
 
     SetProgress(kTotalProgressPercent);
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::system_clock::now() - start_time
-    );
+        std::chrono::system_clock::now() - start_time);
     return elapsed_milliseconds.count();
 }
 
@@ -1017,9 +1015,7 @@ Statistic DataStats::GetInterquartileRange(size_t index) const {
     Statistic q1 = all_stats_[index].quantile25;
     Statistic q3 = all_stats_[index].quantile75;
     
-    if (!q1.HasValue() || !q3.HasValue()) {
-        return {};
-    }
+    if (!q1.HasValue() || !q3.HasValue()) return {};
     
     mo::DoubleType double_type;
     std::byte* q1_val = mo::DoubleType::MakeFrom(q1.GetData(), *q1.GetType());
@@ -1041,19 +1037,15 @@ Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    if (!all_stats_[index].STD.HasValue() || !all_stats_[index].avg.HasValue()) {
-        return {};
-    }
+    if (!all_stats_[index].STD.HasValue() || !all_stats_[index].avg.HasValue()) return {};
         
     mo::DoubleType double_type;
     std::byte* std_val = mo::DoubleType::MakeFrom(
         all_stats_[index].STD.GetData(), 
-        *all_stats_[index].STD.GetType()
-    );
+        *all_stats_[index].STD.GetType());
     std::byte* mean_val = mo::DoubleType::MakeFrom(
         all_stats_[index].avg.GetData(), 
-        *all_stats_[index].avg.GetType()
-    );
+        *all_stats_[index].avg.GetType());
     
     std::byte* zero = double_type.MakeValue(0.0);
     if (double_type.Compare(mean_val, zero) == mo::CompareResult::kEqual) {
@@ -1079,9 +1071,7 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     }
     
     mo::TypedColumnData const& col = col_data_[index];
-    if (!mo::Type::IsOrdered(col.GetTypeId())) {
-        return {};
-    }
+    if (!mo::Type::IsOrdered(col.GetTypeId())) return {};
     
     bool increasing = true;
     bool decreasing = true;
@@ -1089,9 +1079,7 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     bool has_prev = false;
     
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
-        if (col.IsNullOrEmpty(i)) {
-            continue;
-        }
+        if (col.IsNullOrEmpty(i)) continue;
         
         std::byte const* current = col.GetData()[i];
         
@@ -1104,18 +1092,15 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
                 increasing = false;
             }
             
-            if (!increasing && !decreasing) {
-                break;
-            }
+            if (!increasing && !decreasing) break;
         } else {
             has_prev = true;
         }
         prev = current;
     }
     
-    if (!has_prev) {
-        return {};
-    }
+    if (!has_prev) return {};
+
     
     std::string result;
     if (increasing && !decreasing) {
@@ -1141,9 +1126,7 @@ Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
     mo::TypedColumnData const& col = col_data_[index];
     if (!col.IsNumeric()) return {};
 
-    if (!all_stats_[index].skewness.HasValue() || !all_stats_[index].kurtosis.HasValue()) {
-        return {};
-    }
+    if (!all_stats_[index].skewness.HasValue() || !all_stats_[index].kurtosis.HasValue()) return {};
     
     size_t n = NumberOfValues(index);
     if (n < 2) return {};

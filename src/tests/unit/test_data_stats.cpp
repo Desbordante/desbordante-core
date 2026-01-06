@@ -471,11 +471,11 @@ TEST(TestDataStats, MultipleExecutionConsistentResults) {
 class TestNewStatistics : public ::testing::Test {
 protected:
     void SetUp() override {
-        stats_ptr = MakeStatAlgorithm(kTestDataStats);
-        stats_ptr->Execute();
+        stats_ptr_ = MakeStatAlgorithm(kTestDataStats);
+        stats_ptr_->Execute();
     }
     
-    std::unique_ptr<algos::DataStats> stats_ptr;
+    std::unique_ptr<algos::DataStats> stats_ptr_;
 };
 
 
@@ -484,7 +484,7 @@ TEST_F(TestNewStatistics, InterquartileRange_NumericColumn) {
     // n=4, Q1 позиция = 0.25*4 = 1 -> значение 17.21
     // Q3 позиция = 0.75*4 = 3 -> значение 143.9
     // IQR = 143.9 - 17.21 = 126.69
-    auto iqr_stat = stats_ptr->GetInterquartileRange(2);
+    auto iqr_stat = stats_ptr_->GetInterquartileRange(2);
     EXPECT_TRUE(iqr_stat.HasValue());
     
     double iqr = mo::Type::GetValue<mo::Double>(iqr_stat.GetData());
@@ -497,7 +497,7 @@ TEST_F(TestNewStatistics, InterquartileRange_ColumnWithNulls) {
     // n=5, Q1 позиция = 0.25*5 = 1.25 -> 2
     // Q3 позиция = 0.75*5 = 3.75 -> 4
     // IQR = 4 - 2 = 2
-    auto iqr_stat = stats_ptr->GetInterquartileRange(4);
+    auto iqr_stat = stats_ptr_->GetInterquartileRange(4);
     EXPECT_TRUE(iqr_stat.HasValue());
     
     double iqr = mo::Type::GetValue<mo::Double>(iqr_stat.GetData());
@@ -506,7 +506,7 @@ TEST_F(TestNewStatistics, InterquartileRange_ColumnWithNulls) {
 
 TEST_F(TestNewStatistics, InterquartileRange_StringColumnReturnsEmpty) {
     // Строковая колонка должна возвращать пустую статистику
-    auto iqr_stat = stats_ptr->GetInterquartileRange(1);
+    auto iqr_stat = stats_ptr_->GetInterquartileRange(1);
     EXPECT_FALSE(iqr_stat.HasValue());
 }
 
@@ -516,7 +516,7 @@ TEST_F(TestNewStatistics, InterquartileRange_NegativeValues) {
     // n=8, Q1 позиция = 0.25*8 = 2 -> значение -19
     // Q3 позиция = 0.75*8 = 6 -> значение 901
     // IQR = 901 - (-19) = 920
-    auto iqr_stat = stats_ptr->GetInterquartileRange(8);
+    auto iqr_stat = stats_ptr_->GetInterquartileRange(8);
     EXPECT_TRUE(iqr_stat.HasValue());
     
     double iqr = mo::Type::GetValue<mo::Double>(iqr_stat.GetData());
@@ -550,7 +550,7 @@ TEST_F(TestNewStatistics, CoefficientOfVariation_NumericColumn) {
     // Коэф вариации:
     // CV = STD / mean = 335.76 / 195.879 = 1.714
     
-    auto cv_stat = stats_ptr->GetCoefficientOfVariation(7);
+    auto cv_stat = stats_ptr_->GetCoefficientOfVariation(7);
     EXPECT_TRUE(cv_stat.HasValue());
     
     double cv = mo::Type::GetValue<mo::Double>(cv_stat.GetData());
@@ -558,15 +558,15 @@ TEST_F(TestNewStatistics, CoefficientOfVariation_NumericColumn) {
 }
 
 TEST_F(TestNewStatistics, CoefficientOfVariation_ZeroMeanReturnsEmpty) {
-    auto cv_stat = stats_ptr->GetCoefficientOfVariation(7);
+    auto cv_stat = stats_ptr_->GetCoefficientOfVariation(7);
     EXPECT_TRUE(cv_stat.HasValue());
 }
 
 TEST_F(TestNewStatistics, CoefficientOfVariation_ConsistencyWithStdAndMean) {
     // Проверяем, что CV = STD / mean для колонки 9
-    auto cv_stat = stats_ptr->GetCoefficientOfVariation(9);
-    auto std_stat = stats_ptr->GetCorrectedSTD(9);
-    auto mean_stat = stats_ptr->GetAvg(9);
+    auto cv_stat = stats_ptr_->GetCoefficientOfVariation(9);
+    auto std_stat = stats_ptr_->GetCorrectedSTD(9);
+    auto mean_stat = stats_ptr_->GetAvg(9);
     
     EXPECT_TRUE(cv_stat.HasValue());
     EXPECT_TRUE(std_stat.HasValue());
@@ -583,14 +583,14 @@ TEST_F(TestNewStatistics, CoefficientOfVariation_ConsistencyWithStdAndMean) {
 }
 
 TEST_F(TestNewStatistics, CoefficientOfVariation_NonNumericColumnReturnsEmpty) {
-    auto cv_stat = stats_ptr->GetCoefficientOfVariation(1);
+    auto cv_stat = stats_ptr_->GetCoefficientOfVariation(1);
     EXPECT_FALSE(cv_stat.HasValue());
 }
 
 
 TEST_F(TestNewStatistics, Monotonicity_AscendingSequence) {
     // [1, 2, 2, 3, 3, 4, 5]
-    auto monotonicity_stat = stats_ptr->GetMonotonicity(3);
+    auto monotonicity_stat = stats_ptr_->GetMonotonicity(3);
     EXPECT_TRUE(monotonicity_stat.HasValue());
     
     std::string monotonicity = mo::Type::GetValue<mo::String>(monotonicity_stat.GetData());
@@ -599,7 +599,7 @@ TEST_F(TestNewStatistics, Monotonicity_AscendingSequence) {
 
 TEST_F(TestNewStatistics, Monotonicity_StringColumn) {
     // ["", "a", "aaa", "abd", ""]
-    auto monotonicity_stat = stats_ptr->GetMonotonicity(1);
+    auto monotonicity_stat = stats_ptr_->GetMonotonicity(1);
     EXPECT_TRUE(monotonicity_stat.HasValue());
     
     std::string monotonicity = mo::Type::GetValue<mo::String>(monotonicity_stat.GetData());
@@ -608,7 +608,7 @@ TEST_F(TestNewStatistics, Monotonicity_StringColumn) {
 
 TEST_F(TestNewStatistics, Monotonicity_NoneMonotonic) {
     // [1.07, 17.21, 143.9, 50.43]
-    auto monotonicity_stat = stats_ptr->GetMonotonicity(2);
+    auto monotonicity_stat = stats_ptr_->GetMonotonicity(2);
     EXPECT_TRUE(monotonicity_stat.HasValue());
     
     std::string monotonicity = mo::Type::GetValue<mo::String>(monotonicity_stat.GetData());
@@ -617,7 +617,7 @@ TEST_F(TestNewStatistics, Monotonicity_NoneMonotonic) {
 
 TEST_F(TestNewStatistics, Monotonicity_WithNullValues) {
     // [1, 2, 3, 4, 5, NULL, NULL]
-    auto monotonicity_stat = stats_ptr->GetMonotonicity(4);
+    auto monotonicity_stat = stats_ptr_->GetMonotonicity(4);
     EXPECT_TRUE(monotonicity_stat.HasValue());
     
     std::string monotonicity = mo::Type::GetValue<mo::String>(monotonicity_stat.GetData());
@@ -626,16 +626,16 @@ TEST_F(TestNewStatistics, Monotonicity_WithNullValues) {
 
 TEST_F(TestNewStatistics, Monotonicity_NonOrderedTypeReturnsEmpty) {
     // все NULL
-    auto monotonicity_stat = stats_ptr->GetMonotonicity(0);
+    auto monotonicity_stat = stats_ptr_->GetMonotonicity(0);
     EXPECT_FALSE(monotonicity_stat.HasValue());
 }
 
 
 TEST_F(TestNewStatistics, JarqueBera_ConsistentWithSkewnessAndKurtosis) {
     // Проверяем формулу: JB = n/6 * (S^2 + (K-3)^2/4)
-    auto jb_stat = stats_ptr->GetJarqueBeraStatistic(7);
-    auto skewness_stat = stats_ptr->GetSkewness(7);
-    auto kurtosis_stat = stats_ptr->GetKurtosis(7);
+    auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(7);
+    auto skewness_stat = stats_ptr_->GetSkewness(7);
+    auto kurtosis_stat = stats_ptr_->GetKurtosis(7);
     
     EXPECT_TRUE(jb_stat.HasValue());
     EXPECT_TRUE(skewness_stat.HasValue());
@@ -644,7 +644,7 @@ TEST_F(TestNewStatistics, JarqueBera_ConsistentWithSkewnessAndKurtosis) {
     double jb = mo::Type::GetValue<mo::Double>(jb_stat.GetData());
     double skewness = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
     double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
-    size_t n = stats_ptr->NumberOfValues(7);
+    size_t n = stats_ptr_->NumberOfValues(7);
     
     double expected_jb = static_cast<double>(n) / 6.0 * 
                         (skewness * skewness + (kurtosis - 3.0) * (kurtosis - 3.0) / 4.0);
@@ -655,7 +655,7 @@ TEST_F(TestNewStatistics, JarqueBera_ConsistentWithSkewnessAndKurtosis) {
 TEST_F(TestNewStatistics, JarqueBera_NormalDistributionLowValue) {
     // [1, 2, 2, 3, 3, 4, 5] - близка к нормальному распределению
     // JB должна быть небольшой
-    auto jb_stat = stats_ptr->GetJarqueBeraStatistic(3);
+    auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(3);
     EXPECT_TRUE(jb_stat.HasValue());
     
     double jb = mo::Type::GetValue<mo::Double>(jb_stat.GetData());
@@ -666,11 +666,11 @@ TEST_F(TestNewStatistics, JarqueBera_NormalDistributionLowValue) {
 
 TEST_F(TestNewStatistics, JarqueBera_NonNormalDistributionHighValue) {
     // [-2841, -112, -19, 23, 47, 134, 901, 9840]
-    auto jb_stat = stats_ptr->GetJarqueBeraStatistic(8);
+    auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(8);
     EXPECT_TRUE(jb_stat.HasValue());
     
-    auto skewness_stat = stats_ptr->GetSkewness(8);
-    auto kurtosis_stat = stats_ptr->GetKurtosis(8);
+    auto skewness_stat = stats_ptr_->GetSkewness(8);
+    auto kurtosis_stat = stats_ptr_->GetKurtosis(8);
     
     EXPECT_TRUE(skewness_stat.HasValue());
     EXPECT_TRUE(kurtosis_stat.HasValue());
@@ -678,7 +678,7 @@ TEST_F(TestNewStatistics, JarqueBera_NonNormalDistributionHighValue) {
     double jb = mo::Type::GetValue<mo::Double>(jb_stat.GetData());
     double skewness = mo::Type::GetValue<mo::Double>(skewness_stat.GetData());
     double kurtosis = mo::Type::GetValue<mo::Double>(kurtosis_stat.GetData());
-    size_t n = stats_ptr->NumberOfValues(8);
+    size_t n = stats_ptr_->NumberOfValues(8);
     
     // Формула Харке-Бера: JB = n/6 * (S² + (K-3)²/4)
     double expected_jb = static_cast<double>(n) / 6.0 * 
@@ -689,7 +689,7 @@ TEST_F(TestNewStatistics, JarqueBera_NonNormalDistributionHighValue) {
 }
 
 TEST_F(TestNewStatistics, JarqueBera_NonNumericColumnReturnsEmpty) {
-    auto jb_stat = stats_ptr->GetJarqueBeraStatistic(1);
+    auto jb_stat = stats_ptr_->GetJarqueBeraStatistic(1);
     EXPECT_FALSE(jb_stat.HasValue());
 }
 
@@ -701,7 +701,7 @@ TEST_F(TestNewStatistics, Entropy_StringColumn) {
     // Энтропия = -[2/8*log2(2/8) + 6*(1/8*log2(1/8))]
     // = -[0.25*log2(0.25) + 6*0.125*log2(0.125)]
     // = -[0.25*(-2) + 6*0.125*(-3)] = -[-0.5 + -2.25] = 2.75
-    auto entropy_stat = stats_ptr->GetEntropy(6);
+    auto entropy_stat = stats_ptr_->GetEntropy(6);
     EXPECT_TRUE(entropy_stat.HasValue());
     
     double entropy = mo::Type::GetValue<mo::Double>(entropy_stat.GetData());
@@ -710,11 +710,11 @@ TEST_F(TestNewStatistics, Entropy_StringColumn) {
 
 TEST_F(TestNewStatistics, Entropy_MaximumForUniformDistribution) {
     // Максимальная энтропия, когда все значения уникальны
-    auto entropy_stat = stats_ptr->GetEntropy(10);
+    auto entropy_stat = stats_ptr_->GetEntropy(10);
     EXPECT_TRUE(entropy_stat.HasValue());
     
     double entropy = mo::Type::GetValue<mo::Double>(entropy_stat.GetData());
-    size_t unique_count = stats_ptr->Distinct(10);
+    size_t unique_count = stats_ptr_->Distinct(10);
     double max_entropy = std::log2(static_cast<double>(unique_count));
     
     // Энтропия должна быть близка к максимальной
@@ -724,7 +724,7 @@ TEST_F(TestNewStatistics, Entropy_MaximumForUniformDistribution) {
 TEST_F(TestNewStatistics, Entropy_WithNullValues) {
     // ["", "a", "aaa", "abd", ""] (2 пустые строки)
     // Частоты: "":2, "a":1, "aaa":1, "abd":1
-    auto entropy_stat = stats_ptr->GetEntropy(1);
+    auto entropy_stat = stats_ptr_->GetEntropy(1);
     EXPECT_TRUE(entropy_stat.HasValue());
     
     double entropy = mo::Type::GetValue<mo::Double>(entropy_stat.GetData());
@@ -733,12 +733,12 @@ TEST_F(TestNewStatistics, Entropy_WithNullValues) {
 }
 
 TEST_F(TestNewStatistics, Entropy_NonStringColumnReturnsEmpty) {
-    auto entropy_stat = stats_ptr->GetEntropy(2);
+    auto entropy_stat = stats_ptr_->GetEntropy(2);
     EXPECT_FALSE(entropy_stat.HasValue());
 }
 
 TEST_F(TestNewStatistics, Entropy_EmptyColumnReturnsEmpty) {
-    auto entropy_stat = stats_ptr->GetEntropy(0);
+    auto entropy_stat = stats_ptr_->GetEntropy(0);
     EXPECT_FALSE(entropy_stat.HasValue());
 }
 
@@ -750,7 +750,7 @@ TEST_F(TestNewStatistics, GiniCoefficient_StringColumn) {
     // Коэффициент Джини = 1 - sum(p_i^2)
     // = 1 - [(2/8)^2 + 6*(1/8)^2] = 1 - [0.0625 + 6*0.015625]
     // = 1 - [0.0625 + 0.09375] = 1 - 0.15625 = 0.84375
-    auto gini_stat = stats_ptr->GetGiniCoefficient(6);
+    auto gini_stat = stats_ptr_->GetGiniCoefficient(6);
     EXPECT_TRUE(gini_stat.HasValue());
     
     double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
@@ -760,11 +760,11 @@ TEST_F(TestNewStatistics, GiniCoefficient_StringColumn) {
 TEST_F(TestNewStatistics, GiniCoefficient_MaximumForUniformDistribution) {
     // Максимальный коэффициент Джини (близкий к 1), когда распределение равномерное
     // Колонка 10: все значения уникальны
-    auto gini_stat = stats_ptr->GetGiniCoefficient(10);
+    auto gini_stat = stats_ptr_->GetGiniCoefficient(10);
     EXPECT_TRUE(gini_stat.HasValue());
     
     double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
-    size_t unique_count = stats_ptr->Distinct(10);
+    size_t unique_count = stats_ptr_->Distinct(10);
     double expected_gini = 1.0 - 1.0/static_cast<double>(unique_count);
     
     EXPECT_NEAR(gini, expected_gini, 0.001);
@@ -772,7 +772,7 @@ TEST_F(TestNewStatistics, GiniCoefficient_MaximumForUniformDistribution) {
 
 TEST_F(TestNewStatistics, GiniCoefficient_WithNullValues) {
     // Колонка 1: ["", "a", "aaa", "abd", ""]
-    auto gini_stat = stats_ptr->GetGiniCoefficient(1);
+    auto gini_stat = stats_ptr_->GetGiniCoefficient(1);
     EXPECT_TRUE(gini_stat.HasValue());
     
     double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
@@ -782,19 +782,19 @@ TEST_F(TestNewStatistics, GiniCoefficient_WithNullValues) {
 }
 
 TEST_F(TestNewStatistics, GiniCoefficient_NonStringColumnReturnsEmpty) {
-    auto gini_stat = stats_ptr->GetGiniCoefficient(2);
+    auto gini_stat = stats_ptr_->GetGiniCoefficient(2);
     EXPECT_FALSE(gini_stat.HasValue());
 }
 
 TEST_F(TestNewStatistics, GiniCoefficient_EmptyColumnReturnsEmpty) {
-    auto gini_stat = stats_ptr->GetGiniCoefficient(0);
+    auto gini_stat = stats_ptr_->GetGiniCoefficient(0);
     EXPECT_FALSE(gini_stat.HasValue());
 }
 
 TEST_F(TestNewStatistics, GiniCoefficient_RangeCheck) {
     // Коэффициент Джини всегда в [0, 1)
-    for (size_t i = 0; i < stats_ptr->GetNumberOfColumns(); ++i) {
-        auto gini_stat = stats_ptr->GetGiniCoefficient(i);
+    for (size_t i = 0; i < stats_ptr_->GetNumberOfColumns(); ++i) {
+        auto gini_stat = stats_ptr_->GetGiniCoefficient(i);
         if (gini_stat.HasValue()) {
             double gini = mo::Type::GetValue<mo::Double>(gini_stat.GetData());
             EXPECT_GE(gini, 0.0);
@@ -804,7 +804,6 @@ TEST_F(TestNewStatistics, GiniCoefficient_RangeCheck) {
 }
 
 TEST_F(TestNewStatistics, StatisticsIndependentOfExecutionOrder) {
-    // Статистики не должны зависеть от порядка вызова методов
     auto stats1 = MakeStatAlgorithm(kTestDataStats);
     auto stats2 = MakeStatAlgorithm(kTestDataStats);
     
