@@ -1004,9 +1004,8 @@ void DataStats::LoadDataInternal() {
     all_stats_ = std::vector<ColumnStats>{col_data_.size()};
 }
 
-
 Statistic DataStats::GetInterquartileRange(size_t index) const {
-    if (all_stats_[index].interquartile_range.HasValue()) 
+    if (all_stats_[index].interquartile_range.HasValue())
         return all_stats_[index].interquartile_range;
 
     mo::TypedColumnData const& col = col_data_[index];
@@ -1031,7 +1030,7 @@ Statistic DataStats::GetInterquartileRange(size_t index) const {
 }
 
 Statistic DataStats::GetCoefficientOfVariation(size_t index) const {
-    if (all_stats_[index].coefficient_of_variation.HasValue()) 
+    if (all_stats_[index].coefficient_of_variation.HasValue())
         return all_stats_[index].coefficient_of_variation;
 
     mo::TypedColumnData const& col = col_data_[index];
@@ -1115,7 +1114,7 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
 }
 
 Statistic DataStats::GetJarqueBeraStatistic(size_t index) const {
-    if (all_stats_[index].jarque_bera_statistic.HasValue()) 
+    if (all_stats_[index].jarque_bera_statistic.HasValue())
         return all_stats_[index].jarque_bera_statistic;
 
     mo::TypedColumnData const& col = col_data_[index];
