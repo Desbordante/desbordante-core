@@ -10,8 +10,6 @@
 #include "core/config/tabular_data/input_table/option.h"
 #include "core/config/thread_number/option.h"
 
-#include "core/util/logger.h"
-
 namespace algos {
 
 namespace fs = std::filesystem;
@@ -1089,7 +1087,6 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     bool decreasing = true;
     std::byte const* prev = nullptr;
     bool has_prev = false;
-    size_t valid_values = 0;
     
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) {
@@ -1097,7 +1094,6 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
         }
         
         std::byte const* current = col.GetData()[i];
-        valid_values++;
         
         if (has_prev) {
             mo::CompareResult cmp = col.GetType().Compare(prev, current);

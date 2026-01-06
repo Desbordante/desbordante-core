@@ -1,7 +1,7 @@
 import unittest
 import desbordante as db
 
-DATASET_PATH = "./test_input_data/TestDataStats.csv"
+DATASET_PATH = "TestDataStats.csv"
 SEPARATOR = ','
 HAS_HEADER = False
 
