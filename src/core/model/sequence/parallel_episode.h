@@ -17,6 +17,10 @@ public:
     Event GetLastEvent() const {
         return event_set_.GetLast();
     }
+
+    EventSet const& GetEventSet() const {
+        return event_set_;
+    }
 };
 
 }  // namespace model

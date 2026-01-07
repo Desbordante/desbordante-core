@@ -13,7 +13,7 @@ public:
     TimedEventSet(std::vector<Event> event_set, Timestamp timestamp)
         : EventSet(std::move(event_set)), timestamp_(timestamp) {}
 
-    Timestamp GetTimestamp() {
+    Timestamp GetTimestamp() const {
         return timestamp_;
     }
 };

@@ -2,9 +2,34 @@
 
 #include <algorithm>
 
+#include "core/config/names.h"
+#include "core/config/option.h"
 #include "core/util/timed_invoke.h"
 
 namespace algos::maxfem {
+
+MaxFEM::MaxFEM() {
+    RegisterOption(config::Option{
+            &min_support_,
+            config::names::kMinimumSupport,
+            "Minimum support (count)",
+            1ul,
+    });
+    RegisterOption(config::Option{
+            &window_length_,
+            config::names::kWindowSize,
+            "Window size",
+            5ul,
+    });
+}
+
+void MaxFEM::MakeExecuteOptsAvailable() {
+    Algorithm::MakeExecuteOptsAvailable();
+    MakeOptionsAvailable({
+            config::names::kMinimumSupport,
+            config::names::kWindowSize,
+    });
+}
 
 void MaxFEM::ResetState() {}
 
@@ -14,7 +39,7 @@ unsigned long long MaxFEM::ExecuteInternal() {
 
 void MaxFEM::FindFrequentEpisodes() {
     RemoveInfrequentEvents();
-    auto parallel_episodes = FindFrequentParallelEpisodes();
+    frequent_episodes_ = FindFrequentParallelEpisodes();
 }
 
 void MaxFEM::RemoveInfrequentEvents() {

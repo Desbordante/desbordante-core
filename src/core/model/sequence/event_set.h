@@ -27,9 +27,15 @@ public:
         event_set_.push_back(event);
     }
 
+    std::vector<Event> const& GetEvents() const {
+        return event_set_;
+    }
+
     Event GetLast() const {
         return event_set_.back();
     }
+
+    bool IsSortedUnique() const;
 
     void MapEvents(std::vector<Event> const& mapping);
 };
