@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace model {
 
 using Event = uint64_t;
