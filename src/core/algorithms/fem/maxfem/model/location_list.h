@@ -3,19 +3,21 @@
 #include <memory>
 #include <vector>
 
+#include "core/model/sequence/timestamp.h"
+
 namespace algos::maxfem {
 
 class LocationList {
 private:
     // Elements of loc_lists_ are sorted
-    std::vector<size_t> loc_list_;
+    std::vector<model::Timestamp> loc_list_;
 
 public:
     LocationList() {}
 
-    LocationList(std::vector<size_t> loc_list) : loc_list_(std::move(loc_list)) {}
+    LocationList(std::vector<model::Timestamp> loc_list) : loc_list_(std::move(loc_list)) {}
 
-    void PushBack(size_t new_location) {
+    void PushBack(model::Timestamp new_location) {
         loc_list_.push_back(new_location);
     }
 
@@ -23,6 +25,10 @@ public:
 
     size_t Size() const {
         return loc_list_.size();
+    }
+
+    std::vector<model::Timestamp> const& GetLocationList() const {
+        return loc_list_;
     }
 };
 

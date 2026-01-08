@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <vector>
 
 #include "event.h"
@@ -37,7 +38,15 @@ public:
 
     bool IsSortedUnique() const;
 
+    size_t GetSize() const {
+        return event_set_.size();
+    }
+
     void MapEvents(std::vector<Event> const& mapping);
+
+    void MapEventsAndRemoveInfrequent(std::unordered_map<Event, Event> const& mapping);
+
+    bool Includes(EventSet const& other) const;
 };
 
 }  // namespace model

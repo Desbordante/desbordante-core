@@ -3,7 +3,6 @@
 namespace algos::maxfem {
 
 std::vector<ParallelEpisode> ParallelEpisode::BuildParallelEpisodesWithEvents(
-        [[maybe_unused]] model::ComplexEventSequence const& event_sequence,
         std::vector<std::shared_ptr<LocationList>> const& events_location_lists,
         model::Event events_num) {
     std::vector<ParallelEpisode> parallel_episodes;

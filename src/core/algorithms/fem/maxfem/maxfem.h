@@ -3,7 +3,9 @@
 #include <memory>
 
 #include "core/algorithms/fem/fem_algorithm.h"
+#include "core/algorithms/fem/maxfem/model/bound_list.h"
 #include "core/algorithms/fem/maxfem/model/location_list.h"
+#include "core/algorithms/fem/maxfem/model/max_episodes_collection.h"
 #include "core/algorithms/fem/maxfem/model/parallel_episode.h"
 
 namespace algos::maxfem {
@@ -13,7 +15,11 @@ private:
     size_t window_length_;
     size_t min_support_;
     model::Event events_num_ = 0;
-    std::vector<ParallelEpisode> frequent_episodes_;
+    std::vector<model::CompositeEpisode> max_frequent_episodes_;
+    std::unordered_map<model::Event, model::Event> mapping_;
+    std::vector<model::Event> reverse_mapping_;
+
+    MaxEpiosdesCollection max_episodes_collection_;
 
     void ResetState() override;
 
@@ -21,7 +27,7 @@ private:
 
     void FindFrequentEpisodes();
 
-    std::vector<size_t> GetEventsSupports() const;
+    std::unordered_map<model::Event, size_t> GetEventsSupports() const;
 
     void RemoveInfrequentEvents();
 
@@ -34,14 +40,21 @@ private:
             std::vector<std::shared_ptr<LocationList>> const& events_loc_lists,
             std::vector<ParallelEpisode>& results) const;
 
+    void FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes);
+
+    bool FindFrequentCompositeEpisodesRecursive(CompositeEpisode& episode,
+                                                BoundList const& bound_list,
+                                                std::vector<ParallelEpisode> const& seed_episodes,
+                                                std::vector<BoundList> const& seed_bound_lists);
+
 protected:
     void MakeExecuteOptsAvailable() override;
 
 public:
     MaxFEM();
 
-    std::vector<ParallelEpisode> const& GetFrequentEpisodes() const {
-        return frequent_episodes_;
+    std::vector<model::CompositeEpisode> const& GetMaxFrequentEpisodes() const {
+        return max_frequent_episodes_;
     }
 };
 
