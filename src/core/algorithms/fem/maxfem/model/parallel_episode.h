@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
 #include "core/algorithms/fem/maxfem/model/location_list.h"
 #include "core/model/sequence/complex_event_sequence.h"
@@ -20,7 +19,6 @@ public:
         : model::ParallelEpisode(std::move(event_set)), location_list_(std::move(location_list)) {}
 
     static std::vector<ParallelEpisode> BuildParallelEpisodesWithEvents(
-            model::ComplexEventSequence const& event_sequence,
             std::vector<std::shared_ptr<LocationList>> const& events_location_lists,
             model::Event events_num);
 
@@ -28,6 +26,10 @@ public:
 
     ParallelEpisode ParallelExtension(model::Event event,
                                       LocationList const& event_location_list) const;
+
+    std::vector<model::Timestamp> GetLocationList() const {
+        return location_list_->GetLocationList();
+    }
 };
 
 }  // namespace algos::maxfem
