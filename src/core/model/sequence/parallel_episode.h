@@ -1,7 +1,7 @@
 #pragma once
 
-#include "event.h"
-#include "event_set.h"
+#include "core/model/sequence/event.h"
+#include "core/model/sequence/event_set.h"
 
 namespace model {
 
