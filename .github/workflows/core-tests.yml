@@ -112,5 +112,5 @@ jobs:
       - name: Save datasets
         uses: ./.github/composite-actions/save-datasets
         with:
-          cache-hit: '${{ steps.restore.outputs.hash }}'
-          hash: '${{ steps.restore.outputs.cache-hit }}'
+          cache-hit: ${{ steps.restore.outputs.cache-hit }}
+          hash: ${{ steps.restore.outputs.hash }}
