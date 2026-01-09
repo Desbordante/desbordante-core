@@ -27,4 +27,4 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: datasets/*.zip
-        key: datasets-${{ steps.hash.outputs.sha }}
+        key: datasets-${{ steps.hash.outputs.sha }}-1

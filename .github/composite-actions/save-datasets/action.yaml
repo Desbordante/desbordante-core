@@ -16,4 +16,4 @@ runs:
       uses: actions/cache/save@v4
       with:
         path: datasets/*.zip
-        key: datasets-${{ inputs.hash }}
+        key: datasets-${{ inputs.hash }}-1
