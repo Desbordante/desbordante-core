@@ -23,7 +23,7 @@ runs:
         echo "sha=$(gh api repos/desbordante/desbordante-data/commits/HEAD --jq '.sha')" >> $GITHUB_OUTPUT
 
     - name: Restore cache
-      id: cache-datasets-restore
+      id: restore
       uses: actions/cache/restore@v4
       with:
         path: datasets/*.zip
