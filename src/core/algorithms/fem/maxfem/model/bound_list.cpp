@@ -25,7 +25,7 @@ std::optional<BoundList> BoundList::Merge(BoundList const& other, size_t min_sup
 
         if (other_interval_end <= this_interval_end) {
             other_ind++;
-        } else if (other_interval_end - this_interval_end >= window_length) {
+        } else if (other_interval_end - this_interval_start >= window_length) {
             this_ind++;
             remaining--;
         } else {
