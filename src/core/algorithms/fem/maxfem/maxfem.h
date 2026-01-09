@@ -1,6 +1,8 @@
 #pragma once
 
+#include <map>
 #include <memory>
+#include <unordered_map>
 
 #include "core/algorithms/fem/fem_algorithm.h"
 #include "core/algorithms/fem/maxfem/model/bound_list.h"
@@ -27,7 +29,7 @@ private:
 
     void FindFrequentEpisodes();
 
-    std::unordered_map<model::Event, size_t> GetEventsSupports() const;
+    std::map<model::Event, size_t> GetEventsSupports() const;
 
     void RemoveInfrequentEvents();
 
