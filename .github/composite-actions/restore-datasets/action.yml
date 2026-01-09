@@ -18,9 +18,9 @@ runs:
     - name: Get upstream hash
       id: hash
       shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.github-token }}
-      run: echo "sha=$(gh api repos/desbordante/desbordante-data/commits/HEAD --jq '.sha')" >> $GITHUB_OUTPUT
+      run: |
+        echo ${{ inputs.github-token }} | gh auth login --with-token
+        echo "sha=$(gh api repos/desbordante/desbordante-data/commits/HEAD --jq '.sha')" >> $GITHUB_OUTPUT
 
     - name: Restore cache
       id: cache-datasets-restore
