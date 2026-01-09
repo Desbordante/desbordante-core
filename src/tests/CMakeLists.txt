@@ -43,7 +43,7 @@ endif()
 if (DESBORDANTE_BUILD_BENCHMARKS)
 	# Create benchmark executable
 	add_executable(${BENCHMARK_BINARY} ${common_sources} ${benchmark_sources})
-	add_dependencies(${BENCHMARK_BINARY} Desbordante.zip.performance-tests)
+	add_dependencies(${BENCHMARK_BINARY} Desbordante.zip.datasets Desbordante.zip.highway-neighbors Desbordante.zip.performance-tests)
 
 	# ---- Benchmark Dependencies ----
 
