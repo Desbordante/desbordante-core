@@ -1,7 +1,6 @@
 #include "maxfem.h"
 
 #include <algorithm>
-#include <unordered_map>
 
 #include "core/config/names.h"
 #include "core/config/option.h"
@@ -45,7 +44,7 @@ void MaxFEM::FindFrequentEpisodes() {
 }
 
 void MaxFEM::RemoveInfrequentEvents() {
-    std::unordered_map<model::Event, size_t> events_supports = GetEventsSupports();
+    std::map<model::Event, size_t> events_supports = GetEventsSupports();
     model::Event new_events_num = model::kStartEvent;
     reverse_mapping_.resize(new_events_num);
 
@@ -63,8 +62,8 @@ void MaxFEM::RemoveInfrequentEvents() {
     }
 }
 
-std::unordered_map<model::Event, size_t> MaxFEM::GetEventsSupports() const {
-    std::unordered_map<model::Event, size_t> supports;
+std::map<model::Event, size_t> MaxFEM::GetEventsSupports() const {
+    std::map<model::Event, size_t> supports;
     for (auto const& event_set : *event_sequence_) {
         for (model::Event const event : event_set) {
             supports[event] += 1;
@@ -127,8 +126,11 @@ void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& p
 
     for (size_t index = 0; index < parallel_episodes.size(); ++index) {
         auto episode = CompositeEpisode({parallel_episodes[index].GetEventSet()});
-        FindFrequentCompositeEpisodesRecursive(episode, bound_lists[index], parallel_episodes,
-                                               bound_lists);
+        bool has_extension = FindFrequentCompositeEpisodesRecursive(episode, bound_lists[index],
+                                                                    parallel_episodes, bound_lists);
+        if (!has_extension) {
+            max_episodes_collection_.Add(episode);
+        }
     }
 
     max_frequent_episodes_ = max_episodes_collection_.GetResult(reverse_mapping_);

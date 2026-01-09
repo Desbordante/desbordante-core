@@ -13,9 +13,9 @@ void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bo
     int sign = add ? 1 : -1;
     for (model::Event event : event_set) {
         if (event % 2 == 0) {
-            sum_of_even_items_ += sign * event;
+            sum_of_even_items_ += sign * (event + 1);
         } else {
-            sum_of_odd_items_ += sign * event;
+            sum_of_odd_items_ += sign * (event + 1);
         }
     }
     events_count_ += sign * event_set.GetSize();

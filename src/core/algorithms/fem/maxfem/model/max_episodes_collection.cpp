@@ -42,7 +42,7 @@ std::vector<model::CompositeEpisode> MaxEpiosdesCollection::GetResult(
 
 bool MaxEpiosdesCollection::CheckForSuperEpisode(CompositeEpisode const& episode,
                                                  size_t length) const {
-    for (int index = max_episodes_.size() - 1; index > static_cast<int>(length); --index) {
+    for (int index = max_episodes_.size() - 1; index >= static_cast<int>(length); --index) {
         auto& max_episodes_set = max_episodes_[index];
         for (auto iter = max_episodes_set.rbegin(); iter != max_episodes_set.rend(); ++iter) {
             auto const& max_episode = *iter;
@@ -63,7 +63,7 @@ bool MaxEpiosdesCollection::CheckForSuperEpisode(CompositeEpisode const& episode
 }
 
 void MaxEpiosdesCollection::RemoveSubEpisodes(CompositeEpisode const& episode, size_t length) {
-    for (size_t index = 1; index < length; ++index) {
+    for (size_t index = 1; index <= length; ++index) {
         auto& max_episodes_set = max_episodes_[index];
         auto iter = max_episodes_set.begin();
 
