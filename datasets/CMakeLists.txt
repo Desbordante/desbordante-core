@@ -42,7 +42,7 @@ add_custom_target(
     Desbordante.copy_test_input_data
     COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_SOURCE_DIR}/test_input_data
             ${INPUT_DATA_DIR}
-    COMMENT "Copy new/modified test datasets to build directory"
+    COMMENT "Copying new/modified test datasets to build directory"
 )
 
 # ---- Build Cleanup Configuration ----

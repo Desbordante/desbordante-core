@@ -124,7 +124,7 @@ function(desbordante_unpack_datasets stamp_file_var)
         COMMAND ${CMAKE_COMMAND} -E touch ${${stamp_file_var}}
         WORKING_DIRECTORY ${arg_EXTRACT_DIR}
         DEPENDS ${arg_PATH}
-        COMMENT "Extract ${filename}"
+        COMMENT "Extracting ${filename}"
     )
     return(PROPAGATE ${stamp_file_var})
 endfunction()
