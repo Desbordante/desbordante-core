@@ -1,5 +1,8 @@
 name: Performance regression testing
 on:
+  push:
+    branches:
+      - main
   # This workflow runs performance regression tests:
   # - Automatically every Saturday at 3:30 AM (using `schedule` trigger).
   # - Manually on demand using `workflow_dispatch` trigger.
@@ -35,7 +38,7 @@ jobs:
         id: restore
         uses: ./.github/composite-actions/restore-datasets
         with:
-          github-token: ''
+          github-token: ${{ secrets.DESBORDANTE_DATA_COMMITS}}
       - name: Build
         run: |
           export CXX=g++-10

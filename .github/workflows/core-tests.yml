@@ -87,7 +87,7 @@ jobs:
         id: restore
         uses: ./.github/composite-actions/restore-datasets
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.DESBORDANTE_DATA_COMMITS}}
       - name: Build
         shell: bash
         run: |
