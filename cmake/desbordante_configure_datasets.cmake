@@ -1,6 +1,6 @@
 include_guard(DIRECTORY)
 
-set(BASE_URL "https://raw.githubusercontent.com/metrapoliten/desbordante-data/refs/heads/sha")
+set(BASE_URL "https://raw.githubusercontent.com/Desbordante/desbordante-data/refs/heads/main")
 
 #[=[
     Brief
