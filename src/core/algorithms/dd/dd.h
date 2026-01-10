@@ -122,10 +122,25 @@ struct DFStringConstraint {
 
     auto operator<=>(DFStringConstraint const& other) const = default;
 
+    auto operator==(DFStringConstraint const& other) const {
+        return column_name == other.column_name && constraint == other.constraint;
+    }
+
     std::string ToString() const {
         std::stringstream s;
         s << column_name << " " << constraint.ToString();
         return s.str();
+    }
+
+    std::string to_JSON() const {
+        std::stringstream s;
+        s << "{ column_name: " << column_name << ", lower_bound: " << constraint.lower_bound
+          << ", upper_bound: " << constraint.upper_bound << "}";
+        return s.str();
+    }
+
+    int hash() const {
+        return static_cast<int>(constraint.lower_bound + constraint.upper_bound);
     }
 };
 
@@ -135,6 +150,37 @@ struct DDString {
 
     std::string ToString() const {
         return DFToString(left) + " -> " + DFToString(right);
+    }
+
+    auto operator==(DDString const& other) const {
+        bool equal = true;
+        for (auto const& constraint : left) {
+            bool is_match = false;
+            for (auto const& other_constraint : other.left) {
+                if (constraint == other_constraint) {
+                    is_match = true;
+                }
+            }
+            if (!is_match) {
+                equal = false;
+                break;
+            }
+        }
+        if (equal) {
+            for (auto const& constraint : right) {
+                bool is_match = false;
+                for (auto const& other_constraint : other.right) {
+                    if (constraint == other_constraint) {
+                        is_match = true;
+                    }
+                }
+                if (!is_match) {
+                    equal = false;
+                    break;
+                }
+            }
+        }
+        return equal;
     }
 
     std::string DFToString(std::list<DFStringConstraint> const& df) const {
@@ -148,6 +194,31 @@ struct DDString {
             s << constraint.ToString();
         }
         return s.str();
+    }
+
+    std::string to_JSON() const {
+        std::stringstream s;
+        s << "{ left: [ ";
+        for (auto it = left.begin(); it != left.end(); ++it) {
+            s << it->to_JSON();
+            if (it != --left.end()) {
+                s << ", ";
+            }
+        }
+
+        s << " ], right: [ ";
+        for (auto it = right.begin(); it != right.end(); ++it) {
+            s << it->to_JSON();
+            if (it != --right.end()) {
+                s << ", ";
+            }
+        }
+        s << " ] }";
+        return s.str();
+    }
+
+    int hash() const {
+        return left.size() + right.size();
     }
 };
 
