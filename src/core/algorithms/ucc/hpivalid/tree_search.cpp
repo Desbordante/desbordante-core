@@ -35,7 +35,7 @@ TreeSearch::TreeSearch(PLITable const& tab, Config const& cfg, ResultCollector& 
 }
 
 void TreeSearch::Run() {
-    rc_.StartTimer(timer::TimerName::sample_diff_sets);
+    rc_.StartTimer(timer::TimerName::kSampleDiffSets);
     for (auto const& pli : tab_.plis) {
         Hypergraph gen = Sample(pli);
         for (Edge const& e : gen) {
@@ -43,7 +43,7 @@ void TreeSearch::Run() {
         }
     }
     rc_.StopInitialSampling();
-    rc_.StopTimer(timer::TimerName::sample_diff_sets);
+    rc_.StopTimer(timer::TimerName::kSampleDiffSets);
 
     // S, CAND
     Edge s(partial_hg_.NumVertices());
@@ -321,14 +321,14 @@ inline bool TreeSearch::ExtendOrConfirmS(
 inline void TreeSearch::PullUpIntersections(
         std::stack<std::deque<model::PLI::Cluster>>& intersection_stack,
         std::deque<Edge::size_type>& tointersect_queue) {
-    rc_.StartTimer(timer::TimerName::cluster_intersect);
+    rc_.StartTimer(timer::TimerName::kClusterIntersect);
     while (!tointersect_queue.empty()) {
         intersection_stack.push(IntersectClusterListAndClusterMapping(
                 intersection_stack.top(), tab_.inverse_mapping[tointersect_queue.front()]));
 
         tointersect_queue.pop_front();
     }
-    rc_.StopTimer(timer::TimerName::cluster_intersect);
+    rc_.StopTimer(timer::TimerName::kClusterIntersect);
 }
 
 std::deque<model::PLI::Cluster> TreeSearch::IntersectClusterListAndClusterMapping(
@@ -366,9 +366,9 @@ inline void TreeSearch::UpdateEdges(std::vector<Edgemark>& crit, Edgemark& uncov
                                     std::vector<std::vector<Edgemark>>& removed_criticals_stack,
                                     std::deque<model::PLI::Cluster> const& pli) {
     // sample new edges
-    rc_.StartTimer(timer::TimerName::sample_diff_sets);
+    rc_.StartTimer(timer::TimerName::kSampleDiffSets);
     Hypergraph new_edges = Sample(pli);
-    rc_.StopTimer(timer::TimerName::sample_diff_sets);
+    rc_.StopTimer(timer::TimerName::kSampleDiffSets);
 
     // find out which edges are supersets and therefore can be removed and save
     // indices in descending order

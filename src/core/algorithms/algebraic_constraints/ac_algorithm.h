@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <enum.h>
-
 #include "core/algorithms/algebraic_constraints/ac.h"
 #include "core/algorithms/algebraic_constraints/ac_exception.h"
 #include "core/algorithms/algebraic_constraints/ac_exception_finder.h"
@@ -39,7 +37,7 @@ private:
 
     config::InputTable input_table_;
 
-    Binop bin_operation_ = Binop::_values()[0];
+    Binop bin_operation_ = magic_enum::enum_values<Binop>().front();
     /* Desired ratio of exceptions. Value lies in (0, 1] */
     double fuzziness_;
     /* Value lies in (0, 1]. Closer to 0 - many short intervals.

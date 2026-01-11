@@ -1,9 +1,9 @@
 #pragma once
 
-#include <enum.h>
+#include <magic_enum/magic_enum.hpp>
 
 namespace algos {
-BETTER_ENUM(PfdErrorMeasure, char, per_tuple = 0, per_value)
+enum class PfdErrorMeasure : char { kPerTuple = 0, kPerValue };
 
-BETTER_ENUM(AfdErrorMeasure, char, g1 = 0, pdep, tau, mu_plus, rho)
+enum class AfdErrorMeasure : char { kG1 = 0, kPdep, kTau, kMuPlus, kRho };
 }  // namespace algos

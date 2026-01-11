@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic_bitvector.hpp>
 #include <hash_set2.hpp>
 #include <hash_table8.hpp>
 #include <mutex>
@@ -10,6 +9,7 @@
 
 #include "core/algorithms/ind/faida/inclusion_testing/hll_data.h"
 #include "core/algorithms/ind/faida/util/simple_ind.h"
+#include "core/util/atomic_bit_vector.h"
 
 namespace algos::faida {
 
@@ -24,7 +24,7 @@ private:
     emhash2::HashSet<SimpleIND> discovered_inds_;
 
     boost::dynamic_bitset<> seen_cc_indices_;
-    atomicbitvector::atomic_bv_t non_covered_cc_indices_;
+    util::AtomicBitVector non_covered_cc_indices_;
 
     int max_id_;
 
@@ -37,8 +37,8 @@ public:
         auto set_iter = inverted_index_.find(hash);
 
         if (set_iter == inverted_index_.end()) {
-            if (!non_covered_cc_indices_.test(combination.GetIndex())) {
-                non_covered_cc_indices_.set(combination.GetIndex());
+            if (!non_covered_cc_indices_.Test(combination.GetIndex())) {
+                non_covered_cc_indices_.Set(combination.GetIndex());
             }
             return false;
         }
@@ -50,7 +50,7 @@ public:
     }
 
     bool IsCovered(std::shared_ptr<SimpleCC> const& combination) {
-        return !non_covered_cc_indices_.test(combination->GetIndex());
+        return !non_covered_cc_indices_.Test(combination->GetIndex());
     }
 
     bool IsIncludedIn(std::shared_ptr<SimpleCC> const& a, std::shared_ptr<SimpleCC> const& b) {

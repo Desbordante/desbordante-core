@@ -37,6 +37,7 @@ target_link_libraries(
     PRIVATE ${Boost_LIBRARIES} # Boost components specified in find_package
             Threads::Threads # System threading library
     PUBLIC spdlog::spdlog_header_only # Logging infrastructure exposed in headers
+           magic_enum::magic_enum # Enum reflection used in headers
 )
 
 # Propagate the setting to all consumers of the library

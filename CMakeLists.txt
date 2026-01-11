@@ -256,28 +256,11 @@ CPMAddPackage("gh:ktprime/emhash#5f327039a2776f38910e600889acf924a2d99ea3")
 include_directories(SYSTEM "${emhash_SOURCE_DIR}")
 
 CPMAddPackage(
-    NAME frozen
-    GITHUB_REPOSITORY serge-sans-paille/frozen
-    GIT_TAG 1.2.0
-    DOWNLOAD_ONLY True
+    NAME magic_enum
+    GITHUB_REPOSITORY Neargye/magic_enum
+    VERSION 0.9.7
+    SYSTEM YES
 )
-include_directories(SYSTEM "${frozen_SOURCE_DIR}/include")
-
-CPMAddPackage(
-    NAME better-enums
-    GITHUB_REPOSITORY aantron/better-enums
-    GIT_TAG 0.11.3
-    DOWNLOAD_ONLY True
-)
-include_directories(SYSTEM "${better-enums_SOURCE_DIR}")
-
-CPMAddPackage(
-    NAME atomicbitvector
-    GITHUB_REPOSITORY ekg/atomicbitvector
-    GIT_TAG e295358fea9532fa4c37197630d037a4a53ddede
-    DOWNLOAD_ONLY True
-)
-include_directories(SYSTEM "${atomicbitvector_SOURCE_DIR}/include")
 
 if(DESBORDANTE_BUILD_TESTS)
     CPMAddPackage(

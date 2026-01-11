@@ -69,15 +69,15 @@ config::ErrorType PFDTane::CalculatePFDError(model::PositionListIndex const* x_p
                 xa_cluster_it++;
             }
         }
-        sum += measure == +PfdErrorMeasure::per_tuple ? static_cast<double>(max)
-                                                      : static_cast<double>(max) / x_cluster.size();
+        sum += measure == PfdErrorMeasure::kPerTuple ? static_cast<double>(max)
+                                                     : static_cast<double>(max) / x_cluster.size();
         cluster_rows_count += x_cluster.size();
     }
     unsigned int unique_rows =
             static_cast<unsigned int>(x_pli->GetRelationSize() - cluster_rows_count);
     double probability = static_cast<double>(sum + unique_rows) /
-                         (measure == +PfdErrorMeasure::per_tuple ? x_pli->GetRelationSize()
-                                                                 : x_index.size() + unique_rows);
+                         (measure == PfdErrorMeasure::kPerTuple ? x_pli->GetRelationSize()
+                                                                : x_index.size() + unique_rows);
     return 1.0 - probability;
 }
 

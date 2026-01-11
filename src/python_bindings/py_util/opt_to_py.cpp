@@ -17,6 +17,7 @@
 #include "core/config/indices/type.h"
 #include "core/config/max_lhs/type.h"
 #include "core/config/thread_number/type.h"
+#include "core/util/enum_to_str.h"
 
 namespace {
 namespace py = pybind11;
@@ -30,7 +31,7 @@ std::pair<std::type_index, ConvFunction> normal_conv_pair{
 template <typename T>
 std::pair<std::type_index, ConvFunction> enum_conv_pair{
         std::type_index(typeid(T)),
-        [](boost::any value) { return py::cast(boost::any_cast<T>(value)._to_string()); }};
+        [](boost::any value) { return py::cast(util::EnumToStr(boost::any_cast<T>(value))); }};
 std::unordered_map<std::type_index, ConvFunction> const kConverters{
         normal_conv_pair<int>,
         normal_conv_pair<double>,

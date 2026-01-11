@@ -26,16 +26,16 @@ void ACAlgorithm::RegisterOptions() {
 
     auto check_and_set_binop = [this](Binop bin_operation) {
         switch (bin_operation) {
-            case +Binop::Addition:
+            case Binop::kAddition:
                 binop_pointer_ = &model::INumericType::Add;
                 break;
-            case +Binop::Subtraction:
+            case Binop::kSubtraction:
                 binop_pointer_ = &model::INumericType::Sub;
                 break;
-            case +Binop::Multiplication:
+            case Binop::kMultiplication:
                 binop_pointer_ = &model::INumericType::Mul;
                 break;
-            case +Binop::Division:
+            case Binop::kDivision:
                 binop_pointer_ = &model::INumericType::Div;
                 break;
             default:
@@ -172,7 +172,7 @@ std::vector<std::byte const*> ACAlgorithm::SamplingIteration(
             }
             auto res = std::unique_ptr<std::byte[]>(num_type_->Allocate());
             num_type_->ValueFromStr(res.get(), "0");
-            if (bin_operation_ == +Binop::Division &&
+            if (bin_operation_ == Binop::kDivision &&
                 num_type_->Compare(r, res.get()) == model::CompareResult::kEqual) {
                 continue;
             }
@@ -335,7 +335,7 @@ unsigned long long ACAlgorithm::ExecuteInternal() {
                 /* Because of asymmetry and division by 0, we need to rediscover ranges.
                  * We don't need to do that for minus: (column1 - column2) lies in *some ranges*
                  * there we can express one column through another without possible problems */
-                if (bin_operation_ == +Binop::Division) {
+                if (bin_operation_ == Binop::kDivision) {
                     ranges_.emplace_back(
                             RangesCollection{model::CreateSpecificType<model::INumericType>(
                                                      data.at(col_i).GetTypeId(), true),

@@ -27,8 +27,8 @@ bool Predicate::Satisfies(std::vector<model::TypedColumnData>& col_data, size_t 
 
     model::Type const& type = lhs_type;
 
-    std::byte const* l_val = lhs.GetValue(l_.GetTuple() == +ColumnOperandTuple::t ? t : s);
-    std::byte const* r_val = rhs.GetValue(r_.GetTuple() == +ColumnOperandTuple::t ? t : s);
+    std::byte const* l_val = lhs.GetValue(l_.GetTuple() == ColumnOperandTuple::kT ? t : s);
+    std::byte const* r_val = rhs.GetValue(r_.GetTuple() == ColumnOperandTuple::kT ? t : s);
 
     return op_.Eval(l_val, r_val, type);
 }

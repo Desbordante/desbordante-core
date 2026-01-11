@@ -34,7 +34,7 @@ void Mind::MakeLoadOptsAvailable() {
      * At the moment we only have one algorithm for mining unary approximate inds.
      * In the future we should give the user the ability to choose the algorithm.
      */
-    auind_algo_ = CreateAlgorithmInstance<INDAlgorithm>(AlgorithmType::spider);
+    auind_algo_ = CreateAlgorithmInstance<INDAlgorithm>(AlgorithmType::kSpider);
 }
 
 void Mind::MakeExecuteOptsAvailable() {
