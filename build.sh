@@ -38,6 +38,7 @@ Presets available in CMakePresets.json:
 EOF
 }
 
+# TODO: use getopts or something else instead of bash
 function parse_args() {
     while [[ $# -gt 0 ]]; do
         case $1 in
