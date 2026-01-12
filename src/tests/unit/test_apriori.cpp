@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 
 #include "core/algorithms/algo_factory.h"
-#include "core/algorithms/association_rules/apriori.h"
+#include "core/algorithms/ar/apriori/apriori.h"
 #include "core/config/names.h"
+#include "core/model/transaction/input_format_type.h"
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
@@ -75,18 +76,21 @@ protected:
                                            double minconf, unsigned int tidColumnIndex,
                                            unsigned int itemColumnIndex) {
         using namespace config::names;
-        return {{kCsvConfig, csv_config},          {kInputFormat, +algos::InputFormat::singular},
-                {kMinimumSupport, minsup},         {kMinimumConfidence, minconf},
-                {kTIdColumnIndex, tidColumnIndex}, {kItemColumnIndex, itemColumnIndex}};
+        return {{kCsvConfig, csv_config},
+                {kInputFormat, +model::InputFormatType::singular},
+                {kArMinimumSupport, minsup},
+                {kArMinimumConfidence, minconf},
+                {kTIdColumnIndex, tidColumnIndex},
+                {kItemColumnIndex, itemColumnIndex}};
     }
 
     static algos::StdParamsMap GetParamMap(CSVConfig const& csv_config, double minsup,
                                            double minconf, bool firstColumnTid) {
         using namespace config::names;
         return {{kCsvConfig, csv_config},
-                {kInputFormat, +algos::InputFormat::tabular},
-                {kMinimumSupport, minsup},
-                {kMinimumConfidence, minconf},
+                {kInputFormat, +model::InputFormatType::tabular},
+                {kArMinimumSupport, minsup},
+                {kArMinimumConfidence, minconf},
                 {kFirstColumnTId, firstColumnTid}};
     }
 
@@ -168,7 +172,7 @@ TEST_F(ARAlgorithmTest, PresentationDataset) {
 }
 
 TEST_F(ARAlgorithmTest, SynteticDatasetWithPruning) {
-    auto algorithm = CreateAlgorithmInstance(kRulesSynthetic2, 0.13, 1.00001, 0, 1);
+    auto algorithm = CreateAlgorithmInstance(kRulesSynthetic2, 0.13, 1, 0, 1);
     algorithm->Execute();
 
     auto const actual = algorithm->GetFrequentList();
