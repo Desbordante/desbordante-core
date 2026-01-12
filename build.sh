@@ -183,7 +183,7 @@ function configure_and_build() {
     echo "CMake opts: ${EXTRA_CMAKE_OPTS[*]}"
     echo "Build opts: ${EXTRA_BUILD_OPTS[*]}"
 
-    cmake --fresh --preset="$PRESET" "${EXTRA_CMAKE_OPTS[@]}"
+    cmake --preset="$PRESET" "${EXTRA_CMAKE_OPTS[@]}"
     cmake --build --preset="$PRESET" "${EXTRA_BUILD_OPTS[@]}"
 }
 
