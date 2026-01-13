@@ -20,14 +20,6 @@ void BindFem(pybind11::module_& main_module) {
 
     py::class_<algos::FEMAlgorithm, algos::Algorithm>(fem_module, "FEMAlgorithm");
 
-    py::class_<model::EventSet>(fem_module, "EventSet")
-            .def("get_events",
-                 [](model::EventSet const& event_set) { return event_set.GetEvents(); });
-
-    py::class_<model::CompositeEpisode>(fem_module, "Episode")
-            .def("get_event_sets",
-                 [](model::CompositeEpisode const& episode) { return episode.GetEventSets(); });
-
     detail::RegisterAlgorithm<MaxFEM, algos::FEMAlgorithm>(fem_module, "MaxFEM")
             .def("get_max_frequent_episodes", &MaxFEM::GetMaxFrequentEpisodes);
 }

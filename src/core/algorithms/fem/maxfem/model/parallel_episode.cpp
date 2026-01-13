@@ -20,7 +20,7 @@ size_t ParallelEpisode::GetSupport() const {
 
 ParallelEpisode ParallelEpisode::ParallelExtension(model::Event event,
                                                    LocationList const& event_location_list) const {
-    model::EventSet new_event_set = event_set_;
+    model::EventSet new_event_set = *event_set_;
     new_event_set.Add(event);
     auto new_loc_list = location_list_->Merge(event_location_list);
     return ParallelEpisode(std::move(new_event_set), std::move(new_loc_list));

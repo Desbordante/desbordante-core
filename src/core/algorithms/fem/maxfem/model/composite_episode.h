@@ -16,7 +16,7 @@ private:
 public:
     CompositeEpisode() {}
 
-    CompositeEpisode(std::vector<model::EventSet> sequence);
+    CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence);
 
     void Extend(ParallelEpisode const& parallel_episode);
 
@@ -36,12 +36,14 @@ public:
 
     bool StrictlyContains(CompositeEpisode const& other) const;
 
-    void MapEvents(std::vector<model::Event> const& mapping);
+    using RawEpisode = std::vector<std::vector<model::Event>>;
+
+    RawEpisode GetRaw() const;
 };
 
 struct CompositeEpisodeComparator {
-    bool operator()(std::shared_ptr<CompositeEpisode> const& lhs,
-                    std::shared_ptr<CompositeEpisode> const& rhs) const;
+    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
+                    std::unique_ptr<CompositeEpisode> const& rhs) const;
 };
 
 }  // namespace algos::maxfem
