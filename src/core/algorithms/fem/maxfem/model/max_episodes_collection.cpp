@@ -13,12 +13,13 @@ void MaxEpiosdesCollection::Add(CompositeEpisode const& episode) {
     }
     RemoveSubEpisodes(episode, length);
 
-    max_episodes_[length].insert(std::make_shared<CompositeEpisode>(episode));
+    max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
 }
 
-std::vector<model::CompositeEpisode> MaxEpiosdesCollection::GetResult(
-        std::vector<model::Event> const& mapping) {
-    std::vector<model::CompositeEpisode> result;
+std::vector<CompositeEpisode::RawEpisode> MaxEpiosdesCollection::GetResult(
+        std::vector<model::Event> const& mapping,
+        std::vector<ParallelEpisode> const& parallel_episodes) {
+    std::vector<CompositeEpisode::RawEpisode> result;
 
     size_t total_count = 0;
     for (auto const& s : max_episodes_) {
@@ -26,11 +27,14 @@ std::vector<model::CompositeEpisode> MaxEpiosdesCollection::GetResult(
     }
     result.reserve(total_count);
 
+    for (auto const& parallel_episode : parallel_episodes) {
+        parallel_episode.GetEventSetPtr()->MapEvents(mapping);
+    }
+
     for (auto& s : max_episodes_) {
         for (auto const& ptr : s) {
             if (ptr) {
-                ptr->MapEvents(mapping);
-                result.push_back(std::move(*ptr));
+                result.push_back(ptr->GetRaw());
             }
         }
         s.clear();

@@ -17,7 +17,7 @@ private:
     size_t window_length_;
     size_t min_support_;
     model::Event events_num_ = 0;
-    std::vector<model::CompositeEpisode> max_frequent_episodes_;
+    std::vector<CompositeEpisode::RawEpisode> max_frequent_episodes_;
     std::unordered_map<model::Event, model::Event> mapping_;
     std::vector<model::Event> reverse_mapping_;
 
@@ -37,7 +37,7 @@ private:
 
     std::vector<std::shared_ptr<LocationList>> BuildEventsLocationLists() const;
 
-    void FindFrequentEpisodesRecursive(
+    void FindFrequentParallelEpisodesRecursive(
             ParallelEpisode const& current_episode,
             std::vector<std::shared_ptr<LocationList>> const& events_loc_lists,
             std::vector<ParallelEpisode>& results) const;
@@ -55,7 +55,7 @@ protected:
 public:
     MaxFEM();
 
-    std::vector<model::CompositeEpisode> const& GetMaxFrequentEpisodes() const {
+    std::vector<CompositeEpisode::RawEpisode> const& GetMaxFrequentEpisodes() const {
         return max_frequent_episodes_;
     }
 };

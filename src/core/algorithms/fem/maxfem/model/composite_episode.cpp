@@ -2,10 +2,10 @@
 
 namespace algos::maxfem {
 
-CompositeEpisode::CompositeEpisode(std::vector<model::EventSet> sequence)
+CompositeEpisode::CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence)
     : model::CompositeEpisode(std::move(sequence)) {
     for (auto const& event_set : sequence_) {
-        CountDataForEventSet(event_set);
+        CountDataForEventSet(*event_set);
     }
 }
 
@@ -22,12 +22,12 @@ void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bo
 }
 
 void CompositeEpisode::Extend(ParallelEpisode const& parallel_episode) {
-    sequence_.push_back(parallel_episode.GetEventSet());
-    CountDataForEventSet(sequence_.back());
+    sequence_.push_back(parallel_episode.GetEventSetPtr());
+    CountDataForEventSet(*sequence_.back());
 }
 
 void CompositeEpisode::Shorten() {
-    CountDataForEventSet(sequence_.back(), false);
+    CountDataForEventSet(*sequence_.back(), false);
     sequence_.pop_back();
 }
 
@@ -39,7 +39,7 @@ bool CompositeEpisode::StrictlyContains(CompositeEpisode const& other) const {
     size_t this_pos = 0;
     size_t other_pos = 0;
     while (this_pos < GetLength() && other_pos < other.GetLength()) {
-        if (sequence_[this_pos].Includes(other.sequence_[other_pos])) {
+        if (sequence_[this_pos]->Includes(*other.sequence_[other_pos])) {
             other_pos++;
             if (other_pos == other.GetLength()) {
                 return true;
@@ -62,14 +62,17 @@ bool CompositeEpisode::StrictlyContains(CompositeEpisode const& other) const {
     return other_pos == other.GetLength();
 }
 
-void CompositeEpisode::MapEvents(std::vector<model::Event> const& mapping) {
-    for (auto& event_set : sequence_) {
-        event_set.MapEvents(mapping);
+CompositeEpisode::RawEpisode CompositeEpisode::GetRaw() const {
+    RawEpisode result;
+    result.reserve(sequence_.size());
+    for (auto const& event_set : sequence_) {
+        result.push_back(event_set->GetEvents());
     }
+    return result;
 }
 
-bool CompositeEpisodeComparator::operator()(std::shared_ptr<CompositeEpisode> const& lhs,
-                                            std::shared_ptr<CompositeEpisode> const& rhs) const {
+bool CompositeEpisodeComparator::operator()(std::unique_ptr<CompositeEpisode> const& lhs,
+                                            std::unique_ptr<CompositeEpisode> const& rhs) const {
     if (lhs->GetEventsSum() != rhs->GetEventsSum()) {
         return lhs->GetEventsSum() < rhs->GetEventsSum();
     }
