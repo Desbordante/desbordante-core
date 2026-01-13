@@ -7,5 +7,5 @@ target_sources(
 )
 target_link_libraries(
     ${NAME} PRIVATE ${DESBORDANTE_PREFIX}::ucc ${DESBORDANTE_PREFIX}::fd::pyro::common
-                    spdlog::spdlog_header_only better-enums Boost::headers
+                    ${DESBORDANTE_PREFIX}::model::table spdlog::spdlog_header_only better-enums Boost::headers
 )
