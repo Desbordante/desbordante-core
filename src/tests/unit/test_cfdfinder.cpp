@@ -1,3 +1,8 @@
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include <boost/algorithm/string/join.hpp>
 #include <gtest/gtest.h>
 
@@ -8,10 +13,82 @@
 #include "tests/common/all_csv_configs.h"
 
 namespace tests {
+struct CFDFinderParams {
+    using FD = std::string;
+    using Tableau = std::vector<std::string>;
+    using Excepted_CFD = std::pair<FD, Tableau>;
+    algos::StdParamsMap params;
+    std::set<Excepted_CFD> excepted_cfds;
 
-static void CheckCfdfinderSetsEquality(
-        std::set<std::pair<std::string, std::vector<std::string>>> const& expected,
-        std::list<algos::cfdfinder::CFD> const& actual) {
+    // legacy strategy
+    CFDFinderParams(CSVConfig csv_config, algos::cfdfinder::Expansion expansion,
+                    algos::cfdfinder::Result result, unsigned int max_lhs, double min_sup,
+                    double min_conf, bool is_null_equal_null, std::set<Excepted_CFD> excepted)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kMaximumLhs, max_lhs},
+                  {config::names::kCfdPruningStrategy, +algos::cfdfinder::Pruning::legacy},
+                  {config::names::kCfdMinimumSupport, min_sup},
+                  {config::names::kCfdMinimumConfidence, min_conf},
+                  {config::names::kEqualNulls, is_null_equal_null},
+                  {config::names::kCfdResultStrategy, +result},
+                  {config::names::kCfdExpansionStrategy, +expansion}}),
+          excepted_cfds(std::move(excepted)) {}
+
+    // support_independent strategy
+    CFDFinderParams(CSVConfig csv_config, algos::cfdfinder::Expansion expansion,
+                    algos::cfdfinder::Result result, unsigned int max_lhs, double min_conf,
+                    double min_support_gain, double max_level_support_drop,
+                    unsigned int pattern_threshold, bool is_null_equal_null,
+                    std::set<Excepted_CFD> excepted)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kMaximumLhs, max_lhs},
+                  {config::names::kCfdPruningStrategy,
+                   +algos::cfdfinder::Pruning::support_independent},
+                  {config::names::kCfdMinimumConfidence, min_conf},
+                  {config::names::kMinSupportGain, min_support_gain},
+                  {config::names::kMaxLevelSupportDrop, max_level_support_drop},
+                  {config::names::kPatternTreshold, pattern_threshold},
+                  {config::names::kEqualNulls, is_null_equal_null},
+                  {config::names::kCfdResultStrategy, +result},
+                  {config::names::kCfdExpansionStrategy, +expansion}}),
+          excepted_cfds(std::move(excepted)) {}
+
+    // rhs_filter strategy
+    CFDFinderParams(CSVConfig csv_config, algos::cfdfinder::Expansion expansion,
+                    algos::cfdfinder::Result result, unsigned int max_lhs, double min_conf,
+                    double min_support_gain, double max_level_support_drop,
+                    unsigned int pattern_threshold, config::IndicesType rhs_indeces,
+                    bool is_null_equal_null, std::set<Excepted_CFD> excepted)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kMaximumLhs, max_lhs},
+                  {config::names::kCfdPruningStrategy, +algos::cfdfinder::Pruning::rhs_filter},
+                  {config::names::kCfdMinimumConfidence, min_conf},
+                  {config::names::kMinSupportGain, min_support_gain},
+                  {config::names::kMaxLevelSupportDrop, max_level_support_drop},
+                  {config::names::kPatternTreshold, pattern_threshold},
+                  {config::names::kEqualNulls, is_null_equal_null},
+                  {config::names::kRhsIndices, rhs_indeces},
+                  {config::names::kCfdResultStrategy, +result},
+                  {config::names::kCfdExpansionStrategy, +expansion}}),
+          excepted_cfds(std::move(excepted)) {}
+
+    // max_g1 strategy
+    CFDFinderParams(CSVConfig csv_config, algos::cfdfinder::Expansion expansion,
+                    algos::cfdfinder::Result result, unsigned int max_lhs, double max_g1,
+                    bool is_null_equal_null, std::set<Excepted_CFD> excepted)
+        : params({{config::names::kCsvConfig, csv_config},
+                  {config::names::kCfdResultStrategy, +result},
+                  {config::names::kMaximumLhs, max_lhs},
+                  {config::names::kCfdPruningStrategy, +algos::cfdfinder::Pruning::partial_fd},
+                  {config::names::kCfdExpansionStrategy, +expansion},
+                  {config::names::kMaximumG1, max_g1},
+                  {config::names::kEqualNulls, is_null_equal_null},
+                  {config::names::kCfdExpansionStrategy, +expansion}}),
+          excepted_cfds(std::move(excepted)) {}
+};
+
+static void CheckEqualityExceptedCFDs(std::set<CFDFinderParams::Excepted_CFD> const& expected,
+                                      std::list<algos::cfdfinder::CFD> const& actual) {
     ASSERT_EQ(actual.size(), expected.size()) << "count of cfds does not match: expected "
                                               << expected.size() << ", got " << actual.size();
 
@@ -31,250 +108,145 @@ static void CheckCfdfinderSetsEquality(
     SUCCEED();
 }
 
-class CFDFinderAlgorithmTest : public ::testing::Test {
-protected:
-    static algos::StdParamsMap GetParamMap(algos::cfdfinder::Expansion expansion,
-                                           algos::cfdfinder::Result result, unsigned int max_lhs,
-                                           CSVConfig const& csv_config, double min_sup,
-                                           double min_conf, bool is_null_equal_null) {
-        using namespace config::names;
-        return {{kCsvConfig, csv_config},
-                {kMaximumLhs, max_lhs},
-                {kCfdPruningStrategy, +algos::cfdfinder::Pruning::legacy},
-                {kCfdMinimumSupport, min_sup},
-                {kCfdMinimumConfidence, min_conf},
-                {kEqualNulls, is_null_equal_null},
-                {kCfdResultStrategy, result},
-                {kCfdExpansionStrategy, +expansion}};
-    }
+class CFDFinderAlgorithmTest : public ::testing::TestWithParam<CFDFinderParams> {};
 
-    static algos::StdParamsMap GetParamMap(algos::cfdfinder::Expansion expansion,
-                                           algos::cfdfinder::Result result, unsigned int max_lhs,
-                                           CSVConfig const& csv_config, double min_conf,
-                                           double min_support_gain, double max_level_support_drop,
-                                           unsigned int pattern_threshold,
-                                           bool is_null_equal_null) {
-        using namespace config::names;
-        return {{kCsvConfig, csv_config},
-                {kMaximumLhs, max_lhs},
-                {kCfdPruningStrategy, +algos::cfdfinder::Pruning::support_independent},
-                {kCfdMinimumConfidence, min_conf},
-                {kMinSupportGain, min_support_gain},
-                {kMaxLevelSupportDrop, max_level_support_drop},
-                {kPatternTreshold, pattern_threshold},
-                {kEqualNulls, is_null_equal_null},
-                {kCfdResultStrategy, result},
-                {kCfdExpansionStrategy, +expansion}};
-    }
-
-    static algos::StdParamsMap GetParamMap(algos::cfdfinder::Expansion expansion,
-                                           algos::cfdfinder::Result result, unsigned int max_lhs,
-                                           CSVConfig const& csv_config, double min_conf,
-                                           double min_support_gain, double max_level_support_drop,
-                                           unsigned int pattern_threshold,
-                                           config::IndicesType rhs_filter,
-                                           bool is_null_equal_null) {
-        using namespace config::names;
-        return {{kCsvConfig, csv_config},
-                {kMaximumLhs, max_lhs},
-                {kCfdPruningStrategy, +algos::cfdfinder::Pruning::rhs_filter},
-                {kCfdMinimumConfidence, min_conf},
-                {kMinSupportGain, min_support_gain},
-                {kMaxLevelSupportDrop, max_level_support_drop},
-                {kPatternTreshold, pattern_threshold},
-                {kEqualNulls, is_null_equal_null},
-                {kRhsIndices, rhs_filter},
-                {kCfdResultStrategy, result},
-                {kCfdExpansionStrategy, +expansion}};
-    }
-
-    static algos::StdParamsMap GetParamMap(algos::cfdfinder::Expansion expansion,
-                                           algos::cfdfinder::Result result, unsigned int max_lhs,
-                                           CSVConfig const& csv_config, double max_g1,
-                                           bool is_null_equal_null) {
-        using namespace config::names;
-        return {{kCsvConfig, csv_config},
-                {kCfdResultStrategy, result},
-                {kMaximumLhs, max_lhs},
-                {kCfdPruningStrategy, +algos::cfdfinder::Pruning::partial_fd},
-                {kCfdExpansionStrategy, +expansion},
-                {kMaximumG1, max_g1},
-                {kEqualNulls, is_null_equal_null},
-                {kCfdExpansionStrategy, +expansion}};
-    }
-
-    template <typename... Args>
-    static std::unique_ptr<algos::cfdfinder::CFDFinder> CreateAlgorithmInstance(
-            algos::cfdfinder::Expansion expansion, algos::cfdfinder::Result result,
-            unsigned int max_lhs, Args&&... args) {
-        return algos::CreateAndLoadAlgorithm<algos::cfdfinder::CFDFinder>(
-                GetParamMap(expansion, result, max_lhs, std::forward<Args>(args)...));
-    }
-};
-
-TEST_F(CFDFinderAlgorithmTest, TennisConstantExpansionLegacyPruning) {
+TEST_P(CFDFinderAlgorithmTest, Test) {
     algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    unsigned int max_lhs = 4;
-    double min_sup = 0.8;
-    double min_conf = 1.0;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::constant,
-                                             algos::cfdfinder::Result::direct, max_lhs, kTennis,
-                                             min_sup, min_conf, is_null_eq_null);
-    algorithm->Execute();
 
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[temp humidity windy play] -> outlook",
-             {"_|high|_|_", "_|_|true|_", "mild|_|_|_", "hot|_|_|_"}},
-            {"[outlook temp humidity play] -> windy", {"_|_|_|yes", "_|mild|_|_", "_|_|normal|_"}},
-            {"[outlook temp play] -> windy", {"_|_|yes", "_|mild|_", "_|cool|_"}}};
+    auto const& p = GetParam();
+    auto mp = algos::StdParamsMap(p.params);
+    auto algo = algos::CreateAndLoadAlgorithm<algos::cfdfinder::CFDFinder>(mp);
+    algo->Execute();
 
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
+    CheckEqualityExceptedCFDs(p.excepted_cfds, algo->CfdList());
 }
 
-TEST_F(CFDFinderAlgorithmTest, TennisNegativeConstantExpansionLegacyPruning) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    unsigned int max_lhs = 4;
-    double min_sup = 0.7;
-    double min_conf = 1.0;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::negative_constant,
-                                             algos::cfdfinder::Result::tree, max_lhs, kTennis,
-                                             min_sup, min_conf, is_null_eq_null);
-    algorithm->Execute();
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[temp windy play] -> outlook", {"¬cool|false|_", "¬mild|¬false|_", "_|_|¬yes"}},
-            {"[outlook temp windy] -> humidity",
-             {"_|_|true", "¬overcast|¬mild|_", "¬rainy|mild|_"}},
-            {"[outlook temp play] -> humidity", {"¬overcast|¬mild|_", "¬rainy|¬hot|_", "_|_|¬yes"}},
-            {"[outlook humidity windy] -> temp", {"_|_|true", "¬sunny|high|_", "¬rainy|¬high|_"}},
-            {"[outlook temp play] -> windy", {"_|¬hot|_"}},
-            {"[outlook temp humidity] -> play", {"¬rainy|_|_", "_|mild|¬high"}},
+INSTANTIATE_TEST_SUITE_P(
+        CFDFinderAdditionalTests, CFDFinderAlgorithmTest,
+        ::testing::Values(
+                CFDFinderParams({kTennis,
+                                 algos::cfdfinder::Expansion::constant,
+                                 algos::cfdfinder::Result::direct,
+                                 4,     // max_lhs
+                                 0.8,   // min_sup
+                                 1.0,   // min_conf
+                                 true,  // is_null_equal_null
+                                 {
+                                         {"[temp humidity windy play] -> outlook",
+                                          {"_|high|_|_", "_|_|true|_", "mild|_|_|_", "hot|_|_|_"}},
+                                         {"[outlook temp humidity play] -> windy",
+                                          {"_|_|_|yes", "_|mild|_|_", "_|_|normal|_"}},
+                                         {"[outlook temp play] -> windy",
+                                          {"_|_|yes", "_|mild|_", "_|cool|_"}},
+                                 }}),
+                CFDFinderParams({kTennis,
+                                 algos::cfdfinder::Expansion::negative_constant,
+                                 algos::cfdfinder::Result::tree,
+                                 4,
+                                 0.7,
+                                 1.0,
+                                 true,
+                                 {
+                                         {"[temp windy play] -> outlook",
+                                          {"¬cool|false|_", "¬mild|¬false|_", "_|_|¬yes"}},
+                                         {"[outlook temp windy] -> humidity",
+                                          {"_|_|true", "¬overcast|¬mild|_", "¬rainy|mild|_"}},
+                                         {"[outlook temp play] -> humidity",
+                                          {"¬overcast|¬mild|_", "¬rainy|¬hot|_", "_|_|¬yes"}},
+                                         {"[outlook humidity windy] -> temp",
+                                          {"_|_|true", "¬sunny|high|_", "¬rainy|¬high|_"}},
+                                         {"[outlook temp play] -> windy", {"_|¬hot|_"}},
+                                         {"[outlook temp humidity] -> play",
+                                          {"¬rainy|_|_", "_|mild|¬high"}},
+                                 }}),
+                CFDFinderParams(
+                        {kTennis,
+                         algos::cfdfinder::Expansion::range,
+                         algos::cfdfinder::Result::direct,
+                         4,
+                         0.8,
+                         1.0,
+                         true,
+                         {
+                                 {"[temp humidity windy play] -> outlook",
+                                  {"[cool - hot]|[high - normal]|[false - true]|[no - yes]",
+                                   "[mild - mild]|[high - normal]|[true - true]|[no - yes]"}},
+                                 {"[outlook temp humidity play] -> windy",
+                                  {"[overcast - sunny]|[hot - mild]|[high - normal]|[no - yes]",
+                                   "[overcast - rainy]|[cool - mild]|[high - normal]|[yes - yes]"}},
+                                 {"[outlook temp play] -> windy",
+                                  {"[overcast - sunny]|[hot - mild]|[no - yes]",
+                                   "[overcast - rainy]|[cool - mild]|[yes - yes]"}},
+                         }}),
+                CFDFinderParams({kIris,
+                                 algos::cfdfinder::Expansion::constant,
+                                 algos::cfdfinder::Result::lattice,
+                                 4,     // max_lhs
+                                 1.0,   // min_conf
+                                 6,     // min_support_gain
+                                 15,    // max_support_drop
+                                 2000,  // max_patterns
+                                 {0},   // rhs_indeces
+                                 true,  // is_null_equal_null
+                                 {
+                                         {"[1 2] -> 0", {"_|5.6", "3.3|_", "3.8|_"}},
+                                         {"[2 3] -> 0", {"_|2.3", "5.1|_", "_|2.1"}},
+                                 }}),
+                CFDFinderParams({kBridges,
+                                 algos::cfdfinder::Expansion::constant,
+                                 algos::cfdfinder::Result::lattice,
+                                 6,
+                                 1.0,
+                                 35,
+                                 35,
+                                 2000,
+                                 {2},
+                                 true,
+                                 {
+                                         {"[1 4 5 6 9 10] -> 2", {"_|_|_|2|STEEL|_"}},
+                                         {"[1 3 6 8 11 12] -> 2", {"M|_|_|_|_|_"}},
+                                         {"[1 3 8 10 11] -> 2", {"M|_|_|_|_"}},
+                                         {"[1 3 10 11 12] -> 2", {"M|_|_|_|_"}},
+                                         {"[1 3 5] -> 2", {"A|_|_", "M|_|_"}},
+                                         {"[3 5 6] -> 2", {"_|_|2"}},
 
-    };
+                                 }}),
+                CFDFinderParams({kIris,
+                                 algos::cfdfinder::Expansion::constant,
+                                 algos::cfdfinder::Result::tree,
+                                 1,     // max_lhs
+                                 0.05,  // max_g1
+                                 true,
+                                 {
+                                         {"[0] -> 4", {"_"}},
+                                         {"[2] -> 0", {"_"}},
+                                         {"[0] -> 3", {"_"}},
+                                         {"[0] -> 1", {"_"}},
+                                         {"[2] -> 1", {"_"}},
+                                         {"[0] -> 2", {"_"}},
+                                         {"[2] -> 3", {"_"}},
+                                         {"[3] -> 4", {"_"}},
+                                         {"[1] -> 4", {"_"}},
+                                         {"[2] -> 4", {"_"}},
 
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
+                                 }}),
+                CFDFinderParams({kNullEmpty,
+                                 algos::cfdfinder::Expansion::constant,
+                                 algos::cfdfinder::Result::direct,
+                                 52,
+                                 0.3,
+                                 0.8,
+                                 true,
+                                 {
+                                         {"[Int1  IntAndEmpty  Int2] ->  NullAndInt", {"_|null|_"}},
+                                         {"[Int1  NullAndInt  Int2] ->  IntAndEmpty", {"_|NULL|_"}},
+                                         {"[Int1  NullAndInt] ->  IntAndEmpty", {"_|NULL"}},
+                                         {"[ NullAndInt  Int2] ->  IntAndEmpty", {"NULL|_"}},
+                                         {"[Int1  IntAndEmpty] ->  NullAndInt", {"_|null"}},
+                                         {"[ IntAndEmpty  Int2] ->  NullAndInt", {"null|_"}},
+                                         {"[ IntAndEmpty] ->  NullAndInt", {"null"}},
+                                         {"[ NullAndInt] ->  IntAndEmpty", {"NULL"}},
 
-TEST_F(CFDFinderAlgorithmTest, TennisRangeExpansionLegacyPruning) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    unsigned int max_lhs = 4;
-    double min_sup = 0.8;
-    double min_conf = 1.0;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::range,
-                                             algos::cfdfinder::Result::direct, max_lhs, kTennis,
-                                             min_sup, min_conf, is_null_eq_null);
-    algorithm->Execute();
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[temp humidity windy play] -> outlook",
-             {"[cool - hot]|[high - normal]|[false - true]|[no - yes]",
-              "[mild - mild]|[high - normal]|[true - true]|[no - yes]"}},
-            {"[outlook temp humidity play] -> windy",
-             {"[overcast - sunny]|[hot - mild]|[high - normal]|[no - yes]",
-              "[overcast - rainy]|[cool - mild]|[high - normal]|[yes - yes]"}},
-            {"[outlook temp play] -> windy",
-             {"[overcast - sunny]|[hot - mild]|[no - yes]",
-              "[overcast - rainy]|[cool - mild]|[yes - yes]"}}};
-
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
-
-TEST_F(CFDFinderAlgorithmTest, IrisConstantExpansionRhsFilterPruning) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    config::IndicesType rhs = {0};
-    unsigned int max_lhs = 4;
-    double min_support_gain = 6;
-    double max_support_drop = 15;
-    unsigned int max_patterns = 2000;
-    double min_conf = 1.0;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::constant,
-                                             algos::cfdfinder::Result::lattice, max_lhs, kIris,
-                                             min_conf, min_support_gain, max_support_drop,
-                                             max_patterns, rhs, is_null_eq_null);
-    algorithm->Execute();
-
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[1 2] -> 0", {"_|5.6", "3.3|_", "3.8|_"}},
-            {"[2 3] -> 0", {"_|2.3", "5.1|_", "_|2.1"}},
-    };
-
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
-
-TEST_F(CFDFinderAlgorithmTest, BridgesConstantExpansionRhsFilterPruning) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    config::IndicesType rhs = {2};
-    unsigned int max_lhs = 6;
-    double min_support_gain = 35;
-    double max_support_drop = 35;
-    unsigned int max_patterns = 2000;
-    double min_conf = 1.0;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::constant,
-                                             algos::cfdfinder::Result::lattice, max_lhs, kBridges,
-                                             min_conf, min_support_gain, max_support_drop,
-                                             max_patterns, rhs, is_null_eq_null);
-    algorithm->Execute();
-
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[1 4 5 6 9 10] -> 2", {"_|_|_|2|STEEL|_"}},
-            {"[1 3 6 8 11 12] -> 2", {"M|_|_|_|_|_"}},
-            {"[1 3 8 10 11] -> 2", {"M|_|_|_|_"}},
-            {"[1 3 10 11 12] -> 2", {"M|_|_|_|_"}},
-            {"[1 3 5] -> 2", {"A|_|_", "M|_|_"}},
-            {"[3 5 6] -> 2", {"_|_|2"}}
-
-    };
-
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
-
-TEST_F(CFDFinderAlgorithmTest, IrisConstantExpansionG1Pruning) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    double max_g1 = 0.05;
-    unsigned int max_lhs = 1;
-    bool is_null_eq_null = true;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::constant,
-                                             algos::cfdfinder::Result::tree, max_lhs, kIris, max_g1,
-                                             is_null_eq_null);
-    algorithm->Execute();
-
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[0] -> 4", {"_"}}, {"[2] -> 0", {"_"}}, {"[0] -> 3", {"_"}}, {"[0] -> 1", {"_"}},
-            {"[2] -> 1", {"_"}}, {"[0] -> 2", {"_"}}, {"[2] -> 3", {"_"}}, {"[3] -> 4", {"_"}},
-            {"[1] -> 4", {"_"}}, {"[2] -> 4", {"_"}}
-
-    };
-
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
-
-TEST_F(CFDFinderAlgorithmTest, NullEmptyTest) {
-    algos::cfdfinder::PatternDebugController::SetDebugEnabled(true);
-    unsigned int max_lhs = 100;
-    bool is_null_eq_null = true;
-    double min_sup = 0.3;
-    double min_conf = 0.8;
-    auto algorithm = CreateAlgorithmInstance(algos::cfdfinder::Expansion::constant,
-                                             algos::cfdfinder::Result::direct, max_lhs, kNullEmpty,
-                                             min_sup, min_conf, is_null_eq_null);
-    algorithm->Execute();
-
-    std::set<std::pair<std::string, std::vector<std::string>>> expected = {
-            {"[Int1  IntAndEmpty  Int2] ->  NullAndInt", {"_|null|_"}},
-            {"[Int1  NullAndInt  Int2] ->  IntAndEmpty", {"_|NULL|_"}},
-            {"[Int1  NullAndInt] ->  IntAndEmpty", {"_|NULL"}},
-            {"[ NullAndInt  Int2] ->  IntAndEmpty", {"NULL|_"}},
-            {"[Int1  IntAndEmpty] ->  NullAndInt", {"_|null"}},
-            {"[ IntAndEmpty  Int2] ->  NullAndInt", {"null|_"}},
-            {"[ IntAndEmpty] ->  NullAndInt", {"null"}},
-            {"[ NullAndInt] ->  IntAndEmpty", {"NULL"}}
-
-    };
-
-    CheckCfdfinderSetsEquality(expected, algorithm->CfdList());
-}
+                                 }})));
 
 }  // namespace tests
