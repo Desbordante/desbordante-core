@@ -22,6 +22,7 @@ Possible options:
                                       UB      - Undefined Behavior Sanitizer
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
+  -f,         --no-fetch-datasets     Don't fetch datasets for tests or benchmarks
   -L[LEVEL]   --log-level[=LEVEL]     Set log level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
   -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
   -B[OPT]     --build-opt[=OPT]       Forward OPT to build system
@@ -66,6 +67,10 @@ for i in "$@"; do
         # Use GDB's debug information format
         -g)
             GDB_DEBUG=true
+            ;;
+        # Don't fetch datasets for tests or benchmarks
+        -f | --no-fetch-datasets)
+            NO_FETCH_DATASETS=true
             ;;
         # Set log level, long option
         --log-level=*)
@@ -119,6 +124,10 @@ fi
 
 if [[ $GDB_DEBUG == true ]]; then
     CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_GDB_SYMBOLS=ON"
+fi
+
+if [[ $NO_FETCH_DATASETS == true ]]; then
+    CMAKE_OPTS="$CMAKE_OPTS -D DESBORDANTE_FETCH_DATASETS=OFF"
 fi
 
 if [[ $DEBUG_MODE != true ]]; then
