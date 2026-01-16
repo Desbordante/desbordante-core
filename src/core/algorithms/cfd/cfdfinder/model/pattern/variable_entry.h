@@ -17,6 +17,10 @@ public:
         return dynamic_cast<VariableEntry const*>(&other) != nullptr;
     }
 
+    bool operator!=(Entry const& other) const {
+        return !(*this == other);
+    }
+
     size_t Hash() const override {
         return 0x9e3779b9;
     }
@@ -26,8 +30,7 @@ public:
     }
 
     std::string ToString([[maybe_unused]] InvertedClusterMap const& cluster_map) const override {
-        static std::string const kWildCard = "_";
-        return kWildCard;
+        return std::string(kWildCard);
     }
 };
 }  // namespace algos::cfdfinder

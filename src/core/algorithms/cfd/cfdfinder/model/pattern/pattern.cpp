@@ -44,12 +44,12 @@ void Pattern::UpdateCover(Pattern const& pattern) {
 }
 
 void Pattern::UpdateKeepers(Row const& inverted_pli_rhs) {
+    auto sum_violations_in_cluster = [&inverted_pli_rhs](size_t sum, Cluster const& cluster) {
+        return sum + algos::cfdfinder::utils::CalculateViolations(cluster, inverted_pli_rhs);
+    };
+
     size_t child_violations =
-            std::accumulate(cover_.begin(), cover_.end(), 0u,
-                            [&inverted_pli_rhs](size_t sum, Cluster const& cluster) {
-                                return sum + algos::cfdfinder::utils::CalculateViolations(
-                                                     cluster, inverted_pli_rhs);
-                            });
+            std::accumulate(cover_.begin(), cover_.end(), 0u, sum_violations_in_cluster);
 
     num_keepers_ = GetNumCover() - child_violations;
 }

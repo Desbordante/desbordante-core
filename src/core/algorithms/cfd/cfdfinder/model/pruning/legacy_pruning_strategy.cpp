@@ -4,6 +4,9 @@
 #include <memory>
 #include <ranges>
 
+#include "core/algorithms/cfd/cfdfinder/candidate.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
 #include "core/algorithms/cfd/cfdfinder/model/pattern/variable_entry.h"
 
 namespace algos::cfdfinder {

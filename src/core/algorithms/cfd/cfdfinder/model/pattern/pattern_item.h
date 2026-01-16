@@ -16,6 +16,8 @@ struct PatternItem {
     bool operator==(PatternItem const& other) const {
         return id == other.id && *entry == *(other.entry);
     }
+
+    bool operator!=(PatternItem const& other) const = default;
 };
 
 using Entries = std::vector<PatternItem>;

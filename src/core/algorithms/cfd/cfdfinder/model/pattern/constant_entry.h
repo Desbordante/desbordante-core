@@ -25,6 +25,10 @@ public:
         return other_constant != nullptr && constant_ == other_constant->constant_;
     }
 
+    bool operator!=(Entry const& other) const {
+        return !(*this == other);
+    }
+
     size_t Hash() const override {
         return boost::hash_value(constant_);
     }
@@ -40,7 +44,7 @@ public:
     std::string ToString(InvertedClusterMap const& cluster_map) const override {
         std::string value = cluster_map.at(constant_);
 
-        return !value.empty() ? value : kNullRepresentation;
+        return !value.empty() ? value : std::string(kNullRepresentation);
     }
 };
 }  // namespace algos::cfdfinder

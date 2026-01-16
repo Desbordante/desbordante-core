@@ -21,25 +21,41 @@ private:
     double confidence_;
 
 public:
+    CFD(FD embedded_fd, Tableau tableau, double support, double confidence)
+        : embedded_fd_(std::move(embedded_fd)),
+          patterns_(std::move(tableau)),
+          support_(support),
+          confidence_(confidence) {}
+
     CFD(Vertical lhs, Column rhs, PatternTableau const& tableau,
         std::shared_ptr<RelationalSchema const> schema,
         InvertedClusterMaps const& inverted_cluster_maps);
 
     std::string ToString() const;
 
-    double GetSupport() const {
+    bool operator==(CFD const& other) const {
+        return support_ == other.support_ && confidence_ == other.confidence_ &&
+               patterns_ == other.patterns_ &&
+               embedded_fd_.ToNameTuple() == other.embedded_fd_.ToNameTuple();
+    }
+
+    bool operator!=(CFD const& other) const {
+        return !(*this == other);
+    }
+
+    double GetSupport() const noexcept {
         return support_;
     }
 
-    double GetConfidence() const {
+    double GetConfidence() const noexcept {
         return confidence_;
     }
 
-    FD const& GetEmbeddedFD() const {
+    FD const& GetEmbeddedFD() const noexcept {
         return embedded_fd_;
     }
 
-    Tableau const& GetTableau() const {
+    Tableau const& GetTableau() const noexcept {
         return patterns_;
     }
 };

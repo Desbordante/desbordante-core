@@ -16,7 +16,7 @@ RangePatternExpansion::RangePatternExpansion(InvertedClusterMaps const& inverted
         std::vector<std::pair<ClusterId, AttributeValue>> mappings(inverted_cluster_maps[i].begin(),
                                                                    inverted_cluster_maps[i].end());
 
-        std::sort(mappings.begin(), mappings.end(), [](auto const& a, auto const& b) {
+        std::ranges::sort(mappings, [](auto const& a, auto const& b) {
             if (b.second.empty()) {
                 return false;
             }

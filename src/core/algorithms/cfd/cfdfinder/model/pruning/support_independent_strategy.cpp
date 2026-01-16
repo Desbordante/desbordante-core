@@ -2,6 +2,9 @@
 
 #include <algorithm>
 
+#include "core/algorithms/cfd/cfdfinder/candidate.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern.h"
+#include "core/algorithms/cfd/cfdfinder/model/pattern/pattern_tableau.h"
 #include "core/algorithms/cfd/cfdfinder/util/lhs_utils.h"
 
 namespace algos::cfdfinder {

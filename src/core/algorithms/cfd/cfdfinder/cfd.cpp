@@ -1,6 +1,8 @@
 #include "core/algorithms/cfd/cfdfinder/cfd.h"
 
 #include <sstream>
+#include <string>
+#include <vector>
 
 #include <boost/algorithm/string/join.hpp>
 
@@ -12,7 +14,7 @@ Condition GetEntriesString(Pattern const& pattern,
                            InvertedClusterMaps const& inverted_cluster_maps) {
     Condition result;
     for (auto const& [id, entry] : pattern.GetEntries()) {
-        auto const& inverted_cluster_map = inverted_cluster_maps[id];
+        InvertedClusterMap const& inverted_cluster_map = inverted_cluster_maps[id];
         result.push_back(entry->ToString(inverted_cluster_map));
     }
 

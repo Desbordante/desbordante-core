@@ -11,6 +11,7 @@ namespace algos::cfdfinder {
 
 class NegativeConstantEntry final : public Entry {
 private:
+    inline static std::string const kNegationSign = "¬";
     size_t constant_;
 
 public:
@@ -38,10 +39,10 @@ public:
     }
 
     std::string ToString(InvertedClusterMap const& cluster_map) const override {
-        static std::string const kNegationSign = "¬";
         std::string value = cluster_map.at(constant_);
 
-        return kNegationSign + (!value.empty() ? value : kNullRepresentation);
+        return std::string(kNegationSign) +
+               (!value.empty() ? value : std::string(kNullRepresentation));
     }
 };
 }  // namespace algos::cfdfinder

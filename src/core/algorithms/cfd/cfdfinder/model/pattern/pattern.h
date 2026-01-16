@@ -1,5 +1,6 @@
 #pragma once
 
+#include <compare>
 #include <cstddef>
 #include <list>
 #include <ranges>
@@ -16,7 +17,7 @@ private:
     inline static unsigned long long counter_ = 0;
 
 public:
-    static bool IsDebugEnabled() {
+    static bool IsDebugEnabled() noexcept {
         return debug_enabled_;
     }
 
@@ -55,20 +56,36 @@ public:
 
     bool operator<(Pattern const& other) const noexcept;
 
-    bool operator==(Pattern const& other) const {
+    bool operator==(Pattern const& other) const noexcept {
         return entries_ == other.entries_;
     };
+
+    bool operator!=(Pattern const& other) const {
+        return !(*this == other);
+    }
+
+    bool operator>(Pattern const& other) const noexcept {
+        return other < *this;
+    }
+
+    bool operator<=(Pattern const& other) const noexcept {
+        return !(other < *this);
+    }
+
+    bool operator>=(Pattern const& other) const noexcept {
+        return !(*this < other);
+    }
 
     bool Matches(Row const& tuple) const;
     void UpdateCover(Pattern const& pattern);
     void UpdateKeepers(Row const& inverted_pli_rhs);
     size_t GetNumCover() const;
 
-    Entries const& GetEntries() const {
+    Entries const& GetEntries() const noexcept {
         return entries_;
     }
 
-    double GetSupport() const {
+    double GetSupport() const noexcept {
         return support_;
     }
 
@@ -81,7 +98,7 @@ public:
         return num_cover == 0 ? 0 : static_cast<double>(num_keepers_) / num_cover;
     }
 
-    std::list<Cluster> const& GetCover() const {
+    std::list<Cluster> const& GetCover() const noexcept {
         return cover_;
     }
 
@@ -94,7 +111,7 @@ public:
         }
     }
 
-    size_t GetNumKeepers() const {
+    size_t GetNumKeepers() const noexcept {
         return num_keepers_;
     }
 

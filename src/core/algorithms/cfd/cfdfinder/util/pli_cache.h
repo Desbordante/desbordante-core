@@ -56,15 +56,15 @@ public:
         ++total_misses_;
     }
 
-    size_t GetFullHits() const {
+    size_t GetFullHits() const noexcept {
         return full_hits_;
     }
 
-    size_t GetPartialHits() const {
+    size_t GetPartialHits() const noexcept {
         return partial_hits_;
     }
 
-    size_t GetTotalMisses() const {
+    size_t GetTotalMisses() const noexcept {
         return total_misses_;
     }
 };

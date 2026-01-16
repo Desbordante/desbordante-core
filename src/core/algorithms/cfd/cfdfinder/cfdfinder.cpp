@@ -34,7 +34,7 @@ namespace algos::cfdfinder {
 CFDFinder::CFDFinder() : Algorithm({}) {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kMaximumLhs, kLimitPliCache, kEqualNulls});
+    MakeOptionsAvailable({kTable, kEqualNulls});
 }
 
 void CFDFinder::ResetState() {
@@ -43,14 +43,8 @@ void CFDFinder::ResetState() {
 
 void CFDFinder::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({
-            kCfdMinimumSupport,
-            kCfdMinimumConfidence,
-            kMaximumLhs,
-            kCfdExpansionStrategy,
-            kCfdPruningStrategy,
-            kCfdResultStrategy,
-    });
+    MakeOptionsAvailable({kMaximumLhs, kLimitPliCache, kLimitPliCache, kCfdExpansionStrategy,
+                          kCfdPruningStrategy, kCfdResultStrategy});
 };
 
 void CFDFinder::RegisterOptions() {
@@ -87,7 +81,7 @@ void CFDFinder::RegisterOptions() {
     RegisterOption(Option{&min_confidence_, kCfdMinimumConfidence, kDCfdMinimumConfidence, 1.0});
     RegisterOption(Option{&min_support_, kCfdMinimumSupport, kDCfdMinimumSupport, 0.8});
     RegisterOption(Option{&max_g1_, kMaximumG1, kDMaximumG1, 0.1});
-    RegisterOption(Option{&max_patterns_, kPatternTreshold, kDPatternTreshold, 1000u});
+    RegisterOption(Option{&max_patterns_, kMaxPatterns, kDPatternTreshold, 1000u});
     RegisterOption(Option{&min_support_gain_, kMinSupportGain, kDMinSupportGain, 1.0});
     RegisterOption(
             Option{&max_level_support_drop_, kMaxLevelSupportDrop, kDMaxLevelSupportDrop, 1.0});
@@ -100,11 +94,11 @@ void CFDFinder::RegisterOptions() {
             Option{&pruning_strategy_, kCfdPruningStrategy, kDCfdPruningStrategy}
                     .SetConditionalOpts({{legacy_eq, {kCfdMinimumSupport, kCfdMinimumConfidence}},
                                          {support_independent_eq,
-                                          {kPatternTreshold, kMinSupportGain, kMaxLevelSupportDrop,
+                                          {kMaxPatterns, kMinSupportGain, kMaxLevelSupportDrop,
                                            kCfdMinimumConfidence}},
                                          {partial_fd_eq, {kMaximumG1}},
                                          {rhs_filter_eq,
-                                          {kPatternTreshold, kMinSupportGain, kMaxLevelSupportDrop,
+                                          {kMaxPatterns, kMinSupportGain, kMaxLevelSupportDrop,
                                            kCfdMinimumConfidence, kRhsIndices}}}));
 }
 
@@ -133,9 +127,9 @@ unsigned long long CFDFinder::ExecuteInternal() {
     --height;
     while (height >= 0) {
         auto start_level_time = std::chrono::system_clock::now();
-        auto& current_level = levels[height];
+        Level& current_level = levels[height];
         while (!current_level.empty()) {
-            auto candidate = current_level.extract(current_level.begin()).value();
+            Candidate candidate = current_level.extract(current_level.begin()).value();
             auto const lhs_pli = GetLhsPli(pli_cache, candidate.lhs_, *plis_shared);
             auto const& inverted_pli_rhs = inverted_plis_shared->at(candidate.rhs_);
 
@@ -227,22 +221,16 @@ void CFDFinder::RegisterResults(std::shared_ptr<ResultStrategy> result_receiver,
 }
 
 std::vector<Cluster> CFDFinder::EnrichPLI(model::PLI const* pli, int num_tuples) const {
-    auto const& original_clusters = pli->GetIndex();
-    std::vector<Cluster> enriched_clusters;
-
     std::unordered_set<int> existing_elements;
+    existing_elements.reserve(pli->GetSize());
 
-    size_t total_elements = 0;
-    for (auto const& cluster : original_clusters) {
-        total_elements += cluster.size();
-    }
-    existing_elements.reserve(total_elements);
-
+    auto const& original_clusters = pli->GetIndex();
     for (auto const& cluster : original_clusters) {
         existing_elements.insert(cluster.begin(), cluster.end());
     }
-
     size_t missing_count = num_tuples - existing_elements.size();
+
+    std::vector<Cluster> enriched_clusters;
     enriched_clusters.reserve(original_clusters.size() + missing_count);
     enriched_clusters.assign(original_clusters.begin(), original_clusters.end());
 
@@ -356,11 +344,11 @@ CFDFinder::Lattice CFDFinder::GetLattice(PLIsPtr plis, RowsPtr compressed_record
 
     for (auto const& fd : fds) {
         for (auto&& subset : utils::GenerateLhsSubsets(fd.lhs_)) {
-            if (!std::any_of(candidates.begin(), candidates.end(),
-                             [&subset, rhs = fd.rhs_](auto const& candidate) {
-                                 return rhs == candidate.rhs_ &&
-                                        subset.is_subset_of(candidate.lhs_);
-                             })) {
+            auto is_generalization = [&subset, rhs = fd.rhs_](auto const& candidate) {
+                return rhs == candidate.rhs_ && subset.is_subset_of(candidate.lhs_);
+            };
+
+            if (!std::ranges::any_of(candidates, is_generalization)) {
                 candidates.emplace_back(std::move(subset), fd.rhs_);
             }
         }

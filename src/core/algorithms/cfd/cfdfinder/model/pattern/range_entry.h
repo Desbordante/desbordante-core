@@ -55,6 +55,10 @@ public:
                sorted_cluster_ids_ == entry->sorted_cluster_ids_;
     }
 
+    bool operator!=(Entry const& other) const {
+        return !(*this == other);
+    }
+
     size_t Hash() const override {
         size_t hash = 0;
 
@@ -66,11 +70,18 @@ public:
     }
 
     std::string ToString(InvertedClusterMap const& cluster_map) const override {
+        if (min_cluster_ == 0 && max_cluster_ + 1 == sorted_cluster_ids_->size()) {
+            return std::string(kWildCard);
+        }
         std::string lower_bound = cluster_map.at((*sorted_cluster_ids_)[min_cluster_]);
-        std::string upper_bound = cluster_map.at((*sorted_cluster_ids_)[max_cluster_]);
 
-        return "[" + (!lower_bound.empty() ? lower_bound : kNullRepresentation) + " - " +
-               (!upper_bound.empty() ? upper_bound : kNullRepresentation) + "]";
+        if (min_cluster_ == max_cluster_) {
+            return lower_bound;
+        }
+        std::string upper_bound = cluster_map.at((*sorted_cluster_ids_)[max_cluster_]);
+        return "[" + (!lower_bound.empty() ? lower_bound : std::string(kNullRepresentation)) +
+               " - " + (!upper_bound.empty() ? upper_bound : std::string(kNullRepresentation)) +
+               "]";
     }
 };
 }  // namespace algos::cfdfinder

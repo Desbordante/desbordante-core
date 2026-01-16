@@ -184,7 +184,7 @@ Validator::FDValidations Validator::ProcessFirstLevel(LhsPair const& lhs_pair) c
         for (auto const& cluster : plis_->at(lhs_attr)->GetIndex()) {
             size_t const cluster_id = (*compressed_records_)[cluster[0]][attr];
             if (algos::hy::PLIUtil::IsSingletonCluster(cluster_id) ||
-                std::any_of(cluster.cbegin(), cluster.cend(), [this, attr, cluster_id](int id) {
+                std::ranges::any_of(cluster, [this, attr, cluster_id](int id) {
                     return (*compressed_records_)[id][attr] != cluster_id;
                 })) {
                 vertex->RemoveFd(attr);

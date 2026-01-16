@@ -43,7 +43,7 @@ constexpr auto kLimitPliCache = "limit_pli_cache";
 constexpr auto kMaxLevelSupportDrop = "max_level_support_drop";
 constexpr auto kMaximumG1 = "max_g1";
 constexpr auto kMinSupportGain = "min_support_gain";
-constexpr auto kPatternTreshold = "pattern_treshold";
+constexpr auto kMaxPatterns = "max_patterns";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
