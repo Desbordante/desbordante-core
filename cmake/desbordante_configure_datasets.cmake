@@ -42,13 +42,14 @@ function(desbordante_fetch_datasets)
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
-        file(SIZE ${local_hashfile} size)
         message(
             WARNING
                 "Failed to download ${hashfile_url}: [${status_code}] ${str_val}. Fetch skipped \
                 for ${filename}. If you already have the necessary datasets and do not want to \
                 check for updates, consider setting -DDESBORDANTE_FETCH_DATASETS=OFF."
         )
+        # local hashfiles are empty
+        file(REMOVE ${local_hashfile})
         return()
     endif()
 
