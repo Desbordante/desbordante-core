@@ -28,14 +28,22 @@ constexpr auto kMinimumConfidence = "minconf";
 constexpr auto kMinimumSupport = "minsup";
 constexpr auto kTIdColumnIndex = "tid_column_index";
 // CFD
+constexpr auto kCFDRuleLeft = "cfd_rule_left";
+constexpr auto kCFDRuleRight = "cfd_rule_right";
 constexpr auto kCfdColumnsNumber = "columns_number";
+constexpr auto kCfdExpansionStrategy = "expansion_strategy";
 constexpr auto kCfdMaximumLhs = "cfd_max_lhs";
 constexpr auto kCfdMinimumConfidence = "cfd_minconf";
 constexpr auto kCfdMinimumSupport = "cfd_minsup";
-constexpr auto kCFDRuleLeft = "cfd_rule_left";
-constexpr auto kCFDRuleRight = "cfd_rule_right";
+constexpr auto kCfdPruningStrategy = "pruning_strategy";
+constexpr auto kCfdResultStrategy = "result_strategy";
 constexpr auto kCfdSubstrategy = "cfd_substrategy";
 constexpr auto kCfdTuplesNumber = "tuples_number";
+constexpr auto kLimitPliCache = "limit_pli_cache";
+constexpr auto kMaxLevelSupportDrop = "max_level_support_drop";
+constexpr auto kMaximumG1 = "max_g1";
+constexpr auto kMinSupportGain = "min_support_gain";
+constexpr auto kMaxPatterns = "max_patterns";
 // CORDS
 constexpr auto kDelta = "delta";
 constexpr auto kFixedSample = "fixed_sample";
