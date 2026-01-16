@@ -16,6 +16,8 @@ if(POLICY CMP0175)
     cmake_policy(SET CMP0175 NEW)
 endif()
 
+include(CMakeDependentOption)
+
 # ---- Project ----
 
 project(
@@ -46,7 +48,12 @@ endif()
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
 option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
-option(DESBORDANTE_FETCH_DATASETS "Fetch datasets from desbordante-data" ON)
+cmake_dependent_option(DESBORDANTE_FETCH_DATASETS
+    "Fetch datasets for tests or benchmarks"
+    ON
+    "DESBORDANTE_BUILD_BENCHMARKS OR DESBORDANTE_BUILD_TESTS"
+    OFF
+)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 # ---- Vertical Hashing Optimization ----
 # Performance/functionality trade-off:
