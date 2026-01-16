@@ -21,7 +21,7 @@ endif()
 
 foreach(name IN LISTS DATASETS)
     if(NOT DESBORDANTE_FETCH_DATASETS)
-        message(WARNING "There could be updates in dataset ${filename} (Fetch disabled)")
+        message(WARNING "There could be updates in dataset ${name} (Fetch disabled)")
     else()
         desbordante_fetch_datasets(NAME ${name} DOWNLOAD_DIR ${CMAKE_CURRENT_LIST_DIR})
     endif()
