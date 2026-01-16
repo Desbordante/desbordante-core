@@ -250,11 +250,7 @@ python3 -m pip install .
 Now it is possible to `import desbordante` as a module from within the created virtual environment. 
 
 #### Building tests & the Python module manually
-In order to build tests, pull the test datasets using the following command:
-```sh
-./pull_datasets.sh
-```
-then build the tests themselves:
+Build the tests themselves:
 ```sh
 ./build.sh
 ```
