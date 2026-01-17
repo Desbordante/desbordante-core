@@ -145,7 +145,7 @@ bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
         auto extended_bound_list =
                 bound_list.Merge(seed_bound_lists[index], min_support_, window_length_);
 
-        if (extended_bound_list && extended_bound_list->GetSupport() >= min_support_) {
+        if (extended_bound_list) {
             found_frequent_extension = true;
             episode.Extend(seed_episodes[index]);
 
