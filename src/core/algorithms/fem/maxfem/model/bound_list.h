@@ -10,11 +10,12 @@ namespace algos::maxfem {
 
 class BoundList {
 private:
-    std::vector<std::pair<model::Timestamp, model::Timestamp>> bound_list_;
+    std::vector<model::Timestamp> starts_;
+    std::vector<model::Timestamp> ends_;
 
 public:
-    BoundList(std::vector<std::pair<model::Timestamp, model::Timestamp>> bound_list)
-        : bound_list_(std::move(bound_list)) {}
+    BoundList(std::vector<model::Timestamp> starts, std::vector<model::Timestamp> ends)
+        : starts_(std::move(starts)), ends_(std::move(ends)) {}
 
     BoundList(ParallelEpisode const& parallel_episode);
 
@@ -22,7 +23,7 @@ public:
                                    size_t window_length) const;
 
     size_t GetSupport() const {
-        return bound_list_.size();
+        return starts_.size();
     }
 };
 
