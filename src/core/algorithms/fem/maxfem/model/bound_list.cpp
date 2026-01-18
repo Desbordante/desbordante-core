@@ -11,8 +11,8 @@ BoundList::BoundList(ParallelEpisode const& parallel_episode) {
     }
 }
 
-std::optional<BoundList> BoundList::Merge(BoundList const& other, size_t min_support,
-                                          size_t window_length) const {
+std::optional<BoundList> BoundList::Extend(std::vector<model::Timestamp> const& loc_list,
+                                           size_t min_support, size_t window_length) const {
     const size_t max_misses = starts_.size() - min_support;
     size_t current_misses = 0;
 
@@ -22,13 +22,13 @@ std::optional<BoundList> BoundList::Merge(BoundList const& other, size_t min_sup
     new_ends.reserve(starts_.size());
 
     for (size_t this_ind = 0, other_ind = 0;
-         this_ind < starts_.size() && other_ind < other.starts_.size();) {
+         this_ind < starts_.size() && other_ind < loc_list.size();) {
         auto this_interval_start = starts_[this_ind];
-        auto other_interval_end = other.ends_[other_ind];
+        auto other_location = loc_list[other_ind];
 
-        if (other_interval_end <= ends_[this_ind]) {
+        if (other_location <= ends_[this_ind]) {
             other_ind++;
-        } else if (other_interval_end - this_interval_start >= window_length) {
+        } else if (other_location - this_interval_start >= window_length) {
             this_ind++;
             current_misses++;
             if (current_misses > max_misses) {
@@ -36,7 +36,7 @@ std::optional<BoundList> BoundList::Merge(BoundList const& other, size_t min_sup
             }
         } else {
             new_starts.push_back(this_interval_start);
-            new_ends.push_back(other_interval_end);
+            new_ends.push_back(other_location);
             this_ind++;
         }
     }

@@ -116,16 +116,11 @@ void MaxFEM::FindFrequentParallelEpisodesRecursive(
 }
 
 void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
-    std::vector<BoundList> bound_lists;
-    bound_lists.reserve(parallel_episodes.size());
     for (size_t index = 0; index < parallel_episodes.size(); ++index) {
-        bound_lists.emplace_back(parallel_episodes[index]);
-    }
-
-    for (size_t index = 0; index < parallel_episodes.size(); ++index) {
+        auto bound_list = BoundList(parallel_episodes[index]);
         auto episode = CompositeEpisode({parallel_episodes[index].GetEventSetPtr()});
-        bool has_extension = FindFrequentCompositeEpisodesRecursive(episode, bound_lists[index],
-                                                                    parallel_episodes, bound_lists);
+        bool has_extension = FindFrequentCompositeEpisodesRecursive(episode, bound_list,
+                                                                    parallel_episodes);
         if (!has_extension) {
             max_episodes_collection_.Add(episode);
         }
@@ -137,20 +132,19 @@ void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& p
 
 bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
         CompositeEpisode& episode, BoundList const& bound_list,
-        std::vector<ParallelEpisode> const& seed_episodes,
-        std::vector<BoundList> const& seed_bound_lists) {
+        std::vector<ParallelEpisode> const& seed_episodes) {
     bool found_frequent_extension = false;
 
-    for (size_t index = 0; index < seed_episodes.size(); ++index) {
+    for (auto const& parallel_episode : seed_episodes) {
         auto extended_bound_list =
-                bound_list.Merge(seed_bound_lists[index], min_support_, window_length_);
+                bound_list.Extend(parallel_episode.GetLocationList(), min_support_, window_length_);
 
         if (extended_bound_list) {
             found_frequent_extension = true;
-            episode.Extend(seed_episodes[index]);
+            episode.Extend(parallel_episode);
 
             bool has_extension = FindFrequentCompositeEpisodesRecursive(
-                    episode, *extended_bound_list, seed_episodes, seed_bound_lists);
+                    episode, *extended_bound_list, seed_episodes);
             if (!has_extension) {
                 max_episodes_collection_.Add(episode);
             }
