@@ -177,7 +177,8 @@ constexpr auto kDOutputSingleVertices =
 constexpr auto kDMaxNumberOfEdges =
         "an integer indicating a maximum number of edges for each frequent subgraph";
 constexpr auto kDOutputGraphIds = "output the ids of graph containing each frequent subgraph";
-constexpr auto kDGSpanOutputPath = "path to output file for frequent subgraphs (if empty, no file is written)";
+constexpr auto kDGSpanOutputPath =
+        "path to output file for frequent subgraphs (if empty, no file is written)";
 // HyMD
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDLeftTable = "first table processed by the algorithm";
