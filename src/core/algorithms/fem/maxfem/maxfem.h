@@ -46,8 +46,7 @@ private:
 
     bool FindFrequentCompositeEpisodesRecursive(CompositeEpisode& episode,
                                                 BoundList const& bound_list,
-                                                std::vector<ParallelEpisode> const& seed_episodes,
-                                                std::vector<BoundList> const& seed_bound_lists);
+                                                std::vector<ParallelEpisode> const& seed_episodes);
 
 protected:
     void MakeExecuteOptsAvailable() override;

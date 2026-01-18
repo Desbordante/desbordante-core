@@ -29,7 +29,7 @@ public:
     ParallelEpisode ParallelExtension(model::Event event,
                                       LocationList const& event_location_list) const;
 
-    std::vector<model::Timestamp> GetLocationList() const {
+    std::vector<model::Timestamp> const& GetLocationList() const {
         return location_list_->GetLocationList();
     }
 };
