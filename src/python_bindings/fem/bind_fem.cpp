@@ -4,7 +4,6 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/fem/maxfem/maxfem.h"
-#include "core/model/sequence/composite_episode.h"
 #include "python_bindings/py_util/bind_primitive.h"
 
 namespace python_bindings {
