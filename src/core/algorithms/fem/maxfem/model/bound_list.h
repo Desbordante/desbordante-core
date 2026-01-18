@@ -19,8 +19,8 @@ public:
 
     BoundList(ParallelEpisode const& parallel_episode);
 
-    std::optional<BoundList> Merge(BoundList const& other, size_t min_support,
-                                   size_t window_length) const;
+    std::optional<BoundList> Extend(std::vector<model::Timestamp> const& loc_list,
+                                    size_t min_support, size_t window_length) const;
 
     size_t GetSupport() const {
         return starts_.size();
