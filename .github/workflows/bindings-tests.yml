@@ -96,6 +96,7 @@ jobs:
           cp test_input_data/TestLong.csv src/python_bindings/
           cp test_input_data/TestWide.csv src/python_bindings/
           cp test_input_data/transactional_data/rules-kaggle-rows.csv src/python_bindings/
+          cp test_input_data/sequence_data/maxfem_baseline.txt src/python_bindings/
 
           cd src/python_bindings
           python test_bindings.py
