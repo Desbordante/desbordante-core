@@ -168,6 +168,17 @@ constexpr auto kDGraphData = "Path to dot-file with graph";
 constexpr auto kDDoCollectViolations = "Flag which tells whether to collect violations or not";
 constexpr auto kDGfdK = "Max size of mined gfds";
 constexpr auto kDGfdSigma = "Min frequency of mined gfds";
+// gSpan
+constexpr auto kDGraphDatabase = "Path to file with collection of graphs";
+constexpr auto kDGSpanMinimumSupport =
+        "a minimum support value (a percentage represented by a value between 0 and 1)";
+constexpr auto kDOutputSingleVertices =
+        "if true, frequent subgraphs containing a single vertex will be output";
+constexpr auto kDMaxNumberOfEdges =
+        "an integer indicating a maximum number of edges for each frequent subgraph";
+constexpr auto kDOutputGraphIds = "output the ids of graph containing each frequent subgraph";
+constexpr auto kDGSpanOutputPath =
+        "path to output file for frequent subgraphs (if empty, no file is written)";
 // HyMD
 constexpr auto kDColumnMatches = "column matches to examine";
 constexpr auto kDLeftTable = "first table processed by the algorithm";
