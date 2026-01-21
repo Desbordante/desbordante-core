@@ -90,7 +90,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Find typos configs
+        id: search
+        run: |
+          echo "cfg=$(find . -type f \( -name "pyproject.toml" -o -name "typos.toml" -o -name ".typos.toml" \))" \
+          >> $GITHUB_OUTPUT
+
       - name: Check spelling with typos
         uses: crate-ci/typos@v1.39.2
         with:
-          config: ./pyproject.toml
+          config: ${{ steps.search.outputs.cfg }}
