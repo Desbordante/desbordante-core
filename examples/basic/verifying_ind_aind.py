@@ -127,8 +127,8 @@ This error indicates how accurately the dependency holds between the datasets.
 In this scenario, we will use the 'orders' and 'customers' datasets.""")
     print()
 
-    verify = lambda lhs_df, rhs_df: aind_verify(('orders', lhs_df, [1]),
-                                                ('customers', rhs_df, [0]))
+    def verify(lhs_df, rhs_df):
+        return aind_verify(('orders', lhs_df, [1]), ('customers', rhs_df, [0]))
 
     lhs_df = get_table_df('orders')
     rhs_df = get_table_df('customers')

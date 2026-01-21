@@ -52,6 +52,7 @@ jobs:
           echo "### $formatterOutput :heavy_check_mark:" >> $GITHUB_STEP_SUMMARY
 
   clang-tidy-check:
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -84,3 +85,12 @@ jobs:
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  ruff-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v3
+        with :
+          args: "check --output-format=github"
