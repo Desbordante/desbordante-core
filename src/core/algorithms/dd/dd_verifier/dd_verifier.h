@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include "Metric.h"
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/dd_verifier/highlight.h"
@@ -26,7 +27,7 @@ private:
     double error_ = 0.;
     std::unique_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::vector<Highlight> highlights_;
-
+    std::unordered_map<std::string, Metric const *> metrics_;
     void RegisterOptions();
 
     void VisualizeHighlights() const;

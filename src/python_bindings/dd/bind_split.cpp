@@ -1,5 +1,6 @@
 #include "python_bindings/dd/bind_split.h"
 
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -64,8 +65,11 @@ void BindSplit(py::module_& main_module) {
                                     std::move(col_name), lower_bound, upper_bound));
                         }
                         return model::DDString{std::move(left_list), std::move(right_list)};
-                    }));
-
+                    }))
+            .def(pybind11::self == pybind11::self)
+            .def(pybind11::self != pybind11::self)
+            .def("__hash__", &model::DDString::hash)
+            .def("to_json", &model::DDString::to_JSON);
     BindPrimitiveNoBase<dd::Split>(dd_module, "Split").def("get_dds", &dd::Split::GetDDStringList);
 }
 }  // namespace python_bindings
