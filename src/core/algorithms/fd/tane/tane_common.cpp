@@ -243,8 +243,10 @@ unsigned long long TaneCommon::ExecuteInternal() {
     apriori_millis += elapsed_milliseconds.count();
 
     LOG_DEBUG("Time: {} milliseconds", apriori_millis);
+#if 0
     LOG_DEBUG("Intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
     LOG_DEBUG("Total intersections: {}", model::PositionListIndex::intersection_count_);
+#endif
     LOG_DEBUG("Total FD count: {}", fd_collection_.Size());
     LOG_DEBUG("HASH: {}", Fletcher16());
     return apriori_millis;
