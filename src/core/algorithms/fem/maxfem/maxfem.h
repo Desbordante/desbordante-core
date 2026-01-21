@@ -21,7 +21,7 @@ private:
     std::unordered_map<model::Event, model::Event> mapping_;
     std::vector<model::Event> reverse_mapping_;
 
-    MaxEpiosdesCollection max_episodes_collection_;
+    MaxEpisodesCollection max_episodes_collection_;
 
     void ResetState() override;
 
@@ -46,7 +46,8 @@ private:
 
     bool FindFrequentCompositeEpisodesRecursive(CompositeEpisode& episode,
                                                 BoundList const& bound_list,
-                                                std::vector<ParallelEpisode> const& seed_episodes);
+                                                std::vector<ParallelEpisode> const& seed_episodes,
+                                                MaxEpisodesCollection& output_collection);
 
 protected:
     void MakeExecuteOptsAvailable() override;
