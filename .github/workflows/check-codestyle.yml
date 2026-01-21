@@ -93,13 +93,13 @@ jobs:
         include:
           # Group 1
           - name: "General"
-            config: "./typos/general.toml"
+            config: "general.toml"
             path: "."
             args: ""
 
           # Group 2
           - name: "ND"
-            config: "./typos/nd.toml"
+            config: "nd.toml"
             path: "."
             args: ""
 
