@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/fd/tane/enums.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -24,6 +25,13 @@ std::string const kDPfdErrorMeasureString =
         "PFD error measure to use\n" + util::EnumToAvailableValues<algos::PfdErrorMeasure>();
 std::string const kDAfdErrorMeasureString =
         "AFD error measure to use\n" + util::EnumToAvailableValues<algos::AfdErrorMeasure>();
+std::string const kDCfdExpansionStrategyString =
+        "CFD expansion strategy to use\n" +
+        util::EnumToAvailableValues<algos::cfdfinder::Expansion>();
+std::string const kDCfdPruningStrategyString =
+        "CFD pruning strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Pruning>();
+std::string const kDCfdResultStrategyString =
+        "CFD result strategy to use\n" + util::EnumToAvailableValues<algos::cfdfinder::Result>();
 std::string const kDLevelDefinitionString =
         "MD lattice level definition to use\n" +
         util::EnumToAvailableValues<algos::hymd::LevelDefinition>();
@@ -65,6 +73,7 @@ constexpr auto kDMinimumConfidence = "minimum confidence value (between 0 and 1)
 constexpr auto kDMinimumSupport = "minimum support value (between 0 and 1)";
 constexpr auto kDTIdColumnIndex = "index of the column where a TID is stored";
 // CFD
+auto const kDCfdExpansionStrategy = details::kDCfdExpansionStrategyString.c_str();
 constexpr auto kDCfdColumnsNumber =
         "Number of columns in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
@@ -73,24 +82,33 @@ constexpr auto kDCfdMinimumConfidence = "cfd minimum confidence value (between 0
 constexpr auto kDCfdMinimumSupport =
         "minimum support value (integer number "
         "between 1 and number of tuples in dataset)";
-constexpr auto kDCFDRuleLeft = "CFD left rule";
-constexpr auto kDCFDRuleRight = "CFD right rule";
+auto const kDCfdPruningStrategy = details::kDCfdPruningStrategyString.c_str();
+auto const kDCfdResultStrategy = details::kDCfdResultStrategyString.c_str();
 auto const kDCfdSubstrategy = details::kDCfdSubstrategyString.c_str();
 constexpr auto kDCfdTuplesNumber =
         "Number of tuples in the part of the dataset if you "
         "want to use algo not on the full dataset, but on its part";
+constexpr auto kDCFDRuleLeft = "CFD left rule";
+constexpr auto kDCFDRuleRight = "CFD right rule";
+constexpr auto kDLimitPliCache = "limit for the number of PLIs in the cache";
+constexpr auto kDMaxLevelSupportDrop = "maximum support drop for the algorithm.";
+constexpr auto kDMaximumG1 = "maximum G1 value for the algorithm";
+constexpr auto kDMinSupportGain = "minimum support gain for the algorithm.";
+constexpr auto kDPatternTreshold = "minimum number of patterns in the tableau";
 // CORDS
 constexpr auto kDDelta =
         "additional constant for computation of sample size. Value lies in (0, 1) and must be "
         "greater than minimum_cardinality_.";
 constexpr auto kDFixedSample =
-        "Indicates that instead of random generated sample CORDS uses sample consisting of n first "
+        "Indicates that instead of random generated sample CORDS uses sample consisting of n "
+        "first "
         "rows of the given table. Intended for tests only.";
 constexpr auto kDMaxAmountOfCategories =
         "Max amount of categories for the chi-squared test in case the data is not skewed";
 constexpr auto kDMaxDiffValsProportion =
         "the maximum proportion that the number"
-        "of different values in the concatenation of sample columns from the number of rows in the "
+        "of different values in the concatenation of sample columns from the number of rows in "
+        "the "
         "sample for the test for SFD to be meaningful. Value lies in (0, 1)";
 constexpr auto kDMaxFalsePositiveProbability =
         "(1 - max_false_positive_probability) is the maximum acceptable probability of a "
@@ -100,18 +118,22 @@ constexpr auto kDMinCard =
         " (1 - min_cardinality) * |R| (where |R| is amount of rows in table R) denotes minimum "
         "cardinality of a column to be considered a soft key. Value lies in (0, 1)";
 constexpr auto kDMinSFDStrengthMeasure =
-        "(1 - min_sfd_strength) denotes minimum threshold of strength measure of a SFD. Value lies "
+        "(1 - min_sfd_strength) denotes minimum threshold of strength measure of a SFD. Value "
+        "lies "
         "in (0, 1)";
 constexpr auto kDMinSkewThreshold =
-        "(1 - min_skew_threshold) * |R| (where |R| is amount of rows in table R) is the minimum "
+        "(1 - min_skew_threshold) * |R| (where |R| is amount of rows in table R) is the "
+        "minimum "
         "sum of the "
         "frequencies of occurrence of the most frequent"
-        "values of the column in the table R, indicating that the distribution of values in the "
+        "values of the column in the table R, indicating that the distribution of values in "
+        "the "
         "column is skewed. Value lies in (0, 1).";
 constexpr auto kDMinStructuralZeroesAmount =
         "min_structural_zeroes_amount*d1*d2 is the minimum number of structural zeros in the "
         "contingency table indicating "
-        "that the columns are correlated. d1, d2 - the number of different values in columns C1, "
+        "that the columns are correlated. d1, d2 - the number of different values in columns "
+        "C1, "
         "C2, respectively. Value lies in (0, 1).";
 constexpr auto kDOnlySFD = "Don't mine correlations";
 // DC verifier
@@ -150,9 +172,11 @@ constexpr auto kDAllowCrossColumns =
         "Specifies whether to allow the construction of Denial Constraints between different "
         "attributes";
 constexpr auto kDComparableThreshold =
-        "Threshold for the ratio of smaller to larger average values between two numeric columns";
+        "Threshold for the ratio of smaller to larger average values between two numeric "
+        "columns";
 constexpr auto kDEvidenceThreshold =
-        "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint to be "
+        "Denotes the maximum fraction of evidence violations allowed for a Denial Constraint "
+        "to be "
         "considered approximate.";
 constexpr auto kDMinimumSharedValue =
         "Minimum threshold for the shared percentage of values between two columns";
@@ -175,7 +199,8 @@ auto const kDLevelDefinition = details::kDLevelDefinitionString.c_str();
 constexpr auto kDMaxCardinality = "maximum number of MD matching classifiers";
 constexpr auto kDMinSupport = "minimum support for a dependency's LHS";
 constexpr auto kDPruneNonDisjoint =
-        "don't search for dependencies where the LHS decision boundary at the same index as the "
+        "don't search for dependencies where the LHS decision boundary at the same index as "
+        "the "
         "RHS decision boundary limits the number of records matched";
 constexpr auto kDRightTable = "second table processed by the algorithm";
 // IND
@@ -192,7 +217,8 @@ constexpr auto kDQGramLength = "q-gram length for cosine metric";
 constexpr auto kDNDWeight = "Weight of ND to verify (positive integer)";
 // Pyro
 constexpr auto kDCustomRandom =
-        "seed for the custom random generator. Used for consistency of results across platforms.";
+        "seed for the custom random generator. Used for consistency of results across "
+        "platforms.";
 // Spider
 constexpr auto kDMemLimitMB = "memory limit im MBs";
 // Split
