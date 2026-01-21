@@ -87,10 +87,29 @@ jobs:
 
   typos-check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Group 1
+          - name: "General"
+            config: "typos/general.toml"
+            path: "."
+            args: ""
+
+          # Group 2
+          - name: "ND"
+            config: "typos/nd.toml"
+            path: "."
+            args: ""
+
+    name: Typos / ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Check spelling with typos
         uses: crate-ci/typos@v1.39.2
         with:
-          config: ./pyproject.toml
+          files: ${{ matrix.path }}
+          config: ${{ matrix.config }}
+          args: ${{ matrix.args }}

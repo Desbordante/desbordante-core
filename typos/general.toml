@@ -1,0 +1,8 @@
+[files]
+extend-exclude = [ "src/python_bindings/nd", "src/core/algorithms/nd" ]
+
+[default]
+extend-ignore-identifiers-re = []
+extend-ignore-words-re = [ ]
+extend-ignore-re = []
+

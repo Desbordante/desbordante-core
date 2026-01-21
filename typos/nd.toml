@@ -1,0 +1,8 @@
+[default]
+extend-ignore-identifiers-re = []
+extend-ignore-words-re = [
+    "ND",
+    "Nd",
+    "nd",
+]
+extend-ignore-re = []
