@@ -7,7 +7,7 @@
 
 namespace algos::maxfem {
 
-class MaxEpiosdesCollection {
+class MaxEpisodesCollection {
 private:
     std::vector<std::set<std::unique_ptr<CompositeEpisode>, CompositeEpisodeComparator>>
             max_episodes_;
@@ -17,9 +17,11 @@ private:
     void RemoveSubEpisodes(CompositeEpisode const& episode, size_t length);
 
 public:
-    MaxEpiosdesCollection() {}
+    MaxEpisodesCollection() {}
 
     void Add(CompositeEpisode const& episode);
+
+    void BatchAdd(std::vector<MaxEpisodesCollection>& other);
 
     std::vector<CompositeEpisode::RawEpisode> GetResult(
             std::vector<model::Event> const& mapping,
