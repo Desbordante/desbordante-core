@@ -32,7 +32,6 @@ TEST_P(TestNDVerifying, DefaultTest) {
     EXPECT_TRUE(verifier->NDHolds());
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         NDVerifierTestSuite, TestNDVerifying,
         ::testing::Values(
@@ -64,6 +63,4 @@ INSTANTIATE_TEST_SUITE_P(
         NDVerifyingParams({0}, {6}, 3, kTestND, true),
         NDVerifyingParams({0}, {6}, 7, kTestND, false)
     ));
-// clang-format on
-
 }  // namespace tests

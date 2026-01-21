@@ -35,7 +35,6 @@ TEST_P(TestTypeParsing, DefaultTest) {
     }
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
     TypeSystem, TestTypeParsing,
     ::testing::Values(
@@ -74,8 +73,6 @@ INSTANTIATE_TEST_SUITE_P(
         TypeParsingParams({TypeId::kInt, TypeId::kString, TypeId::kDouble,
                            TypeId::kMixed, TypeId::kInt, TypeId::kDate,TypeId::kMixed},
                           kSimpleTypes1)));
-
-// clang-format on
 
 TEST(TypeSystem, SumColumnDoubles) {
     auto input_table = MakeInputTable(kIris);
