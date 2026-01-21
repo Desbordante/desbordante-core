@@ -53,17 +53,26 @@ exclude = [
 [tool.typos]
 [tool.typos.files]
 extend-exclude = [
-    "README.md",
-    "/README_PYPI.md",
-    "examples/notebooks",
-    "examples/datasets",
-    "test_input_data"
+    "test_input_data/",
+]
+[tool.typos.default]
+extend-ignore-re = [
+    "countr_zero",
+    "BA thesis\\.pdf",
+    "Peter J\\. Hass",
+    "Comput\\. J\\.",
+    '"ba"',
+
+# forced options. In the future, when decentralized configurations are added, it will be necessary to remove them
+    "helo",
+    "abd",
 ]
 
 [tool.typos.default.extend-words]
-abd = "abd"
-ba = "ba"
-countr = "countr"
-helo = "helo"
 nd = "nd"
 
+[tool.typos.type.jupyter]
+extend-ignore-re = [
+    '\"id":\s*"[^"\n]*"',
+    '"outputs"\s*:\s*\[(\s*\{[^}]*\}(?:,\s*\{[^}]*\})*)?\s*\]'
+]
