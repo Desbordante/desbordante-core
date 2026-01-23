@@ -83,4 +83,10 @@ bool CompositeEpisodeComparator::operator()(std::unique_ptr<CompositeEpisode> co
     return lhs < rhs;
 }
 
+bool DescendingCompositeEpisodeComparator::operator()(
+        std::unique_ptr<CompositeEpisode> const& lhs,
+        std::unique_ptr<CompositeEpisode> const& rhs) const {
+    return comparator(rhs, lhs);
+}
+
 }  // namespace algos::maxfem

@@ -9,6 +9,8 @@
 #include "core/config/names.h"
 #include "core/config/option.h"
 #include "core/util/timed_invoke.h"
+#include "core/util/logger.h"
+#include "core/algorithms/fem/maxfem/composite_episode_miner.h"
 
 namespace algos::maxfem {
 
@@ -42,8 +44,11 @@ unsigned long long MaxFEM::ExecuteInternal() {
 }
 
 void MaxFEM::FindFrequentEpisodes() {
+    LOG_WARN("Min support: {}. Window length: {}", min_support_, window_length_);
+    LOG_WARN("Sequence length: {}", event_sequence_->Size());
     RemoveInfrequentEvents();
     auto parallel_episodes = FindFrequentParallelEpisodes();
+    LOG_WARN("Frequent parallel episodes number: {}", parallel_episodes.size());
     FindFrequentCompositeEpisodes(parallel_episodes);
 }
 
@@ -60,6 +65,7 @@ void MaxFEM::RemoveInfrequentEvents() {
         }
     }
     events_num_ = new_events_num;
+    LOG_WARN("Frequent events number: {}", events_num_);
 
     for (auto& event_set : *event_sequence_) {
         event_set.MapEventsAndRemoveInfrequent(mapping_);
@@ -73,6 +79,7 @@ std::map<model::Event, size_t> MaxFEM::GetEventsSupports() const {
             supports[event] += 1;
         }
     }
+    LOG_WARN("Events number: {}", supports.size());
     return supports;
 }
 
@@ -119,60 +126,69 @@ void MaxFEM::FindFrequentParallelEpisodesRecursive(
     }
 }
 
+// void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
+//     boost::asio::thread_pool pool(std::thread::hardware_concurrency());
+//     std::vector<MaxEpisodesCollection> thread_results(parallel_episodes.size());
+
+//     for (size_t index = 0; index < parallel_episodes.size(); ++index) {
+//         boost::asio::post(pool, [this, index, &parallel_episodes, &thread_results]() {
+//             MaxEpisodesCollection& my_local_collection = thread_results[index];
+//             const auto& seed = parallel_episodes[index];
+//             auto bound_list = BoundList(seed);
+//             auto episode = CompositeEpisode({seed.GetEventSetPtr()});
+//             bool has_extension = FindFrequentCompositeEpisodesRecursive(
+//                 episode, 
+//                 bound_list, 
+//                 parallel_episodes, 
+//                 my_local_collection
+//             );
+//             if (!has_extension) {
+//                 my_local_collection.Add(episode);
+//             }
+//         });
+//     }
+
+//     pool.join();
+//     max_episodes_collection_.BatchAdd(thread_results);
+
+//     max_frequent_episodes_ =
+//             max_episodes_collection_.GetResult(reverse_mapping_, parallel_episodes);
+// }
+
+// bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
+//         CompositeEpisode& episode, BoundList const& bound_list,
+//         std::vector<ParallelEpisode> const& seed_episodes,
+//         MaxEpisodesCollection& output_collection) {
+//     bool found_frequent_extension = false;
+
+//     for (auto const& parallel_episode : seed_episodes) {
+//         auto extended_bound_list =
+//                 bound_list.Extend(parallel_episode.GetLocationList(), min_support_, window_length_);
+
+//         if (extended_bound_list) {
+//             found_frequent_extension = true;
+//             episode.Extend(parallel_episode);
+
+//             bool has_extension = FindFrequentCompositeEpisodesRecursive(
+//                     episode, *extended_bound_list, seed_episodes, output_collection);
+//             if (!has_extension) {
+//                 output_collection.Add(episode);
+//             }
+
+//             episode.Shorten();
+//         }
+//     }
+
+//     return found_frequent_extension;
+// }
+
 void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
-    boost::asio::thread_pool pool(std::thread::hardware_concurrency());
-    std::vector<MaxEpisodesCollection> thread_results(parallel_episodes.size());
+    CompositeEpisodeMiner miner(min_support_, window_length_);
+    std::vector<MaxEpisodesCollection> raw_results = miner.Mine(parallel_episodes);
 
-    for (size_t index = 0; index < parallel_episodes.size(); ++index) {
-        boost::asio::post(pool, [this, index, &parallel_episodes, &thread_results]() {
-            MaxEpisodesCollection& my_local_collection = thread_results[index];
-            const auto& seed = parallel_episodes[index];
-            auto bound_list = BoundList(seed);
-            auto episode = CompositeEpisode({seed.GetEventSetPtr()}, bound_list.GetSupport());
-            bool has_extension = FindFrequentCompositeEpisodesRecursive(
-                episode, 
-                bound_list, 
-                parallel_episodes, 
-                my_local_collection
-            );
-            if (!has_extension) {
-                my_local_collection.Add(episode);
-            }
-        });
-    }
-
-    pool.join();
-    max_episodes_collection_.BatchAdd(thread_results);
-
+    max_episodes_collection_.BatchAdd(raw_results);
     max_frequent_episodes_ =
             max_episodes_collection_.GetResult(reverse_mapping_, parallel_episodes);
-}
-
-bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
-        CompositeEpisode& episode, BoundList const& bound_list,
-        std::vector<ParallelEpisode> const& seed_episodes,
-        MaxEpisodesCollection& output_collection) {
-    bool found_frequent_extension = false;
-
-    for (auto const& parallel_episode : seed_episodes) {
-        auto extended_bound_list =
-                bound_list.Extend(parallel_episode.GetLocationList(), min_support_, window_length_);
-
-        if (extended_bound_list) {
-            found_frequent_extension = true;
-            episode.Extend(parallel_episode, extended_bound_list->GetSupport());
-
-            bool has_extension = FindFrequentCompositeEpisodesRecursive(
-                    episode, *extended_bound_list, seed_episodes, output_collection);
-            if (!has_extension) {
-                output_collection.Add(episode);
-            }
-
-            episode.Shorten(bound_list.GetSupport());
-        }
-    }
-
-    return found_frequent_extension;
 }
 
 }  // namespace algos::maxfem
