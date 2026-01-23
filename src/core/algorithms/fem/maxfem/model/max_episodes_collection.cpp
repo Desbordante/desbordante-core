@@ -18,6 +18,14 @@ void MaxEpisodesCollection::Add(CompositeEpisode const& episode) {
     max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
 }
 
+void MaxEpisodesCollection::SimpleAdd(CompositeEpisode const& episode) {
+    size_t length = episode.GetLength();
+    while (length >= max_episodes_.size()) {
+        max_episodes_.emplace_back();
+    }
+    max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
+}
+
 void MaxEpisodesCollection::BatchAdd(std::vector<MaxEpisodesCollection>& collections) {
     assert(max_episodes_.size() == 0);
 
@@ -32,27 +40,39 @@ void MaxEpisodesCollection::BatchAdd(std::vector<MaxEpisodesCollection>& collect
         max_episodes_.emplace_back();
     }
 
+    std::vector<std::unique_ptr<CompositeEpisode>> bucket_buffer;
+
     for (int len = static_cast<int>(global_max_len); len >= 0; --len) {
+        size_t length = static_cast<size_t>(len);
         for (auto& collection : collections) {
-            if (len >= collection.max_episodes_.size()) {
+            if (length >= collection.max_episodes_.size()) {
                 continue;
             }
 
-            auto& source_set = collection.max_episodes_[len];
-            auto it = source_set.begin();
-            while (it != source_set.end()) {
-                auto node = source_set.extract(it++);
-                if (node.empty()) {
-                    continue;
+            auto& source_set = collection.max_episodes_[length];
+            auto iter = source_set.begin();
+            while (iter != source_set.end()) {
+                auto node = source_set.extract(iter++);
+                if (!node.empty()) {
+                    bucket_buffer.push_back(std::move(node.value()));
                 }
-
-                std::unique_ptr<CompositeEpisode>& ep_ptr = node.value();
-                if (CheckForSuperEpisode(*ep_ptr, len)) {
-                    continue;
-                }
-                max_episodes_[len].insert(std::move(node));
             }
         }
+
+        if (bucket_buffer.empty()) {
+            continue;
+        }
+
+        std::sort(bucket_buffer.begin(), bucket_buffer.end(), DescendingCompositeEpisodeComparator{});
+
+        for (auto& ep_ptr : bucket_buffer) {
+            if (CheckForSuperEpisode(*ep_ptr, length)) {
+                continue;
+            }
+            max_episodes_[length].insert(std::move(ep_ptr));
+        }
+
+        bucket_buffer.clear();
     }
 
     for (auto& collection : collections) {

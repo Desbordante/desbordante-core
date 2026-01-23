@@ -21,6 +21,8 @@ public:
 
     void Add(CompositeEpisode const& episode);
 
+    void SimpleAdd(CompositeEpisode const& episode);
+
     void BatchAdd(std::vector<MaxEpisodesCollection>& other);
 
     std::vector<CompositeEpisode::RawEpisode> GetResult(
