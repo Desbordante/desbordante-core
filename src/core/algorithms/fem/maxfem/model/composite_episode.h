@@ -47,4 +47,10 @@ struct CompositeEpisodeComparator {
                     std::unique_ptr<CompositeEpisode> const& rhs) const;
 };
 
+struct DescendingCompositeEpisodeComparator {
+    CompositeEpisodeComparator comparator;
+    bool operator()(std::unique_ptr<CompositeEpisode> const& lhs,
+                    std::unique_ptr<CompositeEpisode> const& rhs) const;
+};
+
 }  // namespace algos::maxfem
