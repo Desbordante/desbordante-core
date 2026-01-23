@@ -106,16 +106,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
         add_compile_options("-Wno-deprecated-declarations")
     endif()
 
-    # Workaround for googletest bug with char conversions, being recognized by Clang 21+
-    # See https://github.com/google/googletest/issues/4762
-    # TODO(senichenkov): remove when googletest gets updated
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
-        message(WARNING "Googletest has a bug recognized by Clang 21+. "
-                "Supressing character-conversion warning. "
-                "Consider using an older version of Clang.")
-        target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
-    endif()
-
     if(CMAKE_HOST_APPLE)
         # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
         # because libraries (STL, googletest, boost, etc.) are somehow broken
