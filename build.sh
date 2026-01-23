@@ -25,7 +25,7 @@ Possible options:
   -s,         --sanitizer             Build with sanitizers (with script only debug builds)
   -l                                  Use Link Time Optimization
   -g                                  Use GDB's debug information format
-  -t                                  Run tests after building
+  -t          --run-tests             Run tests after building
   -f,         --no-fetch-datasets     Don't fetch datasets for tests or benchmarks
   -L[LEVEL]   --log-level[=LEVEL]     Set log level (TRACE, DEBUG, INFO, WARN, ERROR, CRITICAL)
   -C[OPT]     --cmake-opt[=OPT]       Forward OPT to CMake
@@ -52,7 +52,7 @@ function parse_args() {
                 ;;
             # Don't fetch datasets for tests or benchmarks
             -f | --no-fetch-datasets)
-                NO_FETCH_DATASETS=true
+                EXTRA_CMAKE_OPTS+=(-D DESBORDANTE_FETCH_DATASETS=OFF)
                 shift
                 ;;
             -g | --gdb)
