@@ -93,25 +93,7 @@ if(DESBORDANTE_USE_LTO)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 
-# Can't move this to desbordante_flags.cmake, because for some reason
-# `CMAKE_CXX_COMPILER_ID` is empty when the file is processing.
-if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    # Workaround for Clang bug in versions 18 and above:
-    # See issue https://github.com/llvm/llvm-project/issues/76515
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "18")
-        message(WARNING "C++ compiler is Clang++-${CMAKE_CXX_COMPILER_VERSION}. "
-                "Suppressing deprecated declaration warnings. "
-                "Consider using another version of Clang."
-        )
-        add_compile_options("-Wno-deprecated-declarations")
-    endif()
-
-    if(CMAKE_HOST_APPLE)
-        # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
-        # because libraries (STL, googletest, boost, etc.) are somehow broken
-        add_compile_options("-fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt")
-    endif()
-endif()
+include(cmake/desbordante_flags.cmake)
 
 execute_process(COMMAND grep -q "Ubuntu" /etc/os-release RESULT_VARIABLE IS_UBUNTU)
 if(DESBORDANTE_SANITIZER AND IS_UBUNTU EQUAL 0 AND CMAKE_CXX_FLAGS MATCHES "-stdlib=libc\\+\\+")
