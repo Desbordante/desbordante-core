@@ -100,7 +100,7 @@ jobs:
           # Group 2
           - name: "ND"
             config: "./typos_modules/nd.toml"
-            path: "."
+            path: "./src/*/nd"
             args: ""
 
     name: Typos / ${{ matrix.name }}
