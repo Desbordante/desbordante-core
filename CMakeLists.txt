@@ -104,6 +104,7 @@ endif()
 
 # Enable colored Ninja and compilers diagnostics
 set(CMAKE_COLOR_DIAGNOSTICS ON)
+# Enable dependency relaxation in phase of generation project files
 set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
