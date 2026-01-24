@@ -30,7 +30,7 @@ target_link_libraries(
 )
 pybind11_extension(${MODULE_NAME})
 
-if(NOT ${CMAKE_BUILD_TYPE} MATCHES Debug|RelWithDebInfo)
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES Debug)
     # Strip unnecessary sections of the binary on Linux/macOS
     pybind11_strip(${MODULE_NAME})
 endif()
