@@ -4,7 +4,7 @@ set(COMPILER_FLAGS)
 set(LINKER_FLAGS)
 
 if(DESBORDANTE_BUILD_NATIVE)
-   list(APPEND COMPILER_FLAGS -march=native)
+    list(APPEND COMPILER_FLAGS -march=native)
 endif()
 
 if(DESBORDANTE_GDB_SYMBOLS)
@@ -17,14 +17,14 @@ endif()
 
 if(DESBORDANTE_SANITIZER)
     set(FLAGS
-            -fsanitize=address
-            -fsanitize=undefined
-            -fsanitize=float-divide-by-zero
-            -Wno-error # Use of -Werror is discouraged with sanitizers
-            # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
-            -fno-sanitize=signed-integer-overflow # Remove this when CustomRandom gets fixed
-            -fno-sanitize=shift # Remove this when CustomRandom gets fixed
-            -fno-sanitize-recover=all
+        -fsanitize=address
+        -fsanitize=undefined
+        -fsanitize=float-divide-by-zero
+        -Wno-error # Use of -Werror is discouraged with sanitizers
+        # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
+        -fno-sanitize=signed-integer-overflow # Remove this when CustomRandom gets fixed
+        -fno-sanitize=shift # Remove this when CustomRandom gets fixed
+        -fno-sanitize-recover=all
     )
     list(APPEND COMPILER_FLAGS ${FLAGS})
     list(APPEND LINKER_FLAGS ${FLAGS})
@@ -38,8 +38,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
     # See issue https://github.com/llvm/llvm-project/issues/76515
     if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "18")
         message(WARNING "C++ compiler is Clang++-${CMAKE_CXX_COMPILER_VERSION}. "
-                "Suppressing deprecated declaration warnings. "
-                "Consider using another version of Clang."
+                        "Suppressing deprecated declaration warnings. "
+                        "Consider using another version of Clang."
         )
         list(APPEND COMPILER_FLAGS -Wno-deprecated-declarations)
     endif()
