@@ -1,21 +1,22 @@
 include_guard(GLOBAL)
 
-set(FLAGS)
+set(COMPILER_FLAGS)
+set(LINKER_FLAGS)
 
 if(DESBORDANTE_BUILD_NATIVE)
-   list(APPEND FLAGS -march=native)
+   list(APPEND COMPILER_FLAGS -march=native)
 endif()
 
 if(DESBORDANTE_GDB_SYMBOLS)
-    list(APPEND FLAGS -ggdb3)
+    list(APPEND COMPILER_FLAGS -ggdb3)
 endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    list(APPEND FLAGS -Wall -Wextra -fno-omit-frame-pointer -fno-optimize-sibling-calls)
+    list(APPEND COMPILER_FLAGS -Wall -Wextra -fno-omit-frame-pointer -fno-optimize-sibling-calls)
 endif()
 
 if(DESBORDANTE_SANITIZER)
-    list(APPEND FLAGS
+    set(FLAGS
             -fsanitize=address
             -fsanitize=undefined
             -fsanitize=float-divide-by-zero
@@ -23,9 +24,12 @@ if(DESBORDANTE_SANITIZER)
             # See https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html#index-fsanitize_003dbuiltin
             -fno-sanitize=signed-integer-overflow # Remove this when CustomRandom gets fixed
             -fno-sanitize=shift # Remove this when CustomRandom gets fixed
-            -fno-sanitize-recover=all)
+            -fno-sanitize-recover=all
+    )
+    list(APPEND COMPILER_FLAGS ${FLAGS})
+    list(APPEND LINKER_FLAGS ${FLAGS})
     if(NOT CMAKE_BUILD_TYPE MATCHES Release)
-        list(APPEND FLAGS "-O1")
+        list(APPEND COMPILER_FLAGS "-O1")
     endif()
 endif()
 
@@ -37,16 +41,22 @@ if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
                 "Suppressing deprecated declaration warnings. "
                 "Consider using another version of Clang."
         )
-        list(APPEND FLAGS -Wno-deprecated-declarations)
+        list(APPEND COMPILER_FLAGS -Wno-deprecated-declarations)
     endif()
 
     if(CMAKE_HOST_APPLE)
         # Limit some UB sanitizer checks to "src" directory on macOS when building with Clang,
         # because libraries (STL, googletest, boost, etc.) are somehow broken
-        list(APPEND FLAGS -fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt)
+        set(FLAGS -fsanitize-ignorelist=${CMAKE_SOURCE_DIR}/ub_sanitizer_ignore_list.txt)
+        list(APPEND COMPILER_FLAGS ${FLAGS})
+        list(APPEND LINKER_FLAGS ${FLAGS})
     endif()
 endif()
 
-if(FLAGS)
-    add_compile_options(${FLAGS})
+if(COMPILER_FLAGS)
+    add_compile_options(${COMPILER_FLAGS})
+endif()
+
+if(LINKER_FLAGS)
+    add_link_options(${LINKER_FLAGS})
 endif()
