@@ -1,0 +1,159 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "_root_config",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "DESBORDANTE_BUILD_NATIVE": "ON",
+                "DESBORDANTE_BUILD_TESTS": "ON",
+                "DESBORDANTE_UNPACK_DATASETS": "ON",
+                "CMAKE_COLOR_DIAGNOSTICS": "ON",
+                "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "Debug",
+            "displayName": "Debug build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "inherits": [
+                "_root_config"
+            ]
+        },
+        {
+            "name": "DebugSan",
+            "displayName": "Debug build with sanitizers",
+            "cacheVariables": {
+                "DESBORDANTE_SANITIZER": "ON"
+            },
+            "inherits": [
+                "Debug"
+            ]
+        },
+        {
+            "name": "Release",
+            "displayName": "Release build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            },
+            "inherits": [
+                "_root_config"
+            ]
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "_root_build",
+            "hidden": true
+        },
+        {
+            "name": "Debug",
+            "configurePreset": "Debug",
+            "inherits": [
+                "_root_build"
+            ]
+        },
+        {
+            "name": "DebugSan",
+            "configurePreset": "DebugSan",
+            "inherits": [
+                "_root_build"
+            ]
+        },
+        {
+            "name": "Release",
+            "configurePreset": "Release",
+            "inherits": [
+                "_root_build"
+            ]
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "_test_base",
+            "hidden": true,
+            "filter": {
+                "exclude": {
+                    "name": ".*HeavyDatasets.*"
+                }
+            },
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "Debug",
+            "inherits": "_test_base",
+            "configurePreset": "Debug"
+        },
+        {
+            "name": "DebugSan",
+            "inherits": "_test_base",
+            "configurePreset": "DebugSan"
+        },
+        {
+            "name": "Release",
+            "inherits": "_test_base",
+            "configurePreset": "Release"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "Debug",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "Debug"
+                },
+                {
+                    "type": "build",
+                    "name": "Debug"
+                },
+                {
+                    "type": "test",
+                    "name": "Debug"
+                }
+            ]
+        },
+        {
+            "name": "DebugSan",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "DebugSan"
+                },
+                {
+                    "type": "build",
+                    "name": "DebugSan"
+                },
+                {
+                    "type": "test",
+                    "name": "DebugSan"
+                }
+            ]
+        },
+        {
+            "name": "Release",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "Release"
+                },
+                {
+                    "type": "build",
+                    "name": "Release"
+                },
+                {
+                    "type": "test",
+                    "name": "Release"
+                }
+            ]
+        }
+    ]
+}

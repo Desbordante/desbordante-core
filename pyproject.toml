@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11", "cmake>=3.25"]
+requires = ["scikit-build-core", "pybind11"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -27,25 +27,26 @@ classifiers = [
 
 urls = { homepage = "https://desbordante.unidata-platform.ru/", repository = "https://github.com/desbordante/desbordante-core", issues = "https://github.com/desbordante/desbordante-core/issues" }
 
+[tool.scikit-build]
+cmake.version = ">=3.25"
+cmake.args = ["--preset Release"]
+
 [tool.scikit-build.cmake.define]
 DESBORDANTE_BINDINGS = "INSTALL"
 DESBORDANTE_BUILD_NATIVE = "OFF"
 DESBORDANTE_BUILD_TESTS = "OFF"
 DESBORDANTE_UNPACK_DATASETS = "OFF"
-ASAN = "OFF"
-CMAKE_BUILD_TYPE = "Release"
 CPM_SOURCE_CACHE = {env="CPM_SOURCE_CACHE", default = "./cmake/cpm-cache"}
 
 [tool.scikit-build.sdist]
 include = ["lib/*"]
 exclude = [
     "datasets/*",
-    "images/*",
-    "pull_datasets.sh",
     "docs/*",
-    "build.sh",
-    "build.bat",
-    "test_input_data/",
-    "src/tests/*",
     "examples/*",
+    "images/*",
+    "src/tests/*",
+    "test_input_data/",
+    "build.sh",
+    "pull_datasets.sh",
 ]

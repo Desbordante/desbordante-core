@@ -62,6 +62,15 @@ if(DESBORDANTE_BUILD_TESTS)
         VERSION 1.14.0
         OPTIONS "INSTALL_GTEST OFF" "gtest_force_shared_crt"
     )
+    # Workaround for googletest bug with char conversions, being recognized by Clang 21+
+    # See https://github.com/google/googletest/issues/4762
+    # TODO(senichenkov): remove when googletest gets updated
+    if (CMAKE_CXX_COMPILER_ID MATCHES Clang AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
+        message(WARNING "Googletest has a bug recognized by Clang 21+. "
+                "Supressing character-conversion warning. "
+                "Consider using an older version of Clang.")
+        target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
+    endif()
 endif()
 
 if(DESBORDANTE_BINDINGS)
