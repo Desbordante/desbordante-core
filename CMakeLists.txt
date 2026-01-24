@@ -138,16 +138,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION
     list(APPEND DEBUG_BUILD_OPTS "-Wno-deprecated-declarations")
 endif()
 
-# Workaround for googletest bug with char conversions, being recognized by Clang 21+
-# See https://github.com/google/googletest/issues/4762
-# TODO(senichenkov): remove when googletest gets updated
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL "21")
-	message(WARNING "Googletest has a bug recognized by Clang 21+. "
-					"Supressing character-conversion warning. "
-					"Consider using an older version of Clang.")
-    target_compile_options(gtest PRIVATE "-Wno-error=character-conversion")
-endif()
-
 if(ASAN)
     # Set DEBUG build options specific for build with ASAN
     set(ASAN_OPTS "-fsanitize=address")
