@@ -229,7 +229,7 @@ if(DESBORDANTE_BUILD_TESTS)
     enable_testing()
 endif()
 
-if (DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
+if(DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
     # Configure the datasets required for tests and benchmarks (downloaded from desbordante-data)
     add_subdirectory("datasets")
     add_subdirectory("src/tests")

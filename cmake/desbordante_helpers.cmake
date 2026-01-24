@@ -9,7 +9,8 @@ set(NAME "${DESBORDANTE_PREFIX}.compile_feats")
 add_library(${NAME} INTERFACE)
 target_compile_features(${NAME} INTERFACE cxx_std_20)
 target_compile_definitions(
-    ${NAME} INTERFACE $<$<BOOL:${DESBORDANTE_SAFE_VERTICAL_HASHING}>:DESBORDANTE_SAFE_VERTICAL_HASHING>
+    ${NAME}
+    INTERFACE $<$<BOOL:${DESBORDANTE_SAFE_VERTICAL_HASHING}>:DESBORDANTE_SAFE_VERTICAL_HASHING>
 )
 
 #[=[
@@ -137,6 +138,10 @@ function(desbordante_add_test name)
          ${DESBORDANTE_PREFIX}.compile_feats
     )
     target_link_libraries(${name} PRIVATE ${arg_LIBS})
+    add_dependencies(
+        ${name} Desbordante.zip.datasets Desbordante.zip.highway-neighbors
+        Desbordante.copy_test_input_data
+    )
 
     gtest_discover_tests(${name} WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endfunction()

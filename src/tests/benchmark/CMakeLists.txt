@@ -25,3 +25,7 @@ target_link_libraries(
             frozen
             spdlog::spdlog_header_only
 )
+add_dependencies(
+    ${NAME} Desbordante.zip.datasets Desbordante.zip.highway-neighbors
+    Desbordante.zip.performance-tests
+)
