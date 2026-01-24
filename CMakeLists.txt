@@ -4,14 +4,14 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(desbordante_helpers)
 
 # ---- CMake Policies ----
-if(POLICY CMP0144)
-    # To use <PACKAGENAME>_ROOT variables. Added in version 3.27.
-    cmake_policy(SET CMP0144 NEW)
-endif()
-
 if(POLICY CMP0167)
     # To search for the upstream BoostConfig.cmake. Added in version 3.30.
     cmake_policy(SET CMP0167 NEW)
+endif()
+
+if(POLICY CMP0144)
+    # To use <PACKAGENAME>_ROOT variables. Added in version 3.27.
+    cmake_policy(SET CMP0144 NEW)
 endif()
 
 if(POLICY CMP0175)
