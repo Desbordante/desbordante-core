@@ -84,3 +84,32 @@ jobs:
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  typos-check:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Group 1
+          - name: "General"
+            config: "./typos_modules/general.toml"
+            path: "."
+            args: ""
+
+          # Group 2
+          - name: "ND"
+            config: "./typos_modules/nd.toml"
+            path: "./src/*/nd"
+            args: ""
+
+    name: Typos / ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.39.2
+        with:
+          files: ${{ matrix.path }}
+          config: ${{ matrix.config }}
+          args: ${{ matrix.args }}

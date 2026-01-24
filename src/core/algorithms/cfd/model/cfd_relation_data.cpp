@@ -16,7 +16,7 @@ size_t CFDRelationData::GetNumRows() const {
 }
 
 void CFDRelationData::AddNewItemsInFullTable(ItemDictionary& item_dictionary,
-                                             ColumnesValuesDict& columns_values_dict,
+                                             ColumnsValuesDict& columns_values_dict,
                                              std::vector<ItemInfo>& items,
                                              std::vector<std::string> const& string_row,
                                              std::vector<int>& int_row,
@@ -52,7 +52,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
     std::vector<Transaction> data_rows;
     ItemDictionary item_dictionary;
     std::vector<ItemInfo> items;
-    ColumnesValuesDict columns_values_dict;
+    ColumnsValuesDict columns_values_dict;
     int unique_elems_number = 1;
 
     unsigned num_columns = parser.GetNumberOfColumns();
@@ -83,7 +83,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
 }
 
 void CFDRelationData::AddNewItemsInPartialTable(ItemDictionary& item_dictionary,
-                                                ColumnesValuesDict& columns_values_dict,
+                                                ColumnsValuesDict& columns_values_dict,
                                                 std::vector<ItemInfo>& items,
                                                 std::vector<std::string> const& string_row,
                                                 std::vector<int> const& columns_numbers_list,
@@ -121,7 +121,7 @@ std::unique_ptr<CFDRelationData> CFDRelationData::CreateFrom(model::IDatasetStre
     std::vector<Transaction> data_rows;
     ItemDictionary item_dictionary;
     std::vector<ItemInfo> items;
-    ColumnesValuesDict columns_values_dict;
+    ColumnsValuesDict columns_values_dict;
     int unique_elems_number = 1;
     std::random_device rd;   // only used once to initialise (seed) engine
     std::mt19937 rng(rd());  // random-number engine used (Mersenne-Twister in this case)

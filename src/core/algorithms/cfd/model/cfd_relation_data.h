@@ -19,7 +19,7 @@ namespace algos::cfd {
 class CFDRelationData : public AbstractRelationData<CFDColumnData> {
 private:
     using ItemDictionary = boost::unordered_map<std::pair<int, std::string>, int, PairHash>;
-    using ColumnesValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
+    using ColumnsValuesDict = std::unordered_map<AttributeIndex, std::vector<int>>;
 
     // ItemInfo contains info about one elem in the table.
     struct ItemInfo {
@@ -39,12 +39,12 @@ private:
     boost::unordered_map<std::pair<int, std::string>, int, PairHash> item_dictionary_;
     std::vector<ItemInfo> items_;
 
-    static void AddNewItemsInFullTable(ItemDictionary &, ColumnesValuesDict &,
+    static void AddNewItemsInFullTable(ItemDictionary &, ColumnsValuesDict &,
                                        std::vector<ItemInfo> &, std::vector<std::string> const &,
                                        std::vector<int> &, std::vector<Transaction> &, int &,
                                        unsigned);
 
-    static void AddNewItemsInPartialTable(ItemDictionary &, ColumnesValuesDict &,
+    static void AddNewItemsInPartialTable(ItemDictionary &, ColumnsValuesDict &,
                                           std::vector<ItemInfo> &, std::vector<std::string> const &,
                                           std::vector<int> const &, std::vector<Transaction> &,
                                           int &, int);

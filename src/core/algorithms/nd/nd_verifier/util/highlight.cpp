@@ -34,27 +34,27 @@ std::unordered_set<size_t> Highlight::CalculateMostFrequentRhsValueCodes() const
     return most_frequent_rhs_value_codes;
 }
 
-std::vector<size_t> const& Highlight::GetOccurencesIndices() {
-    if (occurences_indices_ == nullptr) {
-        occurences_indices_ = std::make_unique<std::vector<size_t>>(CalculateOccurencesIndices());
+std::vector<size_t> const& Highlight::GetOccurrencesIndices() {
+    if (occurrences_indices_ == nullptr) {
+        occurrences_indices_ = std::make_unique<std::vector<size_t>>(CalculateOccurrencesIndices());
     }
 
-    return *occurences_indices_;
+    return *occurrences_indices_;
 }
 
-std::vector<size_t> Highlight::CalculateOccurencesIndices() const {
-    std::vector<size_t> occurences_indices;
+std::vector<size_t> Highlight::CalculateOccurrencesIndices() const {
+    std::vector<size_t> occurrences_indices;
     for (size_t i{0}; i < encoded_lhs_->size(); ++i) {
         if ((*encoded_lhs_)[i] == highlight_lhs_) {
-            occurences_indices.push_back(i);
+            occurrences_indices.push_back(i);
         }
     }
 
-    return occurences_indices;
+    return occurrences_indices;
 }
 
-[[nodiscard]] size_t Highlight::GetOccurencesNumber() {
-    return GetOccurencesIndices().size();
+[[nodiscard]] size_t Highlight::GetOccurrencesNumber() {
+    return GetOccurrencesIndices().size();
 }
 
 std::vector<std::string> const& Highlight::GetRhsValues() {
@@ -100,7 +100,7 @@ std::vector<std::string> const& Highlight::GetRhsValues() {
 }
 
 [[nodiscard]] std::string Highlight::ToIndicesString() const {
-    return ::util::RangeToString(CalculateOccurencesIndices());
+    return ::util::RangeToString(CalculateOccurrencesIndices());
 }
 
 [[nodiscard]] std::string Highlight::ToValuesString() const {
