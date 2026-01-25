@@ -23,7 +23,7 @@ public:
 
     void SimpleAdd(CompositeEpisode const& episode);
 
-    void BatchAdd(std::vector<MaxEpisodesCollection>& other);
+    void BatchFill(std::vector<MaxEpisodesCollection>& other);
 
     std::vector<CompositeEpisode::RawEpisode> GetResult(
             std::vector<model::Event> const& mapping,

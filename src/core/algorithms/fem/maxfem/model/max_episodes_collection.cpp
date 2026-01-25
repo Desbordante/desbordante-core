@@ -1,5 +1,6 @@
 #include "max_episodes_collection.h"
 
+#include <algorithm>
 #include <cassert>
 
 namespace algos::maxfem {
@@ -26,13 +27,13 @@ void MaxEpisodesCollection::SimpleAdd(CompositeEpisode const& episode) {
     max_episodes_[length].insert(std::make_unique<CompositeEpisode>(episode));
 }
 
-void MaxEpisodesCollection::BatchAdd(std::vector<MaxEpisodesCollection>& collections) {
+void MaxEpisodesCollection::BatchFill(std::vector<MaxEpisodesCollection>& collections) {
     assert(max_episodes_.size() == 0);
 
     size_t global_max_len = 0;
-    for (auto const& col : collections) {
-        if (!col.max_episodes_.empty()) {
-            global_max_len = std::max(global_max_len, col.max_episodes_.size() - 1);
+    for (auto const& collection : collections) {
+        if (!collection.max_episodes_.empty()) {
+            global_max_len = std::max(global_max_len, collection.max_episodes_.size() - 1);
         }
     }
 
@@ -63,7 +64,8 @@ void MaxEpisodesCollection::BatchAdd(std::vector<MaxEpisodesCollection>& collect
             continue;
         }
 
-        std::sort(bucket_buffer.begin(), bucket_buffer.end(), DescendingCompositeEpisodeComparator{});
+        std::sort(bucket_buffer.begin(), bucket_buffer.end(),
+                  DescendingCompositeEpisodeComparator{});
 
         for (auto& ep_ptr : bucket_buffer) {
             if (CheckForSuperEpisode(*ep_ptr, length)) {
@@ -95,13 +97,13 @@ std::vector<CompositeEpisode::RawEpisode> MaxEpisodesCollection::GetResult(
         parallel_episode.GetEventSetPtr()->MapEvents(mapping);
     }
 
-    for (auto& s : max_episodes_) {
-        for (auto const& ptr : s) {
-            if (ptr) {
-                result.push_back(ptr->GetRaw());
+    for (auto& episodes_set : max_episodes_) {
+        for (auto const& ep_ptr : episodes_set) {
+            if (ep_ptr) {
+                result.push_back(ep_ptr->GetRaw());
             }
         }
-        s.clear();
+        episodes_set.clear();
     }
 
     max_episodes_.clear();

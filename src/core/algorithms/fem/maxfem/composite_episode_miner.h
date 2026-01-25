@@ -1,14 +1,15 @@
 #pragma once
 
-#include <vector>
-#include <mutex>
 #include <atomic>
+#include <mutex>
+#include <vector>
+
 #include <boost/asio/thread_pool.hpp>
 
-#include "core/algorithms/fem/maxfem/model/parallel_episode.h"
-#include "core/algorithms/fem/maxfem/model/composite_episode.h"
 #include "core/algorithms/fem/maxfem/model/bound_list.h"
+#include "core/algorithms/fem/maxfem/model/composite_episode.h"
 #include "core/algorithms/fem/maxfem/model/max_episodes_collection.h"
+#include "core/algorithms/fem/maxfem/model/parallel_episode.h"
 
 namespace algos::maxfem {
 
@@ -16,12 +17,12 @@ class CompositeEpisodeMiner {
 public:
     CompositeEpisodeMiner(size_t min_support, size_t window_length);
 
-    std::vector<MaxEpisodesCollection> Mine(const std::vector<ParallelEpisode>& seeds);
+    std::vector<MaxEpisodesCollection> Mine(std::vector<ParallelEpisode> const& seeds);
 
 private:
     struct Context {
         boost::asio::thread_pool& pool;
-        const std::vector<ParallelEpisode>& all_seeds;
+        std::vector<ParallelEpisode> const& all_seeds;
         size_t min_support;
         size_t window_length;
 
@@ -31,9 +32,8 @@ private:
         std::mutex results_mutex;
         std::vector<MaxEpisodesCollection> global_results;
 
-        Context(boost::asio::thread_pool& p, 
-                std::vector<ParallelEpisode> const& seeds,
-                size_t min, size_t win);
+        Context(boost::asio::thread_pool& p, std::vector<ParallelEpisode> const& seeds, size_t min,
+                size_t win);
 
         void Commit(MaxEpisodesCollection&& local_buf);
     };
@@ -44,4 +44,4 @@ private:
     size_t window_length_;
 };
 
-} // namespace algos::maxfem
+}  // namespace algos::maxfem
