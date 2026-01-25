@@ -2,8 +2,9 @@
 
 namespace algos::maxfem {
 
-CompositeEpisode::CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence)
-    : model::CompositeEpisode(std::move(sequence)) {
+CompositeEpisode::CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence,
+                                   size_t support)
+    : model::CompositeEpisode(std::move(sequence)), support_(support) {
     for (auto const& event_set : sequence_) {
         CountDataForEventSet(*event_set);
     }
@@ -21,13 +22,15 @@ void CompositeEpisode::CountDataForEventSet(model::EventSet const& event_set, bo
     events_count_ += sign * event_set.GetSize();
 }
 
-void CompositeEpisode::Extend(ParallelEpisode const& parallel_episode) {
+void CompositeEpisode::Extend(ParallelEpisode const& parallel_episode, size_t new_support) {
     sequence_.push_back(parallel_episode.GetEventSetPtr());
+    support_ = new_support;
     CountDataForEventSet(*sequence_.back());
 }
 
-void CompositeEpisode::Shorten() {
+void CompositeEpisode::Shorten(size_t new_support) {
     CountDataForEventSet(*sequence_.back(), false);
+    support_ = new_support;
     sequence_.pop_back();
 }
 
@@ -64,10 +67,11 @@ bool CompositeEpisode::StrictlyContains(CompositeEpisode const& other) const {
 
 CompositeEpisode::RawEpisode CompositeEpisode::GetRaw() const {
     RawEpisode result;
-    result.reserve(sequence_.size());
+    result.first.reserve(sequence_.size());
     for (auto const& event_set : sequence_) {
-        result.push_back(event_set->GetEvents());
+        result.first.push_back(event_set->GetEvents());
     }
+    result.second = support_;
     return result;
 }
 
