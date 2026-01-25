@@ -118,9 +118,10 @@ void MaxFEM::FindFrequentParallelEpisodesRecursive(
 void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
     for (size_t index = 0; index < parallel_episodes.size(); ++index) {
         auto bound_list = BoundList(parallel_episodes[index]);
-        auto episode = CompositeEpisode({parallel_episodes[index].GetEventSetPtr()});
-        bool has_extension = FindFrequentCompositeEpisodesRecursive(episode, bound_list,
-                                                                    parallel_episodes);
+        auto episode = CompositeEpisode({parallel_episodes[index].GetEventSetPtr()},
+                                        bound_list.GetSupport());
+        bool has_extension =
+                FindFrequentCompositeEpisodesRecursive(episode, bound_list, parallel_episodes);
         if (!has_extension) {
             max_episodes_collection_.Add(episode);
         }
@@ -141,7 +142,7 @@ bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
 
         if (extended_bound_list) {
             found_frequent_extension = true;
-            episode.Extend(parallel_episode);
+            episode.Extend(parallel_episode, extended_bound_list->GetSupport());
 
             bool has_extension = FindFrequentCompositeEpisodesRecursive(
                     episode, *extended_bound_list, seed_episodes);
@@ -149,7 +150,7 @@ bool MaxFEM::FindFrequentCompositeEpisodesRecursive(
                 max_episodes_collection_.Add(episode);
             }
 
-            episode.Shorten();
+            episode.Shorten(bound_list.GetSupport());
         }
     }
 
