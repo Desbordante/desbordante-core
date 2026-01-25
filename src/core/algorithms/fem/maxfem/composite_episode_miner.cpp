@@ -1,19 +1,18 @@
 #include "composite_episode_miner.h"
 
-#include <thread>
-
 #include <boost/asio/post.hpp>
 
 namespace algos::maxfem {
 
-CompositeEpisodeMiner::CompositeEpisodeMiner(size_t min_support, size_t window_length)
-    : min_support_(min_support), window_length_(window_length) {}
+CompositeEpisodeMiner::CompositeEpisodeMiner(size_t min_support, size_t window_length,
+                                             config::ThreadNumType threads_num)
+    : min_support_(min_support), window_length_(window_length), threads_num_(threads_num) {}
 
 CompositeEpisodeMiner::Context::Context(boost::asio::thread_pool& thread_pool,
                                         std::vector<ParallelEpisode> const& seeds, size_t min,
-                                        size_t win)
+                                        size_t win, config::ThreadNumType threads_num)
     : pool(thread_pool), all_seeds(seeds), min_support(min), window_length(win) {
-    max_parallel_tasks = std::thread::hardware_concurrency() * 4;
+    max_parallel_tasks = threads_num * 3;
 }
 
 void CompositeEpisodeMiner::Context::Commit(MaxEpisodesCollection&& local_buf) {
@@ -23,8 +22,8 @@ void CompositeEpisodeMiner::Context::Commit(MaxEpisodesCollection&& local_buf) {
 
 std::vector<MaxEpisodesCollection> CompositeEpisodeMiner::Mine(
         std::vector<ParallelEpisode> const& seeds) {
-    boost::asio::thread_pool pool(std::thread::hardware_concurrency());
-    Context ctx(pool, seeds, min_support_, window_length_);
+    boost::asio::thread_pool pool(threads_num_);
+    Context ctx(pool, seeds, min_support_, window_length_, threads_num_);
 
     for (auto const& seed : seeds) {
         ctx.tasks_in_flight++;

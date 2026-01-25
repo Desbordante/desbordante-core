@@ -9,6 +9,7 @@
 #include "core/algorithms/fem/maxfem/composite_episode_miner.h"
 #include "core/config/names.h"
 #include "core/config/option.h"
+#include "core/config/thread_number/option.h"
 #include "core/util/logger.h"
 #include "core/util/timed_invoke.h"
 
@@ -27,6 +28,7 @@ MaxFEM::MaxFEM() {
             "Window size",
             5ul,
     });
+    RegisterOption(config::kThreadNumberOpt(&threads_num_));
 }
 
 void MaxFEM::MakeExecuteOptsAvailable() {
@@ -34,6 +36,7 @@ void MaxFEM::MakeExecuteOptsAvailable() {
     MakeOptionsAvailable({
             config::names::kMinimumSupport,
             config::names::kWindowSize,
+            config::names::kThreads,
     });
 }
 
@@ -45,6 +48,7 @@ unsigned long long MaxFEM::ExecuteInternal() {
 
 void MaxFEM::FindFrequentEpisodes() {
     LOG_WARN("Min support: {}. Window length: {}", min_support_, window_length_);
+    LOG_WARN("Threads num: {}", threads_num_);
     LOG_WARN("Sequence length: {}", event_sequence_->Size());
     RemoveInfrequentEvents();
     auto parallel_episodes = FindFrequentParallelEpisodes();
@@ -127,7 +131,7 @@ void MaxFEM::FindFrequentParallelEpisodesRecursive(
 }
 
 void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
-    CompositeEpisodeMiner miner(min_support_, window_length_);
+    CompositeEpisodeMiner miner(min_support_, window_length_, threads_num_);
     std::vector<MaxEpisodesCollection> raw_results = miner.Mine(parallel_episodes);
 
     max_episodes_collection_.BatchFill(raw_results);
