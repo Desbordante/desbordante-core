@@ -13,7 +13,7 @@ BoundList::BoundList(ParallelEpisode const& parallel_episode) {
 
 std::optional<BoundList> BoundList::Extend(std::vector<model::Timestamp> const& loc_list,
                                            size_t min_support, size_t window_length) const {
-    const size_t max_misses = starts_.size() - min_support;
+    size_t const max_misses = starts_.size() - min_support;
     size_t current_misses = 0;
 
     std::vector<model::Timestamp> new_starts;

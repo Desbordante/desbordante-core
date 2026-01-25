@@ -40,33 +40,33 @@ protected:
 
 TEST_F(MaxFEMAlgorithmTest, Baseline) {
     auto results = ExecuteMaxFEM(kMaxFemBaselinePath, 2, 2);
-    algos::maxfem::CompositeEpisode::RawEpisode ep1 = {{3}};
-    algos::maxfem::CompositeEpisode::RawEpisode ep2 = {{1}, {1, 2}};
+    algos::maxfem::CompositeEpisode::RawEpisode ep1 = {{{3}}, 2};
+    algos::maxfem::CompositeEpisode::RawEpisode ep2 = {{{1}, {1, 2}}, 2};
 
     EXPECT_THAT(results, UnorderedElementsAre(ep1, ep2));
 }
 
 TEST_F(MaxFEMAlgorithmTest, WindowTest) {
     auto results = ExecuteMaxFEM(kMaxFemWindowPath, 2, 3);
-    algos::maxfem::CompositeEpisode::RawEpisode expected = {{10}, {11}, {12}};
+    algos::maxfem::CompositeEpisode::RawEpisode expected = {{{10}, {11}, {12}}, 2};
 
     EXPECT_THAT(results, UnorderedElementsAre(expected));
 }
 
 TEST_F(MaxFEMAlgorithmTest, Parallel) {
     auto results = ExecuteMaxFEM(kMaxFemParallelPath, 2, 5);
-    algos::maxfem::CompositeEpisode::RawEpisode aba = {{10, 11}, {12}, {10, 11}};
-    algos::maxfem::CompositeEpisode::RawEpisode bab = {{12}, {10, 11}, {12}};
+    algos::maxfem::CompositeEpisode::RawEpisode aba = {{{10, 11}, {12}, {10, 11}}, 2};
+    algos::maxfem::CompositeEpisode::RawEpisode bab = {{{12}, {10, 11}, {12}}, 2};
 
     EXPECT_THAT(results, UnorderedElementsAre(aba, bab));
 }
 
 TEST_F(MaxFEMAlgorithmTest, Pruning) {
     auto results_pruning = ExecuteMaxFEM(kMaxFemPruningPath, 2, 5);
-    algos::maxfem::CompositeEpisode::RawEpisode ep1 = {{20}, {21}, {22}};
-    algos::maxfem::CompositeEpisode::RawEpisode ep2 = {{22}, {10}};
-    algos::maxfem::CompositeEpisode::RawEpisode ep3 = {{10}, {11}, {12}, {10}, {11}};
-    algos::maxfem::CompositeEpisode::RawEpisode ep4 = {{11}, {12}, {10}, {11}, {12}};
+    algos::maxfem::CompositeEpisode::RawEpisode ep1 = {{{20}, {21}, {22}}, 2};
+    algos::maxfem::CompositeEpisode::RawEpisode ep2 = {{{22}, {10}}, 2};
+    algos::maxfem::CompositeEpisode::RawEpisode ep3 = {{{10}, {11}, {12}, {10}, {11}}, 2};
+    algos::maxfem::CompositeEpisode::RawEpisode ep4 = {{{11}, {12}, {10}, {11}, {12}}, 2};
 
     EXPECT_THAT(results_pruning, UnorderedElementsAre(ep1, ep2, ep3, ep4));
 }

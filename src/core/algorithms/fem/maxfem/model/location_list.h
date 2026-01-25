@@ -9,7 +9,6 @@ namespace algos::maxfem {
 
 class LocationList {
 private:
-    // Elements of loc_lists_ are sorted
     std::vector<model::Timestamp> loc_list_;
 
 public:

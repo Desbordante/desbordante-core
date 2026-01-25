@@ -10,17 +10,18 @@ private:
     model::Event sum_of_even_items_ = 0;
     model::Event sum_of_odd_items_ = 0;
     size_t events_count_ = 0;
+    size_t support_ = 0;
 
     void CountDataForEventSet(model::EventSet const& event_set, bool add = true);
 
 public:
     CompositeEpisode() {}
 
-    CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence);
+    CompositeEpisode(std::vector<std::shared_ptr<model::EventSet>> sequence, size_t support);
 
-    void Extend(ParallelEpisode const& parallel_episode);
+    void Extend(ParallelEpisode const& parallel_episode, size_t new_support);
 
-    void Shorten();
+    void Shorten(size_t new_support);
 
     model::Event GetEventsSum() const {
         return sum_of_even_items_ + sum_of_odd_items_;
@@ -36,7 +37,7 @@ public:
 
     bool StrictlyContains(CompositeEpisode const& other) const;
 
-    using RawEpisode = std::vector<std::vector<model::Event>>;
+    using RawEpisode = std::pair<std::vector<std::vector<model::Event>>, size_t>;
 
     RawEpisode GetRaw() const;
 };
