@@ -9,6 +9,7 @@
 #include "core/algorithms/fem/maxfem/model/location_list.h"
 #include "core/algorithms/fem/maxfem/model/max_episodes_collection.h"
 #include "core/algorithms/fem/maxfem/model/parallel_episode.h"
+#include "core/config/thread_number/type.h"
 
 namespace algos::maxfem {
 
@@ -16,6 +17,7 @@ class MaxFEM : public FEMAlgorithm {
 private:
     size_t window_length_;
     size_t min_support_;
+    config::ThreadNumType threads_num_;
     model::Event events_num_ = 0;
     std::vector<CompositeEpisode::RawEpisode> max_frequent_episodes_;
     std::unordered_map<model::Event, model::Event> mapping_;
