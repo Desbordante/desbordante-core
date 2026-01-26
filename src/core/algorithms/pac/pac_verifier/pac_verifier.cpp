@@ -1,16 +1,19 @@
-#include "algorithms/pac/pac_verifier/pac_verifier.h"
+#include "core/algorithms/pac/pac_verifier/pac_verifier.h"
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 
-#include "descriptions.h"
-#include "names.h"
-#include "option_using.h"
-#include "tabular_data/input_table/option.h"
+#include "core/config/descriptions.h"
+#include "core/config/exceptions.h"
+#include "core/config/names.h"
+#include "core/config/option_using.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/util/logger.h"
 
 namespace algos::pac_verifier {
 void PACVerifier::RegisterOptions() {
@@ -20,10 +23,10 @@ void PACVerifier::RegisterOptions() {
     RegisterOption(Option<bool>(&distance_from_null_is_infinity_, kDistFromNullIsInfinity,
                                 kDDistFromNullIsInfinity, false));
 
-    RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, kDefaultMinEpsilon));
-    RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, kDefaultMaxEpsilon));
-    RegisterOption(Option(&epsilon_steps_, kEpsilonSteps, kDEpsilonSteps, kDefaultEpsilonSteps));
-    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, kDefaultMinDelta));
+    RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, -1.0));
+    RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0));
+    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0));
+    RegisterOption(Option(&delta_steps_, kDeltaSteps, kDDeltaSteps, 0ul));
     RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
                           kDefaultDiagonalThreshold));
 }
@@ -39,6 +42,15 @@ void PACVerifier::ProcessCommonExecuteOpts() {
 
     if (delta_steps_ == 0) {
         delta_steps_ = (1 - min_delta_) * 1000;
+    }
+
+    // Ignore min_delta if min_eps == max_eps ("validation")
+    if (min_epsilon_ >= 0 && min_epsilon_ == max_epsilon_) {
+        min_delta_ = 0;
+    }
+
+    if (max_epsilon_ > 0 && max_epsilon_ < min_epsilon_) {
+        throw config::ConfigurationError("Min epsilon must be less or equal to max epsilon");
     }
 }
 
@@ -68,46 +80,96 @@ void PACVerifier::LoadDataInternal() {
 void PACVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kEpsilonSteps, kMinDelta, kDiagonalThreshold});
+    MakeOptionsAvailable({kMinEpsilon, kMaxEpsilon, kMinDelta, kDeltaSteps, kDiagonalThreshold});
 }
 
 std::pair<double, double> PACVerifier::FindEpsilonDelta(
-        std::vector<double> const& empirical_probabilities) const {
-    std::vector<bool> horizontal(epsilon_steps_);
-    for (std::size_t i = 0; i < epsilon_steps_ - 1; ++i) {
-        auto k = empirical_probabilities[i + 1] - empirical_probabilities[i];
-        horizontal[i] =
-                (empirical_probabilities[i + 1] >= min_delta_) && (k <= diagonal_threshold_);
+        std::vector<std::pair<double, double>>&& empirical_probabilities) const {
+    if (empirical_probabilities.empty()) {
+        return {0, 0};
     }
-    horizontal[epsilon_steps_ - 1] = true;
 
-    // Find longest sequence of 1's in horizontal
-    std::size_t max_len = 0;
-    std::size_t max_start = 0;
-    std::size_t curr_len = 0;
-    std::size_t curr_start = 0;
-    for (std::size_t i = 0; i < horizontal.size(); ++i) {
-        if (horizontal[i]) {
-            ++curr_len;
-            if (curr_len > max_len) {
-                max_len = curr_len;
-                max_start = curr_start;
-            }
-        } else {
-            curr_start = i + 1;
-            curr_len = 0;
+    LOG_TRACE("Empirical probabilities:");
+    for ([[maybe_unused]] auto const& [eps, delta] : empirical_probabilities) {
+        LOG_TRACE("\t{}, {}", eps, delta);
+    }
+
+    auto begin = empirical_probabilities.begin();
+    auto end = empirical_probabilities.end();
+    if (max_epsilon_ >= 0) {
+        // Special case: max_eps and min_delta cannot be both satisfied.
+        // Return (??, min_delta) so that user can see that parameters are contradictory.
+        // Note that first pair is always (0, ??) -- taht's why we check max_eps before min_eps
+        if (empirical_probabilities.size() >= 2 &&
+            empirical_probabilities[1].second <= min_delta_) {
+            return empirical_probabilities[1];
+        }
+
+        // Take all values that have eps < max_eps
+        // New pair is not added, because it would be stripped out anyway
+        end = std::ranges::upper_bound(
+                begin, end, max_epsilon_, {},
+                [](std::pair<double, double> const& pair) { return pair.first; });
+    }
+    if (min_epsilon_ >= 0) {
+        // Take all values that have eps > min_eps, and add (min_eps, delta_{j - 1}) to beginning
+        // (where j is the index of the first "good" element)
+        begin = std::ranges::upper_bound(
+                begin, end, min_epsilon_, {},
+                [](std::pair<double, double> const& pair) { return pair.first; });
+        // Don't add (min_eps, delta_{j - 1}) if j == 0, because delta_{-1} is less than min_delta
+        if (begin != empirical_probabilities.begin()) {
+            std::advance(begin, -1);
+            begin->first = min_epsilon_;
         }
     }
 
-    double delta;
-    if (max_start == epsilon_steps_ - 1) {
-        delta = empirical_probabilities.back();
-    } else {
-        delta = std::max(empirical_probabilities[max_start], min_delta_);
+    // Due to the delta refinement, there may be several epsilons with near deltas
+    auto extra_pairs = std::ranges::unique(
+            begin, end,
+            [threshold{diagonal_threshold_}](double a, double b) { return b - a < threshold; },
+            [](std::pair<double, double> const& pair) { return pair.second; });
+    // For convenience only
+    auto stripped_emp_prob = std::ranges::subrange(begin, extra_pairs.begin());
+
+    if (stripped_emp_prob.size() == 1) {
+        return stripped_emp_prob.front();
+    }
+    if (stripped_emp_prob.size() == 2) {
+        // We have two pairs: (0, delta_1) and (eps_2, 1)
+        // We don't have enough information to decide which pair is better, so let's use simple
+        // heuristic based on min_delta
+        if (stripped_emp_prob.front().second >= min_delta_) {
+            return stripped_emp_prob.front();
+        }
+        return stripped_emp_prob.back();
+    }
+    // First pair is always (0, ??). We don't want to take it, unless it's the only pair
+    // (this applies only if min_eps <= 0)
+    if (min_epsilon_ <= 0) {
+        stripped_emp_prob.advance(1);
     }
 
-    auto epsilon_step = (max_epsilon_ - min_epsilon_) / (epsilon_steps_ - 1);
-    auto epsilon = min_epsilon_ + max_start * epsilon_step;
-    return {epsilon, delta};
+    LOG_TRACE("Stripped empirical probabilities:");
+    for ([[maybe_unused]] auto const& [eps, delta] : stripped_emp_prob) {
+        LOG_TRACE("\t{}, {}", eps, delta);
+    }
+
+    double max_eps_diff = -1;
+    std::size_t best_eps_idx = 0;
+    for (std::size_t i = 0; i < stripped_emp_prob.size() - 1; ++i) {
+        auto eps_diff = stripped_emp_prob[i + 1].first - stripped_emp_prob[i].first;
+        // Take the least eps_i such that (eps_{i + 1} - eps_i) is maximal
+        if (eps_diff > max_eps_diff) {
+            max_eps_diff = eps_diff;
+            best_eps_idx = i;
+        }
+    }
+
+    if (max_eps_diff < 0) {
+        return stripped_emp_prob.back();
+    }
+
+    return stripped_emp_prob[best_eps_idx];
 }
 }  // namespace algos::pac_verifier

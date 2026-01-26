@@ -5,9 +5,9 @@
 #include <memory>
 #include <vector>
 
-#include "algorithms/pac/model/tuple.h"
-#include "config/indices/type.h"
-#include "model/table/typed_column_data.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/config/indices/type.h"
+#include "core/model/table/typed_column_data.h"
 
 namespace pac::util {
 inline std::shared_ptr<model::Tuples> MakeTuples(
