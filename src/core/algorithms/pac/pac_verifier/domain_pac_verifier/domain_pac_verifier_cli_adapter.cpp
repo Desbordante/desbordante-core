@@ -1,19 +1,19 @@
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_cli_adapter.h"
 
 #include <memory>
 #include <string_view>
 #include <utility>
 #include <vector>
 
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
-#include "descriptions.h"
-#include "exceptions.h"
-#include "names.h"
-#include "option.h"
-#include "option_using.h"
-#include "pac/model/default_domains/ball.h"
-#include "pac/model/default_domains/domain_type.h"
-#include "pac/model/default_domains/parallelepiped.h"
+#include "core/algorithms/pac/model/default_domains/ball.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/model/default_domains/parallelepiped.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
+#include "core/config/descriptions.h"
+#include "core/config/exceptions.h"
+#include "core/config/names.h"
+#include "core/config/option.h"
+#include "core/config/option_using.h"
 
 namespace algos::pac_verifier {
 using namespace pac::model;

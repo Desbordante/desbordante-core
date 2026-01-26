@@ -6,12 +6,13 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/idomain.h"
-#include "algorithms/pac/pac.h"
-#include "table/relational_schema.h"
-#include "table/vertical.h"
+#include "core/algorithms/pac/model/idomain.h"
+#include "core/algorithms/pac/pac.h"
+#include "core/model/table/relational_schema.h"
+#include "core/model/table/vertical.h"
 
 namespace model {
 /// @brief Given an ordered domain D on an attribute, a Domain PAC specifies that all attribute

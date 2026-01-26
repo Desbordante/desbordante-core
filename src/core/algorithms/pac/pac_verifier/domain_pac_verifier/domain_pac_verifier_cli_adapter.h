@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include "algorithms/pac/model/default_domains/domain_type.h"
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
-#include "names.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
+#include "core/config/names.h"
 
 namespace algos::pac_verifier {
 /// @brief Adapts DomainPACVerifier options to simplify its usage in CLI

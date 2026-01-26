@@ -5,11 +5,12 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/tuple.h"
-#include "pac/model/comparable_tuple_type.h"
-#include "type.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
+#include "core/model/types/type.h"
 
 namespace algos::pac_verifier {
 /// @brief Values that violate Domain PAC with given epsilon
@@ -18,12 +19,12 @@ private:
     using Tuples = std::vector<pac::model::Tuple>;
     using TuplesIter = Tuples::iterator;
 
-    std::shared_ptr<pac::model::ComparableTupleType> tuple_type_;
+    std::shared_ptr<pac::model::TupleType> tuple_type_;
     std::shared_ptr<Tuples> original_value_tuples_;
     std::vector<TuplesIter> highlighted_tuples_;
 
 public:
-    DomainPACHighlight(std::shared_ptr<pac::model::ComparableTupleType> tuple_type,
+    DomainPACHighlight(std::shared_ptr<pac::model::TupleType> tuple_type,
                        std::shared_ptr<Tuples> original_value_tuples,
                        std::vector<TuplesIter>&& highlighted_tuples)
         : tuple_type_(std::move(tuple_type)),

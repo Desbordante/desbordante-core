@@ -2,10 +2,10 @@
 
 #include <vector>
 
-#include "algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
-#include "descriptions.h"
-#include "names.h"
-#include "option_using.h"
+#include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
+#include "core/config/descriptions.h"
+#include "core/config/names.h"
+#include "core/config/option_using.h"
 
 namespace algos::pac_verifier {
 /// @brief Domain Probabilistic Approximate Constraint verifier.

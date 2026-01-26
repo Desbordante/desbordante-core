@@ -2,6 +2,8 @@
 
 #include <numeric>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include "algorithms/pac/model/tuple.h"
 #include "builtin.h"
