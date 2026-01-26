@@ -3,9 +3,10 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "model/table/relational_schema.h"
+#include "core/model/table/relational_schema.h"
 
 namespace model {
 
