@@ -6,11 +6,13 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "algorithms/pac/model/comparable_tuple_type.h"
-#include "algorithms/pac/model/tuple.h"
-#include "exceptions.h"
+#include "core/algorithms/pac/model/tuple.h"
+#include "core/algorithms/pac/model/tuple_type.h"
+#include "core/config/exceptions.h"
+#include "core/model/types/imetrizable_type.h"
 
 namespace pac::model {
 using namespace ::model;
@@ -60,18 +62,16 @@ std::vector<Type::Destructor> MetricBasedDomain::GetDestructors() const {
 }
 
 void MetricBasedDomain::SetTypes(std::vector<Type const*>&& types) {
-    using namespace std::placeholders;
-
-    metrizable_types_ = {};
-    std::ranges::transform(types, std::back_inserter(metrizable_types_), [](Type const* type) {
-        auto const* metrizable_type = dynamic_cast<IMetrizableType const*>(type);
+    metrizable_types_ = std::vector<IMetrizableType const*>(types.size());
+    for (std::size_t i = 0; i < types.size(); ++i) {
+        auto const* metrizable_type = dynamic_cast<IMetrizableType const*>(types[i]);
         if (!metrizable_type) {
-            throw config::ConfigurationError(
-                    "To use metric-based domain, all affected columns must have "
-                    "metrizable types");
+            throw config::ConfigurationError("Cannot use metric-based domain, because column #" +
+                                             std::to_string(i) + " has type " +
+                                             types[i]->ToString() + ", which is not metrizable");
         }
-        return metrizable_type;
-    });
+        metrizable_types_[i] = metrizable_type;
+    }
 
     // All leveling coefficients that are not specified are 1
     std::ranges::fill_n(std::back_inserter(leveling_coeffs_),
