@@ -28,6 +28,32 @@ void PACVerifier::RegisterOptions() {
                           kDefaultDiagonalThreshold));
 }
 
+void PACVerifier::ProcessCommonExecuteOpts() {
+    if (min_delta_ < 0) {
+        if (min_epsilon_ >= 0 || max_epsilon_ >= 0) {
+            min_delta_ = 0;
+        } else {
+            min_delta_ = kDefaultMinDelta;
+        }
+    }
+
+    if (delta_steps_ == 0) {
+        delta_steps_ = (1 - min_delta_) * 1000;
+    }
+}
+
+unsigned long long PACVerifier::ExecuteInternal() {
+    ProcessCommonExecuteOpts();
+
+    auto start = std::chrono::system_clock::now();
+    PACTypeExecuteInternal();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                           std::chrono::system_clock::now() - start)
+                           .count();
+    LOG_INFO("Validation took {}ms", elapsed);
+    return elapsed;
+}
+
 void PACVerifier::LoadDataInternal() {
     typed_relation_ = model::ColumnLayoutTypedRelationData::CreateFrom(*input_table_, true);
     input_table_->Reset();
