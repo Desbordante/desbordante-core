@@ -5,20 +5,17 @@
 #include <utility>
 #include <vector>
 
-#include "algorithm.h"
-#include "algorithms/pac/pac.h"
-#include "names.h"
-#include "table/column_layout_typed_relation_data.h"
-#include "tabular_data/input_table/option.h"
-#include "tabular_data/input_table_type.h"
+#include "core/algorithms/algorithm.h"
+#include "core/algorithms/pac/pac.h"
+#include "core/config/names.h"
+#include "core/config/tabular_data/input_table/option.h"
+#include "core/config/tabular_data/input_table_type.h"
+#include "core/model/table/column_layout_typed_relation_data.h"
 
 namespace algos::pac_verifier {
 /// @brief Base class for Probabilistic Approximate Constrains verifiers
 class PACVerifier : public Algorithm {
 private:
-    constexpr static double kDefaultMinEpsilon = 0;
-    constexpr static double kDefaultMaxEpsilon = 1;
-    constexpr static unsigned long kDefaultEpsilonSteps = 100;
     constexpr static double kDefaultMinDelta = 0.9;
     // One extra value on table containing 10^5 rows
     constexpr static double kDefaultDiagonalThreshold = 1e-5;
@@ -27,30 +24,34 @@ private:
     bool distance_from_null_is_infinity_;
     double min_epsilon_;
     double max_epsilon_;
-    unsigned long epsilon_steps_;
     double min_delta_;
     double diagonal_threshold_;
+    unsigned long delta_steps_;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     std::shared_ptr<model::PAC> pac_;
 
     void RegisterOptions();
 
+    /// @brief Process execute options that are common for all PAC types.
+    void ProcessCommonExecuteOpts();
+
+    unsigned long long ExecuteInternal() final;
+
 protected:
+    // Threshold for floating-point comparison of distances
+    constexpr static double kDistThreshold = 1e-12;
+
     bool DistFromNullIsInfty() const {
         return distance_from_null_is_infinity_;
     }
 
-    double MinEpsilon() const {
-        return min_epsilon_;
+    double MinDelta() const {
+        return min_delta_;
     }
 
-    double MaxEpsilon() const {
-        return max_epsilon_;
-    }
-
-    unsigned long EpsilonSteps() const {
-        return epsilon_steps_;
+    std::size_t DeltaSteps() const {
+        return delta_steps_;
     }
 
     model::ColumnLayoutTypedRelationData const& TypedRelation() const {
@@ -66,19 +67,20 @@ protected:
     virtual void MakeExecuteOptsAvailable() override;
 
     /// @brief Process options for concrete PAC type
-    /// @note As a side effect, this metrhod should initialize @c pac_ and may initialize
-    /// private fields of derived classes
     virtual void ProcessPACTypeOptions() {}
 
     /// @brief Prepare data for validating concrete PAC type.
     /// Called after processing options.
     virtual void PreparePACTypeData() {}
 
+    /// @brief ExecuteInternal for concrete PAC types.
+    virtual void PACTypeExecuteInternal() = 0;
+
     /// @brief Find PAC's epsilon and delta using elbow method on ECDF defined by @c
-    /// empirical_probabilities
+    /// empirical_probabilities (epsilon-delta pairs)
     /// @return epsilon, delta
     std::pair<double, double> FindEpsilonDelta(
-            std::vector<double> const& empirical_probabilities) const;
+            std::vector<std::pair<double, double>>&& empirical_probabilities) const;
 
     void ResetState() override {
         pac_ = nullptr;
@@ -93,6 +95,9 @@ public:
     virtual ~PACVerifier() = default;
 
     model::PAC const& GetPAC() const {
+        if (!pac_) {
+            throw std::runtime_error("Cannot get PAC: it's nullptr");
+        }
         return *pac_;
     }
 
