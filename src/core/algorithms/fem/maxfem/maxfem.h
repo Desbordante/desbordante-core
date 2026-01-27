@@ -18,6 +18,8 @@ private:
     size_t window_length_;
     size_t min_support_;
     config::ThreadNumType threads_num_;
+    double tasks_num_multiplier_;
+
     model::Event events_num_ = 0;
     std::vector<CompositeEpisode::RawEpisode> max_frequent_episodes_;
     std::unordered_map<model::Event, model::Event> mapping_;

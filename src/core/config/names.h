@@ -11,6 +11,7 @@ constexpr auto kMinimumSupport = "minsup";
 constexpr auto kRhsIndices = "rhs_indices";
 constexpr auto kSeed = "seed";
 constexpr auto kTable = "table";
+constexpr auto kTasksNumMultiplier = "tasks_num_multiplier";
 constexpr auto kThreads = "threads";
 // AC
 constexpr auto kACSeed = "ac_seed";
