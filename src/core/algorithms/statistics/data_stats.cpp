@@ -1087,9 +1087,10 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     }
     if (prev == nullptr) return {};
 
-    std::string result = (increasing && decreasing) ? "equal" :
-                            increasing ? "ascending" :
-                            decreasing ? "descending" : "none";
+    std::string result = (increasing && decreasing) ? "equal"
+                         : increasing               ? "ascending"
+                         : decreasing               ? "descending"
+                                                    : "none";
 
     mo::StringType string_type;
     std::byte const* result_data = string_type.MakeValue(result);
