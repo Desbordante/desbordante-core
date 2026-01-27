@@ -29,6 +29,12 @@ MaxFEM::MaxFEM() {
             5ul,
     });
     RegisterOption(config::kThreadNumberOpt(&threads_num_));
+    RegisterOption(config::Option{
+            &tasks_num_multiplier_,
+            config::names::kTasksNumMultiplier,
+            "Ratio of tasks number to threads number",
+            3.0,
+    });
 }
 
 void MaxFEM::MakeExecuteOptsAvailable() {
@@ -37,6 +43,7 @@ void MaxFEM::MakeExecuteOptsAvailable() {
             config::names::kMinimumSupport,
             config::names::kWindowSize,
             config::names::kThreads,
+            config::names::kTasksNumMultiplier,
     });
 }
 
@@ -47,12 +54,12 @@ unsigned long long MaxFEM::ExecuteInternal() {
 }
 
 void MaxFEM::FindFrequentEpisodes() {
-    LOG_WARN("Min support: {}. Window length: {}", min_support_, window_length_);
-    LOG_WARN("Threads num: {}", threads_num_);
-    LOG_WARN("Sequence length: {}", event_sequence_->Size());
+    LOG_DEBUG("Min support: {}. Window length: {}", min_support_, window_length_);
+    LOG_DEBUG("Threads num: {}", threads_num_);
+    LOG_DEBUG("Sequence length: {}", event_sequence_->Size());
     RemoveInfrequentEvents();
     auto parallel_episodes = FindFrequentParallelEpisodes();
-    LOG_WARN("Frequent parallel episodes number: {}", parallel_episodes.size());
+    LOG_DEBUG("Frequent parallel episodes number: {}", parallel_episodes.size());
     FindFrequentCompositeEpisodes(parallel_episodes);
 }
 
@@ -69,7 +76,7 @@ void MaxFEM::RemoveInfrequentEvents() {
         }
     }
     events_num_ = new_events_num;
-    LOG_WARN("Frequent events number: {}", events_num_);
+    LOG_DEBUG("Frequent events number: {}", events_num_);
 
     for (auto& event_set : *event_sequence_) {
         event_set.MapEventsAndRemoveInfrequent(mapping_);
@@ -83,7 +90,7 @@ std::map<model::Event, size_t> MaxFEM::GetEventsSupports() const {
             supports[event] += 1;
         }
     }
-    LOG_WARN("Events number: {}", supports.size());
+    LOG_DEBUG("Events number: {}", supports.size());
     return supports;
 }
 
@@ -131,7 +138,7 @@ void MaxFEM::FindFrequentParallelEpisodesRecursive(
 }
 
 void MaxFEM::FindFrequentCompositeEpisodes(std::vector<ParallelEpisode> const& parallel_episodes) {
-    CompositeEpisodeMiner miner(min_support_, window_length_, threads_num_);
+    CompositeEpisodeMiner miner(min_support_, window_length_, threads_num_, tasks_num_multiplier_);
     std::vector<MaxEpisodesCollection> raw_results = miner.Mine(parallel_episodes);
 
     max_episodes_collection_.BatchFill(raw_results);

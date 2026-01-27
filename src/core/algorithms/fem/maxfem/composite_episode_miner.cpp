@@ -5,15 +5,21 @@
 namespace algos::maxfem {
 
 CompositeEpisodeMiner::CompositeEpisodeMiner(size_t min_support, size_t window_length,
-                                             config::ThreadNumType threads_num)
-    : min_support_(min_support), window_length_(window_length), threads_num_(threads_num) {}
+                                             config::ThreadNumType threads_num,
+                                             double tasks_num_multiplier)
+    : min_support_(min_support),
+      window_length_(window_length),
+      threads_num_(threads_num),
+      tasks_num_multiplier_(tasks_num_multiplier) {}
 
 CompositeEpisodeMiner::Context::Context(boost::asio::thread_pool& thread_pool,
                                         std::vector<ParallelEpisode> const& seeds, size_t min,
-                                        size_t win, config::ThreadNumType threads_num)
-    : pool(thread_pool), all_seeds(seeds), min_support(min), window_length(win) {
-    max_parallel_tasks = threads_num * 3;
-}
+                                        size_t win, int tasks_num)
+    : pool(thread_pool),
+      all_seeds(seeds),
+      min_support(min),
+      window_length(win),
+      max_parallel_tasks(tasks_num) {}
 
 void CompositeEpisodeMiner::Context::Commit(MaxEpisodesCollection&& local_buf) {
     std::lock_guard<std::mutex> lock(results_mutex);
@@ -23,7 +29,8 @@ void CompositeEpisodeMiner::Context::Commit(MaxEpisodesCollection&& local_buf) {
 std::vector<MaxEpisodesCollection> CompositeEpisodeMiner::Mine(
         std::vector<ParallelEpisode> const& seeds) {
     boost::asio::thread_pool pool(threads_num_);
-    Context ctx(pool, seeds, min_support_, window_length_, threads_num_);
+    int tasks_num = static_cast<int>(tasks_num_multiplier_ * threads_num_);
+    Context ctx(pool, seeds, min_support_, window_length_, tasks_num);
 
     for (auto const& seed : seeds) {
         ctx.tasks_in_flight++;
@@ -43,7 +50,8 @@ void CompositeEpisodeMiner::RunSearchTask(CompositeEpisode episode, BoundList bo
                                           Context& ctx) {
     MaxEpisodesCollection local_buffer;
 
-    auto recurse = [&](auto&& self, CompositeEpisode& curr_ep, BoundList const& curr_bl) -> void {
+    auto recurse = [this, &local_buffer, &ctx](auto&& self, CompositeEpisode& episode,
+                                               BoundList const& curr_bl) -> void {
         bool is_maximal = true;
 
         for (auto const& seed : ctx.all_seeds) {
@@ -52,11 +60,11 @@ void CompositeEpisodeMiner::RunSearchTask(CompositeEpisode episode, BoundList bo
 
             if (extended_bl) {
                 is_maximal = false;
-                CompositeEpisode child = curr_ep;
-                child.Extend(seed, extended_bl->GetSupport());
 
                 int current_tasks = ctx.tasks_in_flight.load(std::memory_order_relaxed);
                 if (current_tasks < ctx.max_parallel_tasks) {
+                    CompositeEpisode child = episode;
+                    child.Extend(seed, extended_bl->GetSupport());
                     ctx.tasks_in_flight++;
                     boost::asio::post(ctx.pool, [this, child = std::move(child),
                                                  bl = std::move(*extended_bl), &ctx]() mutable {
@@ -64,13 +72,15 @@ void CompositeEpisodeMiner::RunSearchTask(CompositeEpisode episode, BoundList bo
                         ctx.tasks_in_flight--;
                     });
                 } else {
-                    self(self, child, *extended_bl);
+                    episode.Extend(seed, extended_bl->GetSupport());
+                    self(self, episode, *extended_bl);
+                    episode.Shorten(curr_bl.GetSupport());
                 }
             }
         }
 
         if (is_maximal) {
-            local_buffer.SimpleAdd(curr_ep);
+            local_buffer.SimpleAdd(episode);
         }
     };
 

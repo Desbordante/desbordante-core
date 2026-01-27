@@ -17,7 +17,7 @@ namespace algos::maxfem {
 class CompositeEpisodeMiner {
 public:
     CompositeEpisodeMiner(size_t min_support, size_t window_length,
-                          config::ThreadNumType threads_num);
+                          config::ThreadNumType threads_num, double tasks_num_multiplier);
 
     std::vector<MaxEpisodesCollection> Mine(std::vector<ParallelEpisode> const& seeds);
 
@@ -35,7 +35,7 @@ private:
         std::vector<MaxEpisodesCollection> global_results;
 
         Context(boost::asio::thread_pool& thread_pool, std::vector<ParallelEpisode> const& seeds,
-                size_t min, size_t win, config::ThreadNumType threads_num);
+                size_t min, size_t win, int tasks_num);
 
         void Commit(MaxEpisodesCollection&& local_buf);
     };
@@ -45,6 +45,7 @@ private:
     size_t min_support_;
     size_t window_length_;
     config::ThreadNumType threads_num_;
+    double tasks_num_multiplier_;
 };
 
 }  // namespace algos::maxfem
