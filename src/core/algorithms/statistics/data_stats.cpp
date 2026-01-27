@@ -1071,41 +1071,25 @@ Statistic DataStats::GetMonotonicity(size_t index) const {
     bool increasing = true;
     bool decreasing = true;
     std::byte const* prev = nullptr;
-    bool has_prev = false;
-
     for (size_t i = 0; i < col.GetNumRows(); ++i) {
         if (col.IsNullOrEmpty(i)) continue;
-
         std::byte const* current = col.GetData()[i];
-
-        if (has_prev) {
+        if (prev != nullptr) {
             mo::CompareResult cmp = col.GetType().Compare(prev, current);
-
             if (cmp == mo::CompareResult::kLess) {
                 decreasing = false;
             } else if (cmp == mo::CompareResult::kGreater) {
                 increasing = false;
             }
-
             if (!increasing && !decreasing) break;
-        } else {
-            has_prev = true;
         }
         prev = current;
     }
+    if (prev == nullptr) return {};
 
-    if (!has_prev) return {};
-
-    std::string result;
-    if (increasing && !decreasing) {
-        result = "ascending";
-    } else if (!increasing && decreasing) {
-        result = "descending";
-    } else if (increasing && decreasing) {
-        result = "equal";
-    } else {
-        result = "none";
-    }
+    std::string result = (increasing && decreasing) ? "equal" :
+                            increasing ? "ascending" :
+                            decreasing ? "descending" : "none";
 
     mo::StringType string_type;
     std::byte const* result_data = string_type.MakeValue(result);

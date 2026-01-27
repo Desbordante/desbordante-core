@@ -166,12 +166,17 @@ public:
     Statistic GetNumberOfEntirelyUppercaseWords(size_t index) const;
     // Returns the amount of entirely lowercase words in a string column.
     Statistic GetNumberOfEntirelyLowercaseWords(size_t index) const;
-
+    // Returns the interquartile range (IQR) for a numeric column.
     Statistic GetInterquartileRange(size_t index) const;
+    // Returns the coefficient of variation for a numeric column.
     Statistic GetCoefficientOfVariation(size_t index) const;
+    // Returns a flag of monotonicity for a comparable column.
     Statistic GetMonotonicity(size_t index) const;
+    // Returns the Jarque-Bera test statistic for normality for a numeric column.
     Statistic GetJarqueBeraStatistic(size_t index) const;
+    // Returns the entropy value for a column.
     Statistic GetEntropy(size_t index) const;
+    // Returns the Gini coefficient for a column.
     Statistic GetGiniCoefficient(size_t index) const;
 
     ColumnStats const& GetAllStats(size_t index) const;
