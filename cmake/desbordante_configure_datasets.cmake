@@ -38,7 +38,7 @@ function(desbordante_fetch_datasets)
     set(local_hashfile "${arg_DOWNLOAD_DIR}/${hashfile_name}")
     set(hashfile_url "${BASE_URL}/${hashfile_name}")
 
-    file(DOWNLOAD ${hashfile_url} ${local_hashfile} STATUS download_status)
+    file(DOWNLOAD ${hashfile_url} ${local_hashfile} STATUS download_status LOG download_log)
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
@@ -48,6 +48,7 @@ function(desbordante_fetch_datasets)
                 for ${filename}. If you already have the necessary datasets and do not want to \
                 check for updates, consider setting -DDESBORDANTE_FETCH_DATASETS=OFF."
         )
+        message(NOTICE "Download logs:\n${download_log}")
         # local hashfiles are empty
         file(REMOVE ${local_hashfile})
         return()
@@ -57,17 +58,25 @@ function(desbordante_fetch_datasets)
     string(STRIP "${remote_hash}" remote_hash)
 
     message(STATUS "-> Fetching ${filename}")
+	# TODO(p-senichenkov): Use automatic hash check when download error gets caught
     file(
         DOWNLOAD "${BASE_URL}/${filename}" "${file_path}"
-        EXPECTED_HASH SHA256=${remote_hash}
+        # EXPECTED_HASH SHA256=${remote_hash}
         STATUS download_status
+        LOG download_log
     )
 
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
+        message(NOTICE "Donwload log:\n${download_log}")
         message(FATAL_ERROR "Failed to download ${filename}: [${status_code}] ${str_val}.")
     endif()
+
+	file(SHA256 ${file_path} actual_hash)
+	if (NOT ${actual_hash} STREQUAL ${remote_hash})
+		message(FATAL_ERROR "Incorrect hash for file ${filename}")
+	endif()
 endfunction()
 
 #[=[
