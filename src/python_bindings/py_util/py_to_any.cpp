@@ -15,6 +15,8 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
+#include "core/algorithms/pac/model/default_domains/domain_type.h"
+#include "core/algorithms/pac/model/idomain.h"
 #include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
@@ -144,7 +146,11 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kNormalConvPair<model::DDString>,
         kNormalConvPair<std::string>,
         kNormalConvPair<std::vector<std::pair<std::string, std::string>>>,
-        kNormalConvPair<std::pair<std::string, std::string>>};
+        kNormalConvPair<std::pair<std::string, std::string>>,
+        kEnumConvPair<pac::model::DomainType>,
+        kNormalConvPair<std::vector<std::string>>,
+        kNormalConvPair<std::shared_ptr<pac::model::IDomain>>,
+};
 
 }  // namespace
 
