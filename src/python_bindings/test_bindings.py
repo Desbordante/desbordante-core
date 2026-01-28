@@ -141,7 +141,6 @@ ALGO_CORRECT_OPTIONS_INFO = [
             {
                 "column_indices": [1],
                 "domain": desb.pac.domains.CustomDomain(
-                    lambda a, b: int(a[0]) < int(b[0]),
                     lambda val: int(val[0]) < 7, "[-\\infty, 7]"),
             },
             {
