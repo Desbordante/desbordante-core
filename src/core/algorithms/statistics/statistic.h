@@ -5,6 +5,7 @@
 #include "core/model/types/types.h"
 
 namespace algos {
+
 class Statistic {
     bool has_value_ = false;
     std::byte const *data_ = nullptr;
@@ -36,7 +37,9 @@ struct ColumnStats {
             num_zeros, num_negatives, sum_of_squares, geometric_mean, mean_ad, median, median_ad,
             vocab, num_non_letter_chars, num_digit_chars, num_lowercase_chars, num_uppercase_chars,
             num_chars, num_avg_chars, min_num_chars, max_num_chars, min_num_words, max_num_words,
-            num_words, num_entirely_uppercase, num_entirely_lowercase;
+            num_words, num_entirely_uppercase, num_entirely_lowercase, interquartile_range,
+            coefficient_of_variation, monotonicity, jarque_bera_statistic, entropy,
+            gini_coefficient;
 
     std::string ToString() const;
     std::unordered_map<std::string, std::string> ToKeyValueMap() const;

@@ -166,6 +166,20 @@ void BindStatistics(pybind11::module_& main_module) {
                  "Returns the amount of entirely lowercase words in a column.", py::arg("index"))
             .def("get_number_of_entirely_uppercase_words",
                  &DataStats::GetNumberOfEntirelyUppercaseWords,
-                 "Returns the amount of entirely uppercase words in a column.", py::arg("index"));
+                 "Returns the amount of entirely uppercase words in a column.", py::arg("index"))
+            .def("get_interquartile_range", &DataStats::GetInterquartileRange,
+                 "Returns interquartile range (IQR) for numeric column.", py::arg("index"))
+            .def("get_coefficient_of_variation", &DataStats::GetCoefficientOfVariation,
+                 "Returns coefficient of variation (std/mean) for numeric column.",
+                 py::arg("index"))
+            .def("get_monotonicity", &DataStats::GetMonotonicity,
+                 "Returns monotonicity flag: 'ascending', 'descending', 'equal' or 'none'.",
+                 py::arg("index"))
+            .def("get_jarque_bera_statistic", &DataStats::GetJarqueBeraStatistic,
+                 "Returns Jarque-Bera statistic for normality test.", py::arg("index"))
+            .def("get_entropy", &DataStats::GetEntropy,
+                 "Returns Shannon entropy for categorical column.", py::arg("index"))
+            .def("get_gini_coefficient", &DataStats::GetGiniCoefficient,
+                 "Returns Gini coefficient for categorical column.", py::arg("index"));
 }
 }  // namespace python_bindings
