@@ -49,3 +49,28 @@ exclude = [
     "src/tests/*",
     "examples/*",
 ]
+
+[tool.typos]
+[tool.typos.files]
+extend-exclude = [
+    "test_input_data/",
+]
+[tool.typos.default]
+extend-ignore-re = [
+    "countr_zero",
+    "BA thesis.pdf",
+    "Peter J. Hass",
+    "Comput. J.",
+    "\"ba\"",
+]
+extend-ignore-words-re = [
+    "^(nd|ND|Nd)$",
+]
+extend-ignore-identifiers-re = [
+    "^(nd|ND|Nd)$",
+]
+[tool.typos.type.jupyter]
+extend-ignore-re = [
+    '\"id":\s*"[^"\n]*"',
+    '"outputs"\s*:\s*\[(\s*\{[^}]*\}(?:,\s*\{[^}]*\})*)?\s*\]'
+]

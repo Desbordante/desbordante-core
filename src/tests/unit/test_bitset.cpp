@@ -432,7 +432,7 @@ TYPED_TEST_P(BitsetTest, FindFirst_libstdcxxExtensions) {
 
     EXPECT_EQ(c._Find_first(), s._Find_first());
 #else
-    GTEST_SKIP() << "SGI extensions unavailible";
+    GTEST_SKIP() << "SGI extensions unavailable";
 #endif
 }
 
@@ -443,7 +443,7 @@ TYPED_TEST_P(BitsetTest, FindNext_libstdcxxExtensions) {
 
     EXPECT_EQ(c._Find_next(2), s._Find_next(2));
 #else
-    GTEST_SKIP() << "SGI extensions unavailible";
+    GTEST_SKIP() << "SGI extensions unavailable";
 #endif
 }
 

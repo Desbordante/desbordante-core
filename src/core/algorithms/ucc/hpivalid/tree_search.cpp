@@ -72,7 +72,7 @@ void TreeSearch::Run() {
     std::deque<Edge::size_type> tointersect_queue;
 
     // Searching
-    // find edge from uncov with smallest intersecton C with CAND
+    // find edge from uncov with smallest intersection C with CAND
     Edge c = partial_hg_[uncov.find_first()] & cand;
     for (Edge::size_type i_e = uncov.find_next(uncov.find_first()); i_e != Edge::npos;
          i_e = uncov.find_next(i_e)) {
@@ -263,7 +263,7 @@ inline bool TreeSearch::ExtendOrConfirmS(
         }
     }
 
-    // find edge from uncov with smallest intersecton C with CAND
+    // find edge from uncov with smallest intersection C with CAND
     rc_.CountTreeComplexity(uncov.count());
     Edge c = partial_hg_[uncov.find_first()] & cand;
     for (Edge::size_type i_e = uncov.find_next(uncov.find_first()); i_e != Edge::npos;

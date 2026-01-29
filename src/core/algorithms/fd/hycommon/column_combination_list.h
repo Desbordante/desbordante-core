@@ -10,8 +10,8 @@ namespace algos::hy {
 
 /**
  * Collection of column combinations found by the Sampler module.
- * In the HyFD algorithm column combination repesents a non-FD.
- * In the HyUCC algorithm column combination repesents a non-UCC.
+ * In the HyFD algorithm column combination represents a non-FD.
+ * In the HyUCC algorithm column combination represents a non-UCC.
  *
  * Stores combinations with the same column count as a separate level.
  */
@@ -57,7 +57,7 @@ public:
     }
 
     /**
-     * @return Total count of stored column combinations accross all levels.
+     * @return Total count of stored column combinations across all levels.
      */
     [[nodiscard]] size_t GetTotalCount() const {
         return std::accumulate(ccs_.cbegin(), ccs_.cend(), 0,

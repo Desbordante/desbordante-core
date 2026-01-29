@@ -35,13 +35,13 @@ protected:
     config::MaxLhsType max_lhs_;
 
     /* Collection of all discovered FDs
-     * Every FD mining algorithm should place discovered dependecies here. Don't add new FDs by
+     * Every FD mining algorithm should place discovered dependencies here. Don't add new FDs by
      * accessing this field directly, use RegisterFd methods instead
      */
     util::PrimitiveCollection<FD> fd_collection_;
 
     /* Registers new FD.
-     * Should be overrided if custom behavior is needed
+     * Should be overridden if custom behavior is needed
      */
     virtual void RegisterFd(Vertical lhs, Column rhs,
                             std::shared_ptr<RelationalSchema const> const& schema) {

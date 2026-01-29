@@ -63,12 +63,12 @@ print('Let\'s look at clusters violating ND:')
 print(f'Number of clusters: {len(highlights)}')
 highlight_indices = []
 for high in highlights:
-    highlight_indices += high.get_occurences_indices()
+    highlight_indices += high.get_occurrences_indices()
 
 print(CYAN, end='')
 print_table(MERGED_PEOPLE_TABLE, highlight_indices)
 print(ENDC)
-print(f'So, {highlights[0].lhs_value} has {highlights[0].occurences_number} documents. It\'s twice as much as needed.')
+print(f'So, {highlights[0].lhs_value} has {highlights[0].occurrences_number} documents. It\'s twice as much as needed.')
 print(f'Look at birth date. {highlights[0].lhs_value} has two different values.')
 print(f'Maybe, we have two different {highlights[0].lhs_value}? Let\'s split them:')
 print(CYAN, end='')
