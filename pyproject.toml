@@ -66,7 +66,7 @@ extend-ignore-re = [
 extend-ignore-words-re = [
     "^(nd|ND|Nd)$",
 ]
-extend-ignore-identifier-re = [
+extend-ignore-identifiers-re = [
     "^(nd|ND|Nd)$",
 ]
 [tool.typos.type.jupyter]
