@@ -79,6 +79,13 @@ constexpr auto kTimeLimitSeconds = "time_limit";
 // GFD
 constexpr auto kGfdData = "gfd";
 constexpr auto kGraphData = "graph";
+// gSpan
+constexpr auto kGraphDatabase = "graph_database";
+constexpr auto kGSpanMinimumSupport = "minsup";
+constexpr auto kOutputSingleVertices = "output_single_vertices";
+constexpr auto kMaxNumberOfEdges = "max_number_of_edges";
+constexpr auto kOutputGraphIds = "output_graph_ids";
+constexpr auto kGSpanOutputPath = "output_path";
 // GFD miner
 constexpr auto kDoCollectViolations = "do_collect_violations";
 constexpr auto kGfdK = "gfd_k";
