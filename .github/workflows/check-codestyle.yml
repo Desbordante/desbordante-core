@@ -93,7 +93,7 @@ jobs:
       - name: Find typos configs
         id: search
         run: |
-          ALL_CONFIGS=$(find . -type f \( -name "pyproject.toml" -o -name "typos.toml" -o -name ".typos.toml" \))
+          ALL_CONFIGS=$(find . -type f \( -name "pyproject.toml" -o -name "typos.toml" -o -name ".typos.toml" \) | tr '\n' ' ')
           echo "cfg=$ALL_CONFIGS">> $GITHUB_OUTPUT
 
       - name: Check spelling with typos
