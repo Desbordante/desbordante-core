@@ -94,9 +94,10 @@ jobs:
         id: search
         run: |
           ALL_CONFIGS=$(find . -type f \( -name "pyproject.toml" -o -name "typos.toml" -o -name ".typos.toml" \) | tr '\n' ' ')
+          echo $ALL_CONFIGS
           echo "cfg=$ALL_CONFIGS">> $GITHUB_OUTPUT
 
       - name: Check spelling with typos
         uses: crate-ci/typos@v1.39.2
         with:
-          config: ${{ steps.search.outputs.cfg }}
+          args: --config ${{ steps.search.outputs.cfg }}
