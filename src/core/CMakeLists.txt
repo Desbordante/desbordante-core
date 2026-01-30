@@ -6,11 +6,6 @@ set(BINARY ${CMAKE_PROJECT_NAME})
 # Collect all source files recursively (headers and implementations)
 file(GLOB_RECURSE lib_sources "*/*.h*" "*/*.cpp*")
 
-# Configure threading support with pthread preference
-# Required for Boost.Thread and other thread-dependent components
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
-
 # Build core project as a static library
 add_library(${BINARY} STATIC ${lib_sources})
 
@@ -35,7 +30,6 @@ target_compile_definitions(${BINARY} PUBLIC
 target_link_libraries(
     ${BINARY}
     PRIVATE ${Boost_LIBRARIES} # Boost components specified in find_package
-            Threads::Threads # System threading library
     PUBLIC spdlog::spdlog_header_only # Logging infrastructure exposed in headers
 )
 
