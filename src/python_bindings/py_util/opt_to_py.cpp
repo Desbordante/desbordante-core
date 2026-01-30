@@ -7,6 +7,7 @@
 #include <pybind11/stl.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/md/hymd/enums.h"
 #include "core/algorithms/metric/enums.h"
@@ -47,7 +48,10 @@ std::unordered_map<std::type_index, ConvFunction> const kConverters{
         enum_conv_pair<algos::metric::Metric>,
         enum_conv_pair<algos::InputFormat>,
         enum_conv_pair<algos::hymd::LevelDefinition>,
-        enum_conv_pair<algos::od::Ordering>};
+        enum_conv_pair<algos::od::Ordering>,
+        enum_conv_pair<algos::cfdfinder::Expansion>,
+        enum_conv_pair<algos::cfdfinder::Pruning>,
+        enum_conv_pair<algos::cfdfinder::Result>};
 }  // namespace
 
 namespace python_bindings {
