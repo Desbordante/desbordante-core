@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "core/algorithms/gdd/gdd_graph_description.h"
 #include "core/algorithms/gfd/gfd.h"
 #include "core/algorithms/gfd/graph_descriptor.h"
 
-namespace parser {
+namespace parser::graph_parser {
 
-namespace graph_parser {
+namespace gfd {
 
 model::graph_t ReadGraph(std::istream& stream);
 model::graph_t ReadGraph(std::filesystem::path const& path);
@@ -23,6 +24,13 @@ model::Gfd ReadGfd(std::filesystem::path const& path);
 void WriteGfd(std::ostream& stream, model::Gfd const& result);
 void WriteGfd(std::filesystem::path const& path, model::Gfd const& result);
 
-}  // namespace graph_parser
+}  // namespace gfd
 
-}  // namespace parser
+namespace gdd {
+
+model::gdd::graph_t ReadGraph(std::istream& stream);
+model::gdd::graph_t ReadGraph(std::filesystem::path const& path);
+
+}  // namespace gdd
+
+}  // namespace parser::graph_parser

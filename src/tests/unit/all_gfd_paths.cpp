@@ -6,7 +6,7 @@ namespace tests {
 
 model::Gfd MakeGfd(std::filesystem::path const& gfd_path) {
     std::ifstream f(gfd_path);
-    return parser::graph_parser::ReadGfd(f);
+    return parser::graph_parser::gfd::ReadGfd(f);
 };
 
 namespace {
