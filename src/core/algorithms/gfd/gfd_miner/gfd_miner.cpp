@@ -397,7 +397,7 @@ void GfdMiner::RegisterOptions() {
 
 void GfdMiner::LoadDataInternal() {
     std::ifstream f(graph_path_);
-    graph_ = parser::graph_parser::ReadGraph(f);
+    graph_ = parser::graph_parser::gfd::ReadGraph(f);
 }
 
 void GfdMiner::ResetState() {}
