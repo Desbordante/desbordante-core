@@ -44,8 +44,8 @@ endif()
 # --- Build Configuration Options ---
 
 option(DESBORDANTE_BUILD_BENCHMARKS "Build benchmarks" OFF)
-option(DESBORDANTE_BUILD_NATIVE "Build for host machine" OFF)
-option(DESBORDANTE_BUILD_TESTS "Build tests" OFF)
+option(DESBORDANTE_BUILD_NATIVE "Build for host machine" ON)
+option(DESBORDANTE_BUILD_TESTS "Build tests" ON)
 # This option only takes effect if DESBORDANTE_BUILD_TESTS or DESBORDANTE_BUILD_BENCHMARKS is ON
 option(DESBORDANTE_FETCH_DATASETS "Fetch datasets for tests or benchmarks" ON)
 option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
@@ -58,7 +58,7 @@ option(DESBORDANTE_SAFE_VERTICAL_HASHING
     at the cost of reduced performance. Recommended for exploratory data analysis." OFF
 )
 option(DESBORDANTE_SANITIZER "Build with sanitizers (UBSan + ASan)" OFF)
-option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" OFF)
+option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
 option(DESBORDANTE_USE_LTO "Build using interprocedural optimization" OFF)
 
 set(DESBORDANTE_LOG_LEVEL

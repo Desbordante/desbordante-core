@@ -9,6 +9,7 @@
             "cacheVariables": {
                 "DESBORDANTE_BUILD_NATIVE": "ON",
                 "DESBORDANTE_BUILD_TESTS": "ON",
+                "DESBORDANTE_FETCH_DATASETS": "ON",
                 "DESBORDANTE_UNPACK_DATASETS": "ON",
                 "CMAKE_COLOR_DIAGNOSTICS": "ON",
                 "CMAKE_COMPILE_WARNING_AS_ERROR": "ON",
