@@ -250,7 +250,8 @@ python3 -m pip install .
 Now it is possible to `import desbordante` as a module from within the created virtual environment. 
 
 #### Building tests & the Python module manually
-Build the tests themselves:
+##### Option 1. Using the build script
+To build the project with unit tests using the `Release` configuration:
 ```sh
 ./build.sh
 ```
@@ -262,7 +263,27 @@ The Python module can be built by providing the `--pybind` switch:
 
 See `./build.sh --help` for more available options.
 
-The `./build.sh` script generates the following file structure in `/path/to/desbordante-core/build/target`:
+##### Option 2. Using CMake Presets
+You can also use [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) to configure,
+build and test the project. View available presets (i.e., `Debug`, `DebugSan`, `Release`) with `cmake --list-presets`.
+To customize build configurations without modifying the project file, create a `CMakeUserPresets.json` file in the
+project root. This file is ignored by version control.
+
+**Build only.** To configure and build the project without running tests. Configuration is required only
+once unless options change.
+
+```sh
+cmake --preset Debug
+cmake --build --preset Debug
+```
+
+**Full workflow (configure, build, test).** To execute the complete workflow for the `Debug` preset:
+```sh
+cmake --workflow --preset Debug
+```
+
+##### Build artifacts
+After a successful build, the following artifacts are generated in `build/<preset>/target`:
 ```
 ├───input_data
 │   └───some-sample-csv\'s.csv
@@ -270,17 +291,22 @@ The `./build.sh` script generates the following file structure in `/path/to/desb
 ├───desbordante.cpython-*.so
 ```
 
-The `input_data` directory contains several .csv files that are used by `Desbordante_test`. Run `Desbordante_test` to perform unit testing:
+##### Running tests
+
+**Using the test binary.** The `input_data` directory provides .csv files required for testing. To run unit tests directly (excluding heavy datasets):
 ```sh
-cd build/target
+cd build/<preset>/target
 ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
 ```
 
-Alternatively, you can run tests with CTest from any directory in `Desbordante` tree:
+**Using [CTest](https://cmake.org/cmake/help/latest/manual/ctest.1.html).** Alternatively, execute tests from the project root using CTest.
+This example runs tests for the `Debug` build:
 ```sh
-ctest --test-dir build --exclude-regex ".*HeavyDatasets.*" -j $JOBS
+ctest --preset Debug -j $JOBS
 ```
-where `$JOBS` is the desired number of concurrent jobs.
+where `$JOBS` is the desired number of concurrent jobs. Use `--rerun-failed` to execute only previously failed tests.
+
+##### Python module
 
 `desbordante.cpython-*.so` is a Python module, packaging Python bindings for the Desbordante core library. In order to use it, simply `import` it:
 ```sh
@@ -288,7 +314,6 @@ cd build/target
 python3
 >>> import desbordante
 ```
-
 The core library uses [spdlog](https://github.com/gabime/spdlog). All log messages are automatically bridged to Python's standard logging module.
 
 **Log level control**:
