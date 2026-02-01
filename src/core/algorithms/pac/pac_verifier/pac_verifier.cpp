@@ -25,7 +25,9 @@ void PACVerifier::RegisterOptions() {
 
     RegisterOption(Option(&min_epsilon_, kMinEpsilon, kDMinEpsilon, -1.0));
     RegisterOption(Option(&max_epsilon_, kMaxEpsilon, kDMaxEpsilon, -1.0));
-    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0));
+    RegisterOption(Option(&min_delta_, kMinDelta, kDMinDelta, -1.0).SetValueCheck([](double x) {
+        return x <= 1;
+    }));
     RegisterOption(Option(&delta_steps_, kDeltaSteps, kDDeltaSteps, 0ul));
     RegisterOption(Option(&diagonal_threshold_, kDiagonalThreshold, kDDiagonalThreshold,
                           kDefaultDiagonalThreshold));
@@ -96,12 +98,18 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
 
     auto begin = empirical_probabilities.begin();
     auto end = empirical_probabilities.end();
+
+    // Min delta is checked to be less or equal than 1, and empirical probabilies always contain
+    // (??, 1), so begin cannot be equal to empirical_probabilities.end() here
+    begin = std::ranges::lower_bound(begin, end, min_delta_, {},
+                                     [](auto const& p) { return p.second; });
+
     if (max_epsilon_ >= 0) {
         // Special case: max_eps and min_delta cannot be both satisfied.
         // Return (??, min_delta) so that user can see that parameters are contradictory.
-        // Note that first pair is always (0, ??) -- taht's why we check max_eps before min_eps
-        if (empirical_probabilities.size() >= 2 &&
-            empirical_probabilities[1].second <= min_delta_) {
+        if (begin->first > max_epsilon_) {
+            LOG_TRACE(
+                    "Max eps and min delta cannot be both satisfied. Taking pair with min delta.");
             return empirical_probabilities[1];
         }
 
@@ -143,11 +151,6 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
             return stripped_emp_prob.front();
         }
         return stripped_emp_prob.back();
-    }
-    // First pair is always (0, ??). We don't want to take it, unless it's the only pair
-    // (this applies only if min_eps <= 0)
-    if (min_epsilon_ <= 0) {
-        stripped_emp_prob.advance(1);
     }
 
     LOG_TRACE("Stripped empirical probabilities:");
