@@ -77,11 +77,10 @@ std::vector<std::pair<double, double>> DomainPACVerifierBase::FindEpsilons() con
                          static_cast<std::size_t>(std::distance(end, dists_from_domain_.end())));
         std::advance(end, actually_add);
         curr_size += actually_add;
-        auto eps_i = std::prev(end)->second;
+        auto eps_i = end == dists_from_domain_.begin() ? 0 : std::prev(end)->second;
         LOG_TRACE("Eps for {} tuples: {}", needed_tuples_num, eps_i);
 
         // Refine delta_i
-        LOG_TRACE("Size: {}", curr_size);
         while (end != dists_from_domain_.end() &&
                end->second - eps_i < PACVerifier::kDistThreshold) {
             std::advance(end, 1);
