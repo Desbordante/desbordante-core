@@ -9,7 +9,7 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 BLUE = '\033[34m'
 CYAN = '\033[36m'
-GRAY = '\033[1;30m'
+BOLD = '\033[1;37m'
 ENDC = '\033[0m'
 
 ENGINE_TEMPS = 'examples/datasets/verifying_pac/engine_temps_bad.csv'
@@ -24,62 +24,86 @@ def csv_to_str(filename: str) -> str:
 
 
 print(
-    f'''{CYAN}This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
-This example continues first Domain PAC verification example (examples/basic/verifying_pac/verifying_domain_pac1.py).
-If you haven't read first part, start with reading it.{ENDC}
+    f'''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs)
+on multiple columns. It continues the first Domain PAC verification example
+{CYAN}(examples/basic/verifying_pac/verifying_domain_pac1.py){ENDC}. If you have not read the first part yet,
+it is recommended to start there.
 ''')
 
 print(
-    f'''In first example we\'ve verified {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC} on temperature sensor readings.
-Now we also have tachometer readings:''')
-print(f'{GRAY}{csv_to_str(ENGINE_TEMPS)}{ENDC}')
+    f'''In first example we verified {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC} on engine temperature sensor readings.
+Now, in addition to temperature readings, we also have tachometer data:''')
+print(f'{BOLD}{csv_to_str(ENGINE_TEMPS)}{ENDC}')
 print()
 
 print(
-    f'''Normal RPM for our engine lie in {BLUE}[1500, 3500]{ENDC}. Values in {BLUE}[0, 5000]{ENDC} are not harmful themselves, but
-cold engine will stall on low RPM and can be damaged on high RPM, and overheated engine can blow up, especially on RPM
-outside of {BLUE}[1500, 3500]{ENDC} (because cooling system operation depends on RPM).
-Let\'s use Domain PAC verifier to check if engine works properly, just like we did in first example.
+    f'''The normal operating RPM for this engine is {BLUE}[1500, 3500]{ENDC}. Values outside this range are
+not harmful by themselves (as long as they are within {BLUE}[0, 5000]{ENDC}), but:
+    * A cold engine may stall at low RPM and can be damaged at high RPM.
+    * An overheated engine is especially vulnerable at RPM values outside [1500, 3500], because
+      cooling efficiency depends on RPM.
+As in the first example, we use the Domain PAC verifier to check whether the engine operates properly.
 ''')
 
 print(
     f'''Firstly we need to create domain. We have a cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
 so it would be natural to use parallelepiped.''')
-# Arguments of generic version are A = (a0, a1, ..., an) and B = (b0, b1, ..., bn).
-# Domain is [A, B] = [a0, b0] x [a1, b1] x ... x [an, bn].
+print(
+    f'''We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
+of two segments:
+    * temperature: [85, 95];
+    * RPM: [1500, 3500].
+This forms a parallelepiped domain: {BLUE}[85, 95] x [1500, 3500]{ENDC}.
+''')
+# Arguments of generic version are A = (a1, a2, ..., an) and B = (b1, b2, ..., bn).
+# Domain is [A, B] = [a1, b1] x [a2, b2] x ... x [an, bn].
 parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
                                                         ['95', '3500'])
 
 print(
-    f'Let\'s run Domain PAC verifier with domain={BLUE}{parallelepiped}{ENDC}, max_epsilon={BLUE}15{ENDC}, min_delta={BLUE}0.85{ENDC}.'
-)
+    f'''We run the Domain PAC verifier with the following parameters: domain={BLUE}{parallelepiped}{ENDC},
+max_epsilon={BLUE}15{ENDC}.
+''')
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
 algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=parallelepiped,
                column_indices=[0, 1])
-algo.execute(max_epsilon=15, min_delta=0.85)
+algo.execute(max_epsilon=10)
 pac = algo.get_pac()
 print(f'Algorithm result: {RED}{pac}{ENDC}.')
 print(
-    'Delta is less than min_delta? What does it mean? Let\'s look at highlights:'
+    f'A result with δ = {BLUE}{pac.delta}{ENDC} is unexpected. To understand what is happening, we examine the highlights.'
 )
 
-# Default values are eps_1 = min_epsilon and eps_2 = pac.epsilon
 print(
-    f'Highlights between {BLUE}0{ENDC} and {BLUE}{pac.epsilon}{ENDC}: {algo.get_highlights()}\n'
-)
-print(f'''There are no highlights! Maybe we\'ve selected wrong parameters?
-Which epsilon should we use: {BLUE}10{ENDC} for temperatures or {BLUE}1500{ENDC} for RPM? We\'ll need some math to answer this.
+    f'''Highlights between {BLUE}0{ENDC} and {BLUE}{pac.epsilon}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
+''')
+print(
+    f'''There are very few hihglights, which suggests that the parameters may not be chosen correctly.
 
-Parallelepiped uses Chebyshev metric to calculate distance between value tuples: {GRAY}d(x, y) = max{{|x[0] - y[0]|, ..., |x[n] - y[n]|}}{ENDC}.
-But in our case difference between RPM values will always be greater than difference between temperatures!
-For such situations all coodinate-wise-metric-based domains (currently it's Parallelepiped and Ball, but you can
-define your own in C++) have additional parameter: list of levelling coefficients. When it\'s passed,
-distance becomes {GRAY}d(x, y) = max{{|x[0] - y[0]| * lc[0], ..., |x[n] - y[n]| * lc[n]}}{ENDC}.
+The question is: what does ε = {BLUE}{pac.epsilon}{ENDC} mean in two-dimensional domain? Should ε correspond to:
+    * 10 degrees of temperature difference, or
+    * 1500 RPM difference?
+To answer this, we need to understand how distnace is computed.
 
-Let\'s use levelling_coefficients={BLUE}[1, 0.01]{ENDC} to normalize temperatures and RPM.'''
-      )
-# Also parallelepiped uses product compare: x < y iff x[0] < y[0] & ... & x[n] < y[n]
+The parallelepiped uses the Chebyshev metric to calculate distance between value tuples:
+    {BOLD}d(x, y) = max{{|x[1] - y[1]|, ..., |x[n] - y[n]|}}{ENDC}
+In our case:
+    * temperature differences are on the order of tens;
+    * RPM differences are on the order of thousands.
+As a result, RPM differences dominate the distance computation, making temperature differences
+almost irrelevant. This issue affects all coordinate-wise metric-based domains (currently
+Parallelepiped and Ball, though custom domains can be implemented in C++).
+
+To address this, such domains support {CYAN}levelling coefficients{ENDC}, which rescale individual
+dimensions. With levelling coefficients, the distance becomes:
+    {BOLD}d(x, y) = max{{|x[1] - y[1]| * lc[1], ..., |x[n] - y[n]| * lc[n]}}{ENDC}
+To normalize temperatures and RPM scales, we use levelling_coefficients={BLUE}[1, 0.01]{ENDC} parameter.
+This treats a 100 RPM difference as comparable to a 1°C difference.
+
+With levelling coefficients applied, we rerun the algorithm.
+''')
+
 parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
                                                         ['95', '3500'],
                                                         [1, 0.01])
@@ -87,8 +111,9 @@ algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
 algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=parallelepiped,
                column_indices=[0, 1])
-algo.execute(max_epsilon=15, min_delta=0.85)
+algo.execute(max_epsilon=10, min_delta=0.9)
 print(f'''Algorithm result: {GREEN}{algo.get_pac()}{ENDC}.
+This result is now meaningful and consistent with the findings from the first example.
 
-Now it\'s recommended to continue with reading third example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
-which introduces another basic domain: Ball.''')
+It is recommended to continue with the third example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
+which introduces another basic domain type: Ball.''')
