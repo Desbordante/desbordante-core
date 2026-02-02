@@ -100,5 +100,4 @@ jobs:
       - name: Check spelling with typos
         uses: crate-ci/typos@v1.39.2
         with:
-          config: ${{ steps.search.outputs.cfg }}
-          files: .
+          args: --config ${{ steps.search.outputs.cfg }} .
