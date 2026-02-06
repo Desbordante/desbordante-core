@@ -23,7 +23,16 @@ DDVerifier::DDVerifier() : Algorithm({}) {
 void DDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
     auto const default_dd = DDs();
+
+    auto check_threshold = [](double parameter) {
+        if (parameter < 0 || parameter > 1)
+            throw config::ConfigurationError("Satisfaction threshold out of range");
+    };
+
     RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(
+            Option{&satisfaction_threshold_, kSatisfactionThreshold, kDSatisfactionThreshold, 1.0}
+                    .SetValueCheck(check_threshold));
     RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
 }
 
@@ -99,7 +108,7 @@ void DDVerifier::LoadDataInternal() {
 
 void DDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kDDString});
+    MakeOptionsAvailable({kDDString, kSatisfactionThreshold});
 }
 
 void DDVerifier::CheckCorrectnessDd() const {
@@ -178,7 +187,7 @@ std::vector<Highlight> const &DDVerifier::GetHighlights() const {
 }
 
 bool DDVerifier::DDHolds() const {
-    return !num_error_rhs_;
+    return 1 - error_ >= satisfaction_threshold_;
 }
 
 void DDVerifier::PrintStatistics() const {
