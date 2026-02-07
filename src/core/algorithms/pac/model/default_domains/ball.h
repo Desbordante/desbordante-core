@@ -19,7 +19,7 @@ private:
     std::vector<::model::Type::Destructor> destructors_;
 
     /// @brief Euclidean distance.
-    /// d(X, Y) = sqrt((x[0] - y[0])^2 + (x[1] - y[1])^2 + ... + (x[n] - y[n])^2)
+    /// d(X, Y) = (x[1] - y[1])^2 + ... + (x[n] - y[n])^2)
     double EuclideanDist(Tuple const& x, Tuple const& y) const;
 
 protected:

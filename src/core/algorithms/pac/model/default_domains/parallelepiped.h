@@ -10,7 +10,7 @@
 
 namespace pac::model {
 /// @brief Closed n-ary parallelepiped, defined by two corners. D = [@c first, @c last] =
-/// [@c first[0], @c last[0]] x [@c first[1], @c last[1]] x ... x [@c first[n], @c last[n]]
+/// [@c first[1], @c last[1]] x ... x [@c first[n], @c last[n]]
 class Parallelepiped final : public MetricBasedDomain {
 private:
     Tuple first_;
