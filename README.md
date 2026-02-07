@@ -241,7 +241,6 @@ You can also add them to the end of `~/.profile` to set this by default in all s
 Clone the repository, change the current directory to the project directory and run the following commands:
 
 ```bash
-./build.sh --deps-only
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install .
