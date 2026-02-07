@@ -46,7 +46,7 @@ As in the first example, we use the Domain PAC verifier to check whether the eng
 ''')
 
 print(
-    f'''Firstly we need to create domain. We have a cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
+    f'''Firstly, we need to create domain. We have a cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
 so it would be natural to use parallelepiped.''')
 print(
     f'''We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
@@ -84,7 +84,7 @@ print(
 The question is: what does ε = {BLUE}{pac.epsilon}{ENDC} mean in two-dimensional domain? Should ε correspond to:
     * 10 degrees of temperature difference, or
     * 1500 RPM difference?
-To answer this, we need to understand how distnace is computed.
+To answer this, we need to understand how distance is computed.
 
 The parallelepiped uses the Chebyshev metric to calculate distance between value tuples:
     {BOLD}d(x, y) = max{{|x[1] - y[1]|, ..., |x[n] - y[n]|}}{ENDC}
@@ -95,13 +95,13 @@ As a result, RPM differences dominate the distance computation, making temperatu
 almost irrelevant. This issue affects all coordinate-wise metric-based domains (currently
 Parallelepiped and Ball, though custom domains can be implemented in C++).
 
-To address this, such domains support {CYAN}levelling coefficients{ENDC}, which rescale individual
-dimensions. With levelling coefficients, the distance becomes:
+To address this, such domains support {CYAN}leveling coefficients{ENDC}, which rescale individual
+dimensions. With leveling coefficients, the distance becomes:
     {BOLD}d(x, y) = max{{|x[1] - y[1]| * lc[1], ..., |x[n] - y[n]| * lc[n]}}{ENDC}
-To normalize temperatures and RPM scales, we use levelling_coefficients={BLUE}[1, 0.01]{ENDC} parameter.
+To normalize temperatures and RPM scales, we use leveling_coefficients={BLUE}[1, 0.01]{ENDC} parameter.
 This treats a 100 RPM difference as comparable to a 1°C difference.
 
-With levelling coefficients applied, we rerun the algorithm.
+With leveling coefficients applied, we rerun the algorithm.
 ''')
 
 parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
