@@ -10,7 +10,7 @@
 
 namespace model {
 
-/// @brief Probability Approximate Constraints are dependencies that generalize exact dependencies.
+/// @brief Probabilistic Approximate Constraints are dependencies that generalize exact dependencies.
 /// Each PAC has two common parameters: list of epsilons and list of deltas (separate for each
 /// attribute, or the same for all attributes).
 /// Epsilon is a measure of "proximity", which shows how much PAC deviates from exact
