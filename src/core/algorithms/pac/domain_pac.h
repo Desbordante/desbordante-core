@@ -45,6 +45,7 @@ public:
 
     std::vector<std::string> GetColumnNames() const {
         std::vector<std::string> result;
+        result.reserve(columns_.GetArity());
         std::ranges::transform(columns_.GetColumns(), std::back_inserter(result),
                                std::mem_fn(&Column::GetName));
         return result;
