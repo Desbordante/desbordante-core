@@ -176,6 +176,7 @@ INSTANTIATE_TEST_SUITE_P(
                 // -- "Refinement" --
                 // (finding optimal eps, delta)
                 // A simple test on 1D-array
+                // #0
                 DomainPACVerifyingParams(kSimpleTypos, {1},
                                          std::make_shared<Parallelepiped>("0", "5"), 0, 0.9, 0.8),
                 // A simple test on 1D-array, but values don't fall into domain
@@ -228,13 +229,19 @@ INSTANTIATE_TEST_SUITE_P(
                 // (finding optimal eps, delta on some segment of ECDF)
                 // Example from Comparison slides
                 // (https://github.com/p-senichenkov/Domain-PAC-validation-comparison/blob/main/slides/slides.pdf)
+                // #10
                 CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625),
                 CustomMetricBallsIntervalsParams(1.2, 1.3, 1.225, 0.73),
                 CustomMetricBallsIntervalsParams(2, 5, 4.709, 0.991),
+				// (min_eps, ??) is considered a point too, and here it wins
+                DomainPACVerifyingParams(kSimpleTypos, {1},
+                                         std::make_shared<Parallelepiped>("5", "7"), 1, 0.5, 0.5,
+                                         1),
                 // Min_delta is greater than delta for max_eps => should return (??, min_delta)
                 CustomMetricBallsIntervalsParams(0, 1, 2.60487, 0.9, 0.9),
                 // -- Validation --
                 // (finding delta for the given eps)
+                // #15
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774),
                 // Min delta is greater than actual delta => should return actual delta
                 CustomMetricBallsIntervalsParams(1.5, 1.5, 1.5, 0.774, 0.9, 1000)));
