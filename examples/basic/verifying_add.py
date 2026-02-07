@@ -10,15 +10,15 @@ COLOR_CODES = {
     "nocolor": "\033[0m"
 }
 
-def print_holds(result: bool) -> None:
-    if result:
-        print(f'This {COLOR_CODES["green"]}DD holds.{COLOR_CODES["nocolor"]}\n')
+def print_holds(algo, table, is_ADD=True) -> None:
+    if algo.dd_holds():
+        print(f'''This {COLOR_CODES["green"]}{'ADD' if is_ADD else 'DD'} holds{COLOR_CODES["nocolor"]}, error threshold is {COLOR_CODES["green"]}{algo.get_error()}{COLOR_CODES["nocolor"]}.\n''')
     else:
-        print(f'This {COLOR_CODES["red"]}DD doesn`t hold.{COLOR_CODES["nocolor"]}\n')
+        print(f'''This {COLOR_CODES["red"]}{'ADD' if is_ADD else 'DD'} doesn`t hold.{COLOR_CODES["nocolor"]}, error threshold is {COLOR_CODES["red"]}{algo.get_error()}{COLOR_CODES["nocolor"]}.\n''')
 
         print(f"{COLOR_CODES['cyan']}Violations found:{COLOR_CODES['nocolor']}")
         highlights = algo.get_highlights()
-        with open(TABLE, newline='') as f:
+        with open(table, newline='') as f:
             table = list(csv.reader(f))
             table_copy = table.copy()
         for highlight in highlights:
@@ -44,55 +44,128 @@ def print_holds(result: bool) -> None:
                     print(f'{table_copy[second_error_row_index][i]} ', end="")
             print('\n')
 
+print(f'''This example demonstrates validation of approximate differential dependencies.
+      
+Approximate Differential Dependencies were introduced by Liu, Kwashie, Li, 
+Ye and Vincent in their 2013 article, "Discovery of Approximate Differential
+Dependencies".
+URL: https://arxiv.org/abs/1309.3733
+      
+A differential dependency (DD) defines constraints on the
+differences between attribute values within a table.
+These dependencies are formalized using differential
+functions, which specify permissible distance ranges
+between attribute values. 
+      
+An approximate differential dependency (ADD) with satisfaction threshold \eps 
+is a DD where for all tuple pairs satisfying the left-hand side,
+at least \eps fraction of them with the lowest distance satisfy 
+the right-hand side. This relaxation allows focusing on 
+meaningful patterns while filtering out outliers and data errors.
 
+For a detailed example of standard differential dependency validation, 
+see: examples/basic/verifying_dd.py. That file contains demonstrations
+of error correction using both DDs and ADDs.
+      
 
-TABLE = 'examples/datasets/temperature_add.csv'
-df = pd.read_csv(TABLE)
+Example #1 
 
-lhs = [desbordante.add_verification.DF("state", 0, 0)]
-rhs = [desbordante.add_verification.DF("avg_temperature_F", 0, 10)]
+First, let's understand how satisfaction threshold affects ADD validation.
+We'll use an employee salary dataset to demonstrate.
+''')
+
+TABLE0 = 'examples/datasets/add_example.csv'
+df0 = pd.read_csv(TABLE0)
+
+lhs = [desbordante.add_verification.DF("education_level", 0, 0)]
+rhs = [desbordante.add_verification.DF("salary", 0, 15000)]
 dd = desbordante.dd.DD(lhs, rhs)
 
-algo = desbordante.add_verification.algorithms.DDVerifier()
-algo.load_data(table=(TABLE, ',', True))
-
-print('''
-This example demonstrates validation of approximate differential dependencies.
-For a detailed example of standard differential dependency validation, 
-see: examples/basic/verifying_dd.py
-      
-Differential dependencies (DDs) define constraints on differences between
-attribute values in a table. Approximate DDs relax these constraints by allowing
-a limited number of violations. This makes it possible to focus on meaningful
-patterns while filtering out outliers and data errors.
-      
-In this example, we examine a dataset with average temperature and precipitation
-data for U.S. cities.
-''')  
-
-print("-" * 72)
-print(df)
-print("\n" + "-" * 72)
+print("-" * 42)
+print(df0)
+print("-" * 42)
 
 print(f'''
 Consider the following DD:
 
 {COLOR_CODES["yellow"]}{dd.__str__()}{COLOR_CODES["nocolor"]}
 
+This dependency means that for people with the same education level
+salary differences should not exceed 15000.
+
+Let's check whether this DD holds: 
+''')
+
+algoDD = desbordante.dd_verification.algorithms.Default()
+algoDD.load_data(table=(TABLE0, ',', True))
+algoDD.execute(dd=dd)
+print_holds(algoDD, TABLE0, is_ADD=False)
+
+print('''Now let's test the same dependency as an ADD 
+with satisfaction threshold = 1.0:
+''')
+
+algoADD = desbordante.add_verification.algorithms.Default()
+algoADD.load_data(table=(TABLE0, ',', True))
+algoADD.execute(dd=dd, satisfaction_threshold=1.0)
+print_holds(algoADD, TABLE0)
+
+print('''Both tests produce exactly the same outcome. This shows that
+DD is equivalent to ADD with \eps = 1.0
+''')
+
+print(f'''
+Example #2
+      
+Now let's examine a climate dataset containing US cities 
+with their average temperatures and precipitation levels.
+''')  
+
+TABLE1 = 'examples/datasets/temperature1_add.csv'
+TABLE2 = 'examples/datasets/temperature2_add.csv'
+df1 = pd.read_csv(TABLE1)
+df2 = pd.read_csv(TABLE2)
+
+lhs = [desbordante.add_verification.DF("state", 0, 0)]
+rhs = [desbordante.add_verification.DF("avg_temperature_F", 0, 10)]
+dd = desbordante.dd.DD(lhs, rhs)
+
+print("-" * 72)
+print(df1)
+print("-" * 72)
+
+print(f'''
+Consider the following ADD with satisfaction threshold = 1.0:
+
+{COLOR_CODES["yellow"]}{dd.__str__()}{COLOR_CODES["nocolor"]}
+
 This dependency means that for any two cities within the same state,
 the difference in their average temperatures should not exceed 10 degrees.
 
-Let's check whether this DD holds:  
+Let's check whether this ADD holds:  
 ''')
-algo.execute(dd=dd)
-print_holds(algo.dd_holds())
+algo1 = desbordante.add_verification.algorithms.Default()
+algo1.load_data(table=(TABLE1, ',', True))
+algo1.execute(dd=dd, satisfaction_threshold=1.0)
+print_holds(algo1, TABLE1)
 
 print(f'''
 The detected violations correspond to real geographic effects rather than
 data quality issues. Although the dependency is violated, such violations are better
 interpreted as exceptions and should not have a strong influence on the overall pattern.
       
-Let's check the same DD with an 85% satisfaction threshold:   
+Let's check the same ADD with satisfaction threshold = 0.85:   
 ''')
-algo.execute(dd=dd, satisfaction_threshold=0.85)
-print_holds(algo.dd_holds())
+algo1.execute(dd=dd, satisfaction_threshold=0.85)
+print_holds(algo1, TABLE1)
+
+print("Now let's add more California cities and see how the error changes:")
+
+print("-" * 72)
+print(df2)
+print("-" * 72)
+
+algo2 = desbordante.add_verification.algorithms.Default()
+algo2.load_data(table=(TABLE2, ',', True))
+algo2.execute(dd=dd)
+print_holds(algo2, TABLE2)
