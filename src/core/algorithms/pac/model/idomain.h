@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "core/algorithms/pac/model/tuple.h"
 #include "core/algorithms/pac/model/tuple_type.h"
 

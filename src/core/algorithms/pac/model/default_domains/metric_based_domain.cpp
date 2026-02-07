@@ -53,6 +53,7 @@ std::vector<std::byte const*> MetricBasedDomain::AllocateValues(
 
 std::vector<Type::Destructor> MetricBasedDomain::GetDestructors() const {
     std::vector<Type::Destructor> destructors;
+    destructors.reserve(metrizable_types_.size());
     std::ranges::transform(metrizable_types_, std::back_inserter(destructors),
                            std::mem_fn(&::model::Type::GetDestructor));
     return destructors;
@@ -71,8 +72,7 @@ void MetricBasedDomain::SetTypes(std::vector<Type const*>&& types) {
     }
 
     // All leveling coefficients that are not specified are 1
-    std::ranges::fill_n(std::back_inserter(leveling_coeffs_),
-                        types.size() - leveling_coeffs_.size(), 1);
+    leveling_coeffs_.insert(leveling_coeffs_.end(), types.size() - leveling_coeffs_.size(), 1);
 
     tuple_type_ = std::make_shared<TupleType>(std::move(types));
     ConvertValues();
