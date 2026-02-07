@@ -115,7 +115,6 @@ constexpr auto kLevelingCoeffs = "leveling_coefficients";
 constexpr auto kMinDelta = "min_delta";
 constexpr auto kMaxEpsilon = "max_epsilon";
 constexpr auto kMinEpsilon = "min_epsilon";
-constexpr auto kStringCompare = "comparer";
 constexpr auto kStringDistFromDomain = "dist_from_domain";
 // PAC, Typo miner
 constexpr auto kRadius = "radius";
