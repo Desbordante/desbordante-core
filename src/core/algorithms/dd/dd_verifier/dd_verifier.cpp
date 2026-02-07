@@ -6,13 +6,13 @@
 #include <string>
 #include <vector>
 
-#include "core/config/descriptions.h"
-#include "core/config/names.h"
-#include "core/config/option_using.h"
-#include "core/config/tabular_data/input_table/option.h"
+#include "config/descriptions.h"
+#include "config/names.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
 #include "core/model/table/vertical.h"
 #include "core/util/logger.h"
-#include "core/util/timed_invoke.h"
+#include "util/timed_invoke.h"
 
 namespace algos::dd {
 DDVerifier::DDVerifier() : Algorithm({}) {
@@ -23,8 +23,11 @@ DDVerifier::DDVerifier() : Algorithm({}) {
 void DDVerifier::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
     auto const default_dd = DDs();
+    std::unordered_map<std::string, Metric const *> default_metrics;
     RegisterOption(config::kTableOpt(&input_table_));
     RegisterOption(Option{&dd_, kDDString, kDDDString, default_dd});
+    RegisterOption(Option<std::unordered_map<std::string, Metric const *>>{
+            &metrics_, KDDudm, "map, that contains udm for verifying dd", default_metrics});
 }
 
 double DDVerifier::GetError() const {
@@ -64,9 +67,16 @@ bool DDVerifier::IsColumnMetrizable(model::ColumnIndex const column_index) const
 double DDVerifier::CalculateDistance(model::ColumnIndex const column_index,
                                      std::pair<std::size_t, std::size_t> const &tuple_pair) const {
     model::TypedColumnData const &column = typed_relation_->GetColumnData(column_index);
+    auto const column_name = column.GetColumn()->GetName();
     std::byte const *first_value = column.GetValue(tuple_pair.first);
     std::byte const *second_value = column.GetValue(tuple_pair.second);
     auto const &type = static_cast<model::IMetrizableType const &>(column.GetType());
+    for (auto const &it : metrics_) {
+        if (column_name == it.first) {
+            return it.second->Dist(first_value, second_value);
+            ;
+        }
+    }
     return type.Dist(first_value, second_value);
 }
 
@@ -99,7 +109,7 @@ void DDVerifier::LoadDataInternal() {
 
 void DDVerifier::MakeExecuteOptsAvailable() {
     using namespace config::names;
-    MakeOptionsAvailable({kDDString});
+    MakeOptionsAvailable({kDDString, KDDudm});
 }
 
 void DDVerifier::CheckCorrectnessDd() const {
