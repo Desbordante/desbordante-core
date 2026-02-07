@@ -86,7 +86,7 @@ void BindPAC(py::module& main_module) {
             "A closed n-ary ball, defined by center and radius, i. e. D = {x : dist(center, x) <= "
             "radius}.\n"
             "Uses Euclidean distance:\n"
-            "dist(x, y) = sqrt((d_1(x[1], y[1]))^2 + ... + (d_i(x[n], y[n]))^2), where "
+            "dist(x, y) = sqrt((d_1(x[1], y[1]))^2 + ... + (d_n(x[n], y[n]))^2), where "
             "d_i is a default\n"
             "metric for i-th column's data type multiplied by leveling_coefficients[i] (which "
             "defaults to 1).\n";
