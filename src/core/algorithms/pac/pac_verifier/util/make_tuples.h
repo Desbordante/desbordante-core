@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <iterator>
 #include <memory>
 #include <vector>
 
@@ -12,10 +13,11 @@
 namespace pac::util {
 inline std::shared_ptr<model::Tuples> MakeTuples(
         std::vector<::model::TypedColumnData> const& col_data, config::IndicesType const& indices) {
-    std::vector<std::vector<std::byte const*> const*> columns_data(indices.size());
-    std::ranges::transform(indices, columns_data.begin(), [&col_data](auto const col_idx) {
-        return &col_data[col_idx].GetData();
-    });
+    std::vector<std::vector<std::byte const*> const*> columns_data;
+    columns_data.reserve(indices.size());
+    std::ranges::transform(
+            indices, std::back_inserter(columns_data),
+            [&col_data](auto const col_idx) { return &col_data[col_idx].GetData(); });
 
     auto num_rows = col_data.front().GetNumRows();
     auto tuples = std::make_shared<model::Tuples>(num_rows);
