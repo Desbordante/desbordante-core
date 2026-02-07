@@ -54,7 +54,7 @@ Ellipses of any arities are described by Ball domain. You may ask: "ball has the
 while ellipse has different ones. How can I describe ellipse using Ball?". Don\'t worry: ball (in terms
 of metric spaces) is B = {{x : dist(x, center) < r}}. Ball domain uses Euclidean metric:
 dist(x, y) = sqrt((x[0] - y[0])^2 * lc[0] + ... + (x[n] - y[n])^2 * lc[n])
-lc is a list of levelling coefficients, described in second Domain PAC example. We will use them to
+lc is a list of leveling coefficients, described in second Domain PAC example. We will use them to
 turn a circle into an ellipse.
 ''')
 

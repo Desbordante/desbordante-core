@@ -60,7 +60,7 @@ print(
     f'''Suppose we are working on a new model of engine. Its operating temperature range is {BLUE}[85, 95]{ENDC}°C.
 The engine is made of high-strength metal, so short-term temperature deviations are acceptable and
 will not cause immediate damage. In other words, engine operates properly when Pr(t ∈ [85, 95]±ε) ≥ δ.
-Based on enginnering analysis, the acceptable limits are: ε = {BLUE}5{ENDC}, δ = {BLUE}0.9{ENDC}.
+Based on engineering analysis, the acceptable limits are: ε = {BLUE}5{ENDC}, δ = {BLUE}0.9{ENDC}.
 In terms of Domain PACs, the following constraint should hold: {BLUE}Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC}.
 ''')
 
@@ -106,11 +106,11 @@ algo.execute(min_epsilon=5, max_epsilon=5)
 print(f'Algorithm result: {RED}{algo.get_pac()}{ENDC}.')
 print(
     f'''Also, let\'s run algorithm with max_epsilon={BLUE}0{ENDC} and min_delta={BLUE}0.9{ENDC} to check which ε
-is needed to satisfy δ={BLUE}0.9{ENDC}. With these parameters algorithm enter special mode and returns
+is needed to satisfy δ={BLUE}0.9{ENDC}. With these parameters algorithm enters special mode and returns
 pair (ε, min_delta), so that we can validate PAC with the given δ.
 ''')
 
-# Actually, algorithm enter this mode whenever max_epsilon is less than epsislon needed to satisfy
+# Actually, algorithm enters this mode whenever max_epsilon is less than epsilon needed to satisfy
 # min_delta.
 algo.execute(max_epsilon=0, min_delta=0.9)
 
