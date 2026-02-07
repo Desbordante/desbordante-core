@@ -4,6 +4,7 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <pybind11/detail/common.h>
 #include <pybind11/pybind11.h>
@@ -22,10 +23,10 @@ namespace py = pybind11;
 namespace python_bindings {
 /// @brief Register concrete PAC verifier.
 /// Inheritance cannot be used for this purpose, because abstract PAC cannot be copied (and PAC
-/// *must* be copied out from algorithm, becuase algortihm can be executed again and overwrite PAC)
+/// *must* be copied out from algorithm, because algortihm can be executed again and overwrite PAC)
 template <typename VerifierT, typename PACType>
 auto BindPACVerifier(py::module_& algos_module, auto&& name) {
-    // BindPrimitiveNoBase cannot be used here, becuase it cannot bind different methods for
+    // BindPrimitiveNoBase cannot be used here, because it cannot bind different methods for
     // different classes.
     return detail::RegisterAlgorithm<VerifierT, algos::pac_verifier::PACVerifier>(algos_module,
                                                                                   std::move(name))
