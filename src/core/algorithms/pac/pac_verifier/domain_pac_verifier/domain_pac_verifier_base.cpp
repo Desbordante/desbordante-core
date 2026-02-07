@@ -1,6 +1,7 @@
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_verifier_base.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iterator>
 #include <memory>
@@ -11,17 +12,21 @@
 #include "core/algorithms/pac/domain_pac.h"
 #include "core/algorithms/pac/pac_verifier/domain_pac_verifier/domain_pac_highlight.h"
 #include "core/algorithms/pac/pac_verifier/util/make_tuples.h"
+#include "core/config/column_index/validate_index.h"
 #include "core/util/bitset_utils.h"
 #include "core/util/logger.h"
 
 namespace algos::pac_verifier {
 
 void DomainPACVerifierBase::ProcessPACTypeOptions() {
-    std::vector<model::Type const*> types;
+    auto max_idx = *std::ranges::max_element(column_indices_);
+    config::ValidateIndex(max_idx, TypedRelation().GetNumColumns());
+
+    std::vector<model::Type const*> types(column_indices_.size());
     auto const& col_data = TypedRelation().GetColumnData();
-    std::ranges::transform(
-            column_indices_, std::back_inserter(types),
-            [&col_data](auto const col_idx) { return &col_data[col_idx].GetType(); });
+    std::ranges::transform(column_indices_, types.begin(), [&col_data](auto const col_idx) {
+        return &col_data[col_idx].GetType();
+    });
 
     domain_->SetTypes(std::move(types));
     domain_->SetDistFromNullIsInfinity(DistFromNullIsInfty());
@@ -43,7 +48,7 @@ void DomainPACVerifierBase::PreparePACTypeData() {
 std::vector<std::pair<double, double>> DomainPACVerifierBase::FindEpsilons() const {
     auto total_tuples_num = original_value_tuples_->size();
     // Tuples number needed to satisfy min_delta
-    std::size_t min_tuples_num = MinDelta() * total_tuples_num;
+    std::size_t min_tuples_num = std::ceil(MinDelta() * total_tuples_num);
     std::size_t tuples_step;
     if (DeltaSteps() <= 1) {
         tuples_step = total_tuples_num - min_tuples_num;
@@ -66,7 +71,7 @@ std::vector<std::pair<double, double>> DomainPACVerifierBase::FindEpsilons() con
 
     for (auto needed_tuples_num = min_tuples_num; needed_tuples_num <= total_tuples_num;
          needed_tuples_num += tuples_step) {
-        if (needed_tuples_num < curr_size) {
+        if (needed_tuples_num <= curr_size) {
             continue;
         }
 
@@ -111,7 +116,7 @@ void DomainPACVerifierBase::PACTypeExecuteInternal() {
     domain_end_ = std::ranges::partition_point(
             dists_from_domain_, [](auto const& p) { return std::abs(p.second) < kDistThreshold; });
 
-    LOG_TRACE("Distnaces from domain:");
+    LOG_TRACE("Distances from domain:");
     for ([[maybe_unused]] auto const& [it, dist] : dists_from_domain_) {
         LOG_TRACE("\t{}: {}", tuple_type_->ValueToString(*it), dist);
     }
@@ -142,8 +147,9 @@ DomainPACHighlight DomainPACVerifierBase::GetHighlights(double eps_1, double eps
     auto second_end = std::ranges::upper_bound(domain_end_, dists_from_domain_.end(), eps_2, {},
                                                [](auto const& p) { return p.second; });
 
-    std::vector<TuplesIter> highlighted_tuples(std::distance(first_end, second_end));
-    std::ranges::transform(first_end, second_end, highlighted_tuples.begin(),
+    std::vector<TuplesIter> highlighted_tuples;
+    highlighted_tuples.reserve(std::distance(first_end, second_end));
+    std::ranges::transform(first_end, second_end, std::back_inserter(highlighted_tuples),
                            [](auto const& p) { return p.first; });
     return DomainPACHighlight{tuple_type_, original_value_tuples_, std::move(highlighted_tuples)};
 }
