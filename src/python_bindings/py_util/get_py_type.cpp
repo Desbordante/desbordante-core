@@ -9,6 +9,7 @@
 #include <pybind11/stl/filesystem.h>
 
 #include "core/algorithms/association_rules/ar_algorithm_enums.h"
+#include "core/algorithms/cfd/cfdfinder/enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -116,7 +117,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
-    };
+            PyTypePair<algos::cfdfinder::Expansion, kPyStr>,
+            PyTypePair<algos::cfdfinder::Pruning, kPyStr>,
+            PyTypePair<algos::cfdfinder::Result, kPyStr>};
     return type_map.at(type_index)();
 }
 
