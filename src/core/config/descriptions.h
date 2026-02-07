@@ -205,10 +205,7 @@ constexpr auto kDDiagonalThreshold =
         "Maximal k such that diagonal segment of ECDF with slope coefficient of k is considered "
         "horizontal, i. e. maximal ratio m/N such that an addition of m values on a table "
         "containing N rows is not considered a change (default is 1e-5).";
-constexpr auto kDDomain =
-        "Ordered domain for Domain PAC. "
-        "Note that comparer must agree with domain, i. e. x in D iff exist a, b in D such that a "
-        "<= x <= b.";
+constexpr auto kDDomain = "Ordered domain for Domain PAC. ";
 constexpr auto kDDomainName =
         "Optional name for custom domain. This name is displayed as a part of Domain PAC's string "
         "reprsentation, so short unique names are preferrable.";
@@ -228,12 +225,8 @@ constexpr auto kDMinDelta =
         "Minimal value of delta, which is a probability at which values satisfy the dependency "
         "(default is 0 if min_eps or max_eps is passed, 0.9 otherwise).";
 constexpr auto kDPACRadius = "Radius of n-ary ball.";
-constexpr auto kDStringCompare =
-        "Custom comparer for n-ary value tuples. Both arguments are lists of strings. Must return "
-        "true if first tuple is less than second.";
 constexpr auto kDStringDistFromDomain =
-        "Custom metric for n-ary value tuples. First argument is list of strings, second -- "
-        "distance_from_null_is_infty (bool). Must return distance from domain to its argument.";
+        "Custom metric for n-ary value tuples. Must return distance from domain to its argument.";
 // Pyro
 constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across "
