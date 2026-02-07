@@ -7,9 +7,11 @@ constexpr auto kEqualNulls = "is_null_equal_null";
 constexpr auto kError = "error";
 constexpr auto kLhsIndices = "lhs_indices";
 constexpr auto kMaximumLhs = "max_lhs";
+constexpr auto kMinimumSupport = "minsup";
 constexpr auto kRhsIndices = "rhs_indices";
 constexpr auto kSeed = "seed";
 constexpr auto kTable = "table";
+constexpr auto kTasksNumMultiplier = "tasks_num_multiplier";
 constexpr auto kThreads = "threads";
 // AC
 constexpr auto kACSeed = "ac_seed";
@@ -25,7 +27,6 @@ constexpr auto kFirstColumnTId = "has_tid";
 constexpr auto kInputFormat = "input_format";
 constexpr auto kItemColumnIndex = "item_column_index";
 constexpr auto kMinimumConfidence = "minconf";
-constexpr auto kMinimumSupport = "minsup";
 constexpr auto kTIdColumnIndex = "tid_column_index";
 // CFD
 constexpr auto kCfdColumnsNumber = "columns_number";
@@ -68,6 +69,9 @@ constexpr auto kIgnoreNullCols = "ignore_null_cols";
 constexpr auto kSampleSize = "sample_size";
 // FAIDA, MIND
 constexpr auto kMaximumArity = "max_arity";
+// FEM
+constexpr auto kSequence = "sequence";
+constexpr auto kWindowSize = "window_size";
 // FastADC
 constexpr auto kAllowCrossColumns = "allow_cross_columns";
 constexpr auto kComparableThreshold = "comparable_threshold";

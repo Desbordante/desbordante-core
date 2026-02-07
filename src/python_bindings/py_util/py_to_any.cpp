@@ -15,14 +15,15 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/metric/enums.h"
 #include "core/algorithms/od/fastod/od_ordering.h"
-#include "core/config/custom_random_seed/type.h"
 #include "core/config/error_measure/type.h"
 #include "core/config/exceptions.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/parser/sequence_parser/file_sequence_parser.h"
 #include "core/util/enum_to_available_values.h"
 #include "python_bindings/py_util/create_dataframe_reader.h"
+#include "python_bindings/py_util/iterable_sequence_stream.h"
 
 namespace {
 
@@ -107,6 +108,34 @@ boost::any InputTableToAny(std::string_view option_name, py::handle obj) {
     return PythonObjToInputTable(option_name, obj);
 }
 
+boost::any SequenceStreamToAny(std::string_view option_name, py::handle obj) {
+    std::shared_ptr<model::ISequenceStream> stream;
+
+    bool is_path = false;
+    if (py::isinstance<py::str>(obj)) {
+        is_path = true;
+    } else {
+        py::module_ pathlib = py::module_::import("pathlib");
+        if (py::isinstance(obj, pathlib.attr("Path"))) {
+            is_path = true;
+        }
+    }
+
+    if (is_path) {
+        auto path = py::cast<std::filesystem::path>(obj);
+        stream = std::make_shared<parser::FileSequenceParser>(path);
+    } else if (py::isinstance<py::iterable>(obj)) {
+        auto iterable = py::cast<py::iterable>(obj);
+        stream = std::make_shared<python_bindings::IterableSequenceStream>(iterable);
+    } else {
+        throw config::ConfigurationError("Option \"" + std::string(option_name) +
+                                         "\": Sequence data must be a list (iterable) or a file "
+                                         "path.");
+    }
+
+    return stream;
+}
+
 boost::any InputTablesToAny(std::string_view option_name, py::handle obj) {
     auto tables = CastAndReplaceCastError<std::vector<py::handle>>(option_name, obj);
     std::vector<config::InputTable> parsers;
@@ -137,6 +166,7 @@ std::unordered_map<std::type_index, ConvFunc> const kConverters{
         kEnumConvPair<algos::od::Ordering>,
         kCharEnumConvPair<algos::Binop>,
         {typeid(config::InputTable), InputTableToAny},
+        {typeid(std::shared_ptr<model::ISequenceStream>), SequenceStreamToAny},
         {typeid(config::InputTables), InputTablesToAny},
         kNormalConvPair<std::filesystem::path>,
         kNormalConvPair<std::vector<std::filesystem::path>>,
