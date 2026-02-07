@@ -16,8 +16,8 @@ using CFDAttributeValuePair = std::pair<std::string, std::string>;
 class CFDVerifier : public Algorithm {
 private:
     config::InputTable input_table_;
-    std::vector<CFDAttributeValuePair> string_rule_left_;
-    CFDAttributeValuePair string_rule_right_;
+
+    cfd::RawCFD raw_cfd_rule_;
     cfd::ItemsetCFD cfd_;
 
     int minsup_ = 0;
