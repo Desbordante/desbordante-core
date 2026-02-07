@@ -33,10 +33,10 @@ public:
 
     /// @brief Get row numbers of highlighted values
     std::vector<std::size_t> GetRowNums() const {
-        std::vector<std::size_t> indices;
-        std::ranges::transform(highlighted_tuples_, std::back_inserter(indices),
-                               [beg = original_value_tuples_->begin()](auto const it) {
-                                   return std::distance(beg, it);
+        std::vector<std::size_t> indices(highlighted_tuples_.size());
+        std::ranges::transform(highlighted_tuples_, indices.begin(),
+                               [begin = original_value_tuples_->begin()](auto const it) {
+                                   return std::distance(begin, it);
                                });
         return indices;
     }
@@ -50,6 +50,7 @@ public:
     /// @c GetTypes())
     Tuples GetByteData() const {
         Tuples tuples;
+        tuples.reserve(highlighted_tuples_.size());
         std::ranges::transform(highlighted_tuples_, std::back_inserter(tuples),
                                [](auto const it) { return *it; });
         return tuples;
@@ -58,6 +59,7 @@ public:
     /// @brief Get highlighted values as strings
     std::vector<std::string> GetStringData() const {
         std::vector<std::string> strings;
+        strings.reserve(highlighted_tuples_.size());
         std::ranges::transform(highlighted_tuples_, std::back_inserter(strings),
                                [this](auto const it) { return tuple_type_->ValueToString(*it); });
         return strings;

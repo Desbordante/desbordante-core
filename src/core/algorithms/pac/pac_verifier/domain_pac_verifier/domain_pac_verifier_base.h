@@ -50,7 +50,7 @@ public:
         DESBORDANTE_OPTION_USING;
 
         // config::IndicesOption cannot be used here, because it would require indices to be execute
-        // option, but this will make data preparation impossible
+        // option, but this would make data preparation impossible
         RegisterOption(Option(&column_indices_, kColumnIndices, kDColumnIndices));
         MakeOptionsAvailable({kColumnIndices});
     }
