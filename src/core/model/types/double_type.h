@@ -13,7 +13,7 @@ class DoubleType final : public NumericType<Double> {
 public:
     DoubleType() noexcept : NumericType<Double>(TypeId::kDouble) {}
 
-    static unsigned int const kDefaultEpsCount = 5;
+    static constexpr unsigned int kDefaultEpsCount = 5;
 
     CompareResult Compare(std::byte const* l, std::byte const* r) const final {
         return CompareEPS(l, r, kDefaultEpsCount);

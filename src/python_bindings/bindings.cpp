@@ -37,7 +37,8 @@
 
 namespace python_bindings {
 
-PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
+PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used(),
+                pybind11::multiple_interpreters::per_interpreter_gil()) {
     using namespace pybind11::literals;
     for (auto bind_func : {BindMainClasses,
                            BindDataTypes,

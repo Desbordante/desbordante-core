@@ -42,9 +42,11 @@ private:
                           Vertical const& probing_columns, std::vector<int>& probe);
 
 public:
+#if 0
     static int intersection_count_;
     static unsigned long long micros_;
-    static int const kSingletonValueId;
+#endif
+    static constexpr int kSingletonValueId = 0;
 
     PositionListIndex(std::deque<Cluster> index, Cluster null_cluster, unsigned int size,
                       double entropy, unsigned long long nep, unsigned int relation_size,

@@ -89,7 +89,9 @@ unsigned long long PyroUCC::ExecuteInternal() {
 
     LOG_INFO("Init time: {} ms", init_time_millis);
     LOG_INFO("Time: {}  milliseconds", elapsed_milliseconds.count());
+#if 0
     LOG_INFO("Total intersection time: {} ms", model::PositionListIndex::micros_ / 1000);
+#endif
     return elapsed_milliseconds.count();
 }
 
