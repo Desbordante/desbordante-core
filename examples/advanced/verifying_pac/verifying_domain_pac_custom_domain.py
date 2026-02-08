@@ -10,7 +10,7 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 BLUE = '\033[34m'
 CYAN = '\033[36m'
-GRAY = '\033[1;30m'
+BOLD = '\033[1;37m'
 ENDC = '\033[0m'
 
 USER_PREFERENCES = 'examples/datasets/verifying_pac/user_preferences.csv'
@@ -25,20 +25,20 @@ def csv_to_str(filename: str) -> str:
 
 
 print(
-    f'''{CYAN}This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
-Domain PAC on column set X and domain D, with given epsilon and delta means that Pr(x ∈ D±epsilon) ≥ delta.
-For more information consult "Checks and Balances: Monitoring Data Quality Problems in Network Traffic
-Databases" by Filp Korn et al.
-If you haven\'t read basic examples on Domain PAC verification (see examples/basic/verifying_pac/ directory),
-start with reading them. This example is first in "Advdanced Domain PAC verififcation" series
-(see examples/advanced/verifying_pac/ directory).{ENDC}
+    f'''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+A Domain PAC on a column set X and domain D, with given ε and δ means that {BOLD}Pr(x ∈ D±ε) ≥ δ{ENDC}.
+For more information, see "Checks and Balances: Monitoring Data Quality Problems in Network
+Traffic Databases" by Filp Korn et al (Proceedings of the 29th VLDB Conference, Berlin, 2003).
+If you have not read the basic Domain PAC examples yet (see the {CYAN}examples/basic/verifying_pac/{ENDC}
+directory), it is recommended to start there.
 
-Consider we have a dataset of user preferences, where user\'s interest on each topic is encoded as
-values in [0, 1], where 0 is "not interested at all" and 1 is "very interested":
-{GRAY}{csv_to_str(USER_PREFERENCES)}{ENDC}
+Assume we have a dataset of user preferences, where each user\'s interest in several topics is
+encoded as values in [0, 1], where 0 is "not interested at all" and 1 is "very interested":
+{BOLD}{csv_to_str(USER_PREFERENCES)}{ENDC}
 
-We need to check if this group of users will be interested in original paper on Domain PACs ("Checks and Balances: ...").
-For this purpose, we will represent each user\'s profile as a radius-vector:
+We need to estimate whether this group of users will be interested in the original Domain PAC paper
+("Checks and Balances: ...").
+To do this, we represent each user profile as a vector in a multi-dimensional topic space:
      ^ Topic 2
      |
      |   user
@@ -48,13 +48,16 @@ For this purpose, we will represent each user\'s profile as a radius-vector:
     -+------->
      |
 
-A perfect user has a profile (0.9, 0.4, 0.05), which means "highly interested in Databases,
-slightly interested in Networks, not interested in Machine learning".
-Let\'s define metric and comparer for our user-vectors.
+A "perfect" target reader might have the profile: {BLUE}(0.9, 0.4, 0.05){ENDC}.
+This corresponds to:
+    * high interest in Databases;
+    * moderate interest in Networks;
+    * low interest in Machine Learning.
+Our goal is to measure how close real users are to this ideal profile.
 
-As a metric we will use cosine distance, which shows magnitude of angle between vectors,
-not taking into account vectors\' length:
-    {GRAY}dist(x, y) = 1 - cos(angle between x and y) = 1 - (x, y)/(|x| * |y|){ENDC},
+We use cosine distance, which measures the angle between two vectors rather then their absolute
+length. This is useful because we care about interest proportions, not total magnitude.
+    {BOLD}dist(x, y) = 1 - cos(angle between x and y) = 1 - (x, y)/(|x| * |y|){ENDC},
 where (x, y) is a dot product between x and y.
 ''')
 
@@ -72,35 +75,13 @@ def cosine_dist(x: list[float], y: list[float]) -> float:
     return 1 - dot_product / (x_length * y_length)
 
 
-print(
-    f'''We will compare vectors\' direction, i. e. each vector is associated with a value φ:
-    {GRAY}φ(x) = dist(x, (1, 0, 0)) = 1 - (x, (1, 0, 0))/(|x| * |(1, 0, 0)|) = 1 - (x[0])/(|x|){ENDC},
-where x[0] is first coordinate of x.
-''')
-
-
-def phi(x: list[float]):
-    x_length = 0
-    for x_i in x:
-        x_length += x_i * x_i
-    return 1 - float(x[0]) / x_length
-
-
-# Arguments are always lists of strings, even when table contains a single conlumn
-def compare_angles(x: list[str], y: list[str]) -> bool:
-    x_f = [float(x_i) for x_i in x]
-    y_f = [float(y_i) for y_i in y]
-    return phi(x_f) < phi(y_f)
-
-
-print(f'''Custom domain is defined by three parameters:
-    1. Comparer: a function that takes two value tuples (as lists of strings) and returns {GRAY}True{ENDC}
-       when first value is smaller than second.
-    2. Distance from domain: a function that takes a value tuple (as list of strings) and returns a distance
-       between domain and value.
-    3. (Optional) domain name: used to make Domain PAC string representation.
-
-We\'ve already defined comparer. Distance from domain will be dist(x, (0.9, 0.4, 0.05)), and name will be {BLUE}"(0.9, 0.4, 0.05)"{ENDC}.
+print(f'''A custom domain is defined by two parameters:
+    1. Distance function -- takes a value tuple and returns the distance to the domain.
+    2. Domain name (optional) -- used for readable output.
+In this example:
+    * distance function: {BLUE}dist(x, (0.9, 0.4, 0.05)){ENDC};
+    * domain name: {BLUE}"(0.9, 0.4, 0.05)"{ENDC}.
+This effectively defines the domain as "users close to the ideal profile".
 ''')
 
 PERFECT_USER = [0.9, 0.4, 0.05]
@@ -112,32 +93,34 @@ def dist_from_domain(x: list[str]) -> float:
     return cosine_dist(x_f, PERFECT_USER)
 
 
-domain = desbordante.pac.domains.CustomDomain(compare_angles, dist_from_domain,
+domain = desbordante.pac.domains.CustomDomain(dist_from_domain,
                                               "(0.9, 0.4, 0.05)")
 
-print(
-    f'Let\'s run Domain PAC verifier with domain={BLUE}{domain}{ENDC}, max_epsilon={BLUE}0.5{ENDC}.'
-)
+print(f'We run the Domain PAC verifier with domain={BLUE}{domain}{ENDC}.')
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
 algo.load_data(table=(USER_PREFERENCES, ',', True),
                domain=domain,
                column_indices=[0, 1, 2])
-algo.execute(max_epsilon=0.5)
+algo.execute()
 pac_1 = algo.get_pac()
-print(f'''Algorithm result: {GREEN}{pac_1}{ENDC}.
+print(f'''Algorithm result:
+    {GREEN}{pac_1}{ENDC}
+Now we lower the required probability threshold: min_delta={BLUE}0.6{ENDC}.''')
 
-Now let\'s set min_delta to {BLUE}0.6{ENDC}.''')
-algo.execute(max_epsilon=0.5, min_delta=0.6)
+algo.execute(min_delta=0.6)
 pac_2 = algo.get_pac()
-print(f'''Algorithm result: {GREEN}{pac_2}{ENDC}.
 
-This means that all users will be a bit interested in the paper (perfect user±{GREEN}{pac_1.epsilon:.3f}{ENDC}),
-but only {GREEN}{pac_2.delta * 100:.0f}%{ENDC} of users will be highly interested (perfect user±{GREEN}{pac_2.epsilon:.3f}{ENDC}).
+print(f'''Algorithm result:
+    {GREEN}{pac_2}{ENDC}
+Interpretation:
+    * With a larger ε ({BLUE}{pac_1.epsilon:.3f}{ENDC}), nearly all users show some level of interest
+    * With a very small ε ({BLUE}{pac_2.epsilon:.3f}{ENDC}), only {BLUE}{pac_2.delta * 100.0:.0f}%{ENDC} of users closely match the ideal reader.
 
-Note: highlights can be used to determine who will be less and who will be more interested.
-See {CYAN}examples/basic/verifying_pac/verifying_domain_pac1.py{ENDC}.''')
+You can user highlights to identify which users are closer to or farther from the ideal profile.
+For an introduction to highlights, see {CYAN}examples/basic/verifying_pac/verifying_domain_pac1.py{ENDC}.'''
+      )
 
-# C++ note: Custom domain is called "Untyped domain" in C++ code, becuase it erases type
+# C++ note: Custom domain is called "Untyped domain" in C++ code, because it erases type
 # information, converting all values to strings. If you use C++ library, it's recommended to
 # implement IDomain interface or derive from MetricBasedDomain (if your domain is based on
 # coordinate-wise metrics). See Parallelepiped and Ball implementations as examples.

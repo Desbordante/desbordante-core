@@ -9,7 +9,7 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 BLUE = '\033[34m'
 CYAN = '\033[36m'
-GRAY = '\033[1;30m'
+BOLD = '\033[1;37m'
 ENDC = '\033[0m'
 
 ENGINE_TEMPS = 'examples/datasets/verifying_pac/engine_temps_bad.csv'
@@ -24,58 +24,81 @@ def csv_to_str(filename: str) -> str:
 
 
 print(
-    f'''{CYAN}This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
-This example is third of "Basic Domain PAC verification" series (see examples/basic/verifying_pac/ directory).
-If you haven\'t read first and second parts, start with reading them.{ENDC}
+    f'''This example demonstrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the third example of "Basic Domain PAC verification" series (see the {CYAN}examples/basic/verifying_pac/{ENDC} directory).
+If you haven\'t read first and second parts yet, it is recommended to start there.
 
-In first example we\'ve verified {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC} on temperature sensor readings.
-In the second part ve\'we added tachometer readings and validated {BLUE}Domain PAC Pr(x ∈ [{{85, 1500}}, {{95, 3500}}]±15) ± 0.85{ENDC}.
-In both cases we\'ve used Parallelepiped domain. Here are sensor readings:
-{GRAY}{csv_to_str(ENGINE_TEMPS)}{ENDC}
+In the first example we verified the following Domain PAC on temperature sensor readings:
+    {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC}
+In the second example, we added tachometer readings and validated a Domain PAC on two columns using
+the Parallelepiped domain.
+
+The sensor readings are the same as before:
+{BOLD}{csv_to_str(ENGINE_TEMPS)}{ENDC}
 ''')
 
 print(
-    f'''Parallelepiped {BLUE}[{{85, 1500}}, {{95, 3500}}]{ENDC} is a rectangle like this:
+    f'''The parallelepiped {BLUE}[{{85, 1500}}, {{95, 3500}}]{ENDC} is a rectangle in the (temperature, RPM) space:
     (95, 1500)      (95, 3500)
             +--------+
+            |        |
             +--------+
     (85, 1500)      (85, 3500)
-Here is our task from second example:
-    Normal temperatures lie in {BLUE}[85, 95]{ENDC}. Normal RPM for our engine lie in {BLUE}[1500, 3500]{ENDC}.
-    Values in {BLUE}[85, 95]{ENDC}°C and in {BLUE}[0, 5000]{ENDC} RMP are not harmful themselves, but
-    cold engine will stall on low RPM and can be damaged on high RPM, and overheated engine can blow up,
-    especially on RPM outside of {BLUE}[1500, 3500]{ENDC} (because cooling system operation depends on RPM).
+Our task from the second example was:
+    The normal operating RPM for this engine is {BLUE}[1500, 3500]{ENDC}. Values outside this range are
+    not harmful by themselves (as long as they are within {BLUE}[0, 5000]{ENDC}), but:
+        * A cold engine may stall at low RPM and can be damaged at high RPM.
+        * An overheated engine is especially vulnerable at RPM values outside {BLUE}[1500, 3500]{ENDC}, because
+          cooling efficiency depends on RPM.
 
-You may have noticed that a rectangle doesn\'t describe our task perfeclty: value like {BLUE}(80, 3900){ENDC}
-is very harmful for the engine, while {BLUE}(80, 1600){ENDC} is quite OK, but they have the same distance from rectangle.
-Wish there was a geometrical shape without corners... Wait. It\'s ellipse!
+A rectangle does not perfectly describe these conditions. For example,
+    * (80, 3900) is very harmful,
+    * (80, 1600) is mostly acceptable.
+However, both points have the same distance from the rectangle boundary. This shows that a shape
+with sharp corners does not model the risk accurately.
+What we rally want is a smooth shape without corners -- an ellipse.
 
-Ellipses of any arities are described by Ball domain. You may ask: "ball has the same radii in all dimensions,
-while ellipse has different ones. How can I describe ellipse using Ball?". Don\'t worry: ball (in terms
-of metric spaces) is B = {{x : dist(x, center) < r}}. Ball domain uses Euclidean metric:
-dist(x, y) = sqrt((x[0] - y[0])^2 * lc[0] + ... + (x[n] - y[n])^2 * lc[n])
-lc is a list of leveling coefficients, described in second Domain PAC example. We will use them to
-turn a circle into an ellipse.
+In this approach, ellipses (and their higher-dimensional equivalents) are represented by the Ball domain.
+You might wonder: a ball has the same radius in all dimensions, while an ellipse has different ones.
+The answer is leveling coefficients.
+
+In metric-space terms, a ball is defined as {BLUE}B = {{x : dist(x, center) < r}}.
+The Ball domain uses the Euclidean metric:
+    {BOLD}dist(x, y) = sqrt((x[1] - y[1])^2 * lc[1] + ... + (x[n] - y[n])^2 * lc[n]){ENDC}
+Here, lc is the list of leveling coefficients, introduced in the second example. They allow us to
+scale dimensions differently -- effectively turning a circle into an ellipse.
+
+To balance temperature and RPM scales, we use levelling_coefficients={BLUE}[1, 0.005]{ENDC}.
+This treats a 200 RPM difference as roughly equivalent to a 1°C difference.
 ''')
 
 # Formally, it's a disk: D = {x : dist(x, center) ≤ r}, but name "ball" is more clear
-ellipse = desbordante.pac.domains.Ball(["90", "2500"], 10, [2, 0.01])
+ellipse = desbordante.pac.domains.Ball(["90", "2500"], 5, [1, 0.005])
 
-print(
-    f'Let\'s run Domain PAC verifier with the following parameters: domain={BLUE}{ellipse}{ENDC}, max_epsilon={BLUE}10{ENDC}, min_delta={BLUE}0.85{ENDC}.'
-)
+print(f'We now run the Domain PAC verifier with domain={BLUE}{ellipse}{ENDC}.')
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
 algo.load_data(table=(ENGINE_TEMPS, ',', True),
                domain=ellipse,
                column_indices=[0, 1])
-algo.execute(max_epsilon=15, min_delta=0.85)
-print(f'Algorithm result: {GREEN}{algo.get_pac()}{ENDC}.')
+algo.execute()
+print(f'''Algorithm result:
+    {GREEN}{algo.get_pac()}{ENDC}''')
 
-print(
-    f'The result with rectangle domain was {RED}Domain PAC Pr(x ∈ [{85, 1500}, {95, 3500}]±10) ≥ 0.863636 on columns [t rpm]{ENDC}.'
-)
-print(
-    f'''You can see that PAC with ball domain better reflects given conditions.
+parallelepiped = desbordante.pac.domains.Parallelepiped(['85', '1500'],
+                                                        ['95', '3500'],
+                                                        [1, 0.005])
+algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
+algo.load_data(table=(ENGINE_TEMPS, ',', True),
+               domain=parallelepiped,
+               column_indices=[0, 1])
+algo.execute()
 
-Now it\'s recommended to continue with reading fourth example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
-which demonstrates another usage of Ball domain.''')
+print(f'''For comparison, the Parallelepiped domain previously produced:
+    {RED}{algo.get_pac()}{ENDC}
+''')
+print(
+    f'''Although the numerical values differ slightly, the Ball domain better reflects the actual operating
+conditions, because it models gradual risk changes instead of sharp rectangular boundaries.
+
+It is recommended to continue with the fourth example ({CYAN}examples/basic/verifying_pac/verifying_domain_pac3.py{ENDC}),
+which demonstrates another practical usage of the Ball domain.''')

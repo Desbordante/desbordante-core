@@ -9,7 +9,7 @@ RED = '\033[31m'
 GREEN = '\033[32m'
 BLUE = '\033[34m'
 CYAN = '\033[36m'
-GRAY = '\033[1;30m'
+BOLD = '\033[1;37m'
 ENDC = '\033[0m'
 
 LEVENSHTEIN_TYPOS = 'examples/datasets/verifying_pac/levenshtein_typos.csv'
@@ -24,48 +24,44 @@ def csv_to_str(filename: str) -> str:
 
 
 print(
-    f'''{CYAN}This example illustrates the usage of Domain Probabilistic Approximate Constraints (PACs).
-This example is the last of "Basic Domain PAC verification" series (see examples/basic/verifying_pac/ directory).
-If you haven\'t read first three parts, start with reading them.{ENDC}
+    f'''This example illustrates the usage of Domain Probabilistic Approximate Constraints (Domain PACs).
+It is the final example in the "Basic Domain PAC verification" series (see the {CYAN}examples/basic/verifying_pac/{ENDC} directory).
+If you haven\'t read the first three parts yet, it is recommended to start there.
 
-Consider the following dataset of users\' attempts to type a difficult spanish word:
-{GRAY}{csv_to_str(LEVENSHTEIN_TYPOS)}{ENDC}
+Consider the following dataset of users\' attempts to type a difficult Spanish word:
+{BOLD}{csv_to_str(LEVENSHTEIN_TYPOS)}{ENDC}
 
-We want to prove that most of our users can remember difficult words almost exactly.
-In other words, we want to verify {BLUE}Domain PAC Pr(dist(x, "Desbordante") ≤ 3) ≥ 0.9{ENDC}.
+We want to show that most users can remember difficult words almost exactly.
+In probabilistic terms, we want to verify the following Domain PAC:
+    {BLUE}Pr(dist(x, "Desbordante") ≤ 3) ≥ 0.9{ENDC}
 
-As a metric between words we will use Levenshtein distance that shows how much characters must be replaced,
-deleted or inserted into first string to get the second one. We are lucky that this is the default
-metric for strings in Desbordante. If you read previous examples, you may know that the most suitable
-domain in this case is Ball.
-
-Note that, regardless of domain choice, metric must agree with comparer, i. e.
-x ∈ D iff ∃ a, b : a ≤ x ≤ b (otherwise, behaviour is undefined).
-The default comparer for strings is lexicographical compare, which agrees only with "lexicographical
-metric": distance from a to b is a number of words between a and b in lexicographically-sorted dictionary.
-This means that domain, that uses default comparer, cannot be used with string values.
-Fortunately, Ball uses "radius" comparer: a < b iff dist(a, center) < dist(b, center).
-Therefore, if table contains string values, you have to use either Ball or Custom domain
-(see {GRAY}examples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py{ENDC}).
+To measure the similarity between words, we use the Levenshtein distance, which counts how many
+character insertions, deletions, or substitutions are required to transform one string into another.
+In Desbordante, Levenshtein distance is the default metric for strings, so no additional
+configuration is needed.
+Based on the previous examples, the most suitable domain here is the Ball domain, because we are
+measuring distance from a single center value.
 ''')
 
 ball = desbordante.pac.domains.Ball(["Desbordante"], 1)
 
 print(
-    f'Let\'s run Domain PAC verifier with the following options: domain={BLUE}{ball}{ENDC}, max_epsilon={BLUE}3{ENDC}.'
+    f'We run the Domain PAC verifier with the following parameter: domain={BLUE}{ball}{ENDC}.'
 )
 algo = desbordante.pac_verification.algorithms.DomainPACVerifier()
 algo.load_data(table=(LEVENSHTEIN_TYPOS, ',', True),
                domain=ball,
                column_indices=[0])
-algo.execute(max_epsilon=3)
+algo.execute()
 pac = algo.get_pac()
 print(f'Result: {GREEN}{pac}{ENDC}.')
 
 print(
-    f'''This means that {GREEN}{pac.delta * 100}%{ENDC} of our users make no more than {GREEN}{pac.epsilon}{ENDC} typos in word "Desbordante", which is good enough.
+    f'''This means that {GREEN}{pac.delta * 100}%{ENDC} of our users make no more than {GREEN}{pac.epsilon}{ENDC} typos in the word
+"Desbordante", which satisfies our requirement.
 ''')
 
 print(
-    f'''Now that you\'ve read all basic examples, you can check {CYAN}examples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py{ENDC},
-which demonstrates the usage of Custom domain.''')
+    f'''Now that you have completed all basic examples, you continue with the advanced example:
+{CYAN}examples/advanced/verifying_pac/verifying_domain_pac_custom_domain.py{ENDC}.
+This example demonstrates how to define and use a Custom domain.''')

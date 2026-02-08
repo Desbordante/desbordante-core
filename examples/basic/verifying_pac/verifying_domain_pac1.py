@@ -138,7 +138,7 @@ print()
 
 print('''We can see two problems:
     1. The engine operated at low temperatures for an extended period, slightly below 80°C.
-    2. The peak temperature was too high, but this occured only once.\n''')
+    2. The peak temperature was too high, but this occurred only once.\n''')
 
 print('''The second version of engine has:
     1. A pre-heating system to prevent operation at low temperatures.
