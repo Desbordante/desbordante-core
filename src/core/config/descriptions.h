@@ -118,6 +118,8 @@ constexpr auto kDOnlySFD = "Don't mine correlations";
 constexpr auto kDDenialConstraint = "String representation of a Denial Constraint";
 // DD verifier
 constexpr auto kDDDString = "Differential dependency that needs to be verified";
+constexpr auto kDSatisfactionThreshold =
+        "error threshold value for Approximate DD algorithms (between 0 and 1)";
 // DES
 constexpr auto kDCrossoverProbability = "probability of a gene getting mutated in a new individual";
 constexpr auto kDDifferentialScale = "the magnitude of mutations";

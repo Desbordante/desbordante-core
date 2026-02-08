@@ -1,0 +1,14 @@
+city,state,avg_temperature_F,avg_precipitation_inch
+Miami,Florida,77,61.9
+Tampa,Florida,73,46.9
+Orlando,Florida,72,51.5
+Jacksonville,Florida,70,52.4
+Key West,Florida,78,39.8
+Death Valley,California,77,2.4
+San Diego,California,64,10.3
+San Francisco,California,57,23.6
+Phoenix,Arizona,75,8.0
+Tucson,Arizona,70,11.6
+Yuma,Arizona,77,3.2
+Seattle,Washington,54,38.0
+Spokane,Washington,48,16.6
