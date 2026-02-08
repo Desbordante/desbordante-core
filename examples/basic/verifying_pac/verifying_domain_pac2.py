@@ -28,10 +28,8 @@ print(
 on multiple columns. It continues the first Domain PAC verification example
 {CYAN}(examples/basic/verifying_pac/verifying_domain_pac1.py){ENDC}. If you have not read the first part yet,
 it is recommended to start there.
-''')
 
-print(
-    f'''In first example we verified {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC} on engine temperature sensor readings.
+In the first example we verified {BLUE}Domain PAC Pr(x ∈ [85, 95]±5) ≥ 0.9{ENDC} on engine temperature sensor readings.
 Now, in addition to temperature readings, we also have tachometer data:''')
 print(f'{BOLD}{csv_to_str(ENGINE_TEMPS)}{ENDC}')
 print()
@@ -40,13 +38,13 @@ print(
     f'''The normal operating RPM for this engine is {BLUE}[1500, 3500]{ENDC}. Values outside this range are
 not harmful by themselves (as long as they are within {BLUE}[0, 5000]{ENDC}), but:
     * A cold engine may stall at low RPM and can be damaged at high RPM.
-    * An overheated engine is especially vulnerable at RPM values outside [1500, 3500], because
+    * An overheated engine is especially vulnerable at RPM values outside {BLUE}[1500, 3500]{ENDC}, because
       cooling efficiency depends on RPM.
 As in the first example, we use the Domain PAC verifier to check whether the engine operates properly.
 ''')
 
 print(
-    f'''Firstly, we need to create domain. We have a cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
+    f'''Firstly, we need to create domain. We have a Cartesian product of two segments: {BLUE}[85, 95] x [1500, 3500]{ENDC},
 so it would be natural to use parallelepiped.''')
 print(
     f'''We now work with two columns: temperature and RPM. The acceptable operating region is a Cartesian product
@@ -79,7 +77,7 @@ print(
     f'''Highlights between {BLUE}0{ENDC} and {BLUE}{pac.epsilon}{ENDC} are: {BOLD}{algo.get_highlights(0, pac.epsilon)}{ENDC}.
 ''')
 print(
-    f'''There are very few hihglights, which suggests that the parameters may not be chosen correctly.
+    f'''There are very few highlights, which suggests that the parameters may not be chosen correctly.
 
 The question is: what does ε = {BLUE}{pac.epsilon}{ENDC} mean in two-dimensional domain? Should ε correspond to:
     * 10 degrees of temperature difference, or
