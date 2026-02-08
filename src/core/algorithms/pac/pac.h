@@ -10,11 +10,11 @@
 
 namespace model {
 
-/// @brief Probabilistic Approximate Constraints are dependencies that generalize exact dependencies.
-/// Each PAC has two common parameters: list of epsilons and list of deltas (separate for each
-/// attribute, or the same for all attributes).
-/// Epsilon is a measure of "proximity", which shows how much PAC deviates from exact
-/// dependency. Delta is a probability at which approximate dependency holds.
+/// @brief Probabilistic Approximate Constraints are dependencies that generalize exact
+/// dependencies. Each PAC has two common parameters: list of epsilons and list of deltas (separate
+/// for each attribute, or the same for all attributes). Epsilon is a measure of "proximity", which
+/// shows how much PAC deviates from exact dependency. Delta is a probability at which approximate
+/// dependency holds.
 class PAC {
 private:
     std::shared_ptr<RelationalSchema const> rel_schema_;
