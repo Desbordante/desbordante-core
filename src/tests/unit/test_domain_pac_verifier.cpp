@@ -233,7 +233,7 @@ INSTANTIATE_TEST_SUITE_P(
                 CustomMetricBallsIntervalsParams(0, 1, 0.631, 0.625),
                 CustomMetricBallsIntervalsParams(1.2, 1.3, 1.225, 0.73),
                 CustomMetricBallsIntervalsParams(2, 5, 4.709, 0.991),
-				// (min_eps, ??) is considered a point too, and here it wins
+                // (min_eps, ??) is considered a point too, and here it wins
                 DomainPACVerifyingParams(kSimpleTypos, {1},
                                          std::make_shared<Parallelepiped>("5", "7"), 1, 0.5, 0.5,
                                          1),
