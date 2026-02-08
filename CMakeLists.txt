@@ -1,18 +1,21 @@
+cmake_minimum_required(VERSION 3.25)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+include(desbordante_helpers)
+
 # ---- CMake Policies ----
-
-cmake_minimum_required(VERSION 3.26)
-
 if(POLICY CMP0167)
-    # deprecated by definition, but we use old behaviour for find_package(Boost) to load CMake's FindBoost module
-    # TODO: port project to "Modern CMake" https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1
-    cmake_policy(SET CMP0167 OLD)
+    # To search for the upstream BoostConfig.cmake. Added in version 3.30.
+    cmake_policy(SET CMP0167 NEW)
 endif()
+
 if(POLICY CMP0144)
+    # To use <PACKAGENAME>_ROOT variables. Added in version 3.27.
     cmake_policy(SET CMP0144 NEW)
 endif()
 
 if(POLICY CMP0175)
-    # Don't allow invalid arguments of `add_custom_command()`
+    # Don't allow invalid arguments of `add_custom_command()`. Added in version 3.31.
     cmake_policy(SET CMP0175 NEW)
 endif()
 
@@ -54,7 +57,7 @@ option(DESBORDANTE_GDB_SYMBOLS "Include debug information for use by GDB" OFF)
 # - Disabled by default for maximum performance
 # - Enabled for wide datasets (>32 columns) with potential performance penalty
 option(DESBORDANTE_SAFE_VERTICAL_HASHING
-        "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
+       "Enable safe vertical hashing mode. Allows processing wide datasets (>32 columns) \
     at the cost of reduced performance. Recommended for exploratory data analysis." OFF
 )
 option(DESBORDANTE_UNPACK_DATASETS "Unpack datasets" ON)
@@ -101,8 +104,8 @@ endif()
 
 # Enable colored Ninja and compilers diagnostics
 set(CMAKE_COLOR_DIAGNOSTICS ON)
-
-set(CMAKE_CXX_STANDARD 20)
+# Enable dependency relaxation in phase of generation project files
+set(CMAKE_OPTIMIZE_DEPENDENCIES ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/target")
 
 if(DESBORDANTE_BUILD_NATIVE)
@@ -213,11 +216,9 @@ endif()
 
 # --- Dependencies installation ---
 
-include(cmake/desbordante_deps.cmake)
+include(desbordante_deps)
 
 # --- Core Project Structure and Module Setup ---
-
-include_directories("src")
 
 add_subdirectory("src/core")
 
@@ -228,7 +229,7 @@ if(DESBORDANTE_BUILD_TESTS)
     enable_testing()
 endif()
 
-if (DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
+if(DESBORDANTE_BUILD_TESTS OR DESBORDANTE_BUILD_BENCHMARKS)
     # Configure the datasets required for tests and benchmarks (downloaded from desbordante-data)
     add_subdirectory("datasets")
     add_subdirectory("src/tests")
