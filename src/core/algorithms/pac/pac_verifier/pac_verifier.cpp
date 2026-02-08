@@ -150,7 +150,7 @@ std::pair<double, double> PACVerifier::FindEpsilonDelta(
         if (begin != empirical_probabilities.begin()) {
             std::advance(begin, -1);
             begin->first = min_epsilon_;
-			begin->second = std::max(begin->second, min_delta_);
+            begin->second = std::max(begin->second, min_delta_);
         }
 
         // If begin != empirical_probs.begin, a new pair is added.
