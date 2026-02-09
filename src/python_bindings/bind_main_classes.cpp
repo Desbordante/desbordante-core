@@ -14,7 +14,7 @@
 #include "python_bindings/py_util/opt_to_py.h"
 #include "python_bindings/py_util/py_to_any.h"
 
-namespace {
+namespace configure_algorithm_bind_main_classes {
 namespace py = pybind11;
 using algos::Algorithm;
 auto const kVoidIndex = std::type_index{typeid(void)};
@@ -30,7 +30,9 @@ void ConfigureAlgo(Algorithm& algorithm, py::kwargs const& kwargs) {
                                : boost::any{};
             });
 }
-}  // namespace
+}  // namespace configure_algorithm_bind_main_classes
+
+using namespace configure_algorithm_bind_main_classes;
 
 namespace python_bindings {
 void BindMainClasses(py::module_& main_module) {

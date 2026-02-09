@@ -39,6 +39,26 @@ PredicatePtr DeserializePredicate(py::tuple t, std::shared_ptr<RelationalSchema 
 }
 }  // namespace fastadc_serialization
 
+namespace {
+using DC = algos::fastadc::DenialConstraint;
+
+py::tuple GetSortedPredicatesAsTuple(DC const& dc) {
+    std::vector<PredicatePtr> predicate_ptrs;
+    for (PredicatePtr predicate : dc.GetPredicateSet()) {
+        predicate_ptrs.push_back(predicate);
+    }
+    std::sort(predicate_ptrs.begin(), predicate_ptrs.end(),
+              [](PredicatePtr const& p1, PredicatePtr const& p2) {
+                  return p1->ToString() < p2->ToString();
+              });
+    py::tuple predicates(predicate_ptrs.size());
+    for (size_t i = 0; i < predicate_ptrs.size(); i++) {
+        predicates[i] = fastadc_serialization::SerializePredicate(predicate_ptrs[i]);
+    }
+    return predicates;
+}
+}  // namespace
+
 namespace python_bindings {
 void BindFastADC(py::module_& main_module) {
     using namespace algos;
@@ -48,6 +68,31 @@ void BindFastADC(py::module_& main_module) {
     py::class_<DC>(dc_module, "DC")
             .def("__str__", &DC::ToString)
             .def("__repr__", &DC::ToString)
+            .def("__eq__",
+                 [](DC const& dc1, DC const& dc2) {
+                     if (&dc1 == &dc2) {
+                         return true;
+                     }
+                     if (*dc1.GetSchema() != *dc2.GetSchema()) {
+                         return false;
+                     }
+
+                     py::tuple dc1_predicates = GetSortedPredicatesAsTuple(dc1);
+                     py::tuple dc2_predicates = GetSortedPredicatesAsTuple(dc2);
+
+                     return dc1_predicates.equal(dc2_predicates);
+                 })
+            .def("__hash__",
+                 [](DC const& dc) {
+                     py::tuple dc_predicates_tuple = GetSortedPredicatesAsTuple(dc);
+                     py::tuple schema_tuple = table_serialization::ConvertSchemaToImmutableTuple(
+                             dc.GetSchema().get());
+
+                     py::tuple state_tuple = py::make_tuple(std::move(dc_predicates_tuple),
+                                                            std::move(schema_tuple));
+
+                     return py::hash(state_tuple);
+                 })
             .def(py::pickle(
                     //__getstate__
                     [](DenialConstraint const& dc) {

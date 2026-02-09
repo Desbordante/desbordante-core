@@ -1,3 +1,7 @@
+#include <cmath>
+#include <limits>
+#include <utility>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -8,8 +12,11 @@
 
 namespace py = pybind11;
 
-namespace nar_serialization {
+namespace {
+constexpr double kRoundingValue = 1e12;
+}  // namespace
 
+namespace nar_serialization {
 py::object SerializeValueRange(std::shared_ptr<model::ValueRange> const& vr) {
     switch (int type_code = vr->GetTypeId()) {
         case model::TypeId::kString: {
@@ -79,6 +86,70 @@ std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> DeserializeRangeM
     }
     return map;
 }
+
+py::tuple ConvertValueRangeToImmutableTuple(std::shared_ptr<model::ValueRange> const& vr) {
+    switch (int type_code = vr->GetTypeId()) {
+        case model::TypeId::kString: {
+            auto svr = std::dynamic_pointer_cast<model::StringValueRange>(vr);
+            py::tuple domain_tuple = py::tuple(svr->domain.size());
+            for (size_t i = 0; i < svr->domain.size(); i++) {
+                domain_tuple[i] = svr->domain[i];
+            }
+            return py::make_tuple(type_code, domain_tuple);
+        }
+        case model::TypeId::kDouble: {
+            auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Double>>(vr);
+            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+        }
+        case model::TypeId::kInt: {
+            auto nvr = std::dynamic_pointer_cast<model::NumericValueRange<model::Int>>(vr);
+            return py::make_tuple(type_code, py::make_tuple(nvr->lower_bound, nvr->upper_bound));
+        }
+        default: {
+            throw std::runtime_error("Unsupported ValueRange type to hash.");
+        }
+    }
+}
+
+py::tuple ConvertRangeMapToImmutableTuple(
+        std::unordered_map<size_t, std::shared_ptr<model::ValueRange>> const& map) {
+    std::vector<std::pair<size_t, std::shared_ptr<model::ValueRange>>> sorted_ranges;
+    sorted_ranges.reserve(map.size());
+    for (auto const& [key, value] : map) {
+        sorted_ranges.emplace_back(key, value);
+    }
+    std::sort(sorted_ranges.begin(), sorted_ranges.end(),
+              [](auto const& elem1, auto const& elem2) { return elem1.first < elem2.first; });
+
+    py::tuple ranges_tuple = py::tuple(sorted_ranges.size());
+    for (size_t i = 0; i < sorted_ranges.size(); i++) {
+        auto const& [key, value] = sorted_ranges[i];
+        ranges_tuple[i] = py::make_tuple(key, ConvertValueRangeToImmutableTuple(value));
+    }
+    return ranges_tuple;
+}
+
+py::tuple ConvertNarToImmutableTuple(model::NAR const& nar) {
+    py::tuple ante_tuple = ConvertRangeMapToImmutableTuple(nar.GetAnte());
+    py::tuple cons_tuple = ConvertRangeMapToImmutableTuple(nar.GetCons());
+
+    bool is_consistent = nar.IsQualitiesConsistent();
+
+    if (is_consistent) {
+        auto const& qualities = nar.GetQualities();
+
+        auto round_double_val = [](double d) {
+            return std::round(d * kRoundingValue) / kRoundingValue;
+        };
+
+        return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent,
+                              round_double_val(qualities.fitness),
+                              round_double_val(qualities.support),
+                              round_double_val(qualities.confidence));
+    }
+    return py::make_tuple(std::move(ante_tuple), std::move(cons_tuple), is_consistent);
+}
+
 }  // namespace nar_serialization
 
 namespace python_bindings {
@@ -126,6 +197,31 @@ void BindNar(py::module_& main_module) {
             .def_property_readonly("fitness", [](NAR const& n) { return n.GetQualities().fitness; })
             .def_property_readonly("ante", &NAR::GetAnte)
             .def_property_readonly("cons", &NAR::GetCons)
+            .def("__eq__",
+                 [](NAR const& nar1, NAR const& nar2) {
+                     if (&nar1 == &nar2) {
+                         return true;
+                     }
+                     try {
+                         py::tuple nar1_state_tuple =
+                                 nar_serialization::ConvertNarToImmutableTuple(nar1);
+                         py::tuple nar2_state_tuple =
+                                 nar_serialization::ConvertNarToImmutableTuple(nar2);
+
+                         return nar1_state_tuple.equal(nar2_state_tuple);
+                     } catch (std::exception const& e) {
+                         return nar1.ToString() == nar2.ToString();
+                     }
+                 })
+            .def("__hash__",
+                 [](NAR const& nar) {
+                     try {
+                         py::tuple state_tuple = nar_serialization::ConvertNarToImmutableTuple(nar);
+                         return py::hash(state_tuple);
+                     } catch (std::exception const& e) {
+                         return static_cast<long>(0);
+                     }
+                 })
             .def(py::pickle(
                     // __getstate__
                     [](NAR const& nar) {

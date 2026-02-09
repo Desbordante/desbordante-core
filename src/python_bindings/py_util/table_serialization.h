@@ -17,6 +17,8 @@ py::tuple SerializeRelationalSchema(RelationalSchema const* schema);
 
 std::shared_ptr<RelationalSchema const> DeserializeRelationalSchema(py::tuple t);
 
+py::tuple ConvertSchemaToImmutableTuple(RelationalSchema const* schema);
+
 py::tuple SerializeVertical(Vertical const& v);
 
 Vertical DeserializeVertical(py::tuple t, RelationalSchema const* schema);

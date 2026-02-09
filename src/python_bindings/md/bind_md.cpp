@@ -65,6 +65,66 @@ void BindColumnMatchWithConstructor(Args&&... args) {
                          .none(false),
                  "column_functions"_a = ColumnFunctions{});
 }
+
+py::tuple SerializeColumnMatch(MD const& md_obj) {
+    std::vector<py::tuple> match_tuples;
+    std::shared_ptr<std::vector<model::md::ColumnMatch> const> matches_ptr =
+            md_obj.GetColumnMatches();
+    if (matches_ptr) {
+        for (model::md::ColumnMatch const& cm : *matches_ptr) {
+            match_tuples.push_back(py::make_tuple(cm.left_col_index, cm.right_col_index, cm.name));
+        }
+    }
+    py::tuple match_tuple = py::cast(match_tuples);
+    return match_tuple;
+}
+
+py::tuple SerializeLhs(MD const& md_obj) {
+    std::vector<py::tuple> lhs_tuples;
+    for (model::md::LhsColumnSimilarityClassifier const& csc : md_obj.GetLhs()) {
+        std::size_t match_idx = csc.GetColumnMatchIndex();
+        model::md::DecisionBoundary db = csc.GetDecisionBoundary();
+        std::optional<model::md::DecisionBoundary> maybe_max = csc.GetMaxDisprovedBound();
+        lhs_tuples.push_back(py::make_tuple(match_idx, db, maybe_max));
+    }
+    py::tuple lhs_tuple = py::cast(lhs_tuples);
+    return lhs_tuple;
+}
+
+py::tuple SerializeRhs(MD const& md_obj) {
+    auto [rhs_idx, rhs_bound] = md_obj.GetRhs();
+    return py::make_tuple(rhs_idx, rhs_bound);
+}
+
+py::tuple SerializeMD(MD const& md_obj) {
+    py::tuple left_schema_state =
+            table_serialization::SerializeRelationalSchema(md_obj.GetLeftSchema().get());
+    py::tuple right_schema_state =
+            table_serialization::SerializeRelationalSchema(md_obj.GetRightSchema().get());
+
+    py::tuple match_tuple = SerializeColumnMatch(md_obj);
+
+    py::tuple lhs_tuple = SerializeLhs(md_obj);
+
+    py::tuple rhs_tuple = SerializeRhs(md_obj);
+
+    return py::make_tuple(std::move(left_schema_state), std::move(right_schema_state),
+                          std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+}
+
+py::tuple ConvertMdToImmutableTuple(MD const& md_obj) {
+    py::tuple left_schema_tuple =
+            table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetLeftSchema().get());
+    py::tuple right_schema_tuple =
+            table_serialization::ConvertSchemaToImmutableTuple(md_obj.GetRightSchema().get());
+
+    py::tuple match_tuple = SerializeColumnMatch(md_obj);
+    py::tuple lhs_tuple = SerializeLhs(md_obj);
+    py::tuple rhs_tuple = SerializeRhs(md_obj);
+
+    return py::make_tuple(std::move(left_schema_tuple), std::move(right_schema_tuple),
+                          std::move(match_tuple), std::move(lhs_tuple), std::move(rhs_tuple));
+}
 }  // namespace
 
 namespace python_bindings {
@@ -117,39 +177,20 @@ void BindMd(py::module_& main_module) {
             .def("__str__", &MD::ToStringActiveLhsOnly)
             .def_property_readonly("single_table", &MD::SingleTable)
             .def("get_description", &MD::GetDescription)
+            .def("__eq__",
+                 [](MD const& md1, MD const& md2) {
+                     py::tuple md1_state_tuple = ConvertMdToImmutableTuple(md1);
+                     py::tuple md2_state_tuple = ConvertMdToImmutableTuple(md2);
+                     return md1_state_tuple.equal(md2_state_tuple);
+                 })
+            .def("__hash__",
+                 [](MD const& md_obj) {
+                     py::tuple state_tuple = ConvertMdToImmutableTuple(md_obj);
+                     return py::hash(state_tuple);
+                 })
             .def(py::pickle(
                     // __getstate__
-                    [](MD const& md_obj) {
-                        py::tuple left_schema_state =
-                                table_serialization::SerializeRelationalSchema(
-                                        md_obj.GetLeftSchema().get());
-                        py::tuple right_schema_state =
-                                table_serialization::SerializeRelationalSchema(
-                                        md_obj.GetRightSchema().get());
-                        py::list match_list;
-                        std::shared_ptr<std::vector<md::ColumnMatch> const> matches_ptr =
-                                md_obj.GetColumnMatches();
-                        if (matches_ptr) {
-                            for (model::md::ColumnMatch const& cm : *matches_ptr) {
-                                match_list.append(py::make_tuple(cm.left_col_index,
-                                                                 cm.right_col_index, cm.name));
-                            }
-                        }
-                        py::list lhs_list;
-                        for (model::md::LhsColumnSimilarityClassifier const& csc :
-                             md_obj.GetLhs()) {
-                            std::size_t match_idx = csc.GetColumnMatchIndex();
-                            model::md::DecisionBoundary db = csc.GetDecisionBoundary();
-                            std::optional<model::md::DecisionBoundary> maybe_max =
-                                    csc.GetMaxDisprovedBound();
-                            lhs_list.append(py::make_tuple(match_idx, db, maybe_max));
-                        }
-                        auto [rhs_idx, rhs_bound] = md_obj.GetRhs();
-                        auto rhs_tuple = py::make_tuple(rhs_idx, rhs_bound);
-                        return py::make_tuple(std::move(left_schema_state),
-                                              std::move(right_schema_state), std::move(match_list),
-                                              std::move(lhs_list), std::move(rhs_tuple));
-                    },
+                    [](MD const& md_obj) { return SerializeMD(md_obj); },
                     // __setstate__
                     [](py::tuple st) {
                         if (st.size() != 5) {
@@ -161,10 +202,10 @@ void BindMd(py::module_& main_module) {
                         std::shared_ptr<RelationalSchema const> right_schema =
                                 table_serialization::DeserializeRelationalSchema(
                                         st[1].cast<py::tuple>());
-                        auto match_list = st[2].cast<py::list>();
+                        auto match_tuple = st[2].cast<py::tuple>();
                         auto matches_ptr = std::make_shared<std::vector<model::md::ColumnMatch>>();
-                        matches_ptr->reserve(match_list.size());
-                        for (auto item : match_list) {
+                        matches_ptr->reserve(match_tuple.size());
+                        for (auto item : match_tuple) {
                             auto tpl = item.cast<py::tuple>();
                             if (tpl.size() != 3) {
                                 throw std::runtime_error("Invalid state for MD pickle!");
@@ -174,10 +215,10 @@ void BindMd(py::module_& main_module) {
                             auto name = tpl[2].cast<std::string>();
                             matches_ptr->emplace_back(l_idx, r_idx, std::move(name));
                         }
-                        auto lhs_list = st[3].cast<py::list>();
+                        auto lhs_tuple = st[3].cast<py::tuple>();
                         std::vector<model::md::LhsColumnSimilarityClassifier> lhs_vec;
-                        lhs_vec.reserve(lhs_list.size());
-                        for (auto item : lhs_list) {
+                        lhs_vec.reserve(lhs_tuple.size());
+                        for (auto item : lhs_tuple) {
                             auto tpl = item.cast<py::tuple>();
                             if (tpl.size() != 3) {
                                 throw std::runtime_error("Invalid state for MD pickle!");
