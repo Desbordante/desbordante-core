@@ -1,0 +1,5 @@
+[default]
+extend-ignore-words-re = [
+    "abd",
+    "helo",
+]

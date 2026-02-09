@@ -1,4 +1,4 @@
-/* This file contatins simplified implementation of std::bitset with SGI extensions
+/* This file contains simplified implementation of std::bitset with SGI extensions
  * (_Find_first and _Find_next) implemented.
  *
  * It's C++20 "slice" (this won't meet the standard on later versions): all "version" macros were
@@ -532,12 +532,12 @@ public:
         return (static_cast<WordT>(1)) << WhichBit(pos);
     }
 
-    // Here's the only place where users of zero-legth bitsets are penalized
+    // Here's the only place where users of zero-length bitsets are penalized
     // This function is unreachable until _Unchecked methods are used
     [[noreturn]] WordT& GetWord([[maybe_unused]] size_t) noexcept {
         // Originally, here is `throw` statement, but it violates `noexcept` specification
         // throw std::out_of_range("BaseBitset::GetWord");
-        LOG_INFO("Out of range in BaseBitset::GetWord (zero-lenght bitset).");
+        LOG_INFO("Out of range in BaseBitset::GetWord (zero-length bitset).");
         __builtin_unreachable();
     }
 

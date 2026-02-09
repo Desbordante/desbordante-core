@@ -132,10 +132,10 @@ unsigned long long Apriori::FindFrequent() {
             candidates_count += candidate_children.size();
         }
         auto const branching_degree = level_num_;
-        auto const min_treshold = candidates_count / branching_degree + 1;
+        auto const min_threshold = candidates_count / branching_degree + 1;
 
         candidate_hash_tree_ = std::make_unique<CandidateHashTree>(
-                transactional_data_.get(), candidates_, branching_degree, min_treshold);
+                transactional_data_.get(), candidates_, branching_degree, min_threshold);
         candidate_hash_tree_->PerformCounting();
         candidate_hash_tree_->PruneNodes(minsup_);
         AppendToTree();

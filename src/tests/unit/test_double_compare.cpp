@@ -109,7 +109,7 @@ TEST_F(DoubleCompare, ZeroEQMinDivMax) {
     ASSERT_EQ(double_type_ref_.Compare(result_, double_zero), model::CompareResult::kEqual);
 }
 
-TEST_F(DoubleCompare, ComprasionFromAcAlgorithm) {
+TEST_F(DoubleCompare, ComparisonFromAcAlgorithm) {
     std::unique_ptr<std::byte[]> seven_point_seven(double_type_.MakeValue(7.7));
     std::unique_ptr<std::byte[]> six_point_nine(double_type_.MakeValue(6.9));
     std::unique_ptr<std::byte[]> expect(double_type_.MakeValue(7.7 + 6.9));

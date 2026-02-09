@@ -84,3 +84,20 @@ jobs:
       - name: Fail the check if clang-tidy reported issues
         if: steps.review.outputs.total_comments > 0
         run: exit 1
+
+  typos-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find typos configs
+        id: search
+        run: |
+          ALL_CONFIGS=$(find . -type f \( -name "pyproject.toml" -o -name "typos.toml" -o -name ".typos.toml" \) | tr '\n' ' ')
+          echo $ALL_CONFIGS
+          echo "cfg=$ALL_CONFIGS">> $GITHUB_OUTPUT
+
+      - name: Check spelling with typos
+        uses: crate-ci/typos@v1.39.2
+        with:
+          args: --config ${{ steps.search.outputs.cfg }} .

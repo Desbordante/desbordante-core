@@ -27,14 +27,14 @@ private:
 
     // Cached data:
     std::unique_ptr<std::unordered_set<size_t>> most_frequent_rhs_value_codes_{nullptr};
-    std::unique_ptr<std::vector<size_t>> occurences_indices_{nullptr};
+    std::unique_ptr<std::vector<size_t>> occurrences_indices_{nullptr};
     std::unique_ptr<std::vector<std::string>> highlight_rhs_values_{nullptr};
 
     /// @brief Find most frequent rhs values and cache them
     std::unordered_set<size_t> const& GetMostFrequentRhsValueCodes();
 
     [[nodiscard]] std::unordered_set<size_t> CalculateMostFrequentRhsValueCodes() const;
-    [[nodiscard]] std::vector<size_t> CalculateOccurencesIndices() const;
+    [[nodiscard]] std::vector<size_t> CalculateOccurrencesIndices() const;
     [[nodiscard]] std::vector<std::string> CalculateRhsValues() const;
 
 public:
@@ -54,12 +54,12 @@ public:
           highlight_lhs_(highlight_lhs_code),
           highlight_rhs_(std::move(highlight_rhs_codes)) {}
 
-    /// @brief Get cached indices of all occurences of this highlight of calculate it (heavy
+    /// @brief Get cached indices of all occurrences of this highlight of calculate it (heavy
     /// operation)
-    std::vector<size_t> const& GetOccurencesIndices();
+    std::vector<size_t> const& GetOccurrencesIndices();
 
-    /// @brief Get number of occurences of this highlight
-    [[nodiscard]] size_t GetOccurencesNumber();
+    /// @brief Get number of occurrences of this highlight
+    [[nodiscard]] size_t GetOccurrencesNumber();
 
     /// @brief Get Lhs value
     [[nodiscard]] std::string GetLhsValue() const {

@@ -330,7 +330,7 @@ size_t EulerFD::GenerateResults() {
     std::vector<Bitset> neg_cover_vector(new_invalids_.begin(), new_invalids_.end());
     auto new_indexes = GetAttributesSortedByFrequency(neg_cover_vector);
 
-    // Check is rebuild of covers neccesary
+    // Check is rebuild of covers necessary
     if (attribute_indexes_ != new_indexes) {
         if (old_invalid_size_ != 0) {
             InitCovers();

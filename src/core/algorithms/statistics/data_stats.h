@@ -92,7 +92,7 @@ public:
     // Data values converted to string type.
     std::vector<std::vector<std::string>> ShowSample(size_t start_row, size_t end_row,
                                                      size_t start_col, size_t end_col) const;
-    // Returns avarage value in the column if it's numeric.
+    // Returns average value in the column if it's numeric.
     Statistic GetAvg(size_t index) const;
     // Returns corrected standard deviation of the column if it's numeric.
     Statistic GetCorrectedSTD(size_t index) const;

@@ -438,7 +438,7 @@ TEST(TestDataStats, CorrectExecutionEmpty) {
     EXPECT_EQ(stats.GetAllStats().size(), 0);
 }
 
-// To measure performace of mining statistics in multiple threads.
+// To measure performance of mining statistics in multiple threads.
 #if 0
 TEST(TestCsvStats, TestDiffThreadNum) {
     for(unsigned thread_num = 1; thread_num < 9; ++thread_num) {
