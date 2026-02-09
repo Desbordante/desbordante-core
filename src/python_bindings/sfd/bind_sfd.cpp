@@ -12,6 +12,13 @@
 
 namespace {
 namespace py = pybind11;
+
+py::tuple SerializeCorrelation(algos::Correlation const& corr) {
+    py::tuple lhs_state = table_serialization::SerializeColumn(corr.GetLhs());
+    py::tuple rhs_state = table_serialization::SerializeColumn(corr.GetRhs());
+    return py::make_tuple(std::move(lhs_state), std::move(rhs_state));
+}
+
 }  // namespace
 
 namespace python_bindings {
@@ -29,12 +36,20 @@ void BindSFD(py::module_& main_module) {
             .def("GetRhsIndex", &Correlation::GetRhsIndex)
             .def("GetLhsName", &Correlation::GetLhsName)
             .def("GetRhsName", &Correlation::GetRhsName)
+            .def("__eq__", [](Correlation const& corr1, Correlation const& corr2) {
+                py::tuple corr1_state_tuple = SerializeCorrelation(corr1);
+                py::tuple corr2_state_tuple = SerializeCorrelation(corr2);
+
+                return corr1_state_tuple.equal(corr2_state_tuple);
+            })
+            .def("__hash__", [](Correlation const& corr) {
+                py::tuple corr_state_tuple = SerializeCorrelation(corr);
+                return py::hash(corr_state_tuple);
+            })
             .def(py::pickle(
                     // __getstate__
                     [](Correlation const& corr) {
-                        py::tuple lhs_state = table_serialization::SerializeColumn(corr.GetLhs());
-                        py::tuple rhs_state = table_serialization::SerializeColumn(corr.GetRhs());
-                        return py::make_tuple(std::move(lhs_state), std::move(rhs_state));
+                        return SerializeCorrelation(corr);
                     },
                     // __setstate__
                     [](py::tuple t) {
