@@ -5,6 +5,11 @@ IndentWidth: 4
 ContinuationIndentWidth: 8
 ColumnLimit: 100
 AllowShortFunctionsOnASingleLine: Empty
+
+WhitespaceSensitiveMacros:
+  - BETTER_ENUM
+  - INSTANTIATE_TEST_SUITE_P
+
 IncludeCategories:
   - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11|Python|frozen).+>'
     Priority: 2

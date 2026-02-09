@@ -31,7 +31,6 @@ TEST_P(TestDDHoldsVerifying, DDHoldsTest) {
     EXPECT_EQ(verifier->GetNumErrorRhs(), p.num_error_pairs);
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
         DDVerifierTestSuite, TestDDHoldsVerifying,
         ::testing::Values(DDVerifyingParams({{{"Col0", 0, 0}}, {{"Col1", 0, 0}}}, 0, 0.),
@@ -53,6 +52,4 @@ INSTANTIATE_TEST_SUITE_P(
                           DDVerifyingParams({{{"Col0", 2, 3}}, {{"Col1", 1, 2}}}, 5, 1.),
                           DDVerifyingParams({{{"Col1", 2, 16}}, {{"Col3", 112, 333}}}, 5,
                                             5. / 10.)));
-
-// clang-format on
 }  // namespace tests

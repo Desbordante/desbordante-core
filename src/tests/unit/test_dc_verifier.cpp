@@ -45,7 +45,6 @@ TEST_P(TestDCVerifier, DefaultTest) {
     EXPECT_EQ(verifier->DCHolds(), p.dc_holds_);
 }
 
-// clang-format off
 INSTANTIATE_TEST_SUITE_P(
     DCVerifierTestSuite, TestDCVerifier, ::testing::Values(
     DCTestParams{"!(t.Col3 == s.Col3 and s.Col1 == t.Col1 and s.Col2 == t.Col2)", true, true, kTestDC, {}},
@@ -82,7 +81,4 @@ INSTANTIATE_TEST_SUITE_P(
     DCTestParams{"!(t.Salary < 1500  and  t.FedTaxRate > 0.1)", false, false, kTestDC1, {}}
     )
 );
-
-// clang-format on
-
 }  // namespace tests
