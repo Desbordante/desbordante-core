@@ -96,7 +96,7 @@ if __name__ == '__main__':
     print("The core parameters of the CORDS algorithm are:\n"
           "only_sfd: a boolean flag indicating whether we want to mine correlations besides SFDs or not\n\n"
 
-          "min_cardinality: (1 - min_cardinality) * n_rows denotes the minimum amount of distinct values"
+          "min_cardinality: (1 - min_cardinality) * n_rows denotes the minimum amount of distinct values "
           "in a column to be considered a soft key\n\n"
 
           "min_sfd_strength: (1 - min_sfd_strength) denotes the minimum strength threshold of SFD in\n"

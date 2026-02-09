@@ -6,7 +6,9 @@
 #include "core/algorithms/md/md_verifier/column_similarity_classifier.h"
 #include "core/algorithms/md/md_verifier/highlights/highlights.h"
 #include "core/algorithms/md/md_verifier/md_verifier.h"
+#include "python_bindings/bind_main_classes.h"
 #include "python_bindings/py_util/bind_primitive.h"
+#include "core/algorithms/md/md.h"
 
 namespace {
 namespace py = pybind11;
