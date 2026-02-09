@@ -25,7 +25,13 @@ def main() -> None:
         "Min words in a row": data_stats.get_min_number_of_words,
         "Max words in a row": data_stats.get_max_number_of_words,
         "Char vocabulary": data_stats.get_vocab,
-        "Word vocabulary": data_stats.get_words
+        "Word vocabulary": data_stats.get_words,
+        "IQR": data_stats.get_interquartile_range,
+        "Coefficient of variation": data_stats.get_coefficient_of_variation,
+        "Monotonicity": data_stats.get_monotonicity,
+        "Jarque-Bera statistic": data_stats.get_jarque_bera_statistic,
+        "Entropy": data_stats.get_entropy,
+        "Gini coefficient": data_stats.get_gini_coefficient,
     }
 
     table_methods = {
