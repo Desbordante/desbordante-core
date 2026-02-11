@@ -8,7 +8,6 @@
 #include <Python.h>
 #include <pybind11/stl/filesystem.h>
 
-#include "core/algorithms/association_rules/ar_algorithm_enums.h"
 #include "core/algorithms/cfd/enums.h"
 #include "core/algorithms/dd/dd.h"
 #include "core/algorithms/md/hymd/enums.h"
@@ -21,6 +20,7 @@
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/config/tabular_data/input_tables_type.h"
 #include "core/model/table/column_combination.h"
+#include "core/model/transaction/input_format_type.h"
 
 namespace py = pybind11;
 
@@ -33,6 +33,7 @@ constexpr PyTypeObject* const kPyStr = &PyUnicode_Type;
 constexpr PyTypeObject* const kPyList = &PyList_Type;
 constexpr PyTypeObject* const kPyTuple = &PyTuple_Type;
 constexpr PyTypeObject* const kPySet = &PySet_Type;
+constexpr PyTypeObject* const kPyDict = &PyDict_Type;
 
 py::handle MakeType(py::type type) {
     return type;
@@ -86,7 +87,7 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<algos::metric::MetricAlgo, kPyStr>,
             PyTypePair<config::PfdErrorMeasureType, kPyStr>,
             PyTypePair<config::AfdErrorMeasureType, kPyStr>,
-            PyTypePair<algos::InputFormat, kPyStr>,
+            PyTypePair<model::InputFormatType, kPyStr>,
             PyTypePair<algos::cfd::Substrategy, kPyStr>,
             PyTypePair<algos::hymd::LevelDefinition, kPyStr>,
             PyTypePair<algos::od::Ordering, kPyStr>,
@@ -116,6 +117,9 @@ py::tuple GetPyType(std::type_index type_index) {
             PyTypePair<std::vector<std::filesystem::path>, kPyList, kPyStr>,
             PyTypePair<std::unordered_set<size_t>, kPySet, kPyInt>,
             PyTypePair<std::string, kPyStr>,
+            PyTypePair<std::vector<std::string>, kPyList, kPyStr>,
+            PyTypePair<std::unordered_map<std::string, std::vector<unsigned int>>, kPyDict, kPyStr,
+                       kPyList, kPyInt>,
     };
     return type_map.at(type_index)();
 }

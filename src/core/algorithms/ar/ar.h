@@ -1,6 +1,7 @@
 #pragma once
 
-#include <list>
+#include <algorithm>
+#include <vector>
 
 #include "core/model/transaction/itemset.h"
 #include "core/model/transaction/transactional_data.h"
@@ -22,6 +23,26 @@ struct ArIDs {
           confidence(confidence),
           support(support) {}
 
+    ArIDs(std::vector<std::string> const& string_left, std::vector<std::string> const& string_right,
+          TransactionalData const* transactional_data, double const confidence,
+          double const support)
+        : confidence(confidence), support(support) {
+        std::vector<std::string> const& item_names_map = transactional_data->GetItemUniverse();
+
+        for (auto const& item_name : string_left) {
+            auto const it = std::ranges::find(item_names_map, item_name);
+            left.push_back(std::distance(item_names_map.begin(), it));
+        }
+
+        for (auto const& item_name : string_right) {
+            auto const it = std::ranges::find(item_names_map, item_name);
+            right.push_back(std::distance(item_names_map.begin(), it));
+        }
+
+        std::ranges::sort(left);
+        std::ranges::sort(right);
+    }
+
     ArIDs(ArIDs const& other) = default;
     ArIDs& operator=(ArIDs const& other) = default;
     ArIDs(ArIDs&& other) = default;
@@ -29,14 +50,14 @@ struct ArIDs {
 };
 
 struct ARStrings {
-    std::list<std::string> left;   // antecedent
-    std::list<std::string> right;  // consequent
+    std::vector<std::string> left;   // antecedent
+    std::vector<std::string> right;  // consequent
     double confidence = -1;
     double support = -1;
 
     ARStrings() = default;
 
-    ARStrings(std::list<std::string> left, std::list<std::string> right, double confidence,
+    ARStrings(std::vector<std::string> left, std::vector<std::string> right, double confidence,
               double support)
         : left(std::move(left)),
           right(std::move(right)),

@@ -2,6 +2,8 @@
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/nar/nar.h"
+#include "core/config/ar_minimum_conf/type.h"
+#include "core/config/ar_minimum_support/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/column_layout_typed_relation_data.h"
 
@@ -18,8 +20,8 @@ private:
 protected:
     std::vector<NAR> nar_collection_;
     std::unique_ptr<TypedRelation> typed_relation_;
-    double minsup_;
-    double minconf_;
+    config::ArMinimumSupportType minsup_;
+    config::ArMinimumConfidenceType minconf_;
 
     void LoadDataInternal() final;
     void MakeExecuteOptsAvailable() override;
