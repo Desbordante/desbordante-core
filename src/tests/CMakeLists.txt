@@ -19,6 +19,10 @@ if (DESBORDANTE_BUILD_TESTS)
 
 	# Create test executable
     add_executable(${UNIT_TEST_BINARY} ${common_sources} ${unit_test_sources})
+    add_dependencies(
+        ${UNIT_TEST_BINARY} Desbordante.zip.datasets Desbordante.zip.highway-neighbors
+        Desbordante.copy_test_input_data
+    )
 
 	# ---- Test Dependencies ----
 
@@ -39,6 +43,7 @@ endif()
 if (DESBORDANTE_BUILD_BENCHMARKS)
 	# Create benchmark executable
 	add_executable(${BENCHMARK_BINARY} ${common_sources} ${benchmark_sources})
+	add_dependencies(${BENCHMARK_BINARY} Desbordante.zip.datasets Desbordante.zip.highway-neighbors Desbordante.zip.performance-tests)
 
 	# ---- Benchmark Dependencies ----
 
@@ -47,24 +52,3 @@ if (DESBORDANTE_BUILD_BENCHMARKS)
 	# - Core library (implementation under benchmark)
     target_link_libraries(${BENCHMARK_BINARY} PRIVATE ${CMAKE_PROJECT_NAME})
 endif()
-
-# ---- Test Data Preparation ----
-
-# Copy test datasets to build output directory before any build target
-# ALL ensures this runs by default for all build operations
-add_custom_target(
-	copy-files ALL
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/test_input_data
-			${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/input_data
-	COMMENT "Copying test datasets to build directory"
-)
-
-# ---- Build Cleanup Configuration ----
-
-# Register test data directory for automatic removal during cleanup
-# Ensures test artifacts are deleted with `cmake --build . --target clean`
-set_property(
-	DIRECTORY
-	APPEND
-	PROPERTY ADDITIONAL_CLEAN_FILES "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/input_data"
-)
