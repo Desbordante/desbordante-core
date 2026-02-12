@@ -26,20 +26,11 @@ using DFIdx = std::size_t;
 
 class LatticeAlgorithm : public Algorithm {
 private:
-    config::InputTable input_table_;
     double satisfaction_threshold_ = 1.0;
-    // double support_threshold_ = 0.0;
 
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
-    std::vector<model::ColumnIndex> non_empty_cols_;
-    std::size_t tuple_pair_num_;
-
-    std::vector<model::TypeId> type_ids_;
-
-    config::InputTable difference_table_;
-    std::unique_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation_;
 
     std::vector<DistancePositionListIndex> plis_;
     std::vector<std::vector<std::vector<double>>> distances_;
@@ -49,8 +40,6 @@ private:
     std::vector<std::size_t> column_for_df_;
     std::vector<std::pair<std::size_t, std::size_t>> column_partition_idxs_;
     std::vector<Bitset> base_partitions_;
-
-    // std::unordered_map<DFConstraint, std::unique_ptr<DFConstraintTree>> trees_;
 
     void CalculateBasePartitions();
 
@@ -94,8 +83,6 @@ private:
     double CalculateDistance(model::ColumnIndex column_index,
                              std::pair<std::size_t, std::size_t> tuple_pair);
     void CalculateAllDistances();
-
-    // void AddNewDD(Bitset lhs, const DD& rhs);
 };
 
 }  // namespace algos::dd
