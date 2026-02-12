@@ -31,6 +31,7 @@ private:
     std::shared_ptr<model::ColumnLayoutTypedRelationData> typed_relation_;
     unsigned num_rows_;
     model::ColumnIndex num_columns_;
+    std::size_t tuple_pair_num_;
 
     std::vector<DistancePositionListIndex> plis_;
     std::vector<std::vector<std::vector<double>>> distances_;
@@ -76,7 +77,7 @@ private:
             : rhs_(rhs), root_(std::make_shared<DFTreeNode>(std::nullopt)) {}
     };
 
-    bool SameSubtrees(std::shared_ptr<DFTreeNode> subtree1, std::shared_ptr<DFTreeNode> subtree2);
+    bool SameSubtrees(std::shared_ptr<DFTreeNode> subtree_a, std::shared_ptr<DFTreeNode> subtree_b);
     void Combine(std::shared_ptr<DFTreeNode> root, Bitset const& lhs);
     void CheckAndCombine(DFTree& tree, Bitset const& lhs);
 
