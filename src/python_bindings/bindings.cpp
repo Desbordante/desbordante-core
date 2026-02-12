@@ -8,6 +8,8 @@
 #include "python_bindings/bind_main_classes.h"
 #include "python_bindings/cfd/bind_cfd.h"
 #include "python_bindings/cfd/bind_cfd_verification.h"
+#include "python_bindings/cind/bind_cind.h"
+#include "python_bindings/cind/bind_cind_verification.h"
 #include "python_bindings/data/bind_data_types.h"
 #include "python_bindings/dc/bind_dc_verification.h"
 #include "python_bindings/dc/bind_fastadc.h"
@@ -56,6 +58,8 @@ PYBIND11_MODULE(desbordante, module, pybind11::mod_gil_not_used()) {
                            BindStatistics,
                            BindInd,
                            BindIndVerification,
+                           BindCind,
+                           BindCindVerification,
                            BindGfdVerification,
                            BindSplit,
                            BindDynamicFdVerification,

@@ -12,6 +12,7 @@ datasets/*.zip
 .cache/
 .idea/
 .vscode/
+**/compile_commands.json
 
 # OS Generated file
 **/.DS_Store

@@ -129,4 +129,11 @@ constexpr auto kOcRightIndex = "oc_right_index";
 constexpr auto kOcLeftOrdering = "left_ordering";
 constexpr auto kOFDContext = "ofd_context";
 constexpr auto kOFDRightIndex = "ofd_right_index";
+
+// CIND
+constexpr auto kValidity = "validity";
+constexpr auto kCompleteness = "completeness";
+constexpr auto kConditionType = "condition_type";
+constexpr auto kAlgoType = "algo_type";
+
 }  // namespace config::names

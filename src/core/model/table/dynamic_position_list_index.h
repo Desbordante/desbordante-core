@@ -3,21 +3,10 @@
 #include <unordered_map>
 #include <vector>
 
+#include "core/algorithms/cind/condition_miners/position_lists_set.h"
 #include "core/model/table/column.h"
 
 class ColumnLayoutRelationData;
-
-template <>
-struct std::hash<std::vector<int>> {
-    std::size_t operator()(std::vector<int> const& vec) const noexcept {
-        std::size_t secret = vec.size();
-        std::size_t hash = (1 << secret) ^ secret;
-        for (auto const& el : vec) {
-            hash ^= (el << secret) - (hash >> secret);
-        }
-        return hash;
-    }
-};
 
 namespace model {
 class DynamicPositionListIndex {
