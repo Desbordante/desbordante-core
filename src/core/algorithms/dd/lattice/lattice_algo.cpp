@@ -55,7 +55,7 @@ void LatticeAlgorithm::CalculateAllDistances() {
 }
 
 void LatticeAlgorithm::CalculateBasePartitions() {
-    std::size_t tuple_pair_num_ = num_rows_ * (num_rows_ - 1) / 2;
+    tuple_pair_num_ = num_rows_ * (num_rows_ - 1) / 2;
 
     std::vector<std::pair<std::size_t, std::size_t>> all_pairs;
     all_pairs.reserve(tuple_pair_num_);
@@ -176,21 +176,21 @@ std::pair<double, double> LatticeAlgorithm::FindRhs(Bitset const& df_partition,
     return {left, right};
 }
 
-bool LatticeAlgorithm::SameSubtrees(std::shared_ptr<DFTreeNode> subtreeA,
-                                    std::shared_ptr<DFTreeNode> subtreeB) {
-    auto const& childrenA = subtreeA->left_children_;
-    auto const& childrenB = subtreeB->left_children_;
+bool LatticeAlgorithm::SameSubtrees(std::shared_ptr<DFTreeNode> subtree_a,
+                                    std::shared_ptr<DFTreeNode> subtree_b) {
+    auto const& children_a = subtree_a->left_children_;
+    auto const& children_b = subtree_b->left_children_;
 
-    if (childrenA.size() != childrenB.size()) return false;
+    if (children_a.size() != children_b.size()) return false;
 
-    for (auto const& [idxA, childA] : childrenA) {
-        auto itB = childrenB.find(idxA);
-        if (itB == childrenB.end()) return false;
+    for (auto const& [idxA, child_a] : children_a) {
+        auto it_b = children_b.find(idxA);
+        if (it_b == children_b.end()) return false;
 
-        auto const childB = itB->second;
-        if (childA->right_idx_ != childB->right_idx_) return false;
+        auto const child_b = it_b->second;
+        if (child_a->right_idx_ != child_b->right_idx_) return false;
 
-        if (!SameSubtrees(childA, childB)) return false;
+        if (!SameSubtrees(child_a, child_b)) return false;
     }
     return true;
 }
