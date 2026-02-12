@@ -3,8 +3,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "core/model/table/column.h"
 #include "core/algorithms/cind/condition_miners/position_lists_set.h"
+#include "core/model/table/column.h"
 
 class ColumnLayoutRelationData;
 
