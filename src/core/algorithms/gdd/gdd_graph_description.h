@@ -9,7 +9,7 @@
 namespace model::gdd {
 
 struct VertexProperties {
-    int id;
+    size_t id;
     std::string label;
     std::unordered_map<std::string, std::string> attributes;
 };
