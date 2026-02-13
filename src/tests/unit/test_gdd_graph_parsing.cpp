@@ -12,7 +12,7 @@ namespace {
 
 model::gdd::vertex_t FindVertexById(model::gdd::graph_t const& g, int id) {
     for (auto const v : boost::make_iterator_range(boost::vertices(g))) {
-        if (g[v].id == id) return v;
+        if (g[v].id == static_cast<size_t>(id)) return v;
     }
     throw std::runtime_error("vertex with requested id not found");
 }
@@ -62,7 +62,7 @@ TEST(GddGraphParser, VertexWithoutLabelGivesEmptyLabelAndKeepsOtherAttributes) {
     auto const v0 = FindVertexById(g, 0);
     EXPECT_EQ(g[v0].label, "");
 
-    ASSERT_TRUE(g[v0].attributes.find("name") != g[v0].attributes.end());
+    ASSERT_TRUE(g[v0].attributes.contains("name"));
     EXPECT_EQ(g[v0].attributes.at("name"), "x");
 }
 
