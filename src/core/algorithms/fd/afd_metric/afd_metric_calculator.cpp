@@ -4,12 +4,14 @@
 #include <cmath>
 #include <iterator>
 
+#include "util/timed_invoke.h"
 #include "config/descriptions.h"
 #include "config/equal_nulls/option.h"
 #include "config/indices/option.h"
 #include "config/names.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+
 
 namespace algos::afd_metric_calculator {
 
@@ -48,13 +50,9 @@ void AFDMetricCalculator::LoadDataInternal() {
 }
 
 unsigned long long AFDMetricCalculator::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
+    size_t const elapsed_milliseconds = util::TimedInvoke(&AFDMetricCalculator::CalculateMetric, this);
 
-    CalculateMetric();
-
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now() - start_time);
-    return elapsed_milliseconds.count();
+    return elapsed_milliseconds;
 }
 
 void AFDMetricCalculator::CalculateMetric() {
@@ -82,7 +80,9 @@ void AFDMetricCalculator::CalculateMetric() {
 
 long double AFDMetricCalculator::CalculateG2(model::PLI const* lhs_pli, model::PLI const* rhs_pli,
                                              size_t num_rows) {
-    assert(num_rows > 0);
+    if(num_rows <= 0)
+        throw std::invalid_argument("received unpositive number of rows");
+
     auto num_error_rows = 0.L;
 
     auto const& lhs_clusters = lhs_pli->GetIndex();
@@ -190,7 +190,8 @@ long double AFDMetricCalculator::CalculateMuPlus(model::PLIWS const* lhs_pli,
 
 long double AFDMetricCalculator::CalculateFI(model::PLIWS const* lhs_pli,
                                              model::PLIWS const* rhs_pli, size_t num_rows) {
-    assert(num_rows > 0);
+    if(num_rows <= 0)
+        throw std::invalid_argument("received unpositive number of rows");
 
     if (rhs_pli->GetNumCluster() < 2) {
         return 0.L;

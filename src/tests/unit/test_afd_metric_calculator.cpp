@@ -41,6 +41,7 @@ INSTANTIATE_TEST_SUITE_P(
         AFDMetricCalculatorTestSuite, TestAFDMetrics,
         ::testing::Values(
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::tau, 78.L/90),
+            // AFDMetricCalculatorParams({0, 1}, {3}, AFDMetric::tau, 29.L/45),
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::g2, 1.L/6),
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::fi, 1 - std::log(4) / std::log(746496)),
             AFDMetricCalculatorParams({4}, {3}, AFDMetric::mu_plus, 498.L/630),
