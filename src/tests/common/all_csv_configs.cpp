@@ -25,6 +25,7 @@ CSVConfig const kCIPublicHighway10k = CreateCsvConfig("CIPublicHighway10k.csv", 
 CSVConfig const kCIPublicHighway20attr55k =
         CreateCsvConfig("CIPublicHighway20attr55k.csv", ',', true);
 CSVConfig const kCIPublicHighway700 = CreateCsvConfig("CIPublicHighway700.csv", ',', true);
+CSVConfig const kCustomMetricBalls = CreateCsvConfig("pac_data/custom_metric_balls.csv", ',', true);
 CSVConfig const kEpicMeds = CreateCsvConfig("EpicMeds.csv", '|', true);
 CSVConfig const kEpicVitals = CreateCsvConfig("EpicVitals.csv", '|', true);
 CSVConfig const kFdReduced30 = CreateCsvConfig("fd-reduced-30.csv", ',', true);
@@ -46,6 +47,7 @@ CSVConfig const kIris = CreateCsvConfig("iris.csv", ',', false);
 CSVConfig const kLegacyPayors = CreateCsvConfig("LegacyPayors.csv", '|', true);
 CSVConfig const kLetter = CreateCsvConfig("letter.csv", ',', false);
 CSVConfig const kLineItem = CreateCsvConfig("LineItem.csv", '|', true);
+CSVConfig const kMixedWithNulls = CreateCsvConfig("MixedWithNulls.csv", ',', true);
 CSVConfig const kMushroom = CreateCsvConfig("cfd_data/mushroom.csv", ',', true);
 CSVConfig const kMushroomPlus2attr1500 = CreateCsvConfig("mushroom+2attr1500.csv", ',', true);
 CSVConfig const kMushroomPlus3attr1300 = CreateCsvConfig("mushroom+3attr1300.csv", ',', true);
