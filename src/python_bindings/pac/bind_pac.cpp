@@ -1,5 +1,6 @@
 #include "python_bindings/pac/bind_pac.h"
 
+#include <cstdlib>
 #include <functional>
 #include <memory>
 #include <string>
@@ -22,19 +23,18 @@ namespace py = pybind11;
 
 namespace {
 /// @brief Convert Domain PAC to Python tuple, which first element is string representation of
-/// Domain, then follow column names, and then epsilon and delta.
+/// Domain, then follow column indices.
+/// Epsilon and delta are not included in tuple, because there's no proper way to hash doubles
 py::tuple DomainPACToTuple(model::DomainPAC const& d_pac) {
-    auto const column_names = d_pac.GetColumnNames();
-    py::tuple result(column_names.size() + 3);
+    auto const column_indices = d_pac.GetColumns().GetColumnIndicesAsVector();
+    py::tuple result(column_indices.size() + 1);
     // It's unlikely that set of Domain PACs will contain PACs on different domains, so using
     // Domain's string representation shouldn't lead to a lot of collisions.
     result[0] = d_pac.GetDomain().ToString();
     // Cannot use std::copy, because py::tuple provides only const iterators
-    for (std::size_t i = 0; i < column_names.size(); ++i) {
-        result[i] = column_names[i];
+    for (std::size_t i = 0; i < column_indices.size(); ++i) {
+        result[i] = column_indices[i];
     }
-    result[column_names.size() + 1] = d_pac.GetEpsilon();
-    result[column_names.size() + 2] = d_pac.GetDelta();
     return result;
 }
 }  // namespace
@@ -45,6 +45,8 @@ void BindPAC(py::module& main_module) {
     using namespace pac::model;
     using namespace pybind11::literals;
 
+    constexpr static double kEpsilon = 1e-12;
+
     auto pac_module = main_module.def_submodule("pac");
 
     // PACs
@@ -52,7 +54,8 @@ void BindPAC(py::module& main_module) {
             .def("to_short_string", &PAC::ToShortString)
             .def("to_long_string", &PAC::ToLongString)
             .def("__str__", &PAC::ToLongString);
-    // None of current PAC types can be pickled, because all of them contain user-defined metrics
+
+    // Domain PACs cannot be pickled, because they contain user-defined metrics
     py::class_<DomainPAC, PAC>(pac_module, "DomainPAC")
             .def_property_readonly("epsilon", &PAC::GetEpsilon)
             .def_property_readonly("delta", &PAC::GetDelta)
@@ -66,8 +69,9 @@ void BindPAC(py::module& main_module) {
             .def("__eq__",
                  [](DomainPAC const& a, DomainPAC const& b) {
                      return a.GetDomain().ToString() == b.GetDomain().ToString() &&
-                            a.GetColumns() == b.GetColumns() && a.GetEpsilon() == b.GetEpsilon() &&
-                            a.GetDelta() == b.GetDelta();
+                            a.GetColumns() == b.GetColumns() &&
+                            std::abs(a.GetEpsilon() - b.GetEpsilon()) < kEpsilon &&
+                            std::abs(a.GetDelta() - b.GetDelta()) < kEpsilon;
                  })
             .def("__hash__",
                  [](DomainPAC const& d_pac) { return py::hash(DomainPACToTuple(d_pac)); });
