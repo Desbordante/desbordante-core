@@ -101,6 +101,8 @@ function(desbordante_add_bind name)
         PRIVATE FILE_SET HEADERS BASE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
     )
 
+    set_target_properties(${bind_name} PROPERTIES CXX_VISIBILITY_PRESET "hidden")
+
     list(APPEND arg_LIBS pybind11::pybind11 ${DESBORDANTE_PREFIX}.compile_feats)
     target_link_libraries(${bind_name} PRIVATE ${arg_LIBS})
 
