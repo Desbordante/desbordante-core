@@ -17,7 +17,7 @@ set(MODULE_NAME
     CACHE INTERNAL ""
 )
 
-add_library(${MODULE_NAME} MODULE bind_main_classes.cpp bind_main_classes.h bindings.cpp)
+pybind11_add_module(${MODULE_NAME} bind_main_classes.cpp bind_main_classes.h bindings.cpp)
 target_link_libraries(
     ${MODULE_NAME}
     PRIVATE pybind11::module
@@ -27,21 +27,6 @@ target_link_libraries(
             Boost::headers
             Desbordante.bindlib.util
             Desbordante.bindlib.data
-)
-pybind11_extension(${MODULE_NAME})
-
-if(NOT ${CMAKE_BUILD_TYPE} MATCHES Debug)
-    # Strip unnecessary sections of the binary on Linux/macOS
-    pybind11_strip(${MODULE_NAME})
-endif()
-
-set_target_properties(
-    ${MODULE_NAME}
-    PROPERTIES CXX_VISIBILITY_PRESET "hidden"
-               # Configure output directory to central build folder
-               # Ensures generated .so/.pyd files are placed alongside other binaries
-               LIBRARY_OUTPUT_DIRECTORY
-               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} # ${CMAKE_BINARY_DIR}/target
 )
 
 # Uncomment to debug linker issues
