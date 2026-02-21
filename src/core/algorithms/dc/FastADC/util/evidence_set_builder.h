@@ -3,6 +3,7 @@
 #include "core/algorithms/dc/FastADC/model/evidence_set.h"
 #include "core/algorithms/dc/FastADC/util/clue_set_builder.h"
 #include "core/util/logger.h"
+#include "core/util/worker_thread_pool.h"
 
 namespace algos::fastadc {
 
@@ -13,8 +14,10 @@ class EvidenceSetBuilder {
 public:
     EvidenceSet evidence_set;
 
-    EvidenceSetBuilder(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs) {
-        clue_set_ = BuildClueSet(pli_shards, packs);
+    EvidenceSetBuilder(std::vector<PliShard> const& pli_shards, PredicatePacks const& packs,
+                       util::WorkerThreadPool* thread_pool = nullptr) {
+        clue_set_ = thread_pool ? BuildClueSetParallel(pli_shards, packs, thread_pool)
+                                : BuildClueSet(pli_shards, packs);
     }
 
     EvidenceSetBuilder(EvidenceSetBuilder const& other) = delete;

@@ -1,7 +1,6 @@
 #include "core/algorithms/dc/FastADC/util/cross_clue_set_builder.h"
 
-#include <stdexcept>
-#include <stdint.h>
+#include <cstdint>
 
 #include "core/algorithms/dc/FastADC/model/pli_shard.h"
 #include "core/algorithms/dc/FastADC/util/evidence_aux_structures_builder.h"
@@ -18,9 +17,6 @@ void CrossClueSetBuilder::BuildClueSet(PredicatePacks const& packs,
                                        std::vector<Clue>& reverse_clues, ClueSet& clue_set) {
     forward_clues.assign(evidence_count_, Clue());
     reverse_clues.assign(evidence_count_, Clue());
-
-    if (forward_clues.size() < evidence_count_) forward_clues.resize(evidence_count_, Clue());
-    if (reverse_clues.size() < evidence_count_) reverse_clues.resize(evidence_count_, Clue());
 
     for (auto const& cat_pack : packs.str_single) {
         CorrectStrSingle(forward_clues, reverse_clues, plis1_[cat_pack.left_idx],
@@ -67,8 +63,8 @@ void CrossClueSetBuilder::SetSingleEQ(std::vector<Clue>& clues1, std::vector<Clu
 }
 
 void CrossClueSetBuilder::CorrectStrSingle(std::vector<Clue>& clues1, std::vector<Clue>& clues2,
-                                           Pli const& pivotPli, Pli const& probePli,
-                                           Clue const& mask) {
+                                          Pli const& pivotPli, Pli const& probePli,
+                                          Clue const& mask) {
     std::vector<size_t> const& pivot_keys = pivotPli.GetKeys();
 
     for (size_t i = 0; i < pivot_keys.size(); ++i) {
