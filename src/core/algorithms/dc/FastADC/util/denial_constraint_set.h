@@ -8,7 +8,23 @@ namespace algos::fastadc {
 
 class DenialConstraintSet {
 private:
-    std::unordered_set<DenialConstraint> constraints_;
+    struct DCHash {
+        PredicateProvider* provider;
+
+        explicit DCHash(PredicateProvider* p) : provider(p) {}
+
+        size_t operator()(DenialConstraint const& dc) const;
+    };
+
+    struct DCEqual {
+        PredicateProvider* provider;
+
+        explicit DCEqual(PredicateProvider* p) : provider(p) {}
+
+        bool operator()(DenialConstraint const& lhs, DenialConstraint const& rhs) const;
+    };
+
+    std::unordered_set<DenialConstraint, DCHash, DCEqual> constraints_;
     std::vector<DenialConstraint> result_;
     PredicateProvider* predicate_provider_;
 
@@ -79,11 +95,13 @@ private:
 
 public:
     DenialConstraintSet(PredicateProvider* predicate_provider)
-        : predicate_provider_(predicate_provider) {
+        : constraints_(0, DCHash(predicate_provider), DCEqual(predicate_provider)),
+          predicate_provider_(predicate_provider) {
         assert(predicate_provider);
     }
 
-    DenialConstraintSet() : predicate_provider_(nullptr) {}
+    DenialConstraintSet()
+        : constraints_(0, DCHash(nullptr), DCEqual(nullptr)), predicate_provider_(nullptr) {}
 
     DenialConstraintSet(DenialConstraintSet const& other) = delete;
     DenialConstraintSet& operator=(DenialConstraintSet const& other) = delete;
@@ -123,7 +141,7 @@ public:
     }
 
     void Clear() {
-        constraints_.clear();
+        constraints_ = decltype(constraints_)(0, DCHash(nullptr), DCEqual(nullptr));
         result_.clear();
         predicate_provider_ = nullptr;
     }
