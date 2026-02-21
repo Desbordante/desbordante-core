@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/container_hash/hash.hpp>
+
 #include "core/model/table/column.h"
 #include "core/util/better_enum_with_visibility.h"
 
