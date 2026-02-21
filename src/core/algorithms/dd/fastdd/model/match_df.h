@@ -26,7 +26,7 @@ public:
         }
     }
 
-    boost::dynamic_bitset<> GetBitset() const noexcept {
+    boost::dynamic_bitset<> const& GetBitset() const noexcept {
         return bitset_;
     }
 };

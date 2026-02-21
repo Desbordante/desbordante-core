@@ -30,6 +30,8 @@ private:
     void BuildClueIndices();
     std::vector<DifferentialDependency> Minimize(std::vector<boost::dynamic_bitset<>> covers,
                                                  std::size_t rhs_column, std::size_t rhs_offset);
+    std::vector<DifferentialDependency> RemoveTransitive(
+            std::vector<DifferentialDependency> dds) const;
 
 public:
     HybridEvidenceInverter(std::vector<MatchDF> match_dfs,

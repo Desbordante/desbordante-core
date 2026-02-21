@@ -1,5 +1,7 @@
 #include "core/algorithms/dd/fastdd/util/hybrid_evidence_inverter.h"
 
+#include <algorithm>
+#include <list>
 #include <unordered_set>
 #include <utility>
 
@@ -16,7 +18,7 @@ HybridEvidenceInverter::HybridEvidenceInverter(std::vector<MatchDF> match_dfs,
 
     std::vector<std::size_t> dif_func_sizes;
     std::vector<std::size_t> dif_func_nums;
-    std::vector<std::size_t> dif_func_to_node_id;
+    std::vector<std::size_t> dif_func_to_column_index;
     std::vector<std::size_t> dif_func_to_offset;
     std::size_t dif_func_num;
 
@@ -28,26 +30,49 @@ HybridEvidenceInverter::HybridEvidenceInverter(std::vector<MatchDF> match_dfs,
         dif_func_nums.push_back(dif_func_nums[i] + dif_func_sizes[i]);
     }
     dif_func_num = dif_func_nums[dif_func_nums.size() - 1];
-    dif_func_to_node_id.reserve(dif_func_num);
+    dif_func_to_column_index.reserve(dif_func_num);
     dif_func_to_offset.reserve(dif_func_num);
     column_to_dif_funcs_.reserve(dif_funcs_.size());
     for (std::size_t i = 0; i != dif_funcs_.size(); ++i) {
         boost::dynamic_bitset<> cur_column_bitset(dif_func_num);
         for (std::size_t j = 0; j != dif_funcs_[i].size(); ++j) {
-            if (dif_funcs_[i][j].GetOperator() == Operator::kLessOrEqual) {
-                dif_func_to_node_id.push_back(i);
-            } else {
-                dif_func_to_node_id.push_back(i + dif_funcs_.size());
-            }
+            dif_func_to_column_index.push_back(i);
             cur_column_bitset.set(dif_func_nums[i] + j);
             dif_func_to_offset.push_back(j);
         }
         column_to_dif_funcs_.push_back(std::move(cur_column_bitset));
     }
 
+    std::vector<boost::dynamic_bitset<>> dif_func_to_bitset(dif_func_num,
+                                                            boost::dynamic_bitset<>(dif_func_num));
+    for (auto& bitset : dif_func_to_bitset) {
+        bitset.flip();
+    }
+    for (std::size_t i = 0; i != dif_funcs_.size(); ++i) {
+        std::size_t const cur_index = dif_func_nums[i];
+        std::vector<ThresholdInfo> const& thresholds = df_builder.GetThresholds(i);
+        std::list<ThresholdInfo> threshold_list;
+        for (auto const& threshold : thresholds) {
+            if (!threshold.is_upper_bound) {
+                threshold_list.push_back(threshold);
+            } else {
+                auto threshold_it = threshold_list.begin();
+                for (; threshold_it != threshold_list.end(); ++threshold_it) {
+                    dif_func_to_bitset[cur_index + threshold.dif_func_index].set(
+                            cur_index + threshold_it->dif_func_index, false);
+                    if (threshold_it->dif_func_index == threshold.dif_func_index) {
+                        break;
+                    }
+                }
+                threshold_list.erase(threshold_it);
+            }
+        }
+    }
+
     dif_func_info_ = std::make_shared<DifFuncInfo const>(
-            std::move(dif_func_sizes), std::move(dif_func_nums), std::move(dif_func_to_node_id),
-            std::move(dif_func_to_offset), dif_func_num, dif_funcs_.size());
+            std::move(dif_func_sizes), std::move(dif_func_nums),
+            std::move(dif_func_to_column_index), std::move(dif_func_to_offset),
+            std::move(dif_func_to_bitset), dif_func_num, dif_funcs_.size());
 }
 
 void HybridEvidenceInverter::BuildClueIndices() {
@@ -59,7 +84,7 @@ void HybridEvidenceInverter::BuildClueIndices() {
         dif_func_to_not_satisfied_bitsets_.emplace_back(match_dfs_.size());
     }
     for (std::size_t i = 0; i != match_dfs_.size(); ++i) {
-        boost::dynamic_bitset<> diff_bitset = match_dfs_[i].GetBitset();
+        boost::dynamic_bitset<> const& diff_bitset = match_dfs_[i].GetBitset();
         for (std::size_t j = 0; j != dif_func_info_->dif_func_num_; ++j) {
             if (diff_bitset[j]) {
                 dif_func_to_satisfied_bitsets_[j].set(i);
@@ -68,6 +93,46 @@ void HybridEvidenceInverter::BuildClueIndices() {
             }
         }
     }
+}
+
+std::vector<DifferentialDependency> HybridEvidenceInverter::RemoveTransitive(
+        std::vector<DifferentialDependency> dds) const {
+    unsigned num_cycles = 0;
+    std::vector<DifferentialDependency> results_copy;
+
+    auto subsume = [](std::vector<DifferentialFunction> const& lhs,
+                      DifferentialFunction const& rhs) {
+        return lhs.size() == 1 && rhs.GetColumn() == lhs.front().GetColumn() &&
+               rhs.GetConstraint().IsSubsumedBy(lhs.front().GetConstraint());
+    };
+
+    while (true) {
+        ++num_cycles;
+        results_copy.clear();
+        bool is_removable = false;
+        for (auto const& dd3 : dds) {
+            bool remove = false;
+            for (auto const& dd1 : dds) {
+                for (auto const& dd2 : dds) {
+                    if (subsume(dd2.GetLhs(), dd1.GetRhs()) && dd1.GetLhs() == dd3.GetLhs() &&
+                        dd2.GetRhs() == dd3.GetRhs()) {
+                        if (!is_removable) remove = true;
+                        is_removable = true;
+                        break;
+                    }
+                }
+                if (is_removable) break;
+            }
+            if (!remove) results_copy.push_back(dd3);
+        }
+        if (results_copy.size() == dds.size()) break;
+        dds = results_copy;
+    }
+
+    LOG_DEBUG("Removed transitive DDs");
+    LOG_DEBUG("Number of cycles: {}", num_cycles);
+
+    return dds;
 }
 
 std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
@@ -108,6 +173,8 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::BuildDDs() {
         }
     }
 
+    result = RemoveTransitive(std::move(result));
+
     return result;
 }
 
@@ -116,8 +183,8 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::Minimize(
         std::size_t rhs_offset) {
     std::shared_ptr<TranslatingMinimizeTree> minimize_tree;
     std::size_t const minimize_tree_key =
-            dif_func_info_
-                    ->dif_func_to_node_id_[dif_func_info_->dif_func_nums_[rhs_column] + rhs_offset];
+            dif_func_info_->dif_func_to_column_index_[dif_func_info_->dif_func_nums_[rhs_column] +
+                                                      rhs_offset];
     if (minimize_tree_map_[minimize_tree_key]) {
         minimize_tree = minimize_tree_map_[minimize_tree_key];
     } else {
@@ -130,19 +197,23 @@ std::vector<DifferentialDependency> HybridEvidenceInverter::Minimize(
     std::vector<DifferentialDependency> minimized_dds;
     minimized_dds.reserve(minimized_bitsets.size());
     for (auto const& bitset : minimized_bitsets) {
-        std::vector<DifferentialFunction> lhs;
-        lhs.reserve(bitset.count());
-        for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
-             index = bitset.find_next(index)) {
-            std::size_t const node_id = dif_func_info_->dif_func_to_node_id_[index];
-            std::size_t const column_index = node_id % dif_funcs_.size();
-            std::size_t const df_offset = dif_func_info_->dif_func_to_offset_[index];
-            lhs.push_back(dif_funcs_[column_index][df_offset]);
-        }
+        // check if LHS is not trivial
+        if (std::ranges::any_of(match_dfs_, [&bitset](auto const& match_df) {
+                return bitset.is_subset_of(match_df.GetBitset());
+            })) {
+            std::vector<DifferentialFunction> lhs;
+            lhs.reserve(bitset.count());
+            for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
+                 index = bitset.find_next(index)) {
+                std::size_t const column_index = dif_func_info_->dif_func_to_column_index_[index];
+                std::size_t const df_offset = dif_func_info_->dif_func_to_offset_[index];
+                lhs.push_back(dif_funcs_[column_index][df_offset]);
+            }
 
-        DifferentialFunction rhs = dif_funcs_[rhs_column][rhs_offset];
-        minimized_dds.emplace_back(std::move(lhs), std::move(rhs));
-        LOG_TRACE("{}", minimized_dds[minimized_dds.size() - 1].ToString());
+            DifferentialFunction rhs = dif_funcs_[rhs_column][rhs_offset];
+            minimized_dds.emplace_back(std::move(lhs), std::move(rhs));
+            LOG_TRACE("{}", minimized_dds[minimized_dds.size() - 1].ToString());
+        }
     }
 
     return minimized_dds;

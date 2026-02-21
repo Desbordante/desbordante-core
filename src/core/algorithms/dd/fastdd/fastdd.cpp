@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <limits>
 #include <list>
+#include <memory>
 #include <stdexcept>
 #include <utility>
 
@@ -13,6 +14,7 @@
 #include "core/algorithms/dd/fastdd/util/differential_function_builder.h"
 #include "core/algorithms/dd/fastdd/util/distance_calculator.h"
 #include "core/algorithms/dd/fastdd/util/hybrid_evidence_inverter.h"
+#include "core/algorithms/dd/fastdd/util/min_max_dif_calculator.h"
 #include "core/config/names_and_descriptions.h"
 #include "core/config/option_using.h"
 #include "core/config/tabular_data/input_table/option.h"
@@ -32,8 +34,7 @@ void FastDD::RegisterOptions() {
     config::InputTable default_table;
 
     RegisterOption(config::kTableOpt(&input_table_));
-    RegisterOption(Option{&operator_difference_table_, kOperatorDifferenceTable,
-                          kDOperatorDifferenceTable, default_table});
+    RegisterOption(Option{&difference_table_, kDifferenceTable, kDDifferenceTable, default_table});
     RegisterOption(Option{&num_rows_, kNumRows, kDNumRows, 0U});
     RegisterOption(Option{&num_columns_, kNumColumns, kDNumColumns, 0U});
     RegisterOption(Option{&shard_length_, kShardLength, kDShardLength, 10000U});
@@ -42,7 +43,7 @@ void FastDD::RegisterOptions() {
 void FastDD::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
-    MakeOptionsAvailable({kOperatorDifferenceTable, kNumRows, kNumColumns, kShardLength});
+    MakeOptionsAvailable({kDifferenceTable, kNumRows, kNumColumns, kShardLength});
 }
 
 void FastDD::LoadDataInternal() {
@@ -101,9 +102,9 @@ void FastDD::CheckTypes() {
 }
 
 void FastDD::ParseDifferenceTable() {
-    if (operator_difference_table_) {
+    if (difference_table_) {
         difference_typed_relation_ =
-                model::ColumnLayoutTypedRelationData::CreateFrom(*operator_difference_table_,
+                model::ColumnLayoutTypedRelationData::CreateFrom(*difference_table_,
                                                                  false);  // nulls are ignored
         if (typed_relation_->GetNumColumns() != num_columns_) {
             throw std::invalid_argument(
@@ -123,17 +124,21 @@ unsigned long long FastDD::ExecuteInternal() {
 
     std::shared_ptr<DistanceCalculator> distance_calculator =
             std::make_shared<DistanceCalculator>(typed_relation_);
-    DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_,
-                                           distance_calculator);
-    df_builder.BuildDFList(difference_typed_relation_);
-    LOG_INFO("Built DF set");
-    LOG_INFO("Search space size: {}", df_builder.GetDifFuncNum());
 
     PliShardBuilder pli_shard_builder(shard_length_);
     std::vector<PliShard> pli_shards =
             pli_shard_builder.BuildPliShards(typed_relation_->GetColumnData());
     LOG_INFO("Built PLIs");
     LOG_DEBUG("Number of PLI shards: {}", pli_shards.size());
+    MinMaxDifCalculator min_max_dif_calculator(distance_calculator, pli_shards);
+
+    DifferentialFunctionBuilder df_builder(typed_relation_, num_rows_, num_columns_,
+                                           distance_calculator,
+                                           min_max_dif_calculator.GetMinMaxDif());
+    df_builder.BuildDFList(difference_typed_relation_);
+    LOG_INFO("Built DF set");
+    LOG_INFO("Search space size: {}", df_builder.GetDifFuncNum());
+
     auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
     LOG_DEBUG("Current time: {}", elapsed_milliseconds.count());
@@ -152,21 +157,10 @@ unsigned long long FastDD::ExecuteInternal() {
     LOG_INFO("Built Inverter");
 
     dds_ = hybrid_evidence_inverter.BuildDDs();
-    LOG_INFO("Built DDs: {}", dds_.size());
-    if (dds_.size() <= 100) {
-        for (auto const& dd : dds_) {
-            LOG_DEBUG(dd.ToString());
-        }
-    }
 
     std::ranges::for_each(dds_, [this](auto const& dd) {
         auto df_to_constraint = [](DifferentialFunction const& df) {
-            return df.GetOperator() == Operator::kGreater
-                           ? model::DFStringConstraint{df.GetColumn()->GetName(),
-                                                       {df.GetThreshold() + 0.001,
-                                                        std::numeric_limits<double>::infinity()}}
-                           : model::DFStringConstraint{df.GetColumn()->GetName(),
-                                                       {0, df.GetThreshold()}};
+            return model::DFStringConstraint{df.GetColumn()->GetName(), df.GetConstraint()};
         };
 
         std::list<model::DFStringConstraint> lhs;
@@ -176,6 +170,13 @@ unsigned long long FastDD::ExecuteInternal() {
 
         RegisterDD(model::DDString{std::move(lhs), std::move(rhs)});
     });
+
+    LOG_INFO("Built DDs: {}", DDList().size());
+    if (DDList().size() <= 100) {
+        for (auto const& dd : DDList()) {
+            LOG_DEBUG(dd.ToString());
+        }
+    }
 
     elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);

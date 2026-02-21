@@ -172,10 +172,8 @@ constexpr auto kDMinimumSharedValue =
 constexpr auto kDShardLength =
         "Number of rows each shard will cover when building PLI shards. Determines the "
         "segmentation of rows for parallel processing in the FastADC algorithm";
-// FastDD
-constexpr auto kDOperatorDifferenceTable =
-        "CSV table containing distance constraints (with operators <=, >=) for each column";
 // FastDD, Split
+constexpr auto kDDifferenceTable = "CSV table containing difference limits for each column";
 constexpr auto kDNumColumns = "Use only first N columns of the table";
 constexpr auto kDNumRows = "Use only first N rows of the table";
 // FastOD
@@ -229,8 +227,6 @@ constexpr auto kDCustomRandom =
         "seed for the custom random generator. Used for consistency of results across platforms.";
 // Spider
 constexpr auto kDMemLimitMB = "memory limit im MBs";
-// Split
-constexpr auto kDDifferenceTable = "CSV table containing difference limits for each column";
 // Tane
 auto const kDAfdErrorMeasure = details::kDAfdErrorMeasureString.c_str();
 // Tane, Pfd verifier

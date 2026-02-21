@@ -14,10 +14,10 @@ int main(int argc, char** argv) {
     LOG_INFO("Started");
     algos::dd::FastDD fastdd;
     config::InputTable t = std::make_shared<CSVParser>(path, ',', true);
-    config::InputTable op = std::make_shared<CSVParser>(dif_path, ',', true);
+    config::InputTable dif = std::make_shared<CSVParser>(dif_path, ',', true);
     fastdd.SetOption("table", t);
     fastdd.LoadData();
-    fastdd.SetOption("operator_difference_table", op);
+    fastdd.SetOption("difference_table", dif);
     fastdd.SetOption("num_rows");
     fastdd.SetOption("num_columns");
     fastdd.SetOption("shard_length", shard_length);

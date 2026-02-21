@@ -78,9 +78,8 @@ constexpr auto kEvidenceThreshold = "evidence_threshold";
 constexpr auto kMinimumSharedValue = "minimum_shared_value";
 // FastADC, FastDD
 constexpr auto kShardLength = "shard_length";
-// FastDD
-constexpr auto kOperatorDifferenceTable = "operator_difference_table";
 // FastDD, Split
+constexpr auto kDifferenceTable = "difference_table";
 constexpr auto kNumColumns = "num_columns";
 constexpr auto kNumRows = "num_rows";
 // FastOD
@@ -122,8 +121,6 @@ constexpr auto kQGramLength = "q";
 constexpr auto kCustomRandom = "custom_random_seed";
 // Spider
 constexpr auto kMemLimitMB = "mem_limit";
-// Split
-constexpr auto kDifferenceTable = "difference_table";
 // Tane
 constexpr auto kAfdErrorMeasure = "afd_error_measure";
 // Tane, Pfd verifier

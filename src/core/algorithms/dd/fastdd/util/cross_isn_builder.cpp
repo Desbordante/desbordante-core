@@ -52,7 +52,7 @@ std::vector<std::size_t> CrossISNBuilder::CalculateOffsets(
         DFPack const& df_pack, std::size_t const first_cluster_num) const {
     Pli const& first_pli = first_pli_shard_.Plis()[df_pack.column_index];
     Pli const& second_pli = second_pli_shard_.Plis()[df_pack.column_index];
-    std::vector<double> const& thresholds = df_pack.thresholds;
+    std::vector<ThresholdInfo> const& thresholds = df_pack.thresholds;
     std::vector<std::size_t> offsets(second_pli.Size());
     std::size_t start_cluster_num = 0;
 
@@ -80,7 +80,7 @@ std::vector<std::size_t> CrossISNBuilder::CalculateOffsets(
             double const diff = distance_calculator_->CalculateDistance(
                     df_pack.column_index, {first_pli.GetCluster(first_cluster_num)[0],
                                            second_pli.GetCluster(mid - 1)[0]});
-            if (model::LessOrEqual(diff, thresholds[i - 1])) {
+            if (ThresholdInfo{diff, true, thresholds.size()} <= thresholds[i - 1]) {
                 right_bound = mid;
             } else {
                 left_bound = mid;
@@ -95,15 +95,8 @@ std::vector<std::size_t> CrossISNBuilder::CalculateOffsets(
     if (start_cluster_num == second_pli.Size()) {
         return offsets;
     }
-    double const diff = distance_calculator_->CalculateDistance(
-            df_pack.column_index, {first_pli.GetCluster(first_cluster_num)[0],
-                                   second_pli.GetCluster(start_cluster_num)[0]});
-    if (model::IsEqual(diff, 0)) {
-        offsets[start_cluster_num] = 0;
-        start_cluster_num++;
-    }
 
-    for (std::size_t i = 1; i != thresholds.size() && start_cluster_num != second_pli.Size(); ++i) {
+    for (std::size_t i = 0; i != thresholds.size() && start_cluster_num != second_pli.Size(); ++i) {
         std::size_t left_bound = start_cluster_num;
         std::size_t right_bound = second_pli.Size() + 1;
         while (right_bound - left_bound > 1) {
@@ -111,7 +104,7 @@ std::vector<std::size_t> CrossISNBuilder::CalculateOffsets(
             double const diff = distance_calculator_->CalculateDistance(
                     df_pack.column_index, {first_pli.GetCluster(first_cluster_num)[0],
                                            second_pli.GetCluster(mid - 1)[0]});
-            if (model::Greater(diff, thresholds[i])) {
+            if (ThresholdInfo{diff, true, thresholds.size()} > thresholds[i]) {
                 right_bound = mid;
             } else {
                 left_bound = mid;
@@ -134,17 +127,18 @@ std::vector<std::size_t> CrossISNBuilder::CalculateOffsets(
 void CrossISNBuilder::BuildNotDistanceOrdered(DFPack const& df_pack) {
     Pli const& first_pli = first_pli_shard_.Plis()[df_pack.column_index];
     Pli const& second_pli = second_pli_shard_.Plis()[df_pack.column_index];
+    std::vector<ThresholdInfo> const& thresholds = df_pack.thresholds;
     for (std::size_t i = 0; i != first_pli.Size(); ++i) {
         for (std::size_t j = 0; j != second_pli.Size(); ++j) {
             double const diff = distance_calculator_->CalculateDistance(
                     df_pack.column_index,
                     {first_pli.GetCluster(i)[0], second_pli.GetCluster(j)[0]});
             std::size_t const interval_num =
-                    std::lower_bound(df_pack.thresholds.begin(), df_pack.thresholds.end(), diff,
-                                     model::Less) -
-                    df_pack.thresholds.begin();
+                    std::lower_bound(thresholds.begin(), thresholds.end(),
+                                     ThresholdInfo{diff, true, thresholds.size()}) -
+                    thresholds.begin();
             SetNumMask(first_pli.GetCluster(i), second_pli.GetCluster(j), df_pack.base,
-                       interval_num);
+                       df_pack.threshold_zones[interval_num]);
         }
     }
 }
@@ -155,7 +149,8 @@ void CrossISNBuilder::BuildDistanceOrdered(DFPack const& df_pack) {
     for (std::size_t i = 0; i != first_pli.Size(); ++i) {
         std::vector<std::size_t> const offsets = CalculateOffsets(df_pack, i);
         for (std::size_t j = 0; j != second_pli.Size(); ++j) {
-            SetNumMask(first_pli.GetCluster(i), second_pli.GetCluster(j), df_pack.base, offsets[j]);
+            SetNumMask(first_pli.GetCluster(i), second_pli.GetCluster(j), df_pack.base,
+                       df_pack.threshold_zones[offsets[j]]);
         }
     }
 }
