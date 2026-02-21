@@ -1,4 +1,5 @@
 #include <memory>
+#include <optional>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -18,6 +19,7 @@
 #include "core/model/types/int_type.h"
 #include "core/model/types/string_type.h"
 #include "core/parser/csv_parser/csv_parser.h"
+#include "core/util/worker_thread_pool.h"
 #include "tests/common/all_csv_configs.h"
 #include "tests/unit/test_dc_structures_correct_results.h"
 
@@ -293,10 +295,19 @@ protected:
         evidence_aux_structures_builder_ = new EvidenceAuxStructuresBuilder(*predicate_builder_);
     }
 
-    void CreateEvidenceSetBuilder() {
+    void CreateEvidenceSetBuilder(bool use_parallel = false) {
+        unsigned num_threads = 4;
+        std::optional<util::WorkerThreadPool> thread_pool;
+        util::WorkerThreadPool* thread_pool_ptr = nullptr;
+        if (num_threads > 1) {
+            thread_pool.emplace(num_threads);
+            thread_pool_ptr = &thread_pool.value();
+        }
+
         evidence_set_builder_ =
                 new EvidenceSetBuilder(pli_shard_builder_->pli_shards,
-                                       evidence_aux_structures_builder_->GetPredicatePacks());
+                                       evidence_aux_structures_builder_->GetPredicatePacks(),
+                                       use_parallel ? thread_pool_ptr : nullptr);
     }
 };
 
@@ -540,7 +551,7 @@ TEST_F(FastADC, DenialConstraints) {
     pli_shard_builder_->BuildPliShards(col_data_);
     CreatePackAndCorrectionMapBuilder();
     evidence_aux_structures_builder_->BuildAll();
-    CreateEvidenceSetBuilder();
+    CreateEvidenceSetBuilder(true);
     evidence_set_builder_->BuildEvidenceSet(evidence_aux_structures_builder_->GetCorrectionMap(),
                                             evidence_aux_structures_builder_->GetCardinalityMask());
 
