@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include "core/algorithms/dd/fastdd/model/differential_function.h"

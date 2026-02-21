@@ -24,7 +24,7 @@ private:
 
     std::vector<model::TypeId> type_ids_;
 
-    config::InputTable operator_difference_table_;
+    config::InputTable difference_table_;
     std::shared_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation_;
 
     std::vector<DifferentialDependency> dds_;

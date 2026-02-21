@@ -23,7 +23,7 @@ private:
 public:
     DiffSet(DifferentialFunctionBuilder const& df_builder, std::shared_ptr<ISNInfo> isn_info)
         : isn_info_(isn_info), bitset_size_(df_builder.GetDifFuncNum()) {
-        model::ColumnIndex const num_columns = df_builder.GetNumColumns();
+        model::ColumnIndex const num_columns = df_builder.GetDifFuncsSize();
         offset_to_predicates_.reserve(num_columns);
         for (model::ColumnIndex column_index = 0; column_index != num_columns; ++column_index) {
             offset_to_predicates_.push_back(df_builder.GetSatisfiedDFs(column_index));

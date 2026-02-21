@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "core/algorithms/dd/dd.h"
 #include "core/algorithms/dd/fastdd/model/operator.h"
 #include "core/model/table/column.h"
 
@@ -9,20 +10,17 @@ namespace algos::dd {
 
 class DifferentialFunction {
 private:
-    Operator operator_;
-    double threshold_;
+    model::DFConstraint constraint_;
     Column const* column_;
 
 public:
-    DifferentialFunction(Operator op, double threshold, Column const* column)
-        : operator_(op), threshold_(threshold), column_(column) {}
+    DifferentialFunction(model::DFConstraint constraint, Column const* column)
+        : constraint_(constraint), column_(column) {}
 
-    Operator GetOperator() const {
-        return operator_;
-    }
+    bool operator==(DifferentialFunction const& other) const = default;
 
-    double GetThreshold() const {
-        return threshold_;
+    model::DFConstraint GetConstraint() const {
+        return constraint_;
     }
 
     Column const* GetColumn() const {
@@ -30,8 +28,7 @@ public:
     }
 
     std::string ToString() const {
-        return "[ " + column_->GetName() + " " + (operator_ == Operator::kGreater ? ">" : "<=") +
-               std::to_string(threshold_) + " ]";
+        return column_->GetName() + constraint_.ToString();
     }
 };
 
