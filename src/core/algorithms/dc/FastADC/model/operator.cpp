@@ -26,4 +26,8 @@ bool Operator::Eval(std::byte const* v1, std::byte const* v2, model::Type const&
     }
 }
 
+size_t hash_value(Operator const& k) noexcept {
+    return static_cast<size_t>(k.GetType());
+}
+
 }  // namespace algos::fastadc

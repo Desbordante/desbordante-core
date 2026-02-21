@@ -119,7 +119,14 @@ public:
     // NOLINTEND(readability-identifier-naming)
 
     size_t Hash() const {
-        return std::hash<boost::dynamic_bitset<>>()(bitset_);
+        std::size_t seed = 0;
+        boost::hash_combine(seed, bitset_.size());
+
+        for (auto i = bitset_.find_first(); i != boost::dynamic_bitset<>::npos;
+             i = bitset_.find_next(i)) {
+            boost::hash_combine(seed, i);
+        }
+        return seed;
     }
 
     bool operator==(PredicateSet const& other) const {
