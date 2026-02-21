@@ -40,12 +40,19 @@ void SingleISNBuilder::SetNumMask(Cluster const& first_cluster, Cluster const& s
         for (std::size_t j = 0; j != second_cluster.size(); ++j) {
             std::size_t first_tuple_index = first_cluster[i];
             std::size_t second_tuple_index = second_cluster[j];
+            if (first_tuple_index == second_tuple_index) {
+                continue;
+            }
             if (first_tuple_index > second_tuple_index) {
                 std::swap(first_tuple_index, second_tuple_index);
             }
             std::size_t const first_offset = first_tuple_index - pli_shard_.Beg();
-            clues_[(second_tuple_index - first_tuple_index - 1) +
-                   first_offset * (2 * pli_shard_.Range() - first_offset - 1) / 2] += diff;
+            std::size_t const pair_index =
+                    (second_tuple_index - first_tuple_index - 1) +
+                    first_offset * (2 * pli_shard_.Range() - first_offset - 1) / 2;
+            if (clues_[pair_index] < base) {
+                clues_[pair_index] += diff;
+            }
         }
     }
 }
@@ -53,10 +60,10 @@ void SingleISNBuilder::SetNumMask(Cluster const& first_cluster, Cluster const& s
 std::vector<std::size_t> SingleISNBuilder::CalculateOffsets(
         DFPack const& df_pack, std::size_t const first_cluster_num) const {
     Pli const& pli = pli_shard_.Plis()[df_pack.column_index];
-    std::vector<double> const& thresholds = df_pack.thresholds;
+    std::vector<ThresholdInfo> const& thresholds = df_pack.thresholds;
     std::vector<std::size_t> offsets(pli.Size() - first_cluster_num - 1);
     std::size_t start_cluster_num = first_cluster_num + 1;
-    for (std::size_t i = 1; i != thresholds.size() && start_cluster_num != pli.Size(); ++i) {
+    for (std::size_t i = 0; i != thresholds.size() && start_cluster_num != pli.Size(); ++i) {
         std::size_t left_bound = start_cluster_num - 1;
         std::size_t right_bound = pli.Size();
         while (right_bound - left_bound > 1) {
@@ -64,7 +71,7 @@ std::vector<std::size_t> SingleISNBuilder::CalculateOffsets(
             double const diff = distance_calculator_->CalculateDistance(
                     df_pack.column_index,
                     {pli.GetCluster(first_cluster_num)[0], pli.GetCluster(mid)[0]});
-            if (model::Greater(diff, thresholds[i])) {
+            if (ThresholdInfo{diff, true, thresholds.size()} > thresholds[i]) {
                 right_bound = mid;
             } else {
                 left_bound = mid;
@@ -86,15 +93,26 @@ std::vector<std::size_t> SingleISNBuilder::CalculateOffsets(
 
 void SingleISNBuilder::BuildNotDistanceOrdered(DFPack const& df_pack) {
     Pli const& pli = pli_shard_.Plis()[df_pack.column_index];
+    std::vector<ThresholdInfo> const& thresholds = df_pack.thresholds;
     for (std::size_t i = 0; i != pli.Size(); ++i) {
+        if (pli.GetCluster(i).size() > 1) {
+            std::size_t const interval_num =
+                    std::lower_bound(thresholds.begin(), thresholds.end(),
+                                     ThresholdInfo{0.0, true, thresholds.size()}) -
+                    thresholds.begin();
+            SetNumMask(pli.GetCluster(i), pli.GetCluster(i), df_pack.base,
+                       df_pack.threshold_zones[interval_num]);
+        }
+
         for (std::size_t j = i + 1; j != pli.Size(); ++j) {
             double const diff = distance_calculator_->CalculateDistance(
                     df_pack.column_index, {pli.GetCluster(i)[0], pli.GetCluster(j)[0]});
             std::size_t const interval_num =
-                    std::lower_bound(df_pack.thresholds.begin(), df_pack.thresholds.end(), diff,
-                                     model::Less) -
-                    df_pack.thresholds.begin();
-            SetNumMask(pli.GetCluster(i), pli.GetCluster(j), df_pack.base, interval_num);
+                    std::lower_bound(thresholds.begin(), thresholds.end(),
+                                     ThresholdInfo{diff, true, thresholds.size()}) -
+                    thresholds.begin();
+            SetNumMask(pli.GetCluster(i), pli.GetCluster(j), df_pack.base,
+                       df_pack.threshold_zones[interval_num]);
         }
     }
 }
@@ -102,9 +120,19 @@ void SingleISNBuilder::BuildNotDistanceOrdered(DFPack const& df_pack) {
 void SingleISNBuilder::BuildDistanceOrdered(DFPack const& df_pack) {
     Pli const& pli = pli_shard_.Plis()[df_pack.column_index];
     for (std::size_t i = 0; i != pli.Size(); ++i) {
+        if (pli.GetCluster(i).size() > 1) {
+            std::size_t const interval_num =
+                    std::lower_bound(df_pack.thresholds.begin(), df_pack.thresholds.end(),
+                                     ThresholdInfo{0.0, true, df_pack.thresholds.size()}) -
+                    df_pack.thresholds.begin();
+            SetNumMask(pli.GetCluster(i), pli.GetCluster(i), df_pack.base,
+                       df_pack.threshold_zones[interval_num]);
+        }
+
         std::vector<std::size_t> const offsets = CalculateOffsets(df_pack, i);
         for (std::size_t j = i + 1; j != pli.Size(); ++j) {
-            SetNumMask(pli.GetCluster(i), pli.GetCluster(j), df_pack.base, offsets[j - i - 1]);
+            SetNumMask(pli.GetCluster(i), pli.GetCluster(j), df_pack.base,
+                       df_pack.threshold_zones[offsets[j - i - 1]]);
         }
     }
 }

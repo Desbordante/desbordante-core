@@ -11,7 +11,7 @@ std::vector<std::size_t> TranslatingMinimizeTree::TransformToNodes(
     nodes.reserve(bitset.count());
     for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
-        nodes.push_back(dif_func_info_->dif_func_to_node_id_[index]);
+        nodes.push_back(dif_func_info_->dif_func_to_column_index_[index]);
     }
 
     return nodes;
@@ -24,24 +24,7 @@ boost::dynamic_bitset<> TranslatingMinimizeTree::TransformToBitset(
 
     for (std::size_t index = bitset.find_first(); index != boost::dynamic_bitset<>::npos;
          index = bitset.find_next(index)) {
-        std::size_t const node_id = dif_func_info_->dif_func_to_node_id_[index];
-        bool is_greater = node_id >= dif_func_info_->num_columns_;
-        std::size_t const column_index = node_id % dif_func_info_->num_columns_;
-        std::size_t df_offset = dif_func_info_->dif_func_to_offset_[index];
-        if (is_greater) {
-            for (std::size_t i = dif_func_info_->dif_func_nums_[column_index];
-                 i != dif_func_info_->dif_func_nums_[column_index] + df_offset + 1; ++i) {
-                transformed.set(i, false);
-            }
-        } else {
-            df_offset = dif_func_info_->dif_func_sizes_[column_index] - df_offset - 1;
-            for (std::size_t i = dif_func_info_->dif_func_nums_[column_index] + df_offset;
-                 i != dif_func_info_->dif_func_nums_[column_index] +
-                              dif_func_info_->dif_func_sizes_[column_index];
-                 ++i) {
-                transformed.set(i, false);
-            }
-        }
+        transformed &= dif_func_info_->dif_func_to_bitset_[index];
     }
 
     return transformed;

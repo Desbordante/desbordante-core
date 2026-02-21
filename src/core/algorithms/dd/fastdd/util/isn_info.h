@@ -10,7 +10,8 @@
 namespace algos::dd {
 
 struct DFPack {
-    std::vector<double> thresholds;
+    std::vector<ThresholdInfo> thresholds;
+    std::vector<std::size_t> threshold_zones;
     model::ColumnIndex column_index;
     std::size_t base;
     bool is_distance_ordered;

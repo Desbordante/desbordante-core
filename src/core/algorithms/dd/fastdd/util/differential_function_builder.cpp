@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <limits>
 #include <random>
 #include <set>
 #include <string>
@@ -18,22 +19,24 @@
 
 namespace algos::dd {
 
-std::pair<std::vector<double>, std::vector<double>> DifferentialFunctionBuilder::GetThresholds(
-        model::TypedColumnData const& dif_column) const {
+std::vector<DifferentialFunction> DifferentialFunctionBuilder::GetThresholds(
+        model::TypedColumnData const& dif_column, model::ColumnIndex column_index) const {
+    std::vector<DifferentialFunction> dfs;
     std::size_t dif_num_rows = dif_column.GetNumRows();
 
-    boost::regex df_regex(R"((>|<=) (.*)$)");
+    auto pair_compare = [](model::DFConstraint const& first_pair,
+                           model::DFConstraint const& second_pair) {
+        return first_pair.LongerThan(second_pair);
+    };
+
+    std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
+
+    // accepts a string in the following format: [a;b], where a and b are double type values
+    boost::regex df_regex(R"(\[(.*)\;(.*)\]$)");
     boost::regex double_regex(
             R"(^[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?$|)"
             R"(^[+-]?(?i)(inf|nan)(?-i)$|)"
             R"(^[+-]?0[xX](((\d|[a-f]|[A-F]))+(\.(\d|[a-f]|[A-F])*)?|\.(\d|[a-f]|[A-F])+)([pP][+-]?\d+)?$)");
-
-    std::vector<double> less_thresholds;
-    std::vector<double> greater_thresholds;
-
-    std::set<double> less_thresholds_set;
-    std::set<double> greater_thresholds_set;
-    less_thresholds_set.insert(0.0);  // for repeatability
 
     for (std::size_t row_index = 0; row_index < dif_num_rows; row_index++) {
         model::TypeId type_id = dif_column.GetValueTypeId(row_index);
@@ -41,24 +44,33 @@ std::pair<std::vector<double>, std::vector<double>> DifferentialFunctionBuilder:
             std::string df_str = dif_column.GetDataAsString(row_index);
             boost::smatch matches;
             if (boost::regex_match(df_str, matches, df_regex)) {
-                if (boost::regex_match(matches[2].str(), double_regex)) {
-                    double const threshold =
+                if (boost::regex_match(matches[1].str(), double_regex) &&
+                    boost::regex_match(matches[2].str(), double_regex)) {
+                    double const lower_limit =
+                            model::TypeConverter<double>::kConvert(matches[1].str());
+                    double const upper_limit =
                             model::TypeConverter<double>::kConvert(matches[2].str());
-                    if (matches[1].str() == "<=") {
-                        less_thresholds_set.insert(threshold);
-                    } else {
-                        greater_thresholds_set.insert(threshold);
+
+                    model::DFConstraint parsed_limits{lower_limit, upper_limit};
+
+                    if (parsed_limits.IsValid()) {
+                        auto intersect = parsed_limits.IntersectWith(min_max_dif_[column_index]);
+                        if (intersect && *intersect != min_max_dif_[column_index]) {
+                            limits.insert(*intersect);
+                        }
                     }
                 }
             }
         }
     }
 
-    less_thresholds.insert(less_thresholds.end(), less_thresholds_set.begin(),
-                           less_thresholds_set.end());
-    greater_thresholds.insert(greater_thresholds.end(), greater_thresholds_set.begin(),
-                              greater_thresholds_set.end());
-    return {std::move(less_thresholds), std::move(greater_thresholds)};
+    Column const* column = typed_relation_->GetColumnData(column_index).GetColumn();
+    dfs.reserve(limits.size());
+    std::ranges::transform(limits, std::back_inserter(dfs), [column](auto const& constraint) {
+        return DifferentialFunction{constraint, column};
+    });
+
+    return dfs;
 }
 
 std::vector<std::size_t> DifferentialFunctionBuilder::SampleRows(std::size_t row_limit) const {
@@ -210,55 +222,102 @@ std::pair<std::vector<double>, std::vector<double>> DifferentialFunctionBuilder:
 void DifferentialFunctionBuilder::AddThresholds(std::vector<double> const& less_thresholds,
                                                 std::vector<double> const& greater_thresholds,
                                                 model::ColumnIndex const column_index) {
-    std::set<double> threshold_set;
-    threshold_set.insert(less_thresholds.begin(), less_thresholds.end());
-    threshold_set.insert(greater_thresholds.begin(), greater_thresholds.end());
-    thresholds_[column_index].insert(thresholds_[column_index].end(), threshold_set.begin(),
-                                     threshold_set.end());
+    auto pair_compare = [](model::DFConstraint const& first_pair,
+                           model::DFConstraint const& second_pair) {
+        return first_pair.LongerThan(second_pair);
+    };
 
-    differential_functions_[column_index].reserve(less_thresholds.size() +
-                                                  greater_thresholds.size());
+    std::set<model::DFConstraint, decltype(pair_compare)> limits(pair_compare);
+
     Column const* column = typed_relation_->GetColumnData(column_index).GetColumn();
     for (auto threshold_it = less_thresholds.rbegin(); threshold_it != less_thresholds.rend();
          ++threshold_it) {
-        differential_functions_[column_index].push_back(df_provider_.GetDifferentialFunction(
-                Operator::kLessOrEqual, column, *threshold_it));
+        auto intersect =
+                model::DFConstraint{0UL, *threshold_it}.IntersectWith(min_max_dif_[column_index]);
+        if (intersect && *intersect != min_max_dif_[column_index]) {
+            limits.insert(*intersect);
+        }
     }
     for (auto threshold_it = greater_thresholds.begin(); threshold_it != greater_thresholds.end();
          ++threshold_it) {
-        differential_functions_[column_index].push_back(
-                df_provider_.GetDifferentialFunction(Operator::kGreater, column, *threshold_it));
+        auto intersect = model::DFConstraint{*threshold_it, std::numeric_limits<double>::infinity()}
+                                 .IntersectWith(min_max_dif_[column_index]);
+        if (intersect && *intersect != min_max_dif_[column_index]) {
+            limits.insert(*intersect);
+        }
+    }
+
+    if (!limits.empty()) {
+        differential_functions_.emplace_back();
+        differential_functions_.back().reserve(limits.size());
+        std::ranges::transform(limits, std::back_inserter(differential_functions_.back()),
+                               [column](auto const& constraint) {
+                                   return DifferentialFunction{constraint, column};
+                               });
+        dif_func_nums_.push_back(dif_func_nums_.back() + differential_functions_.back().size());
+        LOG_DEBUG("Column: {}", column_index);
+        for (auto const& dif_func : differential_functions_.back()) {
+            LOG_DEBUG(dif_func.ToString());
+        }
+    }
+}
+
+void DifferentialFunctionBuilder::CalculateThresholdZones() {
+    std::size_t const all_dif_funcs_size = differential_functions_.size();
+    zone_to_bitset_.reserve(all_dif_funcs_size);
+    thresholds_.reserve(all_dif_funcs_size);
+    threshold_zones_.reserve(all_dif_funcs_size);
+    std::size_t const bitset_size = dif_func_nums_[dif_func_nums_.size() - 1];
+    for (model::ColumnIndex column_index = 0; column_index != all_dif_funcs_size; ++column_index) {
+        zone_to_bitset_.emplace_back();
+        std::size_t const dif_funcs_size = differential_functions_[column_index].size();
+        thresholds_.emplace_back();
+        auto& cur_thresholds = thresholds_[column_index];
+        cur_thresholds.reserve(2 * dif_funcs_size);
+        for (std::size_t dif_func_index = 0; dif_func_index != dif_funcs_size; ++dif_func_index) {
+            auto constraint = differential_functions_[column_index][dif_func_index].GetConstraint();
+            cur_thresholds.emplace_back(constraint.lower_bound, false, dif_func_index);
+            cur_thresholds.emplace_back(constraint.upper_bound, true, dif_func_index);
+        }
+        std::ranges::sort(thresholds_[column_index]);
+        threshold_zones_.emplace_back();
+        threshold_zones_[column_index].reserve(thresholds_[column_index].size() + 1);
+        std::unordered_map<boost::dynamic_bitset<>, std::size_t> zone_index_map;
+        std::size_t const cur_index = dif_func_nums_[column_index];
+        boost::dynamic_bitset<> cur_bitset(bitset_size);
+        std::size_t cur_zone_index = 0;
+        zone_index_map.emplace(cur_bitset, cur_zone_index);
+        zone_to_bitset_[column_index].push_back(cur_bitset);
+        threshold_zones_[column_index].emplace_back(cur_zone_index);
+        for (std::size_t index = 0; index != cur_thresholds.size(); ++index) {
+            cur_bitset[cur_index + cur_thresholds[index].dif_func_index] =
+                    !cur_thresholds[index].is_upper_bound;
+            auto [it, is_new] = zone_index_map.try_emplace(cur_bitset, cur_zone_index + 1);
+            if (is_new) {
+                zone_to_bitset_[column_index].push_back(cur_bitset);
+                ++cur_zone_index;
+            }
+            threshold_zones_[column_index].emplace_back(it->second);
+        }
     }
 }
 
 void DifferentialFunctionBuilder::BuildDFList(
         std::shared_ptr<model::ColumnLayoutTypedRelationData> difference_typed_relation) {
-    LOG_DEBUG("{}", num_columns_);
+    LOG_DEBUG("Number of columns: {}", num_columns_);
     differential_functions_.reserve(num_columns_);
     dif_func_nums_.reserve(num_columns_ + 1);
     dif_func_nums_.push_back(0);
 
-    auto print_column_thresholds = [](std::vector<double> const& less_thresholds,
-                                      std::vector<double> const& greater_thresholds) {
-        LOG_DEBUG("Less:");
-        for (auto less_threshold : less_thresholds) {
-            LOG_DEBUG("{}", less_threshold);
-        }
-        LOG_DEBUG("Greater:");
-        for (auto greater_threshold : greater_thresholds) {
-            LOG_DEBUG("{}", greater_threshold);
-        }
-    };
-
     if (difference_typed_relation) {
         for (model::ColumnIndex column_index = 0; column_index != num_columns_; ++column_index) {
-            auto const [less_thresholds, greater_thresholds] =
-                    GetThresholds(difference_typed_relation->GetColumnData(column_index));
-            differential_functions_.emplace_back();
-            AddThresholds(less_thresholds, greater_thresholds, column_index);
-            print_column_thresholds(less_thresholds, greater_thresholds);
-            dif_func_nums_.push_back(dif_func_nums_[column_index] +
-                                     differential_functions_[column_index].size());
+            auto dif_funcs = GetThresholds(difference_typed_relation->GetColumnData(column_index),
+                                           column_index);
+            if (!dif_funcs.empty()) {
+                differential_functions_.push_back(std::move(dif_funcs));
+                dif_func_nums_.push_back(dif_func_nums_.back() +
+                                         differential_functions_.back().size());
+            }
         }
     } else {
         std::size_t const row_limit = std::min(200UL, num_rows_ / 5UL);
@@ -268,47 +327,10 @@ void DifferentialFunctionBuilder::BuildDFList(
                     SampleThresholds(column_index, row_nums, row_limit, 5UL, 0.3,
                                      0.75); /* all magic constants for threshold sampling are
                                                taken from the original implementation */
-            differential_functions_.emplace_back();
             AddThresholds(less_thresholds, greater_thresholds, column_index);
-            LOG_DEBUG("Column: {}", column_index);
-            print_column_thresholds(less_thresholds, greater_thresholds);
-            dif_func_nums_.push_back(dif_func_nums_[column_index] +
-                                     differential_functions_[column_index].size());
         }
     }
-}
-
-std::vector<boost::dynamic_bitset<>> DifferentialFunctionBuilder::GetSatisfiedDFs(
-        model::ColumnIndex const column_index) const {
-    std::vector<boost::dynamic_bitset<>> bitsets;
-    bitsets.reserve(thresholds_[column_index].size() + 1);
-    std::size_t const bitset_size = dif_func_nums_[dif_func_nums_.size() - 1];
-    for (auto const threshold : thresholds_[column_index]) {
-        boost::dynamic_bitset<> cur_bitset(bitset_size);
-        for (std::size_t i = 0; i != differential_functions_[column_index].size(); ++i) {
-            DifferentialFunction const& dif_func = differential_functions_[column_index][i];
-            std::size_t const index = dif_func_nums_[column_index] + i;
-            if (dif_func.GetOperator() == Operator::kLessOrEqual &&
-                model::LessOrEqual(threshold, dif_func.GetThreshold())) {
-                cur_bitset.set(index);
-            } else if (dif_func.GetOperator() == Operator::kGreater &&
-                       model::Greater(threshold, dif_func.GetThreshold())) {
-                cur_bitset.set(index);
-            }
-        }
-        bitsets.push_back(std::move(cur_bitset));
-    }
-    boost::dynamic_bitset<> last_bitset(bitset_size);
-    for (std::size_t i = 0; i != differential_functions_[column_index].size(); ++i) {
-        DifferentialFunction const& dif_func = differential_functions_[column_index][i];
-        std::size_t const index = dif_func_nums_[column_index] + i;
-        if (dif_func.GetOperator() == Operator::kGreater) {
-            last_bitset.set(index);
-        }
-    }
-    bitsets.push_back(std::move(last_bitset));
-
-    return bitsets;
+    CalculateThresholdZones();
 }
 
 }  // namespace algos::dd
