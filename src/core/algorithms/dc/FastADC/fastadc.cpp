@@ -35,13 +35,26 @@ void FastADC::RegisterOptions() {
     RegisterOption(
             Option{&comparable_threshold_, kComparableThreshold, kDComparableThreshold, 0.1});
     RegisterOption(Option{&evidence_threshold_, kEvidenceThreshold, kDEvidenceThreshold, 0.01});
+    RegisterOption(Option{&threads_, kThreads, kDThreads, 1U});
 }
 
 void FastADC::MakeExecuteOptsAvailable() {
     using namespace config::names;
 
     MakeOptionsAvailable({kShardLength, kAllowCrossColumns, kMinimumSharedValue,
-                          kComparableThreshold, kEvidenceThreshold});
+                          kComparableThreshold, kEvidenceThreshold, kThreads});
+}
+
+util::WorkerThreadPool* FastADC::GetThreadPool() {
+    if (threads_ <= 1) {
+        thread_pool_.reset();
+        return nullptr;
+    }
+
+    if (!thread_pool_ || thread_pool_->ThreadNum() != threads_) {
+        thread_pool_.emplace(threads_);
+    }
+    return &*thread_pool_;
 }
 
 void FastADC::LoadDataInternal() {
@@ -117,8 +130,10 @@ unsigned long long FastADC::ExecuteInternal() {
     EvidenceAuxStructuresBuilder evidence_aux_structures_builder(predicate_builder);
     evidence_aux_structures_builder.BuildAll();
 
+    util::WorkerThreadPool* thread_pool = GetThreadPool();
     EvidenceSetBuilder evidence_set_builder(pli_shard_builder.pli_shards,
-                                            evidence_aux_structures_builder.GetPredicatePacks());
+                                            evidence_aux_structures_builder.GetPredicatePacks(),
+                                            thread_pool);
     evidence_set_builder.BuildEvidenceSet(evidence_aux_structures_builder.GetCorrectionMap(),
                                           evidence_aux_structures_builder.GetCardinalityMask());
 
