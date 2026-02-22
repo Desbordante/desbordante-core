@@ -1269,6 +1269,7 @@ pdep:
 [Id] -> Price
 
 tau:
+[ProductName] -> Price
 [Id] -> ProductName
 [Id] -> Price
 
