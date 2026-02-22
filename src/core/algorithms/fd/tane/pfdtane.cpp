@@ -27,10 +27,9 @@ config::ErrorType PFDTane::CalculateZeroAryFdError(ColumnData const* rhs) {
     return CalculateZeroAryPFDError(rhs);
 }
 
-config::ErrorType PFDTane::CalculateFdError(
-        model::PositionListIndex const* lhs_pli,
-        [[maybe_unused]] model::PositionListIndex const* rhs_pli,
-        model::PositionListIndex const* joint_pli) {
+config::ErrorType PFDTane::CalculateFdError(model::PLIWS const* lhs_pli,
+                                            [[maybe_unused]] model::PLIWS const* rhs_pli,
+                                            model::PLIWS const* joint_pli) {
     return CalculatePFDError(lhs_pli, joint_pli, pfd_error_measure_);
 }
 
