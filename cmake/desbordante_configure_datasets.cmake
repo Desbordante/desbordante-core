@@ -69,7 +69,7 @@ function(desbordante_fetch_datasets)
     list(GET download_status 0 status_code)
     if(NOT status_code EQUAL 0)
         list(GET download_status 1 str_val)
-        message(NOTICE "Donwload log:\n${download_log}")
+        message(NOTICE "Download log:\n${download_log}")
         message(FATAL_ERROR "Failed to download ${filename}: [${status_code}] ${str_val}.")
     endif()
 
