@@ -8,14 +8,13 @@ config::ErrorType CalculateZeroAryG1(ColumnData const* rhs, unsigned long long n
                        static_cast<config::ErrorType>(num_tuple_pairs);
 }
 
-config::ErrorType CalculateG1Error(model::PositionListIndex const* lhs_pli,
-                                   model::PositionListIndex const* joint_pli,
+config::ErrorType CalculateG1Error(model::PLIWS const* lhs_pli, model::PLIWS const* joint_pli,
                                    unsigned long long num_tuple_pairs) {
     return static_cast<config::ErrorType>((lhs_pli->GetNepAsLong() - joint_pli->GetNepAsLong()) /
                                           static_cast<config::ErrorType>(num_tuple_pairs));
 }
 
-config::ErrorType PdepSelf(model::PositionListIndex const* x_pli) {
+config::ErrorType PdepSelf(model::PLI const* x_pli) {
     size_t n = x_pli->GetRelationSize();
     config::ErrorType sum = 0;
     std::size_t cluster_rows_count = 0;
@@ -29,8 +28,7 @@ config::ErrorType PdepSelf(model::PositionListIndex const* x_pli) {
     return static_cast<config::ErrorType>(sum / (n * n));
 }
 
-config::ErrorType CalculatePdepMeasure(model::PositionListIndex const* x_pli,
-                                       model::PositionListIndex const* xa_pli) {
+config::ErrorType CalculatePdepMeasure(model::PLI const* x_pli, model::PLI const* xa_pli) {
     std::deque<Cluster> xa_index = xa_pli->GetIndex();
     std::deque<Cluster> x_index = x_pli->GetIndex();
     size_t n = x_pli->GetRelationSize();
@@ -68,9 +66,8 @@ config::ErrorType CalculatePdepMeasure(model::PositionListIndex const* x_pli,
     return (sum / static_cast<config::ErrorType>(n));
 }
 
-config::ErrorType CalculateTauMeasure(model::PositionListIndex const* x_pli,
-                                      model::PositionListIndex const* a_pli,
-                                      model::PositionListIndex const* xa_pli) {
+config::ErrorType CalculateTauMeasure(model::PLIWS const* x_pli, model::PLIWS const* a_pli,
+                                      model::PLIWS const* xa_pli) {
     config::ErrorType pdep_y = PdepSelf(a_pli);
     if (pdep_y == 1) return 1;
 
@@ -79,9 +76,8 @@ config::ErrorType CalculateTauMeasure(model::PositionListIndex const* x_pli,
     return ((pdep_xy - pdep_y) / (1 - pdep_y));
 }
 
-config::ErrorType CalculateMuPlusMeasure(model::PositionListIndex const* x_pli,
-                                         model::PositionListIndex const* a_pli,
-                                         model::PositionListIndex const* xa_pli) {
+config::ErrorType CalculateMuPlusMeasure(model::PLIWS const* x_pli, model::PLIWS const* a_pli,
+                                         model::PLIWS const* xa_pli) {
     config::ErrorType pdep_y = PdepSelf(a_pli);
     if (pdep_y == 1) return 1;
 
@@ -106,8 +102,7 @@ config::ErrorType CalculateMuPlusMeasure(model::PositionListIndex const* x_pli,
     return mu_plus;
 }
 
-config::ErrorType CalculateRhoMeasure(model::PositionListIndex const* x_pli,
-                                      model::PositionListIndex const* xa_pli) {
+config::ErrorType CalculateRhoMeasure(model::PLIWS const* x_pli, model::PLIWS const* xa_pli) {
     auto calculate_dom = [](model::PositionListIndex const* pli) {
         auto index = pli->GetIndex();
         size_t dom = index.size();
