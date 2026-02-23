@@ -12,6 +12,10 @@
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
+inline bool NoFDsFound(algos::MultiAttrRhsFdStorage const& storage) {
+    return storage.GetStripped().empty();
+}
+
 inline unsigned int Fletcher16(std::string str) {
     unsigned int sum1 = 0, sum2 = 0, modulus = 255;
     for (auto ch : str) {
@@ -39,6 +43,67 @@ inline static std::string ToIndicesString(boost::dynamic_bitset<> const& lhs) {
     result += ']';
 
     return result;
+}
+
+inline std::vector<std::string> FDToJsonStrings(algos::MultiAttrRhsStrippedFd const& fd) {
+    std::vector<std::string> strings;
+    strings.reserve(fd.rhs.count());
+    auto pre_rhs_portion = "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": ";
+    util::ForEachIndex(fd.rhs, [&](model::Index i) {
+        strings.push_back(pre_rhs_portion + std::to_string(i) + '}');
+    });
+    return strings;
+}
+
+inline std::string FDsToJson(algos::MultiAttrRhsFdStorage const& fd_storage) {
+    std::string result = "{\"fds\": [";
+    std::vector<std::string> discovered_fd_strings;
+    // FDs used to always have one attribute, this is for consistency with the old hashes.
+    for (algos::MultiAttrRhsStrippedFd const& fd : fd_storage.GetStripped()) {
+        for (std::string const& single_rhs_fd_string : FDToJsonStrings(fd)) {
+            discovered_fd_strings.push_back(single_rhs_fd_string);
+        }
+    }
+    std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    for (std::string const& fd : discovered_fd_strings) {
+        result += fd + ",";
+    }
+    if (result.back() == ',') {
+        result.erase(result.size() - 1);
+    }
+    result += "]}";
+    return result;
+}
+
+testing::AssertionResult CheckFdCollectionEquality(
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
+        algos::MultiAttrRhsFdStorage const& actual) {
+    for (algos::MultiAttrRhsStrippedFd const& fd : actual.GetStripped()) {
+        std::vector<unsigned int> lhs_indices = util::BitsetToIndices<unsigned int>(fd.lhs);
+
+        for (auto index = fd.rhs.find_first(); index != boost::dynamic_bitset<>::npos;
+             index = fd.rhs.find_next(index)) {
+            if (auto it = expected.find(std::make_pair(lhs_indices, index)); it == expected.end()) {
+                return testing::AssertionFailure()
+                       << "discovered a false FD: " << ToIndicesString(fd.lhs) << "->" << index;
+            } else {
+                expected.erase(it);
+            }
+        }
+    }
+    return expected.empty() ? testing::AssertionSuccess()
+                            : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        algos::MultiAttrRhsFdStorage const& storage) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : storage.GetStripped()) {
+        util::ForEachIndex(fd.rhs, [&](model::Index i) {
+            set.emplace(util::BitsetToIndices<unsigned int>(fd.lhs), i);
+        });
+    }
+    return set;
 }
 
 template <typename T>

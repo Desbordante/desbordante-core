@@ -20,9 +20,11 @@ namespace {
 namespace py = pybind11;
 
 using FdList = py::typing::List<model::FunctionalDependency>;
+using PySelectionPairs = py::typing::Iterable<py::typing::Tuple<py::int_, py::int_>>;
 
 #define FD_CLASS_NAME "FunctionalDependency"
 #define ATTRIBUTE_CLASS_NAME "Attribute"
+#define MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME "MultiAttrRhsFdStorage"
 
 template <typename ElementType>
 py::tuple VectorToTuple(std::vector<ElementType> vec) {
@@ -111,6 +113,45 @@ std::string FdRepr(model::FunctionalDependency const& fd) {
 
 ssize_t FdHash(model::FunctionalDependency const& fd) {
     return py::hash(py::make_tuple(fd.table_name, fd.lhs, fd.rhs));
+}
+
+FdList FdsToList(algos::MultiAttrRhsFdStorage const& storage) {
+    // The container would be allocated twice if we created it on
+    // core's side: once there, and the other time for the copy.
+    FdList fd_list{storage.GetStripped().size()};
+    Py_ssize_t i = 0;
+    for (model::FunctionalDependency fd : storage) {
+        // If not released, the refcount of the new object will reach 0 after
+        // this line, triggering UB on access.
+        PyList_SET_ITEM(fd_list.ptr(), i, py::cast(std::move(fd)).release().ptr());
+        ++i;
+    }
+    return fd_list;
+}
+
+std::deque<algos::MultiAttrRhsStrippedFd> StrippedFdsFromIntPairs(PySelectionPairs int_pairs,
+                                                                  std::size_t col_number) {
+    std::deque<algos::MultiAttrRhsStrippedFd> stripped_fds;
+    for (py::handle pair : int_pairs) {
+        if (!py::isinstance<py::tuple>(pair)) {
+            throw std::runtime_error("FD in storage must be a tuple!");
+        }
+        auto tuple_pair = py::cast<py::tuple>(pair);
+        if (tuple_pair.size() != 2) {
+            throw std::runtime_error("FD in storage must be a pair!");
+        }
+        py::object lhs{tuple_pair[0]};
+        if (!py::isinstance<py::int_>(lhs)) {
+            throw std::runtime_error("LHS column selection must be an int!");
+        }
+        py::object rhs{tuple_pair[1]};
+        if (!py::isinstance<py::int_>(rhs)) {
+            throw std::runtime_error("RHS column selection must be an int!");
+        }
+        stripped_fds.emplace_back(python_bindings::IntToBitset(lhs, col_number),
+                                  python_bindings::IntToBitset(rhs, col_number));
+    }
+    return stripped_fds;
 }
 
 template <typename Algo>
@@ -232,6 +273,67 @@ void BindFd(py::module_& main_module) {
             .def(py::init<std::string, std::vector<model::Attribute>,
                           std::vector<model::Attribute>>(),
                  "table_name"_a, "lhs"_a, "rhs"_a);
+    py::class_<MultiAttrRhsFdStorage, MultiAttrRhsFdStorage::OwningPointer>(
+            fd_module, MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME)
+            .def("to_fds", static_cast<FdList (*)(MultiAttrRhsFdStorage const&)>(FdsToList))
+            .def(
+                    "__iter__",
+                    [](MultiAttrRhsFdStorage const& storage) {
+                        return py::make_iterator(storage.begin(), storage.end());
+                    },
+                    py::keep_alive<0, 1>())
+            .def(py::pickle(
+                    // __getstate__
+                    [](MultiAttrRhsFdStorage const& storage) {
+                        auto const& stripped_fds = storage.GetStripped();
+                        model::TableHeader const& header = storage.GetTableHeader();
+                        py::list py_stripped_fds{stripped_fds.size()};
+                        Py_ssize_t i = 0;
+                        for (MultiAttrRhsStrippedFd const& stripped_fd : stripped_fds) {
+                            // If not released, the refcount of the new object will reach 0 after
+                            // this line, triggering UB on access.
+                            PyList_SET_ITEM(py_stripped_fds.ptr(), i,
+                                            py::make_tuple(BitsetToInt(stripped_fd.lhs),
+                                                           BitsetToInt(stripped_fd.rhs))
+                                                    .release()
+                                                    .ptr());
+                            ++i;
+                        }
+                        return py::make_tuple(
+                                py::make_tuple(header.table_name, header.column_names),
+                                std::move(py_stripped_fds));
+                    },
+                    // __setstate__
+                    [](py::tuple t) {
+                        if (t.size() != 2) {
+                            throw std::runtime_error(MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME
+                                                     " pickle state must have two elements!");
+                        }
+                        py::tuple header_tuple = t[0];
+                        if (!py::isinstance<py::tuple>(header_tuple)) {
+                            throw std::runtime_error(
+                                    "Expected tuple as first element "
+                                    "in " MULTI_ATTR_RHS_FD_STORAGE_CLASS_NAME " pickle state");
+                        }
+                        if (header_tuple.size() != 2) {
+                            throw std::runtime_error("Header must be represented by two elements!");
+                        }
+                        auto table_name = header_tuple[0].cast<std::string>();
+                        auto column_names = header_tuple[1].cast<std::vector<std::string>>();
+                        std::size_t const col_number = column_names.size();
+                        py::object fds_list = t[1];
+                        return MultiAttrRhsFdStorage{
+                                {std::move(table_name), std::move(column_names)},
+                                StrippedFdsFromIntPairs(std::move(fds_list), col_number)};
+                    }))
+            .def(py::init([](std::string table_name, std::vector<std::string> column_names,
+                             PySelectionPairs selection_pairs) {
+                     std::size_t const col_number = column_names.size();
+                     return MultiAttrRhsFdStorage{
+                             {std::move(table_name), std::move(column_names)},
+                             StrippedFdsFromIntPairs(selection_pairs, col_number)};
+                 }),
+                 "table_name"_a, "column_names"_a, "selection_pairs"_a);
 
     static constexpr auto kPyroName = "Pyro";
     static constexpr auto kTaneName = "Tane";
