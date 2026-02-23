@@ -32,35 +32,32 @@ TEST_P(TestNDVerifying, DefaultTest) {
     EXPECT_TRUE(verifier->NDHolds());
 }
 
-INSTANTIATE_TEST_SUITE_P(
-        NDVerifierTestSuite, TestNDVerifying,
-        ::testing::Values(
-            // Constant lhs:
-            NDVerifyingParams({0}, {1}, 4),
-            NDVerifyingParams({0}, {2}, 6),
-            NDVerifyingParams({0}, {3}, 4),
-            NDVerifyingParams({0}, {4}, 5),
-            NDVerifyingParams({0}, {5}, 9),
-            // Non-constant lhs:
-            NDVerifyingParams({1}, {5}, 3),
-            NDVerifyingParams({4}, {0}, 1),
-            // Multiple columns:
-            NDVerifyingParams({0, 1}, {3, 5}, 3),
-            NDVerifyingParams({1, 2}, {3, 6}, 2),
-            NDVerifyingParams({1, 2, 3}, {6}, 2)
-            ));
+INSTANTIATE_TEST_SUITE_P(NDVerifierTestSuite, TestNDVerifying,
+                         ::testing::Values(
+                                 // Constant lhs:
+                                 NDVerifyingParams({0}, {1}, 4), NDVerifyingParams({0}, {2}, 6),
+                                 NDVerifyingParams({0}, {3}, 4), NDVerifyingParams({0}, {4}, 5),
+                                 NDVerifyingParams({0}, {5}, 9),
+                                 // Non-constant lhs:
+                                 NDVerifyingParams({1}, {5}, 3), NDVerifyingParams({4}, {0}, 1),
+                                 // Multiple columns:
+                                 NDVerifyingParams({0, 1}, {3, 5}, 3),
+                                 NDVerifyingParams({1, 2}, {3, 6}, 2),
+                                 NDVerifyingParams({1, 2, 3}, {6}, 2)));
 
 INSTANTIATE_TEST_SUITE_P(
         NDVerifierHeavyDatasets, TestNDVerifying,
         ::testing::Values(
-            NDVerifyingParams({5}, {6}, 1000000, kIowa1kk),  // I just want to see execution time. Real weight doesn't matter (but it shouldn't be very big)
-            NDVerifyingParams({16, 17, 18}, {20, 23}, 1000000, kIowa1kk)  // Also, I want to see how execution time depends on number of columns
-        ));
+                NDVerifyingParams({5}, {6}, 1000000,
+                                  kIowa1kk),  // I just want to see execution time. Real weight
+                                              // doesn't matter (but it shouldn't be very big)
+                NDVerifyingParams({16, 17, 18}, {20, 23}, 1000000,
+                                  kIowa1kk)  // Also, I want to see how execution time depends on
+                                             // number of columns
+                ));
 
-INSTANTIATE_TEST_SUITE_P(
-    NDVerifierTestNullEqualNull, TestNDVerifying,
-    ::testing::Values(  // 6-th column contains 2 values and 7 empty cells
-        NDVerifyingParams({0}, {6}, 3, kTestND, true),
-        NDVerifyingParams({0}, {6}, 7, kTestND, false)
-    ));
+INSTANTIATE_TEST_SUITE_P(NDVerifierTestNullEqualNull, TestNDVerifying,
+                         ::testing::Values(  // 6-th column contains 2 values and 7 empty cells
+                                 NDVerifyingParams({0}, {6}, 3, kTestND, true),
+                                 NDVerifyingParams({0}, {6}, 7, kTestND, false)));
 }  // namespace tests

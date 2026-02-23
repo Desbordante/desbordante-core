@@ -8,7 +8,6 @@ AllowShortFunctionsOnASingleLine: Empty
 
 WhitespaceSensitiveMacros:
   - BETTER_ENUM
-  - INSTANTIATE_TEST_SUITE_P
 
 IncludeCategories:
   - Regex: '<(spdlog|boost|enum|gmock|gtest|pybind11|Python|frozen).+>'
