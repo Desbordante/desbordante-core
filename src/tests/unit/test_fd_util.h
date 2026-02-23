@@ -5,8 +5,8 @@
 #include "core/algorithms/algo_factory.h"
 #include "core/algorithms/fd/eulerfd/eulerfd.h"
 #include "core/algorithms/fd/fd_algorithm.h"
-#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
 #include "core/algorithms/fd/pyrocommon/core/parameters.h"
+#include "core/algorithms/fd/table_mask_pair_fd_view.h"
 #include "core/config/error/type.h"
 #include "core/config/names.h"
 #include "core/util/bitset_utils.h"
@@ -14,6 +14,10 @@
 #include "tests/common/csv_config_util.h"
 
 namespace tests {
+inline bool NoFDsFound(algos::fd::TableMaskPairFdView const& storage) {
+    return storage.GetTableMaskPairs().empty();
+}
+
 inline unsigned int Fletcher16(std::string str) {
     unsigned int sum1 = 0, sum2 = 0, modulus = 255;
     for (auto ch : str) {
@@ -41,6 +45,67 @@ inline static std::string ToIndicesString(boost::dynamic_bitset<> const& lhs) {
     result += ']';
 
     return result;
+}
+
+inline std::vector<std::string> FDToJsonStrings(algos::fd::TableMaskPair const& fd) {
+    std::vector<std::string> strings;
+    strings.reserve(fd.rhs.count());
+    auto pre_rhs_portion = "{\"lhs\": " + ToIndicesString(fd.lhs) + ", \"rhs\": ";
+    util::ForEachIndex(fd.rhs, [&](model::Index i) {
+        strings.push_back(pre_rhs_portion + std::to_string(i) + '}');
+    });
+    return strings;
+}
+
+inline std::string FDsToJson(algos::fd::TableMaskPairFdView const& fd_storage) {
+    std::string result = "{\"fds\": [";
+    std::vector<std::string> discovered_fd_strings;
+    // FDs used to only be represented with a single RHS attribute, this lets us use the old hashes.
+    for (algos::fd::TableMaskPair const& fd : fd_storage.GetTableMaskPairs()) {
+        for (std::string const& single_rhs_fd_string : FDToJsonStrings(fd)) {
+            discovered_fd_strings.push_back(single_rhs_fd_string);
+        }
+    }
+    std::sort(discovered_fd_strings.begin(), discovered_fd_strings.end());
+    for (std::string const& fd : discovered_fd_strings) {
+        result += fd + ",";
+    }
+    if (result.back() == ',') {
+        result.erase(result.size() - 1);
+    }
+    result += "]}";
+    return result;
+}
+
+testing::AssertionResult CheckFdCollectionEquality(
+        std::set<std::pair<std::vector<unsigned int>, unsigned int>> expected,
+        algos::fd::TableMaskPairFdView const& actual) {
+    for (algos::fd::TableMaskPair const& fd : actual.GetTableMaskPairs()) {
+        std::vector<unsigned int> lhs_indices = util::BitsetToIndices<unsigned int>(fd.lhs);
+
+        for (auto index = fd.rhs.find_first(); index != boost::dynamic_bitset<>::npos;
+             index = fd.rhs.find_next(index)) {
+            if (auto it = expected.find(std::make_pair(lhs_indices, index)); it == expected.end()) {
+                return testing::AssertionFailure()
+                       << "discovered a false FD: " << ToIndicesString(fd.lhs) << "->" << index;
+            } else {
+                expected.erase(it);
+            }
+        }
+    }
+    return expected.empty() ? testing::AssertionSuccess()
+                            : testing::AssertionFailure() << "some FDs remain undiscovered";
+}
+
+std::set<std::pair<std::vector<unsigned int>, unsigned int>> FDsToSet(
+        algos::fd::TableMaskPairFdView const& storage) {
+    std::set<std::pair<std::vector<unsigned int>, unsigned int>> set;
+    for (auto const& fd : storage.GetTableMaskPairs()) {
+        util::ForEachIndex(fd.rhs, [&](model::Index i) {
+            set.emplace(util::BitsetToIndices<unsigned int>(fd.lhs), i);
+        });
+    }
+    return set;
 }
 
 template <typename T>
