@@ -3,29 +3,37 @@
 #include <string>
 #include <vector>
 
-#include "core/algorithms/fd/fd_algorithm.h"
+#include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fdep/fd_tree_element.h"
+#include "core/algorithms/fd/multi_attr_rhs_fd_storage.h"
 #include "core/config/equal_nulls/type.h"
+#include "core/config/max_lhs/type.h"
 #include "core/config/tabular_data/input_table_type.h"
 #include "core/model/table/relation_data.h"
 #include "core/model/table/relational_schema.h"
+#include "core/model/table/table_header.h"
 #include "core/model/types/bitset.h"
 
 namespace algos {
 
-class FDep : public FDAlgorithm {
+class FDep : public Algorithm {
 public:
     FDep();
 
     ~FDep() override = default;
 
+    MultiAttrRhsFdStorage::OwningPointer GetFdStorage() {
+        return fd_storage_;
+    }
+
 private:
+    constexpr static std::string_view kDefaultPhaseName = "FD mining";
+    MultiAttrRhsFdStorage::OwningPointer fd_storage_;
+
     config::InputTable input_table_;
+    config::MaxLhsType max_lhs_;
 
-    std::shared_ptr<RelationalSchema> schema_{};
-
-    std::vector<std::string> column_names_;
-    size_t number_attributes_{};
+    model::TableHeader table_header_;
 
     std::unique_ptr<FDTreeElement> neg_cover_tree_{};
     std::unique_ptr<FDTreeElement> pos_cover_tree_{};
@@ -33,10 +41,11 @@ private:
     std::vector<std::vector<size_t>> tuples_;
 
     void RegisterOptions();
+    void MakeExecuteOptsAvailable() final;
 
     void LoadDataInternal() final;
 
-    void ResetStateFd() final;
+    void ResetState() final;
     unsigned long long ExecuteInternal() final;
 
     // Building negative cover via violated dependencies
