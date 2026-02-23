@@ -50,10 +50,6 @@ public:
         return column_indices_ != other.column_indices_;
     }
 
-    bool operator>(Vertical const& rhs) const {
-        return !(*this < rhs || *this == rhs);
-    }
-
     boost::dynamic_bitset<> GetColumnIndices() const {
         return column_indices_;
     }
