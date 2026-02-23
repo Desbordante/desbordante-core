@@ -202,7 +202,7 @@ TYPED_TEST_P(FdDiscoveryTest, HeavyDatasetsConsistentHash) {
 TYPED_TEST_P(FdDiscoveryTest, ConsistentRepeatedExecution) {
     auto algorithm = TestFixture::CreateAlgorithmInstance(kWdcAstronomical);
     algorithm->Execute();
-    auto first_res = FDsToSet(algorithm->GetFdStorage()->GetStripped());
+    auto first_res = FDsToSet(*algorithm->GetFdStorage());
     for (int i = 0; i < 3; ++i) {
         algos::ConfigureFromMap(*algorithm, TestFixture::GetParamMap(kWdcAstronomical));
         algorithm->Execute();
@@ -211,7 +211,7 @@ TYPED_TEST_P(FdDiscoveryTest, ConsistentRepeatedExecution) {
 }
 
 namespace {
-void MaxLhsTestFun(CSVConfig config, std::deque<algos::MultiAttrRhsStrippedFd> const& fds_list,
+void MaxLhsTestFun(CSVConfig config, algos::MultiAttrRhsFdStorage const& fd_storage,
                    config::MaxLhsType max_lhs) {
     using namespace config::names;
     algos::StdParamsMap verify_params = {
@@ -222,8 +222,8 @@ void MaxLhsTestFun(CSVConfig config, std::deque<algos::MultiAttrRhsStrippedFd> c
     auto verify_algo = algos::CreateAndLoadAlgorithm<algos::Pyro>(verify_params);
     verify_algo->Execute();
     auto verify_list = FDsToSet(verify_algo->FdList());
-    ASSERT_TRUE(CheckFdListEquality(verify_list, fds_list));
-    for (auto& fd : fds_list) {
+    ASSERT_TRUE(CheckFdCollectionEquality(verify_list, fd_storage));
+    for (algos::MultiAttrRhsStrippedFd const& fd : fd_storage.GetStripped()) {
         ASSERT_TRUE(fd.lhs.count() <= max_lhs);
     }
 }
