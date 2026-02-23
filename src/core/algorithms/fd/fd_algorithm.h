@@ -1,10 +1,7 @@
 #pragma once
 
-#include <filesystem>
 #include <list>
-#include <mutex>
-
-#include <boost/any.hpp>
+#include <memory>
 
 #include "core/algorithms/algorithm.h"
 #include "core/algorithms/fd/fd.h"
